@@ -41,12 +41,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/grafana/grafana => ../grafana
-
-// replace github.com/grafana/codejen => ../codejen
-
-// replace github.com/grafana/thema => ../thema
-
 replace cuelang.org/go => github.com/sdboyer/cue v0.5.0-beta.2.0.20221218111347-341999f48bdb
-
-replace github.com/deepmap/oapi-codegen => github.com/spinillos/oapi-codegen v1.12.5-0.20230417081915-2945b61c0b1c

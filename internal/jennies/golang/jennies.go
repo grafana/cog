@@ -12,11 +12,11 @@ func Jennies() *codejen.JennyList[[]*ast.File] {
 		return "golang"
 	})
 	targets.AppendManyToMany(
-		tools.Foreach[*ast.File](GoRawTypes{}),
+		tools.Foreach[*ast.File](RawTypes{}),
 	)
 	targets.AppendOneToMany(
 		codejen.AdaptOneToMany[[]ast.Builder, []*ast.File](
-			&GoBuilder{},
+			&Builder{},
 			func(files []*ast.File) []ast.Builder {
 				generator := &ast.BuilderGenerator{}
 				builders := generator.FromAST(files)

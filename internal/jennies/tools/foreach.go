@@ -23,7 +23,6 @@ func (jenny foreach[Input]) Generate(inputs ...[]Input) (codejen.Files, error) {
 			}
 
 			outputs = append(outputs, out...)
-
 		}
 	}
 

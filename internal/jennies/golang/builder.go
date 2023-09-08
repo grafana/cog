@@ -9,21 +9,18 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type GoBuilder struct {
+type Builder struct {
 }
 
-func (jenny *GoBuilder) JennyName() string {
+func (jenny *Builder) JennyName() string {
 	return "GoBuilder"
 }
 
-func (jenny *GoBuilder) Generate(builders []ast.Builder) (codejen.Files, error) {
+func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 	files := codejen.Files{}
 
 	for _, builder := range builders {
-		output, err := jenny.generateBuilder(builders, builder)
-		if err != nil {
-			return nil, err
-		}
+		output := jenny.generateBuilder(builders, builder)
 
 		files = append(
 			files,
@@ -34,7 +31,7 @@ func (jenny *GoBuilder) Generate(builders []ast.Builder) (codejen.Files, error) 
 	return files, nil
 }
 
-func (jenny *GoBuilder) generateBuilder(builders ast.Builders, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder) []byte {
 	var buffer strings.Builder
 
 	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.For.Name)))
@@ -82,10 +79,10 @@ func (builder *Builder) Internal() *types.%s {
 	buffer.WriteString("}\n")
 	buffer.WriteString("}\n")
 
-	return []byte(buffer.String()), nil
+	return []byte(buffer.String())
 }
 
-func (jenny *GoBuilder) generateConstructor(builders ast.Builders, builder ast.Builder) string {
+func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) string {
 	var buffer strings.Builder
 
 	typeName := tools.UpperCamelCase(builder.For.Name)
@@ -140,7 +137,7 @@ func New(%[2]soptions ...Option) (Builder, error) {
 	return buffer.String()
 }
 
-func (jenny *GoBuilder) formatFieldPath(fieldPath string) string {
+func (jenny *Builder) formatFieldPath(fieldPath string) string {
 	parts := strings.Split(fieldPath, ".")
 	formatted := make([]string, 0, len(parts))
 
@@ -151,7 +148,7 @@ func (jenny *GoBuilder) formatFieldPath(fieldPath string) string {
 	return strings.Join(formatted, ".")
 }
 
-func (jenny *GoBuilder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
+func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := jenny.formatFieldPath(assignment.Path)
 	valueType := assignment.ValueType
 
@@ -173,13 +170,13 @@ func (jenny *GoBuilder) generateInitAssignment(builders ast.Builders, builder as
 
 	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
 	if generatedConstraints != "" {
-		generatedConstraints = generatedConstraints + "\n\n"
+		generatedConstraints += "\n\n"
 	}
 
 	return generatedConstraints + fmt.Sprintf("%[1]s: %[3]s%[2]s", fieldPath, argName, asPointer)
 }
 
-func (jenny *GoBuilder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) string {
+func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -219,7 +216,7 @@ func (jenny *GoBuilder) generateOption(builders ast.Builders, builder ast.Builde
 	return buffer.String()
 }
 
-func (jenny *GoBuilder) typeHasBuilder(builders ast.Builders, builder ast.Builder, t ast.Type) (string, bool) {
+func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder, t ast.Type) (string, bool) {
 	if t.Kind() != ast.KindRef {
 		return "", false
 	}
@@ -231,7 +228,7 @@ func (jenny *GoBuilder) typeHasBuilder(builders ast.Builders, builder ast.Builde
 	return referredTypePkg, builderFound
 }
 
-func (jenny *GoBuilder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
+func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
 	typeName := formatType(arg.Type, true, "types")
 
 	if builderPkg, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
@@ -243,7 +240,7 @@ func (jenny *GoBuilder) generateArgument(builders ast.Builders, builder ast.Buil
 	return fmt.Sprintf("%s %s", name, typeName)
 }
 
-func (jenny *GoBuilder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
+func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := jenny.formatFieldPath(assignment.Path)
 	valueType := assignment.ValueType
 
@@ -276,13 +273,13 @@ func (jenny *GoBuilder) generateAssignment(builders ast.Builders, builder ast.Bu
 
 	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
 	if generatedConstraints != "" {
-		generatedConstraints = generatedConstraints + "\n\n"
+		generatedConstraints += "\n\n"
 	}
 
 	return generatedConstraints + fmt.Sprintf("builder.internal.%[1]s = %[3]s%[2]s", fieldPath, argName, asPointer)
 }
 
-func (jenny *GoBuilder) escapeVarName(varName string) string {
+func (jenny *Builder) escapeVarName(varName string) string {
 	if isReservedGoKeyword(varName) {
 		return varName + "Arg"
 	}
@@ -290,7 +287,7 @@ func (jenny *GoBuilder) escapeVarName(varName string) string {
 	return varName
 }
 
-func (jenny *GoBuilder) generateDefaultCall(option ast.Option) string {
+func (jenny *Builder) generateDefaultCall(option ast.Option) string {
 	args := make([]string, 0, len(option.Default.ArgsValues))
 	for _, arg := range option.Default.ArgsValues {
 		args = append(args, formatScalar(arg))
@@ -299,7 +296,7 @@ func (jenny *GoBuilder) generateDefaultCall(option ast.Option) string {
 	return fmt.Sprintf("%s(%s)", tools.UpperCamelCase(option.Name), strings.Join(args, ", "))
 }
 
-func (jenny *GoBuilder) constraints(argumentName string, constraints []ast.TypeConstraint) []string {
+func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []string {
 	output := make([]string, 0, len(constraints))
 
 	for _, constraint := range constraints {
@@ -309,7 +306,7 @@ func (jenny *GoBuilder) constraints(argumentName string, constraints []ast.TypeC
 	return output
 }
 
-func (jenny *GoBuilder) constraint(argumentName string, constraint ast.TypeConstraint) string {
+func (jenny *Builder) constraint(argumentName string, constraint ast.TypeConstraint) string {
 	var buffer strings.Builder
 
 	buffer.WriteString(fmt.Sprintf("if !(%s) {\n", jenny.constraintComparison(argumentName, constraint)))
@@ -319,7 +316,7 @@ func (jenny *GoBuilder) constraint(argumentName string, constraint ast.TypeConst
 	return buffer.String()
 }
 
-func (jenny *GoBuilder) constraintComparison(argumentName string, constraint ast.TypeConstraint) string {
+func (jenny *Builder) constraintComparison(argumentName string, constraint ast.TypeConstraint) string {
 	if constraint.Op == "minLength" {
 		return fmt.Sprintf("len([]rune(%[1]s)) >= %[2]v", argumentName, constraint.Args[0])
 	}
@@ -331,10 +328,6 @@ func (jenny *GoBuilder) constraintComparison(argumentName string, constraint ast
 }
 
 func isReservedGoKeyword(input string) bool {
-	// TODO
-	if input == "type" {
-		return true
-	}
-
-	return false
+	// TODO: there's more than that
+	return input == "type"
 }

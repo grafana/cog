@@ -9,16 +9,14 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type TypescriptBuilder struct {
-	defaults []string
-	file     *ast.File
+type Builder struct {
 }
 
-func (jenny *TypescriptBuilder) JennyName() string {
+func (jenny *Builder) JennyName() string {
 	return "TypescriptBuilder"
 }
 
-func (jenny *TypescriptBuilder) Generate(builders []ast.Builder) (codejen.Files, error) {
+func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 	files := codejen.Files{}
 
 	for _, builder := range builders {
@@ -36,14 +34,14 @@ func (jenny *TypescriptBuilder) Generate(builders []ast.Builder) (codejen.Files,
 	return files, nil
 }
 
-func (jenny *TypescriptBuilder) generateBuilder(builders ast.Builders, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
 	objectName := tools.UpperCamelCase(builder.For.Name)
 
 	// imports
 	buffer.WriteString(fmt.Sprintf("import * as types from \"../../types/%s/types_gen\";\n", strings.ToLower(objectName)))
-	buffer.WriteString(fmt.Sprintf("import { OptionsBuilder } from \"../../options_builder_gen\";\n\n"))
+	buffer.WriteString("import { OptionsBuilder } from \"../../options_builder_gen\";\n\n")
 
 	// Builder class declaration
 	buffer.WriteString(fmt.Sprintf("export class %[1]sBuilder implements OptionsBuilder<types.%[1]s> {\n", objectName))
@@ -65,11 +63,7 @@ func (jenny *TypescriptBuilder) generateBuilder(builders ast.Builders, builder a
 
 	// Define options
 	for _, option := range builder.Options {
-		opt, err := jenny.generateOption(builders, builder, option)
-		if err != nil {
-			return nil, err
-		}
-		buffer.WriteString(opt)
+		buffer.WriteString(jenny.generateOption(builders, builder, option))
 	}
 
 	// End builder class declaration
@@ -78,7 +72,7 @@ func (jenny *TypescriptBuilder) generateBuilder(builders ast.Builders, builder a
 	return []byte(buffer.String()), nil
 }
 
-func (jenny *TypescriptBuilder) generateConstructor(builders ast.Builders, builder ast.Builder) string {
+func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) string {
 	var buffer strings.Builder
 
 	typeName := tools.UpperCamelCase(builder.For.Name)
@@ -118,7 +112,7 @@ func (jenny *TypescriptBuilder) generateConstructor(builders ast.Builders, build
 	return buffer.String()
 }
 
-func (jenny *TypescriptBuilder) typeHasBuilder(builders ast.Builders, builder ast.Builder, t ast.Type) (string, bool) {
+func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder, t ast.Type) (string, bool) {
 	if t.Kind() != ast.KindRef {
 		return "", false
 	}
@@ -131,7 +125,7 @@ func (jenny *TypescriptBuilder) typeHasBuilder(builders ast.Builders, builder as
 	return referredTypePkg, builderFound
 }
 
-func (jenny *TypescriptBuilder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
+func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := assignment.Path
 
 	if _, valueHasBuilder := jenny.typeHasBuilder(builders, builder, assignment.ValueType); valueHasBuilder {
@@ -146,13 +140,13 @@ func (jenny *TypescriptBuilder) generateInitAssignment(builders ast.Builders, bu
 
 	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
 	if generatedConstraints != "" {
-		generatedConstraints = generatedConstraints + "\n\n"
+		generatedConstraints += "\n\n"
 	}
 
 	return generatedConstraints + fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
-func (jenny *TypescriptBuilder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) (string, error) {
+func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -186,10 +180,10 @@ func (jenny *TypescriptBuilder) generateOption(builders ast.Builders, builder as
 
 `, def.Name, arguments, assignments))
 
-	return buffer.String(), nil
+	return buffer.String()
 }
 
-func (jenny *TypescriptBuilder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
+func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
 	typeName := formatType(arg.Type, "types")
 
 	if builderPkg, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
@@ -201,7 +195,7 @@ func (jenny *TypescriptBuilder) generateArgument(builders ast.Builders, builder 
 	return fmt.Sprintf("%s: %s", name, typeName)
 }
 
-func (jenny *TypescriptBuilder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
+func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := assignment.Path
 
 	if _, found := jenny.typeHasBuilder(builders, builder, assignment.ValueType); found {
@@ -216,13 +210,13 @@ func (jenny *TypescriptBuilder) generateAssignment(builders ast.Builders, builde
 
 	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
 	if generatedConstraints != "" {
-		generatedConstraints = generatedConstraints + "\n\n"
+		generatedConstraints += "\n\n"
 	}
 
 	return generatedConstraints + fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
-func (jenny *TypescriptBuilder) constraints(argumentName string, constraints []ast.TypeConstraint) []string {
+func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []string {
 	output := make([]string, 0, len(constraints))
 
 	for _, constraint := range constraints {
@@ -232,7 +226,7 @@ func (jenny *TypescriptBuilder) constraints(argumentName string, constraints []a
 	return output
 }
 
-func (jenny *TypescriptBuilder) constraint(argumentName string, constraint ast.TypeConstraint) string {
+func (jenny *Builder) constraint(argumentName string, constraint ast.TypeConstraint) string {
 	var buffer strings.Builder
 
 	buffer.WriteString(fmt.Sprintf("\t\tif (!(%s)) {\n", jenny.constraintComparison(argumentName, constraint)))
@@ -242,7 +236,7 @@ func (jenny *TypescriptBuilder) constraint(argumentName string, constraint ast.T
 	return buffer.String()
 }
 
-func (jenny *TypescriptBuilder) constraintComparison(argumentName string, constraint ast.TypeConstraint) string {
+func (jenny *Builder) constraintComparison(argumentName string, constraint ast.TypeConstraint) string {
 	if constraint.Op == "minLength" {
 		return fmt.Sprintf("%[1]s.length >= %[2]v", argumentName, constraint.Args[0])
 	}

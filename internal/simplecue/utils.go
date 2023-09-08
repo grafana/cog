@@ -9,6 +9,7 @@ import (
 	"cuelang.org/go/cue/format"
 )
 
+//nolint:unused
 func mustDumpsyn(v cue.Value) string {
 	dump, err := dumpsyn(v)
 	if err != nil {
@@ -18,6 +19,7 @@ func mustDumpsyn(v cue.Value) string {
 	return dump
 }
 
+//nolint:unused
 func dumpsyn(v cue.Value) (string, error) {
 	syn := v.Syntax(
 		cue.Concrete(false), // allow incomplete values
@@ -28,6 +30,7 @@ func dumpsyn(v cue.Value) (string, error) {
 	)
 
 	byt, err := format.Node(syn, format.TabIndent(true))
+
 	return string(byt), err
 }
 
@@ -69,6 +72,7 @@ outer:
 	}
 	args = args[:k]
 
+	//nolint: gocritic
 	if op == cue.NoOp && len(args) == 1 {
 		// TODO: this is to deal with default value removal. This may change
 		// when we completely separate default values from values.
@@ -80,6 +84,7 @@ outer:
 			a = appendSplit(a, splitBy, v)
 		}
 	}
+
 	return a
 }
 
@@ -108,6 +113,7 @@ func getTypeHint(v cue.Value) (string, error) {
 	if !found {
 		return "", errorWithCueRef(v, "no value for the %q key in @%s attribute", annotationKindFieldName, annotationName)
 	}
+
 	return tt, nil
 }
 
@@ -116,7 +122,7 @@ func getTypeHint(v cue.Value) (string, error) {
 func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 	switch v.Kind() {
 	case cue.NullKind:
-		return nil, nil
+		return nil, nil //nolint: nilnil
 	case cue.StringKind:
 		return v.String()
 	case cue.NumberKind, cue.FloatKind:
@@ -144,6 +150,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		}
 
 		if len(values) == 0 {
+			//nolint: nilnil
 			return nil, nil
 		}
 
@@ -165,9 +172,8 @@ func commentsFromCueValue(v cue.Value) []string {
 
 	ret := make([]string, 0, len(docs))
 	for _, cg := range docs {
-		for _, line := range strings.Split(strings.Trim(cg.Text(), "\n "), "\n") {
-			ret = append(ret, line)
-		}
+		ret = append(ret, strings.Split(strings.Trim(cg.Text(), "\n "), "\n")...)
 	}
+
 	return ret
 }

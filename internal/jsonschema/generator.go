@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/tools"
 	schemaparser "github.com/santhosh-tekuri/jsonschema"
 )
 
@@ -96,7 +97,7 @@ func (g *newGenerator) walkDefinition(schema *schemaparser.Schema) (ast.Type, er
 		}
 
 		if schema.AllOf != nil {
-			return g.walkOneOf(schema)
+			return g.walkAllOf(schema)
 		}
 
 		if schema.Properties != nil || schema.PatternProperties != nil {
@@ -110,6 +111,7 @@ func (g *newGenerator) walkDefinition(schema *schemaparser.Schema) (ast.Type, er
 		return nil, errUndescriptiveSchema
 	}
 
+	//nolint: gocritic
 	if len(schema.Types) > 1 {
 		def, err = g.walkDisjunction(schema)
 	} else if schema.Enum != nil {
@@ -137,7 +139,7 @@ func (g *newGenerator) walkDefinition(schema *schemaparser.Schema) (ast.Type, er
 	return def, err
 }
 
-func (g *newGenerator) walkDisjunction(schema *schemaparser.Schema) (ast.DisjunctionType, error) {
+func (g *newGenerator) walkDisjunction(_ *schemaparser.Schema) (ast.DisjunctionType, error) {
 	// TODO: finish implementation
 	return ast.DisjunctionType{}, nil
 }
@@ -187,7 +189,7 @@ func (g *newGenerator) walkAnyOf(schema *schemaparser.Schema) (ast.DisjunctionTy
 	}, nil
 }
 
-func (g *newGenerator) walkAllOf(schema *schemaparser.Schema) (ast.DisjunctionType, error) {
+func (g *newGenerator) walkAllOf(_ *schemaparser.Schema) (ast.DisjunctionType, error) {
 	// TODO: finish implementation and use correct type
 	return ast.DisjunctionType{}, nil
 }
@@ -202,11 +204,11 @@ func (g *newGenerator) walkRef(schema *schemaparser.Schema) (ast.RefType, error)
 
 	return ast.RefType{
 		ReferredType: referredKindName,
-		//Comments: schemaComments(schema),
+		// Comments: schemaComments(schema),
 	}, nil
 }
 
-func (g *newGenerator) walkString(schema *schemaparser.Schema) (ast.ScalarType, error) {
+func (g *newGenerator) walkString(_ *schemaparser.Schema) (ast.ScalarType, error) {
 	def := ast.ScalarType{ScalarKind: ast.KindString}
 
 	/*
@@ -221,7 +223,7 @@ func (g *newGenerator) walkString(schema *schemaparser.Schema) (ast.ScalarType, 
 	return def, nil
 }
 
-func (g *newGenerator) walkNumber(schema *schemaparser.Schema) (ast.ScalarType, error) {
+func (g *newGenerator) walkNumber(_ *schemaparser.Schema) (ast.ScalarType, error) {
 	// TODO: finish implementation
 	return ast.ScalarType{ScalarKind: ast.KindInt64}, nil
 }
@@ -287,7 +289,7 @@ func (g *newGenerator) walkObject(schema *schemaparser.Schema) (ast.StructType, 
 		fields = append(fields, ast.StructField{
 			Name:     name,
 			Comments: schemaComments(schema),
-			Required: stringInList(schema.Required, name),
+			Required: tools.ItemInList(name, schema.Required),
 			Type:     fieldDef,
 		})
 	}

@@ -21,7 +21,7 @@ import (
 func main() {
 	entrypoints := []string{
 		"./schemas/cue/core/dashboard/",
-		//"./schemas/cue/core/playlist/",
+		// "./schemas/cue/core/playlist/",
 
 		"./schemas/cue/composable/timeseries/",
 
@@ -191,6 +191,7 @@ func ToCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 		}
 
 		overlay[filepath.Join(prefix, path)] = load.FromBytes(b)
+
 		return nil
 	})
 

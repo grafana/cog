@@ -9,14 +9,14 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type TypescriptRawTypes struct {
+type RawTypes struct {
 }
 
-func (jenny TypescriptRawTypes) JennyName() string {
+func (jenny RawTypes) JennyName() string {
 	return "TypescriptRawTypes"
 }
 
-func (jenny TypescriptRawTypes) Generate(file *ast.File) (codejen.Files, error) {
+func (jenny RawTypes) Generate(file *ast.File) (codejen.Files, error) {
 	output, err := jenny.generateFile(file)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (jenny TypescriptRawTypes) Generate(file *ast.File) (codejen.Files, error) 
 	}, nil
 }
 
-func (jenny TypescriptRawTypes) generateFile(file *ast.File) ([]byte, error) {
+func (jenny RawTypes) generateFile(file *ast.File) ([]byte, error) {
 	var buffer strings.Builder
 
 	for _, typeDef := range file.Definitions {
@@ -43,7 +43,7 @@ func (jenny TypescriptRawTypes) generateFile(file *ast.File) ([]byte, error) {
 	return []byte(buffer.String()), nil
 }
 
-func (jenny TypescriptRawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, error) {
+func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, error) {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {

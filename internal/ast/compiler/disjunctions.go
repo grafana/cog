@@ -99,7 +99,7 @@ func (pass *DisjunctionToType) processDisjunction(def ast.DisjunctionType) ast.T
 	// Ex: type | null
 	if len(def.Branches) == 2 && def.Branches.HasNullType() {
 		finalType := def.Branches.NonNullTypes()[0]
-		//finalType.Nullable = true
+		// finalType.Nullable = true
 
 		return finalType
 	}
@@ -134,7 +134,7 @@ func (pass *DisjunctionToType) processDisjunction(def ast.DisjunctionType) ast.T
 
 	return ast.RefType{
 		ReferredType: newTypeName,
-		//Nullable: def.Branches.HasNullType(),
+		// Nullable: def.Branches.HasNullType(),
 	}
 }
 
