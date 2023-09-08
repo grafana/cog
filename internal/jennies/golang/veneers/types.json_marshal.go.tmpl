@@ -1,0 +1,6 @@
+// MarshalIndentJSON renders the resource as indented JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource {{ .def.Name|formatIdentifier }}) MarshalIndentJSON() ([]byte, error) {
+	return json.MarshalIndent(resource, "", "  ")
+}

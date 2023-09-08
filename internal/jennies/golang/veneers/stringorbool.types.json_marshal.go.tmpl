@@ -1,0 +1,51 @@
+// MarshalJSON implements the encoding/json.Marshaler interface.
+//
+// This method can be used to render the resource as JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource {{ .def.Name|formatIdentifier }}) MarshalJSON() ([]byte, error) {
+	if resource.ValString != nil {
+        var buf bytes.Buffer
+    	buf.WriteRune('"')
+        buf.WriteString(*resource.ValString)
+    	buf.WriteRune('"')
+    	return buf.Bytes(), nil
+    }
+
+    return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+}
+
+// MarshalIndentJSON renders the resource as indented JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource {{ .def.Name|formatIdentifier }}) MarshalIndentJSON() ([]byte, error) {
+	return json.MarshalIndent(resource, "", "  ")
+}
+
+func (resource {{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) error {
+	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+		return nil
+	}
+	var (
+		tmp string
+		err error
+	)
+	if raw[0] != '"' {
+		if bytes.Equal(raw, []byte("true")) {
+		    yup := true
+			resource.ValBool = &yup
+			return nil
+		}
+		if bytes.Equal(raw, []byte("false")) {
+		    nope := false
+        	resource.ValBool = &nope
+			return nil
+		}
+		return errors.New("bad boolean value provided")
+	}
+	if err = json.Unmarshal(raw, &tmp); err != nil {
+		return err
+	}
+	resource.ValString = &tmp
+	return nil
+}
