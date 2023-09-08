@@ -6,16 +6,6 @@ import (
 	schemaparser "github.com/santhosh-tekuri/jsonschema"
 )
 
-func stringInList(list []string, input string) bool {
-	for _, value := range list {
-		if value == input {
-			return true
-		}
-	}
-
-	return false
-}
-
 func schemaComments(schema *schemaparser.Schema) []string {
 	comment := schema.Description
 

@@ -289,6 +289,7 @@ func (g *newGenerator) declareNode(v cue.Value) (ast.Type, error) {
 		if op == cue.NoOp {
 			// looking for {[string]: type}
 			// (don't know how to do this properly)
+			//nolint: staticcheck
 			t, ok := opArgs[0].Elem()
 			if ok && t.IncompleteKind() != cue.TopKind {
 				typeDef, err := g.declareNode(t)
@@ -365,6 +366,7 @@ func (g *newGenerator) declareString(v cue.Value) (ast.ScalarType, error) {
 func (g *newGenerator) extractDefault(v cue.Value) (any, error) {
 	defaultVal, ok := v.Default()
 	if !ok {
+		//nolint: nilnil
 		return nil, nil
 	}
 
@@ -405,32 +407,34 @@ func (g *newGenerator) declareStringConstraints(v cue.Value) ([]ast.TypeConstrai
 	for _, andExpr := range typeAndConstraints {
 		op, args := andExpr.Expr()
 
-		switch op {
-		case cue.CallOp:
-			switch fmt.Sprint(args[0]) {
-			case "strings.MinRunes":
-				scalar, err := cueConcreteToScalar(args[1])
-				if err != nil {
-					return nil, err
-				}
+		// TODO: support more OPs?
+		if op != cue.CallOp {
+			continue
+		}
 
-				constraints = append(constraints, ast.TypeConstraint{
-					Op:   "minLength",
-					Args: []any{scalar},
-				})
-
-			case "strings.MaxRunes":
-				scalar, err := cueConcreteToScalar(args[1])
-				if err != nil {
-					return nil, err
-				}
-
-				constraints = append(constraints, ast.TypeConstraint{
-					Op:   "maxLength",
-					Args: []any{scalar},
-				})
-				// TODO: support more OPs?
+		// TODO: support more constraints?
+		switch fmt.Sprint(args[0]) {
+		case "strings.MinRunes":
+			scalar, err := cueConcreteToScalar(args[1])
+			if err != nil {
+				return nil, err
 			}
+
+			constraints = append(constraints, ast.TypeConstraint{
+				Op:   "minLength",
+				Args: []any{scalar},
+			})
+
+		case "strings.MaxRunes":
+			scalar, err := cueConcreteToScalar(args[1])
+			if err != nil {
+				return nil, err
+			}
+
+			constraints = append(constraints, ast.TypeConstraint{
+				Op:   "maxLength",
+				Args: []any{scalar},
+			})
 		}
 	}
 

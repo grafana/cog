@@ -10,14 +10,14 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type GoRawTypes struct {
+type RawTypes struct {
 }
 
-func (jenny GoRawTypes) JennyName() string {
+func (jenny RawTypes) JennyName() string {
 	return "GoRawTypes"
 }
 
-func (jenny GoRawTypes) Generate(file *ast.File) (codejen.Files, error) {
+func (jenny RawTypes) Generate(file *ast.File) (codejen.Files, error) {
 	output, err := jenny.generateFile(file)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (jenny GoRawTypes) Generate(file *ast.File) (codejen.Files, error) {
 	}, nil
 }
 
-func (jenny GoRawTypes) generateFile(file *ast.File) ([]byte, error) {
+func (jenny RawTypes) generateFile(file *ast.File) ([]byte, error) {
 	var buffer strings.Builder
 
 	buffer.WriteString("package types\n\n")
@@ -55,41 +55,47 @@ func (jenny GoRawTypes) generateFile(file *ast.File) ([]byte, error) {
 	return []byte(buffer.String()), nil
 }
 
-func (jenny GoRawTypes) formatObject(def ast.Object) ([]byte, error) {
+func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
+	var buffer strings.Builder
+
 	defName := tools.UpperCamelCase(def.Name)
+
+	for _, commentLine := range def.Comments {
+		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
+	}
 
 	switch def.Type.Kind() {
 	case ast.KindStruct:
-		return jenny.formatStructDef(def)
+		buffer.WriteString(fmt.Sprintf("type %s ", defName))
+		buffer.WriteString(formatStructBody(def.Type.(ast.StructType), ""))
+		buffer.WriteString("\n")
 	case ast.KindEnum:
-		return jenny.formatEnumDef(def)
+		buffer.WriteString(jenny.formatEnumDef(def))
 	case ast.KindString,
 		ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64,
 		ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64,
 		ast.KindFloat32, ast.KindFloat64:
 		scalarType, ok := def.Type.(ast.ScalarType)
 		if ok && scalarType.Value != nil {
-			return []byte(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value))), nil
+			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
+		} else {
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
 		}
-
-		return []byte(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, ""))), nil
 	case ast.KindMap, ast.KindBool:
-		return []byte(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, ""))), nil
+		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
 	case ast.KindRef:
-		return []byte(fmt.Sprintf("type %s %s", defName, def.Type.(ast.RefType).ReferredType)), nil
+		buffer.WriteString(fmt.Sprintf("type %s %s", defName, def.Type.(ast.RefType).ReferredType))
 	case ast.KindAny:
-		return []byte(fmt.Sprintf("type %s any", defName)), nil
+		buffer.WriteString(fmt.Sprintf("type %s any", defName))
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind())
 	}
+
+	return []byte(buffer.String()), nil
 }
 
-func (jenny GoRawTypes) formatEnumDef(def ast.Object) ([]byte, error) {
+func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	var buffer strings.Builder
-
-	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
-	}
 
 	enumName := tools.UpperCamelCase(def.Name)
 	enumType := def.Type.(ast.EnumType)
@@ -102,38 +108,10 @@ func (jenny GoRawTypes) formatEnumDef(def ast.Object) ([]byte, error) {
 	}
 	buffer.WriteString(")\n")
 
-	return []byte(buffer.String()), nil
+	return buffer.String()
 }
 
-func (jenny GoRawTypes) formatStructDef(def ast.Object) ([]byte, error) {
-	var buffer strings.Builder
-
-	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
-	}
-
-	buffer.WriteString(fmt.Sprintf("type %s ", tools.UpperCamelCase(def.Name)))
-	buffer.WriteString(formatStructBody(def.Type.(ast.StructType), ""))
-	buffer.WriteString("\n")
-
-	return []byte(buffer.String()), nil
-}
-
-func (jenny GoRawTypes) formatMapDef(def ast.Object) ([]byte, error) {
-	var buffer strings.Builder
-
-	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
-	}
-
-	buffer.WriteString(fmt.Sprintf("type %s ", tools.UpperCamelCase(def.Name)))
-	buffer.WriteString(formatMap(def.Type.(ast.MapType), ""))
-	buffer.WriteString("\n")
-
-	return []byte(buffer.String()), nil
-}
-
-func (jenny GoRawTypes) veneer(veneerType string, def ast.Object) (string, error) {
+func (jenny RawTypes) veneer(veneerType string, def ast.Object) (string, error) {
 	// First, see if there is a definition-specific veneer
 	templateFile := fmt.Sprintf("%s.types.%s.go.tmpl", strings.ToLower(def.Name), veneerType)
 	tmpl := templates.Lookup(templateFile)

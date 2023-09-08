@@ -83,6 +83,7 @@ func (generator *BuilderGenerator) structObjectToBuilder(file *File, object Obje
 	for _, field := range structType.Fields {
 		if generator.fieldHasStaticValue(field) {
 			builder.Initializations = append(builder.Initializations, generator.structFieldToStaticInitialization(field))
+
 			continue
 		}
 

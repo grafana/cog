@@ -12,14 +12,14 @@ func Jennies() *codejen.JennyList[[]*ast.File] {
 		return "typescript"
 	})
 	targets.AppendOneToOne(
-		TypescriptOptionsBuilder{},
+		OptionsBuilder{},
 	)
 	targets.AppendManyToMany(
-		tools.Foreach[*ast.File](TypescriptRawTypes{}),
+		tools.Foreach[*ast.File](RawTypes{}),
 	)
 	targets.AppendOneToMany(
 		codejen.AdaptOneToMany[[]ast.Builder, []*ast.File](
-			&TypescriptBuilder{},
+			&Builder{},
 			func(files []*ast.File) []ast.Builder {
 				generator := &ast.BuilderGenerator{}
 				builders := generator.FromAST(files)

@@ -1,0 +1,45 @@
+linters:
+  enable-all: true
+  disable:
+    - exhaustruct
+    - wrapcheck
+    - nolintlint
+    - wastedassign
+    - varnamelen
+    - forcetypeassert
+    - goerr113
+    - exhaustivestruct
+    - ireturn
+    - funlen
+    - forbidigo
+    - godot
+    - godox
+    - cyclop
+    - prealloc
+    - dupl
+    - lll
+    - maligned
+    - goconst
+    - depguard
+    - exhaustive
+    - wsl
+    - unparam
+    - gomoddirectives
+    - gofumpt
+    - nestif
+    # deprecated
+    - deadcode
+    - scopelint
+    - nosnakecase
+    - golint
+    - interfacer
+    - structcheck
+    - ifshort
+    - varcheck
+
+linters-settings:
+  errcheck:
+    ignore: fmt:.*
+
+run:
+  modules-download-mode: vendor
