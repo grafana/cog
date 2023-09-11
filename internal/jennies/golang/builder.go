@@ -164,7 +164,7 @@ func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
-	if valueType.Kind() != ast.KindArray && valueType.Kind() != ast.KindStruct && assignment.IntoOptionalField {
+	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindStruct && assignment.IntoOptionalField {
 		asPointer = "&"
 	}
 
@@ -217,11 +217,11 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 }
 
 func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder, t ast.Type) (string, bool) {
-	if t.Kind() != ast.KindRef {
+	if t.Kind != ast.KindRef {
 		return "", false
 	}
 
-	referredTypeName := t.(ast.RefType).ReferredType
+	referredTypeName := t.AsRef().ReferredType
 	referredTypePkg := strings.ToLower(referredTypeName)
 	_, builderFound := builders.LocateByObject(builder.Package, referredTypeName)
 
@@ -267,7 +267,7 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
-	if valueType.Kind() != ast.KindArray && valueType.Kind() != ast.KindStruct && assignment.IntoOptionalField {
+	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindStruct && assignment.IntoOptionalField {
 		asPointer = "&"
 	}
 

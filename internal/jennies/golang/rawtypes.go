@@ -43,7 +43,7 @@ func (jenny RawTypes) generateFile(file *ast.File) ([]byte, error) {
 		buffer.WriteString("\n")
 
 		// Add JSON (un)marshaling shortcuts
-		if object.Type.Kind() != ast.KindAny {
+		if !object.Type.IsAny() {
 			jsonMarshal, err := jenny.veneer("json_marshal", object)
 			if err != nil {
 				return nil, err
@@ -64,31 +64,27 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	switch def.Type.Kind() {
+	switch def.Type.Kind {
 	case ast.KindStruct:
 		buffer.WriteString(fmt.Sprintf("type %s ", defName))
-		buffer.WriteString(formatStructBody(def.Type.(ast.StructType), ""))
+		buffer.WriteString(formatStructBody(def.Type.AsStruct(), ""))
 		buffer.WriteString("\n")
 	case ast.KindEnum:
 		buffer.WriteString(jenny.formatEnumDef(def))
-	case ast.KindString,
-		ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64,
-		ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64,
-		ast.KindFloat32, ast.KindFloat64:
-		scalarType, ok := def.Type.(ast.ScalarType)
-		if ok && scalarType.Value != nil {
+	case ast.KindScalar:
+		scalarType := def.Type.AsScalar()
+
+		if scalarType.Value != nil {
 			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
 		} else {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, scalarType.ScalarKind))
 		}
-	case ast.KindMap, ast.KindBool:
+	case ast.KindMap:
 		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
 	case ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s %s", defName, def.Type.(ast.RefType).ReferredType))
-	case ast.KindAny:
-		buffer.WriteString(fmt.Sprintf("type %s any", defName))
+		buffer.WriteString(fmt.Sprintf("type %s %s", defName, def.Type.AsRef().ReferredType))
 	default:
-		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind())
+		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
 
 	return []byte(buffer.String()), nil
@@ -98,9 +94,9 @@ func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	var buffer strings.Builder
 
 	enumName := tools.UpperCamelCase(def.Name)
-	enumType := def.Type.(ast.EnumType)
+	enumType := def.Type.AsEnum()
 
-	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, enumType.Values[0].Type.Kind()))
+	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatType(enumType.Values[0].Type, true, "")))
 
 	buffer.WriteString("const (\n")
 	for _, val := range enumType.Values {
@@ -178,25 +174,35 @@ func formatField(def ast.StructField, typesPkg string) string {
 
 	return buffer.String()
 }
+
 func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
-	if def.Kind() == ast.KindAny {
+	if def.IsAny() {
 		return "any"
 	}
 
-	if def.Kind() == ast.KindDisjunction {
-		return formatDisjunction(def.(ast.DisjunctionType), typesPkg)
+	if def.Kind == ast.KindDisjunction {
+		return formatDisjunction(def.AsDisjunction(), typesPkg)
 	}
 
-	if def.Kind() == ast.KindArray {
-		return formatArray(def.(ast.ArrayType), typesPkg)
+	if def.Kind == ast.KindArray {
+		return formatArray(def.AsArray(), typesPkg)
 	}
 
-	if def.Kind() == ast.KindMap {
-		return formatMap(def.(ast.MapType), typesPkg)
+	if def.Kind == ast.KindMap {
+		return formatMap(def.AsMap(), typesPkg)
 	}
 
-	if def.Kind() == ast.KindRef {
-		typeName := def.(ast.RefType).ReferredType
+	if def.Kind == ast.KindScalar {
+		typeName := def.AsScalar().ScalarKind
+		if !fieldIsRequired {
+			typeName = "*" + typeName
+		}
+
+		return string(typeName)
+	}
+
+	if def.Kind == ast.KindRef {
+		typeName := def.AsRef().ReferredType
 
 		if typesPkg != "" {
 			typeName = typesPkg + "." + typeName
@@ -209,28 +215,17 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 		return typeName
 	}
 
-	if def.Kind() == ast.KindEnum {
+	if def.Kind == ast.KindEnum {
 		return "enum here"
 	}
 
 	// anonymous struct
-	if def.Kind() == ast.KindStruct {
-		return formatStructBody(def.(ast.StructType), typesPkg)
+	if def.Kind == ast.KindStruct {
+		return formatStructBody(def.AsStruct(), typesPkg)
 	}
 
-	// TODO: there should be an ast.KindScalar with a matching type
-	typeName := string(def.(ast.ScalarType).ScalarKind)
-
-	if !fieldIsRequired {
-		typeName = "*" + typeName
-	}
-	/*
-		if def.Nullable || !fieldIsRequired {
-			typeName = "*" + typeName
-		}
-	*/
-
-	return typeName
+	// FIXME: we shouldn't be here
+	return "unknown"
 }
 
 func formatArray(def ast.ArrayType, typesPkg string) string {
@@ -240,7 +235,7 @@ func formatArray(def ast.ArrayType, typesPkg string) string {
 }
 
 func formatMap(def ast.MapType, typesPkg string) string {
-	keyTypeString := def.IndexType.Kind()
+	keyTypeString := formatType(def.IndexType, true, typesPkg)
 	valueTypeString := formatType(def.ValueType, true, typesPkg)
 
 	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)

@@ -113,16 +113,14 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 }
 
 func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder, t ast.Type) (string, bool) {
-	if t.Kind() != ast.KindRef {
+	if t.Kind != ast.KindRef {
 		return "", false
 	}
 
-	referredTypeName := t.(ast.RefType).ReferredType
-	referredTypePkg := strings.ToLower(referredTypeName)
-
+	referredTypeName := t.AsRef().ReferredType
 	_, builderFound := builders.LocateByObject(builder.Package, referredTypeName)
 
-	return referredTypePkg, builderFound
+	return referredTypeName, builderFound
 }
 
 func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
@@ -186,8 +184,8 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
 	typeName := formatType(arg.Type, "types")
 
-	if builderPkg, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
-		return fmt.Sprintf(`%[1]s: OptionsBuilder<types.%[2]s>`, arg.Name, builderPkg)
+	if referredTypeName, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
+		return fmt.Sprintf(`%[1]s: OptionsBuilder<types.%[2]s>`, arg.Name, referredTypeName)
 	}
 
 	name := tools.LowerCamelCase(arg.Name)
