@@ -8,4 +8,4 @@ const VarUpdateGolden = "COG_UPDATE_GOLDEN"
 // UpdateGoldenFiles determines whether tests should update txtar
 // archives on failures.
 // It is controlled by setting COG_UPDATE_GOLDEN to a non-empty string like "true".
-var UpdateGoldenFiles = os.Getenv(VarUpdateGolden) != ""
+var UpdateGoldenFiles = os.Getenv(VarUpdateGolden) != "" //nolint: gochecknoglobals

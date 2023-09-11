@@ -186,7 +186,7 @@ type Object struct {
 	Type     Type
 }
 
-type File struct {
+type File struct { //nolint: musttag
 	Package     string
 	Definitions []Object
 }
