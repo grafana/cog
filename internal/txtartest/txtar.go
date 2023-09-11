@@ -100,11 +100,12 @@ func (t *Test) WriteFiles(files codejen.Files) {
 
 // Write implements [io.Writer] by writing to the output for the test,
 // which will be tested against the main golden file.
-func (t *Test) Write(b []byte) (n int, err error) {
+func (t *Test) Write(b []byte) (int, error) {
 	if t.buf == nil {
 		t.buf = &bytes.Buffer{}
 		t.outFiles = append(t.outFiles, file{t.prefix, t.buf})
 	}
+
 	return t.buf.Write(b)
 }
 
@@ -122,6 +123,7 @@ func (t *Test) HasTag(key string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -134,7 +136,7 @@ func (t *Test) HasTag(key string) bool {
 //	#key: value
 //
 // White space is trimmed from the value before returning.
-func (t *Test) Value(key string) (value string, ok bool) {
+func (t *Test) Value(key string) (string, bool) {
 	prefix := []byte("#" + key + ":")
 	s := bufio.NewScanner(bytes.NewReader(t.Archive.Comment))
 	for s.Scan() {
@@ -143,6 +145,7 @@ func (t *Test) Value(key string) (value string, ok bool) {
 			return string(bytes.TrimSpace(b[len(prefix):])), true
 		}
 	}
+
 	return "", false
 }
 
@@ -150,6 +153,7 @@ func (t *Test) Value(key string) (value string, ok bool) {
 // reports whether the key exists and its value is true.
 func (t *Test) Bool(key string) bool {
 	s, ok := t.Value(key)
+
 	return ok && s == "true"
 }
 
@@ -289,6 +293,7 @@ func (x *TxTarTest) Run(t *testing.T, f func(tc *Test)) {
 			for _, sub := range tc.outFiles {
 				if i, ok := index[sub.name]; ok {
 					k = i
+
 					break
 				}
 			}
@@ -313,6 +318,7 @@ func (x *TxTarTest) Run(t *testing.T, f func(tc *Test)) {
 				if envvars.UpdateGoldenFiles {
 					update = true
 					gold.Data = result
+
 					continue
 				}
 
@@ -329,7 +335,7 @@ func (x *TxTarTest) Run(t *testing.T, f func(tc *Test)) {
 			a.Files = files
 
 			if update {
-				err = os.WriteFile(fullpath, txtar.Format(a), 0644)
+				err = os.WriteFile(fullpath, txtar.Format(a), 0600)
 				if err != nil {
 					t.Fatal(err)
 				}

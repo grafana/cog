@@ -29,6 +29,8 @@ linters:
     - nestif
     - paralleltest
     - testpackage
+    - gocognit
+    - gomnd
     # deprecated
     - deadcode
     - scopelint
