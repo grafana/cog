@@ -8,6 +8,7 @@ require (
 	github.com/grafana/kindsys v0.0.0-20230615185749-1424263c17c7
 	github.com/grafana/thema v0.0.0-20230628103417-8f63313207a5
 	github.com/santhosh-tekuri/jsonschema v1.2.4
+	github.com/stretchr/testify v1.8.2
 	github.com/yalue/merged_fs v1.2.2
 	golang.org/x/text v0.10.0
 	golang.org/x/tools v0.10.0
@@ -18,6 +19,7 @@ require (
 	github.com/cockroachdb/errors v1.10.0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/proto v1.11.2 // indirect
 	github.com/getsentry/sentry-go v0.22.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
