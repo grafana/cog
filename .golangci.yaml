@@ -27,6 +27,8 @@ linters:
     - gomoddirectives
     - gofumpt
     - nestif
+    - paralleltest
+    - testpackage
     # deprecated
     - deadcode
     - scopelint
