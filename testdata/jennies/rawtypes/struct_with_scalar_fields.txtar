@@ -1,0 +1,38 @@
+# Basic struct with scalar fields
+-- ir.json --
+{
+    "Package": "basic",
+    "Definitions": [
+        {
+            "Name": "SomeStruct",
+            "Comments": ["This", "is", "a", "comment"],
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {
+                                    "ScalarKind": "any"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/basic/types_gen.ts
+// This
+// is
+// a
+// comment
+export interface SomeStruct {
+	fieldAny: any;
+}
+
