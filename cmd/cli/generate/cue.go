@@ -1,7 +1,6 @@
-package main
+package generate
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"io/fs"
@@ -11,30 +10,24 @@ import (
 
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
-	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies"
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/yalue/merged_fs"
 )
 
-func main() {
-	entrypoints := []string{
-		"./schemas/cue/core/dashboard/",
-		// "./schemas/cue/core/playlist/",
+type cueIncludeImport struct {
+	fsPath     string // path of the library on the filesystem
+	importPath string // path used in CUE files to import that library
+}
 
-		"./schemas/cue/composable/timeseries/",
-
-		"github.com/grafana/grafana/packages/grafana-schema/src/common",
-	}
-
-	cueFsOverlay, err := buildCueOverlay()
+func cueLoader(opts options) ([]*ast.File, error) {
+	cueFsOverlay, err := buildCueOverlay(opts)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	allSchemas := make([]*ast.File, 0, len(entrypoints))
-	for _, entrypoint := range entrypoints {
+	allSchemas := make([]*ast.File, 0, len(opts.entrypoints))
+	for _, entrypoint := range opts.entrypoints {
 		pkg := filepath.Base(entrypoint)
 
 		// Load Cue files into Cue build.Instances slice
@@ -47,90 +40,52 @@ func main() {
 
 		values, err := cuecontext.New().BuildInstances(bis)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		schemaAst, err := simplecue.GenerateAST(values[0], simplecue.Config{
 			Package: pkg, // TODO: extract from input schema/?
 		})
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
 		allSchemas = append(allSchemas, schemaAst)
 	}
 
-	// Here begins the code generation setup
-	targetsByLanguage := jennies.All()
-	rootCodeJenFS := codejen.NewFS()
-
-	for language, target := range targetsByLanguage {
-		fmt.Printf("Running '%s' jennies...\n", language)
-
-		var err error
-		processedAsts := allSchemas
-
-		for _, compilerPass := range target.CompilerPasses {
-			processedAsts, err = compilerPass.Process(processedAsts)
-			if err != nil {
-				panic(err)
-			}
-		}
-
-		fs, err := target.Jennies.GenerateFS(processedAsts)
-		if err != nil {
-			panic(err)
-		}
-
-		err = rootCodeJenFS.Merge(fs)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	err = rootCodeJenFS.Write(context.Background(), "generated")
-	if err != nil {
-		panic(err)
-	}
+	return allSchemas, nil
 }
 
-func buildCueOverlay() (map[string]load.Source, error) {
-	libFs, err := buildBaseFSWithLibraries()
+func buildCueOverlay(opts options) (map[string]load.Source, error) {
+	libFs, err := buildBaseFSWithLibraries(opts)
 	if err != nil {
 		return nil, err
 	}
 
 	overlay := make(map[string]load.Source)
-	if err := ToCueOverlay("/", libFs, overlay); err != nil {
+	if err := toCueOverlay("/", libFs, overlay); err != nil {
 		return nil, err
 	}
 
 	return overlay, nil
 }
 
-func buildBaseFSWithLibraries() (fs.FS, error) {
-	// TODO: these should be received as inputs/arguments/parameters
-	importDefinitions := [][2]string{
-		{
-			"github.com/grafana/grafana/packages/grafana-schema/src/common",
-			"../kind-registry/grafana/next/common",
-		},
-		{
-			"github.com/grafana/cog",
-			".",
-		},
+func buildBaseFSWithLibraries(opts options) (fs.FS, error) {
+	importDefinitions, err := opts.cueIncludeImports()
+	if err != nil {
+		return nil, err
 	}
 
 	var librariesFS []fs.FS
 	for _, importDefinition := range importDefinitions {
-		absPath, err := filepath.Abs(importDefinition[1])
+		absPath, err := filepath.Abs(importDefinition.fsPath)
 		if err != nil {
 			return nil, err
 		}
 
-		fmt.Printf("Loading '%s' module from '%s'\n", importDefinition[0], absPath)
+		fmt.Printf("Loading '%s' module from '%s'\n", importDefinition.importPath, absPath)
 
-		libraryFS, err := dirToPrefixedFS(absPath, "cue.mod/pkg/"+importDefinition[0])
+		libraryFS, err := dirToPrefixedFS(absPath, "cue.mod/pkg/"+importDefinition.importPath)
 		if err != nil {
 			return nil, err
 		}
@@ -164,8 +119,8 @@ func dirToPrefixedFS(directory string, prefix string) (fs.FS, error) {
 	return commonFS, nil
 }
 
-// ToOverlay converts an fs.FS into a CUE loader overlay.
-func ToCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) error {
+// ToOverlay converts a fs.FS into a CUE loader overlay.
+func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) error {
 	// TODO why not just stick the prefix on automatically...?
 	if !filepath.IsAbs(prefix) {
 		return fmt.Errorf("must provide absolute path prefix when generating cue overlay, got %q", prefix)
@@ -183,7 +138,7 @@ func ToCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 		if err != nil {
 			return err
 		}
-		defer f.Close() // nolint: errcheck
+		defer func() { _ = f.Close() }()
 
 		b, err := io.ReadAll(f)
 		if err != nil {
