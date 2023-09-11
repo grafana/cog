@@ -19,14 +19,14 @@ func RenameAction(newName string) RewriteAction {
 // FIXME: looks at the first arg only, no way to configure that right now
 func ArrayToAppendAction() RewriteAction {
 	return func(option ast.Option) []ast.Option {
-		if len(option.Args) < 1 || option.Args[0].Type.Kind() != ast.KindArray {
+		if len(option.Args) < 1 || option.Args[0].Type.Kind != ast.KindArray {
 			return []ast.Option{option}
 		}
 
 		oldArgs := option.Args
 
 		newFirstArg := option.Args[0]
-		newFirstArg.Type = option.Args[0].Type.(ast.ArrayType).ValueType
+		newFirstArg.Type = option.Args[0].Type.AsArray().ValueType
 
 		newOpt := option
 		newOpt.Args = []ast.Argument{newFirstArg}
@@ -58,14 +58,14 @@ func PromoteToConstructorAction() RewriteAction {
 func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 	return func(option ast.Option) []ast.Option {
 		// TODO: handle the case where option.Args[0].Type is a KindRef. Follow the ref and keep working.
-		if len(option.Args) < 1 || option.Args[0].Type.Kind() != ast.KindStruct {
+		if len(option.Args) < 1 || option.Args[0].Type.Kind != ast.KindStruct {
 			return []ast.Option{option}
 		}
 
 		oldArgs := option.Args
 		oldAssignments := option.Assignments
 		assignmentPathPrefix := oldAssignments[0].Path
-		structType := option.Args[0].Type.(ast.StructType)
+		structType := option.Args[0].Type.AsStruct()
 
 		newOpt := option
 		newOpt.Args = nil
@@ -77,8 +77,8 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 			}
 
 			var constraints []ast.TypeConstraint
-			if scalarType, ok := field.Type.(ast.ScalarType); ok {
-				constraints = scalarType.Constraints
+			if field.Type.Kind == ast.KindScalar {
+				constraints = field.Type.AsScalar().Constraints
 			}
 
 			newOpt.Args = append(newOpt.Args, ast.Argument{

@@ -61,7 +61,7 @@ func (generator *BuilderGenerator) FromAST(files []*File) []Builder {
 	for _, file := range files {
 		for _, object := range file.Definitions {
 			// we only want builders for structs
-			if object.Type.Kind() != KindStruct {
+			if object.Type.Kind != KindStruct {
 				continue
 			}
 
@@ -78,7 +78,7 @@ func (generator *BuilderGenerator) structObjectToBuilder(file *File, object Obje
 		For:     object,
 		Options: nil,
 	}
-	structType := object.Type.(StructType)
+	structType := object.Type.AsStruct()
 
 	for _, field := range structType.Fields {
 		if generator.fieldHasStaticValue(field) {
@@ -94,17 +94,17 @@ func (generator *BuilderGenerator) structObjectToBuilder(file *File, object Obje
 }
 
 func (generator *BuilderGenerator) fieldHasStaticValue(field StructField) bool {
-	scalarType, ok := field.Type.(ScalarType)
+	if field.Type.Kind != KindScalar {
+		return false
+	}
 
-	return ok && scalarType.Value != nil
+	return field.Type.AsScalar().Value != nil
 }
 
 func (generator *BuilderGenerator) structFieldToStaticInitialization(field StructField) Assignment {
-	scalarType, _ := field.Type.(ScalarType)
-
 	return Assignment{
 		Path:              field.Name,
-		Value:             scalarType.Value,
+		Value:             field.Type.AsScalar().Value,
 		ValueType:         field.Type,
 		IntoOptionalField: !field.Required,
 	}
@@ -112,8 +112,8 @@ func (generator *BuilderGenerator) structFieldToStaticInitialization(field Struc
 
 func (generator *BuilderGenerator) structFieldToOption(field StructField) Option {
 	var constraints []TypeConstraint
-	if scalarType, ok := field.Type.(ScalarType); ok {
-		constraints = scalarType.Constraints
+	if field.Type.Kind == KindScalar {
+		constraints = field.Type.AsScalar().Constraints
 	}
 
 	opt := Option{

@@ -52,37 +52,32 @@ func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, err
 
 	buffer.WriteString("export ")
 
-	switch def.Type.Kind() {
+	switch def.Type.Kind {
 	case ast.KindStruct:
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
-		buffer.WriteString(formatStructFields(def.Type.(ast.StructType).Fields, typesPkg))
+		buffer.WriteString(formatStructFields(def.Type.AsStruct().Fields, typesPkg))
 		buffer.WriteString("\n")
 	case ast.KindEnum:
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
-		for _, val := range def.Type.(ast.EnumType).Values {
+		for _, val := range def.Type.AsEnum().Values {
 			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", tools.UpperCamelCase(val.Name), formatScalar(val.Value)))
 		}
 		buffer.WriteString("}\n")
 	case ast.KindRef:
-		refType := def.Type.(ast.RefType)
+		refType := def.Type.AsRef()
 
 		buffer.WriteString(fmt.Sprintf("type %s = %s;", def.Name, refType.ReferredType))
 	case ast.KindDisjunction, ast.KindMap:
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, "")))
-	case ast.KindString,
-		ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64,
-		ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64,
-		ast.KindFloat32, ast.KindFloat64:
-		scalarType, ok := def.Type.(ast.ScalarType)
-		if ok && scalarType.Value != nil {
+	case ast.KindScalar:
+		scalarType := def.Type.AsScalar()
+		if scalarType.Value != nil {
 			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", def.Name, formatScalar(scalarType.Value)))
 		} else {
-			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, "")))
+			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatScalarKind(scalarType.ScalarKind)))
 		}
-	case ast.KindAny:
-		buffer.WriteString(fmt.Sprintf("type %s = any;\n", def.Name))
 	default:
-		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind())
+		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
 
 	return []byte(buffer.String()), nil
@@ -140,24 +135,33 @@ func formatField(def ast.StructField, typesPkg string) []byte {
 func formatType(def ast.Type, typesPkg string) string {
 	// todo: handle nullable
 	// maybe if nullable, append | null to the type?
-	switch def.Kind() {
+	switch def.Kind {
 	case ast.KindDisjunction:
-		return formatDisjunction(def.(ast.DisjunctionType), typesPkg)
+		return formatDisjunction(def.AsDisjunction(), typesPkg)
 	case ast.KindRef:
 		if typesPkg != "" {
-			return typesPkg + "." + (def.(ast.RefType)).ReferredType
+			return typesPkg + "." + def.AsRef().ReferredType
 		}
 
-		return (def.(ast.RefType)).ReferredType
+		return def.AsRef().ReferredType
 	case ast.KindArray:
-		return formatArray(def.(ast.ArrayType), typesPkg)
+		return formatArray(def.AsArray(), typesPkg)
 	case ast.KindStruct:
-		return formatStructFields(def.(ast.StructType).Fields, typesPkg)
+		return formatStructFields(def.AsStruct().Fields, typesPkg)
 	case ast.KindMap:
-		return formatMap(def.(ast.MapType), typesPkg)
+		return formatMap(def.AsMap(), typesPkg)
 	case ast.KindEnum:
-		return formatAnonymousEnum(def.(ast.EnumType))
+		return formatAnonymousEnum(def.AsEnum())
+	case ast.KindScalar:
+		return formatScalarKind(def.AsScalar().ScalarKind)
 
+	default:
+		return string(def.Kind)
+	}
+}
+
+func formatScalarKind(kind ast.ScalarKind) string {
+	switch kind {
 	case ast.KindNull:
 		return "null"
 	case ast.KindAny:
@@ -175,9 +179,8 @@ func formatType(def ast.Type, typesPkg string) string {
 
 	case ast.KindBool:
 		return "boolean"
-
 	default:
-		return string(def.Kind())
+		return string(kind)
 	}
 }
 

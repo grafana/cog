@@ -55,30 +55,26 @@ func (pass *DisjunctionToType) processObject(object ast.Object) ast.Object {
 }
 
 func (pass *DisjunctionToType) processType(def ast.Type) ast.Type {
-	if def.Kind() == ast.KindArray {
-		return pass.processArray(def.(ast.ArrayType))
+	if def.Kind == ast.KindArray {
+		return pass.processArray(def.AsArray())
 	}
 
-	if def.Kind() == ast.KindStruct {
-		return pass.processStruct(def.(ast.StructType))
+	if def.Kind == ast.KindStruct {
+		return pass.processStruct(def.AsStruct())
 	}
 
-	if def.Kind() == ast.KindDisjunction {
-		return pass.processDisjunction(def.(ast.DisjunctionType))
+	if def.Kind == ast.KindDisjunction {
+		return pass.processDisjunction(def.AsDisjunction())
 	}
 
 	return def
 }
 
-func (pass *DisjunctionToType) processArray(def ast.ArrayType) ast.ArrayType {
-	return ast.ArrayType{
-		ValueType: pass.processType(def.ValueType),
-	}
+func (pass *DisjunctionToType) processArray(def ast.ArrayType) ast.Type {
+	return ast.NewArray(pass.processType(def.ValueType))
 }
 
-func (pass *DisjunctionToType) processStruct(def ast.StructType) ast.StructType {
-	newDef := def
-
+func (pass *DisjunctionToType) processStruct(def ast.StructType) ast.Type {
 	processedFields := make([]ast.StructField, 0, len(def.Fields))
 	for _, field := range def.Fields {
 		processedFields = append(processedFields, ast.StructField{
@@ -90,9 +86,7 @@ func (pass *DisjunctionToType) processStruct(def ast.StructType) ast.StructType 
 		})
 	}
 
-	newDef.Fields = processedFields
-
-	return newDef
+	return ast.NewStruct(processedFields)
 }
 
 func (pass *DisjunctionToType) processDisjunction(def ast.DisjunctionType) ast.Type {
@@ -110,16 +104,13 @@ func (pass *DisjunctionToType) processDisjunction(def ast.DisjunctionType) ast.T
 	newTypeName := pass.disjunctionTypeName(def)
 
 	if _, ok := pass.newObjects[newTypeName]; !ok {
-		structType := ast.StructType{
-			Fields: make([]ast.StructField, 0, len(def.Branches)),
-		}
-
+		fields := make([]ast.StructField, 0, len(def.Branches))
 		for _, branch := range def.Branches {
-			if branch.Kind() == ast.KindNull {
+			if branch.IsNull() {
 				continue
 			}
 
-			structType.Fields = append(structType.Fields, ast.StructField{
+			fields = append(fields, ast.StructField{
 				Name:     "Val" + tools.UpperCamelCase(pass.typeName(branch)),
 				Type:     branch,
 				Required: false,
@@ -128,14 +119,11 @@ func (pass *DisjunctionToType) processDisjunction(def ast.DisjunctionType) ast.T
 
 		pass.newObjects[newTypeName] = ast.Object{
 			Name: newTypeName,
-			Type: structType,
+			Type: ast.NewStruct(fields),
 		}
 	}
 
-	return ast.RefType{
-		ReferredType: newTypeName,
-		// Nullable: def.Branches.HasNullType(),
-	}
+	return ast.NewRef(newTypeName)
 }
 
 func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) string {
@@ -149,9 +137,12 @@ func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) stri
 }
 
 func (pass *DisjunctionToType) typeName(typeDef ast.Type) string {
-	if typeDef.Kind() == ast.KindRef {
-		return typeDef.(ast.RefType).ReferredType
+	if typeDef.Kind == ast.KindRef {
+		return typeDef.AsRef().ReferredType
+	}
+	if typeDef.Kind == ast.KindScalar {
+		return string(typeDef.AsScalar().ScalarKind)
 	}
 
-	return string(typeDef.Kind())
+	return string(typeDef.Kind)
 }

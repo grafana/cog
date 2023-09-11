@@ -10,25 +10,32 @@ const (
 	KindEnum   Kind = "enum"
 	KindMap    Kind = "map"
 
-	KindNull   Kind = "null"
-	KindAny    Kind = "any"
-	KindBytes  Kind = "bytes"
-	KindArray  Kind = "array"
-	KindString Kind = "string"
+	KindArray Kind = "array"
 
-	KindFloat32 Kind = "float32"
-	KindFloat64 Kind = "float64"
+	KindScalar Kind = "scalar"
+)
 
-	KindUint8  Kind = "uint8"
-	KindUint16 Kind = "uint16"
-	KindUint32 Kind = "uint32"
-	KindUint64 Kind = "uint64"
-	KindInt8   Kind = "int8"
-	KindInt16  Kind = "int16"
-	KindInt32  Kind = "int32"
-	KindInt64  Kind = "int64"
+type ScalarKind string
 
-	KindBool Kind = "bool"
+const (
+	KindNull   ScalarKind = "null"
+	KindAny    ScalarKind = "any"
+	KindBytes  ScalarKind = "bytes"
+	KindString ScalarKind = "string"
+
+	KindFloat32 ScalarKind = "float32"
+	KindFloat64 ScalarKind = "float64"
+
+	KindUint8  ScalarKind = "uint8"
+	KindUint16 ScalarKind = "uint16"
+	KindUint32 ScalarKind = "uint32"
+	KindUint64 ScalarKind = "uint64"
+	KindInt8   ScalarKind = "int8"
+	KindInt16  ScalarKind = "int16"
+	KindInt32  ScalarKind = "int32"
+	KindInt64  ScalarKind = "int64"
+
+	KindBool ScalarKind = "bool"
 )
 
 type TypeConstraint struct {
@@ -37,10 +44,139 @@ type TypeConstraint struct {
 	Args []any
 }
 
-// interface for every type that we can represent:
-// struct, enum, array, string, int, ...
-type Type interface {
-	Kind() Kind
+// Struct representing every type defined by the IR.
+// Bonus: in a way that can be (un)marshaled to/from JSON,
+// which is useful for unit tests.
+type Type struct {
+	Kind Kind
+
+	Disjunction *DisjunctionType
+	Array       *ArrayType
+	Enum        *EnumType
+	Map         *MapType
+	Struct      *StructType
+	Ref         *RefType
+	Scalar      *ScalarType
+}
+
+func Any() Type {
+	return NewScalar(KindAny)
+}
+
+func Null() Type {
+	return NewScalar(KindNull)
+}
+
+func Bool() Type {
+	return NewScalar(KindBool)
+}
+
+func Bytes() Type {
+	return NewScalar(KindBytes)
+}
+
+func String() Type {
+	return NewScalar(KindString)
+}
+
+func NewDisjunction(branches Types) Type {
+	return Type{
+		Kind: KindDisjunction,
+		Disjunction: &DisjunctionType{
+			Branches: branches,
+		},
+	}
+}
+
+func NewArray(valueType Type) Type {
+	return Type{
+		Kind: KindArray,
+		Array: &ArrayType{
+			ValueType: valueType,
+		},
+	}
+}
+
+func NewEnum(values []EnumValue) Type {
+	return Type{
+		Kind: KindEnum,
+		Enum: &EnumType{
+			Values: values,
+		},
+	}
+}
+
+func NewMap(indexType Type, valueType Type) Type {
+	return Type{
+		Kind: KindMap,
+		Map: &MapType{
+			IndexType: indexType,
+			ValueType: valueType,
+		},
+	}
+}
+
+func NewStruct(fields []StructField) Type {
+	return Type{
+		Kind: KindStruct,
+		Struct: &StructType{
+			Fields: fields,
+		},
+	}
+}
+
+func NewRef(referredTypeName string) Type {
+	return Type{
+		Kind: KindRef,
+		Ref: &RefType{
+			ReferredType: referredTypeName,
+		},
+	}
+}
+
+func NewScalar(kind ScalarKind) Type {
+	return Type{
+		Kind: KindScalar,
+		Scalar: &ScalarType{
+			ScalarKind: kind,
+		},
+	}
+}
+
+func (t Type) IsNull() bool {
+	return t.Kind == KindScalar && t.AsScalar().ScalarKind == KindNull
+}
+
+func (t Type) IsAny() bool {
+	return t.Kind == KindScalar && t.AsScalar().ScalarKind == KindAny
+}
+
+func (t Type) AsDisjunction() DisjunctionType {
+	return *t.Disjunction
+}
+
+func (t Type) AsArray() ArrayType {
+	return *t.Array
+}
+
+func (t Type) AsEnum() EnumType {
+	return *t.Enum
+}
+
+func (t Type) AsMap() MapType {
+	return *t.Map
+}
+
+func (t Type) AsStruct() StructType {
+	return *t.Struct
+}
+
+func (t Type) AsRef() RefType {
+	return *t.Ref
+}
+
+func (t Type) AsScalar() ScalarType {
+	return *t.Scalar
 }
 
 // named declaration of a type
@@ -65,13 +201,11 @@ func (file *File) LocateDefinition(name string) Object {
 	return Object{}
 }
 
-var _ Type = (*DisjunctionType)(nil)
-
 type Types []Type
 
 func (types Types) HasNullType() bool {
 	for _, t := range types {
-		if t.Kind() == KindNull {
+		if t.IsNull() {
 			return true
 		}
 	}
@@ -83,7 +217,7 @@ func (types Types) NonNullTypes() Types {
 	results := make([]Type, 0, len(types))
 
 	for _, t := range types {
-		if t.Kind() == KindNull {
+		if t.IsNull() {
 			continue
 		}
 
@@ -97,21 +231,9 @@ type DisjunctionType struct {
 	Branches Types
 }
 
-func (disjunctionType DisjunctionType) Kind() Kind {
-	return KindDisjunction
-}
-
-var _ Type = (*ArrayType)(nil)
-
 type ArrayType struct {
 	ValueType Type
 }
-
-func (arrayType ArrayType) Kind() Kind {
-	return KindArray
-}
-
-var _ Type = (*EnumType)(nil)
 
 type EnumType struct {
 	Values []EnumValue // possible values. Value types might be different
@@ -123,29 +245,13 @@ type EnumValue struct {
 	Value any
 }
 
-func (arrayType EnumType) Kind() Kind {
-	return KindEnum
-}
-
-var _ Type = (*MapType)(nil)
-
 type MapType struct {
 	IndexType Type
 	ValueType Type
 }
 
-func (arrayType MapType) Kind() Kind {
-	return KindMap
-}
-
-var _ Type = (*StructType)(nil)
-
 type StructType struct {
 	Fields []StructField
-}
-
-func (structType StructType) Kind() Kind {
-	return KindStruct
 }
 
 type StructField struct {
@@ -156,24 +262,12 @@ type StructField struct {
 	Default  any
 }
 
-var _ Type = (*RefType)(nil)
-
 type RefType struct {
 	ReferredType string
 }
 
-func (refType RefType) Kind() Kind {
-	return KindRef
-}
-
-var _ Type = (*ScalarType)(nil)
-
 type ScalarType struct {
-	ScalarKind  Kind // bool, bytes, string, int, float, ...
-	Value       any  // if value isn't nil, we're representing a constant scalar
+	ScalarKind  ScalarKind // bool, bytes, string, int, float, ...
+	Value       any        // if value isn't nil, we're representing a constant scalar
 	Constraints []TypeConstraint
-}
-
-func (scalarType ScalarType) Kind() Kind {
-	return scalarType.ScalarKind
 }
