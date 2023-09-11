@@ -28,12 +28,12 @@ type Config struct {
 	Package string
 }
 
-type newGenerator struct {
+type generator struct {
 	file *ast.File
 }
 
 func GenerateAST(schemaReader io.Reader, c Config) (*ast.File, error) {
-	g := &newGenerator{
+	g := &generator{
 		file: &ast.File{
 			Package: c.Package,
 		},
@@ -65,7 +65,7 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.File, error) {
 	return g.file, nil
 }
 
-func (g *newGenerator) declareDefinition(definitionName string, schema *schemaparser.Schema) error {
+func (g *generator) declareDefinition(definitionName string, schema *schemaparser.Schema) error {
 	def, err := g.walkDefinition(schema)
 	if err != nil {
 		return fmt.Errorf("%s: %w", definitionName, err)
@@ -79,7 +79,7 @@ func (g *newGenerator) declareDefinition(definitionName string, schema *schemapa
 	return nil
 }
 
-func (g *newGenerator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error) {
+func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error) {
 	var def ast.Type
 	var err error
 
@@ -139,12 +139,12 @@ func (g *newGenerator) walkDefinition(schema *schemaparser.Schema) (ast.Type, er
 	return def, err
 }
 
-func (g *newGenerator) walkDisjunction(_ *schemaparser.Schema) (ast.DisjunctionType, error) {
+func (g *generator) walkDisjunction(_ *schemaparser.Schema) (ast.DisjunctionType, error) {
 	// TODO: finish implementation
 	return ast.DisjunctionType{}, nil
 }
 
-func (g *newGenerator) walkDisjunctionBranches(branches []*schemaparser.Schema) ([]ast.Type, error) {
+func (g *generator) walkDisjunctionBranches(branches []*schemaparser.Schema) ([]ast.Type, error) {
 	definitions := make([]ast.Type, 0, len(branches))
 	for _, oneOf := range branches {
 		branch, err := g.walkDefinition(oneOf)
@@ -158,7 +158,7 @@ func (g *newGenerator) walkDisjunctionBranches(branches []*schemaparser.Schema) 
 	return definitions, nil
 }
 
-func (g *newGenerator) walkOneOf(schema *schemaparser.Schema) (ast.DisjunctionType, error) {
+func (g *generator) walkOneOf(schema *schemaparser.Schema) (ast.DisjunctionType, error) {
 	if len(schema.OneOf) == 0 {
 		return ast.DisjunctionType{}, fmt.Errorf("oneOf with no branches")
 	}
@@ -174,7 +174,7 @@ func (g *newGenerator) walkOneOf(schema *schemaparser.Schema) (ast.DisjunctionTy
 }
 
 // TODO: what's the difference between oneOf and anyOf?
-func (g *newGenerator) walkAnyOf(schema *schemaparser.Schema) (ast.DisjunctionType, error) {
+func (g *generator) walkAnyOf(schema *schemaparser.Schema) (ast.DisjunctionType, error) {
 	if len(schema.AnyOf) == 0 {
 		return ast.DisjunctionType{}, fmt.Errorf("anyOf with no branches")
 	}
@@ -189,12 +189,12 @@ func (g *newGenerator) walkAnyOf(schema *schemaparser.Schema) (ast.DisjunctionTy
 	}, nil
 }
 
-func (g *newGenerator) walkAllOf(_ *schemaparser.Schema) (ast.DisjunctionType, error) {
+func (g *generator) walkAllOf(_ *schemaparser.Schema) (ast.DisjunctionType, error) {
 	// TODO: finish implementation and use correct type
 	return ast.DisjunctionType{}, nil
 }
 
-func (g *newGenerator) walkRef(schema *schemaparser.Schema) (ast.RefType, error) {
+func (g *generator) walkRef(schema *schemaparser.Schema) (ast.RefType, error) {
 	parts := strings.Split(schema.Ref.Ptr, "/")
 	referredKindName := parts[len(parts)-1] // Very naive
 
@@ -208,7 +208,7 @@ func (g *newGenerator) walkRef(schema *schemaparser.Schema) (ast.RefType, error)
 	}, nil
 }
 
-func (g *newGenerator) walkString(_ *schemaparser.Schema) (ast.ScalarType, error) {
+func (g *generator) walkString(_ *schemaparser.Schema) (ast.ScalarType, error) {
 	def := ast.ScalarType{ScalarKind: ast.KindString}
 
 	/*
@@ -223,12 +223,12 @@ func (g *newGenerator) walkString(_ *schemaparser.Schema) (ast.ScalarType, error
 	return def, nil
 }
 
-func (g *newGenerator) walkNumber(_ *schemaparser.Schema) (ast.ScalarType, error) {
+func (g *generator) walkNumber(_ *schemaparser.Schema) (ast.ScalarType, error) {
 	// TODO: finish implementation
 	return ast.ScalarType{ScalarKind: ast.KindInt64}, nil
 }
 
-func (g *newGenerator) walkList(schema *schemaparser.Schema) (ast.ArrayType, error) {
+func (g *generator) walkList(schema *schemaparser.Schema) (ast.ArrayType, error) {
 	var itemsDef ast.Type
 	var err error
 
@@ -254,7 +254,7 @@ func (g *newGenerator) walkList(schema *schemaparser.Schema) (ast.ArrayType, err
 	}, nil
 }
 
-func (g *newGenerator) walkEnum(schema *schemaparser.Schema) (ast.EnumType, error) {
+func (g *generator) walkEnum(schema *schemaparser.Schema) (ast.EnumType, error) {
 	if len(schema.Enum) == 0 {
 		return ast.EnumType{}, fmt.Errorf("enum with no values")
 	}
@@ -277,7 +277,7 @@ func (g *newGenerator) walkEnum(schema *schemaparser.Schema) (ast.EnumType, erro
 	}, nil
 }
 
-func (g *newGenerator) walkObject(schema *schemaparser.Schema) (ast.StructType, error) {
+func (g *generator) walkObject(schema *schemaparser.Schema) (ast.StructType, error) {
 	// TODO: finish implementation
 	fields := make([]ast.StructField, 0, len(schema.Properties))
 	for name, property := range schema.Properties {

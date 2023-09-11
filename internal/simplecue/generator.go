@@ -19,12 +19,12 @@ type Config struct {
 	Package string
 }
 
-type newGenerator struct {
+type generator struct {
 	file *ast.File
 }
 
 func GenerateAST(val cue.Value, c Config) (*ast.File, error) {
-	g := &newGenerator{
+	g := &generator{
 		file: &ast.File{
 			Package: c.Package,
 		},
@@ -49,7 +49,7 @@ func GenerateAST(val cue.Value, c Config) (*ast.File, error) {
 }
 
 // Do we really need to distinguish top-level types with others?
-func (g *newGenerator) declareTopLevelType(name string, v cue.Value) (ast.Object, error) {
+func (g *generator) declareTopLevelType(name string, v cue.Value) (ast.Object, error) {
 	typeHint, err := getTypeHint(v)
 	if err != nil {
 		return ast.Object{}, err
@@ -78,7 +78,7 @@ func (g *newGenerator) declareTopLevelType(name string, v cue.Value) (ast.Object
 	}
 }
 
-func (g *newGenerator) declareTopLevelString(name string, v cue.Value) (ast.Object, error) {
+func (g *generator) declareTopLevelString(name string, v cue.Value) (ast.Object, error) {
 	ik := v.IncompleteKind()
 	if ik&cue.StringKind != ik {
 		return ast.Object{}, errorWithCueRef(v, "top-level strings may only be generated from concrete strings")
@@ -96,7 +96,7 @@ func (g *newGenerator) declareTopLevelString(name string, v cue.Value) (ast.Obje
 	}, nil
 }
 
-func (g *newGenerator) declareEnum(name string, v cue.Value) (ast.Object, error) {
+func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 	// Restrict the expression of enums to ints or strings.
 	allowed := cue.StringKind | cue.IntKind
 	ik := v.IncompleteKind()
@@ -118,7 +118,7 @@ func (g *newGenerator) declareEnum(name string, v cue.Value) (ast.Object, error)
 	}, nil
 }
 
-func (g *newGenerator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
+func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 	_, dvals := v.Expr()
 	a := v.Attribute(annotationName)
 
@@ -175,7 +175,7 @@ func (g *newGenerator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 	return fields, nil
 }
 
-func (g *newGenerator) declareTopLevelStruct(name string, v cue.Value) (ast.Object, error) {
+func (g *generator) declareTopLevelStruct(name string, v cue.Value) (ast.Object, error) {
 	// This check might be too restrictive
 	if v.IncompleteKind() != cue.StructKind {
 		return ast.Object{}, errorWithCueRef(v, "top-level type definitions may only be generated from structs")
@@ -195,7 +195,7 @@ func (g *newGenerator) declareTopLevelStruct(name string, v cue.Value) (ast.Obje
 	return typeDef, nil
 }
 
-func (g *newGenerator) structFields(v cue.Value) ([]ast.StructField, error) {
+func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 	// This check might be too restrictive
 	if v.IncompleteKind() != cue.StructKind {
 		return nil, errorWithCueRef(v, "top-level type definitions may only be generated from structs")
@@ -230,7 +230,7 @@ func (g *newGenerator) structFields(v cue.Value) ([]ast.StructField, error) {
 	return fields, nil
 }
 
-func (g *newGenerator) declareNode(v cue.Value) (ast.Type, error) {
+func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	// This node is referring to another definition
 	_, path := v.ReferencePath()
 	if path.String() != "" {
@@ -320,7 +320,7 @@ func (g *newGenerator) declareNode(v cue.Value) (ast.Type, error) {
 	}
 }
 
-func (g *newGenerator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
+func (g *generator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
 	allowed := cue.StringKind | cue.IntKind
 	ik := v.IncompleteKind()
 	if ik&allowed != ik {
@@ -337,7 +337,7 @@ func (g *newGenerator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
 	}, nil
 }
 
-func (g *newGenerator) declareString(v cue.Value) (ast.ScalarType, error) {
+func (g *generator) declareString(v cue.Value) (ast.ScalarType, error) {
 	typeDef := ast.ScalarType{
 		ScalarKind: ast.KindString,
 	}
@@ -363,7 +363,7 @@ func (g *newGenerator) declareString(v cue.Value) (ast.ScalarType, error) {
 	return typeDef, nil
 }
 
-func (g *newGenerator) extractDefault(v cue.Value) (any, error) {
+func (g *generator) extractDefault(v cue.Value) (any, error) {
 	defaultVal, ok := v.Default()
 	if !ok {
 		//nolint: nilnil
@@ -378,7 +378,7 @@ func (g *newGenerator) extractDefault(v cue.Value) (any, error) {
 	return def, nil
 }
 
-func (g *newGenerator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
+func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
 	typeAndConstraints := appendSplit(nil, cue.AndOp, v)
 
 	// nothing to do
@@ -441,7 +441,7 @@ func (g *newGenerator) declareStringConstraints(v cue.Value) ([]ast.TypeConstrai
 	return constraints, nil
 }
 
-func (g *newGenerator) declareNumber(v cue.Value) (ast.ScalarType, error) {
+func (g *generator) declareNumber(v cue.Value) (ast.ScalarType, error) {
 	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
 	if err != nil {
 		return ast.ScalarType{}, err
@@ -506,7 +506,7 @@ func (g *newGenerator) declareNumber(v cue.Value) (ast.ScalarType, error) {
 	return typeDef, nil
 }
 
-func (g *newGenerator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
+func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
 	// typeAndConstraints can contain the following cue expressions:
 	// 	- number
 	// 	- int|float, number, upper bound, lower bound
@@ -538,7 +538,7 @@ func (g *newGenerator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstrai
 	return constraints, nil
 }
 
-func (g *newGenerator) extractConstraint(v cue.Value) (ast.TypeConstraint, error) {
+func (g *generator) extractConstraint(v cue.Value) (ast.TypeConstraint, error) {
 	toConstraint := func(operator string, arg cue.Value) (ast.TypeConstraint, error) {
 		scalar, err := cueConcreteToScalar(arg)
 		if err != nil {
@@ -567,7 +567,7 @@ func (g *newGenerator) extractConstraint(v cue.Value) (ast.TypeConstraint, error
 	}
 }
 
-func (g *newGenerator) declareList(v cue.Value) (ast.Type, error) {
+func (g *generator) declareList(v cue.Value) (ast.Type, error) {
 	i, err := v.List()
 	if err != nil {
 		return nil, err
