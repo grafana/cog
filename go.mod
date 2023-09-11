@@ -8,6 +8,7 @@ require (
 	github.com/grafana/kindsys v0.0.0-20230615185749-1424263c17c7
 	github.com/grafana/thema v0.0.0-20230628103417-8f63313207a5
 	github.com/santhosh-tekuri/jsonschema v1.2.4
+	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.8.2
 	github.com/yalue/merged_fs v1.2.2
 	golang.org/x/text v0.10.0
@@ -27,6 +28,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.10.6 // indirect
@@ -36,6 +38,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20230412060525-fa9f017c0ded // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/mod v0.11.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
