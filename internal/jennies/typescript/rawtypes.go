@@ -133,8 +133,6 @@ func formatField(def ast.StructField, typesPkg string) []byte {
 }
 
 func formatType(def ast.Type, typesPkg string) string {
-	// todo: handle nullable
-	// maybe if nullable, append | null to the type?
 	switch def.Kind {
 	case ast.KindDisjunction:
 		return formatDisjunction(def.AsDisjunction(), typesPkg)
@@ -236,7 +234,6 @@ func formatScalar(val any) string {
 			items = append(items, formatScalar(item))
 		}
 
-		// TODO: we can't assume a list of strings
 		return fmt.Sprintf("[%s]", strings.Join(items, ", "))
 	}
 
