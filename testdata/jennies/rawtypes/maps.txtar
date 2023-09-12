@@ -1,0 +1,117 @@
+# Enumerations
+-- ir.json --
+{
+    "Package": "maps",
+    "Definitions": [
+        {
+            "Name": "MapOfStringToAny",
+            "Comments": ["String to... something."],
+            "Type": {
+                "Kind": "map",
+                "Map": {
+                    "IndexType": {
+                        "Kind": "scalar",
+                        "Scalar": {"ScalarKind": "string"}
+                    },
+                    "ValueType": {
+                        "Kind": "scalar",
+                        "Scalar": {"ScalarKind": "any"}
+                    }
+                }
+            }
+        },
+
+        {
+            "Name": "MapOfStringToString",
+            "Type": {
+                "Kind": "map",
+                "Map": {
+                    "IndexType": {
+                        "Kind": "scalar",
+                        "Scalar": {"ScalarKind": "string"}
+                    },
+                    "ValueType": {
+                        "Kind": "scalar",
+                        "Scalar": {"ScalarKind": "string"}
+                    }
+                }
+            }
+        },
+
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "MapOfStringToRef",
+            "Type": {
+                "Kind": "map",
+                "Map": {
+                    "IndexType": {
+                        "Kind": "scalar",
+                        "Scalar": {"ScalarKind": "string"}
+                    },
+                    "ValueType": {
+                        "Kind": "ref",
+                        "Ref": {"ReferredType": "MapOfStringToRef"}
+                    }
+                }
+            }
+        },
+
+        {
+            "Name": "MapOfStringToMapOfStringToBool",
+            "Type": {
+                "Kind": "map",
+                "Map": {
+                    "IndexType": {
+                        "Kind": "scalar",
+                        "Scalar": {"ScalarKind": "string"}
+                    },
+                    "ValueType": {
+                        "Kind": "map",
+                        "Map": {
+                            "IndexType": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string"}
+                            },
+                            "ValueType": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "bool"}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/maps/types_gen.ts
+// String to... something.
+export type MapOfStringToAny = Record<string, any>;
+
+export type MapOfStringToString = Record<string, string>;
+
+export interface SomeStruct {
+	fieldAny: any;
+}
+
+export type MapOfStringToRef = Record<string, MapOfStringToRef>;
+
+export type MapOfStringToMapOfStringToBool = Record<string, Record<string, boolean>>;
+
