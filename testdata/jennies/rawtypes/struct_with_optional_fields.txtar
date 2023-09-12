@@ -125,3 +125,28 @@ export interface SomeOtherStruct {
 	fieldAny: any;
 }
 
+-- out/jennies/GoRawTypes --
+== types/struct_optional_fields/types_gen.go
+package types
+
+type SomeStruct struct {
+	FieldRef *SomeOtherStruct `json:"FieldRef,omitempty"`
+	FieldString *string `json:"FieldString,omitempty"`
+	FieldAnonymousEnum *FieldAnonymousEnumEnum `json:"FieldAnonymousEnum,omitempty"`
+	FieldArrayOfStrings []string `json:"FieldArrayOfStrings,omitempty"`
+	FieldAnonymousStruct struct {
+	FieldAny any `json:"FieldAny"`
+} `json:"FieldAnonymousStruct,omitempty"`
+}
+
+type SomeOtherStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type FieldAnonymousEnumEnum string
+const (
+	FieldAnonymousEnumGreaterThan FieldAnonymousEnumEnum = ">"
+	FieldAnonymousEnumLessThan FieldAnonymousEnumEnum = "<"
+)
+
+

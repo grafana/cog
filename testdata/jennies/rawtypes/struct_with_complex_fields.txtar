@@ -176,3 +176,86 @@ export interface SomeOtherStruct {
 	fieldAny: any;
 }
 
+-- out/jennies/GoRawTypes --
+== types/struct_complex_fields/types_gen.go
+package types
+
+// This struct does things.
+type SomeStruct struct {
+	FieldRef SomeOtherStruct `json:"FieldRef"`
+	FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars"`
+	FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction"`
+	FieldAnonymousEnum FieldAnonymousEnumEnum `json:"FieldAnonymousEnum"`
+	FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
+	FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
+	FieldAnonymousStruct struct {
+	FieldAny any `json:"FieldAny"`
+} `json:"FieldAnonymousStruct"`
+}
+
+type SomeOtherStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type FieldAnonymousEnumEnum string
+const (
+	FieldAnonymousEnumGreaterThan FieldAnonymousEnumEnum = ">"
+	FieldAnonymousEnumLessThan FieldAnonymousEnumEnum = "<"
+)
+
+
+type StringOrBool struct {
+	ValString *string `json:"ValString,omitempty"`
+	ValBool *bool `json:"ValBool,omitempty"`
+}
+
+// MarshalJSON implements the encoding/json.Marshaler interface.
+//
+// This method can be used to render the resource as JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+	if resource.ValString != nil {
+		var buf bytes.Buffer
+		buf.WriteRune('"')
+		buf.WriteString(*resource.ValString)
+		buf.WriteRune('"')
+		return buf.Bytes(), nil
+	}
+
+	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+}
+
+func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
+	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+		return nil
+	}
+	var (
+		tmp string
+		err error
+	)
+	if raw[0] != '"' {
+		if bytes.Equal(raw, []byte("true")) {
+			yup := true
+			resource.ValBool = &yup
+			return nil
+		}
+		if bytes.Equal(raw, []byte("false")) {
+			nope := false
+			resource.ValBool = &nope
+			return nil
+		}
+		return errors.New("bad boolean value provided")
+	}
+	if err = json.Unmarshal(raw, &tmp); err != nil {
+		return err
+	}
+	resource.ValString = &tmp
+	return nil
+}
+
+type StringOrSomeOtherStruct struct {
+	ValString *string `json:"ValString,omitempty"`
+	ValSomeOtherStruct *SomeOtherStruct `json:"ValSomeOtherStruct,omitempty"`
+}
+

@@ -25,7 +25,7 @@
             "Name": "RefToSomeStruct",
             "Type": {
                 "Kind": "ref",
-                "Ref": {"ReferredType": "MapOfStringToRef"}
+                "Ref": {"ReferredType": "SomeStruct"}
             }
         }
     ]
@@ -36,4 +36,14 @@ export interface SomeStruct {
 	fieldAny: any;
 }
 
-export type RefToSomeStruct = MapOfStringToRef;
+export type RefToSomeStruct = SomeStruct;
+-- out/jennies/GoRawTypes --
+== types/refs/types_gen.go
+package types
+
+type SomeStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type RefToSomeStruct SomeStruct
+

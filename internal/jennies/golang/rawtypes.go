@@ -65,10 +65,6 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 	}
 
 	switch def.Type.Kind {
-	case ast.KindStruct:
-		buffer.WriteString(fmt.Sprintf("type %s ", defName))
-		buffer.WriteString(formatStructBody(def.Type.AsStruct(), ""))
-		buffer.WriteString("\n")
 	case ast.KindEnum:
 		buffer.WriteString(jenny.formatEnumDef(def))
 	case ast.KindScalar:
@@ -77,15 +73,15 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 		if scalarType.Value != nil {
 			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
 		} else {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, scalarType.ScalarKind))
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
 		}
-	case ast.KindMap:
+	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct:
 		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
-	case ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s %s", defName, def.Type.AsRef().ReferredType))
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
+
+	buffer.WriteString("\n")
 
 	return []byte(buffer.String()), nil
 }
@@ -116,9 +112,9 @@ func (jenny RawTypes) veneer(veneerType string, def ast.Object) (string, error) 
 	if tmpl == nil {
 		tmpl = templates.Lookup(fmt.Sprintf("types.%s.go.tmpl", veneerType))
 	}
-	// If not, something went wrong.
+	// If not, then there's nothing to do.
 	if tmpl == nil {
-		return "", fmt.Errorf("veneer '%s' not found", veneerType)
+		return "", nil
 	}
 
 	buf := bytes.Buffer{}
@@ -180,10 +176,6 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 		return "any"
 	}
 
-	if def.Kind == ast.KindDisjunction {
-		return formatDisjunction(def.AsDisjunction(), typesPkg)
-	}
-
 	if def.Kind == ast.KindArray {
 		return formatArray(def.AsArray(), typesPkg)
 	}
@@ -215,16 +207,12 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 		return typeName
 	}
 
-	if def.Kind == ast.KindEnum {
-		return "enum here"
-	}
-
 	// anonymous struct
 	if def.Kind == ast.KindStruct {
 		return formatStructBody(def.AsStruct(), typesPkg)
 	}
 
-	// FIXME: we shouldn't be here
+	// FIXME: we should never be here
 	return "unknown"
 }
 
@@ -241,15 +229,6 @@ func formatMap(def ast.MapType, typesPkg string) string {
 	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)
 }
 
-func formatDisjunction(def ast.DisjunctionType, typesPkg string) string {
-	subTypes := make([]string, 0, len(def.Branches))
-	for _, subType := range def.Branches {
-		subTypes = append(subTypes, formatType(subType, true, typesPkg))
-	}
-
-	return fmt.Sprintf("disjunction<%s>", strings.Join(subTypes, " | "))
-}
-
 func formatScalar(val any) string {
 	if list, ok := val.([]any); ok {
 		items := make([]string, 0, len(list))
@@ -258,7 +237,7 @@ func formatScalar(val any) string {
 			items = append(items, formatScalar(item))
 		}
 
-		// TODO: we can't assume a list of strings
+		// FIXME: this is wrong, we can't just assume a list of strings.
 		return fmt.Sprintf("[]string{%s}", strings.Join(items, ", "))
 	}
 

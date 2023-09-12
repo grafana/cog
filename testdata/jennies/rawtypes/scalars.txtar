@@ -4,7 +4,7 @@
     "Package": "scalars",
     "Definitions": [
         {
-            "Name": "ConstTypeString",
+            "Name": "constTypeString",
             "Type": {
                 "Kind": "scalar",
                 "Scalar": {"ScalarKind": "string", "Value": "foo"}
@@ -12,7 +12,7 @@
         },
 
         {
-            "Name": "ScalarTypeAny",
+            "Name": "scalarTypeAny",
             "Type": {
                 "Kind": "scalar",
                 "Scalar": {"ScalarKind": "any"}
@@ -117,9 +117,9 @@
 }
 -- out/jennies/TypescriptRawTypes --
 == types/scalars/types_gen.ts
-export const ConstTypeString = "foo";
+export const constTypeString = "foo";
 
-export type ScalarTypeAny = any;
+export type scalarTypeAny = any;
 
 export type ScalarTypeBool = boolean;
 
@@ -146,4 +146,38 @@ export type ScalarTypeInt16 = number;
 export type ScalarTypeInt32 = number;
 
 export type ScalarTypeInt64 = number;
+
+-- out/jennies/GoRawTypes --
+== types/scalars/types_gen.go
+package types
+
+const ConstTypeString = "foo"
+
+type ScalarTypeAny any
+
+type ScalarTypeBool bool
+
+type ScalarTypeBytes bytes
+
+type ScalarTypeString string
+
+type ScalarTypeFloat32 float32
+
+type ScalarTypeFloat64 float64
+
+type ScalarTypeUint8 uint8
+
+type ScalarTypeUint16 uint16
+
+type ScalarTypeUint32 uint32
+
+type ScalarTypeUint64 uint64
+
+type ScalarTypeInt8 int8
+
+type ScalarTypeInt16 int16
+
+type ScalarTypeInt32 int32
+
+type ScalarTypeInt64 int64
 

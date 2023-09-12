@@ -80,3 +80,18 @@ export type ArrayOfRefs = SomeStruct[];
 
 export type ArrayOfArrayOfNumbers = number[][];
 
+-- out/jennies/GoRawTypes --
+== types/arrays/types_gen.go
+package types
+
+// List of tags, maybe?
+type ArrayOfStrings []string
+
+type SomeStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type ArrayOfRefs []SomeStruct
+
+type ArrayOfArrayOfNumbers [][]int64
+

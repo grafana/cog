@@ -15,17 +15,13 @@ type LanguageTarget struct {
 
 func All() map[string]LanguageTarget {
 	targets := map[string]LanguageTarget{
-		// Compiler passes should not have side effects, but they do.
 		"go": {
-			Jennies: golang.Jennies(),
-			CompilerPasses: []compiler.Pass{
-				&compiler.AnonymousEnumToExplicitType{},
-				&compiler.DisjunctionToType{},
-			},
+			Jennies:        golang.Jennies(),
+			CompilerPasses: golang.CompilerPasses(),
 		},
 		"typescript": {
 			Jennies:        typescript.Jennies(),
-			CompilerPasses: nil,
+			CompilerPasses: typescript.CompilerPasses(),
 		},
 	}
 
