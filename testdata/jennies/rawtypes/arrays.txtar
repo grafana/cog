@@ -1,0 +1,82 @@
+# Enumerations
+-- ir.json --
+{
+    "Package": "arrays",
+    "Definitions": [
+        {
+            "Name": "ArrayOfStrings",
+            "Comments": ["List of tags, maybe?"],
+            "Type": {
+                "Kind": "array",
+                "Array": {
+                    "ValueType": {
+                        "Kind": "scalar",
+                        "Scalar": {"ScalarKind": "string"}
+                    }
+                }
+            }
+        },
+
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "ArrayOfRefs",
+            "Type": {
+                "Kind": "array",
+                "Array": {
+                    "ValueType": {
+                        "Kind": "ref",
+                        "Ref": {"ReferredType": "SomeStruct"}
+                    }
+                }
+            }
+        },
+
+        {
+            "Name": "ArrayOfArrayOfNumbers",
+            "Type": {
+                "Kind": "array",
+                "Array": {
+                    "ValueType": {
+                        "Kind": "array",
+                        "Array": {
+                            "ValueType": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int64"}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/arrays/types_gen.ts
+// List of tags, maybe?
+export type ArrayOfStrings = string[];
+
+export interface SomeStruct {
+	fieldAny: any;
+}
+
+export type ArrayOfRefs = SomeStruct[];
+
+export type ArrayOfArrayOfNumbers = number[][];
+
