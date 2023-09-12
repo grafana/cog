@@ -67,7 +67,7 @@ func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, err
 		refType := def.Type.AsRef()
 
 		buffer.WriteString(fmt.Sprintf("type %s = %s;", def.Name, refType.ReferredType))
-	case ast.KindDisjunction, ast.KindMap:
+	case ast.KindDisjunction, ast.KindMap, ast.KindArray:
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, "")))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
