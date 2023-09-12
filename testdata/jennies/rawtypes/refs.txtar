@@ -1,0 +1,39 @@
+# Enumerations
+-- ir.json --
+{
+    "Package": "refs",
+    "Definitions": [
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "RefToSomeStruct",
+            "Type": {
+                "Kind": "ref",
+                "Ref": {"ReferredType": "MapOfStringToRef"}
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/refs/types_gen.ts
+export interface SomeStruct {
+	fieldAny: any;
+}
+
+export type RefToSomeStruct = MapOfStringToRef;
