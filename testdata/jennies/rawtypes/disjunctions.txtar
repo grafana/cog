@@ -161,3 +161,134 @@ export interface YetAnotherStruct {
 
 export type SeveralRefs = SomeStruct | SomeOtherStruct | YetAnotherStruct;
 
+-- out/jennies/GoRawTypes --
+== types/disjunctions/types_gen.go
+package types
+
+// Refresh rate or disabled.
+type StringOrBool StringOrBool
+
+// MarshalJSON implements the encoding/json.Marshaler interface.
+//
+// This method can be used to render the resource as JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+	if resource.ValString != nil {
+		var buf bytes.Buffer
+		buf.WriteRune('"')
+		buf.WriteString(*resource.ValString)
+		buf.WriteRune('"')
+		return buf.Bytes(), nil
+	}
+
+	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+}
+
+func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
+	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+		return nil
+	}
+	var (
+		tmp string
+		err error
+	)
+	if raw[0] != '"' {
+		if bytes.Equal(raw, []byte("true")) {
+			yup := true
+			resource.ValBool = &yup
+			return nil
+		}
+		if bytes.Equal(raw, []byte("false")) {
+			nope := false
+			resource.ValBool = &nope
+			return nil
+		}
+		return errors.New("bad boolean value provided")
+	}
+	if err = json.Unmarshal(raw, &tmp); err != nil {
+		return err
+	}
+	resource.ValString = &tmp
+	return nil
+}
+
+type StringOrNull string
+
+type SomeStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type BoolOrRef BoolOrSomeStruct
+
+type SomeOtherStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type YetAnotherStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type SeveralRefs SomeStructOrSomeOtherStructOrYetAnotherStruct
+
+type BoolOrSomeStruct struct {
+	ValBool *bool `json:"ValBool,omitempty"`
+	ValSomeStruct *SomeStruct `json:"ValSomeStruct,omitempty"`
+}
+
+type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
+	ValSomeStruct *SomeStruct `json:"ValSomeStruct,omitempty"`
+	ValSomeOtherStruct *SomeOtherStruct `json:"ValSomeOtherStruct,omitempty"`
+	ValYetAnotherStruct *YetAnotherStruct `json:"ValYetAnotherStruct,omitempty"`
+}
+
+type StringOrBool struct {
+	ValString *string `json:"ValString,omitempty"`
+	ValBool *bool `json:"ValBool,omitempty"`
+}
+
+// MarshalJSON implements the encoding/json.Marshaler interface.
+//
+// This method can be used to render the resource as JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+	if resource.ValString != nil {
+		var buf bytes.Buffer
+		buf.WriteRune('"')
+		buf.WriteString(*resource.ValString)
+		buf.WriteRune('"')
+		return buf.Bytes(), nil
+	}
+
+	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+}
+
+func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
+	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+		return nil
+	}
+	var (
+		tmp string
+		err error
+	)
+	if raw[0] != '"' {
+		if bytes.Equal(raw, []byte("true")) {
+			yup := true
+			resource.ValBool = &yup
+			return nil
+		}
+		if bytes.Equal(raw, []byte("false")) {
+			nope := false
+			resource.ValBool = &nope
+			return nil
+		}
+		return errors.New("bad boolean value provided")
+	}
+	if err = json.Unmarshal(raw, &tmp); err != nil {
+		return err
+	}
+	resource.ValString = &tmp
+	return nil
+}
+

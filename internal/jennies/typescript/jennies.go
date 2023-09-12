@@ -3,6 +3,7 @@ package typescript
 import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/tools"
 	"github.com/grafana/cog/internal/veneers"
 )
@@ -30,4 +31,8 @@ func Jennies() *codejen.JennyList[[]*ast.File] {
 	)
 
 	return targets
+}
+
+func CompilerPasses() []compiler.Pass {
+	return nil
 }

@@ -5,21 +5,14 @@
 // Grafana.
 func (resource {{ .def.Name|formatIdentifier }}) MarshalJSON() ([]byte, error) {
 	if resource.ValString != nil {
-        var buf bytes.Buffer
-    	buf.WriteRune('"')
-        buf.WriteString(*resource.ValString)
-    	buf.WriteRune('"')
-    	return buf.Bytes(), nil
-    }
+		var buf bytes.Buffer
+		buf.WriteRune('"')
+		buf.WriteString(*resource.ValString)
+		buf.WriteRune('"')
+		return buf.Bytes(), nil
+	}
 
-    return strconv.AppendBool([]byte{}, *resource.ValBool), nil
-}
-
-// MarshalIndentJSON renders the resource as indented JSON
-// which your configuration management tool of choice can then feed into
-// Grafana.
-func (resource {{ .def.Name|formatIdentifier }}) MarshalIndentJSON() ([]byte, error) {
-	return json.MarshalIndent(resource, "", "  ")
+	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
 }
 
 func (resource {{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) error {
@@ -32,13 +25,13 @@ func (resource {{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) error
 	)
 	if raw[0] != '"' {
 		if bytes.Equal(raw, []byte("true")) {
-		    yup := true
+			yup := true
 			resource.ValBool = &yup
 			return nil
 		}
 		if bytes.Equal(raw, []byte("false")) {
-		    nope := false
-        	resource.ValBool = &nope
+			nope := false
+			resource.ValBool = &nope
 			return nil
 		}
 		return errors.New("bad boolean value provided")
@@ -49,3 +42,4 @@ func (resource {{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) error
 	resource.ValString = &tmp
 	return nil
 }
+

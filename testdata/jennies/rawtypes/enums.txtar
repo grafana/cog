@@ -89,3 +89,26 @@ export enum DashboardCursorSync {
 	Tooltip = 2,
 }
 
+-- out/jennies/GoRawTypes --
+== types/enums/types_gen.go
+package types
+
+// This is a very interesting string enum.
+type Operator string
+const (
+	GreaterThan Operator = ">"
+	LessThan Operator = "<"
+)
+
+
+// 0 for no shared crosshair or tooltip (default).
+// 1 for shared crosshair.
+// 2 for shared crosshair AND shared tooltip.
+type DashboardCursorSync int8
+const (
+	Off DashboardCursorSync = 0
+	Crosshair DashboardCursorSync = 1
+	Tooltip DashboardCursorSync = 2
+)
+
+

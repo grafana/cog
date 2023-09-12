@@ -67,7 +67,7 @@
                     },
                     "ValueType": {
                         "Kind": "ref",
-                        "Ref": {"ReferredType": "MapOfStringToRef"}
+                        "Ref": {"ReferredType": "SomeStruct"}
                     }
                 }
             }
@@ -111,7 +111,24 @@ export interface SomeStruct {
 	fieldAny: any;
 }
 
-export type MapOfStringToRef = Record<string, MapOfStringToRef>;
+export type MapOfStringToRef = Record<string, SomeStruct>;
 
 export type MapOfStringToMapOfStringToBool = Record<string, Record<string, boolean>>;
+
+-- out/jennies/GoRawTypes --
+== types/maps/types_gen.go
+package types
+
+// String to... something.
+type MapOfStringToAny map[string]any
+
+type MapOfStringToString map[string]string
+
+type SomeStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type MapOfStringToRef map[string]SomeStruct
+
+type MapOfStringToMapOfStringToBool map[string]map[string]bool
 
