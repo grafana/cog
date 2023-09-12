@@ -1,4 +1,4 @@
-package generate
+package loaders
 
 import (
 	"fmt"
@@ -15,19 +15,14 @@ import (
 	"github.com/yalue/merged_fs"
 )
 
-type cueIncludeImport struct {
-	fsPath     string // path of the library on the filesystem
-	importPath string // path used in CUE files to import that library
-}
-
-func cueLoader(opts options) ([]*ast.File, error) {
+func cueLoader(opts Options) ([]*ast.File, error) {
 	cueFsOverlay, err := buildCueOverlay(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	allSchemas := make([]*ast.File, 0, len(opts.entrypoints))
-	for _, entrypoint := range opts.entrypoints {
+	allSchemas := make([]*ast.File, 0, len(opts.Entrypoints))
+	for _, entrypoint := range opts.Entrypoints {
 		pkg := filepath.Base(entrypoint)
 
 		// Load Cue files into Cue build.Instances slice
@@ -56,7 +51,7 @@ func cueLoader(opts options) ([]*ast.File, error) {
 	return allSchemas, nil
 }
 
-func buildCueOverlay(opts options) (map[string]load.Source, error) {
+func buildCueOverlay(opts Options) (map[string]load.Source, error) {
 	libFs, err := buildBaseFSWithLibraries(opts)
 	if err != nil {
 		return nil, err
@@ -70,7 +65,7 @@ func buildCueOverlay(opts options) (map[string]load.Source, error) {
 	return overlay, nil
 }
 
-func buildBaseFSWithLibraries(opts options) (fs.FS, error) {
+func buildBaseFSWithLibraries(opts Options) (fs.FS, error) {
 	importDefinitions, err := opts.cueIncludeImports()
 	if err != nil {
 		return nil, err

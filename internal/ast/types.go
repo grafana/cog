@@ -50,13 +50,13 @@ type TypeConstraint struct {
 type Type struct {
 	Kind Kind
 
-	Disjunction *DisjunctionType
-	Array       *ArrayType
-	Enum        *EnumType
-	Map         *MapType
-	Struct      *StructType
-	Ref         *RefType
-	Scalar      *ScalarType
+	Disjunction *DisjunctionType `json:",omitempty"`
+	Array       *ArrayType       `json:",omitempty"`
+	Enum        *EnumType        `json:",omitempty"`
+	Map         *MapType         `json:",omitempty"`
+	Struct      *StructType      `json:",omitempty"`
+	Ref         *RefType         `json:",omitempty"`
+	Scalar      *ScalarType      `json:",omitempty"`
 }
 
 func Any() Type {
