@@ -151,6 +151,11 @@ func formatType(def ast.Type, typesPkg string) string {
 	case ast.KindEnum:
 		return formatAnonymousEnum(def.AsEnum())
 	case ast.KindScalar:
+		// This scalar actually refers to a constant
+		if def.AsScalar().Value != nil {
+			return formatScalar(def.AsScalar().Value)
+		}
+
 		return formatScalarKind(def.AsScalar().ScalarKind)
 
 	default:

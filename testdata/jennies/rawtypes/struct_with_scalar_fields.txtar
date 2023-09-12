@@ -44,6 +44,14 @@
                                 "Scalar": {"ScalarKind": "string"}
                             }
                         },
+                        {
+                            "Name": "FieldStringWithConstantValue",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string", "Value": "auto"}
+                            }
+                        },
 
                         {
                             "Name": "FieldFloat32",
@@ -146,6 +154,7 @@ export interface SomeStruct {
 	fieldBool: boolean;
 	fieldBytes: string;
 	fieldString: string;
+	fieldStringWithConstantValue: "auto";
 	fieldFloat32: number;
 	fieldFloat64: number;
 	fieldUint8: number;
