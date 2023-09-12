@@ -1,0 +1,142 @@
+# Enumerations
+-- ir.json --
+{
+    "Package": "disjunctions",
+    "Definitions": [
+        {
+            "Name": "StringOrBool",
+            "Comments": ["Refresh rate or disabled."],
+            "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                    "Branches": [
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "string"}
+                        },
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "bool"}
+                        }
+                    ]
+                }
+            }
+        },
+
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "BoolOrRef",
+            "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                    "Branches": [
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "bool"}
+                        },
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredType": "SomeStruct"}
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "SomeOtherStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "YetAnotherStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "SeveralRefs",
+            "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                    "Branches": [
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredType": "SomeStruct"}
+                        },
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredType": "SomeOtherStruct"}
+                        },
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredType": "YetAnotherStruct"}
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/disjunctions/types_gen.ts
+// Refresh rate or disabled.
+export type StringOrBool = string | boolean;
+
+export interface SomeStruct {
+	fieldAny: any;
+}
+
+export type BoolOrRef = boolean | SomeStruct;
+
+export interface SomeOtherStruct {
+	fieldAny: any;
+}
+
+export interface YetAnotherStruct {
+	fieldAny: any;
+}
+
+export type SeveralRefs = SomeStruct | SomeOtherStruct | YetAnotherStruct;
+
