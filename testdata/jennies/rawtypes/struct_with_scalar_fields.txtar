@@ -1,4 +1,4 @@
-# Basic struct with scalar fields
+# Basic struct with scalar fields, all required.
 -- ir.json --
 {
     "Package": "basic",
@@ -15,9 +15,115 @@
                             "Required": true,
                             "Type": {
                                 "Kind": "scalar",
-                                "Scalar": {
-                                    "ScalarKind": "any"
-                                }
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        },
+                        {
+                            "Name": "FieldBool",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "bool"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldBytes",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "bytes"}
+                            }
+                        },
+                        {
+                            "Name": "FieldString",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldFloat32",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "float32"}
+                            }
+                        },
+                        {
+                            "Name": "FieldFloat64",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "float64"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldUint8",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint8"}
+                            }
+                        },
+                        {
+                            "Name": "FieldUint16",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint16"}
+                            }
+                        },
+                        {
+                            "Name": "FieldUint32",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint32"}
+                            }
+                        },
+                        {
+                            "Name": "FieldUint64",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint64"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldInt8",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int8"}
+                            }
+                        },
+                        {
+                            "Name": "FieldInt16",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int16"}
+                            }
+                        },
+                        {
+                            "Name": "FieldInt32",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int32"}
+                            }
+                        },
+                        {
+                            "Name": "FieldInt64",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int64"}
                             }
                         }
                     ]
@@ -34,5 +140,18 @@
 // comment
 export interface SomeStruct {
 	fieldAny: any;
+	fieldBool: boolean;
+	fieldBytes: string;
+	fieldString: string;
+	fieldFloat32: number;
+	fieldFloat64: number;
+	fieldUint8: number;
+	fieldUint16: number;
+	fieldUint32: number;
+	fieldUint64: number;
+	fieldInt8: number;
+	fieldInt16: number;
+	fieldInt32: number;
+	fieldInt64: number;
 }
 
