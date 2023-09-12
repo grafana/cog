@@ -1,4 +1,4 @@
-package generate
+package loaders
 
 import (
 	"fmt"
@@ -12,11 +12,11 @@ import (
 	"github.com/grafana/thema"
 )
 
-func kindsysCoreLoader(opts options) ([]*ast.File, error) {
+func kindsysCustomLoader(opts Options) ([]*ast.File, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.entrypoints))
-	for _, entrypoint := range opts.entrypoints {
+	allSchemas := make([]*ast.File, 0, len(opts.Entrypoints))
+	for _, entrypoint := range opts.Entrypoints {
 		pkg := filepath.Base(entrypoint)
 
 		overlayFS, err := dirToPrefixedFS(entrypoint, "")
@@ -24,22 +24,22 @@ func kindsysCoreLoader(opts options) ([]*ast.File, error) {
 			return nil, err
 		}
 
-		cueInstance, err := kindsys.BuildInstance(themaRuntime.Context(), ".", "kind", overlayFS)
+		cueInstance, err := kindsys.BuildInstance(themaRuntime.Context(), ".", pkg, overlayFS)
 		if err != nil {
 			return nil, fmt.Errorf("could not load kindsys instance: %w", err)
 		}
 
-		props, err := kindsys.ToKindProps[kindsys.CoreProperties](cueInstance)
+		props, err := kindsys.ToKindProps[kindsys.CustomProperties](cueInstance)
 		if err != nil {
 			return nil, fmt.Errorf("could not convert cue value to kindsys props: %w", err)
 		}
 
-		kindDefinition := kindsys.Def[kindsys.CoreProperties]{
+		kindDefinition := kindsys.Def[kindsys.CustomProperties]{
 			V:          cueInstance,
 			Properties: props,
 		}
 
-		boundKind, err := kindsys.BindCore(themaRuntime, kindDefinition)
+		boundKind, err := kindsys.BindCustom(themaRuntime, kindDefinition)
 		if err != nil {
 			return nil, fmt.Errorf("could not bind kind definition to kind: %w", err)
 		}

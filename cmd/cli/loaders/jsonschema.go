@@ -1,4 +1,4 @@
-package generate
+package loaders
 
 import (
 	"os"
@@ -8,9 +8,9 @@ import (
 	"github.com/grafana/cog/internal/jsonschema"
 )
 
-func jsonschemaLoader(opts options) ([]*ast.File, error) {
-	allSchemas := make([]*ast.File, 0, len(opts.entrypoints))
-	for _, entrypoint := range opts.entrypoints {
+func jsonschemaLoader(opts Options) ([]*ast.File, error) {
+	allSchemas := make([]*ast.File, 0, len(opts.Entrypoints))
+	for _, entrypoint := range opts.Entrypoints {
 		pkg := filepath.Base(filepath.Dir(entrypoint))
 
 		reader, err := os.Open(entrypoint)

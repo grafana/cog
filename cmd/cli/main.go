@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/grafana/cog/cmd/cli/generate"
+	"github.com/grafana/cog/cmd/cli/inspect"
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +16,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(generate.Command())
+	rootCmd.AddCommand(inspect.Command())
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

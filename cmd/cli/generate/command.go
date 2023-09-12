@@ -3,44 +3,21 @@ package generate
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/cmd/cli/loaders"
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/spf13/cobra"
 )
 
-type options struct {
-	outputDir   string
-	entrypoints []string
-	schemasType string
+type Options struct {
+	loaders.Options
 
-	// Cue-specific options
-	cueImports []string
-}
-
-func (opts options) cueIncludeImports() ([]cueIncludeImport, error) {
-	if len(opts.cueImports) == 0 {
-		return nil, nil
-	}
-
-	imports := make([]cueIncludeImport, len(opts.cueImports))
-	for i, importDefinition := range opts.cueImports {
-		parts := strings.Split(importDefinition, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("'%s' is not a valid import definition", importDefinition)
-		}
-
-		imports[i].fsPath = parts[0]
-		imports[i].importPath = parts[1]
-	}
-
-	return imports, nil
+	OutputDir string
 }
 
 func Command() *cobra.Command {
-	opts := options{}
+	opts := Options{}
 
 	cmd := &cobra.Command{
 		Use:   "generate",
@@ -51,10 +28,10 @@ func Command() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.schemasType, "loader", "l", "cue", "Schemas type.")         // TODO: better usage text
-	cmd.Flags().StringVarP(&opts.outputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
-	cmd.Flags().StringArrayVarP(&opts.entrypoints, "input", "i", nil, "Schema.")             // TODO: better usage text
-	cmd.Flags().StringArrayVarP(&opts.cueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
+	cmd.Flags().StringVarP(&opts.SchemasType, "loader", "l", "cue", "Schemas type.")         // TODO: better usage text
+	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
+	cmd.Flags().StringArrayVarP(&opts.Entrypoints, "input", "i", nil, "Schema.")             // TODO: better usage text
+	cmd.Flags().StringArrayVarP(&opts.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
 
 	_ = cmd.MarkFlagRequired("input")
 	_ = cmd.MarkFlagDirname("input")
@@ -63,19 +40,13 @@ func Command() *cobra.Command {
 	return cmd
 }
 
-func doGenerate(opts options) error {
-	loaders := map[string]func(opts options) ([]*ast.File, error){
-		"cue":            cueLoader,
-		"kindsys-core":   kindsysCoreLoader,
-		"kindsys-custom": kindsysCustomLoader,
-		"jsonschema":     jsonschemaLoader,
-	}
-	loader, ok := loaders[opts.schemasType]
-	if !ok {
-		return fmt.Errorf("no loader found for '%s'", opts.schemasType)
+func doGenerate(opts Options) error {
+	loader, err := loaders.ForSchemaType(opts.SchemasType)
+	if err != nil {
+		return err
 	}
 
-	schemas, err := loader(opts)
+	schemas, err := loader(opts.Options)
 	if err != nil {
 		return err
 	}
@@ -108,7 +79,7 @@ func doGenerate(opts options) error {
 		}
 	}
 
-	err = rootCodeJenFS.Write(context.Background(), opts.outputDir)
+	err = rootCodeJenFS.Write(context.Background(), opts.OutputDir)
 	if err != nil {
 		return err
 	}
