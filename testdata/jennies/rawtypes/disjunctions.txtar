@@ -24,6 +24,25 @@
         },
 
         {
+            "Name": "StringOrNull",
+            "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                    "Branches": [
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "string"}
+                        },
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "null"}
+                        }
+                    ]
+                }
+            }
+        },
+
+        {
             "Name": "SomeStruct",
             "Type": {
                 "Kind": "struct",
@@ -123,6 +142,8 @@
 == types/disjunctions/types_gen.ts
 // Refresh rate or disabled.
 export type StringOrBool = string | boolean;
+
+export type StringOrNull = string | null;
 
 export interface SomeStruct {
 	fieldAny: any;

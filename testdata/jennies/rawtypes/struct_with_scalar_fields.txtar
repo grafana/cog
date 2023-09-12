@@ -13,6 +13,7 @@
                         {
                             "Name": "FieldAny",
                             "Required": true,
+                            "Comments": ["Anything can go in there.", "Really, anything."],
                             "Type": {
                                 "Kind": "scalar",
                                 "Scalar": {"ScalarKind": "any"}
@@ -139,6 +140,8 @@
 // a
 // comment
 export interface SomeStruct {
+	// Anything can go in there.
+	// Really, anything.
 	fieldAny: any;
 	fieldBool: boolean;
 	fieldBytes: string;

@@ -1,0 +1,127 @@
+# Basic struct with scalar fields, all required.
+-- ir.json --
+{
+    "Package": "struct_optional_fields",
+    "Definitions": [
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldRef",
+                            "Required": false,
+                            "Type": {
+                                "Kind": "ref",
+                                "Ref": {"ReferredType": "SomeOtherStruct"}
+                            }
+                        },
+                        {
+                            "Name": "FieldString",
+                            "Required": false,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string"}
+                            }
+                        },
+                        {
+                            "Name": "FieldAnonymousEnum",
+                            "Required": false,
+                            "Type": {
+                                "Kind": "enum",
+                                "Enum": {
+                                    "Values": [
+                                        {
+                                            "Name": "GreaterThan",
+                                            "Type": {
+                                                "Kind": "scalar",
+                                                "Scalar": {"ScalarKind": "string"}
+                                            },
+                                            "Value": ">"
+                                        },
+                                        {
+                                            "Name": "LessThan",
+                                            "Type": {
+                                                "Kind": "scalar",
+                                                "Scalar": {"ScalarKind": "string"}
+                                            },
+                                            "Value": "<"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "Name": "FieldArrayOfStrings",
+                            "Required": false,
+                            "Type": {
+                                "Kind": "array",
+                                "Array": {
+                                    "ValueType": {
+                                        "Kind": "scalar",
+                                        "Scalar": {"ScalarKind": "string"}
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "Name": "FieldAnonymousStruct",
+                            "Required": false,
+                            "Type": {
+                                "Kind": "struct",
+                                "Struct": {
+                                    "Fields": [
+                                        {
+                                            "Name": "FieldAny",
+                                            "Required": true,
+                                            "Type": {
+                                                "Kind": "scalar",
+                                                "Scalar": {"ScalarKind": "any"}
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+
+        {
+            "Name": "SomeOtherStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/struct_optional_fields/types_gen.ts
+export interface SomeStruct {
+	fieldRef?: SomeOtherStruct;
+	fieldString?: string;
+	fieldAnonymousEnum?: ">" | "<";
+	fieldArrayOfStrings?: string[];
+	fieldAnonymousStruct?: {
+		fieldAny: any;
+	};
+}
+
+export interface SomeOtherStruct {
+	fieldAny: any;
+}
+
