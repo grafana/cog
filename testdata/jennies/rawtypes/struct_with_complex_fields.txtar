@@ -57,6 +57,25 @@
                             }
                         },
                         {
+                            "Name": "FieldDisjunctionWithNull",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "disjunction",
+                                "Disjunction": {
+                                    "Branches": [
+                                        {
+                                            "Kind": "scalar",
+                                            "Scalar": {"ScalarKind": "string"}
+                                        },
+                                        {
+                                            "Kind": "scalar",
+                                            "Scalar": {"ScalarKind": "null"}
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
                             "Name": "FieldAnonymousEnum",
                             "Required": true,
                             "Type": {
@@ -164,6 +183,7 @@ export interface SomeStruct {
 	fieldRef: SomeOtherStruct;
 	fieldDisjunctionOfScalars: string | boolean;
 	fieldMixedDisjunction: string | SomeOtherStruct;
+	fieldDisjunctionWithNull: string | null;
 	fieldAnonymousEnum: ">" | "<";
 	fieldArrayOfStrings: string[];
 	fieldMapOfStringToString: Record<string, string>;
@@ -185,6 +205,7 @@ type SomeStruct struct {
 	FieldRef SomeOtherStruct `json:"FieldRef"`
 	FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars"`
 	FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction"`
+	FieldDisjunctionWithNull *string `json:"FieldDisjunctionWithNull"`
 	FieldAnonymousEnum FieldAnonymousEnumEnum `json:"FieldAnonymousEnum"`
 	FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
 	FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
@@ -209,49 +230,48 @@ type StringOrBool struct {
 	ValBool *bool `json:"ValBool,omitempty"`
 }
 
-// MarshalJSON implements the encoding/json.Marshaler interface.
-//
-// This method can be used to render the resource as JSON
-// which your configuration management tool of choice can then feed into
-// Grafana.
 func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+
 	if resource.ValString != nil {
-		var buf bytes.Buffer
-		buf.WriteRune('"')
-		buf.WriteString(*resource.ValString)
-		buf.WriteRune('"')
-		return buf.Bytes(), nil
+		return json.Marshal(resource.ValString)
 	}
 
-	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+	if resource.ValBool != nil {
+		return json.Marshal(resource.ValBool)
+	}
+
+
+	return nil, nil
 }
 
 func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
-	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+	if raw == nil {
 		return nil
 	}
-	var (
-		tmp string
-		err error
-	)
-	if raw[0] != '"' {
-		if bytes.Equal(raw, []byte("true")) {
-			yup := true
-			resource.ValBool = &yup
-			return nil
-		}
-		if bytes.Equal(raw, []byte("false")) {
-			nope := false
-			resource.ValBool = &nope
-			return nil
-		}
-		return errors.New("bad boolean value provided")
+
+	var errList []error
+
+	// ValString
+	var ValString string
+	if err := json.Unmarshal(raw, &ValString); err != nil {
+		errList = append(errList, err)
+		resource.ValString = nil
+	} else {
+		resource.ValString = &ValString
+		return nil
 	}
-	if err = json.Unmarshal(raw, &tmp); err != nil {
-		return err
+
+	// ValBool
+	var ValBool bool
+	if err := json.Unmarshal(raw, &ValBool); err != nil {
+		errList = append(errList, err)
+		resource.ValBool = nil
+	} else {
+		resource.ValBool = &ValBool
+		return nil
 	}
-	resource.ValString = &tmp
-	return nil
+
+	return errors.Join(errList...)
 }
 
 type StringOrSomeOtherStruct struct {

@@ -100,6 +100,7 @@ func (pass *DisjunctionToType) processDisjunction(def ast.DisjunctionType) ast.T
 	// Ex: type | null
 	if len(def.Branches) == 2 && def.Branches.HasNullType() {
 		finalType := def.Branches.NonNullTypes()[0]
+		// FIXME: this should be propagated
 		// finalType.Nullable = true
 
 		return finalType
@@ -124,9 +125,14 @@ func (pass *DisjunctionToType) processDisjunction(def ast.DisjunctionType) ast.T
 			})
 		}
 
+		structType := ast.NewStruct(fields)
+		if def.Branches.HasOnlyScalarOrArray() {
+			structType.Struct.Hint[ast.HintDisjunctionOfScalars] = true
+		}
+
 		pass.newObjects[newTypeName] = ast.Object{
 			Name: newTypeName,
-			Type: ast.NewStruct(fields),
+			Type: structType,
 		}
 	}
 
