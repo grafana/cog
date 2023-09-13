@@ -4,7 +4,7 @@
     "Package": "disjunctions",
     "Definitions": [
         {
-            "Name": "StringOrBool",
+            "Name": "RefreshRate",
             "Comments": ["Refresh rate or disabled."],
             "Type": {
                 "Kind": "disjunction",
@@ -141,7 +141,7 @@
 -- out/jennies/TypescriptRawTypes --
 == types/disjunctions/types_gen.ts
 // Refresh rate or disabled.
-export type StringOrBool = string | boolean;
+export type RefreshRate = string | boolean;
 
 export type StringOrNull = string | null;
 
@@ -166,54 +166,9 @@ export type SeveralRefs = SomeStruct | SomeOtherStruct | YetAnotherStruct;
 package types
 
 // Refresh rate or disabled.
-type StringOrBool StringOrBool
+type RefreshRate StringOrBool
 
-// MarshalJSON implements the encoding/json.Marshaler interface.
-//
-// This method can be used to render the resource as JSON
-// which your configuration management tool of choice can then feed into
-// Grafana.
-func (resource StringOrBool) MarshalJSON() ([]byte, error) {
-	if resource.ValString != nil {
-		var buf bytes.Buffer
-		buf.WriteRune('"')
-		buf.WriteString(*resource.ValString)
-		buf.WriteRune('"')
-		return buf.Bytes(), nil
-	}
-
-	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
-}
-
-func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
-	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
-		return nil
-	}
-	var (
-		tmp string
-		err error
-	)
-	if raw[0] != '"' {
-		if bytes.Equal(raw, []byte("true")) {
-			yup := true
-			resource.ValBool = &yup
-			return nil
-		}
-		if bytes.Equal(raw, []byte("false")) {
-			nope := false
-			resource.ValBool = &nope
-			return nil
-		}
-		return errors.New("bad boolean value provided")
-	}
-	if err = json.Unmarshal(raw, &tmp); err != nil {
-		return err
-	}
-	resource.ValString = &tmp
-	return nil
-}
-
-type StringOrNull string
+type StringOrNull *string
 
 type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
@@ -247,48 +202,47 @@ type StringOrBool struct {
 	ValBool *bool `json:"ValBool,omitempty"`
 }
 
-// MarshalJSON implements the encoding/json.Marshaler interface.
-//
-// This method can be used to render the resource as JSON
-// which your configuration management tool of choice can then feed into
-// Grafana.
 func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+
 	if resource.ValString != nil {
-		var buf bytes.Buffer
-		buf.WriteRune('"')
-		buf.WriteString(*resource.ValString)
-		buf.WriteRune('"')
-		return buf.Bytes(), nil
+		return json.Marshal(resource.ValString)
 	}
 
-	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+	if resource.ValBool != nil {
+		return json.Marshal(resource.ValBool)
+	}
+
+
+	return nil, nil
 }
 
 func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
-	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+	if raw == nil {
 		return nil
 	}
-	var (
-		tmp string
-		err error
-	)
-	if raw[0] != '"' {
-		if bytes.Equal(raw, []byte("true")) {
-			yup := true
-			resource.ValBool = &yup
-			return nil
-		}
-		if bytes.Equal(raw, []byte("false")) {
-			nope := false
-			resource.ValBool = &nope
-			return nil
-		}
-		return errors.New("bad boolean value provided")
+
+	var errList []error
+
+	// ValString
+	var ValString string
+	if err := json.Unmarshal(raw, &ValString); err != nil {
+		errList = append(errList, err)
+		resource.ValString = nil
+	} else {
+		resource.ValString = &ValString
+		return nil
 	}
-	if err = json.Unmarshal(raw, &tmp); err != nil {
-		return err
+
+	// ValBool
+	var ValBool bool
+	if err := json.Unmarshal(raw, &ValBool); err != nil {
+		errList = append(errList, err)
+		resource.ValBool = nil
+	} else {
+		resource.ValBool = &ValBool
+		return nil
 	}
-	resource.ValString = &tmp
-	return nil
+
+	return errors.Join(errList...)
 }
 

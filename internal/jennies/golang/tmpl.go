@@ -19,6 +19,7 @@ func init() {
 	base := template.New("golang")
 	base.Funcs(map[string]any{
 		"formatIdentifier": tools.UpperCamelCase,
+		"formatType":       formatType,
 	})
 	templates = template.Must(base.ParseFS(veneersFS, "veneers/*.tmpl"))
 }

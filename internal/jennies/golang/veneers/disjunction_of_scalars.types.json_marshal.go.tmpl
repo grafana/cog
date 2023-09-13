@@ -1,0 +1,30 @@
+func (resource *{{ .def.Name|formatIdentifier }}) MarshalJSON() ([]byte, error) {
+{{ range .def.Type.Struct.Fields }}
+	if resource.{{ .Name|formatIdentifier }} != nil {
+		return json.Marshal(resource.{{ .Name|formatIdentifier }})
+	}
+{{ end }}
+
+	return nil, nil
+}
+
+func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+
+	var errList []error
+{{ range .def.Type.Struct.Fields }}
+	// {{ .Name|formatIdentifier }}
+	var {{ .Name }} {{ formatType .Type true "" }}
+	if err := json.Unmarshal(raw, &{{ .Name }}); err != nil {
+		errList = append(errList, err)
+		resource.{{ .Name|formatIdentifier }} = nil
+	} else {
+		resource.{{ .Name|formatIdentifier }} = {{ if ne .Type.Kind "array" }}&{{ end }}{{ .Name }}
+		return nil
+	}
+{{ end }}
+	return errors.Join(errList...)
+}
+

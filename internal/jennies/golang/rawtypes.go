@@ -43,13 +43,11 @@ func (jenny RawTypes) generateFile(file *ast.File) ([]byte, error) {
 		buffer.WriteString("\n")
 
 		// Add JSON (un)marshaling shortcuts
-		if !object.Type.IsAny() {
-			jsonMarshal, err := jenny.veneer("json_marshal", object)
-			if err != nil {
-				return nil, err
-			}
-			buffer.WriteString(jsonMarshal)
+		jsonMarshal, err := jenny.jsonMarshalVeneer(object)
+		if err != nil {
+			return nil, err
 		}
+		buffer.WriteString(jsonMarshal)
 	}
 
 	return []byte(buffer.String()), nil
@@ -103,18 +101,40 @@ func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	return buffer.String()
 }
 
-func (jenny RawTypes) veneer(veneerType string, def ast.Object) (string, error) {
-	// First, see if there is a definition-specific veneer
-	templateFile := fmt.Sprintf("%s.types.%s.go.tmpl", strings.ToLower(def.Name), veneerType)
-	tmpl := templates.Lookup(templateFile)
+func (jenny RawTypes) jsonMarshalVeneer(def ast.Object) (string, error) {
+	// the only case for which we need to render such veneer is for structs
+	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
 
-	// If not, get the generic one
-	if tmpl == nil {
-		tmpl = templates.Lookup(fmt.Sprintf("types.%s.go.tmpl", veneerType))
-	}
-	// If not, then there's nothing to do.
-	if tmpl == nil {
+	// if the object isn't a struct: nothing to do.
+	if def.Type.Kind != ast.KindStruct {
 		return "", nil
+	}
+
+	structType := def.Type.AsStruct()
+
+	// We know that a struct was generated from a disjunction if it has a "hint" that says so.
+	// There are only two types of disjunctions we support:
+	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
+	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are structs and these structs
+	// 	  have a common "discriminator" field.
+
+	if structType.Hint[ast.HintDisjunctionOfScalars] != nil {
+		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.go.tmpl", def)
+	}
+
+	if structType.Hint[ast.HintDiscriminatedDisjunctionOfStructs] != nil {
+		// TODO
+		return "", nil
+	}
+
+	// We didn't find a hint relevant to us: nothing do to.
+	return "", nil
+}
+
+func (jenny RawTypes) renderVeneerTemplate(templateFile string, def ast.Object) (string, error) {
+	tmpl := templates.Lookup(templateFile)
+	if tmpl == nil {
+		return "", fmt.Errorf("veneer template '%s' not found", templateFile)
 	}
 
 	buf := bytes.Buffer{}

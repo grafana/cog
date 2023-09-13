@@ -121,6 +121,7 @@ func NewStruct(fields []StructField) Type {
 		Kind: KindStruct,
 		Struct: &StructType{
 			Fields: fields,
+			Hint:   make(map[JennyHint]any),
 		},
 	}
 }
@@ -203,6 +204,16 @@ func (file *File) LocateDefinition(name string) Object {
 
 type Types []Type
 
+func (types Types) HasOnlyScalarOrArray() bool {
+	for _, t := range types {
+		if t.Kind != KindScalar && t.Kind != KindArray {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (types Types) HasNullType() bool {
 	for _, t := range types {
 		if t.IsNull() {
@@ -252,6 +263,7 @@ type MapType struct {
 
 type StructType struct {
 	Fields []StructField
+	Hint   map[JennyHint]any // Hints meant to be used by jennies
 }
 
 type StructField struct {
