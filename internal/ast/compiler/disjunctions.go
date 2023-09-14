@@ -243,17 +243,15 @@ func (pass *DisjunctionToType) inferDiscriminatorField(file *ast.File, def ast.D
 
 		for _, field := range structType.Fields {
 			if field.Type.Kind != ast.KindScalar {
-				delete(candidates, field.Name)
 				continue
 			}
 
 			scalarField := field.Type.AsScalar()
 			if !scalarField.IsConcrete() {
-				delete(candidates, field.Name)
 				continue
 			}
 
-			candidates[branch.AsRef().ReferredType][field.Name] = scalarField.Value
+			candidates[typeName][field.Name] = scalarField.Value
 		}
 	}
 
