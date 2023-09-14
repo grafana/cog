@@ -83,7 +83,8 @@ func NewDisjunction(branches Types) Type {
 	return Type{
 		Kind: KindDisjunction,
 		Disjunction: &DisjunctionType{
-			Branches: branches,
+			Branches:             branches,
+			DiscriminatorMapping: make(map[string]any),
 		},
 	}
 }
@@ -209,6 +210,18 @@ func (types Types) HasOnlyScalarOrArray() bool {
 		if t.Kind != KindScalar && t.Kind != KindArray {
 			return false
 		}
+
+		// FIXME: for arrays, we should also inspect them recursively to make sure only scalar types are used
+	}
+
+	return true
+}
+
+func (types Types) HasOnlyRefs() bool {
+	for _, t := range types {
+		if t.Kind != KindRef {
+			return false
+		}
 	}
 
 	return true
@@ -240,6 +253,19 @@ func (types Types) NonNullTypes() Types {
 
 type DisjunctionType struct {
 	Branches Types
+
+	// If the branches are structs, some languages will need extra context to
+	// be able to distinguish between them. Golang, for example, doesn't support
+	// sum types (disjunctions of fixed types).
+	// To emulate sum types for these languages, we need a way to
+	// discriminate against every possible type.
+	//
+	// To do that, we need two things:
+	//	- a discriminator: the name of a field that is present in all types.
+	//	  The value of which identifies the type being used.
+	//  - a mapping: associating a type name to its "discriminator value".
+	Discriminator        string
+	DiscriminatorMapping map[string]any // likely a map[string]string or map[string]int
 }
 
 type ArrayType struct {
@@ -266,6 +292,19 @@ type StructType struct {
 	Hint   map[JennyHint]any // Hints meant to be used by jennies
 }
 
+func (structType StructType) FieldByName(name string) (StructField, bool) {
+	// FIXME: we don't have a way to directly get a struct field by name :(
+	for _, field := range structType.Fields {
+		if field.Name != name {
+			continue
+		}
+
+		return field, true
+	}
+
+	return StructField{}, false
+}
+
 type StructField struct {
 	Name     string
 	Comments []string
@@ -282,4 +321,8 @@ type ScalarType struct {
 	ScalarKind  ScalarKind // bool, bytes, string, int, float, ...
 	Value       any        // if value isn't nil, we're representing a constant scalar
 	Constraints []TypeConstraint
+}
+
+func (scalarType ScalarType) IsConcrete() bool {
+	return scalarType.Value != nil
 }

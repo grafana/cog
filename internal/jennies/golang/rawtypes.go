@@ -115,32 +115,34 @@ func (jenny RawTypes) jsonMarshalVeneer(def ast.Object) (string, error) {
 	// We know that a struct was generated from a disjunction if it has a "hint" that says so.
 	// There are only two types of disjunctions we support:
 	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
-	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are structs and these structs
-	// 	  have a common "discriminator" field.
+	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
+	// 	  structs and these structs have a common "discriminator" field.
 
-	if structType.Hint[ast.HintDisjunctionOfScalars] != nil {
-		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.go.tmpl", def)
+	if _, ok := structType.Hint[ast.HintDisjunctionOfScalars]; ok {
+		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.go.tmpl", map[string]any{
+			"def": def,
+		})
 	}
 
-	if structType.Hint[ast.HintDiscriminatedDisjunctionOfStructs] != nil {
-		// TODO
-		return "", nil
+	if hintVal, ok := structType.Hint[ast.HintDiscriminatedDisjunctionOfStructs]; ok {
+		return jenny.renderVeneerTemplate("disjunction_of_structs.types.json_marshal.go.tmpl", map[string]any{
+			"def":  def,
+			"hint": hintVal,
+		})
 	}
 
 	// We didn't find a hint relevant to us: nothing do to.
 	return "", nil
 }
 
-func (jenny RawTypes) renderVeneerTemplate(templateFile string, def ast.Object) (string, error) {
+func (jenny RawTypes) renderVeneerTemplate(templateFile string, data map[string]any) (string, error) {
 	tmpl := templates.Lookup(templateFile)
 	if tmpl == nil {
 		return "", fmt.Errorf("veneer template '%s' not found", templateFile)
 	}
 
 	buf := bytes.Buffer{}
-	if err := tmpl.Execute(&buf, map[string]any{
-		"def": def,
-	}); err != nil {
+	if err := tmpl.Execute(&buf, data); err != nil {
 		return "", fmt.Errorf("failed executing veneer template: %w", err)
 	}
 
