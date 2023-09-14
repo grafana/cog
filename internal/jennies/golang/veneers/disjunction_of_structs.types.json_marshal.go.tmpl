@@ -37,6 +37,6 @@ func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) erro
 {{ end }}
 	}
 
-	return nil
+	return fmt.Errorf("could not unmarshal resource with `{{ .hint.Discriminator }} = %v`", discriminator)
 }
 
