@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -34,7 +35,12 @@ func (pass *DisjunctionToType) processFile(file *ast.File) (*ast.File, error) {
 
 	processedObjects := make([]ast.Object, 0, len(file.Definitions))
 	for _, object := range file.Definitions {
-		processedObjects = append(processedObjects, pass.processObject(file, object))
+		processedObject, err := pass.processObject(file, object)
+		if err != nil {
+			return nil, err
+		}
+
+		processedObjects = append(processedObjects, processedObject)
 	}
 
 	newObjects := make([]ast.Object, 0, len(pass.newObjects))
@@ -54,14 +60,19 @@ func (pass *DisjunctionToType) processFile(file *ast.File) (*ast.File, error) {
 	}, nil
 }
 
-func (pass *DisjunctionToType) processObject(file *ast.File, object ast.Object) ast.Object {
-	newObject := object
-	newObject.Type = pass.processType(file, object.Type)
+func (pass *DisjunctionToType) processObject(file *ast.File, object ast.Object) (ast.Object, error) {
+	processedType, err := pass.processType(file, object.Type)
+	if err != nil {
+		return object, err
+	}
 
-	return newObject
+	newObject := object
+	newObject.Type = processedType
+
+	return newObject, nil
 }
 
-func (pass *DisjunctionToType) processType(file *ast.File, def ast.Type) ast.Type {
+func (pass *DisjunctionToType) processType(file *ast.File, def ast.Type) (ast.Type, error) {
 	if def.Kind == ast.KindArray {
 		return pass.processArray(file, def.AsArray())
 	}
@@ -74,36 +85,46 @@ func (pass *DisjunctionToType) processType(file *ast.File, def ast.Type) ast.Typ
 		return pass.processDisjunction(file, def.AsDisjunction())
 	}
 
-	return def
+	return def, nil
 }
 
-func (pass *DisjunctionToType) processArray(file *ast.File, def ast.ArrayType) ast.Type {
-	return ast.NewArray(pass.processType(file, def.ValueType))
+func (pass *DisjunctionToType) processArray(file *ast.File, def ast.ArrayType) (ast.Type, error) {
+	processedType, err := pass.processType(file, def.ValueType)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
+	return ast.NewArray(processedType), nil
 }
 
-func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.StructType) ast.Type {
+func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.StructType) (ast.Type, error) {
 	processedFields := make([]ast.StructField, 0, len(def.Fields))
 	for _, field := range def.Fields {
+		processedType, err := pass.processType(file, field.Type)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
 		processedFields = append(processedFields, ast.StructField{
 			Name:     field.Name,
 			Comments: field.Comments,
-			Type:     pass.processType(file, field.Type),
+			Type:     processedType,
 			Required: field.Required,
 			Default:  field.Default,
 		})
 	}
 
-	return ast.NewStruct(processedFields)
+	return ast.NewStruct(processedFields), nil
 }
 
-func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.DisjunctionType) ast.Type {
+func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.DisjunctionType) (ast.Type, error) {
 	// Ex: type | null
 	if len(def.Branches) == 2 && def.Branches.HasNullType() {
 		finalType := def.Branches.NonNullTypes()[0]
 		// FIXME: this should be propagated
 		// finalType.Nullable = true
 
-		return finalType
+		return finalType, nil
 	}
 
 	// type | otherType | something (| null)?
@@ -139,7 +160,12 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Disjun
 			structType.Struct.Hint[ast.HintDisjunctionOfScalars] = def
 		}
 		if def.Branches.HasOnlyRefs() {
-			structType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfStructs] = pass.ensureDiscriminator(file, def)
+			newDisjunctionDef, err := pass.ensureDiscriminator(file, def)
+			if err != nil {
+				return ast.Type{}, err
+			}
+
+			structType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfStructs] = newDisjunctionDef
 		}
 
 		pass.newObjects[newTypeName] = ast.Object{
@@ -148,7 +174,7 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Disjun
 		}
 	}
 
-	return ast.NewRef(newTypeName)
+	return ast.NewRef(newTypeName), nil
 }
 
 func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) string {
@@ -172,10 +198,10 @@ func (pass *DisjunctionToType) typeName(typeDef ast.Type) string {
 	return string(typeDef.Kind)
 }
 
-func (pass *DisjunctionToType) ensureDiscriminator(file *ast.File, def ast.DisjunctionType) ast.DisjunctionType {
+func (pass *DisjunctionToType) ensureDiscriminator(file *ast.File, def ast.DisjunctionType) (ast.DisjunctionType, error) {
 	// discriminator-related data was set during parsing: nothing to do.
 	if def.Discriminator != "" && len(def.DiscriminatorMapping) != 0 {
-		return def
+		return def, nil
 	}
 
 	newDef := def
@@ -185,10 +211,15 @@ func (pass *DisjunctionToType) ensureDiscriminator(file *ast.File, def ast.Disju
 	}
 
 	if len(def.DiscriminatorMapping) == 0 {
-		newDef.DiscriminatorMapping = pass.buildDiscriminatorMapping(file, newDef)
+		mapping, err := pass.buildDiscriminatorMapping(file, newDef)
+		if err != nil {
+			return newDef, err
+		}
+
+		newDef.DiscriminatorMapping = mapping
 	}
 
-	return newDef
+	return newDef, nil
 }
 
 // inferDiscriminatorField tries to identify a field that might be used
@@ -254,11 +285,10 @@ func (pass *DisjunctionToType) inferDiscriminatorField(file *ast.File, def ast.D
 	return fieldName
 }
 
-func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast.DisjunctionType) map[string]any {
+func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast.DisjunctionType) (map[string]any, error) {
 	mapping := make(map[string]any, len(def.Branches))
 	if def.Discriminator == "" {
-		// TODO: return an error?
-		return mapping
+		return nil, fmt.Errorf("can not build discriminator mapping: discriminator field is empty")
 	}
 
 	for _, branch := range def.Branches {
@@ -268,8 +298,7 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast
 
 		field, found := structType.FieldByName(def.Discriminator)
 		if !found {
-			// TODO: return an error
-			return make(map[string]any)
+			return nil, fmt.Errorf("can not build discriminator mapping: could not locate the definition of Ref<%s>", typeName)
 		}
 
 		// TODO: trust, but verify/
@@ -277,5 +306,5 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast
 		mapping[typeName] = field.Type.AsScalar().Value
 	}
 
-	return mapping
+	return mapping, nil
 }
