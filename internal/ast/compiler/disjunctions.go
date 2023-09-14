@@ -301,8 +301,14 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast
 			return nil, fmt.Errorf("can not build discriminator mapping: could not locate the definition of Ref<%s>", typeName)
 		}
 
-		// TODO: trust, but verify/
-		// Is this field an actual scalar with a concrete value?
+		// trust, but verify: we need the field to be an actual scalar with a concrete value?
+		if field.Type.Kind != ast.KindScalar {
+			return nil, fmt.Errorf("can not build discriminator mapping: discriminator field is not a scalar")
+		}
+		if !field.Type.AsScalar().IsConcrete() {
+			return nil, fmt.Errorf("can not build discriminator mapping: discriminator field is not concrete")
+		}
+
 		mapping[typeName] = field.Type.AsScalar().Value
 	}
 
