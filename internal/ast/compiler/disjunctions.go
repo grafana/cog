@@ -132,46 +132,50 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Disjun
 	// add it to preprocessor.types, and use it instead.
 	newTypeName := pass.disjunctionTypeName(def)
 
-	if _, ok := pass.newObjects[newTypeName]; !ok {
-		/*
-			TODO: return an error here. Some jennies won't be able to handle
-			this type of disjunction.
-			if !def.Branches.HasOnlyScalarOrArray() || !def.Branches.HasOnlyRefs() {
-			}
-		*/
+	// if we already generated a new object for this disjunction, let's return
+	// a reference to it.
+	if _, ok := pass.newObjects[newTypeName]; ok {
+		return ast.NewRef(newTypeName), nil
+	}
 
-		fields := make([]ast.StructField, 0, len(def.Branches))
-		for _, branch := range def.Branches {
-			// FIXME: should ignore this completely.
-			// ie: if there was a nullable branch, the whole resulting type should be nullable.
-			if branch.IsNull() {
-				continue
-			}
+	/*
+		TODO: return an error here. Some jennies won't be able to handle
+		this type of disjunction.
+		if !def.Branches.HasOnlyScalarOrArray() || !def.Branches.HasOnlyRefs() {
+		}
+	*/
 
-			fields = append(fields, ast.StructField{
-				Name:     "Val" + tools.UpperCamelCase(pass.typeName(branch)),
-				Type:     branch,
-				Required: false,
-			})
+	fields := make([]ast.StructField, 0, len(def.Branches))
+	for _, branch := range def.Branches {
+		// FIXME: should ignore this completely.
+		// ie: if there was a nullable branch, the whole resulting type should be nullable.
+		if branch.IsNull() {
+			continue
 		}
 
-		structType := ast.NewStruct(fields)
-		if def.Branches.HasOnlyScalarOrArray() {
-			structType.Struct.Hint[ast.HintDisjunctionOfScalars] = def
-		}
-		if def.Branches.HasOnlyRefs() {
-			newDisjunctionDef, err := pass.ensureDiscriminator(file, def)
-			if err != nil {
-				return ast.Type{}, err
-			}
+		fields = append(fields, ast.StructField{
+			Name:     "Val" + tools.UpperCamelCase(pass.typeName(branch)),
+			Type:     branch,
+			Required: false,
+		})
+	}
 
-			structType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfStructs] = newDisjunctionDef
+	structType := ast.NewStruct(fields)
+	if def.Branches.HasOnlyScalarOrArray() {
+		structType.Struct.Hint[ast.HintDisjunctionOfScalars] = def
+	}
+	if def.Branches.HasOnlyRefs() {
+		newDisjunctionDef, err := pass.ensureDiscriminator(file, def)
+		if err != nil {
+			return ast.Type{}, err
 		}
 
-		pass.newObjects[newTypeName] = ast.Object{
-			Name: newTypeName,
-			Type: structType,
-		}
+		structType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfStructs] = newDisjunctionDef
+	}
+
+	pass.newObjects[newTypeName] = ast.Object{
+		Name: newTypeName,
+		Type: structType,
 	}
 
 	return ast.NewRef(newTypeName), nil
