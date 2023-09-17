@@ -49,6 +49,14 @@
                 "Struct": {
                     "Fields": [
                         {
+                            "Name": "Type",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string", "Value": "some-struct"}
+                            }
+                        },
+                        {
                             "Name": "FieldAny",
                             "Required": true,
                             "Type": {
@@ -85,11 +93,19 @@
                 "Struct": {
                     "Fields": [
                         {
-                            "Name": "FieldAny",
+                            "Name": "Type",
                             "Required": true,
                             "Type": {
                                 "Kind": "scalar",
-                                "Scalar": {"ScalarKind": "any"}
+                                "Scalar": {"ScalarKind": "string", "Value": "some-other-struct"}
+                            }
+                        },
+                        {
+                            "Name": "Foo",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "bytes"}
                             }
                         }
                     ]
@@ -103,11 +119,19 @@
                 "Struct": {
                     "Fields": [
                         {
-                            "Name": "FieldAny",
+                            "Name": "Type",
                             "Required": true,
                             "Type": {
                                 "Kind": "scalar",
-                                "Scalar": {"ScalarKind": "any"}
+                                "Scalar": {"ScalarKind": "string", "Value": "yet-another-struct"}
+                            }
+                        },
+                        {
+                            "Name": "Bar",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint8"}
                             }
                         }
                     ]
@@ -146,17 +170,20 @@ export type RefreshRate = string | boolean;
 export type StringOrNull = string | null;
 
 export interface SomeStruct {
+	type: "some-struct";
 	fieldAny: any;
 }
 
 export type BoolOrRef = boolean | SomeStruct;
 
 export interface SomeOtherStruct {
-	fieldAny: any;
+	type: "some-other-struct";
+	foo: string;
 }
 
 export interface YetAnotherStruct {
-	fieldAny: any;
+	type: "yet-another-struct";
+	bar: number;
 }
 
 export type SeveralRefs = SomeStruct | SomeOtherStruct | YetAnotherStruct;
@@ -171,17 +198,20 @@ type RefreshRate StringOrBool
 type StringOrNull *string
 
 type SomeStruct struct {
+	Type string `json:"Type"`
 	FieldAny any `json:"FieldAny"`
 }
 
 type BoolOrRef BoolOrSomeStruct
 
 type SomeOtherStruct struct {
-	FieldAny any `json:"FieldAny"`
+	Type string `json:"Type"`
+	Foo bytes `json:"Foo"`
 }
 
 type YetAnotherStruct struct {
-	FieldAny any `json:"FieldAny"`
+	Type string `json:"Type"`
+	Bar uint8 `json:"Bar"`
 }
 
 type SeveralRefs SomeStructOrSomeOtherStructOrYetAnotherStruct
@@ -197,12 +227,80 @@ type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
 	ValYetAnotherStruct *YetAnotherStruct `json:"ValYetAnotherStruct,omitempty"`
 }
 
+func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]byte, error) {
+
+	if resource.ValSomeStruct != nil {
+		return json.Marshal(resource.ValSomeStruct)
+	}
+
+	if resource.ValSomeOtherStruct != nil {
+		return json.Marshal(resource.ValSomeOtherStruct)
+	}
+
+	if resource.ValYetAnotherStruct != nil {
+		return json.Marshal(resource.ValYetAnotherStruct)
+	}
+
+
+	return nil, nil
+}
+
+func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+
+	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
+	parsedAsMap := make(map[string]any)
+	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
+		return err
+	}
+
+	discriminator, found := parsedAsMap["Type"]
+	if !found {
+		return errors.New("discriminator field 'Type' not found in payload")
+	}
+
+	switch discriminator {
+
+	case "some-other-struct":
+		var valSomeOtherStruct SomeOtherStruct
+		if err := json.Unmarshal(raw, &valSomeOtherStruct); err != nil {
+			return err
+		}
+
+		resource.ValSomeOtherStruct = &valSomeOtherStruct
+		return nil
+
+	case "some-struct":
+		var valSomeStruct SomeStruct
+		if err := json.Unmarshal(raw, &valSomeStruct); err != nil {
+			return err
+		}
+
+		resource.ValSomeStruct = &valSomeStruct
+		return nil
+
+	case "yet-another-struct":
+		var valYetAnotherStruct YetAnotherStruct
+		if err := json.Unmarshal(raw, &valYetAnotherStruct); err != nil {
+			return err
+		}
+
+		resource.ValYetAnotherStruct = &valYetAnotherStruct
+		return nil
+
+	}
+
+	return fmt.Errorf("could not unmarshal resource with `Type = %v`", discriminator)
+}
+
 type StringOrBool struct {
 	ValString *string `json:"ValString,omitempty"`
 	ValBool *bool `json:"ValBool,omitempty"`
 }
 
-func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
 
 	if resource.ValString != nil {
 		return json.Marshal(resource.ValString)
@@ -216,7 +314,7 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	return nil, nil
 }
 
-func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
+func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

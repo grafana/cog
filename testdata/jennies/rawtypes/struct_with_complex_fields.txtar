@@ -230,7 +230,7 @@ type StringOrBool struct {
 	ValBool *bool `json:"ValBool,omitempty"`
 }
 
-func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
 
 	if resource.ValString != nil {
 		return json.Marshal(resource.ValString)
@@ -244,7 +244,7 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	return nil, nil
 }
 
-func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
+func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

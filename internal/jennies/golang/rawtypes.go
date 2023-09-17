@@ -68,8 +68,11 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
 
+		//nolint: gocritic
 		if scalarType.Value != nil {
 			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
+		} else if scalarType.ScalarKind == ast.KindBytes {
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
 		} else {
 			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
 		}
