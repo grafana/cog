@@ -157,7 +157,7 @@ type ScalarTypeAny any
 
 type ScalarTypeBool bool
 
-type ScalarTypeBytes bytes
+type ScalarTypeBytes []byte
 
 type ScalarTypeString string
 

@@ -29,7 +29,7 @@ func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) erro
 	case "{{ $discriminatorValue }}":
 		var val{{ $typeName|formatIdentifier }} {{ $typeName|formatIdentifier }}
 		if err := json.Unmarshal(raw, &val{{ $typeName|formatIdentifier }}); err != nil {
-            return err
+			return err
 		}
 
 		resource.Val{{ $typeName|formatIdentifier }} = &val{{ $typeName|formatIdentifier }}
