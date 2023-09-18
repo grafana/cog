@@ -114,7 +114,7 @@ func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.StructType)
 		})
 	}
 
-	return ast.NewStruct(processedFields), nil
+	return ast.NewStruct(processedFields...), nil
 }
 
 func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.DisjunctionType) (ast.Type, error) {
@@ -160,7 +160,7 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Disjun
 		})
 	}
 
-	structType := ast.NewStruct(fields)
+	structType := ast.NewStruct(fields...)
 	if def.Branches.HasOnlyScalarOrArray() {
 		structType.Struct.Hint[ast.HintDisjunctionOfScalars] = def
 	}
