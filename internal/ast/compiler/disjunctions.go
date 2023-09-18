@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -10,6 +11,8 @@ import (
 )
 
 var _ Pass = (*DisjunctionToType)(nil)
+
+var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mapping")
 
 type DisjunctionToType struct {
 	newObjects map[string]ast.Object
@@ -290,7 +293,7 @@ func (pass *DisjunctionToType) inferDiscriminatorField(file *ast.File, def ast.D
 func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast.DisjunctionType) (map[string]any, error) {
 	mapping := make(map[string]any, len(def.Branches))
 	if def.Discriminator == "" {
-		return nil, fmt.Errorf("can not build discriminator mapping: discriminator field is empty")
+		return nil, fmt.Errorf("discriminator field is empty: %w", ErrCanNotInferDiscriminator)
 	}
 
 	for _, branch := range def.Branches {
@@ -300,15 +303,15 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast
 
 		field, found := structType.FieldByName(def.Discriminator)
 		if !found {
-			return nil, fmt.Errorf("can not build discriminator mapping: could not locate the definition of Ref<%s>", typeName)
+			return nil, fmt.Errorf("discriminator field '%s' not found in Object '%s': %w", def.Discriminator, typeName, ErrCanNotInferDiscriminator)
 		}
 
 		// trust, but verify: we need the field to be an actual scalar with a concrete value?
 		if field.Type.Kind != ast.KindScalar {
-			return nil, fmt.Errorf("can not build discriminator mapping: discriminator field is not a scalar")
+			return nil, fmt.Errorf("discriminator field is not a scalar: %w", ErrCanNotInferDiscriminator)
 		}
 		if !field.Type.AsScalar().IsConcrete() {
-			return nil, fmt.Errorf("can not build discriminator mapping: discriminator field is not concrete")
+			return nil, fmt.Errorf("discriminator field is not concrete: %w", ErrCanNotInferDiscriminator)
 		}
 
 		mapping[typeName] = field.Type.AsScalar().Value
