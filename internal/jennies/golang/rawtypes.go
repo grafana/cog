@@ -127,8 +127,8 @@ func (jenny RawTypes) jsonMarshalVeneer(def ast.Object) (string, error) {
 		})
 	}
 
-	if hintVal, ok := structType.Hint[ast.HintDiscriminatedDisjunctionOfStructs]; ok {
-		return jenny.renderVeneerTemplate("disjunction_of_structs.types.json_marshal.go.tmpl", map[string]any{
+	if hintVal, ok := structType.Hint[ast.HintDiscriminatedDisjunctionOfRefs]; ok {
+		return jenny.renderVeneerTemplate("disjunction_of_refs.types.json_marshal.go.tmpl", map[string]any{
 			"def":  def,
 			"hint": hintVal,
 		})
