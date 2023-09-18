@@ -145,6 +145,16 @@ func NewScalar(kind ScalarKind) Type {
 	}
 }
 
+func NewConcreteScalar(kind ScalarKind, value any) Type {
+	return Type{
+		Kind: KindScalar,
+		Scalar: &ScalarType{
+			ScalarKind: kind,
+			Value:      value,
+		},
+	}
+}
+
 func (t Type) IsNull() bool {
 	return t.Kind == KindScalar && t.AsScalar().ScalarKind == KindNull
 }
