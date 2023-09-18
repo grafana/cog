@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	cuelang.org/go v0.5.0
+	github.com/google/go-cmp v0.5.9
 	github.com/grafana/codejen v0.0.4-0.20221122220907-a5e7cc5407b3
 	github.com/grafana/kindsys v0.0.0-20230615185749-1424263c17c7
 	github.com/grafana/thema v0.0.0-20230628103417-8f63313207a5
@@ -24,7 +25,6 @@ require (
 	github.com/emicklei/proto v1.11.2 // indirect
 	github.com/getsentry/sentry-go v0.22.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

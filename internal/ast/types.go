@@ -117,7 +117,7 @@ func NewMap(indexType Type, valueType Type) Type {
 	}
 }
 
-func NewStruct(fields []StructField) Type {
+func NewStruct(fields ...StructField) Type {
 	return Type{
 		Kind: KindStruct,
 		Struct: &StructType{
@@ -186,6 +186,13 @@ type Object struct {
 	Name     string
 	Comments []string
 	Type     Type
+}
+
+func NewObject(name string, objectType Type) Object {
+	return Object{
+		Name: name,
+		Type: objectType,
+	}
 }
 
 type File struct { //nolint: musttag
@@ -311,6 +318,13 @@ type StructField struct {
 	Type     Type
 	Required bool
 	Default  any
+}
+
+func NewStructField(name string, fieldType Type) StructField {
+	return StructField{
+		Name: name,
+		Type: fieldType,
+	}
 }
 
 type RefType struct {

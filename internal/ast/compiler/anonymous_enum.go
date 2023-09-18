@@ -85,7 +85,7 @@ func (pass *AnonymousEnumToExplicitType) processStruct(def ast.StructType) ast.T
 		})
 	}
 
-	return ast.NewStruct(processedFields)
+	return ast.NewStruct(processedFields...)
 }
 
 func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(parentName string, def ast.EnumType) ast.Type {
