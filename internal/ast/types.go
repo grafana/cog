@@ -224,11 +224,17 @@ type Types []Type
 
 func (types Types) HasOnlyScalarOrArray() bool {
 	for _, t := range types {
-		if t.Kind != KindScalar && t.Kind != KindArray {
-			return false
+		if t.Kind == KindArray {
+			if !t.AsArray().IsArrayOfScalars() {
+				return false
+			}
+
+			continue
 		}
 
-		// FIXME: for arrays, we should also inspect them recursively to make sure only scalar types are used
+		if t.Kind != KindScalar {
+			return false
+		}
 	}
 
 	return true
@@ -287,6 +293,14 @@ type DisjunctionType struct {
 
 type ArrayType struct {
 	ValueType Type
+}
+
+func (t ArrayType) IsArrayOfScalars() bool {
+	if t.ValueType.Kind == KindArray {
+		return t.ValueType.AsArray().IsArrayOfScalars()
+	}
+
+	return t.ValueType.Kind == KindScalar
 }
 
 type EnumType struct {
