@@ -173,7 +173,7 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Disjun
 			return ast.Type{}, err
 		}
 
-		structType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfStructs] = newDisjunctionDef
+		structType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = newDisjunctionDef
 	}
 
 	pass.newObjects[newTypeName] = ast.Object{

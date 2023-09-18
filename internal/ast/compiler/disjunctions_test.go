@@ -277,7 +277,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 		"OtherStruct": "other-struct",
 		"SomeStruct":  "some-struct",
 	}
-	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfStructs] = disjunctionTypeWithDiscriminatorMeta
+	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("ADisjunctionOfRefs", ast.NewRef("SomeStructOrOtherStruct")),
@@ -330,7 +330,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 		"OtherStruct": "other-kind",
 		"SomeStruct":  "some-kind",
 	}
-	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfStructs] = disjunctionTypeWithDiscriminatorMeta
+	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("ADisjunctionOfRefs", ast.NewRef("SomeStructOrOtherStruct")),
@@ -385,7 +385,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 		"OtherStruct": "other-kind",
 		"SomeStruct":  "some-kind",
 	}
-	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfStructs] = disjunctionTypeWithDiscriminatorMeta
+	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("ADisjunctionOfRefs", ast.NewRef("SomeStructOrOtherStruct")),

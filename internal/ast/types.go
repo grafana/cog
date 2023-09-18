@@ -271,9 +271,9 @@ func (types Types) NonNullTypes() Types {
 type DisjunctionType struct {
 	Branches Types
 
-	// If the branches are structs, some languages will need extra context to
-	// be able to distinguish between them. Golang, for example, doesn't support
-	// sum types (disjunctions of fixed types).
+	// If the branches are references to structs, some languages will need
+	// extra context to be able to distinguish between them. Golang, for
+	// example, doesn't support sum types (disjunctions of fixed types).
 	// To emulate sum types for these languages, we need a way to
 	// discriminate against every possible type.
 	//
