@@ -114,6 +114,38 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 	runDisjunctionPass(t, objects, expectedObjects)
 }
 
+func TestDisjunctionToType_WithDisjunctionOfScalars_AsAMapValueType(t *testing.T) {
+	// Prepare test input
+	objects := []ast.Object{
+		ast.NewObject("ADisjunctionOfScalars", ast.NewMap(
+			ast.String(),
+			ast.NewDisjunction([]ast.Type{
+				ast.String(),
+				ast.Bool(),
+			}),
+		)),
+	}
+
+	// Prepare expected output
+	disjunctionStructType := ast.NewStruct(
+		ast.NewStructField("ValString", ast.String(ast.Nullable())),
+		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
+	)
+	// The original disjunction definition is preserved as a hint
+	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = objects[0].Type.AsMap().ValueType.AsDisjunction()
+
+	expectedObjects := []ast.Object{
+		ast.NewObject("ADisjunctionOfScalars", ast.NewMap(
+			ast.String(),
+			ast.NewRef("StringOrBool"),
+		)),
+		ast.NewObject("StringOrBool", disjunctionStructType),
+	}
+
+	// Call the compiler pass
+	runDisjunctionPass(t, objects, expectedObjects)
+}
+
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T) {
 	// Prepare test input
 	disjunctionType := ast.NewDisjunction([]ast.Type{
