@@ -80,6 +80,10 @@ func (pass *DisjunctionToType) processType(file *ast.File, def ast.Type) (ast.Ty
 		return pass.processArray(file, def)
 	}
 
+	if def.Kind == ast.KindMap {
+		return pass.processMap(file, def)
+	}
+
 	if def.Kind == ast.KindStruct {
 		return pass.processStruct(file, def)
 	}
@@ -97,7 +101,22 @@ func (pass *DisjunctionToType) processArray(file *ast.File, def ast.Type) (ast.T
 		return ast.Type{}, err
 	}
 
-	return ast.NewArray(processedType), nil
+	newArray := def
+	newArray.Array.ValueType = processedType
+
+	return newArray, nil
+}
+
+func (pass *DisjunctionToType) processMap(file *ast.File, def ast.Type) (ast.Type, error) {
+	processedValueType, err := pass.processType(file, def.AsMap().ValueType)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
+	newMap := def
+	newMap.Map.ValueType = processedValueType
+
+	return newMap, nil
 }
 
 func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.Type) (ast.Type, error) {
