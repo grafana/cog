@@ -202,13 +202,18 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	// Nullable enums? https://swagger.io/docs/specification/data-models/enums/
 	enums := make([]ast.EnumValue, 0, len(schema.Enum))
 	for _, value := range schema.Enum {
+		enumType, err := getEnumType(schema.Format)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
 		enums = append(enums, ast.EnumValue{
-			Type:  ast.String(),
+			Type:  enumType,
 			Name:  value.(string),
-			Value: value.(string),
+			Value: value,
 		})
 	}
-	return ast.Type{}, nil
+	return ast.NewEnum(enums), nil
 }
 
 func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef) (ast.Type, error) {
