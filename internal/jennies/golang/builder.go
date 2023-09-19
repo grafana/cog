@@ -164,7 +164,7 @@ func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
-	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindStruct && assignment.IntoOptionalField {
+	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindStruct && assignment.IntoNullableField {
 		asPointer = "&"
 	}
 
@@ -229,7 +229,7 @@ func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder,
 }
 
 func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
-	typeName := formatType(arg.Type, true, "types")
+	typeName := strings.Trim(formatType(arg.Type, "types"), "*")
 
 	if builderPkg, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
 		return fmt.Sprintf(`opts ...%[1]s.Option`, builderPkg)
@@ -246,7 +246,7 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 
 	if builderPkg, found := jenny.typeHasBuilder(builders, builder, assignment.ValueType); found {
 		intoPointer := "*"
-		if assignment.IntoOptionalField {
+		if assignment.IntoNullableField {
 			intoPointer = ""
 		}
 
@@ -267,7 +267,7 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
-	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindStruct && assignment.IntoOptionalField {
+	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindMap && assignment.IntoNullableField {
 		asPointer = "&"
 	}
 

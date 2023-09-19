@@ -48,7 +48,8 @@ type TypeConstraint struct {
 // Bonus: in a way that can be (un)marshaled to/from JSON,
 // which is useful for unit tests.
 type Type struct {
-	Kind Kind
+	Kind     Kind
+	Nullable bool
 
 	Disjunction *DisjunctionType `json:",omitempty"`
 	Array       *ArrayType       `json:",omitempty"`
@@ -59,6 +60,24 @@ type Type struct {
 	Scalar      *ScalarType      `json:",omitempty"`
 }
 
+type TypeOption func(def *Type)
+
+func Nullable() TypeOption {
+	return func(def *Type) {
+		def.Nullable = true
+	}
+}
+
+func Value(value any) TypeOption {
+	return func(def *Type) {
+		if def.Kind != KindScalar {
+			return
+		}
+
+		def.Scalar.Value = value
+	}
+}
+
 func Any() Type {
 	return NewScalar(KindAny)
 }
@@ -67,54 +86,78 @@ func Null() Type {
 	return NewScalar(KindNull)
 }
 
-func Bool() Type {
-	return NewScalar(KindBool)
+func Bool(opts ...TypeOption) Type {
+	return NewScalar(KindBool, opts...)
 }
 
-func Bytes() Type {
-	return NewScalar(KindBytes)
+func Bytes(opts ...TypeOption) Type {
+	return NewScalar(KindBytes, opts...)
 }
 
-func String() Type {
-	return NewScalar(KindString)
+func String(opts ...TypeOption) Type {
+	return NewScalar(KindString, opts...)
 }
 
-func NewDisjunction(branches Types) Type {
-	return Type{
+func NewDisjunction(branches Types, opts ...TypeOption) Type {
+	def := Type{
 		Kind: KindDisjunction,
 		Disjunction: &DisjunctionType{
 			Branches:             branches,
 			DiscriminatorMapping: make(map[string]any),
 		},
 	}
+
+	for _, opt := range opts {
+		opt(&def)
+	}
+
+	return def
 }
 
-func NewArray(valueType Type) Type {
-	return Type{
+func NewArray(valueType Type, opts ...TypeOption) Type {
+	def := Type{
 		Kind: KindArray,
 		Array: &ArrayType{
 			ValueType: valueType,
 		},
 	}
+
+	for _, opt := range opts {
+		opt(&def)
+	}
+
+	return def
 }
 
-func NewEnum(values []EnumValue) Type {
-	return Type{
+func NewEnum(values []EnumValue, opts ...TypeOption) Type {
+	def := Type{
 		Kind: KindEnum,
 		Enum: &EnumType{
 			Values: values,
 		},
 	}
+
+	for _, opt := range opts {
+		opt(&def)
+	}
+
+	return def
 }
 
-func NewMap(indexType Type, valueType Type) Type {
-	return Type{
+func NewMap(indexType Type, valueType Type, opts ...TypeOption) Type {
+	def := Type{
 		Kind: KindMap,
 		Map: &MapType{
 			IndexType: indexType,
 			ValueType: valueType,
 		},
 	}
+
+	for _, opt := range opts {
+		opt(&def)
+	}
+
+	return def
 }
 
 func NewStruct(fields ...StructField) Type {
@@ -127,32 +170,41 @@ func NewStruct(fields ...StructField) Type {
 	}
 }
 
-func NewRef(referredTypeName string) Type {
-	return Type{
+func NewNullableStruct(fields ...StructField) Type {
+	def := NewStruct(fields...)
+	def.Nullable = true
+
+	return def
+}
+
+func NewRef(referredTypeName string, opts ...TypeOption) Type {
+	def := Type{
 		Kind: KindRef,
 		Ref: &RefType{
 			ReferredType: referredTypeName,
 		},
 	}
+
+	for _, opt := range opts {
+		opt(&def)
+	}
+
+	return def
 }
 
-func NewScalar(kind ScalarKind) Type {
-	return Type{
+func NewScalar(kind ScalarKind, opts ...TypeOption) Type {
+	def := Type{
 		Kind: KindScalar,
 		Scalar: &ScalarType{
 			ScalarKind: kind,
 		},
 	}
-}
 
-func NewConcreteScalar(kind ScalarKind, value any) Type {
-	return Type{
-		Kind: KindScalar,
-		Scalar: &ScalarType{
-			ScalarKind: kind,
-			Value:      value,
-		},
+	for _, opt := range opts {
+		opt(&def)
 	}
+
+	return def
 }
 
 func (t Type) IsNull() bool {
@@ -344,11 +396,25 @@ type StructField struct {
 	Default  any
 }
 
-func NewStructField(name string, fieldType Type) StructField {
-	return StructField{
+type StructFieldOption func(field *StructField)
+
+func Required() StructFieldOption {
+	return func(field *StructField) {
+		field.Required = true
+	}
+}
+
+func NewStructField(name string, fieldType Type, opts ...StructFieldOption) StructField {
+	field := StructField{
 		Name: name,
 		Type: fieldType,
 	}
+
+	for _, opt := range opts {
+		opt(&field)
+	}
+
+	return field
 }
 
 type RefType struct {
