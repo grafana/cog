@@ -170,13 +170,6 @@ func NewStruct(fields ...StructField) Type {
 	}
 }
 
-func NewNullableStruct(fields ...StructField) Type {
-	def := NewStruct(fields...)
-	def.Nullable = true
-
-	return def
-}
-
 func NewRef(referredTypeName string, opts ...TypeOption) Type {
 	def := Type{
 		Kind: KindRef,
