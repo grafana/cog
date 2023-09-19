@@ -91,7 +91,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 				ArgumentName:      field.Name,
 				ValueType:         field.Type,
 				Constraints:       constraints,
-				IntoOptionalField: !field.Required,
+				IntoNullableField: field.Type.Nullable,
 			})
 		}
 
@@ -120,7 +120,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 					{
 						Path:              option.Assignments[0].Path,
 						ValueType:         option.Assignments[0].ValueType,
-						IntoOptionalField: option.Assignments[0].IntoOptionalField,
+						IntoNullableField: option.Assignments[0].IntoNullableField,
 						Value:             true,
 					},
 				},
@@ -135,7 +135,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 					{
 						Path:              option.Assignments[0].Path,
 						ValueType:         option.Assignments[0].ValueType,
-						IntoOptionalField: option.Assignments[0].IntoOptionalField,
+						IntoNullableField: option.Assignments[0].IntoNullableField,
 						Value:             false,
 					},
 				},
