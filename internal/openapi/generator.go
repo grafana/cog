@@ -81,17 +81,19 @@ func (g *generator) walkSchemaRef(schemaRef *openapi3.SchemaRef) (ast.Type, erro
 
 func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 	if schema.AllOf != nil {
-
+		return g.walkAllOf(schema)
 	}
 	if schema.AnyOf != nil {
-
+		return g.walkAnyOf(schema)
 	}
 	if schema.OneOf != nil {
-
+		return g.walkOneOf(schema)
 	}
-
 	if schema.Enum != nil {
-
+		return g.walkEnum(schema)
+	}
+	if schema.Not != nil {
+		return g.walkNot(schema)
 	}
 
 	switch schema.Type {
@@ -185,13 +187,44 @@ func (g *generator) walkBoolean(_ *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
-	return ast.Type{}, nil
+	return g.walkDisjunctions(schema.AllOf)
 }
 
 func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
-	return ast.Type{}, nil
+	return g.walkDisjunctions(schema.OneOf)
 }
 
 func (g *generator) walkAnyOf(schema *openapi3.Schema) (ast.Type, error) {
+	return g.walkDisjunctions(schema.AnyOf)
+}
+
+func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
+	// Nullable enums? https://swagger.io/docs/specification/data-models/enums/
+	enums := make([]ast.EnumValue, 0, len(schema.Enum))
+	for _, value := range schema.Enum {
+		enums = append(enums, ast.EnumValue{
+			Type:  ast.String(),
+			Name:  value.(string),
+			Value: value.(string),
+		})
+	}
+	return ast.Type{}, nil
+}
+
+func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef) (ast.Type, error) {
+	typeDefs := make([]ast.Type, 0, len(schemaRefs))
+	for _, schemaRef := range schemaRefs {
+		def, err := g.walkSchemaRef(schemaRef)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		typeDefs = append(typeDefs, def)
+	}
+	return ast.NewDisjunction(typeDefs), nil
+}
+
+func (g *generator) walkNot(schema *openapi3.Schema) (ast.Type, error) {
+	// TODO: Iterate not
 	return ast.Type{}, nil
 }
