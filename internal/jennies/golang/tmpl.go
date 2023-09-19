@@ -3,6 +3,7 @@ package golang
 import (
 	"embed"
 	"html/template"
+	"strings"
 
 	"github.com/grafana/cog/internal/tools"
 )
@@ -20,6 +21,7 @@ func init() {
 	base.Funcs(map[string]any{
 		"formatIdentifier": tools.UpperCamelCase,
 		"formatType":       formatType,
+		"trimPrefix":       strings.TrimPrefix,
 	})
 	templates = template.Must(base.ParseFS(veneersFS, "veneers/*.tmpl"))
 }

@@ -47,8 +47,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValString", ast.NewScalar(ast.KindString)),
-		ast.NewStructField("ValBool", ast.NewScalar(ast.KindBool)),
+		ast.NewStructField("ValString", ast.NewScalar(ast.KindString, ast.Nullable())),
+		ast.NewStructField("ValBool", ast.NewScalar(ast.KindBool, ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = objects[0].Type.AsDisjunction()
@@ -76,8 +76,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T)
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValString", ast.NewScalar(ast.KindString)),
-		ast.NewStructField("ValBool", ast.NewScalar(ast.KindBool)),
+		ast.NewStructField("ValString", ast.NewScalar(ast.KindString, ast.Nullable())),
+		ast.NewStructField("ValBool", ast.NewScalar(ast.KindBool, ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
@@ -105,8 +105,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testin
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValString", ast.NewScalar(ast.KindString)),
-		ast.NewStructField("ValBool", ast.NewScalar(ast.KindBool)),
+		ast.NewStructField("ValString", ast.NewScalar(ast.KindString, ast.Nullable())),
+		ast.NewStructField("ValBool", ast.NewScalar(ast.KindBool, ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
@@ -131,11 +131,11 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 		})),
 
 		ast.NewObject("SomeStruct", ast.NewStruct(
-			ast.NewStructField("Kind", ast.NewConcreteScalar(ast.KindString, "other-struct")), // No equivalent in OtherStruct
+			ast.NewStructField("Kind", ast.NewScalar(ast.KindString, ast.Value("some-struct"))), // No equivalent in OtherStruct
 			ast.NewStructField("FieldFoo", ast.NewScalar(ast.KindString)),
 		)),
 		ast.NewObject("OtherStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "other-struct")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.NewScalar(ast.KindBool)),
 		)),
 	}
@@ -199,7 +199,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 			ast.NewStructField("FieldFoo", ast.NewScalar(ast.KindString)),
 		)),
 		ast.NewObject("OtherStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "other-struct")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.NewScalar(ast.KindBool)),
 		)),
 	}
@@ -227,11 +227,11 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 		ast.NewObject("ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("SomeStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "some-struct")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("some-struct"))),
 			ast.NewStructField("FieldFoo", ast.NewScalar(ast.KindString)),
 		)),
 		ast.NewObject("OtherStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "other-struct")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.NewScalar(ast.KindBool)),
 		)),
 	}
@@ -254,19 +254,19 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 		})),
 
 		ast.NewObject("SomeStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "some-struct")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("some-struct"))),
 			ast.NewStructField("FieldFoo", ast.NewScalar(ast.KindString)),
 		)),
 		ast.NewObject("OtherStruct", ast.NewStruct(
 			ast.NewStructField("FieldBar", ast.NewMap(ast.NewScalar(ast.KindString), ast.NewScalar(ast.KindString))),
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "other-struct")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("other-struct"))),
 		)),
 	}
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValSomeStruct", ast.NewRef("SomeStruct")),
-		ast.NewStructField("ValOtherStruct", ast.NewRef("OtherStruct")),
+		ast.NewStructField("ValSomeStruct", ast.NewRef("SomeStruct", ast.Nullable())),
+		ast.NewStructField("ValOtherStruct", ast.NewRef("OtherStruct", ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionTypeWithDiscriminatorMeta := objects[0].Type.AsDisjunction()
@@ -305,21 +305,21 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 		ast.NewObject("ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("SomeStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "some-struct")),
-			ast.NewStructField("Kind", ast.NewConcreteScalar(ast.KindString, "some-kind")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("some-struct"))),
+			ast.NewStructField("Kind", ast.NewScalar(ast.KindString, ast.Value("some-kind"))),
 			ast.NewStructField("FieldFoo", ast.NewScalar(ast.KindString)),
 		)),
 		ast.NewObject("OtherStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "other-struct")),
-			ast.NewStructField("Kind", ast.NewConcreteScalar(ast.KindString, "other-kind")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("other-struct"))),
+			ast.NewStructField("Kind", ast.NewScalar(ast.KindString, ast.Value("other-kind"))),
 			ast.NewStructField("FieldBar", ast.NewScalar(ast.KindBool)),
 		)),
 	}
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValSomeStruct", ast.NewRef("SomeStruct")),
-		ast.NewStructField("ValOtherStruct", ast.NewRef("OtherStruct")),
+		ast.NewStructField("ValSomeStruct", ast.NewRef("SomeStruct", ast.Nullable())),
+		ast.NewStructField("ValOtherStruct", ast.NewRef("OtherStruct", ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionTypeWithDiscriminatorMeta := objects[0].Type.AsDisjunction()
@@ -360,21 +360,21 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 		ast.NewObject("ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("SomeStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "some-struct")),
-			ast.NewStructField("Kind", ast.NewConcreteScalar(ast.KindString, "some-kind")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("some-struct"))),
+			ast.NewStructField("Kind", ast.NewScalar(ast.KindString, ast.Value("some-kind"))),
 			ast.NewStructField("FieldFoo", ast.NewScalar(ast.KindString)),
 		)),
 		ast.NewObject("OtherStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.NewConcreteScalar(ast.KindString, "other-struct")),
-			ast.NewStructField("Kind", ast.NewConcreteScalar(ast.KindString, "other-kind")),
+			ast.NewStructField("Type", ast.NewScalar(ast.KindString, ast.Value("other-struct"))),
+			ast.NewStructField("Kind", ast.NewScalar(ast.KindString, ast.Value("other-kind"))),
 			ast.NewStructField("FieldBar", ast.NewScalar(ast.KindBool)),
 		)),
 	}
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValSomeStruct", ast.NewRef("SomeStruct")),
-		ast.NewStructField("ValOtherStruct", ast.NewRef("OtherStruct")),
+		ast.NewStructField("ValSomeStruct", ast.NewRef("SomeStruct", ast.Nullable())),
+		ast.NewStructField("ValOtherStruct", ast.NewRef("OtherStruct", ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionTypeWithDiscriminatorMeta := objects[0].Type.AsDisjunction()

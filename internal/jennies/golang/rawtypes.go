@@ -74,10 +74,10 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 		} else if scalarType.ScalarKind == ast.KindBytes {
 			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
 		} else {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, "")))
 		}
 	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct:
-		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
+		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, "")))
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -93,7 +93,7 @@ func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	enumName := tools.UpperCamelCase(def.Name)
 	enumType := def.Type.AsEnum()
 
-	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatType(enumType.Values[0].Type, true, "")))
+	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatType(enumType.Values[0].Type, "")))
 
 	buffer.WriteString("const (\n")
 	for _, val := range enumType.Values {
@@ -188,7 +188,7 @@ func formatField(def ast.StructField, typesPkg string) string {
 	buffer.WriteString(fmt.Sprintf(
 		"%s %s `json:\"%s%s\"`\n",
 		tools.UpperCamelCase(def.Name),
-		formatType(def.Type, def.Required, typesPkg),
+		formatType(def.Type, typesPkg),
 		def.Name,
 		jsonOmitEmpty,
 	))
@@ -196,7 +196,7 @@ func formatField(def ast.StructField, typesPkg string) string {
 	return buffer.String()
 }
 
-func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
+func formatType(def ast.Type, typesPkg string) string {
 	if def.IsAny() {
 		return "any"
 	}
@@ -211,7 +211,7 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 
 	if def.Kind == ast.KindScalar {
 		typeName := def.AsScalar().ScalarKind
-		if !fieldIsRequired {
+		if def.Nullable {
 			typeName = "*" + typeName
 		}
 
@@ -225,16 +225,21 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 			typeName = typesPkg + "." + typeName
 		}
 
-		if !fieldIsRequired {
+		if def.Nullable {
 			typeName = "*" + typeName
 		}
 
 		return typeName
 	}
 
-	// anonymous struct
+	// anonymous struct or struct body
 	if def.Kind == ast.KindStruct {
-		return formatStructBody(def.AsStruct(), typesPkg)
+		output := formatStructBody(def.AsStruct(), typesPkg)
+		if def.Nullable {
+			output = "*" + output
+		}
+
+		return output
 	}
 
 	// FIXME: we should never be here
@@ -242,14 +247,14 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 }
 
 func formatArray(def ast.ArrayType, typesPkg string) string {
-	subTypeString := formatType(def.ValueType, true, typesPkg)
+	subTypeString := formatType(def.ValueType, typesPkg)
 
 	return fmt.Sprintf("[]%s", subTypeString)
 }
 
 func formatMap(def ast.MapType, typesPkg string) string {
-	keyTypeString := formatType(def.IndexType, true, typesPkg)
-	valueTypeString := formatType(def.ValueType, true, typesPkg)
+	keyTypeString := formatType(def.IndexType, typesPkg)
+	valueTypeString := formatType(def.ValueType, typesPkg)
 
 	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)
 }

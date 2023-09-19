@@ -16,7 +16,7 @@ func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) erro
 	var errList []error
 {{ range .def.Type.Struct.Fields }}
 	// {{ .Name|formatIdentifier }}
-	var {{ .Name }} {{ formatType .Type true "" }}
+	var {{ .Name }} {{ trimPrefix (formatType .Type "") "*" }}
 	if err := json.Unmarshal(raw, &{{ .Name }}); err != nil {
 		errList = append(errList, err)
 		resource.{{ .Name|formatIdentifier }} = nil

@@ -77,22 +77,22 @@ func (pass *DisjunctionToType) processObject(file *ast.File, object ast.Object) 
 
 func (pass *DisjunctionToType) processType(file *ast.File, def ast.Type) (ast.Type, error) {
 	if def.Kind == ast.KindArray {
-		return pass.processArray(file, def.AsArray())
+		return pass.processArray(file, def)
 	}
 
 	if def.Kind == ast.KindStruct {
-		return pass.processStruct(file, def.AsStruct())
+		return pass.processStruct(file, def)
 	}
 
 	if def.Kind == ast.KindDisjunction {
-		return pass.processDisjunction(file, def.AsDisjunction())
+		return pass.processDisjunction(file, def)
 	}
 
 	return def, nil
 }
 
-func (pass *DisjunctionToType) processArray(file *ast.File, def ast.ArrayType) (ast.Type, error) {
-	processedType, err := pass.processType(file, def.ValueType)
+func (pass *DisjunctionToType) processArray(file *ast.File, def ast.Type) (ast.Type, error) {
+	processedType, err := pass.processType(file, def.AsArray().ValueType)
 	if err != nil {
 		return ast.Type{}, err
 	}
@@ -100,32 +100,33 @@ func (pass *DisjunctionToType) processArray(file *ast.File, def ast.ArrayType) (
 	return ast.NewArray(processedType), nil
 }
 
-func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.StructType) (ast.Type, error) {
-	processedFields := make([]ast.StructField, 0, len(def.Fields))
-	for _, field := range def.Fields {
+func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.Type) (ast.Type, error) {
+	processedFields := make([]ast.StructField, 0, len(def.AsStruct().Fields))
+	for _, field := range def.AsStruct().Fields {
 		processedType, err := pass.processType(file, field.Type)
 		if err != nil {
 			return ast.Type{}, err
 		}
 
-		processedFields = append(processedFields, ast.StructField{
-			Name:     field.Name,
-			Comments: field.Comments,
-			Type:     processedType,
-			Required: field.Required,
-			Default:  field.Default,
-		})
+		newField := field
+		newField.Type = processedType
+
+		processedFields = append(processedFields, newField)
 	}
 
-	return ast.NewStruct(processedFields...), nil
+	newStruct := def
+	newStruct.Struct.Fields = processedFields
+
+	return newStruct, nil
 }
 
-func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.DisjunctionType) (ast.Type, error) {
+func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Type) (ast.Type, error) {
+	disjunction := def.AsDisjunction()
+
 	// Ex: type | null
-	if len(def.Branches) == 2 && def.Branches.HasNullType() {
-		finalType := def.Branches.NonNullTypes()[0]
-		// FIXME: this should be propagated
-		// finalType.Nullable = true
+	if len(disjunction.Branches) == 2 && disjunction.Branches.HasNullType() {
+		finalType := disjunction.Branches.NonNullTypes()[0]
+		finalType.Nullable = true
 
 		return finalType, nil
 	}
@@ -133,12 +134,17 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Disjun
 	// type | otherType | something (| null)?
 	// generate a type with a nullable field for every branch of the disjunction,
 	// add it to preprocessor.types, and use it instead.
-	newTypeName := pass.disjunctionTypeName(def)
+	newTypeName := pass.disjunctionTypeName(disjunction)
 
 	// if we already generated a new object for this disjunction, let's return
 	// a reference to it.
 	if _, ok := pass.newObjects[newTypeName]; ok {
-		return ast.NewRef(newTypeName), nil
+		ref := ast.NewRef(newTypeName)
+		if disjunction.Branches.HasNullType() {
+			ref.Nullable = true
+		}
+
+		return ref, nil
 	}
 
 	/*
@@ -148,27 +154,30 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Disjun
 		}
 	*/
 
-	fields := make([]ast.StructField, 0, len(def.Branches))
-	for _, branch := range def.Branches {
-		// FIXME: should ignore this completely.
-		// ie: if there was a nullable branch, the whole resulting type should be nullable.
+	fields := make([]ast.StructField, 0, len(disjunction.Branches))
+	for _, branch := range disjunction.Branches {
+		// Handled below, by allowing the reference to the disjunction struct
+		// to be null.
 		if branch.IsNull() {
 			continue
 		}
 
+		processedBranch := branch
+		processedBranch.Nullable = true
+
 		fields = append(fields, ast.StructField{
-			Name:     "Val" + tools.UpperCamelCase(pass.typeName(branch)),
-			Type:     branch,
+			Name:     "Val" + tools.UpperCamelCase(pass.typeName(processedBranch)),
+			Type:     processedBranch,
 			Required: false,
 		})
 	}
 
 	structType := ast.NewStruct(fields...)
-	if def.Branches.HasOnlyScalarOrArray() {
-		structType.Struct.Hint[ast.HintDisjunctionOfScalars] = def
+	if disjunction.Branches.HasOnlyScalarOrArray() {
+		structType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunction
 	}
-	if def.Branches.HasOnlyRefs() {
-		newDisjunctionDef, err := pass.ensureDiscriminator(file, def)
+	if disjunction.Branches.HasOnlyRefs() {
+		newDisjunctionDef, err := pass.ensureDiscriminator(file, disjunction)
 		if err != nil {
 			return ast.Type{}, err
 		}
@@ -181,7 +190,12 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Disjun
 		Type: structType,
 	}
 
-	return ast.NewRef(newTypeName), nil
+	ref := ast.NewRef(newTypeName)
+	if disjunction.Branches.HasNullType() {
+		ref.Nullable = true
+	}
+
+	return ref, nil
 }
 
 func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) string {
