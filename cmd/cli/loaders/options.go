@@ -47,6 +47,7 @@ func ForSchemaType(schemaType string) (Loader, error) {
 		"kindsys-core":   kindsysCoreLoader,
 		"kindsys-custom": kindsysCustomLoader,
 		"jsonschema":     jsonschemaLoader,
+		"openapi":        openapiLoader,
 	}
 
 	loader, ok := all[schemaType]
