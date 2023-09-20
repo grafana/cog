@@ -67,7 +67,7 @@ func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, err
 		refType := def.Type.AsRef()
 
 		buffer.WriteString(fmt.Sprintf("type %s = %s;", def.Name, refType.ReferredType))
-	case ast.KindDisjunction, ast.KindMap:
+	case ast.KindDisjunction, ast.KindMap, ast.KindArray:
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, "")))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
@@ -133,8 +133,6 @@ func formatField(def ast.StructField, typesPkg string) []byte {
 }
 
 func formatType(def ast.Type, typesPkg string) string {
-	// todo: handle nullable
-	// maybe if nullable, append | null to the type?
 	switch def.Kind {
 	case ast.KindDisjunction:
 		return formatDisjunction(def.AsDisjunction(), typesPkg)
@@ -153,6 +151,11 @@ func formatType(def ast.Type, typesPkg string) string {
 	case ast.KindEnum:
 		return formatAnonymousEnum(def.AsEnum())
 	case ast.KindScalar:
+		// This scalar actually refers to a constant
+		if def.AsScalar().Value != nil {
+			return formatScalar(def.AsScalar().Value)
+		}
+
 		return formatScalarKind(def.AsScalar().ScalarKind)
 
 	default:
@@ -236,7 +239,6 @@ func formatScalar(val any) string {
 			items = append(items, formatScalar(item))
 		}
 
-		// TODO: we can't assume a list of strings
 		return fmt.Sprintf("[%s]", strings.Join(items, ", "))
 	}
 

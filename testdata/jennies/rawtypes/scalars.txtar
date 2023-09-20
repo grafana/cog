@@ -1,0 +1,183 @@
+# Basic struct with scalar ScalarTypes, all required.
+-- ir.json --
+{
+    "Package": "scalars",
+    "Definitions": [
+        {
+            "Name": "constTypeString",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "string", "Value": "foo"}
+            }
+        },
+
+        {
+            "Name": "scalarTypeAny",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "any"}
+            }
+        },
+        {
+            "Name": "ScalarTypeBool",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "bool"}
+            }
+        },
+
+        {
+            "Name": "ScalarTypeBytes",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "bytes"}
+            }
+        },
+        {
+            "Name": "ScalarTypeString",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "string"}
+            }
+        },
+
+        {
+            "Name": "ScalarTypeFloat32",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "float32"}
+            }
+        },
+        {
+            "Name": "ScalarTypeFloat64",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "float64"}
+            }
+        },
+
+        {
+            "Name": "ScalarTypeUint8",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "uint8"}
+            }
+        },
+        {
+            "Name": "ScalarTypeUint16",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "uint16"}
+            }
+        },
+        {
+            "Name": "ScalarTypeUint32",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "uint32"}
+            }
+        },
+        {
+            "Name": "ScalarTypeUint64",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "uint64"}
+            }
+        },
+
+        {
+            "Name": "ScalarTypeInt8",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "int8"}
+            }
+        },
+        {
+            "Name": "ScalarTypeInt16",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "int16"}
+            }
+        },
+        {
+            "Name": "ScalarTypeInt32",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "int32"}
+            }
+        },
+        {
+            "Name": "ScalarTypeInt64",
+            "Type": {
+                "Kind": "scalar",
+                "Scalar": {"ScalarKind": "int64"}
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/scalars/types_gen.ts
+export const constTypeString = "foo";
+
+export type scalarTypeAny = any;
+
+export type ScalarTypeBool = boolean;
+
+export type ScalarTypeBytes = string;
+
+export type ScalarTypeString = string;
+
+export type ScalarTypeFloat32 = number;
+
+export type ScalarTypeFloat64 = number;
+
+export type ScalarTypeUint8 = number;
+
+export type ScalarTypeUint16 = number;
+
+export type ScalarTypeUint32 = number;
+
+export type ScalarTypeUint64 = number;
+
+export type ScalarTypeInt8 = number;
+
+export type ScalarTypeInt16 = number;
+
+export type ScalarTypeInt32 = number;
+
+export type ScalarTypeInt64 = number;
+
+-- out/jennies/GoRawTypes --
+== types/scalars/types_gen.go
+package types
+
+const ConstTypeString = "foo"
+
+type ScalarTypeAny any
+
+type ScalarTypeBool bool
+
+type ScalarTypeBytes bytes
+
+type ScalarTypeString string
+
+type ScalarTypeFloat32 float32
+
+type ScalarTypeFloat64 float64
+
+type ScalarTypeUint8 uint8
+
+type ScalarTypeUint16 uint16
+
+type ScalarTypeUint32 uint32
+
+type ScalarTypeUint64 uint64
+
+type ScalarTypeInt8 int8
+
+type ScalarTypeInt16 int16
+
+type ScalarTypeInt32 int32
+
+type ScalarTypeInt64 int64
+

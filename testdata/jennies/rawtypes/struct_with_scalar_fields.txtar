@@ -1,4 +1,4 @@
-# Basic struct with scalar fields
+# Basic struct with scalar fields, all required.
 -- ir.json --
 {
     "Package": "basic",
@@ -13,11 +13,126 @@
                         {
                             "Name": "FieldAny",
                             "Required": true,
+                            "Comments": ["Anything can go in there.", "Really, anything."],
                             "Type": {
                                 "Kind": "scalar",
-                                "Scalar": {
-                                    "ScalarKind": "any"
-                                }
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        },
+                        {
+                            "Name": "FieldBool",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "bool"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldBytes",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "bytes"}
+                            }
+                        },
+                        {
+                            "Name": "FieldString",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string"}
+                            }
+                        },
+                        {
+                            "Name": "FieldStringWithConstantValue",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string", "Value": "auto"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldFloat32",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "float32"}
+                            }
+                        },
+                        {
+                            "Name": "FieldFloat64",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "float64"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldUint8",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint8"}
+                            }
+                        },
+                        {
+                            "Name": "FieldUint16",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint16"}
+                            }
+                        },
+                        {
+                            "Name": "FieldUint32",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint32"}
+                            }
+                        },
+                        {
+                            "Name": "FieldUint64",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "uint64"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldInt8",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int8"}
+                            }
+                        },
+                        {
+                            "Name": "FieldInt16",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int16"}
+                            }
+                        },
+                        {
+                            "Name": "FieldInt32",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int32"}
+                            }
+                        },
+                        {
+                            "Name": "FieldInt64",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int64"}
                             }
                         }
                     ]
@@ -33,6 +148,50 @@
 // a
 // comment
 export interface SomeStruct {
+	// Anything can go in there.
+	// Really, anything.
 	fieldAny: any;
+	fieldBool: boolean;
+	fieldBytes: string;
+	fieldString: string;
+	fieldStringWithConstantValue: "auto";
+	fieldFloat32: number;
+	fieldFloat64: number;
+	fieldUint8: number;
+	fieldUint16: number;
+	fieldUint32: number;
+	fieldUint64: number;
+	fieldInt8: number;
+	fieldInt16: number;
+	fieldInt32: number;
+	fieldInt64: number;
+}
+
+-- out/jennies/GoRawTypes --
+== types/basic/types_gen.go
+package types
+
+// This
+// is
+// a
+// comment
+type SomeStruct struct {
+	// Anything can go in there.
+// Really, anything.
+FieldAny any `json:"FieldAny"`
+	FieldBool bool `json:"FieldBool"`
+	FieldBytes bytes `json:"FieldBytes"`
+	FieldString string `json:"FieldString"`
+	FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
+	FieldFloat32 float32 `json:"FieldFloat32"`
+	FieldFloat64 float64 `json:"FieldFloat64"`
+	FieldUint8 uint8 `json:"FieldUint8"`
+	FieldUint16 uint16 `json:"FieldUint16"`
+	FieldUint32 uint32 `json:"FieldUint32"`
+	FieldUint64 uint64 `json:"FieldUint64"`
+	FieldInt8 int8 `json:"FieldInt8"`
+	FieldInt16 int16 `json:"FieldInt16"`
+	FieldInt32 int32 `json:"FieldInt32"`
+	FieldInt64 int64 `json:"FieldInt64"`
 }
 

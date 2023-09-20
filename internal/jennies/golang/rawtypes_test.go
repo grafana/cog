@@ -1,4 +1,4 @@
-package typescript
+package golang
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ import (
 func TestRawTypes_Generate(t *testing.T) {
 	test := txtartest.TxTarTest{
 		Root: "../../../testdata/jennies/rawtypes",
-		Name: "jennies/TypescriptRawTypes",
+		Name: "jennies/GoRawTypes",
 	}
 
 	jenny := RawTypes{}
@@ -33,7 +33,7 @@ func TestRawTypes_Generate(t *testing.T) {
 
 		req.Len(processedAsts, 1, "we somehow got more ast.File than we put in")
 
-		files, err := jenny.Generate(tc.TypesIR())
+		files, err := jenny.Generate(processedAsts[0])
 		req.NoError(err)
 
 		tc.WriteFiles(files)

@@ -1,0 +1,261 @@
+# Basic struct with scalar fields, all required.
+-- ir.json --
+{
+    "Package": "struct_complex_fields",
+    "Definitions": [
+        {
+            "Name": "SomeStruct",
+            "Comments": ["This struct does things."],
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldRef",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "ref",
+                                "Ref": {"ReferredType": "SomeOtherStruct"}
+                            }
+                        },
+                        {
+                            "Name": "FieldDisjunctionOfScalars",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "disjunction",
+                                "Disjunction": {
+                                    "Branches": [
+                                        {
+                                            "Kind": "scalar",
+                                            "Scalar": {"ScalarKind": "string"}
+                                        },
+                                        {
+                                            "Kind": "scalar",
+                                            "Scalar": {"ScalarKind": "bool"}
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "Name": "FieldMixedDisjunction",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "disjunction",
+                                "Disjunction": {
+                                    "Branches": [
+                                        {
+                                            "Kind": "scalar",
+                                            "Scalar": {"ScalarKind": "string"}
+                                        },
+                                        {
+                                            "Kind": "ref",
+                                            "Ref": {"ReferredType": "SomeOtherStruct"}
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "Name": "FieldAnonymousEnum",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "enum",
+                                "Enum": {
+                                    "Values": [
+                                        {
+                                            "Name": "GreaterThan",
+                                            "Type": {
+                                                "Kind": "scalar",
+                                                "Scalar": {"ScalarKind": "string"}
+                                            },
+                                            "Value": ">"
+                                        },
+                                        {
+                                            "Name": "LessThan",
+                                            "Type": {
+                                                "Kind": "scalar",
+                                                "Scalar": {"ScalarKind": "string"}
+                                            },
+                                            "Value": "<"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "Name": "FieldArrayOfStrings",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "array",
+                                "Array": {
+                                    "ValueType": {
+                                        "Kind": "scalar",
+                                        "Scalar": {"ScalarKind": "string"}
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "Name": "FieldMapOfStringToString",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "map",
+                                "Map": {
+                                    "IndexType": {
+                                        "Kind": "scalar",
+                                        "Scalar": {"ScalarKind": "string"}
+                                    },
+                                    "ValueType": {
+                                        "Kind": "scalar",
+                                        "Scalar": {"ScalarKind": "string"}
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "Name": "FieldAnonymousStruct",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "struct",
+                                "Struct": {
+                                    "Fields": [
+                                        {
+                                            "Name": "FieldAny",
+                                            "Required": true,
+                                            "Type": {
+                                                "Kind": "scalar",
+                                                "Scalar": {"ScalarKind": "any"}
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+
+        {
+            "Name": "SomeOtherStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/struct_complex_fields/types_gen.ts
+// This struct does things.
+export interface SomeStruct {
+	fieldRef: SomeOtherStruct;
+	fieldDisjunctionOfScalars: string | boolean;
+	fieldMixedDisjunction: string | SomeOtherStruct;
+	fieldAnonymousEnum: ">" | "<";
+	fieldArrayOfStrings: string[];
+	fieldMapOfStringToString: Record<string, string>;
+	fieldAnonymousStruct: {
+		fieldAny: any;
+	};
+}
+
+export interface SomeOtherStruct {
+	fieldAny: any;
+}
+
+-- out/jennies/GoRawTypes --
+== types/struct_complex_fields/types_gen.go
+package types
+
+// This struct does things.
+type SomeStruct struct {
+	FieldRef SomeOtherStruct `json:"FieldRef"`
+	FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars"`
+	FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction"`
+	FieldAnonymousEnum FieldAnonymousEnumEnum `json:"FieldAnonymousEnum"`
+	FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
+	FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
+	FieldAnonymousStruct struct {
+	FieldAny any `json:"FieldAny"`
+} `json:"FieldAnonymousStruct"`
+}
+
+type SomeOtherStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type FieldAnonymousEnumEnum string
+const (
+	FieldAnonymousEnumGreaterThan FieldAnonymousEnumEnum = ">"
+	FieldAnonymousEnumLessThan FieldAnonymousEnumEnum = "<"
+)
+
+
+type StringOrBool struct {
+	ValString *string `json:"ValString,omitempty"`
+	ValBool *bool `json:"ValBool,omitempty"`
+}
+
+// MarshalJSON implements the encoding/json.Marshaler interface.
+//
+// This method can be used to render the resource as JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+	if resource.ValString != nil {
+		var buf bytes.Buffer
+		buf.WriteRune('"')
+		buf.WriteString(*resource.ValString)
+		buf.WriteRune('"')
+		return buf.Bytes(), nil
+	}
+
+	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+}
+
+func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
+	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+		return nil
+	}
+	var (
+		tmp string
+		err error
+	)
+	if raw[0] != '"' {
+		if bytes.Equal(raw, []byte("true")) {
+			yup := true
+			resource.ValBool = &yup
+			return nil
+		}
+		if bytes.Equal(raw, []byte("false")) {
+			nope := false
+			resource.ValBool = &nope
+			return nil
+		}
+		return errors.New("bad boolean value provided")
+	}
+	if err = json.Unmarshal(raw, &tmp); err != nil {
+		return err
+	}
+	resource.ValString = &tmp
+	return nil
+}
+
+type StringOrSomeOtherStruct struct {
+	ValString *string `json:"ValString,omitempty"`
+	ValSomeOtherStruct *SomeOtherStruct `json:"ValSomeOtherStruct,omitempty"`
+}
+

@@ -1,0 +1,294 @@
+# Enumerations
+-- ir.json --
+{
+    "Package": "disjunctions",
+    "Definitions": [
+        {
+            "Name": "StringOrBool",
+            "Comments": ["Refresh rate or disabled."],
+            "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                    "Branches": [
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "string"}
+                        },
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "bool"}
+                        }
+                    ]
+                }
+            }
+        },
+
+        {
+            "Name": "StringOrNull",
+            "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                    "Branches": [
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "string"}
+                        },
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "null"}
+                        }
+                    ]
+                }
+            }
+        },
+
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "BoolOrRef",
+            "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                    "Branches": [
+                        {
+                            "Kind": "scalar",
+                            "Scalar": {"ScalarKind": "bool"}
+                        },
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredType": "SomeStruct"}
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "SomeOtherStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "YetAnotherStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "SeveralRefs",
+            "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                    "Branches": [
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredType": "SomeStruct"}
+                        },
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredType": "SomeOtherStruct"}
+                        },
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredType": "YetAnotherStruct"}
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/disjunctions/types_gen.ts
+// Refresh rate or disabled.
+export type StringOrBool = string | boolean;
+
+export type StringOrNull = string | null;
+
+export interface SomeStruct {
+	fieldAny: any;
+}
+
+export type BoolOrRef = boolean | SomeStruct;
+
+export interface SomeOtherStruct {
+	fieldAny: any;
+}
+
+export interface YetAnotherStruct {
+	fieldAny: any;
+}
+
+export type SeveralRefs = SomeStruct | SomeOtherStruct | YetAnotherStruct;
+
+-- out/jennies/GoRawTypes --
+== types/disjunctions/types_gen.go
+package types
+
+// Refresh rate or disabled.
+type StringOrBool StringOrBool
+
+// MarshalJSON implements the encoding/json.Marshaler interface.
+//
+// This method can be used to render the resource as JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+	if resource.ValString != nil {
+		var buf bytes.Buffer
+		buf.WriteRune('"')
+		buf.WriteString(*resource.ValString)
+		buf.WriteRune('"')
+		return buf.Bytes(), nil
+	}
+
+	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+}
+
+func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
+	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+		return nil
+	}
+	var (
+		tmp string
+		err error
+	)
+	if raw[0] != '"' {
+		if bytes.Equal(raw, []byte("true")) {
+			yup := true
+			resource.ValBool = &yup
+			return nil
+		}
+		if bytes.Equal(raw, []byte("false")) {
+			nope := false
+			resource.ValBool = &nope
+			return nil
+		}
+		return errors.New("bad boolean value provided")
+	}
+	if err = json.Unmarshal(raw, &tmp); err != nil {
+		return err
+	}
+	resource.ValString = &tmp
+	return nil
+}
+
+type StringOrNull string
+
+type SomeStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type BoolOrRef BoolOrSomeStruct
+
+type SomeOtherStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type YetAnotherStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type SeveralRefs SomeStructOrSomeOtherStructOrYetAnotherStruct
+
+type BoolOrSomeStruct struct {
+	ValBool *bool `json:"ValBool,omitempty"`
+	ValSomeStruct *SomeStruct `json:"ValSomeStruct,omitempty"`
+}
+
+type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
+	ValSomeStruct *SomeStruct `json:"ValSomeStruct,omitempty"`
+	ValSomeOtherStruct *SomeOtherStruct `json:"ValSomeOtherStruct,omitempty"`
+	ValYetAnotherStruct *YetAnotherStruct `json:"ValYetAnotherStruct,omitempty"`
+}
+
+type StringOrBool struct {
+	ValString *string `json:"ValString,omitempty"`
+	ValBool *bool `json:"ValBool,omitempty"`
+}
+
+// MarshalJSON implements the encoding/json.Marshaler interface.
+//
+// This method can be used to render the resource as JSON
+// which your configuration management tool of choice can then feed into
+// Grafana.
+func (resource StringOrBool) MarshalJSON() ([]byte, error) {
+	if resource.ValString != nil {
+		var buf bytes.Buffer
+		buf.WriteRune('"')
+		buf.WriteString(*resource.ValString)
+		buf.WriteRune('"')
+		return buf.Bytes(), nil
+	}
+
+	return strconv.AppendBool([]byte{}, *resource.ValBool), nil
+}
+
+func (resource StringOrBool) UnmarshalJSON(raw []byte) error {
+	if raw == nil || bytes.Equal(raw, []byte(`"null"`)) {
+		return nil
+	}
+	var (
+		tmp string
+		err error
+	)
+	if raw[0] != '"' {
+		if bytes.Equal(raw, []byte("true")) {
+			yup := true
+			resource.ValBool = &yup
+			return nil
+		}
+		if bytes.Equal(raw, []byte("false")) {
+			nope := false
+			resource.ValBool = &nope
+			return nil
+		}
+		return errors.New("bad boolean value provided")
+	}
+	if err = json.Unmarshal(raw, &tmp); err != nil {
+		return err
+	}
+	resource.ValString = &tmp
+	return nil
+}
+

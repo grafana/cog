@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -40,6 +41,12 @@ func (pass *DisjunctionToType) processFile(file *ast.File) (*ast.File, error) {
 	for _, obj := range pass.newObjects {
 		newObjects = append(newObjects, obj)
 	}
+
+	// Since newly created objects are temporarily stored in a map, we need to
+	// sort them to have a deterministic output.
+	sort.SliceStable(newObjects, func(i, j int) bool {
+		return newObjects[i].Name < newObjects[j].Name
+	})
 
 	return &ast.File{
 		Package:     file.Package,

@@ -1,0 +1,49 @@
+# Enumerations
+-- ir.json --
+{
+    "Package": "refs",
+    "Definitions": [
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "FieldAny",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "any"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "RefToSomeStruct",
+            "Type": {
+                "Kind": "ref",
+                "Ref": {"ReferredType": "SomeStruct"}
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/refs/types_gen.ts
+export interface SomeStruct {
+	fieldAny: any;
+}
+
+export type RefToSomeStruct = SomeStruct;
+-- out/jennies/GoRawTypes --
+== types/refs/types_gen.go
+package types
+
+type SomeStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+type RefToSomeStruct SomeStruct
+

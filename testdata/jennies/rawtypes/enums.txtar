@@ -1,0 +1,114 @@
+# Enumerations
+-- ir.json --
+{
+    "Package": "enums",
+    "Definitions": [
+        {
+            "Name": "Operator",
+            "Comments": ["This is a very interesting string enum."],
+            "Type": {
+                "Kind": "enum",
+                "Enum": {
+                    "Values": [
+                        {
+                            "Name": "GreaterThan",
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string"}
+                            },
+                            "Value": ">"
+                        },
+                        {
+                            "Name": "LessThan",
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string"}
+                            },
+                            "Value": "<"
+                        }
+                    ]
+                }
+            }
+        },
+
+        {
+            "Name": "DashboardCursorSync",
+            "Comments": [
+                "0 for no shared crosshair or tooltip (default).",
+                "1 for shared crosshair.",
+                "2 for shared crosshair AND shared tooltip."
+            ],
+            "Type": {
+                "Kind": "enum",
+                "Enum": {
+                    "Values": [
+                        {
+                            "Name": "Off",
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int8"}
+                            },
+                            "Value": 0
+                        },
+                        {
+                            "Name": "Crosshair",
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int8"}
+                            },
+                            "Value": 1
+                        },
+                        {
+                            "Name": "Tooltip",
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int8"}
+                            },
+                            "Value": 2
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/enums/types_gen.ts
+// This is a very interesting string enum.
+export enum Operator {
+	GreaterThan = ">",
+	LessThan = "<",
+}
+
+// 0 for no shared crosshair or tooltip (default).
+// 1 for shared crosshair.
+// 2 for shared crosshair AND shared tooltip.
+export enum DashboardCursorSync {
+	Off = 0,
+	Crosshair = 1,
+	Tooltip = 2,
+}
+
+-- out/jennies/GoRawTypes --
+== types/enums/types_gen.go
+package types
+
+// This is a very interesting string enum.
+type Operator string
+const (
+	GreaterThan Operator = ">"
+	LessThan Operator = "<"
+)
+
+
+// 0 for no shared crosshair or tooltip (default).
+// 1 for shared crosshair.
+// 2 for shared crosshair AND shared tooltip.
+type DashboardCursorSync int8
+const (
+	Off DashboardCursorSync = 0
+	Crosshair DashboardCursorSync = 1
+	Tooltip DashboardCursorSync = 2
+)
+
+
