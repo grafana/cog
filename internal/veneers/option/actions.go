@@ -111,7 +111,7 @@ type BooleanUnfold struct {
 
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 	return func(option ast.Option) []ast.Option {
-		return []ast.Option{
+		newOpts := []ast.Option{
 			{
 				Name:     unfoldOpts.OptionTrue,
 				Comments: option.Comments,
@@ -124,7 +124,6 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 						Value:             true,
 					},
 				},
-				// TODO: default
 			},
 
 			{
@@ -139,8 +138,17 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 						Value:             false,
 					},
 				},
-				// TODO: default
 			},
 		}
+
+		if option.Default != nil {
+			if option.Default.ArgsValues[0].(bool) {
+				newOpts[0].Default = &ast.OptionDefault{}
+			} else {
+				newOpts[1].Default = &ast.OptionDefault{}
+			}
+		}
+
+		return newOpts
 	}
 }
