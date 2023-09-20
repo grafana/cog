@@ -48,15 +48,15 @@ func GenerateAST(filePath string, cfg Config) (*ast.File, error) {
 		return g.file, nil
 	}
 
-	if err := g.declareDefinition(cfg.Package, oapi.Components.Schemas); err != nil {
+	if err := g.declareDefinition(oapi.Components.Schemas); err != nil {
 		return nil, err
 	}
 
 	return g.file, nil
 }
 
-func (g *generator) declareDefinition(name string, schemas openapi3.Schemas) error {
-	for _, schemaRef := range schemas {
+func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
+	for name, schemaRef := range schemas {
 		def, err := g.walkSchemaRef(schemaRef)
 		if err != nil {
 			return err
@@ -167,7 +167,7 @@ func (g *generator) walkNumber(schema *openapi3.Schema) (ast.Type, error) {
 	case FormatDouble:
 		return ast.NewScalar(ast.KindFloat64), nil
 	default:
-		return ast.Type{}, errors.New("unhandled number format")
+		return ast.NewScalar(ast.KindFloat32), nil
 	}
 }
 
@@ -178,7 +178,8 @@ func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
 	case FormatInt64:
 		return ast.NewScalar(ast.KindInt64), nil
 	default:
-		return ast.Type{}, errors.New("unhandled integer format")
+		// TODO: Handle min/max/etc...
+		return ast.NewScalar(ast.KindInt32), nil
 	}
 }
 
@@ -202,14 +203,16 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	// Nullable enums? https://swagger.io/docs/specification/data-models/enums/
 	enums := make([]ast.EnumValue, 0, len(schema.Enum))
 	for _, value := range schema.Enum {
-		enumType, err := getEnumType(schema.Format)
+		enumType, err := getEnumType(schema.Type)
 		if err != nil {
 			return ast.Type{}, err
 		}
 
+		name := parseValue(value)
+
 		enums = append(enums, ast.EnumValue{
 			Type:  enumType,
-			Name:  value.(string),
+			Name:  name,
 			Value: value,
 		})
 	}

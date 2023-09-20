@@ -1,10 +1,10 @@
 package openapi
 
 import (
-	"errors"
 	"fmt"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
+	"strconv"
 	"strings"
 )
 
@@ -23,15 +23,35 @@ func schemaComments(schema *openapi3.Schema) []string {
 	return filtered
 }
 
-func getEnumType(format string) (ast.Type, error) {
-	switch format {
-	case FormatString:
+func getEnumType(t string) (ast.Type, error) {
+	switch t {
+	case openapi3.TypeString:
 		return ast.String(), nil
-	case FormatInt32:
+	case openapi3.TypeNumber:
 		return ast.NewScalar(ast.KindInt32), nil
-	case FormatInt64:
+	case openapi3.TypeInteger:
 		return ast.NewScalar(ast.KindInt64), nil
+	case openapi3.TypeBoolean:
+		return ast.Bool(), nil
 	default:
-		return ast.Type{}, errors.New(fmt.Sprintf("Unhandled enum format: %s. Valid formats are string or integers", format))
+		// TODO: Handle it correctly
+		return ast.String(), nil
 	}
+}
+
+func parseValue(value interface{}) string {
+	if val, ok := value.(string); ok {
+		return val
+	}
+	if val, ok := value.(bool); ok {
+		return strconv.FormatBool(val)
+	}
+	if val, ok := value.(int); ok {
+		return strconv.Itoa(val)
+	}
+	if val, ok := value.(float64); ok {
+		return fmt.Sprintf("%f", val)
+	}
+
+	return ""
 }
