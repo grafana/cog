@@ -48,3 +48,4 @@ linters-settings:
 
 run:
   modules-download-mode: vendor
+  timeout: 3m
