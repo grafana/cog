@@ -71,7 +71,6 @@ func Common() *Rewriter {
 			),
 
 			// Refresh(string) instead of Refresh(struct StringOrBool)
-			// FIXME: doesn't work (yet) since the argument is a reference to a struct and not a struct
 			option.StructFieldsAsArguments(
 				option.ByName("Dashboard", "refresh"),
 				"ValString",
