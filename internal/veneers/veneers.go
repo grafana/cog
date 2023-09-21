@@ -58,9 +58,9 @@ func Common() *Rewriter {
 				"rows",
 			),
 			/*
+				// TODO: finish implementing this rule
 				option.ArrayToAppend(
-					// FIXME: quirk of the current veneer rewrite engine
-					option.ByName("Dashboard", "panels"),
+					option.ByName("Dashboard", "rows"),
 				),
 			*/
 
