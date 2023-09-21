@@ -119,6 +119,7 @@ func (g *generator) walkRef(ref string) (ast.Type, error) {
 	// See https://swagger.io/specification/v3/#reference-object
 	parts := strings.Split(ref, "/")
 	referredKindName := parts[len(parts)-1]
+
 	return ast.NewRef(referredKindName), nil
 }
 
@@ -137,6 +138,7 @@ func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
 			Default:  schema.Default,
 		})
 	}
+
 	return ast.NewStruct(fields), nil
 }
 
@@ -216,6 +218,7 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 			Value: value,
 		})
 	}
+	
 	return ast.NewEnum(enums), nil
 }
 
@@ -232,7 +235,7 @@ func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef) (ast.Type
 	return ast.NewDisjunction(typeDefs), nil
 }
 
-func (g *generator) walkNot(schema *openapi3.Schema) (ast.Type, error) {
+func (g *generator) walkNot(_ *openapi3.Schema) (ast.Type, error) {
 	// TODO: Iterate not
 	return ast.Type{}, nil
 }
