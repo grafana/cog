@@ -43,13 +43,11 @@ func (jenny RawTypes) generateFile(file *ast.File) ([]byte, error) {
 		buffer.WriteString("\n")
 
 		// Add JSON (un)marshaling shortcuts
-		if !object.Type.IsAny() {
-			jsonMarshal, err := jenny.veneer("json_marshal", object)
-			if err != nil {
-				return nil, err
-			}
-			buffer.WriteString(jsonMarshal)
+		jsonMarshal, err := jenny.jsonMarshalVeneer(object)
+		if err != nil {
+			return nil, err
 		}
+		buffer.WriteString(jsonMarshal)
 	}
 
 	return []byte(buffer.String()), nil
@@ -70,13 +68,16 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
 
+		//nolint: gocritic
 		if scalarType.Value != nil {
 			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
+		} else if scalarType.ScalarKind == ast.KindBytes {
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
 		} else {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, "")))
 		}
 	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct:
-		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, true, "")))
+		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, "")))
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -92,7 +93,7 @@ func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	enumName := tools.UpperCamelCase(def.Name)
 	enumType := def.Type.AsEnum()
 
-	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatType(enumType.Values[0].Type, true, "")))
+	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatType(enumType.Values[0].Type, "")))
 
 	buffer.WriteString("const (\n")
 	for _, val := range enumType.Values {
@@ -103,24 +104,48 @@ func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	return buffer.String()
 }
 
-func (jenny RawTypes) veneer(veneerType string, def ast.Object) (string, error) {
-	// First, see if there is a definition-specific veneer
-	templateFile := fmt.Sprintf("%s.types.%s.go.tmpl", strings.ToLower(def.Name), veneerType)
-	tmpl := templates.Lookup(templateFile)
+func (jenny RawTypes) jsonMarshalVeneer(def ast.Object) (string, error) {
+	// the only case for which we need to render such veneer is for structs
+	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
 
-	// If not, get the generic one
-	if tmpl == nil {
-		tmpl = templates.Lookup(fmt.Sprintf("types.%s.go.tmpl", veneerType))
-	}
-	// If not, then there's nothing to do.
-	if tmpl == nil {
+	// if the object isn't a struct: nothing to do.
+	if def.Type.Kind != ast.KindStruct {
 		return "", nil
 	}
 
+	structType := def.Type.AsStruct()
+
+	// We know that a struct was generated from a disjunction if it has a "hint" that says so.
+	// There are only two types of disjunctions we support:
+	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
+	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
+	// 	  structs and these structs have a common "discriminator" field.
+
+	if _, ok := structType.Hint[ast.HintDisjunctionOfScalars]; ok {
+		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.go.tmpl", map[string]any{
+			"def": def,
+		})
+	}
+
+	if hintVal, ok := structType.Hint[ast.HintDiscriminatedDisjunctionOfRefs]; ok {
+		return jenny.renderVeneerTemplate("disjunction_of_refs.types.json_marshal.go.tmpl", map[string]any{
+			"def":  def,
+			"hint": hintVal,
+		})
+	}
+
+	// We didn't find a hint relevant to us: nothing do to.
+	return "", nil
+}
+
+func (jenny RawTypes) renderVeneerTemplate(templateFile string, data map[string]any) (string, error) {
+	tmpl := templates.Lookup(templateFile)
+	if tmpl == nil {
+		return "", fmt.Errorf("veneer template '%s' not found", templateFile)
+	}
+
 	buf := bytes.Buffer{}
-	if err := tmpl.Execute(&buf, map[string]any{
-		"def": def,
-	}); err != nil {
+	if err := tmpl.Execute(&buf, data); err != nil {
 		return "", fmt.Errorf("failed executing veneer template: %w", err)
 	}
 
@@ -163,7 +188,7 @@ func formatField(def ast.StructField, typesPkg string) string {
 	buffer.WriteString(fmt.Sprintf(
 		"%s %s `json:\"%s%s\"`\n",
 		tools.UpperCamelCase(def.Name),
-		formatType(def.Type, def.Required, typesPkg),
+		formatType(def.Type, typesPkg),
 		def.Name,
 		jsonOmitEmpty,
 	))
@@ -171,7 +196,7 @@ func formatField(def ast.StructField, typesPkg string) string {
 	return buffer.String()
 }
 
-func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
+func formatType(def ast.Type, typesPkg string) string {
 	if def.IsAny() {
 		return "any"
 	}
@@ -186,7 +211,7 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 
 	if def.Kind == ast.KindScalar {
 		typeName := def.AsScalar().ScalarKind
-		if !fieldIsRequired {
+		if def.Nullable {
 			typeName = "*" + typeName
 		}
 
@@ -200,16 +225,21 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 			typeName = typesPkg + "." + typeName
 		}
 
-		if !fieldIsRequired {
+		if def.Nullable {
 			typeName = "*" + typeName
 		}
 
 		return typeName
 	}
 
-	// anonymous struct
+	// anonymous struct or struct body
 	if def.Kind == ast.KindStruct {
-		return formatStructBody(def.AsStruct(), typesPkg)
+		output := formatStructBody(def.AsStruct(), typesPkg)
+		if def.Nullable {
+			output = "*" + output
+		}
+
+		return output
 	}
 
 	// FIXME: we should never be here
@@ -217,14 +247,14 @@ func formatType(def ast.Type, fieldIsRequired bool, typesPkg string) string {
 }
 
 func formatArray(def ast.ArrayType, typesPkg string) string {
-	subTypeString := formatType(def.ValueType, true, typesPkg)
+	subTypeString := formatType(def.ValueType, typesPkg)
 
 	return fmt.Sprintf("[]%s", subTypeString)
 }
 
 func formatMap(def ast.MapType, typesPkg string) string {
-	keyTypeString := formatType(def.IndexType, true, typesPkg)
-	valueTypeString := formatType(def.ValueType, true, typesPkg)
+	keyTypeString := formatType(def.IndexType, typesPkg)
+	valueTypeString := formatType(def.ValueType, typesPkg)
 
 	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)
 }

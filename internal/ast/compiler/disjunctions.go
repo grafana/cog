@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"errors"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -9,6 +11,8 @@ import (
 )
 
 var _ Pass = (*DisjunctionToType)(nil)
+
+var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mapping")
 
 type DisjunctionToType struct {
 	newObjects map[string]ast.Object
@@ -34,7 +38,12 @@ func (pass *DisjunctionToType) processFile(file *ast.File) (*ast.File, error) {
 
 	processedObjects := make([]ast.Object, 0, len(file.Definitions))
 	for _, object := range file.Definitions {
-		processedObjects = append(processedObjects, pass.processObject(object))
+		processedObject, err := pass.processObject(file, object)
+		if err != nil {
+			return nil, err
+		}
+
+		processedObjects = append(processedObjects, processedObject)
 	}
 
 	newObjects := make([]ast.Object, 0, len(pass.newObjects))
@@ -54,83 +63,158 @@ func (pass *DisjunctionToType) processFile(file *ast.File) (*ast.File, error) {
 	}, nil
 }
 
-func (pass *DisjunctionToType) processObject(object ast.Object) ast.Object {
-	newObject := object
-	newObject.Type = pass.processType(object.Type)
+func (pass *DisjunctionToType) processObject(file *ast.File, object ast.Object) (ast.Object, error) {
+	processedType, err := pass.processType(file, object.Type)
+	if err != nil {
+		return object, err
+	}
 
-	return newObject
+	newObject := object
+	newObject.Type = processedType
+
+	return newObject, nil
 }
 
-func (pass *DisjunctionToType) processType(def ast.Type) ast.Type {
+func (pass *DisjunctionToType) processType(file *ast.File, def ast.Type) (ast.Type, error) {
 	if def.Kind == ast.KindArray {
-		return pass.processArray(def.AsArray())
+		return pass.processArray(file, def)
+	}
+
+	if def.Kind == ast.KindMap {
+		return pass.processMap(file, def)
 	}
 
 	if def.Kind == ast.KindStruct {
-		return pass.processStruct(def.AsStruct())
+		return pass.processStruct(file, def)
 	}
 
 	if def.Kind == ast.KindDisjunction {
-		return pass.processDisjunction(def.AsDisjunction())
+		return pass.processDisjunction(file, def)
 	}
 
-	return def
+	return def, nil
 }
 
-func (pass *DisjunctionToType) processArray(def ast.ArrayType) ast.Type {
-	return ast.NewArray(pass.processType(def.ValueType))
-}
-
-func (pass *DisjunctionToType) processStruct(def ast.StructType) ast.Type {
-	processedFields := make([]ast.StructField, 0, len(def.Fields))
-	for _, field := range def.Fields {
-		processedFields = append(processedFields, ast.StructField{
-			Name:     field.Name,
-			Comments: field.Comments,
-			Type:     pass.processType(field.Type),
-			Required: field.Required,
-			Default:  field.Default,
-		})
+func (pass *DisjunctionToType) processArray(file *ast.File, def ast.Type) (ast.Type, error) {
+	processedType, err := pass.processType(file, def.AsArray().ValueType)
+	if err != nil {
+		return ast.Type{}, err
 	}
 
-	return ast.NewStruct(processedFields)
+	newArray := def
+	newArray.Array.ValueType = processedType
+
+	return newArray, nil
 }
 
-func (pass *DisjunctionToType) processDisjunction(def ast.DisjunctionType) ast.Type {
+func (pass *DisjunctionToType) processMap(file *ast.File, def ast.Type) (ast.Type, error) {
+	processedValueType, err := pass.processType(file, def.AsMap().ValueType)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
+	newMap := def
+	newMap.Map.ValueType = processedValueType
+
+	return newMap, nil
+}
+
+func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.Type) (ast.Type, error) {
+	processedFields := make([]ast.StructField, 0, len(def.AsStruct().Fields))
+	for _, field := range def.AsStruct().Fields {
+		processedType, err := pass.processType(file, field.Type)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		newField := field
+		newField.Type = processedType
+
+		processedFields = append(processedFields, newField)
+	}
+
+	newStruct := def
+	newStruct.Struct.Fields = processedFields
+
+	return newStruct, nil
+}
+
+func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Type) (ast.Type, error) {
+	disjunction := def.AsDisjunction()
+
 	// Ex: type | null
-	if len(def.Branches) == 2 && def.Branches.HasNullType() {
-		finalType := def.Branches.NonNullTypes()[0]
-		// finalType.Nullable = true
+	if len(disjunction.Branches) == 2 && disjunction.Branches.HasNullType() {
+		finalType := disjunction.Branches.NonNullTypes()[0]
+		finalType.Nullable = true
 
-		return finalType
+		return finalType, nil
 	}
 
 	// type | otherType | something (| null)?
 	// generate a type with a nullable field for every branch of the disjunction,
 	// add it to preprocessor.types, and use it instead.
-	newTypeName := pass.disjunctionTypeName(def)
+	newTypeName := pass.disjunctionTypeName(disjunction)
 
-	if _, ok := pass.newObjects[newTypeName]; !ok {
-		fields := make([]ast.StructField, 0, len(def.Branches))
-		for _, branch := range def.Branches {
-			if branch.IsNull() {
-				continue
-			}
-
-			fields = append(fields, ast.StructField{
-				Name:     "Val" + tools.UpperCamelCase(pass.typeName(branch)),
-				Type:     branch,
-				Required: false,
-			})
+	// if we already generated a new object for this disjunction, let's return
+	// a reference to it.
+	if _, ok := pass.newObjects[newTypeName]; ok {
+		ref := ast.NewRef(newTypeName)
+		if disjunction.Branches.HasNullType() {
+			ref.Nullable = true
 		}
 
-		pass.newObjects[newTypeName] = ast.Object{
-			Name: newTypeName,
-			Type: ast.NewStruct(fields),
-		}
+		return ref, nil
 	}
 
-	return ast.NewRef(newTypeName)
+	/*
+		TODO: return an error here. Some jennies won't be able to handle
+		this type of disjunction.
+		if !def.Branches.HasOnlyScalarOrArray() || !def.Branches.HasOnlyRefs() {
+		}
+	*/
+
+	fields := make([]ast.StructField, 0, len(disjunction.Branches))
+	for _, branch := range disjunction.Branches {
+		// Handled below, by allowing the reference to the disjunction struct
+		// to be null.
+		if branch.IsNull() {
+			continue
+		}
+
+		processedBranch := branch
+		processedBranch.Nullable = true
+
+		fields = append(fields, ast.StructField{
+			Name:     "Val" + tools.UpperCamelCase(pass.typeName(processedBranch)),
+			Type:     processedBranch,
+			Required: false,
+		})
+	}
+
+	structType := ast.NewStruct(fields...)
+	if disjunction.Branches.HasOnlyScalarOrArray() {
+		structType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunction
+	}
+	if disjunction.Branches.HasOnlyRefs() {
+		newDisjunctionDef, err := pass.ensureDiscriminator(file, disjunction)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		structType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = newDisjunctionDef
+	}
+
+	pass.newObjects[newTypeName] = ast.Object{
+		Name: newTypeName,
+		Type: structType,
+	}
+
+	ref := ast.NewRef(newTypeName)
+	if disjunction.Branches.HasNullType() {
+		ref.Nullable = true
+	}
+
+	return ref, nil
 }
 
 func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) string {
@@ -152,4 +236,119 @@ func (pass *DisjunctionToType) typeName(typeDef ast.Type) string {
 	}
 
 	return string(typeDef.Kind)
+}
+
+func (pass *DisjunctionToType) ensureDiscriminator(file *ast.File, def ast.DisjunctionType) (ast.DisjunctionType, error) {
+	// discriminator-related data was set during parsing: nothing to do.
+	if def.Discriminator != "" && len(def.DiscriminatorMapping) != 0 {
+		return def, nil
+	}
+
+	newDef := def
+
+	if def.Discriminator == "" {
+		newDef.Discriminator = pass.inferDiscriminatorField(file, newDef)
+	}
+
+	if len(def.DiscriminatorMapping) == 0 {
+		mapping, err := pass.buildDiscriminatorMapping(file, newDef)
+		if err != nil {
+			return newDef, err
+		}
+
+		newDef.DiscriminatorMapping = mapping
+	}
+
+	return newDef, nil
+}
+
+// inferDiscriminatorField tries to identify a field that might be used
+// as a way to distinguish between the types in the disjunction branches.
+// Such a field must:
+//   - exist in all structs referred by the disjunction
+//   - have a concrete, scalar value
+//
+// Note: this function assumes a disjunction of references to structs.
+func (pass *DisjunctionToType) inferDiscriminatorField(file *ast.File, def ast.DisjunctionType) string {
+	fieldName := ""
+	// map[typeName][fieldName]value
+	candidates := make(map[string]map[string]any)
+
+	// Identify candidates from each branch
+	for _, branch := range def.Branches {
+		// FIXME: what if the definition is itself a reference? Resolve recursively?
+		typeName := branch.AsRef().ReferredType
+		structType := file.LocateDefinition(typeName).Type.AsStruct()
+		candidates[typeName] = make(map[string]any)
+
+		for _, field := range structType.Fields {
+			if field.Type.Kind != ast.KindScalar {
+				continue
+			}
+
+			scalarField := field.Type.AsScalar()
+			if !scalarField.IsConcrete() {
+				continue
+			}
+
+			candidates[typeName][field.Name] = scalarField.Value
+		}
+	}
+
+	// At this point, if a discriminator exists, it will be listed under the candidates
+	// of any type in our map.
+	// We need to check if all other types have a similar field.
+	someType := def.Branches[0].AsRef().ReferredType
+	allTypes := make([]string, 0, len(candidates))
+
+	for typeName := range candidates {
+		allTypes = append(allTypes, typeName)
+	}
+
+	for candidateFieldName := range candidates[someType] {
+		existsInAllBranches := true
+		for _, branchTypeName := range allTypes {
+			if _, ok := candidates[branchTypeName][candidateFieldName]; !ok {
+				existsInAllBranches = false
+				break
+			}
+		}
+
+		if existsInAllBranches {
+			fieldName = candidateFieldName
+			break
+		}
+	}
+
+	return fieldName
+}
+
+func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast.DisjunctionType) (map[string]any, error) {
+	mapping := make(map[string]any, len(def.Branches))
+	if def.Discriminator == "" {
+		return nil, fmt.Errorf("discriminator field is empty: %w", ErrCanNotInferDiscriminator)
+	}
+
+	for _, branch := range def.Branches {
+		// FIXME: what if the definition is itself a reference? Resolve recursively?
+		typeName := branch.AsRef().ReferredType
+		structType := file.LocateDefinition(typeName).Type.AsStruct()
+
+		field, found := structType.FieldByName(def.Discriminator)
+		if !found {
+			return nil, fmt.Errorf("discriminator field '%s' not found in Object '%s': %w", def.Discriminator, typeName, ErrCanNotInferDiscriminator)
+		}
+
+		// trust, but verify: we need the field to be an actual scalar with a concrete value?
+		if field.Type.Kind != ast.KindScalar {
+			return nil, fmt.Errorf("discriminator field is not a scalar: %w", ErrCanNotInferDiscriminator)
+		}
+		if !field.Type.AsScalar().IsConcrete() {
+			return nil, fmt.Errorf("discriminator field is not concrete: %w", ErrCanNotInferDiscriminator)
+		}
+
+		mapping[typeName] = field.Type.AsScalar().Value
+	}
+
+	return mapping, nil
 }

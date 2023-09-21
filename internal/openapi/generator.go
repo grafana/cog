@@ -218,7 +218,7 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 			Value: value,
 		})
 	}
-	
+
 	return ast.NewEnum(enums), nil
 }
 

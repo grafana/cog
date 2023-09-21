@@ -297,7 +297,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			return ast.Any(), nil
 		}
 
-		return ast.NewStruct(fields), nil
+		return ast.NewStruct(fields...), nil
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
 	}

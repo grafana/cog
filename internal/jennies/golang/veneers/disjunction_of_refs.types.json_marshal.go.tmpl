@@ -1,0 +1,42 @@
+func (resource *{{ .def.Name|formatIdentifier }}) MarshalJSON() ([]byte, error) {
+{{ range .def.Type.Struct.Fields }}
+	if resource.{{ .Name|formatIdentifier }} != nil {
+		return json.Marshal(resource.{{ .Name|formatIdentifier }})
+	}
+{{ end }}
+
+	return nil, nil
+}
+
+func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+
+	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
+	parsedAsMap := make(map[string]any)
+	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
+		return err
+	}
+
+	discriminator, found := parsedAsMap["{{ .hint.Discriminator }}"]
+	if !found {
+		return errors.New("discriminator field '{{ .hint.Discriminator }}' not found in payload")
+	}
+
+	switch discriminator {
+{{ range $typeName, $discriminatorValue := .hint.DiscriminatorMapping }}
+	case "{{ $discriminatorValue }}":
+		var val{{ $typeName|formatIdentifier }} {{ $typeName|formatIdentifier }}
+		if err := json.Unmarshal(raw, &val{{ $typeName|formatIdentifier }}); err != nil {
+			return err
+		}
+
+		resource.Val{{ $typeName|formatIdentifier }} = &val{{ $typeName|formatIdentifier }}
+		return nil
+{{ end }}
+	}
+
+	return fmt.Errorf("could not unmarshal resource with `{{ .hint.Discriminator }} = %v`", discriminator)
+}
+

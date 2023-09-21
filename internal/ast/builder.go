@@ -49,7 +49,7 @@ type Assignment struct {
 	Constraints []TypeConstraint
 
 	// Some more context on the what
-	IntoOptionalField bool
+	IntoNullableField bool
 }
 
 type BuilderGenerator struct {
@@ -106,7 +106,7 @@ func (generator *BuilderGenerator) structFieldToStaticInitialization(field Struc
 		Path:              field.Name,
 		Value:             field.Type.AsScalar().Value,
 		ValueType:         field.Type,
-		IntoOptionalField: !field.Required,
+		IntoNullableField: field.Type.Nullable,
 	}
 }
 
@@ -131,7 +131,7 @@ func (generator *BuilderGenerator) structFieldToOption(field StructField) Option
 				ArgumentName:      field.Name,
 				ValueType:         field.Type,
 				Constraints:       constraints,
-				IntoOptionalField: !field.Required,
+				IntoNullableField: field.Type.Nullable,
 			},
 		},
 	}
