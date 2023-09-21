@@ -213,9 +213,10 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 		name := parseValue(value)
 
 		enums = append(enums, ast.EnumValue{
-			Type:  enumType,
-			Name:  name,
-			Value: value,
+			Type:    enumType,
+			Name:    name,
+			Value:   value,
+			Default: schema.Default,
 		})
 	}
 

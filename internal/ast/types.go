@@ -353,9 +353,10 @@ type EnumType struct {
 }
 
 type EnumValue struct {
-	Type  Type
-	Name  string
-	Value any
+	Type    Type
+	Name    string
+	Value   any
+	Default any
 }
 
 type MapType struct {
