@@ -5,11 +5,17 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/cmd/cli/loaders"
+	"github.com/grafana/cog/internal/ast"
 	"github.com/spf13/cobra"
 )
 
+type inspectOptions struct {
+	LoaderOptions loaders.Options
+	BuilderIR     bool
+}
+
 func Command() *cobra.Command {
-	opts := loaders.Options{}
+	opts := inspectOptions{}
 
 	// TODO:
 	// 	- support inspecting our different IRs: types, builders
@@ -20,13 +26,15 @@ func Command() *cobra.Command {
 		Short: "Inspects the intermediate representation.", // TODO: better descriptions
 		Long:  `Inspects the intermediate representation.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return doGenerate(opts)
+			return doInspect(opts)
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.SchemasType, "loader", "l", "cue", "Schemas type.") // TODO: better usage text
-	cmd.Flags().StringArrayVarP(&opts.Entrypoints, "input", "i", nil, "Schema.")     // TODO: better usage text
-	cmd.Flags().StringArrayVarP(&opts.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
+	cmd.Flags().BoolVar(&opts.BuilderIR, "builder-ir", false, "Inspect the \"builder IR\" instead of the \"types\" one.") // TODO: better usage text
+
+	cmd.Flags().StringVarP(&opts.LoaderOptions.SchemasType, "loader", "l", "cue", "Schemas type.") // TODO: better usage text
+	cmd.Flags().StringArrayVarP(&opts.LoaderOptions.Entrypoints, "input", "i", nil, "Schema.")     // TODO: better usage text
+	cmd.Flags().StringArrayVarP(&opts.LoaderOptions.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
 
 	_ = cmd.MarkFlagRequired("input")
 	_ = cmd.MarkFlagDirname("input")
@@ -34,18 +42,33 @@ func Command() *cobra.Command {
 	return cmd
 }
 
-func doGenerate(opts loaders.Options) error {
-	loader, err := loaders.ForSchemaType(opts.SchemasType)
+func doInspect(opts inspectOptions) error {
+	loader, err := loaders.ForSchemaType(opts.LoaderOptions.SchemasType)
 	if err != nil {
 		return err
 	}
 
-	schemas, err := loader(opts)
+	schemas, err := loader(opts.LoaderOptions)
 	if err != nil {
 		return err
 	}
 
-	marshaled, err := json.MarshalIndent(schemas, "", "  ")
+	if opts.BuilderIR {
+		return inspectBuilderIR(schemas)
+	}
+
+	return prettyPrintJSON(schemas)
+}
+
+func inspectBuilderIR(schemas []*ast.File) error {
+	generator := &ast.BuilderGenerator{}
+	buildersIR := generator.FromAST(schemas)
+
+	return prettyPrintJSON(buildersIR)
+}
+
+func prettyPrintJSON(input any) error {
+	marshaled, err := json.MarshalIndent(input, "", "  ")
 	if err != nil {
 		return err
 	}
