@@ -89,6 +89,7 @@ func Common() *Rewriter {
 			option.Omit(option.ByName("Panel", "options")),       // comes from a panel plugin
 			option.Omit(option.ByName("Panel", "custom")),        // comes from a panel plugin
 			option.Omit(option.ByName("Panel", "pluginVersion")), // TODO: check if it's relevant or not
+			option.Omit(option.ByName("Panel", "repeatPanelId")), // TODO: check if it's relevant or not
 
 			/********************************************
 			 * Rows
