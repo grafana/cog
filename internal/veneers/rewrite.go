@@ -57,7 +57,7 @@ func (engine *Rewriter) applyOptionRules(builders []ast.Builder) []ast.Builder {
 					continue
 				}
 
-				processedOptions = append(processedOptions, rule.Action(opt)...)
+				processedOptions = append(processedOptions, rule.Action(b, opt)...)
 			}
 
 			processedBuilders[i].Options = processedOptions
