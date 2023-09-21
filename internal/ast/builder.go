@@ -2,6 +2,7 @@ package ast
 
 type Builder struct {
 	Package         string
+	File            *File
 	For             Object
 	Options         []Option
 	Initializations []Assignment
@@ -75,6 +76,7 @@ func (generator *BuilderGenerator) FromAST(files []*File) []Builder {
 func (generator *BuilderGenerator) structObjectToBuilder(file *File, object Object) Builder {
 	builder := Builder{
 		Package: file.Package,
+		File:    file,
 		For:     object,
 		Options: nil,
 	}
