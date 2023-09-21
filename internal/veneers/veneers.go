@@ -12,8 +12,9 @@ func Common() *Rewriter {
 			builder.Omit(builder.ByName("GridPos")),
 			builder.Omit(builder.ByName("DataSourceRef")),
 			builder.Omit(builder.ByName("LibraryPanelRef")),
-			builder.Omit(builder.ByName("StringOrBool")),
-			builder.Omit(builder.ByName("StringOrArray")),
+
+			// No need for builders for structs generated from a disjunction
+			builder.Omit(builder.StructGeneratedFromDisjunction()),
 
 			// rearrange things a bit
 			builder.MergeInto(
