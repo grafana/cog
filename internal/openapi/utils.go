@@ -2,10 +2,11 @@ package openapi
 
 import (
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/grafana/cog/internal/ast"
 	"strconv"
 	"strings"
+
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/grafana/cog/internal/ast"
 )
 
 func schemaComments(schema *openapi3.Schema) []string {

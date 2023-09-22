@@ -3,10 +3,11 @@ package openapi
 import (
 	"context"
 	"errors"
+	"strings"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
-	"strings"
 )
 
 const (
