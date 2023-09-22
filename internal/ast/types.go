@@ -41,6 +41,8 @@ const (
 type Op string
 
 const (
+	MinLengthOp        Op = "minLength"
+	MaxLengthOp        Op = "maxLength"
 	EqualOp            Op = "=="
 	NotEqualOp         Op = "!="
 	LessThanOp         Op = "<"

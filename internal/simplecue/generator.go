@@ -400,7 +400,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 			}
 
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   ast.GreaterThanEqualOp,
+				Op:   ast.MinLengthOp,
 				Args: []any{scalar},
 			})
 
@@ -411,7 +411,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 			}
 
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   ast.LessThanEqualOp,
+				Op:   ast.MaxLengthOp,
 				Args: []any{scalar},
 			})
 		}
