@@ -66,7 +66,10 @@ func (pass *DisjunctionToType) processFile(file *ast.File) (*ast.File, error) {
 func (pass *DisjunctionToType) processObject(file *ast.File, object ast.Object) (ast.Object, error) {
 	processedType, err := pass.processType(file, object.Type)
 	if err != nil {
-		return object, err
+		return object, errors.Join(
+			fmt.Errorf("could not process object '%s'", object.Name),
+			err,
+		)
 	}
 
 	newObject := object
@@ -124,7 +127,10 @@ func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.Type) (ast.
 	for _, field := range def.AsStruct().Fields {
 		processedType, err := pass.processType(file, field.Type)
 		if err != nil {
-			return ast.Type{}, err
+			return ast.Type{}, errors.Join(
+				fmt.Errorf("could not process struct field '%s'", field.Name),
+				err,
+			)
 		}
 
 		newField := field
