@@ -18,7 +18,7 @@
         },
 
         {
-            "Name": "SomeStruct",
+            "Name": "someStruct",
             "Type": {
                 "Kind": "struct",
                 "Struct": {
@@ -42,7 +42,7 @@
                 "Array": {
                     "ValueType": {
                         "Kind": "ref",
-                        "Ref": {"ReferredType": "SomeStruct"}
+                        "Ref": {"ReferredType": "someStruct"}
                     }
                 }
             }
@@ -72,11 +72,11 @@
 // List of tags, maybe?
 export type ArrayOfStrings = string[];
 
-export interface SomeStruct {
+export interface someStruct {
 	fieldAny: any;
 }
 
-export type ArrayOfRefs = SomeStruct[];
+export type ArrayOfRefs = someStruct[];
 
 export type ArrayOfArrayOfNumbers = number[][];
 
