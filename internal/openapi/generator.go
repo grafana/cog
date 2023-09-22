@@ -152,37 +152,47 @@ func (g *generator) walkArray(schema *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
+	var t ast.Type
 	switch schema.Format {
 	case FormatString, FormatDate, FormatDateTime, FormatPassword:
-		return ast.String(), nil
+		t = ast.String()
 	case FormatByte:
-		return ast.Bytes(), nil
+		t = ast.Bytes()
 	default:
 		return ast.Type{}, errors.New("unhandled string format")
 	}
+
+	t.Scalar.Constraints = getConstraints(schema)
+	return t, nil
 }
 
 func (g *generator) walkNumber(schema *openapi3.Schema) (ast.Type, error) {
+	var t ast.Type
 	switch schema.Format {
 	case FormatFloat:
-		return ast.NewScalar(ast.KindFloat32), nil
+		t = ast.NewScalar(ast.KindFloat32)
 	case FormatDouble:
-		return ast.NewScalar(ast.KindFloat64), nil
+		t = ast.NewScalar(ast.KindFloat64)
 	default:
-		return ast.NewScalar(ast.KindFloat32), nil
+		t = ast.NewScalar(ast.KindFloat32)
 	}
+	t.Scalar.Constraints = getConstraints(schema)
+	return t, nil
 }
 
 func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
+	var t ast.Type
 	switch schema.Format {
 	case FormatInt32:
-		return ast.NewScalar(ast.KindInt32), nil
+		t = ast.NewScalar(ast.KindInt32)
 	case FormatInt64:
-		return ast.NewScalar(ast.KindInt64), nil
+		t = ast.NewScalar(ast.KindInt64)
 	default:
-		// TODO: Handle min/max/etc...
-		return ast.NewScalar(ast.KindInt32), nil
+		t = ast.NewScalar(ast.KindInt32)
 	}
+
+	t.Scalar.Constraints = getConstraints(schema)
+	return t, nil
 }
 
 func (g *generator) walkBoolean(_ *openapi3.Schema) (ast.Type, error) {
