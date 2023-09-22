@@ -150,22 +150,25 @@
 export interface SomeStruct {
 	// Anything can go in there.
 	// Really, anything.
-	fieldAny: any;
-	fieldBool: boolean;
-	fieldBytes: string;
-	fieldString: string;
-	fieldStringWithConstantValue: "auto";
-	fieldFloat32: number;
-	fieldFloat64: number;
-	fieldUint8: number;
-	fieldUint16: number;
-	fieldUint32: number;
-	fieldUint64: number;
-	fieldInt8: number;
-	fieldInt16: number;
-	fieldInt32: number;
-	fieldInt64: number;
+	FieldAny: any;
+	FieldBool: boolean;
+	FieldBytes: string;
+	FieldString: string;
+	FieldStringWithConstantValue: "auto";
+	FieldFloat32: number;
+	FieldFloat64: number;
+	FieldUint8: number;
+	FieldUint16: number;
+	FieldUint32: number;
+	FieldUint64: number;
+	FieldInt8: number;
+	FieldInt16: number;
+	FieldInt32: number;
+	FieldInt64: number;
 }
+
+export const defaultSomeStruct: Partial<SomeStruct> = {
+};
 
 -- out/jennies/GoRawTypes --
 == types/basic/types_gen.go

@@ -73,8 +73,11 @@
 export type ArrayOfStrings = string[];
 
 export interface someStruct {
-	fieldAny: any;
+	FieldAny: any;
 }
+
+export const defaultSomeStruct: Partial<someStruct> = {
+};
 
 export type ArrayOfRefs = someStruct[];
 

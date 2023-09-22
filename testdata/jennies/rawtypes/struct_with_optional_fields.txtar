@@ -112,18 +112,24 @@
 -- out/jennies/TypescriptRawTypes --
 == types/struct_optional_fields/types_gen.ts
 export interface SomeStruct {
-	fieldRef?: SomeOtherStruct;
-	fieldString?: string;
-	fieldAnonymousEnum?: ">" | "<";
-	fieldArrayOfStrings?: string[];
-	fieldAnonymousStruct?: {
-		fieldAny: any;
+	FieldRef?: SomeOtherStruct;
+	FieldString?: string;
+	FieldAnonymousEnum?: ">" | "<";
+	FieldArrayOfStrings?: string[];
+	FieldAnonymousStruct?: {
+		FieldAny: any;
 	};
 }
 
+export const defaultSomeStruct: Partial<SomeStruct> = {
+};
+
 export interface SomeOtherStruct {
-	fieldAny: any;
+	FieldAny: any;
 }
+
+export const defaultSomeOtherStruct: Partial<SomeOtherStruct> = {
+};
 
 -- out/jennies/GoRawTypes --
 == types/struct_optional_fields/types_gen.go

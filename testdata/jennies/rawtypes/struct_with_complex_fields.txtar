@@ -180,21 +180,27 @@
 == types/struct_complex_fields/types_gen.ts
 // This struct does things.
 export interface SomeStruct {
-	fieldRef: SomeOtherStruct;
-	fieldDisjunctionOfScalars: string | boolean;
-	fieldMixedDisjunction: string | SomeOtherStruct;
-	fieldDisjunctionWithNull: string | null;
-	fieldAnonymousEnum: ">" | "<";
-	fieldArrayOfStrings: string[];
-	fieldMapOfStringToString: Record<string, string>;
-	fieldAnonymousStruct: {
-		fieldAny: any;
+	FieldRef: SomeOtherStruct;
+	FieldDisjunctionOfScalars: string | boolean;
+	FieldMixedDisjunction: string | SomeOtherStruct;
+	FieldDisjunctionWithNull: string | null;
+	FieldAnonymousEnum: ">" | "<";
+	FieldArrayOfStrings: string[];
+	FieldMapOfStringToString: Record<string, string>;
+	FieldAnonymousStruct: {
+		FieldAny: any;
 	};
 }
 
+export const defaultSomeStruct: Partial<SomeStruct> = {
+};
+
 export interface SomeOtherStruct {
-	fieldAny: any;
+	FieldAny: any;
 }
+
+export const defaultSomeOtherStruct: Partial<SomeOtherStruct> = {
+};
 
 -- out/jennies/GoRawTypes --
 == types/struct_complex_fields/types_gen.go
