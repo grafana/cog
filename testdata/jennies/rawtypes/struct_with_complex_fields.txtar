@@ -220,8 +220,8 @@ type SomeOtherStruct struct {
 
 type FieldAnonymousEnumEnum string
 const (
-	FieldAnonymousEnumGreaterThan FieldAnonymousEnumEnum = ">"
-	FieldAnonymousEnumLessThan FieldAnonymousEnumEnum = "<"
+	FieldAnonymousEnumEnumFieldAnonymousEnumGreaterThan FieldAnonymousEnumEnum = ">"
+	FieldAnonymousEnumEnumFieldAnonymousEnumLessThan FieldAnonymousEnumEnum = "<"
 )
 
 

@@ -161,10 +161,7 @@ func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 			return nil, err
 		}
 		fields = append(fields, ast.EnumValue{
-			Type: subType,
-
-			// Simple mapping of all enum values (which we are assuming are in
-			// lowerCamelCase) to corresponding CamelCase
+			Type:  subType,
 			Name:  text,
 			Value: val,
 		})

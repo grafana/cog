@@ -34,6 +34,7 @@ func Jennies() *codejen.JennyList[[]*ast.File] {
 func CompilerPasses() []compiler.Pass {
 	return []compiler.Pass{
 		&compiler.AnonymousEnumToExplicitType{},
+		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.DisjunctionToType{},
 	}
