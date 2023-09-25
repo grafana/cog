@@ -1,0 +1,92 @@
+# Basic struct with default values.
+-- ir.json --
+{
+    "Package": "defaults",
+    "Definitions": [
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "fieldBool",
+                            "Required": true,
+                            "Default": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "bool"}
+                            }
+                        },
+
+                        {
+                            "Name": "fieldString",
+                            "Required": true,
+                            "Default": "foo",
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string"}
+                            }
+                        },
+                        {
+                            "Name": "FieldStringWithConstantValue",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "string", "Value": "auto"}
+                            }
+                        },
+
+                        {
+                            "Name": "FieldFloat32",
+                            "Required": true,
+                            "Default": 42.42,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "float32"}
+                            }
+                        },
+                        {
+                            "Name": "FieldInt32",
+                            "Required": true,
+                            "Default": 42,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Scalar": {"ScalarKind": "int32"}
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+-- out/jennies/TypescriptRawTypes --
+== types/defaults/types_gen.ts
+export interface SomeStruct {
+	fieldBool: boolean;
+	fieldString: string;
+	FieldStringWithConstantValue: "auto";
+	FieldFloat32: number;
+	FieldInt32: number;
+}
+
+export const defaultSomeStruct: Partial<SomeStruct> = {
+	fieldBool: true,
+	fieldString: "foo",
+	FieldFloat32: 42.42,
+	FieldInt32: 42,
+};
+
+-- out/jennies/GoRawTypes --
+== types/defaults/types_gen.go
+package types
+
+type SomeStruct struct {
+	FieldBool bool `json:"fieldBool"`
+	FieldString string `json:"fieldString"`
+	FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
+	FieldFloat32 float32 `json:"FieldFloat32"`
+	FieldInt32 int32 `json:"FieldInt32"`
+}
+

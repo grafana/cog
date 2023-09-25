@@ -57,6 +57,10 @@ func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, err
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
 		buffer.WriteString(formatStructFields(def.Type.AsStruct().Fields, typesPkg))
 		buffer.WriteString("\n")
+
+		buffer.WriteString("\n")
+		buffer.WriteString(formatStructDefaults(def))
+		buffer.WriteString("\n")
 	case ast.KindEnum:
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
 		for _, val := range def.Type.AsEnum().Values {
@@ -89,22 +93,37 @@ func formatStructFields(fields []ast.StructField, typesPkg string) string {
 
 	buffer.WriteString("{\n")
 
-	for i, fieldDef := range fields {
+	for _, fieldDef := range fields {
 		fieldDefGen := formatField(fieldDef, typesPkg)
 
 		buffer.WriteString(
 			strings.TrimSuffix(
 				prefixLinesWith(string(fieldDefGen), "\t"),
-				"\n\t",
+				"\t",
 			),
 		)
-
-		if i != len(fields)-1 {
-			buffer.WriteString("\n")
-		}
 	}
 
-	buffer.WriteString("\n}")
+	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+func formatStructDefaults(def ast.Object) string {
+	var buffer strings.Builder
+
+	buffer.WriteString(fmt.Sprintf("export const default%[1]s: Partial<%[2]s> = {\n", tools.UpperCamelCase(def.Name), def.Name))
+
+	fields := def.Type.AsStruct().Fields
+	for _, field := range fields {
+		if field.Default == nil {
+			continue
+		}
+
+		buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", field.Name, formatScalar(field.Default)))
+	}
+
+	buffer.WriteString("};")
 
 	return buffer.String()
 }
@@ -125,7 +144,7 @@ func formatField(def ast.StructField, typesPkg string) []byte {
 
 	buffer.WriteString(fmt.Sprintf(
 		"%s%s: %s;\n",
-		tools.LowerCamelCase(def.Name),
+		def.Name,
 		required,
 		formattedType,
 	))

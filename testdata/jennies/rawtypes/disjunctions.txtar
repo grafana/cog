@@ -170,21 +170,30 @@ export type RefreshRate = string | boolean;
 export type StringOrNull = string | null;
 
 export interface SomeStruct {
-	type: "some-struct";
-	fieldAny: any;
+	Type: "some-struct";
+	FieldAny: any;
 }
+
+export const defaultSomeStruct: Partial<SomeStruct> = {
+};
 
 export type BoolOrRef = boolean | SomeStruct;
 
 export interface SomeOtherStruct {
-	type: "some-other-struct";
-	foo: string;
+	Type: "some-other-struct";
+	Foo: string;
 }
 
+export const defaultSomeOtherStruct: Partial<SomeOtherStruct> = {
+};
+
 export interface YetAnotherStruct {
-	type: "yet-another-struct";
-	bar: number;
+	Type: "yet-another-struct";
+	Bar: number;
 }
+
+export const defaultYetAnotherStruct: Partial<YetAnotherStruct> = {
+};
 
 export type SeveralRefs = SomeStruct | SomeOtherStruct | YetAnotherStruct;
 

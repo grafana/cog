@@ -33,8 +33,11 @@
 -- out/jennies/TypescriptRawTypes --
 == types/refs/types_gen.ts
 export interface SomeStruct {
-	fieldAny: any;
+	FieldAny: any;
 }
+
+export const defaultSomeStruct: Partial<SomeStruct> = {
+};
 
 export type RefToSomeStruct = SomeStruct;
 -- out/jennies/GoRawTypes --
