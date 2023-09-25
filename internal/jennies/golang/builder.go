@@ -328,6 +328,31 @@ func (jenny *Builder) constraintComparison(argumentName string, constraint ast.T
 }
 
 func isReservedGoKeyword(input string) bool {
-	// TODO: there's more than that
-	return input == "type"
+	// see: https://go.dev/ref/spec#Keywords
+	return input == "break" ||
+		input == "case" ||
+		input == "chan" ||
+		input == "continue" ||
+		input == "const" ||
+		input == "default" ||
+		input == "defer" ||
+		input == "else" ||
+		input == "error" ||
+		input == "fallthrough" ||
+		input == "for" ||
+		input == "func" ||
+		input == "go" ||
+		input == "goto" ||
+		input == "if" ||
+		input == "import" ||
+		input == "interface" ||
+		input == "map" ||
+		input == "package" ||
+		input == "range" ||
+		input == "return" ||
+		input == "select" ||
+		input == "struct" ||
+		input == "switch" ||
+		input == "type" ||
+		input == "var"
 }
