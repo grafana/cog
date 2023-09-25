@@ -57,7 +57,7 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 	if schema.MultipleOf != nil {
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   ast.MultipleOfOp,
-			Args: []any{schema.MultipleOf},
+			Args: getArgs(schema.MultipleOf, schema.Type),
 		})
 	}
 
@@ -68,7 +68,7 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 		}
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   op,
-			Args: []any{schema.Min},
+			Args: getArgs(schema.Min, schema.Type),
 		})
 	}
 
@@ -79,9 +79,17 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 		}
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   op,
-			Args: []any{schema.Max},
+			Args: getArgs(schema.Max, schema.Type),
 		})
 	}
 
 	return constraints
+}
+
+func getArgs(v *float64, t string) []any {
+	args := []any{v}
+	if t == openapi3.TypeInteger {
+		args = []any{int64(*v)}
+	}
+	return args
 }

@@ -190,7 +190,7 @@ func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
 	case FormatInt64:
 		t = ast.NewScalar(ast.KindInt64)
 	default:
-		t = ast.NewScalar(ast.KindInt32)
+		t = ast.NewScalar(ast.KindInt64)
 	}
 
 	t.Scalar.Constraints = getConstraints(schema)
