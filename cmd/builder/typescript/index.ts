@@ -14,14 +14,14 @@ const builder = new DashboardBuilder("Some title")
     .refresh("1m")
     .style("dark")
     .timezone("utc")
-    .tooltip(DashboardCursorSync.DashboardCursorSyncCrosshair)
+    .tooltip(DashboardCursorSync.Crosshair)
     .tags(["generated", "from", "cue"])
     .links([
         {
             // TODO: this is painful.
             title: "Some link",
             url: "http://google.com",
-            type: DashboardLinkType.DashboardLinkTypeLink,
+            type: DashboardLinkType.Link,
             tags: [],
             icon: "cloud",
             tooltip: "",
