@@ -6,6 +6,8 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/tools"
 	"github.com/grafana/cog/internal/veneers"
+	"github.com/grafana/cog/internal/veneers/builder"
+	"github.com/grafana/cog/internal/veneers/option"
 )
 
 func Jennies() *codejen.JennyList[[]*ast.File] {
@@ -22,7 +24,11 @@ func Jennies() *codejen.JennyList[[]*ast.File] {
 				generator := &ast.BuilderGenerator{}
 				builders := generator.FromAST(files)
 
-				return veneers.Engine().ApplyTo(builders)
+				// apply common veneers
+				builders = veneers.Common().ApplyTo(builders)
+
+				// apply TS-specific veneers
+				return Veneers().ApplyTo(builders)
 			},
 		),
 	)
@@ -38,4 +44,21 @@ func CompilerPasses() []compiler.Pass {
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.DisjunctionToType{},
 	}
+}
+
+func Veneers() *veneers.Rewriter {
+	return veneers.NewRewrite(
+		[]builder.RewriteRule{},
+
+		[]option.RewriteRule{
+			/********************************************
+			 * Dashboards
+			 ********************************************/
+
+			// Time(from, to) instead of time(struct {From string `json:"from"`, To   string `json:"to"`}{From: "lala", To: "lala})
+			option.StructFieldsAsArguments(
+				option.ByName("Dashboard", "time"),
+			),
+		},
+	)
 }
