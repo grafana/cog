@@ -5,7 +5,7 @@ import (
 	"github.com/grafana/cog/internal/veneers/option"
 )
 
-func Engine() *Rewriter {
+func Common() *Rewriter {
 	return NewRewrite(
 		[]builder.RewriteRule{
 			// We don't want these builders at all
