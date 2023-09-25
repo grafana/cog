@@ -812,18 +812,7 @@
           "panels": {
             "type": "array",
             "items": {
-              "type": "object",
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Panel"
-                },
-                {
-                  "$ref": "#/components/schemas/GraphPanel"
-                },
-                {
-                  "$ref": "#/components/schemas/HeatmapPanel"
-                }
-              ]
+              "$ref": "#/components/schemas/Panel"
             }
           },
           "repeat": {
@@ -1046,22 +1035,7 @@
         }
       },
       "ValueMapping": {
-        "description": "TODO docs",
-        "type": "object",
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/ValueMap"
-          },
-          {
-            "$ref": "#/components/schemas/RangeMap"
-          },
-          {
-            "$ref": "#/components/schemas/RegexMap"
-          },
-          {
-            "$ref": "#/components/schemas/SpecialValueMap"
-          }
-        ]
+        "$ref": "#/components/schemas/ValueMap"
       },
       "ValueMappingResult": {
         "description": "TODO docs",
@@ -1368,21 +1342,7 @@
           "panels": {
             "type": "array",
             "items": {
-              "type": "object",
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/Panel"
-                },
-                {
-                  "$ref": "#/components/schemas/RowPanel"
-                },
-                {
-                  "$ref": "#/components/schemas/GraphPanel"
-                },
-                {
-                  "$ref": "#/components/schemas/HeatmapPanel"
-                }
-              ]
+              "$ref": "#/components/schemas/Panel"
             }
           },
           "templating": {
