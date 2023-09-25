@@ -6,7 +6,7 @@ import {DashboardCursorSync, DashboardLinkType} from "../../../generated/types/d
 const builder = new DashboardBuilder("Some title")
     .uid("test-dashboard-codegen")
     .description("Some description")
-    .time("now-3h", "now")
+    .time({from: "now-3h", to: "now"})
     .timepicker(
         new TimePickerBuilder()
             .refresh_intervals(["30s", "1m", "5m"])
