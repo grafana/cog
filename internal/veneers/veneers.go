@@ -76,11 +76,6 @@ func Common() *Rewriter {
 				"ValString",
 			),
 
-			// Time(from, to) instead of time(struct {From string `json:"from"`, To   string `json:"to"`}{From: "lala", To: "lala})
-			option.StructFieldsAsArguments(
-				option.ByName("Dashboard", "time"),
-			),
-
 			// We don't want these options at all
 			option.Omit(option.ByName("Dashboard", "schemaVersion")),
 
