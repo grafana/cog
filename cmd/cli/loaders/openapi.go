@@ -1,9 +1,10 @@
 package loaders
 
 import (
+	"path/filepath"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/openapi"
-	"path/filepath"
 )
 
 func openapiLoader(opts Options) ([]*ast.File, error) {
