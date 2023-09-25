@@ -47,7 +47,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	buffer.WriteString(fmt.Sprintf("export class %[1]sBuilder implements OptionsBuilder<types.%[1]s> {\n", objectName))
 
 	// internal property, representing the object being built
-	buffer.WriteString(fmt.Sprintf("\tinternal: types.%[1]s;\n", objectName))
+	buffer.WriteString(fmt.Sprintf("\tprivate internal: types.%[1]s;\n", objectName))
 
 	// Add a constructor for the builder
 	constructorCode := jenny.generateConstructor(builders, builder)
@@ -102,14 +102,92 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 
 	args = strings.Join(argsList, ", ")
 	fieldsInit = strings.Join(fieldsInitList, "\n")
+	typeInit := jenny.emptyValueForType(builders, builder.Package, builder.For.Type)
 
 	buffer.WriteString(fmt.Sprintf(`
 	constructor(%[2]s) {
-%[3]s
+		this.internal = %[3]s;
+%[4]s
 	}
-`, typeName, args, fieldsInit))
+`, typeName, args, typeInit, fieldsInit))
 
 	return buffer.String()
+}
+
+func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeDef ast.Type) string {
+	switch typeDef.Kind {
+	case ast.KindDisjunction:
+		return jenny.emptyValueForType(builders, pkg, typeDef.AsDisjunction().Branches[0])
+	case ast.KindRef:
+		referredTypeName := typeDef.AsRef().ReferredType
+		referredTypeBuilder, _ := builders.LocateByObject(pkg, referredTypeName)
+
+		return jenny.emptyValueForType(builders, referredTypeBuilder.Package, referredTypeBuilder.For.Type)
+	case ast.KindStruct:
+		return jenny.emptyValueForStruct(builders, pkg, typeDef.AsStruct())
+	case ast.KindEnum:
+		return formatScalar(typeDef.AsEnum().Values[0].Value)
+	case ast.KindMap:
+		return "{}"
+	case ast.KindArray:
+		return "[]"
+	case ast.KindScalar:
+		return jenny.emptyValueForScalar(typeDef.AsScalar())
+
+	default:
+		return "unknown"
+	}
+}
+
+func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, structType ast.StructType) string {
+	var buffer strings.Builder
+
+	var fieldsInit []string
+	for _, field := range structType.Fields {
+		if field.Default != nil {
+			fieldsInit = append(fieldsInit, fmt.Sprintf("%s: %s, // default value", field.Name, formatScalar(field.Default)))
+			continue
+		}
+
+		if !field.Required {
+			continue
+		}
+
+		fieldsInit = append(fieldsInit, fmt.Sprintf("%s: %s, // zero value", field.Name, jenny.emptyValueForType(builders, pkg, field.Type)))
+	}
+
+	buffer.WriteString(fmt.Sprintf(`{
+%[1]s
+}`, strings.Join(fieldsInit, "\n")))
+
+	return buffer.String()
+}
+
+func (jenny *Builder) emptyValueForScalar(scalar ast.ScalarType) string {
+	switch scalar.ScalarKind {
+	case ast.KindNull:
+		return "null"
+	case ast.KindAny:
+		return "{}"
+
+	case ast.KindBytes, ast.KindString:
+		return "\"\""
+
+	case ast.KindFloat32, ast.KindFloat64:
+		return "0"
+
+	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+		return "0"
+
+	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+		return "0"
+
+	case ast.KindBool:
+		return "false"
+
+	default:
+		return "unknown"
+	}
 }
 
 func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder, t ast.Type) (string, bool) {
