@@ -1,8 +1,6 @@
 package openapi
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -24,37 +22,20 @@ func schemaComments(schema *openapi3.Schema) []string {
 	return filtered
 }
 
-func getEnumType(t string) (ast.Type, error) {
+func getEnumType(t string) ast.Type {
 	switch t {
 	case openapi3.TypeString:
-		return ast.String(), nil
+		return ast.String()
 	case openapi3.TypeNumber:
-		return ast.NewScalar(ast.KindInt32), nil
+		return ast.NewScalar(ast.KindInt32)
 	case openapi3.TypeInteger:
-		return ast.NewScalar(ast.KindInt64), nil
+		return ast.NewScalar(ast.KindInt64)
 	case openapi3.TypeBoolean:
-		return ast.Bool(), nil
+		return ast.Bool()
 	default:
 		// TODO: Handle it correctly
-		return ast.String(), nil
+		return ast.String()
 	}
-}
-
-func parseValue(value interface{}) string {
-	if val, ok := value.(string); ok {
-		return val
-	}
-	if val, ok := value.(bool); ok {
-		return strconv.FormatBool(val)
-	}
-	if val, ok := value.(int); ok {
-		return strconv.Itoa(val)
-	}
-	if val, ok := value.(float64); ok {
-		return fmt.Sprintf("%f", val)
-	}
-
-	return ""
 }
 
 func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {

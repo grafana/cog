@@ -3,6 +3,7 @@ package openapi
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -215,17 +216,14 @@ func (g *generator) walkAnyOf(schema *openapi3.Schema) (ast.Type, error) {
 func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	// Nullable enums? https://swagger.io/docs/specification/data-models/enums/
 	enums := make([]ast.EnumValue, 0, len(schema.Enum))
+	format := "%#v"
+	if schema.Type == openapi3.TypeString {
+		format = "%s"
+	}
 	for _, value := range schema.Enum {
-		enumType, err := getEnumType(schema.Type)
-		if err != nil {
-			return ast.Type{}, err
-		}
-
-		name := parseValue(value)
-
 		enums = append(enums, ast.EnumValue{
-			Type:    enumType,
-			Name:    name,
+			Type:    getEnumType(schema.Type),
+			Name:    fmt.Sprintf(format, value),
 			Value:   value,
 			Default: schema.Default,
 		})
