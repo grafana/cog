@@ -129,27 +129,27 @@
 == types/enums/types_gen.ts
 // This is a very interesting string enum.
 export enum Operator {
-	GreaterThan = ">",
-	LessThan = "<",
+	OperatorGreaterThan = ">",
+	OperatorLessThan = "<",
 }
 
 export enum TableSortOrder {
-	Asc = "asc",
-	Desc = "desc",
+	TableSortOrderAsc = "asc",
+	TableSortOrderDesc = "desc",
 }
 
 export enum LogsSortOrder {
-	Asc = "time_asc",
-	Desc = "time_desc",
+	LogsSortOrderAsc = "time_asc",
+	LogsSortOrderDesc = "time_desc",
 }
 
 // 0 for no shared crosshair or tooltip (default).
 // 1 for shared crosshair.
 // 2 for shared crosshair AND shared tooltip.
 export enum DashboardCursorSync {
-	Off = 0,
-	Crosshair = 1,
-	Tooltip = 2,
+	DashboardCursorSyncOff = 0,
+	DashboardCursorSyncCrosshair = 1,
+	DashboardCursorSyncTooltip = 2,
 }
 
 -- out/jennies/GoRawTypes --

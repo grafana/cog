@@ -98,7 +98,7 @@ func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	buffer.WriteString("const (\n")
 	for _, val := range enumType.Values {
 		name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
-		buffer.WriteString(fmt.Sprintf("\t%s%s %s = %#v\n", enumName, name, enumName, val.Value))
+		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", name, enumName, val.Value))
 	}
 	buffer.WriteString(")\n")
 

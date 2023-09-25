@@ -61,7 +61,7 @@ func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, err
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
 		for _, val := range def.Type.AsEnum().Values {
 			name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
-			buffer.WriteString(fmt.Sprintf("\t%s%s = %s,\n", def.Name, name, formatScalar(val.Value)))
+			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatScalar(val.Value)))
 		}
 		buffer.WriteString("}\n")
 	case ast.KindRef:
