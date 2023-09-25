@@ -171,7 +171,7 @@ func (jenny *Builder) emptyValueForScalar(scalar ast.ScalarType) string {
 		return "{}"
 
 	case ast.KindBytes, ast.KindString:
-		return "\"\""
+		return "''"
 
 	case ast.KindFloat32, ast.KindFloat64:
 		return "0"
