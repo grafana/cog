@@ -43,28 +43,28 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 
 	if schema.MinLength > 0 {
 		constraints = append(constraints, ast.TypeConstraint{
-			Op:   "minLength",
+			Op:   ast.MinLengthOp,
 			Args: []any{schema.MinLength},
 		})
 	}
 	if schema.MaxLength != nil {
 		constraints = append(constraints, ast.TypeConstraint{
-			Op:   "maxLength",
+			Op:   ast.MaxLengthOp,
 			Args: []any{schema.MaxLength},
 		})
 	}
 
 	if schema.MultipleOf != nil {
 		constraints = append(constraints, ast.TypeConstraint{
-			Op:   "multipleOf",
+			Op:   ast.MultipleOfOp,
 			Args: []any{schema.MultipleOf},
 		})
 	}
 
 	if schema.Min != nil {
-		op := ">="
+		op := ast.GreaterThanEqualOp
 		if schema.ExclusiveMin {
-			op = ">"
+			op = ast.GreaterThanOp
 		}
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   op,
@@ -73,9 +73,9 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 	}
 
 	if schema.Max != nil {
-		op := "<="
+		op := ast.LessThanEqualOp
 		if schema.ExclusiveMax {
-			op = "<"
+			op = ast.LessThanOp
 		}
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   op,
