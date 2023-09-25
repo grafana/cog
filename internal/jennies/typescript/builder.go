@@ -40,7 +40,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	objectName := tools.UpperCamelCase(builder.For.Name)
 
 	// imports
-	buffer.WriteString(fmt.Sprintf("import * as types from \"../../types/%s/types_gen\";\n", strings.ToLower(objectName)))
+	buffer.WriteString(fmt.Sprintf("import * as types from \"../../types/%s/types_gen\";\n", builder.Package))
 	buffer.WriteString("import { OptionsBuilder } from \"../../options_builder_gen\";\n\n")
 
 	// Builder class declaration
