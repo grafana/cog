@@ -317,10 +317,10 @@ func (jenny *Builder) constraint(argumentName string, constraint ast.TypeConstra
 }
 
 func (jenny *Builder) constraintComparison(argumentName string, constraint ast.TypeConstraint) string {
-	if constraint.Op == "minLength" {
+	if constraint.Op == ast.MinLengthOp {
 		return fmt.Sprintf("len([]rune(%[1]s)) >= %[2]v", argumentName, constraint.Args[0])
 	}
-	if constraint.Op == "maxLength" {
+	if constraint.Op == ast.MaxLengthOp {
 		return fmt.Sprintf("len([]rune(%[1]s)) <= %[2]v", argumentName, constraint.Args[0])
 	}
 

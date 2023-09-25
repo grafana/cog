@@ -220,7 +220,7 @@ func formatType(def ast.Type, typesPkg string) string {
 	}
 
 	if def.Kind == ast.KindRef {
-		typeName := def.AsRef().ReferredType
+		typeName := tools.UpperCamelCase(def.AsRef().ReferredType)
 
 		if typesPkg != "" {
 			typeName = typesPkg + "." + typeName
