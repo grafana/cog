@@ -372,7 +372,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 
 		return []ast.TypeConstraint{
 			{
-				Op:   "==",
+				Op:   ast.EqualOp,
 				Args: []any{stringVal},
 			},
 		}, nil
@@ -397,7 +397,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 			}
 
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   "minLength",
+				Op:   ast.MinLengthOp,
 				Args: []any{scalar},
 			})
 
@@ -408,7 +408,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 			}
 
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   "maxLength",
+				Op:   ast.MaxLengthOp,
 				Args: []any{scalar},
 			})
 		}
@@ -513,7 +513,7 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 }
 
 func (g *generator) extractConstraint(v cue.Value) (ast.TypeConstraint, error) {
-	toConstraint := func(operator string, arg cue.Value) (ast.TypeConstraint, error) {
+	toConstraint := func(operator ast.Op, arg cue.Value) (ast.TypeConstraint, error) {
 		scalar, err := cueConcreteToScalar(arg)
 		if err != nil {
 			return ast.TypeConstraint{}, err
@@ -527,15 +527,15 @@ func (g *generator) extractConstraint(v cue.Value) (ast.TypeConstraint, error) {
 
 	switch op, a := v.Expr(); op {
 	case cue.LessThanOp:
-		return toConstraint("<", a[0])
+		return toConstraint(ast.LessThanOp, a[0])
 	case cue.LessThanEqualOp:
-		return toConstraint("<=", a[0])
+		return toConstraint(ast.LessThanEqualOp, a[0])
 	case cue.GreaterThanOp:
-		return toConstraint(">", a[0])
+		return toConstraint(ast.GreaterThanOp, a[0])
 	case cue.GreaterThanEqualOp:
-		return toConstraint(">=", a[0])
+		return toConstraint(ast.GreaterThanEqualOp, a[0])
 	case cue.NotEqualOp:
-		return toConstraint("!=", a[0])
+		return toConstraint(ast.NotEqualOp, a[0])
 	default:
 		return ast.TypeConstraint{}, errorWithCueRef(v, "unsupported op for number %v", op)
 	}

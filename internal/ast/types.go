@@ -38,9 +38,21 @@ const (
 	KindBool ScalarKind = "bool"
 )
 
+type Op string
+
+const (
+	MinLengthOp        Op = "minLength"
+	MaxLengthOp        Op = "maxLength"
+	EqualOp            Op = "=="
+	NotEqualOp         Op = "!="
+	LessThanOp         Op = "<"
+	LessThanEqualOp    Op = "<="
+	GreaterThanOp      Op = ">"
+	GreaterThanEqualOp Op = ">="
+)
+
 type TypeConstraint struct {
-	// TODO: something more descriptive here? constant?
-	Op   string
+	Op   Op
 	Args []any
 }
 
