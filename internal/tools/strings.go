@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"regexp"
 	"strings"
 
 	"golang.org/x/text/cases"
@@ -35,4 +36,10 @@ func LowerCamelCase(s string) string {
 	}
 
 	return s
+}
+
+// CleanupNames removes all non-alphanumeric characters
+func CleanupNames(s string) string {
+	rgx := regexp.MustCompile("[^a-zA-Z0-9 ]+")
+	return rgx.ReplaceAllString(s, "")
 }
