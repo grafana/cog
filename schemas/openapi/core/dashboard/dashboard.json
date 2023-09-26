@@ -643,16 +643,6 @@
             "description": "TODO docs",
             "type": "number"
           },
-          "thresholds": {
-            "description": "TODO docs - seems to be an old field from old dashboard alerts?",
-            "type": "array",
-            "items": {}
-          },
-          "timeRegions": {
-            "description": "TODO docs",
-            "type": "array",
-            "items": {}
-          },
           "transformations": {
             "type": "array",
             "items": {

@@ -111,9 +111,10 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 		return g.walkObject(schema)
 	case openapi3.TypeArray:
 		return g.walkArray(schema)
+	default:
+		// No type defined
+		return g.walkAny(schema)
 	}
-
-	return ast.Type{}, nil
 }
 
 func (g *generator) walkRef(ref string) (ast.Type, error) {
@@ -199,6 +200,10 @@ func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
 
 func (g *generator) walkBoolean(_ *openapi3.Schema) (ast.Type, error) {
 	return ast.Bool(), nil
+}
+
+func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
+	return ast.Any(), nil
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
