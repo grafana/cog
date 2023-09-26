@@ -10,6 +10,7 @@ import (
 )
 
 type Builder struct {
+	imports []string
 }
 
 func (jenny *Builder) JennyName() string {
@@ -21,11 +22,9 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 
 	for _, builder := range builders {
 		output := jenny.generateBuilder(builders, builder)
+		filename := builder.Package + "/" + strings.ToLower(builder.For.Name) + "/builder_gen.go"
 
-		files = append(
-			files,
-			*codejen.NewFile(builder.Package+"/"+strings.ToLower(builder.For.Name)+"/builder_gen.go", output, jenny),
-		)
+		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
 	return files, nil
@@ -34,10 +33,33 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder) []byte {
 	var buffer strings.Builder
 
+	jenny.imports = nil
+
+	builderSource := jenny.generateBuilderSource(builders, builder)
+
+	// package declaration
 	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.For.Name)))
 
+	// write import statements
+	buffer.WriteString("import (\n")
+	buffer.WriteString(strings.Join(jenny.imports, "\n"))
+	buffer.WriteString(")\n\n")
+
+	// write the builder source code
+	buffer.WriteString(builderSource)
+
+	return []byte(buffer.String())
+}
+
+func (jenny *Builder) declareImport(importStatement string) {
+	jenny.imports = append(jenny.imports, importStatement)
+}
+
+func (jenny *Builder) generateBuilderSource(builders ast.Builders, builder ast.Builder) string {
+	var buffer strings.Builder
+
 	// import generated types
-	buffer.WriteString(fmt.Sprintf("import \"github.com/grafana/cog/generated/types/%s\"\n\n", builder.Package))
+	jenny.declareImport(fmt.Sprintf("types \"github.com/grafana/cog/generated/types/%s\"", builder.Package))
 
 	// Option type declaration
 	buffer.WriteString("type Option func(builder *Builder) error\n\n")
@@ -79,7 +101,7 @@ func (builder *Builder) Internal() *types.%s {
 	buffer.WriteString("}\n")
 	buffer.WriteString("}\n")
 
-	return []byte(buffer.String())
+	return buffer.String()
 }
 
 func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) string {
@@ -232,6 +254,8 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 	typeName := strings.Trim(formatType(arg.Type, "types"), "*")
 
 	if builderPkg, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
+		jenny.declareImport(fmt.Sprintf("\"github.com/grafana/cog/generated/%s/%s\"", strings.ToLower(builder.Package), builderPkg))
+
 		return fmt.Sprintf(`opts ...%[1]s.Option`, builderPkg)
 	}
 
