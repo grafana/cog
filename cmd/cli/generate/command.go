@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/cmd/cli/loaders"
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/spf13/cobra"
 )
@@ -59,7 +60,7 @@ func doGenerate(opts Options) error {
 		fmt.Printf("Running '%s' jennies...\n", language)
 
 		var err error
-		processedAsts := schemas
+		processedAsts := ast.Files(schemas).DeepCopy()
 
 		for _, compilerPass := range target.CompilerPasses {
 			processedAsts, err = compilerPass.Process(processedAsts)

@@ -5,7 +5,7 @@ import (
 	"github.com/grafana/cog/internal/veneers/option"
 )
 
-func Engine() *Rewriter {
+func Common() *Rewriter {
 	return NewRewrite(
 		[]builder.RewriteRule{
 			// We don't want these builders at all
@@ -74,11 +74,6 @@ func Engine() *Rewriter {
 			option.StructFieldsAsArguments(
 				option.ByName("Dashboard", "refresh"),
 				"ValString",
-			),
-
-			// Time(from, to) instead of time(struct {From string `json:"from"`, To   string `json:"to"`}{From: "lala", To: "lala})
-			option.StructFieldsAsArguments(
-				option.ByName("Dashboard", "time"),
 			),
 
 			// We don't want these options at all

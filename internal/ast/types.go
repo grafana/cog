@@ -57,6 +57,17 @@ type TypeConstraint struct {
 	Args []any
 }
 
+func (constraint TypeConstraint) DeepCopy() TypeConstraint {
+	newConstraint := TypeConstraint{
+		Op:   constraint.Op,
+		Args: make([]any, 0, len(constraint.Args)),
+	}
+
+	newConstraint.Args = append(newConstraint.Args, constraint.Args...)
+
+	return newConstraint
+}
+
 // Struct representing every type defined by the IR.
 // Bonus: in a way that can be (un)marshaled to/from JSON,
 // which is useful for unit tests.
@@ -71,6 +82,44 @@ type Type struct {
 	Struct      *StructType      `json:",omitempty"`
 	Ref         *RefType         `json:",omitempty"`
 	Scalar      *ScalarType      `json:",omitempty"`
+}
+
+func (t Type) DeepCopy() Type {
+	newType := Type{
+		Kind:     t.Kind,
+		Nullable: t.Nullable,
+	}
+
+	if t.Disjunction != nil {
+		newDisjunction := t.Disjunction.DeepCopy()
+		newType.Disjunction = &newDisjunction
+	}
+	if t.Array != nil {
+		newArray := t.Array.DeepCopy()
+		newType.Array = &newArray
+	}
+	if t.Enum != nil {
+		newEnum := t.Enum.DeepCopy()
+		newType.Enum = &newEnum
+	}
+	if t.Map != nil {
+		newMap := t.Map.DeepCopy()
+		newType.Map = &newMap
+	}
+	if t.Struct != nil {
+		newStruct := t.Struct.DeepCopy()
+		newType.Struct = &newStruct
+	}
+	if t.Ref != nil {
+		newRef := t.Ref.DeepCopy()
+		newType.Ref = &newRef
+	}
+	if t.Scalar != nil {
+		newScalar := t.Scalar.DeepCopy()
+		newType.Scalar = &newScalar
+	}
+
+	return newType
 }
 
 type TypeOption func(def *Type)
@@ -263,9 +312,46 @@ func NewObject(name string, objectType Type) Object {
 	}
 }
 
+func (object Object) DeepCopy() Object {
+	newObject := Object{
+		Name: object.Name,
+		Type: object.Type.DeepCopy(),
+	}
+
+	newObject.Comments = append(newObject.Comments, object.Comments...)
+
+	return newObject
+}
+
+type Files []*File
+
+func (files Files) DeepCopy() []*File {
+	newFiles := make([]*File, 0, len(files))
+
+	for _, file := range files {
+		newFile := file.DeepCopy()
+		newFiles = append(newFiles, &newFile)
+	}
+
+	return newFiles
+}
+
 type File struct { //nolint: musttag
 	Package     string
 	Definitions []Object
+}
+
+func (file *File) DeepCopy() File {
+	newFile := File{
+		Package:     file.Package,
+		Definitions: make([]Object, 0, len(file.Definitions)),
+	}
+
+	for _, def := range file.Definitions {
+		newFile.Definitions = append(newFile.Definitions, def.DeepCopy())
+	}
+
+	return newFile
 }
 
 func (file *File) LocateDefinition(name string) Object {
@@ -349,8 +435,32 @@ type DisjunctionType struct {
 	DiscriminatorMapping map[string]any // likely a map[string]string or map[string]int
 }
 
+func (t DisjunctionType) DeepCopy() DisjunctionType {
+	newT := DisjunctionType{
+		Branches:             make([]Type, 0, len(t.Branches)),
+		Discriminator:        t.Discriminator,
+		DiscriminatorMapping: make(map[string]any, len(t.DiscriminatorMapping)),
+	}
+
+	for _, branch := range t.Branches {
+		newT.Branches = append(newT.Branches, branch.DeepCopy())
+	}
+
+	for k, v := range t.DiscriminatorMapping {
+		newT.DiscriminatorMapping[k] = v
+	}
+
+	return newT
+}
+
 type ArrayType struct {
 	ValueType Type
+}
+
+func (t ArrayType) DeepCopy() ArrayType {
+	return ArrayType{
+		ValueType: t.ValueType.DeepCopy(),
+	}
 }
 
 func (t ArrayType) IsArrayOfScalars() bool {
@@ -365,6 +475,18 @@ type EnumType struct {
 	Values []EnumValue // possible values. Value types might be different
 }
 
+func (t EnumType) DeepCopy() EnumType {
+	newT := EnumType{
+		Values: make([]EnumValue, 0, len(t.Values)),
+	}
+
+	for _, value := range t.Values {
+		newT.Values = append(newT.Values, value.DeepCopy())
+	}
+
+	return newT
+}
+
 type EnumValue struct {
 	Type    Type
 	Name    string
@@ -372,14 +494,45 @@ type EnumValue struct {
 	Default any
 }
 
+func (t EnumValue) DeepCopy() EnumValue {
+	return EnumValue{
+		Type:  t.Type.DeepCopy(),
+		Name:  t.Name,
+		Value: t.Value,
+	}
+}
+
 type MapType struct {
 	IndexType Type
 	ValueType Type
 }
 
+func (t MapType) DeepCopy() MapType {
+	return MapType{
+		IndexType: t.IndexType.DeepCopy(),
+		ValueType: t.ValueType.DeepCopy(),
+	}
+}
+
 type StructType struct {
 	Fields []StructField
 	Hint   map[JennyHint]any // Hints meant to be used by jennies
+}
+
+func (structType StructType) DeepCopy() StructType {
+	newT := StructType{
+		Fields: make([]StructField, 0, len(structType.Fields)),
+		Hint:   make(map[JennyHint]any, len(structType.Hint)),
+	}
+
+	for _, field := range structType.Fields {
+		newT.Fields = append(newT.Fields, field.DeepCopy())
+	}
+	for k, v := range structType.Hint {
+		newT.Hint[k] = v
+	}
+
+	return newT
 }
 
 func (structType StructType) FieldByName(name string) (StructField, bool) {
@@ -401,6 +554,19 @@ type StructField struct {
 	Type     Type
 	Required bool
 	Default  any
+}
+
+func (structField StructField) DeepCopy() StructField {
+	newT := StructField{
+		Name:     structField.Name,
+		Type:     structField.Type.DeepCopy(),
+		Required: structField.Required,
+		Default:  structField.Default,
+	}
+
+	newT.Comments = append(newT.Comments, structField.Comments...)
+
+	return newT
 }
 
 type StructFieldOption func(field *StructField)
@@ -428,10 +594,30 @@ type RefType struct {
 	ReferredType string
 }
 
+func (t RefType) DeepCopy() RefType {
+	return RefType{
+		ReferredType: t.ReferredType,
+	}
+}
+
 type ScalarType struct {
 	ScalarKind  ScalarKind // bool, bytes, string, int, float, ...
 	Value       any        // if value isn't nil, we're representing a constant scalar
 	Constraints []TypeConstraint
+}
+
+func (scalarType ScalarType) DeepCopy() ScalarType {
+	newT := ScalarType{
+		ScalarKind:  scalarType.ScalarKind,
+		Value:       scalarType.Value,
+		Constraints: make([]TypeConstraint, 0, len(scalarType.Constraints)),
+	}
+
+	for _, constraint := range scalarType.Constraints {
+		newT.Constraints = append(newT.Constraints, constraint.DeepCopy())
+	}
+
+	return newT
 }
 
 func (scalarType ScalarType) IsConcrete() bool {
