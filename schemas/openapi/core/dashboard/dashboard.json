@@ -257,20 +257,7 @@
         ],
         "properties": {
           "mode": {
-            "description": "The main color scheme mode",
-            "type": "string",
-            "oneOf": [
-              {
-                "enum": [
-                  "thresholds",
-                  "palette-classic",
-                  "palette-saturated",
-                  "continuous-GrYlRd",
-                  "fixed"
-                ]
-              },
-              {}
-            ]
+            "$ref": "#/components/schemas/FieldColorModeId"
           },
           "fixedColor": {
             "description": "Stores the fixed color value if mode is fixed",
@@ -412,9 +399,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "graph"
-            ]
+            "default": "graph"
           },
           "legend": {
             "description": "@deprecated this is part of deprecated graph panel",
@@ -491,9 +476,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "heatmap"
-            ]
+            "default": "heatmap"
           }
         }
       },
@@ -682,17 +665,7 @@
         ],
         "properties": {
           "type": {
-            "type": "string",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MappingType"
-              },
-              {
-                "enum": [
-                  "range"
-                ]
-              }
-            ]
+            "$ref": "#/components/schemas/MappingType"
           },
           "options": {
             "type": "object",
@@ -727,17 +700,7 @@
         ],
         "properties": {
           "type": {
-            "type": "string",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MappingType"
-              },
-              {
-                "enum": [
-                  "regex"
-                ]
-              }
-            ]
+            "$ref": "#/components/schemas/MappingType"
           },
           "options": {
             "type": "object",
@@ -890,17 +853,7 @@
         ],
         "properties": {
           "type": {
-            "type": "string",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MappingType"
-              },
-              {
-                "enum": [
-                  "special"
-                ]
-              }
-            ]
+            "$ref": "#/components/schemas/MappingType"
           },
           "options": {
             "type": "object",
@@ -1004,17 +957,7 @@
         ],
         "properties": {
           "type": {
-            "type": "string",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MappingType"
-              },
-              {
-                "enum": [
-                  "value"
-                ]
-              }
-            ]
+            "$ref": "#/components/schemas/MappingType"
           },
           "options": {
             "type": "object",
@@ -1307,9 +1250,7 @@
             "description": "Refresh rate of dashboard. Represented via interval string, e.g. \"5s\", \"1m\", \"1h\", \"1d\".",
             "oneOf": [
               {
-                "enum": [
-                  false
-                ]
+                "type": "boolean"
               },
               {
                 "type": "string"
