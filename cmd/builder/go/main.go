@@ -12,9 +12,9 @@ func main() {
 			dashboard.Timepicker(
 				timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
 			),
-			dashboard.Style(types.StyleDark),
+			dashboard.Style(types.StyleEnumStyleDark),
 			dashboard.Timezone("utc"),
-			dashboard.Tooltip(types.Crosshair),
+			dashboard.Tooltip(types.DashboardCursorSyncCrosshair),
 			dashboard.Tags([]string{"generated", "from", "cue"}),
 			dashboard.Links([]types.DashboardLink{
 				{
@@ -31,7 +31,7 @@ func main() {
 			panic(err)
 		}
 
-		dashboardJson, err := builder.Internal().MarshalIndentJSON()
+		dashboardJson, err := json.MarshalIndent(builder.Internal(), "", "  ")
 		if err != nil {
 			panic(err)
 		}
