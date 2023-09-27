@@ -18,8 +18,7 @@ func StructGeneratedFromDisjunction() Selector {
 			return false
 		}
 
-		return builder.For.Type.AsStruct().Hint[ast.HintDisjunctionOfScalars] != nil ||
-			builder.For.Type.AsStruct().Hint[ast.HintDiscriminatedDisjunctionOfRefs] != nil
+		return builder.For.Type.AsStruct().IsGeneratedFromDisjunction()
 	}
 }
 
