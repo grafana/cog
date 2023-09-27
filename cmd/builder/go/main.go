@@ -2,13 +2,12 @@ package main
 
 func main() {
 	/*
-		refresh := "1m"
-
 		builder, err := dashboard.New(
 			"Some title",
 			dashboard.Uid("test-dashboard-codegen"),
 			dashboard.Description("Some description"),
 			dashboard.Time("now-3h", "now"),
+			dashboard.Refresh("1m"),
 			dashboard.Timepicker(
 				timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
 			),
@@ -24,8 +23,6 @@ func main() {
 					TargetBlank: true,
 				},
 			}),
-
-			dashboard.Refresh(types.StringOrBool{ValString: &refresh}),
 		)
 		if err != nil {
 			panic(err)
