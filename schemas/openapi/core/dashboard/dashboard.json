@@ -731,9 +731,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "row"
-            ]
+            "default": "row"
           },
           "collapsed": {
             "type": "boolean",
@@ -1250,10 +1248,10 @@
             "description": "Refresh rate of dashboard. Represented via interval string, e.g. \"5s\", \"1m\", \"1h\", \"1d\".",
             "oneOf": [
               {
-                "type": "boolean"
+                "type": "string"
               },
               {
-                "type": "string"
+                "type": "boolean"
               }
             ]
           },
