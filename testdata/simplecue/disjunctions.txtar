@@ -1,0 +1,65 @@
+# Enumerations
+-- schema.cue --
+container: {
+    text: string | [...string]
+}
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Definitions": [
+    {
+      "Name": "container",
+      "Comments": [],
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "text",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    },
+                    {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string",
+                            "Value": null,
+                            "Constraints": null
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "Discriminator": "",
+                  "DiscriminatorMapping": {}
+                }
+              },
+              "Required": true,
+              "Default": null
+            }
+          ],
+          "Hint": {}
+        }
+      }
+    }
+  ]
+}

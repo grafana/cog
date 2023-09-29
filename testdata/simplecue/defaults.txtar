@@ -1,0 +1,23 @@
+# Defaults
+-- schema.cue --
+from: string | *"now-6h"
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Definitions": [
+    {
+      "Name": "from",
+      "Comments": [],
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "string",
+          "Value": null,
+          "Constraints": null
+        }
+      }
+    }
+  ]
+}

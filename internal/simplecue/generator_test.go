@@ -17,6 +17,23 @@ import (
 	"github.com/yalue/merged_fs"
 )
 
+func TestGenerateAST(t *testing.T) {
+	test := txtartest.TxTarTest{
+		Root: "../../testdata/simplecue",
+		Name: "simplecue/GenerateAST",
+	}
+
+	test.Run(t, func(tc *txtartest.Test) {
+		req := require.New(tc)
+
+		schemaAst, err := GenerateAST(txtarTestToCueInstance(tc), Config{Package: "grafanatest"})
+		req.NoError(err)
+		require.NotNil(t, schemaAst)
+
+		writeIR(schemaAst, tc)
+	})
+}
+
 // ToOverlay converts a fs.FS into a CUE loader overlay.
 func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) error {
 	// TODO why not just stick the prefix on automatically...?
@@ -53,23 +70,6 @@ func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 	}
 
 	return nil
-}
-
-func TestGenerateAST(t *testing.T) {
-	test := txtartest.TxTarTest{
-		Root: "../../testdata/simplecue",
-		Name: "simplecue/GenerateAST",
-	}
-
-	test.Run(t, func(tc *txtartest.Test) {
-		req := require.New(tc)
-
-		schemaAst, err := GenerateAST(txtarTestToCueInstance(tc), Config{Package: "grafanatest"})
-		req.NoError(err)
-		require.NotNil(t, schemaAst)
-
-		writeIR(schemaAst, tc)
-	})
 }
 
 func writeIR(irFile *ast.File, tc *txtartest.Test) {
