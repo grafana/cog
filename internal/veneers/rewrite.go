@@ -19,60 +19,66 @@ func NewRewrite(builderRules []builder.RewriteRule, optionRules []option.Rewrite
 }
 
 func (engine *Rewriter) ApplyTo(builders []ast.Builder) []ast.Builder {
+	// TODO: should we deepCopy the builders instead?
 	newBuilders := make([]ast.Builder, 0, len(builders))
+	newBuilders = append(newBuilders, builders...)
 
-	for _, b := range builders {
-		processed := engine.processBuilder(builders, b)
-		// the builder was dismissed
-		if len(processed.Options) == 0 {
-			continue
-		}
-
-		newBuilders = append(newBuilders, processed)
-	}
+	newBuilders = engine.applyBuilderRules(newBuilders)
+	newBuilders = engine.applyOptionRules(newBuilders)
 
 	return newBuilders
 }
 
-func (engine *Rewriter) processBuilder(builders ast.Builders, builder ast.Builder) ast.Builder {
-	processedBuilder := builder
-
+func (engine *Rewriter) applyBuilderRules(builders []ast.Builder) []ast.Builder {
 	for _, rule := range engine.builderRules {
-		if rule.Selector(processedBuilder) {
-			// FIXME: passing `builders` here means that rules only get access to a "pre modification"
-			// set of builders. We should probably pass the most up-to-date list of builders
-			processedBuilder = rule.Action(builders, processedBuilder)
-		}
+		for i, b := range builders {
+			// this builder is being discarded
+			if len(b.Options) == 0 {
+				continue
+			}
 
-		// this builder is dismissed, let's return early
-		if len(processedBuilder.Options) == 0 {
-			return processedBuilder
+			if !rule.Selector(b) {
+				continue
+			}
+
+			builders[i] = rule.Action(builders, b)
 		}
 	}
 
-	processedOptions := make([]ast.Option, 0, len(processedBuilder.Options))
-	for _, opt := range processedBuilder.Options {
-		processedOptions = append(processedOptions, engine.processOption(processedBuilder, opt)...)
-	}
-
-	processedBuilder.Options = processedOptions
-
-	return processedBuilder
+	return engine.filterDiscardedBuilders(builders)
 }
 
-func (engine *Rewriter) processOption(parentBuilder ast.Builder, opt ast.Option) []ast.Option {
-	toProcess := []ast.Option{opt}
+func (engine *Rewriter) applyOptionRules(builders []ast.Builder) []ast.Builder {
 	for _, rule := range engine.optionRules {
-		if !rule.Selector(parentBuilder, opt) {
+		for i, b := range builders {
+			processedOptions := make([]ast.Option, 0, len(b.Options))
+
+			for _, opt := range b.Options {
+				if !rule.Selector(b, opt) {
+					processedOptions = append(processedOptions, opt)
+					continue
+				}
+
+				processedOptions = append(processedOptions, rule.Action(b, opt)...)
+			}
+
+			builders[i].Options = processedOptions
+		}
+	}
+
+	return engine.filterDiscardedBuilders(builders)
+}
+
+func (engine *Rewriter) filterDiscardedBuilders(builders []ast.Builder) []ast.Builder {
+	filteredBuilders := make([]ast.Builder, 0, len(builders))
+	for _, b := range builders {
+		// the builder was dismissed
+		if len(b.Options) == 0 {
 			continue
 		}
 
-		var wip []ast.Option
-		for _, modifiedField := range toProcess {
-			wip = append(wip, rule.Action(modifiedField)...)
-		}
-		toProcess = wip
+		filteredBuilders = append(filteredBuilders, b)
 	}
 
-	return toProcess
+	return filteredBuilders
 }

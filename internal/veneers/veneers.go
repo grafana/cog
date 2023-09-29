@@ -12,8 +12,9 @@ func Common() *Rewriter {
 			builder.Omit(builder.ByName("GridPos")),
 			builder.Omit(builder.ByName("DataSourceRef")),
 			builder.Omit(builder.ByName("LibraryPanelRef")),
-			builder.Omit(builder.ByName("StringOrBool")),
-			builder.Omit(builder.ByName("StringOrArray")),
+
+			// No need for builders for structs generated from a disjunction
+			builder.Omit(builder.StructGeneratedFromDisjunction()),
 
 			// rearrange things a bit
 			builder.MergeInto(
@@ -57,9 +58,9 @@ func Common() *Rewriter {
 				"rows",
 			),
 			/*
+				// TODO: finish implementing this rule
 				option.ArrayToAppend(
-					// FIXME: quirk of the current veneer rewrite engine
-					option.ByName("Dashboard", "panels"),
+					option.ByName("Dashboard", "rows"),
 				),
 			*/
 
@@ -70,7 +71,6 @@ func Common() *Rewriter {
 			),
 
 			// Refresh(string) instead of Refresh(struct StringOrBool)
-			// FIXME: doesn't work (yet) since the argument is a reference to a struct and not a struct
 			option.StructFieldsAsArguments(
 				option.ByName("Dashboard", "refresh"),
 				"ValString",
@@ -88,6 +88,7 @@ func Common() *Rewriter {
 			option.Omit(option.ByName("Panel", "options")),       // comes from a panel plugin
 			option.Omit(option.ByName("Panel", "custom")),        // comes from a panel plugin
 			option.Omit(option.ByName("Panel", "pluginVersion")), // TODO: check if it's relevant or not
+			option.Omit(option.ByName("Panel", "repeatPanelId")), // TODO: check if it's relevant or not
 
 			/********************************************
 			 * Rows
