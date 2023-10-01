@@ -29,9 +29,13 @@ func Command() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.SchemasType, "loader", "l", "cue", "Schemas type.")         // TODO: better usage text
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
-	cmd.Flags().StringArrayVarP(&opts.Entrypoints, "input", "i", nil, "Schema.")             // TODO: better usage text
+
+	cmd.Flags().StringArrayVar(&opts.CueEntrypoints, "cue", nil, "CUE input schema.")                                      // TODO: better usage text
+	cmd.Flags().StringArrayVar(&opts.KindsysCoreEntrypoints, "kindsys-core", nil, "Kindys core kinds input schema.")       // TODO: better usage text
+	cmd.Flags().StringArrayVar(&opts.KindsysCustomEntrypoints, "kindsys-custom", nil, "Kindys custom kinds input schema.") // TODO: better usage text
+	cmd.Flags().StringArrayVar(&opts.JSONSchemaEntrypoints, "jsonschema", nil, "Jsonschema input schema.")                 // TODO: better usage text
+
 	cmd.Flags().StringArrayVarP(&opts.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
 
 	_ = cmd.MarkFlagRequired("input")
@@ -42,12 +46,7 @@ func Command() *cobra.Command {
 }
 
 func doGenerate(opts Options) error {
-	loader, err := loaders.ForSchemaType(opts.SchemasType)
-	if err != nil {
-		return err
-	}
-
-	schemas, err := loader(opts.Options)
+	schemas, err := loaders.LoadAll(opts.Options)
 	if err != nil {
 		return err
 	}

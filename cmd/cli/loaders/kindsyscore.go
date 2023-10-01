@@ -15,8 +15,8 @@ import (
 func kindsysCoreLoader(opts Options) ([]*ast.File, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.Entrypoints))
-	for _, entrypoint := range opts.Entrypoints {
+	allSchemas := make([]*ast.File, 0, len(opts.KindsysCoreEntrypoints))
+	for _, entrypoint := range opts.KindsysCoreEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
 		overlayFS, err := dirToPrefixedFS(entrypoint, "")

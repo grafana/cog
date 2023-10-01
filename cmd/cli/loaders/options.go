@@ -7,6 +7,15 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
+type LoaderRef string
+
+const (
+	CUE           LoaderRef = "cue"
+	KindsysCore   LoaderRef = "kindsys-core"
+	KindsysCustom LoaderRef = "kindsys-custom"
+	JSONSchema    LoaderRef = "jsonschema"
+)
+
 type cueIncludeImport struct {
 	fsPath     string // path of the library on the filesystem
 	importPath string // path used in CUE files to import that library
@@ -15,8 +24,10 @@ type cueIncludeImport struct {
 type Loader func(opts Options) ([]*ast.File, error)
 
 type Options struct {
-	Entrypoints []string
-	SchemasType string
+	CueEntrypoints           []string
+	KindsysCoreEntrypoints   []string
+	KindsysCustomEntrypoints []string
+	JSONSchemaEntrypoints    []string
 
 	// Cue-specific options
 	CueImports []string
@@ -41,12 +52,12 @@ func (opts Options) cueIncludeImports() ([]cueIncludeImport, error) {
 	return imports, nil
 }
 
-func ForSchemaType(schemaType string) (Loader, error) {
-	all := map[string]Loader{
-		"cue":            cueLoader,
-		"kindsys-core":   kindsysCoreLoader,
-		"kindsys-custom": kindsysCustomLoader,
-		"jsonschema":     jsonschemaLoader,
+func ForSchemaType(schemaType LoaderRef) (Loader, error) {
+	all := map[LoaderRef]Loader{
+		CUE:           cueLoader,
+		KindsysCore:   kindsysCoreLoader,
+		KindsysCustom: kindsysCustomLoader,
+		JSONSchema:    jsonschemaLoader,
 	}
 
 	loader, ok := all[schemaType]
@@ -55,4 +66,31 @@ func ForSchemaType(schemaType string) (Loader, error) {
 	}
 
 	return loader, nil
+}
+
+func LoadAll(opts Options) ([]*ast.File, error) {
+	var files []*ast.File
+
+	loaders := []LoaderRef{
+		CUE,
+		KindsysCore,
+		KindsysCustom,
+		JSONSchema,
+	}
+
+	for _, loaderRef := range loaders {
+		loader, err := ForSchemaType(loaderRef)
+		if err != nil {
+			return nil, err
+		}
+
+		schemas, err := loader(opts)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, schemas...)
+	}
+
+	return files, nil
 }
