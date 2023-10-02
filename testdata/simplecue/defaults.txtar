@@ -1,21 +1,54 @@
 # Defaults
 -- schema.cue --
-from: string | *"now-6h"
+container: {
+    from: string | *"now-6h"
+    editable: bool | *true
+}
 -- out/simplecue/GenerateAST --
 == ir.json
 {
   "Package": "grafanatest",
   "Definitions": [
     {
-      "Name": "from",
+      "Name": "container",
       "Comments": [],
       "Type": {
-        "Kind": "scalar",
+        "Kind": "struct",
         "Nullable": false,
-        "Scalar": {
-          "ScalarKind": "string",
-          "Value": null,
-          "Constraints": null
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "from",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Required": true,
+              "Default": "now-6h"
+            },
+            {
+              "Name": "editable",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Required": true,
+              "Default": true
+            }
+          ],
+          "Hint": {}
         }
       }
     }

@@ -2,6 +2,7 @@
 -- schema.cue --
 container: {
     text: string | [...string]
+    refresh?: string | false
 }
 -- out/simplecue/GenerateAST --
 == ir.json
@@ -54,6 +55,40 @@ container: {
                 }
               },
               "Required": true,
+              "Default": null
+            },
+            {
+              "Name": "refresh",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "bool",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    }
+                  ],
+                  "Discriminator": "",
+                  "DiscriminatorMapping": {}
+                }
+              },
+              "Required": false,
               "Default": null
             }
           ],
