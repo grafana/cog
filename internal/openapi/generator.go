@@ -207,14 +207,17 @@ func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
+	// TODO: Add discriminators
 	return g.walkDisjunctions(schema.AllOf)
 }
 
 func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
+	// TODO: Add discriminators
 	return g.walkDisjunctions(schema.OneOf)
 }
 
 func (g *generator) walkAnyOf(schema *openapi3.Schema) (ast.Type, error) {
+	// TODO: Add discriminators
 	return g.walkDisjunctions(schema.AnyOf)
 }
 
