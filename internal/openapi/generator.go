@@ -2,7 +2,6 @@ package openapi
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -16,7 +15,6 @@ const (
 	FormatDouble   = "double"
 	FormatInt32    = "int32"
 	FormatInt64    = "int64"
-	FormatString   = ""
 	FormatByte     = "byte"
 	FormatDate     = "date"
 	FormatDateTime = "date-time"
@@ -65,8 +63,9 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 		}
 
 		g.file.Definitions = append(g.file.Definitions, ast.Object{
-			Name: name,
-			Type: def,
+			Name:     name,
+			Comments: schemaComments(schemaRef.Value),
+			Type:     def,
 		})
 	}
 
@@ -157,12 +156,12 @@ func (g *generator) walkArray(schema *openapi3.Schema) (ast.Type, error) {
 func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
 	var t ast.Type
 	switch schema.Format {
-	case FormatString, FormatDate, FormatDateTime, FormatPassword:
+	case FormatDate, FormatDateTime, FormatPassword:
 		t = ast.String()
 	case FormatByte:
 		t = ast.Bytes()
 	default:
-		return ast.Type{}, errors.New("unhandled string format")
+		t = ast.String()
 	}
 
 	t.Scalar.Constraints = getConstraints(schema)
