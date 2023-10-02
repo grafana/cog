@@ -5,10 +5,10 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type RewriteAction func(option ast.Option) []ast.Option
+type RewriteAction func(builder ast.Builder, option ast.Option) []ast.Option
 
 func RenameAction(newName string) RewriteAction {
-	return func(option ast.Option) []ast.Option {
+	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		newOption := option
 		newOption.Name = newName
 
@@ -18,7 +18,7 @@ func RenameAction(newName string) RewriteAction {
 
 // FIXME: looks at the first arg only, no way to configure that right now
 func ArrayToAppendAction() RewriteAction {
-	return func(option ast.Option) []ast.Option {
+	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 || option.Args[0].Type.Kind != ast.KindArray {
 			return []ast.Option{option}
 		}
@@ -40,13 +40,13 @@ func ArrayToAppendAction() RewriteAction {
 }
 
 func OmitAction() RewriteAction {
-	return func(_ ast.Option) []ast.Option {
+	return func(_ ast.Builder, _ ast.Option) []ast.Option {
 		return nil
 	}
 }
 
 func PromoteToConstructorAction() RewriteAction {
-	return func(option ast.Option) []ast.Option {
+	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		newOpt := option
 		newOpt.IsConstructorArg = true
 
@@ -56,16 +56,25 @@ func PromoteToConstructorAction() RewriteAction {
 
 // FIXME: looks at the first arg only, no way to configure that right now
 func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
-	return func(option ast.Option) []ast.Option {
-		// TODO: handle the case where option.Args[0].Type is a KindRef. Follow the ref and keep working.
-		if len(option.Args) < 1 || option.Args[0].Type.Kind != ast.KindStruct {
+	return func(builder ast.Builder, option ast.Option) []ast.Option {
+		if len(option.Args) < 1 {
+			return []ast.Option{option}
+		}
+
+		firstArgType := option.Args[0].Type
+		if firstArgType.Kind == ast.KindRef {
+			referredObject := builder.File.LocateDefinition(firstArgType.AsRef().ReferredType)
+			firstArgType = referredObject.Type
+		}
+
+		if firstArgType.Kind != ast.KindStruct {
 			return []ast.Option{option}
 		}
 
 		oldArgs := option.Args
 		oldAssignments := option.Assignments
 		assignmentPathPrefix := oldAssignments[0].Path
-		structType := option.Args[0].Type.AsStruct()
+		structType := firstArgType.AsStruct()
 
 		newOpt := option
 		newOpt.Args = nil
@@ -110,7 +119,7 @@ type BooleanUnfold struct {
 }
 
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
-	return func(option ast.Option) []ast.Option {
+	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		newOpts := []ast.Option{
 			{
 				Name:     unfoldOpts.OptionTrue,

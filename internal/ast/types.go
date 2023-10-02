@@ -519,6 +519,11 @@ type StructType struct {
 	Hint   map[JennyHint]any // Hints meant to be used by jennies
 }
 
+func (structType StructType) IsGeneratedFromDisjunction() bool {
+	return structType.Hint[HintDisjunctionOfScalars] != nil ||
+		structType.Hint[HintDiscriminatedDisjunctionOfRefs] != nil
+}
+
 func (structType StructType) DeepCopy() StructType {
 	newT := StructType{
 		Fields: make([]StructField, 0, len(structType.Fields)),

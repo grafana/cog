@@ -12,6 +12,16 @@ func ByName(objectName string) Selector {
 	}
 }
 
+func StructGeneratedFromDisjunction() Selector {
+	return func(builder ast.Builder) bool {
+		if builder.For.Type.Kind != ast.KindStruct {
+			return false
+		}
+
+		return builder.For.Type.AsStruct().IsGeneratedFromDisjunction()
+	}
+}
+
 func EveryBuilder() Selector {
 	return func(builder ast.Builder) bool {
 		return true
