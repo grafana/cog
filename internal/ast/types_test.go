@@ -32,14 +32,14 @@ func TestTypes_HasOnlyScalarOrArray(t *testing.T) {
 			description: "scalars and an array of refs",
 			types: []Type{
 				NewScalar(KindString),
-				NewArray(NewRef("SomeType")),
+				NewArray(NewRef("pkg", "SomeType")),
 			},
 			expected: false,
 		},
 		{
 			description: "ref",
 			types: []Type{
-				NewRef("SomeType"),
+				NewRef("pkg", "SomeType"),
 			},
 			expected: false,
 		},
@@ -47,7 +47,7 @@ func TestTypes_HasOnlyScalarOrArray(t *testing.T) {
 			description: "scalars and ref",
 			types: []Type{
 				NewScalar(KindString),
-				NewRef("SomeType"),
+				NewRef("pkg", "SomeType"),
 			},
 			expected: false,
 		},
@@ -89,15 +89,15 @@ func TestTypes_HasOnlyRefs(t *testing.T) {
 		{
 			description: "refs",
 			types: []Type{
-				NewRef("SomeType"),
-				NewRef("SomeOtherType"),
+				NewRef("pkg", "SomeType"),
+				NewRef("pkg", "SomeOtherType"),
 			},
 			expected: true,
 		},
 		{
 			description: "ref",
 			types: []Type{
-				NewRef("SomeType"),
+				NewRef("pkg", "SomeType"),
 			},
 			expected: true,
 		},
@@ -137,7 +137,7 @@ func TestArrayType_IsArrayOfScalars(t *testing.T) {
 		{
 			description: "array of refs",
 			array: ArrayType{
-				ValueType: NewRef("SomeType"),
+				ValueType: NewRef("pkg", "SomeType"),
 			},
 			Expected: false,
 		},

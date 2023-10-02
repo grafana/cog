@@ -80,7 +80,7 @@
                         },
                         {
                             "Kind": "ref",
-                            "Ref": {"ReferredType": "SomeStruct"}
+                            "Ref": {"ReferredPkg": "disjunctions", "ReferredType": "SomeStruct"}
                         }
                     ]
                 }
@@ -146,15 +146,15 @@
                     "Branches": [
                         {
                             "Kind": "ref",
-                            "Ref": {"ReferredType": "SomeStruct"}
+                            "Ref": {"ReferredPkg": "disjunctions", "ReferredType": "SomeStruct"}
                         },
                         {
                             "Kind": "ref",
-                            "Ref": {"ReferredType": "SomeOtherStruct"}
+                            "Ref": {"ReferredPkg": "disjunctions", "ReferredType": "SomeOtherStruct"}
                         },
                         {
                             "Kind": "ref",
-                            "Ref": {"ReferredType": "YetAnotherStruct"}
+                            "Ref": {"ReferredPkg": "disjunctions", "ReferredType": "YetAnotherStruct"}
                         }
                     ]
                 }

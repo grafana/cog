@@ -25,13 +25,22 @@
             "Name": "RefToSomeStruct",
             "Type": {
                 "Kind": "ref",
-                "Ref": {"ReferredType": "SomeStruct"}
+                "Ref": {"ReferredPkg": "refs", "ReferredType": "SomeStruct"}
+            }
+        },
+        {
+            "Name": "RefToSomeStructFromOtherPackage",
+            "Type": {
+                "Kind": "ref",
+                "Ref": {"ReferredPkg": "otherpkg", "ReferredType": "SomeDistantStruct"}
             }
         }
     ]
 }
 -- out/jennies/TypescriptRawTypes --
 == types/refs/types_gen.ts
+import * as otherpkg from "../otherpkg/types_gen";
+
 export interface SomeStruct {
 	FieldAny: any;
 }
@@ -40,13 +49,22 @@ export const defaultSomeStruct: Partial<SomeStruct> = {
 };
 
 export type RefToSomeStruct = SomeStruct;
+
+export type RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct;
+
 -- out/jennies/GoRawTypes --
 == types/refs/types_gen.go
 package types
+
+import (
+	otherpkg "github.com/grafana/cog/generated/types/otherpkg"
+)
 
 type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
 type RefToSomeStruct SomeStruct
+
+type RefToSomeStructFromOtherPackage otherpkg.SomeDistantStruct
 

@@ -42,7 +42,7 @@
                 "Array": {
                     "ValueType": {
                         "Kind": "ref",
-                        "Ref": {"ReferredType": "someStruct"}
+                        "Ref": {"ReferredPkg": "arrays", "ReferredType": "someStruct"}
                     }
                 }
             }
