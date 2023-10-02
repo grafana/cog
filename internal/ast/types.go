@@ -231,10 +231,11 @@ func NewStruct(fields ...StructField) Type {
 	}
 }
 
-func NewRef(referredTypeName string, opts ...TypeOption) Type {
+func NewRef(referredPkg string, referredTypeName string, opts ...TypeOption) Type {
 	def := Type{
 		Kind: KindRef,
 		Ref: &RefType{
+			ReferredPkg:  referredPkg,
 			ReferredType: referredTypeName,
 		},
 	}
@@ -594,11 +595,13 @@ func NewStructField(name string, fieldType Type, opts ...StructFieldOption) Stru
 }
 
 type RefType struct {
+	ReferredPkg  string
 	ReferredType string
 }
 
 func (t RefType) DeepCopy() RefType {
 	return RefType{
+		ReferredPkg:  t.ReferredPkg,
 		ReferredType: t.ReferredType,
 	}
 }

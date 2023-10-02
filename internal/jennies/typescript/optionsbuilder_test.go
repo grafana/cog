@@ -16,7 +16,7 @@ func TestOptionsBuilder(t *testing.T) {
 
 	req.Equal("options_builder_gen.ts", file.RelativePath)
 	req.NotEmpty(file.From)
-	req.Equal(`export interface OptionsBuilder<T> {
+	req.Equal(`export interface CogOptionsBuilder<T> {
   build: () => T;
 }
 `, string(file.Data))

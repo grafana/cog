@@ -27,7 +27,7 @@ func Jennies() *codejen.JennyList[[]*ast.File] {
 				// apply common veneers
 				builders = veneers.Common().ApplyTo(builders)
 
-				// apply TS-specific veneers
+				// apply Go-specific veneers
 				return Veneers().ApplyTo(builders)
 			},
 		),
