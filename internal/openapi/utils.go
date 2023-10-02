@@ -85,7 +85,7 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 }
 
 func getArgs(v *float64, t string) []any {
-	args := []any{v}
+	args := []any{*v}
 	if t == openapi3.TypeInteger {
 		args = []any{int64(*v)}
 	}
