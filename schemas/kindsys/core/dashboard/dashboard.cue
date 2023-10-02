@@ -98,7 +98,7 @@ lineage: {
 				version?: uint32
 
 				// List of dashboard panels
-				panels?: [...#Panel | #RowPanel | #GraphPanel | #HeatmapPanel]
+				panels?: [...#RowPanel ]
 
 				// Configured template variables
 				templating?: {
@@ -735,7 +735,7 @@ lineage: {
 				id: uint32
 
 				// List of panels in the row
-				panels: [...#Panel | #GraphPanel | #HeatmapPanel]
+				panels: [...#Panel]
 
 				// Name of template variable to repeat for.
 				repeat?: string
