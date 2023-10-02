@@ -2,6 +2,7 @@ package openapi
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -224,9 +225,15 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	if schema.Type == openapi3.TypeString {
 		format = "%s"
 	}
+
+	enumType, err := getEnumType(schema.Type)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
 	for _, value := range schema.Enum {
 		enums = append(enums, ast.EnumValue{
-			Type:    getEnumType(schema.Type),
+			Type:    enumType,
 			Name:    fmt.Sprintf(format, value),
 			Value:   value,
 			Default: schema.Default,
@@ -250,6 +257,5 @@ func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef) (ast.Type
 }
 
 func (g *generator) walkNot(_ *openapi3.Schema) (ast.Type, error) {
-	// TODO: Iterate not
-	return ast.Type{}, nil
+	return ast.Type{}, errors.New("`not` aren't supported")
 }

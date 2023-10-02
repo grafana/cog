@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -22,19 +23,16 @@ func schemaComments(schema *openapi3.Schema) []string {
 	return filtered
 }
 
-func getEnumType(t string) ast.Type {
+func getEnumType(t string) (ast.Type, error) {
 	switch t {
 	case openapi3.TypeString:
-		return ast.String()
+		return ast.String(), nil
 	case openapi3.TypeNumber:
-		return ast.NewScalar(ast.KindInt32)
+		return ast.NewScalar(ast.KindInt32), nil
 	case openapi3.TypeInteger:
-		return ast.NewScalar(ast.KindInt64)
-	case openapi3.TypeBoolean:
-		return ast.Bool()
+		return ast.NewScalar(ast.KindInt64), nil
 	default:
-		// TODO: Handle it correctly
-		return ast.String()
+		return ast.Type{}, errors.New("only strings/numbers are supported")
 	}
 }
 
