@@ -38,8 +38,10 @@ func Command() *cobra.Command {
 
 	cmd.Flags().StringArrayVarP(&opts.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
 
-	_ = cmd.MarkFlagRequired("input")
-	_ = cmd.MarkFlagDirname("input")
+	_ = cmd.MarkFlagDirname("cue")
+	_ = cmd.MarkFlagDirname("kindsys-core")
+	_ = cmd.MarkFlagDirname("kindsys-custom")
+	_ = cmd.MarkFlagDirname("jsonschema")
 	_ = cmd.MarkFlagDirname("output")
 
 	return cmd
