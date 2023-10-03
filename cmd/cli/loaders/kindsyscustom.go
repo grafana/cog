@@ -11,10 +11,10 @@ import (
 	"github.com/grafana/thema"
 )
 
-func kindsysCustomLoader(opts Options) ([]*ast.File, error) {
+func kindsysCustomLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.KindsysCustomEntrypoints))
+	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysCustomEntrypoints))
 	for _, entrypoint := range opts.KindsysCustomEntrypoints {
 		pkg := filepath.Base(entrypoint)
 

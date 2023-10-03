@@ -62,7 +62,7 @@ func doInspect(opts inspectOptions) error {
 	return prettyPrintJSON(schemas)
 }
 
-func inspectBuilderIR(schemas []*ast.File) error {
+func inspectBuilderIR(schemas []*ast.Schema) error {
 	generator := &ast.BuilderGenerator{}
 	buildersIR := generator.FromAST(schemas)
 

@@ -29,12 +29,12 @@ type Config struct {
 }
 
 type generator struct {
-	file *ast.File
+	schema *ast.Schema
 }
 
-func GenerateAST(schemaReader io.Reader, c Config) (*ast.File, error) {
+func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 	g := &generator{
-		file: &ast.File{
+		schema: &ast.Schema{
 			Package: c.Package,
 		},
 	}
@@ -62,7 +62,7 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.File, error) {
 		}
 	}
 
-	return g.file, nil
+	return g.schema, nil
 }
 
 func (g *generator) declareDefinition(definitionName string, schema *schemaparser.Schema) error {
@@ -71,7 +71,7 @@ func (g *generator) declareDefinition(definitionName string, schema *schemaparse
 		return fmt.Errorf("%s: %w", definitionName, err)
 	}
 
-	g.file.Definitions = append(g.file.Definitions, ast.Object{
+	g.schema.Objects = append(g.schema.Objects, ast.Object{
 		Name: definitionName,
 		Type: def,
 	})
@@ -199,7 +199,7 @@ func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
 	}
 
 	// TODO: get the correct package for the referred type
-	return ast.NewRef(g.file.Package, referredKindName), nil
+	return ast.NewRef(g.schema.Package, referredKindName), nil
 }
 
 func (g *generator) walkString(_ *schemaparser.Schema) (ast.Type, error) {

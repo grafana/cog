@@ -159,13 +159,13 @@ func (t *Test) Bool(key string) bool {
 
 // TypesIR locates and returns the raw types intermediate representation described
 // within the txtar archive.
-func (t *Test) TypesIR() *ast.File {
+func (t *Test) TypesIR() *ast.Schema {
 	for _, f := range t.Archive.Files {
 		if f.Name != "ir.json" {
 			continue
 		}
 
-		parsedIR := &ast.File{}
+		parsedIR := &ast.Schema{}
 		if err := json.Unmarshal(f.Data, parsedIR); err != nil {
 			t.Fatalf("could not load types IR: %s", err)
 		}

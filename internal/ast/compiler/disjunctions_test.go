@@ -225,8 +225,8 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	}
 
 	compilerPass := &DisjunctionToType{}
-	_, err := compilerPass.Process([]*ast.File{
-		{Package: "test", Definitions: objects},
+	_, err := compilerPass.Process([]*ast.Schema{
+		{Package: "test", Objects: objects},
 	})
 	req.Error(err)
 	req.ErrorIs(err, ErrCanNotInferDiscriminator)
@@ -257,8 +257,8 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	}
 
 	compilerPass := &DisjunctionToType{}
-	_, err := compilerPass.Process([]*ast.File{
-		{Package: "test", Definitions: objects},
+	_, err := compilerPass.Process([]*ast.Schema{
+		{Package: "test", Objects: objects},
 	})
 	req.Error(err)
 	req.ErrorIs(err, ErrCanNotInferDiscriminator)
@@ -289,8 +289,8 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	}
 
 	compilerPass := &DisjunctionToType{}
-	_, err := compilerPass.Process([]*ast.File{
-		{Package: "test", Definitions: objects},
+	_, err := compilerPass.Process([]*ast.Schema{
+		{Package: "test", Objects: objects},
 	})
 	req.Error(err)
 	req.ErrorIs(err, ErrCanNotInferDiscriminator)
@@ -321,8 +321,8 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	}
 
 	compilerPass := &DisjunctionToType{}
-	_, err := compilerPass.Process([]*ast.File{
-		{Package: "test", Definitions: objects},
+	_, err := compilerPass.Process([]*ast.Schema{
+		{Package: "test", Objects: objects},
 	})
 	req.Error(err)
 	req.ErrorIs(err, ErrCanNotInferDiscriminator)
@@ -488,13 +488,13 @@ func runDisjunctionPass(t *testing.T, input []ast.Object, expectedOutput []ast.O
 	req := require.New(t)
 
 	compilerPass := &DisjunctionToType{}
-	processedFiles, err := compilerPass.Process([]*ast.File{
+	processedFiles, err := compilerPass.Process([]*ast.Schema{
 		{
-			Package:     "test",
-			Definitions: input,
+			Package: "test",
+			Objects: input,
 		},
 	})
 	req.NoError(err)
 	req.Len(processedFiles, 1)
-	req.Empty(cmp.Diff(expectedOutput, processedFiles[0].Definitions))
+	req.Empty(cmp.Diff(expectedOutput, processedFiles[0].Objects))
 }

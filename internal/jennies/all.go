@@ -9,7 +9,7 @@ import (
 )
 
 type LanguageTarget struct {
-	Jennies        *codejen.JennyList[[]*ast.File]
+	Jennies        *codejen.JennyList[[]*ast.Schema]
 	CompilerPasses []compiler.Pass
 }
 

@@ -2,7 +2,7 @@ package ast
 
 type Builder struct {
 	Package         string
-	File            *File
+	Schema          *Schema
 	For             Object
 	Options         []Option
 	Initializations []Assignment
@@ -56,27 +56,27 @@ type Assignment struct {
 type BuilderGenerator struct {
 }
 
-func (generator *BuilderGenerator) FromAST(files []*File) []Builder {
-	builders := make([]Builder, 0, len(files))
+func (generator *BuilderGenerator) FromAST(schemas []*Schema) []Builder {
+	builders := make([]Builder, 0, len(schemas))
 
-	for _, file := range files {
-		for _, object := range file.Definitions {
+	for _, schema := range schemas {
+		for _, object := range schema.Objects {
 			// we only want builders for structs
 			if object.Type.Kind != KindStruct {
 				continue
 			}
 
-			builders = append(builders, generator.structObjectToBuilder(file, object))
+			builders = append(builders, generator.structObjectToBuilder(schema, object))
 		}
 	}
 
 	return builders
 }
 
-func (generator *BuilderGenerator) structObjectToBuilder(file *File, object Object) Builder {
+func (generator *BuilderGenerator) structObjectToBuilder(schema *Schema, object Object) Builder {
 	builder := Builder{
-		Package: file.Package,
-		File:    file,
+		Package: schema.Package,
+		Schema:  schema,
 		For:     object,
 		Options: nil,
 	}
