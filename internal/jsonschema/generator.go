@@ -77,6 +77,10 @@ func (g *generator) declareDefinition(definitionName string, schema *schemaparse
 	g.schema.Objects = append(g.schema.Objects, ast.Object{
 		Name: definitionName,
 		Type: def,
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: definitionName,
+		},
 	})
 
 	return nil

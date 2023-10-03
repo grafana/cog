@@ -54,6 +54,7 @@ func testData() []rewriteTestCase {
 				{
 					Package: "test_pkg",
 					For: ast.NewObject(
+						"test_pkg",
 						"Panel",
 						ast.NewStruct(
 							ast.NewStructField("id", ast.NewScalar(ast.KindInt64)),
@@ -97,6 +98,7 @@ func testData() []rewriteTestCase {
 				{
 					Package: "test_pkg",
 					For: ast.NewObject(
+						"test_pkg",
 						"Dashboard",
 						ast.NewStruct(
 							ast.NewStructField("uid", ast.String()),
@@ -125,6 +127,7 @@ func dashboardBuilder() ast.Builder {
 	return ast.Builder{
 		Package: "test_pkg",
 		For: ast.NewObject(
+			"test_pkg",
 			"Dashboard",
 			ast.NewStruct(
 				ast.NewStructField("uid", ast.String()),
@@ -158,6 +161,7 @@ func panelBuilder() ast.Builder {
 	return ast.Builder{
 		Package: "test_pkg",
 		For: ast.NewObject(
+			"test_pkg",
 			"Panel",
 			ast.NewStruct(
 				ast.NewStructField("id", ast.NewScalar(ast.KindInt64)),
