@@ -10,22 +10,22 @@ import (
 	"github.com/grafana/cog/internal/veneers/option"
 )
 
-func Jennies() *codejen.JennyList[[]*ast.File] {
-	targets := codejen.JennyListWithNamer[[]*ast.File](func(f []*ast.File) string {
+func Jennies() *codejen.JennyList[[]*ast.Schema] {
+	targets := codejen.JennyListWithNamer[[]*ast.Schema](func(_ []*ast.Schema) string {
 		return "typescript"
 	})
 	targets.AppendOneToOne(
 		OptionsBuilder{},
 	)
 	targets.AppendManyToMany(
-		tools.Foreach[*ast.File](RawTypes{}),
+		tools.Foreach[*ast.Schema](RawTypes{}),
 	)
 	targets.AppendOneToMany(
-		codejen.AdaptOneToMany[[]ast.Builder, []*ast.File](
+		codejen.AdaptOneToMany[[]ast.Builder, []*ast.Schema](
 			&Builder{},
-			func(files []*ast.File) []ast.Builder {
+			func(schemas []*ast.Schema) []ast.Builder {
 				generator := &ast.BuilderGenerator{}
-				builders := generator.FromAST(files)
+				builders := generator.FromAST(schemas)
 
 				// apply common veneers
 				builders = veneers.Common().ApplyTo(builders)

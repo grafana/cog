@@ -11,10 +11,10 @@ import (
 	"github.com/grafana/thema"
 )
 
-func kindsysCompopsableLoader(opts Options) ([]*ast.File, error) {
+func kindsysCompopsableLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.KindsysComposableEntrypoints))
+	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysComposableEntrypoints))
 	for _, entrypoint := range opts.KindsysComposableEntrypoints {
 		pkg := filepath.Base(entrypoint)
 

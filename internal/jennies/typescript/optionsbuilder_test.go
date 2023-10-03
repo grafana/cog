@@ -11,7 +11,7 @@ func TestOptionsBuilder(t *testing.T) {
 	req := require.New(t)
 	jenny := OptionsBuilder{}
 
-	file, err := jenny.Generate([]*ast.File{})
+	file, err := jenny.Generate([]*ast.Schema{})
 	req.NoError(err)
 
 	req.Equal("options_builder_gen.ts", file.RelativePath)

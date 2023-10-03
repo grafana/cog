@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "scalars",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "constTypeString",
             "Type": {

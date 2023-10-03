@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "basic",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "SomeStruct",
             "Comments": ["This", "is", "a", "comment"],

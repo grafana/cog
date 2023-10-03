@@ -74,13 +74,13 @@ func runNotRequiredAsNullablePass(t *testing.T, input []ast.Object, expectedOutp
 	req := require.New(t)
 
 	compilerPass := &NotRequiredFieldAsNullableType{}
-	processedFiles, err := compilerPass.Process([]*ast.File{
+	processedFiles, err := compilerPass.Process([]*ast.Schema{
 		{
-			Package:     "test",
-			Definitions: input,
+			Package: "test",
+			Objects: input,
 		},
 	})
 	req.NoError(err)
 	req.Len(processedFiles, 1)
-	req.Empty(cmp.Diff(expectedOutput, processedFiles[0].Definitions))
+	req.Empty(cmp.Diff(expectedOutput, processedFiles[0].Objects))
 }

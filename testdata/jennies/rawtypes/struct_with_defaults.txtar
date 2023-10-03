@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "defaults",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "SomeStruct",
             "Type": {

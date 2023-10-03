@@ -14,10 +14,10 @@ import (
 	"github.com/yalue/merged_fs"
 )
 
-func kindsysCoreLoader(opts Options) ([]*ast.File, error) {
+func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.KindsysCoreEntrypoints))
+	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysCoreEntrypoints))
 	for _, entrypoint := range opts.KindsysCoreEntrypoints {
 		pkg := filepath.Base(entrypoint)
 

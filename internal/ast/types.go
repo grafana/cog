@@ -332,39 +332,39 @@ func (object Object) DeepCopy() Object {
 	return newObject
 }
 
-type Files []*File
+type Schemas []*Schema
 
-func (files Files) DeepCopy() []*File {
-	newFiles := make([]*File, 0, len(files))
+func (schemas Schemas) DeepCopy() []*Schema {
+	newSchemas := make([]*Schema, 0, len(schemas))
 
-	for _, file := range files {
-		newFile := file.DeepCopy()
-		newFiles = append(newFiles, &newFile)
+	for _, schema := range schemas {
+		newSchema := schema.DeepCopy()
+		newSchemas = append(newSchemas, &newSchema)
 	}
 
-	return newFiles
+	return newSchemas
 }
 
-type File struct { //nolint: musttag
-	Package     string
-	Definitions []Object
+type Schema struct { //nolint: musttag
+	Package string
+	Objects []Object
 }
 
-func (file *File) DeepCopy() File {
-	newFile := File{
-		Package:     file.Package,
-		Definitions: make([]Object, 0, len(file.Definitions)),
+func (schema *Schema) DeepCopy() Schema {
+	newSchema := Schema{
+		Package: schema.Package,
+		Objects: make([]Object, 0, len(schema.Objects)),
 	}
 
-	for _, def := range file.Definitions {
-		newFile.Definitions = append(newFile.Definitions, def.DeepCopy())
+	for _, def := range schema.Objects {
+		newSchema.Objects = append(newSchema.Objects, def.DeepCopy())
 	}
 
-	return newFile
+	return newSchema
 }
 
-func (file *File) LocateDefinition(name string) Object {
-	for _, def := range file.Definitions {
+func (schema *Schema) LocateDefinition(name string) Object {
+	for _, def := range schema.Objects {
 		if def.Name == name {
 			return def
 		}

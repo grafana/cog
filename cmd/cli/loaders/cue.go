@@ -15,13 +15,13 @@ import (
 	"github.com/yalue/merged_fs"
 )
 
-func cueLoader(opts Options) ([]*ast.File, error) {
+func cueLoader(opts Options) ([]*ast.Schema, error) {
 	cueFsOverlay, err := buildCueOverlay(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	allSchemas := make([]*ast.File, 0, len(opts.CueEntrypoints))
+	allSchemas := make([]*ast.Schema, 0, len(opts.CueEntrypoints))
 	for _, entrypoint := range opts.CueEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
