@@ -152,8 +152,8 @@ func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, str
 
 	var fieldsInit []string
 	for _, field := range structType.Fields {
-		if field.Default != nil {
-			fieldsInit = append(fieldsInit, fmt.Sprintf("%s: %s, // default value", field.Name, formatScalar(field.Default)))
+		if field.Type.Default != nil {
+			fieldsInit = append(fieldsInit, fmt.Sprintf("%s: %s, // default value", field.Name, formatScalar(field.Type.Default)))
 			continue
 		}
 

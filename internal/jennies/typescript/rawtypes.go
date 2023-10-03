@@ -130,11 +130,11 @@ func formatStructDefaults(def ast.Object) string {
 
 	fields := def.Type.AsStruct().Fields
 	for _, field := range fields {
-		if field.Default == nil {
+		if field.Type.Default == nil {
 			continue
 		}
 
-		buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", field.Name, formatScalar(field.Default)))
+		buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", field.Name, formatScalar(field.Type.Default)))
 	}
 
 	buffer.WriteString("};")
