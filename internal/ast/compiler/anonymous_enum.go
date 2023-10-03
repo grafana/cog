@@ -81,7 +81,6 @@ func (pass *AnonymousEnumToExplicitType) processStruct(def ast.StructType) ast.T
 			Comments: field.Comments,
 			Type:     pass.processType(field.Name, field.Type),
 			Required: field.Required,
-			Default:  field.Default,
 		})
 	}
 

@@ -207,18 +207,11 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 			return nil, err
 		}
 
-		// Extract the default value if it's there
-		defVal, err := g.extractDefault(i.Value())
-		if err != nil {
-			return nil, err
-		}
-
 		fields = append(fields, ast.StructField{
 			Name:     fieldLabel,
 			Comments: commentsFromCueValue(i.Value()),
 			Required: !i.IsOptional(),
 			Type:     node,
-			Default:  defVal,
 		})
 	}
 
@@ -255,15 +248,20 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		return ast.NewDisjunction(branches), nil
 	}
 
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
 	switch v.IncompleteKind() {
 	case cue.TopKind:
 		return ast.Any(), nil
 	case cue.NullKind:
 		return ast.Null(), nil
 	case cue.BoolKind:
-		return ast.Bool(), nil
+		return ast.Bool(ast.Default(defVal)), nil
 	case cue.BytesKind:
-		return ast.Bytes(), nil
+		return ast.Bytes(ast.Default(defVal)), nil
 	case cue.StringKind:
 		return g.declareString(v)
 	case cue.FloatKind, cue.NumberKind, cue.IntKind:
@@ -316,7 +314,12 @@ func (g *generator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
 }
 
 func (g *generator) declareString(v cue.Value) (ast.Type, error) {
-	typeDef := ast.String()
+	// Extract the default value if it's there
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+	typeDef := ast.String(ast.Default(defVal))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
@@ -448,7 +451,13 @@ func (g *generator) declareNumber(v cue.Value) (ast.Type, error) {
 		return ast.Type{}, errorWithCueRef(v, "unknown number type '%s'", parts[0])
 	}
 
-	typeDef := ast.NewScalar(numberType)
+	// Extract the default value if it's there
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
+	typeDef := ast.NewScalar(numberType, ast.Default(defVal))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
