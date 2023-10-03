@@ -9,6 +9,8 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
+type pkgMapper func(string) string
+
 type RawTypes struct {
 }
 
@@ -30,8 +32,20 @@ func (jenny RawTypes) Generate(file *ast.File) (codejen.Files, error) {
 func (jenny RawTypes) generateFile(file *ast.File) ([]byte, error) {
 	var buffer strings.Builder
 
+	imports := newImportMap()
+
+	packageMapper := func(pkg string) string {
+		if pkg == file.Package {
+			return ""
+		}
+
+		imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
+
+		return pkg
+	}
+
 	for _, typeDef := range file.Definitions {
-		typeDefGen, err := jenny.formatObject(typeDef, "")
+		typeDefGen, err := jenny.formatObject(typeDef, packageMapper)
 		if err != nil {
 			return nil, err
 		}
@@ -40,10 +54,15 @@ func (jenny RawTypes) generateFile(file *ast.File) ([]byte, error) {
 		buffer.WriteString("\n")
 	}
 
-	return []byte(buffer.String()), nil
+	importStatements := imports.Format()
+	if importStatements != "" {
+		importStatements += "\n\n"
+	}
+
+	return []byte(importStatements + buffer.String()), nil
 }
 
-func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, error) {
+func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]byte, error) {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -55,7 +74,7 @@ func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, err
 	switch def.Type.Kind {
 	case ast.KindStruct:
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
-		buffer.WriteString(formatStructFields(def.Type.AsStruct().Fields, typesPkg))
+		buffer.WriteString(formatStructFields(def.Type.AsStruct().Fields, packageMapper))
 		buffer.WriteString("\n")
 
 		buffer.WriteString("\n")
@@ -68,12 +87,8 @@ func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, err
 			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatScalar(val.Value)))
 		}
 		buffer.WriteString("}\n")
-	case ast.KindRef:
-		refType := def.Type.AsRef()
-
-		buffer.WriteString(fmt.Sprintf("type %s = %s;", def.Name, refType.ReferredType))
-	case ast.KindDisjunction, ast.KindMap, ast.KindArray:
-		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, "")))
+	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
+		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, packageMapper)))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
 		if scalarType.Value != nil {
@@ -88,13 +103,13 @@ func (jenny RawTypes) formatObject(def ast.Object, typesPkg string) ([]byte, err
 	return []byte(buffer.String()), nil
 }
 
-func formatStructFields(fields []ast.StructField, typesPkg string) string {
+func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("{\n")
 
 	for _, fieldDef := range fields {
-		fieldDefGen := formatField(fieldDef, typesPkg)
+		fieldDefGen := formatField(fieldDef, packageMapper)
 
 		buffer.WriteString(
 			strings.TrimSuffix(
@@ -116,11 +131,11 @@ func formatStructDefaults(def ast.Object) string {
 
 	fields := def.Type.AsStruct().Fields
 	for _, field := range fields {
-		if field.Default == nil {
+		if field.Type.Default == nil {
 			continue
 		}
 
-		buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", field.Name, formatScalar(field.Default)))
+		buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", field.Name, formatScalar(field.Type.Default)))
 	}
 
 	buffer.WriteString("};")
@@ -128,7 +143,7 @@ func formatStructDefaults(def ast.Object) string {
 	return buffer.String()
 }
 
-func formatField(def ast.StructField, typesPkg string) []byte {
+func formatField(def ast.StructField, packageMapper pkgMapper) []byte {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -140,7 +155,7 @@ func formatField(def ast.StructField, typesPkg string) []byte {
 		required = "?"
 	}
 
-	formattedType := formatType(def.Type, typesPkg)
+	formattedType := formatType(def.Type, packageMapper)
 
 	buffer.WriteString(fmt.Sprintf(
 		"%s%s: %s;\n",
@@ -152,22 +167,23 @@ func formatField(def ast.StructField, typesPkg string) []byte {
 	return []byte(buffer.String())
 }
 
-func formatType(def ast.Type, typesPkg string) string {
+func formatType(def ast.Type, packageMapper pkgMapper) string {
 	switch def.Kind {
 	case ast.KindDisjunction:
-		return formatDisjunction(def.AsDisjunction(), typesPkg)
+		return formatDisjunction(def.AsDisjunction(), packageMapper)
 	case ast.KindRef:
-		if typesPkg != "" {
-			return typesPkg + "." + def.AsRef().ReferredType
+		referredPkg := packageMapper(def.AsRef().ReferredPkg)
+		if referredPkg != "" {
+			return referredPkg + "." + def.AsRef().ReferredType
 		}
 
 		return def.AsRef().ReferredType
 	case ast.KindArray:
-		return formatArray(def.AsArray(), typesPkg)
+		return formatArray(def.AsArray(), packageMapper)
 	case ast.KindStruct:
-		return formatStructFields(def.AsStruct().Fields, typesPkg)
+		return formatStructFields(def.AsStruct().Fields, packageMapper)
 	case ast.KindMap:
-		return formatMap(def.AsMap(), typesPkg)
+		return formatMap(def.AsMap(), packageMapper)
 	case ast.KindEnum:
 		return formatAnonymousEnum(def.AsEnum())
 	case ast.KindScalar:
@@ -207,24 +223,24 @@ func formatScalarKind(kind ast.ScalarKind) string {
 	}
 }
 
-func formatArray(def ast.ArrayType, typesPkg string) string {
-	subTypeString := formatType(def.ValueType, typesPkg)
+func formatArray(def ast.ArrayType, packageMapper pkgMapper) string {
+	subTypeString := formatType(def.ValueType, packageMapper)
 
 	return fmt.Sprintf("%s[]", subTypeString)
 }
 
-func formatDisjunction(def ast.DisjunctionType, typesPkg string) string {
+func formatDisjunction(def ast.DisjunctionType, packageMapper pkgMapper) string {
 	subTypes := make([]string, 0, len(def.Branches))
 	for _, subType := range def.Branches {
-		subTypes = append(subTypes, formatType(subType, typesPkg))
+		subTypes = append(subTypes, formatType(subType, packageMapper))
 	}
 
 	return strings.Join(subTypes, " | ")
 }
 
-func formatMap(def ast.MapType, typesPkg string) string {
-	keyTypeString := formatType(def.IndexType, typesPkg)
-	valueTypeString := formatType(def.ValueType, typesPkg)
+func formatMap(def ast.MapType, packageMapper pkgMapper) string {
+	keyTypeString := formatType(def.IndexType, packageMapper)
+	valueTypeString := formatType(def.ValueType, packageMapper)
 
 	return fmt.Sprintf("Record<%s, %s>", keyTypeString, valueTypeString)
 }

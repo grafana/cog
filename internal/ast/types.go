@@ -74,6 +74,7 @@ func (constraint TypeConstraint) DeepCopy() TypeConstraint {
 type Type struct {
 	Kind     Kind
 	Nullable bool
+	Default  any
 
 	Disjunction *DisjunctionType `json:",omitempty"`
 	Array       *ArrayType       `json:",omitempty"`
@@ -88,6 +89,7 @@ func (t Type) DeepCopy() Type {
 	newType := Type{
 		Kind:     t.Kind,
 		Nullable: t.Nullable,
+		Default:  t.Default,
 	}
 
 	if t.Disjunction != nil {
@@ -127,6 +129,12 @@ type TypeOption func(def *Type)
 func Nullable() TypeOption {
 	return func(def *Type) {
 		def.Nullable = true
+	}
+}
+
+func Default(value any) TypeOption {
+	return func(def *Type) {
+		def.Default = value
 	}
 }
 
@@ -232,10 +240,11 @@ func NewStruct(fields ...StructField) Type {
 	}
 }
 
-func NewRef(referredTypeName string, opts ...TypeOption) Type {
+func NewRef(referredPkg string, referredTypeName string, opts ...TypeOption) Type {
 	def := Type{
 		Kind: KindRef,
 		Ref: &RefType{
+			ReferredPkg:  referredPkg,
 			ReferredType: referredTypeName,
 		},
 	}
@@ -558,7 +567,6 @@ type StructField struct {
 	Comments []string
 	Type     Type
 	Required bool
-	Default  any
 }
 
 func (structField StructField) DeepCopy() StructField {
@@ -566,7 +574,6 @@ func (structField StructField) DeepCopy() StructField {
 		Name:     structField.Name,
 		Type:     structField.Type.DeepCopy(),
 		Required: structField.Required,
-		Default:  structField.Default,
 	}
 
 	newT.Comments = append(newT.Comments, structField.Comments...)
@@ -596,11 +603,13 @@ func NewStructField(name string, fieldType Type, opts ...StructFieldOption) Stru
 }
 
 type RefType struct {
+	ReferredPkg  string
 	ReferredType string
 }
 
 func (t RefType) DeepCopy() RefType {
 	return RefType{
+		ReferredPkg:  t.ReferredPkg,
 		ReferredType: t.ReferredType,
 	}
 }

@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
+	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -84,7 +86,13 @@ func (g *generator) declareTopLevelString(name string, v cue.Value) (ast.Object,
 		return ast.Object{}, errorWithCueRef(v, "top-level strings may only be generated from concrete strings")
 	}
 
-	strType, err := g.declareString(v)
+	// Extract the default value if it's there
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Object{}, err
+	}
+
+	strType, err := g.declareString(v, defVal)
 	if err != nil {
 		return ast.Object{}, err
 	}
@@ -207,22 +215,75 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 			return nil, err
 		}
 
-		// Extract the default value if it's there
-		defVal, err := g.extractDefault(i.Value())
-		if err != nil {
-			return nil, err
-		}
-
 		fields = append(fields, ast.StructField{
 			Name:     fieldLabel,
 			Comments: commentsFromCueValue(i.Value()),
 			Required: !i.IsOptional(),
 			Type:     node,
-			Default:  defVal,
 		})
 	}
 
 	return fields, nil
+}
+
+// FIXME: this is probably very brittle and not always correct :|
+func (g *generator) referencePackage(source cueast.Node) (string, error) {
+	switch source.(type) { //nolint: gocritic
+	case *cueast.SelectorExpr:
+		selector := source.(*cueast.SelectorExpr)
+
+		x := selector.X.(*cueast.Ident)
+
+		return x.Name, nil
+	case *cueast.Field:
+		field := source.(*cueast.Field)
+
+		if _, ok := field.Value.(*cueast.SelectorExpr); ok {
+			return g.referencePackage(field.Value)
+		}
+
+		ident := field.Value.(*cueast.Ident)
+
+		if ident.Scope == nil {
+			return g.file.Package, nil
+		}
+
+		if _, ok := ident.Scope.(*cueast.File); !ok {
+			return g.file.Package, nil
+		}
+
+		scope := ident.Scope.(*cueast.File)
+		if len(scope.Decls) == 0 {
+			return g.file.Package, nil
+		}
+
+		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
+
+		return referredTypePkg.Name, nil
+	case *cueast.Ident:
+		ident := source.(*cueast.Ident)
+		if ident.Scope == nil {
+			return g.file.Package, nil
+		}
+
+		if _, ok := ident.Scope.(*cueast.File); !ok {
+			return g.file.Package, nil
+		}
+
+		scope := ident.Scope.(*cueast.File)
+		if len(scope.Decls) == 0 {
+			return g.file.Package, nil
+		}
+
+		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
+
+		return referredTypePkg.Name, nil
+	case *cueast.Ellipsis: // TODO: this makes no sense
+		return g.file.Package, nil
+	default:
+		spew.Dump(source)
+		return "", fmt.Errorf("can't extract reference package")
+	}
 }
 
 func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
@@ -231,7 +292,15 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	if path.String() != "" {
 		selectors := path.Selectors()
 
-		return ast.NewRef(selectorLabel(selectors[len(selectors)-1])), nil
+		refPkg, err := g.referencePackage(v.Source())
+		if err != nil {
+			return ast.Type{}, errorWithCueRef(v, err.Error())
+		}
+
+		return ast.NewRef(
+			refPkg,
+			selectorLabel(selectors[len(selectors)-1]),
+		), nil
 	}
 
 	disjunctions := appendSplit(nil, cue.OrOp, v)
@@ -255,19 +324,24 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		return ast.NewDisjunction(branches), nil
 	}
 
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
 	switch v.IncompleteKind() {
 	case cue.TopKind:
 		return ast.Any(), nil
 	case cue.NullKind:
 		return ast.Null(), nil
 	case cue.BoolKind:
-		return ast.Bool(), nil
+		return ast.Bool(ast.Default(defVal)), nil
 	case cue.BytesKind:
-		return ast.Bytes(), nil
+		return ast.Bytes(ast.Default(defVal)), nil
 	case cue.StringKind:
-		return g.declareString(v)
+		return g.declareString(v, defVal)
 	case cue.FloatKind, cue.NumberKind, cue.IntKind:
-		return g.declareNumber(v)
+		return g.declareNumber(v, defVal)
 	case cue.ListKind:
 		return g.declareList(v)
 	case cue.StructKind:
@@ -315,8 +389,8 @@ func (g *generator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
 	return ast.NewEnum(values), nil
 }
 
-func (g *generator) declareString(v cue.Value) (ast.Type, error) {
-	typeDef := ast.String()
+func (g *generator) declareString(v cue.Value, defVal any) (ast.Type, error) {
+	typeDef := ast.String(ast.Default(defVal))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
@@ -417,7 +491,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 	return constraints, nil
 }
 
-func (g *generator) declareNumber(v cue.Value) (ast.Type, error) {
+func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
 	if err != nil {
 		return ast.Type{}, err
@@ -448,7 +522,7 @@ func (g *generator) declareNumber(v cue.Value) (ast.Type, error) {
 		return ast.Type{}, errorWithCueRef(v, "unknown number type '%s'", parts[0])
 	}
 
-	typeDef := ast.NewScalar(numberType)
+	typeDef := ast.NewScalar(numberType, ast.Default(defVal))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {

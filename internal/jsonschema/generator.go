@@ -198,7 +198,8 @@ func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
 		return ast.Type{}, err
 	}
 
-	return ast.NewRef(referredKindName), nil
+	// TODO: get the correct package for the referred type
+	return ast.NewRef(g.file.Package, referredKindName), nil
 }
 
 func (g *generator) walkString(_ *schemaparser.Schema) (ast.Type, error) {

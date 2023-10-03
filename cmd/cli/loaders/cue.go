@@ -21,15 +21,14 @@ func cueLoader(opts Options) ([]*ast.File, error) {
 		return nil, err
 	}
 
-	allSchemas := make([]*ast.File, 0, len(opts.Entrypoints))
-	for _, entrypoint := range opts.Entrypoints {
+	allSchemas := make([]*ast.File, 0, len(opts.CueEntrypoints))
+	for _, entrypoint := range opts.CueEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
 		// Load Cue files into Cue build.Instances slice
 		// the second arg is a configuration object, we'll see this later
 		bis := load.Instances([]string{entrypoint}, &load.Config{
-			Overlay: cueFsOverlay,
-			//Module:     "github.com/grafana/cog", // TODO: is that needed?
+			Overlay:    cueFsOverlay,
 			ModuleRoot: "/",
 		})
 

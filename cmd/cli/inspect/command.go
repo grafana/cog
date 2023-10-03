@@ -32,23 +32,24 @@ func Command() *cobra.Command {
 
 	cmd.Flags().BoolVar(&opts.BuilderIR, "builder-ir", false, "Inspect the \"builder IR\" instead of the \"types\" one.") // TODO: better usage text
 
-	cmd.Flags().StringVarP(&opts.LoaderOptions.SchemasType, "loader", "l", "cue", "Schemas type.") // TODO: better usage text
-	cmd.Flags().StringArrayVarP(&opts.LoaderOptions.Entrypoints, "input", "i", nil, "Schema.")     // TODO: better usage text
+	cmd.Flags().StringArrayVar(&opts.LoaderOptions.CueEntrypoints, "cue", nil, "CUE input schema.")                                                  // TODO: better usage text
+	cmd.Flags().StringArrayVar(&opts.LoaderOptions.KindsysCoreEntrypoints, "kindsys-core", nil, "Kindys core kinds input schema.")                   // TODO: better usage text
+	cmd.Flags().StringArrayVar(&opts.LoaderOptions.KindsysComposableEntrypoints, "kindsys-composable", nil, "Kindys composable kinds input schema.") // TODO: better usage text
+	cmd.Flags().StringArrayVar(&opts.LoaderOptions.KindsysCustomEntrypoints, "kindsys-custom", nil, "Kindys custom kinds input schema.")             // TODO: better usage text
+	cmd.Flags().StringArrayVar(&opts.LoaderOptions.JSONSchemaEntrypoints, "jsonschema", nil, "Jsonschema input schema.")                             // TODO: better usage text
+
 	cmd.Flags().StringArrayVarP(&opts.LoaderOptions.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
 
-	_ = cmd.MarkFlagRequired("input")
-	_ = cmd.MarkFlagDirname("input")
+	_ = cmd.MarkFlagDirname("cue")
+	_ = cmd.MarkFlagDirname("kindsys-core")
+	_ = cmd.MarkFlagDirname("kindsys-custom")
+	_ = cmd.MarkFlagDirname("jsonschema")
 
 	return cmd
 }
 
 func doInspect(opts inspectOptions) error {
-	loader, err := loaders.ForSchemaType(opts.LoaderOptions.SchemasType)
-	if err != nil {
-		return err
-	}
-
-	schemas, err := loader(opts.LoaderOptions)
+	schemas, err := loaders.LoadAll(opts.LoaderOptions)
 	if err != nil {
 		return err
 	}

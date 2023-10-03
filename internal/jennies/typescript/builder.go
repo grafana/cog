@@ -10,6 +10,7 @@ import (
 )
 
 type Builder struct {
+	imports importMap
 }
 
 func (jenny *Builder) JennyName() string {
@@ -37,14 +38,16 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
+	jenny.imports = newImportMap()
+
 	objectName := tools.UpperCamelCase(builder.For.Name)
 
 	// imports
-	buffer.WriteString(fmt.Sprintf("import * as types from \"../../types/%s/types_gen\";\n", builder.Package))
-	buffer.WriteString("import { OptionsBuilder } from \"../../options_builder_gen\";\n\n")
+	jenny.imports.Add("types", fmt.Sprintf("../../types/%s/types_gen", builder.Package))
+	buffer.WriteString("import { CogOptionsBuilder } from \"../../options_builder_gen\";\n\n")
 
 	// Builder class declaration
-	buffer.WriteString(fmt.Sprintf("export class %[1]sBuilder implements OptionsBuilder<types.%[1]s> {\n", objectName))
+	buffer.WriteString(fmt.Sprintf("export class %[1]sBuilder implements CogOptionsBuilder<types.%[1]s> {\n", objectName))
 
 	// internal property, representing the object being built
 	buffer.WriteString(fmt.Sprintf("\tprivate internal: types.%[1]s;\n", objectName))
@@ -69,7 +72,12 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	// End builder class declaration
 	buffer.WriteString("}\n")
 
-	return []byte(buffer.String()), nil
+	importStatements := jenny.imports.Format()
+	if importStatements != "" {
+		importStatements += "\n"
+	}
+
+	return []byte(importStatements + buffer.String()), nil
 }
 
 func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) string {
@@ -119,8 +127,8 @@ func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeD
 	case ast.KindDisjunction:
 		return jenny.emptyValueForType(builders, pkg, typeDef.AsDisjunction().Branches[0])
 	case ast.KindRef:
-		referredTypeName := typeDef.AsRef().ReferredType
-		referredTypeBuilder, _ := builders.LocateByObject(pkg, referredTypeName)
+		ref := typeDef.AsRef()
+		referredTypeBuilder, _ := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
 
 		return jenny.emptyValueForType(builders, referredTypeBuilder.Package, referredTypeBuilder.For.Type)
 	case ast.KindStruct:
@@ -144,8 +152,8 @@ func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, str
 
 	var fieldsInit []string
 	for _, field := range structType.Fields {
-		if field.Default != nil {
-			fieldsInit = append(fieldsInit, fmt.Sprintf("%s: %s, // default value", field.Name, formatScalar(field.Default)))
+		if field.Type.Default != nil {
+			fieldsInit = append(fieldsInit, fmt.Sprintf("%s: %s, // default value", field.Name, formatScalar(field.Type.Default)))
 			continue
 		}
 
@@ -195,10 +203,10 @@ func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder,
 		return "", false
 	}
 
-	referredTypeName := t.AsRef().ReferredType
-	_, builderFound := builders.LocateByObject(builder.Package, referredTypeName)
+	ref := t.AsRef()
+	_, builderFound := builders.LocateByObject(builder.Package, ref.ReferredType)
 
-	return referredTypeName, builderFound
+	return ref.ReferredPkg, builderFound
 }
 
 func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
@@ -260,7 +268,15 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 }
 
 func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
-	typeName := formatType(arg.Type, "types")
+	typeName := formatType(arg.Type, func(pkg string) string {
+		if pkg == builder.Package {
+			return "types"
+		}
+
+		jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+
+		return pkg
+	})
 
 	if referredTypeName, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
 		return fmt.Sprintf(`%[1]s: OptionsBuilder<types.%[2]s>`, arg.Name, referredTypeName)

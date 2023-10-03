@@ -14,7 +14,7 @@
                             "Required": false,
                             "Type": {
                                 "Kind": "ref",
-                                "Ref": {"ReferredType": "SomeOtherStruct"}
+                                "Ref": {"ReferredPkg": "struct_optional_fields", "ReferredType": "SomeOtherStruct"}
                             }
                         },
                         {

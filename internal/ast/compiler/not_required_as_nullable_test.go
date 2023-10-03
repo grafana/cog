@@ -18,9 +18,9 @@ func TestNotRequiredFieldAsNullableType(t *testing.T) {
 			ast.NewStructField("RequiredNullableString", ast.String(ast.Nullable()), ast.Required()),
 			ast.NewStructField("NotRequiredString", ast.String()),
 
-			ast.NewStructField("RequiredRef", ast.NewRef("SomeStruct"), ast.Required()),
-			ast.NewStructField("RequiredNullableRef", ast.NewRef("SomeStruct", ast.Nullable()), ast.Required()),
-			ast.NewStructField("NotRequiredRef", ast.NewRef("SomeStruct")),
+			ast.NewStructField("RequiredRef", ast.NewRef("test", "SomeStruct"), ast.Required()),
+			ast.NewStructField("RequiredNullableRef", ast.NewRef("test", "SomeStruct", ast.Nullable()), ast.Required()),
+			ast.NewStructField("NotRequiredRef", ast.NewRef("test", "SomeStruct")),
 
 			ast.NewStructField("NotRequiredArray", ast.NewArray(ast.String())),
 			ast.NewStructField("RequiredArray", ast.NewArray(ast.String()), ast.Required()),
@@ -45,9 +45,9 @@ func TestNotRequiredFieldAsNullableType(t *testing.T) {
 			ast.NewStructField("RequiredNullableString", ast.String(ast.Nullable()), ast.Required()),
 			ast.NewStructField("NotRequiredString", ast.String(ast.Nullable())), // should become nullable
 
-			ast.NewStructField("RequiredRef", ast.NewRef("SomeStruct"), ast.Required()),
-			ast.NewStructField("RequiredNullableRef", ast.NewRef("SomeStruct", ast.Nullable()), ast.Required()),
-			ast.NewStructField("NotRequiredRef", ast.NewRef("SomeStruct", ast.Nullable())), // should become nullable
+			ast.NewStructField("RequiredRef", ast.NewRef("test", "SomeStruct"), ast.Required()),
+			ast.NewStructField("RequiredNullableRef", ast.NewRef("test", "SomeStruct", ast.Nullable()), ast.Required()),
+			ast.NewStructField("NotRequiredRef", ast.NewRef("test", "SomeStruct", ast.Nullable())), // should become nullable
 
 			ast.NewStructField("NotRequiredArray", ast.NewArray(ast.String(), ast.Nullable())), // should become nullable
 			ast.NewStructField("RequiredArray", ast.NewArray(ast.String()), ast.Required()),
