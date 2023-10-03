@@ -164,7 +164,7 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Type) 
 	// if we already generated a new object for this disjunction, let's return
 	// a reference to it.
 	if _, ok := pass.newObjects[newTypeName]; ok {
-		ref := ast.NewRef(newTypeName)
+		ref := ast.NewRef(file.Package, newTypeName)
 		if disjunction.Branches.HasNullType() {
 			ref.Nullable = true
 		}
@@ -215,7 +215,7 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Type) 
 		Type: structType,
 	}
 
-	ref := ast.NewRef(newTypeName)
+	ref := ast.NewRef(file.Package, newTypeName)
 	if disjunction.Branches.HasNullType() {
 		ref.Nullable = true
 	}

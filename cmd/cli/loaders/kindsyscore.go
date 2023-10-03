@@ -2,6 +2,7 @@ package loaders
 
 import (
 	"fmt"
+	"io/fs"
 	"path/filepath"
 
 	"cuelang.org/go/cue"
@@ -10,16 +11,17 @@ import (
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/grafana/kindsys"
 	"github.com/grafana/thema"
+	"github.com/yalue/merged_fs"
 )
 
 func kindsysCoreLoader(opts Options) ([]*ast.File, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.Entrypoints))
-	for _, entrypoint := range opts.Entrypoints {
+	allSchemas := make([]*ast.File, 0, len(opts.KindsysCoreEntrypoints))
+	for _, entrypoint := range opts.KindsysCoreEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
-		overlayFS, err := dirToPrefixedFS(entrypoint, "")
+		overlayFS, err := buildKindsysEntrypointFS(opts, entrypoint)
 		if err != nil {
 			return nil, err
 		}
@@ -44,10 +46,7 @@ func kindsysCoreLoader(opts Options) ([]*ast.File, error) {
 			return nil, fmt.Errorf("could not bind kind definition to kind: %w", err)
 		}
 
-		rawLatestSchemaAsCue := boundKind.Lineage().Latest().Underlying()
-		latestSchemaAsCue := rawLatestSchemaAsCue.LookupPath(cue.MakePath(cue.Hid("_#schema", "github.com/grafana/thema")))
-
-		schemaAst, err := simplecue.GenerateAST(latestSchemaAsCue, simplecue.Config{
+		schemaAst, err := simplecue.GenerateAST(kindToLatestSchema(boundKind), simplecue.Config{
 			Package: pkg, // TODO: extract from input schema/folder?
 		})
 		if err != nil {
@@ -58,4 +57,24 @@ func kindsysCoreLoader(opts Options) ([]*ast.File, error) {
 	}
 
 	return allSchemas, nil
+}
+
+func buildKindsysEntrypointFS(opts Options, entrypoint string) (fs.FS, error) {
+	libFs, err := buildBaseFSWithLibraries(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	overlayFS, err := dirToPrefixedFS(entrypoint, "")
+	if err != nil {
+		return nil, err
+	}
+
+	return merged_fs.MergeMultiple(libFs, overlayFS), nil
+}
+
+func kindToLatestSchema(kind kindsys.Kind) cue.Value {
+	rawLatestSchemaAsCue := kind.Lineage().Latest().Underlying()
+
+	return rawLatestSchemaAsCue.LookupPath(cue.MakePath(cue.Hid("_#schema", "github.com/grafana/thema")))
 }

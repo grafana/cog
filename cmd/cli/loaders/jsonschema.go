@@ -9,8 +9,8 @@ import (
 )
 
 func jsonschemaLoader(opts Options) ([]*ast.File, error) {
-	allSchemas := make([]*ast.File, 0, len(opts.Entrypoints))
-	for _, entrypoint := range opts.Entrypoints {
+	allSchemas := make([]*ast.File, 0, len(opts.JSONSchemaEntrypoints))
+	for _, entrypoint := range opts.JSONSchemaEntrypoints {
 		pkg := filepath.Base(filepath.Dir(entrypoint))
 
 		reader, err := os.Open(entrypoint)

@@ -7,6 +7,26 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
+type LoaderRef string
+
+const (
+	CUE               LoaderRef = "cue"
+	KindsysCore       LoaderRef = "kindsys-core"
+	KindsysComposable LoaderRef = "kindsys-composable"
+	KindsysCustom     LoaderRef = "kindsys-custom"
+	JSONSchema        LoaderRef = "jsonschema"
+)
+
+func loadersMap() map[LoaderRef]Loader {
+	return map[LoaderRef]Loader{
+		CUE:               cueLoader,
+		KindsysCore:       kindsysCoreLoader,
+		KindsysComposable: kindsysCompopsableLoader,
+		KindsysCustom:     kindsysCustomLoader,
+		JSONSchema:        jsonschemaLoader,
+	}
+}
+
 type cueIncludeImport struct {
 	fsPath     string // path of the library on the filesystem
 	importPath string // path used in CUE files to import that library
@@ -15,8 +35,11 @@ type cueIncludeImport struct {
 type Loader func(opts Options) ([]*ast.File, error)
 
 type Options struct {
-	Entrypoints []string
-	SchemasType string
+	CueEntrypoints               []string
+	KindsysCoreEntrypoints       []string
+	KindsysComposableEntrypoints []string
+	KindsysCustomEntrypoints     []string
+	JSONSchemaEntrypoints        []string
 
 	// Cue-specific options
 	CueImports []string
@@ -41,13 +64,8 @@ func (opts Options) cueIncludeImports() ([]cueIncludeImport, error) {
 	return imports, nil
 }
 
-func ForSchemaType(schemaType string) (Loader, error) {
-	all := map[string]Loader{
-		"cue":            cueLoader,
-		"kindsys-core":   kindsysCoreLoader,
-		"kindsys-custom": kindsysCustomLoader,
-		"jsonschema":     jsonschemaLoader,
-	}
+func ForSchemaType(schemaType LoaderRef) (Loader, error) {
+	all := loadersMap()
 
 	loader, ok := all[schemaType]
 	if !ok {
@@ -55,4 +73,24 @@ func ForSchemaType(schemaType string) (Loader, error) {
 	}
 
 	return loader, nil
+}
+
+func LoadAll(opts Options) ([]*ast.File, error) {
+	var files []*ast.File
+
+	for loaderRef := range loadersMap() {
+		loader, err := ForSchemaType(loaderRef)
+		if err != nil {
+			return nil, err
+		}
+
+		schemas, err := loader(opts)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, schemas...)
+	}
+
+	return files, nil
 }

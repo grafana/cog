@@ -15,7 +15,7 @@
                             "Required": true,
                             "Type": {
                                 "Kind": "ref",
-                                "Ref": {"ReferredType": "SomeOtherStruct"}
+                                "Ref": {"ReferredPkg": "struct_complex_fields", "ReferredType": "SomeOtherStruct"}
                             }
                         },
                         {
@@ -50,7 +50,7 @@
                                         },
                                         {
                                             "Kind": "ref",
-                                            "Ref": {"ReferredType": "SomeOtherStruct"}
+                                            "Ref": {"ReferredPkg": "struct_complex_fields", "ReferredType": "SomeOtherStruct"}
                                         }
                                     ]
                                 }

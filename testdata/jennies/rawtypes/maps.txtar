@@ -67,7 +67,7 @@
                     },
                     "ValueType": {
                         "Kind": "ref",
-                        "Ref": {"ReferredType": "SomeStruct"}
+                        "Ref": {"ReferredPkg": "maps", "ReferredType": "SomeStruct"}
                     }
                 }
             }
