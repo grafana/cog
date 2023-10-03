@@ -2,6 +2,7 @@ package typescript
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -24,8 +25,14 @@ func (jenny RawTypes) Generate(schema *ast.Schema) (codejen.Files, error) {
 		return nil, err
 	}
 
+	filename := filepath.Join(
+		"types",
+		strings.ToLower(schema.Package),
+		"types_gen.ts",
+	)
+
 	return codejen.Files{
-		*codejen.NewFile("types/"+schema.Package+"/types_gen.ts", output, jenny),
+		*codejen.NewFile(filename, output, jenny),
 	}, nil
 }
 

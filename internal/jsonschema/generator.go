@@ -59,8 +59,10 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 			return nil, err
 		}
 	} else {
+		definitionName := g.definitionNameFromRef(schema)
+
 		// The root of the schema contains definitions, and a reference to the "main" object
-		if err := g.declareDefinition(c.Package, schema.Ref); err != nil {
+		if err := g.declareDefinition(definitionName, schema.Ref); err != nil {
 			return nil, err
 		}
 	}
@@ -197,9 +199,14 @@ func (g *generator) walkAllOf(_ *schemaparser.Schema) (ast.Type, error) {
 	return ast.Type{}, nil
 }
 
-func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
+func (g *generator) definitionNameFromRef(schema *schemaparser.Schema) string {
 	parts := strings.Split(schema.Ref.Ptr, "/")
-	referredKindName := parts[len(parts)-1] // Very naive
+
+	return parts[len(parts)-1] // Very naive
+}
+
+func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
+	referredKindName := g.definitionNameFromRef(schema)
 
 	if err := g.declareDefinition(referredKindName, schema.Ref); err != nil {
 		return ast.Type{}, err
