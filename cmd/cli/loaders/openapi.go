@@ -8,8 +8,8 @@ import (
 )
 
 func openapiLoader(opts Options) ([]*ast.File, error) {
-	allSchemas := make([]*ast.File, 0, len(opts.Entrypoints))
-	for _, entrypoint := range opts.Entrypoints {
+	allSchemas := make([]*ast.File, 0, len(opts.OpenApiEntrypoints))
+	for _, entrypoint := range opts.OpenApiEntrypoints {
 		pkg := filepath.Base(filepath.Dir(entrypoint))
 		schemaAst, err := openapi.GenerateAST(entrypoint, openapi.Config{
 			Package: pkg,
