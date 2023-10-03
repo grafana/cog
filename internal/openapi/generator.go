@@ -166,6 +166,7 @@ func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
 	}
 
 	t.Scalar.Constraints = getConstraints(schema)
+	t.Nullable = schema.Nullable
 	return t, nil
 }
 
@@ -180,6 +181,7 @@ func (g *generator) walkNumber(schema *openapi3.Schema) (ast.Type, error) {
 		t = ast.NewScalar(ast.KindFloat32)
 	}
 	t.Scalar.Constraints = getConstraints(schema)
+	t.Nullable = schema.Nullable
 	return t, nil
 }
 
@@ -195,6 +197,7 @@ func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
 	}
 
 	t.Scalar.Constraints = getConstraints(schema)
+	t.Nullable = schema.Nullable
 	return t, nil
 }
 
