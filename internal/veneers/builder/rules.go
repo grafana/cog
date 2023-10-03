@@ -18,3 +18,10 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 		Action:   MergeIntoAction(sourceBuilderName, underPath, excludeOptions),
 	}
 }
+
+func ComposeDashboardPanel(selector Selector, sourceBuilderName string) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   ComposeDashboardPanelAction(sourceBuilderName),
+	}
+}
