@@ -497,10 +497,9 @@ func (t EnumType) DeepCopy() EnumType {
 }
 
 type EnumValue struct {
-	Type    Type
-	Name    string
-	Value   any
-	Default any
+	Type  Type
+	Name  string
+	Value any
 }
 
 func (t EnumValue) DeepCopy() EnumValue {

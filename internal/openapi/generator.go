@@ -123,7 +123,7 @@ func (g *generator) walkRef(ref string) (ast.Type, error) {
 	parts := strings.Split(ref, "/")
 	referredKindName := parts[len(parts)-1]
 
-	return ast.NewRef(referredKindName), nil
+	return ast.NewRef("", referredKindName), nil
 }
 
 func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
@@ -138,7 +138,6 @@ func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
 			Comments: schemaComments(schema),
 			Type:     def,
 			Required: tools.ItemInList(name, schema.Required),
-			Default:  schema.Default,
 		})
 	}
 
@@ -167,6 +166,7 @@ func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
 
 	t.Scalar.Constraints = getConstraints(schema)
 	t.Nullable = schema.Nullable
+	t.Default = schema.Default
 	return t, nil
 }
 
@@ -182,6 +182,7 @@ func (g *generator) walkNumber(schema *openapi3.Schema) (ast.Type, error) {
 	}
 	t.Scalar.Constraints = getConstraints(schema)
 	t.Nullable = schema.Nullable
+	t.Default = schema.Default
 	return t, nil
 }
 
@@ -198,6 +199,7 @@ func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
 
 	t.Scalar.Constraints = getConstraints(schema)
 	t.Nullable = schema.Nullable
+	t.Default = schema.Default
 	return t, nil
 }
 
@@ -239,14 +241,13 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 
 	for _, value := range schema.Enum {
 		enums = append(enums, ast.EnumValue{
-			Type:    enumType,
-			Name:    fmt.Sprintf(format, value),
-			Value:   value,
-			Default: schema.Default,
+			Type:  enumType,
+			Name:  fmt.Sprintf(format, value),
+			Value: value,
 		})
 	}
 
-	return ast.NewEnum(enums), nil
+	return ast.NewEnum(enums, ast.Default(schema.Default)), nil
 }
 
 func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef) (ast.Type, error) {
