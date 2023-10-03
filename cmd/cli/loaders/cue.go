@@ -38,7 +38,10 @@ func cueLoader(opts Options) ([]*ast.Schema, error) {
 		}
 
 		schemaAst, err := simplecue.GenerateAST(values[0], simplecue.Config{
-			Package: pkg, // TODO: extract from input schema/?
+			Package:        pkg, // TODO: extract from input schema/?
+			SchemaMetadata: ast.SchemaMeta{
+				// TODO: extract these from somewhere
+			},
 		})
 		if err != nil {
 			return nil, err

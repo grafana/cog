@@ -332,47 +332,6 @@ func (object Object) DeepCopy() Object {
 	return newObject
 }
 
-type Schemas []*Schema
-
-func (schemas Schemas) DeepCopy() []*Schema {
-	newSchemas := make([]*Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
-		newSchema := schema.DeepCopy()
-		newSchemas = append(newSchemas, &newSchema)
-	}
-
-	return newSchemas
-}
-
-type Schema struct { //nolint: musttag
-	Package string
-	Objects []Object
-}
-
-func (schema *Schema) DeepCopy() Schema {
-	newSchema := Schema{
-		Package: schema.Package,
-		Objects: make([]Object, 0, len(schema.Objects)),
-	}
-
-	for _, def := range schema.Objects {
-		newSchema.Objects = append(newSchema.Objects, def.DeepCopy())
-	}
-
-	return newSchema
-}
-
-func (schema *Schema) LocateDefinition(name string) Object {
-	for _, def := range schema.Objects {
-		if def.Name == name {
-			return def
-		}
-	}
-
-	return Object{}
-}
-
 type Types []Type
 
 func (types Types) HasOnlyScalarOrArray() bool {
