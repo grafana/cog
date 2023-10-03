@@ -10,11 +10,22 @@ import (
 type LoaderRef string
 
 const (
-	CUE           LoaderRef = "cue"
-	KindsysCore   LoaderRef = "kindsys-core"
-	KindsysCustom LoaderRef = "kindsys-custom"
-	JSONSchema    LoaderRef = "jsonschema"
+	CUE               LoaderRef = "cue"
+	KindsysCore       LoaderRef = "kindsys-core"
+	KindsysComposable LoaderRef = "kindsys-composable"
+	KindsysCustom     LoaderRef = "kindsys-custom"
+	JSONSchema        LoaderRef = "jsonschema"
 )
+
+func loadersMap() map[LoaderRef]Loader {
+	return map[LoaderRef]Loader{
+		CUE:               cueLoader,
+		KindsysCore:       kindsysCoreLoader,
+		KindsysComposable: kindsysCompopsableLoader,
+		KindsysCustom:     kindsysCustomLoader,
+		JSONSchema:        jsonschemaLoader,
+	}
+}
 
 type cueIncludeImport struct {
 	fsPath     string // path of the library on the filesystem
@@ -24,10 +35,11 @@ type cueIncludeImport struct {
 type Loader func(opts Options) ([]*ast.File, error)
 
 type Options struct {
-	CueEntrypoints           []string
-	KindsysCoreEntrypoints   []string
-	KindsysCustomEntrypoints []string
-	JSONSchemaEntrypoints    []string
+	CueEntrypoints               []string
+	KindsysCoreEntrypoints       []string
+	KindsysComposableEntrypoints []string
+	KindsysCustomEntrypoints     []string
+	JSONSchemaEntrypoints        []string
 
 	// Cue-specific options
 	CueImports []string
@@ -53,12 +65,7 @@ func (opts Options) cueIncludeImports() ([]cueIncludeImport, error) {
 }
 
 func ForSchemaType(schemaType LoaderRef) (Loader, error) {
-	all := map[LoaderRef]Loader{
-		CUE:           cueLoader,
-		KindsysCore:   kindsysCoreLoader,
-		KindsysCustom: kindsysCustomLoader,
-		JSONSchema:    jsonschemaLoader,
-	}
+	all := loadersMap()
 
 	loader, ok := all[schemaType]
 	if !ok {
@@ -71,14 +78,7 @@ func ForSchemaType(schemaType LoaderRef) (Loader, error) {
 func LoadAll(opts Options) ([]*ast.File, error) {
 	var files []*ast.File
 
-	loaders := []LoaderRef{
-		CUE,
-		KindsysCore,
-		KindsysCustom,
-		JSONSchema,
-	}
-
-	for _, loaderRef := range loaders {
+	for loaderRef := range loadersMap() {
 		loader, err := ForSchemaType(loaderRef)
 		if err != nil {
 			return nil, err

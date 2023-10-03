@@ -8,7 +8,8 @@ import (
 var _ Pass = (*AnonymousEnumToExplicitType)(nil)
 
 type AnonymousEnumToExplicitType struct {
-	newObjects []ast.Object
+	newObjects     []ast.Object
+	currentPackage string
 }
 
 func (pass *AnonymousEnumToExplicitType) Process(files []*ast.File) ([]*ast.File, error) {
@@ -28,6 +29,7 @@ func (pass *AnonymousEnumToExplicitType) Process(files []*ast.File) ([]*ast.File
 
 func (pass *AnonymousEnumToExplicitType) processFile(file *ast.File) (*ast.File, error) {
 	pass.newObjects = nil
+	pass.currentPackage = file.Package
 
 	processedObjects := make([]ast.Object, 0, len(file.Definitions))
 	for _, object := range file.Definitions {
@@ -104,5 +106,5 @@ func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(parentName string,
 		Type: ast.NewEnum(values),
 	})
 
-	return ast.NewRef(enumTypeName)
+	return ast.NewRef(pass.currentPackage, enumTypeName)
 }

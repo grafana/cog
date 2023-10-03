@@ -10,7 +10,7 @@ import (
 )
 
 type Builder struct {
-	imports []string
+	imports importMap
 }
 
 func (jenny *Builder) JennyName() string {
@@ -33,7 +33,7 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder) []byte {
 	var buffer strings.Builder
 
-	jenny.imports = nil
+	jenny.imports = newImportMap()
 
 	builderSource := jenny.generateBuilderSource(builders, builder)
 
@@ -41,9 +41,8 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.For.Name)))
 
 	// write import statements
-	buffer.WriteString("import (\n")
-	buffer.WriteString(strings.Join(jenny.imports, "\n"))
-	buffer.WriteString(")\n\n")
+	buffer.WriteString(jenny.imports.Format())
+	buffer.WriteString("\n\n")
 
 	// write the builder source code
 	buffer.WriteString(builderSource)
@@ -51,15 +50,11 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	return []byte(buffer.String())
 }
 
-func (jenny *Builder) declareImport(importStatement string) {
-	jenny.imports = append(jenny.imports, importStatement)
-}
-
 func (jenny *Builder) generateBuilderSource(builders ast.Builders, builder ast.Builder) string {
 	var buffer strings.Builder
 
 	// import generated types
-	jenny.declareImport(fmt.Sprintf("types \"github.com/grafana/cog/generated/types/%s\"", builder.Package))
+	jenny.imports.Add("types", "github.com/grafana/cog/generated/types/"+builder.Package)
 
 	// Option type declaration
 	buffer.WriteString("type Option func(builder *Builder) error\n\n")
@@ -139,8 +134,7 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 		fieldsInit = strings.Join(fieldsInitList, ",\n") + ",\n"
 	}
 
-	buffer.WriteString(fmt.Sprintf(`
-func New(%[2]soptions ...Option) (Builder, error) {
+	buffer.WriteString(fmt.Sprintf(`func New(%[2]soptions ...Option) (Builder, error) {
 	resource := &types.%[1]s{
 		%[3]s
 	}
@@ -243,18 +237,25 @@ func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder,
 		return "", false
 	}
 
-	referredTypeName := t.AsRef().ReferredType
-	referredTypePkg := strings.ToLower(referredTypeName)
-	_, builderFound := builders.LocateByObject(builder.Package, referredTypeName)
+	ref := t.AsRef()
+	_, builderFound := builders.LocateByObject(builder.Package, ref.ReferredType)
 
-	return referredTypePkg, builderFound
+	return ref.ReferredPkg, builderFound
 }
 
 func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
-	typeName := strings.Trim(formatType(arg.Type, "types"), "*")
+	typeName := strings.Trim(formatType(arg.Type, func(pkg string) string {
+		if pkg == builder.Package {
+			return "types"
+		}
+
+		jenny.imports.Add(pkg, fmt.Sprintf("github.com/grafana/cog/generated/types/%s", pkg))
+
+		return pkg
+	}), "*")
 
 	if builderPkg, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
-		jenny.declareImport(fmt.Sprintf("\"github.com/grafana/cog/generated/%s/%s\"", strings.ToLower(builder.Package), builderPkg))
+		jenny.imports.Add(builderPkg, fmt.Sprintf("github.com/grafana/cog/generated/%s/%s", strings.ToLower(builder.Package), builderPkg))
 
 		return fmt.Sprintf(`opts ...%[1]s.Option`, builderPkg)
 	}

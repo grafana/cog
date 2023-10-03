@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
+	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -218,13 +220,81 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 	return fields, nil
 }
 
+// FIXME: this is probably very brittle and not always correct :|
+func (g *generator) referencePackage(source cueast.Node) (string, error) {
+	switch source.(type) { //nolint: gocritic
+	case *cueast.SelectorExpr:
+		selector := source.(*cueast.SelectorExpr)
+
+		x := selector.X.(*cueast.Ident)
+
+		return x.Name, nil
+	case *cueast.Field:
+		field := source.(*cueast.Field)
+
+		if _, ok := field.Value.(*cueast.SelectorExpr); ok {
+			return g.referencePackage(field.Value)
+		}
+
+		ident := field.Value.(*cueast.Ident)
+
+		if ident.Scope == nil {
+			return g.file.Package, nil
+		}
+
+		if _, ok := ident.Scope.(*cueast.File); !ok {
+			return g.file.Package, nil
+		}
+
+		scope := ident.Scope.(*cueast.File)
+		if len(scope.Decls) == 0 {
+			return g.file.Package, nil
+		}
+
+		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
+
+		return referredTypePkg.Name, nil
+	case *cueast.Ident:
+		ident := source.(*cueast.Ident)
+		if ident.Scope == nil {
+			return g.file.Package, nil
+		}
+
+		if _, ok := ident.Scope.(*cueast.File); !ok {
+			return g.file.Package, nil
+		}
+
+		scope := ident.Scope.(*cueast.File)
+		if len(scope.Decls) == 0 {
+			return g.file.Package, nil
+		}
+
+		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
+
+		return referredTypePkg.Name, nil
+	case *cueast.Ellipsis: // TODO: this makes no sense
+		return g.file.Package, nil
+	default:
+		spew.Dump(source)
+		return "", fmt.Errorf("can't extract reference package")
+	}
+}
+
 func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	// This node is referring to another definition
 	_, path := v.ReferencePath()
 	if path.String() != "" {
 		selectors := path.Selectors()
 
-		return ast.NewRef(selectorLabel(selectors[len(selectors)-1])), nil
+		refPkg, err := g.referencePackage(v.Source())
+		if err != nil {
+			return ast.Type{}, errorWithCueRef(v, err.Error())
+		}
+
+		return ast.NewRef(
+			refPkg,
+			selectorLabel(selectors[len(selectors)-1]),
+		), nil
 	}
 
 	disjunctions := appendSplit(nil, cue.OrOp, v)

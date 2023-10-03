@@ -19,7 +19,7 @@ func (jenny OptionsBuilder) Generate(_ []*ast.File) (*codejen.File, error) {
 }
 
 func (jenny OptionsBuilder) generateFile() string {
-	return `export interface OptionsBuilder<T> {
+	return `export interface CogOptionsBuilder<T> {
   build: () => T;
 }
 `
