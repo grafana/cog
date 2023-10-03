@@ -50,3 +50,9 @@ func MergeIntoAction(sourceBuilderName string, underPath string, excludeOptions 
 		return newBuilder
 	}
 }
+
+func ComposeDashboardPanelAction(_ /*panelBuilderName*/ string) RewriteAction {
+	return func(builders ast.Builders, destinationBuilder ast.Builder) ast.Builder {
+		return destinationBuilder
+	}
+}

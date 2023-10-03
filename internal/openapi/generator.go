@@ -23,7 +23,8 @@ const (
 )
 
 type Config struct {
-	Package string
+	Package        string
+	SchemaMetadata ast.SchemaMeta
 }
 
 type generator struct {
@@ -42,7 +43,10 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	}
 
 	g := &generator{
-		file: &ast.Schema{Package: cfg.Package},
+		file: &ast.Schema{
+			Package:  cfg.Package,
+			Metadata: cfg.SchemaMetadata,
+		},
 	}
 
 	if oapi.Components == nil {

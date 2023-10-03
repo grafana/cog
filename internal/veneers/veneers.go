@@ -31,6 +31,12 @@ func Common() *Rewriter {
 				},
 			),
 
+			// Panels composability
+			builder.ComposeDashboardPanel(
+				builder.ComposableDashboardPanel(),
+				"dashboard.Panel",
+			),
+
 			// remove builders that were previously merged into something else
 			builder.Omit(builder.ByName("FieldConfig")),
 			builder.Omit(builder.ByName("FieldConfigSource")),
