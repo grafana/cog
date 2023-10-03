@@ -1,9 +1,16 @@
 package ast
 
 type Builder struct {
-	Package         string
-	Schema          *Schema
-	For             Object
+	// Original data used to derive the builder, stored for read-only access
+	// for the jennies and veneers.
+	Schema *Schema
+	For    Object
+
+	// The builder itself
+	// These fields are completely derived from the fields above and can be freely manipulated
+	// by veneers.
+	RootPackage     string // ie: dashboard, alert, ... // TODO: better names and docs
+	Package         string // ie: panel, link, ...
 	Options         []Option
 	Initializations []Assignment
 }
@@ -12,7 +19,7 @@ type Builders []Builder
 
 func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
-		if builder.Package == pkg && builder.For.Name == name {
+		if builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name {
 			return builder, true
 		}
 	}
@@ -75,10 +82,10 @@ func (generator *BuilderGenerator) FromAST(schemas []*Schema) []Builder {
 
 func (generator *BuilderGenerator) structObjectToBuilder(schema *Schema, object Object) Builder {
 	builder := Builder{
-		Package: schema.Package,
-		Schema:  schema,
-		For:     object,
-		Options: nil,
+		RootPackage: schema.Package,
+		Package:     object.Name,
+		Schema:      schema,
+		For:         object,
 	}
 	structType := object.Type.AsStruct()
 
