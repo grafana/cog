@@ -133,7 +133,13 @@ func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeD
 		return jenny.emptyValueForType(builders, pkg, typeDef.AsDisjunction().Branches[0])
 	case ast.KindRef:
 		ref := typeDef.AsRef()
-		referredTypeBuilder, _ := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+		// FIXME: trying to find a reference to an object by only looking at builders is wrong
+		// since the builder could be omitted by veneers
+		referredTypeBuilder, found := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+		if !found {
+			return fmt.Sprintf("\"ref to %s.%s not found\"", ref.ReferredPkg, ref.ReferredType)
+		}
+
 		return jenny.emptyValueForType(builders, referredTypeBuilder.Package, referredTypeBuilder.For.Type)
 	case ast.KindEnum:
 		return jenny.formatEnumDefault(typeDef.AsEnum().Values)
