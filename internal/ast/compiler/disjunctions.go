@@ -214,6 +214,10 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	pass.newObjects[newTypeName] = ast.Object{
 		Name: newTypeName,
 		Type: structType,
+		SelfRef: ast.RefType{
+			ReferredPkg:  schema.Package,
+			ReferredType: newTypeName,
+		},
 	}
 
 	ref := ast.NewRef(schema.Package, newTypeName)

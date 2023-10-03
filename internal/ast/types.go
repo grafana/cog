@@ -312,19 +312,25 @@ type Object struct {
 	Name     string
 	Comments []string
 	Type     Type
+	SelfRef  RefType
 }
 
-func NewObject(name string, objectType Type) Object {
+func NewObject(pkg string, name string, objectType Type) Object {
 	return Object{
 		Name: name,
 		Type: objectType,
+		SelfRef: RefType{
+			ReferredPkg:  pkg,
+			ReferredType: name,
+		},
 	}
 }
 
 func (object Object) DeepCopy() Object {
 	newObject := Object{
-		Name: object.Name,
-		Type: object.Type.DeepCopy(),
+		Name:    object.Name,
+		Type:    object.Type.DeepCopy(),
+		SelfRef: object.SelfRef.DeepCopy(),
 	}
 
 	newObject.Comments = append(newObject.Comments, object.Comments...)

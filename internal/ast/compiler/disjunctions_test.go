@@ -11,9 +11,9 @@ import (
 func TestDisjunctionToType_WithNonDisjunctionObjects_HasNoImpact(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("AMap", ast.NewMap(ast.String(), ast.String())),
-		ast.NewObject("ARef", ast.NewRef("test", "AMap")),
-		ast.NewObject("AnEnum", ast.NewEnum([]ast.EnumValue{
+		ast.NewObject("test", "AMap", ast.NewMap(ast.String(), ast.String())),
+		ast.NewObject("test", "ARef", ast.NewRef("test", "AMap")),
+		ast.NewObject("test", "AnEnum", ast.NewEnum([]ast.EnumValue{
 			{
 				Name:  "Foo",
 				Type:  ast.String(),
@@ -25,9 +25,9 @@ func TestDisjunctionToType_WithNonDisjunctionObjects_HasNoImpact(t *testing.T) {
 				Value: "bar",
 			},
 		})),
-		ast.NewObject("AnArray", ast.NewArray(ast.String())),
-		ast.NewObject("AScalar", ast.NewScalar(ast.KindInt8)),
-		ast.NewObject("AStruct", ast.NewStruct(
+		ast.NewObject("test", "AnArray", ast.NewArray(ast.String())),
+		ast.NewObject("test", "AScalar", ast.NewScalar(ast.KindInt8)),
+		ast.NewObject("test", "AStruct", ast.NewStruct(
 			ast.NewStructField("SomeNonDisjunctionField", ast.NewScalar(ast.KindInt8)),
 		)),
 	}
@@ -39,19 +39,19 @@ func TestDisjunctionToType_WithNonDisjunctionObjects_HasNoImpact(t *testing.T) {
 func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAnObject(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("ScalarWithNull", ast.NewDisjunction([]ast.Type{
+		ast.NewObject("test", "ScalarWithNull", ast.NewDisjunction([]ast.Type{
 			ast.String(),
 			ast.Null(),
 		})),
-		ast.NewObject("RefWithNull", ast.NewDisjunction([]ast.Type{
+		ast.NewObject("test", "RefWithNull", ast.NewDisjunction([]ast.Type{
 			ast.NewRef("test", "SomeType"),
 			ast.Null(),
 		})),
 	}
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("ScalarWithNull", ast.String(ast.Nullable())),
-		ast.NewObject("RefWithNull", ast.NewRef("test", "SomeType", ast.Nullable())),
+		ast.NewObject("test", "ScalarWithNull", ast.String(ast.Nullable())),
+		ast.NewObject("test", "RefWithNull", ast.NewRef("test", "SomeType", ast.Nullable())),
 	}
 
 	// Call the compiler pass
@@ -61,13 +61,13 @@ func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAnObject(t *testing.T)
 func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAStructField(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("StructWithScalarWithNull", ast.NewStruct(
+		ast.NewObject("test", "StructWithScalarWithNull", ast.NewStruct(
 			ast.NewStructField("Field", ast.NewDisjunction([]ast.Type{
 				ast.String(),
 				ast.Null(),
 			})),
 		)),
-		ast.NewObject("StructWithRefWithNull", ast.NewStruct(
+		ast.NewObject("test", "StructWithRefWithNull", ast.NewStruct(
 			ast.NewStructField("Field", ast.NewDisjunction([]ast.Type{
 				ast.NewRef("test", "SomeType"),
 				ast.Null(),
@@ -76,10 +76,10 @@ func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAStructField(t *testin
 	}
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("StructWithScalarWithNull", ast.NewStruct(
+		ast.NewObject("test", "StructWithScalarWithNull", ast.NewStruct(
 			ast.NewStructField("Field", ast.String(ast.Nullable())),
 		)),
-		ast.NewObject("StructWithRefWithNull", ast.NewStruct(
+		ast.NewObject("test", "StructWithRefWithNull", ast.NewStruct(
 			ast.NewStructField("Field", ast.NewRef("test", "SomeType", ast.Nullable())),
 		)),
 	}
@@ -91,7 +91,7 @@ func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAStructField(t *testin
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfScalars", ast.NewDisjunction([]ast.Type{
+		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewDisjunction([]ast.Type{
 			ast.String(),
 			ast.Bool(),
 		})),
@@ -106,8 +106,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = objects[0].Type.AsDisjunction()
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("ADisjunctionOfScalars", ast.NewRef("test", "StringOrBool")),
-		ast.NewObject("StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewRef("test", "StringOrBool")),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType),
 	}
 
 	// Call the compiler pass
@@ -117,7 +117,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAMapValueType(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfScalars", ast.NewMap(
+		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewMap(
 			ast.String(),
 			ast.NewDisjunction([]ast.Type{
 				ast.String(),
@@ -135,11 +135,11 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAMapValueType(t *testing.T
 	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = objects[0].Type.AsMap().ValueType.AsDisjunction()
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("ADisjunctionOfScalars", ast.NewMap(
+		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewMap(
 			ast.String(),
 			ast.NewRef("test", "StringOrBool"),
 		)),
-		ast.NewObject("StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType),
 	}
 
 	// Call the compiler pass
@@ -153,7 +153,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T)
 		ast.Bool(),
 	})
 	objects := []ast.Object{
-		ast.NewObject("AStructWithADisjunctionOfScalars", ast.NewStruct(
+		ast.NewObject("test", "AStructWithADisjunctionOfScalars", ast.NewStruct(
 			ast.NewStructField("AFieldWithADisjunctionOfScalars", disjunctionType),
 		)),
 	}
@@ -167,10 +167,10 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T)
 	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("AStructWithADisjunctionOfScalars", ast.NewStruct(
+		ast.NewObject("test", "AStructWithADisjunctionOfScalars", ast.NewStruct(
 			ast.NewStructField("AFieldWithADisjunctionOfScalars", ast.NewRef("test", "StringOrBool")),
 		)),
-		ast.NewObject("StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType),
 	}
 
 	// Call the compiler pass
@@ -184,7 +184,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testin
 		ast.Bool(),
 	})
 	objects := []ast.Object{
-		ast.NewObject("AnArrayWithADisjunctionOfScalars", ast.NewArray(disjunctionType)),
+		ast.NewObject("test", "AnArrayWithADisjunctionOfScalars", ast.NewArray(disjunctionType)),
 	}
 
 	// Prepare expected output
@@ -196,8 +196,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testin
 	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("AnArrayWithADisjunctionOfScalars", ast.NewArray(ast.NewRef("test", "StringOrBool"))),
-		ast.NewObject("StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "AnArrayWithADisjunctionOfScalars", ast.NewArray(ast.NewRef("test", "StringOrBool"))),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType),
 	}
 
 	// Call the compiler pass
@@ -209,16 +209,16 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
+		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
 			ast.NewRef("test", "SomeStruct"),
 			ast.NewRef("test", "OtherStruct"),
 		})),
 
-		ast.NewObject("SomeStruct", ast.NewStruct(
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
 			ast.NewStructField("Kind", ast.String(ast.Value("some-struct"))), // No equivalent in OtherStruct
 			ast.NewStructField("FieldFoo", ast.String()),
 		)),
-		ast.NewObject("OtherStruct", ast.NewStruct(
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
@@ -244,13 +244,13 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	disjunctionType.Disjunction.Discriminator = "MapOfString"
 
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", disjunctionType),
+		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
-		ast.NewObject("SomeStruct", ast.NewStruct(
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
 			ast.NewStructField("FieldFoo", ast.String()),
 			ast.NewStructField("MapOfString", ast.NewMap(ast.String(), ast.String())),
 		)),
-		ast.NewObject("OtherStruct", ast.NewStruct(
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
 			ast.NewStructField("FieldBar", ast.Bool()),
 			ast.NewStructField("MapOfString", ast.NewMap(ast.String(), ast.String())),
 		)),
@@ -276,13 +276,13 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	disjunctionType.Disjunction.Discriminator = "Type"
 
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", disjunctionType),
+		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
-		ast.NewObject("SomeStruct", ast.NewStruct(
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String()), // Not a concrete scalar
 			ast.NewStructField("FieldFoo", ast.String()),
 		)),
-		ast.NewObject("OtherStruct", ast.NewStruct(
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
@@ -308,13 +308,13 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	disjunctionType.Disjunction.Discriminator = "DoesNotExist"
 
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", disjunctionType),
+		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
-		ast.NewObject("SomeStruct", ast.NewStruct(
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("some-struct"))),
 			ast.NewStructField("FieldFoo", ast.String()),
 		)),
-		ast.NewObject("OtherStruct", ast.NewStruct(
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
@@ -332,16 +332,16 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
+		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
 			ast.NewRef("test", "SomeStruct"),
 			ast.NewRef("test", "OtherStruct"),
 		})),
 
-		ast.NewObject("SomeStruct", ast.NewStruct(
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("some-struct"))),
 			ast.NewStructField("FieldFoo", ast.String()),
 		)),
-		ast.NewObject("OtherStruct", ast.NewStruct(
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
 			ast.NewStructField("FieldBar", ast.NewMap(ast.String(), ast.String())),
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 		)),
@@ -364,10 +364,10 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
+		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
 		objects[1],
 		objects[2],
-		ast.NewObject("SomeStructOrOtherStruct", disjunctionStructType),
+		ast.NewObject("test", "SomeStructOrOtherStruct", disjunctionStructType),
 	}
 
 	// Call the compiler pass
@@ -386,14 +386,14 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	disjunctionType.Disjunction.Discriminator = "Kind"
 
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", disjunctionType),
+		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
-		ast.NewObject("SomeStruct", ast.NewStruct(
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("some-struct"))),
 			ast.NewStructField("Kind", ast.String(ast.Value("some-kind"))),
 			ast.NewStructField("FieldFoo", ast.String()),
 		)),
-		ast.NewObject("OtherStruct", ast.NewStruct(
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("Kind", ast.String(ast.Value("other-kind"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
@@ -417,10 +417,10 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
+		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
 		objects[1],
 		objects[2],
-		ast.NewObject("SomeStructOrOtherStruct", disjunctionStructType),
+		ast.NewObject("test", "SomeStructOrOtherStruct", disjunctionStructType),
 	}
 
 	// Call the compiler pass
@@ -441,14 +441,14 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	}
 
 	objects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", disjunctionType),
+		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
-		ast.NewObject("SomeStruct", ast.NewStruct(
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("some-struct"))),
 			ast.NewStructField("Kind", ast.String(ast.Value("some-kind"))),
 			ast.NewStructField("FieldFoo", ast.String()),
 		)),
-		ast.NewObject("OtherStruct", ast.NewStruct(
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("Kind", ast.String(ast.Value("other-kind"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
@@ -472,10 +472,10 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
+		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
 		objects[1],
 		objects[2],
-		ast.NewObject("SomeStructOrOtherStruct", disjunctionStructType),
+		ast.NewObject("test", "SomeStructOrOtherStruct", disjunctionStructType),
 	}
 
 	// Call the compiler pass

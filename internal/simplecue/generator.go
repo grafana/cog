@@ -104,6 +104,10 @@ func (g *generator) declareTopLevelString(name string, v cue.Value) (ast.Object,
 		Name:     name,
 		Comments: commentsFromCueValue(v),
 		Type:     strType,
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: name,
+		},
 	}, nil
 }
 
@@ -124,6 +128,10 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 		Name:     name,
 		Comments: commentsFromCueValue(v),
 		Type:     ast.NewEnum(values),
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: name,
+		},
 	}, nil
 }
 
@@ -196,6 +204,10 @@ func (g *generator) declareTopLevelStruct(name string, v cue.Value) (ast.Object,
 		Name:     name,
 		Comments: commentsFromCueValue(v),
 		Type:     nodeType,
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: name,
+		},
 	}
 
 	return typeDef, nil
