@@ -45,6 +45,10 @@ func kindsysCustomLoader(opts Options) ([]*ast.Schema, error) {
 
 		schemaAst, err := simplecue.GenerateAST(kindToLatestSchema(boundKind), simplecue.Config{
 			Package: pkg, // TODO: extract from input schema/folder?
+			SchemaMetadata: ast.SchemaMeta{
+				Kind:       ast.SchemaKindCore, // TODO: is there any need for a "SchemaKindCustom"?
+				Identifier: pkg,                // TODO: maybe even core kinds could have one explicitly set in their schema?
+			},
 		})
 		if err != nil {
 			return nil, err

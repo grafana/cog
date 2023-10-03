@@ -19,6 +19,8 @@ const enumMembersAttr = "memberNames"
 type Config struct {
 	// Package name used to generate code into.
 	Package string
+
+	SchemaMetadata ast.SchemaMeta
 }
 
 type generator struct {
@@ -28,7 +30,8 @@ type generator struct {
 func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 	g := &generator{
 		schema: &ast.Schema{
-			Package: c.Package,
+			Package:  c.Package,
+			Metadata: c.SchemaMetadata,
 		},
 	}
 
