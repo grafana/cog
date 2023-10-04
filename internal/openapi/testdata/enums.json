@@ -1,0 +1,42 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "enums",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Enums": {
+        "type": "object",
+        "required": [
+          "enumString"
+        ],
+        "properties": {
+          "enumString": {
+            "type": "string",
+            "enum": [
+              "a",
+              "b"
+            ]
+          },
+          "enumInt": {
+            "type": "integer",
+            "enum": [
+              3,
+              4
+            ]
+          },
+          "enumWithDefault": {
+            "type": "string",
+            "enum": [
+              "a",
+              "b"
+            ],
+            "default": "a"
+          }
+        }
+      }
+    }
+  }
+}
