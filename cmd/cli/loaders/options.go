@@ -42,7 +42,7 @@ type Options struct {
 	KindsysComposableEntrypoints []string
 	KindsysCustomEntrypoints     []string
 	JSONSchemaEntrypoints        []string
-	OpenApiEntrypoints           []string
+	OpenAPIEntrypoints           []string
 
 	// Cue-specific options
 	CueImports []string
