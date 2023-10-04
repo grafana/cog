@@ -33,7 +33,7 @@ func testData() []rewriteTestCase {
 			description:   "omit an entire builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules: []builder.RewriteRule{
-				builder.Omit(builder.ByName("Dashboard")),
+				builder.Omit(builder.ByObjectName("Dashboard")),
 			},
 			optionRules:    nil,
 			outputBuilders: ast.Builders{panelBuilder()},

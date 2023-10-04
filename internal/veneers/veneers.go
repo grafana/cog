@@ -8,18 +8,22 @@ import (
 func Common() *Rewriter {
 	return NewRewrite(
 		[]builder.RewriteRule{
+			/********************************************
+			 * Dashboards
+			 ********************************************/
+
 			// We don't want these builders at all
-			builder.Omit(builder.ByName("GridPos")),
-			builder.Omit(builder.ByName("DataSourceRef")),
-			builder.Omit(builder.ByName("LibraryPanelRef")),
+			builder.Omit(builder.ByObjectName("dashboard.GridPos")),
+			builder.Omit(builder.ByObjectName("dashboard.DataSourceRef")),
+			builder.Omit(builder.ByObjectName("dashboard.LibraryPanelRef")),
 
 			// No need for builders for structs generated from a disjunction
 			builder.Omit(builder.StructGeneratedFromDisjunction()),
 
 			// rearrange things a bit
 			builder.MergeInto(
-				builder.ByName("Panel"),
-				"FieldConfig",
+				builder.ByObjectName("dashboard.Panel"),
+				"dashboard.FieldConfig",
 				"fieldConfig.defaults",
 
 				[]string{
@@ -38,8 +42,8 @@ func Common() *Rewriter {
 			),
 
 			// remove builders that were previously merged into something else
-			builder.Omit(builder.ByName("FieldConfig")),
-			builder.Omit(builder.ByName("FieldConfigSource")),
+			builder.Omit(builder.ByObjectName("dashboard.FieldConfig")),
+			builder.Omit(builder.ByObjectName("dashboard.FieldConfigSource")),
 		},
 
 		[]option.RewriteRule{
