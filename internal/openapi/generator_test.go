@@ -1,13 +1,14 @@
 package openapi
 
 import (
+	"testing"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
-var testFolder = "testdata/"
+const testFolder = "testdata/"
 
 func TestDataTypes(t *testing.T) {
 	f, err := GenerateAST(testFolder+"datatypes.json", Config{Package: "datatypes"})
@@ -216,6 +217,7 @@ type field struct {
 }
 
 func validateFields(t *testing.T, s ast.StructType, f field) {
+	t.Helper()
 	field, ok := s.FieldByName(f.name)
 	require.True(t, ok)
 
@@ -229,6 +231,7 @@ func validateFields(t *testing.T, s ast.StructType, f field) {
 }
 
 func validateKind(t *testing.T, tp ast.Type, f field) {
+	t.Helper()
 	switch tp.Kind {
 	case ast.KindScalar:
 		assert.Equal(t, tp.AsScalar().ScalarKind, f.scalarKind)
