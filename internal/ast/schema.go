@@ -15,6 +15,21 @@ const (
 
 type Schemas []*Schema
 
+func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
+	for _, schema := range schemas {
+		if schema.Package != pkg {
+			continue
+		}
+
+		obj := schema.LocateObject(name)
+
+		// TODO: schema.LocateObject() should return a "found" boolean
+		return obj, obj.Name != ""
+	}
+
+	return Object{}, false
+}
+
 func (schemas Schemas) DeepCopy() []*Schema {
 	newSchemas := make([]*Schema, 0, len(schemas))
 
@@ -46,7 +61,7 @@ func (schema *Schema) DeepCopy() Schema {
 	return newSchema
 }
 
-func (schema *Schema) LocateDefinition(name string) Object {
+func (schema *Schema) LocateObject(name string) Object {
 	for _, def := range schema.Objects {
 		if def.Name == name {
 			return def

@@ -63,31 +63,51 @@ type Assignment struct {
 type BuilderGenerator struct {
 }
 
-func (generator *BuilderGenerator) FromAST(schemas []*Schema) []Builder {
+func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
 	builders := make([]Builder, 0, len(schemas))
 
 	for _, schema := range schemas {
 		for _, object := range schema.Objects {
-			// we only want builders for structs
-			if object.Type.Kind != KindStruct {
+			// we only want builders for structs or references to structs
+			if object.Type.Kind == KindRef {
+				ref := object.Type.AsRef()
+				referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
+				if !found {
+					continue
+				}
+
+				if referredObj.Type.Kind != KindStruct {
+					continue
+				}
+			}
+
+			if object.Type.Kind != KindStruct && object.Type.Kind != KindRef {
 				continue
 			}
 
-			builders = append(builders, generator.structObjectToBuilder(schema, object))
+			builders = append(builders, generator.structObjectToBuilder(schemas, schema, object))
 		}
 	}
 
 	return builders
 }
 
-func (generator *BuilderGenerator) structObjectToBuilder(schema *Schema, object Object) Builder {
+func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema *Schema, object Object) Builder {
 	builder := Builder{
 		RootPackage: schema.Package,
 		Package:     object.Name,
 		Schema:      schema,
 		For:         object,
 	}
-	structType := object.Type.AsStruct()
+
+	var structType StructType
+	if object.Type.Kind == KindStruct {
+		structType = object.Type.AsStruct()
+	} else {
+		ref := object.Type.AsRef()
+		referredObj, _ := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
+		structType = referredObj.Type.AsStruct()
+	}
 
 	for _, field := range structType.Fields {
 		if generator.fieldHasStaticValue(field) {

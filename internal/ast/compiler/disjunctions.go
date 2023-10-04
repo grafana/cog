@@ -289,7 +289,7 @@ func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def a
 	for _, branch := range def.Branches {
 		// FIXME: what if the definition is itself a reference? Resolve recursively?
 		typeName := branch.AsRef().ReferredType
-		structType := schema.LocateDefinition(typeName).Type.AsStruct()
+		structType := schema.LocateObject(typeName).Type.AsStruct()
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
@@ -343,7 +343,7 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def
 	for _, branch := range def.Branches {
 		// FIXME: what if the definition is itself a reference? Resolve recursively?
 		typeName := branch.AsRef().ReferredType
-		structType := schema.LocateDefinition(typeName).Type.AsStruct()
+		structType := schema.LocateObject(typeName).Type.AsStruct()
 
 		field, found := structType.FieldByName(def.Discriminator)
 		if !found {
