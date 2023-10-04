@@ -63,7 +63,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 
 		firstArgType := option.Args[0].Type
 		if firstArgType.Kind == ast.KindRef {
-			referredObject := builder.Schema.LocateDefinition(firstArgType.AsRef().ReferredType)
+			referredObject := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
 			firstArgType = referredObject.Type
 		}
 
