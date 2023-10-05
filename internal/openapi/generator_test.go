@@ -14,9 +14,9 @@ func TestDataTypes(t *testing.T) {
 	f, err := GenerateAST(testFolder+"datatypes.json", Config{Package: "datatypes"})
 	require.NoError(t, err)
 
-	require.Len(t, f.Definitions, 1)
+	require.Len(t, f.Objects, 1)
 
-	def := f.Definitions[0]
+	def := f.Objects[0]
 	assert.Equal(t, def.Name, "DataTypes")
 	assert.Equal(t, def.Type.Kind, ast.KindStruct)
 
@@ -74,9 +74,9 @@ func TestEnums(t *testing.T) {
 	f, err := GenerateAST(testFolder+"enums.json", Config{Package: "enums"})
 	require.NoError(t, err)
 
-	require.Len(t, f.Definitions, 1)
+	require.Len(t, f.Objects, 1)
 
-	def := f.Definitions[0]
+	def := f.Objects[0]
 	assert.Equal(t, def.Name, "Enums")
 	assert.Equal(t, def.Type.Kind, ast.KindStruct)
 
@@ -145,7 +145,7 @@ func TestArrays(t *testing.T) {
 	f, err := GenerateAST(testFolder+"arrays.json", Config{Package: "arrays"})
 	require.NoError(t, err)
 
-	require.Len(t, f.Definitions, 2)
+	require.Len(t, f.Objects, 2)
 	def := f.LocateDefinition("Arrays")
 	assert.Equal(t, def.Type.Kind, ast.KindStruct)
 
@@ -183,7 +183,7 @@ func TestRefs(t *testing.T) {
 	f, err := GenerateAST(testFolder+"refs.json", Config{Package: "refs"})
 	require.NoError(t, err)
 
-	require.Len(t, f.Definitions, 2)
+	require.Len(t, f.Objects, 2)
 	def := f.LocateDefinition("Refs")
 	assert.Equal(t, def.Type.Kind, ast.KindStruct)
 

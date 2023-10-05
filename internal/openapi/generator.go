@@ -27,10 +27,10 @@ type Config struct {
 }
 
 type generator struct {
-	file *ast.File
+	file *ast.Schema
 }
 
-func GenerateAST(filePath string, cfg Config) (*ast.File, error) {
+func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	loader := openapi3.NewLoader()
 	oapi, err := loader.LoadFromFile(filePath)
 	if err != nil {
@@ -42,7 +42,7 @@ func GenerateAST(filePath string, cfg Config) (*ast.File, error) {
 	}
 
 	g := &generator{
-		file: &ast.File{Package: cfg.Package},
+		file: &ast.Schema{Package: cfg.Package},
 	}
 
 	if oapi.Components == nil {
@@ -63,7 +63,7 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 			return err
 		}
 
-		g.file.Definitions = append(g.file.Definitions, ast.Object{
+		g.file.Objects = append(g.file.Objects, ast.Object{
 			Name:     name,
 			Comments: schemaComments(schemaRef.Value),
 			Type:     def,
