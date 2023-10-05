@@ -21,6 +21,6 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<types.{{ .Name }}> 
         return this.internal;
     }
 
-    {{- range $option := .Options }}{{ $option }}{{- end }}
+    {{ range $option := .Options }}{{ $option }}{{- end }}
 
 }
