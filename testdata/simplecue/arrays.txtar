@@ -103,6 +103,7 @@ container: {
                     "Kind": "ref",
                     "Nullable": false,
                     "Ref": {
+                      "ReferredPkg": "grafanatest",
                       "ReferredType": "struct"
                     }
                   }

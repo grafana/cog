@@ -2,7 +2,7 @@
 -- schema.cue --
 container: {
     text: string | [...string]
-    refresh?: string | false
+    stringOrFalse: string | false
 }
 -- out/simplecue/GenerateAST --
 == ir.json
@@ -58,7 +58,7 @@ container: {
               "Default": null
             },
             {
-              "Name": "refresh",
+              "Name": "stringOrFalse",
               "Comments": [],
               "Type": {
                 "Kind": "disjunction",
@@ -88,7 +88,7 @@ container: {
                   "DiscriminatorMapping": {}
                 }
               },
-              "Required": false,
+              "Required": true,
               "Default": null
             }
           ],
