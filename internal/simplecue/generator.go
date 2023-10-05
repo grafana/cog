@@ -117,10 +117,15 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 		return ast.Object{}, err
 	}
 
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Object{}, err
+	}
+
 	return ast.Object{
 		Name:     name,
 		Comments: commentsFromCueValue(v),
-		Type:     ast.NewEnum(values),
+		Type:     ast.NewEnum(values, ast.Default(defVal)),
 	}, nil
 }
 
@@ -168,6 +173,7 @@ func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		fields = append(fields, ast.EnumValue{
 			Type:  subType,
 			Name:  text,
@@ -303,12 +309,17 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		), nil
 	}
 
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
 	disjunctions := appendSplit(nil, cue.OrOp, v)
 	if len(disjunctions) != 1 {
 		allowedKindsForAnonymousEnum := cue.StringKind | cue.IntKind
 		ik := v.IncompleteKind()
 		if ik&allowedKindsForAnonymousEnum == ik {
-			return g.declareAnonymousEnum(v)
+			return g.declareAnonymousEnum(v, defVal)
 		}
 
 		branches := make([]ast.Type, 0, len(disjunctions))
@@ -322,11 +333,6 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		}
 
 		return ast.NewDisjunction(branches), nil
-	}
-
-	defVal, err := g.extractDefault(v)
-	if err != nil {
-		return ast.Type{}, err
 	}
 
 	switch v.IncompleteKind() {
@@ -374,7 +380,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	}
 }
 
-func (g *generator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
+func (g *generator) declareAnonymousEnum(v cue.Value, defValue any) (ast.Type, error) {
 	allowed := cue.StringKind | cue.IntKind
 	ik := v.IncompleteKind()
 	if ik&allowed != ik {
@@ -386,7 +392,7 @@ func (g *generator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
 		return ast.Type{}, err
 	}
 
-	return ast.NewEnum(values), nil
+	return ast.NewEnum(values, ast.Default(defValue)), nil
 }
 
 func (g *generator) declareString(v cue.Value, defVal any) (ast.Type, error) {
