@@ -1,0 +1,26 @@
+{{- range $alias, $importPath := .Imports }}
+import * as {{ $alias }} from '{{ $importPath }}';
+{{- end }}
+import { CogOptionsBuilder } from '../../options_builder_gen';
+
+export class {{ .Name }}Builder implements CogOptionsBuilder<types.{{ .Name }}> {
+    private internal: types.{{ .Name }};
+
+    constructor({{ range $i, $arg := .Constructor.Args }}{{ if gt $i 0 }}, {{ end }}{{ $arg }}{{ end }}) {
+        this.internal = {
+            {{- range $k, $v := .Constructor.Items }}
+            {{ $k }}: {{ $v | simpleQuotes }},
+            {{- end }}
+        };
+        {{- range $i, $arg := .Constructor.Initializers }}
+        {{ $arg }}
+        {{- end }}
+    }
+
+    build(): types.{{ .Name }} {
+        return this.internal;
+    }
+
+    {{- range $option := .Options }}{{ $option }}{{- end }}
+
+}

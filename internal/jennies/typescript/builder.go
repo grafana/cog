@@ -13,6 +13,20 @@ type Builder struct {
 	imports importMap
 }
 
+type Tmpl struct {
+	Package     string
+	Name        string
+	Imports     importMap
+	Options     []string
+	Constructor constructor
+}
+
+type constructor struct {
+	Args         []string
+	Items        map[string]any
+	Initializers []string
+}
+
 func (jenny *Builder) JennyName() string {
 	return "TypescriptBuilder"
 }
@@ -39,53 +53,30 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	var buffer strings.Builder
 
 	jenny.imports = newImportMap()
+	jenny.imports.Add("types", fmt.Sprintf("../../types/%s/types_gen", builder.Package))
 
 	objectName := tools.UpperCamelCase(builder.For.Name)
-
-	// imports
-	jenny.imports.Add("types", fmt.Sprintf("../../types/%s/types_gen", builder.Package))
-	buffer.WriteString("import { CogOptionsBuilder } from \"../../options_builder_gen\";\n\n")
-
-	// Builder class declaration
-	buffer.WriteString(fmt.Sprintf("export class %[1]sBuilder implements CogOptionsBuilder<types.%[1]s> {\n", objectName))
-
-	// internal property, representing the object being built
-	buffer.WriteString(fmt.Sprintf("\tprivate internal: types.%[1]s;\n", objectName))
-
-	// Add a constructor for the builder
 	constructorCode := jenny.generateConstructor(builders, builder)
-	buffer.WriteString(constructorCode)
-
-	// Allow builders to expose the resource they're building
-	buffer.WriteString(fmt.Sprintf(`
-	build(): types.%s {
-		return this.internal;
-	}
-
-`, objectName))
 
 	// Define options
-	for _, option := range builder.Options {
-		buffer.WriteString(jenny.generateOption(builders, builder, option))
+	options := make([]string, len(builder.Options))
+	for i, option := range builder.Options {
+		options[i] = jenny.generateOption(builders, builder, option)
 	}
 
-	// End builder class declaration
-	buffer.WriteString("}\n")
+	tmpl := templates.Lookup("builder.tmpl")
+	err := tmpl.Execute(&buffer, Tmpl{
+		Package:     builder.Package,
+		Name:        objectName,
+		Imports:     jenny.imports,
+		Options:     options,
+		Constructor: constructorCode,
+	})
 
-	importStatements := jenny.imports.Format()
-	if importStatements != "" {
-		importStatements += "\n"
-	}
-
-	return []byte(importStatements + buffer.String()), nil
+	return []byte(buffer.String()), err
 }
 
-func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) string {
-	var buffer strings.Builder
-
-	typeName := tools.UpperCamelCase(builder.For.Name)
-	args := ""
-	fieldsInit := ""
+func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) constructor {
 	var argsList []string
 	var fieldsInitList []string
 	for _, opt := range builder.Options {
@@ -108,18 +99,26 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 		)
 	}
 
-	args = strings.Join(argsList, ", ")
-	fieldsInit = strings.Join(fieldsInitList, "\n")
-	typeInit := jenny.emptyValueForType(builders, builder.Package, builder.For.Type)
-
-	buffer.WriteString(fmt.Sprintf(`
-	constructor(%[2]s) {
-		this.internal = %[3]s;
-%[4]s
+	return constructor{
+		Args:         argsList,
+		Items:        jenny.getDefaultValues(builders, builder.Package, builder.For.Type),
+		Initializers: fieldsInitList,
 	}
-`, typeName, args, typeInit, fieldsInit))
+}
 
-	return buffer.String()
+func (jenny *Builder) getDefaultValues(builders ast.Builders, pkg string, typeDef ast.Type) map[string]any {
+	switch typeDef.Kind {
+	case ast.KindDisjunction:
+		return jenny.getDefaultValues(builders, pkg, typeDef.AsDisjunction().Branches[0])
+	case ast.KindRef:
+		ref := typeDef.AsRef()
+		referredTypeBuilder, _ := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+		return jenny.getDefaultValues(builders, referredTypeBuilder.Package, referredTypeBuilder.For.Type)
+	case ast.KindStruct:
+		return jenny.emptyValueForStruct(builders, pkg, typeDef.AsStruct())
+	default:
+		return map[string]any{"": "undefined"}
+	}
 }
 
 func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeDef ast.Type) string {
@@ -129,10 +128,7 @@ func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeD
 	case ast.KindRef:
 		ref := typeDef.AsRef()
 		referredTypeBuilder, _ := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
-
 		return jenny.emptyValueForType(builders, referredTypeBuilder.Package, referredTypeBuilder.For.Type)
-	case ast.KindStruct:
-		return jenny.emptyValueForStruct(builders, pkg, typeDef.AsStruct())
 	case ast.KindEnum:
 		return formatScalar(typeDef.AsEnum().Values[0].Value)
 	case ast.KindMap:
@@ -143,17 +139,15 @@ func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeD
 		return jenny.emptyValueForScalar(typeDef.AsScalar())
 
 	default:
-		return "unknown"
+		return "undefined"
 	}
 }
 
-func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, structType ast.StructType) string {
-	var buffer strings.Builder
-
-	var fieldsInit []string
+func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, structType ast.StructType) map[string]any {
+	fieldsInit := make(map[string]any, len(structType.Fields))
 	for _, field := range structType.Fields {
 		if field.Type.Default != nil {
-			fieldsInit = append(fieldsInit, fmt.Sprintf("%s: %s, // default value", field.Name, formatScalar(field.Type.Default)))
+			fieldsInit[field.Name] = fmt.Sprintf("%s", formatScalar(field.Type.Default))
 			continue
 		}
 
@@ -161,14 +155,14 @@ func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, str
 			continue
 		}
 
-		fieldsInit = append(fieldsInit, fmt.Sprintf("%s: %s, // zero value", field.Name, jenny.emptyValueForType(builders, pkg, field.Type)))
+		if field.Type.Kind == ast.KindStruct {
+			return jenny.emptyValueForStruct(builders, pkg, field.Type.AsStruct())
+		} else {
+			fieldsInit[field.Name] = fmt.Sprintf("%s", jenny.emptyValueForType(builders, pkg, field.Type))
+		}
 	}
 
-	buffer.WriteString(fmt.Sprintf(`{
-%[1]s
-}`, strings.Join(fieldsInit, "\n")))
-
-	return buffer.String()
+	return fieldsInit
 }
 
 func (jenny *Builder) emptyValueForScalar(scalar ast.ScalarType) string {
@@ -194,7 +188,7 @@ func (jenny *Builder) emptyValueForScalar(scalar ast.ScalarType) string {
 		return "false"
 
 	default:
-		return "unknown"
+		return "undefined"
 	}
 }
 
@@ -227,7 +221,7 @@ func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.
 		generatedConstraints += "\n\n"
 	}
 
-	return generatedConstraints + fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s;", fieldPath, argName)
+	return generatedConstraints + fmt.Sprintf("this.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
 func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) string {
@@ -279,7 +273,7 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 	})
 
 	if referredTypeName, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
-		return fmt.Sprintf(`%[1]s: OptionsBuilder<types.%[2]s>`, arg.Name, referredTypeName)
+		return fmt.Sprintf(`%[1]s: CogOptionsBuilder<types.%[2]s>`, arg.Name, tools.UpperCamelCase(referredTypeName))
 	}
 
 	name := tools.LowerCamelCase(arg.Name)
