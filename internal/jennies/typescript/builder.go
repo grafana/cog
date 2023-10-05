@@ -147,7 +147,7 @@ func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, str
 	fieldsInit := make(map[string]any, len(structType.Fields))
 	for _, field := range structType.Fields {
 		if field.Type.Default != nil {
-			fieldsInit[field.Name] = fmt.Sprintf("%s", formatScalar(field.Type.Default))
+			fieldsInit[field.Name] = formatScalar(field.Type.Default)
 			continue
 		}
 
@@ -157,9 +157,9 @@ func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, str
 
 		if field.Type.Kind == ast.KindStruct {
 			return jenny.emptyValueForStruct(builders, pkg, field.Type.AsStruct())
-		} else {
-			fieldsInit[field.Name] = fmt.Sprintf("%s", jenny.emptyValueForType(builders, pkg, field.Type))
 		}
+
+		fieldsInit[field.Name] = jenny.emptyValueForType(builders, pkg, field.Type)
 	}
 
 	return fieldsInit
