@@ -207,7 +207,8 @@ func TestRewriter_ApplyTo(t *testing.T) {
 			expectedBuildersJSON := mustMarshalJSON(t, tc.outputBuilders)
 
 			// apply the rewrite rules
-			rewrittenBuilders := rewriter.ApplyTo(tc.inputBuilders)
+			rewrittenBuilders, err := rewriter.ApplyTo(tc.inputBuilders)
+			req.NoError(err)
 
 			// save the output states
 			originalBuildersJSONAfterApply := mustMarshalJSON(t, tc.inputBuilders)

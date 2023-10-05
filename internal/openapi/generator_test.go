@@ -146,7 +146,7 @@ func TestArrays(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, f.Objects, 2)
-	def := f.LocateDefinition("Arrays")
+	def := f.LocateObject("Arrays")
 	assert.Equal(t, def.Type.Kind, ast.KindStruct)
 
 	structType := def.Type.AsStruct()
@@ -184,7 +184,7 @@ func TestRefs(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Len(t, f.Objects, 2)
-	def := f.LocateDefinition("Refs")
+	def := f.LocateObject("Refs")
 	assert.Equal(t, def.Type.Kind, ast.KindStruct)
 
 	structType := def.Type.AsStruct()
