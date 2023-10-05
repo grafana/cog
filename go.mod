@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	cuelang.org/go v0.5.0
-	github.com/davecgh/go-spew v1.1.1
 	github.com/google/go-cmp v0.5.9
 	github.com/grafana/codejen v0.0.4-0.20221122220907-a5e7cc5407b3
 	github.com/grafana/kindsys v0.0.0-20230615185749-1424263c17c7
@@ -22,6 +21,7 @@ require (
 	github.com/cockroachdb/errors v1.10.0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/proto v1.11.2 // indirect
 	github.com/getsentry/sentry-go v0.22.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
