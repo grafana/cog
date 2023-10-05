@@ -115,7 +115,8 @@ func (jenny RawTypes) formatEnumDef(def ast.Object, packageMapper pkgMapper) str
 
 	buffer.WriteString("const (\n")
 	for _, val := range enumType.Values {
-		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", tools.UpperCamelCase(val.Name), enumName, val.Value))
+		name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
+		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", name, enumName, val.Value))
 	}
 	buffer.WriteString(")\n")
 

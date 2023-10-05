@@ -83,7 +83,8 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 	case ast.KindEnum:
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
 		for _, val := range def.Type.AsEnum().Values {
-			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", tools.UpperCamelCase(val.Name), formatScalar(val.Value)))
+			name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
+			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatScalar(val.Value)))
 		}
 		buffer.WriteString("}\n")
 	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:

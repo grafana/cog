@@ -15,6 +15,7 @@ const (
 	KindsysComposable LoaderRef = "kindsys-composable"
 	KindsysCustom     LoaderRef = "kindsys-custom"
 	JSONSchema        LoaderRef = "jsonschema"
+	OpenAPI           LoaderRef = "openapi"
 )
 
 func loadersMap() map[LoaderRef]Loader {
@@ -24,6 +25,7 @@ func loadersMap() map[LoaderRef]Loader {
 		KindsysComposable: kindsysCompopsableLoader,
 		KindsysCustom:     kindsysCustomLoader,
 		JSONSchema:        jsonschemaLoader,
+		OpenAPI:           openapiLoader,
 	}
 }
 
@@ -40,6 +42,7 @@ type Options struct {
 	KindsysComposableEntrypoints []string
 	KindsysCustomEntrypoints     []string
 	JSONSchemaEntrypoints        []string
+	OpenAPIEntrypoints           []string
 
 	// Cue-specific options
 	CueImports []string
