@@ -27,7 +27,6 @@ func simpleQuotes(s string) string {
 	if strings.HasSuffix(splitString[0], "\"") && strings.HasPrefix(splitString[0], "\"") {
 		newString := s[1 : len(s)-1]
 		return "'" + newString + "'"
-
 	}
 
 	return s
