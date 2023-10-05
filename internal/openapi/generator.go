@@ -28,7 +28,7 @@ type Config struct {
 }
 
 type generator struct {
-	file *ast.Schema
+	schema *ast.Schema
 }
 
 func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
@@ -43,21 +43,21 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	}
 
 	g := &generator{
-		file: &ast.Schema{
+		schema: &ast.Schema{
 			Package:  cfg.Package,
 			Metadata: cfg.SchemaMetadata,
 		},
 	}
 
 	if oapi.Components == nil {
-		return g.file, nil
+		return g.schema, nil
 	}
 
 	if err := g.declareDefinition(oapi.Components.Schemas); err != nil {
 		return nil, err
 	}
 
-	return g.file, nil
+	return g.schema, nil
 }
 
 func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
@@ -67,10 +67,14 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 			return err
 		}
 
-		g.file.Objects = append(g.file.Objects, ast.Object{
+		g.schema.Objects = append(g.schema.Objects, ast.Object{
 			Name:     name,
 			Comments: schemaComments(schemaRef.Value),
 			Type:     def,
+			SelfRef: ast.RefType{
+				ReferredPkg:  g.schema.Package,
+				ReferredType: name,
+			},
 		})
 	}
 
