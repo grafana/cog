@@ -95,13 +95,13 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 				Type: field.Type,
 			})
 
-			newOpt.Assignments = append(newOpt.Assignments, ast.Assignment{
-				Path:              assignmentPathPrefix + "." + field.Name,
-				ArgumentName:      field.Name,
-				ValueType:         field.Type,
-				Constraints:       constraints,
-				IntoNullableField: field.Type.Nullable,
-			})
+			newAssignment := ast.Assignment{
+				ArgumentName: field.Name,
+				Constraints:  constraints,
+				Path:         assignmentPathPrefix.Append(ast.PathFromStructField(field)),
+			}
+
+			newOpt.Assignments = append(newOpt.Assignments, newAssignment)
 		}
 
 		if len(oldArgs) > 1 {
@@ -124,28 +124,16 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 			{
 				Name:     unfoldOpts.OptionTrue,
 				Comments: option.Comments,
-				Args:     nil,
 				Assignments: []ast.Assignment{
-					{
-						Path:              option.Assignments[0].Path,
-						ValueType:         option.Assignments[0].ValueType,
-						IntoNullableField: option.Assignments[0].IntoNullableField,
-						Value:             true,
-					},
+					{Path: option.Assignments[0].Path, Value: true},
 				},
 			},
 
 			{
 				Name:     unfoldOpts.OptionFalse,
 				Comments: option.Comments,
-				Args:     nil,
 				Assignments: []ast.Assignment{
-					{
-						Path:              option.Assignments[0].Path,
-						ValueType:         option.Assignments[0].ValueType,
-						IntoNullableField: option.Assignments[0].IntoNullableField,
-						Value:             false,
-					},
+					{Path: option.Assignments[0].Path, Value: false},
 				},
 			},
 		}

@@ -225,8 +225,9 @@ func (jenny *Builder) builderForType(builders ast.Builders, builder ast.Builder,
 
 func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := assignment.Path
+	valueType := assignment.Path.Last().Type
 
-	if _, valueHasBuilder := jenny.builderForType(builders, builder, assignment.ValueType); valueHasBuilder {
+	if _, valueHasBuilder := jenny.builderForType(builders, builder, valueType); valueHasBuilder {
 		return "constructor init assignment with type that has a builder is not supported yet"
 	}
 
@@ -306,8 +307,9 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 
 func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := assignment.Path
+	valueType := assignment.Path.Last().Type
 
-	if _, found := jenny.builderForType(builders, builder, assignment.ValueType); found {
+	if _, found := jenny.builderForType(builders, builder, valueType); found {
 		return fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s.build();", fieldPath, assignment.ArgumentName)
 	}
 

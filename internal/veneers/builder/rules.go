@@ -29,7 +29,7 @@ func mapToSelected(selector Selector, mapFunc func(builders ast.Builders, builde
 	}
 }
 
-func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath string, excludeOptions []string) ast.Builder {
+func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath ast.Path, excludeOptions []string) (ast.Builder, error) {
 	newBuilder := intoBuilder
 
 	for _, opt := range fromBuilder.Options {
@@ -37,14 +37,12 @@ func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath st
 			continue
 		}
 
-		// TODO: assignment paths
 		newOpt := opt
 		newOpt.Assignments = nil
 
 		for _, assignment := range opt.Assignments {
 			newAssignment := assignment
-			// @FIXME: this only works if no part of the `underPath` path can be nil
-			newAssignment.Path = underPath + "." + assignment.Path
+			newAssignment.Path = underPath.Append(assignment.Path)
 
 			newOpt.Assignments = append(newOpt.Assignments, newAssignment)
 		}
@@ -52,7 +50,7 @@ func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath st
 		newBuilder.Options = append(newBuilder.Options, newOpt)
 	}
 
-	return newBuilder
+	return newBuilder, nil
 }
 
 func Omit(selector Selector) RewriteRule {
@@ -83,14 +81,17 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 			return destinationBuilder, fmt.Errorf("source builder '%s.%s' not found", sourcePkg, sourceBuilderNameWithoutPkg)
 		}
 
-		// TODO: initializations
-		newBuilder := mergeOptions(sourceBuilder, destinationBuilder, underPath, excludeOptions)
+		newRoot, err := destinationBuilder.MakePath(builders, underPath)
+		if err != nil {
+			return destinationBuilder, err
+		}
 
-		return newBuilder, nil
+		// TODO: initializations
+		return mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions)
 	})
 }
 
-func composePanelType(panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders) ast.Builder {
+func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders) (ast.Builder, error) {
 	newBuilder := ast.Builder{
 		Schema:      panelBuilder.Schema,
 		For:         panelBuilder.For,
@@ -98,10 +99,19 @@ func composePanelType(panelType string, panelBuilder ast.Builder, composableBuil
 		Package:     "panel",
 	}
 
+	typeField, ok := panelBuilder.For.Type.AsStruct().FieldByName("type")
+	if !ok {
+		return panelBuilder, fmt.Errorf("could not find field 'type' in panel builder")
+	}
+
 	newBuilder.Initializations = append(newBuilder.Initializations, ast.Assignment{
-		Path:      "type",
-		ValueType: ast.String(),
-		Value:     panelType,
+		Path: ast.Path{
+			{
+				Identifier: "type",
+				Type:       typeField.Type,
+			},
+		},
+		Value: panelType,
 	})
 
 	// re-add panel-related options
@@ -114,21 +124,33 @@ func composePanelType(panelType string, panelBuilder ast.Builder, composableBuil
 		newBuilder.Options = append(newBuilder.Options, panelOpt)
 	}
 
-	for _, composableBuilder := range composableBuilders {
-		if composableBuilder.For.Name == "Options" {
-			newBuilder = mergeOptions(composableBuilder, newBuilder, "options", nil)
-			continue
-		}
-
-		if composableBuilder.For.Name == "FieldConfig" {
-			newBuilder = mergeOptions(composableBuilder, newBuilder, "fieldConfig.defaults.custom", nil)
-			continue
-		}
-
-		panic("unexpected composable type " + composableBuilder.For.Name)
+	compositionMap := map[string]string{ // Builder → assignment root path
+		"Options":     "options",
+		"FieldConfig": "fieldConfig.defaults.custom",
 	}
 
-	return newBuilder
+	for _, composableBuilder := range composableBuilders {
+		underPath, exists := compositionMap[composableBuilder.For.Name]
+		if !exists {
+			return newBuilder, fmt.Errorf("unexpected composable type '%s'", composableBuilder.For.Name)
+		}
+
+		newRoot, err := newBuilder.MakePath(builders, underPath)
+		if err != nil {
+			return newBuilder, err
+		}
+
+		ref := composableBuilder.For.SelfRef
+		refType := ast.NewRef(ref.ReferredPkg, ref.ReferredType)
+		newRoot[len(newRoot)-1].TypeHint = &refType
+
+		newBuilder, err = mergeOptions(composableBuilder, newBuilder, newRoot, nil)
+		if err != nil {
+			return newBuilder, err
+		}
+	}
+
+	return newBuilder, nil
 }
 
 func ComposeDashboardPanel(selector Selector, panelBuilderName string) RewriteRule {
@@ -163,7 +185,10 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string) RewriteRu
 		}
 
 		for panelType, buildersForType := range composableBuilders {
-			composedBuilder := composePanelType(panelType, panelBuilder, buildersForType)
+			composedBuilder, err := composePanelType(builders, panelType, panelBuilder, buildersForType)
+			if err != nil {
+				return nil, err
+			}
 
 			newBuilders = append(newBuilders, composedBuilder)
 		}
