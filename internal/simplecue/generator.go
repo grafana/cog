@@ -20,6 +20,9 @@ type Config struct {
 	// Package name used to generate code into.
 	Package string
 
+	// For dataqueries, the schema doesn't define any top-level object
+	ForceVariantEnvelope bool
+
 	SchemaMetadata ast.SchemaMeta
 }
 
@@ -35,26 +38,82 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 		},
 	}
 
-	i, err := val.Fields(cue.Definitions(true))
-	if err != nil {
-		return nil, err
-	}
-	for i.Next() {
-		sel := i.Selector()
-
-		n, err := g.declareTopLevelType(selectorLabel(sel), i.Value())
-		if err != nil {
+	if c.ForceVariantEnvelope {
+		if err := g.walkCueSchemaWithVariantEnvelope(val); err != nil {
 			return nil, err
 		}
-
-		g.schema.Objects = append(g.schema.Objects, n)
+	} else {
+		if err := g.walkCueSchema(val); err != nil {
+			return nil, err
+		}
 	}
 
 	return g.schema, nil
 }
 
-// Do we really need to distinguish top-level types with others?
-func (g *generator) declareTopLevelType(name string, v cue.Value) (ast.Object, error) {
+func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
+	i, err := v.Fields(cue.Definitions(true), cue.All())
+	if err != nil {
+		return err
+	}
+
+	var rootObjectFields []ast.StructField
+	for i.Next() {
+		sel := i.Selector()
+		name := selectorLabel(sel)
+
+		if i.Selector().IsDefinition() {
+			n, err := g.declareObject(name, i.Value())
+			if err != nil {
+				return err
+			}
+
+			g.schema.Objects = append(g.schema.Objects, n)
+			continue
+		}
+
+		nodeType, err := g.declareNode(i.Value())
+		if err != nil {
+			return err
+		}
+
+		rootObjectFields = append(rootObjectFields, ast.NewStructField(name, nodeType))
+	}
+
+	g.schema.Objects = append(g.schema.Objects, ast.Object{
+		Name:     string(g.schema.Metadata.Variant),
+		Comments: commentsFromCueValue(v),
+		Type:     ast.NewStruct(rootObjectFields...),
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: string(g.schema.Metadata.Variant),
+		},
+	})
+
+	return nil
+}
+
+func (g *generator) walkCueSchema(v cue.Value) error {
+	i, err := v.Fields(cue.Definitions(true))
+	if err != nil {
+		return err
+	}
+
+	for i.Next() {
+		sel := i.Selector()
+
+		n, err := g.declareObject(selectorLabel(sel), i.Value())
+		if err != nil {
+			return err
+		}
+
+		g.schema.Objects = append(g.schema.Objects, n)
+	}
+
+	return nil
+}
+
+func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) {
 	typeHint, err := getTypeHint(v)
 	if err != nil {
 		return ast.Object{}, err
@@ -73,42 +132,22 @@ func (g *generator) declareTopLevelType(name string, v cue.Value) (ast.Object, e
 		return g.declareEnum(name, v)
 	}
 
-	switch v.IncompleteKind() {
-	case cue.StringKind:
-		return g.declareTopLevelString(name, v)
-	case cue.StructKind:
-		return g.declareTopLevelStruct(name, v)
-	default:
-		return ast.Object{}, errorWithCueRef(v, "unexpected top-level kind '%s'", v.IncompleteKind().String())
-	}
-}
-
-func (g *generator) declareTopLevelString(name string, v cue.Value) (ast.Object, error) {
-	ik := v.IncompleteKind()
-	if ik&cue.StringKind != ik {
-		return ast.Object{}, errorWithCueRef(v, "top-level strings may only be generated from concrete strings")
-	}
-
-	// Extract the default value if it's there
-	defVal, err := g.extractDefault(v)
+	nodeType, err := g.declareNode(v)
 	if err != nil {
 		return ast.Object{}, err
 	}
 
-	strType, err := g.declareString(v, defVal)
-	if err != nil {
-		return ast.Object{}, err
-	}
-
-	return ast.Object{
+	objectDef := ast.Object{
 		Name:     name,
 		Comments: commentsFromCueValue(v),
-		Type:     strType,
+		Type:     nodeType,
 		SelfRef: ast.RefType{
 			ReferredPkg:  g.schema.Package,
 			ReferredType: name,
 		},
-	}, nil
+	}
+
+	return objectDef, nil
 }
 
 func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
@@ -193,30 +232,6 @@ func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 	}
 
 	return fields, nil
-}
-
-func (g *generator) declareTopLevelStruct(name string, v cue.Value) (ast.Object, error) {
-	// This check might be too restrictive
-	if v.IncompleteKind() != cue.StructKind {
-		return ast.Object{}, errorWithCueRef(v, "top-level type definitions may only be generated from structs")
-	}
-
-	nodeType, err := g.declareNode(v)
-	if err != nil {
-		return ast.Object{}, err
-	}
-
-	typeDef := ast.Object{
-		Name:     name,
-		Comments: commentsFromCueValue(v),
-		Type:     nodeType,
-		SelfRef: ast.RefType{
-			ReferredPkg:  g.schema.Package,
-			ReferredType: name,
-		},
-	}
-
-	return typeDef, nil
 }
 
 func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {

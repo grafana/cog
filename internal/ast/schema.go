@@ -10,7 +10,8 @@ const (
 type SchemaVariant string
 
 const (
-	SchemaVariantPanel SchemaVariant = "panelcfg"
+	SchemaVariantPanel     SchemaVariant = "panelcfg"
+	SchemaVariantDataQuery SchemaVariant = "dataquery"
 )
 
 type Schemas []*Schema
