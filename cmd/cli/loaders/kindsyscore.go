@@ -14,10 +14,10 @@ import (
 	"github.com/yalue/merged_fs"
 )
 
-func kindsysCoreLoader(opts Options) ([]*ast.File, error) {
+func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.KindsysCoreEntrypoints))
+	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysCoreEntrypoints))
 	for _, entrypoint := range opts.KindsysCoreEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
@@ -48,6 +48,10 @@ func kindsysCoreLoader(opts Options) ([]*ast.File, error) {
 
 		schemaAst, err := simplecue.GenerateAST(kindToLatestSchema(boundKind), simplecue.Config{
 			Package: pkg, // TODO: extract from input schema/folder?
+			SchemaMetadata: ast.SchemaMeta{
+				Kind:       ast.SchemaKindCore,
+				Identifier: pkg, // TODO: maybe even core kinds could have one explicitly set in their schema?
+			},
 		})
 		if err != nil {
 			return nil, err

@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "struct_optional_fields",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "SomeStruct",
             "Type": {

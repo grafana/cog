@@ -1,9 +1,16 @@
 package ast
 
 type Builder struct {
-	Package         string
-	File            *File
-	For             Object
+	// Original data used to derive the builder, stored for read-only access
+	// for the jennies and veneers.
+	Schema *Schema
+	For    Object
+
+	// The builder itself
+	// These fields are completely derived from the fields above and can be freely manipulated
+	// by veneers.
+	RootPackage     string // ie: dashboard, alert, ... // TODO: better names and docs
+	Package         string // ie: panel, link, ...
 	Options         []Option
 	Initializations []Assignment
 }
@@ -12,7 +19,7 @@ type Builders []Builder
 
 func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
-		if builder.Package == pkg && builder.For.Name == name {
+		if builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name {
 			return builder, true
 		}
 	}
@@ -56,29 +63,29 @@ type Assignment struct {
 type BuilderGenerator struct {
 }
 
-func (generator *BuilderGenerator) FromAST(files []*File) []Builder {
-	builders := make([]Builder, 0, len(files))
+func (generator *BuilderGenerator) FromAST(schemas []*Schema) []Builder {
+	builders := make([]Builder, 0, len(schemas))
 
-	for _, file := range files {
-		for _, object := range file.Definitions {
+	for _, schema := range schemas {
+		for _, object := range schema.Objects {
 			// we only want builders for structs
 			if object.Type.Kind != KindStruct {
 				continue
 			}
 
-			builders = append(builders, generator.structObjectToBuilder(file, object))
+			builders = append(builders, generator.structObjectToBuilder(schema, object))
 		}
 	}
 
 	return builders
 }
 
-func (generator *BuilderGenerator) structObjectToBuilder(file *File, object Object) Builder {
+func (generator *BuilderGenerator) structObjectToBuilder(schema *Schema, object Object) Builder {
 	builder := Builder{
-		Package: file.Package,
-		File:    file,
-		For:     object,
-		Options: nil,
+		RootPackage: schema.Package,
+		Package:     object.Name,
+		Schema:      schema,
+		For:         object,
 	}
 	structType := object.Type.AsStruct()
 

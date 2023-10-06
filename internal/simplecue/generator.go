@@ -19,16 +19,19 @@ const enumMembersAttr = "memberNames"
 type Config struct {
 	// Package name used to generate code into.
 	Package string
+
+	SchemaMetadata ast.SchemaMeta
 }
 
 type generator struct {
-	file *ast.File
+	schema *ast.Schema
 }
 
-func GenerateAST(val cue.Value, c Config) (*ast.File, error) {
+func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 	g := &generator{
-		file: &ast.File{
-			Package: c.Package,
+		schema: &ast.Schema{
+			Package:  c.Package,
+			Metadata: c.SchemaMetadata,
 		},
 	}
 
@@ -44,10 +47,10 @@ func GenerateAST(val cue.Value, c Config) (*ast.File, error) {
 			return nil, err
 		}
 
-		g.file.Definitions = append(g.file.Definitions, n)
+		g.schema.Objects = append(g.schema.Objects, n)
 	}
 
-	return g.file, nil
+	return g.schema, nil
 }
 
 // Do we really need to distinguish top-level types with others?
@@ -101,6 +104,10 @@ func (g *generator) declareTopLevelString(name string, v cue.Value) (ast.Object,
 		Name:     name,
 		Comments: commentsFromCueValue(v),
 		Type:     strType,
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: name,
+		},
 	}, nil
 }
 
@@ -126,6 +133,10 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 		Name:     name,
 		Comments: commentsFromCueValue(v),
 		Type:     ast.NewEnum(values, ast.Default(defVal)),
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: name,
+		},
 	}, nil
 }
 
@@ -199,6 +210,10 @@ func (g *generator) declareTopLevelStruct(name string, v cue.Value) (ast.Object,
 		Name:     name,
 		Comments: commentsFromCueValue(v),
 		Type:     nodeType,
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: name,
+		},
 	}
 
 	return typeDef, nil
@@ -251,16 +266,16 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 		ident := field.Value.(*cueast.Ident)
 
 		if ident.Scope == nil {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		if _, ok := ident.Scope.(*cueast.File); !ok {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		scope := ident.Scope.(*cueast.File)
 		if len(scope.Decls) == 0 {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
@@ -269,23 +284,23 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 	case *cueast.Ident:
 		ident := source.(*cueast.Ident)
 		if ident.Scope == nil {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		if _, ok := ident.Scope.(*cueast.File); !ok {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		scope := ident.Scope.(*cueast.File)
 		if len(scope.Decls) == 0 {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
 
 		return referredTypePkg.Name, nil
 	case *cueast.Ellipsis: // TODO: this makes no sense
-		return g.file.Package, nil
+		return g.schema.Package, nil
 	default:
 		spew.Dump(source)
 		return "", fmt.Errorf("can't extract reference package")

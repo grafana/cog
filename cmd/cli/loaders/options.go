@@ -34,7 +34,7 @@ type cueIncludeImport struct {
 	importPath string // path used in CUE files to import that library
 }
 
-type Loader func(opts Options) ([]*ast.File, error)
+type Loader func(opts Options) ([]*ast.Schema, error)
 
 type Options struct {
 	CueEntrypoints               []string
@@ -78,8 +78,8 @@ func ForSchemaType(schemaType LoaderRef) (Loader, error) {
 	return loader, nil
 }
 
-func LoadAll(opts Options) ([]*ast.File, error) {
-	var files []*ast.File
+func LoadAll(opts Options) ([]*ast.Schema, error) {
+	var allSchemas []*ast.Schema
 
 	for loaderRef := range loadersMap() {
 		loader, err := ForSchemaType(loaderRef)
@@ -92,8 +92,8 @@ func LoadAll(opts Options) ([]*ast.File, error) {
 			return nil, err
 		}
 
-		files = append(files, schemas...)
+		allSchemas = append(allSchemas, schemas...)
 	}
 
-	return files, nil
+	return allSchemas, nil
 }

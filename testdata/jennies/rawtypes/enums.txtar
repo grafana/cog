@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "enums",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "Operator",
             "Comments": ["This is a very interesting string enum."],

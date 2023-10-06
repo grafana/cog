@@ -2,6 +2,7 @@ package typescript
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -26,10 +27,13 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 			return nil, err
 		}
 
-		files = append(
-			files,
-			*codejen.NewFile(builder.Package+"/"+strings.ToLower(builder.For.Name)+"/builder_gen.ts", output, jenny),
+		filename := filepath.Join(
+			strings.ToLower(builder.RootPackage),
+			strings.ToLower(builder.Package),
+			"builder_gen.ts",
 		)
+
+		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
 	return files, nil
@@ -40,17 +44,17 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 
 	jenny.imports = newImportMap()
 
-	objectName := tools.UpperCamelCase(builder.For.Name)
+	objectName := builder.For.Name
 
 	// imports
-	jenny.imports.Add("types", fmt.Sprintf("../../types/%s/types_gen", builder.Package))
+	importAlias := jenny.importType(builder.For)
 	buffer.WriteString("import { CogOptionsBuilder } from \"../../options_builder_gen\";\n\n")
 
 	// Builder class declaration
-	buffer.WriteString(fmt.Sprintf("export class %[1]sBuilder implements CogOptionsBuilder<types.%[1]s> {\n", objectName))
+	buffer.WriteString(fmt.Sprintf("export class %[1]sBuilder implements CogOptionsBuilder<%[2]s.%[1]s> {\n", objectName, importAlias))
 
 	// internal property, representing the object being built
-	buffer.WriteString(fmt.Sprintf("\tprivate internal: types.%[1]s;\n", objectName))
+	buffer.WriteString(fmt.Sprintf("\tprivate internal: %[2]s.%[1]s;\n", objectName, importAlias))
 
 	// Add a constructor for the builder
 	constructorCode := jenny.generateConstructor(builders, builder)
@@ -58,11 +62,11 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 
 	// Allow builders to expose the resource they're building
 	buffer.WriteString(fmt.Sprintf(`
-	build(): types.%s {
+	build(): %[2]s.%[1]s {
 		return this.internal;
 	}
 
-`, objectName))
+`, objectName, importAlias))
 
 	// Define options
 	for _, option := range builder.Options {
@@ -207,21 +211,20 @@ func (jenny *Builder) emptyValueForScalar(scalar ast.ScalarType) string {
 	}
 }
 
-func (jenny *Builder) typeHasBuilder(builders ast.Builders, builder ast.Builder, t ast.Type) (string, bool) {
+func (jenny *Builder) builderForType(builders ast.Builders, builder ast.Builder, t ast.Type) (ast.Builder, bool) {
 	if t.Kind != ast.KindRef {
-		return "", false
+		return ast.Builder{}, false
 	}
 
+	// TODO: shouldn't we using the package from the ref?!
 	ref := t.AsRef()
-	_, builderFound := builders.LocateByObject(builder.Package, ref.ReferredType)
-
-	return ref.ReferredPkg, builderFound
+	return builders.LocateByObject(builder.Package, ref.ReferredType)
 }
 
 func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := assignment.Path
 
-	if _, valueHasBuilder := jenny.typeHasBuilder(builders, builder, assignment.ValueType); valueHasBuilder {
+	if _, valueHasBuilder := jenny.builderForType(builders, builder, assignment.ValueType); valueHasBuilder {
 		return "constructor init assignment with type that has a builder is not supported yet"
 	}
 
@@ -277,19 +280,22 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 }
 
 func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
+	if referredBuilder, found := jenny.builderForType(builders, builder, arg.Type); found {
+		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For)
+
+		return fmt.Sprintf(`%[1]s: OptionsBuilder<%[2]s.%[3]s>`, arg.Name, referredTypeAlias, referredBuilder.For.Name)
+	}
+
+	builderImportAlias := jenny.typeImportAlias(builder.For)
 	typeName := formatType(arg.Type, func(pkg string) string {
-		if pkg == builder.Package {
-			return "types"
+		if pkg == builder.For.SelfRef.ReferredPkg {
+			return builderImportAlias
 		}
 
 		jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
 
 		return pkg
 	})
-
-	if referredTypeName, found := jenny.typeHasBuilder(builders, builder, arg.Type); found {
-		return fmt.Sprintf(`%[1]s: OptionsBuilder<types.%[2]s>`, arg.Name, referredTypeName)
-	}
 
 	name := tools.LowerCamelCase(arg.Name)
 
@@ -299,7 +305,7 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := assignment.Path
 
-	if _, found := jenny.typeHasBuilder(builders, builder, assignment.ValueType); found {
+	if _, found := jenny.builderForType(builders, builder, assignment.ValueType); found {
 		return fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s.build();", fieldPath, assignment.ArgumentName)
 	}
 
@@ -311,7 +317,7 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 
 	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
 	if generatedConstraints != "" {
-		generatedConstraints += "\n\n"
+		generatedConstraints += "\n"
 	}
 
 	return generatedConstraints + fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s;", fieldPath, argName)
@@ -346,4 +352,20 @@ func (jenny *Builder) constraintComparison(argumentName string, constraint ast.T
 	}
 
 	return fmt.Sprintf("%[1]s %[2]s %#[3]v", argumentName, constraint.Op, constraint.Args[0])
+}
+
+// typeImportAlias returns the alias to use when importing the given object's type definition.
+func (jenny *Builder) typeImportAlias(object ast.Object) string {
+	// all types within a schema are generated under the same package
+	return object.SelfRef.ReferredPkg
+}
+
+// importType declares an import statement for the type definition of
+// the given object and returns an alias to it.
+func (jenny *Builder) importType(object ast.Object) string {
+	pkg := jenny.typeImportAlias(object)
+
+	jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+
+	return pkg
 }

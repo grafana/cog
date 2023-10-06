@@ -64,7 +64,7 @@ func doGenerate(opts Options) error {
 		fmt.Printf("Running '%s' jennies...\n", language)
 
 		var err error
-		processedAsts := ast.Files(schemas).DeepCopy()
+		processedAsts := ast.Schemas(schemas).DeepCopy()
 
 		for _, compilerPass := range target.CompilerPasses {
 			processedAsts, err = compilerPass.Process(processedAsts)
