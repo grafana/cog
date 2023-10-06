@@ -1,5 +1,12 @@
 package ast
 
+import (
+	"fmt"
+	"strings"
+
+	"github.com/grafana/cog/internal/tools"
+)
+
 type Builder struct {
 	// Original data used to derive the builder, stored for read-only access
 	// for the jennies and veneers.
@@ -13,6 +20,55 @@ type Builder struct {
 	Package         string // ie: panel, link, ...
 	Options         []Option
 	Initializations []Assignment
+}
+
+func (builder Builder) MakePath(builders Builders, pathAsString string) (Path, error) {
+	if pathAsString == "" {
+		return nil, fmt.Errorf("can not make path from empty input")
+	}
+
+	resolveRef := func(ref RefType) (Builder, error) {
+		referredObjBuilder, found := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+		if !found {
+			return Builder{}, fmt.Errorf("could not make path '%s': reference '%s' could not be resolved", pathAsString, ref.String())
+		}
+
+		return referredObjBuilder, nil
+	}
+
+	currentType := builder.For.Type
+
+	var path Path
+
+	pathParts := strings.Split(pathAsString, ".")
+	for _, part := range pathParts {
+		if currentType.Kind == KindRef {
+			referredObjBuilder, err := resolveRef(currentType.AsRef())
+			if err != nil {
+				return nil, err
+			}
+
+			currentType = referredObjBuilder.For.Type
+		}
+
+		if currentType.Kind != KindStruct {
+			return nil, fmt.Errorf("could not make path '%s': type at path '%s' is not a struct or a ref", pathAsString, path.String())
+		}
+
+		field, found := currentType.AsStruct().FieldByName(part)
+		if !found {
+			return nil, fmt.Errorf("could not make path '%s': field '%s' not found under path '%s'", pathAsString, part, path.String())
+		}
+
+		path = append(path, PathItem{
+			Identifier: part,
+			Type:       field.Type,
+		})
+
+		currentType = field.Type
+	}
+
+	return path, nil
 }
 
 type Builders []Builder
@@ -45,19 +101,52 @@ type Argument struct {
 	Type Type
 }
 
+type PathItem struct {
+	Identifier string
+	Type       Type // any
+	// useful mostly for composability purposes, when a field Type is "any"
+	// and we're trying to "compose in" something of a known type.
+	TypeHint *Type
+}
+
+type Path []PathItem
+
+func PathFromStructField(field StructField) Path {
+	return Path{
+		{
+			Identifier: field.Name,
+			Type:       field.Type,
+		},
+	}
+}
+
+func (path Path) Append(suffix Path) Path {
+	var newPath Path
+	newPath = append(newPath, path...)
+	newPath = append(newPath, suffix...)
+
+	return newPath
+}
+
+func (path Path) Last() PathItem {
+	return path[len(path)-1]
+}
+
+func (path Path) String() string {
+	return strings.Join(tools.Map(path, func(t PathItem) string {
+		return t.Identifier
+	}), ".")
+}
+
 type Assignment struct {
 	// Where
-	Path string
+	Path Path
 
 	// What
-	ValueType    Type   // type of the value being assigned
 	ArgumentName string // if empty, then use `Value`
 	Value        any
 
 	Constraints []TypeConstraint
-
-	// Some more context on the what
-	IntoNullableField bool
 }
 
 type BuilderGenerator struct {
@@ -132,10 +221,8 @@ func (generator *BuilderGenerator) fieldHasStaticValue(field StructField) bool {
 
 func (generator *BuilderGenerator) structFieldToStaticInitialization(field StructField) Assignment {
 	return Assignment{
-		Path:              field.Name,
-		Value:             field.Type.AsScalar().Value,
-		ValueType:         field.Type,
-		IntoNullableField: field.Type.Nullable,
+		Path:  PathFromStructField(field),
+		Value: field.Type.AsScalar().Value,
 	}
 }
 
@@ -156,11 +243,9 @@ func (generator *BuilderGenerator) structFieldToOption(field StructField) Option
 		},
 		Assignments: []Assignment{
 			{
-				Path:              field.Name,
-				ArgumentName:      field.Name,
-				ValueType:         field.Type,
-				Constraints:       constraints,
-				IntoNullableField: field.Type.Nullable,
+				Path:         PathFromStructField(field),
+				ArgumentName: field.Name,
+				Constraints:  constraints,
 			},
 		},
 	}

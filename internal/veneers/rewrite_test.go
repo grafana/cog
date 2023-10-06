@@ -68,7 +68,10 @@ func testData() []rewriteTestCase {
 								{Name: "id", Type: ast.NewScalar(ast.KindInt64)},
 							},
 							Assignments: []ast.Assignment{
-								{Path: "id", ValueType: ast.NewScalar(ast.KindInt64), ArgumentName: "id"},
+								{
+									ArgumentName: "id",
+									Path:         ast.Path{{Identifier: "id", Type: ast.NewScalar(ast.KindInt64)}},
+								},
 							},
 						},
 						{
@@ -77,7 +80,10 @@ func testData() []rewriteTestCase {
 								{Name: "type", Type: ast.String()},
 							},
 							Assignments: []ast.Assignment{
-								{Path: "type", ValueType: ast.String(), ArgumentName: "type"},
+								{
+									ArgumentName: "type",
+									Path:         ast.Path{{Identifier: "type", Type: ast.String()}},
+								},
 							},
 						},
 					},
@@ -112,7 +118,10 @@ func testData() []rewriteTestCase {
 								{Name: "uid", Type: ast.String()},
 							},
 							Assignments: []ast.Assignment{
-								{Path: "uid", ValueType: ast.String(), ArgumentName: "uid"},
+								{
+									ArgumentName: "uid",
+									Path:         ast.Path{{Identifier: "uid", Type: ast.String()}},
+								},
 							},
 						},
 					},
@@ -141,7 +150,10 @@ func dashboardBuilder() ast.Builder {
 					{Name: "uid", Type: ast.String()},
 				},
 				Assignments: []ast.Assignment{
-					{Path: "uid", ValueType: ast.String(), ArgumentName: "uid"},
+					{
+						ArgumentName: "uid",
+						Path:         ast.Path{{Identifier: "uid", Type: ast.String()}},
+					},
 				},
 			},
 			{
@@ -150,7 +162,10 @@ func dashboardBuilder() ast.Builder {
 					{Name: "title", Type: ast.String()},
 				},
 				Assignments: []ast.Assignment{
-					{Path: "title", ValueType: ast.String(), ArgumentName: "title"},
+					{
+						ArgumentName: "title",
+						Path:         ast.Path{{Identifier: "title", Type: ast.String()}},
+					},
 				},
 			},
 		},
@@ -175,7 +190,10 @@ func panelBuilder() ast.Builder {
 					{Name: "id", Type: ast.NewScalar(ast.KindInt64)},
 				},
 				Assignments: []ast.Assignment{
-					{Path: "id", ValueType: ast.NewScalar(ast.KindInt64), ArgumentName: "id"},
+					{
+						ArgumentName: "id",
+						Path:         ast.Path{{Identifier: "id", Type: ast.NewScalar(ast.KindInt64)}},
+					},
 				},
 			},
 			{
@@ -184,7 +202,10 @@ func panelBuilder() ast.Builder {
 					{Name: "type", Type: ast.String()},
 				},
 				Assignments: []ast.Assignment{
-					{Path: "type", ValueType: ast.String(), ArgumentName: "type"},
+					{
+						ArgumentName: "type",
+						Path:         ast.Path{{Identifier: "type", Type: ast.String()}},
+					},
 				},
 			},
 		},

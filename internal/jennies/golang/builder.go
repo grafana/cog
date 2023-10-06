@@ -158,22 +158,31 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 	return buffer.String()
 }
 
-func (jenny *Builder) formatFieldPath(fieldPath string) string {
-	parts := strings.Split(fieldPath, ".")
-	formatted := make([]string, 0, len(parts))
+func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
+	parts := tools.Map(fieldPath, func(t ast.PathItem) string {
+		output := tools.UpperCamelCase(t.Identifier)
 
-	for _, part := range parts {
-		formatted = append(formatted, tools.UpperCamelCase(part))
-	}
+		if !t.Type.IsAny() || t.TypeHint == nil {
+			return output
+		}
 
-	return strings.Join(formatted, ".")
+		formattedTypeHint := formatType(*t.TypeHint, func(pkg string) string {
+			jenny.imports.Add(pkg, fmt.Sprintf("github.com/grafana/cog/generated/types/%s", pkg))
+
+			return pkg
+		})
+
+		return output + fmt.Sprintf(".(*%s)", formattedTypeHint)
+	})
+
+	return strings.Join(parts, ".")
 }
 
 func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := jenny.formatFieldPath(assignment.Path)
-	valueType := assignment.ValueType
+	valueType := assignment.Path.Last().Type
 
-	if _, valueHasBuilder := jenny.builderForType(builders, builder, assignment.ValueType); valueHasBuilder {
+	if _, valueHasBuilder := jenny.builderForType(builders, builder, valueType); valueHasBuilder {
 		return "constructor init assignment with type that has a builder is not supported yet"
 	}
 
@@ -185,7 +194,7 @@ func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
-	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindStruct && assignment.IntoNullableField {
+	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindStruct && valueType.Nullable {
 		asPointer = "&"
 	}
 
@@ -272,12 +281,12 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 
 func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := jenny.formatFieldPath(assignment.Path)
-	valueType := assignment.ValueType
+	valueType := assignment.Path.Last().Type
 
-	if referredBuilder, found := jenny.builderForType(builders, builder, assignment.ValueType); found {
+	if referredBuilder, found := jenny.builderForType(builders, builder, valueType); found {
 		referredBuilderAlias := jenny.importBuilder(referredBuilder)
 		intoPointer := "*"
-		if assignment.IntoNullableField {
+		if valueType.Nullable {
 			intoPointer = ""
 		}
 
@@ -298,7 +307,7 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
-	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindMap && assignment.IntoNullableField {
+	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindMap && valueType.Nullable {
 		asPointer = "&"
 	}
 
