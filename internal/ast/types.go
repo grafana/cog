@@ -89,6 +89,10 @@ type Type struct {
 	Scalar      *ScalarType      `json:",omitempty"`
 }
 
+func (t Type) IsStructOrRef() bool {
+	return t.Kind == KindStruct || t.Kind == KindRef
+}
+
 func (t Type) DeepCopy() Type {
 	newType := Type{
 		Kind:     t.Kind,

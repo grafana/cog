@@ -145,6 +145,11 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 			return newBuilder, err
 		}
 
+		newBuilder.Initializations = append(newBuilder.Initializations, ast.Assignment{
+			Path:       newRoot,
+			EmptyValue: true,
+		})
+
 		ref := composableBuilder.For.SelfRef
 		refType := ast.NewRef(ref.ReferredPkg, ref.ReferredType)
 		newRoot[len(newRoot)-1].TypeHint = &refType
