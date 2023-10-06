@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "maps",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "MapOfStringToAny",
             "Comments": ["String to... something."],

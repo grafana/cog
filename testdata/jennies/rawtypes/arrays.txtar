@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "arrays",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "ArrayOfStrings",
             "Comments": ["List of tags, maybe?"],

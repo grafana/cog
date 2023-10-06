@@ -9,26 +9,26 @@ var _ Pass = (*NotRequiredFieldAsNullableType)(nil)
 type NotRequiredFieldAsNullableType struct {
 }
 
-func (pass *NotRequiredFieldAsNullableType) Process(files []*ast.File) ([]*ast.File, error) {
-	newFiles := make([]*ast.File, 0, len(files))
+func (pass *NotRequiredFieldAsNullableType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	newSchemas := make([]*ast.Schema, 0, len(schemas))
 
-	for _, file := range files {
-		newFiles = append(newFiles, pass.processFile(file))
+	for _, schema := range schemas {
+		newSchemas = append(newSchemas, pass.processSchema(schema))
 	}
 
-	return newFiles, nil
+	return newSchemas, nil
 }
 
-func (pass *NotRequiredFieldAsNullableType) processFile(file *ast.File) *ast.File {
-	processedObjects := make([]ast.Object, 0, len(file.Definitions))
-	for _, object := range file.Definitions {
+func (pass *NotRequiredFieldAsNullableType) processSchema(schema *ast.Schema) *ast.Schema {
+	processedObjects := make([]ast.Object, 0, len(schema.Objects))
+	for _, object := range schema.Objects {
 		processedObjects = append(processedObjects, pass.processObject(object))
 	}
 
-	return &ast.File{
-		Package:     file.Package,
-		Definitions: processedObjects,
-	}
+	newSchema := schema.DeepCopy()
+	newSchema.Objects = processedObjects
+
+	return &newSchema
 }
 
 func (pass *NotRequiredFieldAsNullableType) processObject(object ast.Object) ast.Object {

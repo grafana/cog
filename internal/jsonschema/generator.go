@@ -26,16 +26,19 @@ const (
 type Config struct {
 	// Package name used to generate code into.
 	Package string
+
+	SchemaMetadata ast.SchemaMeta
 }
 
 type generator struct {
-	file *ast.File
+	schema *ast.Schema
 }
 
-func GenerateAST(schemaReader io.Reader, c Config) (*ast.File, error) {
+func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 	g := &generator{
-		file: &ast.File{
-			Package: c.Package,
+		schema: &ast.Schema{
+			Package:  c.Package,
+			Metadata: c.SchemaMetadata,
 		},
 	}
 
@@ -56,13 +59,15 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.File, error) {
 			return nil, err
 		}
 	} else {
+		definitionName := g.definitionNameFromRef(schema)
+
 		// The root of the schema contains definitions, and a reference to the "main" object
-		if err := g.declareDefinition(c.Package, schema.Ref); err != nil {
+		if err := g.declareDefinition(definitionName, schema.Ref); err != nil {
 			return nil, err
 		}
 	}
 
-	return g.file, nil
+	return g.schema, nil
 }
 
 func (g *generator) declareDefinition(definitionName string, schema *schemaparser.Schema) error {
@@ -71,9 +76,13 @@ func (g *generator) declareDefinition(definitionName string, schema *schemaparse
 		return fmt.Errorf("%s: %w", definitionName, err)
 	}
 
-	g.file.Definitions = append(g.file.Definitions, ast.Object{
+	g.schema.Objects = append(g.schema.Objects, ast.Object{
 		Name: definitionName,
 		Type: def,
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: definitionName,
+		},
 	})
 
 	return nil
@@ -190,16 +199,21 @@ func (g *generator) walkAllOf(_ *schemaparser.Schema) (ast.Type, error) {
 	return ast.Type{}, nil
 }
 
-func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
+func (g *generator) definitionNameFromRef(schema *schemaparser.Schema) string {
 	parts := strings.Split(schema.Ref.Ptr, "/")
-	referredKindName := parts[len(parts)-1] // Very naive
+
+	return parts[len(parts)-1] // Very naive
+}
+
+func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
+	referredKindName := g.definitionNameFromRef(schema)
 
 	if err := g.declareDefinition(referredKindName, schema.Ref); err != nil {
 		return ast.Type{}, err
 	}
 
 	// TODO: get the correct package for the referred type
-	return ast.NewRef(g.file.Package, referredKindName), nil
+	return ast.NewRef(g.schema.Package, referredKindName), nil
 }
 
 func (g *generator) walkString(_ *schemaparser.Schema) (ast.Type, error) {

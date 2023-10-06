@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "disjunctions",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "RefreshRate",
             "Comments": ["Refresh rate or disabled."],

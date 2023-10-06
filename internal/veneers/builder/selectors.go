@@ -22,6 +22,14 @@ func StructGeneratedFromDisjunction() Selector {
 	}
 }
 
+func ComposableDashboardPanel() Selector {
+	return func(builder ast.Builder) bool {
+		return builder.Schema.Metadata.Kind == ast.SchemaKindComposable &&
+			builder.Schema.Metadata.Variant == ast.SchemaVariantPanel &&
+			builder.Schema.Metadata.Identifier != ""
+	}
+}
+
 func EveryBuilder() Selector {
 	return func(builder ast.Builder) bool {
 		return true

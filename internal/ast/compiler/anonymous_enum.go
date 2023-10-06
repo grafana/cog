@@ -12,34 +12,35 @@ type AnonymousEnumToExplicitType struct {
 	currentPackage string
 }
 
-func (pass *AnonymousEnumToExplicitType) Process(files []*ast.File) ([]*ast.File, error) {
-	newFiles := make([]*ast.File, 0, len(files))
+func (pass *AnonymousEnumToExplicitType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	newSchemas := make([]*ast.Schema, 0, len(schemas))
 
-	for _, file := range files {
-		newFile, err := pass.processFile(file)
+	for _, schema := range schemas {
+		newSchema, err := pass.processSchema(schema)
 		if err != nil {
 			return nil, err
 		}
 
-		newFiles = append(newFiles, newFile)
+		newSchemas = append(newSchemas, newSchema)
 	}
 
-	return newFiles, nil
+	return newSchemas, nil
 }
 
-func (pass *AnonymousEnumToExplicitType) processFile(file *ast.File) (*ast.File, error) {
+func (pass *AnonymousEnumToExplicitType) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 	pass.newObjects = nil
-	pass.currentPackage = file.Package
+	pass.currentPackage = schema.Package
 
-	processedObjects := make([]ast.Object, 0, len(file.Definitions))
-	for _, object := range file.Definitions {
+	processedObjects := make([]ast.Object, 0, len(schema.Objects))
+	for _, object := range schema.Objects {
 		processedObjects = append(processedObjects, pass.processObject(object))
 	}
 
-	return &ast.File{
-		Package:     file.Package,
-		Definitions: append(processedObjects, pass.newObjects...),
-	}, nil
+	newSchema := schema.DeepCopy()
+	newSchema.Objects = processedObjects
+	newSchema.Objects = append(newSchema.Objects, pass.newObjects...)
+
+	return &newSchema, nil
 }
 
 func (pass *AnonymousEnumToExplicitType) processObject(object ast.Object) ast.Object {

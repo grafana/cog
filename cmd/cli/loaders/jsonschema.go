@@ -8,8 +8,8 @@ import (
 	"github.com/grafana/cog/internal/jsonschema"
 )
 
-func jsonschemaLoader(opts Options) ([]*ast.File, error) {
-	allSchemas := make([]*ast.File, 0, len(opts.JSONSchemaEntrypoints))
+func jsonschemaLoader(opts Options) ([]*ast.Schema, error) {
+	allSchemas := make([]*ast.Schema, 0, len(opts.JSONSchemaEntrypoints))
 	for _, entrypoint := range opts.JSONSchemaEntrypoints {
 		pkg := filepath.Base(filepath.Dir(entrypoint))
 
@@ -19,7 +19,10 @@ func jsonschemaLoader(opts Options) ([]*ast.File, error) {
 		}
 
 		schemaAst, err := jsonschema.GenerateAST(reader, jsonschema.Config{
-			Package: pkg, // TODO: extract from input schema/folder?
+			Package:        pkg, // TODO: extract from input schema/folder?
+			SchemaMetadata: ast.SchemaMeta{
+				// TODO: extract these from somewhere
+			},
 		})
 		if err != nil {
 			return nil, err

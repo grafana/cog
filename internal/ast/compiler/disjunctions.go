@@ -18,27 +18,27 @@ type DisjunctionToType struct {
 	newObjects map[string]ast.Object
 }
 
-func (pass *DisjunctionToType) Process(files []*ast.File) ([]*ast.File, error) {
-	newFiles := make([]*ast.File, 0, len(files))
+func (pass *DisjunctionToType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	newSchemas := make([]*ast.Schema, 0, len(schemas))
 
-	for _, file := range files {
-		newFile, err := pass.processFile(file)
+	for _, schema := range schemas {
+		newSchema, err := pass.processSchema(schema)
 		if err != nil {
 			return nil, err
 		}
 
-		newFiles = append(newFiles, newFile)
+		newSchemas = append(newSchemas, newSchema)
 	}
 
-	return newFiles, nil
+	return newSchemas, nil
 }
 
-func (pass *DisjunctionToType) processFile(file *ast.File) (*ast.File, error) {
+func (pass *DisjunctionToType) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 	pass.newObjects = make(map[string]ast.Object)
 
-	processedObjects := make([]ast.Object, 0, len(file.Definitions))
-	for _, object := range file.Definitions {
-		processedObject, err := pass.processObject(file, object)
+	processedObjects := make([]ast.Object, 0, len(schema.Objects))
+	for _, object := range schema.Objects {
+		processedObject, err := pass.processObject(schema, object)
 		if err != nil {
 			return nil, err
 		}
@@ -57,14 +57,15 @@ func (pass *DisjunctionToType) processFile(file *ast.File) (*ast.File, error) {
 		return newObjects[i].Name < newObjects[j].Name
 	})
 
-	return &ast.File{
-		Package:     file.Package,
-		Definitions: append(processedObjects, newObjects...),
-	}, nil
+	newSchema := schema.DeepCopy()
+	newSchema.Objects = processedObjects
+	newSchema.Objects = append(newSchema.Objects, newObjects...)
+
+	return &newSchema, nil
 }
 
-func (pass *DisjunctionToType) processObject(file *ast.File, object ast.Object) (ast.Object, error) {
-	processedType, err := pass.processType(file, object.Type)
+func (pass *DisjunctionToType) processObject(schema *ast.Schema, object ast.Object) (ast.Object, error) {
+	processedType, err := pass.processType(schema, object.Type)
 	if err != nil {
 		return object, errors.Join(
 			fmt.Errorf("could not process object '%s'", object.Name),
@@ -78,28 +79,28 @@ func (pass *DisjunctionToType) processObject(file *ast.File, object ast.Object) 
 	return newObject, nil
 }
 
-func (pass *DisjunctionToType) processType(file *ast.File, def ast.Type) (ast.Type, error) {
+func (pass *DisjunctionToType) processType(schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	if def.Kind == ast.KindArray {
-		return pass.processArray(file, def)
+		return pass.processArray(schema, def)
 	}
 
 	if def.Kind == ast.KindMap {
-		return pass.processMap(file, def)
+		return pass.processMap(schema, def)
 	}
 
 	if def.Kind == ast.KindStruct {
-		return pass.processStruct(file, def)
+		return pass.processStruct(schema, def)
 	}
 
 	if def.Kind == ast.KindDisjunction {
-		return pass.processDisjunction(file, def)
+		return pass.processDisjunction(schema, def)
 	}
 
 	return def, nil
 }
 
-func (pass *DisjunctionToType) processArray(file *ast.File, def ast.Type) (ast.Type, error) {
-	processedType, err := pass.processType(file, def.AsArray().ValueType)
+func (pass *DisjunctionToType) processArray(schema *ast.Schema, def ast.Type) (ast.Type, error) {
+	processedType, err := pass.processType(schema, def.AsArray().ValueType)
 	if err != nil {
 		return ast.Type{}, err
 	}
@@ -110,8 +111,8 @@ func (pass *DisjunctionToType) processArray(file *ast.File, def ast.Type) (ast.T
 	return newArray, nil
 }
 
-func (pass *DisjunctionToType) processMap(file *ast.File, def ast.Type) (ast.Type, error) {
-	processedValueType, err := pass.processType(file, def.AsMap().ValueType)
+func (pass *DisjunctionToType) processMap(schema *ast.Schema, def ast.Type) (ast.Type, error) {
+	processedValueType, err := pass.processType(schema, def.AsMap().ValueType)
 	if err != nil {
 		return ast.Type{}, err
 	}
@@ -122,10 +123,10 @@ func (pass *DisjunctionToType) processMap(file *ast.File, def ast.Type) (ast.Typ
 	return newMap, nil
 }
 
-func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.Type) (ast.Type, error) {
+func (pass *DisjunctionToType) processStruct(schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	processedFields := make([]ast.StructField, 0, len(def.AsStruct().Fields))
 	for _, field := range def.AsStruct().Fields {
-		processedType, err := pass.processType(file, field.Type)
+		processedType, err := pass.processType(schema, field.Type)
 		if err != nil {
 			return ast.Type{}, errors.Join(
 				fmt.Errorf("could not process struct field '%s'", field.Name),
@@ -145,7 +146,7 @@ func (pass *DisjunctionToType) processStruct(file *ast.File, def ast.Type) (ast.
 	return newStruct, nil
 }
 
-func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Type) (ast.Type, error) {
+func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	disjunction := def.AsDisjunction()
 
 	// Ex: type | null
@@ -164,7 +165,7 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Type) 
 	// if we already generated a new object for this disjunction, let's return
 	// a reference to it.
 	if _, ok := pass.newObjects[newTypeName]; ok {
-		ref := ast.NewRef(file.Package, newTypeName)
+		ref := ast.NewRef(schema.Package, newTypeName)
 		if disjunction.Branches.HasNullType() {
 			ref.Nullable = true
 		}
@@ -202,7 +203,7 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Type) 
 		structType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunction
 	}
 	if disjunction.Branches.HasOnlyRefs() {
-		newDisjunctionDef, err := pass.ensureDiscriminator(file, disjunction)
+		newDisjunctionDef, err := pass.ensureDiscriminator(schema, disjunction)
 		if err != nil {
 			return ast.Type{}, err
 		}
@@ -213,9 +214,13 @@ func (pass *DisjunctionToType) processDisjunction(file *ast.File, def ast.Type) 
 	pass.newObjects[newTypeName] = ast.Object{
 		Name: newTypeName,
 		Type: structType,
+		SelfRef: ast.RefType{
+			ReferredPkg:  schema.Package,
+			ReferredType: newTypeName,
+		},
 	}
 
-	ref := ast.NewRef(file.Package, newTypeName)
+	ref := ast.NewRef(schema.Package, newTypeName)
 	if disjunction.Branches.HasNullType() {
 		ref.Nullable = true
 	}
@@ -244,7 +249,7 @@ func (pass *DisjunctionToType) typeName(typeDef ast.Type) string {
 	return string(typeDef.Kind)
 }
 
-func (pass *DisjunctionToType) ensureDiscriminator(file *ast.File, def ast.DisjunctionType) (ast.DisjunctionType, error) {
+func (pass *DisjunctionToType) ensureDiscriminator(schema *ast.Schema, def ast.DisjunctionType) (ast.DisjunctionType, error) {
 	// discriminator-related data was set during parsing: nothing to do.
 	if def.Discriminator != "" && len(def.DiscriminatorMapping) != 0 {
 		return def, nil
@@ -253,11 +258,11 @@ func (pass *DisjunctionToType) ensureDiscriminator(file *ast.File, def ast.Disju
 	newDef := def
 
 	if def.Discriminator == "" {
-		newDef.Discriminator = pass.inferDiscriminatorField(file, newDef)
+		newDef.Discriminator = pass.inferDiscriminatorField(schema, newDef)
 	}
 
 	if len(def.DiscriminatorMapping) == 0 {
-		mapping, err := pass.buildDiscriminatorMapping(file, newDef)
+		mapping, err := pass.buildDiscriminatorMapping(schema, newDef)
 		if err != nil {
 			return newDef, err
 		}
@@ -275,7 +280,7 @@ func (pass *DisjunctionToType) ensureDiscriminator(file *ast.File, def ast.Disju
 //   - have a concrete, scalar value
 //
 // Note: this function assumes a disjunction of references to structs.
-func (pass *DisjunctionToType) inferDiscriminatorField(file *ast.File, def ast.DisjunctionType) string {
+func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def ast.DisjunctionType) string {
 	fieldName := ""
 	// map[typeName][fieldName]value
 	candidates := make(map[string]map[string]any)
@@ -284,7 +289,7 @@ func (pass *DisjunctionToType) inferDiscriminatorField(file *ast.File, def ast.D
 	for _, branch := range def.Branches {
 		// FIXME: what if the definition is itself a reference? Resolve recursively?
 		typeName := branch.AsRef().ReferredType
-		structType := file.LocateDefinition(typeName).Type.AsStruct()
+		structType := schema.LocateDefinition(typeName).Type.AsStruct()
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
@@ -329,7 +334,7 @@ func (pass *DisjunctionToType) inferDiscriminatorField(file *ast.File, def ast.D
 	return fieldName
 }
 
-func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast.DisjunctionType) (map[string]any, error) {
+func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def ast.DisjunctionType) (map[string]any, error) {
 	mapping := make(map[string]any, len(def.Branches))
 	if def.Discriminator == "" {
 		return nil, fmt.Errorf("discriminator field is empty: %w", ErrCanNotInferDiscriminator)
@@ -338,7 +343,7 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(file *ast.File, def ast
 	for _, branch := range def.Branches {
 		// FIXME: what if the definition is itself a reference? Resolve recursively?
 		typeName := branch.AsRef().ReferredType
-		structType := file.LocateDefinition(typeName).Type.AsStruct()
+		structType := schema.LocateDefinition(typeName).Type.AsStruct()
 
 		field, found := structType.FieldByName(def.Discriminator)
 		if !found {
