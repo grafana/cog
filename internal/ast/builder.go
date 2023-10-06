@@ -143,6 +143,7 @@ type Assignment struct {
 	Path Path
 
 	// What
+	EmptyValue   bool   // we just want to initialize the value at Path
 	ArgumentName string // if empty, then use `Value`
 	Value        any
 

@@ -11,7 +11,8 @@ import (
 )
 
 type Builder struct {
-	imports importMap
+	imports          importMap
+	typeImportMapper func(pkg string) string
 }
 
 func (jenny *Builder) JennyName() string {
@@ -22,6 +23,17 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 	files := codejen.Files{}
 
 	for _, builder := range builders {
+		builderImportAlias := jenny.typeImportAlias(builder.For.SelfRef)
+		jenny.typeImportMapper = func(pkg string) string {
+			if pkg == builder.For.SelfRef.ReferredPkg {
+				return builderImportAlias
+			}
+
+			jenny.imports.Add(pkg, "github.com/grafana/cog/generated/types/"+pkg)
+
+			return pkg
+		}
+
 		output := jenny.generateBuilder(builders, builder)
 		filename := filepath.Join(
 			strings.ToLower(builder.RootPackage),
@@ -61,7 +73,7 @@ func (jenny *Builder) generateBuilderSource(builders ast.Builders, builder ast.B
 	objectName := tools.UpperCamelCase(builder.For.Name)
 
 	// import generated types
-	importAlias := jenny.importType(builder.For)
+	importAlias := jenny.importType(builder.For.SelfRef)
 
 	// Option type declaration
 	buffer.WriteString("type Option func(builder *Builder) error\n\n")
@@ -121,14 +133,14 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 		argsList = append(argsList, jenny.generateArgument(builders, builder, opt.Args[0]))
 		fieldsInitList = append(
 			fieldsInitList,
-			jenny.generateInitAssignment(builders, builder, opt.Assignments[0]),
+			jenny.generateAssignment(builders, builder, opt.Assignments[0]),
 		)
 	}
 
 	for _, init := range builder.Initializations {
 		fieldsInitList = append(
 			fieldsInitList,
-			jenny.generateInitAssignment(builders, builder, init),
+			jenny.generateAssignment(builders, builder, init),
 		)
 	}
 
@@ -136,15 +148,14 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 		args = strings.Join(argsList, ", ") + ", "
 	}
 	if len(fieldsInitList) != 0 {
-		fieldsInit = strings.Join(fieldsInitList, ",\n") + ",\n"
+		fieldsInit = strings.Join(fieldsInitList, "\n") + "\n"
 	}
 
 	buffer.WriteString(fmt.Sprintf(`func New(%[2]soptions ...Option) (Builder, error) {
-	resource := &%[4]s.%[1]s{
-		%[3]s
-	}
+	resource := &%[4]s.%[1]s{}
 	builder := &Builder{internal: resource}
 
+	%[3]s
 	for _, opt := range append(defaults(), options...) {
 		if err := opt(builder); err != nil {
 			return *builder, err
@@ -153,57 +164,32 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 
 	return *builder, nil
 }
-`, typeName, args, fieldsInit, jenny.typeImportAlias(builder.For)))
+`, typeName, args, fieldsInit, jenny.typeImportAlias(builder.For.SelfRef)))
 
 	return buffer.String()
 }
 
 func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
-	parts := tools.Map(fieldPath, func(t ast.PathItem) string {
-		output := tools.UpperCamelCase(t.Identifier)
+	parts := make([]string, len(fieldPath))
 
-		if !t.Type.IsAny() || t.TypeHint == nil {
-			return output
+	for i := range fieldPath {
+		output := tools.UpperCamelCase(fieldPath[i].Identifier)
+
+		// don't generate type hints if:
+		// * there isn't one defined
+		// * the type isn't "any"
+		// * as a trailing element in the path
+		if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
+			parts[i] = output
+			continue
 		}
 
-		formattedTypeHint := formatType(*t.TypeHint, func(pkg string) string {
-			jenny.imports.Add(pkg, fmt.Sprintf("github.com/grafana/cog/generated/types/%s", pkg))
+		formattedTypeHint := formatType(*fieldPath[i].TypeHint, jenny.typeImportMapper)
 
-			return pkg
-		})
-
-		return output + fmt.Sprintf(".(*%s)", formattedTypeHint)
-	})
+		parts[i] = output + fmt.Sprintf(".(*%s)", formattedTypeHint)
+	}
 
 	return strings.Join(parts, ".")
-}
-
-func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
-	fieldPath := jenny.formatFieldPath(assignment.Path)
-	valueType := assignment.Path.Last().Type
-
-	if _, valueHasBuilder := jenny.builderForType(builders, builder, valueType); valueHasBuilder {
-		return "constructor init assignment with type that has a builder is not supported yet"
-	}
-
-	if assignment.ArgumentName == "" {
-		return fmt.Sprintf("%[1]s: %[2]s", fieldPath, formatScalar(assignment.Value))
-	}
-
-	argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.ArgumentName))
-
-	asPointer := ""
-	// FIXME: this condition is probably wrong
-	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindStruct && valueType.Nullable {
-		asPointer = "&"
-	}
-
-	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
-	if generatedConstraints != "" {
-		generatedConstraints += "\n\n"
-	}
-
-	return generatedConstraints + fmt.Sprintf("%[1]s: %[3]s%[2]s", fieldPath, argName, asPointer)
 }
 
 func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) string {
@@ -263,17 +249,7 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 		return fmt.Sprintf(`opts ...%s.Option`, importAlias)
 	}
 
-	builderImportAlias := jenny.typeImportAlias(builder.For)
-	typeName := strings.Trim(formatType(arg.Type, func(pkg string) string {
-		if pkg == builder.For.SelfRef.ReferredPkg {
-			return builderImportAlias
-		}
-
-		jenny.imports.Add(pkg, fmt.Sprintf("github.com/grafana/cog/generated/types/%s", pkg))
-
-		return pkg
-	}), "*")
-
+	typeName := strings.Trim(formatType(arg.Type, jenny.typeImportMapper), "*")
 	name := jenny.escapeVarName(tools.LowerCamelCase(arg.Name))
 
 	return fmt.Sprintf("%s %s", name, typeName)
@@ -281,7 +257,8 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 
 func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := jenny.formatFieldPath(assignment.Path)
-	valueType := assignment.Path.Last().Type
+	pathEnd := assignment.Path.Last()
+	valueType := pathEnd.Type
 
 	if referredBuilder, found := jenny.builderForType(builders, builder, valueType); found {
 		referredBuilderAlias := jenny.importBuilder(referredBuilder)
@@ -297,6 +274,26 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 
 		builder.internal.%[1]s = %[3]sresource.Internal()
 `, fieldPath, referredBuilderAlias, intoPointer)
+	}
+
+	// we just want to initialize a field to its empty value
+	if assignment.EmptyValue {
+		emptyType := valueType
+		if pathEnd.TypeHint != nil {
+			emptyType = *pathEnd.TypeHint
+		}
+
+		emptyVal := jenny.emptyValueForType(emptyType)
+		if emptyVal == "" {
+			return ""
+		}
+
+		prefix := ""
+		if valueType.Nullable || (valueType.IsAny() && pathEnd.TypeHint != nil && pathEnd.TypeHint.IsStructOrRef()) {
+			prefix = "&"
+		}
+
+		return fmt.Sprintf("builder.internal.%[1]s = %[2]s%[3]s", fieldPath, prefix, emptyVal)
 	}
 
 	if assignment.ArgumentName == "" {
@@ -317,6 +314,27 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 	}
 
 	return generatedConstraints + fmt.Sprintf("builder.internal.%[1]s = %[3]s%[2]s", fieldPath, argName, asPointer)
+}
+
+func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
+	switch typeDef.Kind {
+	case ast.KindRef:
+		return formatType(typeDef, jenny.typeImportMapper) + "{}"
+	case ast.KindStruct:
+		return formatType(typeDef, jenny.typeImportMapper)
+	case ast.KindEnum:
+		return formatScalar(typeDef.AsEnum().Values[0].Value)
+	case ast.KindArray, ast.KindMap:
+		return fmt.Sprintf(
+			"make(%s)",
+			formatType(typeDef, jenny.typeImportMapper),
+		)
+	case ast.KindScalar:
+		return "" // no need to do anything here
+
+	default:
+		return "unknown"
+	}
 }
 
 func (jenny *Builder) escapeVarName(varName string) string {
@@ -368,15 +386,15 @@ func (jenny *Builder) constraintComparison(argumentName string, constraint ast.T
 }
 
 // typeImportAlias returns the alias to use when importing the given object's type definition.
-func (jenny *Builder) typeImportAlias(object ast.Object) string {
+func (jenny *Builder) typeImportAlias(ref ast.RefType) string {
 	// all types within a schema are generated under the same package
-	return object.SelfRef.ReferredPkg
+	return ref.ReferredPkg
 }
 
 // importType declares an import statement for the type definition of
 // the given object and returns an alias to it.
-func (jenny *Builder) importType(object ast.Object) string {
-	pkg := jenny.typeImportAlias(object)
+func (jenny *Builder) importType(typeRef ast.RefType) string {
+	pkg := jenny.typeImportAlias(typeRef)
 
 	jenny.imports.Add(pkg, "github.com/grafana/cog/generated/types/"+pkg)
 
