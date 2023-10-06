@@ -18,6 +18,7 @@ type Tmpl struct {
 	Package     string
 	Name        string
 	Imports     importMap
+	ImportAlias string
 	Options     []string
 	Constructor constructor
 }
@@ -57,7 +58,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	var buffer strings.Builder
 
 	jenny.imports = newImportMap()
-	jenny.imports.Add("types", fmt.Sprintf("../../types/%s/types_gen", builder.Package))
+	importAlias := jenny.importType(builder.For)
 
 	objectName := builder.For.Name
 	constructorCode := jenny.generateConstructor(builders, builder)
@@ -73,6 +74,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 		Package:     builder.Package,
 		Name:        objectName,
 		Imports:     jenny.imports,
+		ImportAlias: importAlias,
 		Options:     options,
 		Constructor: constructorCode,
 	})

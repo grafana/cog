@@ -3,8 +3,8 @@ import * as {{ $alias }} from '{{ $importPath }}';
 {{- end }}
 import { CogOptionsBuilder } from '../../options_builder_gen';
 
-export class {{ .Name }}Builder implements CogOptionsBuilder<types.{{ .Name }}> {
-    private internal: types.{{ .Name }};
+export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.{{ .Name }}> {
+    private internal: {{ .ImportAlias }}.{{ .Name }};
 
     constructor({{ range $i, $arg := .Constructor.Args }}{{ if gt $i 0 }}, {{ end }}{{ $arg }}{{ end }}) {
         this.internal = {
@@ -17,7 +17,7 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<types.{{ .Name }}> 
         {{- end }}
     }
 
-    build(): types.{{ .Name }} {
+    build(): {{ .ImportAlias }}.{{ .Name }} {
         return this.internal;
     }
 
