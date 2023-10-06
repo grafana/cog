@@ -37,6 +37,14 @@ func ComposableDashboardPanel() Selector {
 	}
 }
 
+func ComposableDataQuery() Selector {
+	return func(builder ast.Builder) bool {
+		return builder.Schema.Metadata.Kind == ast.SchemaKindComposable &&
+			builder.Schema.Metadata.Variant == ast.SchemaVariantDataQuery &&
+			builder.Schema.Metadata.Identifier != ""
+	}
+}
+
 func EveryBuilder() Selector {
 	return func(builder ast.Builder) bool {
 		return true
