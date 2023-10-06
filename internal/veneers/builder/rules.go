@@ -121,6 +121,11 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 			continue
 		}
 
+		// We don't need these options anymore since we're composing them.
+		if panelOpt.Name == "options" || panelOpt.Name == "custom" {
+			continue
+		}
+
 		newBuilder.Options = append(newBuilder.Options, panelOpt)
 	}
 
