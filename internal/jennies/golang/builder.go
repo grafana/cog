@@ -255,10 +255,50 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 	return fmt.Sprintf("%s %s", name, typeName)
 }
 
+func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string {
+	fieldPath := jenny.formatFieldPath(path)
+	valueType := path.Last().Type
+	if path.Last().TypeHint != nil {
+		valueType = *path.Last().TypeHint
+	}
+
+	emptyValue := jenny.emptyValueForType(valueType)
+	// This should be alright since there shouldn't be any scalar in the middle of a path
+	if emptyValue[0] == '*' {
+		emptyValue = "&" + emptyValue[1:]
+	}
+
+	if path.Last().Type.IsAny() && emptyValue[0] != '&' {
+		emptyValue = "&" + emptyValue
+	}
+
+	return fmt.Sprintf(`if builder.internal.%[1]s == nil {
+	builder.internal.%[1]s = %[2]s
+}`, fieldPath, emptyValue)
+}
+
 func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
 	fieldPath := jenny.formatFieldPath(assignment.Path)
 	pathEnd := assignment.Path.Last()
 	valueType := pathEnd.Type
+
+	var pathInitSafeGuards []string
+	for i, chunk := range assignment.Path {
+		if i == len(assignment.Path)-1 {
+			continue
+		}
+
+		nullable := chunk.Type.Nullable || chunk.Type.Kind == ast.KindMap || chunk.Type.Kind == ast.KindArray
+		if nullable {
+			subPath := assignment.Path[:i+1]
+			pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(subPath))
+		}
+	}
+
+	assignmentSafeGuards := strings.Join(pathInitSafeGuards, "\n")
+	if assignmentSafeGuards != "" {
+		assignmentSafeGuards += "\n\n"
+	}
 
 	if referredBuilder, found := jenny.builderForType(builders, builder, valueType); found {
 		referredBuilderAlias := jenny.importBuilder(referredBuilder)
@@ -272,32 +312,12 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 			return err
 		}
 
-		builder.internal.%[1]s = %[3]sresource.Internal()
-`, fieldPath, referredBuilderAlias, intoPointer)
-	}
-
-	// we just want to initialize a field to its empty value
-	if assignment.EmptyValue {
-		emptyType := valueType
-		if pathEnd.TypeHint != nil {
-			emptyType = *pathEnd.TypeHint
-		}
-
-		emptyVal := jenny.emptyValueForType(emptyType)
-		if emptyVal == "" {
-			return ""
-		}
-
-		prefix := ""
-		if valueType.Nullable || (valueType.IsAny() && pathEnd.TypeHint != nil && pathEnd.TypeHint.IsStructOrRef()) {
-			prefix = "&"
-		}
-
-		return fmt.Sprintf("builder.internal.%[1]s = %[2]s%[3]s", fieldPath, prefix, emptyVal)
+		%[4]sbuilder.internal.%[1]s = %[3]sresource.Internal()
+`, fieldPath, referredBuilderAlias, intoPointer, assignmentSafeGuards)
 	}
 
 	if assignment.ArgumentName == "" {
-		return fmt.Sprintf("builder.internal.%[1]s = %[2]s", fieldPath, formatScalar(assignment.Value))
+		return fmt.Sprintf("%[3]sbuilder.internal.%[1]s = %[2]s", fieldPath, formatScalar(assignment.Value), assignmentSafeGuards)
 	}
 
 	argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.ArgumentName))
@@ -313,7 +333,7 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 		generatedConstraints += "\n\n"
 	}
 
-	return generatedConstraints + fmt.Sprintf("builder.internal.%[1]s = %[3]s%[2]s", fieldPath, argName, asPointer)
+	return generatedConstraints + fmt.Sprintf("%[4]sbuilder.internal.%[1]s = %[3]s%[2]s", fieldPath, argName, asPointer, assignmentSafeGuards)
 }
 
 func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
@@ -321,7 +341,7 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	case ast.KindRef:
 		return formatType(typeDef, jenny.typeImportMapper) + "{}"
 	case ast.KindStruct:
-		return formatType(typeDef, jenny.typeImportMapper)
+		return formatType(typeDef, jenny.typeImportMapper) + "{}"
 	case ast.KindEnum:
 		return formatScalar(typeDef.AsEnum().Values[0].Value)
 	case ast.KindArray, ast.KindMap:

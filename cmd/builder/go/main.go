@@ -41,8 +41,8 @@ func main() {
 		dashboard.Uid("test-dashboard-codegen"),
 		dashboard.Description("Some description"),
 
-			dashboard.Refresh("1m"),
-			dashboard.Time("now-3h", "now"),
+		dashboard.Refresh("1m"),
+		dashboard.Time("now-3h", "now"),
 			dashboard.Timepicker(
 				timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
 			),
