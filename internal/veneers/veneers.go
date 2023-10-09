@@ -86,9 +86,6 @@ func Common() *Rewriter {
 				"ValString",
 			),
 
-			// Time(from, to) instead of Time({from: 'now-6h', to: 'now'})
-			option.StructFieldsAsArguments(option.ByName("dashboard", "time")),
-
 			// We don't want these options at all
 			option.Omit(option.ByName("dashboard", "schemaVersion")),
 
