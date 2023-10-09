@@ -1,19 +1,52 @@
 # Defaults
 -- schema.cue --
-#struct: {
+#refStruct: {
+    things: string
+}
+
+struct: {
     things: string
 }
 
 container: {
     ints: [...int]
     strings: [...string]
-    structs: [...#struct]
+    refs: [...#refStruct]
+    structs: [...struct]
 }
 -- out/simplecue/GenerateAST --
 == ir.json
 {
   "Package": "grafanatest",
   "Definitions": [
+    {
+      "Name": "refStruct",
+      "Comments": [],
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "things",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Required": true,
+              "Default": null
+            }
+          ],
+          "Hint": {}
+        }
+      }
+    },
     {
       "Name": "struct",
       "Comments": [],
@@ -85,6 +118,26 @@ container: {
                       "ScalarKind": "string",
                       "Value": null,
                       "Constraints": null
+                    }
+                  }
+                }
+              },
+              "Required": true,
+              "Default": null
+            },
+            {
+              "Name": "refs",
+              "Comments": [],
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "grafanatest",
+                      "ReferredType": "refStruct"
                     }
                   }
                 }

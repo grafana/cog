@@ -2,7 +2,8 @@
 -- schema.cue --
 container: {
     text: string | [...string]
-    stringOrFalse: string | false
+    stringOrBool: string | false
+    stringOrNull: string | null
 }
 -- out/simplecue/GenerateAST --
 == ir.json
@@ -58,7 +59,7 @@ container: {
               "Default": null
             },
             {
-              "Name": "stringOrFalse",
+              "Name": "stringOrBool",
               "Comments": [],
               "Type": {
                 "Kind": "disjunction",
@@ -79,6 +80,40 @@ container: {
                       "Nullable": false,
                       "Scalar": {
                         "ScalarKind": "bool",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    }
+                  ],
+                  "Discriminator": "",
+                  "DiscriminatorMapping": {}
+                }
+              },
+              "Required": true,
+              "Default": null
+            },
+            {
+              "Name": "stringOrNull",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "null",
                         "Value": null,
                         "Constraints": null
                       }
