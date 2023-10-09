@@ -138,7 +138,7 @@ func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeD
 	case ast.KindStruct:
 		return jenny.emptyValueForStruct(builders, pkg, typeDef.AsStruct())
 	case ast.KindEnum:
-		return formatScalar(typeDef.AsEnum().Values[0].Value)
+		return jenny.formatEnumDefault(typeDef.AsEnum().Values)
 	case ast.KindMap:
 		return "{}"
 	case ast.KindArray:
@@ -173,6 +173,15 @@ func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, str
 }`, strings.Join(fieldsInit, "\n")))
 
 	return buffer.String()
+}
+
+func (jenny *Builder) formatEnumDefault(values []ast.EnumValue) string {
+	for _, v := range values {
+		if v.Type.Default != nil {
+			return formatScalar(v.Type.Default)
+		}
+	}
+	return formatScalar(values[0].Value)
 }
 
 func (jenny *Builder) emptyValueForScalar(scalar ast.ScalarType) string {
