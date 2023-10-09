@@ -19,7 +19,7 @@ type Tmpl struct {
 	Name        string
 	Imports     importMap
 	ImportAlias string
-	Options     []string
+	Options     []builderOptions
 	Constructor constructor
 }
 
@@ -27,6 +27,13 @@ type constructor struct {
 	Args         []string
 	Items        map[string]any
 	Initializers []string
+}
+
+type builderOptions struct {
+	Name        string
+	Comments    []string
+	Args        []string
+	Assignments []string
 }
 
 func (jenny *Builder) JennyName() string {
@@ -64,9 +71,9 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	constructorCode := jenny.generateConstructor(builders, builder)
 
 	// Define options
-	options := make([]string, len(builder.Options))
-	for i, option := range builder.Options {
-		options[i] = jenny.generateOption(builders, builder, option)
+	opts := make([]builderOptions, len(builder.Options))
+	for i, o := range builder.Options {
+		opts[i] = jenny.generateOption(builders, builder, o)
 	}
 
 	tmpl := templates.Lookup("builder.tmpl")
@@ -75,7 +82,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 		Name:        objectName,
 		Imports:     jenny.imports,
 		ImportAlias: importAlias,
-		Options:     options,
+		Options:     opts,
 		Constructor: constructorCode,
 	})
 
@@ -238,22 +245,13 @@ func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.
 	return generatedConstraints + fmt.Sprintf("this.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
-func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) string {
-	var buffer strings.Builder
-
-	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("\t// %s\n", commentLine))
-	}
-
+func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) builderOptions {
 	// Arguments list
-	arguments := ""
+	argsList := make([]string, 0, len(def.Args))
 	if len(def.Args) != 0 {
-		argsList := make([]string, 0, len(def.Args))
 		for _, arg := range def.Args {
 			argsList = append(argsList, jenny.generateArgument(builders, builder, arg))
 		}
-
-		arguments = strings.Join(argsList, ", ")
 	}
 
 	// Assignments
@@ -261,18 +259,13 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 	for _, assignment := range def.Assignments {
 		assignmentsList = append(assignmentsList, jenny.generateAssignment(builders, builder, assignment))
 	}
-	assignments := strings.Join(assignmentsList, "\n")
 
-	// Option body
-	buffer.WriteString(fmt.Sprintf(`	%[1]s(%[2]s): this {
-%[3]s
-
-		return this;
+	return builderOptions{
+		Name:        def.Name,
+		Comments:    def.Comments,
+		Args:        argsList,
+		Assignments: assignmentsList,
 	}
-
-`, def.Name, arguments, assignments))
-
-	return buffer.String()
 }
 
 func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {

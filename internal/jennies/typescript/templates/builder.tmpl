@@ -21,6 +21,15 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.
         return this.internal;
     }
 
-    {{ range $option := .Options }}{{ $option }}{{- end }}
+{{ range .Options }}
+    {{- range .Comments}}
+    // {{ . }}
+    {{- end }}
+    {{ .Name }}({{ range $i, $arg := .Args }}{{ if gt $i 0 }}, {{ end }}{{ $arg }}{{ end }}): this {
+{{ range .Assignments }}{{ . }}{{ end }}
+
+        return this;
+    }
+{{ end }}
 
 }
