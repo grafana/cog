@@ -78,7 +78,8 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 
 		sourceBuilder, found := builders.LocateByObject(sourcePkg, sourceBuilderNameWithoutPkg)
 		if !found {
-			return destinationBuilder, fmt.Errorf("source builder '%s.%s' not found", sourcePkg, sourceBuilderNameWithoutPkg)
+			// We couldn't find the source builder: let's return the selected builder untouched.
+			return destinationBuilder, nil
 		}
 
 		newRoot, err := destinationBuilder.MakePath(builders, underPath)
@@ -167,7 +168,8 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string) RewriteRu
 
 		panelBuilder, found := builders.LocateByObject(panelBuilderPkg, panelBuilderNameWithoutPkg)
 		if !found {
-			return nil, fmt.Errorf("panel builder '%s' not found", panelBuilderName)
+			// We couldn't find the panel builder: let's return the builders untouched.
+			return builders, nil
 		}
 
 		// - add to newBuilders all the builders that are not composable (ie: don't comply to the selector)
