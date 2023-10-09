@@ -121,16 +121,16 @@ func (jenny *Builder) getDefaultValues(builders ast.Builders, pkg string, typeDe
 		referredTypeBuilder, _ := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
 		return jenny.getDefaultValues(builders, referredTypeBuilder.Package, referredTypeBuilder.For.Type)
 	case ast.KindStruct:
-		return jenny.emptyValueForStruct(builders, pkg, typeDef.AsStruct())
+		return jenny.emptyValueForStruct(builders, typeDef.AsStruct())
 	default:
 		return map[string]any{"": "unknown"}
 	}
 }
 
-func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeDef ast.Type) string {
+func (jenny *Builder) emptyValueForType(builders ast.Builders, typeDef ast.Type) string {
 	switch typeDef.Kind {
 	case ast.KindDisjunction:
-		return jenny.emptyValueForType(builders, pkg, typeDef.AsDisjunction().Branches[0])
+		return jenny.emptyValueForType(builders, typeDef.AsDisjunction().Branches[0])
 	case ast.KindRef:
 		ref := typeDef.AsRef()
 		// FIXME: trying to find a reference to an object by only looking at builders is wrong
@@ -140,7 +140,7 @@ func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeD
 			return fmt.Sprintf("\"ref to %s.%s not found\"", ref.ReferredPkg, ref.ReferredType)
 		}
 
-		return jenny.emptyValueForType(builders, referredTypeBuilder.Package, referredTypeBuilder.For.Type)
+		return jenny.emptyValueForType(builders, referredTypeBuilder.For.Type)
 	case ast.KindEnum:
 		return jenny.formatEnumDefault(typeDef.AsEnum().Values)
 	case ast.KindMap:
@@ -155,7 +155,7 @@ func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeD
 	}
 }
 
-func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, structType ast.StructType) map[string]any {
+func (jenny *Builder) emptyValueForStruct(builders ast.Builders, structType ast.StructType) map[string]any {
 	fieldsInit := make(map[string]any, len(structType.Fields))
 	for _, field := range structType.Fields {
 		if field.Type.Default != nil {
@@ -167,11 +167,17 @@ func (jenny *Builder) emptyValueForStruct(builders ast.Builders, pkg string, str
 			continue
 		}
 
-		if field.Type.Kind == ast.KindStruct {
-			return jenny.emptyValueForStruct(builders, pkg, field.Type.AsStruct())
+		// The field and scalar, and has a constant value
+		if field.Type.Kind == ast.KindScalar && field.Type.AsScalar().Value != nil {
+			fieldsInit[field.Name] = formatScalar(field.Type.AsScalar().Value)
+			continue
 		}
 
-		fieldsInit[field.Name] = jenny.emptyValueForType(builders, pkg, field.Type)
+		if field.Type.Kind == ast.KindStruct {
+			fieldsInit[field.Name] = jenny.emptyValueForStruct(builders, field.Type.AsStruct())
+		}
+
+		fieldsInit[field.Name] = jenny.emptyValueForType(builders, field.Type)
 	}
 
 	return fieldsInit
