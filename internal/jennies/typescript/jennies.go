@@ -10,6 +10,24 @@ import (
 	"github.com/grafana/cog/internal/veneers/option"
 )
 
+type BuilderContext struct {
+	Schemas  ast.Schemas
+	Builders ast.Builders
+}
+
+func (context *BuilderContext) BuilderForType(t ast.Type) (ast.Builder, bool) {
+	if t.Kind != ast.KindRef {
+		return ast.Builder{}, false
+	}
+
+	ref := t.AsRef()
+	return context.Builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+}
+
+func (context *BuilderContext) LocateObject(pkg string, name string) (ast.Object, bool) {
+	return context.Schemas.LocateObject(pkg, name)
+}
+
 func Jennies() *codejen.JennyList[[]*ast.Schema] {
 	targets := codejen.JennyListWithNamer[[]*ast.Schema](func(_ []*ast.Schema) string {
 		return "typescript"
@@ -21,9 +39,9 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 		tools.Foreach[*ast.Schema](RawTypes{}),
 	)
 	targets.AppendOneToMany(
-		codejen.AdaptOneToMany[[]ast.Builder, []*ast.Schema](
+		codejen.AdaptOneToMany[BuilderContext, []*ast.Schema](
 			&Builder{},
-			func(schemas []*ast.Schema) []ast.Builder {
+			func(schemas []*ast.Schema) BuilderContext {
 				var err error
 
 				generator := &ast.BuilderGenerator{}
@@ -43,7 +61,10 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 					panic(err)
 				}
 
-				return builders
+				return BuilderContext{
+					Schemas:  schemas,
+					Builders: builders,
+				}
 			},
 		),
 	)
