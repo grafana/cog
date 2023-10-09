@@ -177,6 +177,37 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T)
 	runDisjunctionPass(t, objects, expectedObjects)
 }
 
+func TestDisjunctionToType_WithDisjunctionOfScalars_AsNullableAStructField(t *testing.T) {
+	// Prepare test input
+	disjunctionType := ast.NewDisjunction([]ast.Type{
+		ast.String(),
+		ast.Bool(),
+	}, ast.Nullable())
+	objects := []ast.Object{
+		ast.NewObject("test", "AStructWithADisjunctionOfScalars", ast.NewStruct(
+			ast.NewStructField("AFieldWithADisjunctionOfScalars", disjunctionType),
+		)),
+	}
+
+	// Prepare expected output
+	disjunctionStructType := ast.NewStruct(
+		ast.NewStructField("ValString", ast.String(ast.Nullable())),
+		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
+	)
+	// The original disjunction definition is preserved as a hint
+	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
+
+	expectedObjects := []ast.Object{
+		ast.NewObject("test", "AStructWithADisjunctionOfScalars", ast.NewStruct(
+			ast.NewStructField("AFieldWithADisjunctionOfScalars", ast.NewRef("test", "StringOrBool", ast.Nullable())),
+		)),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType),
+	}
+
+	// Call the compiler pass
+	runDisjunctionPass(t, objects, expectedObjects)
+}
+
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testing.T) {
 	// Prepare test input
 	disjunctionType := ast.NewDisjunction([]ast.Type{

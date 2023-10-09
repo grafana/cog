@@ -166,7 +166,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	// a reference to it.
 	if _, ok := pass.newObjects[newTypeName]; ok {
 		ref := ast.NewRef(schema.Package, newTypeName)
-		if disjunction.Branches.HasNullType() {
+		if def.Nullable || disjunction.Branches.HasNullType() {
 			ref.Nullable = true
 		}
 
@@ -221,7 +221,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	}
 
 	ref := ast.NewRef(schema.Package, newTypeName)
-	if disjunction.Branches.HasNullType() {
+	if def.Nullable || disjunction.Branches.HasNullType() {
 		ref.Nullable = true
 	}
 
