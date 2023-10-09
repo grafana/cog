@@ -123,7 +123,7 @@ func (jenny *Builder) getDefaultValues(builders ast.Builders, pkg string, typeDe
 	case ast.KindStruct:
 		return jenny.emptyValueForStruct(builders, pkg, typeDef.AsStruct())
 	default:
-		return map[string]any{"": "undefined"}
+		return map[string]any{"": "unknown"}
 	}
 }
 
@@ -145,7 +145,7 @@ func (jenny *Builder) emptyValueForType(builders ast.Builders, pkg string, typeD
 		return jenny.emptyValueForScalar(typeDef.AsScalar())
 
 	default:
-		return "undefined"
+		return "unknown"
 	}
 }
 
