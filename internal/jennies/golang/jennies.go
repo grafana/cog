@@ -43,6 +43,7 @@ func CompilerPasses() []compiler.Pass {
 		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.DisjunctionToType{},
+		&compiler.Unspec{},
 	}
 }
 
