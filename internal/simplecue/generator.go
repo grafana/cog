@@ -7,7 +7,6 @@ import (
 	"cuelang.org/go/cue"
 	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -317,7 +316,6 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 	case *cueast.Ellipsis: // TODO: this makes no sense
 		return g.schema.Package, nil
 	default:
-		spew.Dump(source)
 		return "", fmt.Errorf("can't extract reference package")
 	}
 }

@@ -10,6 +10,8 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
+type raw string
+
 type pkgMapper func(string) string
 
 type RawTypes struct {
@@ -52,7 +54,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	}
 
 	for _, typeDef := range schema.Objects {
-		typeDefGen, err := jenny.formatObject(typeDef, packageMapper)
+		typeDefGen, err := jenny.formatObject(schema, typeDef, packageMapper)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +71,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	return []byte(importStatements + buffer.String()), nil
 }
 
-func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]byte, error) {
+func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMapper pkgMapper) ([]byte, error) {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -83,10 +85,6 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
 		buffer.WriteString(formatStructFields(def.Type.AsStruct().Fields, packageMapper))
 		buffer.WriteString("\n")
-
-		buffer.WriteString("\n")
-		buffer.WriteString(formatStructDefaults(def))
-		buffer.WriteString("\n")
 	case ast.KindEnum:
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
 		for _, val := range def.Type.AsEnum().Values {
@@ -98,13 +96,25 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, packageMapper)))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
-		if scalarType.Value != nil {
+		if scalarType.IsConcrete() {
 			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", def.Name, formatScalar(scalarType.Value)))
 		} else {
 			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatScalarKind(scalarType.ScalarKind)))
 		}
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
+	}
+
+	// generate a "default value factory" for every object, except for constants
+	if def.Type.Kind != ast.KindScalar || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
+		buffer.WriteString("\n")
+
+		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(def.Name), def.Name))
+
+		formattedDefaults := formatValue(defaultValueForObject(schema, def, packageMapper))
+		buffer.WriteString(formattedDefaults)
+
+		buffer.WriteString(");\n")
 	}
 
 	return []byte(buffer.String()), nil
@@ -127,25 +137,6 @@ func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) strin
 	}
 
 	buffer.WriteString("}")
-
-	return buffer.String()
-}
-
-func formatStructDefaults(def ast.Object) string {
-	var buffer strings.Builder
-
-	buffer.WriteString(fmt.Sprintf("export const default%[1]s: Partial<%[2]s> = {\n", tools.UpperCamelCase(def.Name), def.Name))
-
-	fields := def.Type.AsStruct().Fields
-	for _, field := range fields {
-		if field.Type.Default == nil {
-			continue
-		}
-
-		buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", field.Name, formatScalar(field.Type.Default)))
-	}
-
-	buffer.WriteString("};")
 
 	return buffer.String()
 }
@@ -263,6 +254,20 @@ func formatAnonymousEnum(def ast.EnumType) string {
 	return enumeration
 }
 
+func formatScalar(val any) string {
+	if list, ok := val.([]any); ok {
+		items := make([]string, 0, len(list))
+
+		for _, item := range list {
+			items = append(items, formatScalar(item))
+		}
+
+		return fmt.Sprintf("[%s]", strings.Join(items, ", "))
+	}
+
+	return fmt.Sprintf("%#v", val)
+}
+
 func prefixLinesWith(input string, prefix string) string {
 	lines := strings.Split(input, "\n")
 	prefixed := make([]string, 0, len(lines))
@@ -274,15 +279,138 @@ func prefixLinesWith(input string, prefix string) string {
 	return strings.Join(prefixed, "\n")
 }
 
-func formatScalar(val any) string {
-	if list, ok := val.([]any); ok {
-		items := make([]string, 0, len(list))
+/******************************************************************************
+* 					 Default and "empty" values management 					  *
+******************************************************************************/
 
-		for _, item := range list {
-			items = append(items, formatScalar(item))
+func defaultValueForObject(schema *ast.Schema, object ast.Object, packageMapper pkgMapper) any {
+	switch object.Type.Kind {
+	case ast.KindEnum:
+		return defaultValueForEnumType(object.Name, object.Type)
+	default:
+		return defaultValueForType(schema, object.Type, packageMapper)
+	}
+}
+
+func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkgMapper) any {
+	switch typeDef.Kind {
+	case ast.KindDisjunction:
+		return defaultValueForType(schema, typeDef.AsDisjunction().Branches[0], packageMapper)
+	case ast.KindStruct:
+		return defaultValuesForStructType(schema, typeDef.AsStruct(), packageMapper)
+	case ast.KindEnum: // anonymous enum
+		return typeDef.AsEnum().Values[0].Value
+	case ast.KindRef:
+		ref := typeDef.AsRef()
+
+		// TODO: handle references to other packages
+		referredType := schema.LocateObject(ref.ReferredType)
+		// is the reference to a constant?
+		if referredType.Type.Kind == ast.KindScalar && referredType.Type.AsScalar().IsConcrete() {
+			return raw(fmt.Sprintf("%s.%s", ref.ReferredPkg, ref.ReferredType))
 		}
 
-		return fmt.Sprintf("[%s]", strings.Join(items, ", "))
+		pkg := packageMapper(ref.ReferredPkg)
+		if pkg != "" {
+			return raw(fmt.Sprintf("%s.default%s()", ref.ReferredPkg, ref.ReferredType))
+		}
+
+		return raw(fmt.Sprintf("default%s()", ref.ReferredType))
+	case ast.KindMap:
+		return raw("{}")
+	case ast.KindArray:
+		return raw("[]")
+	case ast.KindScalar:
+		return defaultValueForScalar(typeDef.AsScalar())
+
+	default:
+		return "unknown"
+	}
+}
+
+func defaultValuesForStructType(schema *ast.Schema, structDef ast.StructType, packageMapper pkgMapper) map[string]any {
+	defaults := make(map[string]any, len(structDef.Fields))
+	for _, field := range structDef.Fields {
+		if field.Type.Default != nil {
+			defaults[field.Name] = field.Type.Default
+			continue
+		}
+
+		if !field.Required {
+			continue
+		}
+
+		defaults[field.Name] = defaultValueForType(schema, field.Type, packageMapper)
+	}
+
+	return defaults
+}
+
+func defaultValueForEnumType(name string, typeDef ast.Type) any {
+	enum := typeDef.AsEnum()
+	defaultValue := enum.Values[0].Value
+	if typeDef.Default != nil {
+		defaultValue = typeDef.Default
+	}
+
+	for _, v := range enum.Values {
+		if v.Value == defaultValue {
+			return raw(fmt.Sprintf("%s.%s", name, tools.CleanupNames(tools.UpperCamelCase(v.Name))))
+		}
+	}
+
+	return raw(fmt.Sprintf("%s.%s", name, tools.CleanupNames(tools.UpperCamelCase(enum.Values[0].Name))))
+}
+
+func defaultValueForScalar(scalar ast.ScalarType) any {
+	// The scalar represents a constant
+	if scalar.Value != nil {
+		return scalar.Value
+	}
+
+	switch scalar.ScalarKind {
+	case ast.KindNull:
+		return raw("null")
+	case ast.KindAny:
+		return raw("{}")
+
+	case ast.KindBytes, ast.KindString:
+		return ""
+
+	case ast.KindFloat32, ast.KindFloat64:
+		return 0.0
+
+	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+		return 0
+
+	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+		return 0
+
+	case ast.KindBool:
+		return false
+
+	default:
+		return "unknown"
+	}
+}
+
+func formatValue(val any) string {
+	if rawVal, ok := val.(raw); ok {
+		return string(rawVal)
+	}
+
+	var buffer strings.Builder
+
+	if valMap, ok := val.(map[string]any); ok {
+		buffer.WriteString("{\n")
+
+		for key, v := range valMap {
+			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(v)))
+		}
+
+		buffer.WriteString("}")
+
+		return buffer.String()
 	}
 
 	return fmt.Sprintf("%#v", val)

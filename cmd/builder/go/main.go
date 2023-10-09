@@ -24,10 +24,10 @@ func main() {
 	someLogsPanel, err := timeseries.New(
 		timeseries.Title("Some timeseries panel"),
 		timeseries.Transparent(true),
-		timeseries.Description("Let there be logs"),
+		timeseries.Description("Let there be data"),
 		timeseries.Decimals(2),
 		timeseries.Min(0),
-		timeseries.Max(0),
+		timeseries.Max(200),
 		timeseries.LineWidth(5),
 		timeseries.DrawStyle(common.GraphDrawStyleBars),
 		timeseries.Targets([]types.Target{
@@ -38,7 +38,7 @@ func main() {
 		panic(err)
 	}
 
-	overviewPanel, err := rowpanel.New(
+	overviewRow, err := rowpanel.New(
 		"Overview",
 		rowpanel.Panels([]types.Panel{
 			*someLogsPanel.Internal(),
@@ -55,9 +55,10 @@ func main() {
 
 		dashboard.Refresh("1m"),
 		dashboard.Time("now-3h", "now"),
-		dashboard.Timepicker(
-			timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
-		),
+
+		//dashboard.Timepicker(
+		//	timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
+		//),
 
 		dashboard.Style(types.StyleEnumStyleDark),
 		dashboard.Timezone("utc"),
@@ -73,7 +74,7 @@ func main() {
 		}),
 
 		dashboard.Rows([]types.RowPanel{
-			*overviewPanel.Internal(),
+			*overviewRow.Internal(),
 		}),
 	)
 	if err != nil {

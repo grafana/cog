@@ -7,11 +7,7 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.
     private internal: {{ .ImportAlias }}.{{ .Name }};
 
     constructor({{ template "args" .Constructor.Args }}) {
-        this.internal = {
-            {{- range $k, $v := .Constructor.Items }}
-            {{ $k }}: {{ $v | simpleQuotes }},
-            {{- end }}
-        };
+       this.internal = {{ .ImportAlias }}.default{{ .Name | upperCamelCase }}();
         {{- range $i, $arg := .Constructor.Initializers }}
         {{ $arg }}
         {{- end }}
@@ -27,6 +23,9 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.
     {{- end }}
     {{ .Name }}({{ template "args" .Args }}): this {
 {{- range .Assignments }}
+{{- range .InitSafeguards }}
+{{ . }}
+{{- end }}
 {{- range .Constraints }}
 {{ . }}
 {{- end }}

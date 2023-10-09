@@ -2,8 +2,10 @@ package typescript
 
 import (
 	"embed"
-	"strings"
+	"encoding/json"
 	"text/template"
+
+	"github.com/grafana/cog/internal/tools"
 )
 
 //nolint:gochecknoglobals
@@ -17,17 +19,17 @@ var templatesFS embed.FS
 func init() {
 	base := template.New("ts")
 	base.Funcs(map[string]any{
-		"simpleQuotes": simpleQuotes,
+		"jsonEncode":     mustJSONEncode,
+		"upperCamelCase": tools.UpperCamelCase,
 	})
 	templates = template.Must(base.ParseFS(templatesFS, "templates/*.tmpl"))
 }
 
-func simpleQuotes(s string) string {
-	splitString := strings.Split(s, " ")
-	if strings.HasSuffix(splitString[0], "\"") && strings.HasPrefix(splitString[0], "\"") {
-		newString := s[1 : len(s)-1]
-		return "'" + newString + "'"
+func mustJSONEncode(val any) string {
+	encoded, err := json.MarshalIndent(val, "", "  ")
+	if err != nil {
+		panic(err)
 	}
 
-	return s
+	return string(encoded)
 }

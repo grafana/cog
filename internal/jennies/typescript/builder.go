@@ -44,21 +44,22 @@ type argument struct {
 }
 
 type assignment struct {
-	Path        string
-	Value       string
-	IsBuilder   bool
-	Constraints []string
+	Path           string
+	InitSafeguards []string
+	Value          string
+	IsBuilder      bool
+	Constraints    []string
 }
 
 func (jenny *Builder) JennyName() string {
 	return "TypescriptBuilder"
 }
 
-func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
+func (jenny *Builder) Generate(buildContext BuilderContext) (codejen.Files, error) {
 	files := codejen.Files{}
 
-	for _, builder := range builders {
-		output, err := jenny.generateBuilder(builders, builder)
+	for _, builder := range buildContext.Builders {
+		output, err := jenny.generateBuilder(buildContext, builder)
 		if err != nil {
 			return nil, err
 		}
@@ -75,18 +76,18 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(buildContext BuilderContext, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
 	jenny.imports = newImportMap()
 	importAlias := jenny.importType(builder.For)
 
-	constructorCode := jenny.generateConstructor(builders, builder)
+	constructorCode := jenny.generateConstructor(buildContext, builder)
 
 	// Define options
 	opts := make([]options, len(builder.Options))
 	for i, o := range builder.Options {
-		opts[i] = jenny.generateOption(builders, builder, o)
+		opts[i] = jenny.generateOption(buildContext, builder, o)
 	}
 
 	err := templates.Lookup("builder.tmpl").Execute(&buffer, Tmpl{
@@ -101,7 +102,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	return []byte(buffer.String()), err
 }
 
-func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) constructor {
+func (jenny *Builder) generateConstructor(buildContext BuilderContext, builder ast.Builder) constructor {
 	var argsList []argument
 	var fieldsInitList []string
 	for _, opt := range builder.Options {
@@ -110,154 +111,36 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 		}
 
 		// FIXME: this is assuming that there's only one argument for that option
-		argsList = append(argsList, jenny.generateArgument(builders, builder, opt.Args[0]))
+		argsList = append(argsList, jenny.generateArgument(buildContext, builder, opt.Args[0]))
 		fieldsInitList = append(
 			fieldsInitList,
-			jenny.generateInitAssignment(builders, builder, opt.Assignments[0]),
+			jenny.generateInitAssignment(buildContext, opt.Assignments[0]),
 		)
 	}
 
 	for _, init := range builder.Initializations {
 		fieldsInitList = append(
 			fieldsInitList,
-			jenny.generateInitAssignment(builders, builder, init),
+			jenny.generateInitAssignment(buildContext, init),
 		)
 	}
 
 	return constructor{
 		Args:         argsList,
-		Items:        jenny.getDefaultValues(builders, builder.Package, builder.For.Type),
 		Initializers: fieldsInitList,
 	}
 }
 
-func (jenny *Builder) getDefaultValues(builders ast.Builders, pkg string, typeDef ast.Type) map[string]any {
-	switch typeDef.Kind {
-	case ast.KindDisjunction:
-		return jenny.getDefaultValues(builders, pkg, typeDef.AsDisjunction().Branches[0])
-	case ast.KindRef:
-		ref := typeDef.AsRef()
-		referredTypeBuilder, _ := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
-		return jenny.getDefaultValues(builders, referredTypeBuilder.Package, referredTypeBuilder.For.Type)
-	case ast.KindStruct:
-		return jenny.emptyValueForStruct(builders, typeDef.AsStruct())
-	default:
-		return map[string]any{"": "unknown"}
-	}
-}
-
-func (jenny *Builder) emptyValueForType(builders ast.Builders, typeDef ast.Type) string {
-	switch typeDef.Kind {
-	case ast.KindDisjunction:
-		return jenny.emptyValueForType(builders, typeDef.AsDisjunction().Branches[0])
-	case ast.KindRef:
-		ref := typeDef.AsRef()
-		// FIXME: trying to find a reference to an object by only looking at builders is wrong
-		// since the builder could be omitted by veneers
-		referredTypeBuilder, found := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
-		if !found {
-			return fmt.Sprintf("\"ref to %s.%s not found\"", ref.ReferredPkg, ref.ReferredType)
-		}
-
-		return jenny.emptyValueForType(builders, referredTypeBuilder.For.Type)
-	case ast.KindEnum:
-		return jenny.formatEnumDefault(typeDef.AsEnum().Values)
-	case ast.KindMap:
-		return "{}"
-	case ast.KindArray:
-		return "[]"
-	case ast.KindScalar:
-		return jenny.emptyValueForScalar(typeDef.AsScalar())
-
-	default:
-		return "unknown"
-	}
-}
-
-func (jenny *Builder) emptyValueForStruct(builders ast.Builders, structType ast.StructType) map[string]any {
-	fieldsInit := make(map[string]any, len(structType.Fields))
-	for _, field := range structType.Fields {
-		if field.Type.Default != nil {
-			fieldsInit[field.Name] = formatScalar(field.Type.Default)
-			continue
-		}
-
-		if !field.Required {
-			continue
-		}
-
-		// The field and scalar, and has a constant value
-		if field.Type.Kind == ast.KindScalar && field.Type.AsScalar().Value != nil {
-			fieldsInit[field.Name] = formatScalar(field.Type.AsScalar().Value)
-			continue
-		}
-
-		if field.Type.Kind == ast.KindStruct {
-			fieldsInit[field.Name] = jenny.emptyValueForStruct(builders, field.Type.AsStruct())
-		}
-
-		fieldsInit[field.Name] = jenny.emptyValueForType(builders, field.Type)
-	}
-
-	return fieldsInit
-}
-
-func (jenny *Builder) formatEnumDefault(values []ast.EnumValue) string {
-	for _, v := range values {
-		if v.Type.Default != nil {
-			return formatScalar(v.Type.Default)
-		}
-	}
-	return formatScalar(values[0].Value)
-}
-
-func (jenny *Builder) emptyValueForScalar(scalar ast.ScalarType) string {
-	switch scalar.ScalarKind {
-	case ast.KindNull:
-		return "null"
-	case ast.KindAny:
-		return "{}"
-
-	case ast.KindBytes, ast.KindString:
-		return "''"
-
-	case ast.KindFloat32, ast.KindFloat64:
-		return "0"
-
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
-		return "0"
-
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
-		return "0"
-
-	case ast.KindBool:
-		return "false"
-
-	default:
-		return "undefined"
-	}
-}
-
-func (jenny *Builder) builderForType(builders ast.Builders, builder ast.Builder, t ast.Type) (ast.Builder, bool) {
-	if t.Kind != ast.KindRef {
-		return ast.Builder{}, false
-	}
-
-	// TODO: shouldn't we using the package from the ref?!
-	ref := t.AsRef()
-	return builders.LocateByObject(builder.Package, ref.ReferredType)
-}
-
-func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
+func (jenny *Builder) generateInitAssignment(buildContext BuilderContext, assignment ast.Assignment) string {
 	fieldPath := assignment.Path
 	valueType := assignment.Path.Last().Type
 
-	if _, valueHasBuilder := jenny.builderForType(builders, builder, valueType); valueHasBuilder {
+	if _, valueHasBuilder := buildContext.BuilderForType(valueType); valueHasBuilder {
 		return "constructor init assignment with type that has a builder is not supported yet"
 	}
 
 	if assignment.ArgumentName == "" {
-		return fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s;", fieldPath, formatScalar(assignment.Value))
+		return fmt.Sprintf("this.internal.%[1]s = %[2]s;", fieldPath, formatScalar(assignment.Value))
 	}
 
 	argName := tools.LowerCamelCase(assignment.ArgumentName)
@@ -270,19 +153,19 @@ func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.
 	return generatedConstraints + fmt.Sprintf("this.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
-func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) options {
+func (jenny *Builder) generateOption(buildContext BuilderContext, builder ast.Builder, def ast.Option) options {
 	// Arguments list
 	argsList := make([]argument, 0, len(def.Args))
 	if len(def.Args) != 0 {
 		for _, arg := range def.Args {
-			argsList = append(argsList, jenny.generateArgument(builders, builder, arg))
+			argsList = append(argsList, jenny.generateArgument(buildContext, builder, arg))
 		}
 	}
 
 	// Assignments
 	assignmentsList := make([]assignment, 0, len(def.Assignments))
-	for _, assignment := range def.Assignments {
-		assignmentsList = append(assignmentsList, jenny.generateAssignment(builders, builder, assignment))
+	for _, assign := range def.Assignments {
+		assignmentsList = append(assignmentsList, jenny.generateAssignment(buildContext, builder, assign))
 	}
 
 	return options{
@@ -293,8 +176,8 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 	}
 }
 
-func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) argument {
-	if referredBuilder, found := jenny.builderForType(builders, builder, arg.Type); found {
+func (jenny *Builder) generateArgument(buildContext BuilderContext, builder ast.Builder, arg ast.Argument) argument {
+	if referredBuilder, found := buildContext.BuilderForType(arg.Type); found {
 		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For)
 
 		return argument{
@@ -318,31 +201,82 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 	return argument{Name: tools.LowerCamelCase(arg.Name), Type: typeName}
 }
 
-func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assign ast.Assignment) assignment {
-	fieldPath := assign.Path.Last().Identifier
+func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Builder, path ast.Path) string {
+	fieldPath := jenny.formatFieldPath(path, currentBuilder)
+	valueType := path.Last().Type
+	if path.Last().TypeHint != nil {
+		valueType = *path.Last().TypeHint
+	}
+
+	emptyValue := defaultValueForType(currentBuilder.Schema, valueType, func(pkg string) string {
+		jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+
+		return pkg
+	})
+
+	return fmt.Sprintf(`		if (!this.internal.%[1]s) {
+			this.internal.%[1]s = %[2]s;
+		}`, fieldPath, emptyValue)
+}
+
+func (jenny *Builder) generateAssignment(buildContext BuilderContext, builder ast.Builder, assign ast.Assignment) assignment {
+	fieldPath := jenny.formatFieldPath(assign.Path, builder)
 	valueType := assign.Path.Last().Type
 
-	if _, found := jenny.builderForType(builders, builder, valueType); found {
+	var pathInitSafeGuards []string
+	for i, chunk := range assign.Path {
+		if i == len(assign.Path)-1 {
+			continue
+		}
+
+		chunkType := chunk.Type
+		if chunk.TypeHint != nil {
+			chunkType = *chunk.TypeHint
+		}
+
+		maybeUndefined := chunkType.Nullable ||
+			chunkType.Kind == ast.KindMap ||
+			chunkType.Kind == ast.KindArray ||
+			chunkType.Kind == ast.KindRef ||
+			chunkType.Kind == ast.KindStruct
+
+		if !maybeUndefined {
+			continue
+		}
+
+		subPath := assign.Path[:i+1]
+		pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
+	}
+
+	assignmentSafeGuards := strings.Join(pathInitSafeGuards, "\n")
+	if assignmentSafeGuards != "" {
+		assignmentSafeGuards = assignmentSafeGuards + "\n\n"
+	}
+
+	if _, found := buildContext.BuilderForType(valueType); found {
 		return assignment{
-			Path:      fieldPath,
-			Value:     assign.ArgumentName,
-			IsBuilder: true,
+			Path:           fieldPath,
+			InitSafeguards: pathInitSafeGuards,
+			Value:          assign.ArgumentName,
+			IsBuilder:      true,
 		}
 	}
 
 	if assign.ArgumentName == "" {
 		return assignment{
-			Path:  fieldPath,
-			Value: formatScalar(assign.Value),
+			Path:           fieldPath,
+			InitSafeguards: pathInitSafeGuards,
+			Value:          formatScalar(assign.Value),
 		}
 	}
 
 	argName := tools.LowerCamelCase(assign.ArgumentName)
 
 	return assignment{
-		Path:        fieldPath,
-		Value:       argName,
-		Constraints: jenny.constraints(argName, assign.Constraints),
+		Path:           fieldPath,
+		InitSafeguards: pathInitSafeGuards,
+		Value:          argName,
+		Constraints:    jenny.constraints(argName, assign.Constraints),
 	}
 }
 
@@ -391,4 +325,39 @@ func (jenny *Builder) importType(object ast.Object) string {
 	jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
 
 	return pkg
+}
+
+func (jenny *Builder) formatFieldPath(fieldPath ast.Path, currentBuilder ast.Builder) string {
+	if len(fieldPath) != 0 {
+		return fieldPath.String()
+	}
+	formattedPath := ""
+
+	builderImportAlias := jenny.typeImportAlias(currentBuilder.For)
+	for i := range fieldPath {
+		output := fieldPath[i].Identifier
+
+		// don't generate type hints if:
+		// * there isn't one defined
+		// * the type isn't "any"
+		// * as a trailing element in the path
+		if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
+			formattedPath += "." + output
+			continue
+		}
+
+		formattedTypeHint := formatType(*fieldPath[i].TypeHint, func(pkg string) string {
+			if pkg == currentBuilder.For.SelfRef.ReferredPkg {
+				return builderImportAlias
+			}
+
+			jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+
+			return pkg
+		})
+
+		formattedPath += "(" + formattedPath + " as " + formattedTypeHint + ")." + output
+	}
+
+	return formattedPath
 }
