@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -19,10 +20,10 @@ func (jenny *Builder) JennyName() string {
 	return "GoBuilder"
 }
 
-func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
+func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) {
 	files := codejen.Files{}
 
-	for _, builder := range builders {
+	for _, builder := range context.Builders {
 		builderImportAlias := jenny.typeImportAlias(builder.For.SelfRef)
 		jenny.typeImportMapper = func(pkg string) string {
 			if pkg == builder.For.SelfRef.ReferredPkg {
@@ -34,7 +35,7 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 			return pkg
 		}
 
-		output := jenny.generateBuilder(builders, builder)
+		output := jenny.generateBuilder(context, builder)
 		filename := filepath.Join(
 			strings.ToLower(builder.RootPackage),
 			strings.ToLower(builder.Package),
@@ -47,12 +48,12 @@ func (jenny *Builder) Generate(builders []ast.Builder) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder) []byte {
+func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Builder) []byte {
 	var buffer strings.Builder
 
 	jenny.imports = newImportMap()
 
-	builderSource := jenny.generateBuilderSource(builders, builder)
+	builderSource := jenny.generateBuilderSource(context, builder)
 
 	// package declaration
 	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.Package)))
@@ -67,7 +68,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	return []byte(buffer.String())
 }
 
-func (jenny *Builder) generateBuilderSource(builders ast.Builders, builder ast.Builder) string {
+func (jenny *Builder) generateBuilderSource(context context.Builders, builder ast.Builder) string {
 	var buffer strings.Builder
 
 	objectName := tools.UpperCamelCase(builder.For.Name)
@@ -85,7 +86,7 @@ func (jenny *Builder) generateBuilderSource(builders ast.Builders, builder ast.B
 `, importAlias, objectName))
 
 	// Add a constructor for the builder
-	constructorCode := jenny.generateConstructor(builders, builder)
+	constructorCode := jenny.generateConstructor(context, builder)
 	buffer.WriteString(constructorCode)
 
 	// Allow builders to expose the resource they're building
@@ -98,7 +99,7 @@ func (builder *Builder) Internal() *%s.%s {
 
 	// Define options
 	for _, option := range builder.Options {
-		buffer.WriteString(jenny.generateOption(builders, builder, option) + "\n")
+		buffer.WriteString(jenny.generateOption(context, option) + "\n")
 	}
 
 	// add calls to set default values
@@ -116,7 +117,7 @@ func (builder *Builder) Internal() *%s.%s {
 	return buffer.String()
 }
 
-func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) string {
+func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) string {
 	var buffer strings.Builder
 
 	typeName := tools.UpperCamelCase(builder.For.Name)
@@ -130,17 +131,17 @@ func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Bui
 		}
 
 		// FIXME: this is assuming that there's only one argument for that option
-		argsList = append(argsList, jenny.generateArgument(builders, builder, opt.Args[0]))
+		argsList = append(argsList, jenny.generateArgument(context, opt.Args[0]))
 		fieldsInitList = append(
 			fieldsInitList,
-			jenny.generateAssignment(builders, builder, opt.Assignments[0]),
+			jenny.generateAssignment(context, opt.Assignments[0]),
 		)
 	}
 
 	for _, init := range builder.Initializations {
 		fieldsInitList = append(
 			fieldsInitList,
-			jenny.generateAssignment(builders, builder, init),
+			jenny.generateAssignment(context, init),
 		)
 	}
 
@@ -192,7 +193,7 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	return strings.Join(parts, ".")
 }
 
-func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) string {
+func (jenny *Builder) generateOption(context context.Builders, def ast.Option) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -207,7 +208,7 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 	if len(def.Args) != 0 {
 		argsList := make([]string, 0, len(def.Args))
 		for _, arg := range def.Args {
-			argsList = append(argsList, jenny.generateArgument(builders, builder, arg))
+			argsList = append(argsList, jenny.generateArgument(context, arg))
 		}
 
 		arguments = strings.Join(argsList, ", ")
@@ -216,7 +217,7 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 	// Assignments
 	assignmentsList := make([]string, 0, len(def.Assignments))
 	for _, assignment := range def.Assignments {
-		assignmentsList = append(assignmentsList, jenny.generateAssignment(builders, builder, assignment))
+		assignmentsList = append(assignmentsList, jenny.generateAssignment(context, assignment))
 	}
 	assignments := strings.Join(assignmentsList, "\n")
 
@@ -232,18 +233,8 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 	return buffer.String()
 }
 
-func (jenny *Builder) builderForType(builders ast.Builders, builder ast.Builder, t ast.Type) (ast.Builder, bool) {
-	if t.Kind != ast.KindRef {
-		return ast.Builder{}, false
-	}
-
-	// TODO: shouldn't we using the package from the ref?!
-	ref := t.AsRef()
-	return builders.LocateByObject(builder.Package, ref.ReferredType)
-}
-
-func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
-	if referredBuilder, found := jenny.builderForType(builders, builder, arg.Type); found {
+func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) string {
+	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		importAlias := jenny.importBuilder(referredBuilder)
 
 		return fmt.Sprintf(`opts ...%s.Option`, importAlias)
@@ -277,7 +268,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string 
 }`, fieldPath, emptyValue)
 }
 
-func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
+func (jenny *Builder) generateAssignment(context context.Builders, assignment ast.Assignment) string {
 	fieldPath := jenny.formatFieldPath(assignment.Path)
 	pathEnd := assignment.Path.Last()
 	valueType := pathEnd.Type
@@ -300,7 +291,7 @@ func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Buil
 		assignmentSafeGuards += "\n\n"
 	}
 
-	if referredBuilder, found := jenny.builderForType(builders, builder, valueType); found {
+	if referredBuilder, found := context.BuilderForType(valueType); found {
 		referredBuilderAlias := jenny.importBuilder(referredBuilder)
 		intoPointer := "*"
 		if valueType.Nullable {

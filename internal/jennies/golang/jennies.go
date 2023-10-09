@@ -4,6 +4,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/jennies/tools"
 	"github.com/grafana/cog/internal/veneers"
 	"github.com/grafana/cog/internal/veneers/builder"
@@ -18,9 +19,9 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 		tools.Foreach[*ast.Schema](RawTypes{}),
 	)
 	targets.AppendOneToMany(
-		codejen.AdaptOneToMany[[]ast.Builder, []*ast.Schema](
+		codejen.AdaptOneToMany[context.Builders, []*ast.Schema](
 			&Builder{},
-			func(schemas []*ast.Schema) []ast.Builder {
+			func(schemas []*ast.Schema) context.Builders {
 				var err error
 
 				generator := &ast.BuilderGenerator{}
@@ -40,7 +41,10 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 					panic(err)
 				}
 
-				return builders
+				return context.Builders{
+					Schemas:  schemas,
+					Builders: builders,
+				}
 			},
 		),
 	)

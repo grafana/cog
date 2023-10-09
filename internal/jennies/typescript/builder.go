@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -55,11 +56,11 @@ func (jenny *Builder) JennyName() string {
 	return "TypescriptBuilder"
 }
 
-func (jenny *Builder) Generate(buildContext BuilderContext) (codejen.Files, error) {
+func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) {
 	files := codejen.Files{}
 
-	for _, builder := range buildContext.Builders {
-		output, err := jenny.generateBuilder(buildContext, builder)
+	for _, builder := range context.Builders {
+		output, err := jenny.generateBuilder(context, builder)
 		if err != nil {
 			return nil, err
 		}
@@ -76,18 +77,18 @@ func (jenny *Builder) Generate(buildContext BuilderContext) (codejen.Files, erro
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(buildContext BuilderContext, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
 	jenny.imports = newImportMap()
 	importAlias := jenny.importType(builder.For)
 
-	constructorCode := jenny.generateConstructor(buildContext, builder)
+	constructorCode := jenny.generateConstructor(context, builder)
 
 	// Define options
 	opts := make([]options, len(builder.Options))
 	for i, o := range builder.Options {
-		opts[i] = jenny.generateOption(buildContext, builder, o)
+		opts[i] = jenny.generateOption(context, builder, o)
 	}
 
 	err := templates.Lookup("builder.tmpl").Execute(&buffer, Tmpl{
@@ -102,7 +103,7 @@ func (jenny *Builder) generateBuilder(buildContext BuilderContext, builder ast.B
 	return []byte(buffer.String()), err
 }
 
-func (jenny *Builder) generateConstructor(buildContext BuilderContext, builder ast.Builder) constructor {
+func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) constructor {
 	var argsList []argument
 	var fieldsInitList []string
 	for _, opt := range builder.Options {
@@ -111,17 +112,17 @@ func (jenny *Builder) generateConstructor(buildContext BuilderContext, builder a
 		}
 
 		// FIXME: this is assuming that there's only one argument for that option
-		argsList = append(argsList, jenny.generateArgument(buildContext, builder, opt.Args[0]))
+		argsList = append(argsList, jenny.generateArgument(context, builder, opt.Args[0]))
 		fieldsInitList = append(
 			fieldsInitList,
-			jenny.generateInitAssignment(buildContext, opt.Assignments[0]),
+			jenny.generateInitAssignment(context, opt.Assignments[0]),
 		)
 	}
 
 	for _, init := range builder.Initializations {
 		fieldsInitList = append(
 			fieldsInitList,
-			jenny.generateInitAssignment(buildContext, init),
+			jenny.generateInitAssignment(context, init),
 		)
 	}
 
@@ -131,11 +132,11 @@ func (jenny *Builder) generateConstructor(buildContext BuilderContext, builder a
 	}
 }
 
-func (jenny *Builder) generateInitAssignment(buildContext BuilderContext, assignment ast.Assignment) string {
+func (jenny *Builder) generateInitAssignment(context context.Builders, assignment ast.Assignment) string {
 	fieldPath := assignment.Path
 	valueType := assignment.Path.Last().Type
 
-	if _, valueHasBuilder := buildContext.BuilderForType(valueType); valueHasBuilder {
+	if _, valueHasBuilder := context.BuilderForType(valueType); valueHasBuilder {
 		return "constructor init assignment with type that has a builder is not supported yet"
 	}
 
@@ -153,19 +154,19 @@ func (jenny *Builder) generateInitAssignment(buildContext BuilderContext, assign
 	return generatedConstraints + fmt.Sprintf("this.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
-func (jenny *Builder) generateOption(buildContext BuilderContext, builder ast.Builder, def ast.Option) options {
+func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) options {
 	// Arguments list
 	argsList := make([]argument, 0, len(def.Args))
 	if len(def.Args) != 0 {
 		for _, arg := range def.Args {
-			argsList = append(argsList, jenny.generateArgument(buildContext, builder, arg))
+			argsList = append(argsList, jenny.generateArgument(context, builder, arg))
 		}
 	}
 
 	// Assignments
 	assignmentsList := make([]assignment, 0, len(def.Assignments))
 	for _, assign := range def.Assignments {
-		assignmentsList = append(assignmentsList, jenny.generateAssignment(buildContext, builder, assign))
+		assignmentsList = append(assignmentsList, jenny.generateAssignment(context, builder, assign))
 	}
 
 	return options{
@@ -176,8 +177,8 @@ func (jenny *Builder) generateOption(buildContext BuilderContext, builder ast.Bu
 	}
 }
 
-func (jenny *Builder) generateArgument(buildContext BuilderContext, builder ast.Builder, arg ast.Argument) argument {
-	if referredBuilder, found := buildContext.BuilderForType(arg.Type); found {
+func (jenny *Builder) generateArgument(context context.Builders, builder ast.Builder, arg ast.Argument) argument {
+	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For)
 
 		return argument{
@@ -219,9 +220,10 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 		}`, fieldPath, emptyValue)
 }
 
-func (jenny *Builder) generateAssignment(buildContext BuilderContext, builder ast.Builder, assign ast.Assignment) assignment {
+func (jenny *Builder) generateAssignment(context context.Builders, builder ast.Builder, assign ast.Assignment) assignment {
 	fieldPath := jenny.formatFieldPath(assign.Path, builder)
-	valueType := assign.Path.Last().Type
+	pathEnd := assign.Path.Last()
+	valueType := pathEnd.Type
 
 	var pathInitSafeGuards []string
 	for i, chunk := range assign.Path {
@@ -253,7 +255,7 @@ func (jenny *Builder) generateAssignment(buildContext BuilderContext, builder as
 		assignmentSafeGuards = assignmentSafeGuards + "\n\n"
 	}
 
-	if _, found := buildContext.BuilderForType(valueType); found {
+	if _, found := context.BuilderForType(valueType); found {
 		return assignment{
 			Path:           fieldPath,
 			InitSafeguards: pathInitSafeGuards,
