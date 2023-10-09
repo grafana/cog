@@ -133,7 +133,7 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 }
 
 func (jenny *Builder) generateInitAssignment(context context.Builders, assignment ast.Assignment) string {
-	fieldPath := assignment.Path
+	fieldPath := jenny.formatFieldPath(assignment.Path)
 	valueType := assignment.Path.Last().Type
 
 	if _, valueHasBuilder := context.BuilderForType(valueType); valueHasBuilder {
@@ -203,7 +203,7 @@ func (jenny *Builder) generateArgument(context context.Builders, builder ast.Bui
 }
 
 func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Builder, path ast.Path) string {
-	fieldPath := jenny.formatFieldPath(path, currentBuilder)
+	fieldPath := jenny.formatFieldPath(path)
 	valueType := path.Last().Type
 	if path.Last().TypeHint != nil {
 		valueType = *path.Last().TypeHint
@@ -221,7 +221,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 }
 
 func (jenny *Builder) generateAssignment(context context.Builders, builder ast.Builder, assign ast.Assignment) assignment {
-	fieldPath := jenny.formatFieldPath(assign.Path, builder)
+	fieldPath := jenny.formatFieldPath(assign.Path)
 	pathEnd := assign.Path.Last()
 	valueType := pathEnd.Type
 
@@ -252,7 +252,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 
 	assignmentSafeGuards := strings.Join(pathInitSafeGuards, "\n")
 	if assignmentSafeGuards != "" {
-		assignmentSafeGuards = assignmentSafeGuards + "\n\n"
+		assignmentSafeGuards += "\n\n"
 	}
 
 	if _, found := context.BuilderForType(valueType); found {
@@ -329,37 +329,8 @@ func (jenny *Builder) importType(object ast.Object) string {
 	return pkg
 }
 
-func (jenny *Builder) formatFieldPath(fieldPath ast.Path, currentBuilder ast.Builder) string {
-	if len(fieldPath) != 0 {
-		return fieldPath.String()
-	}
-	formattedPath := ""
-
-	builderImportAlias := jenny.typeImportAlias(currentBuilder.For)
-	for i := range fieldPath {
-		output := fieldPath[i].Identifier
-
-		// don't generate type hints if:
-		// * there isn't one defined
-		// * the type isn't "any"
-		// * as a trailing element in the path
-		if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
-			formattedPath += "." + output
-			continue
-		}
-
-		formattedTypeHint := formatType(*fieldPath[i].TypeHint, func(pkg string) string {
-			if pkg == currentBuilder.For.SelfRef.ReferredPkg {
-				return builderImportAlias
-			}
-
-			jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
-
-			return pkg
-		})
-
-		formattedPath += "(" + formattedPath + " as " + formattedTypeHint + ")." + output
-	}
-
-	return formattedPath
+func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
+	return strings.Join(tools.Map(fieldPath, func(chunk ast.PathItem) string {
+		return chunk.Identifier
+	}), ".")
 }
