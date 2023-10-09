@@ -32,7 +32,7 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 			},
 		),
 	)
-	//targets.AddPostprocessors(PostProcessFile)
+	targets.AddPostprocessors(PostProcessFile)
 
 	return targets
 }
