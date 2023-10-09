@@ -286,7 +286,7 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 	if referredBuilder, found := jenny.builderForType(builders, builder, arg.Type); found {
 		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For)
 
-		return fmt.Sprintf(`%[1]s: OptionsBuilder<%[2]s.%[3]s>`, arg.Name, referredTypeAlias, referredBuilder.For.Name)
+		return fmt.Sprintf(`%[1]s: CogOptionsBuilder<%[2]s.%[3]s>`, arg.Name, referredTypeAlias, referredBuilder.For.Name)
 	}
 
 	builderImportAlias := jenny.typeImportAlias(builder.For)
