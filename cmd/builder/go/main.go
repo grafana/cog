@@ -1,6 +1,18 @@
 package main
 
 /*
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/grafana/cog/generated/dashboard/dashboard"
+	"github.com/grafana/cog/generated/dashboard/rowpanel"
+	prometheus "github.com/grafana/cog/generated/prometheus/dataquery"
+	timeseries "github.com/grafana/cog/generated/timeseries/panel"
+	common "github.com/grafana/cog/generated/types/common"
+	types "github.com/grafana/cog/generated/types/dashboard"
+)
+
 func main() {
 	someQuery, err := prometheus.New(
 		prometheus.Expr("rate(agent_wal_samples_appended_total{}[10m])"),
@@ -43,9 +55,9 @@ func main() {
 
 		dashboard.Refresh("1m"),
 		dashboard.Time("now-3h", "now"),
-			dashboard.Timepicker(
-				timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
-			),
+		dashboard.Timepicker(
+			timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
+		),
 
 		dashboard.Style(types.StyleEnumStyleDark),
 		dashboard.Timezone("utc"),
