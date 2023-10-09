@@ -133,15 +133,21 @@ export enum Operator {
 	LessThan = "<",
 }
 
+export const defaultOperator = (): Operator => (Operator.GreaterThan);
+
 export enum TableSortOrder {
 	Asc = "asc",
 	Desc = "desc",
 }
 
+export const defaultTableSortOrder = (): TableSortOrder => (TableSortOrder.Asc);
+
 export enum LogsSortOrder {
 	Asc = "time_asc",
 	Desc = "time_desc",
 }
+
+export const defaultLogsSortOrder = (): LogsSortOrder => (LogsSortOrder.Asc);
 
 // 0 for no shared crosshair or tooltip (default).
 // 1 for shared crosshair.
@@ -151,6 +157,8 @@ export enum DashboardCursorSync {
 	Crosshair = 1,
 	Tooltip = 2,
 }
+
+export const defaultDashboardCursorSync = (): DashboardCursorSync => (DashboardCursorSync.Off);
 
 -- out/jennies/GoRawTypes --
 == types/enums/types_gen.go

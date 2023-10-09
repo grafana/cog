@@ -71,12 +71,13 @@ export interface SomeStruct {
 	FieldInt32: number;
 }
 
-export const defaultSomeStruct: Partial<SomeStruct> = {
+export const defaultSomeStruct = (): SomeStruct => ({
 	fieldBool: true,
 	fieldString: "foo",
+	FieldStringWithConstantValue: "auto",
 	FieldFloat32: 42.42,
 	FieldInt32: 42,
-};
+});
 
 -- out/jennies/GoRawTypes --
 == types/defaults/types_gen.go

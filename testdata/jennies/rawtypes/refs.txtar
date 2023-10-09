@@ -45,12 +45,17 @@ export interface SomeStruct {
 	FieldAny: any;
 }
 
-export const defaultSomeStruct: Partial<SomeStruct> = {
-};
+export const defaultSomeStruct = (): SomeStruct => ({
+	FieldAny: {},
+});
 
 export type RefToSomeStruct = SomeStruct;
 
+export const defaultRefToSomeStruct = (): RefToSomeStruct => (defaultSomeStruct());
+
 export type RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct;
+
+export const defaultRefToSomeStructFromOtherPackage = (): RefToSomeStructFromOtherPackage => (otherpkg.defaultSomeDistantStruct());
 
 -- out/jennies/GoRawTypes --
 == types/refs/types_gen.go

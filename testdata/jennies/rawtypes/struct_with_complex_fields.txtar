@@ -192,15 +192,26 @@ export interface SomeStruct {
 	};
 }
 
-export const defaultSomeStruct: Partial<SomeStruct> = {
-};
+export const defaultSomeStruct = (): SomeStruct => ({
+	FieldAnonymousEnum: ">",
+	FieldArrayOfStrings: [],
+	FieldMapOfStringToString: {},
+	FieldAnonymousStruct: {
+	FieldAny: {},
+},
+	FieldRef: defaultSomeOtherStruct(),
+	FieldDisjunctionOfScalars: "",
+	FieldMixedDisjunction: "",
+	FieldDisjunctionWithNull: "",
+});
 
 export interface SomeOtherStruct {
 	FieldAny: any;
 }
 
-export const defaultSomeOtherStruct: Partial<SomeOtherStruct> = {
-};
+export const defaultSomeOtherStruct = (): SomeOtherStruct => ({
+	FieldAny: {},
+});
 
 -- out/jennies/GoRawTypes --
 == types/struct_complex_fields/types_gen.go
