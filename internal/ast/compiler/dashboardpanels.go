@@ -35,11 +35,25 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 
 	for _, object := range schema.Objects {
 		if object.Name == "dashboard" {
-			newSchema.Objects = append(newSchema.Objects, pass.processDashboardObject(schema, object))
+			disjunction := ast.NewDisjunction([]ast.Type{
+				ast.NewRef(schema.Package, "Panel"),
+				ast.NewRef(schema.Package, "RowPanel"),
+			})
+			disjunction.Disjunction.Discriminator = "type"
+			disjunction.Disjunction.DiscriminatorMapping = map[string]any{
+				"RowPanel": "row",
+				"Panel":    ast.DiscriminatorCatchAll,
+			}
+
+			newPanelsFieldType := ast.NewArray(disjunction)
+
+			newSchema.Objects = append(newSchema.Objects, pass.overwritePanelsFieldType(object, newPanelsFieldType))
 			continue
 		}
 		if object.Name == "RowPanel" {
-			newSchema.Objects = append(newSchema.Objects, pass.processRowPanelObject(schema, object))
+			newPanelsFieldType := ast.NewArray(ast.NewRef(schema.Package, "Panel"))
+
+			newSchema.Objects = append(newSchema.Objects, pass.overwritePanelsFieldType(object, newPanelsFieldType))
 			continue
 		}
 
@@ -49,53 +63,22 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 	return &newSchema, nil
 }
 
-func (pass *DashboardPanelsRewrite) processDashboardObject(schema *ast.Schema, object ast.Object) ast.Object {
+func (pass *DashboardPanelsRewrite) overwritePanelsFieldType(object ast.Object, newPanelsFieldType ast.Type) ast.Object {
 	newFields := make([]ast.StructField, len(object.Type.AsStruct().Fields))
 	for i, field := range object.Type.AsStruct().Fields {
-		if field.Name == "panels" {
-			newFields[i] = pass.processPanelsStructField(schema, field)
+		if field.Name != "panels" {
+			newFields[i] = field
 			continue
 		}
 
-		newFields[i] = field
+		newField := field
+		newField.Type = newPanelsFieldType
+
+		newFields[i] = newField
 	}
 
 	newObject := object
 	newObject.Type.Struct.Fields = newFields
 
 	return newObject
-}
-
-func (pass *DashboardPanelsRewrite) processRowPanelObject(schema *ast.Schema, object ast.Object) ast.Object {
-	newFields := make([]ast.StructField, len(object.Type.AsStruct().Fields))
-	for i, field := range object.Type.AsStruct().Fields {
-		if field.Name == "panels" {
-			newFields[i] = pass.processPanelsStructField(schema, field)
-			continue
-		}
-
-		newFields[i] = field
-	}
-
-	newObject := object
-	newObject.Type.Struct.Fields = newFields
-
-	return newObject
-}
-
-func (pass *DashboardPanelsRewrite) processPanelsStructField(schema *ast.Schema, field ast.StructField) ast.StructField {
-	disjunction := ast.NewDisjunction([]ast.Type{
-		ast.NewRef(schema.Package, "Panel"),
-		ast.NewRef(schema.Package, "RowPanel"),
-	})
-	disjunction.Disjunction.Discriminator = "type"
-	disjunction.Disjunction.DiscriminatorMapping = map[string]any{
-		"RowPanel": "row",
-		"Panel":    ast.DiscriminatorCatchAll,
-	}
-
-	newField := field
-	newField.Type = ast.NewArray(disjunction)
-
-	return newField
 }
