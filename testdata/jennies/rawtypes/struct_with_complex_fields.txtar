@@ -248,7 +248,6 @@ type StringOrBool struct {
 }
 
 func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
-
 	if resource.ValString != nil {
 		return json.Marshal(resource.ValString)
 	}
@@ -256,7 +255,6 @@ func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
 	if resource.ValBool != nil {
 		return json.Marshal(resource.ValBool)
 	}
-
 
 	return nil, nil
 }

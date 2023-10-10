@@ -1,9 +1,9 @@
 func (resource *{{ .def.Name|formatIdentifier }}) MarshalJSON() ([]byte, error) {
-{{ range .def.Type.Struct.Fields }}
+{{- range .def.Type.Struct.Fields }}
 	if resource.{{ .Name|formatIdentifier }} != nil {
 		return json.Marshal(resource.{{ .Name|formatIdentifier }})
 	}
-{{ end }}
+{{- end }}
 
 	return nil, nil
 }
@@ -25,12 +25,12 @@ func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) erro
 	}
 
 	switch discriminator {
-{{ range $typeName, $discriminatorValue := .hint.DiscriminatorMapping }}
-    {{ if eq $discriminatorValue "cog_discriminator_catch_all" }}
+{{- range $typeName, $discriminatorValue := .hint.DiscriminatorMapping }}
+    {{- if eq $discriminatorValue "cog_discriminator_catch_all" }}
     default:
-    {{ else }}
+    {{- else }}
 	case "{{ $discriminatorValue }}":
-	{{ end }}
+	{{- end }}
 		var val{{ $typeName|formatIdentifier }} {{ $typeName|formatIdentifier }}
 		if err := json.Unmarshal(raw, &val{{ $typeName|formatIdentifier }}); err != nil {
 			return err
@@ -38,7 +38,7 @@ func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) erro
 
 		resource.Val{{ $typeName|formatIdentifier }} = &val{{ $typeName|formatIdentifier }}
 		return nil
-{{ end }}
+{{- end }}
 	}
 
 	return fmt.Errorf("could not unmarshal resource with `{{ .hint.Discriminator }} = %v`", discriminator)
