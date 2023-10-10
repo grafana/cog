@@ -41,10 +41,6 @@ lineage: {
 				// Tags associated with dashboard.
 				tags?: [...string]
 
-				// Theme of dashboard.
-				// Default value: dark.
-				style: "light" | *"dark"
-
 				// Timezone of dashboard. Accepted values are IANA TZDB zone ID or "browser" or "utc".
 				timezone?: string | *"browser"
 
@@ -70,8 +66,6 @@ lineage: {
 					refresh_intervals: [...string] | *["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
 					// Whether timepicker is collapsed or not. Has no effect on provisioned dashboard.
 					collapse: bool | *false
-					// Whether timepicker is enabled or not. Has no effect on provisioned dashboard.
-					enable: bool | *true
 					// Selectable options available in the time picker dropdown. Has no effect on provisioned dashboard.
 					time_options: [...string] | *["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
 				}
@@ -98,7 +92,7 @@ lineage: {
 				version?: uint32
 
 				// List of dashboard panels
-				panels?: [...#RowPanel ]
+				panels?: [...#Panel | #RowPanel | #GraphPanel | #HeatmapPanel]
 
 				// Configured template variables
 				templating?: {
@@ -117,7 +111,7 @@ lineage: {
 
 				// Snapshot options. They are present only if the dashboard is a snapshot.
 				snapshot?: #Snapshot @grafanamaturity(NeedsExpertReview)
-			}
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type")
 
 			// TODO: this should be a regular DataQuery that depends on the selected dashboard
 			// these match the properties of the "grafana" datasouce that is default in most dashboards
@@ -135,14 +129,14 @@ lineage: {
 				// but code+tests is already depending on it so hard to change
 				type: string
 				...
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafanamaturity(NeedsExpertReview)
 			#AnnotationPanelFilter: {
 				// Should the specified panels be included or excluded
 				exclude?: bool | *false
 
 				// Panel IDs that should be included or excluded
 				ids: [...uint8]
-			}
+			} @cuetsy(kind="interface")
 
 			// Contains the list of annotations that are associated with the dashboard.
 			// Annotations are used to overlay event markers and overlay event tags on graphs.
@@ -151,7 +145,7 @@ lineage: {
 			#AnnotationContainer: {
 				// List of annotations
 				list?: [...#AnnotationQuery]
-			}
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type")
 
 			// TODO docs
 			// FROM: AnnotationQuery in grafana-data/src/types/annotations.ts
@@ -181,12 +175,10 @@ lineage: {
 				// TODO -- this should not exist here, it is based on the --grafana-- datasource
 				type?: string @grafanamaturity(NeedsExpertReview)
 				...
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type") @grafanamaturity(NeedsExpertReview)
 
 			// A variable is a placeholder for a value. You can use variables in metric queries and in panel titles.
 			#VariableModel: {
-				// Unique numeric identifier for the variable.
-				id: string | *"00000000-0000-0000-0000-000000000000"
 				// Type of variable
 				type: #VariableType
 				// Name of variable
@@ -194,9 +186,9 @@ lineage: {
 				// Optional display name
 				label?: string
 				// Visibility configuration for the variable
-				hide: #VariableHide
+				hide?: #VariableHide
 				// Whether the variable value should be managed by URL query params or not
-				skipUrlSync: bool | *false
+				skipUrlSync?: bool | *false
 				// Description of variable. It can be defined but `null`.
 				description?: string
 				// Query used to fetch values for a variable
@@ -205,8 +197,6 @@ lineage: {
 				}
 				// Data source used to fetch values for a variable. It can be defined but `null`.
 				datasource?: #DataSourceRef
-				// Format to use while fetching all values from data source, eg: wildcard, glob, regex, pipe, etc.
-				allFormat?: string
 				// Shows current selected variable text/value on the dashboard
 				current?: #VariableOption
 				// Whether multiple values can be selected or not from variable value list
@@ -214,8 +204,10 @@ lineage: {
 				// Options that can be selected for a variable.
 				options?: [...#VariableOption]
 				refresh?: #VariableRefresh
+				// Options sort order
+				sort?: #VariableSort
 				...
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type") @grafanamaturity(NeedsExpertReview)
 
 			// Option to be selected in a variable.
 			#VariableOption: {
@@ -225,7 +217,7 @@ lineage: {
 				text: string | [...string]
 				// Value of the option
 				value: string | [...string]
-			}
+			} @cuetsy(kind="interface")
 
 			// Options to config when to refresh a variable
 			// `0`: Never refresh the variable
@@ -235,7 +227,7 @@ lineage: {
 
 			// Determine if the variable shows on dashboard
 			// Accepted values are 0 (show label and value), 1 (show value only), 2 (show nothing).
-			#VariableHide: 0 | 1 | 2 @cog(kind="enum",memberNames="dontHide|hideLabel|hideVariable")
+			#VariableHide: 0 | 1 | 2 @cog(kind="enum",memberNames="dontHide|hideLabel|hideVariable") @grafana(TSVeneer="type")
 
 			// Sort variable options
 			// Accepted values are:
@@ -248,10 +240,6 @@ lineage: {
 			// `6`: Alphabetical Case Insensitive DESC
 			#VariableSort: 0 | 1 | 2 | 3 | 4 | 5 | 6 @cog(kind="enum",memberNames="disabled|alphabeticalAsc|alphabeticalDesc|numericalAsc|numericalDesc|alphabeticalCaseInsensitiveAsc|alphabeticalCaseInsensitiveDesc")
 
-			// Loading status
-			// Accepted values are `NotStarted` (the request is not started), `Loading` (waiting for response), `Streaming` (pulling continuous data), `Done` (response received successfully) or `Error` (failed request).
-			#LoadingState: "NotStarted" | "Loading" | "Streaming" | "Done" | "Error" @cog(kind="enum")
-
 			// Ref to a DataSource instance
 			#DataSourceRef: {
 				// The plugin type-id
@@ -259,7 +247,7 @@ lineage: {
 
 				// Specific datasource instance
 				uid?: string
-			}
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type")
 
 			// Links with references to other dashboards or external resources
 			#DashboardLink: {
@@ -283,10 +271,10 @@ lineage: {
 				includeVars: bool | *false
 				// If true, includes current time range in the link as query params
 				keepTime: bool | *false
-			}
+			} @cuetsy(kind="interface")
 
 			// Dashboard Link type. Accepted values are dashboards (to refer to another dashboard) and link (to refer to an external resource)
-			#DashboardLinkType: "link" | "dashboards"
+			#DashboardLinkType: "link" | "dashboards" @cuetsy(kind="type")
 
 			// Dashboard variable type
 			// `query`: Query-generated list of values such as metric names, server names, sensor IDs, data centers, and so on.
@@ -297,7 +285,7 @@ lineage: {
 			// `textbox`: Display a free text input field with an optional default value.
 			// `custom`: Define the variable options manually using a comma-separated list.
 			// `system`: Variables defined by Grafana. See: https://grafana.com/docs/grafana/latest/dashboards/variables/add-template-variables/#global-variables
-			#VariableType: "query" | "adhoc" | "constant" | "datasource" | "interval" | "textbox" | "custom" | "system" @grafanamaturity(NeedsExpertReview)
+			#VariableType: "query" | "adhoc" | "constant" | "datasource" | "interval" | "textbox" | "custom" | "system" @cuetsy(kind="type") @grafanamaturity(NeedsExpertReview)
 
 			// Color mode for a field. You can specify a single color, or select a continuous (gradient) color schemes, based on a value.
 			// Continuous color interpolates a color using the percentage of a value relative to min and max.
@@ -320,7 +308,7 @@ lineage: {
 			#FieldColorModeId: "thresholds" | "palette-classic" | "palette-classic-by-name" | "continuous-GrYlRd" | "continuous-RdYlGr" | "continuous-BlYlRd" | "continuous-YlRd" | "continuous-BlPu" | "continuous-YlBl" | "continuous-blues" | "continuous-reds" | "continuous-greens" | "continuous-purples" | "fixed" | "shades" @cog(kind="enum",memberNames="Thresholds|PaletteClassic|PaletteClassicByName|ContinuousGrYlRd|ContinuousRdYlGr|ContinuousBlYlRd|ContinuousYlRd|ContinuousBlPu|ContinuousYlBl|ContinuousBlues|ContinuousReds|ContinuousGreens|ContinuousPurples|Fixed|Shades") @grafanamaturity(NeedsExpertReview)
 
 			// Defines how to assign a series color from "by value" color schemes. For example for an aggregated data points like a timeseries, the color can be assigned by the min, max or last value.
-			#FieldColorSeriesByMode: "min" | "max" | "last"
+			#FieldColorSeriesByMode: "min" | "max" | "last" @cuetsy(kind="type")
 
 			// Map a field to a color.
 			#FieldColor: {
@@ -330,7 +318,7 @@ lineage: {
 				fixedColor?: string
 				// Some visualizations need to know how to assign a series color from by value color schemes.
 				seriesBy?: #FieldColorSeriesByMode
-			}
+			} @cuetsy(kind="interface")
 
 			// Position and dimensions of a panel in the grid
 			#GridPos: {
@@ -344,7 +332,7 @@ lineage: {
 				y: uint32 & >=0 | *0
 				// Whether the panel is fixed within the grid. If true, the panel will not be affected by other panels' interactions
 				static?: bool
-			}
+			} @cuetsy(kind="interface")
 
 			// User-defined value for a metric that triggers visual changes in a panel when this value is met or exceeded
 			// They are used to conditionally style and color visualizations based on query results , and can be applied to most visualizations.
@@ -354,7 +342,7 @@ lineage: {
 				value: number | null @grafanamaturity(NeedsExpertReview)
 				// Color represents the color of the visual change that will occur in the dashboard when the threshold value is met or exceeded.
 				color: string @grafanamaturity(NeedsExpertReview)
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafanamaturity(NeedsExpertReview)
 
 			// Thresholds can either be `absolute` (specific number) or `percentage` (relative to min or max, it will be values between 0 and 1).
 			#ThresholdsMode: "absolute" | "percentage" @cog(kind="enum",memberNames="Absolute|Percentage")
@@ -366,10 +354,10 @@ lineage: {
 
 				// Must be sorted by 'value', first value is always -Infinity
 				steps: [...#Threshold] @grafanamaturity(NeedsExpertReview)
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafanamaturity(NeedsExpertReview)
 
 			// Allow to transform the visual representation of specific data values in a visualization, irrespective of their original units
-			#ValueMapping: #ValueMap | #RangeMap | #RegexMap | #SpecialValueMap @grafanamaturity(NeedsExpertReview)
+			#ValueMapping: #ValueMap | #RangeMap | #RegexMap | #SpecialValueMap @cuetsy(kind="type") @grafanamaturity(NeedsExpertReview)
 
 			// Supported value mapping types
 			// `value`: Maps text values to a color or different display text and color. For example, you can configure a value mapping so that all instances of the value 10 appear as Perfection! rather than the number.
@@ -388,7 +376,7 @@ lineage: {
 				options: {
 					[string]: #ValueMappingResult
 				}
-			}
+			} @cuetsy(kind="interface")
 
 			// Maps numerical ranges to a display text and color.
 			// For example, if a value is within a certain range, you can configure a range value mapping to display Low or High rather than the number.
@@ -405,7 +393,7 @@ lineage: {
 					// Config to apply when the value is within the range
 					result: #ValueMappingResult
 				}
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafanamaturity(NeedsExpertReview)
 
 			// Maps regular expressions to replacement text and a color.
 			// For example, if a value is www.example.com, you can configure a regex value mapping so that Grafana displays www and truncates the domain.
@@ -420,7 +408,7 @@ lineage: {
 					// Config to apply when the value matches the regex
 					result: #ValueMappingResult
 				}
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafanamaturity(NeedsExpertReview)
 
 			// Maps special values like Null, NaN (not a number), and boolean values like true and false to a display text and color.
 			// See SpecialValueMatch to see the list of special values.
@@ -435,7 +423,7 @@ lineage: {
 					// Config to apply when the value matches the special value
 					result: #ValueMappingResult
 				}
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafanamaturity(NeedsExpertReview)
 
 			// Special value types supported by the `SpecialValueMap`
 			#SpecialValueMatch: "true" | "false" | "null" | "nan" | "null+nan" | "empty" @cog(kind="enum",memberNames="True|False|Null|NaN|NullAndNan|Empty")
@@ -450,7 +438,7 @@ lineage: {
 				icon?: string
 				// Position in the mapping array. Only used internally.
 				index?: int32
-			}
+			} @cuetsy(kind="interface")
 
 			// Transformations allow to manipulate data returned by a query before the system applies a visualization.
 			// Using transformations you can: rename fields, join time series data, perform mathematical operations across queries,
@@ -465,7 +453,7 @@ lineage: {
 				// Options to be passed to the transformer
 				// Valid options depend on the transformer id
 				options: _
-			}
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type")
 
 			// 0 for no shared crosshair or tooltip (default).
 			// 1 for shared crosshair.
@@ -561,8 +549,9 @@ lineage: {
 				// `h` for horizontal, `v` for vertical.
 				repeatDirection?: *"h" | "v"
 
-				// Id of the repeating panel.
-				repeatPanelId?: int64
+				// Option for repeated panels that controls max items per row
+				// Only relevant for horizontally repeated panels
+				maxPerRow?: number
 
 				// The maximum number of data points that the panel queries are retrieving.
 				maxDataPoints?: number
@@ -594,6 +583,9 @@ lineage: {
 				// See: https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/#query-options
 				timeShift?: string
 
+				// Controls if the timeFrom or timeShift overrides are shown in the panel header
+				hideTimeOverride?: bool
+
 				// Dynamically load the panel
 				libraryPanel?: #LibraryPanelRef
 
@@ -604,7 +596,7 @@ lineage: {
 
 				// Field options allow you to change how the data is displayed in your visualizations.
 				fieldConfig: #FieldConfigSource
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type") @grafanamaturity(NeedsExpertReview)
 
 			// The data model used in Grafana, namely the data frame, is a columnar-oriented table structure that unifies both time series and table query results.
 			// Each column within this structure is called a field. A field can represent a single time series or table column.
@@ -617,7 +609,7 @@ lineage: {
 					matcher: #MatcherConfig
 					properties: [...#DynamicConfigValue]
 				}] @grafanamaturity(NeedsExpertReview)
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type") @grafanamaturity(NeedsExpertReview)
 
 			// A library panel is a reusable panel that you can use in any dashboard.
 			// When you make a change to a library panel, that change propagates to all instances of where the panel is used.
@@ -627,7 +619,7 @@ lineage: {
 				name: string
 				// Library panel uid
 				uid: string
-			}
+			} @cuetsy(kind="interface")
 
 			// Matcher is a predicate configuration. Based on the config a set of field(s) or values is filtered in order to apply override / transformation.
 			// It comes with in id ( to resolve implementation from registry) and a configuration that’s specific to a particular matcher type.
@@ -636,7 +628,7 @@ lineage: {
 				id: string | *"" @grafanamaturity(NeedsExpertReview)
 				// The matcher options. This is specific to the matcher implementation.
 				options?: _ @grafanamaturity(NeedsExpertReview)
-			}
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type")
 			#DynamicConfigValue: {
 				id:     string | *"" @grafanamaturity(NeedsExpertReview)
 				value?: _            @grafanamaturity(NeedsExpertReview)
@@ -712,7 +704,7 @@ lineage: {
 				custom?: {
 					...
 				} @grafanamaturity(NeedsExpertReview)
-			} @grafanamaturity(NeedsExpertReview)
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type") @grafanamaturity(NeedsExpertReview)
 
 			// Row panel
 			#RowPanel: {
@@ -735,11 +727,11 @@ lineage: {
 				id: uint32
 
 				// List of panels in the row
-				panels: [...#Panel]
+				panels: [...#Panel | #GraphPanel | #HeatmapPanel]
 
 				// Name of template variable to repeat for.
 				repeat?: string
-			}
+			} @cuetsy(kind="interface") @grafana(TSVeneer="type")
 
 			// Support for legacy graph panel.
 			// @deprecated this a deprecated panel type
@@ -752,14 +744,14 @@ lineage: {
 					sortDesc?: bool
 				}
 				...
-			}
+			} @cuetsy(kind="interface")
 
 			// Support for legacy heatmap panel.
 			// @deprecated this a deprecated panel type
 			#HeatmapPanel: {
 				type: "heatmap"
 				...
-			}
+			} @cuetsy(kind="interface")
 		}
 	}]
 }

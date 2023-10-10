@@ -14,3 +14,5 @@ const (
 	// to this hint.
 	HintDiscriminatedDisjunctionOfRefs JennyHint = "disjunction_of_refs"
 )
+
+const DiscriminatorCatchAll = "cog_discriminator_catch_all"
