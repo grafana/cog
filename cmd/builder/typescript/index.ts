@@ -46,5 +46,5 @@ const builder = new dashboardBuilder("Some title")
         },
     ]);
 
-console.log(builder.build());
+console.log(JSON.stringify(builder.build(), null, 2));
 
