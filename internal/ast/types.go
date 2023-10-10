@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 type Kind string
 
 const (
@@ -83,6 +87,10 @@ type Type struct {
 	Struct      *StructType      `json:",omitempty"`
 	Ref         *RefType         `json:",omitempty"`
 	Scalar      *ScalarType      `json:",omitempty"`
+}
+
+func (t Type) IsStructOrRef() bool {
+	return t.Kind == KindStruct || t.Kind == KindRef
 }
 
 func (t Type) DeepCopy() Type {
@@ -569,6 +577,10 @@ func NewStructField(name string, fieldType Type, opts ...StructFieldOption) Stru
 type RefType struct {
 	ReferredPkg  string
 	ReferredType string
+}
+
+func (t RefType) String() string {
+	return fmt.Sprintf("%s.%s", t.ReferredPkg, t.ReferredType)
 }
 
 func (t RefType) DeepCopy() RefType {

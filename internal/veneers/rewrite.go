@@ -18,34 +18,33 @@ func NewRewrite(builderRules []builder.RewriteRule, optionRules []option.Rewrite
 	}
 }
 
-func (engine *Rewriter) ApplyTo(builders []ast.Builder) []ast.Builder {
+func (engine *Rewriter) ApplyTo(builders []ast.Builder) ([]ast.Builder, error) {
+	var err error
 	// TODO: should we deepCopy the builders instead?
 	newBuilders := make([]ast.Builder, 0, len(builders))
 	newBuilders = append(newBuilders, builders...)
 
-	newBuilders = engine.applyBuilderRules(newBuilders)
+	newBuilders, err = engine.applyBuilderRules(newBuilders)
+	if err != nil {
+		return nil, err
+	}
+
 	newBuilders = engine.applyOptionRules(newBuilders)
 
-	return newBuilders
+	return newBuilders, nil
 }
 
-func (engine *Rewriter) applyBuilderRules(builders []ast.Builder) []ast.Builder {
+func (engine *Rewriter) applyBuilderRules(builders []ast.Builder) ([]ast.Builder, error) {
+	var err error
+
 	for _, rule := range engine.builderRules {
-		for i, b := range builders {
-			// this builder is being discarded
-			if len(b.Options) == 0 {
-				continue
-			}
-
-			if !rule.Selector(b) {
-				continue
-			}
-
-			builders[i] = rule.Action(builders, b)
+		builders, err = rule(builders)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	return engine.filterDiscardedBuilders(builders)
+	return builders, nil
 }
 
 func (engine *Rewriter) applyOptionRules(builders []ast.Builder) []ast.Builder {

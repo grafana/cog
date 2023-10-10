@@ -21,14 +21,26 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 		codejen.AdaptOneToMany[[]ast.Builder, []*ast.Schema](
 			&Builder{},
 			func(schemas []*ast.Schema) []ast.Builder {
+				var err error
+
 				generator := &ast.BuilderGenerator{}
 				builders := generator.FromAST(schemas)
 
 				// apply common veneers
-				builders = veneers.Common().ApplyTo(builders)
+				builders, err = veneers.Common().ApplyTo(builders)
+				if err != nil {
+					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
+					panic(err)
+				}
 
 				// apply Go-specific veneers
-				return Veneers().ApplyTo(builders)
+				builders, err = Veneers().ApplyTo(builders)
+				if err != nil {
+					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
+					panic(err)
+				}
+
+				return builders
 			},
 		),
 	)
@@ -58,7 +70,7 @@ func Veneers() *veneers.Rewriter {
 
 			// Time(from, to) instead of time(struct {From string `json:"from"`, To   string `json:"to"`}{From: "lala", To: "lala})
 			option.StructFieldsAsArguments(
-				option.ByName("Dashboard", "time"),
+				option.ByName("dashboard", "time"),
 			),
 		},
 	)

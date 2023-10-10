@@ -50,7 +50,8 @@ func kindsysCompopsableLoader(opts Options) ([]*ast.Schema, error) {
 		}
 
 		schemaAst, err := simplecue.GenerateAST(kindToLatestSchema(boundKind), simplecue.Config{
-			Package: pkg, // TODO: extract from input schema/folder?
+			Package:              pkg, // TODO: extract from input schema/folder?
+			ForceVariantEnvelope: variant == ast.SchemaVariantDataQuery,
 			SchemaMetadata: ast.SchemaMeta{
 				Kind:       ast.SchemaKindComposable,
 				Variant:    variant,
@@ -71,6 +72,8 @@ func schemaVariant(kindProps kindsys.ComposableProperties) (ast.SchemaVariant, e
 	switch kindProps.SchemaInterface {
 	case "PanelCfg":
 		return ast.SchemaVariantPanel, nil
+	case "DataQuery":
+		return ast.SchemaVariantDataQuery, nil
 	default:
 		return "", fmt.Errorf("unknown schema variant '%s'", kindProps.SchemaInterface)
 	}
