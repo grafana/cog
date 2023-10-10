@@ -7,8 +7,10 @@ container: {
     TheIntEnum: #IntEnum
 }
 
-
-
+anything: { ... }
+foo: {
+    arrayOfAnything: [...]
+}
 -- out/simplecue/GenerateAST --
 == ir.json
 {
@@ -139,6 +141,53 @@ container: {
               },
               "Required": true,
               "Default": 2
+            }
+          ],
+          "Hint": {}
+        }
+      }
+    },
+    {
+      "Name": "anything",
+      "Comments": [],
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "any",
+          "Value": null,
+          "Constraints": null
+        }
+      }
+    },
+    {
+      "Name": "foo",
+      "Comments": [],
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "arrayOfAnything",
+              "Comments": [],
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "any",
+                      "Value": null,
+                      "Constraints": null
+                    }
+                  }
+                }
+              },
+              "Required": true,
+              "Default": null
             }
           ],
           "Hint": {}
