@@ -193,16 +193,16 @@ export interface SomeStruct {
 }
 
 export const defaultSomeStruct = (): SomeStruct => ({
+	FieldRef: defaultSomeOtherStruct(),
+	FieldDisjunctionOfScalars: "",
+	FieldMixedDisjunction: "",
+	FieldDisjunctionWithNull: "",
 	FieldAnonymousEnum: ">",
 	FieldArrayOfStrings: [],
 	FieldMapOfStringToString: {},
 	FieldAnonymousStruct: {
 	FieldAny: {},
 },
-	FieldRef: defaultSomeOtherStruct(),
-	FieldDisjunctionOfScalars: "",
-	FieldMixedDisjunction: "",
-	FieldDisjunctionWithNull: "",
 });
 
 export interface SomeOtherStruct {

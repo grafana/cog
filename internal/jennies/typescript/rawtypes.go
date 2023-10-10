@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -328,11 +329,12 @@ func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkg
 	}
 }
 
-func defaultValuesForStructType(schema *ast.Schema, structDef ast.StructType, packageMapper pkgMapper) map[string]any {
-	defaults := make(map[string]any, len(structDef.Fields))
+func defaultValuesForStructType(schema *ast.Schema, structDef ast.StructType, packageMapper pkgMapper) *orderedmap.Map[string, any] {
+	defaults := orderedmap.New[string, any]()
+
 	for _, field := range structDef.Fields {
 		if field.Type.Default != nil {
-			defaults[field.Name] = field.Type.Default
+			defaults.Set(field.Name, field.Type.Default)
 			continue
 		}
 
@@ -340,7 +342,7 @@ func defaultValuesForStructType(schema *ast.Schema, structDef ast.StructType, pa
 			continue
 		}
 
-		defaults[field.Name] = defaultValueForType(schema, field.Type, packageMapper)
+		defaults.Set(field.Name, defaultValueForType(schema, field.Type, packageMapper))
 	}
 
 	return defaults
@@ -401,12 +403,12 @@ func formatValue(val any) string {
 
 	var buffer strings.Builder
 
-	if valMap, ok := val.(map[string]any); ok {
+	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
 		buffer.WriteString("{\n")
 
-		for key, v := range valMap {
-			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(v)))
-		}
+		orderedMap.Iterate(func(key string, value any) {
+			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(value)))
+		})
 
 		buffer.WriteString("}")
 
