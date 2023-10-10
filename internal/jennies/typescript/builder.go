@@ -24,7 +24,7 @@ type Tmpl struct {
 }
 
 type constructor struct {
-	Args         []args
+	Args         []argument
 	Items        map[string]any
 	Initializers []string
 }
@@ -32,15 +32,22 @@ type constructor struct {
 type options struct {
 	Name        string
 	Comments    []string
-	Args        []args
-	Assignments []string
+	Args        []argument
+	Assignments []assignment
 }
 
-type args struct {
+type argument struct {
 	Name          string
 	Type          string
 	ReferredAlias string
 	ReferredName  string
+}
+
+type assignment struct {
+	Path        string
+	Value       string
+	IsBuilder   bool
+	Constraints []string
 }
 
 func (jenny *Builder) JennyName() string {
@@ -95,7 +102,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 }
 
 func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) constructor {
-	var argsList []args
+	var argsList []argument
 	var fieldsInitList []string
 	for _, opt := range builder.Options {
 		if !opt.IsConstructorArg {
@@ -252,7 +259,7 @@ func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.
 
 func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) options {
 	// Arguments list
-	argsList := make([]args, 0, len(def.Args))
+	argsList := make([]argument, 0, len(def.Args))
 	if len(def.Args) != 0 {
 		for _, arg := range def.Args {
 			argsList = append(argsList, jenny.generateArgument(builders, builder, arg))
@@ -260,7 +267,7 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 	}
 
 	// Assignments
-	assignmentsList := make([]string, 0, len(def.Assignments))
+	assignmentsList := make([]assignment, 0, len(def.Assignments))
 	for _, assignment := range def.Assignments {
 		assignmentsList = append(assignmentsList, jenny.generateAssignment(builders, builder, assignment))
 	}
@@ -273,11 +280,11 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 	}
 }
 
-func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) args {
+func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) argument {
 	if referredBuilder, found := jenny.builderForType(builders, builder, arg.Type); found {
 		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For)
 
-		return args{
+		return argument{
 			Name:          arg.Name,
 			ReferredAlias: referredTypeAlias,
 			ReferredName:  referredBuilder.For.Name,
@@ -295,28 +302,32 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 		return pkg
 	})
 
-	return args{Name: tools.LowerCamelCase(arg.Name), Type: typeName}
+	return argument{Name: tools.LowerCamelCase(arg.Name), Type: typeName}
 }
 
-func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
-	fieldPath := assignment.Path
-
-	if _, found := jenny.builderForType(builders, builder, assignment.ValueType); found {
-		return fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s.build();", fieldPath, assignment.ArgumentName)
+func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assign ast.Assignment) assignment {
+	if _, found := jenny.builderForType(builders, builder, assign.ValueType); found {
+		return assignment{
+			Path:      assign.Path,
+			Value:     assign.ArgumentName,
+			IsBuilder: true,
+		}
 	}
 
-	if assignment.ArgumentName == "" {
-		return fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s;", fieldPath, formatScalar(assignment.Value))
+	if assign.ArgumentName == "" {
+		return assignment{
+			Path:  assign.Path,
+			Value: formatScalar(assign.Value),
+		}
 	}
 
-	argName := tools.LowerCamelCase(assignment.ArgumentName)
+	argName := tools.LowerCamelCase(assign.ArgumentName)
 
-	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
-	if generatedConstraints != "" {
-		generatedConstraints += "\n"
+	return assignment{
+		Path:        assign.Path,
+		Value:       argName,
+		Constraints: jenny.constraints(argName, assign.Constraints),
 	}
-
-	return generatedConstraints + fmt.Sprintf("\t\tthis.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []string {

@@ -26,8 +26,12 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.
     // {{ . }}
     {{- end }}
     {{ .Name }}({{ template "args" .Args }}): this {
-{{ range .Assignments }}{{ . }}{{ end }}
-
+{{- range .Assignments }}
+{{- range .Constraints }}
+{{ . }}
+{{- end }}
+        this.internal.{{ .Path }} = {{ .Value }}{{ if .IsBuilder }}.build(){{ end }};
+{{ end }}
         return this;
     }
 {{ end }}
