@@ -279,7 +279,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 			continue
 		}
 
-		nullable := chunk.Type.Nullable || chunk.Type.Kind == ast.KindMap || chunk.Type.Kind == ast.KindArray
+		nullable := chunk.Type.Nullable || chunk.Type.Kind == ast.KindMap || chunk.Type.Kind == ast.KindArray || chunk.Type.IsAny()
 		if nullable {
 			subPath := assignment.Path[:i+1]
 			pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(subPath))
