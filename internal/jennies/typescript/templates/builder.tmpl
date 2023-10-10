@@ -6,7 +6,7 @@ import { CogOptionsBuilder } from '../../options_builder_gen';
 export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.{{ .Name }}> {
     private internal: {{ .ImportAlias }}.{{ .Name }};
 
-    constructor({{ range $i, $arg := .Constructor.Args }}{{ if gt $i 0 }}, {{ end }}{{ $arg }}{{ end }}) {
+    constructor({{ template "args" .Constructor.Args }}) {
         this.internal = {
             {{- range $k, $v := .Constructor.Items }}
             {{ $k }}: {{ $v | simpleQuotes }},
@@ -25,7 +25,7 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.
     {{- range .Comments}}
     // {{ . }}
     {{- end }}
-    {{ .Name }}({{ range $i, $arg := .Args }}{{ if gt $i 0 }}, {{ end }}{{ $arg }}{{ end }}): this {
+    {{ .Name }}({{ template "args" .Args }}): this {
 {{ range .Assignments }}{{ . }}{{ end }}
 
         return this;

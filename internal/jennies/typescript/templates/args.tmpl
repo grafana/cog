@@ -1,0 +1,10 @@
+{{- define "args" }}
+    {{- range $i, $arg := . }}
+        {{- if gt $i 0 }}, {{- end }}
+        {{- if eq $arg.Type "" }}
+            {{- $arg.Name }}: OptionsBuilder<{{- $arg.ReferredAlias }}.{{- $arg.ReferredName }}>
+        {{ else }}
+            {{- $arg.Name }}: {{ $arg.Type }}
+        {{- end }}
+    {{- end }}
+{{- end }}

@@ -19,21 +19,28 @@ type Tmpl struct {
 	Name        string
 	Imports     importMap
 	ImportAlias string
-	Options     []builderOptions
+	Options     []options
 	Constructor constructor
 }
 
 type constructor struct {
-	Args         []string
+	Args         []args
 	Items        map[string]any
 	Initializers []string
 }
 
-type builderOptions struct {
+type options struct {
 	Name        string
 	Comments    []string
-	Args        []string
+	Args        []args
 	Assignments []string
+}
+
+type args struct {
+	Name          string
+	Type          string
+	ReferredAlias string
+	ReferredName  string
 }
 
 func (jenny *Builder) JennyName() string {
@@ -67,19 +74,17 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 	jenny.imports = newImportMap()
 	importAlias := jenny.importType(builder.For)
 
-	objectName := builder.For.Name
 	constructorCode := jenny.generateConstructor(builders, builder)
 
 	// Define options
-	opts := make([]builderOptions, len(builder.Options))
+	opts := make([]options, len(builder.Options))
 	for i, o := range builder.Options {
 		opts[i] = jenny.generateOption(builders, builder, o)
 	}
 
-	tmpl := templates.Lookup("builder.tmpl")
-	err := tmpl.Execute(&buffer, Tmpl{
+	err := templates.Lookup("builder.tmpl").Execute(&buffer, Tmpl{
 		Package:     builder.Package,
-		Name:        objectName,
+		Name:        builder.For.Name,
 		Imports:     jenny.imports,
 		ImportAlias: importAlias,
 		Options:     opts,
@@ -90,7 +95,7 @@ func (jenny *Builder) generateBuilder(builders ast.Builders, builder ast.Builder
 }
 
 func (jenny *Builder) generateConstructor(builders ast.Builders, builder ast.Builder) constructor {
-	var argsList []string
+	var argsList []args
 	var fieldsInitList []string
 	for _, opt := range builder.Options {
 		if !opt.IsConstructorArg {
@@ -245,9 +250,9 @@ func (jenny *Builder) generateInitAssignment(builders ast.Builders, builder ast.
 	return generatedConstraints + fmt.Sprintf("this.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
-func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) builderOptions {
+func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder, def ast.Option) options {
 	// Arguments list
-	argsList := make([]string, 0, len(def.Args))
+	argsList := make([]args, 0, len(def.Args))
 	if len(def.Args) != 0 {
 		for _, arg := range def.Args {
 			argsList = append(argsList, jenny.generateArgument(builders, builder, arg))
@@ -260,7 +265,7 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 		assignmentsList = append(assignmentsList, jenny.generateAssignment(builders, builder, assignment))
 	}
 
-	return builderOptions{
+	return options{
 		Name:        def.Name,
 		Comments:    def.Comments,
 		Args:        argsList,
@@ -268,11 +273,15 @@ func (jenny *Builder) generateOption(builders ast.Builders, builder ast.Builder,
 	}
 }
 
-func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) string {
+func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builder, arg ast.Argument) args {
 	if referredBuilder, found := jenny.builderForType(builders, builder, arg.Type); found {
 		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For)
 
-		return fmt.Sprintf(`%[1]s: OptionsBuilder<%[2]s.%[3]s>`, arg.Name, referredTypeAlias, referredBuilder.For.Name)
+		return args{
+			Name:          arg.Name,
+			ReferredAlias: referredTypeAlias,
+			ReferredName:  referredBuilder.For.Name,
+		}
 	}
 
 	builderImportAlias := jenny.typeImportAlias(builder.For)
@@ -286,9 +295,7 @@ func (jenny *Builder) generateArgument(builders ast.Builders, builder ast.Builde
 		return pkg
 	})
 
-	name := tools.LowerCamelCase(arg.Name)
-
-	return fmt.Sprintf("%s: %s", name, typeName)
+	return args{Name: tools.LowerCamelCase(arg.Name), Type: typeName}
 }
 
 func (jenny *Builder) generateAssignment(builders ast.Builders, builder ast.Builder, assignment ast.Assignment) string {
