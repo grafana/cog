@@ -234,7 +234,7 @@ func formatDisjunction(def ast.DisjunctionType, packageMapper pkgMapper) string 
 		subTypes = append(subTypes, formatType(subType, packageMapper))
 	}
 
-	return strings.Join(subTypes, " | ")
+	return fmt.Sprintf("(%s)", strings.Join(subTypes, " | "))
 }
 
 func formatMap(def ast.MapType, packageMapper pkgMapper) string {

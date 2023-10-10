@@ -21,7 +21,7 @@ func main() {
 		panic(err)
 	}
 
-	someLogsPanel, err := timeseries.New(
+	someTimeseriesPanel, err := timeseries.New(
 		timeseries.Title("Some timeseries panel"),
 		timeseries.Transparent(true),
 		timeseries.Description("Let there be data"),
@@ -38,12 +38,7 @@ func main() {
 		panic(err)
 	}
 
-	overviewRow, err := rowpanel.New(
-		"Overview",
-		rowpanel.Panels([]types.Panel{
-			*someLogsPanel.Internal(),
-		}),
-	)
+	overviewRow, err := rowpanel.New("Overview")
 	if err != nil {
 		panic(err)
 	}
@@ -60,7 +55,6 @@ func main() {
 		//	timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
 		//),
 
-		dashboard.Style(types.StyleEnumStyleDark),
 		dashboard.Timezone("utc"),
 		dashboard.Tooltip(types.DashboardCursorSyncCrosshair),
 		dashboard.Tags([]string{"generated", "from", "cue"}),
@@ -73,8 +67,9 @@ func main() {
 			},
 		}),
 
-		dashboard.Rows([]types.RowPanel{
-			*overviewRow.Internal(),
+		dashboard.Rows([]types.PanelOrRowPanel{
+			{ValRowPanel: overviewRow.Internal()},
+			{ValPanel: someTimeseriesPanel.Internal()},
 		}),
 	)
 	if err != nil {

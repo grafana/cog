@@ -16,22 +16,19 @@ const timeseriesPanel = new PanelBuilder()
     .drawStyle(GraphDrawStyle.Bars)
     .tooltip(new VizTooltipOptionsBuilder().mode(TooltipDisplayMode.Single));
 
-const overviewRow = new RowPanelBuilder("Overview")
-    .panels([
-        timeseriesPanel.build(),
-    ]);
+const overviewRow = new RowPanelBuilder("Overview");
 
 const builder = new dashboardBuilder("Some title")
     .uid("test-dashboard-codegen")
     .description("Some description")
     .time({from: "now-3h", to: "now"})
     .refresh("1m")
-    .style("dark")
     .timezone("utc")
     .tooltip(DashboardCursorSync.Crosshair)
     .tags(["generated", "from", "cue"])
     .rows([
         overviewRow.build(),
+        timeseriesPanel.build(),
     ])
     .links([
         {
