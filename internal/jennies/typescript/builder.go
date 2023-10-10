@@ -25,9 +25,8 @@ type Tmpl struct {
 }
 
 type constructor struct {
-	Args         []argument
-	Items        map[string]any
-	Initializers []string
+	Args        []argument
+	Assignments []assignment
 }
 
 type options struct {
@@ -49,7 +48,14 @@ type assignment struct {
 	InitSafeguards []string
 	Value          string
 	IsBuilder      bool
-	Constraints    []string
+	Constraints    []constraint
+}
+
+type constraint struct {
+	Name     string
+	Op       ast.Op
+	Arg      any
+	IsString bool
 }
 
 func (jenny *Builder) JennyName() string {
@@ -105,7 +111,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 
 func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) constructor {
 	var argsList []argument
-	var fieldsInitList []string
+	var assignments []assignment
 	for _, opt := range builder.Options {
 		if !opt.IsConstructorArg {
 			continue
@@ -113,45 +119,40 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 		// FIXME: this is assuming that there's only one argument for that option
 		argsList = append(argsList, jenny.generateArgument(context, builder, opt.Args[0]))
-		fieldsInitList = append(
-			fieldsInitList,
-			jenny.generateInitAssignment(context, opt.Assignments[0]),
-		)
+		assignments = append(assignments, jenny.generateInitAssignment(context, opt.Assignments[0]))
 	}
 
 	for _, init := range builder.Initializations {
-		fieldsInitList = append(
-			fieldsInitList,
-			jenny.generateInitAssignment(context, init),
-		)
+		assignments = append(assignments, jenny.generateInitAssignment(context, init))
 	}
 
 	return constructor{
-		Args:         argsList,
-		Initializers: fieldsInitList,
+		Args:        argsList,
+		Assignments: assignments,
 	}
 }
 
-func (jenny *Builder) generateInitAssignment(context context.Builders, assignment ast.Assignment) string {
-	fieldPath := jenny.formatFieldPath(assignment.Path)
-	valueType := assignment.Path.Last().Type
+func (jenny *Builder) generateInitAssignment(context context.Builders, assign ast.Assignment) assignment {
+	fieldPath := jenny.formatFieldPath(assign.Path)
+	valueType := assign.Path.Last().Type
 
 	if _, valueHasBuilder := context.BuilderForType(valueType); valueHasBuilder {
-		return "constructor init assignment with type that has a builder is not supported yet"
+		return assignment{Path: fieldPath, Value: "constructor init assignment with type that has a builder is not supported yet"}
 	}
 
-	if assignment.ArgumentName == "" {
-		return fmt.Sprintf("this.internal.%[1]s = %[2]s;", fieldPath, formatScalar(assignment.Value))
+	if assign.ArgumentName == "" {
+		return assignment{
+			Path:  fieldPath,
+			Value: formatScalar(assign.Value),
+		}
 	}
 
-	argName := tools.LowerCamelCase(assignment.ArgumentName)
-
-	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
-	if generatedConstraints != "" {
-		generatedConstraints += "\n\n"
+	argName := tools.LowerCamelCase(assign.ArgumentName)
+	return assignment{
+		Path:        fieldPath,
+		Value:       argName,
+		Constraints: jenny.constraints(argName, assign.Constraints),
 	}
-
-	return generatedConstraints + fmt.Sprintf("this.internal.%[1]s = %[2]s;", fieldPath, argName)
 }
 
 func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) options {
@@ -277,35 +278,31 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 	}
 }
 
-func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []string {
-	output := make([]string, 0, len(constraints))
+func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []constraint {
+	output := make([]constraint, 0, len(constraints))
 
-	for _, constraint := range constraints {
-		output = append(output, jenny.constraint(argumentName, constraint))
+	for _, c := range constraints {
+		op, isString := jenny.constraintComparison(c)
+		output = append(output, constraint{
+			Name:     argumentName,
+			Op:       op,
+			Arg:      c.Args[0],
+			IsString: isString,
+		})
 	}
 
 	return output
 }
 
-func (jenny *Builder) constraint(argumentName string, constraint ast.TypeConstraint) string {
-	var buffer strings.Builder
-
-	buffer.WriteString(fmt.Sprintf("\t\tif (!(%s)) {\n", jenny.constraintComparison(argumentName, constraint)))
-	buffer.WriteString(fmt.Sprintf("\t\t\tthrow new Error(\"%[1]s must be %[2]s %[3]v\");\n", argumentName, constraint.Op, constraint.Args[0]))
-	buffer.WriteString("\t\t}\n")
-
-	return buffer.String()
-}
-
-func (jenny *Builder) constraintComparison(argumentName string, constraint ast.TypeConstraint) string {
+func (jenny *Builder) constraintComparison(constraint ast.TypeConstraint) (ast.Op, bool) {
 	if constraint.Op == ast.MinLengthOp {
-		return fmt.Sprintf("%[1]s.length >= %[2]v", argumentName, constraint.Args[0])
+		return ast.GreaterThanEqualOp, true
 	}
 	if constraint.Op == ast.MaxLengthOp {
-		return fmt.Sprintf("%[1]s.length <= %[2]v", argumentName, constraint.Args[0])
+		return ast.LessThanEqualOp, true
 	}
 
-	return fmt.Sprintf("%[1]s %[2]s %#[3]v", argumentName, constraint.Op, constraint.Args[0])
+	return constraint.Op, false
 }
 
 // typeImportAlias returns the alias to use when importing the given object's type definition.
