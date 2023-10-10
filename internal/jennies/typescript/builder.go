@@ -250,11 +250,6 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 		pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
 	}
 
-	assignmentSafeGuards := strings.Join(pathInitSafeGuards, "\n")
-	if assignmentSafeGuards != "" {
-		assignmentSafeGuards += "\n\n"
-	}
-
 	if _, found := context.BuilderForType(valueType); found {
 		return assignment{
 			Path:           fieldPath,
