@@ -251,19 +251,15 @@ type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
 }
 
 func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]byte, error) {
-
 	if resource.ValSomeStruct != nil {
 		return json.Marshal(resource.ValSomeStruct)
 	}
-
 	if resource.ValSomeOtherStruct != nil {
 		return json.Marshal(resource.ValSomeOtherStruct)
 	}
-
 	if resource.ValYetAnotherStruct != nil {
 		return json.Marshal(resource.ValYetAnotherStruct)
 	}
-
 
 	return nil, nil
 }
@@ -285,7 +281,6 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 	}
 
 	switch discriminator {
-
 	case "some-other-struct":
 		var valSomeOtherStruct SomeOtherStruct
 		if err := json.Unmarshal(raw, &valSomeOtherStruct); err != nil {
@@ -294,7 +289,6 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 
 		resource.ValSomeOtherStruct = &valSomeOtherStruct
 		return nil
-
 	case "some-struct":
 		var valSomeStruct SomeStruct
 		if err := json.Unmarshal(raw, &valSomeStruct); err != nil {
@@ -303,7 +297,6 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 
 		resource.ValSomeStruct = &valSomeStruct
 		return nil
-
 	case "yet-another-struct":
 		var valYetAnotherStruct YetAnotherStruct
 		if err := json.Unmarshal(raw, &valYetAnotherStruct); err != nil {
@@ -312,7 +305,6 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 
 		resource.ValYetAnotherStruct = &valYetAnotherStruct
 		return nil
-
 	}
 
 	return fmt.Errorf("could not unmarshal resource with `Type = %v`", discriminator)
@@ -324,7 +316,6 @@ type StringOrBool struct {
 }
 
 func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
-
 	if resource.ValString != nil {
 		return json.Marshal(resource.ValString)
 	}
@@ -332,7 +323,6 @@ func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
 	if resource.ValBool != nil {
 		return json.Marshal(resource.ValBool)
 	}
-
 
 	return nil, nil
 }

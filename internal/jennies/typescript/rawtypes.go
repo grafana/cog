@@ -225,6 +225,10 @@ func formatScalarKind(kind ast.ScalarKind) string {
 func formatArray(def ast.ArrayType, packageMapper pkgMapper) string {
 	subTypeString := formatType(def.ValueType, packageMapper)
 
+	if def.ValueType.Kind == ast.KindDisjunction {
+		return fmt.Sprintf("(%s)[]", subTypeString)
+	}
+
 	return fmt.Sprintf("%s[]", subTypeString)
 }
 
@@ -234,7 +238,7 @@ func formatDisjunction(def ast.DisjunctionType, packageMapper pkgMapper) string 
 		subTypes = append(subTypes, formatType(subType, packageMapper))
 	}
 
-	return fmt.Sprintf("(%s)", strings.Join(subTypes, " | "))
+	return strings.Join(subTypes, " | ")
 }
 
 func formatMap(def ast.MapType, packageMapper pkgMapper) string {
