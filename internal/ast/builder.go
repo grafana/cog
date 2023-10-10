@@ -201,7 +201,6 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 	for _, field := range structType.Fields {
 		if generator.fieldHasStaticValue(field) {
 			builder.Initializations = append(builder.Initializations, generator.structFieldToStaticInitialization(field))
-
 			continue
 		}
 
@@ -216,7 +215,7 @@ func (generator *BuilderGenerator) fieldHasStaticValue(field StructField) bool {
 		return false
 	}
 
-	return field.Type.AsScalar().Value != nil
+	return field.Type.AsScalar().IsConcrete()
 }
 
 func (generator *BuilderGenerator) structFieldToStaticInitialization(field StructField) Assignment {
