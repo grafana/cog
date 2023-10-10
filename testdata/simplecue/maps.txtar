@@ -1,15 +1,23 @@
 # Maps
 -- schema.cue --
-options: {
-		[string]: int
+intStringMap: {
+    [string]: int
 }
+stringStringMap: {
+    [string]: string
+}
+#foo: {
+    bar: string
+}
+stringRefMap: [string]: #foo
+stringToMapOfMap: [string]: {[string]: bool}
 -- out/simplecue/GenerateAST --
 == ir.json
 {
   "Package": "grafanatest",
   "Definitions": [
     {
-      "Name": "options",
+      "Name": "intStringMap",
       "Comments": [],
       "Type": {
         "Kind": "map",
@@ -31,6 +39,132 @@ options: {
               "ScalarKind": "int64",
               "Value": null,
               "Constraints": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "Name": "stringStringMap",
+      "Comments": [],
+      "Type": {
+        "Kind": "map",
+        "Nullable": false,
+        "Map": {
+          "IndexType": {
+            "Kind": "scalar",
+            "Nullable": false,
+            "Scalar": {
+              "ScalarKind": "string",
+              "Value": null,
+              "Constraints": null
+            }
+          },
+          "ValueType": {
+            "Kind": "scalar",
+            "Nullable": false,
+            "Scalar": {
+              "ScalarKind": "string",
+              "Value": null,
+              "Constraints": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "Name": "foo",
+      "Comments": [],
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "bar",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Required": true,
+              "Default": null
+            }
+          ],
+          "Hint": {}
+        }
+      }
+    },
+    {
+      "Name": "stringRefMap",
+      "Comments": [],
+      "Type": {
+        "Kind": "map",
+        "Nullable": false,
+        "Map": {
+          "IndexType": {
+            "Kind": "scalar",
+            "Nullable": false,
+            "Scalar": {
+              "ScalarKind": "string",
+              "Value": null,
+              "Constraints": null
+            }
+          },
+          "ValueType": {
+            "Kind": "ref",
+            "Nullable": false,
+            "Ref": {
+              "ReferredPkg": "grafanatest",
+              "ReferredType": "foo"
+            }
+          }
+        }
+      }
+    },
+    {
+      "Name": "stringToMapOfMap",
+      "Comments": [],
+      "Type": {
+        "Kind": "map",
+        "Nullable": false,
+        "Map": {
+          "IndexType": {
+            "Kind": "scalar",
+            "Nullable": false,
+            "Scalar": {
+              "ScalarKind": "string",
+              "Value": null,
+              "Constraints": null
+            }
+          },
+          "ValueType": {
+            "Kind": "map",
+            "Nullable": false,
+            "Map": {
+              "IndexType": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "ValueType": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool",
+                  "Value": null,
+                  "Constraints": null
+                }
+              }
             }
           }
         }

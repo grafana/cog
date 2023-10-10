@@ -2,6 +2,7 @@
 -- schema.cue --
 IntEnum: 0 | 1 | 2 @cog(kind="enum",memberNames="firstValue|secondValue|thirdValue")
 StringEnum: "foo" | "bar" | "baz"
+Operator: "<" | ">"
 -- out/simplecue/GenerateAST --
 == ir.json
 {
@@ -104,6 +105,44 @@ StringEnum: "foo" | "bar" | "baz"
               },
               "Name": "baz",
               "Value": "baz"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "Operator",
+      "Comments": [],
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "\u003c",
+              "Value": "\u003c"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "\u003e",
+              "Value": "\u003e"
             }
           ]
         }
