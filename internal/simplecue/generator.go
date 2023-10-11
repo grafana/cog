@@ -550,6 +550,8 @@ func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 		numberType = ast.KindUint64
 	case "int":
 		numberType = ast.KindInt64
+	case "float":
+		numberType = ast.KindFloat64
 	case "number":
 		numberType = ast.KindFloat64
 	default:
