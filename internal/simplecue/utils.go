@@ -95,7 +95,7 @@ func getTypeHint(v cue.Value) (string, error) {
 	var found bool
 	var attr cue.Attribute
 	for _, a := range v.Attributes(cue.ValueAttr) {
-		if a.Name() == annotationName {
+		if a.Name() == cogAnnotationName || a.Name() == cuetsyAnnotationName {
 			found = true
 			attr = a
 		}
@@ -111,7 +111,7 @@ func getTypeHint(v cue.Value) (string, error) {
 	}
 
 	if !found {
-		return "", errorWithCueRef(v, "no value for the %q key in @%s attribute", annotationKindFieldName, annotationName)
+		return "", errorWithCueRef(v, "no value for the %q key in @%s attribute", annotationKindFieldName, cogAnnotationName)
 	}
 
 	return tt, nil

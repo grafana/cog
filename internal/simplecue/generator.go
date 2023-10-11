@@ -10,7 +10,8 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-const annotationName = "cog"
+const cogAnnotationName = "cog"
+const cuetsyAnnotationName = "cuetsy"
 const hintKindEnum = "enum"
 const annotationKindFieldName = "kind"
 const enumMembersAttr = "memberNames"
@@ -180,7 +181,11 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 
 func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 	_, dvals := v.Expr()
-	a := v.Attribute(annotationName)
+	a := v.Attribute(cogAnnotationName)
+	// try to fall-back on the cuetsy annotation
+	if a.Err() != nil {
+		a = v.Attribute(cuetsyAnnotationName)
+	}
 
 	var attrMemberNameExist bool
 	var evals []string
