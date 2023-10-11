@@ -1,0 +1,7 @@
+{{- define "constraints" }}
+    {{- range $c := . }}
+        if (!({{ .Name }}{{if .IsString }}.length{{ end }} {{ .Op }} {{ .Arg }})) {
+            throw new Error("{{ .Name }} must be {{ .Op }} {{ .Arg }}");
+        }
+    {{- end }}
+{{- end }}
