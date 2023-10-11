@@ -2,7 +2,7 @@
 -- ir.json --
 {
     "Package": "defaults",
-    "Definitions": [
+    "Objects": [
         {
             "Name": "SomeStruct",
             "Type": {
@@ -12,9 +12,9 @@
                         {
                             "Name": "fieldBool",
                             "Required": true,
-                            "Default": true,
                             "Type": {
                                 "Kind": "scalar",
+                                "Default": true,
                                 "Scalar": {"ScalarKind": "bool"}
                             }
                         },
@@ -22,9 +22,9 @@
                         {
                             "Name": "fieldString",
                             "Required": true,
-                            "Default": "foo",
                             "Type": {
                                 "Kind": "scalar",
+                                "Default": "foo",
                                 "Scalar": {"ScalarKind": "string"}
                             }
                         },
@@ -40,18 +40,18 @@
                         {
                             "Name": "FieldFloat32",
                             "Required": true,
-                            "Default": 42.42,
                             "Type": {
                                 "Kind": "scalar",
+                                "Default": 42.42,
                                 "Scalar": {"ScalarKind": "float32"}
                             }
                         },
                         {
                             "Name": "FieldInt32",
                             "Required": true,
-                            "Default": 42,
                             "Type": {
                                 "Kind": "scalar",
+                                "Default": 42,
                                 "Scalar": {"ScalarKind": "int32"}
                             }
                         }
@@ -71,12 +71,13 @@ export interface SomeStruct {
 	FieldInt32: number;
 }
 
-export const defaultSomeStruct: Partial<SomeStruct> = {
+export const defaultSomeStruct = (): SomeStruct => ({
 	fieldBool: true,
 	fieldString: "foo",
+	FieldStringWithConstantValue: "auto",
 	FieldFloat32: 42.42,
 	FieldInt32: 42,
-};
+});
 
 -- out/jennies/GoRawTypes --
 == types/defaults/types_gen.go

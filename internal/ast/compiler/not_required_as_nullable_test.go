@@ -11,9 +11,9 @@ import (
 func TestNotRequiredFieldAsNullableType(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("NotAStruct", ast.String()),
+		ast.NewObject("pkg", "NotAStruct", ast.String()),
 
-		ast.NewObject("AStruct", ast.NewStruct(
+		ast.NewObject("pkg", "AStruct", ast.NewStruct(
 			ast.NewStructField("RequiredString", ast.String(), ast.Required()),
 			ast.NewStructField("RequiredNullableString", ast.String(ast.Nullable()), ast.Required()),
 			ast.NewStructField("NotRequiredString", ast.String()),
@@ -38,9 +38,9 @@ func TestNotRequiredFieldAsNullableType(t *testing.T) {
 
 	// Prepare expected output
 	expected := []ast.Object{
-		ast.NewObject("NotAStruct", ast.String()),
+		ast.NewObject("pkg", "NotAStruct", ast.String()),
 
-		ast.NewObject("AStruct", ast.NewStruct(
+		ast.NewObject("pkg", "AStruct", ast.NewStruct(
 			ast.NewStructField("RequiredString", ast.String(), ast.Required()),
 			ast.NewStructField("RequiredNullableString", ast.String(ast.Nullable()), ast.Required()),
 			ast.NewStructField("NotRequiredString", ast.String(ast.Nullable())), // should become nullable
@@ -74,13 +74,13 @@ func runNotRequiredAsNullablePass(t *testing.T, input []ast.Object, expectedOutp
 	req := require.New(t)
 
 	compilerPass := &NotRequiredFieldAsNullableType{}
-	processedFiles, err := compilerPass.Process([]*ast.File{
+	processedFiles, err := compilerPass.Process([]*ast.Schema{
 		{
-			Package:     "test",
-			Definitions: input,
+			Package: "test",
+			Objects: input,
 		},
 	})
 	req.NoError(err)
 	req.Len(processedFiles, 1)
-	req.Empty(cmp.Diff(expectedOutput, processedFiles[0].Definitions))
+	req.Empty(cmp.Diff(expectedOutput, processedFiles[0].Objects))
 }

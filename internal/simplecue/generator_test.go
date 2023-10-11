@@ -72,7 +72,7 @@ func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 	return nil
 }
 
-func writeIR(irFile *ast.File, tc *txtartest.Test) {
+func writeIR(irFile *ast.Schema, tc *txtartest.Test) {
 	tc.Helper()
 
 	// TODO: use FileWriter instead in separate CL.

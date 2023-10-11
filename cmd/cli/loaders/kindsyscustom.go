@@ -11,10 +11,10 @@ import (
 	"github.com/grafana/thema"
 )
 
-func kindsysCustomLoader(opts Options) ([]*ast.File, error) {
+func kindsysCustomLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.KindsysCustomEntrypoints))
+	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysCustomEntrypoints))
 	for _, entrypoint := range opts.KindsysCustomEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
@@ -45,6 +45,10 @@ func kindsysCustomLoader(opts Options) ([]*ast.File, error) {
 
 		schemaAst, err := simplecue.GenerateAST(kindToLatestSchema(boundKind), simplecue.Config{
 			Package: pkg, // TODO: extract from input schema/folder?
+			SchemaMetadata: ast.SchemaMeta{
+				Kind:       ast.SchemaKindCore, // TODO: is there any need for a "SchemaKindCustom"?
+				Identifier: pkg,                // TODO: maybe even core kinds could have one explicitly set in their schema?
+			},
 		})
 		if err != nil {
 			return nil, err

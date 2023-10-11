@@ -18,39 +18,101 @@ const enumMembersAttr = "memberNames"
 type Config struct {
 	// Package name used to generate code into.
 	Package string
+
+	// For dataqueries, the schema doesn't define any top-level object
+	ForceVariantEnvelope bool
+
+	SchemaMetadata ast.SchemaMeta
 }
 
 type generator struct {
-	file *ast.File
+	schema *ast.Schema
 }
 
-func GenerateAST(val cue.Value, c Config) (*ast.File, error) {
+func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 	g := &generator{
-		file: &ast.File{
-			Package: c.Package,
+		schema: &ast.Schema{
+			Package:  c.Package,
+			Metadata: c.SchemaMetadata,
 		},
 	}
 
-	i, err := val.Fields(cue.Definitions(true))
-	if err != nil {
-		return nil, err
+	if c.ForceVariantEnvelope {
+		if err := g.walkCueSchemaWithVariantEnvelope(val); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := g.walkCueSchema(val); err != nil {
+			return nil, err
+		}
 	}
+
+	return g.schema, nil
+}
+
+func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
+	i, err := v.Fields(cue.Definitions(true), cue.All())
+	if err != nil {
+		return err
+	}
+
+	var rootObjectFields []ast.StructField
+	for i.Next() {
+		sel := i.Selector()
+		name := selectorLabel(sel)
+
+		if i.Selector().IsDefinition() {
+			n, err := g.declareObject(name, i.Value())
+			if err != nil {
+				return err
+			}
+
+			g.schema.Objects = append(g.schema.Objects, n)
+			continue
+		}
+
+		nodeType, err := g.declareNode(i.Value())
+		if err != nil {
+			return err
+		}
+
+		rootObjectFields = append(rootObjectFields, ast.NewStructField(name, nodeType))
+	}
+
+	g.schema.Objects = append(g.schema.Objects, ast.Object{
+		Name:     string(g.schema.Metadata.Variant),
+		Comments: commentsFromCueValue(v),
+		Type:     ast.NewStruct(rootObjectFields...),
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: string(g.schema.Metadata.Variant),
+		},
+	})
+
+	return nil
+}
+
+func (g *generator) walkCueSchema(v cue.Value) error {
+	i, err := v.Fields(cue.Definitions(true))
+	if err != nil {
+		return err
+	}
+
 	for i.Next() {
 		sel := i.Selector()
 
-		n, err := g.declareTopLevelType(selectorLabel(sel), i.Value())
+		n, err := g.declareObject(selectorLabel(sel), i.Value())
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		g.file.Definitions = append(g.file.Definitions, n)
+		g.schema.Objects = append(g.schema.Objects, n)
 	}
 
-	return g.file, nil
+	return nil
 }
 
-// Do we really need to distinguish top-level types with others?
-func (g *generator) declareTopLevelType(name string, v cue.Value) (ast.Object, error) {
+func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) {
 	typeHint, err := getTypeHint(v)
 	if err != nil {
 		return ast.Object{}, err
@@ -69,32 +131,22 @@ func (g *generator) declareTopLevelType(name string, v cue.Value) (ast.Object, e
 		return g.declareEnum(name, v)
 	}
 
-	switch v.IncompleteKind() {
-	case cue.StringKind:
-		return g.declareTopLevelString(name, v)
-	case cue.StructKind:
-		return g.declareTopLevelStruct(name, v)
-	default:
-		return ast.Object{}, errorWithCueRef(v, "unexpected top-level kind '%s'", v.IncompleteKind().String())
-	}
-}
-
-func (g *generator) declareTopLevelString(name string, v cue.Value) (ast.Object, error) {
-	ik := v.IncompleteKind()
-	if ik&cue.StringKind != ik {
-		return ast.Object{}, errorWithCueRef(v, "top-level strings may only be generated from concrete strings")
-	}
-
-	strType, err := g.declareString(v)
+	nodeType, err := g.declareNode(v)
 	if err != nil {
 		return ast.Object{}, err
 	}
 
-	return ast.Object{
+	objectDef := ast.Object{
 		Name:     name,
 		Comments: commentsFromCueValue(v),
-		Type:     strType,
-	}, nil
+		Type:     nodeType,
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: name,
+		},
+	}
+
+	return objectDef, nil
 }
 
 func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
@@ -110,10 +162,19 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 		return ast.Object{}, err
 	}
 
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Object{}, err
+	}
+
 	return ast.Object{
 		Name:     name,
 		Comments: commentsFromCueValue(v),
-		Type:     ast.NewEnum(values),
+		Type:     ast.NewEnum(values, ast.Default(defVal)),
+		SelfRef: ast.RefType{
+			ReferredPkg:  g.schema.Package,
+			ReferredType: name,
+		},
 	}, nil
 }
 
@@ -161,6 +222,7 @@ func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		fields = append(fields, ast.EnumValue{
 			Type:  subType,
 			Name:  text,
@@ -169,26 +231,6 @@ func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 	}
 
 	return fields, nil
-}
-
-func (g *generator) declareTopLevelStruct(name string, v cue.Value) (ast.Object, error) {
-	// This check might be too restrictive
-	if v.IncompleteKind() != cue.StructKind {
-		return ast.Object{}, errorWithCueRef(v, "top-level type definitions may only be generated from structs")
-	}
-
-	nodeType, err := g.declareNode(v)
-	if err != nil {
-		return ast.Object{}, err
-	}
-
-	typeDef := ast.Object{
-		Name:     name,
-		Comments: commentsFromCueValue(v),
-		Type:     nodeType,
-	}
-
-	return typeDef, nil
 }
 
 func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
@@ -208,18 +250,11 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 			return nil, err
 		}
 
-		// Extract the default value if it's there
-		defVal, err := g.extractDefault(i.Value())
-		if err != nil {
-			return nil, err
-		}
-
 		fields = append(fields, ast.StructField{
 			Name:     fieldLabel,
 			Comments: commentsFromCueValue(i.Value()),
 			Required: !i.IsOptional(),
 			Type:     node,
-			Default:  defVal,
 		})
 	}
 
@@ -245,20 +280,20 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 		ident := field.Value.(*cueast.Ident)
 
 		if ident.Scope == nil {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		if _, ok := ident.Scope.(*cueast.File); !ok {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		scope := ident.Scope.(*cueast.File)
 		if len(scope.Decls) == 0 {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		if _, ok := scope.Decls[0].(*cueast.Package); !ok {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
@@ -267,23 +302,23 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 	case *cueast.Ident:
 		ident := source.(*cueast.Ident)
 		if ident.Scope == nil {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		if _, ok := ident.Scope.(*cueast.File); !ok {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		scope := ident.Scope.(*cueast.File)
 		if len(scope.Decls) == 0 {
-			return g.file.Package, nil
+			return g.schema.Package, nil
 		}
 
 		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
 
 		return referredTypePkg.Name, nil
 	case *cueast.Ellipsis: // TODO: this makes no sense
-		return g.file.Package, nil
+		return g.schema.Package, nil
 	default:
 		return "", fmt.Errorf("can't extract reference package")
 	}
@@ -306,12 +341,17 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		), nil
 	}
 
+	defVal, err := g.extractDefault(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+
 	disjunctions := appendSplit(nil, cue.OrOp, v)
 	if len(disjunctions) != 1 {
 		allowedKindsForAnonymousEnum := cue.StringKind | cue.IntKind
 		ik := v.IncompleteKind()
 		if ik&allowedKindsForAnonymousEnum == ik {
-			return g.declareAnonymousEnum(v)
+			return g.declareAnonymousEnum(v, defVal)
 		}
 
 		branches := make([]ast.Type, 0, len(disjunctions))
@@ -333,13 +373,13 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.NullKind:
 		return ast.Null(), nil
 	case cue.BoolKind:
-		return ast.Bool(), nil
+		return ast.Bool(ast.Default(defVal)), nil
 	case cue.BytesKind:
-		return ast.Bytes(), nil
+		return ast.Bytes(ast.Default(defVal)), nil
 	case cue.StringKind:
-		return g.declareString(v)
+		return g.declareString(v, defVal)
 	case cue.FloatKind, cue.NumberKind, cue.IntKind:
-		return g.declareNumber(v)
+		return g.declareNumber(v, defVal)
 	case cue.ListKind:
 		return g.declareList(v)
 	case cue.StructKind:
@@ -372,7 +412,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	}
 }
 
-func (g *generator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
+func (g *generator) declareAnonymousEnum(v cue.Value, defValue any) (ast.Type, error) {
 	allowed := cue.StringKind | cue.IntKind
 	ik := v.IncompleteKind()
 	if ik&allowed != ik {
@@ -384,11 +424,11 @@ func (g *generator) declareAnonymousEnum(v cue.Value) (ast.Type, error) {
 		return ast.Type{}, err
 	}
 
-	return ast.NewEnum(values), nil
+	return ast.NewEnum(values, ast.Default(defValue)), nil
 }
 
-func (g *generator) declareString(v cue.Value) (ast.Type, error) {
-	typeDef := ast.String()
+func (g *generator) declareString(v cue.Value, defVal any) (ast.Type, error) {
+	typeDef := ast.String(ast.Default(defVal))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
@@ -489,7 +529,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 	return constraints, nil
 }
 
-func (g *generator) declareNumber(v cue.Value) (ast.Type, error) {
+func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
 	if err != nil {
 		return ast.Type{}, err
@@ -520,7 +560,7 @@ func (g *generator) declareNumber(v cue.Value) (ast.Type, error) {
 		return ast.Type{}, errorWithCueRef(v, "unknown number type '%s'", parts[0])
 	}
 
-	typeDef := ast.NewScalar(numberType)
+	typeDef := ast.NewScalar(numberType, ast.Default(defVal))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {

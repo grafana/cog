@@ -4,31 +4,47 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/jennies/tools"
 	"github.com/grafana/cog/internal/veneers"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
 )
 
-func Jennies() *codejen.JennyList[[]*ast.File] {
-	targets := codejen.JennyListWithNamer[[]*ast.File](func(files []*ast.File) string {
+func Jennies() *codejen.JennyList[[]*ast.Schema] {
+	targets := codejen.JennyListWithNamer[[]*ast.Schema](func(_ []*ast.Schema) string {
 		return "golang"
 	})
 	targets.AppendManyToMany(
-		tools.Foreach[*ast.File](RawTypes{}),
+		tools.Foreach[*ast.Schema](RawTypes{}),
 	)
 	targets.AppendOneToMany(
-		codejen.AdaptOneToMany[[]ast.Builder, []*ast.File](
+		codejen.AdaptOneToMany[context.Builders, []*ast.Schema](
 			&Builder{},
-			func(files []*ast.File) []ast.Builder {
+			func(schemas []*ast.Schema) context.Builders {
+				var err error
+
 				generator := &ast.BuilderGenerator{}
-				builders := generator.FromAST(files)
+				builders := generator.FromAST(schemas)
 
 				// apply common veneers
-				builders = veneers.Common().ApplyTo(builders)
+				builders, err = veneers.Common().ApplyTo(builders)
+				if err != nil {
+					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
+					panic(err)
+				}
 
 				// apply Go-specific veneers
-				return Veneers().ApplyTo(builders)
+				builders, err = Veneers().ApplyTo(builders)
+				if err != nil {
+					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
+					panic(err)
+				}
+
+				return context.Builders{
+					Schemas:  schemas,
+					Builders: builders,
+				}
 			},
 		),
 	)
@@ -43,6 +59,7 @@ func CompilerPasses() []compiler.Pass {
 		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.DisjunctionToType{},
+		&compiler.Unspec{},
 	}
 }
 
@@ -57,7 +74,7 @@ func Veneers() *veneers.Rewriter {
 
 			// Time(from, to) instead of time(struct {From string `json:"from"`, To   string `json:"to"`}{From: "lala", To: "lala})
 			option.StructFieldsAsArguments(
-				option.ByName("Dashboard", "time"),
+				option.ByName("dashboard", "time"),
 			),
 		},
 	)

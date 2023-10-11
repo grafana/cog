@@ -1,0 +1,38 @@
+{{- range $alias, $importPath := .Imports }}
+import * as {{ $alias }} from '{{ $importPath }}';
+{{- end }}
+import { CogOptionsBuilder } from '../../options_builder_gen';
+
+export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.{{ .Name }}> {
+    private internal: {{ .ImportAlias }}.{{ .Name }};
+
+    constructor({{ template "args" .Constructor.Args }}) {
+        this.internal = {{ .ImportAlias }}.default{{ .Name | upperCamelCase }}();
+        {{- range $i, $arg := .Constructor.Initializers }}
+        {{ $arg }}
+        {{- end }}
+    }
+
+    build(): {{ .ImportAlias }}.{{ .Name }} {
+        return this.internal;
+    }
+
+{{ range .Options }}
+    {{- range .Comments}}
+    // {{ . }}
+    {{- end }}
+    {{ .Name }}({{ template "args" .Args }}): this {
+{{- range .Assignments }}
+{{- range .InitSafeguards }}
+{{ . }}
+{{- end }}
+{{- range .Constraints }}
+{{ . }}
+{{- end }}
+        this.internal.{{ .Path }} = {{ .Value }}{{ if .IsBuilder }}.build(){{ end }};
+{{ end }}
+        return this;
+    }
+{{ end }}
+
+}

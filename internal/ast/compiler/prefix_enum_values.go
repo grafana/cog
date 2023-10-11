@@ -10,34 +10,34 @@ var _ Pass = (*PrefixEnumValues)(nil)
 type PrefixEnumValues struct {
 }
 
-func (pass *PrefixEnumValues) Process(files []*ast.File) ([]*ast.File, error) {
-	newFiles := make([]*ast.File, 0, len(files))
+func (pass *PrefixEnumValues) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	newSchemas := make([]*ast.Schema, 0, len(schemas))
 
-	for _, file := range files {
-		newFile, err := pass.processFile(file)
+	for _, schema := range schemas {
+		newSchema, err := pass.processSchema(schema)
 		if err != nil {
 			return nil, err
 		}
 
-		newFiles = append(newFiles, newFile)
+		newSchemas = append(newSchemas, newSchema)
 	}
 
-	return newFiles, nil
+	return newSchemas, nil
 }
 
-func (pass *PrefixEnumValues) processFile(file *ast.File) (*ast.File, error) {
-	processedObjects := make([]ast.Object, 0, len(file.Definitions))
-	for _, object := range file.Definitions {
+func (pass *PrefixEnumValues) processSchema(schema *ast.Schema) (*ast.Schema, error) {
+	processedObjects := make([]ast.Object, 0, len(schema.Objects))
+	for _, object := range schema.Objects {
 		newObject := object
 		newObject.Type = pass.processType(object.Name, object.Type)
 
 		processedObjects = append(processedObjects, newObject)
 	}
 
-	return &ast.File{
-		Package:     file.Package,
-		Definitions: processedObjects,
-	}, nil
+	newSchema := schema.DeepCopy()
+	newSchema.Objects = processedObjects
+
+	return &newSchema, nil
 }
 
 func (pass *PrefixEnumValues) processType(parentObjectName string, def ast.Type) ast.Type {

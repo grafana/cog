@@ -1,21 +1,38 @@
-import {DashboardBuilder} from "../../../generated/dashboard/dashboard/builder_gen";
-import {TimePickerBuilder} from "../../../generated/dashboard/timepicker/builder_gen";
 import {DashboardCursorSync, DashboardLinkType} from "../../../generated/types/dashboard/types_gen";
+import {GraphDrawStyle, TooltipDisplayMode} from "../../../generated/types/common/types_gen";
+import {dashboardBuilder} from "../../../generated/dashboard/dashboard/builder_gen";
+import {RowPanelBuilder} from "../../../generated/dashboard/rowpanel/builder_gen";
+import {PanelBuilder} from "../../../generated/timeseries/panel/builder_gen";
+import {VizTooltipOptionsBuilder} from "../../../generated/common/viztooltipoptions/builder_gen";
 
+const timeseriesPanel = new PanelBuilder()
+    .title("Some timeseries panel")
+    .transparent(true)
+    .description("Let there be data")
+    .decimals(2)
+    .min(0)
+    .max(200)
+    .lineWidth(5)
+    .drawStyle(GraphDrawStyle.Bars)
+    .tooltip(new VizTooltipOptionsBuilder().mode(TooltipDisplayMode.Single));
 
-const builder = new DashboardBuilder("Some title")
+const overviewRow = new RowPanelBuilder("Overview")
+    .panels([
+        timeseriesPanel.build(),
+    ]);
+
+const builder = new dashboardBuilder("Some title")
     .uid("test-dashboard-codegen")
     .description("Some description")
     .time({from: "now-3h", to: "now"})
-    .timepicker(
-        new TimePickerBuilder()
-            .refresh_intervals(["30s", "1m", "5m"])
-    )
     .refresh("1m")
     .style("dark")
     .timezone("utc")
     .tooltip(DashboardCursorSync.Crosshair)
     .tags(["generated", "from", "cue"])
+    .rows([
+        overviewRow.build(),
+    ])
     .links([
         {
             // TODO: this is painful.

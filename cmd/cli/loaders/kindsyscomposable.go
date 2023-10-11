@@ -3,6 +3,7 @@ package loaders
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/grafana/cog/internal/ast"
@@ -11,10 +12,10 @@ import (
 	"github.com/grafana/thema"
 )
 
-func kindsysCompopsableLoader(opts Options) ([]*ast.File, error) {
+func kindsysCompopsableLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
-	allSchemas := make([]*ast.File, 0, len(opts.KindsysComposableEntrypoints))
+	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysComposableEntrypoints))
 	for _, entrypoint := range opts.KindsysComposableEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
@@ -43,8 +44,19 @@ func kindsysCompopsableLoader(opts Options) ([]*ast.File, error) {
 			return nil, fmt.Errorf("could not bind kind definition to kind: %w", err)
 		}
 
+		variant, err := schemaVariant(props)
+		if err != nil {
+			return nil, err
+		}
+
 		schemaAst, err := simplecue.GenerateAST(kindToLatestSchema(boundKind), simplecue.Config{
-			Package: pkg, // TODO: extract from input schema/folder?
+			Package:              pkg, // TODO: extract from input schema/folder?
+			ForceVariantEnvelope: variant == ast.SchemaVariantDataQuery,
+			SchemaMetadata: ast.SchemaMeta{
+				Kind:       ast.SchemaKindComposable,
+				Variant:    variant,
+				Identifier: inferComposableKindIdentifier(props),
+			},
 		})
 		if err != nil {
 			return nil, err
@@ -54,4 +66,22 @@ func kindsysCompopsableLoader(opts Options) ([]*ast.File, error) {
 	}
 
 	return allSchemas, nil
+}
+
+func schemaVariant(kindProps kindsys.ComposableProperties) (ast.SchemaVariant, error) {
+	switch kindProps.SchemaInterface {
+	case "PanelCfg":
+		return ast.SchemaVariantPanel, nil
+	case "DataQuery":
+		return ast.SchemaVariantDataQuery, nil
+	default:
+		return "", fmt.Errorf("unknown schema variant '%s'", kindProps.SchemaInterface)
+	}
+}
+
+// TODO: the schema should explicitly tell us the "plugin ID"/panel ID/dataquery type/...
+func inferComposableKindIdentifier(kindProps kindsys.ComposableProperties) string {
+	lowerVariant := strings.ToLower(kindProps.SchemaInterface)
+
+	return strings.TrimSuffix(kindProps.MachineName, lowerVariant)
 }

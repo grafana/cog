@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 type Kind string
 
 const (
@@ -43,6 +47,7 @@ type Op string
 const (
 	MinLengthOp        Op = "minLength"
 	MaxLengthOp        Op = "maxLength"
+	MultipleOfOp       Op = "multipleOf"
 	EqualOp            Op = "=="
 	NotEqualOp         Op = "!="
 	LessThanOp         Op = "<"
@@ -73,6 +78,7 @@ func (constraint TypeConstraint) DeepCopy() TypeConstraint {
 type Type struct {
 	Kind     Kind
 	Nullable bool
+	Default  any
 
 	Disjunction *DisjunctionType `json:",omitempty"`
 	Array       *ArrayType       `json:",omitempty"`
@@ -83,10 +89,15 @@ type Type struct {
 	Scalar      *ScalarType      `json:",omitempty"`
 }
 
+func (t Type) IsStructOrRef() bool {
+	return t.Kind == KindStruct || t.Kind == KindRef
+}
+
 func (t Type) DeepCopy() Type {
 	newType := Type{
 		Kind:     t.Kind,
 		Nullable: t.Nullable,
+		Default:  t.Default,
 	}
 
 	if t.Disjunction != nil {
@@ -126,6 +137,12 @@ type TypeOption func(def *Type)
 func Nullable() TypeOption {
 	return func(def *Type) {
 		def.Nullable = true
+	}
+}
+
+func Default(value any) TypeOption {
+	return func(def *Type) {
+		def.Default = value
 	}
 }
 
@@ -303,65 +320,30 @@ type Object struct {
 	Name     string
 	Comments []string
 	Type     Type
+	SelfRef  RefType
 }
 
-func NewObject(name string, objectType Type) Object {
+func NewObject(pkg string, name string, objectType Type) Object {
 	return Object{
 		Name: name,
 		Type: objectType,
+		SelfRef: RefType{
+			ReferredPkg:  pkg,
+			ReferredType: name,
+		},
 	}
 }
 
 func (object Object) DeepCopy() Object {
 	newObject := Object{
-		Name: object.Name,
-		Type: object.Type.DeepCopy(),
+		Name:    object.Name,
+		Type:    object.Type.DeepCopy(),
+		SelfRef: object.SelfRef.DeepCopy(),
 	}
 
 	newObject.Comments = append(newObject.Comments, object.Comments...)
 
 	return newObject
-}
-
-type Files []*File
-
-func (files Files) DeepCopy() []*File {
-	newFiles := make([]*File, 0, len(files))
-
-	for _, file := range files {
-		newFile := file.DeepCopy()
-		newFiles = append(newFiles, &newFile)
-	}
-
-	return newFiles
-}
-
-type File struct { //nolint: musttag
-	Package     string
-	Definitions []Object
-}
-
-func (file *File) DeepCopy() File {
-	newFile := File{
-		Package:     file.Package,
-		Definitions: make([]Object, 0, len(file.Definitions)),
-	}
-
-	for _, def := range file.Definitions {
-		newFile.Definitions = append(newFile.Definitions, def.DeepCopy())
-	}
-
-	return newFile
-}
-
-func (file *File) LocateDefinition(name string) Object {
-	for _, def := range file.Definitions {
-		if def.Name == name {
-			return def
-		}
-	}
-
-	return Object{}
 }
 
 type Types []Type
@@ -557,7 +539,6 @@ type StructField struct {
 	Comments []string
 	Type     Type
 	Required bool
-	Default  any
 }
 
 func (structField StructField) DeepCopy() StructField {
@@ -565,7 +546,6 @@ func (structField StructField) DeepCopy() StructField {
 		Name:     structField.Name,
 		Type:     structField.Type.DeepCopy(),
 		Required: structField.Required,
-		Default:  structField.Default,
 	}
 
 	newT.Comments = append(newT.Comments, structField.Comments...)
@@ -597,6 +577,10 @@ func NewStructField(name string, fieldType Type, opts ...StructFieldOption) Stru
 type RefType struct {
 	ReferredPkg  string
 	ReferredType string
+}
+
+func (t RefType) String() string {
+	return fmt.Sprintf("%s.%s", t.ReferredPkg, t.ReferredType)
 }
 
 func (t RefType) DeepCopy() RefType {
