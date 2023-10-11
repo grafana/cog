@@ -10,13 +10,19 @@ container: {
 == ir.json
 {
   "Package": "grafanatest",
-  "Definitions": [
+  "Metadata": {
+    "Kind": "",
+    "Variant": "",
+    "Identifier": ""
+  },
+  "Objects": [
     {
       "Name": "container",
       "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
+        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -25,14 +31,14 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
+                "Default": "now-6h",
                 "Scalar": {
                   "ScalarKind": "string",
                   "Value": null,
                   "Constraints": null
                 }
               },
-              "Required": true,
-              "Default": "now-6h"
+              "Required": true
             },
             {
               "Name": "editable",
@@ -40,14 +46,14 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
+                "Default": true,
                 "Scalar": {
                   "ScalarKind": "bool",
                   "Value": null,
                   "Constraints": null
                 }
               },
-              "Required": true,
-              "Default": true
+              "Required": true
             },
             {
               "Name": "IntEnum",
@@ -55,12 +61,14 @@ container: {
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
+                "Default": 2,
                 "Enum": {
                   "Values": [
                     {
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
+                        "Default": null,
                         "Scalar": {
                           "ScalarKind": "int64",
                           "Value": null,
@@ -74,6 +82,7 @@ container: {
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
+                        "Default": null,
                         "Scalar": {
                           "ScalarKind": "int64",
                           "Value": null,
@@ -87,6 +96,7 @@ container: {
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
+                        "Default": null,
                         "Scalar": {
                           "ScalarKind": "int64",
                           "Value": null,
@@ -99,8 +109,7 @@ container: {
                   ]
                 }
               },
-              "Required": true,
-              "Default": 2
+              "Required": true
             },
             {
               "Name": "Number",
@@ -108,18 +117,22 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
+                "Default": 5,
                 "Scalar": {
                   "ScalarKind": "int64",
                   "Value": null,
                   "Constraints": []
                 }
               },
-              "Required": true,
-              "Default": 5
+              "Required": true
             }
           ],
           "Hint": {}
         }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
       }
     }
   ]

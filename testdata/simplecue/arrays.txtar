@@ -18,13 +18,19 @@ container: {
 == ir.json
 {
   "Package": "grafanatest",
-  "Definitions": [
+  "Metadata": {
+    "Kind": "",
+    "Variant": "",
+    "Identifier": ""
+  },
+  "Objects": [
     {
       "Name": "refStruct",
       "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
+        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -33,18 +39,22 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
+                "Default": null,
                 "Scalar": {
                   "ScalarKind": "string",
                   "Value": null,
                   "Constraints": null
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             }
           ],
           "Hint": {}
         }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "refStruct"
       }
     },
     {
@@ -53,6 +63,7 @@ container: {
       "Type": {
         "Kind": "struct",
         "Nullable": false,
+        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -61,18 +72,22 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
+                "Default": null,
                 "Scalar": {
                   "ScalarKind": "string",
                   "Value": null,
                   "Constraints": null
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             }
           ],
           "Hint": {}
         }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "struct"
       }
     },
     {
@@ -81,6 +96,7 @@ container: {
       "Type": {
         "Kind": "struct",
         "Nullable": false,
+        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -89,10 +105,12 @@ container: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
+                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": null,
                     "Scalar": {
                       "ScalarKind": "int64",
                       "Value": null,
@@ -101,8 +119,7 @@ container: {
                   }
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             },
             {
               "Name": "strings",
@@ -110,10 +127,12 @@ container: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
+                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": null,
                     "Scalar": {
                       "ScalarKind": "string",
                       "Value": null,
@@ -122,8 +141,7 @@ container: {
                   }
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             },
             {
               "Name": "refs",
@@ -131,10 +149,12 @@ container: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
+                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "ref",
                     "Nullable": false,
+                    "Default": null,
                     "Ref": {
                       "ReferredPkg": "grafanatest",
                       "ReferredType": "refStruct"
@@ -142,8 +162,7 @@ container: {
                   }
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             },
             {
               "Name": "structs",
@@ -151,10 +170,12 @@ container: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
+                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "ref",
                     "Nullable": false,
+                    "Default": null,
                     "Ref": {
                       "ReferredPkg": "grafanatest",
                       "ReferredType": "struct"
@@ -162,12 +183,15 @@ container: {
                   }
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             }
           ],
           "Hint": {}
         }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
       }
     }
   ]

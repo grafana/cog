@@ -9,13 +9,19 @@ container: {
 == ir.json
 {
   "Package": "grafanatest",
-  "Definitions": [
+  "Metadata": {
+    "Kind": "",
+    "Variant": "",
+    "Identifier": ""
+  },
+  "Objects": [
     {
       "Name": "container",
       "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
+        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -24,11 +30,13 @@ container: {
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
+                "Default": null,
                 "Disjunction": {
                   "Branches": [
                     {
                       "Kind": "scalar",
                       "Nullable": false,
+                      "Default": null,
                       "Scalar": {
                         "ScalarKind": "string",
                         "Value": null,
@@ -38,10 +46,12 @@ container: {
                     {
                       "Kind": "array",
                       "Nullable": false,
+                      "Default": null,
                       "Array": {
                         "ValueType": {
                           "Kind": "scalar",
                           "Nullable": false,
+                          "Default": null,
                           "Scalar": {
                             "ScalarKind": "string",
                             "Value": null,
@@ -55,8 +65,7 @@ container: {
                   "DiscriminatorMapping": {}
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             },
             {
               "Name": "stringOrBool",
@@ -64,11 +73,13 @@ container: {
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
+                "Default": null,
                 "Disjunction": {
                   "Branches": [
                     {
                       "Kind": "scalar",
                       "Nullable": false,
+                      "Default": null,
                       "Scalar": {
                         "ScalarKind": "string",
                         "Value": null,
@@ -78,6 +89,7 @@ container: {
                     {
                       "Kind": "scalar",
                       "Nullable": false,
+                      "Default": null,
                       "Scalar": {
                         "ScalarKind": "bool",
                         "Value": null,
@@ -89,8 +101,7 @@ container: {
                   "DiscriminatorMapping": {}
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             },
             {
               "Name": "stringOrNull",
@@ -98,11 +109,13 @@ container: {
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
+                "Default": null,
                 "Disjunction": {
                   "Branches": [
                     {
                       "Kind": "scalar",
                       "Nullable": false,
+                      "Default": null,
                       "Scalar": {
                         "ScalarKind": "string",
                         "Value": null,
@@ -112,6 +125,7 @@ container: {
                     {
                       "Kind": "scalar",
                       "Nullable": false,
+                      "Default": null,
                       "Scalar": {
                         "ScalarKind": "null",
                         "Value": null,
@@ -123,12 +137,15 @@ container: {
                   "DiscriminatorMapping": {}
                 }
               },
-              "Required": true,
-              "Default": null
+              "Required": true
             }
           ],
           "Hint": {}
         }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
       }
     }
   ]
