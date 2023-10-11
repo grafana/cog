@@ -307,8 +307,16 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 `, fieldPath, referredBuilderAlias, intoPointer, assignmentSafeGuards)
 	}
 
-	if assignment.ArgumentName == "" {
+	// constant value, not into a pointer type
+	if assignment.ArgumentName == "" && !valueType.Nullable {
 		return fmt.Sprintf("%[3]sbuilder.internal.%[1]s = %[2]s", fieldPath, formatScalar(assignment.Value), assignmentSafeGuards)
+	}
+	// constant value, into a pointer type
+	if assignment.ArgumentName == "" && valueType.Nullable {
+		tmpVarName := "val" + tools.UpperCamelCase(assignment.Path.Last().Identifier)
+
+		return fmt.Sprintf(`%[3]s%[4]s := %[2]s
+builder.internal.%[1]s = &%[4]s`, fieldPath, formatScalar(assignment.Value), assignmentSafeGuards, tmpVarName)
 	}
 
 	argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.ArgumentName))
