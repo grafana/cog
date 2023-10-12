@@ -1,0 +1,152 @@
+# Enumerations
+-- schema.cue --
+container: {
+    text: string | [...string]
+    stringOrBool: string | false
+    stringOrNull: string | null
+}
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Metadata": {
+    "Kind": "",
+    "Variant": "",
+    "Identifier": ""
+  },
+  "Objects": [
+    {
+      "Name": "container",
+      "Comments": [],
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Default": null,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "text",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Default": null,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Default": null,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    },
+                    {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Default": null,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Default": null,
+                          "Scalar": {
+                            "ScalarKind": "string",
+                            "Value": null,
+                            "Constraints": null
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "Discriminator": "",
+                  "DiscriminatorMapping": {}
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "stringOrBool",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Default": null,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Default": null,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Default": null,
+                      "Scalar": {
+                        "ScalarKind": "bool",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    }
+                  ],
+                  "Discriminator": "",
+                  "DiscriminatorMapping": {}
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "stringOrNull",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Default": null,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Default": null,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Default": null,
+                      "Scalar": {
+                        "ScalarKind": "null",
+                        "Value": null,
+                        "Constraints": null
+                      }
+                    }
+                  ],
+                  "Discriminator": "",
+                  "DiscriminatorMapping": {}
+                }
+              },
+              "Required": true
+            }
+          ],
+          "Hint": {}
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  ]
+}

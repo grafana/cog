@@ -1,0 +1,139 @@
+# Defaults
+-- schema.cue --
+container: {
+    from: string | *"now-6h"
+    editable: bool | *true
+    IntEnum: 0 | 1 | *2 @cog(kind="enum",memberNames="firstValue|secondValue|thirdValue")
+    Number: int64 | *5
+}
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Metadata": {
+    "Kind": "",
+    "Variant": "",
+    "Identifier": ""
+  },
+  "Objects": [
+    {
+      "Name": "container",
+      "Comments": [],
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Default": null,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "from",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "now-6h",
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "editable",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "IntEnum",
+              "Comments": [],
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Default": 2,
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Default": null,
+                        "Scalar": {
+                          "ScalarKind": "int64",
+                          "Value": null,
+                          "Constraints": null
+                        }
+                      },
+                      "Name": "firstValue",
+                      "Value": 0
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Default": null,
+                        "Scalar": {
+                          "ScalarKind": "int64",
+                          "Value": null,
+                          "Constraints": null
+                        }
+                      },
+                      "Name": "secondValue",
+                      "Value": 1
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Default": null,
+                        "Scalar": {
+                          "ScalarKind": "int64",
+                          "Value": null,
+                          "Constraints": null
+                        }
+                      },
+                      "Name": "thirdValue",
+                      "Value": 2
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "Number",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 5,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Value": null,
+                  "Constraints": []
+                }
+              },
+              "Required": true
+            }
+          ],
+          "Hint": {}
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  ]
+}

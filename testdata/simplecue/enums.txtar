@@ -1,0 +1,180 @@
+# Enumerations
+-- schema.cue --
+IntEnum: 0 | 1 | 2 @cog(kind="enum",memberNames="firstValue|secondValue|thirdValue")
+StringEnum: "foo" | "bar" | "baz"
+Operator: "<" | ">"
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Metadata": {
+    "Kind": "",
+    "Variant": "",
+    "Identifier": ""
+  },
+  "Objects": [
+    {
+      "Name": "IntEnum",
+      "Comments": [],
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Default": null,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": null,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "firstValue",
+              "Value": 0
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": null,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "secondValue",
+              "Value": 1
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": null,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "thirdValue",
+              "Value": 2
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "IntEnum"
+      }
+    },
+    {
+      "Name": "StringEnum",
+      "Comments": [],
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Default": null,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": null,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "foo",
+              "Value": "foo"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": null,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "bar",
+              "Value": "bar"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": null,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "baz",
+              "Value": "baz"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "StringEnum"
+      }
+    },
+    {
+      "Name": "Operator",
+      "Comments": [],
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Default": null,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": null,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "\u003c",
+              "Value": "\u003c"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": null,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": null,
+                  "Constraints": null
+                }
+              },
+              "Name": "\u003e",
+              "Value": "\u003e"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Operator"
+      }
+    }
+  ]
+}

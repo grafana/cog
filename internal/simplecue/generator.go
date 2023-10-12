@@ -297,6 +297,10 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 			return g.schema.Package, nil
 		}
 
+		if _, ok := scope.Decls[0].(*cueast.Package); !ok {
+			return g.schema.Package, nil
+		}
+
 		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
 
 		return referredTypePkg.Name, nil

@@ -1,0 +1,57 @@
+# Defaults
+-- schema.cue --
+container: {
+    fiscalYearStartMonth?: uint8 & <12 | *0
+}
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Metadata": {
+    "Kind": "",
+    "Variant": "",
+    "Identifier": ""
+  },
+  "Objects": [
+    {
+      "Name": "container",
+      "Comments": [],
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Default": null,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "fiscalYearStartMonth",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 0,
+                "Scalar": {
+                  "ScalarKind": "uint8",
+                  "Value": null,
+                  "Constraints": [
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        12
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ],
+          "Hint": {}
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  ]
+}
