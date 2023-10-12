@@ -11,6 +11,10 @@ import (
 func kindRegistryLoader(opts Options) ([]*ast.Schema, error) {
 	var allSchemas []*ast.Schema
 
+	if opts.KindRegistryPath == "" {
+		return nil, nil
+	}
+
 	coreKindEntrypoints, err := locateEntrypoints(opts, "core")
 	if err != nil {
 		return nil, fmt.Errorf("could not locate core kind entrypoints: %w", err)
