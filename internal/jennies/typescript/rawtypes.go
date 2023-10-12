@@ -298,6 +298,10 @@ func defaultValueForObject(schema *ast.Schema, object ast.Object, packageMapper 
 }
 
 func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkgMapper) any {
+	if typeDef.Default != nil {
+		return typeDef.Default
+	}
+
 	switch typeDef.Kind {
 	case ast.KindDisjunction:
 		return defaultValueForType(schema, typeDef.AsDisjunction().Branches[0], packageMapper)
