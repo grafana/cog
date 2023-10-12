@@ -18,11 +18,7 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
 == ir.json
 {
   "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "",
-    "Variant": "",
-    "Identifier": ""
-  },
+  "Metadata": {},
   "Objects": [
     {
       "Name": "TimeZoneUtc",
@@ -32,11 +28,12 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
       "Type": {
         "Kind": "scalar",
         "Nullable": false,
-        "Default": null,
         "Scalar": {
           "ScalarKind": "string",
-          "Value": "utc",
-          "Constraints": null
+          "Value": "utc"
+        },
+        "Hints": {
+          "kind": "type"
         }
       },
       "SelfRef": {
@@ -52,11 +49,12 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
       "Type": {
         "Kind": "scalar",
         "Nullable": false,
-        "Default": null,
         "Scalar": {
           "ScalarKind": "string",
-          "Value": "browser",
-          "Constraints": null
+          "Value": "browser"
+        },
+        "Hints": {
+          "kind": "type"
         }
       },
       "SelfRef": {
@@ -78,7 +76,6 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
             {
               "Kind": "ref",
               "Nullable": false,
-              "Default": null,
               "Ref": {
                 "ReferredPkg": "grafanatest",
                 "ReferredType": "TimeZoneUtc"
@@ -87,7 +84,6 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
             {
               "Kind": "ref",
               "Nullable": false,
-              "Default": null,
               "Ref": {
                 "ReferredPkg": "grafanatest",
                 "ReferredType": "TimeZoneBrowser"
@@ -96,16 +92,16 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
             {
               "Kind": "scalar",
               "Nullable": false,
-              "Default": null,
               "Scalar": {
-                "ScalarKind": "string",
-                "Value": null,
-                "Constraints": null
+                "ScalarKind": "string"
               }
             }
           ],
           "Discriminator": "",
           "DiscriminatorMapping": {}
+        },
+        "Hints": {
+          "kind": "type"
         }
       },
       "SelfRef": {
@@ -121,18 +117,14 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
       "Type": {
         "Kind": "enum",
         "Nullable": false,
-        "Default": null,
         "Enum": {
           "Values": [
             {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Name": "foo",
@@ -142,11 +134,8 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Name": "bar",
@@ -156,11 +145,8 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Name": "baz",

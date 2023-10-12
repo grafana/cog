@@ -139,22 +139,20 @@ func (jenny RawTypes) jsonMarshalVeneer(def ast.Object, packageMapper pkgMapper)
 		return "", nil
 	}
 
-	structType := def.Type.AsStruct()
-
 	// We know that a struct was generated from a disjunction if it has a "hint" that says so.
 	// There are only two types of disjunctions we support:
 	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
 	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
 	// 	  structs and these structs have a common "discriminator" field.
 
-	if _, ok := structType.Hint[ast.HintDisjunctionOfScalars]; ok {
+	if _, ok := def.Type.Hints[ast.HintDisjunctionOfScalars]; ok {
 		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.go.tmpl", map[string]any{
 			"def":       def,
 			"pkgMapper": packageMapper,
 		})
 	}
 
-	if hintVal, ok := structType.Hint[ast.HintDiscriminatedDisjunctionOfRefs]; ok {
+	if hintVal, ok := def.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs]; ok {
 		return jenny.renderVeneerTemplate("disjunction_of_refs.types.json_marshal.go.tmpl", map[string]any{
 			"def":       def,
 			"pkgMapper": packageMapper,

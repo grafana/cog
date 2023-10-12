@@ -85,8 +85,7 @@ container: {
               },
               "Required": true
             }
-          ],
-          "Hint": {}
+          ]
         }
       },
       "SelfRef": {

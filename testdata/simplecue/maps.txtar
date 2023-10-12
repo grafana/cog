@@ -90,8 +90,7 @@ stringToMapOfMap: [string]: {[string]: bool}
               },
               "Required": true
             }
-          ],
-          "Hint": {}
+          ]
         }
       },
       "SelfRef": {

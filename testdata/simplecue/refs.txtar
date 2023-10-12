@@ -59,6 +59,10 @@ foo: {
               "Value": 2
             }
           ]
+        },
+        "Hints": {
+          "kind": "enum",
+          "memberNames": "firstValue|secondValue|thirdValue"
         }
       },
       "SelfRef": {
@@ -132,8 +136,7 @@ foo: {
               },
               "Required": true
             }
-          ],
-          "Hint": {}
+          ]
         }
       },
       "SelfRef": {
@@ -180,8 +183,7 @@ foo: {
               },
               "Required": true
             }
-          ],
-          "Hint": {}
+          ]
         }
       },
       "SelfRef": {
