@@ -116,11 +116,11 @@ func (g *generator) walkCueSchema(v cue.Value) error {
 
 func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) {
 	// Try to guess if `v` can be represented as an enum
-	isImplicitEnum, err := g.isImplicitEnum(v)
+	implicitEnum, err := isImplicitEnum(v)
 	if err != nil {
 		return ast.Object{}, err
 	}
-	if isImplicitEnum {
+	if implicitEnum {
 		return g.declareEnum(name, v)
 	}
 
@@ -140,36 +140,6 @@ func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) 
 	}
 
 	return objectDef, nil
-}
-
-func (g *generator) isImplicitEnum(v cue.Value) (bool, error) {
-	typeHint, err := getTypeHint(v)
-	if err != nil {
-		return false, err
-	}
-
-	// Hinted as an enum
-	if typeHint == hintKindEnum {
-		return true, err
-	}
-
-	// Is `v` a disjunction that we can turn into an enum?
-	disjunctionBranches := appendSplit(nil, cue.OrOp, v)
-
-	// only one disjunction branch means no disjunction
-	if len(disjunctionBranches) == 1 {
-		return false, nil
-	}
-
-	allowedKindsForEnum := cue.StringKind | cue.IntKind
-	ik := v.IncompleteKind()
-
-	// we can't handle the type
-	if ik&allowedKindsForEnum != ik {
-		return false, nil
-	}
-
-	return true, nil
 }
 
 func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
@@ -367,15 +337,20 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	}
 
 	disjunctions := appendSplit(nil, cue.OrOp, v)
+	// Possible cases:
+	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
+	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
 	if len(disjunctions) != 1 {
-		isImplicitEnum, err := g.isImplicitEnum(v)
+		// Try to guess if `v` can be represented as an enum (includes checking for a type hint) (1)
+		implicitEnum, err := isImplicitEnum(v)
 		if err != nil {
 			return ast.Type{}, err
 		}
-		if isImplicitEnum {
+		if implicitEnum {
 			return g.declareAnonymousEnum(v, defVal)
 		}
 
+		// We must be looking at a disjunction then (2)
 		branches := make([]ast.Type, 0, len(disjunctions))
 		for _, subTypeValue := range disjunctions {
 			subType, err := g.declareNode(subTypeValue)
@@ -386,7 +361,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			branches = append(branches, subType)
 		}
 
-		return ast.NewDisjunction(branches), nil
+		return ast.NewDisjunction(branches, ast.Default(defVal)), nil
 	}
 
 	switch v.IncompleteKind() {
