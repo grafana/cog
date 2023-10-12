@@ -7,6 +7,7 @@ import (
 	"cuelang.org/go/cue"
 	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
+	"cuelang.org/go/pkg/strconv"
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -545,26 +546,29 @@ func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 	}
 
 	// dirty way of preserving the actual type from cue
-	// FIXME: fails if the type has a custom bound that further restricts the values
-	// IE: uint8 & < 12 will be printed as "uint & < 12
+	// note that CUE has predefined "types": https://cuelang.org/docs/tutorials/tour/types/bounddef/
 	var numberType ast.ScalarKind
-	switch ast.ScalarKind(parts[0]) {
-	case ast.KindFloat32, ast.KindFloat64:
-		numberType = ast.ScalarKind(parts[0])
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
-		numberType = ast.ScalarKind(parts[0])
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
-		numberType = ast.ScalarKind(parts[0])
-	case "uint":
-		numberType = ast.KindUint64
-	case "int":
-		numberType = ast.KindInt64
-	case "float":
-		numberType = ast.KindFloat64
-	case "number":
-		numberType = ast.KindFloat64
-	default:
-		return ast.Type{}, errorWithCueRef(v, "unknown number type '%s'", parts[0])
+	for _, numberTypeCandidate := range parts {
+		switch ast.ScalarKind(numberTypeCandidate) {
+		case ast.KindFloat32, ast.KindFloat64:
+			numberType = ast.ScalarKind(numberTypeCandidate)
+		case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+			numberType = ast.ScalarKind(numberTypeCandidate)
+		case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+			numberType = ast.ScalarKind(numberTypeCandidate)
+		case "uint":
+			numberType = ast.KindUint64
+		case "int":
+			numberType = ast.KindInt64
+		case "float":
+			numberType = ast.KindFloat64
+		case "number":
+			numberType = ast.KindFloat64
+		}
+	}
+
+	if numberType == "" {
+		return ast.Type{}, errorWithCueRef(v, "could not infer number type from expression '%s'", numberTypeWithConstraintsAsString)
 	}
 
 	typeDef := ast.NewScalar(numberType, ast.Default(defVal))
@@ -582,11 +586,6 @@ func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 	// If the default (all lists have a default, usually self, ugh) differs from the
 	// input list, peel it off. Otherwise our AnyIndex lookup may end up getting
 	// sent on the wrong path.
-	defv, _ := v.Default()
-	if !defv.Equals(v) {
-		_, dvals := v.Expr()
-		v = dvals[0]
-	}
 
 	// extract constraints
 	constraints, err := g.declareNumberConstraints(v)
@@ -599,65 +598,85 @@ func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 	return typeDef, nil
 }
 
+// having written this makes my soul hurt.
 func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
-	// typeAndConstraints can contain the following cue expressions:
-	// 	- number
-	// 	- int|float, number, upper bound, lower bound
-	typeAndConstraints := appendSplit(nil, cue.AndOp, v)
-
-	// nothing to do
-	if len(typeAndConstraints) == 1 {
-		return nil, nil
+	// if the number has a default value, strip it from `v` before trying to extract constraints.
+	_, hasDefault := v.Default()
+	if hasDefault {
+		_, dvals := v.Expr()
+		v = dvals[0]
 	}
 
-	constraints := make([]ast.TypeConstraint, 0, len(typeAndConstraints))
-
-	constraintsStartIndex := 1
-
-	// don't include type-related constraints
-	if len(typeAndConstraints) > 1 && typeAndConstraints[0].IncompleteKind() != cue.NumberKind {
-		constraintsStartIndex = 3
+	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
+	if err != nil {
+		return nil, err
 	}
 
-	for _, s := range typeAndConstraints[constraintsStartIndex:] {
-		constraint, err := g.extractConstraint(s)
-		if err != nil {
-			return nil, err
+	parts := strings.Split(string(numberTypeWithConstraintsAsString), " & ")
+
+	extractOperatorAndArg := func(input string, numberKind cue.Kind) (ast.Op, any, error) {
+		argStartIndex := -1
+
+		var op ast.Op
+
+		if input[0] == '>' {
+			op = ast.GreaterThanOp
+			argStartIndex = 1
+
+			if input[1] == '=' {
+				op = ast.GreaterThanEqualOp
+				argStartIndex = 2
+			}
+		}
+		if input[0] == '<' {
+			op = ast.LessThanOp
+			argStartIndex = 1
+
+			if input[1] == '=' {
+				op = ast.LessThanEqualOp
+				argStartIndex = 2
+			}
+		}
+		if input[0] == '=' && input[1] == '=' {
+			op = ast.EqualOp
+			argStartIndex = 2
+		}
+		if input[0] == '!' && input[1] == '=' {
+			op = ast.NotEqualOp
+			argStartIndex = 2
 		}
 
-		constraints = append(constraints, constraint)
+		if op == "" {
+			return op, nil, fmt.Errorf("could not infer operator from '%s'", input)
+		}
+
+		if numberKind.IsAnyOf(cue.FloatKind) {
+			arg, err := strconv.ParseFloat(input[argStartIndex:], 64)
+			return op, arg, err
+		}
+
+		arg, err := strconv.ParseInt(input[argStartIndex:], 10, 64)
+		return op, arg, err
+	}
+
+	var constraints []ast.TypeConstraint
+	for _, part := range parts {
+		if part[0] != '<' && part[0] != '>' {
+			continue
+		}
+
+		op, arg, err := extractOperatorAndArg(part, v.IncompleteKind())
+		if err != nil {
+			return nil, errorWithCueRef(v, err.Error())
+		}
+
+		constraints = append(constraints, ast.TypeConstraint{
+			Op:   op,
+			Args: []any{arg},
+		})
 	}
 
 	return constraints, nil
-}
-
-func (g *generator) extractConstraint(v cue.Value) (ast.TypeConstraint, error) {
-	toConstraint := func(operator ast.Op, arg cue.Value) (ast.TypeConstraint, error) {
-		scalar, err := cueConcreteToScalar(arg)
-		if err != nil {
-			return ast.TypeConstraint{}, err
-		}
-
-		return ast.TypeConstraint{
-			Op:   operator,
-			Args: []any{scalar},
-		}, nil
-	}
-
-	switch op, a := v.Expr(); op {
-	case cue.LessThanOp:
-		return toConstraint(ast.LessThanOp, a[0])
-	case cue.LessThanEqualOp:
-		return toConstraint(ast.LessThanEqualOp, a[0])
-	case cue.GreaterThanOp:
-		return toConstraint(ast.GreaterThanOp, a[0])
-	case cue.GreaterThanEqualOp:
-		return toConstraint(ast.GreaterThanEqualOp, a[0])
-	case cue.NotEqualOp:
-		return toConstraint(ast.NotEqualOp, a[0])
-	default:
-		return ast.TypeConstraint{}, errorWithCueRef(v, "unsupported op for number %v", op)
-	}
 }
 
 func (g *generator) declareList(v cue.Value) (ast.Type, error) {
