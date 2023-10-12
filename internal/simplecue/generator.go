@@ -115,21 +115,12 @@ func (g *generator) walkCueSchema(v cue.Value) error {
 }
 
 func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) {
-	typeHint, err := getTypeHint(v)
+	// Try to guess if `v` can be represented as an enum
+	isImplicitEnum, err := g.isImplicitEnum(v)
 	if err != nil {
 		return ast.Object{}, err
 	}
-
-	// Hinted as an enum
-	if typeHint == hintKindEnum {
-		return g.declareEnum(name, v)
-	}
-
-	ik := v.IncompleteKind()
-
-	// Is it a string disjunction that we can turn into an enum?
-	disjunctions := appendSplit(nil, cue.OrOp, v)
-	if len(disjunctions) != 1 && ik&cue.StringKind == ik {
+	if isImplicitEnum {
 		return g.declareEnum(name, v)
 	}
 
@@ -151,20 +142,43 @@ func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) 
 	return objectDef, nil
 }
 
-func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
-	// Restrict the expression of enums to ints or strings.
-	allowed := cue.StringKind | cue.IntKind
-	ik := v.IncompleteKind()
-	if ik&allowed != ik {
-		return ast.Object{}, errorWithCueRef(v, "enums may only be generated from concrete strings, or ints")
+func (g *generator) isImplicitEnum(v cue.Value) (bool, error) {
+	typeHint, err := getTypeHint(v)
+	if err != nil {
+		return false, err
 	}
 
-	values, err := g.extractEnumValues(v)
+	// Hinted as an enum
+	if typeHint == hintKindEnum {
+		return true, err
+	}
+
+	// Is `v` a disjunction that we can turn into an enum?
+	disjunctionBranches := appendSplit(nil, cue.OrOp, v)
+
+	// only one disjunction branch means no disjunction
+	if len(disjunctionBranches) == 1 {
+		return false, nil
+	}
+
+	allowedKindsForEnum := cue.StringKind | cue.IntKind
+	ik := v.IncompleteKind()
+
+	// we can't handle the type
+	if ik&allowedKindsForEnum != ik {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
+	defVal, err := g.extractDefault(v)
 	if err != nil {
 		return ast.Object{}, err
 	}
 
-	defVal, err := g.extractDefault(v)
+	enumType, err := g.declareAnonymousEnum(v, defVal)
 	if err != nil {
 		return ast.Object{}, err
 	}
@@ -172,7 +186,7 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 	return ast.Object{
 		Name:     name,
 		Comments: commentsFromCueValue(v),
-		Type:     ast.NewEnum(values, ast.Default(defVal)),
+		Type:     enumType,
 		SelfRef: ast.RefType{
 			ReferredPkg:  g.schema.Package,
 			ReferredType: name,
@@ -354,9 +368,11 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 
 	disjunctions := appendSplit(nil, cue.OrOp, v)
 	if len(disjunctions) != 1 {
-		allowedKindsForAnonymousEnum := cue.StringKind | cue.IntKind
-		ik := v.IncompleteKind()
-		if ik&allowedKindsForAnonymousEnum == ik {
+		isImplicitEnum, err := g.isImplicitEnum(v)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if isImplicitEnum {
 			return g.declareAnonymousEnum(v, defVal)
 		}
 
