@@ -12,7 +12,7 @@ import (
 	"github.com/grafana/thema"
 )
 
-func kindsysCompopsableLoader(opts Options) ([]*ast.Schema, error) {
+func kindsysComposableLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
 	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysComposableEntrypoints))
@@ -26,12 +26,12 @@ func kindsysCompopsableLoader(opts Options) ([]*ast.Schema, error) {
 
 		cueInstance, err := kindsys.BuildInstance(themaRuntime.Context(), ".", "grafanaplugin", overlayFS)
 		if err != nil {
-			return nil, fmt.Errorf("could not load kindsys instance: %w", err)
+			return nil, fmt.Errorf("could not load kindsys composable kind %s: %w", pkg, err)
 		}
 
 		props, err := kindsys.ToKindProps[kindsys.ComposableProperties](cueInstance)
 		if err != nil {
-			return nil, fmt.Errorf("could not convert cue value to kindsys props: %w", err)
+			return nil, fmt.Errorf("could not convert cue value to kindsys composable props: %w", err)
 		}
 
 		kindDefinition := kindsys.Def[kindsys.ComposableProperties]{
