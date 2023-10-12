@@ -16,16 +16,18 @@ const (
 	KindsysCustom     LoaderRef = "kindsys-custom"
 	JSONSchema        LoaderRef = "jsonschema"
 	OpenAPI           LoaderRef = "openapi"
+	KindRegistry      LoaderRef = "kind-registry"
 )
 
 func loadersMap() map[LoaderRef]Loader {
 	return map[LoaderRef]Loader{
 		CUE:               cueLoader,
 		KindsysCore:       kindsysCoreLoader,
-		KindsysComposable: kindsysCompopsableLoader,
+		KindsysComposable: kindsysComposableLoader,
 		KindsysCustom:     kindsysCustomLoader,
 		JSONSchema:        jsonschemaLoader,
 		OpenAPI:           openapiLoader,
+		KindRegistry:      kindRegistryLoader,
 	}
 }
 
@@ -43,9 +45,13 @@ type Options struct {
 	KindsysCustomEntrypoints     []string
 	JSONSchemaEntrypoints        []string
 	OpenAPIEntrypoints           []string
+	KindRegistryPath             string
 
 	// Cue-specific options
 	CueImports []string
+
+	// Kind registry-specific options
+	KindRegistryVersion string
 }
 
 func (opts Options) cueIncludeImports() ([]cueIncludeImport, error) {
