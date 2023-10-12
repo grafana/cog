@@ -7,4 +7,4 @@ TimeZoneUtc: "utc"  @cuetsy(kind="type")
 TimeZoneBrowser: "browser"  @cuetsy(kind="type")
 
 // A specific timezone from https://en.wikipedia.org/wiki/Tz_database
-TimeZone: string
+TimeZone: TimeZoneUtc | TimeZoneBrowser | string | *"browser" @cuetsy(kind="type")
