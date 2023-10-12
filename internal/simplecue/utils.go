@@ -177,3 +177,40 @@ func commentsFromCueValue(v cue.Value) []string {
 
 	return ret
 }
+
+func isImplicitEnum(v cue.Value) (bool, error) {
+	typeHint, err := getTypeHint(v)
+	if err != nil {
+		return false, err
+	}
+
+	// Hinted as an enum
+	if typeHint == hintKindEnum {
+		return true, nil
+	}
+
+	// Is `v` a disjunction that we can turn into an enum?
+	disjunctionBranches := appendSplit(nil, cue.OrOp, v)
+
+	// only one disjunction branch means no disjunction
+	if len(disjunctionBranches) == 1 {
+		return false, nil
+	}
+
+	allowedKindsForEnum := cue.StringKind | cue.IntKind
+	ik := v.IncompleteKind()
+
+	// we can't handle the type
+	if ik&allowedKindsForEnum != ik {
+		return false, nil
+	}
+
+	// are all the values concrete?
+	for _, branch := range disjunctionBranches {
+		if !branch.IsConcrete() {
+			return false, nil
+		}
+	}
+
+	return true, nil
+}
