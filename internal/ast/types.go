@@ -78,7 +78,7 @@ func (constraint TypeConstraint) DeepCopy() TypeConstraint {
 type Type struct {
 	Kind     Kind
 	Nullable bool
-	Default  any
+	Default  any `json:",omitempty"`
 
 	Disjunction *DisjunctionType `json:",omitempty"`
 	Array       *ArrayType       `json:",omitempty"`
@@ -318,7 +318,7 @@ func (t Type) AsScalar() ScalarType {
 // named declaration of a type
 type Object struct {
 	Name     string
-	Comments []string
+	Comments []string `json:",omitempty"`
 	Type     Type
 	SelfRef  RefType
 }
@@ -591,9 +591,9 @@ func (t RefType) DeepCopy() RefType {
 }
 
 type ScalarType struct {
-	ScalarKind  ScalarKind // bool, bytes, string, int, float, ...
-	Value       any        // if value isn't nil, we're representing a constant scalar
-	Constraints []TypeConstraint
+	ScalarKind  ScalarKind       // bool, bytes, string, int, float, ...
+	Value       any              `json:",omitempty"` // if value isn't nil, we're representing a constant scalar
+	Constraints []TypeConstraint `json:",omitempty"`
 }
 
 func (scalarType ScalarType) DeepCopy() ScalarType {

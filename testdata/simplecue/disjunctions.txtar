@@ -9,19 +9,13 @@ container: {
 == ir.json
 {
   "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "",
-    "Variant": "",
-    "Identifier": ""
-  },
+  "Metadata": {},
   "Objects": [
     {
       "Name": "container",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -30,32 +24,24 @@ container: {
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
-                "Default": null,
                 "Disjunction": {
                   "Branches": [
                     {
                       "Kind": "scalar",
                       "Nullable": false,
-                      "Default": null,
                       "Scalar": {
-                        "ScalarKind": "string",
-                        "Value": null,
-                        "Constraints": null
+                        "ScalarKind": "string"
                       }
                     },
                     {
                       "Kind": "array",
                       "Nullable": false,
-                      "Default": null,
                       "Array": {
                         "ValueType": {
                           "Kind": "scalar",
                           "Nullable": false,
-                          "Default": null,
                           "Scalar": {
-                            "ScalarKind": "string",
-                            "Value": null,
-                            "Constraints": null
+                            "ScalarKind": "string"
                           }
                         }
                       }
@@ -73,27 +59,20 @@ container: {
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
-                "Default": null,
                 "Disjunction": {
                   "Branches": [
                     {
                       "Kind": "scalar",
                       "Nullable": false,
-                      "Default": null,
                       "Scalar": {
-                        "ScalarKind": "string",
-                        "Value": null,
-                        "Constraints": null
+                        "ScalarKind": "string"
                       }
                     },
                     {
                       "Kind": "scalar",
                       "Nullable": false,
-                      "Default": null,
                       "Scalar": {
-                        "ScalarKind": "bool",
-                        "Value": null,
-                        "Constraints": null
+                        "ScalarKind": "bool"
                       }
                     }
                   ],
@@ -109,27 +88,20 @@ container: {
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
-                "Default": null,
                 "Disjunction": {
                   "Branches": [
                     {
                       "Kind": "scalar",
                       "Nullable": false,
-                      "Default": null,
                       "Scalar": {
-                        "ScalarKind": "string",
-                        "Value": null,
-                        "Constraints": null
+                        "ScalarKind": "string"
                       }
                     },
                     {
                       "Kind": "scalar",
                       "Nullable": false,
-                      "Default": null,
                       "Scalar": {
-                        "ScalarKind": "null",
-                        "Value": null,
-                        "Constraints": null
+                        "ScalarKind": "null"
                       }
                     }
                   ],

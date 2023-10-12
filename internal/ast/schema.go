@@ -44,7 +44,7 @@ func (schemas Schemas) DeepCopy() []*Schema {
 
 type Schema struct { //nolint: musttag
 	Package  string
-	Metadata SchemaMeta
+	Metadata SchemaMeta `json:",omitempty"`
 	Objects  []Object
 }
 
@@ -73,7 +73,7 @@ func (schema *Schema) LocateObject(name string) Object {
 }
 
 type SchemaMeta struct {
-	Kind       SchemaKind
-	Variant    SchemaVariant
-	Identifier string
+	Kind       SchemaKind    `json:",omitempty"`
+	Variant    SchemaVariant `json:",omitempty"`
+	Identifier string        `json:",omitempty"`
 }

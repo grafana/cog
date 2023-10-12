@@ -15,15 +15,10 @@ foo: {
 == ir.json
 {
   "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "",
-    "Variant": "",
-    "Identifier": ""
-  },
+  "Metadata": {},
   "Objects": [
     {
       "Name": "IntEnum",
-      "Comments": [],
       "Type": {
         "Kind": "enum",
         "Nullable": false,
@@ -34,11 +29,8 @@ foo: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int64",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "int64"
                 }
               },
               "Name": "firstValue",
@@ -48,11 +40,8 @@ foo: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int64",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "int64"
                 }
               },
               "Name": "secondValue",
@@ -62,11 +51,8 @@ foo: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int64",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "int64"
                 }
               },
               "Name": "thirdValue",
@@ -82,11 +68,9 @@ foo: {
     },
     {
       "Name": "container",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -95,18 +79,14 @@ foo: {
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
-                "Default": null,
                 "Enum": {
                   "Values": [
                     {
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
-                        "Default": null,
                         "Scalar": {
-                          "ScalarKind": "string",
-                          "Value": null,
-                          "Constraints": null
+                          "ScalarKind": "string"
                         }
                       },
                       "Name": "foo",
@@ -116,11 +96,8 @@ foo: {
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
-                        "Default": null,
                         "Scalar": {
-                          "ScalarKind": "string",
-                          "Value": null,
-                          "Constraints": null
+                          "ScalarKind": "string"
                         }
                       },
                       "Name": "bar",
@@ -130,11 +107,8 @@ foo: {
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
-                        "Default": null,
                         "Scalar": {
-                          "ScalarKind": "string",
-                          "Value": null,
-                          "Constraints": null
+                          "ScalarKind": "string"
                         }
                       },
                       "Name": "baz",
@@ -151,7 +125,6 @@ foo: {
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
-                "Default": null,
                 "Ref": {
                   "ReferredPkg": "grafanatest",
                   "ReferredType": "IntEnum"
@@ -170,15 +143,11 @@ foo: {
     },
     {
       "Name": "anything",
-      "Comments": [],
       "Type": {
         "Kind": "scalar",
         "Nullable": false,
-        "Default": null,
         "Scalar": {
-          "ScalarKind": "any",
-          "Value": null,
-          "Constraints": null
+          "ScalarKind": "any"
         }
       },
       "SelfRef": {
@@ -188,11 +157,9 @@ foo: {
     },
     {
       "Name": "foo",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -201,16 +168,12 @@ foo: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
-                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "scalar",
                     "Nullable": false,
-                    "Default": null,
                     "Scalar": {
-                      "ScalarKind": "any",
-                      "Value": null,
-                      "Constraints": null
+                      "ScalarKind": "any"
                     }
                   }
                 }
