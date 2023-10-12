@@ -15,38 +15,26 @@ stringToMapOfMap: [string]: {[string]: bool}
 == ir.json
 {
   "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "",
-    "Variant": "",
-    "Identifier": ""
-  },
+  "Metadata": {},
   "Objects": [
     {
       "Name": "intStringMap",
-      "Comments": [],
       "Type": {
         "Kind": "map",
         "Nullable": false,
-        "Default": null,
         "Map": {
           "IndexType": {
             "Kind": "scalar",
             "Nullable": false,
-            "Default": null,
             "Scalar": {
-              "ScalarKind": "string",
-              "Value": null,
-              "Constraints": null
+              "ScalarKind": "string"
             }
           },
           "ValueType": {
             "Kind": "scalar",
             "Nullable": false,
-            "Default": null,
             "Scalar": {
-              "ScalarKind": "int64",
-              "Value": null,
-              "Constraints": null
+              "ScalarKind": "int64"
             }
           }
         }
@@ -58,30 +46,22 @@ stringToMapOfMap: [string]: {[string]: bool}
     },
     {
       "Name": "stringStringMap",
-      "Comments": [],
       "Type": {
         "Kind": "map",
         "Nullable": false,
-        "Default": null,
         "Map": {
           "IndexType": {
             "Kind": "scalar",
             "Nullable": false,
-            "Default": null,
             "Scalar": {
-              "ScalarKind": "string",
-              "Value": null,
-              "Constraints": null
+              "ScalarKind": "string"
             }
           },
           "ValueType": {
             "Kind": "scalar",
             "Nullable": false,
-            "Default": null,
             "Scalar": {
-              "ScalarKind": "string",
-              "Value": null,
-              "Constraints": null
+              "ScalarKind": "string"
             }
           }
         }
@@ -93,11 +73,9 @@ stringToMapOfMap: [string]: {[string]: bool}
     },
     {
       "Name": "foo",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -106,11 +84,8 @@ stringToMapOfMap: [string]: {[string]: bool}
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Required": true
@@ -126,26 +101,20 @@ stringToMapOfMap: [string]: {[string]: bool}
     },
     {
       "Name": "stringRefMap",
-      "Comments": [],
       "Type": {
         "Kind": "map",
         "Nullable": false,
-        "Default": null,
         "Map": {
           "IndexType": {
             "Kind": "scalar",
             "Nullable": false,
-            "Default": null,
             "Scalar": {
-              "ScalarKind": "string",
-              "Value": null,
-              "Constraints": null
+              "ScalarKind": "string"
             }
           },
           "ValueType": {
             "Kind": "ref",
             "Nullable": false,
-            "Default": null,
             "Ref": {
               "ReferredPkg": "grafanatest",
               "ReferredType": "foo"
@@ -160,45 +129,33 @@ stringToMapOfMap: [string]: {[string]: bool}
     },
     {
       "Name": "stringToMapOfMap",
-      "Comments": [],
       "Type": {
         "Kind": "map",
         "Nullable": false,
-        "Default": null,
         "Map": {
           "IndexType": {
             "Kind": "scalar",
             "Nullable": false,
-            "Default": null,
             "Scalar": {
-              "ScalarKind": "string",
-              "Value": null,
-              "Constraints": null
+              "ScalarKind": "string"
             }
           },
           "ValueType": {
             "Kind": "map",
             "Nullable": false,
-            "Default": null,
             "Map": {
               "IndexType": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "ValueType": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "bool",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "bool"
                 }
               }
             }

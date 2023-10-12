@@ -7,19 +7,13 @@ container: {
 == ir.json
 {
   "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "",
-    "Variant": "",
-    "Identifier": ""
-  },
+  "Metadata": {},
   "Objects": [
     {
       "Name": "container",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -31,7 +25,6 @@ container: {
                 "Default": 0,
                 "Scalar": {
                   "ScalarKind": "uint8",
-                  "Value": null,
                   "Constraints": [
                     {
                       "Op": "\u003c",

@@ -19,19 +19,13 @@ container: {
 == ir.json
 {
   "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "",
-    "Variant": "",
-    "Identifier": ""
-  },
+  "Metadata": {},
   "Objects": [
     {
       "Name": "container",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -40,11 +34,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Required": true
@@ -55,11 +46,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "bool",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "bool"
                 }
               },
               "Required": true
@@ -70,11 +58,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "any",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "any"
                 }
               },
               "Required": true
@@ -85,11 +70,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "bytes",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "bytes"
                 }
               },
               "Required": true
@@ -100,11 +82,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "uint8",
-                  "Value": null,
-                  "Constraints": []
+                  "ScalarKind": "uint8"
                 }
               },
               "Required": true
@@ -115,11 +94,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int8",
-                  "Value": null,
-                  "Constraints": []
+                  "ScalarKind": "int8"
                 }
               },
               "Required": true
@@ -130,11 +106,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "uint16",
-                  "Value": null,
-                  "Constraints": []
+                  "ScalarKind": "uint16"
                 }
               },
               "Required": true
@@ -145,11 +118,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int16",
-                  "Value": null,
-                  "Constraints": []
+                  "ScalarKind": "int16"
                 }
               },
               "Required": true
@@ -160,11 +130,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "uint32",
-                  "Value": null,
-                  "Constraints": []
+                  "ScalarKind": "uint32"
                 }
               },
               "Required": true
@@ -175,11 +142,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int32",
-                  "Value": null,
-                  "Constraints": []
+                  "ScalarKind": "int32"
                 }
               },
               "Required": true
@@ -190,11 +154,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "uint64",
-                  "Value": null,
-                  "Constraints": []
+                  "ScalarKind": "uint64"
                 }
               },
               "Required": true
@@ -205,11 +166,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int64",
-                  "Value": null,
-                  "Constraints": []
+                  "ScalarKind": "int64"
                 }
               },
               "Required": true

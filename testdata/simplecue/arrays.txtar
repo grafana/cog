@@ -18,19 +18,13 @@ container: {
 == ir.json
 {
   "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "",
-    "Variant": "",
-    "Identifier": ""
-  },
+  "Metadata": {},
   "Objects": [
     {
       "Name": "refStruct",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -39,11 +33,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Required": true
@@ -59,11 +50,9 @@ container: {
     },
     {
       "Name": "struct",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -72,11 +61,8 @@ container: {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Required": true
@@ -92,11 +78,9 @@ container: {
     },
     {
       "Name": "container",
-      "Comments": [],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
-        "Default": null,
         "Struct": {
           "Fields": [
             {
@@ -105,16 +89,12 @@ container: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
-                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "scalar",
                     "Nullable": false,
-                    "Default": null,
                     "Scalar": {
-                      "ScalarKind": "int64",
-                      "Value": null,
-                      "Constraints": null
+                      "ScalarKind": "int64"
                     }
                   }
                 }
@@ -127,16 +107,12 @@ container: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
-                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "scalar",
                     "Nullable": false,
-                    "Default": null,
                     "Scalar": {
-                      "ScalarKind": "string",
-                      "Value": null,
-                      "Constraints": null
+                      "ScalarKind": "string"
                     }
                   }
                 }
@@ -149,12 +125,10 @@ container: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
-                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "ref",
                     "Nullable": false,
-                    "Default": null,
                     "Ref": {
                       "ReferredPkg": "grafanatest",
                       "ReferredType": "refStruct"
@@ -170,12 +144,10 @@ container: {
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
-                "Default": null,
                 "Array": {
                   "ValueType": {
                     "Kind": "ref",
                     "Nullable": false,
-                    "Default": null,
                     "Ref": {
                       "ReferredPkg": "grafanatest",
                       "ReferredType": "struct"

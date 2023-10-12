@@ -7,30 +7,21 @@ Operator: "<" | ">"
 == ir.json
 {
   "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "",
-    "Variant": "",
-    "Identifier": ""
-  },
+  "Metadata": {},
   "Objects": [
     {
       "Name": "IntEnum",
-      "Comments": [],
       "Type": {
         "Kind": "enum",
         "Nullable": false,
-        "Default": null,
         "Enum": {
           "Values": [
             {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int64",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "int64"
                 }
               },
               "Name": "firstValue",
@@ -40,11 +31,8 @@ Operator: "<" | ">"
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int64",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "int64"
                 }
               },
               "Name": "secondValue",
@@ -54,11 +42,8 @@ Operator: "<" | ">"
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "int64",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "int64"
                 }
               },
               "Name": "thirdValue",
@@ -74,22 +59,17 @@ Operator: "<" | ">"
     },
     {
       "Name": "StringEnum",
-      "Comments": [],
       "Type": {
         "Kind": "enum",
         "Nullable": false,
-        "Default": null,
         "Enum": {
           "Values": [
             {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Name": "foo",
@@ -99,11 +79,8 @@ Operator: "<" | ">"
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Name": "bar",
@@ -113,11 +90,8 @@ Operator: "<" | ">"
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Name": "baz",
@@ -133,22 +107,17 @@ Operator: "<" | ">"
     },
     {
       "Name": "Operator",
-      "Comments": [],
       "Type": {
         "Kind": "enum",
         "Nullable": false,
-        "Default": null,
         "Enum": {
           "Values": [
             {
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Name": "\u003c",
@@ -158,11 +127,8 @@ Operator: "<" | ">"
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": null,
                 "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": null,
-                  "Constraints": null
+                  "ScalarKind": "string"
                 }
               },
               "Name": "\u003e",
