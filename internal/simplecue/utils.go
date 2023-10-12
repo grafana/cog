@@ -5,8 +5,9 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/ast"
+	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
+	"github.com/grafana/cog/internal/ast"
 )
 
 //nolint:unused
@@ -88,6 +89,26 @@ outer:
 	return a
 }
 
+func hintsFromCueValue(v cue.Value) ast.JenniesHints {
+	hints := make(ast.JenniesHints)
+
+	for _, a := range v.Attributes(cue.ValueAttr) {
+		if a.Name() != cogAnnotationName && a.Name() != cuetsyAnnotationName {
+			continue
+		}
+
+		i := 0
+		for i < a.NumArgs() {
+			key, value := a.Arg(i)
+			hints[key] = value
+
+			i++
+		}
+	}
+
+	return hints
+}
+
 func getTypeHint(v cue.Value) (string, error) {
 	// Direct lookup of attributes with Attribute() seems broken-ish, so do our
 	// own search as best we can, allowing ValueAttrs, which include both field
@@ -162,7 +183,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 
 func commentsFromCueValue(v cue.Value) []string {
 	docs := v.Doc()
-	if s, ok := v.Source().(*ast.Field); ok {
+	if s, ok := v.Source().(*cueast.Field); ok {
 		for _, c := range s.Comments() {
 			if !c.Doc && c.Line {
 				docs = append(docs, c)

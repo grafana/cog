@@ -39,8 +39,7 @@ container: {
               },
               "Required": true
             }
-          ],
-          "Hint": {}
+          ]
         }
       },
       "SelfRef": {
@@ -67,8 +66,7 @@ container: {
               },
               "Required": true
             }
-          ],
-          "Hint": {}
+          ]
         }
       },
       "SelfRef": {
@@ -157,8 +155,7 @@ container: {
               },
               "Required": true
             }
-          ],
-          "Hint": {}
+          ]
         }
       },
       "SelfRef": {

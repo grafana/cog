@@ -88,6 +88,10 @@ container: {
                       "Value": 2
                     }
                   ]
+                },
+                "Hints": {
+                  "kind": "enum",
+                  "memberNames": "firstValue|secondValue|thirdValue"
                 }
               },
               "Required": true
@@ -105,8 +109,7 @@ container: {
               },
               "Required": true
             }
-          ],
-          "Hint": {}
+          ]
         }
       },
       "SelfRef": {

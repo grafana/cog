@@ -148,7 +148,7 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 		return ast.Object{}, err
 	}
 
-	enumType, err := g.declareAnonymousEnum(v, defVal)
+	enumType, err := g.declareAnonymousEnum(v, defVal, hintsFromCueValue(v))
 	if err != nil {
 		return ast.Object{}, err
 	}
@@ -336,6 +336,8 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		return ast.Type{}, err
 	}
 
+	hints := hintsFromCueValue(v)
+
 	disjunctions := appendSplit(nil, cue.OrOp, v)
 	// Possible cases:
 	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
@@ -347,7 +349,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			return ast.Type{}, err
 		}
 		if implicitEnum {
-			return g.declareAnonymousEnum(v, defVal)
+			return g.declareAnonymousEnum(v, defVal, hints)
 		}
 
 		// We must be looking at a disjunction then (2)
@@ -361,7 +363,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			branches = append(branches, subType)
 		}
 
-		return ast.NewDisjunction(branches, ast.Default(defVal)), nil
+		return ast.NewDisjunction(branches, ast.Default(defVal), ast.Hints(hints)), nil
 	}
 
 	switch v.IncompleteKind() {
@@ -370,15 +372,15 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.NullKind:
 		return ast.Null(), nil
 	case cue.BoolKind:
-		return ast.Bool(ast.Default(defVal)), nil
+		return ast.Bool(ast.Default(defVal), ast.Hints(hints)), nil
 	case cue.BytesKind:
-		return ast.Bytes(ast.Default(defVal)), nil
+		return ast.Bytes(ast.Default(defVal), ast.Hints(hints)), nil
 	case cue.StringKind:
-		return g.declareString(v, defVal)
+		return g.declareString(v, defVal, hints)
 	case cue.FloatKind, cue.NumberKind, cue.IntKind:
-		return g.declareNumber(v, defVal)
+		return g.declareNumber(v, defVal, hints)
 	case cue.ListKind:
-		return g.declareList(v)
+		return g.declareList(v, hints)
 	case cue.StructKind:
 		// in cue: {...}, {[string]: type}, or inline struct
 		if op, _ := v.Expr(); op == cue.NoOp {
@@ -389,7 +391,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 					return ast.Type{}, err
 				}
 
-				return ast.NewMap(ast.String(), typeDef), nil
+				return ast.NewMap(ast.String(), typeDef, ast.Hints(hints)), nil
 			}
 		}
 
@@ -409,7 +411,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	}
 }
 
-func (g *generator) declareAnonymousEnum(v cue.Value, defValue any) (ast.Type, error) {
+func (g *generator) declareAnonymousEnum(v cue.Value, defValue any, hints ast.JenniesHints) (ast.Type, error) {
 	allowed := cue.StringKind | cue.IntKind
 	ik := v.IncompleteKind()
 	if ik&allowed != ik {
@@ -421,11 +423,11 @@ func (g *generator) declareAnonymousEnum(v cue.Value, defValue any) (ast.Type, e
 		return ast.Type{}, err
 	}
 
-	return ast.NewEnum(values, ast.Default(defValue)), nil
+	return ast.NewEnum(values, ast.Default(defValue), ast.Hints(hints)), nil
 }
 
-func (g *generator) declareString(v cue.Value, defVal any) (ast.Type, error) {
-	typeDef := ast.String(ast.Default(defVal))
+func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
+	typeDef := ast.String(ast.Default(defVal), ast.Hints(hints))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
@@ -526,7 +528,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 	return constraints, nil
 }
 
-func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
+func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
 	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
 	if err != nil {
 		return ast.Type{}, err
@@ -562,7 +564,7 @@ func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 		return ast.Type{}, errorWithCueRef(v, "could not infer number type from expression '%s'", numberTypeWithConstraintsAsString)
 	}
 
-	typeDef := ast.NewScalar(numberType, ast.Default(defVal))
+	typeDef := ast.NewScalar(numberType, ast.Default(defVal), ast.Hints(hints))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
@@ -670,13 +672,13 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 	return constraints, nil
 }
 
-func (g *generator) declareList(v cue.Value) (ast.Type, error) {
+func (g *generator) declareList(v cue.Value, hints ast.JenniesHints) (ast.Type, error) {
 	i, err := v.List()
 	if err != nil {
 		return ast.Type{}, err
 	}
 
-	typeDef := ast.NewArray(ast.Any())
+	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints))
 
 	// works only for a closed/concrete list
 	if v.IsConcrete() {

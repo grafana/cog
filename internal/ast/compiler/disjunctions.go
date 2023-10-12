@@ -208,7 +208,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 
 	structType := ast.NewStruct(fields...)
 	if disjunction.Branches.HasOnlyScalarOrArray() {
-		structType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunction
+		structType.Hints[ast.HintDisjunctionOfScalars] = disjunction
 	}
 	if disjunction.Branches.HasOnlyRefs() {
 		newDisjunctionDef, err := pass.ensureDiscriminator(schema, disjunction)
@@ -216,7 +216,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 			return ast.Type{}, err
 		}
 
-		structType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = newDisjunctionDef
+		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = newDisjunctionDef
 	}
 
 	pass.newObjects[newTypeName] = ast.Object{

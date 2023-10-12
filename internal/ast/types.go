@@ -72,6 +72,9 @@ func (constraint TypeConstraint) DeepCopy() TypeConstraint {
 	return newConstraint
 }
 
+// meant to be used by jennies, to gain a finer control on the codegen from schemas
+type JenniesHints map[string]any
+
 // Struct representing every type defined by the IR.
 // Bonus: in a way that can be (un)marshaled to/from JSON,
 // which is useful for unit tests.
@@ -87,10 +90,21 @@ type Type struct {
 	Struct      *StructType      `json:",omitempty"`
 	Ref         *RefType         `json:",omitempty"`
 	Scalar      *ScalarType      `json:",omitempty"`
+
+	Hints JenniesHints `json:",omitempty"`
 }
 
 func (t Type) IsStructOrRef() bool {
 	return t.Kind == KindStruct || t.Kind == KindRef
+}
+
+func (t Type) IsStructGeneratedFromDisjunction() bool {
+	if t.Kind != KindStruct {
+		return false
+	}
+
+	return t.Hints[HintDisjunctionOfScalars] != nil ||
+		t.Hints[HintDiscriminatedDisjunctionOfRefs] != nil
 }
 
 func (t Type) DeepCopy() Type {
@@ -98,6 +112,7 @@ func (t Type) DeepCopy() Type {
 		Kind:     t.Kind,
 		Nullable: t.Nullable,
 		Default:  t.Default,
+		Hints:    make(JenniesHints, len(t.Hints)),
 	}
 
 	if t.Disjunction != nil {
@@ -129,6 +144,10 @@ func (t Type) DeepCopy() Type {
 		newType.Scalar = &newScalar
 	}
 
+	for k, v := range t.Hints {
+		newType.Hints[k] = v
+	}
+
 	return newType
 }
 
@@ -143,6 +162,12 @@ func Nullable() TypeOption {
 func Default(value any) TypeOption {
 	return func(def *Type) {
 		def.Default = value
+	}
+}
+
+func Hints(hints JenniesHints) TypeOption {
+	return func(def *Type) {
+		def.Hints = hints
 	}
 }
 
@@ -178,7 +203,8 @@ func String(opts ...TypeOption) Type {
 
 func NewDisjunction(branches Types, opts ...TypeOption) Type {
 	def := Type{
-		Kind: KindDisjunction,
+		Kind:  KindDisjunction,
+		Hints: make(JenniesHints),
 		Disjunction: &DisjunctionType{
 			Branches:             branches,
 			DiscriminatorMapping: make(map[string]any),
@@ -194,7 +220,8 @@ func NewDisjunction(branches Types, opts ...TypeOption) Type {
 
 func NewArray(valueType Type, opts ...TypeOption) Type {
 	def := Type{
-		Kind: KindArray,
+		Kind:  KindArray,
+		Hints: make(JenniesHints),
 		Array: &ArrayType{
 			ValueType: valueType,
 		},
@@ -209,7 +236,8 @@ func NewArray(valueType Type, opts ...TypeOption) Type {
 
 func NewEnum(values []EnumValue, opts ...TypeOption) Type {
 	def := Type{
-		Kind: KindEnum,
+		Kind:  KindEnum,
+		Hints: make(JenniesHints),
 		Enum: &EnumType{
 			Values: values,
 		},
@@ -224,7 +252,8 @@ func NewEnum(values []EnumValue, opts ...TypeOption) Type {
 
 func NewMap(indexType Type, valueType Type, opts ...TypeOption) Type {
 	def := Type{
-		Kind: KindMap,
+		Kind:  KindMap,
+		Hints: make(JenniesHints),
 		Map: &MapType{
 			IndexType: indexType,
 			ValueType: valueType,
@@ -240,17 +269,18 @@ func NewMap(indexType Type, valueType Type, opts ...TypeOption) Type {
 
 func NewStruct(fields ...StructField) Type {
 	return Type{
-		Kind: KindStruct,
+		Hints: make(JenniesHints),
+		Kind:  KindStruct,
 		Struct: &StructType{
 			Fields: fields,
-			Hint:   make(map[JennyHint]any),
 		},
 	}
 }
 
 func NewRef(referredPkg string, referredTypeName string, opts ...TypeOption) Type {
 	def := Type{
-		Kind: KindRef,
+		Kind:  KindRef,
+		Hints: make(JenniesHints),
 		Ref: &RefType{
 			ReferredPkg:  referredPkg,
 			ReferredType: referredTypeName,
@@ -266,7 +296,8 @@ func NewRef(referredPkg string, referredTypeName string, opts ...TypeOption) Typ
 
 func NewScalar(kind ScalarKind, opts ...TypeOption) Type {
 	def := Type{
-		Kind: KindScalar,
+		Kind:  KindScalar,
+		Hints: make(JenniesHints),
 		Scalar: &ScalarType{
 			ScalarKind: kind,
 		},
@@ -497,25 +528,15 @@ func (t MapType) DeepCopy() MapType {
 
 type StructType struct {
 	Fields []StructField
-	Hint   map[JennyHint]any // Hints meant to be used by jennies
-}
-
-func (structType StructType) IsGeneratedFromDisjunction() bool {
-	return structType.Hint[HintDisjunctionOfScalars] != nil ||
-		structType.Hint[HintDiscriminatedDisjunctionOfRefs] != nil
 }
 
 func (structType StructType) DeepCopy() StructType {
 	newT := StructType{
 		Fields: make([]StructField, 0, len(structType.Fields)),
-		Hint:   make(map[JennyHint]any, len(structType.Hint)),
 	}
 
 	for _, field := range structType.Fields {
 		newT.Fields = append(newT.Fields, field.DeepCopy())
-	}
-	for k, v := range structType.Hint {
-		newT.Hint[k] = v
 	}
 
 	return newT
