@@ -156,6 +156,16 @@ func Value(value any) TypeOption {
 	}
 }
 
+func Discriminator(discriminator string) TypeOption {
+	return func(def *Type) {
+		if def.Kind != KindDisjunction {
+			return
+		}
+
+		def.Disjunction.Discriminator = discriminator
+	}
+}
+
 func Any() Type {
 	return NewScalar(KindAny)
 }

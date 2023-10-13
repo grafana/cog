@@ -2,10 +2,7 @@ package openapi
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
@@ -102,9 +99,6 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 	if schema.Enum != nil {
 		return g.walkEnum(schema)
 	}
-	if schema.Not != nil {
-		return g.walkNot(schema)
-	}
 
 	switch schema.Type {
 	case openapi3.TypeString:
@@ -128,10 +122,9 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 func (g *generator) walkRef(ref string) (ast.Type, error) {
 	// TODO: Its assuming that we are referencing an object in the same document
 	// See https://swagger.io/specification/v3/#reference-object
-	parts := strings.Split(ref, "/")
-	referredKindName := parts[len(parts)-1]
+	referredKindName := getRefName(ref)
 
-	return ast.NewRef("", referredKindName), nil
+	return ast.NewRef(g.schema.Package, referredKindName), nil
 }
 
 func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
@@ -220,18 +213,23 @@ func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
-	// TODO: Add discriminators
-	return g.walkDisjunctions(schema.AllOf)
+	return g.walkDisjunctions(schema.AllOf, "")
 }
 
 func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
-	// TODO: Add discriminators
-	return g.walkDisjunctions(schema.OneOf)
+	discriminator := ""
+	if schema.Discriminator != nil {
+		discriminator = schema.Discriminator.PropertyName
+	}
+	return g.walkDisjunctions(schema.OneOf, discriminator)
 }
 
 func (g *generator) walkAnyOf(schema *openapi3.Schema) (ast.Type, error) {
-	// TODO: Add discriminators
-	return g.walkDisjunctions(schema.AnyOf)
+	discriminator := ""
+	if schema.Discriminator != nil {
+		discriminator = schema.Discriminator.PropertyName
+	}
+	return g.walkDisjunctions(schema.AnyOf, discriminator)
 }
 
 func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
@@ -258,7 +256,7 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	return ast.NewEnum(enums, ast.Default(schema.Default)), nil
 }
 
-func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef) (ast.Type, error) {
+func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discriminator string) (ast.Type, error) {
 	typeDefs := make([]ast.Type, 0, len(schemaRefs))
 	for _, schemaRef := range schemaRefs {
 		def, err := g.walkSchemaRef(schemaRef)
@@ -268,9 +266,6 @@ func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef) (ast.Type
 
 		typeDefs = append(typeDefs, def)
 	}
-	return ast.NewDisjunction(typeDefs), nil
-}
 
-func (g *generator) walkNot(_ *openapi3.Schema) (ast.Type, error) {
-	return ast.Type{}, errors.New("`not` aren't supported")
+	return ast.NewDisjunction(typeDefs, ast.Discriminator(discriminator)), nil
 }

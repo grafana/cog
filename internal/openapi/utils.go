@@ -91,3 +91,8 @@ func getArgs(v *float64, t string) []any {
 	}
 	return args
 }
+
+func getRefName(value string) string {
+	parts := strings.Split(value, "/")
+	return parts[len(parts)-1]
+}

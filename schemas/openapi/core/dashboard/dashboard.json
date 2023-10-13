@@ -665,7 +665,8 @@
         ],
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/MappingType"
+            "type": "string",
+            "default": "range"
           },
           "options": {
             "type": "object",
@@ -700,7 +701,8 @@
         ],
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/MappingType"
+            "type": "string",
+            "default": "regex"
           },
           "options": {
             "type": "object",
@@ -851,7 +853,8 @@
         ],
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/MappingType"
+            "type": "string",
+            "default": "special"
           },
           "options": {
             "type": "object",
@@ -955,7 +958,8 @@
         ],
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/MappingType"
+            "type": "string",
+            "default": "value"
           },
           "options": {
             "type": "object",
@@ -966,7 +970,23 @@
         }
       },
       "ValueMapping": {
-        "$ref": "#/components/schemas/ValueMap"
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ValueMap"
+          },
+          {
+            "$ref": "#/components/schemas/RangeMap"
+          },
+          {
+            "$ref": "#/components/schemas/RegexMap"
+          },
+          {
+            "$ref": "#/components/schemas/SpecialValueMap"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type"
+        }
       },
       "ValueMappingResult": {
         "description": "TODO docs",
