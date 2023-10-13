@@ -3,6 +3,7 @@ package openapi
 import (
 	"context"
 	"fmt"
+	
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
