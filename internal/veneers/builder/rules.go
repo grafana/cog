@@ -138,7 +138,10 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 	for _, composableBuilder := range composableBuilders {
 		underPath, exists := compositionMap[composableBuilder.For.Name]
 		if !exists {
-			return newBuilder, fmt.Errorf("unexpected composable type '%s'", composableBuilder.For.Name)
+			// schemas for composable panels can define more types than just "Options"
+			// and "FieldConfig": we probably want to leave the builders for them untouched.
+			// TODO: or maybe merge these into a single, unified builder?
+			return newBuilder, nil
 		}
 
 		newRoot, err := newBuilder.MakePath(builders, underPath)
