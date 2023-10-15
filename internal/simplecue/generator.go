@@ -560,6 +560,18 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 		}
 	}
 
+	// the heuristic above will likely fail for concrete numbers, so let's handle them explicitly
+	if numberType == "" && v.IsConcrete() {
+		switch v.Kind() {
+		case cue.FloatKind:
+			numberType = ast.KindFloat64
+		case cue.IntKind:
+			numberType = ast.KindInt64
+		case cue.NumberKind:
+			numberType = ast.KindFloat64
+		}
+	}
+
 	if numberType == "" {
 		return ast.Type{}, errorWithCueRef(v, "could not infer number type from expression '%s'", numberTypeWithConstraintsAsString)
 	}
