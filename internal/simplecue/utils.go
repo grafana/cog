@@ -176,6 +176,9 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		}
 
 		return values, nil
+	case cue.StructKind:
+		// TODO: this would be used for struct-level default values
+		return nil, nil //nolint: nilnil
 	default:
 		return nil, errorWithCueRef(v, "can not convert kind to scalar: %s", v.Kind())
 	}
