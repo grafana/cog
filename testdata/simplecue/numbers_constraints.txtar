@@ -1,6 +1,8 @@
 # Numbers and bounds
 -- schema.cue --
 container: {
+    constantInt: 42
+    constantFloat: 42.24
     rowHeight: float & >=0 & <=1
     colWidth: float64 & <=1
     fiscalYearStartMonth: uint8 & <12 | *0
@@ -18,6 +20,32 @@ container: {
         "Nullable": false,
         "Struct": {
           "Fields": [
+            {
+              "Name": "constantInt",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Value": 42
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "constantFloat",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64",
+                  "Value": 42.24
+                }
+              },
+              "Required": true
+            },
             {
               "Name": "rowHeight",
               "Comments": [],
