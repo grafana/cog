@@ -1,5 +1,8 @@
 name: CI
-on: [pull_request]
+on:
+  pull_request: ~
+  push:
+    branches: [main] # so that we build a Go cache that can be re-used in PRs
 
 env:
   GO_VERSION: '1.21'
