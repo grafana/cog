@@ -338,11 +338,11 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 
 	hints := hintsFromCueValue(v)
 
-	disjunctions := appendSplit(nil, cue.OrOp, v)
+	op, disjunctionBranches := v.Expr()
 	// Possible cases:
 	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
 	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
-	if len(disjunctions) != 1 {
+	if op == cue.OrOp && len(disjunctionBranches) != 1 {
 		// Try to guess if `v` can be represented as an enum (includes checking for a type hint) (1)
 		implicitEnum, err := isImplicitEnum(v)
 		if err != nil {
@@ -353,8 +353,8 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		}
 
 		// We must be looking at a disjunction then (2)
-		branches := make([]ast.Type, 0, len(disjunctions))
-		for _, subTypeValue := range disjunctions {
+		branches := make([]ast.Type, 0, len(disjunctionBranches))
+		for _, subTypeValue := range disjunctionBranches {
 			subType, err := g.declareNode(subTypeValue)
 			if err != nil {
 				return ast.Type{}, err

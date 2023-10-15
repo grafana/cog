@@ -96,9 +96,7 @@ DisjunctionWithOnlyConcreteValues: "foo" | "bar" | "baz"
                 "ScalarKind": "string"
               }
             }
-          ],
-          "Discriminator": "",
-          "DiscriminatorMapping": {}
+          ]
         },
         "Hints": {
           "kind": "type"

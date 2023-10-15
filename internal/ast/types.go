@@ -444,8 +444,8 @@ type DisjunctionType struct {
 	//	- a discriminator: the name of a field that is present in all types.
 	//	  The value of which identifies the type being used.
 	//  - a mapping: associating a type name to its "discriminator value".
-	Discriminator        string
-	DiscriminatorMapping map[string]any // likely a map[string]string or map[string]int
+	Discriminator        string         `json:",omitempty"`
+	DiscriminatorMapping map[string]any `json:",omitempty"` // likely a map[string]string or map[string]int
 }
 
 func (t DisjunctionType) DeepCopy() DisjunctionType {
