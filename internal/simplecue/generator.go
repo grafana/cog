@@ -673,15 +673,15 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 }
 
 func (g *generator) declareList(v cue.Value, hints ast.JenniesHints) (ast.Type, error) {
-	i, err := v.List()
-	if err != nil {
-		return ast.Type{}, err
-	}
-
 	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints))
 
 	// works only for a closed/concrete list
 	if v.IsConcrete() {
+		i, err := v.List()
+		if err != nil {
+			return ast.Type{}, err
+		}
+
 		// fixme: this is wrong
 		for i.Next() {
 			node, err := g.declareNode(i.Value())
