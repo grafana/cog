@@ -3,6 +3,7 @@ on: [pull_request]
 
 env:
   GO_VERSION: '1.21'
+  DOCKER_TOOLS: false
 
 jobs:
   linters:
@@ -20,7 +21,12 @@ jobs:
         run: make deps
 
       - name: Run golangci-lint
-        run: make lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.54.2
+          # Done by setup-go
+          skip-pkg-cache: true
+          skip-build-cache: true
 
   tests:
     name: Tests
@@ -29,10 +35,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
-          go-version: 1.21
-          cache: true
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install vendors
         run: make deps
