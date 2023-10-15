@@ -41,11 +41,11 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 
 	if c.ForceVariantEnvelope {
 		if err := g.walkCueSchemaWithVariantEnvelope(val); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	} else {
 		if err := g.walkCueSchema(val); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	}
 

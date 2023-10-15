@@ -39,7 +39,7 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	}
 
 	if err := oapi.Validate(context.Background()); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
 
 	g := &generator{
@@ -54,7 +54,7 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	}
 
 	if err := g.declareDefinition(oapi.Components.Schemas); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
 
 	return g.schema, nil
