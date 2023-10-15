@@ -2,6 +2,7 @@
 -- schema.cue --
 container: {
     text: string | [...string]
+    listWithDifferentTypes: [...bool] | [...string]
     stringOrBool: string | false
     stringOrNull: string | null
 }
@@ -46,9 +47,46 @@ container: {
                         }
                       }
                     }
-                  ],
-                  "Discriminator": "",
-                  "DiscriminatorMapping": {}
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "listWithDifferentTypes",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "bool"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               },
               "Required": true
@@ -75,9 +113,7 @@ container: {
                         "ScalarKind": "bool"
                       }
                     }
-                  ],
-                  "Discriminator": "",
-                  "DiscriminatorMapping": {}
+                  ]
                 }
               },
               "Required": true
@@ -104,9 +140,7 @@ container: {
                         "ScalarKind": "null"
                       }
                     }
-                  ],
-                  "Discriminator": "",
-                  "DiscriminatorMapping": {}
+                  ]
                 }
               },
               "Required": true

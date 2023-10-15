@@ -253,6 +253,9 @@ func (pass *DisjunctionToType) typeName(typeDef ast.Type) string {
 	if typeDef.Kind == ast.KindScalar {
 		return string(typeDef.AsScalar().ScalarKind)
 	}
+	if typeDef.Kind == ast.KindArray {
+		return "ArrayOf" + pass.typeName(typeDef.AsArray().ValueType)
+	}
 
 	return string(typeDef.Kind)
 }
