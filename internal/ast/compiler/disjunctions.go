@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -147,7 +148,7 @@ func (pass *DisjunctionToType) processStruct(schema *ast.Schema, def ast.Type) (
 }
 
 func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	disjunction := def.AsDisjunction()
+	disjunction := pass.flattenDisjunction(schema, def.AsDisjunction())
 
 	// Ex: type | null
 	if len(disjunction.Branches) == 2 && disjunction.Branches.HasNullType() {
@@ -236,6 +237,62 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	return ref, nil
 }
 
+// flattenDisjunction will traverse all the branches of the given disjunction
+// and, for each disjunction it finds, flatten it into the top-level disjunction.
+//
+// Example input:
+//
+//	SomeStruct: {
+//		foo: string
+//	}
+//	OtherStruct: {
+//		bar: string
+//	}
+//	LastStruct: {
+//		hello: string
+//	}
+//	SomeOrOther: SomeStruct | OtherStruct
+//	AnyStruct: SomeOrOther | LastStruct
+//
+// flattenDisjunction called with `AnyStruct` as an input will return a "flattened"
+// disjunction with for branches `SomeStruct | OtherStruct | LastStruct`
+func (pass *DisjunctionToType) flattenDisjunction(schema *ast.Schema, disjunction ast.DisjunctionType) ast.DisjunctionType {
+	newDisjunction := disjunction.DeepCopy()
+	newDisjunction.Branches = nil
+
+	refResolver := pass.makeReferenceResolver(schema)
+
+	branchMap := make(map[string]struct{})
+	addBranch := func(typeDef ast.Type) {
+		typeName := pass.typeName(typeDef)
+		if _, exists := branchMap[typeName]; exists {
+			return
+		}
+
+		branchMap[typeName] = struct{}{}
+		newDisjunction.Branches = append(newDisjunction.Branches, typeDef)
+	}
+
+	for _, branch := range disjunction.Branches {
+		if branch.Kind != ast.KindRef {
+			addBranch(branch)
+			continue
+		}
+
+		resolved := refResolver(branch)
+		if resolved.Kind != ast.KindDisjunction {
+			addBranch(branch)
+			continue
+		}
+
+		for _, resolvedBranch := range resolved.AsDisjunction().Branches {
+			addBranch(resolvedBranch)
+		}
+	}
+
+	return newDisjunction
+}
+
 func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) string {
 	parts := make([]string, 0, len(def.Branches))
 
@@ -301,6 +358,9 @@ func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def a
 	// Identify candidates from each branch
 	for _, branch := range def.Branches {
 		typeName := branch.AsRef().ReferredType
+		if refResolver(branch).Kind != ast.KindStruct {
+			spew.Dump(branch.AsRef())
+		}
 		structType := refResolver(branch).AsStruct()
 		candidates[typeName] = make(map[string]any)
 

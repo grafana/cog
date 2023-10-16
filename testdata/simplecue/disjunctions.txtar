@@ -1,4 +1,4 @@
-# Enumerations
+# Disjunctions
 -- schema.cue --
 container: {
     text: string | [...string]
