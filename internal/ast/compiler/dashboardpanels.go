@@ -40,9 +40,9 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 				ast.NewRef(schema.Package, "RowPanel"),
 			})
 			disjunction.Disjunction.Discriminator = "type"
-			disjunction.Disjunction.DiscriminatorMapping = map[string]any{
-				"RowPanel": "row",
-				"Panel":    ast.DiscriminatorCatchAll,
+			disjunction.Disjunction.DiscriminatorMapping = map[string]string{
+				"row":                     "RowPanel",
+				ast.DiscriminatorCatchAll: "Panel",
 			}
 
 			newPanelsFieldType := ast.NewArray(disjunction)
