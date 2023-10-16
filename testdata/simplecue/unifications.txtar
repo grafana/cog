@@ -1,0 +1,178 @@
+# Unifications
+-- schema.cue --
+#InlineScript: string | {
+    inline?: string
+}
+
+#MetricAggregationWithInlineScript: {
+    settings?: {
+        script?: #InlineScript
+    }
+}
+
+#Average: {
+    #MetricAggregationWithInlineScript
+    type: "avg"
+    settings?: {
+        script?: #InlineScript
+        missing?: string
+    }
+}
+
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "InlineScript",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "string"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "inline",
+                    "Comments": [],
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "InlineScript"
+      }
+    },
+    {
+      "Name": "MetricAggregationWithInlineScript",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "settings",
+              "Comments": [],
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "script",
+                      "Comments": [],
+                      "Type": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "grafanatest",
+                          "ReferredType": "InlineScript"
+                        }
+                      },
+                      "Required": false
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "MetricAggregationWithInlineScript"
+      }
+    },
+    {
+      "Name": "Average",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "avg"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "settings",
+              "Comments": [],
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "script",
+                      "Comments": [],
+                      "Type": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "grafanatest",
+                          "ReferredType": "InlineScript"
+                        }
+                      },
+                      "Required": false
+                    },
+                    {
+                      "Name": "missing",
+                      "Comments": [],
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Required": false
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Average"
+      }
+    }
+  ]
+}
