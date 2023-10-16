@@ -315,6 +315,8 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 }
 
 func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
+	v = g.removeTautologicalUnification(v)
+
 	// This node is referring to another definition
 	_, path := v.ReferencePath()
 	if path.String() != "" {
@@ -342,7 +344,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	// Possible cases:
 	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
 	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
-	if op == cue.OrOp && len(disjunctionBranches) != 1 {
+	if op == cue.OrOp && len(disjunctionBranches) > 1 {
 		// Try to guess if `v` can be represented as an enum (includes checking for a type hint) (1)
 		implicitEnum, err := isImplicitEnum(v)
 		if err != nil {
@@ -732,4 +734,29 @@ func (g *generator) declareList(v cue.Value, hints ast.JenniesHints) (ast.Type, 
 	typeDef.Array.ValueType = expr
 
 	return typeDef, nil
+}
+
+// removeTautologicalUnification simplifies CUE unifications
+// that unify identical branches.
+// Ex: SomeType & SomeType → SomeType
+func (g *generator) removeTautologicalUnification(v cue.Value) cue.Value {
+	op, branches := v.Expr()
+
+	// not a unification
+	if op != cue.AndOp {
+		return v
+	}
+
+	// for now, we only simplify purely binary operations
+	if len(branches) != 2 {
+		return v
+	}
+
+	// If the branches mutually subsume each other, then they should be the same.
+	// In which case we pick only one and return it.
+	if branches[1].Subsume(branches[0]) == nil && branches[0].Subsume(branches[1]) == nil {
+		return branches[0]
+	}
+
+	return v
 }
