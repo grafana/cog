@@ -156,13 +156,14 @@ func Value(value any) TypeOption {
 	}
 }
 
-func Discriminator(discriminator string) TypeOption {
+func Discriminator(discriminator string, mapping map[string]any) TypeOption {
 	return func(def *Type) {
 		if def.Kind != KindDisjunction {
 			return
 		}
 
 		def.Disjunction.Discriminator = discriminator
+		def.Disjunction.DiscriminatorMapping = mapping
 	}
 }
 

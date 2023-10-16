@@ -214,23 +214,17 @@ func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
-	return g.walkDisjunctions(schema.AllOf, "")
+	return g.walkDisjunctions(schema.AllOf, "", nil)
 }
 
 func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
-	discriminator := ""
-	if schema.Discriminator != nil {
-		discriminator = schema.Discriminator.PropertyName
-	}
-	return g.walkDisjunctions(schema.OneOf, discriminator)
+	discriminator, mapping := g.getDiscriminator(schema)
+	return g.walkDisjunctions(schema.OneOf, discriminator, mapping)
 }
 
 func (g *generator) walkAnyOf(schema *openapi3.Schema) (ast.Type, error) {
-	discriminator := ""
-	if schema.Discriminator != nil {
-		discriminator = schema.Discriminator.PropertyName
-	}
-	return g.walkDisjunctions(schema.AnyOf, discriminator)
+	discriminator, mapping := g.getDiscriminator(schema)
+	return g.walkDisjunctions(schema.AnyOf, discriminator, mapping)
 }
 
 func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
@@ -257,7 +251,7 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	return ast.NewEnum(enums, ast.Default(schema.Default)), nil
 }
 
-func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discriminator string) (ast.Type, error) {
+func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discriminator string, mapping map[string]any) (ast.Type, error) {
 	typeDefs := make([]ast.Type, 0, len(schemaRefs))
 	for _, schemaRef := range schemaRefs {
 		def, err := g.walkSchemaRef(schemaRef)
@@ -268,5 +262,18 @@ func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discrimin
 		typeDefs = append(typeDefs, def)
 	}
 
-	return ast.NewDisjunction(typeDefs, ast.Discriminator(discriminator)), nil
+	return ast.NewDisjunction(typeDefs, ast.Discriminator(discriminator, mapping)), nil
+}
+
+func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[string]any) {
+	name := ""
+	mapping := make(map[string]any)
+	if schema.Discriminator != nil {
+		name = schema.Discriminator.PropertyName
+		for k, v := range schema.Discriminator.Mapping {
+			mapping[k] = v
+		}
+	}
+
+	return name, mapping
 }
