@@ -7,3 +7,11 @@ import (
 type Pass interface {
 	Process(schemas []*ast.Schema) ([]*ast.Schema, error)
 }
+
+func CommonPasses() []Pass {
+	return []Pass{
+		&Unspec{},
+		&DashboardPanelsRewrite{},
+		&CloudwatchQueryEditorExpression{},
+	}
+}
