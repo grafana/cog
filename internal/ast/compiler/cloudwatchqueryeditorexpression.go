@@ -6,6 +6,11 @@ import (
 
 var _ Pass = (*CloudwatchQueryEditorExpression)(nil)
 
+// CloudwatchQueryEditorExpression defines some kind of "types IR veneer",
+// where we use a compiler pass to rewrite a part of the cloudwatch schema.
+// In that schema, the `QueryEditorExpression` type is defined as a disjunction
+// for which the discriminator and mapping can not be inferred.
+// This compiler pass is here to define that mapping.
 type CloudwatchQueryEditorExpression struct {
 }
 
