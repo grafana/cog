@@ -55,9 +55,6 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 
 func CompilerPasses() []compiler.Pass {
 	return []compiler.Pass{
-		&compiler.Unspec{},
-		&compiler.DashboardPanelsRewrite{},
-		&compiler.CloudwatchQueryEditorExpression{},
 		&compiler.AnonymousEnumToExplicitType{},
 		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},

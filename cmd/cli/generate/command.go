@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/cmd/cli/loaders"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/spf13/cobra"
 )
@@ -69,7 +70,11 @@ func doGenerate(opts Options) error {
 		var err error
 		processedAsts := ast.Schemas(schemas).DeepCopy()
 
-		for _, compilerPass := range target.CompilerPasses {
+		var compilerPasses []compiler.Pass
+		compilerPasses = append(compilerPasses, compiler.CommonPasses()...)
+		compilerPasses = append(compilerPasses, target.CompilerPasses...)
+
+		for _, compilerPass := range compilerPasses {
 			processedAsts, err = compilerPass.Process(processedAsts)
 			if err != nil {
 				return err
