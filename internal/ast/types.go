@@ -207,7 +207,7 @@ func NewDisjunction(branches Types, opts ...TypeOption) Type {
 		Hints: make(JenniesHints),
 		Disjunction: &DisjunctionType{
 			Branches:             branches,
-			DiscriminatorMapping: make(map[string]any),
+			DiscriminatorMapping: make(map[string]string),
 		},
 	}
 
@@ -443,16 +443,16 @@ type DisjunctionType struct {
 	// To do that, we need two things:
 	//	- a discriminator: the name of a field that is present in all types.
 	//	  The value of which identifies the type being used.
-	//  - a mapping: associating a type name to its "discriminator value".
-	Discriminator        string         `json:",omitempty"`
-	DiscriminatorMapping map[string]any `json:",omitempty"` // likely a map[string]string or map[string]int
+	//  - a mapping: associating a "discriminator value" to a type.
+	Discriminator        string            `json:",omitempty"`
+	DiscriminatorMapping map[string]string `json:",omitempty"`
 }
 
 func (t DisjunctionType) DeepCopy() DisjunctionType {
 	newT := DisjunctionType{
 		Branches:             make([]Type, 0, len(t.Branches)),
 		Discriminator:        t.Discriminator,
-		DiscriminatorMapping: make(map[string]any, len(t.DiscriminatorMapping)),
+		DiscriminatorMapping: make(map[string]string, len(t.DiscriminatorMapping)),
 	}
 
 	for _, branch := range t.Branches {

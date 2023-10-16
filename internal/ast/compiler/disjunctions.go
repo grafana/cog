@@ -24,7 +24,7 @@ func (pass *DisjunctionToType) Process(schemas []*ast.Schema) ([]*ast.Schema, er
 	for _, schema := range schemas {
 		newSchema, err := pass.processSchema(schema)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[%s] %w", schema.Package, err)
 		}
 
 		newSchemas = append(newSchemas, newSchema)
@@ -313,6 +313,9 @@ func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def a
 			if !scalarField.IsConcrete() {
 				continue
 			}
+			if field.Type.AsScalar().ScalarKind != ast.KindString {
+				continue
+			}
 
 			candidates[typeName][field.Name] = scalarField.Value
 		}
@@ -346,8 +349,8 @@ func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def a
 	return fieldName
 }
 
-func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def ast.DisjunctionType) (map[string]any, error) {
-	mapping := make(map[string]any, len(def.Branches))
+func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def ast.DisjunctionType) (map[string]string, error) {
+	mapping := make(map[string]string, len(def.Branches))
 	if def.Discriminator == "" {
 		return nil, fmt.Errorf("discriminator field is empty: %w", ErrCanNotInferDiscriminator)
 	}
@@ -370,8 +373,11 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def
 		if !field.Type.AsScalar().IsConcrete() {
 			return nil, fmt.Errorf("discriminator field is not concrete: %w", ErrCanNotInferDiscriminator)
 		}
+		if field.Type.AsScalar().ScalarKind != ast.KindString {
+			return nil, fmt.Errorf("discriminator field is not a string: %w", ErrCanNotInferDiscriminator)
+		}
 
-		mapping[typeName] = field.Type.AsScalar().Value
+		mapping[field.Type.AsScalar().Value.(string)] = typeName
 	}
 
 	return mapping, nil

@@ -388,9 +388,9 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 
 	// Metadata should be inferred
 	disjunctionTypeWithDiscriminatorMeta.Discriminator = "Type"
-	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]any{
-		"OtherStruct": "other-struct",
-		"SomeStruct":  "some-struct",
+	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
+		"other-struct": "OtherStruct",
+		"some-struct":  "SomeStruct",
 	}
 	disjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
@@ -441,9 +441,9 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 
 	// Metadata should be inferred
 	disjunctionTypeWithDiscriminatorMeta.Discriminator = "Kind"
-	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]any{
-		"OtherStruct": "other-kind",
-		"SomeStruct":  "some-kind",
+	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
+		"other-kind": "OtherStruct",
+		"some-kind":  "SomeStruct",
 	}
 	disjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
@@ -466,9 +466,9 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	})
 	// Add discriminator-related metadata to the disjunction
 	disjunctionType.Disjunction.Discriminator = "Kind"
-	disjunctionType.Disjunction.DiscriminatorMapping = map[string]any{
-		"OtherStruct": "other-kind",
-		"SomeStruct":  "some-kind",
+	disjunctionType.Disjunction.DiscriminatorMapping = map[string]string{
+		"other-kind": "OtherStruct",
+		"some-kind":  "SomeStruct",
 	}
 
 	objects := []ast.Object{
@@ -496,9 +496,9 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 
 	// Metadata should be inferred
 	disjunctionTypeWithDiscriminatorMeta.Discriminator = "Kind"
-	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]any{
-		"OtherStruct": "other-kind",
-		"SomeStruct":  "some-kind",
+	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
+		"other-kind": "OtherStruct",
+		"some-kind":  "SomeStruct",
 	}
 	disjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
