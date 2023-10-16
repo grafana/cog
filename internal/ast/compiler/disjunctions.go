@@ -355,12 +355,12 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def
 			return nil, fmt.Errorf("discriminator field is not a scalar: %w", ErrCanNotInferDiscriminator)
 		}
 
-		if field.Type.AsScalar().IsConcrete() {
+		switch {
+		case field.Type.AsScalar().IsConcrete():
 			mapping[typeName] = field.Type.AsScalar().Value
-		} else if field.Type.Default != nil {
-			// Open-api and Json-schema don't have the option to set a concrete value unless you set a default
+		case field.Type.Default != nil:
 			mapping[typeName] = field.Type.Default
-		} else {
+		default:
 			return nil, fmt.Errorf("discriminator field is not concrete: %w", ErrCanNotInferDiscriminator)
 		}
 	}
