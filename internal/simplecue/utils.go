@@ -238,3 +238,37 @@ func isImplicitEnum(v cue.Value) (bool, error) {
 
 	return true, nil
 }
+
+func buildImportsAliasMap(v cue.Value) map[string]string {
+	aliasMap := make(map[string]string)
+	syntax := v.Syntax()
+
+	if _, ok := syntax.(*cueast.File); !ok {
+		return aliasMap
+	}
+
+	file := syntax.(*cueast.File)
+
+	for _, decl := range file.Decls {
+		if _, ok := decl.(*cueast.ImportDecl); !ok {
+			continue
+		}
+
+		importDecl := decl.(*cueast.ImportDecl)
+
+		for _, spec := range importDecl.Specs {
+			importPath := strings.Trim(spec.Path.Value, "\"")
+			pkgParts := strings.Split(importPath, "/")
+			pkgName := pkgParts[len(pkgParts)-1]
+
+			alias := pkgName
+			if spec.Name != nil {
+				alias = spec.Name.Name
+			}
+
+			aliasMap[alias] = pkgName
+		}
+	}
+
+	return aliasMap
+}

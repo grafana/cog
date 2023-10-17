@@ -28,7 +28,8 @@ type Config struct {
 }
 
 type generator struct {
-	schema *ast.Schema
+	schema          *ast.Schema
+	importsAliasMap map[string]string
 }
 
 func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
@@ -37,6 +38,7 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 			Package:  c.Package,
 			Metadata: c.SchemaMetadata,
 		},
+		importsAliasMap: buildImportsAliasMap(val),
 	}
 
 	if c.ForceVariantEnvelope {
@@ -259,7 +261,7 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 
 		x := selector.X.(*cueast.Ident)
 
-		return x.Name, nil
+		return g.resolveImportAlias(x.Name), nil
 	case *cueast.Field:
 		field := source.(*cueast.Field)
 
@@ -288,7 +290,7 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 
 		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
 
-		return referredTypePkg.Name, nil
+		return g.resolveImportAlias(referredTypePkg.Name), nil
 	case *cueast.Ident:
 		ident := source.(*cueast.Ident)
 		if ident.Scope == nil {
@@ -306,7 +308,7 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 
 		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
 
-		return referredTypePkg.Name, nil
+		return g.resolveImportAlias(referredTypePkg.Name), nil
 	case *cueast.Ellipsis: // TODO: this makes no sense
 		return g.schema.Package, nil
 	default:
@@ -759,4 +761,12 @@ func (g *generator) removeTautologicalUnification(v cue.Value) cue.Value {
 	}
 
 	return v
+}
+
+func (g *generator) resolveImportAlias(alias string) string {
+	if resolved, found := g.importsAliasMap[alias]; found {
+		return resolved
+	}
+
+	return alias
 }
