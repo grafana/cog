@@ -3,6 +3,8 @@ package openapi
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
@@ -31,6 +33,7 @@ type generator struct {
 
 func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
 	oapi, err := loader.LoadFromFile(filePath)
 	if err != nil {
 		return nil, err
@@ -123,9 +126,9 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 func (g *generator) walkRef(ref string) (ast.Type, error) {
 	// TODO: Its assuming that we are referencing an object in the same document
 	// See https://swagger.io/specification/v3/#reference-object
-	referredKindName := getRefName(ref)
+	pkg, referredKindName := g.getRefName(ref)
 
-	return ast.NewRef(g.schema.Package, referredKindName), nil
+	return ast.NewRef(pkg, referredKindName), nil
 }
 
 func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
@@ -214,7 +217,8 @@ func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
-	return g.walkDisjunctions(schema.AllOf, "", nil)
+	discriminator, mapping := g.getDiscriminator(schema)
+	return g.walkDisjunctions(schema.AllOf, discriminator, mapping)
 }
 
 func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
@@ -270,8 +274,30 @@ func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[strin
 	mapping := make(map[string]string)
 	if schema.Discriminator != nil {
 		name = schema.Discriminator.PropertyName
-		mapping = schema.Discriminator.Mapping
+		for k, v := range schema.Discriminator.Mapping {
+			ref, err := g.walkRef(v)
+			if err != nil {
+				mapping[k] = v
+				continue
+			}
+			mapping[k] = ref.AsRef().ReferredPkg
+		}
 	}
 
 	return name, mapping
+}
+
+func (g *generator) getRefName(value string) (string, string) {
+	rgx, _ := regexp.Compile("(../)*(\\w*/)*(.*).(json|yml)")
+	group := rgx.FindStringSubmatch(value)
+
+	parts := strings.Split(value, "/")
+	schemaName := parts[len(parts)-1]
+
+	// Reference in the same file
+	if len(group) == 0 {
+		return g.schema.Package, schemaName
+	}
+
+	return group[3], schemaName
 }
