@@ -309,7 +309,15 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
 
 		return g.resolveImportAlias(referredTypePkg.Name), nil
-	case *cueast.Ellipsis: // TODO: this makes no sense
+	case *cueast.Ellipsis:
+		if source.(*cueast.Ellipsis).Type == nil {
+			return g.schema.Package, nil
+		}
+
+		if _, ok := source.(*cueast.Ellipsis).Type.(*cueast.SelectorExpr); ok {
+			return g.referencePackage(source.(*cueast.Ellipsis).Type)
+		}
+
 		return g.schema.Package, nil
 	default:
 		return "", fmt.Errorf("can't extract reference package")
