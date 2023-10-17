@@ -92,7 +92,7 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 	})
 }
 
-func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders) (ast.Builder, error) {
+func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders, panelOptionsToExclude []string) (ast.Builder, error) {
 	newBuilder := ast.Builder{
 		Schema:      panelBuilder.Schema,
 		For:         panelBuilder.For,
@@ -124,6 +124,11 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 
 		// We don't need these options anymore since we're composing them.
 		if panelOpt.Name == "options" || panelOpt.Name == "custom" {
+			continue
+		}
+
+		// Is the option explicitly excluded?
+		if tools.ItemInList(panelOpt.Name, panelOptionsToExclude) {
 			continue
 		}
 
@@ -162,7 +167,7 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 	return newBuilder, nil
 }
 
-func ComposeDashboardPanel(selector Selector, panelBuilderName string) RewriteRule {
+func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOptionsToExclude []string) RewriteRule {
 	return func(builders ast.Builders) (ast.Builders, error) {
 		panelBuilderPkg, panelBuilderNameWithoutPkg, found := strings.Cut(panelBuilderName, ".")
 		if !found {
@@ -195,7 +200,7 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string) RewriteRu
 		}
 
 		for panelType, buildersForType := range composableBuilders {
-			composedBuilder, err := composePanelType(builders, panelType, panelBuilder, buildersForType)
+			composedBuilder, err := composePanelType(builders, panelType, panelBuilder, buildersForType, panelOptionsToExclude)
 			if err != nil {
 				return nil, err
 			}
