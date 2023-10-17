@@ -15,6 +15,11 @@ import (
 func kindsysComposableLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
+	libraries, err := opts.cueIncludeImports()
+	if err != nil {
+		return nil, err
+	}
+
 	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysComposableEntrypoints))
 	for _, entrypoint := range opts.KindsysComposableEntrypoints {
 		pkg := filepath.Base(entrypoint)
@@ -57,6 +62,7 @@ func kindsysComposableLoader(opts Options) ([]*ast.Schema, error) {
 				Variant:    variant,
 				Identifier: inferComposableKindIdentifier(props),
 			},
+			Libraries: libraries,
 		})
 		if err != nil {
 			return nil, err

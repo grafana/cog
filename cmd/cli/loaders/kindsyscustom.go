@@ -14,6 +14,11 @@ import (
 func kindsysCustomLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
+	libraries, err := opts.cueIncludeImports()
+	if err != nil {
+		return nil, err
+	}
+
 	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysCustomEntrypoints))
 	for _, entrypoint := range opts.KindsysCustomEntrypoints {
 		pkg := filepath.Base(entrypoint)
@@ -49,6 +54,7 @@ func kindsysCustomLoader(opts Options) ([]*ast.Schema, error) {
 				Kind:       ast.SchemaKindCore, // TODO: is there any need for a "SchemaKindCustom"?
 				Identifier: pkg,                // TODO: maybe even core kinds could have one explicitly set in their schema?
 			},
+			Libraries: libraries,
 		})
 		if err != nil {
 			return nil, err

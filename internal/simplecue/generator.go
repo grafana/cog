@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
-	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
 	"cuelang.org/go/pkg/strconv"
 	"github.com/grafana/cog/internal/ast"
@@ -17,6 +16,11 @@ const hintKindEnum = "enum"
 const annotationKindFieldName = "kind"
 const enumMembersAttr = "memberNames"
 
+type LibraryInclude struct {
+	FSPath     string // path of the library on the filesystem
+	ImportPath string // path used in CUE files to import that library
+}
+
 type Config struct {
 	// Package name used to generate code into.
 	Package string
@@ -25,11 +29,13 @@ type Config struct {
 	ForceVariantEnvelope bool
 
 	SchemaMetadata ast.SchemaMeta
+
+	Libraries []LibraryInclude
 }
 
 type generator struct {
-	schema          *ast.Schema
-	importsAliasMap map[string]string
+	schema      *ast.Schema
+	refResolver *referenceResolver
 }
 
 func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
@@ -38,7 +44,9 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 			Package:  c.Package,
 			Metadata: c.SchemaMetadata,
 		},
-		importsAliasMap: buildImportsAliasMap(val),
+		refResolver: newReferenceResolver(val, referenceResolverConfig{
+			Libraries: c.Libraries,
+		}),
 	}
 
 	if c.ForceVariantEnvelope {
@@ -253,77 +261,6 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 	return fields, nil
 }
 
-// FIXME: this is probably very brittle and not always correct :|
-func (g *generator) referencePackage(source cueast.Node) (string, error) {
-	switch source.(type) { //nolint: gocritic
-	case *cueast.SelectorExpr:
-		selector := source.(*cueast.SelectorExpr)
-
-		x := selector.X.(*cueast.Ident)
-
-		return g.resolveImportAlias(x.Name), nil
-	case *cueast.Field:
-		field := source.(*cueast.Field)
-
-		if _, ok := field.Value.(*cueast.SelectorExpr); ok {
-			return g.referencePackage(field.Value)
-		}
-
-		ident := field.Value.(*cueast.Ident)
-
-		if ident.Scope == nil {
-			return g.schema.Package, nil
-		}
-
-		if _, ok := ident.Scope.(*cueast.File); !ok {
-			return g.schema.Package, nil
-		}
-
-		scope := ident.Scope.(*cueast.File)
-		if len(scope.Decls) == 0 {
-			return g.schema.Package, nil
-		}
-
-		if _, ok := scope.Decls[0].(*cueast.Package); !ok {
-			return g.schema.Package, nil
-		}
-
-		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
-
-		return g.resolveImportAlias(referredTypePkg.Name), nil
-	case *cueast.Ident:
-		ident := source.(*cueast.Ident)
-		if ident.Scope == nil {
-			return g.schema.Package, nil
-		}
-
-		if _, ok := ident.Scope.(*cueast.File); !ok {
-			return g.schema.Package, nil
-		}
-
-		scope := ident.Scope.(*cueast.File)
-		if len(scope.Decls) == 0 {
-			return g.schema.Package, nil
-		}
-
-		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
-
-		return g.resolveImportAlias(referredTypePkg.Name), nil
-	case *cueast.Ellipsis:
-		if source.(*cueast.Ellipsis).Type == nil {
-			return g.schema.Package, nil
-		}
-
-		if _, ok := source.(*cueast.Ellipsis).Type.(*cueast.SelectorExpr); ok {
-			return g.referencePackage(source.(*cueast.Ellipsis).Type)
-		}
-
-		return g.schema.Package, nil
-	default:
-		return "", fmt.Errorf("can't extract reference package")
-	}
-}
-
 func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	v = g.removeTautologicalUnification(v)
 
@@ -332,7 +269,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	if path.String() != "" {
 		selectors := path.Selectors()
 
-		refPkg, err := g.referencePackage(v.Source())
+		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
 		if err != nil {
 			return ast.Type{}, errorWithCueRef(v, err.Error())
 		}
@@ -769,12 +706,4 @@ func (g *generator) removeTautologicalUnification(v cue.Value) cue.Value {
 	}
 
 	return v
-}
-
-func (g *generator) resolveImportAlias(alias string) string {
-	if resolved, found := g.importsAliasMap[alias]; found {
-		return resolved
-	}
-
-	return alias
 }

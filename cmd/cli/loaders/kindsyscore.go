@@ -17,6 +17,11 @@ import (
 func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
 	themaRuntime := thema.NewRuntime(cuecontext.New())
 
+	libraries, err := opts.cueIncludeImports()
+	if err != nil {
+		return nil, err
+	}
+
 	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysCoreEntrypoints))
 	for _, entrypoint := range opts.KindsysCoreEntrypoints {
 		pkg := filepath.Base(entrypoint)
@@ -52,6 +57,7 @@ func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
 				Kind:       ast.SchemaKindCore,
 				Identifier: pkg, // TODO: maybe even core kinds could have one explicitly set in their schema?
 			},
+			Libraries: libraries,
 		})
 		if err != nil {
 			return nil, err
