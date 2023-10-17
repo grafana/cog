@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/simplecue"
 )
 
 type LoaderRef string
@@ -31,11 +32,6 @@ func loadersMap() map[LoaderRef]Loader {
 	}
 }
 
-type cueIncludeImport struct {
-	fsPath     string // path of the library on the filesystem
-	importPath string // path used in CUE files to import that library
-}
-
 type Loader func(opts Options) ([]*ast.Schema, error)
 
 type Options struct {
@@ -54,20 +50,22 @@ type Options struct {
 	KindRegistryVersion string
 }
 
-func (opts Options) cueIncludeImports() ([]cueIncludeImport, error) {
+func (opts Options) cueIncludeImports() ([]simplecue.LibraryInclude, error) {
 	if len(opts.CueImports) == 0 {
 		return nil, nil
 	}
 
-	imports := make([]cueIncludeImport, len(opts.CueImports))
+	imports := make([]simplecue.LibraryInclude, len(opts.CueImports))
 	for i, importDefinition := range opts.CueImports {
 		parts := strings.Split(importDefinition, ":")
 		if len(parts) != 2 {
 			return nil, fmt.Errorf("'%s' is not a valid import definition", importDefinition)
 		}
 
-		imports[i].fsPath = parts[0]
-		imports[i].importPath = parts[1]
+		imports[i] = simplecue.LibraryInclude{
+			FSPath:     parts[0],
+			ImportPath: parts[1],
+		}
 	}
 
 	return imports, nil
