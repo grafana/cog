@@ -1,0 +1,323 @@
+-- discriminator.json --
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "discriminator",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Discriminator": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "only-property": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Value1"
+              },
+              {
+                "$ref": "#/components/schemas/Value2"
+              },
+              {
+                "$ref": "#/components/schemas/Value3"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "discriminator"
+            }
+          },
+          "no-discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Value1"
+              },
+              {
+                "$ref": "#/components/schemas/Value2"
+              },
+              {
+                "$ref": "#/components/schemas/Value3"
+              }
+            ]
+          },
+          "mapping": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Value1"
+              },
+              {
+                "$ref": "#/components/schemas/Value2"
+              },
+              {
+                "$ref": "#/components/schemas/Value3"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "value1": "#/components/schemas/Value1",
+                "value2": "#/components/schemas/Value2",
+                "value3": "#/components/schemas/Value3"
+              }
+            }
+          },
+        }
+      },
+      "Value1": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value1"
+          }
+        }
+      },
+      "Value2": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value2"
+          }
+        }
+      },
+      "Value3": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value3"
+          }
+        }
+      }
+    }
+  }
+}
+
+-- out/openapi/GenerateAST --
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Discriminator",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "mapping",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value1"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value2"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value3"
+                      }
+                    }
+                  ],
+                  "Discriminator": "type",
+                  "DiscriminatorMapping": {
+                    "value1": "#/components/schemas/Value1",
+                    "value2": "#/components/schemas/Value2",
+                    "value3": "#/components/schemas/Value3"
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "no-discriminator",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value1"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value2"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value3"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "only-property",
+              "Comments": [],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value1"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value2"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value3"
+                      }
+                    }
+                  ],
+                  "Discriminator": "discriminator"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Discriminator"
+      }
+    },
+    {
+      "Name": "Value1",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value1",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value1"
+      }
+    },
+    {
+      "Name": "Value2",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value2",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value2"
+      }
+    },
+    {
+      "Name": "Value3",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value3",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value3"
+      }
+    }
+  ]
+}
