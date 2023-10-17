@@ -49,22 +49,22 @@ func (pass *AnonymousEnumToExplicitType) processObject(object ast.Object) ast.Ob
 	}
 
 	newObject := object
-	newObject.Type = pass.processType(object.Name, object.Type)
+	newObject.Type = pass.processType(object.Name, tools.UpperCamelCase(object.Name)+"Enum", object.Type)
 
 	return newObject
 }
 
-func (pass *AnonymousEnumToExplicitType) processType(parentName string, def ast.Type) ast.Type {
+func (pass *AnonymousEnumToExplicitType) processType(currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
 	if def.Kind == ast.KindArray {
-		return pass.processArray(parentName, def.AsArray())
+		return pass.processArray(currentObjectName, suggestedEnumName, def.AsArray())
 	}
 
 	if def.Kind == ast.KindStruct {
-		return pass.processStruct(def.AsStruct())
+		return pass.processStruct(currentObjectName, def.AsStruct())
 	}
 
 	if def.Kind == ast.KindEnum {
-		return pass.processAnonymousEnum(parentName, def.AsEnum())
+		return pass.processAnonymousEnum(suggestedEnumName, def.AsEnum())
 	}
 
 	// TODO: do the same for disjunctions?
@@ -72,17 +72,17 @@ func (pass *AnonymousEnumToExplicitType) processType(parentName string, def ast.
 	return def
 }
 
-func (pass *AnonymousEnumToExplicitType) processArray(parentName string, def ast.ArrayType) ast.Type {
-	return ast.NewArray(pass.processType(parentName, def.ValueType))
+func (pass *AnonymousEnumToExplicitType) processArray(currentObjectName string, suggestedEnumName string, def ast.ArrayType) ast.Type {
+	return ast.NewArray(pass.processType(currentObjectName, suggestedEnumName, def.ValueType))
 }
 
-func (pass *AnonymousEnumToExplicitType) processStruct(def ast.StructType) ast.Type {
+func (pass *AnonymousEnumToExplicitType) processStruct(parentName string, def ast.StructType) ast.Type {
 	processedFields := make([]ast.StructField, 0, len(def.Fields))
 	for _, field := range def.Fields {
 		processedFields = append(processedFields, ast.StructField{
 			Name:     field.Name,
 			Comments: field.Comments,
-			Type:     pass.processType(field.Name, field.Type),
+			Type:     pass.processType(parentName, tools.UpperCamelCase(parentName)+tools.UpperCamelCase(field.Name), field.Type),
 			Required: field.Required,
 		})
 	}
@@ -91,13 +91,13 @@ func (pass *AnonymousEnumToExplicitType) processStruct(def ast.StructType) ast.T
 }
 
 func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(parentName string, def ast.EnumType) ast.Type {
-	enumTypeName := tools.UpperCamelCase(parentName) + "Enum"
+	enumTypeName := tools.UpperCamelCase(parentName)
 
 	values := make([]ast.EnumValue, 0, len(def.Values))
 	for _, val := range def.Values {
 		values = append(values, ast.EnumValue{
 			Type:  val.Type,
-			Name:  parentName + tools.UpperCamelCase(val.Name),
+			Name:  tools.UpperCamelCase(val.Name),
 			Value: val.Value,
 		})
 	}

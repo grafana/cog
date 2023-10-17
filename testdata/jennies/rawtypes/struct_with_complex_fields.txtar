@@ -76,7 +76,7 @@
                             }
                         },
                         {
-                            "Name": "FieldAnonymousEnum",
+                            "Name": "Operator",
                             "Required": true,
                             "Type": {
                                 "Kind": "enum",
@@ -184,7 +184,7 @@ export interface SomeStruct {
 	FieldDisjunctionOfScalars: string | boolean;
 	FieldMixedDisjunction: string | SomeOtherStruct;
 	FieldDisjunctionWithNull: string | null;
-	FieldAnonymousEnum: ">" | "<";
+	Operator: ">" | "<";
 	FieldArrayOfStrings: string[];
 	FieldMapOfStringToString: Record<string, string>;
 	FieldAnonymousStruct: {
@@ -197,7 +197,7 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	FieldDisjunctionOfScalars: "",
 	FieldMixedDisjunction: "",
 	FieldDisjunctionWithNull: "",
-	FieldAnonymousEnum: ">",
+	Operator: ">",
 	FieldArrayOfStrings: [],
 	FieldMapOfStringToString: {},
 	FieldAnonymousStruct: {
@@ -223,7 +223,7 @@ type SomeStruct struct {
 	FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars"`
 	FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction"`
 	FieldDisjunctionWithNull *string `json:"FieldDisjunctionWithNull"`
-	FieldAnonymousEnum FieldAnonymousEnumEnum `json:"FieldAnonymousEnum"`
+	Operator SomeStructOperator `json:"Operator"`
 	FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
 	FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
 	FieldAnonymousStruct struct {
@@ -235,10 +235,10 @@ type SomeOtherStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-type FieldAnonymousEnumEnum string
+type SomeStructOperator string
 const (
-	FieldAnonymousEnumEnumFieldAnonymousEnumGreaterThan FieldAnonymousEnumEnum = ">"
-	FieldAnonymousEnumEnumFieldAnonymousEnumLessThan FieldAnonymousEnumEnum = "<"
+	SomeStructOperatorGreaterThan SomeStructOperator = ">"
+	SomeStructOperatorLessThan SomeStructOperator = "<"
 )
 
 
