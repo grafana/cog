@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
@@ -204,6 +205,38 @@ func TestRefs(t *testing.T) {
 	}
 }
 
+func TestDiscriminator(t *testing.T) {
+	f, err := GenerateAST(testFolder+"discriminator.json", Config{Package: "discriminator"})
+	require.NoError(t, err)
+
+	def := f.LocateObject("Discriminator")
+	assert.Equal(t, def.Type.Kind, ast.KindStruct)
+
+	structType := def.Type.AsStruct()
+
+	fmt.Printf("%v\n", structType)
+
+	testCases := []field{
+		{
+			name:          "value",
+			kind:          ast.KindDisjunction,
+			required:      true,
+			discriminator: "discriminator",
+		},
+		{
+			name:          "no-discriminator",
+			kind:          ast.KindDisjunction,
+			discriminator: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			validateFields(t, structType, tc)
+		})
+	}
+}
+
 type field struct {
 	name          string
 	kind          ast.Kind
@@ -214,6 +247,7 @@ type field struct {
 	enumValues    []ast.EnumValue
 	refType       string
 	arrayTypeKind ast.Kind
+	discriminator string
 }
 
 func validateFields(t *testing.T, s ast.StructType, f field) {
@@ -242,5 +276,7 @@ func validateKind(t *testing.T, tp ast.Type, f field) {
 	case ast.KindArray:
 		assert.Equal(t, tp.AsArray().ValueType.Kind, f.arrayTypeKind)
 		validateKind(t, tp.AsArray().ValueType, f)
+	case ast.KindDisjunction:
+		assert.Equal(t, tp.AsDisjunction().Discriminator, f.discriminator)
 	}
 }

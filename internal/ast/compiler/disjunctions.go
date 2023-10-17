@@ -430,14 +430,15 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def
 		if field.Type.Kind != ast.KindScalar {
 			return nil, fmt.Errorf("discriminator field is not a scalar: %w", ErrCanNotInferDiscriminator)
 		}
-		if !field.Type.AsScalar().IsConcrete() {
+
+		switch {
+		case field.Type.AsScalar().IsConcrete():
+			mapping[field.Type.AsScalar().Value.(string)] = typeName
+		case field.Type.Default != nil:
+			mapping[field.Type.Default.(string)] = typeName
+		default:
 			return nil, fmt.Errorf("discriminator field is not concrete: %w", ErrCanNotInferDiscriminator)
 		}
-		if field.Type.AsScalar().ScalarKind != ast.KindString {
-			return nil, fmt.Errorf("discriminator field is not a string: %w", ErrCanNotInferDiscriminator)
-		}
-
-		mapping[field.Type.AsScalar().Value.(string)] = typeName
 	}
 
 	return mapping, nil

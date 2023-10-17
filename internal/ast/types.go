@@ -181,6 +181,17 @@ func Value(value any) TypeOption {
 	}
 }
 
+func Discriminator(discriminator string, mapping map[string]string) TypeOption {
+	return func(def *Type) {
+		if def.Kind != KindDisjunction {
+			return
+		}
+
+		def.Disjunction.Discriminator = discriminator
+		def.Disjunction.DiscriminatorMapping = mapping
+	}
+}
+
 func Any() Type {
 	return NewScalar(KindAny)
 }

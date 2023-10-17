@@ -56,7 +56,9 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 }
 
 func CompilerPasses() []compiler.Pass {
-	return nil
+	return []compiler.Pass{
+		&compiler.PrefixEnumValues{},
+	}
 }
 
 func Veneers() *veneers.Rewriter {
