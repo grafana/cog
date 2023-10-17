@@ -7,10 +7,12 @@ import (
 	"cuelang.org/go/cue"
 	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
+	"cuelang.org/go/pkg/strconv"
 	"github.com/grafana/cog/internal/ast"
 )
 
-const annotationName = "cog"
+const cogAnnotationName = "cog"
+const cuetsyAnnotationName = "cuetsy"
 const hintKindEnum = "enum"
 const annotationKindFieldName = "kind"
 const enumMembersAttr = "memberNames"
@@ -39,11 +41,11 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 
 	if c.ForceVariantEnvelope {
 		if err := g.walkCueSchemaWithVariantEnvelope(val); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	} else {
 		if err := g.walkCueSchema(val); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	}
 
@@ -113,21 +115,12 @@ func (g *generator) walkCueSchema(v cue.Value) error {
 }
 
 func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) {
-	typeHint, err := getTypeHint(v)
+	// Try to guess if `v` can be represented as an enum
+	implicitEnum, err := isImplicitEnum(v)
 	if err != nil {
 		return ast.Object{}, err
 	}
-
-	// Hinted as an enum
-	if typeHint == hintKindEnum {
-		return g.declareEnum(name, v)
-	}
-
-	ik := v.IncompleteKind()
-
-	// Is it a string disjunction that we can turn into an enum?
-	disjunctions := appendSplit(nil, cue.OrOp, v)
-	if len(disjunctions) != 1 && ik&cue.StringKind == ik {
+	if implicitEnum {
 		return g.declareEnum(name, v)
 	}
 
@@ -150,19 +143,12 @@ func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) 
 }
 
 func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
-	// Restrict the expression of enums to ints or strings.
-	allowed := cue.StringKind | cue.IntKind
-	ik := v.IncompleteKind()
-	if ik&allowed != ik {
-		return ast.Object{}, errorWithCueRef(v, "enums may only be generated from concrete strings, or ints")
-	}
-
-	values, err := g.extractEnumValues(v)
+	defVal, err := g.extractDefault(v)
 	if err != nil {
 		return ast.Object{}, err
 	}
 
-	defVal, err := g.extractDefault(v)
+	enumType, err := g.declareAnonymousEnum(v, defVal, hintsFromCueValue(v))
 	if err != nil {
 		return ast.Object{}, err
 	}
@@ -170,7 +156,7 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 	return ast.Object{
 		Name:     name,
 		Comments: commentsFromCueValue(v),
-		Type:     ast.NewEnum(values, ast.Default(defVal)),
+		Type:     enumType,
 		SelfRef: ast.RefType{
 			ReferredPkg:  g.schema.Package,
 			ReferredType: name,
@@ -180,7 +166,11 @@ func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
 
 func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 	_, dvals := v.Expr()
-	a := v.Attribute(annotationName)
+	a := v.Attribute(cogAnnotationName)
+	// try to fall-back on the cuetsy annotation
+	if a.Err() != nil {
+		a = v.Attribute(cuetsyAnnotationName)
+	}
 
 	var attrMemberNameExist bool
 	var evals []string
@@ -292,6 +282,10 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 			return g.schema.Package, nil
 		}
 
+		if _, ok := scope.Decls[0].(*cueast.Package); !ok {
+			return g.schema.Package, nil
+		}
+
 		referredTypePkg := scope.Decls[0].(*cueast.Package).Name
 
 		return referredTypePkg.Name, nil
@@ -321,6 +315,8 @@ func (g *generator) referencePackage(source cueast.Node) (string, error) {
 }
 
 func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
+	v = g.removeTautologicalUnification(v)
+
 	// This node is referring to another definition
 	_, path := v.ReferencePath()
 	if path.String() != "" {
@@ -342,16 +338,25 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		return ast.Type{}, err
 	}
 
-	disjunctions := appendSplit(nil, cue.OrOp, v)
-	if len(disjunctions) != 1 {
-		allowedKindsForAnonymousEnum := cue.StringKind | cue.IntKind
-		ik := v.IncompleteKind()
-		if ik&allowedKindsForAnonymousEnum == ik {
-			return g.declareAnonymousEnum(v, defVal)
+	hints := hintsFromCueValue(v)
+
+	op, disjunctionBranches := v.Expr()
+	// Possible cases:
+	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
+	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
+	if op == cue.OrOp && len(disjunctionBranches) > 1 {
+		// Try to guess if `v` can be represented as an enum (includes checking for a type hint) (1)
+		implicitEnum, err := isImplicitEnum(v)
+		if err != nil {
+			return ast.Type{}, err
+		}
+		if implicitEnum {
+			return g.declareAnonymousEnum(v, defVal, hints)
 		}
 
-		branches := make([]ast.Type, 0, len(disjunctions))
-		for _, subTypeValue := range disjunctions {
+		// We must be looking at a disjunction then (2)
+		branches := make([]ast.Type, 0, len(disjunctionBranches))
+		for _, subTypeValue := range disjunctionBranches {
 			subType, err := g.declareNode(subTypeValue)
 			if err != nil {
 				return ast.Type{}, err
@@ -360,7 +365,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			branches = append(branches, subType)
 		}
 
-		return ast.NewDisjunction(branches), nil
+		return ast.NewDisjunction(branches, ast.Default(defVal), ast.Hints(hints)), nil
 	}
 
 	switch v.IncompleteKind() {
@@ -369,15 +374,15 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.NullKind:
 		return ast.Null(), nil
 	case cue.BoolKind:
-		return ast.Bool(ast.Default(defVal)), nil
+		return ast.Bool(ast.Default(defVal), ast.Hints(hints)), nil
 	case cue.BytesKind:
-		return ast.Bytes(ast.Default(defVal)), nil
+		return ast.Bytes(ast.Default(defVal), ast.Hints(hints)), nil
 	case cue.StringKind:
-		return g.declareString(v, defVal)
+		return g.declareString(v, defVal, hints)
 	case cue.FloatKind, cue.NumberKind, cue.IntKind:
-		return g.declareNumber(v, defVal)
+		return g.declareNumber(v, defVal, hints)
 	case cue.ListKind:
-		return g.declareList(v)
+		return g.declareList(v, hints)
 	case cue.StructKind:
 		// in cue: {...}, {[string]: type}, or inline struct
 		if op, _ := v.Expr(); op == cue.NoOp {
@@ -388,7 +393,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 					return ast.Type{}, err
 				}
 
-				return ast.NewMap(ast.String(), typeDef), nil
+				return ast.NewMap(ast.String(), typeDef, ast.Hints(hints)), nil
 			}
 		}
 
@@ -408,7 +413,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	}
 }
 
-func (g *generator) declareAnonymousEnum(v cue.Value, defValue any) (ast.Type, error) {
+func (g *generator) declareAnonymousEnum(v cue.Value, defValue any, hints ast.JenniesHints) (ast.Type, error) {
 	allowed := cue.StringKind | cue.IntKind
 	ik := v.IncompleteKind()
 	if ik&allowed != ik {
@@ -420,11 +425,11 @@ func (g *generator) declareAnonymousEnum(v cue.Value, defValue any) (ast.Type, e
 		return ast.Type{}, err
 	}
 
-	return ast.NewEnum(values, ast.Default(defValue)), nil
+	return ast.NewEnum(values, ast.Default(defValue), ast.Hints(hints)), nil
 }
 
-func (g *generator) declareString(v cue.Value, defVal any) (ast.Type, error) {
-	typeDef := ast.String(ast.Default(defVal))
+func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
+	typeDef := ast.String(ast.Default(defVal), ast.Hints(hints))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
@@ -525,7 +530,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 	return constraints, nil
 }
 
-func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
+func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
 	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
 	if err != nil {
 		return ast.Type{}, err
@@ -536,27 +541,44 @@ func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 	}
 
 	// dirty way of preserving the actual type from cue
-	// FIXME: fails if the type has a custom bound that further restricts the values
-	// IE: uint8 & < 12 will be printed as "uint & < 12
+	// note that CUE has predefined "types": https://cuelang.org/docs/tutorials/tour/types/bounddef/
 	var numberType ast.ScalarKind
-	switch ast.ScalarKind(parts[0]) {
-	case ast.KindFloat32, ast.KindFloat64:
-		numberType = ast.ScalarKind(parts[0])
-	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
-		numberType = ast.ScalarKind(parts[0])
-	case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
-		numberType = ast.ScalarKind(parts[0])
-	case "uint":
-		numberType = ast.KindUint64
-	case "int":
-		numberType = ast.KindInt64
-	case "number":
-		numberType = ast.KindFloat64
-	default:
-		return ast.Type{}, errorWithCueRef(v, "unknown number type '%s'", parts[0])
+	for _, numberTypeCandidate := range parts {
+		switch ast.ScalarKind(numberTypeCandidate) {
+		case ast.KindFloat32, ast.KindFloat64:
+			numberType = ast.ScalarKind(numberTypeCandidate)
+		case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64:
+			numberType = ast.ScalarKind(numberTypeCandidate)
+		case ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
+			numberType = ast.ScalarKind(numberTypeCandidate)
+		case "uint":
+			numberType = ast.KindUint64
+		case "int":
+			numberType = ast.KindInt64
+		case "float":
+			numberType = ast.KindFloat64
+		case "number":
+			numberType = ast.KindFloat64
+		}
 	}
 
-	typeDef := ast.NewScalar(numberType, ast.Default(defVal))
+	// the heuristic above will likely fail for concrete numbers, so let's handle them explicitly
+	if numberType == "" && v.IsConcrete() {
+		switch v.Kind() {
+		case cue.FloatKind:
+			numberType = ast.KindFloat64
+		case cue.IntKind:
+			numberType = ast.KindInt64
+		case cue.NumberKind:
+			numberType = ast.KindFloat64
+		}
+	}
+
+	if numberType == "" {
+		return ast.Type{}, errorWithCueRef(v, "could not infer number type from expression '%s'", numberTypeWithConstraintsAsString)
+	}
+
+	typeDef := ast.NewScalar(numberType, ast.Default(defVal), ast.Hints(hints))
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
@@ -571,11 +593,6 @@ func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 	// If the default (all lists have a default, usually self, ugh) differs from the
 	// input list, peel it off. Otherwise our AnyIndex lookup may end up getting
 	// sent on the wrong path.
-	defv, _ := v.Default()
-	if !defv.Equals(v) {
-		_, dvals := v.Expr()
-		v = dvals[0]
-	}
 
 	// extract constraints
 	constraints, err := g.declareNumberConstraints(v)
@@ -588,77 +605,97 @@ func (g *generator) declareNumber(v cue.Value, defVal any) (ast.Type, error) {
 	return typeDef, nil
 }
 
+// having written this makes my soul hurt.
 func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
-	// typeAndConstraints can contain the following cue expressions:
-	// 	- number
-	// 	- int|float, number, upper bound, lower bound
-	typeAndConstraints := appendSplit(nil, cue.AndOp, v)
-
-	// nothing to do
-	if len(typeAndConstraints) == 1 {
-		return nil, nil
+	// if the number has a default value, strip it from `v` before trying to extract constraints.
+	_, hasDefault := v.Default()
+	if hasDefault {
+		_, dvals := v.Expr()
+		v = dvals[0]
 	}
 
-	constraints := make([]ast.TypeConstraint, 0, len(typeAndConstraints))
-
-	constraintsStartIndex := 1
-
-	// don't include type-related constraints
-	if len(typeAndConstraints) > 1 && typeAndConstraints[0].IncompleteKind() != cue.NumberKind {
-		constraintsStartIndex = 3
+	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
+	if err != nil {
+		return nil, err
 	}
 
-	for _, s := range typeAndConstraints[constraintsStartIndex:] {
-		constraint, err := g.extractConstraint(s)
-		if err != nil {
-			return nil, err
+	parts := strings.Split(string(numberTypeWithConstraintsAsString), " & ")
+
+	extractOperatorAndArg := func(input string, numberKind cue.Kind) (ast.Op, any, error) {
+		argStartIndex := -1
+
+		var op ast.Op
+
+		if input[0] == '>' {
+			op = ast.GreaterThanOp
+			argStartIndex = 1
+
+			if input[1] == '=' {
+				op = ast.GreaterThanEqualOp
+				argStartIndex = 2
+			}
+		}
+		if input[0] == '<' {
+			op = ast.LessThanOp
+			argStartIndex = 1
+
+			if input[1] == '=' {
+				op = ast.LessThanEqualOp
+				argStartIndex = 2
+			}
+		}
+		if input[0] == '=' && input[1] == '=' {
+			op = ast.EqualOp
+			argStartIndex = 2
+		}
+		if input[0] == '!' && input[1] == '=' {
+			op = ast.NotEqualOp
+			argStartIndex = 2
 		}
 
-		constraints = append(constraints, constraint)
+		if op == "" {
+			return op, nil, fmt.Errorf("could not infer operator from '%s'", input)
+		}
+
+		if numberKind.IsAnyOf(cue.FloatKind) {
+			arg, err := strconv.ParseFloat(input[argStartIndex:], 64)
+			return op, arg, err
+		}
+
+		arg, err := strconv.ParseInt(input[argStartIndex:], 10, 64)
+		return op, arg, err
+	}
+
+	var constraints []ast.TypeConstraint
+	for _, part := range parts {
+		if part[0] != '<' && part[0] != '>' {
+			continue
+		}
+
+		op, arg, err := extractOperatorAndArg(part, v.IncompleteKind())
+		if err != nil {
+			return nil, errorWithCueRef(v, err.Error())
+		}
+
+		constraints = append(constraints, ast.TypeConstraint{
+			Op:   op,
+			Args: []any{arg},
+		})
 	}
 
 	return constraints, nil
 }
 
-func (g *generator) extractConstraint(v cue.Value) (ast.TypeConstraint, error) {
-	toConstraint := func(operator ast.Op, arg cue.Value) (ast.TypeConstraint, error) {
-		scalar, err := cueConcreteToScalar(arg)
-		if err != nil {
-			return ast.TypeConstraint{}, err
-		}
-
-		return ast.TypeConstraint{
-			Op:   operator,
-			Args: []any{scalar},
-		}, nil
-	}
-
-	switch op, a := v.Expr(); op {
-	case cue.LessThanOp:
-		return toConstraint(ast.LessThanOp, a[0])
-	case cue.LessThanEqualOp:
-		return toConstraint(ast.LessThanEqualOp, a[0])
-	case cue.GreaterThanOp:
-		return toConstraint(ast.GreaterThanOp, a[0])
-	case cue.GreaterThanEqualOp:
-		return toConstraint(ast.GreaterThanEqualOp, a[0])
-	case cue.NotEqualOp:
-		return toConstraint(ast.NotEqualOp, a[0])
-	default:
-		return ast.TypeConstraint{}, errorWithCueRef(v, "unsupported op for number %v", op)
-	}
-}
-
-func (g *generator) declareList(v cue.Value) (ast.Type, error) {
-	i, err := v.List()
-	if err != nil {
-		return ast.Type{}, err
-	}
-
-	typeDef := ast.NewArray(ast.Any())
+func (g *generator) declareList(v cue.Value, hints ast.JenniesHints) (ast.Type, error) {
+	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints))
 
 	// works only for a closed/concrete list
 	if v.IsConcrete() {
+		i, err := v.List()
+		if err != nil {
+			return ast.Type{}, err
+		}
+
 		// fixme: this is wrong
 		for i.Next() {
 			node, err := g.declareNode(i.Value())
@@ -697,4 +734,29 @@ func (g *generator) declareList(v cue.Value) (ast.Type, error) {
 	typeDef.Array.ValueType = expr
 
 	return typeDef, nil
+}
+
+// removeTautologicalUnification simplifies CUE unifications
+// that unify identical branches.
+// Ex: SomeType & SomeType → SomeType
+func (g *generator) removeTautologicalUnification(v cue.Value) cue.Value {
+	op, branches := v.Expr()
+
+	// not a unification
+	if op != cue.AndOp {
+		return v
+	}
+
+	// for now, we only simplify purely binary operations
+	if len(branches) != 2 {
+		return v
+	}
+
+	// If the branches mutually subsume each other, then they should be the same.
+	// In which case we pick only one and return it.
+	if branches[1].Subsume(branches[0]) == nil && branches[0].Subsume(branches[1]) == nil {
+		return branches[0]
+	}
+
+	return v
 }

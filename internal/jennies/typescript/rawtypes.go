@@ -97,10 +97,16 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, packageMapper)))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
-		if scalarType.IsConcrete() {
-			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", def.Name, formatScalar(scalarType.Value)))
+		typeValue := formatScalar(scalarType.Value)
+
+		if !scalarType.IsConcrete() || def.Type.Hints["kind"] == "type" {
+			if !scalarType.IsConcrete() {
+				typeValue = formatScalarKind(scalarType.ScalarKind)
+			}
+
+			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, typeValue))
 		} else {
-			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatScalarKind(scalarType.ScalarKind)))
+			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", def.Name, typeValue))
 		}
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
@@ -298,6 +304,10 @@ func defaultValueForObject(schema *ast.Schema, object ast.Object, packageMapper 
 }
 
 func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkgMapper) any {
+	if typeDef.Default != nil {
+		return typeDef.Default
+	}
+
 	switch typeDef.Kind {
 	case ast.KindDisjunction:
 		return defaultValueForType(schema, typeDef.AsDisjunction().Branches[0], packageMapper)

@@ -28,12 +28,12 @@ func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
 
 		cueInstance, err := kindsys.BuildInstance(themaRuntime.Context(), ".", "kind", overlayFS)
 		if err != nil {
-			return nil, fmt.Errorf("could not load kindsys instance: %w", err)
+			return nil, fmt.Errorf("could not load kindsys composable kind %s: %w", pkg, err)
 		}
 
 		props, err := kindsys.ToKindProps[kindsys.CoreProperties](cueInstance)
 		if err != nil {
-			return nil, fmt.Errorf("could not convert cue value to kindsys props: %w", err)
+			return nil, fmt.Errorf("could not convert cue value to kindsys core props: %w", err)
 		}
 
 		kindDefinition := kindsys.Def[kindsys.CoreProperties]{

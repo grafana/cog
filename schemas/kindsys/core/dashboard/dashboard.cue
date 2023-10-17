@@ -45,11 +45,11 @@ lineage: {
 				timezone?: string | *"browser"
 
 				// Whether a dashboard is editable or not.
-				editable: bool | *true
+				editable?: bool | *true
 
 				// Configuration of dashboard cursor sync behavior.
 				// Accepted values are 0 (sync turned off), 1 (shared crosshair), 2 (shared crosshair and tooltip).
-				graphTooltip: #DashboardCursorSync
+				graphTooltip?: #DashboardCursorSync
 
 				// Time range for dashboard.
 				// Accepted values are relative time strings like {from: 'now-6h', to: 'now'} or absolute time strings like {from: '2020-07-10T08:00:00.000Z', to: '2020-07-10T14:00:00.000Z'}.
@@ -223,11 +223,11 @@ lineage: {
 			// `0`: Never refresh the variable
 			// `1`: Queries the data source every time the dashboard loads.
 			// `2`: Queries the data source when the dashboard time range changes.
-			#VariableRefresh: 0 | 1 | 2 @cog(kind="enum",memberNames="never|onDashboardLoad|onTimeRangeChanged")
+			#VariableRefresh: 0 | 1 | 2 @cuetsy(kind="enum",memberNames="never|onDashboardLoad|onTimeRangeChanged")
 
 			// Determine if the variable shows on dashboard
 			// Accepted values are 0 (show label and value), 1 (show value only), 2 (show nothing).
-			#VariableHide: 0 | 1 | 2 @cog(kind="enum",memberNames="dontHide|hideLabel|hideVariable") @grafana(TSVeneer="type")
+			#VariableHide: 0 | 1 | 2 @cuetsy(kind="enum",memberNames="dontHide|hideLabel|hideVariable") @grafana(TSVeneer="type")
 
 			// Sort variable options
 			// Accepted values are:
@@ -238,7 +238,7 @@ lineage: {
 			// `4`: Numerical DESC
 			// `5`: Alphabetical Case Insensitive ASC
 			// `6`: Alphabetical Case Insensitive DESC
-			#VariableSort: 0 | 1 | 2 | 3 | 4 | 5 | 6 @cog(kind="enum",memberNames="disabled|alphabeticalAsc|alphabeticalDesc|numericalAsc|numericalDesc|alphabeticalCaseInsensitiveAsc|alphabeticalCaseInsensitiveDesc")
+			#VariableSort: 0 | 1 | 2 | 3 | 4 | 5 | 6 @cuetsy(kind="enum",memberNames="disabled|alphabeticalAsc|alphabeticalDesc|numericalAsc|numericalDesc|alphabeticalCaseInsensitiveAsc|alphabeticalCaseInsensitiveDesc")
 
 			// Ref to a DataSource instance
 			#DataSourceRef: {
@@ -305,7 +305,7 @@ lineage: {
 			// `continuous-purples`: Continuous Purple palette mode
 			// `shades`: Shades of a single color. Specify a single color, useful in an override rule.
 			// `fixed`: Fixed color mode. Specify a single color, useful in an override rule.
-			#FieldColorModeId: "thresholds" | "palette-classic" | "palette-classic-by-name" | "continuous-GrYlRd" | "continuous-RdYlGr" | "continuous-BlYlRd" | "continuous-YlRd" | "continuous-BlPu" | "continuous-YlBl" | "continuous-blues" | "continuous-reds" | "continuous-greens" | "continuous-purples" | "fixed" | "shades" @cog(kind="enum",memberNames="Thresholds|PaletteClassic|PaletteClassicByName|ContinuousGrYlRd|ContinuousRdYlGr|ContinuousBlYlRd|ContinuousYlRd|ContinuousBlPu|ContinuousYlBl|ContinuousBlues|ContinuousReds|ContinuousGreens|ContinuousPurples|Fixed|Shades") @grafanamaturity(NeedsExpertReview)
+			#FieldColorModeId: "thresholds" | "palette-classic" | "palette-classic-by-name" | "continuous-GrYlRd" | "continuous-RdYlGr" | "continuous-BlYlRd" | "continuous-YlRd" | "continuous-BlPu" | "continuous-YlBl" | "continuous-blues" | "continuous-reds" | "continuous-greens" | "continuous-purples" | "fixed" | "shades" @cuetsy(kind="enum",memberNames="Thresholds|PaletteClassic|PaletteClassicByName|ContinuousGrYlRd|ContinuousRdYlGr|ContinuousBlYlRd|ContinuousYlRd|ContinuousBlPu|ContinuousYlBl|ContinuousBlues|ContinuousReds|ContinuousGreens|ContinuousPurples|Fixed|Shades") @grafanamaturity(NeedsExpertReview)
 
 			// Defines how to assign a series color from "by value" color schemes. For example for an aggregated data points like a timeseries, the color can be assigned by the min, max or last value.
 			#FieldColorSeriesByMode: "min" | "max" | "last" @cuetsy(kind="type")
@@ -345,7 +345,7 @@ lineage: {
 			} @cuetsy(kind="interface") @grafanamaturity(NeedsExpertReview)
 
 			// Thresholds can either be `absolute` (specific number) or `percentage` (relative to min or max, it will be values between 0 and 1).
-			#ThresholdsMode: "absolute" | "percentage" @cog(kind="enum",memberNames="Absolute|Percentage")
+			#ThresholdsMode: "absolute" | "percentage" @cuetsy(kind="enum",memberNames="Absolute|Percentage")
 
 			// Thresholds configuration for the panel
 			#ThresholdsConfig: {
@@ -364,7 +364,7 @@ lineage: {
 			// `range`: Maps numerical ranges to a display text and color. For example, if a value is within a certain range, you can configure a range value mapping to display Low or High rather than the number.
 			// `regex`: Maps regular expressions to replacement text and a color. For example, if a value is www.example.com, you can configure a regex value mapping so that Grafana displays www and truncates the domain.
 			// `special`: Maps special values like Null, NaN (not a number), and boolean values like true and false to a display text and color. See SpecialValueMatch to see the list of special values. For example, you can configure a special value mapping so that null values appear as N/A.
-			#MappingType: "value" | "range" | "regex" | "special" @cog(kind="enum",memberNames="ValueToText|RangeToText|RegexToText|SpecialValue") @grafanamaturity(NeedsExpertReview)
+			#MappingType: "value" | "range" | "regex" | "special" @cuetsy(kind="enum",memberNames="ValueToText|RangeToText|RegexToText|SpecialValue") @grafanamaturity(NeedsExpertReview)
 
 			// Maps text values to a color or different display text and color.
 			// For example, you can configure a value mapping so that all instances of the value 10 appear as Perfection! rather than the number.
@@ -426,7 +426,7 @@ lineage: {
 			} @cuetsy(kind="interface") @grafanamaturity(NeedsExpertReview)
 
 			// Special value types supported by the `SpecialValueMap`
-			#SpecialValueMatch: "true" | "false" | "null" | "nan" | "null+nan" | "empty" @cog(kind="enum",memberNames="True|False|Null|NaN|NullAndNan|Empty")
+			#SpecialValueMatch: "true" | "false" | "null" | "nan" | "null+nan" | "empty" @cuetsy(kind="enum",memberNames="True|False|Null|NaN|NullAndNan|Empty")
 
 			// Result used as replacement with text and color when the value matches
 			#ValueMappingResult: {
@@ -458,7 +458,7 @@ lineage: {
 			// 0 for no shared crosshair or tooltip (default).
 			// 1 for shared crosshair.
 			// 2 for shared crosshair AND shared tooltip.
-			#DashboardCursorSync: *0 | 1 | 2 @cog(kind="enum",memberNames="Off|Crosshair|Tooltip")
+			#DashboardCursorSync: *0 | 1 | 2 @cuetsy(kind="enum",memberNames="Off|Crosshair|Tooltip")
 
 			// Schema for panel targets is specified by datasource
 			// plugins. We use a placeholder definition, which the Go
@@ -531,7 +531,7 @@ lineage: {
 				description?: string
 
 				// Whether to display the panel without a background.
-				transparent: bool | *false
+				transparent?: bool | *false
 
 				// The datasource used in all targets.
 				datasource?: #DataSourceRef
@@ -559,7 +559,7 @@ lineage: {
 				// List of transformations that are applied to the panel data before rendering.
 				// When there are multiple transformations, Grafana applies them in the order they are listed.
 				// Each transformation creates a result set that then passes on to the next transformation in the processing pipeline.
-				transformations: [...#DataTransformerConfig]
+				transformations?: [...#DataTransformerConfig]
 
 				// The min time interval setting defines a lower limit for the $__interval and $__interval_ms variables.
 				// This value must be formatted as a number followed by a valid time
@@ -590,12 +590,12 @@ lineage: {
 				libraryPanel?: #LibraryPanelRef
 
 				// It depends on the panel plugin. They are specified by the Options field in panel plugin schemas.
-				options: {
+				options?: {
 					...
 				} @grafanamaturity(NeedsExpertReview)
 
 				// Field options allow you to change how the data is displayed in your visualizations.
-				fieldConfig: #FieldConfigSource
+				fieldConfig?: #FieldConfigSource
 			} @cuetsy(kind="interface") @grafana(TSVeneer="type") @grafanamaturity(NeedsExpertReview)
 
 			// The data model used in Grafana, namely the data frame, is a columnar-oriented table structure that unifies both time series and table query results.

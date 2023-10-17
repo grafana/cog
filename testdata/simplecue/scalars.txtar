@@ -1,0 +1,184 @@
+# Defaults
+-- schema.cue --
+container: {
+    str: string
+    trueOrFalse: bool
+    anything: {...}
+    data: bytes
+
+    num_unit8: uint8
+    num_int8: int8
+    num_uint16: uint16
+    num_int16: int16
+    num_uint32: uint32
+    num_int32: int32
+    num_uint64: uint64
+    num_int64: int64
+}
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "str",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "trueOrFalse",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "anything",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "data",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bytes"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_unit8",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint8"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_int8",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int8"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_uint16",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint16"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_int16",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int16"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_uint32",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint32"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_int32",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int32"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_uint64",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_int64",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  ]
+}

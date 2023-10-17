@@ -2,7 +2,7 @@ package common
 
 HeatmapCalculationMode: "size" | "count" @cuetsy(kind="enum")
 
-HeatmapCellLayout: "le" | "ge" | "unknown" | "auto" @grok(kind="enum",memberNames="le|ge|unknown|auto")
+HeatmapCellLayout: "le" | "ge" | "unknown" | "auto" @cuetsy(kind="enum",memberNames="le|ge|unknown|auto")
 
 HeatmapCalculationBucketConfig: {
   // Sets the bucket calculation mode

@@ -25,7 +25,7 @@ func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) erro
 	}
 
 	switch discriminator {
-{{- range $typeName, $discriminatorValue := .hint.DiscriminatorMapping }}
+{{- range $discriminatorValue, $typeName := .hint.DiscriminatorMapping }}
     {{- if eq $discriminatorValue "cog_discriminator_catch_all" }}
     default:
     {{- else }}

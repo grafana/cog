@@ -37,7 +37,7 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	}
 
 	if err := oapi.Validate(context.Background()); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
 
 	g := &generator{
@@ -52,7 +52,7 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	}
 
 	if err := g.declareDefinition(oapi.Components.Schemas); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
 
 	return g.schema, nil
@@ -251,7 +251,7 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	return ast.NewEnum(enums, ast.Default(schema.Default)), nil
 }
 
-func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discriminator string, mapping map[string]any) (ast.Type, error) {
+func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discriminator string, mapping map[string]string) (ast.Type, error) {
 	typeDefs := make([]ast.Type, 0, len(schemaRefs))
 	for _, schemaRef := range schemaRefs {
 		def, err := g.walkSchemaRef(schemaRef)
@@ -265,14 +265,12 @@ func (g *generator) walkDisjunctions(schemaRefs []*openapi3.SchemaRef, discrimin
 	return ast.NewDisjunction(typeDefs, ast.Discriminator(discriminator, mapping)), nil
 }
 
-func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[string]any) {
+func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[string]string) {
 	name := ""
-	mapping := make(map[string]any)
+	mapping := make(map[string]string)
 	if schema.Discriminator != nil {
 		name = schema.Discriminator.PropertyName
-		for k, v := range schema.Discriminator.Mapping {
-			mapping[k] = v
-		}
+		mapping = schema.Discriminator.Mapping
 	}
 
 	return name, mapping

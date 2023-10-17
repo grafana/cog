@@ -103,7 +103,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
-	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = objects[0].Type.AsDisjunction()
+	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = objects[0].Type.AsDisjunction()
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewRef("test", "StringOrBool")),
@@ -132,7 +132,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAMapValueType(t *testing.T
 		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
-	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = objects[0].Type.AsMap().ValueType.AsDisjunction()
+	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = objects[0].Type.AsMap().ValueType.AsDisjunction()
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewMap(
@@ -164,7 +164,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T)
 		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
-	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
+	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "AStructWithADisjunctionOfScalars", ast.NewStruct(
@@ -195,7 +195,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsNullableAStructField(t *te
 		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
-	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
+	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "AStructWithADisjunctionOfScalars", ast.NewStruct(
@@ -224,7 +224,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testin
 		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
-	disjunctionStructType.Struct.Hint[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
+	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "AnArrayWithADisjunctionOfScalars", ast.NewArray(ast.NewRef("test", "StringOrBool"))),
@@ -388,11 +388,11 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 
 	// Metadata should be inferred
 	disjunctionTypeWithDiscriminatorMeta.Discriminator = "Type"
-	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]any{
-		"OtherStruct": "other-struct",
-		"SomeStruct":  "some-struct",
+	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
+		"other-struct": "OtherStruct",
+		"some-struct":  "SomeStruct",
 	}
-	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
+	disjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
@@ -441,11 +441,11 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 
 	// Metadata should be inferred
 	disjunctionTypeWithDiscriminatorMeta.Discriminator = "Kind"
-	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]any{
-		"OtherStruct": "other-kind",
-		"SomeStruct":  "some-kind",
+	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
+		"other-kind": "OtherStruct",
+		"some-kind":  "SomeStruct",
 	}
-	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
+	disjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
@@ -466,9 +466,9 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	})
 	// Add discriminator-related metadata to the disjunction
 	disjunctionType.Disjunction.Discriminator = "Kind"
-	disjunctionType.Disjunction.DiscriminatorMapping = map[string]any{
-		"OtherStruct": "other-kind",
-		"SomeStruct":  "some-kind",
+	disjunctionType.Disjunction.DiscriminatorMapping = map[string]string{
+		"other-kind": "OtherStruct",
+		"some-kind":  "SomeStruct",
 	}
 
 	objects := []ast.Object{
@@ -496,17 +496,97 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 
 	// Metadata should be inferred
 	disjunctionTypeWithDiscriminatorMeta.Discriminator = "Kind"
-	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]any{
-		"OtherStruct": "other-kind",
-		"SomeStruct":  "some-kind",
+	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
+		"other-kind": "OtherStruct",
+		"some-kind":  "SomeStruct",
 	}
-	disjunctionStructType.Struct.Hint[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
+	disjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
 		objects[1],
 		objects[2],
 		ast.NewObject("test", "SomeStructOrOtherStruct", disjunctionStructType),
+	}
+
+	// Call the compiler pass
+	runDisjunctionPass(t, objects, expectedObjects)
+}
+
+func TestDisjunctionToType_WithNestedDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata(t *testing.T) {
+	// Prepare test input
+	objects := []ast.Object{
+		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
+			ast.NewRef("test", "SomeOrOther"),
+			ast.NewRef("test", "LastStruct"),
+		})),
+
+		ast.NewObject("test", "SomeOrOther", ast.NewDisjunction([]ast.Type{
+			ast.NewRef("test", "SomeStruct"),
+			ast.NewRef("test", "OtherStruct"),
+		})),
+
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
+			ast.NewStructField("Type", ast.String(ast.Value("some-struct"))),
+			ast.NewStructField("FieldFoo", ast.String()),
+		)),
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
+			ast.NewStructField("FieldBar", ast.NewMap(ast.String(), ast.String())),
+			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
+		)),
+		ast.NewObject("test", "LastStruct", ast.NewStruct(
+			ast.NewStructField("FieldLast", ast.NewMap(ast.String(), ast.String())),
+			ast.NewStructField("Type", ast.String(ast.Value("last-struct"))),
+		)),
+	}
+
+	// Prepare expected output
+	fullDisjunctionStructType := ast.NewStruct(
+		ast.NewStructField("ValSomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
+		ast.NewStructField("ValOtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
+		ast.NewStructField("ValLastStruct", ast.NewRef("test", "LastStruct", ast.Nullable())),
+	)
+	// The original disjunction definition is preserved as a hint
+	disjunctionTypeWithDiscriminatorMeta := ast.DisjunctionType{
+		Branches: []ast.Type{
+			ast.NewRef("test", "SomeStruct"),
+			ast.NewRef("test", "OtherStruct"),
+			ast.NewRef("test", "LastStruct"),
+		},
+	}
+
+	// Metadata should be inferred
+	disjunctionTypeWithDiscriminatorMeta.Discriminator = "Type"
+	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
+		"other-struct": "OtherStruct",
+		"some-struct":  "SomeStruct",
+		"last-struct":  "LastStruct",
+	}
+	fullDisjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
+
+	partialDisjunctionStructType := ast.NewStruct(
+		ast.NewStructField("ValSomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
+		ast.NewStructField("ValOtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
+	)
+	// The original disjunction definition is preserved as a hint
+	partialDisjunctionTypeWithDiscriminatorMeta := objects[1].Type.AsDisjunction()
+
+	// Metadata should be inferred
+	partialDisjunctionTypeWithDiscriminatorMeta.Discriminator = "Type"
+	partialDisjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
+		"other-struct": "OtherStruct",
+		"some-struct":  "SomeStruct",
+	}
+	partialDisjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = partialDisjunctionTypeWithDiscriminatorMeta
+
+	expectedObjects := []ast.Object{
+		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStructOrLastStruct")),
+		ast.NewObject("test", "SomeOrOther", ast.NewRef("test", "SomeStructOrOtherStruct")),
+		objects[2],
+		objects[3],
+		objects[4],
+		ast.NewObject("test", "SomeStructOrOtherStruct", partialDisjunctionStructType),
+		ast.NewObject("test", "SomeStructOrOtherStructOrLastStruct", fullDisjunctionStructType),
 	}
 
 	// Call the compiler pass

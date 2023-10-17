@@ -1,40 +1,40 @@
 package common
 
 // TODO docs
-AxisPlacement:      "auto" | "top" | "right" | "bottom" | "left" | "hidden" @cog(kind="enum")
+AxisPlacement:      "auto" | "top" | "right" | "bottom" | "left" | "hidden" @cuetsy(kind="enum")
 
 // TODO docs
-AxisColorMode:      "text" | "series"                                       @cog(kind="enum")
+AxisColorMode:      "text" | "series"                                       @cuetsy(kind="enum")
 
 // TODO docs
-VisibilityMode:     "auto" | "never" | "always"                             @cog(kind="enum")
+VisibilityMode:     "auto" | "never" | "always"                             @cuetsy(kind="enum")
 
 // TODO docs
-GraphDrawStyle:     "line" | "bars" | "points"                              @cog(kind="enum")
+GraphDrawStyle:     "line" | "bars" | "points"                              @cuetsy(kind="enum")
 
 // TODO docs
-GraphTransform:     "constant" | "negative-Y"                               @cog(kind="enum",memberNames="Constant|NegativeY")
+GraphTransform:     "constant" | "negative-Y"                               @cuetsy(kind="enum",memberNames="Constant|NegativeY")
 
 // TODO docs
-LineInterpolation:  "linear" | "smooth" | "stepBefore" | "stepAfter"        @cog(kind="enum")
+LineInterpolation:  "linear" | "smooth" | "stepBefore" | "stepAfter"        @cuetsy(kind="enum")
 
 // TODO docs
-ScaleDistribution:  "linear" | "log" | "ordinal" | "symlog"                 @cog(kind="enum")
+ScaleDistribution:  "linear" | "log" | "ordinal" | "symlog"                 @cuetsy(kind="enum")
 
 // TODO docs
-GraphGradientMode:  "none" | "opacity" | "hue" | "scheme"                   @cog(kind="enum")
+GraphGradientMode:  "none" | "opacity" | "hue" | "scheme"                   @cuetsy(kind="enum")
 
 // TODO docs
-StackingMode:       "none" | "normal" | "percent"                           @cog(kind="enum")
+StackingMode:       "none" | "normal" | "percent"                           @cuetsy(kind="enum")
 
 // TODO docs
-BarAlignment:       -1 | 0 | 1                                              @cog(kind="enum",memberNames="Before|Center|After")
+BarAlignment:       -1 | 0 | 1                                              @cuetsy(kind="enum",memberNames="Before|Center|After")
 
 // TODO docs
-ScaleOrientation:   0 | 1                                                   @cog(kind="enum",memberNames="Horizontal|Vertical")
+ScaleOrientation:   0 | 1                                                   @cuetsy(kind="enum",memberNames="Horizontal|Vertical")
 
 // TODO docs
-ScaleDirection:     1 | 1 | -1 | -1                                         @cog(kind="enum",memberNames="Up|Right|Down|Left")
+ScaleDirection:     1 | 1 | -1 | -1                                         @cuetsy(kind="enum",memberNames="Up|Right|Down|Left")
 
 // TODO docs
 LineStyle: {
@@ -94,7 +94,8 @@ AxisConfig: {
 	axisSoftMax?:       number
 	axisGridShow?:      bool
 	scaleDistribution?: ScaleDistributionConfig
-	axisCenteredZero?:   bool
+	axisCenteredZero?:  bool
+	axisBorderShow?:    bool
 } @cuetsy(kind="interface")
 
 // TODO docs
@@ -121,7 +122,7 @@ HideableFieldConfig: {
 } @cuetsy(kind="interface")
 
 // TODO docs
-GraphTresholdsStyleMode: "off" | "line" | "dashed" | "area" | "line+area" | "dashed+area" | "series" @cog(kind="enum",memberNames="Off|Line|Dashed|Area|LineAndArea|DashedAndArea|Series")
+GraphTresholdsStyleMode: "off" | "line" | "dashed" | "area" | "line+area" | "dashed+area" | "series" @cuetsy(kind="enum",memberNames="Off|Line|Dashed|Area|LineAndArea|DashedAndArea|Series")
 
 // TODO docs
 GraphThresholdsStyleConfig: {
@@ -133,7 +134,7 @@ LegendPlacement: "bottom" | "right" @cuetsy(kind="type")
 
 // TODO docs
 // Note: "hidden" needs to remain as an option for plugins compatibility
-LegendDisplayMode: "list" | "table" | "hidden" @cog(kind="enum")
+LegendDisplayMode: "list" | "table" | "hidden" @cuetsy(kind="enum")
 
 // TODO docs
 SingleStatBaseOptions: {
@@ -155,7 +156,7 @@ ReduceDataOptions: {
 } @cuetsy(kind="interface")
 
 // TODO docs
-VizOrientation: "auto" | "vertical" | "horizontal" @cog(kind="enum")
+VizOrientation: "auto" | "vertical" | "horizontal" @cuetsy(kind="enum")
 
 // TODO docs
 OptionsWithTooltip: {
@@ -169,7 +170,7 @@ OptionsWithLegend: {
 
 // TODO docs
 OptionsWithTimezones: {
-	timezone?: [...string]
+	timezone?: [...TimeZone]
 } @cuetsy(kind="interface")
 
 // TODO docs
@@ -178,16 +179,16 @@ OptionsWithTextFormatting: {
 } @cuetsy(kind="interface")
 
 // TODO docs
-BigValueColorMode: "value" | "background" | "background_solid" | "none" @cog(kind="enum", memberNames="Value|Background|BackgroundSolid|None")
+BigValueColorMode: "value" | "background" | "background_solid" | "none" @cuetsy(kind="enum", memberNames="Value|Background|BackgroundSolid|None")
 
 // TODO docs
-BigValueGraphMode: "none" | "line" | "area" @cog(kind="enum")
+BigValueGraphMode: "none" | "line" | "area" @cuetsy(kind="enum")
 
 // TODO docs
-BigValueJustifyMode: "auto" | "center" @cog(kind="enum")
+BigValueJustifyMode: "auto" | "center" @cuetsy(kind="enum")
 
 // TODO docs
-BigValueTextMode: "auto" | "value" | "value_and_name" | "name" | "none" @cog(kind="enum",memberNames="Auto|Value|ValueAndName|Name|None")
+BigValueTextMode: "auto" | "value" | "value_and_name" | "name" | "none" @cuetsy(kind="enum",memberNames="Auto|Value|ValueAndName|Name|None")
 
 // TODO -- should not be table specific!
 // TODO docs
@@ -205,10 +206,10 @@ VizTextDisplayOptions: {
 } @cuetsy(kind="interface")
 
 // TODO docs
-TooltipDisplayMode: "single" | "multi" | "none" @cog(kind="enum")
+TooltipDisplayMode: "single" | "multi" | "none" @cuetsy(kind="enum")
 
 // TODO docs
-SortOrder: "asc" | "desc" | "none" @cog(kind="enum",memberNames="Ascending|Descending|None")
+SortOrder: "asc" | "desc" | "none" @cuetsy(kind="enum",memberNames="Ascending|Descending|None")
 
 // TODO docs
 GraphFieldConfig: {
@@ -240,10 +241,13 @@ VizLegendOptions: {
 
 // Enum expressing the possible display modes
 // for the bar gauge component of Grafana UI
-BarGaugeDisplayMode: "basic" | "lcd" | "gradient" @cog(kind="enum")
+BarGaugeDisplayMode: "basic" | "lcd" | "gradient" @cuetsy(kind="enum")
 
 // Allows for the table cell gauge display type to set the gauge mode.
-BarGaugeValueMode: "color" | "text" | "hidden" @cog(kind="enum")
+BarGaugeValueMode: "color" | "text" | "hidden" @cuetsy(kind="enum")
+
+// Allows for the bar gauge name to be placed explicitly
+BarGaugeNamePlacement: "auto" | "top" | "left" @cuetsy(kind="enum")
 
 // TODO docs
 VizTooltipOptions: {
@@ -256,4 +260,4 @@ Labels: {
 } @cuetsy(kind="interface")
 
 // Compare two values
-ComparisonOperation: "eq" | "neq" | "lt" | "lte" | "gt" | "gte" @cog(kind="enum",memberNames="EQ|NEQ|LT|LTE|GT|GTE")
+ComparisonOperation: "eq" | "neq" | "lt" | "lte" | "gt" | "gte" @cuetsy(kind="enum",memberNames="EQ|NEQ|LT|LTE|GT|GTE")

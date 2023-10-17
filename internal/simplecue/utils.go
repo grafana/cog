@@ -5,8 +5,9 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/ast"
+	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
+	"github.com/grafana/cog/internal/ast"
 )
 
 //nolint:unused
@@ -88,6 +89,26 @@ outer:
 	return a
 }
 
+func hintsFromCueValue(v cue.Value) ast.JenniesHints {
+	hints := make(ast.JenniesHints)
+
+	for _, a := range v.Attributes(cue.ValueAttr) {
+		if a.Name() != cogAnnotationName && a.Name() != cuetsyAnnotationName {
+			continue
+		}
+
+		i := 0
+		for i < a.NumArgs() {
+			key, value := a.Arg(i)
+			hints[key] = value
+
+			i++
+		}
+	}
+
+	return hints
+}
+
 func getTypeHint(v cue.Value) (string, error) {
 	// Direct lookup of attributes with Attribute() seems broken-ish, so do our
 	// own search as best we can, allowing ValueAttrs, which include both field
@@ -95,7 +116,7 @@ func getTypeHint(v cue.Value) (string, error) {
 	var found bool
 	var attr cue.Attribute
 	for _, a := range v.Attributes(cue.ValueAttr) {
-		if a.Name() == annotationName {
+		if a.Name() == cogAnnotationName || a.Name() == cuetsyAnnotationName {
 			found = true
 			attr = a
 		}
@@ -111,7 +132,7 @@ func getTypeHint(v cue.Value) (string, error) {
 	}
 
 	if !found {
-		return "", errorWithCueRef(v, "no value for the %q key in @%s attribute", annotationKindFieldName, annotationName)
+		return "", errorWithCueRef(v, "no value for the %q key in @%s attribute", annotationKindFieldName, cogAnnotationName)
 	}
 
 	return tt, nil
@@ -155,6 +176,9 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		}
 
 		return values, nil
+	case cue.StructKind:
+		// TODO: this would be used for struct-level default values
+		return nil, nil //nolint: nilnil
 	default:
 		return nil, errorWithCueRef(v, "can not convert kind to scalar: %s", v.Kind())
 	}
@@ -162,7 +186,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 
 func commentsFromCueValue(v cue.Value) []string {
 	docs := v.Doc()
-	if s, ok := v.Source().(*ast.Field); ok {
+	if s, ok := v.Source().(*cueast.Field); ok {
 		for _, c := range s.Comments() {
 			if !c.Doc && c.Line {
 				docs = append(docs, c)
@@ -176,4 +200,41 @@ func commentsFromCueValue(v cue.Value) []string {
 	}
 
 	return ret
+}
+
+func isImplicitEnum(v cue.Value) (bool, error) {
+	typeHint, err := getTypeHint(v)
+	if err != nil {
+		return false, err
+	}
+
+	// Hinted as an enum
+	if typeHint == hintKindEnum {
+		return true, nil
+	}
+
+	// Is `v` a disjunction that we can turn into an enum?
+	disjunctionBranches := appendSplit(nil, cue.OrOp, v)
+
+	// only one disjunction branch means no disjunction
+	if len(disjunctionBranches) == 1 {
+		return false, nil
+	}
+
+	allowedKindsForEnum := cue.StringKind | cue.IntKind
+	ik := v.IncompleteKind()
+
+	// we can't handle the type
+	if ik&allowedKindsForEnum != ik {
+		return false, nil
+	}
+
+	// are all the values concrete?
+	for _, branch := range disjunctionBranches {
+		if !branch.IsConcrete() {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }

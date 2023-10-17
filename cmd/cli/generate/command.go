@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/cmd/cli/loaders"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/spf13/cobra"
 )
@@ -37,15 +38,18 @@ func Command() *cobra.Command {
 	cmd.Flags().StringArrayVar(&opts.KindsysCustomEntrypoints, "kindsys-custom", nil, "Kindys custom kinds input schema.")             // TODO: better usage text
 	cmd.Flags().StringArrayVar(&opts.JSONSchemaEntrypoints, "jsonschema", nil, "Jsonschema input schema.")                             // TODO: better usage text
 	cmd.Flags().StringArrayVar(&opts.OpenAPIEntrypoints, "openapi", nil, "Openapi input schema.")                                      // TODO: better usage text
+	cmd.Flags().StringVar(&opts.KindRegistryPath, "kind-registry", "", "Kind registry input.")                                         // TODO: better usage text
 
 	cmd.Flags().StringArrayVarP(&opts.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
+	cmd.Flags().StringVar(&opts.KindRegistryVersion, "kind-registry-version", "next", "Schemas version")
 
 	_ = cmd.MarkFlagDirname("cue")
 	_ = cmd.MarkFlagDirname("kindsys-core")
 	_ = cmd.MarkFlagDirname("kindsys-custom")
-	_ = cmd.MarkFlagDirname("jsonschema")
-	_ = cmd.MarkFlagDirname("output")
+	_ = cmd.MarkFlagDirname("kind-registry")
+	_ = cmd.MarkFlagFilename("jsonschema")
 	_ = cmd.MarkFlagDirname("openapi")
+	_ = cmd.MarkFlagDirname("output")
 
 	return cmd
 }
@@ -66,7 +70,11 @@ func doGenerate(opts Options) error {
 		var err error
 		processedAsts := ast.Schemas(schemas).DeepCopy()
 
-		for _, compilerPass := range target.CompilerPasses {
+		var compilerPasses []compiler.Pass
+		compilerPasses = append(compilerPasses, compiler.CommonPasses()...)
+		compilerPasses = append(compilerPasses, target.CompilerPasses...)
+
+		for _, compilerPass := range compilerPasses {
 			processedAsts, err = compilerPass.Process(processedAsts)
 			if err != nil {
 				return err

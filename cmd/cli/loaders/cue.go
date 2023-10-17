@@ -80,8 +80,6 @@ func buildBaseFSWithLibraries(opts Options) (fs.FS, error) {
 			return nil, err
 		}
 
-		fmt.Printf("Loading '%s' module from '%s'\n", importDefinition.importPath, absPath)
-
 		libraryFS, err := dirToPrefixedFS(absPath, "cue.mod/pkg/"+importDefinition.importPath)
 		if err != nil {
 			return nil, err

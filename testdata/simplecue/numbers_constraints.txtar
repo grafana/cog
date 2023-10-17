@@ -1,0 +1,125 @@
+# Numbers and bounds
+-- schema.cue --
+container: {
+    constantInt: 42
+    constantFloat: 42.24
+    rowHeight: float & >=0 & <=1
+    colWidth: float64 & <=1
+    fiscalYearStartMonth: uint8 & <12 | *0
+}
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "constantInt",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Value": 42
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "constantFloat",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64",
+                  "Value": 42.24
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "rowHeight",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "colWidth",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "fiscalYearStartMonth",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 0,
+                "Scalar": {
+                  "ScalarKind": "uint8",
+                  "Constraints": [
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        12
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  ]
+}

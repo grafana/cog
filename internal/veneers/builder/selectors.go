@@ -25,7 +25,7 @@ func StructGeneratedFromDisjunction() Selector {
 			return false
 		}
 
-		return builder.For.Type.AsStruct().IsGeneratedFromDisjunction()
+		return builder.For.Type.IsStructGeneratedFromDisjunction()
 	}
 }
 
