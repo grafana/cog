@@ -2,8 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DataQuery",
-    "version": "0.0",
-    "x-identifier": "dataquery"
+    "version": "0.0"
   },
   "paths": {},
   "components": {
