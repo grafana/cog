@@ -2,12 +2,12 @@ package openapi
 
 import (
 	"encoding/json"
-	"github.com/grafana/cog/internal/txtartest"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/txtartest"
 	"github.com/stretchr/testify/require"
 )
 
