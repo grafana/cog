@@ -1,4 +1,4 @@
-package veneers
+package rewrite
 
 import (
 	"encoding/json"

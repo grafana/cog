@@ -1,4 +1,4 @@
-package veneers
+package rewrite
 
 import (
 	"github.com/grafana/cog/internal/ast"

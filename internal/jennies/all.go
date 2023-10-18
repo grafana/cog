@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/typescript"
+	"github.com/grafana/cog/internal/veneers/rewrite"
 )
 
 type LanguageTarget struct {
@@ -36,14 +37,14 @@ func (languageTargets LanguageTargets) ForLanguages(languages []string) (Languag
 	return filtered, nil
 }
 
-func All() LanguageTargets {
+func All(veneerRewriter *rewrite.Rewriter) LanguageTargets {
 	targets := map[string]LanguageTarget{
 		"go": {
-			Jennies:        golang.Jennies(),
+			Jennies:        golang.Jennies(veneerRewriter),
 			CompilerPasses: golang.CompilerPasses(),
 		},
 		"typescript": {
-			Jennies:        typescript.Jennies(),
+			Jennies:        typescript.Jennies(veneerRewriter),
 			CompilerPasses: typescript.CompilerPasses(),
 		},
 	}

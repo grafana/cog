@@ -32,6 +32,8 @@ environments, and the risks are unknown/high.
 
 ## Usage
 
+For specific schemas:
+
 ```console
 $ go run cmd/cli/main.go generate \
     --output ./generated \
@@ -41,5 +43,20 @@ $ go run cmd/cli/main.go generate \
     --jsonschema ./schemas/jsonschema/core/playlist/playlist.json \
     --kindsys-composable ./schemas/kindsys/composable/timeseries \
     --kindsys-composable ./schemas/kindsys/composable/logs \
-    --kindsys-composable ./schemas/kindsys/composable/prometheus
+    --kindsys-composable ./schemas/kindsys/composable/prometheus \
+    --veneer ./config/dashboard.veneers.yaml \
+```
+
+For the [`kind-registry`](https://github.com/grafana/kind-registry):
+
+
+```console
+$ git clone https://github.com/grafana/kind-registry
+$ go run cmd/cli/main.go generate \
+    --output ./generated \
+    --kind-registry ./kind-registry \
+    --cue ./schemas/cue/common \
+    --include-cue-import ./schemas/cue/common:github.com/grafana/grafana/packages/grafana-schema/src/common \
+    --veneer ./config/dashboard.veneers.yaml \
+    --veneer ./config/team.veneers.yaml
 ```
