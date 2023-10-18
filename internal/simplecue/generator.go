@@ -288,31 +288,8 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	hints := hintsFromCueValue(v)
 
 	op, disjunctionBranches := v.Expr()
-	// Possible cases:
-	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
-	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
 	if op == cue.OrOp && len(disjunctionBranches) > 1 {
-		// Try to guess if `v` can be represented as an enum (includes checking for a type hint) (1)
-		implicitEnum, err := isImplicitEnum(v)
-		if err != nil {
-			return ast.Type{}, err
-		}
-		if implicitEnum {
-			return g.declareAnonymousEnum(v, defVal, hints)
-		}
-
-		// We must be looking at a disjunction then (2)
-		branches := make([]ast.Type, 0, len(disjunctionBranches))
-		for _, subTypeValue := range disjunctionBranches {
-			subType, err := g.declareNode(subTypeValue)
-			if err != nil {
-				return ast.Type{}, err
-			}
-
-			branches = append(branches, subType)
-		}
-
-		return ast.NewDisjunction(branches, ast.Default(defVal), ast.Hints(hints)), nil
+		return g.declareDisjunction(v, hints, defVal)
 	}
 
 	switch v.IncompleteKind() {
@@ -358,6 +335,56 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
 	}
+}
+
+func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defaultValue any) (ast.Type, error) {
+	_, disjunctionBranchesWithPossibleDefault := v.Expr()
+	defaultAsCueValue, hasDefault := v.Default()
+
+	disjunctionBranches := make([]cue.Value, 0, len(disjunctionBranchesWithPossibleDefault))
+	for _, branch := range disjunctionBranchesWithPossibleDefault {
+		if hasDefault && branch.Equals(defaultAsCueValue) {
+			_, bPath := branch.ReferencePath()
+			_, dPath := defaultAsCueValue.ReferencePath()
+
+			if bPath.String() == dPath.String() {
+				continue
+			}
+		}
+
+		disjunctionBranches = append(disjunctionBranches, branch)
+	}
+
+	// not a disjunction anymore
+	if len(disjunctionBranchesWithPossibleDefault) != len(disjunctionBranches) && len(disjunctionBranches) == 1 {
+		return g.declareNode(disjunctionBranches[0])
+	}
+
+	// Possible cases:
+	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
+	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
+
+	// Try to guess if `v` can be represented as an enum (includes checking for a type hint) (1)
+	implicitEnum, err := isImplicitEnum(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+	if implicitEnum {
+		return g.declareAnonymousEnum(v, defaultValue, hints)
+	}
+
+	// We must be looking at a disjunction then (2)
+	branches := make([]ast.Type, 0, len(disjunctionBranches))
+	for _, subTypeValue := range disjunctionBranches {
+		subType, err := g.declareNode(subTypeValue)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		branches = append(branches, subType)
+	}
+
+	return ast.NewDisjunction(branches, ast.Default(defaultValue), ast.Hints(hints)), nil
 }
 
 func (g *generator) declareAnonymousEnum(v cue.Value, defValue any, hints ast.JenniesHints) (ast.Type, error) {
