@@ -114,6 +114,14 @@ func Common() *Rewriter {
 			option.PromoteToConstructor(
 				option.ByName("RowPanel", "title"),
 			),
+			/********************************************
+			 * Team
+			 ********************************************/
+
+			// Let's make the row constructor more friendly
+			option.PromoteToConstructor(
+				option.ByName("team", "name"),
+			),
 		},
 	)
 }
