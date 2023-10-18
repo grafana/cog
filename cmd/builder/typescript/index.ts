@@ -13,8 +13,8 @@ const timeseriesPanel = new PanelBuilder()
     .min(0)
     .max(200)
     .lineWidth(5)
-    .drawStyle(GraphDrawStyle.Bars)
-    .tooltip(new VizTooltipOptionsBuilder().mode(TooltipDisplayMode.Single));
+    .drawStyle(GraphDrawStyle.GraphDrawStyleBars)
+    .tooltip(new VizTooltipOptionsBuilder().mode(TooltipDisplayMode.TooltipDisplayModeSingle));
 
 const overviewRow = new RowPanelBuilder("Overview");
 
@@ -24,7 +24,7 @@ const builder = new dashboardBuilder("Some title")
     .time({from: "now-3h", to: "now"})
     .refresh("1m")
     .timezone("utc")
-    .tooltip(DashboardCursorSync.Crosshair)
+    .tooltip(DashboardCursorSync.DashboardCursorSyncCrosshair)
     .tags(["generated", "from", "cue"])
     .rows([
         overviewRow.build(),
@@ -35,7 +35,7 @@ const builder = new dashboardBuilder("Some title")
             // TODO: this is painful.
             title: "Some link",
             url: "http://google.com",
-            type: DashboardLinkType.Link,
+            type: DashboardLinkType.DashboardLinkTypeLink,
             tags: [],
             icon: "cloud",
             tooltip: "",

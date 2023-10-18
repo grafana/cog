@@ -21,6 +21,11 @@ func cueLoader(opts Options) ([]*ast.Schema, error) {
 		return nil, err
 	}
 
+	libraries, err := opts.cueIncludeImports()
+	if err != nil {
+		return nil, err
+	}
+
 	allSchemas := make([]*ast.Schema, 0, len(opts.CueEntrypoints))
 	for _, entrypoint := range opts.CueEntrypoints {
 		pkg := filepath.Base(entrypoint)
@@ -42,6 +47,7 @@ func cueLoader(opts Options) ([]*ast.Schema, error) {
 			SchemaMetadata: ast.SchemaMeta{
 				// TODO: extract these from somewhere
 			},
+			Libraries: libraries,
 		})
 		if err != nil {
 			return nil, err
@@ -75,12 +81,12 @@ func buildBaseFSWithLibraries(opts Options) (fs.FS, error) {
 
 	var librariesFS []fs.FS
 	for _, importDefinition := range importDefinitions {
-		absPath, err := filepath.Abs(importDefinition.fsPath)
+		absPath, err := filepath.Abs(importDefinition.FSPath)
 		if err != nil {
 			return nil, err
 		}
 
-		libraryFS, err := dirToPrefixedFS(absPath, "cue.mod/pkg/"+importDefinition.importPath)
+		libraryFS, err := dirToPrefixedFS(absPath, "cue.mod/pkg/"+importDefinition.ImportPath)
 		if err != nil {
 			return nil, err
 		}

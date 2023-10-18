@@ -26,7 +26,7 @@
                             }
                         },
                         {
-                            "Name": "FieldAnonymousEnum",
+                            "Name": "Operator",
                             "Required": false,
                             "Type": {
                                 "Kind": "enum",
@@ -114,7 +114,7 @@
 export interface SomeStruct {
 	FieldRef?: SomeOtherStruct;
 	FieldString?: string;
-	FieldAnonymousEnum?: ">" | "<";
+	Operator?: ">" | "<";
 	FieldArrayOfStrings?: string[];
 	FieldAnonymousStruct?: {
 		FieldAny: any;
@@ -139,7 +139,7 @@ package types
 type SomeStruct struct {
 	FieldRef *SomeOtherStruct `json:"FieldRef,omitempty"`
 	FieldString *string `json:"FieldString,omitempty"`
-	FieldAnonymousEnum *FieldAnonymousEnumEnum `json:"FieldAnonymousEnum,omitempty"`
+	Operator *SomeStructOperator `json:"Operator,omitempty"`
 	FieldArrayOfStrings []string `json:"FieldArrayOfStrings,omitempty"`
 	FieldAnonymousStruct *struct {
 	FieldAny any `json:"FieldAny"`
@@ -150,10 +150,10 @@ type SomeOtherStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-type FieldAnonymousEnumEnum string
+type SomeStructOperator string
 const (
-	FieldAnonymousEnumEnumFieldAnonymousEnumGreaterThan FieldAnonymousEnumEnum = ">"
-	FieldAnonymousEnumEnumFieldAnonymousEnumLessThan FieldAnonymousEnumEnum = "<"
+	SomeStructOperatorGreaterThan SomeStructOperator = ">"
+	SomeStructOperatorLessThan SomeStructOperator = "<"
 )
 
 
