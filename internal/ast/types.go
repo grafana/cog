@@ -321,6 +321,15 @@ func NewScalar(kind ScalarKind, opts ...TypeOption) Type {
 	return def
 }
 
+func NewIntersection(s *StructType, intersections []RefType) Type {
+	s.Intersections = intersections
+	return Type{
+		Kind:   KindStruct,
+		Hints:  make(JenniesHints),
+		Struct: s,
+	}
+}
+
 func (t Type) IsNull() bool {
 	return t.Kind == KindScalar && t.AsScalar().ScalarKind == KindNull
 }
@@ -538,16 +547,22 @@ func (t MapType) DeepCopy() MapType {
 }
 
 type StructType struct {
-	Fields []StructField
+	Fields        []StructField
+	Intersections []RefType
 }
 
 func (structType StructType) DeepCopy() StructType {
 	newT := StructType{
-		Fields: make([]StructField, 0, len(structType.Fields)),
+		Fields:        make([]StructField, 0, len(structType.Fields)),
+		Intersections: make([]RefType, 0, len(structType.Intersections)),
 	}
 
 	for _, field := range structType.Fields {
 		newT.Fields = append(newT.Fields, field.DeepCopy())
+	}
+
+	for _, i := range structType.Intersections {
+		newT.Intersections = append(newT.Intersections, i.DeepCopy())
 	}
 
 	return newT

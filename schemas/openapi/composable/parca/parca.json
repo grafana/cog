@@ -8,35 +8,29 @@
   "components": {
     "schemas": {
       "ParcaDataQuery": {
-        "type": "object",
-        "required": [
-          "labelSelector",
-          "profileTypeId"
-        ],
-        "properties": {
-          "labelSelector": {
-            "description": "Specifies the query label selectors.",
-            "type": "string",
-            "default": "{}"
-          },
-          "profileTypeId": {
-            "description": "Specifies the type of profile to query.",
-            "type": "string"
-          }
-        },
         "allOf": [
           {
             "$ref": "../dataquery/dataquery.json/#/components/schemas/DataQuery"
+          },
+          {
+            "type": "object",
+            "required": [
+              "labelSelector",
+              "profileTypeId"
+            ],
+            "properties": {
+              "labelSelector": {
+                "description": "Specifies the query label selectors.",
+                "type": "string",
+                "default": "{}"
+              },
+              "profileTypeId": {
+                "description": "Specifies the type of profile to query.",
+                "type": "string"
+              }
+            }
           }
-        ],
-        "discriminator": {
-          "propertyName": "queryType",
-          "mapping": {
-            "profile": "../dataquery/dataquery.json/#/components/schemas/DataQuery",
-            "both": "../dataquery/dataquery.json/#/components/schemas/DataQuery",
-            "metrics": "../dataquery/dataquery.json/#/components/schemas/DataQuery"
-          }
-        }
+        ]
       },
       "ParcaQueryType": {
         "type": "string",

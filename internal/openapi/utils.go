@@ -91,3 +91,7 @@ func getArgs(v *float64, t string) []any {
 	}
 	return args
 }
+
+func isRef(ref string) bool {
+	return ref != "" && strings.ContainsAny(ref, "#")
+}

@@ -88,8 +88,8 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 }
 
 func (g *generator) walkSchemaRef(schemaRef *openapi3.SchemaRef) (ast.Type, error) {
-	if schemaRef.Ref != "" {
-		return g.walkRef(schemaRef.Ref)
+	if isRef(schemaRef.Ref) {
+		return g.walkRef(schemaRef)
 	}
 
 	return g.walkDefinitions(schemaRef.Value)
@@ -128,10 +128,8 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 	}
 }
 
-func (g *generator) walkRef(ref string) (ast.Type, error) {
-	// TODO: Its assuming that we are referencing an object in the same document
-	// See https://swagger.io/specification/v3/#reference-object
-	pkg, referredKindName := g.getRefName(ref)
+func (g *generator) walkRef(schema *openapi3.SchemaRef) (ast.Type, error) {
+	pkg, referredKindName := g.getRefName(schema.Ref)
 
 	return ast.NewRef(pkg, referredKindName), nil
 }
@@ -226,8 +224,23 @@ func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
-	discriminator, mapping := g.getDiscriminator(schema)
-	return g.walkDisjunctions(schema.AllOf, discriminator, mapping)
+	strct := ast.StructType{}
+	intersections := make([]ast.RefType, 0)
+	for _, sch := range schema.AllOf {
+		def, err := g.walkSchemaRef(sch)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		if def.Ref != nil {
+			intersections = append(intersections, def.AsRef())
+			continue
+		}
+
+		strct = def.AsStruct()
+	}
+
+	return ast.NewIntersection(&strct, intersections), nil
 }
 
 func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
@@ -284,12 +297,7 @@ func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[strin
 	if schema.Discriminator != nil {
 		name = schema.Discriminator.PropertyName
 		for k, v := range schema.Discriminator.Mapping {
-			ref, err := g.walkRef(v)
-			if err != nil {
-				mapping[k] = v
-				continue
-			}
-			mapping[k] = ref.AsRef().ReferredPkg
+			mapping[k] = v
 		}
 	}
 
