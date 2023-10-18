@@ -143,6 +143,7 @@ func (pass *DisjunctionToType) processStruct(schema *ast.Schema, def ast.Type) (
 
 	newStruct := def
 	newStruct.Struct.Fields = processedFields
+	newStruct.Struct.Intersections = def.AsStruct().Intersections
 
 	return newStruct, nil
 }

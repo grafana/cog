@@ -83,5 +83,8 @@ func (pass *NotRequiredFieldAsNullableType) processStruct(def ast.StructType) as
 		processedFields = append(processedFields, newField)
 	}
 
-	return ast.NewStruct(processedFields...)
+	strct := ast.NewStruct(processedFields...)
+	strct.Struct.Intersections = def.Intersections
+
+	return strct
 }

@@ -87,7 +87,10 @@ func (pass *AnonymousEnumToExplicitType) processStruct(parentName string, def as
 		})
 	}
 
-	return ast.NewStruct(processedFields...)
+	strct := ast.NewStruct(processedFields...)
+	strct.Struct.Intersections = def.Intersections
+
+	return strct
 }
 
 func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(parentName string, def ast.EnumType) ast.Type {
