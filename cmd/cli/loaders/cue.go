@@ -60,20 +60,48 @@ func cueLoader(opts Options) ([]*ast.Schema, error) {
 }
 
 func buildCueOverlay(opts Options) (map[string]load.Source, error) {
+	mockKindsysFS := buildMockKindsysFS()
 	libFs, err := buildBaseFSWithLibraries(opts)
 	if err != nil {
 		return nil, err
 	}
 
+	mergedFS := merged_fs.MergeMultiple(append(libFs, mockKindsysFS)...)
+
 	overlay := make(map[string]load.Source)
-	if err := toCueOverlay("/", libFs, overlay); err != nil {
+	if err := toCueOverlay("/", mergedFS, overlay); err != nil {
 		return nil, err
 	}
 
 	return overlay, nil
 }
 
-func buildBaseFSWithLibraries(opts Options) (fs.FS, error) {
+func buildMockKindsysFS() fs.FS {
+	mockFS := fstest.MapFS{
+		"cue.mod/pkg/github.com/grafana/kindsys/composable.cue": &fstest.MapFile{
+			Data: []byte(`package kindsys
+Composable: {
+	...
+}`),
+		},
+		"cue.mod/pkg/github.com/grafana/kindsys/core.cue": &fstest.MapFile{
+			Data: []byte(`package kindsys
+Core: {
+	...
+}`),
+		},
+		"cue.mod/pkg/github.com/grafana/kindsys/custom.cue": &fstest.MapFile{
+			Data: []byte(`package kindsys
+Custom: {
+	...
+}`),
+		},
+	}
+
+	return mockFS
+}
+
+func buildBaseFSWithLibraries(opts Options) ([]fs.FS, error) {
 	importDefinitions, err := opts.cueIncludeImports()
 	if err != nil {
 		return nil, err
@@ -94,7 +122,7 @@ func buildBaseFSWithLibraries(opts Options) (fs.FS, error) {
 		librariesFS = append(librariesFS, libraryFS)
 	}
 
-	return merged_fs.MergeMultiple(librariesFS...), nil
+	return librariesFS, nil
 }
 
 func dirToPrefixedFS(directory string, prefix string) (fs.FS, error) {

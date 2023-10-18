@@ -1,21 +1,20 @@
 package loaders
 
 import (
-	"fmt"
-	"io/fs"
 	"path/filepath"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
+	"cuelang.org/go/cue/load"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
-	"github.com/grafana/kindsys"
-	"github.com/grafana/thema"
-	"github.com/yalue/merged_fs"
 )
 
 func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
-	themaRuntime := thema.NewRuntime(cuecontext.New())
+	cueFsOverlay, err := buildCueOverlay(opts)
+	if err != nil {
+		return nil, err
+	}
 
 	libraries, err := opts.cueIncludeImports()
 	if err != nil {
@@ -26,36 +25,31 @@ func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
 	for _, entrypoint := range opts.KindsysCoreEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
-		overlayFS, err := buildKindsysEntrypointFS(opts, entrypoint)
+		// Load Cue files into Cue build.Instances slice
+		// the second arg is a configuration object, we'll see this later
+		bis := load.Instances([]string{entrypoint}, &load.Config{
+			Overlay:    cueFsOverlay,
+			ModuleRoot: "/",
+		})
+
+		values, err := cuecontext.New().BuildInstances(bis)
 		if err != nil {
 			return nil, err
 		}
 
-		cueInstance, err := kindsys.BuildInstance(themaRuntime.Context(), ".", "kind", overlayFS)
+		schemaRoot := values[0]
+		schemaAsCueValue := schemaRoot.LookupPath(cue.ParsePath("lineage.schemas[0].schema"))
+
+		kindIdentifier, err := inferCoreKindIdentifier(schemaRoot)
 		if err != nil {
-			return nil, fmt.Errorf("could not load kindsys composable kind %s: %w", pkg, err)
+			return nil, err
 		}
 
-		props, err := kindsys.ToKindProps[kindsys.CoreProperties](cueInstance)
-		if err != nil {
-			return nil, fmt.Errorf("could not convert cue value to kindsys core props: %w", err)
-		}
-
-		kindDefinition := kindsys.Def[kindsys.CoreProperties]{
-			V:          cueInstance,
-			Properties: props,
-		}
-
-		boundKind, err := kindsys.BindCore(themaRuntime, kindDefinition)
-		if err != nil {
-			return nil, fmt.Errorf("could not bind kind definition to kind: %w", err)
-		}
-
-		schemaAst, err := simplecue.GenerateAST(kindToLatestSchema(boundKind), simplecue.Config{
-			Package: pkg, // TODO: extract from input schema/folder?
+		schemaAst, err := simplecue.GenerateAST(schemaAsCueValue, simplecue.Config{
+			Package: pkg, // TODO: extract from somewhere else?
 			SchemaMetadata: ast.SchemaMeta{
 				Kind:       ast.SchemaKindCore,
-				Identifier: pkg, // TODO: maybe even core kinds could have one explicitly set in their schema?
+				Identifier: kindIdentifier,
 			},
 			Libraries: libraries,
 		})
@@ -69,22 +63,6 @@ func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
 	return allSchemas, nil
 }
 
-func buildKindsysEntrypointFS(opts Options, entrypoint string) (fs.FS, error) {
-	libFs, err := buildBaseFSWithLibraries(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	overlayFS, err := dirToPrefixedFS(entrypoint, "")
-	if err != nil {
-		return nil, err
-	}
-
-	return merged_fs.MergeMultiple(libFs, overlayFS), nil
-}
-
-func kindToLatestSchema(kind kindsys.Kind) cue.Value {
-	rawLatestSchemaAsCue := kind.Lineage().Latest().Underlying()
-
-	return rawLatestSchemaAsCue.LookupPath(cue.MakePath(cue.Hid("_#schema", "github.com/grafana/thema")))
+func inferCoreKindIdentifier(kindRoot cue.Value) (string, error) {
+	return kindRoot.LookupPath(cue.ParsePath("name")).String()
 }

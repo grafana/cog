@@ -6,7 +6,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -358,9 +357,6 @@ func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def a
 	// Identify candidates from each branch
 	for _, branch := range def.Branches {
 		typeName := branch.AsRef().ReferredType
-		if refResolver(branch).Kind != ast.KindStruct {
-			spew.Dump(branch.AsRef())
-		}
 		structType := refResolver(branch).AsStruct()
 		candidates[typeName] = make(map[string]any)
 
