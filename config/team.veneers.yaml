@@ -1,0 +1,5 @@
+builders: ~
+
+options:
+  # Make the constructor more friendly
+  - promote_to_constructor: { by_name: Team.name }

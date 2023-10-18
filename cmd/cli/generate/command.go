@@ -9,14 +9,16 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
+	"github.com/grafana/cog/internal/veneers/yaml"
 	"github.com/spf13/cobra"
 )
 
 type Options struct {
 	loaders.Options
 
-	Languages []string
-	OutputDir string
+	Languages         []string
+	VeneerConfigFiles []string
+	OutputDir         string
 }
 
 func Command() *cobra.Command {
@@ -33,6 +35,7 @@ func Command() *cobra.Command {
 
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
+	cmd.Flags().StringArrayVarP(&opts.VeneerConfigFiles, "veneer", "c", nil, "Veneer configuration file.")
 
 	cmd.Flags().StringArrayVar(&opts.CueEntrypoints, "cue", nil, "CUE input schema.")                                                  // TODO: better usage text
 	cmd.Flags().StringArrayVar(&opts.KindsysCoreEntrypoints, "kindsys-core", nil, "Kindys core kinds input schema.")                   // TODO: better usage text
@@ -52,6 +55,7 @@ func Command() *cobra.Command {
 	_ = cmd.MarkFlagFilename("jsonschema")
 	_ = cmd.MarkFlagDirname("openapi")
 	_ = cmd.MarkFlagDirname("output")
+	_ = cmd.MarkFlagFilename("veneer")
 
 	return cmd
 }
@@ -62,8 +66,13 @@ func doGenerate(opts Options) error {
 		return err
 	}
 
+	veneerRewriter, err := yaml.NewLoader().RewriterFromFiles(opts.VeneerConfigFiles)
+	if err != nil {
+		return err
+	}
+
 	// Here begins the code generation setup
-	targetsByLanguage, err := jennies.All().ForLanguages(opts.Languages)
+	targetsByLanguage, err := jennies.All(veneerRewriter).ForLanguages(opts.Languages)
 	if err != nil {
 		return err
 	}
