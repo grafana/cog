@@ -1,6 +1,8 @@
 package jennies
 
 import (
+	"fmt"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
@@ -13,7 +15,28 @@ type LanguageTarget struct {
 	CompilerPasses []compiler.Pass
 }
 
-func All() map[string]LanguageTarget {
+type LanguageTargets map[string]LanguageTarget
+
+func (languageTargets LanguageTargets) ForLanguages(languages []string) (LanguageTargets, error) {
+	if languages == nil {
+		return languageTargets, nil
+	}
+
+	filtered := make(LanguageTargets)
+
+	for _, language := range languages {
+		if target, exists := languageTargets[language]; exists {
+			filtered[language] = target
+			continue
+		}
+
+		return nil, fmt.Errorf("unknown language '%s'", language)
+	}
+
+	return filtered, nil
+}
+
+func All() LanguageTargets {
 	targets := map[string]LanguageTarget{
 		"go": {
 			Jennies:        golang.Jennies(),
