@@ -83,6 +83,10 @@ func (resolver *referenceResolver) PackageForNode(source cueast.Node, defaultPac
 			return defaultPackage, nil
 		}
 
+		if _, ok := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package); !ok {
+			return defaultPackage, nil
+		}
+
 		referredTypePkg := ident.Scope.(*cueast.File).Decls[0].(*cueast.Package).Name
 
 		return resolver.resolveImportAlias(referredTypePkg.Name), nil
