@@ -27,9 +27,6 @@ func Common() *Rewriter {
 			builder.Omit(builder.ByObjectName("dashboard.DataSourceRef")),
 			builder.Omit(builder.ByObjectName("dashboard.LibraryPanelRef")),
 
-			// No need for builders for structs generated from a disjunction
-			builder.Omit(builder.StructGeneratedFromDisjunction()),
-
 			// rearrange things a bit
 			builder.MergeInto(
 				builder.ByObjectName("dashboard.Panel"),
@@ -55,6 +52,9 @@ func Common() *Rewriter {
 			// remove builders that were previously merged into something else
 			builder.Omit(builder.ByObjectName("dashboard.FieldConfig")),
 			builder.Omit(builder.ByObjectName("dashboard.FieldConfigSource")),
+
+			// No need for builders for structs generated from a disjunction
+			builder.Omit(builder.StructGeneratedFromDisjunction()),
 		},
 
 		[]option.RewriteRule{

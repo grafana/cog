@@ -21,10 +21,6 @@ func ByObjectName(objectName string) Selector {
 
 func StructGeneratedFromDisjunction() Selector {
 	return func(builder ast.Builder) bool {
-		if builder.For.Type.Kind != ast.KindStruct {
-			return false
-		}
-
 		return builder.For.Type.IsStructGeneratedFromDisjunction()
 	}
 }

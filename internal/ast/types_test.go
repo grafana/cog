@@ -34,7 +34,7 @@ func TestTypes_HasOnlyScalarOrArray(t *testing.T) {
 				NewScalar(KindString),
 				NewArray(NewRef("pkg", "SomeType")),
 			},
-			expected: false,
+			expected: true,
 		},
 		{
 			description: "ref",

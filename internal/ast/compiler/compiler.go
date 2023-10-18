@@ -12,6 +12,6 @@ func CommonPasses() []Pass {
 	return []Pass{
 		&Unspec{},
 		&DashboardPanelsRewrite{},
-		&CloudwatchQueryEditorExpression{},
+		&Cloudwatch{},
 	}
 }

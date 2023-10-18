@@ -393,10 +393,6 @@ type Types []Type
 func (types Types) HasOnlyScalarOrArray() bool {
 	for _, t := range types {
 		if t.Kind == KindArray {
-			if !t.AsArray().IsArrayOfScalars() {
-				return false
-			}
-
 			continue
 		}
 
