@@ -90,9 +90,8 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 	buffer.WriteString(constructorCode)
 
 	// Allow builders to expose the resource they're building
-	// TODO: better name, with less conflict chance
 	buffer.WriteString(fmt.Sprintf(`
-func (builder *Builder) Internal() *%s.%s {
+func (builder *Builder) Build() *%s.%s {
 	return builder.internal
 }
 `, importAlias, objectName))
@@ -303,7 +302,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 			return err
 		}
 
-		%[4]sbuilder.internal.%[1]s = %[3]sresource.Internal()
+		%[4]sbuilder.internal.%[1]s = %[3]sresource.Build()
 `, fieldPath, referredBuilderAlias, intoPointer, assignmentSafeGuards)
 	}
 
