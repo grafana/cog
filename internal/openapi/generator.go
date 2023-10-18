@@ -3,6 +3,7 @@ package openapi
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
@@ -76,6 +77,10 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 		})
 	}
 
+	sort.Slice(g.schema.Objects, func(i, j int) bool {
+		return g.schema.Objects[i].Name < g.schema.Objects[j].Name
+	})
+
 	return nil
 }
 
@@ -142,6 +147,10 @@ func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
 			Required: tools.ItemInList(name, schema.Required),
 		})
 	}
+
+	sort.Slice(fields, func(i, j int) bool {
+		return fields[i].Name < fields[j].Name
+	})
 
 	return ast.NewStruct(fields...), nil
 }
