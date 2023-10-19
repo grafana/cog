@@ -296,7 +296,7 @@ func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) stri
 	parts := make([]string, 0, len(def.Branches))
 
 	for _, subType := range def.Branches {
-		parts = append(parts, tools.UpperCamelCase(pass.typeName(subType)))
+		parts = append(parts, pass.typeName(subType))
 	}
 
 	return strings.Join(parts, "Or")
@@ -304,16 +304,16 @@ func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) stri
 
 func (pass *DisjunctionToType) typeName(typeDef ast.Type) string {
 	if typeDef.Kind == ast.KindRef {
-		return typeDef.AsRef().ReferredType
+		return tools.UpperCamelCase(typeDef.AsRef().ReferredType)
 	}
 	if typeDef.Kind == ast.KindScalar {
-		return string(typeDef.AsScalar().ScalarKind)
+		return tools.UpperCamelCase(string(typeDef.AsScalar().ScalarKind))
 	}
 	if typeDef.Kind == ast.KindArray {
 		return "ArrayOf" + pass.typeName(typeDef.AsArray().ValueType)
 	}
 
-	return string(typeDef.Kind)
+	return tools.UpperCamelCase(string(typeDef.Kind))
 }
 
 func (pass *DisjunctionToType) ensureDiscriminator(schema *ast.Schema, def ast.DisjunctionType) (ast.DisjunctionType, error) {
