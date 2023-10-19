@@ -5,6 +5,7 @@ container: {
     editable: bool | *true
     IntEnum: 0 | 1 | *2 @cog(kind="enum",memberNames="firstValue|secondValue|thirdValue")
     Number: int64 | *5
+    repeatDirection: *"h" | "v"
 }
 -- out/simplecue/GenerateAST --
 == ir.json
@@ -105,6 +106,42 @@ container: {
                 "Default": 5,
                 "Scalar": {
                   "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "repeatDirection",
+              "Comments": [],
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Default": "h",
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "h",
+                      "Value": "h"
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "v",
+                      "Value": "v"
+                    }
+                  ]
                 }
               },
               "Required": true
