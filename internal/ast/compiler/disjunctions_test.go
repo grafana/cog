@@ -99,8 +99,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValString", ast.String(ast.Nullable())),
-		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
+		ast.NewStructField("String", ast.String(ast.Nullable())),
+		ast.NewStructField("Bool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = objects[0].Type.AsDisjunction()
@@ -128,8 +128,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAMapValueType(t *testing.T
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValString", ast.String(ast.Nullable())),
-		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
+		ast.NewStructField("String", ast.String(ast.Nullable())),
+		ast.NewStructField("Bool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = objects[0].Type.AsMap().ValueType.AsDisjunction()
@@ -160,8 +160,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T)
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValString", ast.String(ast.Nullable())),
-		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
+		ast.NewStructField("String", ast.String(ast.Nullable())),
+		ast.NewStructField("Bool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
@@ -191,8 +191,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsNullableAStructField(t *te
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValString", ast.String(ast.Nullable())),
-		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
+		ast.NewStructField("String", ast.String(ast.Nullable())),
+		ast.NewStructField("Bool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
@@ -220,8 +220,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testin
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValString", ast.String(ast.Nullable())),
-		ast.NewStructField("ValBool", ast.Bool(ast.Nullable())),
+		ast.NewStructField("String", ast.String(ast.Nullable())),
+		ast.NewStructField("Bool", ast.Bool(ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
@@ -380,8 +380,8 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValSomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
-		ast.NewStructField("ValOtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
+		ast.NewStructField("SomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
+		ast.NewStructField("OtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionTypeWithDiscriminatorMeta := objects[0].Type.AsDisjunction()
@@ -433,8 +433,8 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValSomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
-		ast.NewStructField("ValOtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
+		ast.NewStructField("SomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
+		ast.NewStructField("OtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionTypeWithDiscriminatorMeta := objects[0].Type.AsDisjunction()
@@ -488,8 +488,8 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 
 	// Prepare expected output
 	disjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValSomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
-		ast.NewStructField("ValOtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
+		ast.NewStructField("SomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
+		ast.NewStructField("OtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionTypeWithDiscriminatorMeta := objects[0].Type.AsDisjunction()
@@ -542,9 +542,9 @@ func TestDisjunctionToType_WithNestedDisjunctionOfRefs_AsAnObject_NoDiscriminato
 
 	// Prepare expected output
 	fullDisjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValSomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
-		ast.NewStructField("ValOtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
-		ast.NewStructField("ValLastStruct", ast.NewRef("test", "LastStruct", ast.Nullable())),
+		ast.NewStructField("SomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
+		ast.NewStructField("OtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
+		ast.NewStructField("LastStruct", ast.NewRef("test", "LastStruct", ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	disjunctionTypeWithDiscriminatorMeta := ast.DisjunctionType{
@@ -565,8 +565,8 @@ func TestDisjunctionToType_WithNestedDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	fullDisjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	partialDisjunctionStructType := ast.NewStruct(
-		ast.NewStructField("ValSomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
-		ast.NewStructField("ValOtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
+		ast.NewStructField("SomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
+		ast.NewStructField("OtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
 	)
 	// The original disjunction definition is preserved as a hint
 	partialDisjunctionTypeWithDiscriminatorMeta := objects[1].Type.AsDisjunction()

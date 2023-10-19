@@ -20,6 +20,7 @@ func init() {
 	base := template.New("golang")
 	base.Funcs(map[string]any{
 		"formatIdentifier": tools.UpperCamelCase,
+		"lowerCamelCase":   tools.LowerCamelCase,
 		"formatType":       formatType,
 		"trimPrefix":       strings.TrimPrefix,
 	})

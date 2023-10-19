@@ -240,25 +240,25 @@ type YetAnotherStruct struct {
 type SeveralRefs SomeStructOrSomeOtherStructOrYetAnotherStruct
 
 type BoolOrSomeStruct struct {
-	ValBool *bool `json:"ValBool,omitempty"`
-	ValSomeStruct *SomeStruct `json:"ValSomeStruct,omitempty"`
+	Bool *bool `json:"Bool,omitempty"`
+	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
 }
 
 type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
-	ValSomeStruct *SomeStruct `json:"ValSomeStruct,omitempty"`
-	ValSomeOtherStruct *SomeOtherStruct `json:"ValSomeOtherStruct,omitempty"`
-	ValYetAnotherStruct *YetAnotherStruct `json:"ValYetAnotherStruct,omitempty"`
+	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
+	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
+	YetAnotherStruct *YetAnotherStruct `json:"YetAnotherStruct,omitempty"`
 }
 
 func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]byte, error) {
-	if resource.ValSomeStruct != nil {
-		return json.Marshal(resource.ValSomeStruct)
+	if resource.SomeStruct != nil {
+		return json.Marshal(resource.SomeStruct)
 	}
-	if resource.ValSomeOtherStruct != nil {
-		return json.Marshal(resource.ValSomeOtherStruct)
+	if resource.SomeOtherStruct != nil {
+		return json.Marshal(resource.SomeOtherStruct)
 	}
-	if resource.ValYetAnotherStruct != nil {
-		return json.Marshal(resource.ValYetAnotherStruct)
+	if resource.YetAnotherStruct != nil {
+		return json.Marshal(resource.YetAnotherStruct)
 	}
 
 	return nil, nil
@@ -282,28 +282,28 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 
 	switch discriminator {
 	case "some-other-struct":
-		var valSomeOtherStruct SomeOtherStruct
-		if err := json.Unmarshal(raw, &valSomeOtherStruct); err != nil {
+		var someOtherStruct SomeOtherStruct
+		if err := json.Unmarshal(raw, &someOtherStruct); err != nil {
 			return err
 		}
 
-		resource.ValSomeOtherStruct = &valSomeOtherStruct
+		resource.SomeOtherStruct = &someOtherStruct
 		return nil
 	case "some-struct":
-		var valSomeStruct SomeStruct
-		if err := json.Unmarshal(raw, &valSomeStruct); err != nil {
+		var someStruct SomeStruct
+		if err := json.Unmarshal(raw, &someStruct); err != nil {
 			return err
 		}
 
-		resource.ValSomeStruct = &valSomeStruct
+		resource.SomeStruct = &someStruct
 		return nil
 	case "yet-another-struct":
-		var valYetAnotherStruct YetAnotherStruct
-		if err := json.Unmarshal(raw, &valYetAnotherStruct); err != nil {
+		var yetAnotherStruct YetAnotherStruct
+		if err := json.Unmarshal(raw, &yetAnotherStruct); err != nil {
 			return err
 		}
 
-		resource.ValYetAnotherStruct = &valYetAnotherStruct
+		resource.YetAnotherStruct = &yetAnotherStruct
 		return nil
 	}
 
@@ -311,17 +311,17 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 }
 
 type StringOrBool struct {
-	ValString *string `json:"ValString,omitempty"`
-	ValBool *bool `json:"ValBool,omitempty"`
+	String *string `json:"String,omitempty"`
+	Bool *bool `json:"Bool,omitempty"`
 }
 
 func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
-	if resource.ValString != nil {
-		return json.Marshal(resource.ValString)
+	if resource.String != nil {
+		return json.Marshal(resource.String)
 	}
 
-	if resource.ValBool != nil {
-		return json.Marshal(resource.ValBool)
+	if resource.Bool != nil {
+		return json.Marshal(resource.Bool)
 	}
 
 	return nil, nil
@@ -334,23 +334,23 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 
 	var errList []error
 
-	// ValString
-	var ValString string
-	if err := json.Unmarshal(raw, &ValString); err != nil {
+	// String
+	var String string
+	if err := json.Unmarshal(raw, &String); err != nil {
 		errList = append(errList, err)
-		resource.ValString = nil
+		resource.String = nil
 	} else {
-		resource.ValString = &ValString
+		resource.String = &String
 		return nil
 	}
 
-	// ValBool
-	var ValBool bool
-	if err := json.Unmarshal(raw, &ValBool); err != nil {
+	// Bool
+	var Bool bool
+	if err := json.Unmarshal(raw, &Bool); err != nil {
 		errList = append(errList, err)
-		resource.ValBool = nil
+		resource.Bool = nil
 	} else {
-		resource.ValBool = &ValBool
+		resource.Bool = &Bool
 		return nil
 	}
 
