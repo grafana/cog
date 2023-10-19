@@ -348,6 +348,19 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 }
 
 func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defaultValue any) (ast.Type, error) {
+	// Possible cases:
+	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
+	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
+
+	// Try to guess if `v` can be represented as an enum (includes checking for a type hint) (1)
+	implicitEnum, err := isImplicitEnum(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+	if implicitEnum {
+		return g.declareAnonymousEnum(v, defaultValue, hints)
+	}
+
 	_, disjunctionBranchesWithPossibleDefault := v.Expr()
 	defaultAsCueValue, hasDefault := v.Default()
 
@@ -368,19 +381,6 @@ func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defa
 	// not a disjunction anymore
 	if len(disjunctionBranchesWithPossibleDefault) != len(disjunctionBranches) && len(disjunctionBranches) == 1 {
 		return g.declareNode(disjunctionBranches[0])
-	}
-
-	// Possible cases:
-	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
-	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
-
-	// Try to guess if `v` can be represented as an enum (includes checking for a type hint) (1)
-	implicitEnum, err := isImplicitEnum(v)
-	if err != nil {
-		return ast.Type{}, err
-	}
-	if implicitEnum {
-		return g.declareAnonymousEnum(v, defaultValue, hints)
 	}
 
 	// We must be looking at a disjunction then (2)
