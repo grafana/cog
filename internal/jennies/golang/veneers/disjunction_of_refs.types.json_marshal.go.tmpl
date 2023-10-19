@@ -31,12 +31,12 @@ func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) erro
     {{- else }}
 	case "{{ $discriminatorValue }}":
 	{{- end }}
-		var val{{ $typeName|formatIdentifier }} {{ $typeName|formatIdentifier }}
-		if err := json.Unmarshal(raw, &val{{ $typeName|formatIdentifier }}); err != nil {
+		var {{ $typeName|lowerCamelCase }} {{ $typeName|formatIdentifier }}
+		if err := json.Unmarshal(raw, &{{ $typeName|lowerCamelCase }}); err != nil {
 			return err
 		}
 
-		resource.Val{{ $typeName|formatIdentifier }} = &val{{ $typeName|formatIdentifier }}
+		resource.{{ $typeName|formatIdentifier }} = &{{ $typeName|lowerCamelCase }}
 		return nil
 {{- end }}
 	}

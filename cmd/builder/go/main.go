@@ -31,7 +31,7 @@ func main() {
 		timeseries.LineWidth(5),
 		timeseries.DrawStyle(common.GraphDrawStyleBars),
 		timeseries.Targets([]types.Target{
-			someQuery.Internal(),
+			someQuery.Build(),
 		}),
 	)
 	if err != nil {
@@ -68,15 +68,15 @@ func main() {
 		}),
 
 		dashboard.Rows([]types.PanelOrRowPanel{
-			{ValRowPanel: overviewRow.Internal()},
-			{ValPanel: someTimeseriesPanel.Internal()},
+			{RowPanel: overviewRow.Build()},
+			{Panel: someTimeseriesPanel.Build()},
 		}),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	dashboardJson, err := json.MarshalIndent(builder.Internal(), "", "  ")
+	dashboardJson, err := json.MarshalIndent(builder.Build(), "", "  ")
 	if err != nil {
 		panic(err)
 	}

@@ -243,17 +243,17 @@ const (
 
 
 type StringOrBool struct {
-	ValString *string `json:"ValString,omitempty"`
-	ValBool *bool `json:"ValBool,omitempty"`
+	String *string `json:"String,omitempty"`
+	Bool *bool `json:"Bool,omitempty"`
 }
 
 func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
-	if resource.ValString != nil {
-		return json.Marshal(resource.ValString)
+	if resource.String != nil {
+		return json.Marshal(resource.String)
 	}
 
-	if resource.ValBool != nil {
-		return json.Marshal(resource.ValBool)
+	if resource.Bool != nil {
+		return json.Marshal(resource.Bool)
 	}
 
 	return nil, nil
@@ -266,23 +266,23 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 
 	var errList []error
 
-	// ValString
-	var ValString string
-	if err := json.Unmarshal(raw, &ValString); err != nil {
+	// String
+	var String string
+	if err := json.Unmarshal(raw, &String); err != nil {
 		errList = append(errList, err)
-		resource.ValString = nil
+		resource.String = nil
 	} else {
-		resource.ValString = &ValString
+		resource.String = &String
 		return nil
 	}
 
-	// ValBool
-	var ValBool bool
-	if err := json.Unmarshal(raw, &ValBool); err != nil {
+	// Bool
+	var Bool bool
+	if err := json.Unmarshal(raw, &Bool); err != nil {
 		errList = append(errList, err)
-		resource.ValBool = nil
+		resource.Bool = nil
 	} else {
-		resource.ValBool = &ValBool
+		resource.Bool = &Bool
 		return nil
 	}
 
@@ -290,7 +290,7 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 }
 
 type StringOrSomeOtherStruct struct {
-	ValString *string `json:"ValString,omitempty"`
-	ValSomeOtherStruct *SomeOtherStruct `json:"ValSomeOtherStruct,omitempty"`
+	String *string `json:"String,omitempty"`
+	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
 }
 

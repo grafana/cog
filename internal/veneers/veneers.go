@@ -94,7 +94,7 @@ func Common() *Rewriter {
 			// Refresh(string) instead of Refresh(struct StringOrBool)
 			option.StructFieldsAsArguments(
 				option.ByName("Dashboard", "refresh"),
-				"ValString",
+				"String",
 			),
 
 			// We don't want these options at all

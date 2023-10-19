@@ -200,7 +200,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		processedBranch.Nullable = true
 
 		fields = append(fields, ast.StructField{
-			Name:     "Val" + tools.UpperCamelCase(pass.typeName(processedBranch)),
+			Name:     pass.typeName(processedBranch),
 			Type:     processedBranch,
 			Required: false,
 		})
