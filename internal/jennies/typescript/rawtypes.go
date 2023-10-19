@@ -417,6 +417,16 @@ func formatValue(val any) string {
 
 	var buffer strings.Builder
 
+	if array, ok := val.([]any); ok {
+		buffer.WriteString("[\n")
+		for _, v := range array {
+			buffer.WriteString(fmt.Sprintf("%s,\n", formatValue(v)))
+		}
+		buffer.WriteString("]")
+
+		return buffer.String()
+	}
+
 	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
 		buffer.WriteString("{\n")
 

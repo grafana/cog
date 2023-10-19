@@ -20,13 +20,10 @@ func (pass *NotRequiredFieldAsNullableType) Process(schemas []*ast.Schema) ([]*a
 }
 
 func (pass *NotRequiredFieldAsNullableType) processSchema(schema *ast.Schema) *ast.Schema {
-	processedObjects := make([]ast.Object, 0, len(schema.Objects))
-	for _, object := range schema.Objects {
-		processedObjects = append(processedObjects, pass.processObject(object))
-	}
-
 	newSchema := schema.DeepCopy()
-	newSchema.Objects = processedObjects
+	for i, object := range schema.Objects {
+		newSchema.Objects[i] = pass.processObject(object)
+	}
 
 	return &newSchema
 }
@@ -36,42 +33,42 @@ func (pass *NotRequiredFieldAsNullableType) processObject(object ast.Object) ast
 		return object
 	}
 
-	newObject := object
-	newObject.Type = pass.processType(object.Type)
+	object.Type = pass.processType(object.Type)
 
-	return newObject
+	return object
 }
 
 func (pass *NotRequiredFieldAsNullableType) processType(def ast.Type) ast.Type {
 	if def.Kind == ast.KindArray {
-		return pass.processArray(def.AsArray())
+		return pass.processArray(def)
 	}
 
 	if def.Kind == ast.KindMap {
-		return pass.processMap(def.AsMap())
+		return pass.processMap(def)
 	}
 
 	if def.Kind == ast.KindStruct {
-		return pass.processStruct(def.AsStruct())
+		return pass.processStruct(def)
 	}
 
 	return def
 }
 
-func (pass *NotRequiredFieldAsNullableType) processArray(def ast.ArrayType) ast.Type {
-	return ast.NewArray(pass.processType(def.ValueType))
+func (pass *NotRequiredFieldAsNullableType) processArray(def ast.Type) ast.Type {
+	def.Array.ValueType = pass.processType(def.Array.ValueType)
+
+	return def
 }
 
-func (pass *NotRequiredFieldAsNullableType) processMap(def ast.MapType) ast.Type {
-	return ast.NewMap(
-		pass.processType(def.IndexType),
-		pass.processType(def.ValueType),
-	)
+func (pass *NotRequiredFieldAsNullableType) processMap(def ast.Type) ast.Type {
+	def.Map.IndexType = pass.processType(def.Map.IndexType)
+	def.Map.ValueType = pass.processType(def.Map.ValueType)
+
+	return def
 }
 
-func (pass *NotRequiredFieldAsNullableType) processStruct(def ast.StructType) ast.Type {
-	processedFields := make([]ast.StructField, 0, len(def.Fields))
-	for _, field := range def.Fields {
+func (pass *NotRequiredFieldAsNullableType) processStruct(def ast.Type) ast.Type {
+	for i, field := range def.Struct.Fields {
 		fieldType := pass.processType(field.Type)
 		if !field.Required {
 			fieldType.Nullable = true
@@ -80,8 +77,8 @@ func (pass *NotRequiredFieldAsNullableType) processStruct(def ast.StructType) as
 		newField := field
 		newField.Type = fieldType
 
-		processedFields = append(processedFields, newField)
+		def.Struct.Fields[i] = newField
 	}
 
-	return ast.NewStruct(processedFields...)
+	return def
 }

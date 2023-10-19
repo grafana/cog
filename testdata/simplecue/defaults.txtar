@@ -6,6 +6,7 @@ container: {
     IntEnum: 0 | 1 | *2 @cog(kind="enum",memberNames="firstValue|secondValue|thirdValue")
     Number: int64 | *5
     repeatDirection: *"h" | "v"
+    tags: [...string] | *["default", "tags"]
 }
 -- out/simplecue/GenerateAST --
 == ir.json
@@ -137,6 +138,27 @@ container: {
                       "Value": "v"
                     }
                   ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "tags",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Default": [
+                  "default",
+                  "tags"
+                ],
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
                 }
               },
               "Required": true
