@@ -12,10 +12,11 @@ import (
  *****************************************************************************/
 
 type OptionRule struct {
-	Omit                 *OptionSelector `yaml:"omit"`
-	PromoteToConstructor *OptionSelector `yaml:"promote_to_constructor"`
-	Rename               *Rename         `yaml:"rename"`
-	UnfoldBoolean        *UnfoldBoolean  `yaml:"unfold_boolean"`
+	Omit                    *OptionSelector          `yaml:"omit"`
+	PromoteToConstructor    *OptionSelector          `yaml:"promote_to_constructor"`
+	Rename                  *Rename                  `yaml:"rename"`
+	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean"`
+	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
 }
 
 func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
@@ -43,6 +44,10 @@ func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
 
 	if rule.UnfoldBoolean != nil {
 		return rule.UnfoldBoolean.AsRewriteRule()
+	}
+
+	if rule.StructFieldsAsArguments != nil {
+		return rule.StructFieldsAsArguments.AsRewriteRule()
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
@@ -80,6 +85,20 @@ func (rule UnfoldBoolean) AsRewriteRule() (option.RewriteRule, error) {
 		OptionTrue:  rule.TrueAs,
 		OptionFalse: rule.FalseAs,
 	}), nil
+}
+
+type StructFieldsAsArguments struct {
+	OptionSelector `yaml:",inline"`
+	Fields         []string `yaml:"fields"`
+}
+
+func (rule StructFieldsAsArguments) AsRewriteRule() (option.RewriteRule, error) {
+	selector, err := rule.AsSelector()
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.StructFieldsAsArguments(selector, rule.Fields...), nil
 }
 
 /******************************************************************************
