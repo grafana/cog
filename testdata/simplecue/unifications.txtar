@@ -46,7 +46,6 @@
                 "Fields": [
                   {
                     "Name": "inline",
-                    "Comments": [],
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -76,7 +75,6 @@
           "Fields": [
             {
               "Name": "settings",
-              "Comments": [],
               "Type": {
                 "Kind": "struct",
                 "Nullable": false,
@@ -84,7 +82,6 @@
                   "Fields": [
                     {
                       "Name": "script",
-                      "Comments": [],
                       "Type": {
                         "Kind": "ref",
                         "Nullable": false,
@@ -117,7 +114,6 @@
           "Fields": [
             {
               "Name": "type",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -130,7 +126,6 @@
             },
             {
               "Name": "settings",
-              "Comments": [],
               "Type": {
                 "Kind": "struct",
                 "Nullable": false,
@@ -138,7 +133,6 @@
                   "Fields": [
                     {
                       "Name": "script",
-                      "Comments": [],
                       "Type": {
                         "Kind": "ref",
                         "Nullable": false,
@@ -151,7 +145,6 @@
                     },
                     {
                       "Name": "missing",
-                      "Comments": [],
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,

@@ -80,7 +80,6 @@ stringToMapOfMap: [string]: {[string]: bool}
           "Fields": [
             {
               "Name": "bar",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

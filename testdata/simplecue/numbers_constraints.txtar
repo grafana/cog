@@ -22,7 +22,6 @@ container: {
           "Fields": [
             {
               "Name": "constantInt",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -35,7 +34,6 @@ container: {
             },
             {
               "Name": "constantFloat",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -48,7 +46,6 @@ container: {
             },
             {
               "Name": "rowHeight",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -74,7 +71,6 @@ container: {
             },
             {
               "Name": "colWidth",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -94,7 +90,6 @@ container: {
             },
             {
               "Name": "fiscalYearStartMonth",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
