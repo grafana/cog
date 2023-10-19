@@ -26,7 +26,7 @@
                                         "Required": true,
                                         "Type": {
                                             "Kind": "scalar",
-                                            "Default": true,
+                                            "Default": "hello",
                                             "Scalar": {"ScalarKind": "string"}
                                         }
                                     }
@@ -42,7 +42,7 @@
                                         "Required": true,
                                         "Type": {
                                             "Kind": "scalar",
-                                            "Default": true,
+                                            "Default": 32,
                                             "Scalar": {"ScalarKind": "int32"}
                                         }
                                     }
@@ -104,7 +104,10 @@ export interface Intersections extends SomeStruct, externalPkg.AnotherStruct {
 	fieldInteger: number;
 }
 
-export const defaultIntersections = (): Intersections => ("unknown");
+export const defaultIntersections = (): Intersections => ({
+	fieldString: "hello",
+	fieldInteger: 32,
+});
 
 export interface SomeStruct {
 	fieldBool: boolean;

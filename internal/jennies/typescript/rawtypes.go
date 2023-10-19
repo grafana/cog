@@ -342,7 +342,8 @@ func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkg
 		return raw("[]")
 	case ast.KindScalar:
 		return defaultValueForScalar(typeDef.AsScalar())
-
+	case ast.KindIntersection:
+		return defaultValuesForIntersection(schema, typeDef.AsIntersection(), packageMapper)
 	default:
 		return "unknown"
 	}
@@ -413,6 +414,27 @@ func defaultValueForScalar(scalar ast.ScalarType) any {
 	default:
 		return "unknown"
 	}
+}
+
+func defaultValuesForIntersection(schema *ast.Schema, intersectDef ast.IntersectionType, packageMapper pkgMapper) *orderedmap.Map[string, any] {
+	defaults := orderedmap.New[string, any]()
+
+	for _, branch := range intersectDef.Branches {
+		if branch.Ref != nil {
+			continue
+		}
+
+		if branch.Struct != nil {
+			strctDef := defaultValuesForStructType(schema, branch.AsStruct(), packageMapper)
+			strctDef.Iterate(func(key string, value any) {
+				defaults.Set(key, value)
+			})
+		}
+
+		// TODO: Add them for other types?
+	}
+
+	return defaults
 }
 
 func formatValue(val any) string {
