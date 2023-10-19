@@ -548,7 +548,7 @@ func (t MapType) DeepCopy() MapType {
 
 type StructType struct {
 	Fields        []StructField
-	Intersections []RefType
+	Intersections []RefType `json:",omitempty"`
 }
 
 func (structType StructType) DeepCopy() StructType {

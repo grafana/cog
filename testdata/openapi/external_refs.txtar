@@ -1,0 +1,124 @@
+-- external_refs.json --
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "external_refs",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "WithOneRef": {
+        "allOf": [
+          {
+            "$ref": "./refs/refs.json/#/components/schemas/ReferenceA"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "WithTwoRef": {
+        "allOf": [
+          {
+            "$ref": "./refs/refs.json/#/components/schemas/ReferenceA"
+          },
+          {
+            "$ref": "./refs/refs.json/#/components/schemas/ReferenceB"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
+-- out/openapi/GenerateAST --
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "WithOneRef",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "description",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ],
+          "Intersections": [
+            {
+              "ReferredPkg": "./refs/refs",
+              "ReferredType": "ReferenceA"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "WithOneRef"
+      }
+    },
+    {
+      "Name": "WithTwoRef",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "description",
+              "Comments": [],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ],
+          "Intersections": [
+            {
+              "ReferredPkg": "./refs/refs",
+              "ReferredType": "ReferenceA"
+            },
+            {
+              "ReferredPkg": "./refs/refs",
+              "ReferredType": "ReferenceB"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "WithTwoRef"
+      }
+    }
+  ]
+}
