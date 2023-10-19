@@ -65,11 +65,10 @@ options:
       true_as: editable
       false_as: readonly
 
-  # TODO
-  # option.StructFieldsAsArguments(
-  #				option.ByName("dashboard", "refresh"),
-  #				"ValString",
-  #			),
+  # Refresh(string) instead of Refresh(struct StringOrBool)
+  - struct_fields_as_arguments:
+      by_name: dashboard.refresh
+      fields: [ValString]
 
   # We don't want these options at all
   - omit: { by_name: Dashboard.schemaVersion }
