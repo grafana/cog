@@ -1,0 +1,116 @@
+# Basic struct with default values.
+-- ir.json --
+{
+    "Package": "intersections",
+    "Objects": [
+        {
+            "Name": "Intersections",
+            "Type": {
+                "Kind": "intersection",
+                "Intersection": {
+                    "Branches": [
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredPkg": "intersections", "ReferredType": "SomeStruct"}
+                        },
+                        {
+                            "Kind": "ref",
+                            "Ref": {"ReferredPkg": "externalPkg", "ReferredType": "AnotherStruct"}
+                        },
+                        {
+                            "Kind": "struct",
+                            "Struct": {
+                                "Fields": [
+                                    {
+                                        "Name": "fieldString",
+                                        "Required": true,
+                                        "Type": {
+                                            "Kind": "scalar",
+                                            "Default": true,
+                                            "Scalar": {"ScalarKind": "string"}
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "Kind": "struct",
+                            "Struct": {
+                                "Fields": [
+                                    {
+                                        "Name": "fieldInteger",
+                                        "Required": true,
+                                        "Type": {
+                                            "Kind": "scalar",
+                                            "Default": true,
+                                            "Scalar": {"ScalarKind": "int32"}
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "Name": "SomeStruct",
+            "Type": {
+                "Kind": "struct",
+                "Struct": {
+                    "Fields": [
+                        {
+                            "Name": "fieldBool",
+                            "Required": true,
+                            "Type": {
+                                "Kind": "scalar",
+                                "Default": true,
+                                "Scalar": {"ScalarKind": "bool"}
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+
+-- out/jennies/GoRawTypes --
+== types/intersections/types_gen.go
+package types
+
+import (
+	externalPkg "github.com/grafana/cog/generated/types/externalPkg"
+)
+
+type Intersections struct {
+	SomeStruct
+	externalPkg.AnotherStruct
+
+	FieldString string `json:"fieldString"`
+	FieldInteger int32 `json:"fieldInteger"`
+}
+
+type SomeStruct struct {
+	FieldBool bool `json:"fieldBool"`
+}
+
+-- out/jennies/TypescriptRawTypes --
+== types/intersections/types_gen.ts
+import * as externalPkg from "../externalPkg/types_gen";
+
+export interface Intersections extends SomeStruct, externalPkg.AnotherStruct {
+	fieldString: string;
+	fieldInteger: number;
+}
+
+export const defaultIntersections = (): Intersections => ("unknown");
+
+export interface SomeStruct {
+	fieldBool: boolean;
+}
+
+export const defaultSomeStruct = (): SomeStruct => ({
+	fieldBool: true,
+});
+
