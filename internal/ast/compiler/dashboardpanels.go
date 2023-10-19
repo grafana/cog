@@ -34,7 +34,7 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 	newSchema.Objects = nil
 
 	for _, object := range schema.Objects {
-		if object.Name == "dashboard" {
+		if object.Name == "Dashboard" {
 			disjunction := ast.NewDisjunction([]ast.Type{
 				ast.NewRef(schema.Package, "Panel"),
 				ast.NewRef(schema.Package, "RowPanel"),
