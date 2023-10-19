@@ -106,7 +106,10 @@ func (rule StructFieldsAsArguments) AsRewriteRule() (option.RewriteRule, error) 
  *****************************************************************************/
 
 type OptionSelector struct {
+	// objectName.optionName
 	ByName *string `yaml:"by_name"`
+
+	ByNames *ByNamesSelector `yaml:"by_names"`
 }
 
 func (selector OptionSelector) AsSelector() (option.Selector, error) {
@@ -119,5 +122,22 @@ func (selector OptionSelector) AsSelector() (option.Selector, error) {
 		return option.ByName(objectName, optionName), nil
 	}
 
+	if selector.ByNames != nil {
+		return selector.ByNames.AsSelector()
+	}
+
 	return nil, fmt.Errorf("empty selector")
+}
+
+type ByNamesSelector struct {
+	Object  string   `yaml:"object"`
+	Options []string `yaml:"options"`
+}
+
+func (selector ByNamesSelector) AsSelector() (option.Selector, error) {
+	if selector.Object == "" {
+		return nil, fmt.Errorf("`object` is required")
+	}
+
+	return option.ByName(selector.Object, selector.Options...), nil
 }
