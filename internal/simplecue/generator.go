@@ -298,9 +298,19 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.NullKind:
 		return ast.Null(), nil
 	case cue.BoolKind:
-		return g.declareBoolean(v, defVal, hints)
+		opts, err := g.scalarTypeOptions(v, defVal, hints)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.Bool(opts...), nil
 	case cue.BytesKind:
-		return ast.Bytes(ast.Default(defVal), ast.Hints(hints)), nil
+		opts, err := g.scalarTypeOptions(v, defVal, hints)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.Bytes(opts...), nil
 	case cue.StringKind:
 		return g.declareString(v, defVal, hints)
 	case cue.FloatKind, cue.NumberKind, cue.IntKind:
@@ -402,7 +412,7 @@ func (g *generator) declareAnonymousEnum(v cue.Value, defValue any, hints ast.Je
 	return ast.NewEnum(values, ast.Default(defValue), ast.Hints(hints)), nil
 }
 
-func (g *generator) declareBoolean(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
+func (g *generator) scalarTypeOptions(v cue.Value, defVal any, hints ast.JenniesHints) ([]ast.TypeOption, error) {
 	opts := []ast.TypeOption{
 		ast.Default(defVal),
 		ast.Hints(hints),
@@ -411,27 +421,22 @@ func (g *generator) declareBoolean(v cue.Value, defVal any, hints ast.JenniesHin
 	if v.IsConcrete() {
 		val, err := cueConcreteToScalar(v)
 		if err != nil {
-			return ast.Type{}, err
+			return nil, err
 		}
 
 		opts = append(opts, ast.Value(val))
 	}
 
-	return ast.Bool(opts...), nil
+	return opts, nil
 }
 
 func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
-	typeDef := ast.String(ast.Default(defVal), ast.Hints(hints))
-
-	// v.IsConcrete() being true means we're looking at a constant/known value
-	if v.IsConcrete() {
-		val, err := cueConcreteToScalar(v)
-		if err != nil {
-			return typeDef, err
-		}
-
-		typeDef.Scalar.Value = val
+	opts, err := g.scalarTypeOptions(v, defVal, hints)
+	if err != nil {
+		return ast.Type{}, err
 	}
+
+	typeDef := ast.String(opts...)
 
 	// Extract constraints
 	constraints, err := g.declareStringConstraints(v)
