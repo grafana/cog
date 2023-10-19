@@ -16,7 +16,8 @@ const (
 
 	KindArray Kind = "array"
 
-	KindScalar Kind = "scalar"
+	KindScalar       Kind = "scalar"
+	KindIntersection Kind = "intersection"
 )
 
 type ScalarKind string
@@ -83,13 +84,14 @@ type Type struct {
 	Nullable bool
 	Default  any `json:",omitempty"`
 
-	Disjunction *DisjunctionType `json:",omitempty"`
-	Array       *ArrayType       `json:",omitempty"`
-	Enum        *EnumType        `json:",omitempty"`
-	Map         *MapType         `json:",omitempty"`
-	Struct      *StructType      `json:",omitempty"`
-	Ref         *RefType         `json:",omitempty"`
-	Scalar      *ScalarType      `json:",omitempty"`
+	Disjunction  *DisjunctionType  `json:",omitempty"`
+	Array        *ArrayType        `json:",omitempty"`
+	Enum         *EnumType         `json:",omitempty"`
+	Map          *MapType          `json:",omitempty"`
+	Struct       *StructType       `json:",omitempty"`
+	Ref          *RefType          `json:",omitempty"`
+	Scalar       *ScalarType       `json:",omitempty"`
+	Intersection *IntersectionType `json:",omitempty"`
 
 	Hints JenniesHints `json:",omitempty"`
 }
@@ -321,6 +323,15 @@ func NewScalar(kind ScalarKind, opts ...TypeOption) Type {
 	return def
 }
 
+func NewIntersection(branches []Type) Type {
+	return Type{
+		Kind: KindIntersection,
+		Intersection: &IntersectionType{
+			Branches: branches,
+		},
+	}
+}
+
 func (t Type) IsNull() bool {
 	return t.Kind == KindScalar && t.AsScalar().ScalarKind == KindNull
 }
@@ -355,6 +366,10 @@ func (t Type) AsRef() RefType {
 
 func (t Type) AsScalar() ScalarType {
 	return *t.Scalar
+}
+
+func (t Type) AsIntersection() IntersectionType {
+	return *t.Intersection
 }
 
 // named declaration of a type
@@ -640,4 +655,18 @@ func (scalarType ScalarType) DeepCopy() ScalarType {
 
 func (scalarType ScalarType) IsConcrete() bool {
 	return scalarType.Value != nil
+}
+
+type IntersectionType struct {
+	Branches []Type
+}
+
+func (inter IntersectionType) DeepCopy() IntersectionType {
+	newT := IntersectionType{}
+
+	for _, b := range inter.Branches {
+		newT.Branches = append(newT.Branches, b.DeepCopy())
+	}
+
+	return newT
 }
