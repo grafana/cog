@@ -22,7 +22,6 @@ container: {
           "Fields": [
             {
               "Name": "from",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -35,7 +34,6 @@ container: {
             },
             {
               "Name": "editable",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -48,7 +46,6 @@ container: {
             },
             {
               "Name": "IntEnum",
-              "Comments": [],
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -99,7 +96,6 @@ container: {
             },
             {
               "Name": "Number",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -112,7 +108,6 @@ container: {
             },
             {
               "Name": "repeatDirection",
-              "Comments": [],
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,

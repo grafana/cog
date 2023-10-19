@@ -564,7 +564,7 @@ func (structType StructType) FieldByName(name string) (StructField, bool) {
 
 type StructField struct {
 	Name     string
-	Comments []string
+	Comments []string `json:",omitempty"`
 	Type     Type
 	Required bool
 }

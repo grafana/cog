@@ -56,7 +56,6 @@
           "Fields": [
             {
               "Name": "enumInt",
-              "Comments": [],
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -91,7 +90,6 @@
             },
             {
               "Name": "enumString",
-              "Comments": [],
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -126,7 +124,6 @@
             },
             {
               "Name": "enumWithDefault",
-              "Comments": [],
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -170,5 +167,3 @@
     }
   ]
 }
-
-
