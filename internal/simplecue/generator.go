@@ -316,7 +316,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.FloatKind, cue.NumberKind, cue.IntKind:
 		return g.declareNumber(v, defVal, hints)
 	case cue.ListKind:
-		return g.declareList(v, hints)
+		return g.declareList(v, defVal, hints)
 	case cue.StructKind:
 		// in cue: {...}, {[string]: type}, or inline struct
 		if op, _ := v.Expr(); op == cue.NoOp {
@@ -683,8 +683,8 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 	return constraints, nil
 }
 
-func (g *generator) declareList(v cue.Value, hints ast.JenniesHints) (ast.Type, error) {
-	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints))
+func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
+	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints), ast.Default(defVal))
 
 	// works only for a closed/concrete list
 	if v.IsConcrete() {
