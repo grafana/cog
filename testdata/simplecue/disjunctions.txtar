@@ -110,7 +110,8 @@ container: {
                       "Kind": "scalar",
                       "Nullable": false,
                       "Scalar": {
-                        "ScalarKind": "bool"
+                        "ScalarKind": "bool",
+                        "Value": false
                       }
                     }
                   ]

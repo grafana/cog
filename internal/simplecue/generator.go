@@ -298,7 +298,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.NullKind:
 		return ast.Null(), nil
 	case cue.BoolKind:
-		return ast.Bool(ast.Default(defVal), ast.Hints(hints)), nil
+		return g.declareBoolean(v, defVal, hints)
 	case cue.BytesKind:
 		return ast.Bytes(ast.Default(defVal), ast.Hints(hints)), nil
 	case cue.StringKind:
@@ -400,6 +400,24 @@ func (g *generator) declareAnonymousEnum(v cue.Value, defValue any, hints ast.Je
 	}
 
 	return ast.NewEnum(values, ast.Default(defValue), ast.Hints(hints)), nil
+}
+
+func (g *generator) declareBoolean(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
+	opts := []ast.TypeOption{
+		ast.Default(defVal),
+		ast.Hints(hints),
+	}
+
+	if v.IsConcrete() {
+		val, err := cueConcreteToScalar(v)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		opts = append(opts, ast.Value(val))
+	}
+
+	return ast.Bool(opts...), nil
 }
 
 func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
