@@ -64,47 +64,47 @@ func Common() *Rewriter {
 
 			// Let's make the dashboard constructor more friendly
 			option.PromoteToConstructor(
-				option.ByName("dashboard", "title"),
+				option.ByName("Dashboard", "title"),
 			),
 
 			// `Tooltip` looks better than `GraphTooltip`
 			option.Rename(
-				option.ByName("dashboard", "graphTooltip"),
+				option.ByName("Dashboard", "graphTooltip"),
 				"tooltip",
 			),
 
 			// `panels` refers to RowPanel only for now
 			option.Rename(
-				option.ByName("dashboard", "panels"),
+				option.ByName("Dashboard", "panels"),
 				"rows",
 			),
 			/*
 				// TODO: finish implementing this rule
 				option.ArrayToAppend(
-					option.ByName("dashboard", "rows"),
+					option.ByName("Dashboard", "rows"),
 				),
 			*/
 
 			// Editable() + Readonly() instead of Editable(val bool)
 			option.UnfoldBoolean(
-				option.ByName("dashboard", "editable"),
+				option.ByName("Dashboard", "editable"),
 				option.BooleanUnfold{OptionTrue: "editable", OptionFalse: "readonly"},
 			),
 
 			// Refresh(string) instead of Refresh(struct StringOrBool)
 			option.StructFieldsAsArguments(
-				option.ByName("dashboard", "refresh"),
+				option.ByName("Dashboard", "refresh"),
 				"ValString",
 			),
 
 			// We don't want these options at all
-			option.Omit(option.ByName("dashboard", "schemaVersion")),
+			option.Omit(option.ByName("Dashboard", "schemaVersion")),
 
 			/********************************************
 			 * Panels
 			 ********************************************/
 
-			option.Omit(option.ByName("panel", dashboardPanelOptionsToExclude...)),
+			option.Omit(option.ByName("Panel", dashboardPanelOptionsToExclude...)),
 
 			/********************************************
 			 * Rows
@@ -120,7 +120,7 @@ func Common() *Rewriter {
 
 			// Let's make the row constructor more friendly
 			option.PromoteToConstructor(
-				option.ByName("team", "name"),
+				option.ByName("Team", "name"),
 			),
 		},
 	)

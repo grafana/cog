@@ -73,7 +73,7 @@ func Veneers() *veneers.Rewriter {
 
 			// Time(from, to) instead of time(struct {From string `json:"from"`, To   string `json:"to"`}{From: "lala", To: "lala})
 			option.StructFieldsAsArguments(
-				option.ByName("dashboard", "time"),
+				option.ByName("Dashboard", "time"),
 			),
 		},
 	)

@@ -40,6 +40,9 @@ func (pass *Unspec) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 
 		if strings.ToLower(object.Name) == "spec" && object.Type.Kind == ast.KindStruct {
 			newObject.Name = schema.Package
+			if schema.Metadata.Identifier != "" {
+				newObject.Name = schema.Metadata.Identifier
+			}
 		}
 
 		newSchema.Objects = append(newSchema.Objects, newObject)
