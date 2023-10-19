@@ -61,11 +61,6 @@ func Command() *cobra.Command {
 }
 
 func doGenerate(opts Options) error {
-	schemas, err := loaders.LoadAll(opts.Options)
-	if err != nil {
-		return err
-	}
-
 	veneerRewriter, err := yaml.NewLoader().RewriterFromFiles(opts.VeneerConfigFiles)
 	if err != nil {
 		return err
@@ -73,6 +68,11 @@ func doGenerate(opts Options) error {
 
 	// Here begins the code generation setup
 	targetsByLanguage, err := jennies.All(veneerRewriter).ForLanguages(opts.Languages)
+	if err != nil {
+		return err
+	}
+
+	schemas, err := loaders.LoadAll(opts.Options)
 	if err != nil {
 		return err
 	}
