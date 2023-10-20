@@ -21,7 +21,13 @@ func ByObjectName(objectName string) Selector {
 
 func StructGeneratedFromDisjunction() Selector {
 	return func(builder ast.Builder) bool {
-		return builder.For.Type.IsStructGeneratedFromDisjunction()
+		typeDef := builder.For.Type
+
+		if typeDef.Kind == ast.KindRef {
+			typeDef = builder.Schema.LocateObject(typeDef.AsRef().ReferredType).Type
+		}
+
+		return typeDef.IsStructGeneratedFromDisjunction()
 	}
 }
 
