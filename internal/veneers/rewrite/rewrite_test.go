@@ -221,14 +221,20 @@ func TestRewriter_ApplyTo(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			req := require.New(t)
 
-			rewriter := NewRewrite(tc.builderRules, tc.optionRules)
+			rewriter := NewRewrite([]LanguageRules{
+				{
+					Language:     AllLanguages,
+					BuilderRules: tc.builderRules,
+					OptionRules:  tc.optionRules,
+				},
+			})
 
 			// save our original/expected states
 			originalBuildersJSONBeforeApply := mustMarshalJSON(t, tc.inputBuilders)
 			expectedBuildersJSON := mustMarshalJSON(t, tc.outputBuilders)
 
 			// apply the rewrite rules
-			rewrittenBuilders, err := rewriter.ApplyTo(tc.inputBuilders)
+			rewrittenBuilders, err := rewriter.ApplyTo(tc.inputBuilders, "go")
 			req.NoError(err)
 
 			// save the output states

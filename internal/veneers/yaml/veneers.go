@@ -10,6 +10,7 @@ import (
 )
 
 type Veneers struct {
+	Language string        `yaml:"language"`
 	Builders []BuilderRule `yaml:"builders"`
 	Options  []OptionRule  `yaml:"options"`
 }
@@ -22,32 +23,30 @@ func NewLoader() *Loader {
 }
 
 func (loader *Loader) RewriterFromFiles(filenames []string) (*rewrite.Rewriter, error) {
-	builderRules, optionRules, err := loader.LoadFiles(filenames)
+	rules, err := loader.LoadFiles(filenames)
 	if err != nil {
 		return nil, err
 	}
 
-	return rewrite.NewRewrite(builderRules, optionRules), nil
+	return rewrite.NewRewrite(rules), nil
 }
 
-func (loader *Loader) LoadFiles(filenames []string) ([]builder.RewriteRule, []option.RewriteRule, error) {
-	var allBuilderRules []builder.RewriteRule
-	var allOptionRules []option.RewriteRule
+func (loader *Loader) LoadFiles(filenames []string) ([]rewrite.LanguageRules, error) {
+	languageRules := make([]rewrite.LanguageRules, 0, len(filenames))
 
 	for _, filename := range filenames {
-		builderRules, optionRules, err := loader.LoadFile(filename)
+		rules, err := loader.LoadFile(filename)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
-		allBuilderRules = append(allBuilderRules, builderRules...)
-		allOptionRules = append(allOptionRules, optionRules...)
+		languageRules = append(languageRules, rules)
 	}
 
-	return allBuilderRules, allOptionRules, nil
+	return languageRules, nil
 }
 
-func (loader *Loader) LoadFile(filename string) ([]builder.RewriteRule, []option.RewriteRule, error) {
+func (loader *Loader) LoadFile(filename string) (rewrite.LanguageRules, error) {
 	var builderRules []builder.RewriteRule
 	var optionRules []option.RewriteRule
 
@@ -56,11 +55,11 @@ func (loader *Loader) LoadFile(filename string) ([]builder.RewriteRule, []option
 	// read and parse the input file
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, nil, err
+		return rewrite.LanguageRules{}, err
 	}
 
 	if err := yaml.Unmarshal(data, &veneers); err != nil {
-		return nil, nil, err
+		return rewrite.LanguageRules{}, err
 	}
 
 	builderRules = make([]builder.RewriteRule, 0, len(veneers.Builders))
@@ -70,7 +69,7 @@ func (loader *Loader) LoadFile(filename string) ([]builder.RewriteRule, []option
 	for _, rule := range veneers.Builders {
 		builderRule, err := rule.AsRewriteRule()
 		if err != nil {
-			return nil, nil, err
+			return rewrite.LanguageRules{}, err
 		}
 
 		builderRules = append(builderRules, builderRule)
@@ -80,11 +79,15 @@ func (loader *Loader) LoadFile(filename string) ([]builder.RewriteRule, []option
 	for _, rule := range veneers.Options {
 		optionRule, err := rule.AsRewriteRule()
 		if err != nil {
-			return nil, nil, err
+			return rewrite.LanguageRules{}, err
 		}
 
 		optionRules = append(optionRules, optionRule)
 	}
 
-	return builderRules, optionRules, nil
+	return rewrite.LanguageRules{
+		Language:     veneers.Language,
+		BuilderRules: builderRules,
+		OptionRules:  optionRules,
+	}, nil
 }

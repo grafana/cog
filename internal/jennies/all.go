@@ -39,11 +39,11 @@ func (languageTargets LanguageTargets) ForLanguages(languages []string) (Languag
 
 func All(veneerRewriter *rewrite.Rewriter) LanguageTargets {
 	targets := map[string]LanguageTarget{
-		"go": {
+		golang.LanguageRef: {
 			Jennies:        golang.Jennies(veneerRewriter),
 			CompilerPasses: golang.CompilerPasses(),
 		},
-		"typescript": {
+		typescript.LanguageRef: {
 			Jennies:        typescript.Jennies(veneerRewriter),
 			CompilerPasses: typescript.CompilerPasses(),
 		},

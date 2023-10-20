@@ -57,6 +57,5 @@ $ go run cmd/cli/main.go generate \
     --kind-registry ./kind-registry \
     --cue ./schemas/cue/common \
     --include-cue-import ./schemas/cue/common:github.com/grafana/grafana/packages/grafana-schema/src/common \
-    --veneer ./config/dashboard.veneers.yaml \
-    --veneer ./config/team.veneers.yaml
+    --veneers ./config
 ```

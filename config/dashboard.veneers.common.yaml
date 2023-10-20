@@ -1,3 +1,5 @@
+language: all
+
 builders:
   ##############
   # Dashboards #
@@ -67,7 +69,7 @@ options:
 
   # Refresh(string) instead of Refresh(struct StringOrBool)
   - struct_fields_as_arguments:
-      by_name: dashboard.refresh
+      by_name: Dashboard.refresh
       fields: [ValString]
 
   # We don't want these options at all
