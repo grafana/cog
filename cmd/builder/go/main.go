@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/cog/generated/dashboard/dashboard"
 	"github.com/grafana/cog/generated/dashboard/rowpanel"
+	"github.com/grafana/cog/generated/dashboard/timepicker"
 	prometheus "github.com/grafana/cog/generated/prometheus/dataquery"
 	timeseries "github.com/grafana/cog/generated/timeseries/panel"
 	common "github.com/grafana/cog/generated/types/common"
@@ -50,12 +51,12 @@ func main() {
 
 		dashboard.Refresh("1m"),
 		dashboard.Time("now-3h", "now"),
-
-		//dashboard.Timepicker(
-		//	timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
-		//),
-
 		dashboard.Timezone("utc"),
+
+		dashboard.Timepicker(
+			timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
+		),
+
 		dashboard.Tooltip(types.DashboardCursorSyncCrosshair),
 		dashboard.Tags([]string{"generated", "from", "cue"}),
 		dashboard.Links([]types.DashboardLink{
