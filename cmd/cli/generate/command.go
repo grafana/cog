@@ -3,6 +3,7 @@ package generate
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/cmd/cli/loaders"
@@ -16,9 +17,27 @@ import (
 type Options struct {
 	loaders.Options
 
-	Languages         []string
-	VeneerConfigFiles []string
-	OutputDir         string
+	Languages               []string
+	VeneerConfigFiles       []string
+	VeneerConfigDirectories []string
+	OutputDir               string
+}
+
+func (opts Options) VeneerFiles() ([]string, error) {
+	veneers := make([]string, 0, len(opts.VeneerConfigFiles))
+	veneers = append(veneers, opts.VeneerConfigFiles...)
+
+	for _, dir := range opts.VeneerConfigDirectories {
+		globPattern := filepath.Join(filepath.Clean(dir), "*.yaml")
+		matches, err := filepath.Glob(globPattern)
+		if err != nil {
+			return nil, err
+		}
+
+		veneers = append(veneers, matches...)
+	}
+
+	return veneers, nil
 }
 
 func Command() *cobra.Command {
@@ -36,6 +55,7 @@ func Command() *cobra.Command {
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
 	cmd.Flags().StringArrayVarP(&opts.VeneerConfigFiles, "veneer", "c", nil, "Veneer configuration file.")
+	cmd.Flags().StringArrayVar(&opts.VeneerConfigDirectories, "veneers", nil, "Veneer configuration directories.")
 
 	cmd.Flags().StringArrayVar(&opts.CueEntrypoints, "cue", nil, "CUE input schema.")                                                  // TODO: better usage text
 	cmd.Flags().StringArrayVar(&opts.KindsysCoreEntrypoints, "kindsys-core", nil, "Kindys core kinds input schema.")                   // TODO: better usage text
@@ -56,12 +76,18 @@ func Command() *cobra.Command {
 	_ = cmd.MarkFlagDirname("openapi")
 	_ = cmd.MarkFlagDirname("output")
 	_ = cmd.MarkFlagFilename("veneer")
+	_ = cmd.MarkFlagDirname("veneers")
 
 	return cmd
 }
 
 func doGenerate(opts Options) error {
-	veneerRewriter, err := yaml.NewLoader().RewriterFromFiles(opts.VeneerConfigFiles)
+	veneerFiles, err := opts.VeneerFiles()
+	if err != nil {
+		return err
+	}
+
+	veneerRewriter, err := yaml.NewLoader().RewriterFromFiles(veneerFiles)
 	if err != nil {
 		return err
 	}

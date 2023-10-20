@@ -6,14 +6,14 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/jennies/tools"
-	"github.com/grafana/cog/internal/veneers/builder"
-	"github.com/grafana/cog/internal/veneers/option"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 )
 
+const LanguageRef = "go"
+
 func Jennies(veneers *rewrite.Rewriter) *codejen.JennyList[[]*ast.Schema] {
 	targets := codejen.JennyListWithNamer[[]*ast.Schema](func(_ []*ast.Schema) string {
-		return "golang"
+		return LanguageRef
 	})
 	targets.AppendOneToOne(BuilderInterface{})
 	targets.AppendManyToMany(
@@ -29,14 +29,7 @@ func Jennies(veneers *rewrite.Rewriter) *codejen.JennyList[[]*ast.Schema] {
 				builders := generator.FromAST(schemas)
 
 				// apply given veneers
-				builders, err = veneers.ApplyTo(builders)
-				if err != nil {
-					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
-					panic(err)
-				}
-
-				// apply Go-specific veneers
-				builders, err = Veneers().ApplyTo(builders)
+				builders, err = veneers.ApplyTo(builders, LanguageRef)
 				if err != nil {
 					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
 					panic(err)
@@ -61,21 +54,4 @@ func CompilerPasses() []compiler.Pass {
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.DisjunctionToType{},
 	}
-}
-
-func Veneers() *rewrite.Rewriter {
-	return rewrite.NewRewrite(
-		[]builder.RewriteRule{},
-
-		[]option.RewriteRule{
-			/********************************************
-			 * Dashboards
-			 ********************************************/
-
-			// Time(from, to) instead of time(struct {From string `json:"from"`, To   string `json:"to"`}{From: "lala", To: "lala})
-			option.StructFieldsAsArguments(
-				option.ByName("Dashboard", "time"),
-			),
-		},
-	)
 }

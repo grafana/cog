@@ -1,0 +1,12 @@
+language: go
+
+builders: ~
+
+options:
+  ##############
+  # Dashboards #
+  ##############
+
+  # Time(from, to) instead of time(struct {From string `json:"from"`, To string `json:"to"`}{From: "lala", To: "lala})
+  - struct_fields_as_arguments:
+      by_name: Dashboard.time
