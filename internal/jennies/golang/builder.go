@@ -343,10 +343,7 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	case ast.KindEnum:
 		return formatScalar(typeDef.AsEnum().Values[0].Value)
 	case ast.KindArray, ast.KindMap:
-		return fmt.Sprintf(
-			"make(%s)",
-			formatType(typeDef, jenny.typeImportMapper),
-		)
+		return formatType(typeDef, jenny.typeImportMapper) + "{}"
 	case ast.KindScalar:
 		return "" // no need to do anything here
 
