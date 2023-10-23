@@ -140,7 +140,7 @@ func (jenny *Builder) generateInitAssignment(context context.Builders, assign as
 		return assignment{
 			Path:   fieldPath,
 			Method: assign.Method,
-			Value:  formatScalar(assign.Value),
+			Value:  formatScalar(assign.Value.Constant),
 		}
 	}
 
@@ -233,7 +233,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 
 	var pathInitSafeGuards []string
 	for i, chunk := range assign.Path {
-		if i == len(assign.Path)-1 {
+		if i == len(assign.Path)-1 && assign.Method != ast.AppendAssignment {
 			continue
 		}
 
@@ -267,7 +267,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 
 	// TODO
 	if assign.Value.Envelope != nil {
-		panic("we don't know how to do that yet")
+		panic("enveloped value assignment not implemented")
 	}
 
 	if _, found := context.BuilderForType(assign.Value.Argument.Type); found {

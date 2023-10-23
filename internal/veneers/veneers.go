@@ -81,10 +81,15 @@ func Common() *Rewriter {
 			option.DisjunctionAsOptions(
 				option.ByName("Dashboard", "panels"),
 			),
-			// RowPanel() to Row()
+			// Panel() to WithPanel()
 			option.Rename(
-				option.ByName("Dashboard", "rowPanel"),
-				"row",
+				option.ByNameCaseInsensitive("Dashboard", "Panel"),
+				"withPanel",
+			),
+			// RowPanel() to WithRow()
+			option.Rename(
+				option.ByNameCaseInsensitive("Dashboard", "RowPanel"),
+				"withRow",
 			),
 
 			// Editable() + Readonly() instead of Editable(val bool)
@@ -113,11 +118,9 @@ func Common() *Rewriter {
 			 ********************************************/
 
 			// Let's make the row constructor more friendly
-			/*
-				option.PromoteToConstructor(
-					option.ByName("RowPanel", "title"),
-				),
-			*/
+			option.PromoteToConstructor(
+				option.ByName("RowPanel", "title"),
+			),
 
 			/********************************************
 			 * Team
