@@ -290,19 +290,28 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 		assignmentSafeGuards += "\n\n"
 	}
 
+	assignmentSetup, assignmentSource := jenny.formatAssignmentValue(context, assignment.Value, valueType)
+
+	return assignmentSafeGuards + assignmentSetup + jenny.formatAssignment(assignment, fieldPath, assignmentSource)
+}
+
+func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (string, string) {
 	// constant value, not into a pointer type
-	if assignment.Value.Constant != nil && !valueType.Nullable {
-		return assignmentSafeGuards + jenny.formatAssignment(assignment, fieldPath, formatScalar(assignment.Value.Constant))
-	}
-	// constant value, into a pointer type
-	if assignment.Value.Constant != nil && valueType.Nullable {
-		tmpVarName := "val" + tools.UpperCamelCase(assignment.Path.Last().Identifier)
-		tmpVarSource := fmt.Sprintf("%[1]s := %[2]s\n", tmpVarName, formatScalar(assignment.Value.Constant))
-
-		return assignmentSafeGuards + tmpVarSource + jenny.formatAssignment(assignment, fieldPath, "&"+tmpVarName)
+	if value.Constant != nil {
+		return jenny.formatConstantAssignmentValue(value, valueType)
 	}
 
-	if referredBuilder, found := context.BuilderForType(assignment.Value.Argument.Type); found {
+	// envelope
+	if value.Envelope != nil {
+		return jenny.formatEnvelopeAssignmentValue(context, value)
+	}
+
+	// argument
+	return jenny.formatArgumentAssignmentValue(context, value, valueType)
+}
+
+func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (string, string) {
+	if referredBuilder, found := context.BuilderForType(value.Argument.Type); found {
 		referredBuilderAlias := jenny.importBuilder(referredBuilder)
 		intoPointer := "*"
 		if valueType.Nullable {
@@ -313,13 +322,12 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 		if err != nil {
 			return err
 		}
+`, referredBuilderAlias)
 
-		%[2]s`, referredBuilderAlias, assignmentSafeGuards)
-
-		return source + jenny.formatAssignment(assignment, fieldPath, fmt.Sprintf("%[2]sresource.Build()", fieldPath, intoPointer))
+		return source, fmt.Sprintf("%[1]sresource.Build()", intoPointer)
 	}
 
-	argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
+	argName := jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
@@ -327,12 +335,34 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 		asPointer = "&"
 	}
 
-	generatedConstraints := strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
-	if generatedConstraints != "" {
-		generatedConstraints += "\n\n"
+	return "", asPointer + argName
+}
+
+func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, value ast.AssignmentValue) (string, string) {
+	envelope := value.Envelope
+	referredTypeAlias := jenny.importType(envelope.Type)
+
+	setup, val := jenny.formatAssignmentValue(context, envelope.Value, envelope.Path[0].Type)
+
+	envelopeValue := fmt.Sprintf(`%[1]s.%[2]s{
+	%[3]s: %[4]s,
+}`, referredTypeAlias, envelope.Type.ReferredType, envelope.Path[0].Identifier, val)
+
+	return setup, envelopeValue
+}
+
+func (jenny *Builder) formatConstantAssignmentValue(value ast.AssignmentValue, valueType ast.Type) (string, string) {
+	// constant value, not into a pointer type
+	if !valueType.Nullable {
+		return "", formatScalar(value.Constant)
 	}
 
-	return generatedConstraints + assignmentSafeGuards + jenny.formatAssignment(assignment, fieldPath, asPointer+argName)
+	// constant value, into a pointer type
+	// todo: find a better name for that temporary variable
+	tmpVarName := "val" + tools.UpperCamelCase(ast.TypeName(valueType))
+	tmpVarSource := fmt.Sprintf("%[1]s := %[2]s\n", tmpVarName, formatScalar(value.Constant))
+
+	return tmpVarSource, "&" + tmpVarName
 }
 
 func (jenny *Builder) formatAssignment(assignment ast.Assignment, fieldPath string, value string) string {

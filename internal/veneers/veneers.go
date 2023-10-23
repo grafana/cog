@@ -77,10 +77,14 @@ func Common() *Rewriter {
 			option.ArrayToAppend(
 				option.ByName("Dashboard", "panels"),
 			),
-			// `panel` instead of `panels`, since we're now adding one panel at a time
-			option.Rename(
+			// Panel(...) and RowPanel(...) instead of panels(...(Panel|RowPanel))
+			option.DisjunctionAsOptions(
 				option.ByName("Dashboard", "panels"),
-				"panel",
+			),
+			// RowPanel() to Row()
+			option.Rename(
+				option.ByName("Dashboard", "rowPanel"),
+				"row",
 			),
 
 			// Editable() + Readonly() instead of Editable(val bool)
@@ -109,9 +113,12 @@ func Common() *Rewriter {
 			 ********************************************/
 
 			// Let's make the row constructor more friendly
-			option.PromoteToConstructor(
-				option.ByName("RowPanel", "title"),
-			),
+			/*
+				option.PromoteToConstructor(
+					option.ByName("RowPanel", "title"),
+				),
+			*/
+
 			/********************************************
 			 * Team
 			 ********************************************/

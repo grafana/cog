@@ -138,17 +138,24 @@ func (path Path) String() string {
 	}), ".")
 }
 
+type AssignmentEnvelope struct {
+	Type  RefType         // Reference to the type of the envelope
+	Path  Path            // where to assign within the struct/ref
+	Value AssignmentValue // what to assign
+}
+
+type AssignmentValue struct {
+	Argument *Argument
+	Constant any
+	Envelope *AssignmentEnvelope
+}
+
 type AssignmentMethod string
 
 const (
 	DirectAssignment AssignmentMethod = "direct" // `foo = bar`
 	AppendAssignment AssignmentMethod = "append" // `foo = append(foo, bar)`
 )
-
-type AssignmentValue struct {
-	Argument *Argument // if empty, then use `Constant`
-	Constant any
-}
 
 type Assignment struct {
 	// Where

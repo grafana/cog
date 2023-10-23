@@ -144,6 +144,11 @@ func (jenny *Builder) generateInitAssignment(context context.Builders, assign as
 		}
 	}
 
+	// TODO
+	if assign.Value.Envelope != nil {
+		panic("we don't know how to do that yet")
+	}
+
 	if _, valueHasBuilder := context.BuilderForType(assign.Value.Argument.Type); valueHasBuilder {
 		return assignment{Value: "constructor init assignment with type that has a builder is not supported yet"}
 	}
@@ -258,6 +263,11 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 			InitSafeguards: pathInitSafeGuards,
 			Value:          formatScalar(assign.Value.Constant),
 		}
+	}
+
+	// TODO
+	if assign.Value.Envelope != nil {
+		panic("we don't know how to do that yet")
 	}
 
 	if _, found := context.BuilderForType(assign.Value.Argument.Type); found {
