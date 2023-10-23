@@ -21,6 +21,8 @@ func init() {
 	base.Funcs(map[string]any{
 		"jsonEncode":     mustJSONEncode,
 		"upperCamelCase": tools.UpperCamelCase,
+		"setOperator":    setOperator,
+		"setCloser":      setCloser,
 	})
 	templates = template.Must(base.ParseFS(templatesFS, "templates/*.tmpl"))
 }
@@ -32,4 +34,24 @@ func mustJSONEncode(val any) string {
 	}
 
 	return string(encoded)
+}
+
+func setOperator(valueType Type) string {
+	switch valueType {
+	case TypeInterface, TypeEnum:
+		return "{\n"
+	case TypeConst, TypeType:
+		return "="
+	}
+	return ""
+}
+
+func setCloser(valueType Type) string {
+	switch valueType {
+	case TypeInterface, TypeEnum:
+		return "\n}"
+	case TypeConst, TypeType:
+		return ";"
+	}
+	return ""
 }

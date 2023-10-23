@@ -54,77 +54,89 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		return pkg
 	}
 
-	for _, typeDef := range schema.Objects {
+	objects := make([]Object, len(schema.Objects))
+	for i, typeDef := range schema.Objects {
 		typeDefGen, err := jenny.formatObject(schema, typeDef, packageMapper)
 		if err != nil {
 			return nil, err
 		}
-
-		buffer.Write(typeDefGen)
-		buffer.WriteString("\n")
+		objects[i] = typeDefGen
 	}
 
-	importStatements := imports.Format()
-	if importStatements != "" {
-		importStatements += "\n\n"
+	err := templates.Lookup("types.tmpl").Execute(&buffer, Tmpl{
+		Imports: imports,
+		Objects: objects,
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
-	return []byte(importStatements + buffer.String()), nil
+	return []byte(buffer.String()), nil
 }
 
-func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMapper pkgMapper) ([]byte, error) {
+func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMapper pkgMapper) (Object, error) {
 	var buffer strings.Builder
 
-	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
+	comments := make([]string, len(def.Comments))
+	for i, commentLine := range def.Comments {
+		comments[i] = commentLine
 	}
 
-	buffer.WriteString("export ")
+	objectType := TypeEmpty
+	var typeValue string
 
 	switch def.Type.Kind {
 	case ast.KindStruct:
-		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
-		buffer.WriteString(formatStructFields(def.Type.AsStruct().Fields, packageMapper))
-		buffer.WriteString("\n")
+		objectType = TypeInterface
+		fields := def.Type.AsStruct().Fields
+		for _, field := range fields {
+			// TODO: Improve this
+			typeValue = formatField(field, packageMapper)
+		}
 	case ast.KindEnum:
-		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
+		objectType = TypeEnum
 		for _, val := range def.Type.AsEnum().Values {
 			name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
 			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatScalar(val.Value)))
 		}
-		buffer.WriteString("}\n")
+		// TODO: Improve this
+		typeValue = buffer.String()
 	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, formatType(def.Type, packageMapper)))
+		objectType = TypeType
+		typeValue = formatType(def.Type, packageMapper)
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
-		typeValue := formatScalar(scalarType.Value)
+		typeValue = formatScalar(scalarType.Value)
 
+		objectType = TypeConst
 		if !scalarType.IsConcrete() || def.Type.Hints["kind"] == "type" {
 			if !scalarType.IsConcrete() {
 				typeValue = formatScalarKind(scalarType.ScalarKind)
 			}
-
-			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, typeValue))
-		} else {
-			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", def.Name, typeValue))
+			objectType = TypeType
 		}
 	default:
-		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
+		return Object{}, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
 
+	hasDefault := false
+	defaultValue := ""
 	// generate a "default value factory" for every object, except for constants
 	if def.Type.Kind != ast.KindScalar || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
-		buffer.WriteString("\n")
-
-		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(def.Name), def.Name))
-
-		formattedDefaults := formatValue(defaultValueForObject(schema, def, packageMapper))
-		buffer.WriteString(formattedDefaults)
-
-		buffer.WriteString(");\n")
+		hasDefault = true
+		// TODO: Improve this
+		defaultValue = formatValue(defaultValueForObject(schema, def, packageMapper))
 	}
 
-	return []byte(buffer.String()), nil
+	return Object{
+		Name:         def.Name,
+		Type:         Type(objectType),
+		Comments:     comments,
+		Value:        typeValue,
+		HasDefault:   hasDefault,
+		DefaultValue: defaultValue,
+	}, nil
 }
 
 func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) string {
@@ -148,7 +160,7 @@ func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) strin
 	return buffer.String()
 }
 
-func formatField(def ast.StructField, packageMapper pkgMapper) []byte {
+func formatField(def ast.StructField, packageMapper pkgMapper) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -169,7 +181,7 @@ func formatField(def ast.StructField, packageMapper pkgMapper) []byte {
 		formattedType,
 	))
 
-	return []byte(buffer.String())
+	return buffer.String()
 }
 
 func formatType(def ast.Type, packageMapper pkgMapper) string {

@@ -1,0 +1,10 @@
+{{- range $alias, $importPath := .Imports }}
+import * as {{ $alias }} from '{{ $importPath }}';
+{{- end }}
+
+{{- range $object := .Objects }}
+{{- range $c := $object.Comments }}
+// {{ $c }}
+{{- end }}
+{{ $object.Type }} {{$object.Name }} {{ $object.Type | setOperator }}{{ $object.Value }}{{ $object.Type | setCloser }}
+{{ end }}
