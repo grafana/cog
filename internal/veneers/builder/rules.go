@@ -184,7 +184,7 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 		for _, builder := range builders {
 			// the builder is for a composable type
 			if selector(builder) {
-				panelType := builder.Schema.Metadata.Identifier
+				panelType := strings.ToLower(builder.Schema.Metadata.Identifier)
 				composableBuilders[panelType] = append(composableBuilders[panelType], builder)
 				continue
 			}
