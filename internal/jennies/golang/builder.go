@@ -290,35 +290,36 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 		assignmentSafeGuards += "\n\n"
 	}
 
-	if referredBuilder, found := context.BuilderForType(valueType); found {
+	// constant value, not into a pointer type
+	if assignment.Value.Constant != nil && !valueType.Nullable {
+		return assignmentSafeGuards + jenny.formatAssignment(assignment, fieldPath, formatScalar(assignment.Value.Constant))
+	}
+	// constant value, into a pointer type
+	if assignment.Value.Constant != nil && valueType.Nullable {
+		tmpVarName := "val" + tools.UpperCamelCase(assignment.Path.Last().Identifier)
+		tmpVarSource := fmt.Sprintf("%[1]s := %[2]s\n", tmpVarName, formatScalar(assignment.Value.Constant))
+
+		return assignmentSafeGuards + tmpVarSource + jenny.formatAssignment(assignment, fieldPath, "&"+tmpVarName)
+	}
+
+	if referredBuilder, found := context.BuilderForType(assignment.Value.Argument.Type); found {
 		referredBuilderAlias := jenny.importBuilder(referredBuilder)
 		intoPointer := "*"
 		if valueType.Nullable {
 			intoPointer = ""
 		}
 
-		return fmt.Sprintf(`resource, err := %[2]s.New(opts...)
+		source := fmt.Sprintf(`resource, err := %[1]s.New(opts...)
 		if err != nil {
 			return err
 		}
 
-		%[4]sbuilder.internal.%[1]s = %[3]sresource.Build()
-`, fieldPath, referredBuilderAlias, intoPointer, assignmentSafeGuards)
+		%[2]s`, referredBuilderAlias, assignmentSafeGuards)
+
+		return source + jenny.formatAssignment(assignment, fieldPath, fmt.Sprintf("%[2]sresource.Build()", fieldPath, intoPointer))
 	}
 
-	// constant value, not into a pointer type
-	if assignment.ArgumentName == "" && !valueType.Nullable {
-		return fmt.Sprintf("%[3]sbuilder.internal.%[1]s = %[2]s", fieldPath, formatScalar(assignment.Value), assignmentSafeGuards)
-	}
-	// constant value, into a pointer type
-	if assignment.ArgumentName == "" && valueType.Nullable {
-		tmpVarName := "val" + tools.UpperCamelCase(assignment.Path.Last().Identifier)
-
-		return fmt.Sprintf(`%[3]s%[4]s := %[2]s
-builder.internal.%[1]s = &%[4]s`, fieldPath, formatScalar(assignment.Value), assignmentSafeGuards, tmpVarName)
-	}
-
-	argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.ArgumentName))
+	argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
@@ -331,7 +332,15 @@ builder.internal.%[1]s = &%[4]s`, fieldPath, formatScalar(assignment.Value), ass
 		generatedConstraints += "\n\n"
 	}
 
-	return generatedConstraints + fmt.Sprintf("%[4]sbuilder.internal.%[1]s = %[3]s%[2]s", fieldPath, argName, asPointer, assignmentSafeGuards)
+	return generatedConstraints + assignmentSafeGuards + jenny.formatAssignment(assignment, fieldPath, asPointer+argName)
+}
+
+func (jenny *Builder) formatAssignment(assignment ast.Assignment, fieldPath string, value string) string {
+	if assignment.Method == ast.DirectAssignment {
+		return fmt.Sprintf("builder.internal.%[1]s = %[2]s", fieldPath, value)
+	}
+
+	return fmt.Sprintf("builder.internal.%[1]s = append(builder.internal.%[1]s, %[2]s)", fieldPath, value)
 }
 
 func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {

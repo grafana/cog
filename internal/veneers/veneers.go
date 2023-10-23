@@ -73,17 +73,15 @@ func Common() *Rewriter {
 				"tooltip",
 			),
 
-			// `panels` refers to RowPanel only for now
+			// Append a single `panel|row` value instead of a list of everything
+			option.ArrayToAppend(
+				option.ByName("Dashboard", "panels"),
+			),
+			// `panel` instead of `panels`, since we're now adding one panel at a time
 			option.Rename(
 				option.ByName("Dashboard", "panels"),
-				"rows",
+				"panel",
 			),
-			/*
-				// TODO: finish implementing this rule
-				option.ArrayToAppend(
-					option.ByName("Dashboard", "rows"),
-				),
-			*/
 
 			// Editable() + Readonly() instead of Editable(val bool)
 			option.UnfoldBoolean(
