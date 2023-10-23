@@ -23,16 +23,27 @@ func ArrayToAppendAction() RewriteAction {
 			return []ast.Option{option}
 		}
 
+		// Update the argument type from list to a single value
 		oldArgs := option.Args
 
 		newFirstArg := option.Args[0]
 		newFirstArg.Type = option.Args[0].Type.AsArray().ValueType
 
+		// Update the assignment to do an append instead of a list assignment
+		oldAssignments := option.Assignments
+
+		newFirstAssignment := option.Assignments[0]
+		newFirstAssignment.Method = ast.AppendAssignment
+
 		newOpt := option
 		newOpt.Args = []ast.Argument{newFirstArg}
+		newOpt.Assignments = []ast.Assignment{newFirstAssignment}
 
 		if len(oldArgs) > 1 {
 			newOpt.Args = append(newOpt.Args, oldArgs[1:]...)
+		}
+		if len(oldAssignments) > 1 {
+			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
 		}
 
 		return []ast.Option{newOpt}
@@ -90,16 +101,18 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 				constraints = field.Type.AsScalar().Constraints
 			}
 
-			newOpt.Args = append(newOpt.Args, ast.Argument{
+			newArg := ast.Argument{
 				Name: field.Name,
 				Type: field.Type,
-			})
-
-			newAssignment := ast.Assignment{
-				ArgumentName: field.Name,
-				Constraints:  constraints,
-				Path:         assignmentPathPrefix.Append(ast.PathFromStructField(field)),
 			}
+
+			newOpt.Args = append(newOpt.Args, newArg)
+
+			newAssignment := ast.ArgumentAssignment(
+				assignmentPathPrefix.Append(ast.PathFromStructField(field)),
+				newArg,
+				ast.Constraints(constraints),
+			)
 
 			newOpt.Assignments = append(newOpt.Assignments, newAssignment)
 		}
@@ -125,7 +138,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 				Name:     unfoldOpts.OptionTrue,
 				Comments: option.Comments,
 				Assignments: []ast.Assignment{
-					{Path: option.Assignments[0].Path, Value: true},
+					ast.ConstantAssignment(option.Assignments[0].Path, true),
 				},
 			},
 
@@ -133,7 +146,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 				Name:     unfoldOpts.OptionFalse,
 				Comments: option.Comments,
 				Assignments: []ast.Assignment{
-					{Path: option.Assignments[0].Path, Value: false},
+					ast.ConstantAssignment(option.Assignments[0].Path, false),
 				},
 			},
 		}

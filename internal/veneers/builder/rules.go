@@ -105,15 +105,8 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 		return panelBuilder, fmt.Errorf("could not find field 'type' in panel builder")
 	}
 
-	newBuilder.Initializations = append(newBuilder.Initializations, ast.Assignment{
-		Path: ast.Path{
-			{
-				Identifier: "type",
-				Type:       typeField.Type,
-			},
-		},
-		Value: panelType,
-	})
+	typeAssignment := ast.ConstantAssignment(ast.PathFromStructField(typeField), panelType)
+	newBuilder.Initializations = append(newBuilder.Initializations, typeAssignment)
 
 	// re-add panel-related options
 	for _, panelOpt := range panelBuilder.Options {

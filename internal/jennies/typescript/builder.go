@@ -48,6 +48,7 @@ type assignment struct {
 	InitSafeguards []string
 	Value          string
 	IsBuilder      bool
+	Method         ast.AssignmentMethod
 	Constraints    []constraint
 }
 
@@ -134,22 +135,23 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 func (jenny *Builder) generateInitAssignment(context context.Builders, assign ast.Assignment) assignment {
 	fieldPath := jenny.formatFieldPath(assign.Path)
-	valueType := assign.Path.Last().Type
 
-	if _, valueHasBuilder := context.BuilderForType(valueType); valueHasBuilder {
-		return assignment{Path: fieldPath, Value: "constructor init assignment with type that has a builder is not supported yet"}
-	}
-
-	if assign.ArgumentName == "" {
+	if assign.Value.Constant != nil {
 		return assignment{
-			Path:  fieldPath,
-			Value: formatScalar(assign.Value),
+			Path:   fieldPath,
+			Method: assign.Method,
+			Value:  formatScalar(assign.Value),
 		}
 	}
 
-	argName := tools.LowerCamelCase(assign.ArgumentName)
+	if _, valueHasBuilder := context.BuilderForType(assign.Value.Argument.Type); valueHasBuilder {
+		return assignment{Value: "constructor init assignment with type that has a builder is not supported yet"}
+	}
+
+	argName := tools.LowerCamelCase(assign.Value.Argument.Name)
 	return assignment{
 		Path:        fieldPath,
+		Method:      assign.Method,
 		Value:       argName,
 		Constraints: jenny.constraints(argName, assign.Constraints),
 	}
@@ -223,8 +225,6 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 
 func (jenny *Builder) generateAssignment(context context.Builders, builder ast.Builder, assign ast.Assignment) assignment {
 	fieldPath := jenny.formatFieldPath(assign.Path)
-	pathEnd := assign.Path.Last()
-	valueType := pathEnd.Type
 
 	var pathInitSafeGuards []string
 	for i, chunk := range assign.Path {
@@ -251,27 +251,30 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 		pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
 	}
 
-	if _, found := context.BuilderForType(valueType); found {
+	if assign.Value.Constant != nil {
 		return assignment{
 			Path:           fieldPath,
+			Method:         assign.Method,
 			InitSafeguards: pathInitSafeGuards,
-			Value:          assign.ArgumentName,
+			Value:          formatScalar(assign.Value.Constant),
+		}
+	}
+
+	if _, found := context.BuilderForType(assign.Value.Argument.Type); found {
+		return assignment{
+			Path:           fieldPath,
+			Method:         assign.Method,
+			InitSafeguards: pathInitSafeGuards,
+			Value:          assign.Value.Argument.Name,
 			IsBuilder:      true,
 		}
 	}
 
-	if assign.ArgumentName == "" {
-		return assignment{
-			Path:           fieldPath,
-			InitSafeguards: pathInitSafeGuards,
-			Value:          formatScalar(assign.Value),
-		}
-	}
-
-	argName := tools.LowerCamelCase(assign.ArgumentName)
+	argName := tools.LowerCamelCase(assign.Value.Argument.Name)
 
 	return assignment{
 		Path:           fieldPath,
+		Method:         assign.Method,
 		InitSafeguards: pathInitSafeGuards,
 		Value:          argName,
 		Constraints:    jenny.constraints(argName, assign.Constraints),

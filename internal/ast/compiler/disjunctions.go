@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/tools"
 )
 
 var _ Pass = (*DisjunctionToType)(nil)
@@ -200,7 +199,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		processedBranch.Nullable = true
 
 		fields = append(fields, ast.StructField{
-			Name:     pass.typeName(processedBranch),
+			Name:     ast.TypeName(processedBranch),
 			Type:     processedBranch,
 			Required: false,
 		})
@@ -263,7 +262,7 @@ func (pass *DisjunctionToType) flattenDisjunction(schema *ast.Schema, disjunctio
 
 	branchMap := make(map[string]struct{})
 	addBranch := func(typeDef ast.Type) {
-		typeName := pass.typeName(typeDef)
+		typeName := ast.TypeName(typeDef)
 		if _, exists := branchMap[typeName]; exists {
 			return
 		}
@@ -296,24 +295,10 @@ func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) stri
 	parts := make([]string, 0, len(def.Branches))
 
 	for _, subType := range def.Branches {
-		parts = append(parts, pass.typeName(subType))
+		parts = append(parts, ast.TypeName(subType))
 	}
 
 	return strings.Join(parts, "Or")
-}
-
-func (pass *DisjunctionToType) typeName(typeDef ast.Type) string {
-	if typeDef.Kind == ast.KindRef {
-		return tools.UpperCamelCase(typeDef.AsRef().ReferredType)
-	}
-	if typeDef.Kind == ast.KindScalar {
-		return tools.UpperCamelCase(string(typeDef.AsScalar().ScalarKind))
-	}
-	if typeDef.Kind == ast.KindArray {
-		return "ArrayOf" + pass.typeName(typeDef.AsArray().ValueType)
-	}
-
-	return tools.UpperCamelCase(string(typeDef.Kind))
 }
 
 func (pass *DisjunctionToType) ensureDiscriminator(schema *ast.Schema, def ast.DisjunctionType) (ast.DisjunctionType, error) {

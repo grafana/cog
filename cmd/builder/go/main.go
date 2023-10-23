@@ -68,10 +68,8 @@ func main() {
 			},
 		}),
 
-		dashboard.Rows([]types.PanelOrRowPanel{
-			{RowPanel: overviewRow.Build()},
-			{Panel: someTimeseriesPanel.Build()},
-		}),
+		dashboard.Panel(types.PanelOrRowPanel{RowPanel: overviewRow.Build()}),
+		dashboard.Panel(types.PanelOrRowPanel{Panel: someTimeseriesPanel.Build()}),
 	)
 	if err != nil {
 		panic(err)

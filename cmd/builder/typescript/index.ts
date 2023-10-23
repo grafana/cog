@@ -50,10 +50,9 @@ const builder = new DashboardBuilder("Some title")
         },
     ])
 
-    .rows([
-        overviewRow.build(),
-        timeseriesPanel.build(),
-    ]);
+    .panel(overviewRow.build())
+    .panel(timeseriesPanel.build())
+;
 
 console.log(JSON.stringify(builder.build(), null, 2));
 

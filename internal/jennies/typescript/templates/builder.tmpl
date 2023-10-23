@@ -28,7 +28,8 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.
 {{ . }}
 {{- end }}
 {{- template "constraints" .Constraints }}
-        this.internal.{{ .Path }} = {{ .Value }}{{ if .IsBuilder }}.build(){{ end }};
+        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ .Value }}{{ if .IsBuilder }}.build(){{ end }};{{ end }}
+        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ .Value }}{{ if .IsBuilder }}.build(){{ end }});{{ end }}
 {{ end }}
         return this;
     }
