@@ -145,6 +145,10 @@ func (t Type) DeepCopy() Type {
 		newScalar := t.Scalar.DeepCopy()
 		newType.Scalar = &newScalar
 	}
+	if t.Intersection != nil {
+		newIntersection := t.Intersection.DeepCopy()
+		newType.Intersection = &newIntersection
+	}
 
 	for k, v := range t.Hints {
 		newType.Hints[k] = v
