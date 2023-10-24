@@ -88,7 +88,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	var buffer strings.Builder
 
 	jenny.imports = newImportMap()
-	importAlias := jenny.importType(builder.For)
+	importAlias := jenny.importType(builder.For.SelfRef)
 
 	constructorCode := jenny.generateConstructor(context, builder)
 
@@ -120,45 +120,16 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 		// FIXME: this is assuming that there's only one argument for that option
 		argsList = append(argsList, jenny.generateArgument(context, builder, opt.Args[0]))
-		assignments = append(assignments, jenny.generateInitAssignment(context, opt.Assignments[0]))
+		assignments = append(assignments, jenny.generateAssignment(context, builder, opt.Assignments[0]))
 	}
 
 	for _, init := range builder.Initializations {
-		assignments = append(assignments, jenny.generateInitAssignment(context, init))
+		assignments = append(assignments, jenny.generateAssignment(context, builder, init))
 	}
 
 	return constructor{
 		Args:        argsList,
 		Assignments: assignments,
-	}
-}
-
-func (jenny *Builder) generateInitAssignment(context context.Builders, assign ast.Assignment) assignment {
-	fieldPath := jenny.formatFieldPath(assign.Path)
-
-	if assign.Value.Constant != nil {
-		return assignment{
-			Path:   fieldPath,
-			Method: assign.Method,
-			Value:  formatScalar(assign.Value.Constant),
-		}
-	}
-
-	// TODO
-	if assign.Value.Envelope != nil {
-		panic("we don't know how to do that yet")
-	}
-
-	if _, valueHasBuilder := context.BuilderForType(assign.Value.Argument.Type); valueHasBuilder {
-		return assignment{Value: "constructor init assignment with type that has a builder is not supported yet"}
-	}
-
-	argName := tools.LowerCamelCase(assign.Value.Argument.Name)
-	return assignment{
-		Path:        fieldPath,
-		Method:      assign.Method,
-		Value:       argName,
-		Constraints: jenny.constraints(argName, assign.Constraints),
 	}
 }
 
@@ -187,7 +158,7 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 
 func (jenny *Builder) generateArgument(context context.Builders, builder ast.Builder, arg ast.Argument) argument {
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
-		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For)
+		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For.SelfRef)
 
 		return argument{
 			Name:          arg.Name,
@@ -196,7 +167,7 @@ func (jenny *Builder) generateArgument(context context.Builders, builder ast.Bui
 		}
 	}
 
-	builderImportAlias := jenny.typeImportAlias(builder.For)
+	builderImportAlias := jenny.typeImportAlias(builder.For.SelfRef)
 	typeName := formatType(arg.Type, func(pkg string) string {
 		if pkg == builder.For.SelfRef.ReferredPkg {
 			return builderImportAlias
@@ -256,39 +227,49 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 		pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
 	}
 
-	if assign.Value.Constant != nil {
-		return assignment{
-			Path:           fieldPath,
-			Method:         assign.Method,
-			InitSafeguards: pathInitSafeGuards,
-			Value:          formatScalar(assign.Value.Constant),
-		}
-	}
+	var constraints []constraint
+	isBuilder := false
 
-	// TODO
-	if assign.Value.Envelope != nil {
-		panic("enveloped value assignment not implemented")
+	if assign.Value.Argument != nil {
+		argName := tools.LowerCamelCase(assign.Value.Argument.Name)
+		_, isBuilder = context.BuilderForType(assign.Value.Argument.Type)
+		constraints = jenny.constraints(argName, assign.Constraints)
 	}
-
-	if _, found := context.BuilderForType(assign.Value.Argument.Type); found {
-		return assignment{
-			Path:           fieldPath,
-			Method:         assign.Method,
-			InitSafeguards: pathInitSafeGuards,
-			Value:          assign.Value.Argument.Name,
-			IsBuilder:      true,
-		}
-	}
-
-	argName := tools.LowerCamelCase(assign.Value.Argument.Name)
 
 	return assignment{
 		Path:           fieldPath,
 		Method:         assign.Method,
 		InitSafeguards: pathInitSafeGuards,
-		Value:          argName,
-		Constraints:    jenny.constraints(argName, assign.Constraints),
+		Value:          jenny.formatAssignmentValue(assign.Value),
+		IsBuilder:      isBuilder,
+		Constraints:    constraints,
 	}
+}
+
+func (jenny *Builder) formatAssignmentValue(value ast.AssignmentValue) string {
+	// constant value, not into a pointer type
+	if value.Constant != nil {
+		return formatScalar(value.Constant)
+	}
+
+	// envelope
+	if value.Envelope != nil {
+		return jenny.formatEnvelopeAssignmentValue(value)
+	}
+
+	// argument
+	return tools.LowerCamelCase(value.Argument.Name)
+}
+
+func (jenny *Builder) formatEnvelopeAssignmentValue(value ast.AssignmentValue) string {
+	envelope := value.Envelope
+	referredTypeAlias := jenny.importType(envelope.Type)
+
+	val := jenny.formatAssignmentValue(envelope.Value)
+
+	return fmt.Sprintf(`%[1]s.%[2]s{
+	%[3]s: %[4]s,
+}`, referredTypeAlias, envelope.Type.ReferredType, envelope.Path[0].Identifier, val)
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []constraint {
@@ -319,15 +300,15 @@ func (jenny *Builder) constraintComparison(constraint ast.TypeConstraint) (ast.O
 }
 
 // typeImportAlias returns the alias to use when importing the given object's type definition.
-func (jenny *Builder) typeImportAlias(object ast.Object) string {
+func (jenny *Builder) typeImportAlias(typeRef ast.RefType) string {
 	// all types within a schema are generated under the same package
-	return object.SelfRef.ReferredPkg
+	return typeRef.ReferredPkg
 }
 
 // importType declares an import statement for the type definition of
 // the given object and returns an alias to it.
-func (jenny *Builder) importType(object ast.Object) string {
-	pkg := jenny.typeImportAlias(object)
+func (jenny *Builder) importType(typeRef ast.RefType) string {
+	pkg := jenny.typeImportAlias(typeRef)
 
 	jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
 
