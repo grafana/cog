@@ -1,10 +1,10 @@
-{{- range $alias, $importPath := .Imports }}
+{{ range $alias, $importPath := .Imports -}}
 import * as {{ $alias }} from '{{ $importPath }}';
 {{- end }}
 import { CogOptionsBuilder } from '../../options_builder_gen';
 
 export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.{{ .Name }}> {
-    private internal: {{ .ImportAlias }}.{{ .Name }};
+    private readonly internal: {{ .ImportAlias }}.{{ .Name }};
 
     constructor({{ template "args" .Constructor.Args }}) {
         this.internal = {{ .ImportAlias }}.default{{ .Name | upperCamelCase }}();
@@ -17,7 +17,6 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.
     build(): {{ .ImportAlias }}.{{ .Name }} {
         return this.internal;
     }
-
 {{ range .Options }}
     {{- range .Comments}}
     // {{ . }}
@@ -28,10 +27,10 @@ export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.
 {{ . }}
 {{- end }}
 {{- template "constraints" .Constraints }}
-        this.internal.{{ .Path }} = {{ .Value }}{{ if .IsBuilder }}.build(){{ end }};
+        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ .Value }}{{ if .IsBuilder }}.build(){{ end }};{{ end -}}
+        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ .Value }}{{ if .IsBuilder }}.build(){{ end }});{{ end -}}
 {{ end }}
         return this;
     }
-{{ end }}
-
+{{ end -}}
 }

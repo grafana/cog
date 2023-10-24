@@ -15,6 +15,7 @@ func Jennies() *codejen.JennyList[[]*ast.Schema] {
 	targets := codejen.JennyListWithNamer[[]*ast.Schema](func(_ []*ast.Schema) string {
 		return "golang"
 	})
+	targets.AppendOneToOne(BuilderInterface{})
 	targets.AppendManyToMany(
 		tools.Foreach[*ast.Schema](RawTypes{}),
 	)

@@ -5,19 +5,25 @@ import {RowPanelBuilder} from "../../../generated/dashboard/rowpanel/builder_gen
 import {PanelBuilder} from "../../../generated/timeseries/panel/builder_gen";
 import {VizTooltipOptionsBuilder} from "../../../generated/common/viztooltipoptions/builder_gen";
 import {TimePickerBuilder} from "../../../generated/dashboard/timepicker/builder_gen";
+import {dataqueryBuilder as PrometheusQuery} from "../../../generated/prometheus/dataquery/builder_gen";
+
+const someQuery = new PrometheusQuery().
+    expr("rate(agent_wal_samples_appended_total{}[10m])").
+    legendFormat("Samples");
 
 const timeseriesPanel = new PanelBuilder()
     .title("Some timeseries panel")
     .transparent(true)
     .description("Let there be data")
     .decimals(2)
-    .min(0)
-    .max(200)
+    .axisSoftMin(0)
+    .axisSoftMax(200)
     .lineWidth(5)
-    .drawStyle(GraphDrawStyle.GraphDrawStyleBars)
-    .tooltip(new VizTooltipOptionsBuilder().mode(TooltipDisplayMode.TooltipDisplayModeSingle));
-
-const overviewRow = new RowPanelBuilder("Overview");
+    .drawStyle(GraphDrawStyle.GraphDrawStylePoints)
+    .tooltip(new VizTooltipOptionsBuilder().mode(TooltipDisplayMode.TooltipDisplayModeSingle))
+    .targets([
+        someQuery.build(),
+    ]);
 
 const builder = new DashboardBuilder("Some title")
     .uid("test-dashboard-codegen")
@@ -33,7 +39,7 @@ const builder = new DashboardBuilder("Some title")
     )
 
     .tooltip(DashboardCursorSync.DashboardCursorSyncCrosshair)
-    .tags(["generated", "from", "cue"])
+    .tags(["generated", "from", "typescript"])
     .links([
         {
             // TODO: this is painful.
@@ -50,10 +56,9 @@ const builder = new DashboardBuilder("Some title")
         },
     ])
 
-    .rows([
-        overviewRow.build(),
-        timeseriesPanel.build(),
-    ]);
+    .withRow(new RowPanelBuilder("Overview"))
+    .withPanel(timeseriesPanel)
+;
 
 console.log(JSON.stringify(builder.build(), null, 2));
 

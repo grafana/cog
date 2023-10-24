@@ -73,17 +73,24 @@ func Common() *Rewriter {
 				"tooltip",
 			),
 
-			// `panels` refers to RowPanel only for now
-			option.Rename(
+			// Append a single `panel|row` value instead of a list of everything
+			option.ArrayToAppend(
 				option.ByName("Dashboard", "panels"),
-				"rows",
 			),
-			/*
-				// TODO: finish implementing this rule
-				option.ArrayToAppend(
-					option.ByName("Dashboard", "rows"),
-				),
-			*/
+			// Panel(...) and RowPanel(...) instead of panels(...(Panel|RowPanel))
+			option.DisjunctionAsOptions(
+				option.ByName("Dashboard", "panels"),
+			),
+			// Panel() to WithPanel()
+			option.Rename(
+				option.ByNameCaseInsensitive("Dashboard", "Panel"),
+				"withPanel",
+			),
+			// RowPanel() to WithRow()
+			option.Rename(
+				option.ByNameCaseInsensitive("Dashboard", "RowPanel"),
+				"withRow",
+			),
 
 			// Editable() + Readonly() instead of Editable(val bool)
 			option.UnfoldBoolean(
@@ -114,6 +121,7 @@ func Common() *Rewriter {
 			option.PromoteToConstructor(
 				option.ByName("RowPanel", "title"),
 			),
+
 			/********************************************
 			 * Team
 			 ********************************************/
