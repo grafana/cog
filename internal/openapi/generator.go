@@ -224,23 +224,17 @@ func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
-	strct := ast.StructType{}
-	intersections := make([]ast.RefType, 0)
-	for _, sch := range schema.AllOf {
+	branches := make([]ast.Type, len(schema.AllOf))
+	for i, sch := range schema.AllOf {
 		def, err := g.walkSchemaRef(sch)
 		if err != nil {
 			return ast.Type{}, err
 		}
 
-		if def.Ref != nil {
-			intersections = append(intersections, def.AsRef())
-			continue
-		}
-
-		strct = def.AsStruct()
+		branches[i] = def
 	}
 
-	return ast.NewIntersection(&strct, intersections), nil
+	return ast.NewIntersection(branches), nil
 }
 
 func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
