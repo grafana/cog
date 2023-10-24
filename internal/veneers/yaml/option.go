@@ -17,6 +17,8 @@ type OptionRule struct {
 	Rename                  *Rename                  `yaml:"rename"`
 	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean"`
 	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
+	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append"`
+	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
 }
 
 func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
@@ -48,6 +50,14 @@ func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
 
 	if rule.StructFieldsAsArguments != nil {
 		return rule.StructFieldsAsArguments.AsRewriteRule()
+	}
+
+	if rule.ArrayToAppend != nil {
+		return rule.ArrayToAppend.AsRewriteRule()
+	}
+
+	if rule.DisjunctionAsOptions != nil {
+		return rule.DisjunctionAsOptions.AsRewriteRule()
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
@@ -101,6 +111,32 @@ func (rule StructFieldsAsArguments) AsRewriteRule() (option.RewriteRule, error) 
 	return option.StructFieldsAsArguments(selector, rule.Fields...), nil
 }
 
+type ArrayToAppend struct {
+	OptionSelector `yaml:",inline"`
+}
+
+func (rule ArrayToAppend) AsRewriteRule() (option.RewriteRule, error) {
+	selector, err := rule.AsSelector()
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.ArrayToAppend(selector), nil
+}
+
+type DisjunctionAsOptions struct {
+	OptionSelector `yaml:",inline"`
+}
+
+func (rule DisjunctionAsOptions) AsRewriteRule() (option.RewriteRule, error) {
+	selector, err := rule.AsSelector()
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.DisjunctionAsOptions(selector), nil
+}
+
 /******************************************************************************
  * Selectors
  *****************************************************************************/
@@ -108,6 +144,9 @@ func (rule StructFieldsAsArguments) AsRewriteRule() (option.RewriteRule, error) 
 type OptionSelector struct {
 	// objectName.optionName
 	ByName *string `yaml:"by_name"`
+
+	// objectName.optionName
+	ByNameCaseInsensitive *string `yaml:"by_name_case_insensitive"`
 
 	ByNames *ByNamesSelector `yaml:"by_names"`
 }
@@ -120,6 +159,15 @@ func (selector OptionSelector) AsSelector() (option.Selector, error) {
 		}
 
 		return option.ByName(objectName, optionName), nil
+	}
+
+	if selector.ByNameCaseInsensitive != nil {
+		objectName, optionName, found := strings.Cut(*selector.ByNameCaseInsensitive, ".")
+		if !found {
+			return nil, fmt.Errorf("option name '%s' is incorrect: no object name found", *selector.ByNameCaseInsensitive)
+		}
+
+		return option.ByNameCaseInsensitive(objectName, optionName), nil
 	}
 
 	if selector.ByNames != nil {
