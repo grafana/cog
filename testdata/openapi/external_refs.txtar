@@ -53,27 +53,36 @@
     {
       "Name": "WithOneRef",
       "Type": {
-        "Kind": "struct",
+        "Kind": "intersection",
         "Nullable": false,
-        "Struct": {
-          "Fields": [
+        "Intersection": {
+          "Branches": [
             {
-              "Name": "description",
-              "Comments": [],
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
-                }
-              },
-              "Required": false
-            }
-          ],
-          "Intersections": [
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "./refs/refs",
+                "ReferredType": "ReferenceA"
+              }
+            },
             {
-              "ReferredPkg": "./refs/refs",
-              "ReferredType": "ReferenceA"
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "description",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
             }
           ]
         }
@@ -86,31 +95,44 @@
     {
       "Name": "WithTwoRef",
       "Type": {
-        "Kind": "struct",
+        "Kind": "intersection",
         "Nullable": false,
-        "Struct": {
-          "Fields": [
+        "Intersection": {
+          "Branches": [
             {
-              "Name": "description",
-              "Comments": [],
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
-                }
-              },
-              "Required": false
-            }
-          ],
-          "Intersections": [
-            {
-              "ReferredPkg": "./refs/refs",
-              "ReferredType": "ReferenceA"
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "./refs/refs",
+                "ReferredType": "ReferenceA"
+              }
             },
             {
-              "ReferredPkg": "./refs/refs",
-              "ReferredType": "ReferenceB"
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "./refs/refs",
+                "ReferredType": "ReferenceB"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "description",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
             }
           ]
         }
