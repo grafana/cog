@@ -18,6 +18,10 @@ func main() {
 	someQuery := prometheus.New().
 		Expr("rate(agent_wal_samples_appended_total{}[10m])").
 		LegendFormat("Samples")
+	query, err := someQuery.Build()
+	if err != nil {
+		panic(err)
+	}
 
 	someTimeseriesPanel := timeseries.New().
 		Title("Some timeseries panel").
@@ -29,7 +33,7 @@ func main() {
 		LineWidth(5).
 		DrawStyle(common.GraphDrawStylePoints).
 		Targets([]types.Target{
-			someQuery.Build(),
+			query,
 		})
 
 	builder := dashboard.New("Some title").
@@ -54,7 +58,11 @@ func main() {
 		WithRow(rowpanel.New("Overview")).
 		WithPanel(someTimeseriesPanel)
 
-	dashboardJson, err := json.MarshalIndent(builder.Build(), "", "  ")
+	sampleDashboard, err := builder.Build()
+	if err != nil {
+		panic(err)
+	}
+	dashboardJson, err := json.MarshalIndent(sampleDashboard, "", "  ")
 	if err != nil {
 		panic(err)
 	}
