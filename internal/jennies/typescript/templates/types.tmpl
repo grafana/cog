@@ -7,4 +7,9 @@ import * as {{ $alias }} from '{{ $importPath }}';
 // {{ $c }}
 {{- end }}
 {{ $object.Type }} {{$object.Name }} {{ $object.Type | setOperator }}{{ $object.Value }}{{ $object.Type | setCloser }}
+{{- if $object.HasDefault }}
+export const default{{ $object.Name | upperCamelCase }} = (): {{ $object.Name }} => ({{ $object.DefaultValue }}{{- end }});
 {{ end }}
+
+
+

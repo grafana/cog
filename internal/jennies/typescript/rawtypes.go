@@ -11,6 +11,30 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
+type Type string
+
+const (
+	TypeType      = "type"
+	TypeEnum      = "enum"
+	TypeConst     = "const"
+	TypeInterface = "interface"
+	TypeEmpty     = ""
+)
+
+type RawTmpl struct {
+	Imports importMap
+	Objects []Object
+}
+
+type Object struct {
+	Name         string
+	Type         Type
+	Comments     []string
+	Value        string
+	HasDefault   bool
+	DefaultValue string
+}
+
 type raw string
 
 type pkgMapper func(string) string
@@ -63,7 +87,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		objects[i] = typeDefGen
 	}
 
-	err := templates.Lookup("types.tmpl").Execute(&buffer, Tmpl{
+	err := templates.Lookup("types.tmpl").Execute(&buffer, RawTmpl{
 		Imports: imports,
 		Objects: objects,
 	})

@@ -11,16 +11,6 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type Type string
-
-const (
-	TypeType      = "type"
-	TypeEnum      = "enum"
-	TypeConst     = "const"
-	TypeInterface = "interface"
-	TypeEmpty     = ""
-)
-
 type Tmpl struct {
 	Package     string
 	Name        string
@@ -28,7 +18,6 @@ type Tmpl struct {
 	ImportAlias string
 	Options     []Options
 	Constructor Constructor
-	Objects     []Object
 }
 
 type Constructor struct {
@@ -63,15 +52,6 @@ type Constraint struct {
 	Op       ast.Op
 	Arg      any
 	IsString bool
-}
-
-type Object struct {
-	Name         string
-	Type         Type
-	Comments     []string
-	Value        string
-	HasDefault   bool
-	DefaultValue string
 }
 
 type Builder struct {
