@@ -6,9 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/tools"
 )
 
 var _ Pass = (*DisjunctionToType)(nil)
@@ -202,7 +200,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		processedBranch.Nullable = true
 
 		fields = append(fields, ast.StructField{
-			Name:     "Val" + tools.UpperCamelCase(pass.typeName(processedBranch)),
+			Name:     ast.TypeName(processedBranch),
 			Type:     processedBranch,
 			Required: false,
 		})
@@ -265,7 +263,7 @@ func (pass *DisjunctionToType) flattenDisjunction(schema *ast.Schema, disjunctio
 
 	branchMap := make(map[string]struct{})
 	addBranch := func(typeDef ast.Type) {
-		typeName := pass.typeName(typeDef)
+		typeName := ast.TypeName(typeDef)
 		if _, exists := branchMap[typeName]; exists {
 			return
 		}
@@ -298,24 +296,10 @@ func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) stri
 	parts := make([]string, 0, len(def.Branches))
 
 	for _, subType := range def.Branches {
-		parts = append(parts, tools.UpperCamelCase(pass.typeName(subType)))
+		parts = append(parts, ast.TypeName(subType))
 	}
 
 	return strings.Join(parts, "Or")
-}
-
-func (pass *DisjunctionToType) typeName(typeDef ast.Type) string {
-	if typeDef.Kind == ast.KindRef {
-		return typeDef.AsRef().ReferredType
-	}
-	if typeDef.Kind == ast.KindScalar {
-		return string(typeDef.AsScalar().ScalarKind)
-	}
-	if typeDef.Kind == ast.KindArray {
-		return "ArrayOf" + pass.typeName(typeDef.AsArray().ValueType)
-	}
-
-	return string(typeDef.Kind)
 }
 
 func (pass *DisjunctionToType) ensureDiscriminator(schema *ast.Schema, def ast.DisjunctionType) (ast.DisjunctionType, error) {
@@ -359,9 +343,6 @@ func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def a
 	// Identify candidates from each branch
 	for _, branch := range def.Branches {
 		typeName := branch.AsRef().ReferredType
-		if refResolver(branch).Kind != ast.KindStruct {
-			spew.Dump(branch.AsRef())
-		}
 		structType := refResolver(branch).AsStruct()
 		candidates[typeName] = make(map[string]any)
 

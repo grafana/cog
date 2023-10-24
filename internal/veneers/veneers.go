@@ -27,9 +27,6 @@ func Common() *Rewriter {
 			builder.Omit(builder.ByObjectName("dashboard.DataSourceRef")),
 			builder.Omit(builder.ByObjectName("dashboard.LibraryPanelRef")),
 
-			// No need for builders for structs generated from a disjunction
-			builder.Omit(builder.StructGeneratedFromDisjunction()),
-
 			// rearrange things a bit
 			builder.MergeInto(
 				builder.ByObjectName("dashboard.Panel"),
@@ -55,6 +52,9 @@ func Common() *Rewriter {
 			// remove builders that were previously merged into something else
 			builder.Omit(builder.ByObjectName("dashboard.FieldConfig")),
 			builder.Omit(builder.ByObjectName("dashboard.FieldConfigSource")),
+
+			// No need for builders for structs generated from a disjunction
+			builder.Omit(builder.StructGeneratedFromDisjunction()),
 		},
 
 		[]option.RewriteRule{
@@ -64,47 +64,54 @@ func Common() *Rewriter {
 
 			// Let's make the dashboard constructor more friendly
 			option.PromoteToConstructor(
-				option.ByName("dashboard", "title"),
+				option.ByName("Dashboard", "title"),
 			),
 
 			// `Tooltip` looks better than `GraphTooltip`
 			option.Rename(
-				option.ByName("dashboard", "graphTooltip"),
+				option.ByName("Dashboard", "graphTooltip"),
 				"tooltip",
 			),
 
-			// `panels` refers to RowPanel only for now
-			option.Rename(
-				option.ByName("dashboard", "panels"),
-				"rows",
+			// Append a single `panel|row` value instead of a list of everything
+			option.ArrayToAppend(
+				option.ByName("Dashboard", "panels"),
 			),
-			/*
-				// TODO: finish implementing this rule
-				option.ArrayToAppend(
-					option.ByName("dashboard", "rows"),
-				),
-			*/
+			// Panel(...) and RowPanel(...) instead of panels(...(Panel|RowPanel))
+			option.DisjunctionAsOptions(
+				option.ByName("Dashboard", "panels"),
+			),
+			// Panel() to WithPanel()
+			option.Rename(
+				option.ByNameCaseInsensitive("Dashboard", "Panel"),
+				"withPanel",
+			),
+			// RowPanel() to WithRow()
+			option.Rename(
+				option.ByNameCaseInsensitive("Dashboard", "RowPanel"),
+				"withRow",
+			),
 
 			// Editable() + Readonly() instead of Editable(val bool)
 			option.UnfoldBoolean(
-				option.ByName("dashboard", "editable"),
+				option.ByName("Dashboard", "editable"),
 				option.BooleanUnfold{OptionTrue: "editable", OptionFalse: "readonly"},
 			),
 
 			// Refresh(string) instead of Refresh(struct StringOrBool)
 			option.StructFieldsAsArguments(
-				option.ByName("dashboard", "refresh"),
-				"ValString",
+				option.ByName("Dashboard", "refresh"),
+				"String",
 			),
 
 			// We don't want these options at all
-			option.Omit(option.ByName("dashboard", "schemaVersion")),
+			option.Omit(option.ByName("Dashboard", "schemaVersion")),
 
 			/********************************************
 			 * Panels
 			 ********************************************/
 
-			option.Omit(option.ByName("panel", dashboardPanelOptionsToExclude...)),
+			option.Omit(option.ByName("Panel", dashboardPanelOptionsToExclude...)),
 
 			/********************************************
 			 * Rows
@@ -113,6 +120,15 @@ func Common() *Rewriter {
 			// Let's make the row constructor more friendly
 			option.PromoteToConstructor(
 				option.ByName("RowPanel", "title"),
+			),
+
+			/********************************************
+			 * Team
+			 ********************************************/
+
+			// Let's make the row constructor more friendly
+			option.PromoteToConstructor(
+				option.ByName("Team", "name"),
 			),
 		},
 	)

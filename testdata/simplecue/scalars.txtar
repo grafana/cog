@@ -30,7 +30,6 @@ container: {
           "Fields": [
             {
               "Name": "str",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -42,7 +41,6 @@ container: {
             },
             {
               "Name": "trueOrFalse",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -54,7 +52,6 @@ container: {
             },
             {
               "Name": "anything",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -66,7 +63,6 @@ container: {
             },
             {
               "Name": "data",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -78,7 +74,6 @@ container: {
             },
             {
               "Name": "num_unit8",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -90,7 +85,6 @@ container: {
             },
             {
               "Name": "num_int8",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -102,7 +96,6 @@ container: {
             },
             {
               "Name": "num_uint16",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -114,7 +107,6 @@ container: {
             },
             {
               "Name": "num_int16",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -126,7 +118,6 @@ container: {
             },
             {
               "Name": "num_uint32",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -138,7 +129,6 @@ container: {
             },
             {
               "Name": "num_int32",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -150,7 +140,6 @@ container: {
             },
             {
               "Name": "num_uint64",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -162,7 +151,6 @@ container: {
             },
             {
               "Name": "num_int64",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

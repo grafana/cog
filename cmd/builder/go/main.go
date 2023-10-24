@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/cog/generated/dashboard/dashboard"
 	"github.com/grafana/cog/generated/dashboard/rowpanel"
+	"github.com/grafana/cog/generated/dashboard/timepicker"
 	prometheus "github.com/grafana/cog/generated/prometheus/dataquery"
 	timeseries "github.com/grafana/cog/generated/timeseries/panel"
 	common "github.com/grafana/cog/generated/types/common"
@@ -14,69 +15,54 @@ import (
 )
 
 func main() {
-	someQuery, err := prometheus.New(
-		prometheus.Expr("rate(agent_wal_samples_appended_total{}[10m])"),
-	)
+	someQuery := prometheus.New().
+		Expr("rate(agent_wal_samples_appended_total{}[10m])").
+		LegendFormat("Samples")
+	query, err := someQuery.Build()
 	if err != nil {
 		panic(err)
 	}
 
-	someTimeseriesPanel, err := timeseries.New(
-		timeseries.Title("Some timeseries panel"),
-		timeseries.Transparent(true),
-		timeseries.Description("Let there be data"),
-		timeseries.Decimals(2),
-		timeseries.Min(0),
-		timeseries.Max(200),
-		timeseries.LineWidth(5),
-		timeseries.DrawStyle(common.GraphDrawStyleBars),
-		timeseries.Targets([]types.Target{
-			someQuery.Internal(),
-		}),
-	)
-	if err != nil {
-		panic(err)
-	}
+	someTimeseriesPanel := timeseries.New().
+		Title("Some timeseries panel").
+		Transparent(true).
+		Description("Let there be data").
+		Decimals(2).
+		AxisSoftMin(0).
+		AxisSoftMax(50).
+		LineWidth(5).
+		DrawStyle(common.GraphDrawStylePoints).
+		Targets([]types.Target{
+			query,
+		})
 
-	overviewRow, err := rowpanel.New("Overview")
-	if err != nil {
-		panic(err)
-	}
-
-	builder, err := dashboard.New(
-		"Some title",
-		dashboard.Uid("test-dashboard-codegen"),
-		dashboard.Description("Some description"),
-
-		dashboard.Refresh("1m"),
-		dashboard.Time("now-3h", "now"),
-
-		//dashboard.Timepicker(
-		//	timepicker.RefreshIntervals([]string{"30s", "1m", "5m"}),
-		//),
-
-		dashboard.Timezone("utc"),
-		dashboard.Tooltip(types.DashboardCursorSyncCrosshair),
-		dashboard.Tags([]string{"generated", "from", "cue"}),
-		dashboard.Links([]types.DashboardLink{
+	builder := dashboard.New("Some title").
+		Uid("test-dashboard-codegen").
+		Description("Some description").
+		Refresh("1m").
+		Time("now-3h", "now").
+		Timezone("utc").
+		Timepicker(
+			timepicker.New().RefreshIntervals([]string{"30s", "1m", "5m"}),
+		).
+		Tooltip(types.DashboardCursorSyncCrosshair).
+		Tags([]string{"generated", "from", "go"}).
+		Links([]types.DashboardLink{
 			{
 				Title:       "Some link",
 				Url:         "http://google.com",
 				AsDropdown:  false,
 				TargetBlank: true,
 			},
-		}),
+		}).
+		WithRow(rowpanel.New("Overview")).
+		WithPanel(someTimeseriesPanel)
 
-		dashboard.Rows([]types.PanelOrRowPanel{
-			{ValRowPanel: overviewRow.Internal()},
-			{ValPanel: someTimeseriesPanel.Internal()},
-		}),
-	)
+	sampleDashboard, err := builder.Build()
 	if err != nil {
 		panic(err)
 	}
-
-	dashboardJson, err := json.MarshalIndent(builder.Internal(), "", "  ")
+	dashboardJson, err := json.MarshalIndent(sampleDashboard, "", "  ")
 	if err != nil {
 		panic(err)
 	}

@@ -108,6 +108,10 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 		} else {
 			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", def.Name, typeValue))
 		}
+	case ast.KindIntersection:
+		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
+		buffer.WriteString(formatIntersection(def.Type.AsIntersection(), packageMapper))
+		buffer.WriteString("\n")
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -137,7 +141,7 @@ func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) strin
 
 		buffer.WriteString(
 			strings.TrimSuffix(
-				prefixLinesWith(string(fieldDefGen), "\t"),
+				prefixLinesWith(fieldDefGen, "\t"),
 				"\t",
 			),
 		)
@@ -148,7 +152,7 @@ func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) strin
 	return buffer.String()
 }
 
-func formatField(def ast.StructField, packageMapper pkgMapper) []byte {
+func formatField(def ast.StructField, packageMapper pkgMapper) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -169,7 +173,7 @@ func formatField(def ast.StructField, packageMapper pkgMapper) []byte {
 		formattedType,
 	))
 
-	return []byte(buffer.String())
+	return buffer.String()
 }
 
 func formatType(def ast.Type, packageMapper pkgMapper) string {
@@ -198,7 +202,8 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 		}
 
 		return formatScalarKind(def.AsScalar().ScalarKind)
-
+	case ast.KindIntersection:
+		return formatIntersection(def.AsIntersection(), packageMapper)
 	default:
 		return string(def.Kind)
 	}
@@ -337,7 +342,8 @@ func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkg
 		return raw("[]")
 	case ast.KindScalar:
 		return defaultValueForScalar(typeDef.AsScalar())
-
+	case ast.KindIntersection:
+		return defaultValuesForIntersection(schema, typeDef.AsIntersection(), packageMapper)
 	default:
 		return "unknown"
 	}
@@ -410,12 +416,43 @@ func defaultValueForScalar(scalar ast.ScalarType) any {
 	}
 }
 
+func defaultValuesForIntersection(schema *ast.Schema, intersectDef ast.IntersectionType, packageMapper pkgMapper) *orderedmap.Map[string, any] {
+	defaults := orderedmap.New[string, any]()
+
+	for _, branch := range intersectDef.Branches {
+		if branch.Ref != nil {
+			continue
+		}
+
+		if branch.Struct != nil {
+			strctDef := defaultValuesForStructType(schema, branch.AsStruct(), packageMapper)
+			strctDef.Iterate(func(key string, value any) {
+				defaults.Set(key, value)
+			})
+		}
+
+		// TODO: Add them for other types?
+	}
+
+	return defaults
+}
+
 func formatValue(val any) string {
 	if rawVal, ok := val.(raw); ok {
 		return string(rawVal)
 	}
 
 	var buffer strings.Builder
+
+	if array, ok := val.([]any); ok {
+		buffer.WriteString("[\n")
+		for _, v := range array {
+			buffer.WriteString(fmt.Sprintf("%s,\n", formatValue(v)))
+		}
+		buffer.WriteString("]")
+
+		return buffer.String()
+	}
 
 	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
 		buffer.WriteString("{\n")
@@ -430,4 +467,46 @@ func formatValue(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
+}
+
+func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) string {
+	var buffer strings.Builder
+
+	refs := make([]ast.Type, 0)
+	rest := make([]ast.Type, 0)
+	for _, b := range def.Branches {
+		if b.Ref != nil {
+			refs = append(refs, b)
+			continue
+		}
+		rest = append(rest, b)
+	}
+
+	if len(refs) > 0 {
+		buffer.WriteString("extends ")
+	}
+
+	for i, ref := range refs {
+		if i != 0 && i < len(refs) {
+			buffer.WriteString(", ")
+		}
+
+		buffer.WriteString(formatType(ref, packageMapper))
+	}
+
+	buffer.WriteString(" {\n")
+
+	for _, r := range rest {
+		if r.Struct != nil {
+			for _, fieldDef := range r.AsStruct().Fields {
+				buffer.WriteString("\t" + formatField(fieldDef, packageMapper))
+			}
+			continue
+		}
+		buffer.WriteString("\t" + formatType(r, packageMapper))
+	}
+
+	buffer.WriteString("}")
+
+	return buffer.String()
 }

@@ -29,7 +29,6 @@ container: {
           "Fields": [
             {
               "Name": "things",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -56,7 +55,6 @@ container: {
           "Fields": [
             {
               "Name": "things",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -83,7 +81,6 @@ container: {
           "Fields": [
             {
               "Name": "ints",
-              "Comments": [],
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -101,7 +98,6 @@ container: {
             },
             {
               "Name": "strings",
-              "Comments": [],
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -119,7 +115,6 @@ container: {
             },
             {
               "Name": "refs",
-              "Comments": [],
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -138,7 +133,6 @@ container: {
             },
             {
               "Name": "structs",
-              "Comments": [],
               "Type": {
                 "Kind": "array",
                 "Nullable": false,

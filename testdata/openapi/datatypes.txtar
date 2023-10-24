@@ -71,7 +71,6 @@
           "Fields": [
             {
               "Name": "boolean",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -83,7 +82,6 @@
             },
             {
               "Name": "bytes",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -95,7 +93,6 @@
             },
             {
               "Name": "float32",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -108,7 +105,6 @@
             },
             {
               "Name": "float64",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -120,7 +116,6 @@
             },
             {
               "Name": "int32",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -133,7 +128,6 @@
             },
             {
               "Name": "int64",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -145,7 +139,6 @@
             },
             {
               "Name": "string",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": true,

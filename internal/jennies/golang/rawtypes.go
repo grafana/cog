@@ -101,7 +101,7 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 		} else {
 			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, packageMapper)))
 		}
-	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct:
+	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct, ast.KindIntersection:
 		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, packageMapper)))
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
@@ -245,18 +245,7 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 	}
 
 	if def.Kind == ast.KindRef {
-		referredPkg := packageMapper(def.AsRef().ReferredPkg)
-		typeName := tools.UpperCamelCase(def.AsRef().ReferredType)
-
-		if referredPkg != "" {
-			typeName = referredPkg + "." + typeName
-		}
-
-		if def.Nullable {
-			typeName = "*" + typeName
-		}
-
-		return typeName
+		return formatRef(def, packageMapper)
 	}
 
 	// anonymous struct or struct body
@@ -267,6 +256,10 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 		}
 
 		return output
+	}
+
+	if def.Kind == ast.KindIntersection {
+		return formatIntersection(def.AsIntersection(), packageMapper)
 	}
 
 	// FIXME: we should never be here
@@ -299,4 +292,58 @@ func formatScalar(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
+}
+
+func formatRef(def ast.Type, packageMapper pkgMapper) string {
+	referredPkg := packageMapper(def.AsRef().ReferredPkg)
+	typeName := tools.UpperCamelCase(def.AsRef().ReferredType)
+
+	if referredPkg != "" {
+		typeName = referredPkg + "." + typeName
+	}
+
+	if def.Nullable {
+		typeName = "*" + typeName
+	}
+
+	return typeName
+}
+
+func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) string {
+	var buffer strings.Builder
+
+	buffer.WriteString("struct {\n")
+
+	refs := make([]ast.Type, 0)
+	rest := make([]ast.Type, 0)
+	for _, b := range def.Branches {
+		if b.Ref != nil {
+			refs = append(refs, b)
+			continue
+		}
+
+		rest = append(rest, b)
+	}
+
+	for _, ref := range refs {
+		buffer.WriteString("\t" + formatRef(ref, packageMapper) + "\n")
+	}
+
+	if len(refs) > 0 {
+		buffer.WriteString("\n")
+	}
+
+	for _, r := range rest {
+		if r.Struct != nil {
+			for _, fieldDef := range r.AsStruct().Fields {
+				buffer.WriteString("\t" + formatField(fieldDef, packageMapper))
+			}
+			continue
+		}
+		buffer.WriteString("\t" + formatType(r, packageMapper) + "\n")
+	}
+
+	buffer.WriteString("}")
+
+	return buffer.String()
 }

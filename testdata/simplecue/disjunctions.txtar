@@ -21,7 +21,6 @@ container: {
           "Fields": [
             {
               "Name": "text",
-              "Comments": [],
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -54,7 +53,6 @@ container: {
             },
             {
               "Name": "listWithDifferentTypes",
-              "Comments": [],
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -93,7 +91,6 @@ container: {
             },
             {
               "Name": "stringOrBool",
-              "Comments": [],
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -110,7 +107,8 @@ container: {
                       "Kind": "scalar",
                       "Nullable": false,
                       "Scalar": {
-                        "ScalarKind": "bool"
+                        "ScalarKind": "bool",
+                        "Value": false
                       }
                     }
                   ]
@@ -120,7 +118,6 @@ container: {
             },
             {
               "Name": "stringOrNull",
-              "Comments": [],
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,

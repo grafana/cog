@@ -60,7 +60,6 @@
           "Fields": [
             {
               "Name": "arrayInt",
-              "Comments": [],
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -78,7 +77,6 @@
             },
             {
               "Name": "arrayRef",
-              "Comments": [],
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -97,7 +95,6 @@
             },
             {
               "Name": "arrayString",
-              "Comments": [],
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -130,7 +127,6 @@
           "Fields": [
             {
               "Name": "a",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

@@ -1,0 +1,120 @@
+# Defaults on struct
+-- schema.cue --
+HeatmapColorOptions: {
+    scheme: string
+    fill: string
+    exponent: float32
+    min?: float32
+    max?: float32
+}
+container: {
+    color: HeatmapColorOptions | *{
+        scheme: "Oranges"
+        fill: "dark-orange"
+    }
+}
+-- out/simplecue/GenerateAST --
+== ir.json
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "HeatmapColorOptions",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "scheme",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "fill",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "exponent",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float32"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "min",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float32"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "max",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float32"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "HeatmapColorOptions"
+      }
+    },
+    {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "color",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "HeatmapColorOptions"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  ]
+}

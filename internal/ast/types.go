@@ -16,7 +16,8 @@ const (
 
 	KindArray Kind = "array"
 
-	KindScalar Kind = "scalar"
+	KindScalar       Kind = "scalar"
+	KindIntersection Kind = "intersection"
 )
 
 type ScalarKind string
@@ -83,13 +84,14 @@ type Type struct {
 	Nullable bool
 	Default  any `json:",omitempty"`
 
-	Disjunction *DisjunctionType `json:",omitempty"`
-	Array       *ArrayType       `json:",omitempty"`
-	Enum        *EnumType        `json:",omitempty"`
-	Map         *MapType         `json:",omitempty"`
-	Struct      *StructType      `json:",omitempty"`
-	Ref         *RefType         `json:",omitempty"`
-	Scalar      *ScalarType      `json:",omitempty"`
+	Disjunction  *DisjunctionType  `json:",omitempty"`
+	Array        *ArrayType        `json:",omitempty"`
+	Enum         *EnumType         `json:",omitempty"`
+	Map          *MapType          `json:",omitempty"`
+	Struct       *StructType       `json:",omitempty"`
+	Ref          *RefType          `json:",omitempty"`
+	Scalar       *ScalarType       `json:",omitempty"`
+	Intersection *IntersectionType `json:",omitempty"`
 
 	Hints JenniesHints `json:",omitempty"`
 }
@@ -321,12 +323,12 @@ func NewScalar(kind ScalarKind, opts ...TypeOption) Type {
 	return def
 }
 
-func NewIntersection(s *StructType, intersections []RefType) Type {
-	s.Intersections = intersections
+func NewIntersection(branches []Type) Type {
 	return Type{
-		Kind:   KindStruct,
-		Hints:  make(JenniesHints),
-		Struct: s,
+		Kind: KindIntersection,
+		Intersection: &IntersectionType{
+			Branches: branches,
+		},
 	}
 }
 
@@ -366,6 +368,10 @@ func (t Type) AsScalar() ScalarType {
 	return *t.Scalar
 }
 
+func (t Type) AsIntersection() IntersectionType {
+	return *t.Intersection
+}
+
 // named declaration of a type
 type Object struct {
 	Name     string
@@ -402,10 +408,6 @@ type Types []Type
 func (types Types) HasOnlyScalarOrArray() bool {
 	for _, t := range types {
 		if t.Kind == KindArray {
-			if !t.AsArray().IsArrayOfScalars() {
-				return false
-			}
-
 			continue
 		}
 
@@ -583,7 +585,7 @@ func (structType StructType) FieldByName(name string) (StructField, bool) {
 
 type StructField struct {
 	Name     string
-	Comments []string
+	Comments []string `json:",omitempty"`
 	Type     Type
 	Required bool
 }
@@ -659,4 +661,18 @@ func (scalarType ScalarType) DeepCopy() ScalarType {
 
 func (scalarType ScalarType) IsConcrete() bool {
 	return scalarType.Value != nil
+}
+
+type IntersectionType struct {
+	Branches []Type
+}
+
+func (inter IntersectionType) DeepCopy() IntersectionType {
+	newT := IntersectionType{}
+
+	for _, b := range inter.Branches {
+		newT.Branches = append(newT.Branches, b.DeepCopy())
+	}
+
+	return newT
 }

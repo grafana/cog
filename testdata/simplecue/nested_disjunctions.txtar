@@ -39,7 +39,6 @@ Message: ChitChat | QuestionMsg | AnswerMsg
           "Fields": [
             {
               "Name": "type",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -52,7 +51,6 @@ Message: ChitChat | QuestionMsg | AnswerMsg
             },
             {
               "Name": "salutation",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -79,7 +77,6 @@ Message: ChitChat | QuestionMsg | AnswerMsg
           "Fields": [
             {
               "Name": "type",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -92,7 +89,6 @@ Message: ChitChat | QuestionMsg | AnswerMsg
             },
             {
               "Name": "reason",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -119,7 +115,6 @@ Message: ChitChat | QuestionMsg | AnswerMsg
           "Fields": [
             {
               "Name": "type",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -132,7 +127,6 @@ Message: ChitChat | QuestionMsg | AnswerMsg
             },
             {
               "Name": "question",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -159,7 +153,6 @@ Message: ChitChat | QuestionMsg | AnswerMsg
           "Fields": [
             {
               "Name": "type",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -172,7 +165,6 @@ Message: ChitChat | QuestionMsg | AnswerMsg
             },
             {
               "Name": "content",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

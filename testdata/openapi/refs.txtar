@@ -45,7 +45,6 @@
           "Fields": [
             {
               "Name": "ref",
-              "Comments": [],
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -73,7 +72,6 @@
           "Fields": [
             {
               "Name": "a",
-              "Comments": [],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -93,5 +91,3 @@
     }
   ]
 }
-
-

@@ -23,16 +23,27 @@ func ArrayToAppendAction() RewriteAction {
 			return []ast.Option{option}
 		}
 
+		// Update the argument type from list to a single value
 		oldArgs := option.Args
 
 		newFirstArg := option.Args[0]
 		newFirstArg.Type = option.Args[0].Type.AsArray().ValueType
 
+		// Update the assignment to do an append instead of a list assignment
+		oldAssignments := option.Assignments
+
+		newFirstAssignment := option.Assignments[0]
+		newFirstAssignment.Method = ast.AppendAssignment
+
 		newOpt := option
 		newOpt.Args = []ast.Argument{newFirstArg}
+		newOpt.Assignments = []ast.Assignment{newFirstAssignment}
 
 		if len(oldArgs) > 1 {
 			newOpt.Args = append(newOpt.Args, oldArgs[1:]...)
+		}
+		if len(oldAssignments) > 1 {
+			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
 		}
 
 		return []ast.Option{newOpt}
@@ -90,16 +101,18 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 				constraints = field.Type.AsScalar().Constraints
 			}
 
-			newOpt.Args = append(newOpt.Args, ast.Argument{
+			newArg := ast.Argument{
 				Name: field.Name,
 				Type: field.Type,
-			})
-
-			newAssignment := ast.Assignment{
-				ArgumentName: field.Name,
-				Constraints:  constraints,
-				Path:         assignmentPathPrefix.Append(ast.PathFromStructField(field)),
 			}
+
+			newOpt.Args = append(newOpt.Args, newArg)
+
+			newAssignment := ast.ArgumentAssignment(
+				assignmentPathPrefix.Append(ast.PathFromStructField(field)),
+				newArg,
+				ast.Constraints(constraints),
+			)
 
 			newOpt.Assignments = append(newOpt.Assignments, newAssignment)
 		}
@@ -111,6 +124,113 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 
 		return []ast.Option{newOpt}
 	}
+}
+
+// FIXME: looks at the first arg only, no way to configure that right now
+func DisjunctionAsOptionsAction() RewriteAction {
+	return func(builder ast.Builder, option ast.Option) []ast.Option {
+		if len(option.Args) < 1 {
+			return []ast.Option{option}
+		}
+
+		firstArgType := option.Args[0].Type
+
+		// "proper" disjunction
+		if firstArgType.Kind == ast.KindDisjunction {
+			return disjunctionAsOptions(option)
+		}
+
+		// or maybe a reference to a struct that was created to simulate a disjunction?
+		if firstArgType.Kind == ast.KindRef {
+			// FIXME: we only try to resolve the reference within the same package
+			referredObj := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			// Object not found
+			// TODO: LocateObject() should return a "found" boolean
+			if referredObj.Name == "" {
+				return []ast.Option{option}
+			}
+
+			if !referredObj.Type.IsStructGeneratedFromDisjunction() {
+				return []ast.Option{option}
+			}
+
+			return disjunctionStructAsOptions(option, referredObj)
+		}
+
+		return []ast.Option{option}
+	}
+}
+
+func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Object) []ast.Option {
+	firstArgType := option.Args[0].Type
+	firstAssignmentPath := option.Assignments[0].Path
+	firstAssignmentMethod := option.Assignments[0].Method
+
+	newOpts := make([]ast.Option, 0, len(disjunctionStruct.Type.AsStruct().Fields))
+	for _, field := range disjunctionStruct.Type.AsStruct().Fields {
+		arg := ast.Argument{Name: field.Name, Type: field.Type}
+
+		opt := ast.Option{
+			Name: field.Name,
+			Args: []ast.Argument{arg},
+			Assignments: []ast.Assignment{
+				{
+					Path: firstAssignmentPath,
+					Value: ast.AssignmentValue{
+						Envelope: &ast.AssignmentEnvelope{
+							Type: firstArgType.AsRef(),
+							Path: ast.PathFromStructField(field),
+							Value: ast.AssignmentValue{
+								Argument: &arg,
+							},
+						},
+					},
+					Method: firstAssignmentMethod,
+				},
+			},
+		}
+
+		if field.Type.Default != nil {
+			opt.Default = &ast.OptionDefault{
+				ArgsValues: []any{field.Type.Default},
+			}
+		}
+
+		newOpts = append(newOpts, opt)
+	}
+
+	return newOpts
+}
+
+func disjunctionAsOptions(option ast.Option) []ast.Option {
+	firstArgType := option.Args[0].Type
+	firstAssignmentPath := option.Assignments[0].Path
+	firstAssignmentMethod := option.Assignments[0].Method
+
+	newOpts := make([]ast.Option, 0, len(firstArgType.AsDisjunction().Branches))
+	for _, branch := range firstArgType.AsDisjunction().Branches {
+		typeName := tools.LowerCamelCase(ast.TypeName(branch))
+
+		arg := ast.Argument{Name: typeName, Type: branch}
+
+		opt := ast.Option{
+			Name: typeName,
+			Args: []ast.Argument{arg},
+			Assignments: []ast.Assignment{
+				ast.ArgumentAssignment(firstAssignmentPath, arg, ast.Method(firstAssignmentMethod)),
+			},
+		}
+
+		if branch.Default != nil {
+			opt.Default = &ast.OptionDefault{
+				ArgsValues: []any{branch.Default},
+			}
+		}
+
+		newOpts = append(newOpts, opt)
+	}
+
+	return newOpts
 }
 
 type BooleanUnfold struct {
@@ -125,7 +245,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 				Name:     unfoldOpts.OptionTrue,
 				Comments: option.Comments,
 				Assignments: []ast.Assignment{
-					{Path: option.Assignments[0].Path, Value: true},
+					ast.ConstantAssignment(option.Assignments[0].Path, true),
 				},
 			},
 
@@ -133,7 +253,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 				Name:     unfoldOpts.OptionFalse,
 				Comments: option.Comments,
 				Assignments: []ast.Assignment{
-					{Path: option.Assignments[0].Path, Value: false},
+					ast.ConstantAssignment(option.Assignments[0].Path, false),
 				},
 			},
 		}

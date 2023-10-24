@@ -138,15 +138,95 @@ func (path Path) String() string {
 	}), ".")
 }
 
+type AssignmentEnvelope struct {
+	Type  RefType         // Reference to the type of the envelope
+	Path  Path            // where to assign within the struct/ref
+	Value AssignmentValue // what to assign
+}
+
+type AssignmentValue struct {
+	Argument *Argument
+	Constant any
+	Envelope *AssignmentEnvelope
+}
+
+type AssignmentMethod string
+
+const (
+	DirectAssignment AssignmentMethod = "direct" // `foo = bar`
+	AppendAssignment AssignmentMethod = "append" // `foo = append(foo, bar)`
+)
+
 type Assignment struct {
 	// Where
 	Path Path
 
 	// What
-	ArgumentName string // if empty, then use `Value`
-	Value        any
+	Value AssignmentValue
+
+	// How
+	Method AssignmentMethod
 
 	Constraints []TypeConstraint
+}
+
+type AssignmentOpt func(assignment *Assignment)
+
+func Constraints(constraints []TypeConstraint) AssignmentOpt {
+	return func(assignment *Assignment) {
+		assignment.Constraints = constraints
+	}
+}
+
+func Method(method AssignmentMethod) AssignmentOpt {
+	return func(assignment *Assignment) {
+		assignment.Method = method
+	}
+}
+
+func ConstantAssignment(path Path, value any, opts ...AssignmentOpt) Assignment {
+	assignment := Assignment{
+		Path: path,
+		Value: AssignmentValue{
+			Constant: value,
+		},
+		Method: DirectAssignment,
+	}
+
+	for _, opt := range opts {
+		opt(&assignment)
+	}
+
+	return assignment
+}
+
+func ArgumentAssignment(path Path, argument Argument, opts ...AssignmentOpt) Assignment {
+	assignment := Assignment{
+		Path: path,
+		Value: AssignmentValue{
+			Argument: &argument,
+		},
+		Method: DirectAssignment,
+	}
+
+	for _, opt := range opts {
+		opt(&assignment)
+	}
+
+	return assignment
+}
+
+func FieldAssignment(field StructField, opts ...AssignmentOpt) Assignment {
+	var constraints []TypeConstraint
+	if field.Type.Kind == KindScalar {
+		constraints = field.Type.AsScalar().Constraints
+	}
+
+	argument := Argument{Name: field.Name, Type: field.Type}
+	allOpts := []AssignmentOpt{Constraints(constraints)}
+	allOpts = append(allOpts, opts...)
+
+	return ArgumentAssignment(PathFromStructField(field), argument, allOpts...)
 }
 
 type BuilderGenerator struct {
@@ -200,7 +280,8 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 
 	for _, field := range structType.Fields {
 		if generator.fieldHasStaticValue(field) {
-			builder.Initializations = append(builder.Initializations, generator.structFieldToStaticInitialization(field))
+			constantAssignment := ConstantAssignment(PathFromStructField(field), field.Type.AsScalar().Value)
+			builder.Initializations = append(builder.Initializations, constantAssignment)
 			continue
 		}
 
@@ -218,34 +299,15 @@ func (generator *BuilderGenerator) fieldHasStaticValue(field StructField) bool {
 	return field.Type.AsScalar().IsConcrete()
 }
 
-func (generator *BuilderGenerator) structFieldToStaticInitialization(field StructField) Assignment {
-	return Assignment{
-		Path:  PathFromStructField(field),
-		Value: field.Type.AsScalar().Value,
-	}
-}
-
 func (generator *BuilderGenerator) structFieldToOption(field StructField) Option {
-	var constraints []TypeConstraint
-	if field.Type.Kind == KindScalar {
-		constraints = field.Type.AsScalar().Constraints
-	}
-
 	opt := Option{
 		Name:     field.Name,
 		Comments: field.Comments,
 		Args: []Argument{
-			{
-				Name: field.Name,
-				Type: field.Type,
-			},
+			{Name: field.Name, Type: field.Type},
 		},
 		Assignments: []Assignment{
-			{
-				Path:         PathFromStructField(field),
-				ArgumentName: field.Name,
-				Constraints:  constraints,
-			},
+			FieldAssignment(field),
 		},
 	}
 

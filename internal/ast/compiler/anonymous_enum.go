@@ -31,13 +31,11 @@ func (pass *AnonymousEnumToExplicitType) processSchema(schema *ast.Schema) (*ast
 	pass.newObjects = nil
 	pass.currentPackage = schema.Package
 
-	processedObjects := make([]ast.Object, 0, len(schema.Objects))
-	for _, object := range schema.Objects {
-		processedObjects = append(processedObjects, pass.processObject(object))
+	newSchema := schema.DeepCopy()
+	for i, object := range schema.Objects {
+		newSchema.Objects[i] = pass.processObject(object)
 	}
 
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = processedObjects
 	newSchema.Objects = append(newSchema.Objects, pass.newObjects...)
 
 	return &newSchema, nil
@@ -48,19 +46,18 @@ func (pass *AnonymousEnumToExplicitType) processObject(object ast.Object) ast.Ob
 		return object
 	}
 
-	newObject := object
-	newObject.Type = pass.processType(object.Name, tools.UpperCamelCase(object.Name)+"Enum", object.Type)
+	object.Type = pass.processType(object.Name, tools.UpperCamelCase(object.Name)+"Enum", object.Type)
 
-	return newObject
+	return object
 }
 
 func (pass *AnonymousEnumToExplicitType) processType(currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
 	if def.Kind == ast.KindArray {
-		return pass.processArray(currentObjectName, suggestedEnumName, def.AsArray())
+		return pass.processArray(currentObjectName, suggestedEnumName, def)
 	}
 
 	if def.Kind == ast.KindStruct {
-		return pass.processStruct(currentObjectName, def.AsStruct())
+		return pass.processStruct(currentObjectName, def)
 	}
 
 	if def.Kind == ast.KindEnum {
@@ -72,25 +69,21 @@ func (pass *AnonymousEnumToExplicitType) processType(currentObjectName string, s
 	return def
 }
 
-func (pass *AnonymousEnumToExplicitType) processArray(currentObjectName string, suggestedEnumName string, def ast.ArrayType) ast.Type {
-	return ast.NewArray(pass.processType(currentObjectName, suggestedEnumName, def.ValueType))
+func (pass *AnonymousEnumToExplicitType) processArray(currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
+	def.Array.ValueType = pass.processType(currentObjectName, suggestedEnumName, def.Array.ValueType)
+
+	return def
 }
 
-func (pass *AnonymousEnumToExplicitType) processStruct(parentName string, def ast.StructType) ast.Type {
-	processedFields := make([]ast.StructField, 0, len(def.Fields))
-	for _, field := range def.Fields {
-		processedFields = append(processedFields, ast.StructField{
-			Name:     field.Name,
-			Comments: field.Comments,
-			Type:     pass.processType(parentName, tools.UpperCamelCase(parentName)+tools.UpperCamelCase(field.Name), field.Type),
-			Required: field.Required,
-		})
+func (pass *AnonymousEnumToExplicitType) processStruct(parentName string, def ast.Type) ast.Type {
+	for i, field := range def.Struct.Fields {
+		newField := field
+		newField.Type = pass.processType(parentName, tools.UpperCamelCase(parentName)+tools.UpperCamelCase(field.Name), field.Type)
+
+		def.Struct.Fields[i] = newField
 	}
 
-	strct := ast.NewStruct(processedFields...)
-	strct.Struct.Intersections = def.Intersections
-
-	return strct
+	return def
 }
 
 func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(parentName string, def ast.EnumType) ast.Type {

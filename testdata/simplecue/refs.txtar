@@ -79,7 +79,6 @@ foo: {
           "Fields": [
             {
               "Name": "StringEnum",
-              "Comments": [],
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -125,7 +124,6 @@ foo: {
             },
             {
               "Name": "TheIntEnum",
-              "Comments": [],
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -167,7 +165,6 @@ foo: {
           "Fields": [
             {
               "Name": "arrayOfAnything",
-              "Comments": [],
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
