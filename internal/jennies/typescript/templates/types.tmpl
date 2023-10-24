@@ -6,7 +6,13 @@ import * as {{ $alias }} from '{{ $importPath }}';
 {{- range $c := $object.Comments }}
 // {{ $c }}
 {{- end }}
+{{- if eq $object.Type "interface" }}
+interface {{ $object.Name }} {
+{{- template "interface" $object.Fields }}
+}
+{{ else }}
 {{ $object.Type }} {{$object.Name }} {{ $object.Type | setOperator }}{{ $object.Value }}{{ $object.Type | setCloser }}
+{{ end }}
 {{- if $object.HasDefault }}
 export const default{{ $object.Name | upperCamelCase }} = (): {{ $object.Name }} => ({{ $object.DefaultValue }}{{- end }});
 {{ end }}

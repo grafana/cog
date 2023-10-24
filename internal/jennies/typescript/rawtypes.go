@@ -31,8 +31,16 @@ type Object struct {
 	Type         Type
 	Comments     []string
 	Value        string
+	Fields       []Field
 	HasDefault   bool
 	DefaultValue string
+}
+
+type Field struct {
+	Name     string
+	Value    string
+	Comments []string
+	Fields   []Field
 }
 
 type raw string
@@ -102,22 +110,14 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMapper pkgMapper) (Object, error) {
 	var buffer strings.Builder
 
-	comments := make([]string, len(def.Comments))
-	for i, commentLine := range def.Comments {
-		comments[i] = commentLine
-	}
-
 	objectType := TypeEmpty
 	var typeValue string
+	fields := make([]Field, 0)
 
 	switch def.Type.Kind {
 	case ast.KindStruct:
 		objectType = TypeInterface
-		fields := def.Type.AsStruct().Fields
-		for _, field := range fields {
-			// TODO: Improve this
-			typeValue = formatField(field, packageMapper)
-		}
+		fields = formatStruct(def.Type.AsStruct().Fields, packageMapper)
 	case ast.KindEnum:
 		objectType = TypeEnum
 		for _, val := range def.Type.AsEnum().Values {
@@ -156,11 +156,30 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 	return Object{
 		Name:         def.Name,
 		Type:         Type(objectType),
-		Comments:     comments,
+		Comments:     def.Comments,
 		Value:        typeValue,
+		Fields:       fields,
 		HasDefault:   hasDefault,
 		DefaultValue: defaultValue,
 	}, nil
+}
+
+func formatStruct(structFields []ast.StructField, packageMapper pkgMapper) []Field {
+	fields := make([]Field, len(structFields))
+	for i, field := range structFields {
+		nestedFields := make([]Field, 0)
+		if field.Type.Kind == ast.KindStruct {
+			nestedFields = formatStruct(field.Type.AsStruct().Fields, packageMapper)
+		}
+		fields[i] = Field{
+			Name:     field.Name,
+			Value:    formatType(field.Type, packageMapper),
+			Comments: field.Comments,
+			Fields:   nestedFields,
+		}
+	}
+
+	return fields
 }
 
 func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) string {

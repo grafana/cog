@@ -1,0 +1,11 @@
+{{- define "interface" }}
+{{- range $field := . }}
+    {{- if eq (len $field.Fields) 0 }}
+    {{ $field.Name }}: {{ $field.Value }};
+    {{- else }}
+    {{ .Name }}: {
+        {{- template "interface" $field.Fields }}
+    }
+    {{- end }}
+{{- end }}
+{{- end }}
