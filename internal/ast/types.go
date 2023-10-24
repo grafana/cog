@@ -553,22 +553,16 @@ func (t MapType) DeepCopy() MapType {
 }
 
 type StructType struct {
-	Fields        []StructField
-	Intersections []RefType `json:",omitempty"`
+	Fields []StructField
 }
 
 func (structType StructType) DeepCopy() StructType {
 	newT := StructType{
-		Fields:        make([]StructField, 0, len(structType.Fields)),
-		Intersections: make([]RefType, 0, len(structType.Intersections)),
+		Fields: make([]StructField, 0, len(structType.Fields)),
 	}
 
 	for _, field := range structType.Fields {
 		newT.Fields = append(newT.Fields, field.DeepCopy())
-	}
-
-	for _, i := range structType.Intersections {
-		newT.Intersections = append(newT.Intersections, i.DeepCopy())
 	}
 
 	return newT
