@@ -75,12 +75,17 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 
 	// import generated types
 	importAlias := jenny.importType(builder.For.SelfRef)
+	cogAlias := jenny.importCog()
+
+	// just to make explicit that this builder implements the generic Cog builder interface
+	buffer.WriteString(fmt.Sprintf("var _ %[1]s.Builder[%[2]s.%[3]s] = (*Builder)(nil)\n\n", cogAlias, importAlias, objectName))
 
 	// Builder type declaration
 	buffer.WriteString(fmt.Sprintf(`type Builder struct {
-	internal *%s.%s
+	internal *%[1]s.%[2]s
+	errors map[string]%[3]s.BuildErrors
 }
-`, importAlias, objectName))
+`, importAlias, objectName, cogAlias))
 
 	// Add a constructor for the builder
 	constructorCode := jenny.generateConstructor(context, builder)
@@ -88,10 +93,20 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 
 	// Allow builders to expose the resource they're building
 	buffer.WriteString(fmt.Sprintf(`
-func (builder *Builder) Build() *%s.%s {
-	return builder.internal
+func (builder *Builder) Build() (*%[1]s.%[2]s, error) {
+	var errs %[3]s.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, %[3]s.MakeBuildErrors("%[2]s", err)...)
+	}
+
+	if len(errs) != 0 {
+		return nil, errs
+	}
+
+	return builder.internal, nil
 }
-`, importAlias, objectName))
+`, importAlias, objectName, cogAlias))
 
 	// Define options
 	for _, option := range builder.Options {
@@ -114,6 +129,7 @@ func (builder *Builder) Build() *%s.%s {
 func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) string {
 	var buffer strings.Builder
 
+	cogAlias := jenny.importCog()
 	typeName := tools.UpperCamelCase(builder.For.Name)
 	args := ""
 	fieldsInit := ""
@@ -148,14 +164,17 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 	buffer.WriteString(fmt.Sprintf(`func New(%[2]s) *Builder {
 	resource := &%[4]s.%[1]s{}
-	builder := &Builder{internal: resource}
+	builder := &Builder{
+		internal: resource,
+		errors: make(map[string]%[5]s.BuildErrors),
+	}
 
 	%[3]s
 	builder.applyDefaults()
 
 	return builder
 }
-`, typeName, args, fieldsInit, jenny.typeImportAlias(builder.For.SelfRef)))
+`, typeName, args, fieldsInit, jenny.typeImportAlias(builder.For.SelfRef), cogAlias))
 
 	return buffer.String()
 }
@@ -315,18 +334,25 @@ func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.
 }
 
 func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (string, string) {
+	argName := jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
+
 	if _, found := context.BuilderForType(value.Argument.Type); found {
+		cogAlias := jenny.importCog()
 		maybeDereference := "*"
 		if valueType.Nullable {
 			maybeDereference = ""
 		}
 
-		argName := jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
+		resourceBuildSource := fmt.Sprintf(`resource, err := %[1]s.Build()
+if err != nil {
+	builder.errors["%[1]s"] = err.(%[2]s.BuildErrors)
+	return builder
+}
 
-		return "", fmt.Sprintf("%[1]s%[2]s.Build()", maybeDereference, argName)
+`, argName, cogAlias)
+
+		return resourceBuildSource, fmt.Sprintf("%[1]sresource", maybeDereference)
 	}
-
-	argName := jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
 
 	asPointer := ""
 	// FIXME: this condition is probably wrong
@@ -420,9 +446,12 @@ func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeCon
 func (jenny *Builder) constraint(argumentName string, constraint ast.TypeConstraint) string {
 	var buffer strings.Builder
 
+	cogAlias := jenny.importCog()
+
 	buffer.WriteString(fmt.Sprintf("if !(%s) {\n", jenny.constraintComparison(argumentName, constraint)))
-	// TODO
-	buffer.WriteString(fmt.Sprintf("//return errors.New(\"%[1]s must be %[2]s %[3]v\")\n", argumentName, constraint.Op, constraint.Args[0]))
+	buffer.WriteString(fmt.Sprintf(`builder.errors["%[1]s"] = %[1]s.MakeBuildErrors("%[2]s", errors.New("value must be %[3]s %[4]v"))
+`, cogAlias, argumentName, constraint.Op, constraint.Args[0]))
+	buffer.WriteString("return builder\n")
 	buffer.WriteString("}\n")
 
 	return buffer.String()
@@ -451,16 +480,6 @@ func (jenny *Builder) importType(typeRef ast.RefType) string {
 	pkg := jenny.typeImportAlias(typeRef)
 
 	jenny.imports.Add(pkg, "github.com/grafana/cog/generated/types/"+pkg)
-
-	return pkg
-}
-
-// importBuilderForObject declares an import statement for the builder definition of
-// the given object and returns an alias to it.
-func (jenny *Builder) importBuilder(builder ast.Builder) string {
-	pkg := strings.ToLower(builder.For.Name) // conflict with type import?
-
-	jenny.imports.Add(pkg, fmt.Sprintf("github.com/grafana/cog/generated/%s/%s", strings.ToLower(builder.RootPackage), strings.ToLower(builder.Package)))
 
 	return pkg
 }
