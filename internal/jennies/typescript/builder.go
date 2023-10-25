@@ -188,11 +188,11 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 		valueType = *path.Last().TypeHint
 	}
 
-	emptyValue := defaultValueForType(currentBuilder.Schema, valueType, func(pkg string) string {
+	emptyValue := formatValue(defaultValueForType(currentBuilder.Schema, valueType, func(pkg string) string {
 		jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
 
 		return pkg
-	})
+	}))
 
 	return fmt.Sprintf(`		if (!this.internal.%[1]s) {
 			this.internal.%[1]s = %[2]s;

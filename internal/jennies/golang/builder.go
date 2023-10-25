@@ -336,6 +336,13 @@ func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.
 func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (string, string) {
 	argName := jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
 
+	switch valueType.Kind {
+	case ast.KindArray:
+		valueType = valueType.AsArray().ValueType
+	case ast.KindMap:
+		valueType = valueType.AsMap().ValueType
+	}
+
 	if _, found := context.BuilderForType(value.Argument.Type); found {
 		cogAlias := jenny.importCog()
 		maybeDereference := "*"
@@ -354,13 +361,12 @@ if err != nil {
 		return resourceBuildSource, fmt.Sprintf("%[1]sresource", maybeDereference)
 	}
 
-	asPointer := ""
-	// FIXME: this condition is probably wrong
-	if valueType.Kind != ast.KindArray && valueType.Kind != ast.KindMap && valueType.Nullable {
-		asPointer = "&"
+	maybeAsPointer := ""
+	if valueType.Nullable {
+		maybeAsPointer = "&"
 	}
 
-	return "", asPointer + argName
+	return "", maybeAsPointer + argName
 }
 
 func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, value ast.AssignmentValue) (string, string) {
