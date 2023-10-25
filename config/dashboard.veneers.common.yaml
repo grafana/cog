@@ -22,6 +22,10 @@ builders:
         # TODO: check if these are actually relevant
         "displayNameFromDS", "filterable", "path", "writeable",
       ]
+  - merge_into:
+      source: dashboard.FieldConfigSource
+      destination: dashboard.Panel
+      under_path: fieldConfig
 
   # Panels composability
   - compose_dashboard_panel:
