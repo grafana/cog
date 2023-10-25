@@ -30,7 +30,7 @@ type Object struct {
 	Name         string
 	Type         Type
 	Comments     []string
-	Value        string
+	Value        any
 	Fields       []Field
 	HasDefault   bool
 	DefaultValue string
@@ -38,7 +38,7 @@ type Object struct {
 
 type Field struct {
 	Name     string
-	Value    string
+	Value    any
 	Comments []string
 	Fields   []Field
 }
@@ -111,7 +111,7 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 	var buffer strings.Builder
 
 	objectType := TypeEmpty
-	var typeValue string
+	var typeValue any
 	fields := make([]Field, 0)
 
 	switch def.Type.Kind {
@@ -120,26 +120,24 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 		fields = formatStruct(def.Type.AsStruct().Fields, packageMapper)
 	case ast.KindEnum:
 		objectType = TypeEnum
-		for _, val := range def.Type.AsEnum().Values {
-			name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
-			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatScalar(val.Value)))
-		}
-		// TODO: Improve this
-		typeValue = buffer.String()
+		fields = formatEnum(def.Type.AsEnum().Values)
 	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
 		objectType = TypeType
 		typeValue = formatType(def.Type, packageMapper)
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
-		typeValue = formatScalar(scalarType.Value)
-
-		objectType = TypeConst
-		if !scalarType.IsConcrete() || def.Type.Hints["kind"] == "type" {
-			if !scalarType.IsConcrete() {
-				typeValue = formatScalarKind(scalarType.ScalarKind)
-			}
+		switch {
+		case def.Type.Hints["kind"] == "type":
 			objectType = TypeType
+			typeValue = scalarType.Value
+		case !scalarType.IsConcrete():
+			objectType = TypeType
+			typeValue = formatScalarKind(scalarType.ScalarKind)
+		default:
+			objectType = TypeConst
+			typeValue = scalarType.Value
 		}
+
 	case ast.KindIntersection:
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
 		buffer.WriteString(formatIntersection(def.Type.AsIntersection(), packageMapper))
@@ -180,6 +178,18 @@ func formatStruct(structFields []ast.StructField, packageMapper pkgMapper) []Fie
 			Value:    formatType(field.Type, packageMapper),
 			Comments: field.Comments,
 			Fields:   nestedFields,
+		}
+	}
+
+	return fields
+}
+
+func formatEnum(values []ast.EnumValue) []Field {
+	fields := make([]Field, len(values))
+	for i, v := range values {
+		fields[i] = Field{
+			Name:  tools.CleanupNames(tools.UpperCamelCase(v.Name)),
+			Value: v.Value,
 		}
 	}
 

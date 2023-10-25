@@ -10,10 +10,20 @@ import * as {{ $alias }} from '{{ $importPath }}';
 interface {{ $object.Name }} {
 {{- template "interface" $object.Fields }}
 }
-{{ else }}
+{{- else if eq $object.Type "enum" }}
+enum {{ $object.Name }} {
+{{- range $field := $object.Fields }}
+    {{ $field.Name }} = {{ printf "%#v" $field.Value }},
+{{- end }}
+}
+{{- else if eq $object.Type "type" }}
+type {{ $object.Name }} = {{ $object.Value }};
+{{- else if eq $object.Type "const" }}
+const {{ $object.Name }} = {{ $object.Value }};
+{{- else }}
 {{ $object.Type }} {{$object.Name }} {{ $object.Type | setOperator }}{{ $object.Value }}{{ $object.Type | setCloser }}
-{{ end }}
-{{- if $object.HasDefault }}
+{{- end }}
+{{ if $object.HasDefault }}
 export const default{{ $object.Name | upperCamelCase }} = (): {{ $object.Name }} => ({{ $object.DefaultValue }}{{- end }});
 {{ end }}
 
