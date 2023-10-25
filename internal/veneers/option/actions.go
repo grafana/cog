@@ -34,6 +34,10 @@ func ArrayToAppendAction() RewriteAction {
 
 		newFirstAssignment := option.Assignments[0]
 		newFirstAssignment.Method = ast.AppendAssignment
+		// TODO: what if there is an envelope in the value assignment?
+		if newFirstAssignment.Value.Argument != nil {
+			newFirstAssignment.Value.Argument.Type = newFirstArg.Type
+		}
 
 		newOpt := option
 		newOpt.Args = []ast.Argument{newFirstArg}
