@@ -20,6 +20,21 @@ enum {{ $object.Name }} {
 type {{ $object.Name }} = {{ $object.Value }};
 {{- else if eq $object.Type "const" }}
 const {{ $object.Name }} = {{ $object.Value }};
+{{- else if eq $object.Type "intersection" }}
+interface {{ $object.Name }} extends
+    {{- range $i, $field := $object.Fields }}
+         {{- if eq (len $field.Fields) 0 }}
+            {{- if gt $i 0 }}, {{- end }}
+            {{ $field.Name }}
+         {{- end }}
+{
+    {{- end }}
+    {{- range $field := $object.Fields }}
+        {{- if ne (len $field.Fields) 0 }}
+            {{- template "interface" $field.Fields }}
+        {{- end }}
+    {{- end }}
+}
 {{- else }}
 {{ $object.Type }} {{$object.Name }} {{ $object.Type | setOperator }}{{ $object.Value }}{{ $object.Type | setCloser }}
 {{- end }}

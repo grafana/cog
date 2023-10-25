@@ -14,11 +14,12 @@ import (
 type Type string
 
 const (
-	TypeType      = "type"
-	TypeEnum      = "enum"
-	TypeConst     = "const"
-	TypeInterface = "interface"
-	TypeEmpty     = ""
+	TypeType         = "type"
+	TypeEnum         = "enum"
+	TypeConst        = "const"
+	TypeInterface    = "interface"
+	TypeIntersection = "intersection"
+	TypeEmpty        = ""
 )
 
 type RawTmpl struct {
@@ -108,8 +109,6 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 }
 
 func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMapper pkgMapper) (Object, error) {
-	var buffer strings.Builder
-
 	objectType := TypeEmpty
 	var typeValue any
 	fields := make([]Field, 0)
@@ -137,11 +136,9 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 			objectType = TypeConst
 			typeValue = scalarType.Value
 		}
-
 	case ast.KindIntersection:
-		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
-		buffer.WriteString(formatIntersection(def.Type.AsIntersection(), packageMapper))
-		buffer.WriteString("\n")
+		objectType = TypeIntersection
+		fields = formatIntersection(def.Type.AsIntersection(), packageMapper)
 	default:
 		return Object{}, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -194,6 +191,15 @@ func formatEnum(values []ast.EnumValue) []Field {
 	}
 
 	return fields
+}
+
+func formatReference(ref ast.RefType, packageMapper pkgMapper) string {
+	referredPkg := packageMapper(ref.ReferredPkg)
+	if referredPkg != "" {
+		return referredPkg + "." + ref.ReferredType
+	}
+
+	return ref.ReferredType
 }
 
 func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) string {
@@ -267,8 +273,6 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 		}
 
 		return formatScalarKind(def.AsScalar().ScalarKind)
-	case ast.KindIntersection:
-		return formatIntersection(def.AsIntersection(), packageMapper)
 	default:
 		return string(def.Kind)
 	}
@@ -347,6 +351,36 @@ func formatScalar(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
+}
+
+func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) []Field {
+	fields := make([]Field, 0, len(def.Branches))
+
+	refs := make([]ast.Type, 0)
+	rest := make([]ast.Type, 0)
+	for _, b := range def.Branches {
+		if b.Ref != nil {
+			refs = append(refs, b)
+			continue
+		}
+		rest = append(rest, b)
+	}
+
+	for _, ref := range refs {
+		fields = append(fields, Field{
+			Name: formatReference(ref.AsRef(), packageMapper),
+		})
+	}
+
+	for _, r := range rest {
+		if r.Struct != nil {
+			fields = append(fields, formatStruct(r.AsStruct().Fields, packageMapper)...)
+		}
+
+		// Map different types ??
+	}
+
+	return fields
 }
 
 func prefixLinesWith(input string, prefix string) string {
@@ -532,46 +566,4 @@ func formatValue(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
-}
-
-func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) string {
-	var buffer strings.Builder
-
-	refs := make([]ast.Type, 0)
-	rest := make([]ast.Type, 0)
-	for _, b := range def.Branches {
-		if b.Ref != nil {
-			refs = append(refs, b)
-			continue
-		}
-		rest = append(rest, b)
-	}
-
-	if len(refs) > 0 {
-		buffer.WriteString("extends ")
-	}
-
-	for i, ref := range refs {
-		if i != 0 && i < len(refs) {
-			buffer.WriteString(", ")
-		}
-
-		buffer.WriteString(formatType(ref, packageMapper))
-	}
-
-	buffer.WriteString(" {\n")
-
-	for _, r := range rest {
-		if r.Struct != nil {
-			for _, fieldDef := range r.AsStruct().Fields {
-				buffer.WriteString("\t" + formatField(fieldDef, packageMapper))
-			}
-			continue
-		}
-		buffer.WriteString("\t" + formatType(r, packageMapper))
-	}
-
-	buffer.WriteString("}")
-
-	return buffer.String()
 }
