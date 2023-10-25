@@ -9,6 +9,7 @@ builders:
   - omit: { by_object: dashboard.GridPos }
   - omit: { by_object: dashboard.DataSourceRef }
   - omit: { by_object: dashboard.LibraryPanelRef }
+  - omit: { by_object: dashboard.VariableOption }
 
   # Rearrange things a bit
   - merge_into:
@@ -90,6 +91,18 @@ options:
   - rename:
       by_name_case_insensitive: Dashboard.rowPanel
       as: withRow
+
+  # Templating([]VariableModel) instead of Templating(struct []struct{List []VariableModel})
+  - struct_fields_as_arguments:
+      by_name: Dashboard.templating
+      fields: [list]
+  # Append a single variable instead forcing to define every variable at once
+  - array_to_append:
+      by_name: Dashboard.templating
+  # Templating() to WithVariable()
+  - rename:
+      by_name_case_insensitive: Dashboard.templating
+      as: withVariable
 
   # We don't want these options at all
   - omit: { by_name: Dashboard.schemaVersion }

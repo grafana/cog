@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/cog/generated/dashboard/dashboard"
 	"github.com/grafana/cog/generated/dashboard/rowpanel"
 	"github.com/grafana/cog/generated/dashboard/timepicker"
+	"github.com/grafana/cog/generated/dashboard/variablemodel"
 	common "github.com/grafana/cog/generated/types/common"
 	types "github.com/grafana/cog/generated/types/dashboard"
 )
@@ -24,91 +25,67 @@ func main() {
 				TimeOptions([]string{"5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"}),
 		).
 		Tooltip(types.DashboardCursorSyncCrosshair).
-		Templating(struct { // TODO: uh.
-			List []types.VariableModel `json:"list,omitempty"`
-		}{
-			List: []types.VariableModel{
-				{
-					Type:        "datasource",
-					Name:        "datasource",
-					Label:       toPtr("Data Source"),
-					Hide:        toPtr(types.VariableHideDontHide),
-					SkipUrlSync: toPtr(false),
-					Query: &types.StringOrAny{
-						String: toPtr("prometheus"),
-					},
-					Datasource: &types.DataSourceRef{
-						Type: toPtr("prometheus"),
-						Uid:  toPtr("$datasource"),
-					},
-					Current: &types.VariableOption{
-						Selected: toPtr(true),
-						Text:     types.StringOrArrayOfString{String: toPtr("grafanacloud-potatopi-prom")},
-						Value:    types.StringOrArrayOfString{String: toPtr("grafanacloud-prom")},
-					},
-					Multi:   toPtr(false),
-					Refresh: toPtr(types.VariableRefreshOnDashboardLoad),
-					Sort:    toPtr(types.VariableSortDisabled),
-				},
-				{
-					Type:        "query",
-					Name:        "instance",
-					Label:       toPtr("Instance"),
-					Hide:        toPtr(types.VariableHideDontHide),
-					SkipUrlSync: toPtr(false),
-					Query: &types.StringOrAny{
-						String: toPtr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
-					},
-					Datasource: &types.DataSourceRef{
-						Type: toPtr("prometheus"),
-						Uid:  toPtr("$datasource"),
-					},
-					Current: &types.VariableOption{
-						Selected: toPtr(false),
-						Text:     types.StringOrArrayOfString{String: toPtr("potato")},
-						Value:    types.StringOrArrayOfString{String: toPtr("potato")},
-					},
-					Multi:   toPtr(false),
-					Refresh: toPtr(types.VariableRefreshOnTimeRangeChanged),
-					Sort:    toPtr(types.VariableSortDisabled),
-				},
-				{
-					Type:        "query",
-					Name:        "instance",
-					Label:       toPtr("Instance"),
-					Hide:        toPtr(types.VariableHideDontHide),
-					SkipUrlSync: toPtr(false),
-					Query: &types.StringOrAny{
-						String: toPtr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
-					},
-					Datasource: &types.DataSourceRef{
-						Type: toPtr("prometheus"),
-						Uid:  toPtr("$datasource"),
-					},
-					Current: &types.VariableOption{
-						Selected: toPtr(false),
-						Text:     types.StringOrArrayOfString{String: toPtr("potato")},
-						Value:    types.StringOrArrayOfString{String: toPtr("potato")},
-					},
-					Multi:   toPtr(false),
-					Refresh: toPtr(types.VariableRefreshOnTimeRangeChanged),
-					Sort:    toPtr(types.VariableSortDisabled),
-				},
-			},
-		}).
+		// TODO: we should have specific builders for every possible variable type
+		// "Data Source" variable
+		WithVariable(variablemodel.New().
+			Type(types.VariableTypeDatasource).
+			Name("datasource").
+			Label("Data Source").
+			Hide(types.VariableHideDontHide).
+			Refresh(types.VariableRefreshOnDashboardLoad).
+			Query(types.StringOrAny{
+				String: toPtr("prometheus"),
+			}).
+			Datasource(types.DataSourceRef{
+				Type: toPtr("prometheus"),
+				Uid:  toPtr("$datasource"),
+			}).
+			Current(types.VariableOption{
+				Selected: toPtr(true),
+				Text:     types.StringOrArrayOfString{String: toPtr("grafanacloud-potatopi-prom")},
+				Value:    types.StringOrArrayOfString{String: toPtr("grafanacloud-prom")},
+			}).
+			Sort(types.VariableSortDisabled),
+		).
+		// "Instance" variable
+		WithVariable(variablemodel.New().
+			Type(types.VariableTypeQuery).
+			Name("instance").
+			Label("Instance").
+			Hide(types.VariableHideDontHide).
+			Refresh(types.VariableRefreshOnTimeRangeChanged).
+			Query(types.StringOrAny{
+				String: toPtr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
+			}).
+			Datasource(types.DataSourceRef{
+				Type: toPtr("prometheus"),
+				Uid:  toPtr("$datasource"),
+			}).
+			Current(types.VariableOption{
+				Selected: toPtr(false),
+				Text:     types.StringOrArrayOfString{String: toPtr("potato")},
+				Value:    types.StringOrArrayOfString{String: toPtr("potato")},
+			}).
+			Sort(types.VariableSortDisabled),
+		).
+		// CPU
 		WithRow(rowpanel.New("CPU").GridPos(types.GridPos{H: 1, W: 24})).
 		WithPanel(cpuUsageTimeseries().GridPos(types.GridPos{H: 7, W: 18})).    // TODO: painful, not intuitive
 		WithPanel(cpuTemperatureGauge().GridPos(types.GridPos{H: 7, W: 6})).    // TODO: painful, not intuitive
 		WithPanel(loadAverageTimeseries().GridPos(types.GridPos{H: 7, W: 18})). // TODO: painful, not intuitive
-		WithRow(rowpanel.New("Memory").GridPos(types.GridPos{H: 1, W: 24})).    // TODO: painful, not intuitive
+		// Memory
+		WithRow(rowpanel.New("Memory").GridPos(types.GridPos{H: 1, W: 24})). // TODO: painful, not intuitive
 		WithPanel(memoryUsageTimeseries().GridPos(types.GridPos{H: 7, W: 18})).
 		WithPanel(memoryUsageGauge().GridPos(types.GridPos{H: 7, W: 6})).
+		// Disk
 		WithRow(rowpanel.New("Disk")).
 		WithPanel(diskIOTimeseries().GridPos(types.GridPos{H: 7, W: 12})).
 		WithPanel(diskSpaceUsageTable().GridPos(types.GridPos{H: 7, W: 12})).
+		// Network
 		WithRow(rowpanel.New("Network")).
 		WithPanel(networkReceivedTimeseries().GridPos(types.GridPos{H: 7, W: 12})).
 		WithPanel(networkTransmittedTimeseries().GridPos(types.GridPos{H: 7, W: 12})).
+		// Logs
 		WithRow(rowpanel.New("Logs")).
 		WithPanel(errorsInSystemLogs().GridPos(types.GridPos{H: 7, W: 24})).
 		WithPanel(authLogs().GridPos(types.GridPos{H: 7, W: 24})).
