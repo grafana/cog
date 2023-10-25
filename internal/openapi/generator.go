@@ -299,7 +299,7 @@ func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[strin
 }
 
 func (g *generator) getRefName(value string) (string, string) {
-	rgx := regexp.MustCompile("(../)*(\\w*/)*(.*).(json|yml)")
+	rgx := regexp.MustCompile(`(../)*(\w*/)*(.*).(json|yml)`)
 	group := rgx.FindStringSubmatch(value)
 
 	parts := strings.Split(value, "/")
