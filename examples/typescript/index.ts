@@ -1,11 +1,11 @@
-import {DashboardCursorSync, DashboardLinkType} from "../../../generated/types/dashboard/types_gen";
-import {GraphDrawStyle, TooltipDisplayMode} from "../../../generated/types/common/types_gen";
-import {DashboardBuilder} from "../../../generated/dashboard/dashboard/builder_gen";
-import {RowPanelBuilder} from "../../../generated/dashboard/rowpanel/builder_gen";
-import {PanelBuilder} from "../../../generated/timeseries/panel/builder_gen";
-import {VizTooltipOptionsBuilder} from "../../../generated/common/viztooltipoptions/builder_gen";
-import {TimePickerBuilder} from "../../../generated/dashboard/timepicker/builder_gen";
-import {dataqueryBuilder as PrometheusQuery} from "../../../generated/prometheus/dataquery/builder_gen";
+import {DashboardCursorSync, DashboardLinkType} from "../../generated/types/dashboard/types_gen";
+import {GraphDrawStyle, TooltipDisplayMode} from "../../generated/types/common/types_gen";
+import {DashboardBuilder} from "../../generated/dashboard/dashboard/builder_gen";
+import {RowPanelBuilder} from "../../generated/dashboard/rowpanel/builder_gen";
+import {PanelBuilder} from "../../generated/timeseries/panel/builder_gen";
+import {VizTooltipOptionsBuilder} from "../../generated/common/viztooltipoptions/builder_gen";
+import {TimePickerBuilder} from "../../generated/dashboard/timepicker/builder_gen";
+import {dataqueryBuilder as PrometheusQuery} from "../../generated/prometheus/dataquery/builder_gen";
 
 const someQuery = new PrometheusQuery().
     expr("rate(agent_wal_samples_appended_total{}[10m])").
