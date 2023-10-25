@@ -49,7 +49,6 @@ $ go run cmd/cli/main.go generate \
 
 For the [`kind-registry`](https://github.com/grafana/kind-registry):
 
-
 ```console
 $ git clone https://github.com/grafana/kind-registry
 $ go run cmd/cli/main.go generate \
