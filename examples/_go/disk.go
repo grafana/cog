@@ -51,83 +51,84 @@ func diskSpaceUsageTable() *table.PanelBuilder {
 			tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "A"),
 			tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "B"),
 		}).
-		Transformations([]dashboard.DataTransformerConfig{
-			{
-				Id: "groupBy",
-				Options: map[string]any{
-					"fields": map[string]any{
-						"Value #A": map[string]any{
-							"aggregations": []string{"lastNotNull"},
-							"operation":    "aggregate",
-						},
-						"Value #B": map[string]any{
-							"aggregations": []string{"lastNotNull"},
-							"operation":    "aggregate",
-						},
-						"mountpoint": map[string]any{
-							"aggregations": []string{},
-							"operation":    "groupby",
-						},
+		// Transformations
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "groupBy",
+			Options: map[string]any{
+				"fields": map[string]any{
+					"Value #A": map[string]any{
+						"aggregations": []string{"lastNotNull"},
+						"operation":    "aggregate",
 					},
-				},
-			},
-			{
-				Id:      "merge",
-				Options: map[string]any{},
-			},
-			{
-				Id: "calculateField",
-				Options: map[string]any{
-					"alias": "Used",
-					"binary": map[string]any{
-						"left":     "Value #A (lastNotNull)",
-						"operator": "-",
-						"reducer":  "sum",
-						"right":    "Value #B (lastNotNull)",
+					"Value #B": map[string]any{
+						"aggregations": []string{"lastNotNull"},
+						"operation":    "aggregate",
 					},
-					"mode": "binary",
-					"reduce": map[string]any{
-						"reducer": "sum",
-					},
-				},
-			},
-			{
-				Id: "calculateField",
-				Options: map[string]any{
-					"alias": "Used, %",
-					"binary": map[string]any{
-						"left":     "Used",
-						"operator": "/",
-						"reducer":  "sum",
-						"right":    "Value #A (lastNotNull)",
-					},
-					"mode": "binary",
-					"reduce": map[string]any{
-						"reducer": "sum",
-					},
-				},
-			},
-			{
-				Id: "organize",
-				Options: map[string]any{
-					"excludeByName": map[string]any{},
-					"indexByName":   map[string]any{},
-					"renameByName": map[string]any{
-						"Value #A (lastNotNull)": "Size",
-						"Value #B (lastNotNull)": "Available",
-						"mountpoint":             "Mounted on",
-					},
-				},
-			}, {
-				Id: "sortBy",
-				Options: map[string]any{
-					"fields": map[string]any{},
-					"sort": []map[string]any{
-						{"field": "Mounted on"},
+					"mountpoint": map[string]any{
+						"aggregations": []string{},
+						"operation":    "groupby",
 					},
 				},
 			},
 		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id:      "merge",
+			Options: map[string]any{},
+		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "calculateField",
+			Options: map[string]any{
+				"alias": "Used",
+				"binary": map[string]any{
+					"left":     "Value #A (lastNotNull)",
+					"operator": "-",
+					"reducer":  "sum",
+					"right":    "Value #B (lastNotNull)",
+				},
+				"mode": "binary",
+				"reduce": map[string]any{
+					"reducer": "sum",
+				},
+			},
+		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "calculateField",
+			Options: map[string]any{
+				"alias": "Used, %",
+				"binary": map[string]any{
+					"left":     "Used",
+					"operator": "/",
+					"reducer":  "sum",
+					"right":    "Value #A (lastNotNull)",
+				},
+				"mode": "binary",
+				"reduce": map[string]any{
+					"reducer": "sum",
+				},
+			},
+		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "organize",
+			Options: map[string]any{
+				"excludeByName": map[string]any{},
+				"indexByName":   map[string]any{},
+				"renameByName": map[string]any{
+					"Value #A (lastNotNull)": "Size",
+					"Value #B (lastNotNull)": "Available",
+					"mountpoint":             "Mounted on",
+				},
+			},
+		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "sortBy",
+			Options: map[string]any{
+				"fields": map[string]any{},
+				"sort": []map[string]any{
+					{"field": "Mounted on"},
+				},
+			},
+		}).
+
 		// Overrides configuration
 		WithOverride(
 			dashboard.MatcherConfig{Id: "byName", Options: "Mounted on"},
