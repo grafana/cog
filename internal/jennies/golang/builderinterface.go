@@ -19,7 +19,7 @@ func (jenny BuilderInterface) Generate(_ []*ast.Schema) (*codejen.File, error) {
 }
 
 func (jenny BuilderInterface) generateFile() string {
-	return `package types
+	return `package cog
 
 import (
 	"fmt"

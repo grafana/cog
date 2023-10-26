@@ -1,7 +1,7 @@
 {{ range $alias, $importPath := .Imports -}}
 import * as {{ $alias }} from '{{ $importPath }}';
 {{- end }}
-import { CogOptionsBuilder } from '../../options_builder_gen';
+import { CogOptionsBuilder } from '../options_builder_gen';
 
 export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.{{ .Name }}> {
     private readonly internal: {{ .ImportAlias }}.{{ .Name }};

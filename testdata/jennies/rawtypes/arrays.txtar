@@ -68,7 +68,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== types/arrays/types_gen.ts
+== arrays/types_gen.ts
 // List of tags, maybe?
 export type ArrayOfStrings = string[];
 

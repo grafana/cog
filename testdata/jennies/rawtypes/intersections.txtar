@@ -96,7 +96,7 @@ type SomeStruct struct {
 }
 
 -- out/jennies/TypescriptRawTypes --
-== types/intersections/types_gen.ts
+== intersections/types_gen.ts
 import * as externalPkg from "../externalPkg/types_gen";
 
 export interface Intersections extends SomeStruct, externalPkg.AnotherStruct {

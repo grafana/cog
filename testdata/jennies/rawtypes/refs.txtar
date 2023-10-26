@@ -38,7 +38,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== types/refs/types_gen.ts
+== refs/types_gen.ts
 import * as otherpkg from "../otherpkg/types_gen";
 
 export interface SomeStruct {

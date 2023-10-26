@@ -1,17 +1,13 @@
-import {DashboardCursorSync, DashboardLinkType} from "../../generated/types/dashboard/types_gen";
-import {GraphDrawStyle, TooltipDisplayMode} from "../../generated/types/common/types_gen";
-import {DashboardBuilder} from "../../generated/dashboard/dashboard/builder_gen";
-import {RowPanelBuilder} from "../../generated/dashboard/rowpanel/builder_gen";
-import {PanelBuilder} from "../../generated/timeseries/panel/builder_gen";
-import {VizTooltipOptionsBuilder} from "../../generated/common/viztooltipoptions/builder_gen";
-import {TimePickerBuilder} from "../../generated/dashboard/timepicker/builder_gen";
-import {dataqueryBuilder as PrometheusQuery} from "../../generated/prometheus/dataquery/builder_gen";
+import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/timeseries";
+import {VizTooltipOptionsBuilder, GraphDrawStyle, TooltipDisplayMode} from "../../generated/common";
+import {DashboardBuilder, TimePickerBuilder, RowPanelBuilder, DashboardCursorSync, DashboardLinkType} from "../../generated/dashboard";
+import {dataqueryBuilder as PrometheusQuery} from "../../generated/prometheus";
 
 const someQuery = new PrometheusQuery().
     expr("rate(agent_wal_samples_appended_total{}[10m])").
     legendFormat("Samples");
 
-const timeseriesPanel = new PanelBuilder()
+const timeseriesPanel = new TimeseriesPanelBuilder()
     .title("Some timeseries panel")
     .transparent(true)
     .description("Let there be data")
