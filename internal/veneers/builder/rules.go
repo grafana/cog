@@ -94,10 +94,10 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 
 func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders, panelOptionsToExclude []string) (ast.Builder, error) {
 	newBuilder := ast.Builder{
-		Schema:      panelBuilder.Schema,
-		For:         panelBuilder.For,
-		RootPackage: panelType,
-		Package:     "panel",
+		Schema:  panelBuilder.Schema,
+		Package: panelType,
+		For:     panelBuilder.For,
+		Name:    panelBuilder.For.Name,
 	}
 
 	typeField, ok := panelBuilder.For.Type.AsStruct().FieldByName("type")
@@ -202,5 +202,19 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 		}
 
 		return newBuilders, nil
+	}
+}
+
+func Rename(selector Selector, newName string) RewriteRule {
+	return func(builders ast.Builders) (ast.Builders, error) {
+		for i, builder := range builders {
+			if !selector(builder) {
+				continue
+			}
+
+			builders[i].Name = newName
+		}
+
+		return builders, nil
 	}
 }

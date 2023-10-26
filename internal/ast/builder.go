@@ -16,8 +16,8 @@ type Builder struct {
 	// The builder itself
 	// These fields are completely derived from the fields above and can be freely manipulated
 	// by veneers.
-	RootPackage     string // ie: dashboard, alert, ... // TODO: better names and docs
-	Package         string // ie: panel, link, ...
+	Package         string
+	Name            string
 	Options         []Option
 	Initializations []Assignment
 }
@@ -267,10 +267,10 @@ func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
 
 func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema *Schema, object Object) Builder {
 	builder := Builder{
-		RootPackage: schema.Package,
-		Package:     object.Name,
-		Schema:      schema,
-		For:         object,
+		Package: schema.Package,
+		Schema:  schema,
+		For:     object,
+		Name:    object.Name,
 	}
 
 	var structType StructType

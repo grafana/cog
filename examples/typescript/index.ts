@@ -1,7 +1,7 @@
 import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/timeseries";
 import {VizTooltipOptionsBuilder, GraphDrawStyle, TooltipDisplayMode} from "../../generated/common";
-import {DashboardBuilder, TimePickerBuilder, RowPanelBuilder, DashboardCursorSync, DashboardLinkType} from "../../generated/dashboard";
-import {dataqueryBuilder as PrometheusQuery} from "../../generated/prometheus";
+import {DashboardBuilder, TimePickerBuilder, RowBuilder, DashboardCursorSync, DashboardLinkType} from "../../generated/dashboard";
+import {DataqueryBuilder as PrometheusQuery} from "../../generated/prometheus";
 
 const someQuery = new PrometheusQuery().
     expr("rate(agent_wal_samples_appended_total{}[10m])").
@@ -52,7 +52,7 @@ const builder = new DashboardBuilder("Some title")
         },
     ])
 
-    .withRow(new RowPanelBuilder("Overview"))
+    .withRow(new RowBuilder("Overview"))
     .withPanel(timeseriesPanel)
 ;
 

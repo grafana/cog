@@ -3,18 +3,18 @@ import * as {{ $alias }} from '{{ $importPath }}';
 {{- end }}
 import { CogOptionsBuilder } from '../options_builder_gen';
 
-export class {{ .Name }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.{{ .Name }}> {
-    private readonly internal: {{ .ImportAlias }}.{{ .Name }};
+export class {{ .BuilderName|upperCamelCase }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.{{ .ObjectName }}> {
+    private readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
 
     constructor({{ template "args" .Constructor.Args }}) {
-        this.internal = {{ .ImportAlias }}.default{{ .Name | upperCamelCase }}();
+        this.internal = {{ .ImportAlias }}.default{{ .ObjectName | upperCamelCase }}();
         {{- range $arg := .Constructor.Assignments }}
         {{- template "constraints" $arg.Constraints }}
         this.internal.{{ $arg.Path }} = {{ $arg.Value }};
         {{- end }}
     }
 
-    build(): {{ .ImportAlias }}.{{ .Name }} {
+    build(): {{ .ImportAlias }}.{{ .ObjectName }} {
         return this.internal;
     }
 {{ range .Options }}

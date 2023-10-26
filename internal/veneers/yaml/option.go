@@ -14,7 +14,7 @@ import (
 type OptionRule struct {
 	Omit                    *OptionSelector          `yaml:"omit"`
 	PromoteToConstructor    *OptionSelector          `yaml:"promote_to_constructor"`
-	Rename                  *Rename                  `yaml:"rename"`
+	Rename                  *RenameOption            `yaml:"rename"`
 	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean"`
 	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
 	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append"`
@@ -63,13 +63,13 @@ func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
 }
 
-type Rename struct {
+type RenameOption struct {
 	OptionSelector `yaml:",inline"`
 
 	As string `yaml:"as"`
 }
 
-func (rule Rename) AsRewriteRule() (option.RewriteRule, error) {
+func (rule RenameOption) AsRewriteRule() (option.RewriteRule, error) {
 	selector, err := rule.AsSelector()
 	if err != nil {
 		return option.RewriteRule{}, err

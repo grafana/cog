@@ -65,24 +65,24 @@ func main() {
 			Sort(dashboard.VariableSortDisabled),
 		).
 		// CPU
-		WithRow(dashboard.NewRowPanelBuilder("CPU").GridPos(dashboard.GridPos{H: 1, W: 24})).
+		WithRow(dashboard.NewRowBuilder("CPU").GridPos(dashboard.GridPos{H: 1, W: 24})).
 		WithPanel(cpuUsageTimeseries().GridPos(dashboard.GridPos{H: 7, W: 18})).    // TODO: painful, not intuitive
 		WithPanel(cpuTemperatureGauge().GridPos(dashboard.GridPos{H: 7, W: 6})).    // TODO: painful, not intuitive
 		WithPanel(loadAverageTimeseries().GridPos(dashboard.GridPos{H: 7, W: 18})). // TODO: painful, not intuitive
 		// Memory
-		WithRow(dashboard.NewRowPanelBuilder("Memory").GridPos(dashboard.GridPos{H: 1, W: 24})). // TODO: painful, not intuitive
+		WithRow(dashboard.NewRowBuilder("Memory").GridPos(dashboard.GridPos{H: 1, W: 24})). // TODO: painful, not intuitive
 		WithPanel(memoryUsageTimeseries().GridPos(dashboard.GridPos{H: 7, W: 18})).
 		WithPanel(memoryUsageGauge().GridPos(dashboard.GridPos{H: 7, W: 6})).
 		// Disk
-		WithRow(dashboard.NewRowPanelBuilder("Disk")).
+		WithRow(dashboard.NewRowBuilder("Disk")).
 		WithPanel(diskIOTimeseries().GridPos(dashboard.GridPos{H: 7, W: 12})).
 		WithPanel(diskSpaceUsageTable().GridPos(dashboard.GridPos{H: 7, W: 12})).
 		// Network
-		WithRow(dashboard.NewRowPanelBuilder("Network")).
+		WithRow(dashboard.NewRowBuilder("Network")).
 		WithPanel(networkReceivedTimeseries().GridPos(dashboard.GridPos{H: 7, W: 12})).
 		WithPanel(networkTransmittedTimeseries().GridPos(dashboard.GridPos{H: 7, W: 12})).
 		// Logs
-		WithRow(dashboard.NewRowPanelBuilder("Logs")).
+		WithRow(dashboard.NewRowBuilder("Logs")).
 		WithPanel(errorsInSystemLogs().GridPos(dashboard.GridPos{H: 7, W: 24})).
 		WithPanel(authLogs().GridPos(dashboard.GridPos{H: 7, W: 24})).
 		WithPanel(kernelLogs().GridPos(dashboard.GridPos{H: 7, W: 24})).

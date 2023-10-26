@@ -24,7 +24,7 @@ func (jenny Index) Generate(context context.Builders) (codejen.Files, error) {
 		packages[schema.Package] = []string{"types_gen"}
 	}
 	for _, builder := range context.Builders {
-		packages[builder.RootPackage] = append(packages[builder.RootPackage], fmt.Sprintf("%s_builder_gen", strings.ToLower(builder.For.Name)))
+		packages[builder.Package] = append(packages[builder.Package], fmt.Sprintf("%s_builder_gen", strings.ToLower(builder.For.Name)))
 	}
 
 	for pkg, refs := range packages {
