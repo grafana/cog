@@ -128,8 +128,8 @@ export type MapOfStringToMapOfStringToBool = Record<string, Record<string, boole
 export const defaultMapOfStringToMapOfStringToBool = (): MapOfStringToMapOfStringToBool => ({});
 
 -- out/jennies/GoRawTypes --
-== types/maps/types_gen.go
-package types
+== maps/types_gen.go
+package maps
 
 // String to... something.
 type MapOfStringToAny map[string]any

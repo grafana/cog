@@ -1,30 +1,30 @@
 package main
 
 import (
-	timeseries "github.com/grafana/cog/generated/timeseries/panel"
-	types "github.com/grafana/cog/generated/types/dashboard"
+	"github.com/grafana/cog/generated/dashboard"
+	"github.com/grafana/cog/generated/timeseries"
 )
 
-func networkReceivedTimeseries() *timeseries.Builder {
+func networkReceivedTimeseries() *timeseries.PanelBuilder {
 	return defaultTimeseries().
 		Title("Network Received").
 		Description("Network received (bits/s)").
 		Min(0).
 		Unit("bps").
 		FillOpacity(0).
-		Targets([]types.Target{
+		Targets([]dashboard.Target{
 			basicPrometheusQuery(`rate(node_network_receive_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8`, "{{ device }}"),
 		})
 }
 
-func networkTransmittedTimeseries() *timeseries.Builder {
+func networkTransmittedTimeseries() *timeseries.PanelBuilder {
 	return defaultTimeseries().
 		Title("Network Transmitted").
 		Description("Network transmitted (bits/s)").
 		Min(0).
 		Unit("bps").
 		FillOpacity(0).
-		Targets([]types.Target{
+		Targets([]dashboard.Target{
 			basicPrometheusQuery(`rate(node_network_transmit_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8`, "{{ device }}"),
 		})
 }

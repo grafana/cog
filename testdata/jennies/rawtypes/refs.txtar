@@ -58,11 +58,11 @@ export type RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct;
 export const defaultRefToSomeStructFromOtherPackage = (): RefToSomeStructFromOtherPackage => (otherpkg.defaultSomeDistantStruct());
 
 -- out/jennies/GoRawTypes --
-== types/refs/types_gen.go
-package types
+== refs/types_gen.go
+package refs
 
 import (
-	otherpkg "github.com/grafana/cog/generated/types/otherpkg"
+	otherpkg "github.com/grafana/cog/generated/otherpkg"
 )
 
 type SomeStruct struct {

@@ -176,8 +176,8 @@ export type ScalarTypeInt64 = number;
 export const defaultScalarTypeInt64 = (): ScalarTypeInt64 => (0);
 
 -- out/jennies/GoRawTypes --
-== types/scalars/types_gen.go
-package types
+== scalars/types_gen.go
+package scalars
 
 const ConstTypeString = "foo"
 

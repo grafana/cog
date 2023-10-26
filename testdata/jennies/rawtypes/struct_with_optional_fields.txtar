@@ -133,8 +133,8 @@ export const defaultSomeOtherStruct = (): SomeOtherStruct => ({
 });
 
 -- out/jennies/GoRawTypes --
-== types/struct_optional_fields/types_gen.go
-package types
+== struct_optional_fields/types_gen.go
+package struct_optional_fields
 
 type SomeStruct struct {
 	FieldRef *SomeOtherStruct `json:"FieldRef,omitempty"`

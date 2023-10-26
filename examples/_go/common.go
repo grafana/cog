@@ -1,25 +1,21 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/common/reducedataoptions"
-	"github.com/grafana/cog/generated/common/vizlegendoptions"
-	gauge "github.com/grafana/cog/generated/gauge/panel"
-	logs "github.com/grafana/cog/generated/logs/panel"
-	loki "github.com/grafana/cog/generated/loki/dataquery"
-	prometheus "github.com/grafana/cog/generated/prometheus/dataquery"
-	timeseries "github.com/grafana/cog/generated/timeseries/panel"
-	common "github.com/grafana/cog/generated/types/common"
-	types "github.com/grafana/cog/generated/types/dashboard"
-	lokitypes "github.com/grafana/cog/generated/types/loki"
-	promtypes "github.com/grafana/cog/generated/types/prometheus"
+	"github.com/grafana/cog/generated/common"
+	"github.com/grafana/cog/generated/dashboard"
+	"github.com/grafana/cog/generated/gauge"
+	"github.com/grafana/cog/generated/logs"
+	"github.com/grafana/cog/generated/loki"
+	"github.com/grafana/cog/generated/prometheus"
+	"github.com/grafana/cog/generated/timeseries"
 )
 
 func toPtr[T any](input T) *T {
 	return &input
 }
 
-func basicPrometheusQuery(query string, legend string) *promtypes.Dataquery {
-	queryBuilder := prometheus.New().
+func basicPrometheusQuery(query string, legend string) *prometheus.Dataquery {
+	queryBuilder := prometheus.NewDataqueryBuilder().
 		Expr(query).
 		LegendFormat(legend)
 
@@ -31,8 +27,8 @@ func basicPrometheusQuery(query string, legend string) *promtypes.Dataquery {
 	return result
 }
 
-func basicLokiQuery(query string) *lokitypes.Dataquery {
-	queryBuilder := loki.New().
+func basicLokiQuery(query string) *loki.Dataquery {
+	queryBuilder := loki.NewDataqueryBuilder().
 		Expr(query)
 
 	result, err := queryBuilder.Build() // TODO
@@ -43,11 +39,11 @@ func basicLokiQuery(query string) *lokitypes.Dataquery {
 	return result
 }
 
-func tablePrometheusQuery(query string, ref string) *promtypes.Dataquery {
-	queryBuilder := prometheus.New().
+func tablePrometheusQuery(query string, ref string) *prometheus.Dataquery {
+	queryBuilder := prometheus.NewDataqueryBuilder().
 		Expr(query).
 		Instant(true).
-		Format(promtypes.PromQueryFormatTable).
+		Format(prometheus.PromQueryFormatTable).
 		RefId(ref)
 
 	result, err := queryBuilder.Build() // TODO
@@ -58,23 +54,23 @@ func tablePrometheusQuery(query string, ref string) *promtypes.Dataquery {
 	return result
 }
 
-func defaultTimeseries() *timeseries.Builder {
-	return timeseries.New().
+func defaultTimeseries() *timeseries.PanelBuilder {
+	return timeseries.NewPanelBuilder().
 		LineWidth(1).
 		FillOpacity(10).
 		DrawStyle(common.GraphDrawStyleLine).
 		ShowPoints(common.VisibilityModeNever).
 		Legend(
-			vizlegendoptions.New().
+			common.NewVizLegendOptionsBuilder().
 				ShowLegend(true).
 				Placement(common.LegendPlacementBottom).
 				DisplayMode(common.LegendDisplayModeList),
 		)
 }
 
-func defaultLogs() *logs.Builder {
-	return logs.New().
-		Datasource(types.DataSourceRef{
+func defaultLogs() *logs.PanelBuilder {
+	return logs.NewPanelBuilder().
+		Datasource(dashboard.DataSourceRef{
 			Type: toPtr("loki"),
 			Uid:  toPtr("grafanacloud-logs"),
 		}).
@@ -84,8 +80,12 @@ func defaultLogs() *logs.Builder {
 		WrapLogMessage(true)
 }
 
-func defaultGauge() *gauge.Builder {
-	return gauge.New().
+func defaultGauge() *gauge.PanelBuilder {
+	return gauge.NewPanelBuilder().
 		Orientation(common.VizOrientationAuto).
-		ReduceOptions(reducedataoptions.New().Calcs([]string{"lastNotNull"}).Values(false)) // TODO: not intuitive
+		// TODO: not intuitive
+		ReduceOptions(
+			common.NewReduceDataOptionsBuilder().
+				Calcs([]string{"lastNotNull"}).Values(false),
+		)
 }

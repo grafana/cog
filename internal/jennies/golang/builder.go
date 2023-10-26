@@ -24,13 +24,12 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 	files := codejen.Files{}
 
 	for _, builder := range context.Builders {
-		builderImportAlias := jenny.typeImportAlias(builder.For.SelfRef)
 		jenny.typeImportMapper = func(pkg string) string {
-			if pkg == builder.For.SelfRef.ReferredPkg {
-				return builderImportAlias
+			if pkg == builder.RootPackage {
+				return ""
 			}
 
-			jenny.imports.Add(pkg, "github.com/grafana/cog/generated/types/"+pkg)
+			jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
 
 			return pkg
 		}
@@ -38,8 +37,7 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 		output := jenny.generateBuilder(context, builder)
 		filename := filepath.Join(
 			strings.ToLower(builder.RootPackage),
-			strings.ToLower(builder.Package),
-			"builder_gen.go",
+			fmt.Sprintf("%s_builder_gen.go", strings.ToLower(builder.For.Name)),
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
@@ -56,7 +54,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	builderSource := jenny.generateBuilderSource(context, builder)
 
 	// package declaration
-	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.Package)))
+	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.RootPackage)))
 
 	// write import statements
 	buffer.WriteString(jenny.imports.Format())
@@ -74,18 +72,18 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 	objectName := tools.UpperCamelCase(builder.For.Name)
 
 	// import generated types
-	importAlias := jenny.importType(builder.For.SelfRef)
 	cogAlias := jenny.importCog()
+	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
 
 	// just to make explicit that this builder implements the generic Cog builder interface
-	buffer.WriteString(fmt.Sprintf("var _ %[1]s.Builder[%[2]s.%[3]s] = (*Builder)(nil)\n\n", cogAlias, importAlias, objectName))
+	buffer.WriteString(fmt.Sprintf("var _ %[1]s.Builder[%[2]s] = (*%[3]sBuilder)(nil)\n\n", cogAlias, qualifiedObjectName, objectName))
 
 	// Builder type declaration
-	buffer.WriteString(fmt.Sprintf(`type Builder struct {
-	internal *%[1]s.%[2]s
+	buffer.WriteString(fmt.Sprintf(`type %[2]sBuilder struct {
+	internal *%[1]s
 	errors map[string]%[3]s.BuildErrors
 }
-`, importAlias, objectName, cogAlias))
+`, qualifiedObjectName, objectName, cogAlias))
 
 	// Add a constructor for the builder
 	constructorCode := jenny.generateConstructor(context, builder)
@@ -93,7 +91,7 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 
 	// Allow builders to expose the resource they're building
 	buffer.WriteString(fmt.Sprintf(`
-func (builder *Builder) Build() (*%[1]s.%[2]s, error) {
+func (builder *%[2]sBuilder) Build() (*%[1]s, error) {
 	var errs %[3]s.BuildErrors
 
 	for _, err := range builder.errors {
@@ -106,16 +104,16 @@ func (builder *Builder) Build() (*%[1]s.%[2]s, error) {
 
 	return builder.internal, nil
 }
-`, importAlias, objectName, cogAlias))
+`, qualifiedObjectName, objectName, cogAlias))
 
 	// Define options
 	for _, option := range builder.Options {
-		buffer.WriteString(jenny.generateOption(context, option) + "\n")
+		buffer.WriteString(jenny.generateOption(context, builder, option) + "\n")
 	}
 
 	// add calls to set default values
 	buffer.WriteString("\n")
-	buffer.WriteString("func (builder *Builder) applyDefaults() {\n")
+	buffer.WriteString(fmt.Sprintf("func (builder *%[1]sBuilder) applyDefaults() {\n", objectName))
 	for _, opt := range builder.Options {
 		if opt.Default != nil {
 			buffer.WriteString(jenny.generateDefaultCall(opt) + "\n")
@@ -162,9 +160,11 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 		fieldsInit = strings.Join(fieldsInitList, "\n") + "\n"
 	}
 
-	buffer.WriteString(fmt.Sprintf(`func New(%[2]s) *Builder {
-	resource := &%[4]s.%[1]s{}
-	builder := &Builder{
+	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
+
+	buffer.WriteString(fmt.Sprintf(`func New%[1]sBuilder(%[2]s) *%[1]sBuilder {
+	resource := &%[4]s{}
+	builder := &%[1]sBuilder{
 		internal: resource,
 		errors: make(map[string]%[5]s.BuildErrors),
 	}
@@ -174,7 +174,7 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 	return builder
 }
-`, typeName, args, fieldsInit, jenny.typeImportAlias(builder.For.SelfRef), cogAlias))
+`, typeName, args, fieldsInit, qualifiedObjectName, cogAlias))
 
 	return buffer.String()
 }
@@ -202,7 +202,7 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	return strings.Join(parts, ".")
 }
 
-func (jenny *Builder) generateOption(context context.Builders, def ast.Option) string {
+func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -230,12 +230,12 @@ func (jenny *Builder) generateOption(context context.Builders, def ast.Option) s
 	}
 	assignments := strings.Join(assignmentsList, "\n")
 
-	buffer.WriteString(fmt.Sprintf(`func (builder *Builder) %[1]s(%[2]s) *Builder {
-	%[3]s
+	buffer.WriteString(fmt.Sprintf(`func (builder *%[1]sBuilder) %[2]s(%[3]s) *%[1]sBuilder {
+	%[4]s
 
 	return builder
 }
-`, optionName, arguments, assignments))
+`, tools.UpperCamelCase(builder.For.Name), optionName, arguments, assignments))
 
 	return buffer.String()
 }
@@ -245,10 +245,9 @@ func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argumen
 
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		cogAlias := jenny.importCog()
-		importAlias := jenny.importType(referredBuilder.For.SelfRef)
-		referredTypeName := tools.UpperCamelCase(referredBuilder.For.Name)
+		qualifiedType := jenny.importType(referredBuilder.For.SelfRef)
 
-		return fmt.Sprintf(`%[1]s %[2]s.Builder[%[3]s.%[4]s]`, argName, cogAlias, importAlias, referredTypeName)
+		return fmt.Sprintf(`%[1]s %[2]s.Builder[%[3]s]`, argName, cogAlias, qualifiedType)
 	}
 
 	typeName := strings.Trim(formatType(arg.Type, jenny.typeImportMapper), "*")
@@ -371,13 +370,13 @@ if err != nil {
 
 func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, value ast.AssignmentValue) (string, string) {
 	envelope := value.Envelope
-	referredTypeAlias := jenny.importType(envelope.Type)
+	qualifiedType := jenny.importType(envelope.Type)
 
 	setup, val := jenny.formatAssignmentValue(context, envelope.Value, envelope.Path[0].Type)
 
-	envelopeValue := fmt.Sprintf(`%[1]s.%[2]s{
-	%[3]s: %[4]s,
-}`, referredTypeAlias, envelope.Type.ReferredType, envelope.Path[0].Identifier, val)
+	envelopeValue := fmt.Sprintf(`%[1]s{
+	%[2]s: %[3]s,
+}`, qualifiedType, envelope.Path[0].Identifier, val)
 
 	return setup, envelopeValue
 }
@@ -474,26 +473,22 @@ func (jenny *Builder) constraintComparison(argumentName string, constraint ast.T
 	return fmt.Sprintf("%[1]s %[2]s %#[3]v", argumentName, constraint.Op, constraint.Args[0])
 }
 
-// typeImportAlias returns the alias to use when importing the given object's type definition.
-func (jenny *Builder) typeImportAlias(ref ast.RefType) string {
-	// all types within a schema are generated under the same package
-	return ref.ReferredPkg
+func (jenny *Builder) importCog() string {
+	jenny.imports.Add("cog", "github.com/grafana/cog/generated")
+
+	return "cog"
 }
 
 // importType declares an import statement for the type definition of
-// the given object and returns an alias to it.
+// the given object and returns a fully qualified type name for it.
 func (jenny *Builder) importType(typeRef ast.RefType) string {
-	pkg := jenny.typeImportAlias(typeRef)
+	pkg := jenny.typeImportMapper(typeRef.ReferredPkg)
+	typeName := tools.UpperCamelCase(typeRef.ReferredType)
+	if pkg == "" {
+		return typeName
+	}
 
-	jenny.imports.Add(pkg, "github.com/grafana/cog/generated/types/"+pkg)
-
-	return pkg
-}
-
-func (jenny *Builder) importCog() string {
-	jenny.imports.Add("cog", "github.com/grafana/cog/generated/types")
-
-	return "cog"
+	return fmt.Sprintf("%s.%s", pkg, typeName)
 }
 
 func isReservedGoKeyword(input string) bool {

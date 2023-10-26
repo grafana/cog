@@ -1,15 +1,13 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/common/stackingconfig"
-	"github.com/grafana/cog/generated/dashboard/thresholdsconfig"
-	gauge "github.com/grafana/cog/generated/gauge/panel"
-	timeseries "github.com/grafana/cog/generated/timeseries/panel"
-	common "github.com/grafana/cog/generated/types/common"
-	types "github.com/grafana/cog/generated/types/dashboard"
+	"github.com/grafana/cog/generated/common"
+	"github.com/grafana/cog/generated/dashboard"
+	"github.com/grafana/cog/generated/gauge"
+	"github.com/grafana/cog/generated/timeseries"
 )
 
-func cpuUsageTimeseries() *timeseries.Builder {
+func cpuUsageTimeseries() *timeseries.PanelBuilder {
 	query := `(
   (1 - sum without (mode) (rate(node_cpu_seconds_total{job="integrations/raspberrypi-node", mode=~"idle|iowait|steal", instance="$instance"}[$__rate_interval])))
 / ignoring(cpu) group_left
@@ -18,29 +16,37 @@ func cpuUsageTimeseries() *timeseries.Builder {
 
 	return defaultTimeseries().
 		Title("CPU Usage").
-		Stacking(stackingconfig.New().Mode(common.StackingModeNormal)). // TODO: painful, not intuitive
-		Thresholds(thresholdsconfig.New().Mode(types.ThresholdsModeAbsolute).Steps([]types.Threshold{
-			{Value: nil, Color: "green"},
-			{Value: toPtr(80.0), Color: "red"},
-		})).
+		Stacking(common.NewStackingConfigBuilder().Mode(common.StackingModeNormal)). // TODO: painful, not intuitive
+		Thresholds(
+			dashboard.NewThresholdsConfigBuilder().
+				Mode(dashboard.ThresholdsModeAbsolute).
+				Steps([]dashboard.Threshold{
+					{Value: nil, Color: "green"},
+					{Value: toPtr(80.0), Color: "red"},
+				}),
+		).
 		Min(0).
 		Max(1).
 		Unit("percentunit").
-		Targets([]types.Target{
+		Targets([]dashboard.Target{
 			basicPrometheusQuery(query, "{{ cpu }}"),
 		})
 }
 
-func loadAverageTimeseries() *timeseries.Builder {
+func loadAverageTimeseries() *timeseries.PanelBuilder {
 	return defaultTimeseries().
 		Title("Load Average").
-		Thresholds(thresholdsconfig.New().Mode(types.ThresholdsModeAbsolute).Steps([]types.Threshold{
-			{Value: nil, Color: "green"},
-			{Value: toPtr(80.0), Color: "red"},
-		})).
+		Thresholds(
+			dashboard.NewThresholdsConfigBuilder().
+				Mode(dashboard.ThresholdsModeAbsolute).
+				Steps([]dashboard.Threshold{
+					{Value: nil, Color: "green"},
+					{Value: toPtr(80.0), Color: "red"},
+				}),
+		).
 		Min(0).
 		Unit("short").
-		Targets([]types.Target{
+		Targets([]dashboard.Target{
 			basicPrometheusQuery(`node_load1{job="integrations/raspberrypi-node", instance="$instance"}`, "1m load average"),
 			basicPrometheusQuery(`node_load5{job="integrations/raspberrypi-node", instance="$instance"}`, "5m load average"),
 			basicPrometheusQuery(`node_load15{job="integrations/raspberrypi-node", instance="$instance"}`, "15m load average"),
@@ -48,18 +54,22 @@ func loadAverageTimeseries() *timeseries.Builder {
 		})
 }
 
-func cpuTemperatureGauge() *gauge.Builder {
+func cpuTemperatureGauge() *gauge.PanelBuilder {
 	return defaultGauge().
 		Title("CPU Temperature").
 		Min(30).
 		Max(100).
 		Unit("celsius").
-		Thresholds(thresholdsconfig.New().Mode(types.ThresholdsModeAbsolute).Steps([]types.Threshold{
-			{Value: nil, Color: "rgba(50, 172, 45, 0.97)"},
-			{Value: toPtr(65.0), Color: "rgba(237, 129, 40, 0.89)"},
-			{Value: toPtr(85.0), Color: "rgba(245, 54, 54, 0.9)"},
-		})).
-		Targets([]types.Target{
+		Thresholds(
+			dashboard.NewThresholdsConfigBuilder().
+				Mode(dashboard.ThresholdsModeAbsolute).
+				Steps([]dashboard.Threshold{
+					{Value: nil, Color: "rgba(50, 172, 45, 0.97)"},
+					{Value: toPtr(65.0), Color: "rgba(237, 129, 40, 0.89)"},
+					{Value: toPtr(85.0), Color: "rgba(245, 54, 54, 0.9)"},
+				}),
+		).
+		Targets([]dashboard.Target{
 			basicPrometheusQuery(`avg(node_hwmon_temp_celsius{job="integrations/raspberrypi-node", instance="$instance"})`, ""),
 		})
 }

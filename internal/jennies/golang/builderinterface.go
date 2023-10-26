@@ -15,7 +15,7 @@ func (jenny BuilderInterface) JennyName() string {
 func (jenny BuilderInterface) Generate(_ []*ast.Schema) (*codejen.File, error) {
 	output := jenny.generateFile()
 
-	return codejen.NewFile("types/builder.go", []byte(output), jenny), nil
+	return codejen.NewFile("builder.go", []byte(output), jenny), nil
 }
 
 func (jenny BuilderInterface) generateFile() string {

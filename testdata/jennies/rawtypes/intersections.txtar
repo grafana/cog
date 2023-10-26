@@ -76,11 +76,11 @@
 }
 
 -- out/jennies/GoRawTypes --
-== types/intersections/types_gen.go
-package types
+== intersections/types_gen.go
+package intersections
 
 import (
-	externalPkg "github.com/grafana/cog/generated/types/externalPkg"
+	externalPkg "github.com/grafana/cog/generated/externalPkg"
 )
 
 type Intersections struct {

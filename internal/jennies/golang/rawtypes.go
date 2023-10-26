@@ -27,7 +27,6 @@ func (jenny RawTypes) Generate(schema *ast.Schema) (codejen.Files, error) {
 	}
 
 	filename := filepath.Join(
-		"types",
 		strings.ToLower(schema.Package),
 		"types_gen.go",
 	)
@@ -46,7 +45,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 			return ""
 		}
 
-		imports.Add(pkg, "github.com/grafana/cog/generated/types/"+pkg)
+		imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
 
 		return pkg
 	}
@@ -73,9 +72,9 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		importStatements += "\n\n"
 	}
 
-	return []byte(fmt.Sprintf(`package types
+	return []byte(fmt.Sprintf(`package %[1]s
 
-%[1]s%[2]s`, importStatements, buffer.String())), nil
+%[2]s%[3]s`, strings.ToLower(schema.Package), importStatements, buffer.String())), nil
 }
 
 func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]byte, error) {
