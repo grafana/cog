@@ -16,8 +16,8 @@ type Builder struct {
 }
 
 type Tmpl struct {
-	Package     string
-	Name        string
+	BuilderName string
+	ObjectName  string
 	Imports     importMap
 	ImportAlias string
 	Options     []options
@@ -73,7 +73,7 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(builder.RootPackage),
+			strings.ToLower(builder.Package),
 			fmt.Sprintf("%s_builder_gen.ts", strings.ToLower(builder.For.Name)),
 		)
 
@@ -98,8 +98,8 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	}
 
 	err := templates.Lookup("builder.tmpl").Execute(&buffer, Tmpl{
-		Package:     builder.Package,
-		Name:        builder.For.Name,
+		BuilderName: builder.Name,
+		ObjectName:  builder.For.Name,
 		Imports:     jenny.imports,
 		ImportAlias: importAlias,
 		Options:     opts,

@@ -25,7 +25,7 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 
 	for _, builder := range context.Builders {
 		jenny.typeImportMapper = func(pkg string) string {
-			if pkg == builder.RootPackage {
+			if pkg == builder.Package {
 				return ""
 			}
 
@@ -36,7 +36,7 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 
 		output := jenny.generateBuilder(context, builder)
 		filename := filepath.Join(
-			strings.ToLower(builder.RootPackage),
+			strings.ToLower(builder.Package),
 			fmt.Sprintf("%s_builder_gen.go", strings.ToLower(builder.For.Name)),
 		)
 
@@ -54,7 +54,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	builderSource := jenny.generateBuilderSource(context, builder)
 
 	// package declaration
-	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.RootPackage)))
+	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.Package)))
 
 	// write import statements
 	buffer.WriteString(jenny.imports.Format())
@@ -69,21 +69,21 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 func (jenny *Builder) generateBuilderSource(context context.Builders, builder ast.Builder) string {
 	var buffer strings.Builder
 
-	objectName := tools.UpperCamelCase(builder.For.Name)
+	builderName := tools.UpperCamelCase(builder.Name)
 
 	// import generated types
 	cogAlias := jenny.importCog()
 	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
 
 	// just to make explicit that this builder implements the generic Cog builder interface
-	buffer.WriteString(fmt.Sprintf("var _ %[1]s.Builder[%[2]s] = (*%[3]sBuilder)(nil)\n\n", cogAlias, qualifiedObjectName, objectName))
+	buffer.WriteString(fmt.Sprintf("var _ %[1]s.Builder[%[2]s] = (*%[3]sBuilder)(nil)\n\n", cogAlias, qualifiedObjectName, builderName))
 
 	// Builder type declaration
 	buffer.WriteString(fmt.Sprintf(`type %[2]sBuilder struct {
 	internal *%[1]s
 	errors map[string]%[3]s.BuildErrors
 }
-`, qualifiedObjectName, objectName, cogAlias))
+`, qualifiedObjectName, builderName, cogAlias))
 
 	// Add a constructor for the builder
 	constructorCode := jenny.generateConstructor(context, builder)
@@ -104,7 +104,7 @@ func (builder *%[2]sBuilder) Build() (*%[1]s, error) {
 
 	return builder.internal, nil
 }
-`, qualifiedObjectName, objectName, cogAlias))
+`, qualifiedObjectName, builderName, cogAlias))
 
 	// Define options
 	for _, option := range builder.Options {
@@ -113,7 +113,7 @@ func (builder *%[2]sBuilder) Build() (*%[1]s, error) {
 
 	// add calls to set default values
 	buffer.WriteString("\n")
-	buffer.WriteString(fmt.Sprintf("func (builder *%[1]sBuilder) applyDefaults() {\n", objectName))
+	buffer.WriteString(fmt.Sprintf("func (builder *%[1]sBuilder) applyDefaults() {\n", builderName))
 	for _, opt := range builder.Options {
 		if opt.Default != nil {
 			buffer.WriteString(jenny.generateDefaultCall(opt) + "\n")
@@ -128,7 +128,6 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 	var buffer strings.Builder
 
 	cogAlias := jenny.importCog()
-	typeName := tools.UpperCamelCase(builder.For.Name)
 	args := ""
 	fieldsInit := ""
 	var argsList []string
@@ -161,6 +160,7 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 	}
 
 	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
+	builderName := tools.UpperCamelCase(builder.Name)
 
 	buffer.WriteString(fmt.Sprintf(`func New%[1]sBuilder(%[2]s) *%[1]sBuilder {
 	resource := &%[4]s{}
@@ -174,7 +174,7 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 	return builder
 }
-`, typeName, args, fieldsInit, qualifiedObjectName, cogAlias))
+`, builderName, args, fieldsInit, qualifiedObjectName, cogAlias))
 
 	return buffer.String()
 }
@@ -209,7 +209,7 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	// Option name
+	builderName := tools.UpperCamelCase(builder.Name)
 	optionName := tools.UpperCamelCase(def.Name)
 
 	// Arguments list
@@ -235,7 +235,7 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 
 	return builder
 }
-`, tools.UpperCamelCase(builder.For.Name), optionName, arguments, assignments))
+`, builderName, optionName, arguments, assignments))
 
 	return buffer.String()
 }

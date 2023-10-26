@@ -15,6 +15,10 @@ builders:
   - omit: { by_object: dashboard.DynamicConfigValue }
   - omit: { by_object: dashboard.DataTransformerConfig }
 
+  - rename:
+      by_object: dashboard.RowPanel
+      as: Row
+
   # Rearrange things a bit
   - merge_into:
       source: dashboard.FieldConfig
