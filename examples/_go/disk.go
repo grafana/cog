@@ -1,41 +1,40 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/common/tablefooteroptions"
-	table "github.com/grafana/cog/generated/table/panel"
-	timeseries "github.com/grafana/cog/generated/timeseries/panel"
-	common "github.com/grafana/cog/generated/types/common"
-	types "github.com/grafana/cog/generated/types/dashboard"
+	"github.com/grafana/cog/generated/common"
+	"github.com/grafana/cog/generated/dashboard"
+	"github.com/grafana/cog/generated/table"
+	"github.com/grafana/cog/generated/timeseries"
 )
 
-func diskIOTimeseries() *timeseries.Builder {
+func diskIOTimeseries() *timeseries.PanelBuilder {
 	return defaultTimeseries().
 		Title("Disk I/O").
 		FillOpacity(0).
 		Overrides([]struct { // TODO: paaaaaain
-			Matcher    types.MatcherConfig        `json:"matcher"`
-			Properties []types.DynamicConfigValue `json:"properties"`
+			Matcher    dashboard.MatcherConfig        `json:"matcher"`
+			Properties []dashboard.DynamicConfigValue `json:"properties"`
 		}{
 			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
+				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
 					Id:      "byRegexp",
 					Options: "/ io time/",
 				},
-				Properties: []types.DynamicConfigValue{
+				Properties: []dashboard.DynamicConfigValue{
 					{Id: "unit", Value: "percentunit"},
 				},
 			},
 		}).
 		Unit("Bps").
-		Targets([]types.Target{
+		Targets([]dashboard.Target{
 			basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read"),
 			basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written"),
 			basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time"),
 		})
 }
 
-func diskSpaceUsageTable() *table.Builder {
-	return table.New().
+func diskSpaceUsageTable() *table.PanelBuilder {
+	return table.NewPanelBuilder().
 		Title("Disk Space Usage").
 		Align(common.FieldTextAlignmentAuto).
 		CellOptions(common.TableCellOptions{
@@ -45,12 +44,12 @@ func diskSpaceUsageTable() *table.Builder {
 		}).
 		Unit("decbytes").
 		CellHeight(common.TableCellHeightSm).
-		Footer(tablefooteroptions.New().CountRows(false).Reducer([]string{"sum"})).
-		Targets([]types.Target{
+		Footer(common.NewTableFooterOptionsBuilder().CountRows(false).Reducer([]string{"sum"})).
+		Targets([]dashboard.Target{
 			tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "A"),
 			tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "B"),
 		}).
-		Transformations([]types.DataTransformerConfig{
+		Transformations([]dashboard.DataTransformerConfig{
 			{
 				Id: "groupBy",
 				Options: map[string]any{
@@ -128,51 +127,51 @@ func diskSpaceUsageTable() *table.Builder {
 			},
 		}).
 		Overrides([]struct { // TODO: paaaaaain
-			Matcher    types.MatcherConfig        `json:"matcher"`
-			Properties []types.DynamicConfigValue `json:"properties"`
+			Matcher    dashboard.MatcherConfig        `json:"matcher"`
+			Properties []dashboard.DynamicConfigValue `json:"properties"`
 		}{
 			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
+				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
 					Id:      "byName",
 					Options: "Mounted on",
 				},
-				Properties: []types.DynamicConfigValue{
+				Properties: []dashboard.DynamicConfigValue{
 					{Id: "custom.width", Value: 260},
 				},
 			},
 			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
+				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
 					Id:      "byName",
 					Options: "Size",
 				},
-				Properties: []types.DynamicConfigValue{
+				Properties: []dashboard.DynamicConfigValue{
 					{Id: "custom.width", Value: 93},
 				},
 			},
 			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
+				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
 					Id:      "byName",
 					Options: "Used",
 				},
-				Properties: []types.DynamicConfigValue{
+				Properties: []dashboard.DynamicConfigValue{
 					{Id: "custom.width", Value: 72},
 				},
 			},
 			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
+				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
 					Id:      "byName",
 					Options: "Available",
 				},
-				Properties: []types.DynamicConfigValue{
+				Properties: []dashboard.DynamicConfigValue{
 					{Id: "custom.width", Value: 88},
 				},
 			},
 			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
+				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
 					Id:      "byName",
 					Options: "Used, %",
 				},
-				Properties: []types.DynamicConfigValue{
+				Properties: []dashboard.DynamicConfigValue{
 					{Id: "unit", Value: "percentunit"},
 					{Id: "custom.cellOptions", Value: struct {
 						Mode string `json:"mode"`

@@ -43,6 +43,8 @@ func (pass *Unspec) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 			if schema.Metadata.Identifier != "" {
 				newObject.Name = schema.Metadata.Identifier
 			}
+
+			newObject.SelfRef.ReferredType = newObject.Name
 		}
 
 		newSchema.Objects = append(newSchema.Objects, newObject)

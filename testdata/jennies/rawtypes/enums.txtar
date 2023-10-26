@@ -161,8 +161,8 @@ export enum DashboardCursorSync {
 export const defaultDashboardCursorSync = (): DashboardCursorSync => (DashboardCursorSync.Off);
 
 -- out/jennies/GoRawTypes --
-== types/enums/types_gen.go
-package types
+== enums/types_gen.go
+package enums
 
 // This is a very interesting string enum.
 type Operator string

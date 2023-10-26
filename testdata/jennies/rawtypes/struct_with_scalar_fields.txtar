@@ -186,8 +186,8 @@ export const defaultSomeStruct = (): SomeStruct => ({
 });
 
 -- out/jennies/GoRawTypes --
-== types/basic/types_gen.go
-package types
+== basic/types_gen.go
+package basic
 
 // This
 // is

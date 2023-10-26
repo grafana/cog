@@ -91,8 +91,8 @@ export type ArrayOfArrayOfNumbers = number[][];
 export const defaultArrayOfArrayOfNumbers = (): ArrayOfArrayOfNumbers => ([]);
 
 -- out/jennies/GoRawTypes --
-== types/arrays/types_gen.go
-package types
+== arrays/types_gen.go
+package arrays
 
 // List of tags, maybe?
 type ArrayOfStrings []string
