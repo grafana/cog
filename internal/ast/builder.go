@@ -138,10 +138,14 @@ func (path Path) String() string {
 	}), ".")
 }
 
-type AssignmentEnvelope struct {
-	Type  RefType         // Reference to the type of the envelope
+type EnvelopeFieldValue struct {
 	Path  Path            // where to assign within the struct/ref
 	Value AssignmentValue // what to assign
+}
+
+type AssignmentEnvelope struct {
+	Type   Type // Should be a ref or a struct only
+	Values []EnvelopeFieldValue
 }
 
 type AssignmentValue struct {

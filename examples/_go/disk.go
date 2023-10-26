@@ -11,26 +11,28 @@ func diskIOTimeseries() *timeseries.PanelBuilder {
 	return defaultTimeseries().
 		Title("Disk I/O").
 		FillOpacity(0).
-		Overrides([]struct { // TODO: paaaaaain
-			Matcher    dashboard.MatcherConfig        `json:"matcher"`
-			Properties []dashboard.DynamicConfigValue `json:"properties"`
-		}{
-			{
-				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
-					Id:      "byRegexp",
-					Options: "/ io time/",
-				},
-				Properties: []dashboard.DynamicConfigValue{
-					{Id: "unit", Value: "percentunit"},
-				},
-			},
-		}).
 		Unit("Bps").
 		Targets([]dashboard.Target{
 			basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read"),
 			basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written"),
 			basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time"),
-		})
+		}).
+		// Overrides configuration
+		WithOverride(
+			// TODO: not very intuitive
+			// we could have "factory" functions:
+			// - dashboard.OverrideByName("Mounted on")
+			// - dashboard.OverrideByRegexp("/ regex /")
+			// - ...
+			// Also: knowing what to set in the Value field is far from obvious
+			dashboard.MatcherConfig{
+				Id:      "byRegexp", // TODO: we don't have constants for these?
+				Options: "/ io time/",
+			},
+			[]dashboard.DynamicConfigValue{
+				{Id: "unit", Value: "percentunit"},
+			},
+		)
 }
 
 func diskSpaceUsageTable() *table.PanelBuilder {
@@ -126,63 +128,44 @@ func diskSpaceUsageTable() *table.PanelBuilder {
 				},
 			},
 		}).
-		Overrides([]struct { // TODO: paaaaaain
-			Matcher    dashboard.MatcherConfig        `json:"matcher"`
-			Properties []dashboard.DynamicConfigValue `json:"properties"`
-		}{
-			{
-				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Mounted on",
-				},
-				Properties: []dashboard.DynamicConfigValue{
-					{Id: "custom.width", Value: 260},
-				},
+		// Overrides configuration
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Mounted on"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.width", Value: 260},
 			},
-			{
-				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Size",
-				},
-				Properties: []dashboard.DynamicConfigValue{
-					{Id: "custom.width", Value: 93},
-				},
+		).
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Size"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.width", Value: 93},
 			},
-			{
-				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Used",
-				},
-				Properties: []dashboard.DynamicConfigValue{
-					{Id: "custom.width", Value: 72},
-				},
+		).
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Used"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.width", Value: 72},
 			},
-			{
-				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Available",
-				},
-				Properties: []dashboard.DynamicConfigValue{
-					{Id: "custom.width", Value: 88},
-				},
+		).
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Available"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.width", Value: 88},
 			},
-			{
-				Matcher: dashboard.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Used, %",
-				},
-				Properties: []dashboard.DynamicConfigValue{
-					{Id: "unit", Value: "percentunit"},
-					{Id: "custom.cellOptions", Value: struct {
-						Mode string `json:"mode"`
-						Type string `json:"type"`
-					}{
-						Mode: "gradient",
-						Type: "gauge",
-					}},
-					{Id: "min", Value: 0},
-					{Id: "max", Value: 1},
-				},
+		).
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Used, %"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "unit", Value: "percentunit"},
+				{Id: "custom.cellOptions", Value: struct {
+					Mode string `json:"mode"`
+					Type string `json:"type"`
+				}{
+					Mode: "gradient",
+					Type: "gauge",
+				}},
+				{Id: "min", Value: 0},
+				{Id: "max", Value: 1},
 			},
-		})
+		)
 }

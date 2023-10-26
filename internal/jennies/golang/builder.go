@@ -370,15 +370,21 @@ if err != nil {
 
 func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, value ast.AssignmentValue) (string, string) {
 	envelope := value.Envelope
-	qualifiedType := jenny.importType(envelope.Type)
+	formattedType := formatType(envelope.Type, jenny.typeImportMapper)
 
-	setup, val := jenny.formatAssignmentValue(context, envelope.Value, envelope.Path[0].Type)
+	var allSetup, allValues string
+
+	for _, item := range envelope.Values {
+		setup, val := jenny.formatAssignmentValue(context, item.Value, item.Path.Last().Type)
+		allSetup += setup
+		allValues += fmt.Sprintf("%s: %s,\n", tools.UpperCamelCase(item.Path[0].Identifier), val)
+	}
 
 	envelopeValue := fmt.Sprintf(`%[1]s{
-	%[2]s: %[3]s,
-}`, qualifiedType, envelope.Path[0].Identifier, val)
+	%[2]s
+}`, formattedType, allValues)
 
-	return setup, envelopeValue
+	return allSetup, envelopeValue
 }
 
 func (jenny *Builder) formatConstantAssignmentValue(value ast.AssignmentValue, valueType ast.Type) (string, string) {

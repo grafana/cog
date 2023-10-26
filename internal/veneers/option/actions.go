@@ -95,6 +95,10 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 		newOpt.Args = nil
 		newOpt.Assignments = nil
 
+		assignIntoList := assignmentPathPrefix.Last().Type.Kind == ast.KindArray
+
+		newAssignments := make([]ast.Assignment, 0, len(structType.Fields))
+		valuesForEnvelope := make([]ast.EnvelopeFieldValue, 0, len(structType.Fields))
 		for _, field := range structType.Fields {
 			if explicitFields != nil && !tools.ItemInList(field.Name, explicitFields) {
 				continue
@@ -112,13 +116,38 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 
 			newOpt.Args = append(newOpt.Args, newArg)
 
-			newAssignment := ast.ArgumentAssignment(
-				assignmentPathPrefix.Append(ast.PathFromStructField(field)),
-				newArg,
-				ast.Constraints(constraints),
-			)
+			if !assignIntoList {
+				newAssignment := ast.ArgumentAssignment(
+					assignmentPathPrefix.Append(ast.PathFromStructField(field)),
+					newArg,
+					ast.Constraints(constraints),
+					ast.Method(oldAssignments[0].Method),
+				)
 
-			newOpt.Assignments = append(newOpt.Assignments, newAssignment)
+				newAssignments = append(newAssignments, newAssignment)
+			} else {
+				valuesForEnvelope = append(valuesForEnvelope, ast.EnvelopeFieldValue{
+					Path:  ast.PathFromStructField(field),
+					Value: ast.AssignmentValue{Argument: &newArg},
+				})
+			}
+		}
+
+		if !assignIntoList {
+			newOpt.Assignments = newAssignments
+		} else {
+			newOpt.Assignments = []ast.Assignment{
+				{
+					Method: ast.AppendAssignment,
+					Path:   assignmentPathPrefix,
+					Value: ast.AssignmentValue{
+						Envelope: &ast.AssignmentEnvelope{
+							Type:   assignmentPathPrefix.Last().Type.AsArray().ValueType,
+							Values: valuesForEnvelope,
+						},
+					},
+				},
+			}
 		}
 
 		if len(oldArgs) > 1 {
@@ -182,10 +211,12 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Object)
 					Path: firstAssignmentPath,
 					Value: ast.AssignmentValue{
 						Envelope: &ast.AssignmentEnvelope{
-							Type: firstArgType.AsRef(),
-							Path: ast.PathFromStructField(field),
-							Value: ast.AssignmentValue{
-								Argument: &arg,
+							Type: firstArgType,
+							Values: []ast.EnvelopeFieldValue{
+								{
+									Path:  ast.PathFromStructField(field),
+									Value: ast.AssignmentValue{Argument: &arg},
+								},
 							},
 						},
 					},
