@@ -96,3 +96,23 @@ func getRefName(value string) string {
 	parts := strings.Split(value, "/")
 	return parts[len(parts)-1]
 }
+
+func extractMetadata(info *openapi3.Info) ast.SchemaMeta {
+	if info == nil {
+		return ast.SchemaMeta{}
+	}
+
+	metadata := ast.SchemaMeta{}
+	if kind, ok := info.Extensions[MetadataKind]; ok {
+		metadata.Kind = ast.SchemaKind(kind.(string))
+	}
+	if identifier, ok := info.Extensions[MetadataIdentifier]; ok {
+		metadata.Identifier = identifier.(string)
+	}
+
+	if variant, ok := info.Extensions[MetadataVariant]; ok {
+		metadata.Variant = ast.SchemaVariant(variant.(string))
+	}
+
+	return metadata
+}

@@ -1,0 +1,26 @@
+-- arrays.json --
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "metadata",
+    "version": "0.0",
+    "x-identifier": "metadata",
+    "x-kind": "composable",
+    "x-variant": "dataquery"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {}
+  }
+}
+
+-- out/openapi/GenerateAST --
+{
+  "Package": "grafanatest",
+  "Metadata": {
+    "Kind": "composable",
+    "Variant": "dataquery",
+    "Identifier": "metadata"
+  },
+  "Objects": null
+}
