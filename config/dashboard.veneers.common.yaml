@@ -10,6 +10,9 @@ builders:
   - omit: { by_object: dashboard.DataSourceRef }
   - omit: { by_object: dashboard.LibraryPanelRef }
   - omit: { by_object: dashboard.VariableOption }
+  # overrides-related
+  - omit: { by_object: dashboard.MatcherConfig }
+  - omit: { by_object: dashboard.DynamicConfigValue }
 
   # Rearrange things a bit
   - merge_into:
@@ -107,6 +110,17 @@ options:
   ##############
 
   - omit: { by_names: {object: Panel, options: *UnwantedPanelOptions} }
+
+  # Append a single override instead forcing to define all of them at once
+  - array_to_append:
+      by_name: Panel.overrides
+  # Overrides() to WithOverride()
+  - rename:
+      by_name_case_insensitive: Panel.overrides
+      as: withOverride
+  # WithOverride(matcher, properties) instead of WithOverride(struct{...})
+  - struct_fields_as_arguments:
+      by_name: Panel.withOverride
 
   ##############
   #    Rows    #

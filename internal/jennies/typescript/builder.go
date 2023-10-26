@@ -261,14 +261,17 @@ func (jenny *Builder) formatAssignmentValue(value ast.AssignmentValue) string {
 }
 
 func (jenny *Builder) formatEnvelopeAssignmentValue(value ast.AssignmentValue) string {
-	envelope := value.Envelope
-	referredTypeAlias := jenny.importType(envelope.Type)
+	var allValues string
+	for _, item := range value.Envelope.Values {
+		val := jenny.formatAssignmentValue(item.Value)
+		allValues += fmt.Sprintf("%s: %s,\n", item.Path[0].Identifier, val)
+	}
 
-	val := jenny.formatAssignmentValue(envelope.Value)
+	envelopeValue := fmt.Sprintf(`{
+	%s
+}`, allValues)
 
-	return fmt.Sprintf(`%[1]s.%[2]s{
-	%[3]s: %[4]s,
-}`, referredTypeAlias, envelope.Type.ReferredType, envelope.Path[0].Identifier, val)
+	return envelopeValue
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []constraint {
