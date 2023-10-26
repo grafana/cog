@@ -74,8 +74,7 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 
 		filename := filepath.Join(
 			strings.ToLower(builder.RootPackage),
-			strings.ToLower(builder.Package),
-			"builder_gen.ts",
+			fmt.Sprintf("%s_builder_gen.ts", strings.ToLower(builder.For.Name)),
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
@@ -173,7 +172,7 @@ func (jenny *Builder) generateArgument(context context.Builders, builder ast.Bui
 			return builderImportAlias
 		}
 
-		jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+		jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
 
 		return pkg
 	})
@@ -189,7 +188,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 	}
 
 	emptyValue := formatValue(defaultValueForType(currentBuilder.Schema, valueType, func(pkg string) string {
-		jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+		jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
 
 		return pkg
 	}))
@@ -310,7 +309,7 @@ func (jenny *Builder) typeImportAlias(typeRef ast.RefType) string {
 func (jenny *Builder) importType(typeRef ast.RefType) string {
 	pkg := jenny.typeImportAlias(typeRef)
 
-	jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+	jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
 
 	return pkg
 }

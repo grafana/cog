@@ -44,6 +44,29 @@ func Jennies(veneers *rewrite.Rewriter) *codejen.JennyList[[]*ast.Schema] {
 			},
 		),
 	)
+	targets.AppendOneToMany(
+		codejen.AdaptOneToMany[context.Builders, []*ast.Schema](
+			Index{},
+			func(schemas []*ast.Schema) context.Builders {
+				var err error
+
+				generator := &ast.BuilderGenerator{}
+				builders := generator.FromAST(schemas)
+
+				// apply given veneers
+				builders, err = veneers.ApplyTo(builders, LanguageRef)
+				if err != nil {
+					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
+					panic(err)
+				}
+
+				return context.Builders{
+					Schemas:  schemas,
+					Builders: builders,
+				}
+			},
+		),
+	)
 
 	return targets
 }
