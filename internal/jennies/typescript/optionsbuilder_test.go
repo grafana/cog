@@ -3,7 +3,7 @@ package typescript
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/stretchr/testify/require"
 )
 
@@ -11,7 +11,7 @@ func TestOptionsBuilder(t *testing.T) {
 	req := require.New(t)
 	jenny := OptionsBuilder{}
 
-	file, err := jenny.Generate([]*ast.Schema{})
+	file, err := jenny.Generate(context.Builders{})
 	req.NoError(err)
 
 	req.Equal("options_builder_gen.ts", file.RelativePath)

@@ -2,7 +2,7 @@ package typescript
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/context"
 )
 
 type OptionsBuilder struct {
@@ -12,7 +12,7 @@ func (jenny OptionsBuilder) JennyName() string {
 	return "TypescriptOptionsBuilder"
 }
 
-func (jenny OptionsBuilder) Generate(_ []*ast.Schema) (*codejen.File, error) {
+func (jenny OptionsBuilder) Generate(_ context.Builders) (*codejen.File, error) {
 	output := jenny.generateFile()
 
 	return codejen.NewFile("options_builder_gen.ts", []byte(output), jenny), nil

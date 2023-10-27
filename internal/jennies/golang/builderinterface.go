@@ -2,7 +2,7 @@ package golang
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/context"
 )
 
 type BuilderInterface struct {
@@ -12,7 +12,7 @@ func (jenny BuilderInterface) JennyName() string {
 	return "GolangOptionsBuilder"
 }
 
-func (jenny BuilderInterface) Generate(_ []*ast.Schema) (*codejen.File, error) {
+func (jenny BuilderInterface) Generate(_ context.Builders) (*codejen.File, error) {
 	output := jenny.generateFile()
 
 	return codejen.NewFile("builder.go", []byte(output), jenny), nil

@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
+	codegenContext "github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/veneers/yaml"
 	"github.com/spf13/cobra"
 )
@@ -93,7 +94,7 @@ func doGenerate(opts Options) error {
 	}
 
 	// Here begins the code generation setup
-	targetsByLanguage, err := jennies.All(veneerRewriter).ForLanguages(opts.Languages)
+	targetsByLanguage, err := jennies.All().ForLanguages(opts.Languages)
 	if err != nil {
 		return err
 	}
@@ -109,20 +110,35 @@ func doGenerate(opts Options) error {
 		fmt.Printf("Running '%s' jennies...\n", language)
 
 		var err error
-		processedAsts := ast.Schemas(schemas).DeepCopy()
+		processedSchemas := ast.Schemas(schemas).DeepCopy()
 
 		var compilerPasses []compiler.Pass
 		compilerPasses = append(compilerPasses, compiler.CommonPasses()...)
 		compilerPasses = append(compilerPasses, target.CompilerPasses...)
 
+		// run the compiler passes that will modify types
 		for _, compilerPass := range compilerPasses {
-			processedAsts, err = compilerPass.Process(processedAsts)
+			processedSchemas, err = compilerPass.Process(processedSchemas)
 			if err != nil {
 				return err
 			}
 		}
 
-		fs, err := target.Jennies.GenerateFS(processedAsts)
+		// from these types, create builders
+		builderGenerator := &ast.BuilderGenerator{}
+		builders := builderGenerator.FromAST(processedSchemas)
+
+		// apply the builder veneers
+		builders, err = veneerRewriter.ApplyTo(builders, language)
+		if err != nil {
+			return err
+		}
+
+		// then delegate the actual codegen to the jennies
+		fs, err := target.Jennies.GenerateFS(codegenContext.Builders{
+			Schemas:  processedSchemas,
+			Builders: builders,
+		})
 		if err != nil {
 			return err
 		}
