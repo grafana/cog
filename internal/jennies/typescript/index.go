@@ -39,6 +39,7 @@ func (jenny Index) generateIndex(refs []string) []byte {
 
 	for _, ref := range refs {
 		output.WriteString(fmt.Sprintf("export * from './%s';\n", ref))
+		output.WriteString(fmt.Sprintf("export type * from './%s';\n", ref))
 	}
 
 	return []byte(output.String())

@@ -10,6 +10,7 @@ builders:
   - omit: { by_object: dashboard.DataSourceRef }
   - omit: { by_object: dashboard.LibraryPanelRef }
   - omit: { by_object: dashboard.VariableOption }
+  - omit: { by_object: dashboard.Threshold }
   # overrides and transformations related
   - omit: { by_object: dashboard.MatcherConfig }
   - omit: { by_object: dashboard.DynamicConfigValue }

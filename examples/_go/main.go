@@ -32,10 +32,6 @@ func main() {
 			Query(dashboard.StringOrAny{
 				String: toPtr("prometheus"),
 			}).
-			Datasource(dashboard.DataSourceRef{
-				Type: toPtr("prometheus"),
-				Uid:  toPtr("$datasource"),
-			}).
 			Current(dashboard.VariableOption{
 				Selected: toPtr(true),
 				Text:     dashboard.StringOrArrayOfString{String: toPtr("grafanacloud-potatopi-prom")},
