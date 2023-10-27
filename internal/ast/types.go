@@ -641,9 +641,12 @@ type ScalarType struct {
 
 func (scalarType ScalarType) DeepCopy() ScalarType {
 	newT := ScalarType{
-		ScalarKind:  scalarType.ScalarKind,
-		Value:       scalarType.Value,
-		Constraints: make([]TypeConstraint, 0, len(scalarType.Constraints)),
+		ScalarKind: scalarType.ScalarKind,
+		Value:      scalarType.Value,
+	}
+
+	if len(scalarType.Constraints) != 0 {
+		newT.Constraints = make([]TypeConstraint, 0, len(scalarType.Constraints))
 	}
 
 	for _, constraint := range scalarType.Constraints {
