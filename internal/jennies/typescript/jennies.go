@@ -2,70 +2,23 @@ package typescript
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/context"
-	"github.com/grafana/cog/internal/jennies/tools"
-	"github.com/grafana/cog/internal/veneers/rewrite"
 )
 
 const LanguageRef = "typescript"
 
-func Jennies(veneers *rewrite.Rewriter) *codejen.JennyList[[]*ast.Schema] {
-	targets := codejen.JennyListWithNamer[[]*ast.Schema](func(_ []*ast.Schema) string {
+func Jennies() *codejen.JennyList[context.Builders] {
+	targets := codejen.JennyListWithNamer[context.Builders](func(_ context.Builders) string {
 		return LanguageRef
 	})
 	targets.AppendOneToOne(
 		OptionsBuilder{},
 	)
-	targets.AppendManyToMany(
-		tools.Foreach[*ast.Schema](RawTypes{}),
-	)
 	targets.AppendOneToMany(
-		codejen.AdaptOneToMany[context.Builders, []*ast.Schema](
-			&Builder{},
-			func(schemas []*ast.Schema) context.Builders {
-				var err error
-
-				generator := &ast.BuilderGenerator{}
-				builders := generator.FromAST(schemas)
-
-				// apply given veneers
-				builders, err = veneers.ApplyTo(builders, LanguageRef)
-				if err != nil {
-					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
-					panic(err)
-				}
-
-				return context.Builders{
-					Schemas:  schemas,
-					Builders: builders,
-				}
-			},
-		),
-	)
-	targets.AppendOneToMany(
-		codejen.AdaptOneToMany[context.Builders, []*ast.Schema](
-			Index{},
-			func(schemas []*ast.Schema) context.Builders {
-				var err error
-
-				generator := &ast.BuilderGenerator{}
-				builders := generator.FromAST(schemas)
-
-				// apply given veneers
-				builders, err = veneers.ApplyTo(builders, LanguageRef)
-				if err != nil {
-					// FIXME: codejen.AdaptOneToMany() doesn't let us return an error
-					panic(err)
-				}
-
-				return context.Builders{
-					Schemas:  schemas,
-					Builders: builders,
-				}
-			},
-		),
+		RawTypes{},
+		&Builder{},
+		Index{},
 	)
 
 	return targets
