@@ -1,9 +1,10 @@
 package jsonschema
 
 import (
+	"github.com/grafana/cog/internal/ast"
 	"strings"
 
-	schemaparser "github.com/santhosh-tekuri/jsonschema"
+	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
 )
 
 func schemaComments(schema *schemaparser.Schema) []string {
@@ -21,4 +22,24 @@ func schemaComments(schema *schemaparser.Schema) []string {
 	}
 
 	return filtered
+}
+
+func extractMetadata(schema *schemaparser.Schema) (ast.SchemaMeta, error) {
+	if m, ok := schema.Extensions["metadata"]; ok {
+		if err := m.Validate(schemaparser.ValidationContext{}, m); err != nil {
+			return ast.SchemaMeta{}, err
+		}
+		metadata, ok := m.(metadataValidator)
+		if !ok {
+			return ast.SchemaMeta{}, nil
+		}
+
+		return ast.SchemaMeta{
+			Kind:       ast.SchemaKind(metadata[MetadataKind]),
+			Variant:    ast.SchemaVariant(metadata[MetadataVariant]),
+			Identifier: metadata[MetadataIdentifier],
+		}, nil
+	}
+
+	return ast.SchemaMeta{}, nil
 }

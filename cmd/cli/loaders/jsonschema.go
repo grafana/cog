@@ -19,10 +19,7 @@ func jsonschemaLoader(opts Options) ([]*ast.Schema, error) {
 		}
 
 		schemaAst, err := jsonschema.GenerateAST(reader, jsonschema.Config{
-			Package:        pkg, // TODO: extract from input schema/folder?
-			SchemaMetadata: ast.SchemaMeta{
-				// TODO: extract these from somewhere
-			},
+			Package: pkg, // TODO: extract from input schema/folder?
 		})
 		if err != nil {
 			return nil, err

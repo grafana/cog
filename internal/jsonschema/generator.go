@@ -8,7 +8,7 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
-	schemaparser "github.com/santhosh-tekuri/jsonschema"
+	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
 )
 
 var errUndescriptiveSchema = fmt.Errorf("the schema does not appear to be describing anything")
@@ -26,8 +26,6 @@ const (
 type Config struct {
 	// Package name used to generate code into.
 	Package string
-
-	SchemaMetadata ast.SchemaMeta
 }
 
 type generator struct {
@@ -35,15 +33,10 @@ type generator struct {
 }
 
 func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
-	g := &generator{
-		schema: &ast.Schema{
-			Package:  c.Package,
-			Metadata: c.SchemaMetadata,
-		},
-	}
-
 	compiler := schemaparser.NewCompiler()
 	compiler.ExtractAnnotations = true
+	compiler.RegisterExtension("metadata", metadata(), metadataCompiler{})
+
 	if err := compiler.AddResource("schema", schemaReader); err != nil {
 		return nil, fmt.Errorf("[%s] %w", c.Package, err)
 	}
@@ -53,9 +46,25 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		return nil, fmt.Errorf("[%s] %w", c.Package, err)
 	}
 
+	md, err := extractMetadata(schema)
+	if err != nil {
+		return nil, err
+	}
+
+	g := &generator{
+		schema: &ast.Schema{
+			Package:  c.Package,
+			Metadata: md,
+		},
+	}
+
 	// The root of the schema is an actual type/object
 	if schema.Ref == nil {
-		if err := g.declareDefinition(c.Package, schema); err != nil {
+		name := schema.Title
+		if name != "" {
+			name = c.Package
+		}
+		if err := g.declareDefinition(name, schema); err != nil {
 			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	} else {
@@ -200,7 +209,7 @@ func (g *generator) walkAllOf(_ *schemaparser.Schema) (ast.Type, error) {
 }
 
 func (g *generator) definitionNameFromRef(schema *schemaparser.Schema) string {
-	parts := strings.Split(schema.Ref.Ptr, "/")
+	parts := strings.Split(schema.Ref.String(), "/")
 
 	return parts[len(parts)-1] // Very naive
 }
