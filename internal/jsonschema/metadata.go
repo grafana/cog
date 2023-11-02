@@ -54,7 +54,7 @@ func (metadataCompiler) Compile(_ schemaparser.CompilerContext, m map[string]int
 
 type metadataValidator map[string]string
 
-func (m metadataValidator) Validate(_ schemaparser.ValidationContext, v interface{}) error {
+func (m metadataValidator) Validate(_ schemaparser.ValidationContext, _ interface{}) error {
 	if err := m.validateKeyword(MetadataIdentifier); err != nil {
 		return err
 	}
