@@ -62,7 +62,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== types/defaults/types_gen.ts
+== defaults/types_gen.ts
 export interface SomeStruct {
 	fieldBool: boolean;
 	fieldString: string;
@@ -80,8 +80,8 @@ export const defaultSomeStruct = (): SomeStruct => ({
 });
 
 -- out/jennies/GoRawTypes --
-== types/defaults/types_gen.go
-package types
+== defaults/types_gen.go
+package defaults
 
 type SomeStruct struct {
 	FieldBool bool `json:"fieldBool"`

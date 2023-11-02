@@ -16,8 +16,8 @@ type Builder struct {
 }
 
 type Tmpl struct {
-	Package     string
-	Name        string
+	BuilderName string
+	ObjectName  string
 	Imports     importMap
 	ImportAlias string
 	Options     []options
@@ -73,9 +73,8 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(builder.RootPackage),
 			strings.ToLower(builder.Package),
-			"builder_gen.ts",
+			fmt.Sprintf("%s_builder_gen.ts", strings.ToLower(builder.For.Name)),
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
@@ -99,8 +98,8 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	}
 
 	err := templates.Lookup("builder.tmpl").Execute(&buffer, Tmpl{
-		Package:     builder.Package,
-		Name:        builder.For.Name,
+		BuilderName: builder.Name,
+		ObjectName:  builder.For.Name,
 		Imports:     jenny.imports,
 		ImportAlias: importAlias,
 		Options:     opts,
@@ -173,7 +172,7 @@ func (jenny *Builder) generateArgument(context context.Builders, builder ast.Bui
 			return builderImportAlias
 		}
 
-		jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+		jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
 
 		return pkg
 	})
@@ -189,7 +188,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 	}
 
 	emptyValue := formatValue(defaultValueForType(currentBuilder.Schema, valueType, func(pkg string) string {
-		jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+		jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
 
 		return pkg
 	}))
@@ -262,14 +261,17 @@ func (jenny *Builder) formatAssignmentValue(value ast.AssignmentValue) string {
 }
 
 func (jenny *Builder) formatEnvelopeAssignmentValue(value ast.AssignmentValue) string {
-	envelope := value.Envelope
-	referredTypeAlias := jenny.importType(envelope.Type)
+	var allValues string
+	for _, item := range value.Envelope.Values {
+		val := jenny.formatAssignmentValue(item.Value)
+		allValues += fmt.Sprintf("%s: %s,\n", item.Path[0].Identifier, val)
+	}
 
-	val := jenny.formatAssignmentValue(envelope.Value)
+	envelopeValue := fmt.Sprintf(`{
+	%s
+}`, allValues)
 
-	return fmt.Sprintf(`%[1]s.%[2]s{
-	%[3]s: %[4]s,
-}`, referredTypeAlias, envelope.Type.ReferredType, envelope.Path[0].Identifier, val)
+	return envelopeValue
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []constraint {
@@ -310,7 +312,7 @@ func (jenny *Builder) typeImportAlias(typeRef ast.RefType) string {
 func (jenny *Builder) importType(typeRef ast.RefType) string {
 	pkg := jenny.typeImportAlias(typeRef)
 
-	jenny.imports.Add(pkg, fmt.Sprintf("../../types/%s/types_gen", pkg))
+	jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
 
 	return pkg
 }

@@ -12,6 +12,7 @@ import (
 
 type BuilderRule struct {
 	Omit                  *BuilderSelector       `yaml:"omit"`
+	Rename                *RenameBuilder         `yaml:"rename"`
 	MergeInto             *MergeInto             `yaml:"merge_into"`
 	ComposeDashboardPanel *ComposeDashboardPanel `yaml:"compose_dashboard_panel"`
 }
@@ -26,6 +27,10 @@ func (rule BuilderRule) AsRewriteRule() (builder.RewriteRule, error) {
 		return builder.Omit(selector), nil
 	}
 
+	if rule.Rename != nil {
+		return rule.Rename.AsRewriteRule()
+	}
+
 	if rule.MergeInto != nil {
 		return rule.MergeInto.AsRewriteRule()
 	}
@@ -35,6 +40,21 @@ func (rule BuilderRule) AsRewriteRule() (builder.RewriteRule, error) {
 	}
 
 	return nil, fmt.Errorf("empty rule")
+}
+
+type RenameBuilder struct {
+	BuilderSelector `yaml:",inline"`
+
+	As string `yaml:"as"`
+}
+
+func (rule RenameBuilder) AsRewriteRule() (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector()
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.Rename(selector, rule.As), nil
 }
 
 type MergeInto struct {

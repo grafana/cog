@@ -1,63 +1,95 @@
-import {DashboardCursorSync, DashboardLinkType} from "../../generated/types/dashboard/types_gen";
-import {GraphDrawStyle, TooltipDisplayMode} from "../../generated/types/common/types_gen";
-import {DashboardBuilder} from "../../generated/dashboard/dashboard/builder_gen";
-import {RowPanelBuilder} from "../../generated/dashboard/rowpanel/builder_gen";
-import {PanelBuilder} from "../../generated/timeseries/panel/builder_gen";
-import {VizTooltipOptionsBuilder} from "../../generated/common/viztooltipoptions/builder_gen";
-import {TimePickerBuilder} from "../../generated/dashboard/timepicker/builder_gen";
-import {dataqueryBuilder as PrometheusQuery} from "../../generated/prometheus/dataquery/builder_gen";
+import {
+    DashboardBuilder,
+    DashboardCursorSync,
+    RowBuilder,
+    TimePickerBuilder,
+    VariableHide,
+    VariableModelBuilder,
+    VariableRefresh,
+    VariableSort,
+    VariableType
+} from "../../generated/dashboard";
+import {cpuTemperatureGauge, cpuUsageTimeseries, loadAverageTimeseries} from "./cpu";
+import {memoryUsageGauge, memoryUsageTimeseries} from "./memory";
+import {diskIOTimeseries, diskSpaceUsageTable} from "./disk";
+import {networkReceivedTimeseries, networkTransmittedTimeseries} from "./network";
+import {allSystemLogs, authLogs, errorsInSystemLogs, kernelLogs} from "./logs";
 
-const someQuery = new PrometheusQuery().
-    expr("rate(agent_wal_samples_appended_total{}[10m])").
-    legendFormat("Samples");
+const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
+    .uid("test-dashboard-raspberry")
+    .tags(["generated", "raspberrypi-node-integration"])
 
-const timeseriesPanel = new PanelBuilder()
-    .title("Some timeseries panel")
-    .transparent(true)
-    .description("Let there be data")
-    .decimals(2)
-    .axisSoftMin(0)
-    .axisSoftMax(200)
-    .lineWidth(5)
-    .drawStyle(GraphDrawStyle.GraphDrawStylePoints)
-    .tooltip(new VizTooltipOptionsBuilder().mode(TooltipDisplayMode.TooltipDisplayModeSingle))
-    .targets([
-        someQuery.build(),
-    ]);
-
-const builder = new DashboardBuilder("Some title")
-    .uid("test-dashboard-codegen")
-    .description("Some description")
-
-    .refresh("1m")
-    .time({from: "now-3h", to: "now"})
-    .timezone("utc")
+    .refresh("30s")
+    .time({from: "now-30m", to: "now"})
+    .timezone("browser")
 
     .timepicker(
         new TimePickerBuilder()
-            .refresh_intervals(["30s", "1m", "5m"]),
+            .refresh_intervals(["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"])
+            .time_options(["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]),
     )
 
     .tooltip(DashboardCursorSync.DashboardCursorSyncCrosshair)
-    .tags(["generated", "from", "typescript"])
-    .links([
-        {
-            // TODO: this is painful.
-            title: "Some link",
-            url: "http://google.com",
-            type: DashboardLinkType.DashboardLinkTypeLink,
-            tags: [],
-            icon: "cloud",
-            tooltip: "",
-            asDropdown: false,
-            targetBlank: false,
-            includeVars: false,
-            keepTime: false,
-        },
-    ])
 
-    .withRow(new RowPanelBuilder("Overview"))
-    .withPanel(timeseriesPanel)
+    // "Data Source" variable
+    .withVariable(
+        new VariableModelBuilder()
+            .type(VariableType.VariableTypeDatasource)
+            .name("datasource")
+            .label("Data Source")
+            .hide(VariableHide.VariableHideDontHide)
+            .refresh(VariableRefresh.VariableRefreshOnDashboardLoad)
+            .query("prometheus")
+            .current({
+                selected: true,
+                text: "grafanacloud-potatopi-prom",
+                value: "grafanacloud-prom",
+            })
+            .sort(VariableSort.VariableSortDisabled)
+    )
+    // "Instance" variable
+    .withVariable(
+        new VariableModelBuilder()
+            .type(VariableType.VariableTypeQuery)
+            .name("instance")
+            .label("Instance")
+            .hide(VariableHide.VariableHideDontHide)
+            .refresh(VariableRefresh.VariableRefreshOnTimeRangeChanged)
+            .query('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)')
+            .datasource({
+                "type": "prometheus",
+                "uid": "$datasource"
+            })
+            .current({
+                selected: false,
+                text: "potato",
+                value: "potato"
+            })
+            .sort(VariableSort.VariableSortDisabled)
+    )
+
+    .withRow(new RowBuilder("CPU").gridPos({h: 1, w: 24, x: 0, y: 0}))
+    .withPanel(cpuUsageTimeseries().gridPos({h: 7, w: 18, x: 0, y: 0}))
+    .withPanel(cpuTemperatureGauge().gridPos({h: 7, w: 6, x: 0, y: 0}))
+    .withPanel(loadAverageTimeseries().gridPos({h: 7, w: 18, x: 0, y: 0}))
+
+    .withRow(new RowBuilder("Memory").gridPos({h: 1, w: 24, x: 0, y: 0}))
+    .withPanel(memoryUsageTimeseries().gridPos({h: 7, w: 18, x: 0, y: 0}))
+    .withPanel(memoryUsageGauge().gridPos({h: 7, w: 6, x: 0, y: 0}))
+
+    .withRow(new RowBuilder("Disk").gridPos({h: 1, w: 24, x: 0, y: 0}))
+    .withPanel(diskIOTimeseries().gridPos({h: 7, w: 12, x: 0, y: 0}))
+    .withPanel(diskSpaceUsageTable().gridPos({h: 7, w: 12, x: 0, y: 0}))
+
+    .withRow(new RowBuilder("Network").gridPos({h: 1, w: 24, x: 0, y: 0}))
+    .withPanel(networkReceivedTimeseries().gridPos({h: 7, w: 12, x: 0, y: 0}))
+    .withPanel(networkTransmittedTimeseries().gridPos({h: 7, w: 12, x: 0, y: 0}))
+
+    .withRow(new RowBuilder("Logs").gridPos({h: 1, w: 24, x: 0, y: 0}))
+    .withPanel(errorsInSystemLogs().gridPos({h: 7, w: 24, x: 0, y: 0}))
+    .withPanel(authLogs().gridPos({h: 7, w: 24, x: 0, y: 0}))
+    .withPanel(kernelLogs().gridPos({h: 7, w: 24, x: 0, y: 0}))
+    .withPanel(allSystemLogs().gridPos({h: 7, w: 24, x: 0, y: 0}))
 ;
 
 console.log(JSON.stringify(builder.build(), null, 2));

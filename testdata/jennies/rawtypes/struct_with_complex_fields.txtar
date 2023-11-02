@@ -177,7 +177,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== types/struct_complex_fields/types_gen.ts
+== struct_complex_fields/types_gen.ts
 // This struct does things.
 export interface SomeStruct {
 	FieldRef: SomeOtherStruct;
@@ -214,8 +214,8 @@ export const defaultSomeOtherStruct = (): SomeOtherStruct => ({
 });
 
 -- out/jennies/GoRawTypes --
-== types/struct_complex_fields/types_gen.go
-package types
+== struct_complex_fields/types_gen.go
+package struct_complex_fields
 
 // This struct does things.
 type SomeStruct struct {

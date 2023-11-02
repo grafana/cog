@@ -4,15 +4,14 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/typescript"
-	"github.com/grafana/cog/internal/veneers/rewrite"
 )
 
 type LanguageTarget struct {
-	Jennies        *codejen.JennyList[[]*ast.Schema]
+	Jennies        *codejen.JennyList[context.Builders]
 	CompilerPasses []compiler.Pass
 }
 
@@ -37,14 +36,14 @@ func (languageTargets LanguageTargets) ForLanguages(languages []string) (Languag
 	return filtered, nil
 }
 
-func All(veneerRewriter *rewrite.Rewriter) LanguageTargets {
+func All() LanguageTargets {
 	targets := map[string]LanguageTarget{
 		golang.LanguageRef: {
-			Jennies:        golang.Jennies(veneerRewriter),
+			Jennies:        golang.Jennies(),
 			CompilerPasses: golang.CompilerPasses(),
 		},
 		typescript.LanguageRef: {
-			Jennies:        typescript.Jennies(veneerRewriter),
+			Jennies:        typescript.Jennies(),
 			CompilerPasses: typescript.CompilerPasses(),
 		},
 	}

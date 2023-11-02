@@ -163,7 +163,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== types/disjunctions/types_gen.ts
+== disjunctions/types_gen.ts
 // Refresh rate or disabled.
 export type RefreshRate = string | boolean;
 
@@ -212,8 +212,8 @@ export type SeveralRefs = SomeStruct | SomeOtherStruct | YetAnotherStruct;
 export const defaultSeveralRefs = (): SeveralRefs => (defaultSomeStruct());
 
 -- out/jennies/GoRawTypes --
-== types/disjunctions/types_gen.go
-package types
+== disjunctions/types_gen.go
+package disjunctions
 
 // Refresh rate or disabled.
 type RefreshRate StringOrBool

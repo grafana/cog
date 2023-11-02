@@ -1,41 +1,42 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/common/tablefooteroptions"
-	table "github.com/grafana/cog/generated/table/panel"
-	timeseries "github.com/grafana/cog/generated/timeseries/panel"
-	common "github.com/grafana/cog/generated/types/common"
-	types "github.com/grafana/cog/generated/types/dashboard"
+	"github.com/grafana/cog/generated/common"
+	"github.com/grafana/cog/generated/dashboard"
+	"github.com/grafana/cog/generated/table"
+	"github.com/grafana/cog/generated/timeseries"
 )
 
-func diskIOTimeseries() *timeseries.Builder {
+func diskIOTimeseries() *timeseries.PanelBuilder {
 	return defaultTimeseries().
 		Title("Disk I/O").
 		FillOpacity(0).
-		Overrides([]struct { // TODO: paaaaaain
-			Matcher    types.MatcherConfig        `json:"matcher"`
-			Properties []types.DynamicConfigValue `json:"properties"`
-		}{
-			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
-					Id:      "byRegexp",
-					Options: "/ io time/",
-				},
-				Properties: []types.DynamicConfigValue{
-					{Id: "unit", Value: "percentunit"},
-				},
-			},
-		}).
 		Unit("Bps").
-		Targets([]types.Target{
+		Targets([]dashboard.Target{
 			basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read"),
 			basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written"),
 			basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time"),
-		})
+		}).
+		// Overrides configuration
+		WithOverride(
+			// TODO: not very intuitive
+			// we could have "factory" functions:
+			// - dashboard.OverrideByName("Mounted on")
+			// - dashboard.OverrideByRegexp("/ regex /")
+			// - ...
+			// Also: knowing what to set in the Value field is far from obvious
+			dashboard.MatcherConfig{
+				Id:      "byRegexp", // TODO: we don't have constants for these?
+				Options: "/ io time/",
+			},
+			[]dashboard.DynamicConfigValue{
+				{Id: "unit", Value: "percentunit"},
+			},
+		)
 }
 
-func diskSpaceUsageTable() *table.Builder {
-	return table.New().
+func diskSpaceUsageTable() *table.PanelBuilder {
+	return table.NewPanelBuilder().
 		Title("Disk Space Usage").
 		Align(common.FieldTextAlignmentAuto).
 		CellOptions(common.TableCellOptions{
@@ -45,145 +46,127 @@ func diskSpaceUsageTable() *table.Builder {
 		}).
 		Unit("decbytes").
 		CellHeight(common.TableCellHeightSm).
-		Footer(tablefooteroptions.New().CountRows(false).Reducer([]string{"sum"})).
-		Targets([]types.Target{
+		Footer(common.NewTableFooterOptionsBuilder().CountRows(false).Reducer([]string{"sum"})).
+		Targets([]dashboard.Target{
 			tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "A"),
 			tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "B"),
 		}).
-		Transformations([]types.DataTransformerConfig{
-			{
-				Id: "groupBy",
-				Options: map[string]any{
-					"fields": map[string]any{
-						"Value #A": map[string]any{
-							"aggregations": []string{"lastNotNull"},
-							"operation":    "aggregate",
-						},
-						"Value #B": map[string]any{
-							"aggregations": []string{"lastNotNull"},
-							"operation":    "aggregate",
-						},
-						"mountpoint": map[string]any{
-							"aggregations": []string{},
-							"operation":    "groupby",
-						},
+		// Transformations
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "groupBy",
+			Options: map[string]any{
+				"fields": map[string]any{
+					"Value #A": map[string]any{
+						"aggregations": []string{"lastNotNull"},
+						"operation":    "aggregate",
 					},
-				},
-			},
-			{
-				Id:      "merge",
-				Options: map[string]any{},
-			},
-			{
-				Id: "calculateField",
-				Options: map[string]any{
-					"alias": "Used",
-					"binary": map[string]any{
-						"left":     "Value #A (lastNotNull)",
-						"operator": "-",
-						"reducer":  "sum",
-						"right":    "Value #B (lastNotNull)",
+					"Value #B": map[string]any{
+						"aggregations": []string{"lastNotNull"},
+						"operation":    "aggregate",
 					},
-					"mode": "binary",
-					"reduce": map[string]any{
-						"reducer": "sum",
-					},
-				},
-			},
-			{
-				Id: "calculateField",
-				Options: map[string]any{
-					"alias": "Used, %",
-					"binary": map[string]any{
-						"left":     "Used",
-						"operator": "/",
-						"reducer":  "sum",
-						"right":    "Value #A (lastNotNull)",
-					},
-					"mode": "binary",
-					"reduce": map[string]any{
-						"reducer": "sum",
-					},
-				},
-			},
-			{
-				Id: "organize",
-				Options: map[string]any{
-					"excludeByName": map[string]any{},
-					"indexByName":   map[string]any{},
-					"renameByName": map[string]any{
-						"Value #A (lastNotNull)": "Size",
-						"Value #B (lastNotNull)": "Available",
-						"mountpoint":             "Mounted on",
-					},
-				},
-			}, {
-				Id: "sortBy",
-				Options: map[string]any{
-					"fields": map[string]any{},
-					"sort": []map[string]any{
-						{"field": "Mounted on"},
+					"mountpoint": map[string]any{
+						"aggregations": []string{},
+						"operation":    "groupby",
 					},
 				},
 			},
 		}).
-		Overrides([]struct { // TODO: paaaaaain
-			Matcher    types.MatcherConfig        `json:"matcher"`
-			Properties []types.DynamicConfigValue `json:"properties"`
-		}{
-			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Mounted on",
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id:      "merge",
+			Options: map[string]any{},
+		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "calculateField",
+			Options: map[string]any{
+				"alias": "Used",
+				"binary": map[string]any{
+					"left":     "Value #A (lastNotNull)",
+					"operator": "-",
+					"reducer":  "sum",
+					"right":    "Value #B (lastNotNull)",
 				},
-				Properties: []types.DynamicConfigValue{
-					{Id: "custom.width", Value: 260},
-				},
-			},
-			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Size",
-				},
-				Properties: []types.DynamicConfigValue{
-					{Id: "custom.width", Value: 93},
+				"mode": "binary",
+				"reduce": map[string]any{
+					"reducer": "sum",
 				},
 			},
-			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Used",
+		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "calculateField",
+			Options: map[string]any{
+				"alias": "Used, %",
+				"binary": map[string]any{
+					"left":     "Used",
+					"operator": "/",
+					"reducer":  "sum",
+					"right":    "Value #A (lastNotNull)",
 				},
-				Properties: []types.DynamicConfigValue{
-					{Id: "custom.width", Value: 72},
-				},
-			},
-			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Available",
-				},
-				Properties: []types.DynamicConfigValue{
-					{Id: "custom.width", Value: 88},
+				"mode": "binary",
+				"reduce": map[string]any{
+					"reducer": "sum",
 				},
 			},
-			{
-				Matcher: types.MatcherConfig{ // TODO: not intuitive
-					Id:      "byName",
-					Options: "Used, %",
-				},
-				Properties: []types.DynamicConfigValue{
-					{Id: "unit", Value: "percentunit"},
-					{Id: "custom.cellOptions", Value: struct {
-						Mode string `json:"mode"`
-						Type string `json:"type"`
-					}{
-						Mode: "gradient",
-						Type: "gauge",
-					}},
-					{Id: "min", Value: 0},
-					{Id: "max", Value: 1},
+		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "organize",
+			Options: map[string]any{
+				"excludeByName": map[string]any{},
+				"indexByName":   map[string]any{},
+				"renameByName": map[string]any{
+					"Value #A (lastNotNull)": "Size",
+					"Value #B (lastNotNull)": "Available",
+					"mountpoint":             "Mounted on",
 				},
 			},
-		})
+		}).
+		WithTransformation(dashboard.DataTransformerConfig{
+			Id: "sortBy",
+			Options: map[string]any{
+				"fields": map[string]any{},
+				"sort": []map[string]any{
+					{"field": "Mounted on"},
+				},
+			},
+		}).
+
+		// Overrides configuration
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Mounted on"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.width", Value: 260},
+			},
+		).
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Size"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.width", Value: 93},
+			},
+		).
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Used"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.width", Value: 72},
+			},
+		).
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Available"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "custom.width", Value: 88},
+			},
+		).
+		WithOverride(
+			dashboard.MatcherConfig{Id: "byName", Options: "Used, %"},
+			[]dashboard.DynamicConfigValue{
+				{Id: "unit", Value: "percentunit"},
+				{Id: "custom.cellOptions", Value: struct {
+					Mode string `json:"mode"`
+					Type string `json:"type"`
+				}{
+					Mode: "gradient",
+					Type: "gauge",
+				}},
+				{Id: "min", Value: 0},
+				{Id: "max", Value: 1},
+			},
+		)
 }

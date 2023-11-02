@@ -16,8 +16,8 @@ type Builder struct {
 	// The builder itself
 	// These fields are completely derived from the fields above and can be freely manipulated
 	// by veneers.
-	RootPackage     string // ie: dashboard, alert, ... // TODO: better names and docs
-	Package         string // ie: panel, link, ...
+	Package         string
+	Name            string
 	Options         []Option
 	Initializations []Assignment
 }
@@ -138,10 +138,14 @@ func (path Path) String() string {
 	}), ".")
 }
 
-type AssignmentEnvelope struct {
-	Type  RefType         // Reference to the type of the envelope
+type EnvelopeFieldValue struct {
 	Path  Path            // where to assign within the struct/ref
 	Value AssignmentValue // what to assign
+}
+
+type AssignmentEnvelope struct {
+	Type   Type // Should be a ref or a struct only
+	Values []EnvelopeFieldValue
 }
 
 type AssignmentValue struct {
@@ -263,10 +267,10 @@ func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
 
 func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema *Schema, object Object) Builder {
 	builder := Builder{
-		RootPackage: schema.Package,
-		Package:     object.Name,
-		Schema:      schema,
-		For:         object,
+		Package: schema.Package,
+		Schema:  schema,
+		For:     object,
+		Name:    object.Name,
 	}
 
 	var structType StructType

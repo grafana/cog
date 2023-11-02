@@ -10,6 +10,15 @@ builders:
   - omit: { by_object: dashboard.DataSourceRef }
   - omit: { by_object: dashboard.LibraryPanelRef }
   - omit: { by_object: dashboard.VariableOption }
+  - omit: { by_object: dashboard.Threshold }
+  # overrides and transformations related
+  - omit: { by_object: dashboard.MatcherConfig }
+  - omit: { by_object: dashboard.DynamicConfigValue }
+  - omit: { by_object: dashboard.DataTransformerConfig }
+
+  - rename:
+      by_object: dashboard.RowPanel
+      as: Row
 
   # Rearrange things a bit
   - merge_into:
@@ -55,11 +64,6 @@ options:
 
   # Make the dashboard constructor more friendly
   - promote_to_constructor: { by_name: Dashboard.title }
-
-  # `Tooltip` looks better than `GraphTooltip`
-  - rename:
-      by_name: Dashboard.graphTooltip
-      as: tooltip
 
   # `Tooltip` looks better than `GraphTooltip`
   - rename:
@@ -112,6 +116,25 @@ options:
   ##############
 
   - omit: { by_names: {object: Panel, options: *UnwantedPanelOptions} }
+
+  # Append a single override instead forcing to define all of them at once
+  - array_to_append:
+      by_name: Panel.overrides
+  # Overrides() to WithOverride()
+  - rename:
+      by_name_case_insensitive: Panel.overrides
+      as: withOverride
+  # WithOverride(matcher, properties) instead of WithOverride(struct{...})
+  - struct_fields_as_arguments:
+      by_name: Panel.withOverride
+
+  # Append a single transformation instead forcing to define all of them at once
+  - array_to_append:
+      by_name: Panel.transformations
+  # Overrides() to WithOverride()
+  - rename:
+      by_name_case_insensitive: Panel.transformations
+      as: withTransformation
 
   ##############
   #    Rows    #

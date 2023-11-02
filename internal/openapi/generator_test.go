@@ -33,7 +33,7 @@ func getFilePath(tc *txtartest.Test) string {
 
 	for _, f := range tc.Archive.Files {
 		if strings.HasSuffix(f.Name, ".json") {
-			file, _ := os.CreateTemp(".", "tmp.json")
+			file, _ := os.CreateTemp("../../testdata/openapi", "tmp.json")
 			_, _ = file.Write(f.Data)
 			tc.Cleanup(func() {
 				_ = os.Remove(file.Name())

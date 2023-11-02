@@ -142,7 +142,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== types/basic/types_gen.ts
+== basic/types_gen.ts
 // This
 // is
 // a
@@ -186,8 +186,8 @@ export const defaultSomeStruct = (): SomeStruct => ({
 });
 
 -- out/jennies/GoRawTypes --
-== types/basic/types_gen.go
-package types
+== basic/types_gen.go
+package basic
 
 // This
 // is

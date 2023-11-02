@@ -8,6 +8,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -20,21 +21,24 @@ func (jenny RawTypes) JennyName() string {
 	return "GoRawTypes"
 }
 
-func (jenny RawTypes) Generate(schema *ast.Schema) (codejen.Files, error) {
-	output, err := jenny.generateSchema(schema)
-	if err != nil {
-		return nil, err
+func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) {
+	files := make(codejen.Files, 0, len(context.Schemas))
+
+	for _, schema := range context.Schemas {
+		output, err := jenny.generateSchema(schema)
+		if err != nil {
+			return nil, err
+		}
+
+		filename := filepath.Join(
+			strings.ToLower(schema.Package),
+			"types_gen.go",
+		)
+
+		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
-	filename := filepath.Join(
-		"types",
-		strings.ToLower(schema.Package),
-		"types_gen.go",
-	)
-
-	return codejen.Files{
-		*codejen.NewFile(filename, output, jenny),
-	}, nil
+	return files, nil
 }
 
 func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
@@ -46,7 +50,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 			return ""
 		}
 
-		imports.Add(pkg, "github.com/grafana/cog/generated/types/"+pkg)
+		imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
 
 		return pkg
 	}
@@ -73,9 +77,9 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		importStatements += "\n\n"
 	}
 
-	return []byte(fmt.Sprintf(`package types
+	return []byte(fmt.Sprintf(`package %[1]s
 
-%[1]s%[2]s`, importStatements, buffer.String())), nil
+%[2]s%[3]s`, strings.ToLower(schema.Package), importStatements, buffer.String())), nil
 }
 
 func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]byte, error) {
