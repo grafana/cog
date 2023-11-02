@@ -2,8 +2,9 @@ package openapi
 
 import (
 	"fmt"
-	"github.com/grafana/cog/internal/ast"
 	"strings"
+
+	"github.com/grafana/cog/internal/ast"
 )
 
 const (
@@ -13,7 +14,7 @@ const (
 	MetadataVariant    = "variant"
 )
 
-var errMetadataValidationFailed = "metadata validation failed: %s"
+const errMetadataValidationFailed = "metadata validation failed: %s"
 
 type metadata map[string]string
 
