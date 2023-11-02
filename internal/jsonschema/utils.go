@@ -1,9 +1,9 @@
 package jsonschema
 
 import (
-	"github.com/grafana/cog/internal/ast"
 	"strings"
 
+	"github.com/grafana/cog/internal/ast"
 	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
 )
 

@@ -2,9 +2,10 @@ package jsonschema
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/grafana/cog/internal/ast"
 	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
-	"strings"
 )
 
 const (
@@ -53,7 +54,7 @@ func (metadataCompiler) Compile(ctx schemaparser.CompilerContext, m map[string]i
 
 type metadataValidator map[string]string
 
-func (m metadataValidator) Validate(ctx schemaparser.ValidationContext, v interface{}) error {
+func (m metadataValidator) Validate(_ schemaparser.ValidationContext, v interface{}) error {
 	if err := m.validateKeyword(MetadataIdentifier); err != nil {
 		return err
 	}
