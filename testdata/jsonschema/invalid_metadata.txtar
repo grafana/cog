@@ -1,0 +1,23 @@
+-- metadata.json --
+{
+  "$id": "Test",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Test",
+  "metadata": {
+    "identifier": "invalid-metadata",
+    "kind": "invent",
+    "variant": "panelcfg"
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "value": {
+      "default": "test",
+      "description": "Description",
+      "type": "string"
+    }
+  }
+}
+
+-- out/jsonschema/GenerateAST --
+jsonschema: '' does not validate with #metadata: kind only accepts values: 'composable, core'

@@ -1,8 +1,9 @@
-package openapi
+package jsonschema
 
 import (
+	"bytes"
 	"encoding/json"
-	"os"
+	"io"
 	"strings"
 	"testing"
 
@@ -13,12 +14,12 @@ import (
 
 func TestGenerateAST(t *testing.T) {
 	test := txtartest.TxTarTest{
-		Root: "../../testdata/openapi",
-		Name: "openapi/GenerateAST",
+		Root: "../../testdata/jsonschema",
+		Name: "jsonschema/GenerateAST",
 	}
 
 	test.Run(t, func(tc *txtartest.Test) {
-		schemaAst, err := GenerateAST(getFilePath(tc), Config{Package: "grafanatest"})
+		schemaAst, err := GenerateAST(getReader(tc), Config{Package: "grafanatest"})
 		if err != nil {
 			writeError(tc, err)
 		} else {
@@ -28,23 +29,18 @@ func TestGenerateAST(t *testing.T) {
 	})
 }
 
-func getFilePath(tc *txtartest.Test) string {
+func getReader(tc *txtartest.Test) io.Reader {
 	tc.Helper()
 
-	for _, f := range tc.Archive.Files {
-		if strings.HasSuffix(f.Name, ".json") {
-			file, _ := os.CreateTemp("../../testdata/openapi", "tmp.json")
-			_, _ = file.Write(f.Data)
-			tc.Cleanup(func() {
-				_ = os.Remove(file.Name())
-			})
-			return file.Name()
+	for _, a := range tc.Archive.Files {
+		if strings.HasSuffix(a.Name, ".json") {
+			return bytes.NewReader(a.Data)
 		}
 	}
 
-	tc.Fatal("could not load types IR: file '*.json' not found in test archive")
+	tc.Error("Cannot find test files")
 
-	return ""
+	return nil
 }
 
 func writeIR(tc *txtartest.Test, irFile *ast.Schema) {

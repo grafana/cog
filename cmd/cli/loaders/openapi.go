@@ -12,10 +12,7 @@ func openapiLoader(opts Options) ([]*ast.Schema, error) {
 	for _, entrypoint := range opts.OpenAPIEntrypoints {
 		pkg := filepath.Base(filepath.Dir(entrypoint))
 		schemaAst, err := openapi.GenerateAST(entrypoint, openapi.Config{
-			Package:        pkg,
-			SchemaMetadata: ast.SchemaMeta{
-				// TODO: extract these from somewhere
-			},
+			Package: pkg,
 		})
 		if err != nil {
 			return nil, err

@@ -24,8 +24,7 @@ const (
 )
 
 type Config struct {
-	Package        string
-	SchemaMetadata ast.SchemaMeta
+	Package string
 }
 
 type generator struct {
@@ -44,10 +43,15 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
 
+	metadata, err := extractMetadata(oapi.Info)
+	if err != nil {
+		return nil, err
+	}
+
 	g := &generator{
 		schema: &ast.Schema{
 			Package:  cfg.Package,
-			Metadata: cfg.SchemaMetadata,
+			Metadata: metadata,
 		},
 	}
 
