@@ -156,6 +156,16 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 }
 
 func (jenny *Builder) generateArgument(context context.Builders, builder ast.Builder, arg ast.Argument) argument {
+	if _, isRefToComposable := context.RefToComposable(arg.Type); isRefToComposable {
+		referredTypeAlias := jenny.typeImportAlias(arg.Type.AsRef())
+
+		return argument{
+			Name:          arg.Name,
+			ReferredAlias: referredTypeAlias,
+			ReferredName:  arg.Type.AsRef().ReferredType,
+		}
+	}
+
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For.SelfRef)
 
@@ -233,6 +243,11 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 		argName := tools.LowerCamelCase(assign.Value.Argument.Name)
 		_, isBuilder = context.BuilderForType(assign.Value.Argument.Type)
 		constraints = jenny.constraints(argName, assign.Constraints)
+
+		if !isBuilder {
+			_, isRefToComposable := context.RefToComposable(assign.Value.Argument.Type)
+			isBuilder = isRefToComposable
+		}
 	}
 
 	return assignment{

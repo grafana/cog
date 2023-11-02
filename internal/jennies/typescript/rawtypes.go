@@ -88,7 +88,7 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 	switch def.Type.Kind {
 	case ast.KindStruct:
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
-		buffer.WriteString(formatStructFields(def.Type.AsStruct().Fields, packageMapper))
+		buffer.WriteString(formatStructFields(def.Type, packageMapper))
 		buffer.WriteString("\n")
 	case ast.KindEnum:
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
@@ -116,12 +116,16 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
 		buffer.WriteString(formatIntersection(def.Type.AsIntersection(), packageMapper))
 		buffer.WriteString("\n")
+	case ast.KindComposabilitySlot:
+		buffer.WriteString(fmt.Sprintf("interface %s {\n", def.Name))
+		buffer.WriteString(fmt.Sprintf("\t_composable%s(): void;\n", tools.UpperCamelCase(string(def.Type.AsComposabilitySlot().Variant))))
+		buffer.WriteString("}\n")
 	default:
-		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
+		return nil, fmt.Errorf("unhandled object of type: %s", def.Type.Kind)
 	}
 
-	// generate a "default value factory" for every object, except for constants
-	if def.Type.Kind != ast.KindScalar || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
+	// generate a "default value factory" for every object, except for constants or composability slots
+	if (def.Type.Kind != ast.KindScalar && def.Type.Kind != ast.KindComposabilitySlot) || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
 		buffer.WriteString("\n")
 
 		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(def.Name), def.Name))
@@ -135,12 +139,12 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 	return []byte(buffer.String()), nil
 }
 
-func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) string {
+func formatStructFields(structType ast.Type, packageMapper pkgMapper) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("{\n")
 
-	for _, fieldDef := range fields {
+	for _, fieldDef := range structType.AsStruct().Fields {
 		fieldDefGen := formatField(fieldDef, packageMapper)
 
 		buffer.WriteString(
@@ -149,6 +153,11 @@ func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) strin
 				"\t",
 			),
 		)
+	}
+
+	if structType.HasHint(ast.HintComposableVariant) {
+		variant := tools.UpperCamelCase(structType.Hints[ast.HintComposableVariant].(string))
+		buffer.WriteString(fmt.Sprintf("\t_composable%s(): void;\n", variant))
 	}
 
 	buffer.WriteString("}")
@@ -194,7 +203,7 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 	case ast.KindArray:
 		return formatArray(def.AsArray(), packageMapper)
 	case ast.KindStruct:
-		return formatStructFields(def.AsStruct().Fields, packageMapper)
+		return formatStructFields(def, packageMapper)
 	case ast.KindMap:
 		return formatMap(def.AsMap(), packageMapper)
 	case ast.KindEnum:
@@ -321,7 +330,7 @@ func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkg
 	case ast.KindDisjunction:
 		return defaultValueForType(schema, typeDef.AsDisjunction().Branches[0], packageMapper)
 	case ast.KindStruct:
-		return defaultValuesForStructType(schema, typeDef.AsStruct(), packageMapper)
+		return defaultValuesForStructType(schema, typeDef, packageMapper)
 	case ast.KindEnum: // anonymous enum
 		return typeDef.AsEnum().Values[0].Value
 	case ast.KindRef:
@@ -353,10 +362,10 @@ func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkg
 	}
 }
 
-func defaultValuesForStructType(schema *ast.Schema, structDef ast.StructType, packageMapper pkgMapper) *orderedmap.Map[string, any] {
+func defaultValuesForStructType(schema *ast.Schema, structType ast.Type, packageMapper pkgMapper) *orderedmap.Map[string, any] {
 	defaults := orderedmap.New[string, any]()
 
-	for _, field := range structDef.Fields {
+	for _, field := range structType.AsStruct().Fields {
 		if field.Type.Default != nil {
 			defaults.Set(field.Name, field.Type.Default)
 			continue
@@ -367,6 +376,11 @@ func defaultValuesForStructType(schema *ast.Schema, structDef ast.StructType, pa
 		}
 
 		defaults.Set(field.Name, defaultValueForType(schema, field.Type, packageMapper))
+	}
+
+	if structType.HasHint(ast.HintComposableVariant) {
+		variant := tools.UpperCamelCase(structType.Hints[ast.HintComposableVariant].(string))
+		defaults.Set("_composable"+variant, raw("() => {}"))
 	}
 
 	return defaults
@@ -429,7 +443,7 @@ func defaultValuesForIntersection(schema *ast.Schema, intersectDef ast.Intersect
 		}
 
 		if branch.Struct != nil {
-			strctDef := defaultValuesForStructType(schema, branch.AsStruct(), packageMapper)
+			strctDef := defaultValuesForStructType(schema, branch, packageMapper)
 			strctDef.Iterate(func(key string, value any) {
 				defaults.Set(key, value)
 			})

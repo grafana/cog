@@ -25,9 +25,7 @@ export const cpuUsageTimeseries = (): TimeseriesPanelBuilder => {
         .min(0)
         .max(1)
         .unit("percentunit")
-        .targets([
-            basicPrometheusQuery(query, "{{ cpu }}")
-        ]);
+        .withTarget(basicPrometheusQuery(query, "{{ cpu }}"));
 };
 
 export const loadAverageTimeseries = (): TimeseriesPanelBuilder => {
@@ -44,12 +42,10 @@ export const loadAverageTimeseries = (): TimeseriesPanelBuilder => {
         )
         .min(0)
         .unit("short")
-        .targets([
-            basicPrometheusQuery(`node_load1{job="integrations/raspberrypi-node", instance="$instance"}`, "1m load average"),
-            basicPrometheusQuery(`node_load5{job="integrations/raspberrypi-node", instance="$instance"}`, "5m load average"),
-            basicPrometheusQuery(`node_load15{job="integrations/raspberrypi-node", instance="$instance"}`, "15m load average"),
-            basicPrometheusQuery(`count(node_cpu_seconds_total{job="integrations/raspberrypi-node", instance="$instance", mode="idle"})`, "logical cores"),
-        ]);
+        .withTarget(basicPrometheusQuery(`node_load1{job="integrations/raspberrypi-node", instance="$instance"}`, "1m load average"))
+        .withTarget(basicPrometheusQuery(`node_load5{job="integrations/raspberrypi-node", instance="$instance"}`, "5m load average"))
+        .withTarget(basicPrometheusQuery(`node_load15{job="integrations/raspberrypi-node", instance="$instance"}`, "15m load average"))
+        .withTarget(basicPrometheusQuery(`count(node_cpu_seconds_total{job="integrations/raspberrypi-node", instance="$instance", mode="idle"})`, "logical cores"));
 };
 
 export const cpuTemperatureGauge = (): GaugePanelBuilder => {
@@ -67,7 +63,5 @@ export const cpuTemperatureGauge = (): GaugePanelBuilder => {
                     {value: 85.0, color: "rgba(245, 54, 54, 0.9)"},
                 ])
         )
-        .targets([
-            basicPrometheusQuery(`avg(node_hwmon_temp_celsius{job="integrations/raspberrypi-node", instance="$instance"})`, ""),
-        ]);
+        .withTarget(basicPrometheusQuery(`avg(node_hwmon_temp_celsius{job="integrations/raspberrypi-node", instance="$instance"})`, ""));
 };

@@ -75,8 +75,14 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 	cogAlias := jenny.importCog()
 	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
 
+	buildObjectSignature := qualifiedObjectName
+	if builder.For.Type.HasHint(ast.HintComposableVariant) {
+		variant := builder.For.Type.Hints[ast.HintComposableVariant].(string)
+		buildObjectSignature = composableInterface(variant)
+	}
+
 	// just to make explicit that this builder implements the generic Cog builder interface
-	buffer.WriteString(fmt.Sprintf("var _ %[1]s.Builder[%[2]s] = (*%[3]sBuilder)(nil)\n\n", cogAlias, qualifiedObjectName, builderName))
+	buffer.WriteString(fmt.Sprintf("var _ %[1]s.Builder[%[2]s] = (*%[3]sBuilder)(nil)\n\n", cogAlias, buildObjectSignature, builderName))
 
 	// Builder type declaration
 	buffer.WriteString(fmt.Sprintf(`type %[2]sBuilder struct {
@@ -91,7 +97,7 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 
 	// Allow builders to expose the resource they're building
 	buffer.WriteString(fmt.Sprintf(`
-func (builder *%[2]sBuilder) Build() (*%[1]s, error) {
+func (builder *%[2]sBuilder) Build() (%[4]s, error) {
 	var errs %[3]s.BuildErrors
 
 	for _, err := range builder.errors {
@@ -99,12 +105,12 @@ func (builder *%[2]sBuilder) Build() (*%[1]s, error) {
 	}
 
 	if len(errs) != 0 {
-		return nil, errs
+		return %[1]s{}, errs
 	}
 
-	return builder.internal, nil
+	return *builder.internal, nil
 }
-`, qualifiedObjectName, builderName, cogAlias))
+`, qualifiedObjectName, builderName, cogAlias, buildObjectSignature))
 
 	// Define options
 	for _, option := range builder.Options {
@@ -243,6 +249,13 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) string {
 	argName := jenny.escapeVarName(tools.LowerCamelCase(arg.Name))
 
+	if composable, isRefToComposable := context.RefToComposable(arg.Type); isRefToComposable {
+		cogAlias := jenny.importCog()
+		qualifiedType := formatType(composable, jenny.typeImportMapper)
+
+		return fmt.Sprintf(`%[1]s %[2]s.Builder[%[3]s]`, argName, cogAlias, qualifiedType)
+	}
+
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		cogAlias := jenny.importCog()
 		qualifiedType := jenny.importType(referredBuilder.For.SelfRef)
@@ -342,12 +355,15 @@ func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, va
 		valueType = valueType.AsMap().ValueType
 	}
 
-	if _, found := context.BuilderForType(value.Argument.Type); found {
+	maybeAsPointer := ""
+	if valueType.Nullable {
+		maybeAsPointer = "&"
+	}
+
+	_, hasBuilder := context.BuilderForType(value.Argument.Type)
+	_, isRefToComposable := context.RefToComposable(value.Argument.Type)
+	if hasBuilder || isRefToComposable {
 		cogAlias := jenny.importCog()
-		maybeDereference := "*"
-		if valueType.Nullable {
-			maybeDereference = ""
-		}
 
 		resourceBuildSource := fmt.Sprintf(`resource, err := %[1]s.Build()
 if err != nil {
@@ -357,12 +373,7 @@ if err != nil {
 
 `, argName, cogAlias)
 
-		return resourceBuildSource, fmt.Sprintf("%[1]sresource", maybeDereference)
-	}
-
-	maybeAsPointer := ""
-	if valueType.Nullable {
-		maybeAsPointer = "&"
+		return resourceBuildSource, fmt.Sprintf("%[1]sresource", maybeAsPointer)
 	}
 
 	return "", maybeAsPointer + argName

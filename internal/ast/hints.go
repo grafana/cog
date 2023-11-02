@@ -11,6 +11,8 @@ const (
 	// references to structs, the original definition of which is associated
 	// to this hint.
 	HintDiscriminatedDisjunctionOfRefs = "disjunction_of_refs"
+
+	HintComposableVariant = "composable_variant"
 )
 
 const DiscriminatorCatchAll = "cog_discriminator_catch_all"

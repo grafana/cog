@@ -28,12 +28,10 @@ export const memoryUsageTimeseries = (): TimeseriesPanelBuilder => {
         )
         .min(0)
         .unit("bytes")
-        .targets([
-            basicPrometheusQuery(memUsedQuery, "Used"),
-            basicPrometheusQuery(`node_memory_Buffers_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Buffers"),
-            basicPrometheusQuery(`node_memory_Cached_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Cached"),
-            basicPrometheusQuery(`node_memory_MemFree_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Free"),
-        ]);
+        .withTarget(basicPrometheusQuery(memUsedQuery, "Used"))
+        .withTarget(basicPrometheusQuery(`node_memory_Buffers_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Buffers"))
+        .withTarget(basicPrometheusQuery(`node_memory_Cached_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Cached"))
+        .withTarget(basicPrometheusQuery(`node_memory_MemFree_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Free"));
 };
 
 export const memoryUsageGauge = (): GaugePanelBuilder => {
@@ -56,7 +54,5 @@ export const memoryUsageGauge = (): GaugePanelBuilder => {
                     {value: 90.0, color: "rgba(245, 54, 54, 0.9)"},
                 ])
         )
-        .targets([
-            basicPrometheusQuery(query, ""),
-        ]);
+        .withTarget(basicPrometheusQuery(query, ""));
 };

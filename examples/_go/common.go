@@ -14,44 +14,23 @@ func toPtr[T any](input T) *T {
 	return &input
 }
 
-func basicPrometheusQuery(query string, legend string) *prometheus.Dataquery {
-	queryBuilder := prometheus.NewDataqueryBuilder().
+func basicPrometheusQuery(query string, legend string) *prometheus.DataqueryBuilder {
+	return prometheus.NewDataqueryBuilder().
 		Expr(query).
 		LegendFormat(legend)
-
-	result, err := queryBuilder.Build() // TODO
-	if err != nil {
-		panic(err)
-	}
-
-	return result
 }
 
-func basicLokiQuery(query string) *loki.Dataquery {
-	queryBuilder := loki.NewDataqueryBuilder().
+func basicLokiQuery(query string) *loki.DataqueryBuilder {
+	return loki.NewDataqueryBuilder().
 		Expr(query)
-
-	result, err := queryBuilder.Build() // TODO
-	if err != nil {
-		panic(err)
-	}
-
-	return result
 }
 
-func tablePrometheusQuery(query string, ref string) *prometheus.Dataquery {
-	queryBuilder := prometheus.NewDataqueryBuilder().
+func tablePrometheusQuery(query string, ref string) *prometheus.DataqueryBuilder {
+	return prometheus.NewDataqueryBuilder().
 		Expr(query).
 		Instant(true).
 		Format(prometheus.PromQueryFormatTable).
 		RefId(ref)
-
-	result, err := queryBuilder.Build() // TODO
-	if err != nil {
-		panic(err)
-	}
-
-	return result
 }
 
 func defaultTimeseries() *timeseries.PanelBuilder {

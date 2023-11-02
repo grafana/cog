@@ -105,13 +105,20 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 		} else {
 			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, packageMapper)))
 		}
-	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct, ast.KindIntersection:
+	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct, ast.KindIntersection, ast.KindComposabilitySlot:
 		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, packageMapper)))
 	default:
-		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
+		return nil, fmt.Errorf("unhandled object of type: %s", def.Type.Kind)
 	}
 
 	buffer.WriteString("\n")
+
+	if def.Type.Kind == ast.KindStruct && def.Type.HasHint(ast.HintComposableVariant) {
+		variant := tools.UpperCamelCase(def.Type.Hints[ast.HintComposableVariant].(string))
+
+		buffer.WriteString(fmt.Sprintf("func (resource %s) Composable%s() {}\n", defName, variant))
+		buffer.WriteString("\n")
+	}
 
 	return []byte(buffer.String()), nil
 }
@@ -231,6 +238,10 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 		return "any"
 	}
 
+	if def.Kind == ast.KindComposabilitySlot {
+		return composableInterface(string(def.AsComposabilitySlot().Variant))
+	}
+
 	if def.Kind == ast.KindArray {
 		return formatArray(def.AsArray(), packageMapper)
 	}
@@ -268,6 +279,12 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 
 	// FIXME: we should never be here
 	return "unknown"
+}
+
+func composableInterface(variant string) string {
+	return fmt.Sprintf(`interface {
+	Composable%s()
+}`, tools.UpperCamelCase(variant))
 }
 
 func formatArray(def ast.ArrayType, packageMapper pkgMapper) string {
