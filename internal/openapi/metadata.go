@@ -49,7 +49,6 @@ func (m metadata) extractMetadata() (ast.SchemaMeta, error) {
 		Kind:       ast.SchemaKind(kind),
 		Variant:    ast.SchemaVariant(variant),
 	}, nil
-
 }
 
 func (m metadata) validateKeyword(key string) (string, error) {
