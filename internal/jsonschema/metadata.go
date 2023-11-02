@@ -36,7 +36,7 @@ func metadata() *schemaparser.Schema {
 
 type metadataCompiler struct{}
 
-func (metadataCompiler) Compile(ctx schemaparser.CompilerContext, m map[string]interface{}) (schemaparser.ExtSchema, error) {
+func (metadataCompiler) Compile(_ schemaparser.CompilerContext, m map[string]interface{}) (schemaparser.ExtSchema, error) {
 	if pow, ok := m["metadata"]; ok {
 		if v, ok := pow.(map[string]interface{}); ok {
 			md := metadataValidator{}
