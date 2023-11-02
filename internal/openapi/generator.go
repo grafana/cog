@@ -3,7 +3,9 @@ package openapi
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
@@ -32,6 +34,7 @@ type generator struct {
 
 func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
 	oapi, err := loader.LoadFromFile(filePath)
 	if err != nil {
 		return nil, err
@@ -85,8 +88,8 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 }
 
 func (g *generator) walkSchemaRef(schemaRef *openapi3.SchemaRef) (ast.Type, error) {
-	if schemaRef.Ref != "" {
-		return g.walkRef(schemaRef.Ref)
+	if isRef(schemaRef.Ref) {
+		return g.walkRef(schemaRef)
 	}
 
 	return g.walkDefinitions(schemaRef.Value)
@@ -125,12 +128,10 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 	}
 }
 
-func (g *generator) walkRef(ref string) (ast.Type, error) {
-	// TODO: Its assuming that we are referencing an object in the same document
-	// See https://swagger.io/specification/v3/#reference-object
-	referredKindName := getRefName(ref)
+func (g *generator) walkRef(schema *openapi3.SchemaRef) (ast.Type, error) {
+	pkg, referredKindName := g.getRefName(schema.Ref)
 
-	return ast.NewRef(g.schema.Package, referredKindName), nil
+	return ast.NewRef(pkg, referredKindName), nil
 }
 
 func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
@@ -223,7 +224,17 @@ func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
-	return g.walkDisjunctions(schema.AllOf, "", nil)
+	branches := make([]ast.Type, len(schema.AllOf))
+	for i, sch := range schema.AllOf {
+		def, err := g.walkSchemaRef(sch)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		branches[i] = def
+	}
+
+	return ast.NewIntersection(branches), nil
 }
 
 func (g *generator) walkOneOf(schema *openapi3.Schema) (ast.Type, error) {
@@ -279,8 +290,25 @@ func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[strin
 	mapping := make(map[string]string)
 	if schema.Discriminator != nil {
 		name = schema.Discriminator.PropertyName
-		mapping = schema.Discriminator.Mapping
+		for k, v := range schema.Discriminator.Mapping {
+			mapping[k] = v
+		}
 	}
 
 	return name, mapping
+}
+
+func (g *generator) getRefName(value string) (string, string) {
+	rgx := regexp.MustCompile(`(../)*(\w*/)*(.*).(json|yml)`)
+	group := rgx.FindStringSubmatch(value)
+
+	parts := strings.Split(value, "/")
+	schemaName := parts[len(parts)-1]
+
+	// Reference in the same file
+	if len(group) == 0 {
+		return g.schema.Package, schemaName
+	}
+
+	return group[3], schemaName
 }

@@ -31,7 +31,7 @@
             }
           },
           "no-discriminator": {
-            "allOf": [
+            "oneOf": [
               {
                 "$ref": "#/components/schemas/Value1"
               },
