@@ -7,7 +7,7 @@
     "x-metadata": {
         "identifier": "metadata",
         "kind": "composable",
-        "variant": "dataquery"
+        "variant": "nope"
     }
   },
   "paths": {},
@@ -17,12 +17,4 @@
 }
 
 -- out/openapi/GenerateAST --
-{
-  "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "composable",
-    "Variant": "dataquery",
-    "Identifier": "metadata"
-  },
-  "Objects": null
-}
+metadata validation failed: variant only accepts values: 'panelcfg, dataquery'

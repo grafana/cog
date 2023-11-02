@@ -4,7 +4,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Test",
   "metadata": {
-    "identifier": "invalid-metadata",
+    "identifier": "missing-metadata",
     "kind": "composable"
   },
   "additionalProperties": false,

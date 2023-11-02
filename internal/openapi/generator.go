@@ -23,12 +23,6 @@ const (
 	FormatPassword = "password"
 )
 
-const (
-	MetadataIdentifier = "x-identifier"
-	MetadataKind       = "x-kind"
-	MetadataVariant    = "x-variant"
-)
-
 type Config struct {
 	Package string
 }
@@ -49,10 +43,15 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
 
+	metadata, err := extractMetadata(oapi.Info)
+	if err != nil {
+		return nil, err
+	}
+
 	g := &generator{
 		schema: &ast.Schema{
 			Package:  cfg.Package,
-			Metadata: extractMetadata(oapi.Info),
+			Metadata: metadata,
 		},
 	}
 

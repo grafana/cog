@@ -6,8 +6,7 @@
     "version": "0.0",
     "x-metadata": {
         "identifier": "metadata",
-        "kind": "composable",
-        "variant": "dataquery"
+        "kind": "composable"
     }
   },
   "paths": {},
@@ -17,12 +16,4 @@
 }
 
 -- out/openapi/GenerateAST --
-{
-  "Package": "grafanatest",
-  "Metadata": {
-    "Kind": "composable",
-    "Variant": "dataquery",
-    "Identifier": "metadata"
-  },
-  "Objects": null
-}
+metadata validation failed: missing 'variant' keyword

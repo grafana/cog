@@ -2,6 +2,7 @@ package openapi
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -96,22 +97,25 @@ func isRef(ref string) bool {
 	return ref != "" && strings.ContainsAny(ref, "#")
 }
 
-func extractMetadata(info *openapi3.Info) ast.SchemaMeta {
+func extractMetadata(info *openapi3.Info) (ast.SchemaMeta, error) {
 	if info == nil {
-		return ast.SchemaMeta{}
+		return ast.SchemaMeta{}, nil
 	}
 
-	metadata := ast.SchemaMeta{}
-	if kind, ok := info.Extensions[MetadataKind]; ok {
-		metadata.Kind = ast.SchemaKind(kind.(string))
-	}
-	if identifier, ok := info.Extensions[MetadataIdentifier]; ok {
-		metadata.Identifier = identifier.(string)
+	xMetadata, ok := info.Extensions[MetadataMetadata]
+	if !ok {
+		return ast.SchemaMeta{}, nil
 	}
 
-	if variant, ok := info.Extensions[MetadataVariant]; ok {
-		metadata.Variant = ast.SchemaVariant(variant.(string))
+	md, ok := xMetadata.(map[string]interface{})
+	if !ok {
+		return ast.SchemaMeta{}, nil
 	}
 
-	return metadata
+	parsedMetadata := make(map[string]string, len(md))
+	for k, v := range md {
+		parsedMetadata[k] = fmt.Sprintf("%s", v)
+	}
+
+	return metadata(parsedMetadata).extractMetadata()
 }

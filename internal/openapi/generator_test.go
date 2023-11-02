@@ -18,13 +18,13 @@ func TestGenerateAST(t *testing.T) {
 	}
 
 	test.Run(t, func(tc *txtartest.Test) {
-		req := require.New(tc)
-
 		schemaAst, err := GenerateAST(getFilePath(tc), Config{Package: "grafanatest"})
-		req.NoError(err)
-		require.NotNil(t, schemaAst)
-
-		writeIR(schemaAst, tc)
+		if err != nil {
+			writeError(tc, err)
+		} else {
+			require.NotNil(t, schemaAst)
+			writeIR(tc, schemaAst)
+		}
 	})
 }
 
@@ -47,12 +47,19 @@ func getFilePath(tc *txtartest.Test) string {
 	return ""
 }
 
-func writeIR(irFile *ast.Schema, tc *txtartest.Test) {
+func writeIR(tc *txtartest.Test, irFile *ast.Schema) {
 	tc.Helper()
 
 	marshaledIR, err := json.MarshalIndent(irFile, "", "  ")
 	require.NoError(tc, err)
 
 	_, err = tc.Write(marshaledIR)
+	require.NoError(tc, err)
+}
+
+func writeError(tc *txtartest.Test, err error) {
+	tc.Helper()
+
+	_, err = tc.Write([]byte(err.Error()))
 	require.NoError(tc, err)
 }
