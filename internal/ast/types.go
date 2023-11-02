@@ -16,9 +16,9 @@ const (
 
 	KindArray Kind = "array"
 
-	KindScalar            Kind = "scalar"
-	KindIntersection      Kind = "intersection"
-	KindComposabilitySlot Kind = "composability_slot"
+	KindScalar         Kind = "scalar"
+	KindIntersection   Kind = "intersection"
+	KindComposableSlot Kind = "composability_slot"
 )
 
 type ScalarKind string
@@ -85,17 +85,25 @@ type Type struct {
 	Nullable bool
 	Default  any `json:",omitempty"`
 
-	Disjunction       *DisjunctionType       `json:",omitempty"`
-	Array             *ArrayType             `json:",omitempty"`
-	Enum              *EnumType              `json:",omitempty"`
-	Map               *MapType               `json:",omitempty"`
-	Struct            *StructType            `json:",omitempty"`
-	Ref               *RefType               `json:",omitempty"`
-	Scalar            *ScalarType            `json:",omitempty"`
-	Intersection      *IntersectionType      `json:",omitempty"`
-	ComposabilitySlot *ComposabilitySlotType `json:",omitempty"`
+	Disjunction    *DisjunctionType    `json:",omitempty"`
+	Array          *ArrayType          `json:",omitempty"`
+	Enum           *EnumType           `json:",omitempty"`
+	Map            *MapType            `json:",omitempty"`
+	Struct         *StructType         `json:",omitempty"`
+	Ref            *RefType            `json:",omitempty"`
+	Scalar         *ScalarType         `json:",omitempty"`
+	Intersection   *IntersectionType   `json:",omitempty"`
+	ComposableSlot *ComposableSlotType `json:",omitempty"`
 
 	Hints JenniesHints `json:",omitempty"`
+}
+
+func (t Type) ImplementsVariant() bool {
+	return t.HasHint(HintImplementsVariant)
+}
+
+func (t Type) ImplementedVariant() string {
+	return t.Hints[HintImplementsVariant].(string)
 }
 
 func (t Type) HasHint(hintName string) bool {
@@ -157,9 +165,9 @@ func (t Type) DeepCopy() Type {
 		newIntersection := t.Intersection.DeepCopy()
 		newType.Intersection = &newIntersection
 	}
-	if t.ComposabilitySlot != nil {
-		newComposabilitySlot := t.ComposabilitySlot.DeepCopy()
-		newType.ComposabilitySlot = &newComposabilitySlot
+	if t.ComposableSlot != nil {
+		newComposableSlot := t.ComposableSlot.DeepCopy()
+		newType.ComposableSlot = &newComposableSlot
 	}
 
 	for k, v := range t.Hints {
@@ -350,8 +358,8 @@ func NewIntersection(branches []Type) Type {
 
 func NewComposabilitySlot(variant SchemaVariant) Type {
 	return Type{
-		Kind: KindComposabilitySlot,
-		ComposabilitySlot: &ComposabilitySlotType{
+		Kind: KindComposableSlot,
+		ComposableSlot: &ComposableSlotType{
 			Variant: variant,
 		},
 	}
@@ -397,8 +405,8 @@ func (t Type) AsIntersection() IntersectionType {
 	return *t.Intersection
 }
 
-func (t Type) AsComposabilitySlot() ComposabilitySlotType {
-	return *t.ComposabilitySlot
+func (t Type) AsComposableSlot() ComposableSlotType {
+	return *t.ComposableSlot
 }
 
 // named declaration of a type
@@ -703,12 +711,12 @@ func (inter IntersectionType) DeepCopy() IntersectionType {
 	return newT
 }
 
-type ComposabilitySlotType struct {
+type ComposableSlotType struct {
 	Variant SchemaVariant
 }
 
-func (slot ComposabilitySlotType) DeepCopy() ComposabilitySlotType {
-	return ComposabilitySlotType{
+func (slot ComposableSlotType) DeepCopy() ComposableSlotType {
+	return ComposableSlotType{
 		Variant: slot.Variant,
 	}
 }

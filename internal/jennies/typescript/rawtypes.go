@@ -116,16 +116,16 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
 		buffer.WriteString(formatIntersection(def.Type.AsIntersection(), packageMapper))
 		buffer.WriteString("\n")
-	case ast.KindComposabilitySlot:
+	case ast.KindComposableSlot:
 		buffer.WriteString(fmt.Sprintf("interface %s {\n", def.Name))
-		buffer.WriteString(fmt.Sprintf("\t_composable%s(): void;\n", tools.UpperCamelCase(string(def.Type.AsComposabilitySlot().Variant))))
+		buffer.WriteString(fmt.Sprintf("\t_implements%sVariant(): void;\n", tools.UpperCamelCase(string(def.Type.AsComposableSlot().Variant))))
 		buffer.WriteString("}\n")
 	default:
 		return nil, fmt.Errorf("unhandled object of type: %s", def.Type.Kind)
 	}
 
 	// generate a "default value factory" for every object, except for constants or composability slots
-	if (def.Type.Kind != ast.KindScalar && def.Type.Kind != ast.KindComposabilitySlot) || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
+	if (def.Type.Kind != ast.KindScalar && def.Type.Kind != ast.KindComposableSlot) || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
 		buffer.WriteString("\n")
 
 		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(def.Name), def.Name))
@@ -155,9 +155,9 @@ func formatStructFields(structType ast.Type, packageMapper pkgMapper) string {
 		)
 	}
 
-	if structType.HasHint(ast.HintComposableVariant) {
-		variant := tools.UpperCamelCase(structType.Hints[ast.HintComposableVariant].(string))
-		buffer.WriteString(fmt.Sprintf("\t_composable%s(): void;\n", variant))
+	if structType.ImplementsVariant() {
+		variant := tools.UpperCamelCase(structType.ImplementedVariant())
+		buffer.WriteString(fmt.Sprintf("\t_implements%sVariant(): void;\n", variant))
 	}
 
 	buffer.WriteString("}")
@@ -378,9 +378,9 @@ func defaultValuesForStructType(schema *ast.Schema, structType ast.Type, package
 		defaults.Set(field.Name, defaultValueForType(schema, field.Type, packageMapper))
 	}
 
-	if structType.HasHint(ast.HintComposableVariant) {
-		variant := tools.UpperCamelCase(structType.Hints[ast.HintComposableVariant].(string))
-		defaults.Set("_composable"+variant, raw("() => {}"))
+	if structType.ImplementsVariant() {
+		variant := tools.UpperCamelCase(structType.ImplementedVariant())
+		defaults.Set("_implements"+variant+"Variant", raw("() => {}"))
 	}
 
 	return defaults

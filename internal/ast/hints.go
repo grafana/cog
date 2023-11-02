@@ -12,7 +12,7 @@ const (
 	// to this hint.
 	HintDiscriminatedDisjunctionOfRefs = "disjunction_of_refs"
 
-	HintComposableVariant = "composable_variant"
+	HintImplementsVariant = "implements_variant"
 )
 
 const DiscriminatorCatchAll = "cog_discriminator_catch_all"

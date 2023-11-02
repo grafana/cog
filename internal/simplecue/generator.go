@@ -92,7 +92,7 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 	}
 
 	structType := ast.NewStruct(rootObjectFields...)
-	structType.Hints[ast.HintComposableVariant] = string(g.schema.Metadata.Variant)
+	structType.Hints[ast.HintImplementsVariant] = string(g.schema.Metadata.Variant)
 
 	g.schema.Objects = append(g.schema.Objects, ast.Object{
 		Name:     string(g.schema.Metadata.Variant),

@@ -76,9 +76,8 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
 
 	buildObjectSignature := qualifiedObjectName
-	if builder.For.Type.HasHint(ast.HintComposableVariant) {
-		variant := builder.For.Type.Hints[ast.HintComposableVariant].(string)
-		buildObjectSignature = composableInterface(variant)
+	if builder.For.Type.ImplementsVariant() {
+		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
 	// just to make explicit that this builder implements the generic Cog builder interface
@@ -249,9 +248,9 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) string {
 	argName := jenny.escapeVarName(tools.LowerCamelCase(arg.Name))
 
-	if composable, isRefToComposable := context.RefToComposable(arg.Type); isRefToComposable {
+	if composableSlot, isRefToComposable := context.RefToComposableSlot(arg.Type); isRefToComposable {
 		cogAlias := jenny.importCog()
-		qualifiedType := formatType(composable, jenny.typeImportMapper)
+		qualifiedType := formatType(composableSlot, jenny.typeImportMapper)
 
 		return fmt.Sprintf(`%[1]s %[2]s.Builder[%[3]s]`, argName, cogAlias, qualifiedType)
 	}
@@ -361,7 +360,7 @@ func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, va
 	}
 
 	_, hasBuilder := context.BuilderForType(value.Argument.Type)
-	_, isRefToComposable := context.RefToComposable(value.Argument.Type)
+	_, isRefToComposable := context.RefToComposableSlot(value.Argument.Type)
 	if hasBuilder || isRefToComposable {
 		cogAlias := jenny.importCog()
 

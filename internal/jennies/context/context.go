@@ -9,7 +9,7 @@ type Builders struct {
 	Builders ast.Builders
 }
 
-func (context *Builders) RefToComposable(t ast.Type) (ast.Type, bool) {
+func (context *Builders) RefToComposableSlot(t ast.Type) (ast.Type, bool) {
 	if t.Kind != ast.KindRef {
 		return t, false
 	}
@@ -17,7 +17,7 @@ func (context *Builders) RefToComposable(t ast.Type) (ast.Type, bool) {
 	ref := t.AsRef()
 	referredObj, found := context.Schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 
-	if !found || referredObj.Type.Kind != ast.KindComposabilitySlot {
+	if !found || referredObj.Type.Kind != ast.KindComposableSlot {
 		return t, false
 	}
 
