@@ -1,9 +1,27 @@
 package {{ .Package }}
 
-{{- if eq (len .Imports) 0 }}
 import (
+    {{ .ImportAlias }} "github.com/grafana/cog/generated"
 {{- range $alias, $importPath := .Imports -}}
     {{ $alias }} {{ $importPath }}
 {{- end }}
 )
-{{- end }}
+
+var _ {{ .ImportAlias }}.Builder[{{ .ObjectName }}] = (*{{ .ObjectName }}Builder)(nil)
+
+type {{ .BuilderName }}Builder struct {
+    internal *{{ .BuilderName }}
+    errors map[string]{{ .ImportAlias }}.BuildErrors
+}
+
+func New{{ .BuilderName }}Builder() *{{ .BuilderName }}Builder {
+	resource := &{{ .BuilderName }}{}
+	builder := &{{ .BuilderName }}Builder{
+		internal: resource,
+		errors: make(map[string]{{ .ImportAlias }}.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}

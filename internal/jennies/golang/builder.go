@@ -55,7 +55,9 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	err := templates.Lookup("builder.tmpl").Execute(&buffer, template.Tmpl{
 		Package:     builder.Package,
 		Imports:     jenny.imports,
-		BuilderName: builder.Name,
+		ImportAlias: "cog",
+		BuilderName: tools.UpperCamelCase(builder.Name),
+		ObjectName:  builder.For.Name,
 	})
 
 	if err != nil {
@@ -78,19 +80,9 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 	cogAlias := jenny.importCog()
 	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
 
-	// just to make explicit that this builder implements the generic Cog builder interface
-	buffer.WriteString(fmt.Sprintf("var _ %[1]s.Builder[%[2]s] = (*%[3]sBuilder)(nil)\n\n", cogAlias, qualifiedObjectName, builderName))
-
-	// Builder type declaration
-	buffer.WriteString(fmt.Sprintf(`type %[2]sBuilder struct {
-	internal *%[1]s
-	errors map[string]%[3]s.BuildErrors
-}
-`, qualifiedObjectName, builderName, cogAlias))
-
 	// Add a constructor for the builder
-	constructorCode := jenny.generateConstructor(context, builder)
-	buffer.WriteString(constructorCode)
+	// TODO: Add arguments and assignments to constructor
+	_ = jenny.generateConstructor(context, builder)
 
 	// Allow builders to expose the resource they're building
 	buffer.WriteString(fmt.Sprintf(`
@@ -127,14 +119,9 @@ func (builder *%[2]sBuilder) Build() (*%[1]s, error) {
 	return buffer.String()
 }
 
-func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) string {
-	var buffer strings.Builder
-
-	cogAlias := jenny.importCog()
-	args := ""
-	fieldsInit := ""
-	var argsList []string
-	var fieldsInitList []string
+func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) template.Constructor {
+	var argsList []template.Argument
+	var assignmentList []template.Assignment
 	for _, opt := range builder.Options {
 		if !opt.IsConstructorArg {
 			continue
@@ -142,44 +129,17 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 		// FIXME: this is assuming that there's only one argument for that option
 		argsList = append(argsList, jenny.generateArgument(context, opt.Args[0]))
-		fieldsInitList = append(
-			fieldsInitList,
-			jenny.generateAssignment(context, opt.Assignments[0]),
-		)
+		assignmentList = append(assignmentList, jenny.generateAssignment(context, opt.Assignments[0]))
 	}
 
 	for _, init := range builder.Initializations {
-		fieldsInitList = append(
-			fieldsInitList,
-			jenny.generateAssignment(context, init),
-		)
+		assignmentList = append(assignmentList, jenny.generateAssignment(context, init))
 	}
 
-	if len(argsList) != 0 {
-		args = strings.Join(argsList, ", ")
+	return template.Constructor{
+		Args:        argsList,
+		Assignments: assignmentList,
 	}
-	if len(fieldsInitList) != 0 {
-		fieldsInit = strings.Join(fieldsInitList, "\n") + "\n"
-	}
-
-	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
-	builderName := tools.UpperCamelCase(builder.Name)
-
-	buffer.WriteString(fmt.Sprintf(`func New%[1]sBuilder(%[2]s) *%[1]sBuilder {
-	resource := &%[4]s{}
-	builder := &%[1]sBuilder{
-		internal: resource,
-		errors: make(map[string]%[5]s.BuildErrors),
-	}
-
-	%[3]s
-	builder.applyDefaults()
-
-	return builder
-}
-`, builderName, args, fieldsInit, qualifiedObjectName, cogAlias))
-
-	return buffer.String()
 }
 
 func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
@@ -243,19 +203,24 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 	return buffer.String()
 }
 
-func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) string {
+func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) template.Argument {
 	argName := jenny.escapeVarName(tools.LowerCamelCase(arg.Name))
 
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		cogAlias := jenny.importCog()
 		qualifiedType := jenny.importType(referredBuilder.For.SelfRef)
 
-		return fmt.Sprintf(`%[1]s %[2]s.Builder[%[3]s]`, argName, cogAlias, qualifiedType)
+		return template.Argument{
+			Name:          argName,
+			Type:          qualifiedType,
+			ReferredAlias: cogAlias,
+		}
 	}
 
-	typeName := strings.Trim(formatType(arg.Type, jenny.typeImportMapper), "*")
-
-	return fmt.Sprintf("%s %s", argName, typeName)
+	return template.Argument{
+		Name: argName,
+		Type: strings.Trim(formatType(arg.Type, jenny.typeImportMapper), "*"),
+	}
 }
 
 func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string {
@@ -280,12 +245,12 @@ func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string 
 }`, fieldPath, emptyValue)
 }
 
-func (jenny *Builder) generateAssignment(context context.Builders, assignment ast.Assignment) string {
+func (jenny *Builder) generateAssignment(context context.Builders, assignment ast.Assignment) template.Assignment {
 	fieldPath := jenny.formatFieldPath(assignment.Path)
 	pathEnd := assignment.Path.Last()
 	valueType := pathEnd.Type
 
-	var pathInitSafeGuards []string
+	var initSafeGuards []string
 	for i, chunk := range assignment.Path {
 		if i == len(assignment.Path)-1 {
 			continue
@@ -297,27 +262,23 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 			chunk.Type.IsAny()
 		if nullable {
 			subPath := assignment.Path[:i+1]
-			pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(subPath))
+			initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(subPath))
 		}
 	}
 
-	assignmentSafeGuards := strings.Join(pathInitSafeGuards, "\n")
-	if assignmentSafeGuards != "" {
-		assignmentSafeGuards += "\n\n"
-	}
-
-	constraintsChecks := ""
+	constraints := make([]template.Constraint, 0)
 	if assignment.Value.Argument != nil {
 		argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
-		constraintsChecks = strings.Join(jenny.constraints(argName, assignment.Constraints), "\n")
-		if constraintsChecks != "" {
-			constraintsChecks += "\n\n"
-		}
+		constraints = append(jenny.constraints(argName, assignment.Constraints))
 	}
 
-	assignmentSetup, assignmentSource := jenny.formatAssignmentValue(context, assignment.Value, valueType)
-
-	return constraintsChecks + assignmentSafeGuards + assignmentSetup + jenny.formatAssignment(assignment, fieldPath, assignmentSource)
+	_, _ = jenny.formatAssignmentValue(context, assignment.Value, valueType)
+	return template.Assignment{
+		Path:           fieldPath,
+		InitSafeguards: initSafeGuards,
+		Constraints:    constraints,
+		Method:         assignment.Method,
+	}
 }
 
 func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (string, string) {
@@ -447,39 +408,31 @@ func (jenny *Builder) generateDefaultCall(option ast.Option) string {
 	return fmt.Sprintf("builder.%s(%s)", tools.UpperCamelCase(option.Name), strings.Join(args, ", "))
 }
 
-func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []string {
-	output := make([]string, 0, len(constraints))
+func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
+	output := make([]template.Constraint, 0, len(constraints))
 
 	for _, constraint := range constraints {
-		output = append(output, jenny.constraint(argumentName, constraint))
+		op, isString := jenny.constraintComparison(constraint)
+		output = append(output, template.Constraint{
+			Name:     argumentName,
+			Op:       op,
+			Arg:      constraint.Args[0],
+			IsString: isString,
+		})
 	}
 
 	return output
 }
 
-func (jenny *Builder) constraint(argumentName string, constraint ast.TypeConstraint) string {
-	var buffer strings.Builder
-
-	cogAlias := jenny.importCog()
-
-	buffer.WriteString(fmt.Sprintf("if !(%s) {\n", jenny.constraintComparison(argumentName, constraint)))
-	buffer.WriteString(fmt.Sprintf(`builder.errors["%[1]s"] = %[1]s.MakeBuildErrors("%[2]s", errors.New("value must be %[3]s %[4]v"))
-`, cogAlias, argumentName, constraint.Op, constraint.Args[0]))
-	buffer.WriteString("return builder\n")
-	buffer.WriteString("}\n")
-
-	return buffer.String()
-}
-
-func (jenny *Builder) constraintComparison(argumentName string, constraint ast.TypeConstraint) string {
+func (jenny *Builder) constraintComparison(constraint ast.TypeConstraint) (ast.Op, bool) {
 	if constraint.Op == ast.MinLengthOp {
-		return fmt.Sprintf("len([]rune(%[1]s)) >= %[2]v", argumentName, constraint.Args[0])
+		return ast.GreaterThanEqualOp, true
 	}
 	if constraint.Op == ast.MaxLengthOp {
-		return fmt.Sprintf("len([]rune(%[1]s)) <= %[2]v", argumentName, constraint.Args[0])
+		return ast.LessThanEqualOp, true
 	}
 
-	return fmt.Sprintf("%[1]s %[2]s %#[3]v", argumentName, constraint.Op, constraint.Args[0])
+	return constraint.Op, false
 }
 
 func (jenny *Builder) importCog() string {
