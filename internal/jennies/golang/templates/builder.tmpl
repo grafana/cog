@@ -1,0 +1,9 @@
+package {{ .Package }}
+
+{{- if eq (len .Imports) 0 }}
+import (
+{{- range $alias, $importPath := .Imports -}}
+    {{ $alias }} {{ $importPath }}
+{{- end }}
+)
+{{- end }}

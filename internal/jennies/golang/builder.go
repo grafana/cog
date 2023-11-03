@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"github.com/grafana/cog/internal/jennies/template"
 	"path/filepath"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 )
 
 type Builder struct {
-	imports          importMap
+	imports          template.ImportMap
 	typeImportMapper func(pkg string) string
 }
 
@@ -49,17 +50,19 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Builder) []byte {
 	var buffer strings.Builder
 
-	jenny.imports = newImportMap()
+	jenny.imports = template.NewImportMap()
+
+	err := templates.Lookup("builder.tmpl").Execute(&buffer, template.Tmpl{
+		Package:     builder.Package,
+		Imports:     jenny.imports,
+		BuilderName: builder.Name,
+	})
+
+	if err != nil {
+		return nil
+	}
 
 	builderSource := jenny.generateBuilderSource(context, builder)
-
-	// package declaration
-	buffer.WriteString(fmt.Sprintf("package %s\n\n", strings.ToLower(builder.Package)))
-
-	// write import statements
-	buffer.WriteString(jenny.imports.Format())
-	buffer.WriteString("\n\n")
-
 	// write the builder source code
 	buffer.WriteString(builderSource)
 
