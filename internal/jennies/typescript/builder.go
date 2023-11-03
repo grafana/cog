@@ -2,6 +2,7 @@ package typescript
 
 import (
 	"fmt"
+	"github.com/grafana/cog/internal/jennies/template"
 	"path/filepath"
 	"strings"
 
@@ -12,51 +13,7 @@ import (
 )
 
 type Builder struct {
-	imports importMap
-}
-
-type Tmpl struct {
-	BuilderName string
-	ObjectName  string
-	Imports     importMap
-	ImportAlias string
-	Options     []options
-	Constructor constructor
-}
-
-type constructor struct {
-	Args        []argument
-	Assignments []assignment
-}
-
-type options struct {
-	Name        string
-	Comments    []string
-	Args        []argument
-	Assignments []assignment
-}
-
-type argument struct {
-	Name          string
-	Type          string
-	ReferredAlias string
-	ReferredName  string
-}
-
-type assignment struct {
-	Path           string
-	InitSafeguards []string
-	Value          string
-	IsBuilder      bool
-	Method         ast.AssignmentMethod
-	Constraints    []constraint
-}
-
-type constraint struct {
-	Name     string
-	Op       ast.Op
-	Arg      any
-	IsString bool
+	imports template.ImportMap
 }
 
 func (jenny *Builder) JennyName() string {
@@ -86,18 +43,18 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
-	jenny.imports = newImportMap()
+	jenny.imports = template.NewImportMap()
 	importAlias := jenny.importType(builder.For.SelfRef)
 
 	constructorCode := jenny.generateConstructor(context, builder)
 
 	// Define options
-	opts := make([]options, len(builder.Options))
+	opts := make([]template.Option, len(builder.Options))
 	for i, o := range builder.Options {
 		opts[i] = jenny.generateOption(context, builder, o)
 	}
 
-	err := templates.Lookup("builder.tmpl").Execute(&buffer, Tmpl{
+	err := templates.Lookup("builder.tmpl").Execute(&buffer, template.Tmpl{
 		BuilderName: builder.Name,
 		ObjectName:  builder.For.Name,
 		Imports:     jenny.imports,
@@ -109,9 +66,9 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	return []byte(buffer.String()), err
 }
 
-func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) constructor {
-	var argsList []argument
-	var assignments []assignment
+func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) template.Constructor {
+	var argsList []template.Argument
+	var assignments []template.Assignment
 	for _, opt := range builder.Options {
 		if !opt.IsConstructorArg {
 			continue
@@ -126,15 +83,15 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 		assignments = append(assignments, jenny.generateAssignment(context, builder, init))
 	}
 
-	return constructor{
+	return template.Constructor{
 		Args:        argsList,
 		Assignments: assignments,
 	}
 }
 
-func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) options {
+func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) template.Option {
 	// Arguments list
-	argsList := make([]argument, 0, len(def.Args))
+	argsList := make([]template.Argument, 0, len(def.Args))
 	if len(def.Args) != 0 {
 		for _, arg := range def.Args {
 			argsList = append(argsList, jenny.generateArgument(context, builder, arg))
@@ -142,12 +99,12 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 	}
 
 	// Assignments
-	assignmentsList := make([]assignment, 0, len(def.Assignments))
+	assignmentsList := make([]template.Assignment, 0, len(def.Assignments))
 	for _, assign := range def.Assignments {
 		assignmentsList = append(assignmentsList, jenny.generateAssignment(context, builder, assign))
 	}
 
-	return options{
+	return template.Option{
 		Name:        def.Name,
 		Comments:    def.Comments,
 		Args:        argsList,
@@ -155,11 +112,11 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 	}
 }
 
-func (jenny *Builder) generateArgument(context context.Builders, builder ast.Builder, arg ast.Argument) argument {
+func (jenny *Builder) generateArgument(context context.Builders, builder ast.Builder, arg ast.Argument) template.Argument {
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For.SelfRef)
 
-		return argument{
+		return template.Argument{
 			Name:          arg.Name,
 			ReferredAlias: referredTypeAlias,
 			ReferredName:  referredBuilder.For.Name,
@@ -177,7 +134,7 @@ func (jenny *Builder) generateArgument(context context.Builders, builder ast.Bui
 		return pkg
 	})
 
-	return argument{Name: tools.LowerCamelCase(arg.Name), Type: typeName}
+	return template.Argument{Name: tools.LowerCamelCase(arg.Name), Type: typeName}
 }
 
 func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Builder, path ast.Path) string {
@@ -198,7 +155,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 		}`, fieldPath, emptyValue)
 }
 
-func (jenny *Builder) generateAssignment(context context.Builders, builder ast.Builder, assign ast.Assignment) assignment {
+func (jenny *Builder) generateAssignment(context context.Builders, builder ast.Builder, assign ast.Assignment) template.Assignment {
 	fieldPath := jenny.formatFieldPath(assign.Path)
 
 	var pathInitSafeGuards []string
@@ -226,7 +183,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 		pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
 	}
 
-	var constraints []constraint
+	var constraints []template.Constraint
 	isBuilder := false
 
 	if assign.Value.Argument != nil {
@@ -235,7 +192,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 		constraints = jenny.constraints(argName, assign.Constraints)
 	}
 
-	return assignment{
+	return template.Assignment{
 		Path:           fieldPath,
 		Method:         assign.Method,
 		InitSafeguards: pathInitSafeGuards,
@@ -274,12 +231,12 @@ func (jenny *Builder) formatEnvelopeAssignmentValue(value ast.AssignmentValue) s
 	return envelopeValue
 }
 
-func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []constraint {
-	output := make([]constraint, 0, len(constraints))
+func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
+	output := make([]template.Constraint, 0, len(constraints))
 
 	for _, c := range constraints {
 		op, isString := jenny.constraintComparison(c)
-		output = append(output, constraint{
+		output = append(output, template.Constraint{
 			Name:     argumentName,
 			Op:       op,
 			Arg:      c.Args[0],
