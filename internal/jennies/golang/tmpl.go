@@ -11,7 +11,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed veneers/*.tmpl
+//go:embed templates/*.tmpl
 //nolint:gochecknoglobals
 var veneersFS embed.FS
 
@@ -24,5 +24,5 @@ func init() {
 		"formatType":       formatType,
 		"trimPrefix":       strings.TrimPrefix,
 	})
-	templates = template.Must(base.ParseFS(veneersFS, "veneers/*.tmpl"))
+	templates = template.Must(base.ParseFS(veneersFS, "templates/*.tmpl"))
 }

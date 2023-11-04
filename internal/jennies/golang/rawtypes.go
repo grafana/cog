@@ -1,7 +1,6 @@
 package golang
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -63,13 +62,6 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 
 		buffer.Write(objectOutput)
 		buffer.WriteString("\n")
-
-		// Add JSON (un)marshaling shortcuts
-		jsonMarshal, err := jenny.jsonMarshalVeneer(object, packageMapper)
-		if err != nil {
-			return nil, err
-		}
-		buffer.WriteString(jsonMarshal)
 	}
 
 	importStatements := imports.Format()
@@ -139,54 +131,6 @@ func (jenny RawTypes) formatEnumDef(def ast.Object, packageMapper pkgMapper) str
 	buffer.WriteString(")\n")
 
 	return buffer.String()
-}
-
-func (jenny RawTypes) jsonMarshalVeneer(def ast.Object, packageMapper pkgMapper) (string, error) {
-	// the only case for which we need to render such veneer is for structs
-	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
-
-	// if the object isn't a struct: nothing to do.
-	if def.Type.Kind != ast.KindStruct {
-		return "", nil
-	}
-
-	// We know that a struct was generated from a disjunction if it has a "hint" that says so.
-	// There are only two types of disjunctions we support:
-	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
-	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
-	// 	  structs and these structs have a common "discriminator" field.
-
-	if _, ok := def.Type.Hints[ast.HintDisjunctionOfScalars]; ok {
-		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.go.tmpl", map[string]any{
-			"def":       def,
-			"pkgMapper": packageMapper,
-		})
-	}
-
-	if hintVal, ok := def.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs]; ok {
-		return jenny.renderVeneerTemplate("disjunction_of_refs.types.json_marshal.go.tmpl", map[string]any{
-			"def":       def,
-			"pkgMapper": packageMapper,
-			"hint":      hintVal,
-		})
-	}
-
-	// We didn't find a hint relevant to us: nothing do to.
-	return "", nil
-}
-
-func (jenny RawTypes) renderVeneerTemplate(templateFile string, data map[string]any) (string, error) {
-	tmpl := templates.Lookup(templateFile)
-	if tmpl == nil {
-		return "", fmt.Errorf("veneer template '%s' not found", templateFile)
-	}
-
-	buf := bytes.Buffer{}
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return "", fmt.Errorf("failed executing veneer template: %w", err)
-	}
-
-	return buf.String(), nil
 }
 
 func formatStructBody(def ast.StructType, packageMapper pkgMapper) string {

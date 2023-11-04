@@ -97,7 +97,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 		opts[i] = jenny.generateOption(context, builder, o)
 	}
 
-	err := templates.Lookup("builder.tmpl").Execute(&buffer, Tmpl{
+	err := templates.ExecuteTemplate(&buffer, "builder.tmpl", Tmpl{
 		BuilderName: builder.Name,
 		ObjectName:  builder.For.Name,
 		Imports:     jenny.imports,
