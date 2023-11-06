@@ -102,8 +102,9 @@ func (builder *%[2]sBuilder) Build() (*%[1]s, error) {
 `, qualifiedObjectName, builderName, cogAlias))
 
 	// Define options
-	for _, option := range builder.Options {
-		buffer.WriteString(jenny.generateOption(context, builder, option) + "\n")
+	options := make([]template.Option, len(builder.Options))
+	for i, option := range builder.Options {
+		options[i] = jenny.generateOption(context, builder, option)
 	}
 
 	// add calls to set default values
@@ -165,42 +166,27 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	return strings.Join(parts, ".")
 }
 
-func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) string {
-	var buffer strings.Builder
-
-	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
-	}
-
-	builderName := tools.UpperCamelCase(builder.Name)
-	optionName := tools.UpperCamelCase(def.Name)
-
+func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) template.Option {
 	// Arguments list
-	arguments := ""
+	argsList := make([]template.Argument, 0, len(def.Args))
 	if len(def.Args) != 0 {
-		argsList := make([]string, 0, len(def.Args))
 		for _, arg := range def.Args {
 			argsList = append(argsList, jenny.generateArgument(context, arg))
 		}
-
-		arguments = strings.Join(argsList, ", ")
 	}
 
 	// Assignments
-	assignmentsList := make([]string, 0, len(def.Assignments))
+	assignmentsList := make([]template.Assignment, 0, len(def.Assignments))
 	for _, assignment := range def.Assignments {
 		assignmentsList = append(assignmentsList, jenny.generateAssignment(context, assignment))
 	}
-	assignments := strings.Join(assignmentsList, "\n")
 
-	buffer.WriteString(fmt.Sprintf(`func (builder *%[1]sBuilder) %[2]s(%[3]s) *%[1]sBuilder {
-	%[4]s
-
-	return builder
-}
-`, builderName, optionName, arguments, assignments))
-
-	return buffer.String()
+	return template.Option{
+		Name:        tools.UpperCamelCase(def.Name),
+		Comments:    def.Comments,
+		Args:        argsList,
+		Assignments: assignmentsList,
+	}
 }
 
 func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) template.Argument {
