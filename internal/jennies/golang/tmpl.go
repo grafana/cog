@@ -2,8 +2,8 @@ package golang
 
 import (
 	"embed"
-	"html/template"
 	"strings"
+	"text/template"
 
 	"github.com/grafana/cog/internal/tools"
 )
