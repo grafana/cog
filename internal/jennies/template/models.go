@@ -2,6 +2,14 @@ package template
 
 import "github.com/grafana/cog/internal/ast"
 
+type ValueType string
+
+const (
+	ValueTypeConstant  = "constant"
+	ValueTypeAssigment = "assigment"
+	ValueTypeEnvelope  = "envelope"
+)
+
 type Tmpl struct {
 	Package     string
 	BuilderName string
@@ -36,7 +44,9 @@ type Assignment struct {
 	InitSafeguards []string
 	Value          string
 	IsBuilder      bool
+	IsNullable     bool
 	Method         ast.AssignmentMethod
+	ValueType      ValueType
 	Constraints    []Constraint
 }
 

@@ -2,7 +2,7 @@ package {{ .Package }}
 
 import (
     {{ .ImportAlias }} "github.com/grafana/cog/generated"
-{{- range $alias, $importPath := .Imports -}}
+{{ range $alias, $importPath := .Imports -}}
     {{ $alias }} {{ $importPath }}
 {{- end }}
 )
@@ -25,3 +25,49 @@ func New{{ .BuilderName }}Builder() *{{ .BuilderName }}Builder {
 
 	return builder
 }
+
+func (builder *{{ .BuilderName }}Builder) Build() (*{{ .ObjectName }}, error) {
+	var errs {{ .ImportAlias }}.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, {{ .ImportAlias }}.MakeBuildErrors("{{ .BuilderName }}", err)...)
+	}
+
+	if len(errs) != 0 {
+		return nil, errs
+	}
+
+	return builder.internal, nil
+}
+
+{{- range .Options }}
+    {{- range .Comments }}
+    // {{ . }}
+    {{- end }}
+
+func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args }}) *{{ $.BuilderName }}Builder {
+    {{- range .Assignments }}
+        {{- template "constraints" .Constraints }}
+        {{- range .InitSafeguards }}
+        {{- . }}
+        {{- end }}
+        {{- if eq .ValueType "constant" }}
+            {{ if eq .Method "direct" }}builder.internal.{{ .Path }} = {{ if ne .IsNullable }}&{{ end }}{{ .Value }}{{ end -}}
+            {{ if eq .Method "append" }}builder.internal.{{ .Path }} = append(builder.internal.{{ .Path }}, {{ if ne .IsNullable }}&{{ end }}{{ .Value }}){{ end -}}
+        {{- else if eq .ValueType "assigment" }}
+            {{- if .IsBuilder }}
+            resource, err := {{ .Path | lowerCamelCase }}.Build()
+            if err != nil {
+                builder.errors["{{ .Path }}"] = err.({{ $.ImportAlias }}.BuildErrors)
+                return builder
+            }
+            {{- end }}
+            {{ if eq .Method "direct" }}builder.internal.{{ .Path }} = {{ .Value }}{{ end -}}
+            {{ if eq .Method "append" }}builder.internal.{{ .Path }} = append(builder.internal.{{ .Path }}, {{ .Value }}){{ end -}}
+        {{- else if eq .ValueType "envelope" }}
+        {{- end }}
+        
+        return builder
+    {{- end }}
+}
+{{- end }}

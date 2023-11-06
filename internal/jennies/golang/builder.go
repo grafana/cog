@@ -2,13 +2,13 @@ package golang
 
 import (
 	"fmt"
-	"github.com/grafana/cog/internal/jennies/template"
 	"path/filepath"
 	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -58,54 +58,27 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 		ImportAlias: "cog",
 		BuilderName: tools.UpperCamelCase(builder.Name),
 		ObjectName:  builder.For.Name,
+		Constructor: jenny.generateConstructor(context, builder),
+		// TODO: Add arguments and assignments to constructor
+		Options: jenny.generateOptions(context, builder),
 	})
 
 	if err != nil {
+		fmt.Println(err)
 		return nil
 	}
 
-	builderSource := jenny.generateBuilderSource(context, builder)
+	builderSource := jenny.generateBuilderSource(builder)
 	// write the builder source code
 	buffer.WriteString(builderSource)
 
 	return []byte(buffer.String())
 }
 
-func (jenny *Builder) generateBuilderSource(context context.Builders, builder ast.Builder) string {
+func (jenny *Builder) generateBuilderSource(builder ast.Builder) string {
 	var buffer strings.Builder
 
 	builderName := tools.UpperCamelCase(builder.Name)
-
-	// import generated types
-	cogAlias := jenny.importCog()
-	qualifiedObjectName := jenny.importType(builder.For.SelfRef)
-
-	// Add a constructor for the builder
-	// TODO: Add arguments and assignments to constructor
-	_ = jenny.generateConstructor(context, builder)
-
-	// Allow builders to expose the resource they're building
-	buffer.WriteString(fmt.Sprintf(`
-func (builder *%[2]sBuilder) Build() (*%[1]s, error) {
-	var errs %[3]s.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, %[3]s.MakeBuildErrors("%[2]s", err)...)
-	}
-
-	if len(errs) != 0 {
-		return nil, errs
-	}
-
-	return builder.internal, nil
-}
-`, qualifiedObjectName, builderName, cogAlias))
-
-	// Define options
-	options := make([]template.Option, len(builder.Options))
-	for i, option := range builder.Options {
-		options[i] = jenny.generateOption(context, builder, option)
-	}
 
 	// add calls to set default values
 	buffer.WriteString("\n")
@@ -166,7 +139,16 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	return strings.Join(parts, ".")
 }
 
-func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) template.Option {
+func (jenny *Builder) generateOptions(context context.Builders, builder ast.Builder) []template.Option {
+	options := make([]template.Option, len(builder.Options))
+	for i, opt := range builder.Options {
+		options[i] = jenny.generateOption(context, opt)
+	}
+
+	return options
+}
+
+func (jenny *Builder) generateOption(context context.Builders, def ast.Option) template.Option {
 	// Arguments list
 	argsList := make([]template.Argument, 0, len(def.Args))
 	if len(def.Args) != 0 {
@@ -193,13 +175,12 @@ func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argumen
 	argName := jenny.escapeVarName(tools.LowerCamelCase(arg.Name))
 
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
-		cogAlias := jenny.importCog()
 		qualifiedType := jenny.importType(referredBuilder.For.SelfRef)
 
 		return template.Argument{
 			Name:          argName,
 			Type:          qualifiedType,
-			ReferredAlias: cogAlias,
+			ReferredAlias: "cog",
 		}
 	}
 
@@ -258,31 +239,38 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 		constraints = append(jenny.constraints(argName, assignment.Constraints))
 	}
 
-	_, _ = jenny.formatAssignmentValue(context, assignment.Value, valueType)
+	assigmentValueType, value := jenny.formatAssignmentValue(context, assignment.Value, valueType)
+	isBuilder := false
+	if assigmentValueType == template.ValueTypeAssigment {
+		_, isBuilder = context.BuilderForType(assignment.Value.Argument.Type)
+	}
 	return template.Assignment{
 		Path:           fieldPath,
 		InitSafeguards: initSafeGuards,
 		Constraints:    constraints,
 		Method:         assignment.Method,
+		Value:          value,
+		ValueType:      assigmentValueType,
+		IsBuilder:      isBuilder,
 	}
 }
 
-func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (string, string) {
+func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (template.ValueType, string) {
 	// constant value, not into a pointer type
 	if value.Constant != nil {
-		return jenny.formatConstantAssignmentValue(value, valueType)
+		return template.ValueTypeConstant, jenny.formatConstantAssignmentValue(value, valueType)
 	}
 
 	// envelope
 	if value.Envelope != nil {
-		return jenny.formatEnvelopeAssignmentValue(context, value)
+		return template.ValueTypeEnvelope, jenny.formatEnvelopeAssignmentValue(context, value)
 	}
 
 	// argument
-	return jenny.formatArgumentAssignmentValue(context, value, valueType)
+	return template.ValueTypeAssigment, jenny.formatArgumentAssignmentValue(context, value, valueType)
 }
 
-func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (string, string) {
+func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) string {
 	argName := jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
 
 	switch valueType.Kind {
@@ -293,21 +281,12 @@ func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, va
 	}
 
 	if _, found := context.BuilderForType(value.Argument.Type); found {
-		cogAlias := jenny.importCog()
 		maybeDereference := "*"
 		if valueType.Nullable {
 			maybeDereference = ""
 		}
 
-		resourceBuildSource := fmt.Sprintf(`resource, err := %[1]s.Build()
-if err != nil {
-	builder.errors["%[1]s"] = err.(%[2]s.BuildErrors)
-	return builder
-}
-
-`, argName, cogAlias)
-
-		return resourceBuildSource, fmt.Sprintf("%[1]sresource", maybeDereference)
+		return fmt.Sprintf("%[1]sresource", maybeDereference)
 	}
 
 	maybeAsPointer := ""
@@ -315,18 +294,16 @@ if err != nil {
 		maybeAsPointer = "&"
 	}
 
-	return "", maybeAsPointer + argName
+	return maybeAsPointer + argName
 }
 
-func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, value ast.AssignmentValue) (string, string) {
+func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, value ast.AssignmentValue) string {
 	envelope := value.Envelope
 	formattedType := formatType(envelope.Type, jenny.typeImportMapper)
 
-	var allSetup, allValues string
-
+	var allValues string
 	for _, item := range envelope.Values {
-		setup, val := jenny.formatAssignmentValue(context, item.Value, item.Path.Last().Type)
-		allSetup += setup
+		_, val := jenny.formatAssignmentValue(context, item.Value, item.Path.Last().Type)
 		allValues += fmt.Sprintf("%s: %s,\n", tools.UpperCamelCase(item.Path[0].Identifier), val)
 	}
 
@@ -334,21 +311,11 @@ func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, va
 	%[2]s
 }`, formattedType, allValues)
 
-	return allSetup, envelopeValue
+	return envelopeValue
 }
 
-func (jenny *Builder) formatConstantAssignmentValue(value ast.AssignmentValue, valueType ast.Type) (string, string) {
-	// constant value, not into a pointer type
-	if !valueType.Nullable {
-		return "", formatScalar(value.Constant)
-	}
-
-	// constant value, into a pointer type
-	// todo: find a better name for that temporary variable
-	tmpVarName := "val" + tools.UpperCamelCase(ast.TypeName(valueType))
-	tmpVarSource := fmt.Sprintf("%[1]s := %[2]s\n", tmpVarName, formatScalar(value.Constant))
-
-	return tmpVarSource, "&" + tmpVarName
+func (jenny *Builder) formatConstantAssignmentValue(value ast.AssignmentValue, valueType ast.Type) string {
+	return formatScalar(value.Constant)
 }
 
 func (jenny *Builder) formatAssignment(assignment ast.Assignment, fieldPath string, value string) string {
@@ -419,12 +386,6 @@ func (jenny *Builder) constraintComparison(constraint ast.TypeConstraint) (ast.O
 	}
 
 	return constraint.Op, false
-}
-
-func (jenny *Builder) importCog() string {
-	jenny.imports.Add("cog", "github.com/grafana/cog/generated")
-
-	return "cog"
 }
 
 // importType declares an import statement for the type definition of
