@@ -1,16 +1,14 @@
-func UnmarshalDataquery(raw []byte) (cogvariants.Dataquery, error) {
-	dataquery := {{ .object.Name|formatIdentifier }}{}
-
-	if err := json.Unmarshal(raw, &dataquery); err != nil {
-		return nil, err
-	}
-
-	return dataquery, nil
-}
-
 func VariantConfig() cogvariants.DataqueryConfig {
 	return cogvariants.DataqueryConfig{
-	    DataqueryUnmarshaler: UnmarshalDataquery,
+	    DataqueryUnmarshaler: func (raw []byte) (cogvariants.Dataquery, error) {
+            dataquery := {{ .object.Name|formatIdentifier }}{}
+
+            if err := json.Unmarshal(raw, &dataquery); err != nil {
+                return nil, err
+            }
+
+            return dataquery, nil
+       },
 	}
 }
 
