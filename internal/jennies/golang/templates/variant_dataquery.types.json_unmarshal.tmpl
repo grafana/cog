@@ -1,5 +1,6 @@
 func VariantConfig() cogvariants.DataqueryConfig {
 	return cogvariants.DataqueryConfig{
+		Identifier: "{{ .schema.Metadata.Identifier|toLower }}",
 	    DataqueryUnmarshaler: func (raw []byte) (cogvariants.Dataquery, error) {
             dataquery := {{ .object.Name|formatIdentifier }}{}
 

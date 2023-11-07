@@ -36,7 +36,7 @@ func (runtime *Runtime) RegisterDataqueryVariant(config cogvariants.DataqueryCon
 	runtime.dataqueryVariants[config.Identifier] = config
 }
 
-func (runtime *Runtime) UnmarshalDataqueryArray(raw []byte) ([]cogvariants.Dataquery, error) {
+func (runtime *Runtime) UnmarshalDataqueryArray(raw []byte, dataqueryTypeHint string) ([]cogvariants.Dataquery, error) {
 	rawDataqueries := []json.RawMessage{}
 	if err := json.Unmarshal(raw, &rawDataqueries); err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func (runtime *Runtime) UnmarshalDataqueryArray(raw []byte) ([]cogvariants.Dataq
 
 	dataqueries := make([]cogvariants.Dataquery, 0, len(rawDataqueries))
 	for _, rawDataquery := range rawDataqueries {
-		dataquery, err := runtime.UnmarshalDataquery(rawDataquery)
+		dataquery, err := runtime.UnmarshalDataquery(rawDataquery, dataqueryTypeHint)
 		if err != nil {
 			return nil, err
 		}
@@ -55,29 +55,33 @@ func (runtime *Runtime) UnmarshalDataqueryArray(raw []byte) ([]cogvariants.Dataq
 	return dataqueries, nil
 }
 
-func (runtime *Runtime) UnmarshalDataquery(raw []byte) (cogvariants.Dataquery, error) {
-	var empty cogvariants.Dataquery
+func (runtime *Runtime) UnmarshalDataquery(raw []byte, dataqueryTypeHint string) (cogvariants.Dataquery, error) {
+	// A hint tells us the dataquery type: let's use it.
+	if dataqueryTypeHint != "" {
+		config, found := runtime.dataqueryVariants[dataqueryTypeHint]
+		if found {
+			dataquery, err := config.DataqueryUnmarshaler(raw)
+			if err != nil {
+				return nil, err
+			}
 
-	for _, config := range runtime.dataqueryVariants {
-		if config.DataqueryUnmarshaler == nil {
-			continue
+			return dataquery.(cogvariants.Dataquery), nil
 		}
-
-		dataquery, err := config.DataqueryUnmarshaler(raw)
-		if err != nil {
-			continue
-		}
-
-		return dataquery.(cogvariants.Dataquery), nil
 	}
 
-	return empty, fmt.Errorf("could not unmarshal dataquery")
+	// We have no idea what type the dataquery is: use our `UnknownDataquery` bag to not loose data.
+	dataquery := cogvariants.UnknownDataquery{}
+	if err := json.Unmarshal(raw, &dataquery); err != nil {
+		return nil, err
+	}
+
+	return dataquery, nil
 }
 
-func UnmarshalDataqueryArray(raw []byte) ([]cogvariants.Dataquery, error) {
-	return NewRuntime().UnmarshalDataqueryArray(raw)
+func UnmarshalDataqueryArray(raw []byte, dataqueryTypeHint string) ([]cogvariants.Dataquery, error) {
+	return NewRuntime().UnmarshalDataqueryArray(raw, dataqueryTypeHint)
 }
 
-func UnmarshalDataquery(raw []byte) (cogvariants.Dataquery, error) {
-	return NewRuntime().UnmarshalDataquery(raw)
+func UnmarshalDataquery(raw []byte, dataqueryTypeHint string) (cogvariants.Dataquery, error) {
+	return NewRuntime().UnmarshalDataquery(raw, dataqueryTypeHint)
 }

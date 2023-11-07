@@ -18,3 +18,9 @@ type Dataquery interface {
 type Panelcfg interface {
 	ImplementsPanelcfgVariant()
 }
+
+type UnknownDataquery map[string]any
+
+func (unknown UnknownDataquery) ImplementsDataqueryVariant() {
+
+}

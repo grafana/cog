@@ -209,7 +209,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context context
 
 		switch variant {
 		case ast.SchemaVariantDataQuery:
-			source := jenny.renderUnmarshalDataqueryField(field)
+			source := jenny.renderUnmarshalDataqueryField(obj, field)
 			buffer.WriteString(source)
 		case ast.SchemaVariantPanel:
 			// TODO
@@ -235,24 +235,51 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context context
 `, tools.UpperCamelCase(obj.Name), buffer.String()), nil
 }
 
-func (jenny JSONMarshalling) renderUnmarshalDataqueryField(field ast.StructField) string {
+func (jenny JSONMarshalling) renderUnmarshalDataqueryField(parentStruct ast.Object, field ast.StructField) string {
+	// First: try to locate a field that would contain the type of datasource being used.
+	// We're looking for a field defined as a reference to the `DataSourceRef` type.
+	var hintField *ast.StructField
+	for i, candidate := range parentStruct.Type.AsStruct().Fields {
+		if candidate.Type.Kind != ast.KindRef {
+			continue
+		}
+		if candidate.Type.AsRef().ReferredType != "DataSourceRef" {
+			continue
+		}
+
+		hintField = &parentStruct.Type.AsStruct().Fields[i]
+	}
+
+	// then: unmarshalling boilerplate
+	hintValue := `dataqueryTypeHint := ""
+`
+
+	if hintField != nil {
+		hintValue += fmt.Sprintf(`if resource.%[1]s != nil && resource.%[1]s.Type != nil {
+dataqueryTypeHint = *resource.%[1]s.Type
+}
+`, tools.UpperCamelCase(hintField.Name))
+	}
+
 	if field.Type.Kind == ast.KindArray {
 		return fmt.Sprintf(`
-	%[2]s, err := cog.UnmarshalDataqueryArray(fields["%[2]s"])
+	%[3]s
+	%[2]s, err := cog.UnmarshalDataqueryArray(fields["%[2]s"], dataqueryTypeHint)
 	if err != nil {
 		return err
 	}
 	resource.%[1]s = %[2]s
-`, tools.UpperCamelCase(field.Name), field.Name)
+`, tools.UpperCamelCase(field.Name), field.Name, hintValue)
 	}
 
 	return fmt.Sprintf(`
-	%[2]s, err := cog.UnmarshalDataquery(fields["%[2]s"])
+	%[3]s
+	%[2]s, err := cog.UnmarshalDataquery(fields["%[2]s"], dataqueryTypeHint)
 	if err != nil {
 		return err
 	}
 	resource.%[1]s = %[2]s
-`, tools.UpperCamelCase(field.Name), field.Name)
+`, tools.UpperCamelCase(field.Name), field.Name, hintValue)
 }
 
 func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
