@@ -5,6 +5,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -18,11 +19,13 @@ var veneersFS embed.FS
 //nolint:gochecknoinits
 func init() {
 	base := template.New("golang")
-	base.Funcs(map[string]any{
-		"formatIdentifier": tools.UpperCamelCase,
-		"lowerCamelCase":   tools.LowerCamelCase,
-		"formatType":       formatType,
-		"trimPrefix":       strings.TrimPrefix,
-	})
+	base.
+		Funcs(sprig.FuncMap()).
+		Funcs(map[string]any{
+			"formatIdentifier": tools.UpperCamelCase,
+			"lowerCamelCase":   tools.LowerCamelCase,
+			"formatType":       formatType,
+			"trimPrefix":       strings.TrimPrefix,
+		})
 	templates = template.Must(base.ParseFS(veneersFS, "templates/*.tmpl", "templates/veneers/*.tmpl"))
 }

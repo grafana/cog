@@ -52,21 +52,25 @@ func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args
         {{- . }}
         {{- end }}
         {{- if eq .ValueType "constant" }}
-            {{ if eq .Method "direct" }}builder.internal.{{ .Path }} = {{ if ne .IsNullable }}&{{ end }}{{ .Value }}{{ end -}}
-            {{ if eq .Method "append" }}builder.internal.{{ .Path }} = append(builder.internal.{{ .Path }}, {{ if ne .IsNullable }}&{{ end }}{{ .Value }}){{ end -}}
+            {{- if .IsNullable }}
+                {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
+            {{- else }}
+                val{{ .Path }} := {{ .Value }}
+                {{- template "method" (dict "Method" .Method "Path" .Path "Value" `&val{{ .Path }}`) }}
+            {{- end }}
         {{- else if eq .ValueType "assigment" }}
             {{- if .IsBuilder }}
-            resource, err := {{ .Path | lowerCamelCase }}.Build()
+            resource, err := {{ .Path | lower }}.Build()
             if err != nil {
                 builder.errors["{{ .Path }}"] = err.({{ $.ImportAlias }}.BuildErrors)
                 return builder
             }
             {{- end }}
-            {{ if eq .Method "direct" }}builder.internal.{{ .Path }} = {{ .Value }}{{ end -}}
-            {{ if eq .Method "append" }}builder.internal.{{ .Path }} = append(builder.internal.{{ .Path }}, {{ .Value }}){{ end -}}
+            {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
         {{- else if eq .ValueType "envelope" }}
+            {{ .Value }}
         {{- end }}
-        
+
         return builder
     {{- end }}
 }
