@@ -52,7 +52,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 
 	jenny.imports = template.NewImportMap()
 
-	err := templates.Lookup("builder.tmpl").Execute(&buffer, template.Tmpl{
+	err := templates.ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
 		Package:     builder.Package,
 		Imports:     jenny.imports,
 		ImportAlias: "cog",
