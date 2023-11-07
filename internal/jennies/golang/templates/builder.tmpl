@@ -69,9 +69,9 @@ func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args
         {{- else if eq .ValueType "envelope" }}
             {{ .Value }}
         {{- end }}
-
-        return builder
     {{- end }}
+
+    return builder
 }
 {{- end }}
 
