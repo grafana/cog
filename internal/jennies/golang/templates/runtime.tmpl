@@ -85,3 +85,7 @@ func UnmarshalDataqueryArray(raw []byte, dataqueryTypeHint string) ([]cogvariant
 func UnmarshalDataquery(raw []byte, dataqueryTypeHint string) (cogvariants.Dataquery, error) {
 	return NewRuntime().UnmarshalDataquery(raw, dataqueryTypeHint)
 }
+
+func ConfigForPanelcfgVariant(identifier string) (cogvariants.PanelcfgConfig, bool) {
+	return NewRuntime().ConfigForPanelcfgVariant(identifier)
+}
