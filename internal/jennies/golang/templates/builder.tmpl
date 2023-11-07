@@ -39,17 +39,16 @@ func (builder *{{ .BuilderName }}Builder) Build() (*{{ .ObjectName }}, error) {
 
 	return builder.internal, nil
 }
-
 {{- range .Options }}
-    {{- range .Comments }}
-    // {{ . }}
-    {{- end }}
 
+{{ range .Comments -}}
+// {{ . }}
+{{- end }}
 func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args }}) *{{ $.BuilderName }}Builder {
     {{- range .Assignments }}
         {{- template "constraints" .Constraints }}
         {{- range .InitSafeguards }}
-        {{- . }}
+        {{ . }}
         {{- end }}
         {{- if eq .ValueType "constant" }}
             {{- if .IsNullable }}
