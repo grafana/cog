@@ -60,37 +60,29 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 		ObjectName:  builder.For.Name,
 		Constructor: jenny.generateConstructor(context, builder),
 		// TODO: Add arguments and assignments to constructor
-		Options: jenny.generateOptions(context, builder),
+		Options:        jenny.generateOptions(context, builder),
+		DefaultBuilder: jenny.genDefaultBuilder(builder),
 	})
 
 	if err != nil {
-		fmt.Println(err)
 		return nil
 	}
-
-	builderSource := jenny.generateBuilderSource(builder)
-	// write the builder source code
-	buffer.WriteString(builderSource)
 
 	return []byte(buffer.String())
 }
 
-func (jenny *Builder) generateBuilderSource(builder ast.Builder) string {
-	var buffer strings.Builder
-
-	builderName := tools.UpperCamelCase(builder.Name)
-
-	// add calls to set default values
-	buffer.WriteString("\n")
-	buffer.WriteString(fmt.Sprintf("func (builder *%[1]sBuilder) applyDefaults() {\n", builderName))
+func (jenny *Builder) genDefaultBuilder(builder ast.Builder) template.DefaultBuilder {
+	arguments := make([]template.Argument, 0)
 	for _, opt := range builder.Options {
 		if opt.Default != nil {
-			buffer.WriteString(jenny.generateDefaultCall(opt) + "\n")
+			arguments = append(arguments, jenny.generateDefaultCall(opt)...)
 		}
 	}
-	buffer.WriteString("}\n")
 
-	return buffer.String()
+	return template.DefaultBuilder{
+		Name: tools.UpperCamelCase(builder.Name),
+		Args: arguments,
+	}
 }
 
 func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) template.Constructor {
@@ -352,13 +344,16 @@ func (jenny *Builder) escapeVarName(varName string) string {
 	return varName
 }
 
-func (jenny *Builder) generateDefaultCall(option ast.Option) string {
-	args := make([]string, 0, len(option.Default.ArgsValues))
+func (jenny *Builder) generateDefaultCall(option ast.Option) []template.Argument {
+	args := make([]template.Argument, 0, len(option.Default.ArgsValues))
 	for _, arg := range option.Default.ArgsValues {
-		args = append(args, formatScalar(arg))
+		args = append(args, template.Argument{
+			Name: tools.UpperCamelCase(option.Name),
+			Type: formatScalar(arg),
+		})
 	}
 
-	return fmt.Sprintf("builder.%s(%s)", tools.UpperCamelCase(option.Name), strings.Join(args, ", "))
+	return args
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
