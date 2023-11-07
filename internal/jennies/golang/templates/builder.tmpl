@@ -55,7 +55,7 @@ func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args
                 {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
             {{- else }}
                 val{{ .Path }} := {{ .Value }}
-                {{- template "method" (dict "Method" .Method "Path" .Path "Value" `&val{{ .Path }}`) }}
+                {{- template "method" (dict "Method" .Method "Path" .Path "Value" (print "&val" .Path)) }}
             {{- end }}
         {{- else if eq .ValueType "assigment" }}
             {{- if .IsBuilder }}
