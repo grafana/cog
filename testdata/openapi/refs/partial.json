@@ -1,0 +1,9 @@
+{
+    "type": "object",
+    "properties": {
+      "id": {
+        "description": "An identifier",
+        "type": "string"
+      }
+    }
+}
