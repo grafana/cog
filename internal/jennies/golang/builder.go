@@ -488,7 +488,7 @@ func (jenny *Builder) constraintComparison(argumentName string, constraint ast.T
 }
 
 func (jenny *Builder) importCog() string {
-	return jenny.imports.Add("cog", "github.com/grafana/cog/generated")
+	return jenny.imports.Add("cog", "github.com/grafana/cog/generated/cog")
 }
 
 // importType declares an import statement for the type definition of
