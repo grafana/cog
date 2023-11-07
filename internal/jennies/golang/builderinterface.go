@@ -48,7 +48,8 @@ func (err *BuildError) Error() string {
 }
 
 func MakeBuildErrors(rootPath string, err error) BuildErrors {
-	if buildErrs, ok := err.(BuildErrors); ok {
+	var buildErrs BuildErrors
+	if errors.As(err, &buildErrs) {
 		for _, buildErr := range buildErrs {
 			buildErr.Path = rootPath + "." + buildErr.Path
 		}
@@ -56,7 +57,8 @@ func MakeBuildErrors(rootPath string, err error) BuildErrors {
 		return buildErrs
 	}
 	
-	if buildErr, ok := err.(*BuildError); ok {
+	var buildErr *BuildError
+	if errors.As(err, &buildErr) {
 		return BuildErrors{buildErr}
 	}
 
