@@ -75,3 +75,9 @@ func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args
     {{- end }}
 }
 {{- end }}
+
+func (builder *{{ .DefaultBuilder.Name }}Builder) applyDefaults() {
+    {{- range .DefaultBuilder.Args }}
+    builder.{{ .Name }}({{ .Type }})
+    {{- end }}
+}

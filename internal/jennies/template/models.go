@@ -11,13 +11,14 @@ const (
 )
 
 type Tmpl struct {
-	Package     string
-	BuilderName string
-	ObjectName  string
-	Imports     ImportMap
-	ImportAlias string
-	Options     []Option
-	Constructor Constructor
+	Package        string
+	BuilderName    string
+	ObjectName     string
+	Imports        ImportMap
+	ImportAlias    string
+	Options        []Option
+	Constructor    Constructor
+	DefaultBuilder DefaultBuilder
 }
 
 type Constructor struct {
@@ -55,4 +56,9 @@ type Constraint struct {
 	Op       ast.Op
 	Arg      any
 	IsString bool
+}
+
+type DefaultBuilder struct {
+	Name string
+	Args []Argument
 }
