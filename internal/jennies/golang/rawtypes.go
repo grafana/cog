@@ -49,9 +49,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 			return ""
 		}
 
-		imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
-
-		return pkg
+		return imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
 	}
 
 	for _, object := range schema.Objects {
@@ -154,13 +152,6 @@ func formatField(def ast.StructField, packageMapper pkgMapper) string {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	// ToDo: this doesn't follow references to other types like the builder jenny does
-	/*
-		if def.Type.Default != nil {
-			buffer.WriteString(fmt.Sprintf("// Default: %#v\n", def.Type.Default))
-		}
-	*/
-
 	jsonOmitEmpty := ""
 	if !def.Required {
 		jsonOmitEmpty = ",omitempty"
@@ -183,7 +174,7 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 	}
 
 	if def.Kind == ast.KindComposableSlot {
-		return variantInterface(string(def.AsComposableSlot().Variant))
+		return variantInterface(string(def.AsComposableSlot().Variant), packageMapper)
 	}
 
 	if def.Kind == ast.KindArray {
@@ -225,10 +216,10 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 	return "unknown"
 }
 
-func variantInterface(variant string) string {
-	return fmt.Sprintf(`interface {
-	Implements%sVariant()
-}`, tools.UpperCamelCase(variant))
+func variantInterface(variant string, packageMapper pkgMapper) string {
+	referredPkg := packageMapper("cog/variants")
+
+	return fmt.Sprintf("%s.%s", referredPkg, tools.UpperCamelCase(variant))
 }
 
 func formatArray(def ast.ArrayType, packageMapper pkgMapper) string {

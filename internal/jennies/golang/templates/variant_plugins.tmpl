@@ -1,0 +1,15 @@
+package plugins
+
+{{ .imports }}
+
+func RegisterDefaultPlugins() {
+	runtime := cog.NewRuntime()
+
+{{- range $schema := index .init_map "panelcfg" }}
+	runtime.RegisterPanelcfgVariant({{ $schema.Package }}.VariantConfig())
+{{- end }}
+
+{{- range $schema := index .init_map "dataquery" }}
+	runtime.RegisterDataqueryVariant({{ $schema.Package }}.VariantConfig())
+{{- end }}
+}

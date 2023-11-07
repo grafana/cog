@@ -11,8 +11,11 @@ func newImportMap() importMap {
 	return make(map[string]string)
 }
 
-func (im importMap) Add(alias string, importPath string) {
-	im[alias] = importPath
+func (im importMap) Add(alias string, importPath string) string {
+	sanitizedAlias := strings.ReplaceAll(alias, "/", "")
+	im[sanitizedAlias] = importPath
+
+	return sanitizedAlias
 }
 
 func (im importMap) Format() string {

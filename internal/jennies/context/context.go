@@ -24,6 +24,27 @@ func (context *Builders) RefToComposableSlot(t ast.Type) (ast.Type, bool) {
 	return referredObj.Type, true
 }
 
+func (context *Builders) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {
+	if def.Kind == ast.KindComposableSlot {
+		return def, true
+	}
+
+	if def.Kind == ast.KindArray {
+		return context.ResolveToComposableSlot(def.AsArray().ValueType)
+	}
+
+	if def.Kind == ast.KindRef {
+		referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		if !found {
+			return ast.Type{}, false
+		}
+
+		return context.ResolveToComposableSlot(referredObj.Type)
+	}
+
+	return ast.Type{}, false
+}
+
 func (context *Builders) BuilderForType(t ast.Type) (ast.Builder, bool) {
 	if t.Kind != ast.KindRef {
 		return ast.Builder{}, false

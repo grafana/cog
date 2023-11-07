@@ -1,0 +1,31 @@
+{{- if .hasOptions }}
+func UnmarshalOptions(raw []byte) (any, error) {
+	options := Options{}
+
+	if err := json.Unmarshal(raw, &options); err != nil {
+		return nil, err
+	}
+
+	return options, nil
+}
+{{- end }}
+
+{{- if .hasFieldConfig }}
+func UnmarshalFieldConfig(raw []byte) (any, error) {
+	fieldConfig := FieldConfig{}
+
+	if err := json.Unmarshal(raw, &fieldConfig); err != nil {
+		return nil, err
+	}
+
+	return fieldConfig, nil
+}
+{{- end }}
+
+func VariantConfig() cogvariants.PanelcfgConfig {
+	return cogvariants.PanelcfgConfig{
+	    {{ if .hasOptions }}OptionsUnmarshaler: UnmarshalOptions,{{ end }}
+	    {{ if .hasFieldConfig }}FieldConfigUnmarshaler: UnmarshalFieldConfig,{{ end }}
+	}
+}
+

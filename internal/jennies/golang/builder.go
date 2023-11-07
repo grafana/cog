@@ -29,9 +29,7 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 				return ""
 			}
 
-			jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
-
-			return pkg
+			return jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
 		}
 
 		output := jenny.generateBuilder(context, builder)
@@ -77,7 +75,7 @@ func (jenny *Builder) generateBuilderSource(context context.Builders, builder as
 
 	buildObjectSignature := qualifiedObjectName
 	if builder.For.Type.ImplementsVariant() {
-		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant())
+		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant(), jenny.typeImportMapper)
 	}
 
 	// just to make explicit that this builder implements the generic Cog builder interface
@@ -248,7 +246,7 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) string {
 	argName := jenny.escapeVarName(tools.LowerCamelCase(arg.Name))
 
-	if composableSlot, isRefToComposable := context.RefToComposableSlot(arg.Type); isRefToComposable {
+	if composableSlot, ok := context.ResolveToComposableSlot(arg.Type); ok {
 		cogAlias := jenny.importCog()
 		qualifiedType := formatType(composableSlot, jenny.typeImportMapper)
 
@@ -360,8 +358,8 @@ func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, va
 	}
 
 	_, hasBuilder := context.BuilderForType(value.Argument.Type)
-	_, isRefToComposable := context.RefToComposableSlot(value.Argument.Type)
-	if hasBuilder || isRefToComposable {
+	_, resolvesToComposableSlot := context.ResolveToComposableSlot(value.Argument.Type)
+	if hasBuilder || resolvesToComposableSlot {
 		cogAlias := jenny.importCog()
 
 		resourceBuildSource := fmt.Sprintf(`resource, err := %[1]s.Build()
@@ -490,9 +488,7 @@ func (jenny *Builder) constraintComparison(argumentName string, constraint ast.T
 }
 
 func (jenny *Builder) importCog() string {
-	jenny.imports.Add("cog", "github.com/grafana/cog/generated")
-
-	return "cog"
+	return jenny.imports.Add("cog", "github.com/grafana/cog/generated")
 }
 
 // importType declares an import statement for the type definition of
