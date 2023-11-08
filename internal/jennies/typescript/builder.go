@@ -44,15 +44,6 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	var buffer strings.Builder
 
 	jenny.imports = template.NewImportMap()
-	importAlias := jenny.importType(builder.For.SelfRef)
-
-	constructorCode := jenny.generateConstructor(context, builder)
-
-	// Define options
-	opts := make([]template.Option, len(builder.Options))
-	for i, o := range builder.Options {
-		opts[i] = jenny.generateOption(context, builder, o)
-	}
 
 	err := templates.
 		Funcs(map[string]any{
@@ -65,9 +56,11 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 			BuilderName: builder.Name,
 			ObjectName:  builder.For.Name,
 			Imports:     jenny.imports,
-			ImportAlias: importAlias,
-			Options:     opts,
-			Constructor: constructorCode,
+			ImportAlias: jenny.importType(builder.For.SelfRef),
+			Constructor: jenny.generateConstructor(context, builder),
+			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
+				return jenny.generateOption(context, builder, opt)
+			}),
 		})
 
 	return []byte(buffer.String()), err
@@ -98,22 +91,20 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) template.Option {
 	// Arguments list
-	argsList := make([]template.Argument, 0, len(def.Args))
-	for _, arg := range def.Args {
-		argsList = append(argsList, jenny.generateArgument(context, builder, arg))
-	}
+	arguments := tools.Map(def.Args, func(arg ast.Argument) template.Argument {
+		return jenny.generateArgument(context, builder, arg)
+	})
 
 	// Assignments
-	assignmentsList := make([]template.Assignment, 0, len(def.Assignments))
-	for _, assign := range def.Assignments {
-		assignmentsList = append(assignmentsList, jenny.generateAssignment(builder, assign))
-	}
+	assignments := tools.Map(def.Assignments, func(assignment ast.Assignment) template.Assignment {
+		return jenny.generateAssignment(builder, assignment)
+	})
 
 	return template.Option{
 		Name:        def.Name,
 		Comments:    def.Comments,
-		Args:        argsList,
-		Assignments: assignmentsList,
+		Args:        arguments,
+		Assignments: assignments,
 	}
 }
 
