@@ -236,7 +236,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 		constraints = append(jenny.constraints(argName, assignment.Constraints))
 	}
 
-	assigmentValueType, value := jenny.formatAssignmentValue(context, assignment.Value, valueType)
+	assigmentValueType, value := jenny.formatAssignmentValue(context, assignment.Value)
 	isBuilder := false
 	if assigmentValueType == template.ValueTypeAssigment {
 		_, isBuilder = context.BuilderForType(assignment.Value.Argument.Type)
@@ -254,7 +254,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 	}
 }
 
-func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (template.ValueType, string) {
+func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.AssignmentValue) (template.ValueType, string) {
 	// constant value, not into a pointer type
 	if value.Constant != nil {
 		return template.ValueTypeConstant, formatScalar(value.Constant)
@@ -275,7 +275,7 @@ func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, va
 
 	var allValues string
 	for _, item := range envelope.Values {
-		_, val := jenny.formatAssignmentValue(context, item.Value, item.Path.Last().Type)
+		_, val := jenny.formatAssignmentValue(context, item.Value)
 		allValues += fmt.Sprintf("%s: %s,\n", tools.UpperCamelCase(item.Path[0].Identifier), val)
 	}
 
