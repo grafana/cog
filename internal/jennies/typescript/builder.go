@@ -2,13 +2,13 @@ package typescript
 
 import (
 	"fmt"
-	"github.com/grafana/cog/internal/jennies/template"
 	"path/filepath"
 	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 )
 

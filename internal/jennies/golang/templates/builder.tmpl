@@ -1,24 +1,23 @@
 package {{ .Package }}
 
 import (
-    {{ .ImportAlias }} "github.com/grafana/cog/generated"
-{{ range $alias, $importPath := .Imports -}}
-    {{ $alias }} {{ $importPath }}
+{{ range $alias, $importPath := .Imports }}
+    {{ $alias }} "{{ $importPath }}"
 {{- end }}
 )
 
-var _ {{ .ImportAlias }}.Builder[{{ .ObjectName }}] = (*{{ .ObjectName }}Builder)(nil)
+var _ cog.Builder[{{ .ObjectName }}] = (*{{ .ObjectName }}Builder)(nil)
 
 type {{ .BuilderName }}Builder struct {
     internal *{{ .BuilderName }}
-    errors map[string]{{ .ImportAlias }}.BuildErrors
+    errors map[string]cog.BuildErrors
 }
 
 func New{{ .BuilderName }}Builder() *{{ .BuilderName }}Builder {
 	resource := &{{ .BuilderName }}{}
 	builder := &{{ .BuilderName }}Builder{
 		internal: resource,
-		errors: make(map[string]{{ .ImportAlias }}.BuildErrors),
+		errors: make(map[string]cog.BuildErrors),
 	}
 
 	builder.applyDefaults()
@@ -27,10 +26,10 @@ func New{{ .BuilderName }}Builder() *{{ .BuilderName }}Builder {
 }
 
 func (builder *{{ .BuilderName }}Builder) Build() ({{ .ObjectName }}, error) {
-	var errs {{ .ImportAlias }}.BuildErrors
+	var errs cog.BuildErrors
 
 	for _, err := range builder.errors {
-		errs = append(errs, {{ .ImportAlias }}.MakeBuildErrors("{{ .BuilderName }}", err)...)
+		errs = append(errs, cog.MakeBuildErrors("{{ .BuilderName }}", err)...)
 	}
 
 	if len(errs) != 0 {
@@ -63,7 +62,7 @@ func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args
             {{- if .IsBuilder }}
             resource, err := {{ .Value }}.Build()
             if err != nil {
-                builder.errors["{{ .Path }}"] = err.({{ $.ImportAlias }}.BuildErrors)
+                builder.errors["{{ .Path }}"] = err.(cog.BuildErrors)
                 return builder
             }
             {{- $value = maybeAsPointer .IntoNullable "resource" }}
