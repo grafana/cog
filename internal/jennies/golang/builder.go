@@ -53,7 +53,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	jenny.imports = template.NewImportMap()
 	jenny.imports.Add("cog", "github.com/grafana/cog/generated")
 
-	fullObjectName := builder.For.Name
+	fullObjectName := tools.UpperCamelCase(builder.For.Name)
 	if builder.For.SelfRef.ReferredPkg != builder.Package {
 		fullObjectName = builder.For.SelfRef.ReferredPkg + "." + fullObjectName
 	}
@@ -67,7 +67,6 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 		Options:        jenny.generateOptions(context, builder),
 		DefaultBuilder: jenny.genDefaultBuilder(builder),
 	})
-
 	if err != nil {
 		return nil
 	}
@@ -168,7 +167,7 @@ func (jenny *Builder) generateOption(context context.Builders, def ast.Option) t
 }
 
 func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) template.Argument {
-	argName := jenny.escapeVarName(tools.LowerCamelCase(arg.Name))
+	argName := escapeVarName(tools.LowerCamelCase(arg.Name))
 
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		qualifiedType := jenny.importType(referredBuilder.For.SelfRef)
@@ -231,58 +230,21 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 
 	constraints := make([]template.Constraint, 0)
 	if assignment.Value.Argument != nil {
-		argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
+		argName := escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
 		constraints = append(constraints, jenny.constraints(argName, assignment.Constraints)...)
 	}
 
-	assigmentValueType, value := jenny.formatAssignmentValue(context, assignment.Value)
-	isBuilder := false
-	if assigmentValueType == template.ValueTypeAssigment {
-		_, isBuilder = context.BuilderForType(assignment.Value.Argument.Type)
-	}
-
 	return template.Assignment{
+		Context:      context,
+		ImportMapper: jenny.typeImportMapper,
+
 		Path:           fieldPath,
 		InitSafeguards: initSafeGuards,
 		Constraints:    constraints,
 		Method:         assignment.Method,
-		Value:          value,
-		ValueType:      assigmentValueType,
-		IsBuilder:      isBuilder,
+		Value:          assignment.Value,
 		IntoNullable:   valueType.Nullable && valueType.Kind != ast.KindArray,
 	}
-}
-
-func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.AssignmentValue) (template.ValueType, string) {
-	// constant value, not into a pointer type
-	if value.Constant != nil {
-		return template.ValueTypeConstant, formatScalar(value.Constant)
-	}
-
-	// envelope
-	if value.Envelope != nil {
-		return template.ValueTypeEnvelope, jenny.formatEnvelopeAssignmentValue(context, value)
-	}
-
-	// argument
-	return template.ValueTypeAssigment, jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
-}
-
-func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, value ast.AssignmentValue) string {
-	envelope := value.Envelope
-	formattedType := formatType(envelope.Type, jenny.typeImportMapper)
-
-	var allValues string
-	for _, item := range envelope.Values {
-		_, val := jenny.formatAssignmentValue(context, item.Value)
-		allValues += fmt.Sprintf("%s: %s,\n", tools.UpperCamelCase(item.Path[0].Identifier), val)
-	}
-
-	envelopeValue := fmt.Sprintf(`%[1]s{
-	%[2]s
-}`, formattedType, allValues)
-
-	return envelopeValue
 }
 
 func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
@@ -301,14 +263,6 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	default:
 		return "unknown"
 	}
-}
-
-func (jenny *Builder) escapeVarName(varName string) string {
-	if isReservedGoKeyword(varName) {
-		return varName + "Arg"
-	}
-
-	return varName
 }
 
 func (jenny *Builder) generateDefaultCall(option ast.Option) []template.Argument {
@@ -360,6 +314,14 @@ func (jenny *Builder) importType(typeRef ast.RefType) string {
 	}
 
 	return fmt.Sprintf("%s.%s", pkg, typeName)
+}
+
+func escapeVarName(varName string) string {
+	if isReservedGoKeyword(varName) {
+		return varName + "Arg"
+	}
+
+	return varName
 }
 
 func isReservedGoKeyword(input string) bool {

@@ -196,9 +196,9 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 		Path:           fieldPath,
 		Method:         assign.Method,
 		InitSafeguards: pathInitSafeGuards,
-		Value:          jenny.formatAssignmentValue(assign.Value),
-		IsBuilder:      isBuilder,
-		Constraints:    constraints,
+		//Value:          jenny.formatAssignmentValue(assign.Value),
+		IsBuilder:   isBuilder,
+		Constraints: constraints,
 	}
 }
 

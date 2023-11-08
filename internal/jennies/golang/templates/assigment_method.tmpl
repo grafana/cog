@@ -1,4 +1,0 @@
-{{- define "method" }}
-    {{ if eq .Method "direct" }}builder.internal.{{ .Path }} = {{ .Value }}{{ end -}}
-    {{ if eq .Method "append" }}builder.internal.{{ .Path }} = append(builder.internal.{{ .Path }}, {{ .Value }}){{ end -}}
-{{- end }}

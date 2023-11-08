@@ -3,28 +3,69 @@
     {{- range .InitSafeguards }}
     {{ . }}
     {{- end }}
-    {{- if eq .ValueType "constant" }}
-        {{- if .IntoNullable }}
-            val{{ .Path }} := {{ .Value }}
-            {{- template "method" (dict "Method" .Method "Path" .Path "Value" (print "&val" .Path)) }}
-        {{- else }}
-            {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
-        {{- end }}
-    {{- else if eq .ValueType "assigment" }}
-        {{- $value := maybeAsPointer .IntoNullable .Value }}
 
-        {{- if .IsBuilder }}
-        resource, err := {{ .Value }}.Build()
+    {{- template "assignment_setup" (dict "Assignment" . "Value" .Value) -}}
+
+    {{- $value := include "assignment_value" (dict "Assignment" . "Value" .Value) -}}
+
+    {{- template "assignment_method" (dict "Method" $.Method "Path" $.Path "Value" $value) }}
+{{- end }}
+
+{{- define "assignment_value" }}
+    {{- if not (eq .Value.Constant nil) }}
+        {{- if .Assignment.IntoNullable }}
+            {{- print "&val" .Assignment.Path }}
+        {{- else }}
+            {{- formatScalar .Value.Constant }}
+        {{- end }}
+    {{- end }}
+    {{- with .Value.Argument }}
+        {{- $argName := formatArgName .Name }}
+
+        {{- if $.Assignment.HasBuilder .Type }}
+        {{- $argName = (print $argName "Resource") }}
+        {{- end }}
+
+        {{- maybeAsPointer $.Assignment.IntoNullable $argName }}
+    {{- end }}
+    {{- with .Value.Envelope }}
+        {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+    {{- end }}
+{{- end }}
+
+{{- define "assignment_setup" }}
+    {{- if not (eq .Value.Constant nil) }}
+        {{- if .Assignment.IntoNullable }}
+            val{{ .Assignment.Path }} := {{ formatScalar .Value.Constant }}
+        {{- end }}
+    {{- end }}
+    {{- with .Value.Argument }}
+        {{- if $.Assignment.HasBuilder .Type }}
+        {{ formatArgName .Name}}Resource, err := {{ formatArgName .Name}}.Build()
         if err != nil {
-            builder.errors["{{ .Path }}"] = err.(cog.BuildErrors)
+            builder.errors["{{ $.Assignment.Path }}"] = err.(cog.BuildErrors)
             return builder
         }
-        {{- $value = maybeAsPointer .IntoNullable "resource" }}
-        {{- template "method" (dict "Method" .Method "Path" .Path "Value" $value) }}
-        {{- else }}
-        {{- template "method" (dict "Method" .Method "Path" .Path "Value" $value) }}
         {{- end }}
-    {{- else if eq .ValueType "envelope" }}
-        {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
     {{- end }}
+    {{- with .Value.Envelope }}
+        {{- range .Values }}
+        {{- template "assignment_setup" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- define "value_envelope" }}
+    {{- formatType .Envelope.Type .Assignment.ImportMapper }}{
+        {{- range .Envelope.Values }}
+        {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{- $value = maybeAsPointer (.Path.Last.Type.Nullable) $value }}
+        {{ (index .Path 0).Identifier | formatIdentifier }}: {{ $value }},
+        {{- end }}
+    }
+{{- end }}
+
+{{- define "assignment_method" }}
+    {{ if eq .Method "direct" }}builder.internal.{{ .Path }} = {{ .Value }}{{ end -}}
+    {{ if eq .Method "append" }}builder.internal.{{ .Path }} = append(builder.internal.{{ .Path }}, {{ .Value }}){{ end -}}
 {{- end }}
