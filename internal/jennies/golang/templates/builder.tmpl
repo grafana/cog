@@ -26,7 +26,7 @@ func New{{ .BuilderName }}Builder() *{{ .BuilderName }}Builder {
 	return builder
 }
 
-func (builder *{{ .BuilderName }}Builder) Build() (*{{ .ObjectName }}, error) {
+func (builder *{{ .BuilderName }}Builder) Build() ({{ .ObjectName }}, error) {
 	var errs {{ .ImportAlias }}.BuildErrors
 
 	for _, err := range builder.errors {
@@ -34,10 +34,10 @@ func (builder *{{ .BuilderName }}Builder) Build() (*{{ .ObjectName }}, error) {
 	}
 
 	if len(errs) != 0 {
-		return nil, errs
+		return {{ .ObjectName }}{}, errs
 	}
 
-	return builder.internal, nil
+	return *builder.internal, nil
 }
 {{- range .Options }}
 
@@ -51,23 +51,28 @@ func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args
         {{ . }}
         {{- end }}
         {{- if eq .ValueType "constant" }}
-            {{- if .IsNullable }}
-                {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
-            {{- else }}
+            {{- if .IntoNullable }}
                 val{{ .Path }} := {{ .Value }}
                 {{- template "method" (dict "Method" .Method "Path" .Path "Value" (print "&val" .Path)) }}
+            {{- else }}
+                {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
             {{- end }}
         {{- else if eq .ValueType "assigment" }}
+            {{- $value := maybeAsPointer .IntoNullable .Value }}
+
             {{- if .IsBuilder }}
-            resource, err := {{ .Path | lower }}.Build()
+            resource, err := {{ .Value }}.Build()
             if err != nil {
                 builder.errors["{{ .Path }}"] = err.({{ $.ImportAlias }}.BuildErrors)
                 return builder
             }
+            {{- $value = maybeAsPointer .IntoNullable "resource" }}
+            {{- template "method" (dict "Method" .Method "Path" .Path "Value" $value) }}
+            {{- else }}
+            {{- template "method" (dict "Method" .Method "Path" .Path "Value" $value) }}
             {{- end }}
-            {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
         {{- else if eq .ValueType "envelope" }}
-            {{ .Value }}
+            {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
         {{- end }}
     {{- end }}
 

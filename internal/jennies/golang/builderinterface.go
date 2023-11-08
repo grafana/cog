@@ -69,7 +69,7 @@ func MakeBuildErrors(rootPath string, err error) BuildErrors {
 }
 
 type Builder[ResourceT any] interface {
-  Build() (*ResourceT, error)
+  Build() (ResourceT, error)
 }
 `
 }
