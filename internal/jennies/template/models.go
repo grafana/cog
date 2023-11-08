@@ -45,7 +45,7 @@ type Assignment struct {
 	InitSafeguards []string
 	Value          string
 	IsBuilder      bool
-	IsNullable     bool
+	IntoNullable   bool
 	Method         ast.AssignmentMethod
 	ValueType      ValueType
 	Constraints    []Constraint

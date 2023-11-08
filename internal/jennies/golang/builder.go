@@ -236,6 +236,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 	if assigmentValueType == template.ValueTypeAssigment {
 		_, isBuilder = context.BuilderForType(assignment.Value.Argument.Type)
 	}
+
 	return template.Assignment{
 		Path:           fieldPath,
 		InitSafeguards: initSafeGuards,
@@ -244,13 +245,14 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 		Value:          value,
 		ValueType:      assigmentValueType,
 		IsBuilder:      isBuilder,
+		IntoNullable:   valueType.Nullable && valueType.Kind != ast.KindArray,
 	}
 }
 
 func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) (template.ValueType, string) {
 	// constant value, not into a pointer type
 	if value.Constant != nil {
-		return template.ValueTypeConstant, jenny.formatConstantAssignmentValue(value, valueType)
+		return template.ValueTypeConstant, formatScalar(value.Constant)
 	}
 
 	// envelope
@@ -259,34 +261,7 @@ func (jenny *Builder) formatAssignmentValue(context context.Builders, value ast.
 	}
 
 	// argument
-	return template.ValueTypeAssigment, jenny.formatArgumentAssignmentValue(context, value, valueType)
-}
-
-func (jenny *Builder) formatArgumentAssignmentValue(context context.Builders, value ast.AssignmentValue, valueType ast.Type) string {
-	argName := jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
-
-	switch valueType.Kind {
-	case ast.KindArray:
-		valueType = valueType.AsArray().ValueType
-	case ast.KindMap:
-		valueType = valueType.AsMap().ValueType
-	}
-
-	if _, found := context.BuilderForType(value.Argument.Type); found {
-		maybeDereference := "*"
-		if valueType.Nullable {
-			maybeDereference = ""
-		}
-
-		return fmt.Sprintf("%[1]sresource", maybeDereference)
-	}
-
-	maybeAsPointer := ""
-	if valueType.Nullable {
-		maybeAsPointer = "&"
-	}
-
-	return maybeAsPointer + argName
+	return template.ValueTypeAssigment, jenny.escapeVarName(tools.LowerCamelCase(value.Argument.Name))
 }
 
 func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, value ast.AssignmentValue) string {
@@ -304,18 +279,6 @@ func (jenny *Builder) formatEnvelopeAssignmentValue(context context.Builders, va
 }`, formattedType, allValues)
 
 	return envelopeValue
-}
-
-func (jenny *Builder) formatConstantAssignmentValue(value ast.AssignmentValue, valueType ast.Type) string {
-	return formatScalar(value.Constant)
-}
-
-func (jenny *Builder) formatAssignment(assignment ast.Assignment, fieldPath string, value string) string {
-	if assignment.Method == ast.DirectAssignment {
-		return fmt.Sprintf("builder.internal.%[1]s = %[2]s", fieldPath, value)
-	}
-
-	return fmt.Sprintf("builder.internal.%[1]s = append(builder.internal.%[1]s, %[2]s)", fieldPath, value)
 }
 
 func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {

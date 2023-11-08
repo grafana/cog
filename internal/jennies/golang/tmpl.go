@@ -26,6 +26,13 @@ func init() {
 			"lowerCamelCase":   tools.LowerCamelCase,
 			"formatType":       formatType,
 			"trimPrefix":       strings.TrimPrefix,
+			"maybeAsPointer": func(intoNullable bool, variableName string) string {
+				if intoNullable {
+					return "&" + variableName
+				}
+
+				return variableName
+			},
 		})
 	templates = template.Must(base.ParseFS(veneersFS, "templates/*.tmpl", "templates/veneers/*.tmpl"))
 }
