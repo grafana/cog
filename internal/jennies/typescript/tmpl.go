@@ -21,6 +21,8 @@ func init() {
 	base.Funcs(map[string]any{
 		"jsonEncode":     mustJSONEncode,
 		"upperCamelCase": tools.UpperCamelCase,
+		"lowerCamelCase": tools.LowerCamelCase,
+		"formatScalar":   formatScalar,
 	})
 	templates = template.Must(base.ParseFS(templatesFS, "templates/*.tmpl"))
 }

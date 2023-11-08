@@ -41,7 +41,6 @@ type Assignment struct {
 
 	Path           string
 	InitSafeguards []string
-	IsBuilder      bool // TODO: remove
 	IntoNullable   bool
 	Method         ast.AssignmentMethod
 	Value          ast.AssignmentValue

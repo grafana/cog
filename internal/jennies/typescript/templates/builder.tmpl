@@ -10,7 +10,7 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements CogOptionsBuild
         this.internal = {{ .ImportAlias }}.default{{ .ObjectName | upperCamelCase }}();
         {{- range $arg := .Constructor.Assignments }}
         {{- template "constraints" $arg.Constraints }}
-        this.internal.{{ $arg.Path }} = {{ $arg.Value }};
+        this.internal.{{ $arg.Path }} = {{ template "assignment_value" $arg }};
         {{- end }}
     }
 
@@ -27,10 +27,25 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements CogOptionsBuild
 {{ . }}
 {{- end }}
 {{- template "constraints" .Constraints }}
-        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ .Value }}{{ if .IsBuilder }}.build(){{ end }};{{ end -}}
-        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ .Value }}{{ if .IsBuilder }}.build(){{ end }});{{ end -}}
+        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ template "assignment_value" . }};{{ end -}}
+        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ template "assignment_value" . }});{{ end -}}
 {{ end }}
         return this;
     }
 {{ end -}}
 }
+
+{{- define "assignment_value" }}
+    {{- if not (eq .Value.Constant nil) }}
+        {{- formatScalar .Value.Constant }}
+    {{- end }}
+    {{- with .Value.Argument }}
+        {{- $argName := lowerCamelCase .Name }}
+
+        {{- if $.HasBuilder .Type }}
+        {{- $argName }}.build()
+        {{- else }}
+        {{- $argName }}
+        {{- end }}
+    {{- end }}
+{{- end }}
