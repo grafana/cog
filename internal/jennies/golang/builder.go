@@ -111,11 +111,11 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 		// FIXME: this is assuming that there's only one argument for that option
 		argsList = append(argsList, jenny.generateArgument(context, opt.Args[0]))
-		assignmentList = append(assignmentList, jenny.generateAssignment(context, opt.Assignments[0]))
+		assignmentList = append(assignmentList, jenny.generateAssignment(opt.Assignments[0]))
 	}
 
 	for _, init := range builder.Initializations {
-		assignmentList = append(assignmentList, jenny.generateAssignment(context, init))
+		assignmentList = append(assignmentList, jenny.generateAssignment(init))
 	}
 
 	return template.Constructor{
@@ -157,25 +157,13 @@ func (jenny *Builder) generateOptions(context context.Builders, builder ast.Buil
 }
 
 func (jenny *Builder) generateOption(context context.Builders, def ast.Option) template.Option {
-	// Arguments list
-	argsList := make([]template.Argument, 0, len(def.Args))
-	if len(def.Args) != 0 {
-		for _, arg := range def.Args {
-			argsList = append(argsList, jenny.generateArgument(context, arg))
-		}
-	}
-
-	// Assignments
-	assignmentsList := make([]template.Assignment, 0, len(def.Assignments))
-	for _, assignment := range def.Assignments {
-		assignmentsList = append(assignmentsList, jenny.generateAssignment(context, assignment))
-	}
-
 	return template.Option{
-		Name:        tools.UpperCamelCase(def.Name),
-		Comments:    def.Comments,
-		Args:        argsList,
-		Assignments: assignmentsList,
+		Name:     tools.UpperCamelCase(def.Name),
+		Comments: def.Comments,
+		Args: tools.Map(def.Args, func(arg ast.Argument) template.Argument {
+			return jenny.generateArgument(context, arg)
+		}),
+		Assignments: tools.Map(def.Assignments, jenny.generateAssignment),
 	}
 }
 
@@ -220,7 +208,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string 
 }`, fieldPath, emptyValue)
 }
 
-func (jenny *Builder) generateAssignment(context context.Builders, assignment ast.Assignment) template.Assignment {
+func (jenny *Builder) generateAssignment(assignment ast.Assignment) template.Assignment {
 	var initSafeGuards []string
 	for i, chunk := range assignment.Path {
 		if i == len(assignment.Path)-1 {

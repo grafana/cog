@@ -83,11 +83,11 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 
 		// FIXME: this is assuming that there's only one argument for that option
 		argsList = append(argsList, jenny.generateArgument(context, builder, opt.Args[0]))
-		assignments = append(assignments, jenny.generateAssignment(context, builder, opt.Assignments[0]))
+		assignments = append(assignments, jenny.generateAssignment(builder, opt.Assignments[0]))
 	}
 
 	for _, init := range builder.Initializations {
-		assignments = append(assignments, jenny.generateAssignment(context, builder, init))
+		assignments = append(assignments, jenny.generateAssignment(builder, init))
 	}
 
 	return template.Constructor{
@@ -99,16 +99,14 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) template.Option {
 	// Arguments list
 	argsList := make([]template.Argument, 0, len(def.Args))
-	if len(def.Args) != 0 {
-		for _, arg := range def.Args {
-			argsList = append(argsList, jenny.generateArgument(context, builder, arg))
-		}
+	for _, arg := range def.Args {
+		argsList = append(argsList, jenny.generateArgument(context, builder, arg))
 	}
 
 	// Assignments
 	assignmentsList := make([]template.Assignment, 0, len(def.Assignments))
 	for _, assign := range def.Assignments {
-		assignmentsList = append(assignmentsList, jenny.generateAssignment(context, builder, assign))
+		assignmentsList = append(assignmentsList, jenny.generateAssignment(builder, assign))
 	}
 
 	return template.Option{
@@ -141,7 +139,10 @@ func (jenny *Builder) generateArgument(context context.Builders, builder ast.Bui
 		return pkg
 	})
 
-	return template.Argument{Name: tools.LowerCamelCase(arg.Name), Type: typeName}
+	return template.Argument{
+		Name: tools.LowerCamelCase(arg.Name),
+		Type: typeName,
+	}
 }
 
 func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Builder, path ast.Path) string {
@@ -162,7 +163,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 		}`, fieldPath, emptyValue)
 }
 
-func (jenny *Builder) generateAssignment(context context.Builders, builder ast.Builder, assign ast.Assignment) template.Assignment {
+func (jenny *Builder) generateAssignment(builder ast.Builder, assign ast.Assignment) template.Assignment {
 	var pathInitSafeGuards []string
 	for i, chunk := range assign.Path {
 		if i == len(assign.Path)-1 && assign.Method != ast.AppendAssignment {
@@ -204,19 +205,16 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
-	output := make([]template.Constraint, 0, len(constraints))
+	return tools.Map(constraints, func(constraint ast.TypeConstraint) template.Constraint {
+		op, isString := jenny.constraintComparison(constraint)
 
-	for _, c := range constraints {
-		op, isString := jenny.constraintComparison(c)
-		output = append(output, template.Constraint{
+		return template.Constraint{
 			Name:     argumentName,
 			Op:       op,
-			Arg:      c.Args[0],
+			Arg:      constraint.Args[0],
 			IsString: isString,
-		})
-	}
-
-	return output
+		}
+	})
 }
 
 func (jenny *Builder) constraintComparison(constraint ast.TypeConstraint) (ast.Op, bool) {
