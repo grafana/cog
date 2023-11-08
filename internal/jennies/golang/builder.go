@@ -233,7 +233,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 	constraints := make([]template.Constraint, 0)
 	if assignment.Value.Argument != nil {
 		argName := jenny.escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
-		constraints = append(jenny.constraints(argName, assignment.Constraints))
+		constraints = append(constraints, jenny.constraints(argName, assignment.Constraints)...)
 	}
 
 	assigmentValueType, value := jenny.formatAssignmentValue(context, assignment.Value)
