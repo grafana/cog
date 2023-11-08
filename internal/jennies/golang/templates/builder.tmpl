@@ -13,7 +13,7 @@ type {{ .BuilderName }}Builder struct {
     errors map[string]cog.BuildErrors
 }
 
-func New{{ .BuilderName }}Builder() *{{ .BuilderName }}Builder {
+func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ .BuilderName }}Builder {
 	resource := &{{ .ObjectName }}{}
 	builder := &{{ .BuilderName }}Builder{
 		internal: resource,
@@ -21,6 +21,10 @@ func New{{ .BuilderName }}Builder() *{{ .BuilderName }}Builder {
 	}
 
 	builder.applyDefaults()
+
+    {{- range .Constructor.Assignments }}
+        {{- template "assignment" . }}
+    {{- end }}
 
 	return builder
 }
@@ -45,34 +49,7 @@ func (builder *{{ .BuilderName }}Builder) Build() ({{ .ObjectName }}, error) {
 {{- end }}
 func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args }}) *{{ $.BuilderName }}Builder {
     {{- range .Assignments }}
-        {{- template "constraints" .Constraints }}
-        {{- range .InitSafeguards }}
-        {{ . }}
-        {{- end }}
-        {{- if eq .ValueType "constant" }}
-            {{- if .IntoNullable }}
-                val{{ .Path }} := {{ .Value }}
-                {{- template "method" (dict "Method" .Method "Path" .Path "Value" (print "&val" .Path)) }}
-            {{- else }}
-                {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
-            {{- end }}
-        {{- else if eq .ValueType "assigment" }}
-            {{- $value := maybeAsPointer .IntoNullable .Value }}
-
-            {{- if .IsBuilder }}
-            resource, err := {{ .Value }}.Build()
-            if err != nil {
-                builder.errors["{{ .Path }}"] = err.(cog.BuildErrors)
-                return builder
-            }
-            {{- $value = maybeAsPointer .IntoNullable "resource" }}
-            {{- template "method" (dict "Method" .Method "Path" .Path "Value" $value) }}
-            {{- else }}
-            {{- template "method" (dict "Method" .Method "Path" .Path "Value" $value) }}
-            {{- end }}
-        {{- else if eq .ValueType "envelope" }}
-            {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
-        {{- end }}
+        {{- template "assignment" . }}
     {{- end }}
 
     return builder

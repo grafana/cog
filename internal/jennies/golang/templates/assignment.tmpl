@@ -1,0 +1,30 @@
+{{- define "assignment" }}
+    {{- template "constraints" .Constraints }}
+    {{- range .InitSafeguards }}
+    {{ . }}
+    {{- end }}
+    {{- if eq .ValueType "constant" }}
+        {{- if .IntoNullable }}
+            val{{ .Path }} := {{ .Value }}
+            {{- template "method" (dict "Method" .Method "Path" .Path "Value" (print "&val" .Path)) }}
+        {{- else }}
+            {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
+        {{- end }}
+    {{- else if eq .ValueType "assigment" }}
+        {{- $value := maybeAsPointer .IntoNullable .Value }}
+
+        {{- if .IsBuilder }}
+        resource, err := {{ .Value }}.Build()
+        if err != nil {
+            builder.errors["{{ .Path }}"] = err.(cog.BuildErrors)
+            return builder
+        }
+        {{- $value = maybeAsPointer .IntoNullable "resource" }}
+        {{- template "method" (dict "Method" .Method "Path" .Path "Value" $value) }}
+        {{- else }}
+        {{- template "method" (dict "Method" .Method "Path" .Path "Value" $value) }}
+        {{- end }}
+    {{- else if eq .ValueType "envelope" }}
+        {{- template "method" (dict "Method" .Method "Path" .Path "Value" .Value) }}
+    {{- end }}
+{{- end }}
