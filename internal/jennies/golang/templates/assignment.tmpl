@@ -13,8 +13,8 @@
 
 {{- define "assignment_value" }}
     {{- if not (eq .Value.Constant nil) }}
-        {{- if .Assignment.IntoNullable }}
-            {{- print "&val" .Assignment.Path }}
+        {{- if isNullableNonArray .Assignment.Path.Last.Type }}
+            {{- print "&val" .Assignment.Path.Last.Identifier }}
         {{- else }}
             {{- formatScalar .Value.Constant }}
         {{- end }}
@@ -22,11 +22,11 @@
     {{- with .Value.Argument }}
         {{- $argName := formatArgName .Name }}
 
-        {{- if $.Assignment.HasBuilder .Type }}
+        {{- if (typeHasBuilder .Type) }}
         {{- $argName = (print $argName "Resource") }}
         {{- end }}
 
-        {{- maybeAsPointer $.Assignment.IntoNullable $argName }}
+        {{- maybeAsPointer (isNullableNonArray $.Assignment.Path.Last.Type) $argName }}
     {{- end }}
     {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
@@ -35,12 +35,12 @@
 
 {{- define "assignment_setup" }}
     {{- if not (eq .Value.Constant nil) }}
-        {{- if .Assignment.IntoNullable }}
+        {{- if .Assignment.Path.Last.Type.Nullable }}
             val{{ .Assignment.Path }} := {{ formatScalar .Value.Constant }}
         {{- end }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- if $.Assignment.HasBuilder .Type }}
+        {{- if (typeHasBuilder .Type) }}
         {{ formatArgName .Name}}Resource, err := {{ formatArgName .Name}}.Build()
         if err != nil {
             builder.errors["{{ $.Assignment.Path }}"] = err.(cog.BuildErrors)
@@ -56,7 +56,7 @@
 {{- end }}
 
 {{- define "value_envelope" }}
-    {{- formatType .Envelope.Type .Assignment.ImportMapper }}{
+    {{- .Envelope.Type | formatType }}{
         {{- range .Envelope.Values }}
         {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
         {{- $value = maybeAsPointer (.Path.Last.Type.Nullable) $value }}
@@ -66,6 +66,6 @@
 {{- end }}
 
 {{- define "assignment_method" }}
-    {{ if eq .Method "direct" }}builder.internal.{{ .Path }} = {{ .Value }}{{ end -}}
-    {{ if eq .Method "append" }}builder.internal.{{ .Path }} = append(builder.internal.{{ .Path }}, {{ .Value }}){{ end -}}
+    {{ if eq .Method "direct" }}builder.internal.{{ .Path|formatPath }} = {{ .Value }}{{ end -}}
+    {{ if eq .Method "append" }}builder.internal.{{ .Path|formatPath }} = append(builder.internal.{{ .Path|formatPath }}, {{ .Value }}){{ end -}}
 {{- end }}

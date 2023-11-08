@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"text/template"
 
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -19,12 +20,14 @@ var templatesFS embed.FS
 func init() {
 	base := template.New("ts")
 	base.Funcs(map[string]any{
+		"typeHasBuilder": func(_ ast.Type) bool { return false }, // placeholder function, will be overridden by jennies
+
 		"jsonEncode":     mustJSONEncode,
 		"upperCamelCase": tools.UpperCamelCase,
 		"lowerCamelCase": tools.LowerCamelCase,
 		"formatScalar":   formatScalar,
 	})
-	templates = template.Must(base.ParseFS(templatesFS, "templates/*.tmpl"))
+	templates = template.Must(base.ParseFS(templatesFS, "templates/*.tmpl")).Option("missingkey=error")
 }
 
 func mustJSONEncode(val any) string {

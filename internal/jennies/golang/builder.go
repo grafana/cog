@@ -58,15 +58,28 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 		fullObjectName = builder.For.SelfRef.ReferredPkg + "." + fullObjectName
 	}
 
-	err := templates.ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
-		Package:        builder.Package,
-		Imports:        jenny.imports,
-		BuilderName:    tools.UpperCamelCase(builder.Name),
-		ObjectName:     fullObjectName,
-		Constructor:    jenny.generateConstructor(context, builder),
-		Options:        jenny.generateOptions(context, builder),
-		DefaultBuilder: jenny.genDefaultBuilder(builder),
-	})
+	err := templates.
+		Funcs(map[string]any{
+			"formatPath": func(path ast.Path) string {
+				return jenny.formatFieldPath(path)
+			},
+			"formatType": func(typerDef ast.Type) string {
+				return formatType(typerDef, jenny.typeImportMapper)
+			},
+			"typeHasBuilder": func(typeDef ast.Type) bool {
+				_, found := context.BuilderForType(typeDef)
+				return found
+			},
+		}).
+		ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
+			Package:        builder.Package,
+			Imports:        jenny.imports,
+			BuilderName:    tools.UpperCamelCase(builder.Name),
+			ObjectName:     fullObjectName,
+			Constructor:    jenny.generateConstructor(context, builder),
+			Options:        jenny.generateOptions(context, builder),
+			DefaultBuilder: jenny.genDefaultBuilder(builder),
+		})
 	if err != nil {
 		return nil
 	}
@@ -208,10 +221,6 @@ func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string 
 }
 
 func (jenny *Builder) generateAssignment(context context.Builders, assignment ast.Assignment) template.Assignment {
-	fieldPath := jenny.formatFieldPath(assignment.Path)
-	pathEnd := assignment.Path.Last()
-	valueType := pathEnd.Type
-
 	var initSafeGuards []string
 	for i, chunk := range assignment.Path {
 		if i == len(assignment.Path)-1 {
@@ -235,15 +244,11 @@ func (jenny *Builder) generateAssignment(context context.Builders, assignment as
 	}
 
 	return template.Assignment{
-		Context:      context,
-		ImportMapper: jenny.typeImportMapper,
-
-		Path:           fieldPath,
+		Path:           assignment.Path,
 		InitSafeguards: initSafeGuards,
 		Constraints:    constraints,
 		Method:         assignment.Method,
 		Value:          assignment.Value,
-		IntoNullable:   valueType.Nullable && valueType.Kind != ast.KindArray,
 	}
 }
 
