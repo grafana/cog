@@ -1,0 +1,285 @@
+-- intersection.json --
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "intersection",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Structs": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Value1"
+          },
+          {
+            "$ref": "#/components/schemas/Value2"
+          },
+          {
+            "$ref": "#/components/schemas/Value3"
+          }
+        ]
+      },
+      "Mixed": {
+        "allOf": [
+        {
+          "$ref": "#/components/schemas/Enum"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
+            }
+        ]
+      },
+      "Value1": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value1"
+          }
+        }
+      },
+      "Value2": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value2"
+          }
+        }
+      },
+      "Value3": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value3"
+          }
+        }
+      },
+      "Enum": {
+        "type": "string",
+        "enum": [
+            "a",
+            "b"
+        ]
+      }
+    }
+  }
+}
+
+-- out/openapi/GenerateAST --
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Enum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Enum"
+      }
+    },
+    {
+      "Name": "Mixed",
+      "Type": {
+        "Kind": "intersection",
+        "Nullable": false,
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "Enum"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Mixed"
+      }
+    },
+    {
+      "Name": "Structs",
+      "Type": {
+        "Kind": "intersection",
+        "Nullable": false,
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "Value1"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "Value2"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "Value3"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Structs"
+      }
+    },
+    {
+      "Name": "Value1",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value1",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value1"
+      }
+    },
+    {
+      "Name": "Value2",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value2",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value2"
+      }
+    },
+    {
+      "Name": "Value3",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value3",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value3"
+      }
+    }
+  ]
+}

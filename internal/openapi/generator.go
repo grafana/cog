@@ -162,7 +162,7 @@ func (g *generator) walkArray(schema *openapi3.Schema) (ast.Type, error) {
 		return ast.Type{}, err
 	}
 
-	return ast.NewArray(def), nil
+	return ast.NewArray(def, ast.Default(schema.Default)), nil
 }
 
 func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
@@ -215,8 +215,8 @@ func (g *generator) walkInteger(schema *openapi3.Schema) (ast.Type, error) {
 	return t, nil
 }
 
-func (g *generator) walkBoolean(_ *openapi3.Schema) (ast.Type, error) {
-	return ast.Bool(), nil
+func (g *generator) walkBoolean(schema *openapi3.Schema) (ast.Type, error) {
+	return ast.Bool(ast.Default(schema.Default)), nil
 }
 
 func (g *generator) walkAny(_ *openapi3.Schema) (ast.Type, error) {
