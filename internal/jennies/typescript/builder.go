@@ -54,14 +54,21 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 		opts[i] = jenny.generateOption(context, builder, o)
 	}
 
-	err := templates.Lookup("builder.tmpl").Execute(&buffer, template.Tmpl{
-		BuilderName: builder.Name,
-		ObjectName:  builder.For.Name,
-		Imports:     jenny.imports,
-		ImportAlias: importAlias,
-		Options:     opts,
-		Constructor: constructorCode,
-	})
+	err := templates.
+		Funcs(map[string]any{
+			"typeHasBuilder": func(typeDef ast.Type) bool {
+				_, found := context.BuilderForType(typeDef)
+				return found
+			},
+		}).
+		ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
+			BuilderName: builder.Name,
+			ObjectName:  builder.For.Name,
+			Imports:     jenny.imports,
+			ImportAlias: importAlias,
+			Options:     opts,
+			Constructor: constructorCode,
+		})
 
 	return []byte(buffer.String()), err
 }
@@ -156,8 +163,6 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 }
 
 func (jenny *Builder) generateAssignment(context context.Builders, builder ast.Builder, assign ast.Assignment) template.Assignment {
-	fieldPath := jenny.formatFieldPath(assign.Path)
-
 	var pathInitSafeGuards []string
 	for i, chunk := range assign.Path {
 		if i == len(assign.Path)-1 && assign.Method != ast.AppendAssignment {
@@ -190,8 +195,7 @@ func (jenny *Builder) generateAssignment(context context.Builders, builder ast.B
 	}
 
 	return template.Assignment{
-		Context:        context,
-		Path:           fieldPath,
+		Path:           assign.Path,
 		Method:         assign.Method,
 		InitSafeguards: pathInitSafeGuards,
 		Value:          assign.Value,

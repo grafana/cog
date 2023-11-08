@@ -42,7 +42,7 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements CogOptionsBuild
     {{- with .Value.Argument }}
         {{- $argName := lowerCamelCase .Name }}
 
-        {{- if $.HasBuilder .Type }}
+        {{- if (typeHasBuilder .Type) }}
         {{- $argName }}.build()
         {{- else }}
         {{- $argName }}

@@ -151,28 +151,32 @@ func (jenny RawTypes) jsonMarshalVeneer(def ast.Object, packageMapper pkgMapper)
 
 	if _, ok := def.Type.Hints[ast.HintDisjunctionOfScalars]; ok {
 		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.go.tmpl", map[string]any{
-			"def":       def,
-			"pkgMapper": packageMapper,
-		})
+			"def": def,
+		}, packageMapper)
 	}
 
 	if hintVal, ok := def.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs]; ok {
 		return jenny.renderVeneerTemplate("disjunction_of_refs.types.json_marshal.go.tmpl", map[string]any{
-			"def":       def,
-			"pkgMapper": packageMapper,
-			"hint":      hintVal,
-		})
+			"def":  def,
+			"hint": hintVal,
+		}, packageMapper)
 	}
 
 	// We didn't find a hint relevant to us: nothing do to.
 	return "", nil
 }
 
-func (jenny RawTypes) renderVeneerTemplate(templateFile string, data map[string]any) (string, error) {
+func (jenny RawTypes) renderVeneerTemplate(templateFile string, data map[string]any, packageMapper pkgMapper) (string, error) {
 	tmpl := templates.Lookup(templateFile)
 	if tmpl == nil {
 		return "", fmt.Errorf("veneer template '%s' not found", templateFile)
 	}
+
+	tmpl = tmpl.Funcs(map[string]any{
+		"formatType": func(typerDef ast.Type) string {
+			return formatType(typerDef, packageMapper)
+		},
+	})
 
 	buf := bytes.Buffer{}
 	if err := tmpl.Execute(&buf, data); err != nil {

@@ -2,7 +2,6 @@ package template
 
 import (
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
 )
 
 type Tmpl struct {
@@ -36,20 +35,11 @@ type Argument struct {
 }
 
 type Assignment struct {
-	Context      context.Builders // TODO: meh.
-	ImportMapper func(string) string
-
-	Path           string
+	Path           ast.Path
 	InitSafeguards []string
-	IntoNullable   bool
 	Method         ast.AssignmentMethod
 	Value          ast.AssignmentValue
 	Constraints    []Constraint
-}
-
-func (assignment Assignment) HasBuilder(typeDef ast.Type) bool {
-	_, found := assignment.Context.BuilderForType(typeDef)
-	return found
 }
 
 type Constraint struct {
