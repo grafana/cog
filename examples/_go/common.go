@@ -14,7 +14,7 @@ func toPtr[T any](input T) *T {
 	return &input
 }
 
-func basicPrometheusQuery(query string, legend string) *prometheus.Dataquery {
+func basicPrometheusQuery(query string, legend string) prometheus.Dataquery {
 	queryBuilder := prometheus.NewDataqueryBuilder().
 		Expr(query).
 		LegendFormat(legend)
@@ -27,7 +27,7 @@ func basicPrometheusQuery(query string, legend string) *prometheus.Dataquery {
 	return result
 }
 
-func basicLokiQuery(query string) *loki.Dataquery {
+func basicLokiQuery(query string) loki.Dataquery {
 	queryBuilder := loki.NewDataqueryBuilder().
 		Expr(query)
 
@@ -39,7 +39,7 @@ func basicLokiQuery(query string) *loki.Dataquery {
 	return result
 }
 
-func tablePrometheusQuery(query string, ref string) *prometheus.Dataquery {
+func tablePrometheusQuery(query string, ref string) prometheus.Dataquery {
 	queryBuilder := prometheus.NewDataqueryBuilder().
 		Expr(query).
 		Instant(true).
