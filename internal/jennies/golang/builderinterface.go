@@ -22,6 +22,7 @@ func (jenny BuilderInterface) generateFile() string {
 	return `package cog
 
 import (
+	"errors"
 	"fmt"
 )
 

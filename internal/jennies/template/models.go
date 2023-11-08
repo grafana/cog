@@ -15,7 +15,7 @@ type Tmpl struct {
 	BuilderName    string
 	ObjectName     string
 	Imports        ImportMap
-	ImportAlias    string
+	ImportAlias    string // alias to the pkg in which the object being built lives.
 	Options        []Option
 	Constructor    Constructor
 	DefaultBuilder DefaultBuilder

@@ -53,11 +53,16 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	jenny.imports = template.NewImportMap()
 	jenny.imports.Add("cog", "github.com/grafana/cog/generated")
 
+	fullObjectName := builder.For.Name
+	if builder.For.SelfRef.ReferredPkg != builder.Package {
+		fullObjectName = builder.For.SelfRef.ReferredPkg + "." + fullObjectName
+	}
+
 	err := templates.ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
 		Package:     builder.Package,
 		Imports:     jenny.imports,
 		BuilderName: tools.UpperCamelCase(builder.Name),
-		ObjectName:  builder.For.Name,
+		ObjectName:  fullObjectName,
 		Constructor: jenny.generateConstructor(context, builder),
 		// TODO: Add arguments and assignments to constructor
 		Options:        jenny.generateOptions(context, builder),

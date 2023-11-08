@@ -6,15 +6,15 @@ import (
 {{- end }}
 )
 
-var _ cog.Builder[{{ .ObjectName }}] = (*{{ .ObjectName }}Builder)(nil)
+var _ cog.Builder[{{ .ObjectName }}] = (*{{ .BuilderName }}Builder)(nil)
 
 type {{ .BuilderName }}Builder struct {
-    internal *{{ .BuilderName }}
+    internal *{{ .ObjectName }}
     errors map[string]cog.BuildErrors
 }
 
 func New{{ .BuilderName }}Builder() *{{ .BuilderName }}Builder {
-	resource := &{{ .BuilderName }}{}
+	resource := &{{ .ObjectName }}{}
 	builder := &{{ .BuilderName }}Builder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
