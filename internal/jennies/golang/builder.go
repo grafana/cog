@@ -77,8 +77,10 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 			BuilderName:    tools.UpperCamelCase(builder.Name),
 			ObjectName:     fullObjectName,
 			Constructor:    jenny.generateConstructor(context, builder),
-			Options:        jenny.generateOptions(context, builder),
 			DefaultBuilder: jenny.genDefaultBuilder(builder),
+			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
+				return jenny.generateOption(context, opt)
+			}),
 		})
 	if err != nil {
 		return nil
@@ -145,15 +147,6 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	}
 
 	return strings.Join(parts, ".")
-}
-
-func (jenny *Builder) generateOptions(context context.Builders, builder ast.Builder) []template.Option {
-	options := make([]template.Option, len(builder.Options))
-	for i, opt := range builder.Options {
-		options[i] = jenny.generateOption(context, opt)
-	}
-
-	return options
 }
 
 func (jenny *Builder) generateOption(context context.Builders, def ast.Option) template.Option {
@@ -271,19 +264,16 @@ func (jenny *Builder) generateDefaultCall(option ast.Option) []template.Argument
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
-	output := make([]template.Constraint, 0, len(constraints))
-
-	for _, constraint := range constraints {
+	return tools.Map(constraints, func(constraint ast.TypeConstraint) template.Constraint {
 		op, isString := jenny.constraintComparison(constraint)
-		output = append(output, template.Constraint{
+
+		return template.Constraint{
 			Name:     argumentName,
 			Op:       op,
 			Arg:      constraint.Args[0],
 			IsString: isString,
-		})
-	}
-
-	return output
+		}
+	})
 }
 
 func (jenny *Builder) constraintComparison(constraint ast.TypeConstraint) (ast.Op, bool) {
