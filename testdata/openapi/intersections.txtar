@@ -1,0 +1,181 @@
+-- intersection.json --
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "intersection",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Intersection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Value1"
+          },
+          {
+            "$ref": "#/components/schemas/Value2"
+          },
+          {
+            "$ref": "#/components/schemas/Value3"
+          }
+        ]
+      },
+      "Value1": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value1"
+          }
+        }
+      },
+      "Value2": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value2"
+          }
+        }
+      },
+      "Value3": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value3"
+          }
+        }
+      }
+    }
+  }
+}
+
+-- out/openapi/GenerateAST --
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Intersection",
+      "Type": {
+        "Kind": "intersection",
+        "Nullable": false,
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "Value1"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "Value2"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "Value3"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Intersection"
+      }
+    },
+    {
+      "Name": "Value1",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value1",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value1"
+      }
+    },
+    {
+      "Name": "Value2",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value2",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value2"
+      }
+    },
+    {
+      "Name": "Value3",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value3",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value3"
+      }
+    }
+  ]
+}
