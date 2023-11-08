@@ -44,16 +44,16 @@ $ go run cmd/cli/main.go generate \
     --kindsys-composable ./schemas/kindsys/composable/timeseries \
     --kindsys-composable ./schemas/kindsys/composable/logs \
     --kindsys-composable ./schemas/kindsys/composable/prometheus \
-    --veneer ./config/dashboard.veneers.yaml \
+    --veneers ./config
 ```
 
 For the [`kind-registry`](https://github.com/grafana/kind-registry):
 
 ```console
-$ git clone https://github.com/grafana/kind-registry
+$ git clone https://github.com/grafana/kind-registry schemas/kind-registry
 $ go run cmd/cli/main.go generate \
     --output ./generated \
-    --kind-registry ./kind-registry \
+    --kind-registry ./schemas/kind-registry \
     --cue ./schemas/cue/common \
     --include-cue-import ./schemas/cue/common:github.com/grafana/grafana/packages/grafana-schema/src/common \
     --veneers ./config
