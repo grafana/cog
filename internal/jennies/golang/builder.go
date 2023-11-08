@@ -51,11 +51,11 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	var buffer strings.Builder
 
 	jenny.imports = template.NewImportMap()
+	jenny.imports.Add("cog", "github.com/grafana/cog/generated")
 
 	err := templates.ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
 		Package:     builder.Package,
 		Imports:     jenny.imports,
-		ImportAlias: "cog",
 		BuilderName: tools.UpperCamelCase(builder.Name),
 		ObjectName:  builder.For.Name,
 		Constructor: jenny.generateConstructor(context, builder),
