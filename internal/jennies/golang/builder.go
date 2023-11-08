@@ -59,12 +59,11 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	}
 
 	err := templates.ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
-		Package:     builder.Package,
-		Imports:     jenny.imports,
-		BuilderName: tools.UpperCamelCase(builder.Name),
-		ObjectName:  fullObjectName,
-		Constructor: jenny.generateConstructor(context, builder),
-		// TODO: Add arguments and assignments to constructor
+		Package:        builder.Package,
+		Imports:        jenny.imports,
+		BuilderName:    tools.UpperCamelCase(builder.Name),
+		ObjectName:     fullObjectName,
+		Constructor:    jenny.generateConstructor(context, builder),
 		Options:        jenny.generateOptions(context, builder),
 		DefaultBuilder: jenny.genDefaultBuilder(builder),
 	})
