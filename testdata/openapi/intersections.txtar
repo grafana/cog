@@ -8,7 +8,7 @@
   "paths": {},
   "components": {
     "schemas": {
-      "Intersection": {
+      "Structs": {
         "allOf": [
           {
             "$ref": "#/components/schemas/Value1"
@@ -19,6 +19,24 @@
           {
             "$ref": "#/components/schemas/Value3"
           }
+        ]
+      },
+      "Mixed": {
+        "allOf": [
+        {
+          "$ref": "#/components/schemas/Enum"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
+            }
         ]
       },
       "Value1": {
@@ -47,6 +65,13 @@
             "default": "value3"
           }
         }
+      },
+      "Enum": {
+        "type": "string",
+        "enum": [
+            "a",
+            "b"
+        ]
       }
     }
   }
@@ -58,7 +83,86 @@
   "Metadata": {},
   "Objects": [
     {
-      "Name": "Intersection",
+      "Name": "Enum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Enum"
+      }
+    },
+    {
+      "Name": "Mixed",
+      "Type": {
+        "Kind": "intersection",
+        "Nullable": false,
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "Enum"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Mixed"
+      }
+    },
+    {
+      "Name": "Structs",
       "Type": {
         "Kind": "intersection",
         "Nullable": false,
@@ -93,7 +197,7 @@
       },
       "SelfRef": {
         "ReferredPkg": "grafanatest",
-        "ReferredType": "Intersection"
+        "ReferredType": "Structs"
       }
     },
     {
