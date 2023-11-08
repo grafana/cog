@@ -9,7 +9,6 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
-	"github.com/pkg/errors"
 )
 
 //nolint:gochecknoglobals
@@ -54,7 +53,7 @@ func init() {
 				var buf strings.Builder
 				if v, ok := includedNames[name]; ok {
 					if v > recursionMaxNums {
-						return "", errors.Wrapf(fmt.Errorf("unable to execute template"), "rendering template has a nested reference name: %s", name)
+						return "", fmt.Errorf("unable to execute template: rendering template has a nested reference name: %s", name)
 					}
 					includedNames[name]++
 				} else {
@@ -65,5 +64,6 @@ func init() {
 				return buf.String(), err
 			},
 		})
+
 	templates = template.Must(base.ParseFS(veneersFS, "templates/*.tmpl", "templates/veneers/*.tmpl")).Option("missingkey=error")
 }
