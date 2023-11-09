@@ -4,15 +4,15 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-type Tmpl struct {
-	Package        string
-	BuilderName    string
-	ObjectName     string
-	Imports        ImportMap
-	ImportAlias    string // alias to the pkg in which the object being built lives.
-	Options        []Option
-	Constructor    Constructor
-	DefaultBuilder DefaultBuilder
+type Builder struct {
+	Package     string
+	BuilderName string
+	ObjectName  string
+	Imports     ImportMap
+	ImportAlias string // alias to the pkg in which the object being built lives.
+	Constructor Constructor
+	Options     []Option
+	Defaults    []OptionCall
 }
 
 type Constructor struct {
@@ -49,7 +49,7 @@ type Constraint struct {
 	IsString bool
 }
 
-type DefaultBuilder struct {
-	Name string
-	Args []Argument
+type OptionCall struct {
+	OptionName string
+	Args       []string
 }

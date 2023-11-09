@@ -52,7 +52,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				return found
 			},
 		}).
-		ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
+		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
 			BuilderName: builder.Name,
 			ObjectName:  builder.For.Name,
 			Imports:     jenny.imports,
