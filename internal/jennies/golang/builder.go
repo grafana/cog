@@ -71,13 +71,13 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				return found
 			},
 		}).
-		ExecuteTemplate(&buffer, "builder.tmpl", template.Tmpl{
-			Package:        builder.Package,
-			Imports:        jenny.imports,
-			BuilderName:    tools.UpperCamelCase(builder.Name),
-			ObjectName:     fullObjectName,
-			Constructor:    jenny.generateConstructor(context, builder),
-			DefaultBuilder: jenny.genDefaultBuilder(builder),
+		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
+			Package:     builder.Package,
+			Imports:     jenny.imports,
+			BuilderName: tools.UpperCamelCase(builder.Name),
+			ObjectName:  fullObjectName,
+			Constructor: jenny.generateConstructor(context, builder),
+			Defaults:    jenny.genDefaultOptionsCalls(builder),
 			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
 				return jenny.generateOption(context, opt)
 			}),
@@ -89,18 +89,20 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	return []byte(buffer.String())
 }
 
-func (jenny *Builder) genDefaultBuilder(builder ast.Builder) template.DefaultBuilder {
-	arguments := make([]template.Argument, 0)
+func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.OptionCall {
+	calls := make([]template.OptionCall, 0)
 	for _, opt := range builder.Options {
-		if opt.Default != nil {
-			arguments = append(arguments, jenny.generateDefaultCall(opt)...)
+		if opt.Default == nil {
+			continue
 		}
+
+		calls = append(calls, template.OptionCall{
+			OptionName: opt.Name,
+			Args:       tools.Map(opt.Default.ArgsValues, formatScalar),
+		})
 	}
 
-	return template.DefaultBuilder{
-		Name: tools.UpperCamelCase(builder.Name),
-		Args: arguments,
-	}
+	return calls
 }
 
 func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) template.Constructor {
@@ -249,18 +251,6 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	default:
 		return "unknown"
 	}
-}
-
-func (jenny *Builder) generateDefaultCall(option ast.Option) []template.Argument {
-	args := make([]template.Argument, 0, len(option.Default.ArgsValues))
-	for _, arg := range option.Default.ArgsValues {
-		args = append(args, template.Argument{
-			Name: tools.UpperCamelCase(option.Name),
-			Type: formatScalar(arg),
-		})
-	}
-
-	return args
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
