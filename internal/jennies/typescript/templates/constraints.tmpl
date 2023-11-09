@@ -1,7 +1,18 @@
 {{- define "constraints" }}
     {{- range $c := . }}
-        if (!({{ .Name }}{{if .IsString }}.length{{ end }} {{ .Op }} {{ .Arg }})) {
-            throw new Error("{{ .Name }} must be {{ .Op }} {{ .Arg }}");
+        {{- $leftOperand := .ArgName }}
+        {{- $operator := .Op }}
+
+        {{- if eq .Op "minLength"}}
+            {{- $leftOperand = print .ArgName ".length" }}
+            {{- $operator = ">=" }}
+        {{- end }}
+        {{- if eq .Op "maxLength"}}
+            {{- $leftOperand = print .ArgName ".length" }}
+            {{- $operator = "<=" }}
+        {{- end }}
+        if (!({{ $leftOperand }} {{ $operator }} {{ .Parameter }})) {
+            throw new Error("{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}");
         }
     {{- end }}
 {{- end }}
