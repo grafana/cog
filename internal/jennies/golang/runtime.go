@@ -5,20 +5,31 @@ import (
 	"github.com/grafana/cog/internal/jennies/context"
 )
 
-type BuilderInterface struct {
+type Runtime struct {
 }
 
-func (jenny BuilderInterface) JennyName() string {
-	return "GolangOptionsBuilder"
+func (jenny Runtime) JennyName() string {
+	return "GoRuntime"
 }
 
-func (jenny BuilderInterface) Generate(_ context.Builders) (*codejen.File, error) {
-	output := jenny.generateFile()
-
-	return codejen.NewFile("builder.go", []byte(output), jenny), nil
+func (jenny Runtime) Generate(_ context.Builders) (codejen.Files, error) {
+	return codejen.Files{
+		*codejen.NewFile("cog/builder.go", []byte(jenny.generateBuilderInterface()), jenny),
+		*codejen.NewFile("cog/errors.go", []byte(jenny.generateErrorTools()), jenny),
+	}, nil
 }
 
-func (jenny BuilderInterface) generateFile() string {
+func (jenny Runtime) generateBuilderInterface() string {
+	return `package cog
+
+type Builder[ResourceT any] interface {
+  Build() (ResourceT, error)
+}
+
+`
+}
+
+func (jenny Runtime) generateErrorTools() string {
 	return `package cog
 
 import (
@@ -69,8 +80,5 @@ func MakeBuildErrors(rootPath string, err error) BuildErrors {
 	}}
 }
 
-type Builder[ResourceT any] interface {
-  Build() (ResourceT, error)
-}
 `
 }

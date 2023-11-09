@@ -150,13 +150,13 @@ func (jenny RawTypes) jsonMarshalVeneer(def ast.Object, packageMapper pkgMapper)
 	// 	  structs and these structs have a common "discriminator" field.
 
 	if _, ok := def.Type.Hints[ast.HintDisjunctionOfScalars]; ok {
-		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.go.tmpl", map[string]any{
+		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.tmpl", map[string]any{
 			"def": def,
 		}, packageMapper)
 	}
 
 	if hintVal, ok := def.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs]; ok {
-		return jenny.renderVeneerTemplate("disjunction_of_refs.types.json_marshal.go.tmpl", map[string]any{
+		return jenny.renderVeneerTemplate("disjunction_of_refs.types.json_marshal.tmpl", map[string]any{
 			"def":  def,
 			"hint": hintVal,
 		}, packageMapper)
