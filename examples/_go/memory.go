@@ -32,12 +32,18 @@ func memoryUsageTimeseries() *timeseries.PanelBuilder {
 		Min(0).
 		Unit("bytes").
 		Decimals(2).
-		Targets([]dashboard.Target{
+		WithTarget(
 			basicPrometheusQuery(memUsedQuery, "Used"),
+		).
+		WithTarget(
 			basicPrometheusQuery(`node_memory_Buffers_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Buffers"),
+		).
+		WithTarget(
 			basicPrometheusQuery(`node_memory_Cached_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Cached"),
+		).
+		WithTarget(
 			basicPrometheusQuery(`node_memory_MemFree_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Free"),
-		})
+		)
 }
 
 func memoryUsageGauge() *gauge.PanelBuilder {
@@ -60,7 +66,7 @@ func memoryUsageGauge() *gauge.PanelBuilder {
 					{Value: toPtr(90.0), Color: "rgba(245, 54, 54, 0.9)"},
 				}),
 		).
-		Targets([]dashboard.Target{
+		WithTarget(
 			basicPrometheusQuery(query, ""),
-		})
+		)
 }

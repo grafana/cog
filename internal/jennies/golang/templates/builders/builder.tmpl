@@ -6,7 +6,7 @@ import (
 {{- end }}
 )
 
-var _ cog.Builder[{{ .ObjectName }}] = (*{{ .BuilderName }}Builder)(nil)
+var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .BuilderName }}Builder)(nil)
 
 type {{ .BuilderName }}Builder struct {
     internal *{{ .ObjectName }}
@@ -29,7 +29,7 @@ func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ 
 	return builder
 }
 
-func (builder *{{ .BuilderName }}Builder) Build() ({{ .ObjectName }}, error) {
+func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
 	var errs cog.BuildErrors
 
 	for _, err := range builder.errors {

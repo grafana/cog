@@ -30,12 +30,14 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 				return ""
 			}
 
-			jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
-
-			return pkg
+			return jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
 		}
 
-		output := jenny.generateBuilder(context, builder)
+		output, err := jenny.generateBuilder(context, builder)
+		if err != nil {
+			return nil, err
+		}
+
 		filename := filepath.Join(
 			strings.ToLower(builder.Package),
 			fmt.Sprintf("%s_builder_gen.go", strings.ToLower(builder.For.Name)),
@@ -47,15 +49,20 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Builder) []byte {
+func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
 	jenny.imports = template.NewImportMap()
-	jenny.imports.Add("cog", "github.com/grafana/cog/generated/cog")
+	jenny.importCog()
 
 	fullObjectName := tools.UpperCamelCase(builder.For.Name)
 	if builder.For.SelfRef.ReferredPkg != builder.Package {
 		fullObjectName = builder.For.SelfRef.ReferredPkg + "." + fullObjectName
+	}
+
+	buildObjectSignature := fullObjectName
+	if builder.For.Type.ImplementsVariant() {
+		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant(), jenny.typeImportMapper)
 	}
 
 	err := templates.
@@ -70,23 +77,28 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				_, found := context.BuilderForType(typeDef)
 				return found
 			},
+			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
+				_, found := context.ResolveToComposableSlot(typeDef)
+				return found
+			},
 		}).
-		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
-			Package:     builder.Package,
-			Imports:     jenny.imports,
-			BuilderName: tools.UpperCamelCase(builder.Name),
-			ObjectName:  fullObjectName,
-			Constructor: jenny.generateConstructor(context, builder),
-			Defaults:    jenny.genDefaultOptionsCalls(builder),
+		ExecuteTemplate(&buffer, "builders/builder.tmpl", template.Builder{
+			Package:              builder.Package,
+			BuilderSignatureType: buildObjectSignature,
+			Imports:              jenny.imports,
+			BuilderName:          tools.UpperCamelCase(builder.Name),
+			ObjectName:           fullObjectName,
+			Constructor:          jenny.generateConstructor(context, builder),
+			Defaults:             jenny.genDefaultOptionsCalls(builder),
 			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
 				return jenny.generateOption(context, opt)
 			}),
 		})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return []byte(buffer.String())
+	return []byte(buffer.String()), nil
 }
 
 func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.OptionCall {
@@ -165,13 +177,19 @@ func (jenny *Builder) generateOption(context context.Builders, def ast.Option) t
 func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) template.Argument {
 	argName := escapeVarName(tools.LowerCamelCase(arg.Name))
 
-	if referredBuilder, found := context.BuilderForType(arg.Type); found {
-		qualifiedType := jenny.importType(referredBuilder.For.SelfRef)
-
+	if composableSlot, ok := context.ResolveToComposableSlot(arg.Type); ok {
 		return template.Argument{
 			Name:          argName,
-			Type:          qualifiedType,
-			ReferredAlias: "cog",
+			Type:          formatType(composableSlot, jenny.typeImportMapper),
+			ReferredAlias: jenny.importCog(),
+		}
+	}
+
+	if referredBuilder, found := context.BuilderForType(arg.Type); found {
+		return template.Argument{
+			Name:          argName,
+			Type:          jenny.importType(referredBuilder.For.SelfRef),
+			ReferredAlias: jenny.importCog(),
 		}
 	}
 
@@ -261,6 +279,10 @@ func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeCon
 			Parameter: constraint.Args[0],
 		}
 	})
+}
+
+func (jenny *Builder) importCog() string {
+	return jenny.imports.Add("cog", "github.com/grafana/cog/generated/cog")
 }
 
 // importType declares an import statement for the type definition of

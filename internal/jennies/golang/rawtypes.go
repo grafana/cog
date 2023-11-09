@@ -1,7 +1,6 @@
 package golang
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -9,6 +8,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -43,16 +43,14 @@ func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) 
 
 func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
-	imports := newImportMap()
+	imports := template.NewImportMap()
 
 	packageMapper := func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
 		}
 
-		imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
-
-		return pkg
+		return imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
 	}
 
 	for _, object := range schema.Objects {
@@ -63,16 +61,9 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 
 		buffer.Write(objectOutput)
 		buffer.WriteString("\n")
-
-		// Add JSON (un)marshaling shortcuts
-		jsonMarshal, err := jenny.jsonMarshalVeneer(object, packageMapper)
-		if err != nil {
-			return nil, err
-		}
-		buffer.WriteString(jsonMarshal)
 	}
 
-	importStatements := imports.Format()
+	importStatements := formatImports(imports)
 	if importStatements != "" {
 		importStatements += "\n\n"
 	}
@@ -113,6 +104,13 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 
 	buffer.WriteString("\n")
 
+	if def.Type.Kind == ast.KindStruct && def.Type.ImplementsVariant() {
+		variant := tools.UpperCamelCase(def.Type.ImplementedVariant())
+
+		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", defName, variant))
+		buffer.WriteString("\n")
+	}
+
 	return []byte(buffer.String()), nil
 }
 
@@ -132,58 +130,6 @@ func (jenny RawTypes) formatEnumDef(def ast.Object, packageMapper pkgMapper) str
 	buffer.WriteString(")\n")
 
 	return buffer.String()
-}
-
-func (jenny RawTypes) jsonMarshalVeneer(def ast.Object, packageMapper pkgMapper) (string, error) {
-	// the only case for which we need to render such veneer is for structs
-	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
-
-	// if the object isn't a struct: nothing to do.
-	if def.Type.Kind != ast.KindStruct {
-		return "", nil
-	}
-
-	// We know that a struct was generated from a disjunction if it has a "hint" that says so.
-	// There are only two types of disjunctions we support:
-	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
-	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
-	// 	  structs and these structs have a common "discriminator" field.
-
-	if _, ok := def.Type.Hints[ast.HintDisjunctionOfScalars]; ok {
-		return jenny.renderVeneerTemplate("disjunction_of_scalars.types.json_marshal.tmpl", map[string]any{
-			"def": def,
-		}, packageMapper)
-	}
-
-	if hintVal, ok := def.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs]; ok {
-		return jenny.renderVeneerTemplate("disjunction_of_refs.types.json_marshal.tmpl", map[string]any{
-			"def":  def,
-			"hint": hintVal,
-		}, packageMapper)
-	}
-
-	// We didn't find a hint relevant to us: nothing do to.
-	return "", nil
-}
-
-func (jenny RawTypes) renderVeneerTemplate(templateFile string, data map[string]any, packageMapper pkgMapper) (string, error) {
-	tmpl := templates.Lookup(templateFile)
-	if tmpl == nil {
-		return "", fmt.Errorf("veneer template '%s' not found", templateFile)
-	}
-
-	tmpl = tmpl.Funcs(map[string]any{
-		"formatType": func(typerDef ast.Type) string {
-			return formatType(typerDef, packageMapper)
-		},
-	})
-
-	buf := bytes.Buffer{}
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return "", fmt.Errorf("failed executing veneer template: %w", err)
-	}
-
-	return buf.String(), nil
 }
 
 func formatStructBody(def ast.StructType, packageMapper pkgMapper) string {
@@ -207,13 +153,6 @@ func formatField(def ast.StructField, packageMapper pkgMapper) string {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	// ToDo: this doesn't follow references to other types like the builder jenny does
-	/*
-		if def.Type.Default != nil {
-			buffer.WriteString(fmt.Sprintf("// Default: %#v\n", def.Type.Default))
-		}
-	*/
-
 	jsonOmitEmpty := ""
 	if !def.Required {
 		jsonOmitEmpty = ",omitempty"
@@ -233,6 +172,10 @@ func formatField(def ast.StructField, packageMapper pkgMapper) string {
 func formatType(def ast.Type, packageMapper pkgMapper) string {
 	if def.IsAny() {
 		return "any"
+	}
+
+	if def.Kind == ast.KindComposableSlot {
+		return variantInterface(string(def.AsComposableSlot().Variant), packageMapper)
 	}
 
 	if def.Kind == ast.KindArray {
@@ -272,6 +215,12 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 
 	// FIXME: we should never be here
 	return "unknown"
+}
+
+func variantInterface(variant string, packageMapper pkgMapper) string {
+	referredPkg := packageMapper("cog/variants")
+
+	return fmt.Sprintf("%s.%s", referredPkg, tools.UpperCamelCase(variant))
 }
 
 func formatArray(def ast.ArrayType, packageMapper pkgMapper) string {
@@ -354,4 +303,20 @@ func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) strin
 	buffer.WriteString("}")
 
 	return buffer.String()
+}
+
+func formatImports(importMap map[string]string) string {
+	if len(importMap) == 0 {
+		return ""
+	}
+
+	statements := make([]string, 0, len(importMap))
+
+	for alias, importPath := range importMap {
+		statements = append(statements, fmt.Sprintf(`	%s "%s"`, alias, importPath))
+	}
+
+	return fmt.Sprintf(`import (
+%[1]s
+)`, strings.Join(statements, "\n"))
 }

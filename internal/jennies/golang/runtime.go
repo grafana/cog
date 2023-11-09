@@ -3,6 +3,7 @@ package golang
 import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/template"
 )
 
 type Runtime struct {
@@ -13,9 +14,15 @@ func (jenny Runtime) JennyName() string {
 }
 
 func (jenny Runtime) Generate(_ context.Builders) (codejen.Files, error) {
+	runtime, err := jenny.Runtime()
+	if err != nil {
+		return nil, err
+	}
+
 	return codejen.Files{
 		*codejen.NewFile("cog/builder.go", []byte(jenny.generateBuilderInterface()), jenny),
 		*codejen.NewFile("cog/errors.go", []byte(jenny.generateErrorTools()), jenny),
+		*codejen.NewFile("cog/runtime.go", []byte(runtime), jenny),
 	}, nil
 }
 
@@ -27,6 +34,15 @@ type Builder[ResourceT any] interface {
 }
 
 `
+}
+
+func (jenny Runtime) Runtime() (string, error) {
+	imports := template.NewImportMap()
+	imports.Add("cogvariants", "github.com/grafana/cog/generated/cog/variants")
+
+	return renderTemplate("runtime/runtime.tmpl", map[string]any{
+		"imports": formatImports(imports),
+	})
 }
 
 func (jenny Runtime) generateErrorTools() string {

@@ -12,11 +12,15 @@ func diskIOTimeseries() *timeseries.PanelBuilder {
 		Title("Disk I/O").
 		FillOpacity(0).
 		Unit("Bps").
-		Targets([]dashboard.Target{
+		WithTarget(
 			basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read"),
+		).
+		WithTarget(
 			basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written"),
+		).
+		WithTarget(
 			basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time"),
-		}).
+		).
 		// Overrides configuration
 		WithOverride(
 			// TODO: not very intuitive
@@ -47,10 +51,12 @@ func diskSpaceUsageTable() *table.PanelBuilder {
 		Unit("decbytes").
 		CellHeight(common.TableCellHeightSm).
 		Footer(common.NewTableFooterOptionsBuilder().CountRows(false).Reducer([]string{"sum"})).
-		Targets([]dashboard.Target{
+		WithTarget(
 			tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "A"),
+		).
+		WithTarget(
 			tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "B"),
-		}).
+		).
 		// Transformations
 		WithTransformation(dashboard.DataTransformerConfig{
 			Id: "groupBy",

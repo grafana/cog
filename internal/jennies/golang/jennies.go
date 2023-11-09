@@ -14,7 +14,10 @@ func Jennies() *codejen.JennyList[context.Builders] {
 	})
 	targets.AppendOneToMany(
 		Runtime{},
+		VariantsPlugins{},
+
 		RawTypes{},
+		JSONMarshalling{},
 		&Builder{},
 	)
 	targets.AddPostprocessors(PostProcessFile)
