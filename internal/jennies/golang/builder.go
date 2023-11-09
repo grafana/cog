@@ -51,7 +51,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	var buffer strings.Builder
 
 	jenny.imports = template.NewImportMap()
-	jenny.imports.Add("cog", "github.com/grafana/cog/generated")
+	jenny.imports.Add("cog", "github.com/grafana/cog/generated/cog")
 
 	fullObjectName := tools.UpperCamelCase(builder.For.Name)
 	if builder.For.SelfRef.ReferredPkg != builder.Package {

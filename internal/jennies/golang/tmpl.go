@@ -14,7 +14,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/*.tmpl templates/veneers/*.tmpl
+//go:embed templates/builders/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
 var veneersFS embed.FS
 
@@ -65,5 +65,5 @@ func init() {
 			},
 		})
 
-	templates = template.Must(base.ParseFS(veneersFS, "templates/*.tmpl", "templates/veneers/*.tmpl")).Option("missingkey=error")
+	templates = template.Must(base.ParseFS(veneersFS, "templates/builders/*.tmpl", "templates/types/*.tmpl")).Option("missingkey=error")
 }

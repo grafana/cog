@@ -12,8 +12,8 @@ func Jennies() *codejen.JennyList[context.Builders] {
 	targets := codejen.JennyListWithNamer[context.Builders](func(_ context.Builders) string {
 		return LanguageRef
 	})
-	targets.AppendOneToOne(BuilderInterface{})
 	targets.AppendOneToMany(
+		Runtime{},
 		RawTypes{},
 		&Builder{},
 	)
