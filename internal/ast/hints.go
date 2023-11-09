@@ -11,6 +11,10 @@ const (
 	// references to structs, the original definition of which is associated
 	// to this hint.
 	HintDiscriminatedDisjunctionOfRefs = "disjunction_of_refs"
+
+	// HintImplementsVariant indicates that a type implements a variant.
+	// ie: dataquery, panelcfg, ...
+	HintImplementsVariant = "implements_variant"
 )
 
 const DiscriminatorCatchAll = "cog_discriminator_catch_all"

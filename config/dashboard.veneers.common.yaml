@@ -117,6 +117,14 @@ options:
 
   - omit: { by_names: {object: Panel, options: *UnwantedPanelOptions} }
 
+  # Append a single target instead forcing to define all of them at once
+  - array_to_append:
+      by_name: Panel.targets
+  # Targets() to WithTarget()
+  - rename:
+      by_name_case_insensitive: Panel.targets
+      as: withTarget
+
   # Append a single override instead forcing to define all of them at once
   - array_to_append:
       by_name: Panel.overrides

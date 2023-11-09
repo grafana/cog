@@ -1,0 +1,10 @@
+func (resource *{{ .def.Name|formatIdentifier }}) MarshalJSON() ([]byte, error) {
+{{- range .def.Type.Struct.Fields }}
+	if resource.{{ .Name|formatIdentifier }} != nil {
+		return json.Marshal(resource.{{ .Name|formatIdentifier }})
+	}
+{{- end }}
+
+	return nil, nil
+}
+

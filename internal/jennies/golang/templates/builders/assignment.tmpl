@@ -22,7 +22,7 @@
     {{- with .Value.Argument }}
         {{- $argName := formatArgName .Name }}
 
-        {{- if (typeHasBuilder .Type) }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- $argName = (print $argName "Resource") }}
         {{- end }}
 
@@ -40,7 +40,7 @@
         {{- end }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- if (typeHasBuilder .Type) }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{ formatArgName .Name}}Resource, err := {{ formatArgName .Name}}.Build()
         if err != nil {
             builder.errors["{{ $.Assignment.Path }}"] = err.(cog.BuildErrors)

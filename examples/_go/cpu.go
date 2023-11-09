@@ -28,9 +28,9 @@ func cpuUsageTimeseries() *timeseries.PanelBuilder {
 		Min(0).
 		Max(1).
 		Unit("percentunit").
-		Targets([]dashboard.Target{
+		WithTarget(
 			basicPrometheusQuery(query, "{{ cpu }}"),
-		})
+		)
 }
 
 func loadAverageTimeseries() *timeseries.PanelBuilder {
@@ -46,12 +46,18 @@ func loadAverageTimeseries() *timeseries.PanelBuilder {
 		).
 		Min(0).
 		Unit("short").
-		Targets([]dashboard.Target{
+		WithTarget(
 			basicPrometheusQuery(`node_load1{job="integrations/raspberrypi-node", instance="$instance"}`, "1m load average"),
+		).
+		WithTarget(
 			basicPrometheusQuery(`node_load5{job="integrations/raspberrypi-node", instance="$instance"}`, "5m load average"),
+		).
+		WithTarget(
 			basicPrometheusQuery(`node_load15{job="integrations/raspberrypi-node", instance="$instance"}`, "15m load average"),
+		).
+		WithTarget(
 			basicPrometheusQuery(`count(node_cpu_seconds_total{job="integrations/raspberrypi-node", instance="$instance", mode="idle"})`, "logical cores"),
-		})
+		)
 }
 
 func cpuTemperatureGauge() *gauge.PanelBuilder {
@@ -69,7 +75,7 @@ func cpuTemperatureGauge() *gauge.PanelBuilder {
 					{Value: toPtr(85.0), Color: "rgba(245, 54, 54, 0.9)"},
 				}),
 		).
-		Targets([]dashboard.Target{
+		WithTarget(
 			basicPrometheusQuery(`avg(node_hwmon_temp_celsius{job="integrations/raspberrypi-node", instance="$instance"})`, ""),
-		})
+		)
 }

@@ -12,6 +12,7 @@ func CommonPasses() []Pass {
 	return []Pass{
 		&Unspec{},
 		&DashboardPanelsRewrite{},
+		&DashboardTargetsRewrite{},
 		&DashboardTimePicker{},
 		&Cloudwatch{},
 	}

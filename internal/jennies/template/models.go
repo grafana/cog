@@ -5,14 +5,15 @@ import (
 )
 
 type Builder struct {
-	Package     string
-	BuilderName string
-	ObjectName  string
-	Imports     ImportMap
-	ImportAlias string // alias to the pkg in which the object being built lives.
-	Constructor Constructor
-	Options     []Option
-	Defaults    []OptionCall
+	Package              string
+	BuilderSignatureType string
+	BuilderName          string
+	ObjectName           string
+	Imports              ImportMap
+	ImportAlias          string // alias to the pkg in which the object being built lives.
+	Constructor          Constructor
+	Options              []Option
+	Defaults             []OptionCall
 }
 
 type Constructor struct {

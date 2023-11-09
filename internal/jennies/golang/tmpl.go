@@ -1,8 +1,11 @@
 package golang
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
+	"io"
+	"io/fs"
 	"strings"
 	"text/template"
 
@@ -14,7 +17,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/builders/*.tmpl templates/types/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
 var veneersFS embed.FS
 
@@ -26,11 +29,14 @@ func init() {
 
 	base := template.New("golang")
 	base.
+		Option("missingkey=error").
 		Funcs(sprig.FuncMap()).
 		Funcs(map[string]any{
-			"formatPath":     func(_ ast.Path) string { return "" },  // placeholder function, will be overridden by jennies
-			"formatType":     func(_ ast.Type) string { return "" },  // placeholder function, will be overridden by jennies
-			"typeHasBuilder": func(_ ast.Type) bool { return false }, // placeholder function, will be overridden by jennies
+			// placeholder functions, will be overridden by jennies
+			"formatPath":               func(_ ast.Path) string { return "" },
+			"formatType":               func(_ ast.Type) string { return "" },
+			"typeHasBuilder":           func(_ ast.Type) bool { return false },
+			"resolvesToComposableSlot": func(_ ast.Type) bool { return false },
 
 			"formatIdentifier": tools.UpperCamelCase,
 			"lowerCamelCase":   tools.LowerCamelCase,
@@ -65,5 +71,44 @@ func init() {
 			},
 		})
 
-	templates = template.Must(base.ParseFS(veneersFS, "templates/builders/*.tmpl", "templates/types/*.tmpl")).Option("missingkey=error")
+	templates = template.Must(findAndParseTemplates(veneersFS, base, "templates"))
+}
+
+func findAndParseTemplates(vfs fs.FS, rootTmpl *template.Template, rootDir string) (*template.Template, error) {
+	err := fs.WalkDir(vfs, rootDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		fileHandle, err := vfs.Open(path)
+		if err != nil {
+			return err
+		}
+
+		contents, err := io.ReadAll(fileHandle)
+		if err != nil {
+			return err
+		}
+
+		templateName := strings.TrimPrefix(strings.TrimPrefix(path, rootDir), "/")
+		t := rootTmpl.New(templateName)
+		_, err = t.Parse(string(contents))
+
+		return err
+	})
+
+	return rootTmpl, err
+}
+
+func renderTemplate(templateFile string, data map[string]any) (string, error) {
+	buf := bytes.Buffer{}
+	if err := templates.ExecuteTemplate(&buf, templateFile, data); err != nil {
+		return "", fmt.Errorf("failed executing template: %w", err)
+	}
+
+	return buf.String(), nil
 }
