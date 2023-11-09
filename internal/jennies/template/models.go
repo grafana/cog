@@ -37,16 +37,15 @@ type Argument struct {
 type Assignment struct {
 	Path           ast.Path
 	InitSafeguards []string
+	Constraints    []Constraint
 	Method         ast.AssignmentMethod
 	Value          ast.AssignmentValue
-	Constraints    []Constraint
 }
 
 type Constraint struct {
-	Name     string
-	Op       ast.Op
-	Arg      any
-	IsString bool
+	ArgName   string
+	Op        ast.Op
+	Parameter any
 }
 
 type OptionCall struct {

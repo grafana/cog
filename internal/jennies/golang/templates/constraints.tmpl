@@ -1,7 +1,19 @@
 {{- define "constraints" }}
 {{- range . }}
-    if !({{ if .IsString }}len([]rune({{ .Name }})){{ else }}{{ .Name }}{{ end }} {{ .Op }} {{ .Arg }}) {
-        builder.errors["cog"] = cog.MakeBuildErrors("{{ .Name }}", errors.New("value must be {{ .Op }} {{ .Arg }}"))
+    {{- $leftOperand := .ArgName }}
+    {{- $operator := .Op }}
+
+    {{- if eq .Op "minLength"}}
+        {{- $leftOperand = print "len([]rune(" .ArgName "))" }}
+        {{- $operator = ">=" }}
+    {{- end }}
+    {{- if eq .Op "maxLength"}}
+        {{- $leftOperand = print .ArgName ".length" }}
+        {{- $operator = "<=" }}
+    {{- end }}
+
+    if !({{ $leftOperand }} {{ $operator }} {{ .Parameter }}) {
+        builder.errors["{{ .ArgName }}"] = cog.MakeBuildErrors("{{ .ArgName }}", errors.New("{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}"))
         return builder
     }
 {{- end }}

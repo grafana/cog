@@ -155,7 +155,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 }
 
 func (jenny *Builder) generateAssignment(builder ast.Builder, assign ast.Assignment) template.Assignment {
-	var pathInitSafeGuards []string
+	var initSafeGuards []string
 	for i, chunk := range assign.Path {
 		if i == len(assign.Path)-1 && assign.Method != ast.AppendAssignment {
 			continue
@@ -177,7 +177,7 @@ func (jenny *Builder) generateAssignment(builder ast.Builder, assign ast.Assignm
 		}
 
 		subPath := assign.Path[:i+1]
-		pathInitSafeGuards = append(pathInitSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
+		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
 	}
 
 	var constraints []template.Constraint
@@ -188,35 +188,21 @@ func (jenny *Builder) generateAssignment(builder ast.Builder, assign ast.Assignm
 
 	return template.Assignment{
 		Path:           assign.Path,
-		Method:         assign.Method,
-		InitSafeguards: pathInitSafeGuards,
-		Value:          assign.Value,
+		InitSafeguards: initSafeGuards,
 		Constraints:    constraints,
+		Method:         assign.Method,
+		Value:          assign.Value,
 	}
 }
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
 	return tools.Map(constraints, func(constraint ast.TypeConstraint) template.Constraint {
-		op, isString := jenny.constraintComparison(constraint)
-
 		return template.Constraint{
-			Name:     argumentName,
-			Op:       op,
-			Arg:      constraint.Args[0],
-			IsString: isString,
+			ArgName:   argumentName,
+			Op:        constraint.Op,
+			Parameter: constraint.Args[0],
 		}
 	})
-}
-
-func (jenny *Builder) constraintComparison(constraint ast.TypeConstraint) (ast.Op, bool) {
-	if constraint.Op == ast.MinLengthOp {
-		return ast.GreaterThanEqualOp, true
-	}
-	if constraint.Op == ast.MaxLengthOp {
-		return ast.LessThanEqualOp, true
-	}
-
-	return constraint.Op, false
 }
 
 // typeImportAlias returns the alias to use when importing the given object's type definition.

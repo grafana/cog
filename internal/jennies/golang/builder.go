@@ -220,10 +220,10 @@ func (jenny *Builder) generateAssignment(assignment ast.Assignment) template.Ass
 		}
 	}
 
-	constraints := make([]template.Constraint, 0)
+	var constraints []template.Constraint
 	if assignment.Value.Argument != nil {
 		argName := escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
-		constraints = append(constraints, jenny.constraints(argName, assignment.Constraints)...)
+		constraints = jenny.constraints(argName, assignment.Constraints)
 	}
 
 	return template.Assignment{
@@ -255,26 +255,12 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 
 func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
 	return tools.Map(constraints, func(constraint ast.TypeConstraint) template.Constraint {
-		op, isString := jenny.constraintComparison(constraint)
-
 		return template.Constraint{
-			Name:     argumentName,
-			Op:       op,
-			Arg:      constraint.Args[0],
-			IsString: isString,
+			ArgName:   argumentName,
+			Op:        constraint.Op,
+			Parameter: constraint.Args[0],
 		}
 	})
-}
-
-func (jenny *Builder) constraintComparison(constraint ast.TypeConstraint) (ast.Op, bool) {
-	if constraint.Op == ast.MinLengthOp {
-		return ast.GreaterThanEqualOp, true
-	}
-	if constraint.Op == ast.MaxLengthOp {
-		return ast.LessThanEqualOp, true
-	}
-
-	return constraint.Op, false
 }
 
 // importType declares an import statement for the type definition of
