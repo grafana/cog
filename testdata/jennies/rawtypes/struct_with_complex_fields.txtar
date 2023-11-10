@@ -247,6 +247,14 @@ type StringOrBool struct {
 	Bool *bool `json:"Bool,omitempty"`
 }
 
+type StringOrSomeOtherStruct struct {
+	String *string `json:"String,omitempty"`
+	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
+}
+
+-- out/jennies/GoJSONMarshalling --
+== struct_complex_fields/types_json_marshalling_gen.go
+package struct_complex_fields
 func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {
 		return json.Marshal(resource.String)
@@ -287,10 +295,5 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	}
 
 	return errors.Join(errList...)
-}
-
-type StringOrSomeOtherStruct struct {
-	String *string `json:"String,omitempty"`
-	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
 }
 
