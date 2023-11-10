@@ -39,7 +39,7 @@
 }
 -- out/jennies/TypescriptRawTypes --
 == refs/types_gen.ts
-import * as otherpkg from "../otherpkg/types_gen";
+import * as otherpkg from "../otherpkg";
 
 export interface SomeStruct {
 	FieldAny: any;
