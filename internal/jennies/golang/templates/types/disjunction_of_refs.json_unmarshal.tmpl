@@ -1,4 +1,4 @@
-func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) error {
+func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -21,12 +21,12 @@ func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) erro
     {{- else }}
 	case "{{ $discriminatorValue }}":
 	{{- end }}
-		var {{ $typeName|lowerCamelCase }} {{ $typeName|formatIdentifier }}
+		var {{ $typeName|lowerCamelCase }} {{ $typeName|upperCamelCase }}
 		if err := json.Unmarshal(raw, &{{ $typeName|lowerCamelCase }}); err != nil {
 			return err
 		}
 
-		resource.{{ $typeName|formatIdentifier }} = &{{ $typeName|lowerCamelCase }}
+		resource.{{ $typeName|upperCamelCase }} = &{{ $typeName|lowerCamelCase }}
 		return nil
 {{- end }}
 	}

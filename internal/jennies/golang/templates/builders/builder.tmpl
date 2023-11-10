@@ -58,6 +58,6 @@ func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args
 
 func (builder *{{ .BuilderName }}Builder) applyDefaults() {
     {{- range .Defaults }}
-    builder.{{ .OptionName|formatIdentifier }}({{ .Args|join ", " }})
+    builder.{{ .OptionName|upperCamelCase }}({{ .Args|join ", " }})
     {{- end }}
 }

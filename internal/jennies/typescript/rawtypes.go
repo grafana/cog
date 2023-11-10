@@ -533,7 +533,7 @@ func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) strin
 	return buffer.String()
 }
 
-func formatImports(importMap map[string]string) string {
+func formatImports(importMap template.ImportMap) string {
 	if len(importMap) == 0 {
 		return ""
 	}

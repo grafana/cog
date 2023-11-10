@@ -1,17 +1,17 @@
-func (resource *{{ .def.Name|formatIdentifier }}) UnmarshalJSON(raw []byte) error {
+func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
 
 	var errList []error
 {{ range .def.Type.Struct.Fields }}
-	// {{ .Name|formatIdentifier }}
-	var {{ .Name }} {{ trimPrefix (.Type | formatType) "*" }}
+	// {{ .Name|upperCamelCase }}
+	var {{ .Name }} {{ trimPrefix "*" (.Type | formatType) }}
 	if err := json.Unmarshal(raw, &{{ .Name }}); err != nil {
 		errList = append(errList, err)
-		resource.{{ .Name|formatIdentifier }} = nil
+		resource.{{ .Name|upperCamelCase }} = nil
 	} else {
-		resource.{{ .Name|formatIdentifier }} = {{ if ne .Type.Kind "array" }}&{{ end }}{{ .Name }}
+		resource.{{ .Name|upperCamelCase }} = {{ if ne .Type.Kind "array" }}&{{ end }}{{ .Name }}
 		return nil
 	}
 {{ end }}
