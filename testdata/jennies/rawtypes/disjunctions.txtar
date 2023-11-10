@@ -250,6 +250,14 @@ type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
 	YetAnotherStruct *YetAnotherStruct `json:"YetAnotherStruct,omitempty"`
 }
 
+type StringOrBool struct {
+	String *string `json:"String,omitempty"`
+	Bool *bool `json:"Bool,omitempty"`
+}
+
+-- out/jennies/GoJSONMarshalling --
+== disjunctions/types_json_marshalling_gen.go
+package disjunctions
 func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]byte, error) {
 	if resource.SomeStruct != nil {
 		return json.Marshal(resource.SomeStruct)
@@ -308,11 +316,6 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 	}
 
 	return fmt.Errorf("could not unmarshal resource with `Type = %v`", discriminator)
-}
-
-type StringOrBool struct {
-	String *string `json:"String,omitempty"`
-	Bool *bool `json:"Bool,omitempty"`
 }
 
 func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
