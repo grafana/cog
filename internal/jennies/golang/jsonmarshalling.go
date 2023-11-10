@@ -54,9 +54,7 @@ func (jenny JSONMarshalling) generateSchema(context context.Builders, schema *as
 			return ""
 		}
 
-		jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
-
-		return pkg
+		return jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
 	}
 
 	for _, object := range schema.Objects {

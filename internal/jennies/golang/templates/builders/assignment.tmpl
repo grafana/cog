@@ -60,7 +60,7 @@
         {{- range .Envelope.Values }}
         {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
         {{- $value = maybeAsPointer (.Path.Last.Type.Nullable) $value }}
-        {{ (index .Path 0).Identifier | formatIdentifier }}: {{ $value }},
+        {{ (index .Path 0).Identifier | upperCamelCase }}: {{ $value }},
         {{- end }}
     }
 {{- end }}
