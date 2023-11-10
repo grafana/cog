@@ -1,9 +1,7 @@
 {{ range $alias, $importPath := .Imports -}}
 import * as {{ $alias }} from '{{ $importPath }}';
-{{- end }}
-import { CogOptionsBuilder } from '../options_builder_gen';
-
-export class {{ .BuilderName|upperCamelCase }}Builder implements CogOptionsBuilder<{{ .ImportAlias }}.{{ .ObjectName }}> {
+{{ end }}
+export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuilder<{{ .BuilderSignatureType }}> {
     private readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
 
     constructor({{ template "args" .Constructor.Args }}) {
@@ -42,7 +40,7 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements CogOptionsBuild
     {{- with .Value.Argument }}
         {{- $argName := lowerCamelCase .Name }}
 
-        {{- if (typeHasBuilder .Type) }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- $argName }}.build()
         {{- else }}
         {{- $argName }}

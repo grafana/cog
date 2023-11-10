@@ -44,6 +44,19 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	var buffer strings.Builder
 
 	jenny.imports = template.NewImportMap()
+	jenny.imports.Add("cog", "../cog")
+	typeImportMapper := func(pkg string) string {
+		if pkg == builder.Package {
+			return ""
+		}
+
+		return jenny.imports.Add(pkg, fmt.Sprintf("../%s", pkg))
+	}
+
+	buildObjectSignature := builder.For.SelfRef.ReferredPkg + "." + tools.UpperCamelCase(builder.For.Name)
+	if builder.For.Type.ImplementsVariant() {
+		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant(), typeImportMapper)
+	}
 
 	err := templates.
 		Funcs(map[string]any{
@@ -51,13 +64,18 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				_, found := context.BuilderForType(typeDef)
 				return found
 			},
+			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
+				_, found := context.ResolveToComposableSlot(typeDef)
+				return found
+			},
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
-			BuilderName: builder.Name,
-			ObjectName:  builder.For.Name,
-			Imports:     jenny.imports,
-			ImportAlias: jenny.importType(builder.For.SelfRef),
-			Constructor: jenny.generateConstructor(context, builder),
+			BuilderName:          builder.Name,
+			ObjectName:           builder.For.Name,
+			BuilderSignatureType: buildObjectSignature,
+			Imports:              jenny.imports,
+			ImportAlias:          jenny.importType(builder.For.SelfRef),
+			Constructor:          jenny.generateConstructor(context, builder),
 			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
 				return jenny.generateOption(context, builder, opt)
 			}),
@@ -109,6 +127,14 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 }
 
 func (jenny *Builder) generateArgument(context context.Builders, builder ast.Builder, arg ast.Argument) template.Argument {
+	if composableSlot, ok := context.ResolveToComposableSlot(arg.Type); ok {
+		return template.Argument{
+			Name:          arg.Name,
+			ReferredAlias: "cog",
+			ReferredName:  tools.UpperCamelCase(string(composableSlot.AsComposableSlot().Variant)),
+		}
+	}
+
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For.SelfRef)
 

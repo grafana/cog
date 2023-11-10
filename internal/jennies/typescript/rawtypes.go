@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -46,16 +47,14 @@ func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) 
 func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
-	imports := newImportMap()
+	imports := template.NewImportMap()
 
 	packageMapper := func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
 		}
 
-		imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
-
-		return pkg
+		return imports.Add(pkg, fmt.Sprintf("../%s", pkg))
 	}
 
 	for _, typeDef := range schema.Objects {
@@ -68,7 +67,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		buffer.WriteString("\n")
 	}
 
-	importStatements := imports.Format()
+	importStatements := formatImports(imports)
 	if importStatements != "" {
 		importStatements += "\n\n"
 	}
@@ -88,7 +87,7 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 	switch def.Type.Kind {
 	case ast.KindStruct:
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
-		buffer.WriteString(formatStructFields(def.Type.AsStruct().Fields, packageMapper))
+		buffer.WriteString(formatStructFields(def.Type, packageMapper))
 		buffer.WriteString("\n")
 	case ast.KindEnum:
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
@@ -116,12 +115,13 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
 		buffer.WriteString(formatIntersection(def.Type.AsIntersection(), packageMapper))
 		buffer.WriteString("\n")
+	case ast.KindComposableSlot:
+		buffer.WriteString(fmt.Sprintf("interface %s %s\n", def.Name, variantInterface(string(def.Type.AsComposableSlot().Variant), packageMapper)))
 	default:
-		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
+		return nil, fmt.Errorf("unhandled object of type: %s", def.Type.Kind)
 	}
-
-	// generate a "default value factory" for every object, except for constants
-	if def.Type.Kind != ast.KindScalar || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
+	// generate a "default value factory" for every object, except for constants or composability slots
+	if (def.Type.Kind != ast.KindScalar && def.Type.Kind != ast.KindComposableSlot) || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
 		buffer.WriteString("\n")
 
 		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(def.Name), def.Name))
@@ -135,12 +135,12 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object, packageMa
 	return []byte(buffer.String()), nil
 }
 
-func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) string {
+func formatStructFields(structType ast.Type, packageMapper pkgMapper) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("{\n")
 
-	for _, fieldDef := range fields {
+	for _, fieldDef := range structType.AsStruct().Fields {
 		fieldDefGen := formatField(fieldDef, packageMapper)
 
 		buffer.WriteString(
@@ -149,6 +149,11 @@ func formatStructFields(fields []ast.StructField, packageMapper pkgMapper) strin
 				"\t",
 			),
 		)
+	}
+
+	if structType.ImplementsVariant() {
+		variant := tools.UpperCamelCase(structType.ImplementedVariant())
+		buffer.WriteString(fmt.Sprintf("\t_implements%sVariant(): void;\n", variant))
 	}
 
 	buffer.WriteString("}")
@@ -194,7 +199,7 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 	case ast.KindArray:
 		return formatArray(def.AsArray(), packageMapper)
 	case ast.KindStruct:
-		return formatStructFields(def.AsStruct().Fields, packageMapper)
+		return formatStructFields(def, packageMapper)
 	case ast.KindMap:
 		return formatMap(def.AsMap(), packageMapper)
 	case ast.KindEnum:
@@ -208,6 +213,8 @@ func formatType(def ast.Type, packageMapper pkgMapper) string {
 		return formatScalarKind(def.AsScalar().ScalarKind)
 	case ast.KindIntersection:
 		return formatIntersection(def.AsIntersection(), packageMapper)
+	case ast.KindComposableSlot:
+		return variantInterface(string(def.AsComposableSlot().Variant), packageMapper)
 	default:
 		return string(def.Kind)
 	}
@@ -321,7 +328,7 @@ func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkg
 	case ast.KindDisjunction:
 		return defaultValueForType(schema, typeDef.AsDisjunction().Branches[0], packageMapper)
 	case ast.KindStruct:
-		return defaultValuesForStructType(schema, typeDef.AsStruct(), packageMapper)
+		return defaultValuesForStructType(schema, typeDef, packageMapper)
 	case ast.KindEnum: // anonymous enum
 		return typeDef.AsEnum().Values[0].Value
 	case ast.KindRef:
@@ -353,10 +360,10 @@ func defaultValueForType(schema *ast.Schema, typeDef ast.Type, packageMapper pkg
 	}
 }
 
-func defaultValuesForStructType(schema *ast.Schema, structDef ast.StructType, packageMapper pkgMapper) *orderedmap.Map[string, any] {
+func defaultValuesForStructType(schema *ast.Schema, structType ast.Type, packageMapper pkgMapper) *orderedmap.Map[string, any] {
 	defaults := orderedmap.New[string, any]()
 
-	for _, field := range structDef.Fields {
+	for _, field := range structType.AsStruct().Fields {
 		if field.Type.Default != nil {
 			defaults.Set(field.Name, field.Type.Default)
 			continue
@@ -367,6 +374,11 @@ func defaultValuesForStructType(schema *ast.Schema, structDef ast.StructType, pa
 		}
 
 		defaults.Set(field.Name, defaultValueForType(schema, field.Type, packageMapper))
+	}
+
+	if structType.ImplementsVariant() {
+		variant := tools.UpperCamelCase(structType.ImplementedVariant())
+		defaults.Set("_implements"+variant+"Variant", raw("() => {}"))
 	}
 
 	return defaults
@@ -429,7 +441,7 @@ func defaultValuesForIntersection(schema *ast.Schema, intersectDef ast.Intersect
 		}
 
 		if branch.Struct != nil {
-			strctDef := defaultValuesForStructType(schema, branch.AsStruct(), packageMapper)
+			strctDef := defaultValuesForStructType(schema, branch, packageMapper)
 			strctDef.Iterate(func(key string, value any) {
 				defaults.Set(key, value)
 			})
@@ -473,6 +485,12 @@ func formatValue(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
+func variantInterface(variant string, packageMapper pkgMapper) string {
+	referredPkg := packageMapper("cog")
+
+	return fmt.Sprintf("%s.%s", referredPkg, tools.UpperCamelCase(variant))
+}
+
 func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) string {
 	var buffer strings.Builder
 
@@ -513,4 +531,18 @@ func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) strin
 	buffer.WriteString("}")
 
 	return buffer.String()
+}
+
+func formatImports(importMap map[string]string) string {
+	if len(importMap) == 0 {
+		return ""
+	}
+
+	statements := make([]string, 0, len(importMap))
+
+	for alias, importPath := range importMap {
+		statements = append(statements, fmt.Sprintf(`import * as %s from "%s";`, alias, importPath))
+	}
+
+	return strings.Join(statements, "\n")
 }

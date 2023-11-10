@@ -15,26 +15,23 @@ import * as prometheus from "../../generated/prometheus";
 import * as loki from "../../generated/loki";
 import {PromQueryFormat} from "../../generated/prometheus";
 
-export const basicPrometheusQuery = (query: string, legend: string): prometheus.dataquery => {
+export const basicPrometheusQuery = (query: string, legend: string): prometheus.DataqueryBuilder => {
     return new prometheus.DataqueryBuilder()
         .expr(query)
-        .legendFormat(legend)
-        .build();
+        .legendFormat(legend);
 };
 
-export const basicLokiQuery = (query: string): loki.dataquery => {
+export const basicLokiQuery = (query: string): loki.DataqueryBuilder => {
     return new loki.DataqueryBuilder()
-        .expr(query)
-        .build();
+        .expr(query);
 };
 
-export const tablePrometheusQuery = (query: string, ref: string): prometheus.dataquery => {
+export const tablePrometheusQuery = (query: string, ref: string): prometheus.DataqueryBuilder => {
     return new prometheus.DataqueryBuilder()
         .expr(query)
         .instant(true)
         .format(PromQueryFormat.PromQueryFormatTable)
-        .refId(ref)
-        .build();
+        .refId(ref);
 };
 
 export const defaultTimeseries = (): TimeseriesPanelBuilder => {

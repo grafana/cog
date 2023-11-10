@@ -2,7 +2,7 @@
     {{- range $i, $arg := . }}
         {{- if gt $i 0 }}, {{- end }}
         {{- if eq $arg.Type "" }}
-            {{- $arg.Name }}: CogOptionsBuilder<{{- $arg.ReferredAlias }}.{{- $arg.ReferredName }}>
+            {{- $arg.Name }}: cog.OptionsBuilder<{{- $arg.ReferredAlias }}.{{- $arg.ReferredName }}>
         {{- else }}
             {{- $arg.Name }}: {{ $arg.Type }}
         {{- end }}

@@ -8,11 +8,15 @@ export const diskIOTimeseries = (): TimeseriesPanelBuilder => {
         .title("Disk I/O")
         .fillOpacity(0)
         .unit("Bps")
-        .targets([
+        .withTarget(
             basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read"),
+        )
+        .withTarget(
             basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written"),
+        )
+        .withTarget(
             basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time"),
-        ])
+        )
         .withOverride(
             {id: "byRegexp", options: "/ io time/"},
             [
@@ -29,10 +33,12 @@ export const diskSpaceUsageTable = (): TablePanelBuilder => {
         .cellHeight(TableCellHeight.TableCellHeightSm)
         .footer(new TableFooterOptionsBuilder().countRows(false).reducer(["sum"]))
         .unit("decbytes")
-        .targets([
+        .withTarget(
             tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "A"),
+        )
+        .withTarget(
             tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "B"),
-        ])
+        )
 
         // Transformations
         .withTransformation({
