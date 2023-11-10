@@ -28,12 +28,9 @@ export * from './options_builder_gen';
 
 func (jenny Runtime) generateVariantsFile() string {
 	return `export interface Dataquery {
-	implementsDataqueryVariant(): void;
+	_implementsDataqueryVariant(): void;
 }
 
-export interface Panelcfg {
-	implementsPanelcfgVariant(): void;
-}
 `
 }
 
