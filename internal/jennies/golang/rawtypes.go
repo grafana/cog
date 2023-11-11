@@ -15,6 +15,7 @@ import (
 type pkgMapper func(string) string
 
 type RawTypes struct {
+	Config Config
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -50,7 +51,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 			return ""
 		}
 
-		return imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
+		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
 
 	for _, object := range schema.Objects {

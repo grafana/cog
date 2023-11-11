@@ -14,6 +14,8 @@ import (
 )
 
 type JSONMarshalling struct {
+	Config Config
+
 	imports       template.ImportMap
 	packageMapper func(string) string
 }
@@ -54,7 +56,7 @@ func (jenny JSONMarshalling) generateSchema(context context.Builders, schema *as
 			return ""
 		}
 
-		return jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
+		return jenny.imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
 
 	for _, object := range schema.Objects {
@@ -180,7 +182,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context context
 	var buffer strings.Builder
 	fields := obj.Type.AsStruct().Fields
 
-	jenny.imports.Add("cog", "github.com/grafana/cog/generated/cog")
+	jenny.imports.Add("cog", jenny.Config.importPath("cog"))
 
 	// unmarshal "normal" fields (ie: with no composable slot)
 	for _, field := range fields {
@@ -329,7 +331,7 @@ dataqueryTypeHint = *resource.%[1]s.Type
 }
 
 func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
-	jenny.imports.Add("cogvariants", "github.com/grafana/cog/generated/cog/variants")
+	jenny.imports.Add("cogvariants", jenny.Config.importPath("cog/variants"))
 
 	return jenny.renderTemplate("types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
 		"schema":         schema,
@@ -339,7 +341,7 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 }
 
 func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
-	jenny.imports.Add("cogvariants", "github.com/grafana/cog/generated/cog/variants")
+	jenny.imports.Add("cogvariants", jenny.Config.importPath("cog/variants"))
 
 	return jenny.renderTemplate("types/variant_dataquery.json_unmarshal.tmpl", map[string]any{
 		"schema": schema,
