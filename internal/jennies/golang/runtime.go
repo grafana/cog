@@ -7,6 +7,7 @@ import (
 )
 
 type Runtime struct {
+	Config Config
 }
 
 func (jenny Runtime) JennyName() string {
@@ -38,7 +39,7 @@ type Builder[ResourceT any] interface {
 
 func (jenny Runtime) Runtime() (string, error) {
 	imports := template.NewImportMap()
-	imports.Add("cogvariants", "github.com/grafana/cog/generated/cog/variants")
+	imports.Add("cogvariants", jenny.Config.importPath("cog/variants"))
 
 	return renderTemplate("runtime/runtime.tmpl", map[string]any{
 		"imports": formatImports(imports),

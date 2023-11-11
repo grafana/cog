@@ -13,6 +13,8 @@ import (
 )
 
 type Builder struct {
+	Config Config
+
 	imports          template.ImportMap
 	typeImportMapper func(pkg string) string
 }
@@ -30,7 +32,7 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 				return ""
 			}
 
-			return jenny.imports.Add(pkg, "github.com/grafana/cog/generated/"+pkg)
+			return jenny.imports.Add(pkg, jenny.Config.importPath(pkg))
 		}
 
 		output, err := jenny.generateBuilder(context, builder)
@@ -282,7 +284,7 @@ func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeCon
 }
 
 func (jenny *Builder) importCog() string {
-	return jenny.imports.Add("cog", "github.com/grafana/cog/generated/cog")
+	return jenny.imports.Add("cog", jenny.Config.importPath("cog"))
 }
 
 // importType declares an import statement for the type definition of

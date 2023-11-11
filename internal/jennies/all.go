@@ -36,10 +36,14 @@ func (languageTargets LanguageTargets) ForLanguages(languages []string) (Languag
 	return filtered, nil
 }
 
-func All() LanguageTargets {
+type Config struct {
+	Go golang.Config
+}
+
+func All(config Config) LanguageTargets {
 	targets := map[string]LanguageTarget{
 		golang.LanguageRef: {
-			Jennies:        golang.Jennies(),
+			Jennies:        golang.Jennies(config.Go),
 			CompilerPasses: golang.CompilerPasses(),
 		},
 		typescript.LanguageRef: {

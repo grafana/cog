@@ -1,6 +1,9 @@
 package golang
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/context"
@@ -8,17 +11,28 @@ import (
 
 const LanguageRef = "go"
 
-func Jennies() *codejen.JennyList[context.Builders] {
+type Config struct {
+	// Root path for imports.
+	// Ex: github.com/grafana/cog/generated
+	PackageRoot string
+}
+
+func (config Config) importPath(suffix string) string {
+	root := strings.TrimSuffix(config.PackageRoot, "/")
+	return fmt.Sprintf("%s/%s", root, suffix)
+}
+
+func Jennies(config Config) *codejen.JennyList[context.Builders] {
 	targets := codejen.JennyListWithNamer[context.Builders](func(_ context.Builders) string {
 		return LanguageRef
 	})
 	targets.AppendOneToMany(
-		Runtime{},
-		VariantsPlugins{},
+		Runtime{Config: config},
+		VariantsPlugins{Config: config},
 
-		RawTypes{},
-		JSONMarshalling{},
-		&Builder{},
+		RawTypes{Config: config},
+		JSONMarshalling{Config: config},
+		&Builder{Config: config},
 	)
 	targets.AddPostprocessors(PostProcessFile)
 

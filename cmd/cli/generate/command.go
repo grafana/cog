@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
 	codegenContext "github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/veneers/yaml"
 	"github.com/spf13/cobra"
 )
@@ -22,6 +23,10 @@ type Options struct {
 	VeneerConfigFiles       []string
 	VeneerConfigDirectories []string
 	OutputDir               string
+
+	// Root path for imports.
+	// Ex: github.com/grafana/cog/generated
+	GoPackageRoot string
 }
 
 func (opts Options) VeneerFiles() ([]string, error) {
@@ -39,6 +44,14 @@ func (opts Options) VeneerFiles() ([]string, error) {
 	}
 
 	return veneers, nil
+}
+
+func (opts Options) toJenniesConfig() jennies.Config {
+	return jennies.Config{
+		Go: golang.Config{
+			PackageRoot: opts.GoPackageRoot,
+		},
+	}
 }
 
 func Command() *cobra.Command {
@@ -69,6 +82,8 @@ func Command() *cobra.Command {
 	cmd.Flags().StringArrayVarP(&opts.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
 	cmd.Flags().StringVar(&opts.KindRegistryVersion, "kind-registry-version", "next", "Schemas version")
 
+	cmd.Flags().StringVar(&opts.GoPackageRoot, "go-package-root", "github.com/grafana/cog/generated", "Go package root.")
+
 	_ = cmd.MarkFlagDirname("cue")
 	_ = cmd.MarkFlagDirname("kindsys-core")
 	_ = cmd.MarkFlagDirname("kindsys-custom")
@@ -94,7 +109,7 @@ func doGenerate(opts Options) error {
 	}
 
 	// Here begins the code generation setup
-	targetsByLanguage, err := jennies.All().ForLanguages(opts.Languages)
+	targetsByLanguage, err := jennies.All(opts.toJenniesConfig()).ForLanguages(opts.Languages)
 	if err != nil {
 		return err
 	}

@@ -8,6 +8,7 @@ import (
 )
 
 type VariantsPlugins struct {
+	Config Config
 }
 
 func (jenny VariantsPlugins) JennyName() string {
@@ -41,7 +42,7 @@ func (jenny VariantsPlugins) variantPlugins(context context.Builders) (string, e
 	imports := template.NewImportMap()
 	initMap := make(map[string][]*ast.Schema) // variant to schemas
 
-	imports.Add("cog", "github.com/grafana/cog/generated/cog")
+	imports.Add("cog", jenny.Config.importPath("cog"))
 
 	for _, schema := range context.Schemas {
 		if schema.Metadata.Kind != ast.SchemaKindComposable || schema.Metadata.Identifier == "" {
@@ -49,7 +50,7 @@ func (jenny VariantsPlugins) variantPlugins(context context.Builders) (string, e
 		}
 
 		variant := string(schema.Metadata.Variant)
-		imports.Add(schema.Package, "github.com/grafana/cog/generated/"+schema.Package)
+		imports.Add(schema.Package, jenny.Config.importPath(schema.Package))
 		initMap[variant] = append(initMap[variant], schema)
 	}
 

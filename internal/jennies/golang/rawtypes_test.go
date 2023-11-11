@@ -15,7 +15,11 @@ func TestRawTypes_Generate(t *testing.T) {
 		Name: "jennies/GoRawTypes",
 	}
 
-	jenny := RawTypes{}
+	jenny := RawTypes{
+		Config: Config{
+			PackageRoot: "github.com/grafana/cog/generated",
+		},
+	}
 	compilerPasses := CompilerPasses()
 
 	test.Run(t, func(tc *txtartest.Test) {
