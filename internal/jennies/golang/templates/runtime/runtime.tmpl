@@ -69,7 +69,7 @@ func (runtime *Runtime) UnmarshalDataquery(raw []byte, dataqueryTypeHint string)
 		}
 	}
 
-	// We have no idea what type the dataquery is: use our `UnknownDataquery` bag to not loose data.
+	// We have no idea what type the dataquery is: use our `UnknownDataquery` bag to not lose data.
 	dataquery := cogvariants.UnknownDataquery{}
 	if err := json.Unmarshal(raw, &dataquery); err != nil {
 		return nil, err
