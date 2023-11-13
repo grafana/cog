@@ -201,7 +201,6 @@ export class SomeStructBuilder implements cog.OptionsBuilder<sandbox.SomeStruct>
 package sandbox
 
 import (
-
     cog "github.com/grafana/cog/generated/cog"
 )
 
@@ -237,7 +236,6 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 
 	return *builder.internal, nil
 }
-
 
 func (builder *SomeStructBuilder) Tags(tags string) *SomeStructBuilder {
     builder.internal.Tags = append(builder.internal.Tags, tags)
