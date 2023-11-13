@@ -14,7 +14,7 @@
 {{- define "assignment_value" }}
     {{- if not (eq .Value.Constant nil) }}
         {{- if isNullableNonArray .Assignment.Path.Last.Type }}
-            {{- print "&val" .Assignment.Path.Last.Identifier }}
+            {{- print "&val" (.Assignment.Path.Last.Identifier | upperCamelCase) }}
         {{- else }}
             {{- formatScalar .Value.Constant }}
         {{- end }}
@@ -36,7 +36,7 @@
 {{- define "assignment_setup" }}
     {{- if not (eq .Value.Constant nil) }}
         {{- if .Assignment.Path.Last.Type.Nullable }}
-            val{{ .Assignment.Path }} := {{ formatScalar .Value.Constant }}
+            val{{ .Assignment.Path.Last.Identifier | upperCamelCase }} := {{ formatScalar .Value.Constant }}
         {{- end }}
     {{- end }}
     {{- with .Value.Argument }}
