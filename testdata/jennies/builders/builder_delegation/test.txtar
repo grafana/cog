@@ -1,0 +1,937 @@
+# Example of builder delegation (ie: a builder, depending on a type that itself has a builder).
+# Generated using `go run cmd/cli/main.go inspect --cue ./testdata/jennies/builders/builder_delegation --builder-ir`
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "builder_delegation",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "DashboardLink",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "url",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "builder_delegation",
+            "ReferredType": "DashboardLink"
+          }
+        },
+        {
+          "Name": "Dashboard",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "links",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "builder_delegation",
+                          "ReferredType": "DashboardLink"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "singleLink",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "builder_delegation",
+                      "ReferredType": "DashboardLink"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "builder_delegation",
+            "ReferredType": "Dashboard"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "builder_delegation",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "DashboardLink",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "url",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "builder_delegation",
+              "ReferredType": "DashboardLink"
+            }
+          },
+          {
+            "Name": "Dashboard",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int64"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "links",
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "ref",
+                          "Nullable": false,
+                          "Ref": {
+                            "ReferredPkg": "builder_delegation",
+                            "ReferredType": "DashboardLink"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "singleLink",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "builder_delegation",
+                        "ReferredType": "DashboardLink"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "builder_delegation",
+              "ReferredType": "Dashboard"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "DashboardLink",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "url",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "builder_delegation",
+          "ReferredType": "DashboardLink"
+        }
+      },
+      "Package": "builder_delegation",
+      "Name": "DashboardLink",
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "url",
+          "Args": [
+            {
+              "Name": "url",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "url",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "url",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    },
+    {
+      "Schema": {
+        "Package": "builder_delegation",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "DashboardLink",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "url",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "builder_delegation",
+              "ReferredType": "DashboardLink"
+            }
+          },
+          {
+            "Name": "Dashboard",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int64"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "links",
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "ref",
+                          "Nullable": false,
+                          "Ref": {
+                            "ReferredPkg": "builder_delegation",
+                            "ReferredType": "DashboardLink"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "singleLink",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "builder_delegation",
+                        "ReferredType": "DashboardLink"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "builder_delegation",
+              "ReferredType": "Dashboard"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Dashboard",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "id",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "int64"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "links",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "builder_delegation",
+                        "ReferredType": "DashboardLink"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "singleLink",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "builder_delegation",
+                    "ReferredType": "DashboardLink"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "builder_delegation",
+          "ReferredType": "Dashboard"
+        }
+      },
+      "Package": "builder_delegation",
+      "Name": "Dashboard",
+      "Options": [
+        {
+          "Name": "id",
+          "Args": [
+            {
+              "Name": "id",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "links",
+          "Args": [
+            {
+              "Name": "links",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "builder_delegation",
+                      "ReferredType": "DashboardLink"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "links",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "builder_delegation",
+                          "ReferredType": "DashboardLink"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "links",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "builder_delegation",
+                          "ReferredType": "DashboardLink"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "singleLink",
+          "Args": [
+            {
+              "Name": "singleLink",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "builder_delegation",
+                  "ReferredType": "DashboardLink"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "singleLink",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "builder_delegation",
+                      "ReferredType": "DashboardLink"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "singleLink",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "builder_delegation",
+                      "ReferredType": "DashboardLink"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/TypescriptBuilder --
+== builder_delegation/dashboardlink_builder_gen.ts
+import * as builder_delegation from '../builder_delegation/types_gen';
+import * as cog from '../cog';
+
+export class DashboardLinkBuilder implements cog.OptionsBuilder<builder_delegation.DashboardLink> {
+    private readonly internal: builder_delegation.DashboardLink;
+
+    constructor() {
+        this.internal = builder_delegation.defaultDashboardLink();
+    }
+
+    build(): builder_delegation.DashboardLink {
+        return this.internal;
+    }
+
+    title(title: string): this {
+        this.internal.title = title;
+        return this;
+    }
+
+    url(url: string): this {
+        this.internal.url = url;
+        return this;
+    }
+}
+== builder_delegation/dashboard_builder_gen.ts
+import * as builder_delegation from '../builder_delegation/types_gen';
+import * as cog from '../cog';
+
+export class DashboardBuilder implements cog.OptionsBuilder<builder_delegation.Dashboard> {
+    private readonly internal: builder_delegation.Dashboard;
+
+    constructor() {
+        this.internal = builder_delegation.defaultDashboard();
+    }
+
+    build(): builder_delegation.Dashboard {
+        return this.internal;
+    }
+
+    id(id: number): this {
+        this.internal.id = id;
+        return this;
+    }
+
+    title(title: string): this {
+        this.internal.title = title;
+        return this;
+    }
+
+    links(links: builder_delegation.DashboardLink[]): this {
+        this.internal.links = links;
+        return this;
+    }
+
+    singleLink(singleLink: cog.OptionsBuilder<builder_delegation.DashboardLink>): this {
+        this.internal.singleLink = singleLink.build();
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== builder_delegation/dashboardlink_builder_gen.go
+package builder_delegation
+
+import (
+    cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[DashboardLink] = (*DashboardLinkBuilder)(nil)
+
+type DashboardLinkBuilder struct {
+    internal *DashboardLink
+    errors map[string]cog.BuildErrors
+}
+
+func NewDashboardLinkBuilder() *DashboardLinkBuilder {
+	resource := &DashboardLink{}
+	builder := &DashboardLinkBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *DashboardLinkBuilder) Build() (DashboardLink, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("DashboardLink", err)...)
+	}
+
+	if len(errs) != 0 {
+		return DashboardLink{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *DashboardLinkBuilder) Title(title string) *DashboardLinkBuilder {
+    builder.internal.Title = title
+
+    return builder
+}
+
+func (builder *DashboardLinkBuilder) Url(url string) *DashboardLinkBuilder {
+    builder.internal.Url = url
+
+    return builder
+}
+
+func (builder *DashboardLinkBuilder) applyDefaults() {
+}
+== builder_delegation/dashboard_builder_gen.go
+package builder_delegation
+
+import (
+    cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[Dashboard] = (*DashboardBuilder)(nil)
+
+type DashboardBuilder struct {
+    internal *Dashboard
+    errors map[string]cog.BuildErrors
+}
+
+func NewDashboardBuilder() *DashboardBuilder {
+	resource := &Dashboard{}
+	builder := &DashboardBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *DashboardBuilder) Build() (Dashboard, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("Dashboard", err)...)
+	}
+
+	if len(errs) != 0 {
+		return Dashboard{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *DashboardBuilder) Id(id int64) *DashboardBuilder {
+    builder.internal.Id = id
+
+    return builder
+}
+
+func (builder *DashboardBuilder) Title(title string) *DashboardBuilder {
+    builder.internal.Title = title
+
+    return builder
+}
+
+func (builder *DashboardBuilder) Links(links []DashboardLink) *DashboardBuilder {
+    builder.internal.Links = links
+
+    return builder
+}
+
+func (builder *DashboardBuilder) SingleLink(singleLink cog.Builder[DashboardLink]) *DashboardBuilder {
+        singleLinkResource, err := singleLink.Build()
+        if err != nil {
+            builder.errors["singleLink"] = err.(cog.BuildErrors)
+            return builder
+        }
+    builder.internal.SingleLink = singleLinkResource
+
+    return builder
+}
+
+func (builder *DashboardBuilder) applyDefaults() {
+}
