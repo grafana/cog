@@ -144,9 +144,24 @@ options:
       by_name_case_insensitive: Panel.transformations
       as: withTransformation
 
+  # W(), H() instead of explicit GridPos() definition
+  - struct_fields_as_options:
+      by_name: Panel.gridPos
+      fields: [w, h]
+  # W() → Span()
+  - rename:
+      by_name_case_insensitive: Panel.w
+      as: span
+  # H() → Height()
+  - rename:
+      by_name_case_insensitive: Panel.h
+      as: height
+
   ##############
   #    Rows    #
   ##############
+
+  - omit: { by_name: RowPanel.gridPos }
 
   # Make the constructor more friendly
   - promote_to_constructor: { by_name: RowPanel.title }
