@@ -16,6 +16,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/envvars"
+	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/tools/txtar"
 )
@@ -177,6 +178,28 @@ func (t *Test) TypesIR() *ast.Schema {
 	t.Fatal("could not load types IR: file 'ir.json' not found in test archive")
 
 	return nil
+}
+
+// BuildersContext locates and returns the builders intermediate representation described
+// within the txtar archive.
+func (t *Test) BuildersContext() context.Builders {
+	buildersContext := context.Builders{}
+	for _, f := range t.Archive.Files {
+		if f.Name != "builders_context.json" {
+			continue
+		}
+
+		if err := json.Unmarshal(f.Data, &buildersContext); err != nil {
+			t.Fatal("could not unmarshal test input into context.Builders{}")
+		}
+
+		return buildersContext
+	}
+
+	// the ir.json file wasn't found, let's fail hard.
+	t.Fatal("could not builders context: file 'builders_context.json' not found in test archive")
+
+	return buildersContext
 }
 
 // Writer returns a Writer with the given name. Data written will
