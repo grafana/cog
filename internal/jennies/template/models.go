@@ -11,6 +11,7 @@ type Builder struct {
 	ObjectName           string
 	Imports              ImportMap
 	ImportAlias          string // alias to the pkg in which the object being built lives.
+	Comments             []string
 	Constructor          Constructor
 	Options              []Option
 	Defaults             []OptionCall

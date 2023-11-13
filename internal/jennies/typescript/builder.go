@@ -75,6 +75,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 			BuilderSignatureType: buildObjectSignature,
 			Imports:              jenny.imports,
 			ImportAlias:          jenny.importType(builder.For.SelfRef),
+			Comments:             builder.For.Comments,
 			Constructor:          jenny.generateConstructor(context, builder),
 			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
 				return jenny.generateOption(context, builder, opt)
