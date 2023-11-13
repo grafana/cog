@@ -9,6 +9,9 @@
       "Objects": [
         {
           "Name": "SomeStruct",
+          "Comments": [
+            "SomeStruct, to hold data."
+          ],
           "Type": {
             "Kind": "struct",
             "Nullable": false,
@@ -16,6 +19,9 @@
               "Fields": [
                 {
                   "Name": "id",
+                  "Comments": [
+                    "id identifies something. Weird, right?"
+                  ],
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
@@ -55,6 +61,10 @@
                 },
                 {
                   "Name": "liveNow",
+                  "Comments": [
+                    "This thing could be live.",
+                    "Or maybe not."
+                  ],
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
@@ -83,6 +93,9 @@
         "Objects": [
           {
             "Name": "SomeStruct",
+            "Comments": [
+              "SomeStruct, to hold data."
+            ],
             "Type": {
               "Kind": "struct",
               "Nullable": false,
@@ -90,6 +103,9 @@
                 "Fields": [
                   {
                     "Name": "id",
+                    "Comments": [
+                      "id identifies something. Weird, right?"
+                    ],
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -129,6 +145,10 @@
                   },
                   {
                     "Name": "liveNow",
+                    "Comments": [
+                      "This thing could be live.",
+                      "Or maybe not."
+                    ],
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -150,6 +170,9 @@
       },
       "For": {
         "Name": "SomeStruct",
+        "Comments": [
+          "SomeStruct, to hold data."
+        ],
         "Type": {
           "Kind": "struct",
           "Nullable": false,
@@ -157,6 +180,9 @@
             "Fields": [
               {
                 "Name": "id",
+                "Comments": [
+                  "id identifies something. Weird, right?"
+                ],
                 "Type": {
                   "Kind": "scalar",
                   "Nullable": false,
@@ -196,6 +222,10 @@
               },
               {
                 "Name": "liveNow",
+                "Comments": [
+                  "This thing could be live.",
+                  "Or maybe not."
+                ],
                 "Type": {
                   "Kind": "scalar",
                   "Nullable": false,
@@ -218,6 +248,9 @@
       "Options": [
         {
           "Name": "id",
+          "Comments": [
+            "id identifies something. Weird, right?"
+          ],
           "Args": [
             {
               "Name": "id",
@@ -371,6 +404,10 @@
         },
         {
           "Name": "liveNow",
+          "Comments": [
+            "This thing could be live.",
+            "Or maybe not."
+          ],
           "Args": [
             {
               "Name": "liveNow",
@@ -424,6 +461,7 @@
 import * as basic_struct from '../basic_struct/types_gen';
 import * as cog from '../cog';
 
+// SomeStruct, to hold data.
 export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct.SomeStruct> {
     private readonly internal: basic_struct.SomeStruct;
 
@@ -435,6 +473,7 @@ export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct.SomeSt
         return this.internal;
     }
 
+    // id identifies something. Weird, right?
     id(id: number): this {
         this.internal.id = id;
         return this;
@@ -450,6 +489,8 @@ export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct.SomeSt
         return this;
     }
 
+    // This thing could be live.
+    // Or maybe not.
     liveNow(liveNow: boolean): this {
         this.internal.liveNow = liveNow;
         return this;
@@ -465,6 +506,7 @@ import (
 
 var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
 
+// SomeStruct, to hold data.
 type SomeStructBuilder struct {
     internal *SomeStruct
     errors map[string]cog.BuildErrors
@@ -496,6 +538,7 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	return *builder.internal, nil
 }
 
+// id identifies something. Weird, right?
 func (builder *SomeStructBuilder) Id(id int64) *SomeStructBuilder {
     builder.internal.Id = id
 
@@ -514,6 +557,8 @@ func (builder *SomeStructBuilder) Tags(tags []string) *SomeStructBuilder {
     return builder
 }
 
+// This thing could be live.
+// Or maybe not.
 func (builder *SomeStructBuilder) LiveNow(liveNow bool) *SomeStructBuilder {
     builder.internal.LiveNow = liveNow
 

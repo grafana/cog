@@ -1,6 +1,10 @@
 {{ range $alias, $importPath := .Imports -}}
 import * as {{ $alias }} from '{{ $importPath }}';
 {{ end }}
+
+{{- range .Comments }}
+// {{ . }}
+{{- end }}
 export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuilder<{{ .BuilderSignatureType }}> {
     private readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
 

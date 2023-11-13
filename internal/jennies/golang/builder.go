@@ -90,6 +90,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 			Imports:              jenny.imports,
 			BuilderName:          tools.UpperCamelCase(builder.Name),
 			ObjectName:           fullObjectName,
+			Comments:             builder.For.Comments,
 			Constructor:          jenny.generateConstructor(context, builder),
 			Defaults:             jenny.genDefaultOptionsCalls(builder),
 			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
