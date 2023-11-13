@@ -4,6 +4,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
+//nolint:musttag
 type Builders struct {
 	Schemas  ast.Schemas
 	Builders ast.Builders
