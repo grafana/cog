@@ -1,4 +1,4 @@
-# Enumerations
+# Disjunctions
 -- ir.json --
 {
     "Package": "disjunctions",

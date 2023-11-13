@@ -1,4 +1,4 @@
-# Basic struct with scalar fields, all required.
+# More complex struct with complex fields, all required.
 -- ir.json --
 {
     "Package": "struct_complex_fields",
