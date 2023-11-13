@@ -160,6 +160,60 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 }
 
 // FIXME: looks at the first arg only, no way to configure that right now
+func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
+	return func(builder ast.Builder, option ast.Option) []ast.Option {
+		if len(option.Args) < 1 {
+			return []ast.Option{option}
+		}
+
+		firstArgType := option.Args[0].Type
+		if firstArgType.Kind == ast.KindRef {
+			referredObject := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			firstArgType = referredObject.Type
+		}
+
+		if firstArgType.Kind != ast.KindStruct {
+			return []ast.Option{option}
+		}
+
+		var newOptions []ast.Option
+
+		structType := firstArgType.AsStruct()
+		oldAssignments := option.Assignments
+		assignmentPathPrefix := oldAssignments[0].Path
+
+		for _, field := range structType.Fields {
+			if explicitFields != nil && !tools.ItemInList(field.Name, explicitFields) {
+				continue
+			}
+
+			newOpt := ast.Option{
+				Name:     field.Name,
+				Comments: field.Comments,
+				Args: []ast.Argument{
+					{Name: field.Name, Type: field.Type},
+				},
+				Assignments: []ast.Assignment{
+					ast.FieldAssignment(field),
+				},
+			}
+
+			newOpt.Assignments[0].Path = assignmentPathPrefix.Append(newOpt.Assignments[0].Path)
+
+			if field.Type.Default != nil {
+				newOpt.Default = &ast.OptionDefault{
+					ArgsValues: []any{field.Type.Default},
+				}
+			}
+
+			newOptions = append(newOptions, newOpt)
+		}
+
+		return newOptions
+	}
+}
+
+// FIXME: looks at the first arg only, no way to configure that right now
 func DisjunctionAsOptionsAction() RewriteAction {
 	return func(builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
