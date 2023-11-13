@@ -1,4 +1,4 @@
-# Basic struct with default values.
+# Intersections.
 -- ir.json --
 {
     "Package": "intersections",
