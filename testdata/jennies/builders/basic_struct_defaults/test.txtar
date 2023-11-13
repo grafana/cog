@@ -1,10 +1,10 @@
 # Basic builder for a simple struct.
-# Generated using `go run cmd/cli/main.go inspect --cue ./testdata/jennies/builders/basic_struct --builder-ir`
+# Generated using `go run cmd/cli/main.go inspect --cue ./testdata/jennies/builders/basic_struct_defaults --builder-ir`
 -- builders_context.json --
 {
   "Schemas": [
     {
-      "Package": "basic_struct",
+      "Package": "basic_struct_defaults",
       "Metadata": {},
       "Objects": [
         {
@@ -19,6 +19,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": 42,
                     "Scalar": {
                       "ScalarKind": "int64"
                     }
@@ -30,6 +31,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": "default-uid",
                     "Scalar": {
                       "ScalarKind": "string"
                     }
@@ -41,6 +43,10 @@
                   "Type": {
                     "Kind": "array",
                     "Nullable": false,
+                    "Default": [
+                      "generated",
+                      "cog"
+                    ],
                     "Array": {
                       "ValueType": {
                         "Kind": "scalar",
@@ -58,6 +64,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": true,
                     "Scalar": {
                       "ScalarKind": "bool"
                     }
@@ -68,7 +75,7 @@
             }
           },
           "SelfRef": {
-            "ReferredPkg": "basic_struct",
+            "ReferredPkg": "basic_struct_defaults",
             "ReferredType": "SomeStruct"
           }
         }
@@ -78,7 +85,7 @@
   "Builders": [
     {
       "Schema": {
-        "Package": "basic_struct",
+        "Package": "basic_struct_defaults",
         "Metadata": {},
         "Objects": [
           {
@@ -93,6 +100,7 @@
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
+                      "Default": 42,
                       "Scalar": {
                         "ScalarKind": "int64"
                       }
@@ -104,6 +112,7 @@
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
+                      "Default": "default-uid",
                       "Scalar": {
                         "ScalarKind": "string"
                       }
@@ -115,6 +124,10 @@
                     "Type": {
                       "Kind": "array",
                       "Nullable": false,
+                      "Default": [
+                        "generated",
+                        "cog"
+                      ],
                       "Array": {
                         "ValueType": {
                           "Kind": "scalar",
@@ -132,6 +145,7 @@
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
+                      "Default": true,
                       "Scalar": {
                         "ScalarKind": "bool"
                       }
@@ -142,7 +156,7 @@
               }
             },
             "SelfRef": {
-              "ReferredPkg": "basic_struct",
+              "ReferredPkg": "basic_struct_defaults",
               "ReferredType": "SomeStruct"
             }
           }
@@ -160,6 +174,7 @@
                 "Type": {
                   "Kind": "scalar",
                   "Nullable": false,
+                  "Default": 42,
                   "Scalar": {
                     "ScalarKind": "int64"
                   }
@@ -171,6 +186,7 @@
                 "Type": {
                   "Kind": "scalar",
                   "Nullable": false,
+                  "Default": "default-uid",
                   "Scalar": {
                     "ScalarKind": "string"
                   }
@@ -182,6 +198,10 @@
                 "Type": {
                   "Kind": "array",
                   "Nullable": false,
+                  "Default": [
+                    "generated",
+                    "cog"
+                  ],
                   "Array": {
                     "ValueType": {
                       "Kind": "scalar",
@@ -199,6 +219,7 @@
                 "Type": {
                   "Kind": "scalar",
                   "Nullable": false,
+                  "Default": true,
                   "Scalar": {
                     "ScalarKind": "bool"
                   }
@@ -209,11 +230,11 @@
           }
         },
         "SelfRef": {
-          "ReferredPkg": "basic_struct",
+          "ReferredPkg": "basic_struct_defaults",
           "ReferredType": "SomeStruct"
         }
       },
-      "Package": "basic_struct",
+      "Package": "basic_struct_defaults",
       "Name": "SomeStruct",
       "Options": [
         {
@@ -224,6 +245,7 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
+                "Default": 42,
                 "Scalar": {
                   "ScalarKind": "int64"
                 }
@@ -238,6 +260,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": 42,
                     "Scalar": {
                       "ScalarKind": "int64"
                     }
@@ -250,6 +273,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": 42,
                     "Scalar": {
                       "ScalarKind": "int64"
                     }
@@ -259,6 +283,11 @@
               "Method": "direct"
             }
           ],
+          "Default": {
+            "ArgsValues": [
+              42
+            ]
+          },
           "IsConstructorArg": false
         },
         {
@@ -269,6 +298,7 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
+                "Default": "default-uid",
                 "Scalar": {
                   "ScalarKind": "string"
                 }
@@ -283,6 +313,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": "default-uid",
                     "Scalar": {
                       "ScalarKind": "string"
                     }
@@ -295,6 +326,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": "default-uid",
                     "Scalar": {
                       "ScalarKind": "string"
                     }
@@ -304,6 +336,11 @@
               "Method": "direct"
             }
           ],
+          "Default": {
+            "ArgsValues": [
+              "default-uid"
+            ]
+          },
           "IsConstructorArg": false
         },
         {
@@ -314,6 +351,10 @@
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
+                "Default": [
+                  "generated",
+                  "cog"
+                ],
                 "Array": {
                   "ValueType": {
                     "Kind": "scalar",
@@ -334,6 +375,10 @@
                   "Type": {
                     "Kind": "array",
                     "Nullable": false,
+                    "Default": [
+                      "generated",
+                      "cog"
+                    ],
                     "Array": {
                       "ValueType": {
                         "Kind": "scalar",
@@ -352,6 +397,10 @@
                   "Type": {
                     "Kind": "array",
                     "Nullable": false,
+                    "Default": [
+                      "generated",
+                      "cog"
+                    ],
                     "Array": {
                       "ValueType": {
                         "Kind": "scalar",
@@ -367,6 +416,14 @@
               "Method": "direct"
             }
           ],
+          "Default": {
+            "ArgsValues": [
+              [
+                "generated",
+                "cog"
+              ]
+            ]
+          },
           "IsConstructorArg": false
         },
         {
@@ -377,6 +434,7 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
+                "Default": true,
                 "Scalar": {
                   "ScalarKind": "bool"
                 }
@@ -391,6 +449,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": true,
                     "Scalar": {
                       "ScalarKind": "bool"
                     }
@@ -403,6 +462,7 @@
                   "Type": {
                     "Kind": "scalar",
                     "Nullable": false,
+                    "Default": true,
                     "Scalar": {
                       "ScalarKind": "bool"
                     }
@@ -412,26 +472,30 @@
               "Method": "direct"
             }
           ],
+          "Default": {
+            "ArgsValues": [
+              true
+            ]
+          },
           "IsConstructorArg": false
         }
       ]
     }
   ]
 }
-
 -- out/jennies/TypescriptBuilder --
-== basic_struct/somestruct_builder_gen.ts
-import * as basic_struct from '../basic_struct/types_gen';
+== basic_struct_defaults/somestruct_builder_gen.ts
+import * as basic_struct_defaults from '../basic_struct_defaults/types_gen';
 import * as cog from '../cog';
 
-export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct.SomeStruct> {
-    private readonly internal: basic_struct.SomeStruct;
+export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct_defaults.SomeStruct> {
+    private readonly internal: basic_struct_defaults.SomeStruct;
 
     constructor() {
-        this.internal = basic_struct.defaultSomeStruct();
+        this.internal = basic_struct_defaults.defaultSomeStruct();
     }
 
-    build(): basic_struct.SomeStruct {
+    build(): basic_struct_defaults.SomeStruct {
         return this.internal;
     }
 
@@ -456,8 +520,8 @@ export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct.SomeSt
     }
 }
 -- out/jennies/GoBuilder --
-== basic_struct/somestruct_builder_gen.go
-package basic_struct
+== basic_struct_defaults/somestruct_builder_gen.go
+package basic_struct_defaults
 
 import (
     cog "github.com/grafana/cog/generated/cog"
@@ -521,4 +585,8 @@ func (builder *SomeStructBuilder) LiveNow(liveNow bool) *SomeStructBuilder {
 }
 
 func (builder *SomeStructBuilder) applyDefaults() {
+    builder.Id(42)
+    builder.Uid("default-uid")
+    builder.Tags([]string{"generated", "cog"})
+    builder.LiveNow(true)
 }

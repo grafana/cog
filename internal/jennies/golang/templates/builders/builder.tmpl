@@ -1,7 +1,7 @@
 package {{ .Package }}
 
 import (
-{{ range $alias, $importPath := .Imports }}
+{{- range $alias, $importPath := .Imports }}
     {{ $alias }} "{{ $importPath }}"
 {{- end }}
 )
@@ -43,7 +43,6 @@ func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, 
 	return *builder.internal, nil
 }
 {{- range .Options }}
-
 {{ range .Comments -}}
 // {{ . }}
 {{- end }}
