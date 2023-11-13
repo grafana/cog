@@ -1,7 +1,8 @@
 func VariantConfig() cogvariants.PanelcfgConfig {
 	return cogvariants.PanelcfgConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",
-		{{ if .hasOptions }}OptionsUnmarshaler: func (raw []byte) (any, error) {
+		{{- if .hasOptions }}
+		OptionsUnmarshaler: func (raw []byte) (any, error) {
 			options := Options{}
 
 			if err := json.Unmarshal(raw, &options); err != nil {
@@ -9,8 +10,10 @@ func VariantConfig() cogvariants.PanelcfgConfig {
 			}
 
 			return options, nil
-		},{{ end }}
-		{{ if .hasFieldConfig }}FieldConfigUnmarshaler: func (raw []byte) (any, error) {
+		},
+		{{- end }}
+		{{- if .hasFieldConfig }}
+		FieldConfigUnmarshaler: func (raw []byte) (any, error) {
 			fieldConfig := FieldConfig{}
 
 			if err := json.Unmarshal(raw, &fieldConfig); err != nil {
@@ -18,7 +21,8 @@ func VariantConfig() cogvariants.PanelcfgConfig {
 			}
 
 			return fieldConfig, nil
-		},{{ end }}
+		},
+		{{- end }}
 	}
 }
 
