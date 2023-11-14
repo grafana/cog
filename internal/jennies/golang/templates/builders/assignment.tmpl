@@ -1,14 +1,20 @@
 {{- define "assignment" }}
-    {{- template "constraints" .Constraints }}
-    {{- range .InitSafeguards }}
+    {{- template "constraints" .Assignment.Constraints }}
+    {{- range .Assignment.InitSafeguards }}
     {{ . }}
     {{- end }}
 
-    {{- template "assignment_setup" (dict "Assignment" . "Value" .Value) -}}
+    {{- template "assignment_setup" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
 
-    {{- $value := include "assignment_value" (dict "Assignment" . "Value" .Value) -}}
+    {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
 
-    {{- template "assignment_method" (dict "Method" $.Method "Path" $.Path "Value" $value) }}
+    {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- include_if_exists $preTmpl (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
+
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
+
+    {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- include_if_exists $postTmpl (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
 {{- end }}
 
 {{- define "assignment_value" }}

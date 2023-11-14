@@ -1,5 +1,5 @@
 package {{ .Package }}
-
+{{- $builder := . }}
 import (
 {{- range $alias, $importPath := .Imports }}
     {{ $alias }} "{{ $importPath }}"
@@ -29,7 +29,7 @@ func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ 
 	builder.applyDefaults()
 
     {{- range .Constructor.Assignments }}
-        {{- template "assignment" . }}
+        {{- template "assignment" (dict "Assignment" . "Builder" $builder "Option" (dict "Name" "")) }}
     {{- end }}
 
 	return builder
@@ -49,12 +49,13 @@ func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, 
 	return *builder.internal, nil
 }
 {{ range .Options }}
+{{- $option := . }}
 {{- range .Comments }}
 // {{ . }}
 {{- end }}
 func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args }}) *{{ $.BuilderName }}Builder {
     {{- range .Assignments }}
-        {{- template "assignment" . }}
+        {{- template "assignment" (dict "Assignment" . "Builder" $builder "Option" $option) }}
     {{- end }}
 
     return builder
