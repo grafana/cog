@@ -49,7 +49,7 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
 
     {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
     {{- includeIfExists $preTmpl (dict) -}}
-    
+
     {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
 
     {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
