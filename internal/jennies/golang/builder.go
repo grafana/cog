@@ -57,11 +57,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	jenny.imports = template.NewImportMap()
 	jenny.importCog()
 
-	fullObjectName := tools.UpperCamelCase(builder.For.Name)
-	if builder.For.SelfRef.ReferredPkg != builder.Package {
-		fullObjectName = builder.For.SelfRef.ReferredPkg + "." + fullObjectName
-	}
-
+	fullObjectName := jenny.importType(builder.For.SelfRef)
 	buildObjectSignature := fullObjectName
 	if builder.For.Type.ImplementsVariant() {
 		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant(), jenny.typeImportMapper)
