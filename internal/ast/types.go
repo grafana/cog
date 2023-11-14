@@ -672,8 +672,8 @@ func (t RefType) DeepCopy() RefType {
 }
 
 type ScalarType struct {
-	ScalarKind  ScalarKind       // bool, bytes, string, int, float, ...
-	Value       any              `json:",omitempty"` // if value isn't nil, we're representing a constant scalar
+	ScalarKind  ScalarKind       `yaml:"scalar_kind"` // bool, bytes, string, int, float, ...
+	Value       any              `json:",omitempty"`  // if value isn't nil, we're representing a constant scalar
 	Constraints []TypeConstraint `json:",omitempty"`
 }
 

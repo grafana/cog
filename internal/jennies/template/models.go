@@ -13,6 +13,7 @@ type Builder struct {
 	ImportAlias          string // alias to the pkg in which the object being built lives.
 	Comments             []string
 	Constructor          Constructor
+	Properties           []ast.StructField
 	Options              []Option
 	Defaults             []OptionCall
 }
