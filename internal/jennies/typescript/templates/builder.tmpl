@@ -9,7 +9,7 @@ import * as {{ $alias }} from '{{ $importPath }}';
 export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuilder<{{ .BuilderSignatureType }}> {
     private readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
     {{- range .Properties }}
-    private {{ .Name }}: {{ .Type | formatType }};
+    private {{ .Name }}: {{ .Type | formatType }} = {{ .Type | defaultValueForType }};
     {{- end }}
 
     constructor({{ template "args" .Constructor.Args }}) {

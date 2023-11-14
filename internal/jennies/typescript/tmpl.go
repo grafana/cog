@@ -28,6 +28,9 @@ func init() {
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
+			"defaultValueForType": func(_ ast.Type) string {
+				panic("defaultValueForType() needs to be overridden by a jenny")
+			},
 		}).
 		Funcs(template.FuncMap{
 			"formatScalar": formatScalar,

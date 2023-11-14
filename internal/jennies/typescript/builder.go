@@ -71,6 +71,9 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
 			},
+			"defaultValueForType": func(typeDef ast.Type) string {
+				return formatValue(defaultValueForType(builder.Schema, typeDef, typeImportMapper))
+			},
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
 			BuilderName:          builder.Name,
