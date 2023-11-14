@@ -19,7 +19,7 @@ const (
 	KindScalar       Kind = "scalar"
 	KindIntersection Kind = "intersection"
 
-	KindComposableSlot Kind = "composability_slot"
+	KindComposableSlot Kind = "composable_slot"
 )
 
 type ScalarKind string

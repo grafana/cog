@@ -1,28 +1,26 @@
-# Dataquery variant builder.
+# Composable slot.
+# ie: a builder that has one or more of its fields defined as a composable slot.
 -- builders_context.json --
 {
   "Schemas": [
     {
-      "Package": "dataquery_variant_builder",
+      "Package": "composable_slot",
       "Metadata": {},
       "Objects": [
         {
-          "Name": "Loki",
+          "Name": "Dashboard",
           "Type": {
             "Kind": "struct",
             "Nullable": false,
-            "Hints": {
-                "implements_variant": "dataquery"
-            },
             "Struct": {
               "Fields": [
                 {
-                  "Name": "expr",
+                  "Name": "target",
                   "Type": {
-                    "Kind": "scalar",
+                    "Kind": "composable_slot",
                     "Nullable": false,
-                    "Scalar": {
-                      "ScalarKind": "string"
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
                     }
                   },
                   "Required": true
@@ -31,8 +29,8 @@
             }
           },
           "SelfRef": {
-            "ReferredPkg": "dataquery_variant_builder",
-            "ReferredType": "Loki"
+            "ReferredPkg": "composable_slot",
+            "ReferredType": "Dashboard"
           }
         }
       ]
@@ -41,26 +39,23 @@
   "Builders": [
     {
       "Schema": {
-        "Package": "dataquery_variant_builder",
+        "Package": "composable_slot",
         "Metadata": {},
         "Objects": [
           {
-            "Name": "Loki",
+            "Name": "Dashboard",
             "Type": {
               "Kind": "struct",
               "Nullable": false,
-              "Hints": {
-                "implements_variant": "dataquery"
-              },
               "Struct": {
                 "Fields": [
                   {
-                    "Name": "expr",
+                    "Name": "target",
                     "Type": {
-                      "Kind": "scalar",
+                      "Kind": "composable_slot",
                       "Nullable": false,
-                      "Scalar": {
-                        "ScalarKind": "string"
+                      "ComposableSlot": {
+                        "Variant": "dataquery"
                       }
                     },
                     "Required": true
@@ -69,29 +64,26 @@
               }
             },
             "SelfRef": {
-              "ReferredPkg": "dataquery_variant_builder",
-              "ReferredType": "Loki"
+              "ReferredPkg": "composable_slot",
+              "ReferredType": "Dashboard"
             }
           }
         ]
       },
       "For": {
-        "Name": "Loki",
+        "Name": "Dashboard",
         "Type": {
           "Kind": "struct",
           "Nullable": false,
-          "Hints": {
-            "implements_variant": "dataquery"
-          },
           "Struct": {
             "Fields": [
               {
-                "Name": "expr",
+                "Name": "target",
                 "Type": {
-                  "Kind": "scalar",
+                  "Kind": "composable_slot",
                   "Nullable": false,
-                  "Scalar": {
-                    "ScalarKind": "string"
+                  "ComposableSlot": {
+                    "Variant": "dataquery"
                   }
                 },
                 "Required": true
@@ -100,23 +92,23 @@
           }
         },
         "SelfRef": {
-          "ReferredPkg": "dataquery_variant_builder",
-          "ReferredType": "Loki"
+          "ReferredPkg": "composable_slot",
+          "ReferredType": "Dashboard"
         }
       },
-      "Package": "dataquery_variant_builder",
+      "Package": "composable_slot",
       "Name": "LokiBuilder",
       "Options": [
         {
-          "Name": "expr",
+          "Name": "target",
           "Args": [
             {
-              "Name": "expr",
+              "Name": "target",
               "Type": {
-                "Kind": "scalar",
+                "Kind": "composable_slot",
                 "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
+                "ComposableSlot": {
+                  "Variant": "dataquery"
                 }
               }
             }
@@ -125,24 +117,24 @@
             {
               "Path": [
                 {
-                  "Identifier": "expr",
+                  "Identifier": "target",
                   "Type": {
-                    "Kind": "scalar",
+                    "Kind": "composable_slot",
                     "Nullable": false,
-                    "Scalar": {
-                      "ScalarKind": "string"
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
                     }
                   }
                 }
               ],
               "Value": {
                 "Argument": {
-                  "Name": "expr",
+                  "Name": "target",
                   "Type": {
-                    "Kind": "scalar",
+                    "Kind": "composable_slot",
                     "Nullable": false,
-                    "Scalar": {
-                      "ScalarKind": "string"
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
                     }
                   }
                 }
@@ -158,44 +150,44 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== dataquery_variant_builder/loki_builder_gen.ts
+== composable_slot/dashboard_builder_gen.ts
 import * as cog from '../cog';
-import * as dataquery_variant_builder from '../dataquery_variant_builder/types_gen';
+import * as composable_slot from '../composable_slot/types_gen';
 
-export class LokiBuilderBuilder implements cog.OptionsBuilder<cog.Dataquery> {
-    private readonly internal: dataquery_variant_builder.Loki;
+export class LokiBuilderBuilder implements cog.OptionsBuilder<composable_slot.Dashboard> {
+    private readonly internal: composable_slot.Dashboard;
 
     constructor() {
-        this.internal = dataquery_variant_builder.defaultLoki();
+        this.internal = composable_slot.defaultDashboard();
     }
 
-    build(): dataquery_variant_builder.Loki {
+    build(): composable_slot.Dashboard {
         return this.internal;
     }
 
-    expr(expr: string): this {
-        this.internal.expr = expr;
+    target(target: cog.OptionsBuilder<cog.Dataquery>): this {
+        this.internal.target = target.build();
         return this;
     }
 }
 -- out/jennies/GoBuilder --
-== dataquery_variant_builder/loki_builder_gen.go
-package dataquery_variant_builder
+== composable_slot/dashboard_builder_gen.go
+package composable_slot
 
 import (
     cog "github.com/grafana/cog/generated/cog"
     cogvariants "github.com/grafana/cog/generated/cog/variants"
 )
 
-var _ cog.Builder[cogvariants.Dataquery] = (*LokiBuilderBuilder)(nil)
+var _ cog.Builder[Dashboard] = (*LokiBuilderBuilder)(nil)
 
 type LokiBuilderBuilder struct {
-    internal *Loki
+    internal *Dashboard
     errors map[string]cog.BuildErrors
 }
 
 func NewLokiBuilderBuilder() *LokiBuilderBuilder {
-	resource := &Loki{}
+	resource := &Dashboard{}
 	builder := &LokiBuilderBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
@@ -206,7 +198,7 @@ func NewLokiBuilderBuilder() *LokiBuilderBuilder {
 	return builder
 }
 
-func (builder *LokiBuilderBuilder) Build() (cogvariants.Dataquery, error) {
+func (builder *LokiBuilderBuilder) Build() (Dashboard, error) {
 	var errs cog.BuildErrors
 
 	for _, err := range builder.errors {
@@ -214,14 +206,19 @@ func (builder *LokiBuilderBuilder) Build() (cogvariants.Dataquery, error) {
 	}
 
 	if len(errs) != 0 {
-		return Loki{}, errs
+		return Dashboard{}, errs
 	}
 
 	return *builder.internal, nil
 }
 
-func (builder *LokiBuilderBuilder) Expr(expr string) *LokiBuilderBuilder {
-    builder.internal.Expr = expr
+func (builder *LokiBuilderBuilder) Target(target cog.Builder[cogvariants.Dataquery]) *LokiBuilderBuilder {
+        targetResource, err := target.Build()
+        if err != nil {
+            builder.errors["target"] = err.(cog.BuildErrors)
+            return builder
+        }
+    builder.internal.Target = targetResource
 
     return builder
 }
