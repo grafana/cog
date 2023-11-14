@@ -64,6 +64,9 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				_, found := context.BuilderForType(typeDef)
 				return found
 			},
+			"formatType": func(typerDef ast.Type) string {
+				return formatType(typerDef, typeImportMapper)
+			},
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
@@ -77,6 +80,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 			ImportAlias:          jenny.importType(builder.For.SelfRef),
 			Comments:             builder.For.Comments,
 			Constructor:          jenny.generateConstructor(context, builder),
+			Properties:           builder.Properties,
 			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
 				return jenny.generateOption(context, builder, opt)
 			}),

@@ -218,3 +218,17 @@ func Rename(selector Selector, newName string) RewriteRule {
 		return builders, nil
 	}
 }
+
+func Properties(selector Selector, properties []ast.StructField) RewriteRule {
+	return func(builders ast.Builders) (ast.Builders, error) {
+		for i, builder := range builders {
+			if !selector(builder) {
+				continue
+			}
+
+			builders[i].Properties = append(builders[i].Properties, properties...)
+		}
+
+		return builders, nil
+	}
+}

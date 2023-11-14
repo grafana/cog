@@ -16,9 +16,26 @@ builders:
   - omit: { by_object: dashboard.DynamicConfigValue }
   - omit: { by_object: dashboard.DataTransformerConfig }
 
+  # RowPanel → Row
   - rename:
       by_object: dashboard.RowPanel
       as: Row
+
+  - properties:
+      by_object: dashboard.Dashboard
+      set:
+        - name: currentY
+          type:
+            kind: scalar
+            scalar: {scalar_kind: uint32 }
+        - name: currentX
+          type:
+            kind: scalar
+            scalar: {scalar_kind: uint32 }
+        - name: lastPanelHeight
+          type:
+            kind: scalar
+            scalar: {scalar_kind: uint32 }
 
   # Rearrange things a bit
   - merge_into:

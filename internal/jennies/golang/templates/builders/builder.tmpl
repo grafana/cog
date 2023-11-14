@@ -13,6 +13,10 @@ var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .BuilderName }}Builder)(ni
 type {{ .BuilderName }}Builder struct {
     internal *{{ .ObjectName }}
     errors map[string]cog.BuildErrors
+
+    {{- range .Properties }}
+    {{ .Name }} {{ .Type | formatType }}
+    {{- end }}
 }
 
 func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ .BuilderName }}Builder {

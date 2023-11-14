@@ -18,6 +18,7 @@ type Builder struct {
 	// by veneers.
 	Package         string
 	Name            string
+	Properties      []StructField
 	Options         []Option
 	Initializations []Assignment `json:",omitempty"`
 }
