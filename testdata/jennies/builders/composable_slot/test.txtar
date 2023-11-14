@@ -166,7 +166,8 @@ export class LokiBuilderBuilder implements cog.OptionsBuilder<composable_slot.Da
     }
 
     target(target: cog.OptionsBuilder<cog.Dataquery>): this {
-        this.internal.target = target.build();
+        const targetResource = target.build();
+        this.internal.target = targetResource;
         return this;
     }
 }
