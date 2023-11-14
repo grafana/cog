@@ -9,3 +9,11 @@
         W: 24, // full width
     }
 {{- end }}
+
+{{- define "post_assignment_Dashboard_WithRow" }}
+
+    // Reset the state for the next row
+	builder.currentX = 0
+	builder.currentY += rowPanelResource.GridPos.H
+	builder.lastPanelHeight = 0
+{{- end }}

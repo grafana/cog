@@ -17,6 +17,7 @@ export const memoryUsageTimeseries = (): TimeseriesPanelBuilder => {
 
     return defaultTimeseries()
         .title("Memory Usage")
+        .span(18)
         .stacking(new StackingConfigBuilder().mode(StackingMode.Normal))
         .thresholds(
             new ThresholdsConfigBuilder()
@@ -48,6 +49,7 @@ export const memoryUsageGauge = (): GaugePanelBuilder => {
 
     return defaultGauge()
         .title("Memory Usage")
+        .span(6)
         .min(30)
         .max(100)
         .unit("percent")

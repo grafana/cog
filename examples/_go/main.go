@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/grafana/cog/generated/cog/plugins"
 	"github.com/grafana/cog/generated/common"
 	"github.com/grafana/cog/generated/dashboard"
 )
 
-func main() {
+func dashboardBuilder() []byte {
 	builder := dashboard.NewDashboardBuilder("[TEST] Node Exporter / Raspberry").
 		Uid("test-dashboard-raspberry").
 		Tags([]string{"generated", "raspberrypi-node-integration"}).
@@ -61,28 +62,28 @@ func main() {
 			Sort(dashboard.VariableSortDisabled),
 		).
 		// CPU
-		WithRow(dashboard.NewRowBuilder("CPU").GridPos(dashboard.GridPos{H: 1, W: 24})).
-		WithPanel(cpuUsageTimeseries().GridPos(dashboard.GridPos{H: 7, W: 18})).    // TODO: painful, not intuitive
-		WithPanel(cpuTemperatureGauge().GridPos(dashboard.GridPos{H: 7, W: 6})).    // TODO: painful, not intuitive
-		WithPanel(loadAverageTimeseries().GridPos(dashboard.GridPos{H: 7, W: 18})). // TODO: painful, not intuitive
+		WithRow(dashboard.NewRowBuilder("CPU")).
+		WithPanel(cpuUsageTimeseries()).
+		WithPanel(cpuTemperatureGauge()).
+		WithPanel(loadAverageTimeseries()).
 		// Memory
-		WithRow(dashboard.NewRowBuilder("Memory").GridPos(dashboard.GridPos{H: 1, W: 24})). // TODO: painful, not intuitive
-		WithPanel(memoryUsageTimeseries().GridPos(dashboard.GridPos{H: 7, W: 18})).
-		WithPanel(memoryUsageGauge().GridPos(dashboard.GridPos{H: 7, W: 6})).
+		WithRow(dashboard.NewRowBuilder("Memory")).
+		WithPanel(memoryUsageTimeseries()).
+		WithPanel(memoryUsageGauge()).
 		// Disk
 		WithRow(dashboard.NewRowBuilder("Disk")).
-		WithPanel(diskIOTimeseries().GridPos(dashboard.GridPos{H: 7, W: 12})).
-		WithPanel(diskSpaceUsageTable().GridPos(dashboard.GridPos{H: 7, W: 12})).
+		WithPanel(diskIOTimeseries()).
+		WithPanel(diskSpaceUsageTable()).
 		// Network
 		WithRow(dashboard.NewRowBuilder("Network")).
-		WithPanel(networkReceivedTimeseries().GridPos(dashboard.GridPos{H: 7, W: 12})).
-		WithPanel(networkTransmittedTimeseries().GridPos(dashboard.GridPos{H: 7, W: 12})).
+		WithPanel(networkReceivedTimeseries()).
+		WithPanel(networkTransmittedTimeseries()).
 		// Logs
 		WithRow(dashboard.NewRowBuilder("Logs")).
-		WithPanel(errorsInSystemLogs().GridPos(dashboard.GridPos{H: 7, W: 24})).
-		WithPanel(authLogs().GridPos(dashboard.GridPos{H: 7, W: 24})).
-		WithPanel(kernelLogs().GridPos(dashboard.GridPos{H: 7, W: 24})).
-		WithPanel(allSystemLogs().GridPos(dashboard.GridPos{H: 7, W: 24}))
+		WithPanel(errorsInSystemLogs()).
+		WithPanel(authLogs()).
+		WithPanel(kernelLogs()).
+		WithPanel(allSystemLogs())
 
 	sampleDashboard, err := builder.Build()
 	if err != nil {
@@ -92,5 +93,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(dashboardJson))
+
+	return dashboardJson
+}
+
+func main() {
+	// Required to correctly unmarshal panels and dataqueries
+	plugins.RegisterDefaultPlugins()
+
+	dashboardAsBytes := dashboardBuilder()
+
+	fmt.Println(string(dashboardAsBytes))
 }

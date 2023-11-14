@@ -49,6 +49,7 @@ func defaultTimeseries() *timeseries.PanelBuilder {
 
 func defaultLogs() *logs.PanelBuilder {
 	return logs.NewPanelBuilder().
+		Span(24).
 		Datasource(dashboard.DataSourceRef{
 			Type: toPtr("loki"),
 			Uid:  toPtr("grafanacloud-logs"),

@@ -4,6 +4,7 @@ import (
 	"embed"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
@@ -11,7 +12,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/*.tmpl
+//go:embed templates/*.tmpl templates/veneers/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -20,6 +21,7 @@ func init() {
 	base := template.New("ts")
 	base.
 		Option("missingkey=error").
+		Funcs(sprig.FuncMap()).
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(template.FuncMap{
@@ -30,5 +32,5 @@ func init() {
 		Funcs(template.FuncMap{
 			"formatScalar": formatScalar,
 		})
-	templates = template.Must(base.ParseFS(templatesFS, "templates/*.tmpl"))
+	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
 }

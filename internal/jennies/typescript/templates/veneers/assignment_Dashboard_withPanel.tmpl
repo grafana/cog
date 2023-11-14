@@ -1,0 +1,24 @@
+{{- define "pre_assignment_Dashboard_withPanel" }}
+
+		if (!panelResource.gridPos) {
+			panelResource.gridPos = dashboard.defaultGridPos();
+		}
+
+		// Position the panel on the grid
+		panelResource.gridPos.x = this.currentX;
+		panelResource.gridPos.y = this.currentY;
+{{- end }}
+
+{{- define "post_assignment_Dashboard_withPanel" }}
+
+		// Prepare the coordinates for the next panel
+		this.currentX += panelResource.gridPos.w;
+		this.lastPanelHeight = Math.max(this.lastPanelHeight, panelResource.gridPos.h);
+
+		// Check for grid width overflow?
+		if (this.currentX >= 24) {
+			this.currentX = 0;
+			this.currentY += this.lastPanelHeight;
+			this.lastPanelHeight = 0;
+		}
+{{- end }}
