@@ -805,7 +805,8 @@ export class DashboardBuilder implements cog.OptionsBuilder<builder_delegation.D
     }
 
     singleLink(singleLink: cog.OptionsBuilder<builder_delegation.DashboardLink>): this {
-        this.internal.singleLink = singleLink.build();
+        const singleLinkResource = singleLink.build();
+        this.internal.singleLink = singleLinkResource;
         return this;
     }
 }

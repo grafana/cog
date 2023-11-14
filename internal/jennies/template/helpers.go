@@ -43,7 +43,7 @@ func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 		"upperCamelCase": tools.UpperCamelCase,
 		"lowerCamelCase": tools.LowerCamelCase,
 		"include":        include,
-		"include_if_exists": func(name string, data interface{}) (string, error) {
+		"includeIfExists": func(name string, data interface{}) (string, error) {
 			if tmpl := baseTemplate.Lookup(name); tmpl == nil {
 				return "", nil
 			}
