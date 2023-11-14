@@ -1,0 +1,296 @@
+# Basic builder with a field declared as known, but annotated with a type hint.
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "known_any",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "config",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": true,
+                    "Scalar": {
+                      "ScalarKind": "any"
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "known_any",
+            "ReferredType": "SomeStruct"
+          }
+        },
+        {
+          "Name": "Config",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "known_any",
+            "ReferredType": "Config"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "known_any",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomeStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "config",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": true,
+                      "Scalar": {
+                        "ScalarKind": "any"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "known_any",
+              "ReferredType": "SomeStruct"
+            }
+          },
+          {
+            "Name": "Config",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "known_any",
+              "ReferredType": "Config"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "config",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "any"
+                  }
+                },
+                "Required": false
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "known_any",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "known_any",
+      "Name": "SomeStruct",
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "config",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "any"
+                    }
+                  },
+                  "TypeHint": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "known_any",
+                      "ReferredType": "Config"
+                    }
+                  }
+                },
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/TypescriptBuilder --
+== known_any/somestruct_builder_gen.ts
+import * as cog from '../cog';
+import * as known_any from '../known_any/types_gen';
+
+export class SomeStructBuilder implements cog.OptionsBuilder<known_any.SomeStruct> {
+    private readonly internal: known_any.SomeStruct;
+
+    constructor() {
+        this.internal = known_any.defaultSomeStruct();
+    }
+
+    build(): known_any.SomeStruct {
+        return this.internal;
+    }
+
+    title(title: string): this {
+		if (!this.internal.config) {
+			this.internal.config = known_any.defaultConfig();
+		}
+        this.internal.config.title = title;
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== known_any/somestruct_builder_gen.go
+package known_any
+
+import (
+    cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
+
+type SomeStructBuilder struct {
+    internal *SomeStruct
+    errors map[string]cog.BuildErrors
+}
+
+func NewSomeStructBuilder() *SomeStructBuilder {
+	resource := &SomeStruct{}
+	builder := &SomeStructBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
+	}
+
+	if len(errs) != 0 {
+		return SomeStruct{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *SomeStructBuilder) Title(title string) *SomeStructBuilder {
+    if builder.internal.Config == nil {
+	builder.internal.Config = &Config{}
+}
+    builder.internal.Config.(*Config).Title = title
+
+    return builder
+}
+
+func (builder *SomeStructBuilder) applyDefaults() {
+}
