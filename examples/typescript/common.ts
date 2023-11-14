@@ -50,6 +50,7 @@ export const defaultTimeseries = (): TimeseriesPanelBuilder => {
 
 export const defaultLogs = (): LogsPanelBuilder => {
     return new LogsPanelBuilder()
+        .span(24)
         .datasource({
             type: "loki",
             uid:  "grafanacloud-logs",

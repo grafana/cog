@@ -1,3 +1,4 @@
+{{- $builder := . }}
 {{ range $alias, $importPath := .Imports -}}
 import * as {{ $alias }} from '{{ $importPath }}';
 {{ end }}
@@ -23,22 +24,46 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
         return this.internal;
     }
 {{ range .Options }}
+{{- $option := . }}
     {{- range .Comments}}
     // {{ . }}
     {{- end }}
     {{ .Name }}({{ template "args" .Args }}): this {
 {{- range .Assignments }}
-{{- range .InitSafeguards }}
-{{ . }}
-{{- end }}
-{{- template "constraints" .Constraints }}
-        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ template "assignment_value" . }};{{ end -}}
-        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ template "assignment_value" . }});{{ end -}}
+{{- template "assignment" (dict "Assignment" . "Builder" $builder "Option" $option) }}
 {{ end }}
         return this;
     }
 {{ end -}}
 }
+
+{{- define "assignment" }}
+{{- range .Assignment.InitSafeguards }}
+{{ . }}
+{{- end }}
+{{- template "constraints" .Assignment.Constraints }}
+
+    {{- template "assignment_setup" (dict "Value" .Assignment.Value) -}}
+
+    {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
+
+    {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- include_if_exists $preTmpl (dict) -}}
+    
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
+
+    {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- include_if_exists $postTmpl (dict) -}}
+{{- end }}
+
+{{- define "assignment_setup" }}
+    {{- with .Value.Argument }}
+        {{- $argName := lowerCamelCase .Name }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        const {{ $argName }}Resource = {{ $argName }}.build();
+        {{- end }}
+    {{- end }}
+{{- end }}
 
 {{- define "assignment_value" }}
     {{- if not (eq .Value.Constant nil) }}
@@ -48,9 +73,14 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
         {{- $argName := lowerCamelCase .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- $argName }}.build()
+        {{- $argName }}Resource
         {{- else }}
         {{- $argName }}
         {{- end }}
     {{- end }}
+{{- end }}
+
+{{- define "assignment_method" }}
+        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ .Value }};{{ end -}}
+        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ .Value }});{{ end -}}
 {{- end }}

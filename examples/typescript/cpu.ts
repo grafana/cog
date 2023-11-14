@@ -13,6 +13,7 @@ export const cpuUsageTimeseries = (): TimeseriesPanelBuilder => {
 
     return defaultTimeseries()
         .title("CPU Usage")
+        .span(18)
         .stacking(new StackingConfigBuilder().mode(StackingMode.Normal))
         .thresholds(
             new ThresholdsConfigBuilder()
@@ -31,6 +32,7 @@ export const cpuUsageTimeseries = (): TimeseriesPanelBuilder => {
 export const loadAverageTimeseries = (): TimeseriesPanelBuilder => {
     return defaultTimeseries()
         .title("Load Average")
+        .span(18)
         .stacking(new StackingConfigBuilder().mode(StackingMode.Normal))
         .thresholds(
             new ThresholdsConfigBuilder()
@@ -59,6 +61,7 @@ export const loadAverageTimeseries = (): TimeseriesPanelBuilder => {
 export const cpuTemperatureGauge = (): GaugePanelBuilder => {
     return defaultGauge()
         .title("CPU Temperature")
+        .span(6)
         .min(30)
         .max(100)
         .unit("celsius")

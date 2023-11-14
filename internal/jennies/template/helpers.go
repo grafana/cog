@@ -7,7 +7,6 @@ import (
 	"strings"
 	gotemplate "text/template"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -45,23 +44,8 @@ func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 		"lowerCamelCase": tools.LowerCamelCase,
 		"include":        include,
 		"include_if_exists": func(name string, data interface{}) (string, error) {
-			if name == "builders/veneers/post_assignment_Dashboard_WithRow" {
-				spew.Dump(name)
-			}
 			if tmpl := baseTemplate.Lookup(name); tmpl == nil {
-				if name == "builders/veneers/post_assignment_Dashboard_WithRow" {
-					spew.Dump("not found")
-					spew.Dump(baseTemplate.DefinedTemplates())
-
-					for _, known := range baseTemplate.Templates() {
-						spew.Dump(known.Name())
-					}
-				}
 				return "", nil
-			}
-
-			if name == "builders/veneers/post_assignment_Dashboard_WithRow" {
-				spew.Dump("found")
 			}
 
 			return include(name, data)

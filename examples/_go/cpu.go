@@ -16,6 +16,7 @@ func cpuUsageTimeseries() *timeseries.PanelBuilder {
 
 	return defaultTimeseries().
 		Title("CPU Usage").
+		Span(18).
 		Stacking(common.NewStackingConfigBuilder().Mode(common.StackingModeNormal)). // TODO: painful, not intuitive
 		Thresholds(
 			dashboard.NewThresholdsConfigBuilder().
@@ -36,6 +37,7 @@ func cpuUsageTimeseries() *timeseries.PanelBuilder {
 func loadAverageTimeseries() *timeseries.PanelBuilder {
 	return defaultTimeseries().
 		Title("Load Average").
+		Span(18).
 		Thresholds(
 			dashboard.NewThresholdsConfigBuilder().
 				Mode(dashboard.ThresholdsModeAbsolute).
@@ -63,6 +65,7 @@ func loadAverageTimeseries() *timeseries.PanelBuilder {
 func cpuTemperatureGauge() *gauge.PanelBuilder {
 	return defaultGauge().
 		Title("CPU Temperature").
+		Span(6).
 		Min(30).
 		Max(100).
 		Unit("celsius").
