@@ -9,12 +9,12 @@
     {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
 
     {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
-    {{- include_if_exists $preTmpl (dict) -}}
+    {{- includeIfExists $preTmpl (dict) -}}
 
     {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
 
     {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
-    {{- include_if_exists $postTmpl (dict) -}}
+    {{- includeIfExists $postTmpl (dict) -}}
 {{- end }}
 
 {{- define "assignment_value" }}

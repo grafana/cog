@@ -1,5 +1,5 @@
 package {{ .Package }}
-{{- $builder := . }}
+{{ $builder := . }}
 import (
 {{- range $alias, $importPath := .Imports }}
     {{ $alias }} "{{ $importPath }}"
