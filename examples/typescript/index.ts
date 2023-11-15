@@ -29,32 +29,32 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
             .time_options(["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]),
     )
 
-    .tooltip(DashboardCursorSync.DashboardCursorSyncCrosshair)
+    .tooltip(DashboardCursorSync.Crosshair)
 
     // "Data Source" variable
     .withVariable(
         new VariableModelBuilder()
-            .type(VariableType.VariableTypeDatasource)
+            .type(VariableType.Datasource)
             .name("datasource")
             .label("Data Source")
-            .hide(VariableHide.VariableHideDontHide)
-            .refresh(VariableRefresh.VariableRefreshOnDashboardLoad)
+            .hide(VariableHide.DontHide)
+            .refresh(VariableRefresh.OnDashboardLoad)
             .query("prometheus")
             .current({
                 selected: true,
                 text: "grafanacloud-potatopi-prom",
                 value: "grafanacloud-prom",
             })
-            .sort(VariableSort.VariableSortDisabled)
+            .sort(VariableSort.Disabled)
     )
     // "Instance" variable
     .withVariable(
         new VariableModelBuilder()
-            .type(VariableType.VariableTypeQuery)
+            .type(VariableType.Query)
             .name("instance")
             .label("Instance")
-            .hide(VariableHide.VariableHideDontHide)
-            .refresh(VariableRefresh.VariableRefreshOnTimeRangeChanged)
+            .hide(VariableHide.DontHide)
+            .refresh(VariableRefresh.OnTimeRangeChanged)
             .query('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)')
             .datasource({
                 "type": "prometheus",
@@ -65,7 +65,7 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
                 text: "potato",
                 value: "potato"
             })
-            .sort(VariableSort.VariableSortDisabled)
+            .sort(VariableSort.Disabled)
     )
 
     .withRow(new RowBuilder("CPU").gridPos({h: 1, w: 24, x: 0, y: 0}))

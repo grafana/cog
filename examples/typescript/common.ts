@@ -30,7 +30,7 @@ export const tablePrometheusQuery = (query: string, ref: string): prometheus.Dat
     return new prometheus.DataqueryBuilder()
         .expr(query)
         .instant(true)
-        .format(PromQueryFormat.PromQueryFormatTable)
+        .format(PromQueryFormat.Table)
         .refId(ref);
 };
 
@@ -38,13 +38,13 @@ export const defaultTimeseries = (): TimeseriesPanelBuilder => {
     return new TimeseriesPanelBuilder()
         .lineWidth(1)
         .fillOpacity(10)
-        .drawStyle(GraphDrawStyle.GraphDrawStyleLine)
-        .showPoints(VisibilityMode.VisibilityModeNever)
+        .drawStyle(GraphDrawStyle.Line)
+        .showPoints(VisibilityMode.Never)
         .legend(
             new VizLegendOptionsBuilder()
                 .showLegend(true)
-                .placement(LegendPlacement.LegendPlacementBottom)
-                .displayMode(LegendDisplayMode.LegendDisplayModeList)
+                .placement(LegendPlacement.Bottom)
+                .displayMode(LegendDisplayMode.List)
         );
 };
 
@@ -56,13 +56,13 @@ export const defaultLogs = (): LogsPanelBuilder => {
         })
         .showTime(true)
         .enableLogDetails(true)
-        .sortOrder(LogsSortOrder.LogsSortOrderDescending)
+        .sortOrder(LogsSortOrder.Descending)
         .wrapLogMessage(true);
 };
 
 export const defaultGauge = (): GaugePanelBuilder => {
     return new GaugePanelBuilder()
-        .orientation(VizOrientation.VizOrientationAuto)
+        .orientation(VizOrientation.Auto)
         .reduceOptions(
             new ReduceDataOptionsBuilder()
                 .calcs(["lastNotNull"])

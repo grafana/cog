@@ -13,10 +13,10 @@ export const cpuUsageTimeseries = (): TimeseriesPanelBuilder => {
 
     return defaultTimeseries()
         .title("CPU Usage")
-        .stacking(new StackingConfigBuilder().mode(StackingMode.StackingModeNormal))
+        .stacking(new StackingConfigBuilder().mode(StackingMode.Normal))
         .thresholds(
             new ThresholdsConfigBuilder()
-                .mode(ThresholdsMode.ThresholdsModeAbsolute)
+                .mode(ThresholdsMode.Absolute)
                 .steps([
                     {value: null, color: "green"},
                     {value: 80.0, color: "red"},
@@ -31,10 +31,10 @@ export const cpuUsageTimeseries = (): TimeseriesPanelBuilder => {
 export const loadAverageTimeseries = (): TimeseriesPanelBuilder => {
     return defaultTimeseries()
         .title("Load Average")
-        .stacking(new StackingConfigBuilder().mode(StackingMode.StackingModeNormal))
+        .stacking(new StackingConfigBuilder().mode(StackingMode.Normal))
         .thresholds(
             new ThresholdsConfigBuilder()
-                .mode(ThresholdsMode.ThresholdsModeAbsolute)
+                .mode(ThresholdsMode.Absolute)
                 .steps([
                     {value: null, color: "green"},
                     {value: 80.0, color: "red"},
@@ -64,7 +64,7 @@ export const cpuTemperatureGauge = (): GaugePanelBuilder => {
         .unit("celsius")
         .thresholds(
             new ThresholdsConfigBuilder()
-                .mode(ThresholdsMode.ThresholdsModeAbsolute)
+                .mode(ThresholdsMode.Absolute)
                 .steps([
                     {value: null, color: "rgba(50, 172, 45, 0.97)"},
                     {value: 65.0, color: "rgba(237, 129, 40, 0.89)"},
