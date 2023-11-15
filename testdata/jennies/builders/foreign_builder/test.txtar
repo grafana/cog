@@ -152,7 +152,7 @@
 -- out/jennies/TypescriptBuilder --
 == builder_pkg/somestruct_builder_gen.ts
 import * as cog from '../cog';
-import * as some_pkg from '../some_pkg/types_gen';
+import * as some_pkg from '../some_pkg';
 
 export class SomeNiceBuilderBuilder implements cog.OptionsBuilder<some_pkg.SomeStruct> {
     private readonly internal: some_pkg.SomeStruct;

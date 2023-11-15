@@ -160,7 +160,7 @@
 -- out/jennies/TypescriptBuilder --
 == dataquery_variant_builder/loki_builder_gen.ts
 import * as cog from '../cog';
-import * as dataquery_variant_builder from '../dataquery_variant_builder/types_gen';
+import * as dataquery_variant_builder from '../dataquery_variant_builder';
 
 export class LokiBuilderBuilder implements cog.OptionsBuilder<cog.Dataquery> {
     private readonly internal: dataquery_variant_builder.Loki;

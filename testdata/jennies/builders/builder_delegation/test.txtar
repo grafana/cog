@@ -750,7 +750,7 @@
 
 -- out/jennies/TypescriptBuilder --
 == builder_delegation/dashboardlink_builder_gen.ts
-import * as builder_delegation from '../builder_delegation/types_gen';
+import * as builder_delegation from '../builder_delegation';
 import * as cog from '../cog';
 
 export class DashboardLinkBuilder implements cog.OptionsBuilder<builder_delegation.DashboardLink> {
@@ -775,7 +775,7 @@ export class DashboardLinkBuilder implements cog.OptionsBuilder<builder_delegati
     }
 }
 == builder_delegation/dashboard_builder_gen.ts
-import * as builder_delegation from '../builder_delegation/types_gen';
+import * as builder_delegation from '../builder_delegation';
 import * as cog from '../cog';
 
 export class DashboardBuilder implements cog.OptionsBuilder<builder_delegation.Dashboard> {

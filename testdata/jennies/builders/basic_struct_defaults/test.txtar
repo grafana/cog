@@ -485,7 +485,7 @@
 }
 -- out/jennies/TypescriptBuilder --
 == basic_struct_defaults/somestruct_builder_gen.ts
-import * as basic_struct_defaults from '../basic_struct_defaults/types_gen';
+import * as basic_struct_defaults from '../basic_struct_defaults';
 import * as cog from '../cog';
 
 export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct_defaults.SomeStruct> {

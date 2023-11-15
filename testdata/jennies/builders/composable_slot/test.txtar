@@ -152,7 +152,7 @@
 -- out/jennies/TypescriptBuilder --
 == composable_slot/dashboard_builder_gen.ts
 import * as cog from '../cog';
-import * as composable_slot from '../composable_slot/types_gen';
+import * as composable_slot from '../composable_slot';
 
 export class LokiBuilderBuilder implements cog.OptionsBuilder<composable_slot.Dashboard> {
     private readonly internal: composable_slot.Dashboard;
