@@ -178,18 +178,21 @@ func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argumen
 	argName := escapeVarName(tools.LowerCamelCase(arg.Name))
 
 	if composableSlot, ok := context.ResolveToComposableSlot(arg.Type); ok {
+		formattedType := fmt.Sprintf("cog.Builder[%s]", formatType(composableSlot, jenny.typeImportMapper))
+		if arg.Type.IsArray() {
+			formattedType = "[]" + formattedType
+		}
+
 		return template.Argument{
-			Name:          argName,
-			Type:          formatType(composableSlot, jenny.typeImportMapper),
-			ReferredAlias: jenny.importCog(),
+			Name: argName,
+			Type: formattedType,
 		}
 	}
 
 	if referredBuilder, found := context.BuilderForType(arg.Type); found {
 		return template.Argument{
-			Name:          argName,
-			Type:          jenny.importType(referredBuilder.For.SelfRef),
-			ReferredAlias: jenny.importCog(),
+			Name: argName,
+			Type: fmt.Sprintf("cog.Builder[%s]", jenny.importType(referredBuilder.For.SelfRef)),
 		}
 	}
 

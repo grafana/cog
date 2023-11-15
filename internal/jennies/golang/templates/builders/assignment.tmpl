@@ -29,7 +29,11 @@
         {{- $argName := formatArgName .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- $argName = (print $argName "Resource") }}
+            {{- if .Type.IsArray }}
+                {{- $argName = (print $argName "Resources") }}
+            {{- else }}
+                {{- $argName = (print $argName "Resource") }}
+            {{- end }}
         {{- end }}
 
         {{- maybeAsPointer (isNullableNonArray $.Assignment.Path.Last.Type) $argName }}
@@ -47,11 +51,23 @@
     {{- end }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- if .Type.IsArray }}
+        {{ formatArgName .Name}}Resources := make({{ .Type | formatType }}, 0, len({{ formatArgName .Name}}))
+        for _, r := range {{ formatArgName .Name}} {
+            {{ formatArgName .Name}}Resource, err := r.Build()
+            if err != nil {
+                builder.errors["{{ $.Assignment.Path }}"] = err.(cog.BuildErrors)
+                return builder
+            }
+            {{ formatArgName .Name}}Resources = append({{ formatArgName .Name}}Resources, {{ formatArgName .Name}}Resource)
+        }
+        {{- else }}
         {{ formatArgName .Name}}Resource, err := {{ formatArgName .Name}}.Build()
         if err != nil {
             builder.errors["{{ $.Assignment.Path }}"] = err.(cog.BuildErrors)
             return builder
         }
+        {{- end }}
         {{- end }}
     {{- end }}
     {{- with .Value.Envelope }}
