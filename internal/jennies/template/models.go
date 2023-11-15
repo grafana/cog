@@ -31,10 +31,8 @@ type Option struct {
 }
 
 type Argument struct {
-	Name          string
-	Type          string
-	ReferredAlias string
-	ReferredName  string
+	Name string
+	Type string
 }
 
 type Assignment struct {

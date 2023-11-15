@@ -13,7 +13,8 @@ import (
 )
 
 type Builder struct {
-	imports template.ImportMap
+	imports          template.ImportMap
+	typeImportMapper func(string) string
 }
 
 func (jenny *Builder) JennyName() string {
@@ -45,17 +46,13 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 
 	jenny.imports = template.NewImportMap()
 	jenny.imports.Add("cog", "../cog")
-	typeImportMapper := func(pkg string) string {
-		if pkg == builder.Package {
-			return ""
-		}
-
+	jenny.typeImportMapper = func(pkg string) string {
 		return jenny.imports.Add(pkg, fmt.Sprintf("../%s", pkg))
 	}
 
 	buildObjectSignature := builder.For.SelfRef.ReferredPkg + "." + tools.UpperCamelCase(builder.For.Name)
 	if builder.For.Type.ImplementsVariant() {
-		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant(), typeImportMapper)
+		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant(), jenny.typeImportMapper)
 	}
 
 	err := templates.
@@ -65,14 +62,14 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				return found
 			},
 			"formatType": func(typerDef ast.Type) string {
-				return formatType(typerDef, typeImportMapper)
+				return formatType(typerDef, jenny.typeImportMapper)
 			},
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
 			},
 			"defaultValueForType": func(typeDef ast.Type) string {
-				return formatValue(defaultValueForType(builder.Schema, typeDef, typeImportMapper))
+				return formatValue(defaultValueForType(builder.Schema, typeDef, jenny.typeImportMapper))
 			},
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
@@ -101,7 +98,7 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 		}
 
 		// FIXME: this is assuming that there's only one argument for that option
-		argsList = append(argsList, jenny.generateArgument(context, builder, opt.Args[0]))
+		argsList = append(argsList, jenny.generateArgument(context, opt.Args[0]))
 		assignments = append(assignments, jenny.generateAssignment(builder, opt.Assignments[0]))
 	}
 
@@ -116,12 +113,10 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 }
 
 func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) template.Option {
-	// Arguments list
 	arguments := tools.Map(def.Args, func(arg ast.Argument) template.Argument {
-		return jenny.generateArgument(context, builder, arg)
+		return jenny.generateArgument(context, arg)
 	})
 
-	// Assignments
 	assignments := tools.Map(def.Assignments, func(assignment ast.Assignment) template.Assignment {
 		return jenny.generateAssignment(builder, assignment)
 	})
@@ -134,39 +129,29 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 	}
 }
 
-func (jenny *Builder) generateArgument(context context.Builders, builder ast.Builder, arg ast.Argument) template.Argument {
+func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) template.Argument {
 	if composableSlot, ok := context.ResolveToComposableSlot(arg.Type); ok {
+		formattedType := fmt.Sprintf("cog.OptionsBuilder<%s>", formatType(composableSlot, jenny.typeImportMapper))
+		if arg.Type.IsArray() {
+			formattedType += "[]"
+		}
+
 		return template.Argument{
-			Name:          arg.Name,
-			ReferredAlias: "cog",
-			ReferredName:  tools.UpperCamelCase(string(composableSlot.AsComposableSlot().Variant)),
+			Name: arg.Name,
+			Type: formattedType,
 		}
 	}
 
-	if referredBuilder, found := context.BuilderForType(arg.Type); found {
-		referredTypeAlias := jenny.typeImportAlias(referredBuilder.For.SelfRef)
-
+	if _, found := context.BuilderForType(arg.Type); found {
 		return template.Argument{
-			Name:          arg.Name,
-			ReferredAlias: referredTypeAlias,
-			ReferredName:  referredBuilder.For.Name,
+			Name: arg.Name,
+			Type: fmt.Sprintf("cog.OptionsBuilder<%s>", formatType(arg.Type, jenny.typeImportMapper)),
 		}
 	}
-
-	builderImportAlias := jenny.typeImportAlias(builder.For.SelfRef)
-	typeName := formatType(arg.Type, func(pkg string) string {
-		if pkg == builder.For.SelfRef.ReferredPkg {
-			return builderImportAlias
-		}
-
-		jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
-
-		return pkg
-	})
 
 	return template.Argument{
 		Name: tools.LowerCamelCase(arg.Name),
-		Type: typeName,
+		Type: formatType(arg.Type, jenny.typeImportMapper),
 	}
 }
 

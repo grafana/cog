@@ -60,7 +60,11 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
     {{- with .Value.Argument }}
         {{- $argName := lowerCamelCase .Name }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- if .Type.IsArray }}
+        const {{ $argName }}Resources = {{ $argName }}.map(builder => builder.build());
+        {{- else }}
         const {{ $argName }}Resource = {{ $argName }}.build();
+        {{- end }}
         {{- end }}
     {{- end }}
 {{- end }}
@@ -73,7 +77,11 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
         {{- $argName := lowerCamelCase .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- if .Type.IsArray }}
+        {{- $argName }}Resources
+        {{- else }}
         {{- $argName }}Resource
+        {{- end }}
         {{- else }}
         {{- $argName }}
         {{- end }}

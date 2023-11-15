@@ -117,6 +117,10 @@ func (t Type) IsStructOrRef() bool {
 	return t.Kind == KindStruct || t.Kind == KindRef
 }
 
+func (t Type) IsArray() bool {
+	return t.Kind == KindArray
+}
+
 func (t Type) IsStructGeneratedFromDisjunction() bool {
 	if t.Kind != KindStruct {
 		return false
