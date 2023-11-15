@@ -198,8 +198,8 @@
 -- out/jennies/TypescriptBuilder --
 == some_pkg/person_builder_gen.ts
 import * as cog from '../cog';
-import * as other_pkg from '../other_pkg/types_gen';
-import * as some_pkg from '../some_pkg/types_gen';
+import * as other_pkg from '../other_pkg';
+import * as some_pkg from '../some_pkg';
 
 export class PersonBuilder implements cog.OptionsBuilder<some_pkg.Person> {
     private readonly internal: some_pkg.Person;

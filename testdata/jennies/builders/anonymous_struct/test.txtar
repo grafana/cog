@@ -300,7 +300,7 @@
 
 -- out/jennies/TypescriptBuilder --
 == anonymous_struct/somestruct_builder_gen.ts
-import * as anonymous_struct from '../anonymous_struct/types_gen';
+import * as anonymous_struct from '../anonymous_struct';
 import * as cog from '../cog';
 
 export class SomeStructBuilder implements cog.OptionsBuilder<anonymous_struct.SomeStruct> {

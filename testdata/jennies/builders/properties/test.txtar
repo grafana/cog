@@ -164,7 +164,7 @@
 -- out/jennies/TypescriptBuilder --
 == properties/somestruct_builder_gen.ts
 import * as cog from '../cog';
-import * as properties from '../properties/types_gen';
+import * as properties from '../properties';
 
 export class SomeStructBuilder implements cog.OptionsBuilder<properties.SomeStruct> {
     private readonly internal: properties.SomeStruct;

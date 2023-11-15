@@ -458,7 +458,7 @@
 
 -- out/jennies/TypescriptBuilder --
 == basic_struct/somestruct_builder_gen.ts
-import * as basic_struct from '../basic_struct/types_gen';
+import * as basic_struct from '../basic_struct';
 import * as cog from '../cog';
 
 // SomeStruct, to hold data.

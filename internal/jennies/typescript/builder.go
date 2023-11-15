@@ -162,11 +162,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 		valueType = *path.Last().TypeHint
 	}
 
-	emptyValue := formatValue(defaultValueForType(currentBuilder.Schema, valueType, func(pkg string) string {
-		jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
-
-		return pkg
-	}))
+	emptyValue := formatValue(defaultValueForType(currentBuilder.Schema, valueType, jenny.typeImportMapper))
 
 	return fmt.Sprintf(`		if (!this.internal.%[1]s) {
 			this.internal.%[1]s = %[2]s;
@@ -224,20 +220,10 @@ func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeCon
 	})
 }
 
-// typeImportAlias returns the alias to use when importing the given object's type definition.
-func (jenny *Builder) typeImportAlias(typeRef ast.RefType) string {
-	// all types within a schema are generated under the same package
-	return typeRef.ReferredPkg
-}
-
 // importType declares an import statement for the type definition of
 // the given object and returns an alias to it.
 func (jenny *Builder) importType(typeRef ast.RefType) string {
-	pkg := jenny.typeImportAlias(typeRef)
-
-	jenny.imports.Add(pkg, fmt.Sprintf("../%s/types_gen", pkg))
-
-	return pkg
+	return jenny.typeImportMapper(typeRef.ReferredPkg)
 }
 
 func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {

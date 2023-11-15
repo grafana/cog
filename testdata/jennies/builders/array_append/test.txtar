@@ -175,7 +175,7 @@
 -- out/jennies/TypescriptBuilder --
 == sandbox/somestruct_builder_gen.ts
 import * as cog from '../cog';
-import * as sandbox from '../sandbox/types_gen';
+import * as sandbox from '../sandbox';
 
 export class SomeStructBuilder implements cog.OptionsBuilder<sandbox.SomeStruct> {
     private readonly internal: sandbox.SomeStruct;
