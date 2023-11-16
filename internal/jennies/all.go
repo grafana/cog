@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/typescript"
@@ -12,7 +13,7 @@ import (
 )
 
 type LanguageJenny interface {
-	Jennies() *codejen.JennyList[context.Builders]
+	Jennies(targets common.Targets) *codejen.JennyList[context.Builders]
 	CompilerPasses() compiler.Passes
 	RegisterCliFlags(cmd *cobra.Command)
 }
