@@ -272,8 +272,6 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		return g.declareReference(v, defV)
 	}
 
-	op, disjunctionBranches := v.Expr()
-
 	defVal, err := g.extractDefault(v)
 	if err != nil {
 		return ast.Type{}, err
@@ -281,6 +279,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 
 	hints := hintsFromCueValue(v)
 
+	op, disjunctionBranches := v.Expr()
 	if op == cue.OrOp && len(disjunctionBranches) > 1 {
 		return g.declareDisjunction(v, hints, defVal)
 	}
