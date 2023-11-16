@@ -12,7 +12,7 @@ import (
 
 type LanguageTarget struct {
 	Jennies        *codejen.JennyList[context.Builders]
-	CompilerPasses []compiler.Pass
+	CompilerPasses compiler.Passes
 }
 
 type LanguageTargets map[string]LanguageTarget

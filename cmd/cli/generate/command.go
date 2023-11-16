@@ -103,7 +103,7 @@ func doGenerate(opts Options) error {
 		return err
 	}
 
-	veneerRewriter, err := yaml.NewLoader().RewriterFromFiles(veneerFiles)
+	veneers, err := yaml.NewLoader().RewriterFromFiles(veneerFiles)
 	if err != nil {
 		return err
 	}
@@ -124,19 +124,10 @@ func doGenerate(opts Options) error {
 	for language, target := range targetsByLanguage {
 		fmt.Printf("Running '%s' jennies...\n", language)
 
-		var err error
-		processedSchemas := ast.Schemas(schemas).DeepCopy()
-
-		var compilerPasses []compiler.Pass
-		compilerPasses = append(compilerPasses, compiler.CommonPasses()...)
-		compilerPasses = append(compilerPasses, target.CompilerPasses...)
-
-		// run the compiler passes that will modify types
-		for _, compilerPass := range compilerPasses {
-			processedSchemas, err = compilerPass.Process(processedSchemas)
-			if err != nil {
-				return err
-			}
+		compilerPasses := compiler.CommonPasses().Concat(target.CompilerPasses)
+		processedSchemas, err := compilerPasses.Process(schemas)
+		if err != nil {
+			return err
 		}
 
 		// from these types, create builders
@@ -144,7 +135,7 @@ func doGenerate(opts Options) error {
 		builders := builderGenerator.FromAST(processedSchemas)
 
 		// apply the builder veneers
-		builders, err = veneerRewriter.ApplyTo(builders, language)
+		builders, err = veneers.ApplyTo(builders, language)
 		if err != nil {
 			return err
 		}
