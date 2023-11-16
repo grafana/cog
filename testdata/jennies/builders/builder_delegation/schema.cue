@@ -8,6 +8,6 @@ package builder_delegation
 Dashboard: {
 	id: int64
 	title: string
-	links: [...#DashboardLink] // we currently don't expand that to []cog.Builder<DashboardLink>
+	links: [...#DashboardLink] // will be expanded to []cog.Builder<DashboardLink>
 	singleLink: #DashboardLink // will be expanded to cog.Builder<DashboardLink>
 }

@@ -24,6 +24,23 @@
                     }
                   },
                   "Required": true
+                },
+                {
+                  "Name": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
                 }
               ]
             }
@@ -59,6 +76,23 @@
                       }
                     },
                     "Required": true
+                  },
+                  {
+                    "Name": "targets",
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "composable_slot",
+                          "Nullable": false,
+                          "ComposableSlot": {
+                            "Variant": "dataquery"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
                   }
                 ]
               }
@@ -84,6 +118,23 @@
                   "Nullable": false,
                   "ComposableSlot": {
                     "Variant": "dataquery"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "targets",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "composable_slot",
+                      "Nullable": false,
+                      "ComposableSlot": {
+                        "Variant": "dataquery"
+                      }
+                    }
                   }
                 },
                 "Required": true
@@ -143,6 +194,69 @@
             }
           ],
           "IsConstructorArg": false
+        },
+        {
+          "Name": "targets",
+          "Args": [
+            {
+              "Name": "targets",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
         }
       ]
     }
@@ -168,6 +282,12 @@ export class LokiBuilderBuilder implements cog.OptionsBuilder<composable_slot.Da
     target(target: cog.OptionsBuilder<cog.Dataquery>): this {
         const targetResource = target.build();
         this.internal.target = targetResource;
+        return this;
+    }
+
+    targets(targets: cog.OptionsBuilder<cog.Dataquery>[]): this {
+        const targetsResources = targets.map(builder => builder.build());
+        this.internal.targets = targetsResources;
         return this;
     }
 }
@@ -220,6 +340,21 @@ func (builder *LokiBuilderBuilder) Target(target cog.Builder[cogvariants.Dataque
             return builder
         }
     builder.internal.Target = targetResource
+
+    return builder
+}
+
+func (builder *LokiBuilderBuilder) Targets(targets []cog.Builder[cogvariants.Dataquery]) *LokiBuilderBuilder {
+        targetsResources := make([]cogvariants.Dataquery, 0, len(targets))
+        for _, r := range targets {
+            targetsResource, err := r.Build()
+            if err != nil {
+                builder.errors["targets"] = err.(cog.BuildErrors)
+                return builder
+            }
+            targetsResources = append(targetsResources, targetsResource)
+        }
+    builder.internal.Targets = targetsResources
 
     return builder
 }
