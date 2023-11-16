@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/spf13/cobra"
 )
@@ -37,21 +38,22 @@ func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&language.config.PackageRoot, "go-package-root", "github.com/grafana/cog/generated", "Go package root.")
 }
 
-func (language *Language) Jennies() *codejen.JennyList[context.Builders] {
-	targets := codejen.JennyListWithNamer[context.Builders](func(_ context.Builders) string {
+func (language *Language) Jennies(targets common.Targets) *codejen.JennyList[context.Builders] {
+	jenny := codejen.JennyListWithNamer[context.Builders](func(_ context.Builders) string {
 		return LanguageRef
 	})
-	targets.AppendOneToMany(
+	jenny.AppendOneToMany(
 		Runtime{Config: language.config},
 		VariantsPlugins{Config: language.config},
 
-		RawTypes{Config: language.config},
-		JSONMarshalling{Config: language.config},
-		&Builder{Config: language.config},
-	)
-	targets.AddPostprocessors(PostProcessFile)
+		common.If[context.Builders](targets.Types, RawTypes{Config: language.config}),
+		common.If[context.Builders](targets.Types, JSONMarshalling{Config: language.config}),
 
-	return targets
+		common.If[context.Builders](targets.Builders, &Builder{Config: language.config}),
+	)
+	jenny.AddPostprocessors(PostProcessFile)
+
+	return jenny
 }
 
 func (language *Language) CompilerPasses() compiler.Passes {

@@ -3,6 +3,7 @@ package typescript
 import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/spf13/cobra"
 )
@@ -19,18 +20,20 @@ func New() *Language {
 func (language *Language) RegisterCliFlags(_ *cobra.Command) {
 }
 
-func (language *Language) Jennies() *codejen.JennyList[context.Builders] {
-	targets := codejen.JennyListWithNamer[context.Builders](func(_ context.Builders) string {
+func (language *Language) Jennies(targets common.Targets) *codejen.JennyList[context.Builders] {
+	jenny := codejen.JennyListWithNamer[context.Builders](func(_ context.Builders) string {
 		return LanguageRef
 	})
-	targets.AppendOneToMany(
+	jenny.AppendOneToMany(
 		Runtime{},
-		RawTypes{},
-		&Builder{},
-		Index{},
+
+		common.If[context.Builders](targets.Types, RawTypes{}),
+		common.If[context.Builders](targets.Builders, &Builder{}),
+
+		Index{Targets: targets},
 	)
 
-	return targets
+	return jenny
 }
 
 func (language *Language) CompilerPasses() compiler.Passes {
