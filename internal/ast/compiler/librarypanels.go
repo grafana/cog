@@ -8,7 +8,6 @@ type LibraryPanels struct {
 }
 
 func (lp *LibraryPanels) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-
 	dashboardRef := lp.getDashboardSchema(schemas)
 	if dashboardRef == nil {
 		return schemas, nil
