@@ -7,7 +7,7 @@
         {{- $operator = ">=" }}
     {{- end }}
     {{- if eq .Op "maxLength" }}
-        {{- $leftOperand = print .ArgName ".length" }}
+        {{- $leftOperand = print "len([]rune(" .ArgName "))" }}
         {{- $operator = "<=" }}
     {{- end }}
     if !({{ $leftOperand }} {{ $operator }} {{ .Parameter }}) {

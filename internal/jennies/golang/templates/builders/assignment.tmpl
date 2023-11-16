@@ -29,11 +29,7 @@
         {{- $argName := formatArgName .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-            {{- if .Type.IsArray }}
-                {{- $argName = (print $argName "Resources") }}
-            {{- else }}
-                {{- $argName = (print $argName "Resource") }}
-            {{- end }}
+            {{- $argName = .Type.IsArray | ternary (print $argName "Resources") (print $argName "Resource") }}
         {{- end }}
 
         {{- maybeAsPointer (isNullableNonArray $.Assignment.Path.Last.Type) $argName }}
