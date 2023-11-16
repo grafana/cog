@@ -16,7 +16,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/envvars"
-	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/tools/txtar"
 )
@@ -182,15 +182,15 @@ func (t *Test) TypesIR() *ast.Schema {
 
 // BuildersContext locates and returns the builders intermediate representation described
 // within the txtar archive.
-func (t *Test) BuildersContext() context.Builders {
-	buildersContext := context.Builders{}
+func (t *Test) BuildersContext() common.Context {
+	buildersContext := common.Context{}
 	for _, f := range t.Archive.Files {
 		if f.Name != "builders_context.json" {
 			continue
 		}
 
 		if err := json.Unmarshal(f.Data, &buildersContext); err != nil {
-			t.Fatal("could not unmarshal test input into context.Builders{}")
+			t.Fatal("could not unmarshal test input into context.Context{}")
 		}
 
 		return buildersContext

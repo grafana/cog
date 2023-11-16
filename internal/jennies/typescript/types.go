@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -13,17 +13,17 @@ type typeFormatter struct {
 	packageMapper func(pkg string) string
 
 	forBuilder bool
-	context    context.Builders
+	context    common.Context
 }
 
 func defaultTypeFormatter(packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
-		context:       context.Builders{},
+		context:       common.Context{},
 	}
 }
 
-func builderTypeFormatter(context context.Builders, packageMapper func(pkg string) string) *typeFormatter {
+func builderTypeFormatter(context common.Context, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
 		forBuilder:    true,

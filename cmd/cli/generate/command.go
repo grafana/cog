@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/grafana/cog/internal/jennies/common"
-	codegenContext "github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/veneers/yaml"
 	"github.com/spf13/cobra"
 )
@@ -136,7 +135,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		}
 
 		// then delegate the actual codegen to the jennies
-		fs, err := target.Jennies(opts.Targets).GenerateFS(codegenContext.Builders{
+		fs, err := target.Jennies(opts.Targets).GenerateFS(common.Context{
 			Schemas:  processedSchemas,
 			Builders: builders,
 		})
