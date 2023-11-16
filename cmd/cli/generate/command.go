@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/veneers/rewrite"
 	"github.com/grafana/cog/internal/veneers/yaml"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +26,7 @@ type Options struct {
 	OutputDir               string
 }
 
-func (opts Options) VeneerFiles() ([]string, error) {
+func (opts Options) veneerFiles() ([]string, error) {
 	veneers := make([]string, 0, len(opts.VeneerConfigFiles))
 	veneers = append(veneers, opts.VeneerConfigFiles...)
 
@@ -40,6 +41,15 @@ func (opts Options) VeneerFiles() ([]string, error) {
 	}
 
 	return veneers, nil
+}
+
+func (opts Options) veneers() (*rewrite.Rewriter, error) {
+	veneerFiles, err := opts.veneerFiles()
+	if err != nil {
+		return nil, err
+	}
+
+	return yaml.NewLoader().RewriterFromFiles(veneerFiles)
 }
 
 func Command() *cobra.Command {
@@ -92,12 +102,7 @@ func Command() *cobra.Command {
 }
 
 func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
-	veneerFiles, err := opts.VeneerFiles()
-	if err != nil {
-		return err
-	}
-
-	veneers, err := yaml.NewLoader().RewriterFromFiles(veneerFiles)
+	veneers, err := opts.veneers()
 	if err != nil {
 		return err
 	}

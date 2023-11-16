@@ -6,7 +6,7 @@ import (
 
 	"github.com/grafana/cog/cmd/cli/loaders"
 	"github.com/grafana/cog/internal/ast"
-	codegenContext "github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/spf13/cobra"
 )
 
@@ -70,7 +70,7 @@ func doInspect(opts inspectOptions) error {
 func inspectBuilderIR(schemas []*ast.Schema) error {
 	generator := &ast.BuilderGenerator{}
 
-	return prettyPrintJSON(codegenContext.Context{
+	return prettyPrintJSON(common.Context{
 		Schemas:  schemas,
 		Builders: generator.FromAST(schemas),
 	})
