@@ -18,6 +18,7 @@ type JSONMarshalling struct {
 
 	imports       template.ImportMap
 	packageMapper func(string) string
+	typeFormatter *typeFormatter
 }
 
 func (jenny JSONMarshalling) JennyName() string {
@@ -58,6 +59,7 @@ func (jenny JSONMarshalling) generateSchema(context context.Builders, schema *as
 
 		return jenny.imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
+	jenny.typeFormatter = defaultTypeFormatter(jenny.packageMapper)
 
 	for _, object := range schema.Objects {
 		if jenny.objectNeedsCustomMarshal(object) {
@@ -353,9 +355,7 @@ func (jenny JSONMarshalling) renderTemplate(templateFile string, data map[string
 	buf := bytes.Buffer{}
 
 	tmpls := templates.Funcs(map[string]any{
-		"formatType": func(typerDef ast.Type) string {
-			return formatType(typerDef, jenny.packageMapper)
-		},
+		"formatType": jenny.typeFormatter.formatType,
 	})
 
 	if err := tmpls.ExecuteTemplate(&buf, templateFile, data); err != nil {

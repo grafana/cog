@@ -34,6 +34,9 @@ func init() {
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
+			"formatTypeNoBuilder": func(_ ast.Type) string {
+				panic("formatType() needs to be overridden by a jenny")
+			},
 		}).
 		Funcs(map[string]any{
 			"formatScalar": formatScalar,

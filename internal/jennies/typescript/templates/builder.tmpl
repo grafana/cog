@@ -1,4 +1,5 @@
 {{- $builder := . -}}
+{{- $options := include "options" . -}}
 {{ range $alias, $importPath := .Imports -}}
 import * as {{ $alias }} from '{{ $importPath }}';
 {{ end }}
@@ -23,18 +24,7 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
     build(): {{ .ImportAlias }}.{{ .ObjectName }} {
         return this.internal;
     }
-{{ range .Options }}
-{{- $option := . }}
-    {{- range .Comments}}
-    // {{ . }}
-    {{- end }}
-    {{ .Name }}({{ template "args" .Args }}): this {
-{{- range .Assignments }}
-{{- template "assignment" (dict "Assignment" . "Builder" $builder "Option" $option) }}
-{{- end }}
-        return this;
-    }
-{{ end -}}
+{{- $options -}}
 }
 
 {{- define "assignment" }}
@@ -58,12 +48,11 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
 
 {{- define "assignment_setup" }}
     {{- with .Value.Argument }}
-        {{- $argName := lowerCamelCase .Name }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- if .Type.IsArray }}
-        const {{ $argName }}Resources = {{ $argName }}.map(builder => builder.build());
+        const {{ .Name }}Resources = {{ .Name }}.map(builder => builder.build());
         {{- else }}
-        const {{ $argName }}Resource = {{ $argName }}.build();
+        const {{ .Name }}Resource = {{ .Name }}.build();
         {{- end }}
         {{- end }}
     {{- end }}
@@ -74,16 +63,14 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
         {{- formatScalar .Value.Constant }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- $argName := lowerCamelCase .Name }}
-
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- if .Type.IsArray }}
-        {{- $argName }}Resources
+        {{- .Name }}Resources
         {{- else }}
-        {{- $argName }}Resource
+        {{- .Name }}Resource
         {{- end }}
         {{- else }}
-        {{- $argName }}
+        {{- .Name }}
         {{- end }}
     {{- end }}
 {{- end }}
