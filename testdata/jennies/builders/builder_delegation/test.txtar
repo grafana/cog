@@ -799,8 +799,9 @@ export class DashboardBuilder implements cog.OptionsBuilder<builder_delegation.D
         return this;
     }
 
-    links(links: builder_delegation.DashboardLink[]): this {
-        this.internal.links = links;
+    links(links: cog.OptionsBuilder<builder_delegation.DashboardLink>[]): this {
+        const linksResources = links.map(builder => builder.build());
+        this.internal.links = linksResources;
         return this;
     }
 
@@ -917,8 +918,17 @@ func (builder *DashboardBuilder) Title(title string) *DashboardBuilder {
     return builder
 }
 
-func (builder *DashboardBuilder) Links(links []DashboardLink) *DashboardBuilder {
-    builder.internal.Links = links
+func (builder *DashboardBuilder) Links(links []cog.Builder[DashboardLink]) *DashboardBuilder {
+        linksResources := make([]DashboardLink, 0, len(links))
+        for _, r := range links {
+            linksResource, err := r.Build()
+            if err != nil {
+                builder.errors["links"] = err.(cog.BuildErrors)
+                return builder
+            }
+            linksResources = append(linksResources, linksResource)
+        }
+    builder.internal.Links = linksResources
 
     return builder
 }

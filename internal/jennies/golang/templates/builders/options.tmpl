@@ -1,0 +1,16 @@
+{{- define "options" }}
+{{- $builder := . }}
+{{ range .Options }}
+{{- $option := . }}
+{{- range .Comments }}
+// {{ . }}
+{{- end }}
+func (builder *{{ $builder.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args }}) *{{ $builder.BuilderName }}Builder {
+    {{- range .Assignments }}
+        {{- template "assignment" (dict "Assignment" . "Builder" $builder "Option" $option) }}
+    {{- end }}
+
+    return builder
+}
+{{ end }}
+{{- end }}

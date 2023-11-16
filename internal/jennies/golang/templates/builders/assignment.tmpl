@@ -52,7 +52,7 @@
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- if .Type.IsArray }}
-        {{ formatArgName .Name}}Resources := make({{ .Type | formatType }}, 0, len({{ formatArgName .Name}}))
+        {{ formatArgName .Name}}Resources := make({{ .Type | formatTypeNoBuilder }}, 0, len({{ formatArgName .Name}}))
         for _, r := range {{ formatArgName .Name}} {
             {{ formatArgName .Name}}Resource, err := r.Build()
             if err != nil {

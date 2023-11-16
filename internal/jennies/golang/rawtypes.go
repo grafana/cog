@@ -12,10 +12,10 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type pkgMapper func(string) string
-
 type RawTypes struct {
 	Config Config
+
+	typeFormatter *typeFormatter
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -44,18 +44,18 @@ func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) 
 
 func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
-	imports := template.NewImportMap()
 
-	packageMapper := func(pkg string) string {
+	imports := template.NewImportMap()
+	jenny.typeFormatter = defaultTypeFormatter(func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
 		}
 
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
-	}
+	})
 
 	for _, object := range schema.Objects {
-		objectOutput, err := jenny.formatObject(object, packageMapper)
+		objectOutput, err := jenny.formatObject(object)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +74,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 %[2]s%[3]s`, strings.ToLower(schema.Package), importStatements, buffer.String())), nil
 }
 
-func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]byte, error) {
+func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 	var buffer strings.Builder
 
 	defName := tools.UpperCamelCase(def.Name)
@@ -85,7 +85,7 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 
 	switch def.Type.Kind {
 	case ast.KindEnum:
-		buffer.WriteString(jenny.formatEnumDef(def, packageMapper))
+		buffer.WriteString(jenny.formatEnumDef(def))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
 
@@ -95,10 +95,10 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 		} else if scalarType.ScalarKind == ast.KindBytes {
 			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
 		} else {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, packageMapper)))
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, jenny.typeFormatter.formatType(def.Type)))
 		}
 	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct, ast.KindIntersection:
-		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatType(def.Type, packageMapper)))
+		buffer.WriteString(fmt.Sprintf("type %s %s", defName, jenny.typeFormatter.formatType(def.Type)))
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -115,13 +115,13 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 	return []byte(buffer.String()), nil
 }
 
-func (jenny RawTypes) formatEnumDef(def ast.Object, packageMapper pkgMapper) string {
+func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	var buffer strings.Builder
 
 	enumName := tools.UpperCamelCase(def.Name)
 	enumType := def.Type.AsEnum()
 
-	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatType(enumType.Values[0].Type, packageMapper)))
+	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, jenny.typeFormatter.formatType(enumType.Values[0].Type)))
 
 	buffer.WriteString("const (\n")
 	for _, val := range enumType.Values {
@@ -129,179 +129,6 @@ func (jenny RawTypes) formatEnumDef(def ast.Object, packageMapper pkgMapper) str
 		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", name, enumName, val.Value))
 	}
 	buffer.WriteString(")\n")
-
-	return buffer.String()
-}
-
-func formatStructBody(def ast.StructType, packageMapper pkgMapper) string {
-	var buffer strings.Builder
-
-	buffer.WriteString("struct {\n")
-
-	for _, fieldDef := range def.Fields {
-		buffer.WriteString("\t" + formatField(fieldDef, packageMapper))
-	}
-
-	buffer.WriteString("}")
-
-	return buffer.String()
-}
-
-func formatField(def ast.StructField, packageMapper pkgMapper) string {
-	var buffer strings.Builder
-
-	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
-	}
-
-	jsonOmitEmpty := ""
-	if !def.Required {
-		jsonOmitEmpty = ",omitempty"
-	}
-
-	buffer.WriteString(fmt.Sprintf(
-		"%s %s `json:\"%s%s\"`\n",
-		tools.UpperCamelCase(def.Name),
-		formatType(def.Type, packageMapper),
-		def.Name,
-		jsonOmitEmpty,
-	))
-
-	return buffer.String()
-}
-
-func formatType(def ast.Type, packageMapper pkgMapper) string {
-	if def.IsAny() {
-		return "any"
-	}
-
-	if def.Kind == ast.KindComposableSlot {
-		return variantInterface(string(def.AsComposableSlot().Variant), packageMapper)
-	}
-
-	if def.Kind == ast.KindArray {
-		return formatArray(def.AsArray(), packageMapper)
-	}
-
-	if def.Kind == ast.KindMap {
-		return formatMap(def.AsMap(), packageMapper)
-	}
-
-	if def.Kind == ast.KindScalar {
-		typeName := def.AsScalar().ScalarKind
-		if def.Nullable {
-			typeName = "*" + typeName
-		}
-
-		return string(typeName)
-	}
-
-	if def.Kind == ast.KindRef {
-		return formatRef(def, packageMapper)
-	}
-
-	// anonymous struct or struct body
-	if def.Kind == ast.KindStruct {
-		output := formatStructBody(def.AsStruct(), packageMapper)
-		if def.Nullable {
-			output = "*" + output
-		}
-
-		return output
-	}
-
-	if def.Kind == ast.KindIntersection {
-		return formatIntersection(def.AsIntersection(), packageMapper)
-	}
-
-	// FIXME: we should never be here
-	return "unknown"
-}
-
-func variantInterface(variant string, packageMapper pkgMapper) string {
-	referredPkg := packageMapper("cog/variants")
-
-	return fmt.Sprintf("%s.%s", referredPkg, tools.UpperCamelCase(variant))
-}
-
-func formatArray(def ast.ArrayType, packageMapper pkgMapper) string {
-	subTypeString := formatType(def.ValueType, packageMapper)
-
-	return fmt.Sprintf("[]%s", subTypeString)
-}
-
-func formatMap(def ast.MapType, packageMapper pkgMapper) string {
-	keyTypeString := formatType(def.IndexType, packageMapper)
-	valueTypeString := formatType(def.ValueType, packageMapper)
-
-	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)
-}
-
-func formatScalar(val any) string {
-	if list, ok := val.([]any); ok {
-		items := make([]string, 0, len(list))
-
-		for _, item := range list {
-			items = append(items, formatScalar(item))
-		}
-
-		// FIXME: this is wrong, we can't just assume a list of strings.
-		return fmt.Sprintf("[]string{%s}", strings.Join(items, ", "))
-	}
-
-	return fmt.Sprintf("%#v", val)
-}
-
-func formatRef(def ast.Type, packageMapper pkgMapper) string {
-	referredPkg := packageMapper(def.AsRef().ReferredPkg)
-	typeName := tools.UpperCamelCase(def.AsRef().ReferredType)
-
-	if referredPkg != "" {
-		typeName = referredPkg + "." + typeName
-	}
-
-	if def.Nullable {
-		typeName = "*" + typeName
-	}
-
-	return typeName
-}
-
-func formatIntersection(def ast.IntersectionType, packageMapper pkgMapper) string {
-	var buffer strings.Builder
-
-	buffer.WriteString("struct {\n")
-
-	refs := make([]ast.Type, 0)
-	rest := make([]ast.Type, 0)
-	for _, b := range def.Branches {
-		if b.Ref != nil {
-			refs = append(refs, b)
-			continue
-		}
-
-		rest = append(rest, b)
-	}
-
-	for _, ref := range refs {
-		buffer.WriteString("\t" + formatRef(ref, packageMapper) + "\n")
-	}
-
-	if len(refs) > 0 {
-		buffer.WriteString("\n")
-	}
-
-	for _, r := range rest {
-		if r.Struct != nil {
-			for _, fieldDef := range r.AsStruct().Fields {
-				buffer.WriteString("\t" + formatField(fieldDef, packageMapper))
-			}
-			continue
-		}
-		buffer.WriteString("\t" + formatType(r, packageMapper) + "\n")
-	}
-
-	buffer.WriteString("}")
 
 	return buffer.String()
 }

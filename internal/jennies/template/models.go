@@ -19,20 +19,15 @@ type Builder struct {
 }
 
 type Constructor struct {
-	Args        []Argument
+	Args        []ast.Argument
 	Assignments []Assignment
 }
 
 type Option struct {
 	Name        string
 	Comments    []string
-	Args        []Argument
+	Args        []ast.Argument
 	Assignments []Assignment
-}
-
-type Argument struct {
-	Name string
-	Type string
 }
 
 type Assignment struct {

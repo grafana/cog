@@ -15,6 +15,7 @@ import (
 type Builder struct {
 	imports          template.ImportMap
 	typeImportMapper func(string) string
+	typeFormatter    *typeFormatter
 }
 
 func (jenny *Builder) JennyName() string {
@@ -49,21 +50,17 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 	jenny.typeImportMapper = func(pkg string) string {
 		return jenny.imports.Add(pkg, fmt.Sprintf("../%s", pkg))
 	}
+	jenny.typeFormatter = builderTypeFormatter(context, jenny.typeImportMapper)
 
 	buildObjectSignature := builder.For.SelfRef.ReferredPkg + "." + tools.UpperCamelCase(builder.For.Name)
 	if builder.For.Type.ImplementsVariant() {
-		buildObjectSignature = variantInterface(builder.For.Type.ImplementedVariant(), jenny.typeImportMapper)
+		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
 	err := templates.
 		Funcs(map[string]any{
-			"typeHasBuilder": func(typeDef ast.Type) bool {
-				_, found := context.BuilderForType(typeDef)
-				return found
-			},
-			"formatType": func(typerDef ast.Type) string {
-				return formatType(typerDef, jenny.typeImportMapper)
-			},
+			"typeHasBuilder": context.ResolveToBuilder,
+			"formatType":     jenny.typeFormatter.formatType,
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
@@ -79,18 +76,18 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 			Imports:              jenny.imports,
 			ImportAlias:          jenny.importType(builder.For.SelfRef),
 			Comments:             builder.For.Comments,
-			Constructor:          jenny.generateConstructor(context, builder),
+			Constructor:          jenny.generateConstructor(builder),
 			Properties:           builder.Properties,
 			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
-				return jenny.generateOption(context, builder, opt)
+				return jenny.generateOption(builder, opt)
 			}),
 		})
 
 	return []byte(buffer.String()), err
 }
 
-func (jenny *Builder) generateConstructor(context context.Builders, builder ast.Builder) template.Constructor {
-	var argsList []template.Argument
+func (jenny *Builder) generateConstructor(builder ast.Builder) template.Constructor {
+	var argsList []ast.Argument
 	var assignments []template.Assignment
 	for _, opt := range builder.Options {
 		if !opt.IsConstructorArg {
@@ -98,7 +95,7 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 		}
 
 		// FIXME: this is assuming that there's only one argument for that option
-		argsList = append(argsList, jenny.generateArgument(context, opt.Args[0]))
+		argsList = append(argsList, opt.Args[0])
 		assignments = append(assignments, jenny.generateAssignment(builder, opt.Assignments[0]))
 	}
 
@@ -112,11 +109,7 @@ func (jenny *Builder) generateConstructor(context context.Builders, builder ast.
 	}
 }
 
-func (jenny *Builder) generateOption(context context.Builders, builder ast.Builder, def ast.Option) template.Option {
-	arguments := tools.Map(def.Args, func(arg ast.Argument) template.Argument {
-		return jenny.generateArgument(context, arg)
-	})
-
+func (jenny *Builder) generateOption(builder ast.Builder, def ast.Option) template.Option {
 	assignments := tools.Map(def.Assignments, func(assignment ast.Assignment) template.Assignment {
 		return jenny.generateAssignment(builder, assignment)
 	})
@@ -124,34 +117,8 @@ func (jenny *Builder) generateOption(context context.Builders, builder ast.Build
 	return template.Option{
 		Name:        def.Name,
 		Comments:    def.Comments,
-		Args:        arguments,
+		Args:        def.Args,
 		Assignments: assignments,
-	}
-}
-
-func (jenny *Builder) generateArgument(context context.Builders, arg ast.Argument) template.Argument {
-	if composableSlot, ok := context.ResolveToComposableSlot(arg.Type); ok {
-		formattedType := fmt.Sprintf("cog.OptionsBuilder<%s>", formatType(composableSlot, jenny.typeImportMapper))
-		if arg.Type.IsArray() {
-			formattedType += "[]"
-		}
-
-		return template.Argument{
-			Name: arg.Name,
-			Type: formattedType,
-		}
-	}
-
-	if _, found := context.BuilderForType(arg.Type); found {
-		return template.Argument{
-			Name: arg.Name,
-			Type: fmt.Sprintf("cog.OptionsBuilder<%s>", formatType(arg.Type, jenny.typeImportMapper)),
-		}
-	}
-
-	return template.Argument{
-		Name: tools.LowerCamelCase(arg.Name),
-		Type: formatType(arg.Type, jenny.typeImportMapper),
 	}
 }
 
