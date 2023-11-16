@@ -268,19 +268,11 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	v = g.removeTautologicalUnification(v)
 
 	// This node is referring to another definition
-	_, path := v.ReferencePath()
-	if path.String() != "" {
-		selectors := path.Selectors()
-		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
-		if err != nil {
-			return ast.Type{}, errorWithCueRef(v, err.Error())
-		}
-
-		return ast.NewRef(
-			refPkg,
-			selectorLabel(selectors[len(selectors)-1]),
-		), nil
+	if ok, v, defV := getReference(v); ok {
+		return g.declareReference(v, defV)
 	}
+
+	op, disjunctionBranches := v.Expr()
 
 	defVal, err := g.extractDefault(v)
 	if err != nil {
@@ -289,7 +281,6 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 
 	hints := hintsFromCueValue(v)
 
-	op, disjunctionBranches := v.Expr()
 	if op == cue.OrOp && len(disjunctionBranches) > 1 {
 		return g.declareDisjunction(v, hints, defVal)
 	}
@@ -347,6 +338,49 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
 	}
+}
+
+func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
+	_, path := v.ReferencePath()
+	if path.String() != "" {
+		return true, v, v
+	}
+
+	op, exprs := v.Expr()
+	if len(exprs) != 2 {
+		return false, v, v
+	}
+
+	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
+		return true, exprs[0], exprs[1]
+	}
+
+	return false, v, v
+}
+
+func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, error) {
+	_, path := v.ReferencePath()
+
+	if path.String() != "" {
+		selectors := path.Selectors()
+		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
+		if err != nil {
+			return ast.Type{}, errorWithCueRef(v, err.Error())
+		}
+
+		defValue, err := g.extractDefault(defV)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewRef(
+			refPkg,
+			selectorLabel(selectors[len(selectors)-1]),
+			ast.Default(defValue),
+		), nil
+	}
+
+	return ast.Type{}, nil
 }
 
 func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defaultValue any) (ast.Type, error) {
