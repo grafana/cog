@@ -271,7 +271,6 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	_, path := v.ReferencePath()
 	if path.String() != "" {
 		selectors := path.Selectors()
-
 		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
 		if err != nil {
 			return ast.Type{}, errorWithCueRef(v, err.Error())
@@ -754,7 +753,7 @@ func (g *generator) removeTautologicalUnification(v cue.Value) cue.Value {
 
 	// If the branches mutually subsume each other, then they should be the same.
 	// In which case we pick only one and return it.
-	if branches[1].Subsume(branches[0]) == nil && branches[0].Subsume(branches[1]) == nil {
+	if branches[0].Equals(branches[1]) && branches[1].Subsume(branches[0]) == nil && branches[0].Subsume(branches[1]) == nil {
 		return branches[0]
 	}
 
