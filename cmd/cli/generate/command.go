@@ -11,7 +11,6 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
 	codegenContext "github.com/grafana/cog/internal/jennies/context"
-	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/veneers/yaml"
 	"github.com/spf13/cobra"
 )
@@ -23,10 +22,6 @@ type Options struct {
 	VeneerConfigFiles       []string
 	VeneerConfigDirectories []string
 	OutputDir               string
-
-	// Root path for imports.
-	// Ex: github.com/grafana/cog/generated
-	GoPackageRoot string
 }
 
 func (opts Options) VeneerFiles() ([]string, error) {
@@ -46,23 +41,16 @@ func (opts Options) VeneerFiles() ([]string, error) {
 	return veneers, nil
 }
 
-func (opts Options) toJenniesConfig() jennies.Config {
-	return jennies.Config{
-		Go: golang.Config{
-			PackageRoot: opts.GoPackageRoot,
-		},
-	}
-}
-
 func Command() *cobra.Command {
 	opts := Options{}
+	languageJennies := jennies.All()
 
 	cmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Generates code from schemas.", // TODO: better descriptions
 		Long:  `Generates code from schemas.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return doGenerate(opts)
+			return doGenerate(languageJennies, opts)
 		},
 	}
 
@@ -82,7 +70,9 @@ func Command() *cobra.Command {
 	cmd.Flags().StringArrayVarP(&opts.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
 	cmd.Flags().StringVar(&opts.KindRegistryVersion, "kind-registry-version", "next", "Schemas version")
 
-	cmd.Flags().StringVar(&opts.GoPackageRoot, "go-package-root", "github.com/grafana/cog/generated", "Go package root.")
+	for _, jenny := range languageJennies {
+		jenny.RegisterCliFlags(cmd)
+	}
 
 	_ = cmd.MarkFlagDirname("cue")
 	_ = cmd.MarkFlagDirname("kindsys-core")
@@ -97,7 +87,7 @@ func Command() *cobra.Command {
 	return cmd
 }
 
-func doGenerate(opts Options) error {
+func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 	veneerFiles, err := opts.VeneerFiles()
 	if err != nil {
 		return err
@@ -109,7 +99,7 @@ func doGenerate(opts Options) error {
 	}
 
 	// Here begins the code generation setup
-	targetsByLanguage, err := jennies.All(opts.toJenniesConfig()).ForLanguages(opts.Languages)
+	targetsByLanguage, err := allTargets.ForLanguages(opts.Languages)
 	if err != nil {
 		return err
 	}
@@ -124,7 +114,7 @@ func doGenerate(opts Options) error {
 	for language, target := range targetsByLanguage {
 		fmt.Printf("Running '%s' jennies...\n", language)
 
-		compilerPasses := compiler.CommonPasses().Concat(target.CompilerPasses)
+		compilerPasses := compiler.CommonPasses().Concat(target.CompilerPasses())
 		processedSchemas, err := compilerPasses.Process(schemas)
 		if err != nil {
 			return err
@@ -141,7 +131,7 @@ func doGenerate(opts Options) error {
 		}
 
 		// then delegate the actual codegen to the jennies
-		fs, err := target.Jennies.GenerateFS(codegenContext.Builders{
+		fs, err := target.Jennies().GenerateFS(codegenContext.Builders{
 			Schemas:  processedSchemas,
 			Builders: builders,
 		})

@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/spf13/cobra"
 )
 
 const LanguageRef = "go"
@@ -22,24 +23,38 @@ func (config Config) importPath(suffix string) string {
 	return fmt.Sprintf("%s/%s", root, suffix)
 }
 
-func Jennies(config Config) *codejen.JennyList[context.Builders] {
+type Language struct {
+	config Config
+}
+
+func New() *Language {
+	return &Language{
+		config: Config{},
+	}
+}
+
+func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVar(&language.config.PackageRoot, "go-package-root", "github.com/grafana/cog/generated", "Go package root.")
+}
+
+func (language *Language) Jennies() *codejen.JennyList[context.Builders] {
 	targets := codejen.JennyListWithNamer[context.Builders](func(_ context.Builders) string {
 		return LanguageRef
 	})
 	targets.AppendOneToMany(
-		Runtime{Config: config},
-		VariantsPlugins{Config: config},
+		Runtime{Config: language.config},
+		VariantsPlugins{Config: language.config},
 
-		RawTypes{Config: config},
-		JSONMarshalling{Config: config},
-		&Builder{Config: config},
+		RawTypes{Config: language.config},
+		JSONMarshalling{Config: language.config},
+		&Builder{Config: language.config},
 	)
 	targets.AddPostprocessors(PostProcessFile)
 
 	return targets
 }
 
-func CompilerPasses() compiler.Passes {
+func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
 		&compiler.AnonymousEnumToExplicitType{},
 		&compiler.PrefixEnumValues{},
