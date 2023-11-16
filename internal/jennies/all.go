@@ -8,24 +8,25 @@ import (
 	"github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/typescript"
+	"github.com/spf13/cobra"
 )
 
-type LanguageTarget struct {
-	Jennies        *codejen.JennyList[context.Builders]
-	CompilerPasses compiler.Passes
+type LanguageJenny interface {
+	Jennies() *codejen.JennyList[context.Builders]
+	CompilerPasses() compiler.Passes
+	RegisterCliFlags(cmd *cobra.Command)
 }
 
-type LanguageTargets map[string]LanguageTarget
+type LanguageJennies map[string]LanguageJenny
 
-func (languageTargets LanguageTargets) ForLanguages(languages []string) (LanguageTargets, error) {
+func (languageJennies LanguageJennies) ForLanguages(languages []string) (LanguageJennies, error) {
 	if languages == nil {
-		return languageTargets, nil
+		return languageJennies, nil
 	}
 
-	filtered := make(LanguageTargets)
-
+	filtered := make(LanguageJennies)
 	for _, language := range languages {
-		if target, exists := languageTargets[language]; exists {
+		if target, exists := languageJennies[language]; exists {
 			filtered[language] = target
 			continue
 		}
@@ -36,21 +37,9 @@ func (languageTargets LanguageTargets) ForLanguages(languages []string) (Languag
 	return filtered, nil
 }
 
-type Config struct {
-	Go golang.Config
-}
-
-func All(config Config) LanguageTargets {
-	targets := map[string]LanguageTarget{
-		golang.LanguageRef: {
-			Jennies:        golang.Jennies(config.Go),
-			CompilerPasses: golang.CompilerPasses(),
-		},
-		typescript.LanguageRef: {
-			Jennies:        typescript.Jennies(),
-			CompilerPasses: typescript.CompilerPasses(),
-		},
+func All() LanguageJennies {
+	return LanguageJennies{
+		golang.LanguageRef:     golang.New(),
+		typescript.LanguageRef: typescript.New(),
 	}
-
-	return targets
 }
