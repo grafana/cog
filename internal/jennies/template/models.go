@@ -11,28 +11,23 @@ type Builder struct {
 	ObjectName           string
 	Imports              ImportMap
 	ImportAlias          string // alias to the pkg in which the object being built lives.
+	Comments             []string
 	Constructor          Constructor
+	Properties           []ast.StructField
 	Options              []Option
 	Defaults             []OptionCall
 }
 
 type Constructor struct {
-	Args        []Argument
+	Args        []ast.Argument
 	Assignments []Assignment
 }
 
 type Option struct {
 	Name        string
 	Comments    []string
-	Args        []Argument
+	Args        []ast.Argument
 	Assignments []Assignment
-}
-
-type Argument struct {
-	Name          string
-	Type          string
-	ReferredAlias string
-	ReferredName  string
 }
 
 type Assignment struct {

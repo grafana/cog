@@ -19,7 +19,7 @@ const (
 	KindScalar       Kind = "scalar"
 	KindIntersection Kind = "intersection"
 
-	KindComposableSlot Kind = "composability_slot"
+	KindComposableSlot Kind = "composable_slot"
 )
 
 type ScalarKind string
@@ -115,6 +115,10 @@ func (t Type) HasHint(hintName string) bool {
 
 func (t Type) IsStructOrRef() bool {
 	return t.Kind == KindStruct || t.Kind == KindRef
+}
+
+func (t Type) IsArray() bool {
+	return t.Kind == KindArray
 }
 
 func (t Type) IsStructGeneratedFromDisjunction() bool {
@@ -672,8 +676,8 @@ func (t RefType) DeepCopy() RefType {
 }
 
 type ScalarType struct {
-	ScalarKind  ScalarKind       // bool, bytes, string, int, float, ...
-	Value       any              `json:",omitempty"` // if value isn't nil, we're representing a constant scalar
+	ScalarKind  ScalarKind       `yaml:"scalar_kind"` // bool, bytes, string, int, float, ...
+	Value       any              `json:",omitempty"`  // if value isn't nil, we're representing a constant scalar
 	Constraints []TypeConstraint `json:",omitempty"`
 }
 

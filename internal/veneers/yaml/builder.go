@@ -3,6 +3,7 @@ package yaml
 import (
 	"fmt"
 
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/veneers/builder"
 )
 
@@ -15,6 +16,7 @@ type BuilderRule struct {
 	Rename                *RenameBuilder         `yaml:"rename"`
 	MergeInto             *MergeInto             `yaml:"merge_into"`
 	ComposeDashboardPanel *ComposeDashboardPanel `yaml:"compose_dashboard_panel"`
+	Properties            *Properties            `yaml:"properties"`
 }
 
 func (rule BuilderRule) AsRewriteRule() (builder.RewriteRule, error) {
@@ -37,6 +39,10 @@ func (rule BuilderRule) AsRewriteRule() (builder.RewriteRule, error) {
 
 	if rule.ComposeDashboardPanel != nil {
 		return rule.ComposeDashboardPanel.AsRewriteRule()
+	}
+
+	if rule.Properties != nil {
+		return rule.Properties.AsRewriteRule()
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -83,6 +89,23 @@ func (rule ComposeDashboardPanel) AsRewriteRule() (builder.RewriteRule, error) {
 		builder.ComposableDashboardPanel(),
 		rule.PanelBuilderName,
 		rule.ExcludePanelOptions,
+	), nil
+}
+
+type Properties struct {
+	BuilderSelector `yaml:",inline"`
+	Set             []ast.StructField `yaml:"set"`
+}
+
+func (rule Properties) AsRewriteRule() (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector()
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.Properties(
+		selector,
+		rule.Set,
 	), nil
 }
 

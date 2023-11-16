@@ -15,7 +15,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/types/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/builders/veneers/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
 var veneersFS embed.FS
 
@@ -32,6 +32,9 @@ func init() {
 				panic("formatPath() needs to be overridden by a jenny")
 			},
 			"formatType": func(_ ast.Type) string {
+				panic("formatType() needs to be overridden by a jenny")
+			},
+			"formatTypeNoBuilder": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
 		}).

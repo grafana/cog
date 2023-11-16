@@ -16,6 +16,21 @@ const recursionMaxNums = 1000
 func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 	includedNames := make(map[string]int)
 
+	include := func(name string, data interface{}) (string, error) {
+		var buf strings.Builder
+		if v, ok := includedNames[name]; ok {
+			if v > recursionMaxNums {
+				return "", fmt.Errorf("unable to execute template: rendering template has a nested reference name: %s", name)
+			}
+			includedNames[name]++
+		} else {
+			includedNames[name] = 1
+		}
+		err := baseTemplate.ExecuteTemplate(&buf, name, data)
+		includedNames[name]--
+		return buf.String(), err
+	}
+
 	return gotemplate.FuncMap{
 		// placeholder functions, will be overridden by jennies
 		"typeHasBuilder": func(_ ast.Type) bool {
@@ -27,19 +42,13 @@ func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 
 		"upperCamelCase": tools.UpperCamelCase,
 		"lowerCamelCase": tools.LowerCamelCase,
-		"include": func(name string, data interface{}) (string, error) {
-			var buf strings.Builder
-			if v, ok := includedNames[name]; ok {
-				if v > recursionMaxNums {
-					return "", fmt.Errorf("unable to execute template: rendering template has a nested reference name: %s", name)
-				}
-				includedNames[name]++
-			} else {
-				includedNames[name] = 1
+		"include":        include,
+		"includeIfExists": func(name string, data interface{}) (string, error) {
+			if tmpl := baseTemplate.Lookup(name); tmpl == nil {
+				return "", nil
 			}
-			err := baseTemplate.ExecuteTemplate(&buf, name, data)
-			includedNames[name]--
-			return buf.String(), err
+
+			return include(name, data)
 		},
 	}
 }

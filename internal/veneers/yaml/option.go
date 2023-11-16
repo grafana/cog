@@ -17,6 +17,7 @@ type OptionRule struct {
 	Rename                  *RenameOption            `yaml:"rename"`
 	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean"`
 	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
+	StructFieldsAsOptions   *StructFieldsAsOptions   `yaml:"struct_fields_as_options"`
 	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append"`
 	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
 }
@@ -50,6 +51,10 @@ func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
 
 	if rule.StructFieldsAsArguments != nil {
 		return rule.StructFieldsAsArguments.AsRewriteRule()
+	}
+
+	if rule.StructFieldsAsOptions != nil {
+		return rule.StructFieldsAsOptions.AsRewriteRule()
 	}
 
 	if rule.ArrayToAppend != nil {
@@ -109,6 +114,20 @@ func (rule StructFieldsAsArguments) AsRewriteRule() (option.RewriteRule, error) 
 	}
 
 	return option.StructFieldsAsArguments(selector, rule.Fields...), nil
+}
+
+type StructFieldsAsOptions struct {
+	OptionSelector `yaml:",inline"`
+	Fields         []string `yaml:"fields"`
+}
+
+func (rule StructFieldsAsOptions) AsRewriteRule() (option.RewriteRule, error) {
+	selector, err := rule.AsSelector()
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.StructFieldsAsOptions(selector, rule.Fields...), nil
 }
 
 type ArrayToAppend struct {

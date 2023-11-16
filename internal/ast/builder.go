@@ -18,8 +18,9 @@ type Builder struct {
 	// by veneers.
 	Package         string
 	Name            string
+	Properties      []StructField
 	Options         []Option
-	Initializations []Assignment
+	Initializations []Assignment `json:",omitempty"`
 }
 
 func (builder Builder) MakePath(builders Builders, pathAsString string) (Path, error) {
@@ -85,10 +86,10 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 
 type Option struct {
 	Name             string
-	Comments         []string
+	Comments         []string `json:",omitempty"`
 	Args             []Argument
 	Assignments      []Assignment
-	Default          *OptionDefault
+	Default          *OptionDefault `json:",omitempty"`
 	IsConstructorArg bool
 }
 
@@ -106,7 +107,7 @@ type PathItem struct {
 	Type       Type // any
 	// useful mostly for composability purposes, when a field Type is "any"
 	// and we're trying to "compose in" something of a known type.
-	TypeHint *Type
+	TypeHint *Type `json:",omitempty"`
 }
 
 type Path []PathItem
@@ -149,9 +150,9 @@ type AssignmentEnvelope struct {
 }
 
 type AssignmentValue struct {
-	Argument *Argument
-	Constant any
-	Envelope *AssignmentEnvelope
+	Argument *Argument           `json:",omitempty"`
+	Constant any                 `json:",omitempty"`
+	Envelope *AssignmentEnvelope `json:",omitempty"`
 }
 
 type AssignmentMethod string
@@ -171,7 +172,7 @@ type Assignment struct {
 	// How
 	Method AssignmentMethod
 
-	Constraints []TypeConstraint
+	Constraints []TypeConstraint `json:",omitempty"`
 }
 
 type AssignmentOpt func(assignment *Assignment)

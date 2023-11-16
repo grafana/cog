@@ -16,8 +16,8 @@ import (
 type JSONMarshalling struct {
 	Config Config
 
-	imports       template.ImportMap
 	packageMapper func(string) string
+	typeFormatter *typeFormatter
 }
 
 func (jenny JSONMarshalling) JennyName() string {
@@ -50,14 +50,15 @@ func (jenny JSONMarshalling) Generate(context context.Builders) (codejen.Files, 
 func (jenny JSONMarshalling) generateSchema(context context.Builders, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
-	jenny.imports = template.NewImportMap()
+	imports := template.NewImportMap()
 	jenny.packageMapper = func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
 		}
 
-		return jenny.imports.Add(pkg, jenny.Config.importPath(pkg))
+		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
+	jenny.typeFormatter = defaultTypeFormatter(jenny.packageMapper)
 
 	for _, object := range schema.Objects {
 		if jenny.objectNeedsCustomMarshal(object) {
@@ -97,7 +98,7 @@ func (jenny JSONMarshalling) generateSchema(context context.Builders, schema *as
 		return nil, nil
 	}
 
-	importStatements := formatImports(jenny.imports)
+	importStatements := formatImports(imports)
 	if importStatements != "" {
 		importStatements += "\n\n"
 	}
@@ -182,7 +183,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context context
 	var buffer strings.Builder
 	fields := obj.Type.AsStruct().Fields
 
-	jenny.imports.Add("cog", jenny.Config.importPath("cog"))
+	jenny.packageMapper("cog")
 
 	// unmarshal "normal" fields (ie: with no composable slot)
 	for _, field := range fields {
@@ -331,7 +332,7 @@ dataqueryTypeHint = *resource.%[1]s.Type
 }
 
 func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
-	jenny.imports.Add("cogvariants", jenny.Config.importPath("cog/variants"))
+	jenny.packageMapper("cog/variants")
 
 	return jenny.renderTemplate("types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
 		"schema":         schema,
@@ -341,7 +342,7 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 }
 
 func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
-	jenny.imports.Add("cogvariants", jenny.Config.importPath("cog/variants"))
+	jenny.packageMapper("cog/variants")
 
 	return jenny.renderTemplate("types/variant_dataquery.json_unmarshal.tmpl", map[string]any{
 		"schema": schema,
@@ -353,9 +354,7 @@ func (jenny JSONMarshalling) renderTemplate(templateFile string, data map[string
 	buf := bytes.Buffer{}
 
 	tmpls := templates.Funcs(map[string]any{
-		"formatType": func(typerDef ast.Type) string {
-			return formatType(typerDef, jenny.packageMapper)
-		},
+		"formatType": jenny.typeFormatter.formatType,
 	})
 
 	if err := tmpls.ExecuteTemplate(&buf, templateFile, data); err != nil {

@@ -1,4 +1,4 @@
-# Basic struct with scalar fields, all required.
+# Basic struct with optional fields.
 -- ir.json --
 {
     "Package": "struct_optional_fields",

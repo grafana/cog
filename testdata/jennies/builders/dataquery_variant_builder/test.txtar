@@ -1,0 +1,230 @@
+# Dataquery variant builder.
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "dataquery_variant_builder",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "Loki",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Hints": {
+                "implements_variant": "dataquery"
+            },
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "expr",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "dataquery_variant_builder",
+            "ReferredType": "Loki"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "dataquery_variant_builder",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "Loki",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Hints": {
+                "implements_variant": "dataquery"
+              },
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "expr",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "dataquery_variant_builder",
+              "ReferredType": "Loki"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Loki",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Hints": {
+            "implements_variant": "dataquery"
+          },
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "expr",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "dataquery_variant_builder",
+          "ReferredType": "Loki"
+        }
+      },
+      "Package": "dataquery_variant_builder",
+      "Name": "LokiBuilder",
+      "Options": [
+        {
+          "Name": "expr",
+          "Args": [
+            {
+              "Name": "expr",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "expr",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "expr",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/TypescriptBuilder --
+== dataquery_variant_builder/loki_builder_gen.ts
+import * as cog from '../cog';
+import * as dataquery_variant_builder from '../dataquery_variant_builder';
+
+export class LokiBuilderBuilder implements cog.OptionsBuilder<cog.Dataquery> {
+    private readonly internal: dataquery_variant_builder.Loki;
+
+    constructor() {
+        this.internal = dataquery_variant_builder.defaultLoki();
+    }
+
+    build(): dataquery_variant_builder.Loki {
+        return this.internal;
+    }
+
+    expr(expr: string): this {
+        this.internal.expr = expr;
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== dataquery_variant_builder/loki_builder_gen.go
+package dataquery_variant_builder
+
+import (
+    cog "github.com/grafana/cog/generated/cog"
+    cogvariants "github.com/grafana/cog/generated/cog/variants"
+)
+
+var _ cog.Builder[cogvariants.Dataquery] = (*LokiBuilderBuilder)(nil)
+
+type LokiBuilderBuilder struct {
+    internal *Loki
+    errors map[string]cog.BuildErrors
+}
+
+func NewLokiBuilderBuilder() *LokiBuilderBuilder {
+	resource := &Loki{}
+	builder := &LokiBuilderBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *LokiBuilderBuilder) Build() (cogvariants.Dataquery, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("LokiBuilder", err)...)
+	}
+
+	if len(errs) != 0 {
+		return Loki{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *LokiBuilderBuilder) Expr(expr string) *LokiBuilderBuilder {
+    builder.internal.Expr = expr
+
+    return builder
+}
+
+func (builder *LokiBuilderBuilder) applyDefaults() {
+}

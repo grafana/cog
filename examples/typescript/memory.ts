@@ -17,10 +17,11 @@ export const memoryUsageTimeseries = (): TimeseriesPanelBuilder => {
 
     return defaultTimeseries()
         .title("Memory Usage")
-        .stacking(new StackingConfigBuilder().mode(StackingMode.StackingModeNormal))
+        .span(18)
+        .stacking(new StackingConfigBuilder().mode(StackingMode.Normal))
         .thresholds(
             new ThresholdsConfigBuilder()
-                .mode(ThresholdsMode.ThresholdsModeAbsolute)
+                .mode(ThresholdsMode.Absolute)
                 .steps([
                     {value: null, color: "green"},
                     {value: 80.0, color: "red"},
@@ -48,12 +49,13 @@ export const memoryUsageGauge = (): GaugePanelBuilder => {
 
     return defaultGauge()
         .title("Memory Usage")
+        .span(6)
         .min(30)
         .max(100)
         .unit("percent")
         .thresholds(
             new ThresholdsConfigBuilder()
-                .mode(ThresholdsMode.ThresholdsModeAbsolute)
+                .mode(ThresholdsMode.Absolute)
                 .steps([
                     {value: null, color: "rgba(50, 172, 45, 0.97)"},
                     {value: 80.0, color: "rgba(237, 129, 40, 0.89)"},

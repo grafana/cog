@@ -1,10 +1,6 @@
 {{- define "args" }}
     {{- range $i, $arg := . }}
         {{- if gt $i 0 }}, {{- end }}
-        {{- if eq $arg.Type "" }}
-            {{- $arg.Name }}: cog.OptionsBuilder<{{- $arg.ReferredAlias }}.{{- $arg.ReferredName }}>
-        {{- else }}
-            {{- $arg.Name }}: {{ $arg.Type }}
-        {{- end }}
+        {{- $arg.Name }}: {{ $arg.Type | formatType }}
     {{- end }}
 {{- end }}

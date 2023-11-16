@@ -47,6 +47,13 @@ func StructFieldsAsArguments(selector Selector, explicitFields ...string) Rewrit
 	}
 }
 
+func StructFieldsAsOptions(selector Selector, explicitFields ...string) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   StructFieldsAsOptionsAction(explicitFields...),
+	}
+}
+
 func DisjunctionAsOptions(selector Selector) RewriteRule {
 	return RewriteRule{
 		Selector: selector,

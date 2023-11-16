@@ -1,0 +1,363 @@
+# Composable slot.
+# ie: a builder that has one or more of its fields defined as a composable slot.
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "composable_slot",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "Dashboard",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "target",
+                  "Type": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "composable_slot",
+            "ReferredType": "Dashboard"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "composable_slot",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "Dashboard",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "target",
+                    "Type": {
+                      "Kind": "composable_slot",
+                      "Nullable": false,
+                      "ComposableSlot": {
+                        "Variant": "dataquery"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "targets",
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "composable_slot",
+                          "Nullable": false,
+                          "ComposableSlot": {
+                            "Variant": "dataquery"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "composable_slot",
+              "ReferredType": "Dashboard"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Dashboard",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "target",
+                "Type": {
+                  "Kind": "composable_slot",
+                  "Nullable": false,
+                  "ComposableSlot": {
+                    "Variant": "dataquery"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "targets",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "composable_slot",
+                      "Nullable": false,
+                      "ComposableSlot": {
+                        "Variant": "dataquery"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "composable_slot",
+          "ReferredType": "Dashboard"
+        }
+      },
+      "Package": "composable_slot",
+      "Name": "LokiBuilder",
+      "Options": [
+        {
+          "Name": "target",
+          "Args": [
+            {
+              "Name": "target",
+              "Type": {
+                "Kind": "composable_slot",
+                "Nullable": false,
+                "ComposableSlot": {
+                  "Variant": "dataquery"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "target",
+                  "Type": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "target",
+                  "Type": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "targets",
+          "Args": [
+            {
+              "Name": "targets",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/TypescriptBuilder --
+== composable_slot/dashboard_builder_gen.ts
+import * as cog from '../cog';
+import * as composable_slot from '../composable_slot';
+
+export class LokiBuilderBuilder implements cog.OptionsBuilder<composable_slot.Dashboard> {
+    private readonly internal: composable_slot.Dashboard;
+
+    constructor() {
+        this.internal = composable_slot.defaultDashboard();
+    }
+
+    build(): composable_slot.Dashboard {
+        return this.internal;
+    }
+
+    target(target: cog.OptionsBuilder<cog.Dataquery>): this {
+        const targetResource = target.build();
+        this.internal.target = targetResource;
+        return this;
+    }
+
+    targets(targets: cog.OptionsBuilder<cog.Dataquery>[]): this {
+        const targetsResources = targets.map(builder => builder.build());
+        this.internal.targets = targetsResources;
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== composable_slot/dashboard_builder_gen.go
+package composable_slot
+
+import (
+    cog "github.com/grafana/cog/generated/cog"
+    cogvariants "github.com/grafana/cog/generated/cog/variants"
+)
+
+var _ cog.Builder[Dashboard] = (*LokiBuilderBuilder)(nil)
+
+type LokiBuilderBuilder struct {
+    internal *Dashboard
+    errors map[string]cog.BuildErrors
+}
+
+func NewLokiBuilderBuilder() *LokiBuilderBuilder {
+	resource := &Dashboard{}
+	builder := &LokiBuilderBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *LokiBuilderBuilder) Build() (Dashboard, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("LokiBuilder", err)...)
+	}
+
+	if len(errs) != 0 {
+		return Dashboard{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *LokiBuilderBuilder) Target(target cog.Builder[cogvariants.Dataquery]) *LokiBuilderBuilder {
+        targetResource, err := target.Build()
+        if err != nil {
+            builder.errors["target"] = err.(cog.BuildErrors)
+            return builder
+        }
+    builder.internal.Target = targetResource
+
+    return builder
+}
+
+func (builder *LokiBuilderBuilder) Targets(targets []cog.Builder[cogvariants.Dataquery]) *LokiBuilderBuilder {
+        targetsResources := make([]cogvariants.Dataquery, 0, len(targets))
+        for _, r := range targets {
+            targetsResource, err := r.Build()
+            if err != nil {
+                builder.errors["targets"] = err.(cog.BuildErrors)
+                return builder
+            }
+            targetsResources = append(targetsResources, targetsResource)
+        }
+    builder.internal.Targets = targetsResources
+
+    return builder
+}
+
+func (builder *LokiBuilderBuilder) applyDefaults() {
+}

@@ -20,6 +20,7 @@ func memoryUsageTimeseries() *timeseries.PanelBuilder {
 
 	return defaultTimeseries().
 		Title("Memory Usage").
+		Span(18).
 		Stacking(common.NewStackingConfigBuilder().Mode(common.StackingModeNormal)). // TODO: painful, not intuitive
 		Thresholds(
 			dashboard.NewThresholdsConfigBuilder().
@@ -54,6 +55,7 @@ func memoryUsageGauge() *gauge.PanelBuilder {
 
 	return defaultGauge().
 		Title("Memory Usage").
+		Span(6).
 		Min(30).
 		Max(100).
 		Unit("percent").

@@ -1,20 +1,26 @@
 {{- define "assignment" }}
-    {{- template "constraints" .Constraints }}
-    {{- range .InitSafeguards }}
+    {{- template "constraints" .Assignment.Constraints }}
+    {{- range .Assignment.InitSafeguards }}
     {{ . }}
     {{- end }}
 
-    {{- template "assignment_setup" (dict "Assignment" . "Value" .Value) -}}
+    {{- template "assignment_setup" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
 
-    {{- $value := include "assignment_value" (dict "Assignment" . "Value" .Value) -}}
+    {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
 
-    {{- template "assignment_method" (dict "Method" $.Method "Path" $.Path "Value" $value) }}
+    {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- includeIfExists $preTmpl (dict) -}}
+
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
+
+    {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- includeIfExists $postTmpl (dict) -}}
 {{- end }}
 
 {{- define "assignment_value" }}
     {{- if not (eq .Value.Constant nil) }}
         {{- if isNullableNonArray .Assignment.Path.Last.Type }}
-            {{- print "&val" .Assignment.Path.Last.Identifier }}
+            {{- print "&val" (.Assignment.Path.Last.Identifier | upperCamelCase) }}
         {{- else }}
             {{- formatScalar .Value.Constant }}
         {{- end }}
@@ -23,7 +29,7 @@
         {{- $argName := formatArgName .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- $argName = (print $argName "Resource") }}
+            {{- $argName = .Type.IsArray | ternary (print $argName "Resources") (print $argName "Resource") }}
         {{- end }}
 
         {{- maybeAsPointer (isNullableNonArray $.Assignment.Path.Last.Type) $argName }}
@@ -36,16 +42,28 @@
 {{- define "assignment_setup" }}
     {{- if not (eq .Value.Constant nil) }}
         {{- if .Assignment.Path.Last.Type.Nullable }}
-            val{{ .Assignment.Path }} := {{ formatScalar .Value.Constant }}
+            val{{ .Assignment.Path.Last.Identifier | upperCamelCase }} := {{ formatScalar .Value.Constant }}
         {{- end }}
     {{- end }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- if .Type.IsArray }}
+        {{ formatArgName .Name}}Resources := make({{ .Type | formatTypeNoBuilder }}, 0, len({{ formatArgName .Name}}))
+        for _, r := range {{ formatArgName .Name}} {
+            {{ formatArgName .Name}}Resource, err := r.Build()
+            if err != nil {
+                builder.errors["{{ $.Assignment.Path }}"] = err.(cog.BuildErrors)
+                return builder
+            }
+            {{ formatArgName .Name}}Resources = append({{ formatArgName .Name}}Resources, {{ formatArgName .Name}}Resource)
+        }
+        {{- else }}
         {{ formatArgName .Name}}Resource, err := {{ formatArgName .Name}}.Build()
         if err != nil {
             builder.errors["{{ $.Assignment.Path }}"] = err.(cog.BuildErrors)
             return builder
         }
+        {{- end }}
         {{- end }}
     {{- end }}
     {{- with .Value.Envelope }}

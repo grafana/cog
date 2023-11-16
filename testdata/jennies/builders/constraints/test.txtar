@@ -1,0 +1,485 @@
+# Constraints generation.
+# Generated using `go run cmd/cli/main.go inspect --cue ./testdata/jennies/builders/constraints --builder-ir`
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "constraints",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "uint64",
+                      "Constraints": [
+                        {
+                          "Op": "\u003e=",
+                          "Args": [
+                            5
+                          ]
+                        },
+                        {
+                          "Op": "\u003c",
+                          "Args": [
+                            10
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "constraints",
+            "ReferredType": "SomeStruct"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "constraints",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomeStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "uint64",
+                        "Constraints": [
+                          {
+                            "Op": "\u003e=",
+                            "Args": [
+                              5
+                            ]
+                          },
+                          {
+                            "Op": "\u003c",
+                            "Args": [
+                              10
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Constraints": [
+                          {
+                            "Op": "minLength",
+                            "Args": [
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "constraints",
+              "ReferredType": "SomeStruct"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "id",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "uint64",
+                    "Constraints": [
+                      {
+                        "Op": "\u003e=",
+                        "Args": [
+                          5
+                        ]
+                      },
+                      {
+                        "Op": "\u003c",
+                        "Args": [
+                          10
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Constraints": [
+                      {
+                        "Op": "minLength",
+                        "Args": [
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constraints",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "constraints",
+      "Name": "SomeStruct",
+      "Options": [
+        {
+          "Name": "id",
+          "Args": [
+            {
+              "Name": "id",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        5
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        10
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "uint64",
+                      "Constraints": [
+                        {
+                          "Op": "\u003e=",
+                          "Args": [
+                            5
+                          ]
+                        },
+                        {
+                          "Op": "\u003c",
+                          "Args": [
+                            10
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "uint64",
+                      "Constraints": [
+                        {
+                          "Op": "\u003e=",
+                          "Args": [
+                            5
+                          ]
+                        },
+                        {
+                          "Op": "\u003c",
+                          "Args": [
+                            10
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Method": "direct",
+              "Constraints": [
+                {
+                  "Op": "\u003e=",
+                  "Args": [
+                    5
+                  ]
+                },
+                {
+                  "Op": "\u003c",
+                  "Args": [
+                    10
+                  ]
+                }
+              ]
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "minLength",
+                      "Args": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Method": "direct",
+              "Constraints": [
+                {
+                  "Op": "minLength",
+                  "Args": [
+                    1
+                  ]
+                }
+              ]
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/TypescriptBuilder --
+== constraints/somestruct_builder_gen.ts
+import * as cog from '../cog';
+import * as constraints from '../constraints';
+
+export class SomeStructBuilder implements cog.OptionsBuilder<constraints.SomeStruct> {
+    private readonly internal: constraints.SomeStruct;
+
+    constructor() {
+        this.internal = constraints.defaultSomeStruct();
+    }
+
+    build(): constraints.SomeStruct {
+        return this.internal;
+    }
+
+    id(id: number): this {
+        if (!(id >= 5)) {
+            throw new Error("id must be >= 5");
+        }
+        if (!(id < 10)) {
+            throw new Error("id must be < 10");
+        }
+        this.internal.id = id;
+        return this;
+    }
+
+    title(title: string): this {
+        if (!(title.length >= 1)) {
+            throw new Error("title.length must be >= 1");
+        }
+        this.internal.title = title;
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== constraints/somestruct_builder_gen.go
+package constraints
+
+import (
+    cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
+
+type SomeStructBuilder struct {
+    internal *SomeStruct
+    errors map[string]cog.BuildErrors
+}
+
+func NewSomeStructBuilder() *SomeStructBuilder {
+	resource := &SomeStruct{}
+	builder := &SomeStructBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
+	}
+
+	if len(errs) != 0 {
+		return SomeStruct{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *SomeStructBuilder) Id(id uint64) *SomeStructBuilder {
+    if !(id >= 5) {
+        builder.errors["id"] = cog.MakeBuildErrors("id", errors.New("id must be >= 5"))
+        return builder
+    }
+    if !(id < 10) {
+        builder.errors["id"] = cog.MakeBuildErrors("id", errors.New("id must be < 10"))
+        return builder
+    }
+    builder.internal.Id = id
+
+    return builder
+}
+
+func (builder *SomeStructBuilder) Title(title string) *SomeStructBuilder {
+    if !(len([]rune(title)) >= 1) {
+        builder.errors["title"] = cog.MakeBuildErrors("title", errors.New("len([]rune(title)) must be >= 1"))
+        return builder
+    }
+    builder.internal.Title = title
+
+    return builder
+}
+
+func (builder *SomeStructBuilder) applyDefaults() {
+}

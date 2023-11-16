@@ -28,9 +28,9 @@ export const diskIOTimeseries = (): TimeseriesPanelBuilder => {
 export const diskSpaceUsageTable = (): TablePanelBuilder => {
     return new TablePanelBuilder()
         .title("Disk Space Usage")
-        .align(FieldTextAlignment.FieldTextAlignmentAuto)
+        .align(FieldTextAlignment.Auto)
         .cellOptions({type: "auto"})
-        .cellHeight(TableCellHeight.TableCellHeightSm)
+        .cellHeight(TableCellHeight.Sm)
         .footer(new TableFooterOptionsBuilder().countRows(false).reducer(["sum"]))
         .unit("decbytes")
         .withTarget(

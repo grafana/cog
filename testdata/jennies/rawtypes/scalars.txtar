@@ -1,4 +1,4 @@
-# Basic struct with scalar ScalarTypes, all required.
+# Scalar types.
 -- ir.json --
 {
     "Package": "scalars",

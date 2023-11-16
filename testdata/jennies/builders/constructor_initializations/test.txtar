@@ -1,0 +1,279 @@
+# Constructor initializations.
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "constructor_initializations",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomePanel",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "panel_type"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "constructor_initializations",
+            "ReferredType": "SomePanel"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "constructor_initializations",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomePanel",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "type",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": "panel_type"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "constructor_initializations",
+              "ReferredType": "SomePanel"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomePanel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "type",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "panel_type"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constructor_initializations",
+          "ReferredType": "SomePanel"
+        }
+      },
+      "Package": "constructor_initializations",
+      "Name": "SomePanel",
+      "Initializations": [
+        {
+          "Path": [
+            {
+              "Identifier": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "panel_type"
+                }
+              }
+            }
+          ],
+          "Value": {
+            "Constant": "panel_type"
+          },
+          "Method": "direct"
+        }
+      ],
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/TypescriptBuilder --
+== constructor_initializations/somepanel_builder_gen.ts
+import * as cog from '../cog';
+import * as constructor_initializations from '../constructor_initializations';
+
+export class SomePanelBuilder implements cog.OptionsBuilder<constructor_initializations.SomePanel> {
+    private readonly internal: constructor_initializations.SomePanel;
+
+    constructor() {
+        this.internal = constructor_initializations.defaultSomePanel();
+        this.internal.type = "panel_type";
+    }
+
+    build(): constructor_initializations.SomePanel {
+        return this.internal;
+    }
+
+    title(title: string): this {
+        this.internal.title = title;
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== constructor_initializations/somepanel_builder_gen.go
+package constructor_initializations
+
+import (
+    cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[SomePanel] = (*SomePanelBuilder)(nil)
+
+type SomePanelBuilder struct {
+    internal *SomePanel
+    errors map[string]cog.BuildErrors
+}
+
+func NewSomePanelBuilder() *SomePanelBuilder {
+	resource := &SomePanel{}
+	builder := &SomePanelBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+    builder.internal.Type = "panel_type"
+
+	return builder
+}
+
+func (builder *SomePanelBuilder) Build() (SomePanel, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("SomePanel", err)...)
+	}
+
+	if len(errs) != 0 {
+		return SomePanel{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
+    builder.internal.Title = title
+
+    return builder
+}
+
+func (builder *SomePanelBuilder) applyDefaults() {
+}

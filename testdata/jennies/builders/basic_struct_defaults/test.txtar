@@ -1,0 +1,592 @@
+# Basic builder for a simple struct.
+# Generated using `go run cmd/cli/main.go inspect --cue ./testdata/jennies/builders/basic_struct_defaults --builder-ir`
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "basic_struct_defaults",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": 42,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "uid",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "default-uid",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "tags",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Default": [
+                      "generated",
+                      "cog"
+                    ],
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "liveNow",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "basic_struct_defaults",
+            "ReferredType": "SomeStruct"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "basic_struct_defaults",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomeStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Default": 42,
+                      "Scalar": {
+                        "ScalarKind": "int64"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "uid",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Default": "default-uid",
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "tags",
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Default": [
+                        "generated",
+                        "cog"
+                      ],
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "liveNow",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Default": true,
+                      "Scalar": {
+                        "ScalarKind": "bool"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "basic_struct_defaults",
+              "ReferredType": "SomeStruct"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "id",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": 42,
+                  "Scalar": {
+                    "ScalarKind": "int64"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "uid",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": "default-uid",
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "tags",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Default": [
+                    "generated",
+                    "cog"
+                  ],
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "liveNow",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "basic_struct_defaults",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "basic_struct_defaults",
+      "Name": "SomeStruct",
+      "Options": [
+        {
+          "Name": "id",
+          "Args": [
+            {
+              "Name": "id",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 42,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": 42,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": 42,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              42
+            ]
+          },
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "uid",
+          "Args": [
+            {
+              "Name": "uid",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "default-uid",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "uid",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "default-uid",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "uid",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "default-uid",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              "default-uid"
+            ]
+          },
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "tags",
+          "Args": [
+            {
+              "Name": "tags",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Default": [
+                  "generated",
+                  "cog"
+                ],
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "tags",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Default": [
+                      "generated",
+                      "cog"
+                    ],
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "tags",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Default": [
+                      "generated",
+                      "cog"
+                    ],
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              [
+                "generated",
+                "cog"
+              ]
+            ]
+          },
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "liveNow",
+          "Args": [
+            {
+              "Name": "liveNow",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "liveNow",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "liveNow",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              true
+            ]
+          },
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+-- out/jennies/TypescriptBuilder --
+== basic_struct_defaults/somestruct_builder_gen.ts
+import * as basic_struct_defaults from '../basic_struct_defaults';
+import * as cog from '../cog';
+
+export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct_defaults.SomeStruct> {
+    private readonly internal: basic_struct_defaults.SomeStruct;
+
+    constructor() {
+        this.internal = basic_struct_defaults.defaultSomeStruct();
+    }
+
+    build(): basic_struct_defaults.SomeStruct {
+        return this.internal;
+    }
+
+    id(id: number): this {
+        this.internal.id = id;
+        return this;
+    }
+
+    uid(uid: string): this {
+        this.internal.uid = uid;
+        return this;
+    }
+
+    tags(tags: string[]): this {
+        this.internal.tags = tags;
+        return this;
+    }
+
+    liveNow(liveNow: boolean): this {
+        this.internal.liveNow = liveNow;
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== basic_struct_defaults/somestruct_builder_gen.go
+package basic_struct_defaults
+
+import (
+    cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
+
+type SomeStructBuilder struct {
+    internal *SomeStruct
+    errors map[string]cog.BuildErrors
+}
+
+func NewSomeStructBuilder() *SomeStructBuilder {
+	resource := &SomeStruct{}
+	builder := &SomeStructBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
+	}
+
+	if len(errs) != 0 {
+		return SomeStruct{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *SomeStructBuilder) Id(id int64) *SomeStructBuilder {
+    builder.internal.Id = id
+
+    return builder
+}
+
+func (builder *SomeStructBuilder) Uid(uid string) *SomeStructBuilder {
+    builder.internal.Uid = uid
+
+    return builder
+}
+
+func (builder *SomeStructBuilder) Tags(tags []string) *SomeStructBuilder {
+    builder.internal.Tags = tags
+
+    return builder
+}
+
+func (builder *SomeStructBuilder) LiveNow(liveNow bool) *SomeStructBuilder {
+    builder.internal.LiveNow = liveNow
+
+    return builder
+}
+
+func (builder *SomeStructBuilder) applyDefaults() {
+    builder.Id(42)
+    builder.Uid("default-uid")
+    builder.Tags([]string{"generated", "cog"})
+    builder.LiveNow(true)
+}

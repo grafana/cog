@@ -1,8 +1,17 @@
+{{- $builder := . -}}
+{{- $options := include "options" . -}}
 {{ range $alias, $importPath := .Imports -}}
 import * as {{ $alias }} from '{{ $importPath }}';
 {{ end }}
+
+{{- range .Comments }}
+// {{ . }}
+{{- end }}
 export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuilder<{{ .BuilderSignatureType }}> {
     private readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
+    {{- range .Properties }}
+    private {{ .Name }}: {{ .Type | formatType }} = {{ .Type | defaultValueForType }};
+    {{- end }}
 
     constructor({{ template "args" .Constructor.Args }}) {
         this.internal = {{ .ImportAlias }}.default{{ .ObjectName | upperCamelCase }}();
@@ -15,35 +24,54 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
     build(): {{ .ImportAlias }}.{{ .ObjectName }} {
         return this.internal;
     }
-{{ range .Options }}
-    {{- range .Comments}}
-    // {{ . }}
-    {{- end }}
-    {{ .Name }}({{ template "args" .Args }}): this {
-{{- range .Assignments }}
-{{- range .InitSafeguards }}
+{{- $options -}}
+}
+
+{{- define "assignment" }}
+{{- range .Assignment.InitSafeguards }}
 {{ . }}
 {{- end }}
-{{- template "constraints" .Constraints }}
-        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ template "assignment_value" . }};{{ end -}}
-        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ template "assignment_value" . }});{{ end -}}
-{{ end }}
-        return this;
-    }
-{{ end -}}
-}
+{{- template "constraints" .Assignment.Constraints }}
+
+    {{- template "assignment_setup" (dict "Value" .Assignment.Value) -}}
+
+    {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
+
+    {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- includeIfExists $preTmpl (dict) -}}
+
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
+
+    {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- includeIfExists $postTmpl (dict) -}}
+{{- end }}
+
+{{- define "assignment_setup" }}
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- if .Type.IsArray }}
+        const {{ .Name }}Resources = {{ .Name }}.map(builder => builder.build());
+        {{- else }}
+        const {{ .Name }}Resource = {{ .Name }}.build();
+        {{- end }}
+        {{- end }}
+    {{- end }}
+{{- end }}
 
 {{- define "assignment_value" }}
     {{- if not (eq .Value.Constant nil) }}
         {{- formatScalar .Value.Constant }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- $argName := lowerCamelCase .Name }}
-
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- $argName }}.build()
+        {{- .Name }}{{- .Type.IsArray | ternary "Resources" "Resource" }}
         {{- else }}
-        {{- $argName }}
+        {{- .Name }}
         {{- end }}
     {{- end }}
+{{- end }}
+
+{{- define "assignment_method" }}
+        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ .Value }};{{ end -}}
+        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ .Value }});{{ end -}}
 {{- end }}

@@ -1,16 +1,22 @@
 package {{ .Package }}
-
+{{ $options := include "options" . }}
 import (
-{{ range $alias, $importPath := .Imports }}
+{{- range $alias, $importPath := .Imports }}
     {{ $alias }} "{{ $importPath }}"
 {{- end }}
 )
 
 var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .BuilderName }}Builder)(nil)
-
+{{ range .Comments }}
+// {{ . }}
+{{- end }}
 type {{ .BuilderName }}Builder struct {
     internal *{{ .ObjectName }}
     errors map[string]cog.BuildErrors
+
+    {{- range .Properties }}
+    {{ .Name }} {{ .Type | formatType }}
+    {{- end }}
 }
 
 func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ .BuilderName }}Builder {
@@ -23,7 +29,7 @@ func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ 
 	builder.applyDefaults()
 
     {{- range .Constructor.Assignments }}
-        {{- template "assignment" . }}
+        {{- template "assignment" (dict "Assignment" . "Builder" $ "Option" (dict "Name" "")) }}
     {{- end }}
 
 	return builder
@@ -42,20 +48,7 @@ func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, 
 
 	return *builder.internal, nil
 }
-{{- range .Options }}
-
-{{ range .Comments -}}
-// {{ . }}
-{{- end }}
-func (builder *{{ $.BuilderName }}Builder) {{ .Name }}({{- template "args" .Args }}) *{{ $.BuilderName }}Builder {
-    {{- range .Assignments }}
-        {{- template "assignment" . }}
-    {{- end }}
-
-    return builder
-}
-{{- end }}
-
+{{- $options }}
 func (builder *{{ .BuilderName }}Builder) applyDefaults() {
     {{- range .Defaults }}
     builder.{{ .OptionName|upperCamelCase }}({{ .Args|join ", " }})
