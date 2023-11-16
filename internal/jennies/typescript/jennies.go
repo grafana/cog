@@ -22,8 +22,8 @@ func Jennies() *codejen.JennyList[context.Builders] {
 	return targets
 }
 
-func CompilerPasses() []compiler.Pass {
-	return []compiler.Pass{
+func CompilerPasses() compiler.Passes {
+	return compiler.Passes{
 		&compiler.RenameNumericEnumValues{},
 	}
 }
