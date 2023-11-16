@@ -7,7 +7,6 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/context"
 )
 
 type Index struct {
@@ -18,7 +17,7 @@ func (jenny Index) JennyName() string {
 	return "TypescriptIndex"
 }
 
-func (jenny Index) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny Index) Generate(context common.Context) (codejen.Files, error) {
 	packages := make(map[string][]string, len(context.Schemas))
 	files := codejen.Files{}
 

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/txtartest"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +33,7 @@ func TestJSONMarshalling_Generate(t *testing.T) {
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
 
-		files, err := jenny.Generate(context.Builders{
+		files, err := jenny.Generate(common.Context{
 			Schemas: processedAsts,
 		})
 		req.NoError(err)

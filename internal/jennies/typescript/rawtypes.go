@@ -7,7 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
@@ -26,7 +26,7 @@ func (jenny RawTypes) JennyName() string {
 	return "TypescriptRawTypes"
 }
 
-func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	jenny.schemas = context.Schemas
 	files := make(codejen.Files, 0, len(context.Schemas))
 
