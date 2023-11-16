@@ -64,11 +64,7 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuil
     {{- end }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- if .Type.IsArray }}
-        {{- .Name }}Resources
-        {{- else }}
-        {{- .Name }}Resource
-        {{- end }}
+        {{- .Name }}{{- .Type.IsArray | ternary "Resources" "Resource" }}
         {{- else }}
         {{- .Name }}
         {{- end }}
