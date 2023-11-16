@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
+	"github.com/grafana/cog/internal/jennies/common"
 	codegenContext "github.com/grafana/cog/internal/jennies/context"
 	"github.com/grafana/cog/internal/veneers/yaml"
 	"github.com/spf13/cobra"
@@ -18,6 +19,7 @@ import (
 type Options struct {
 	loaders.Options
 
+	Targets                 common.Targets
 	Languages               []string
 	VeneerConfigFiles       []string
 	VeneerConfigDirectories []string
@@ -53,6 +55,9 @@ func Command() *cobra.Command {
 			return doGenerate(languageJennies, opts)
 		},
 	}
+
+	cmd.Flags().BoolVar(&opts.Targets.Types, "generate-types", true, "Generate types.")          // TODO: better usage text
+	cmd.Flags().BoolVar(&opts.Targets.Builders, "generate-builders", true, "Generate builders.") // TODO: better usage text
 
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
@@ -131,7 +136,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		}
 
 		// then delegate the actual codegen to the jennies
-		fs, err := target.Jennies().GenerateFS(codegenContext.Builders{
+		fs, err := target.Jennies(opts.Targets).GenerateFS(codegenContext.Builders{
 			Schemas:  processedSchemas,
 			Builders: builders,
 		})
