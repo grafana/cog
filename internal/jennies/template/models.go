@@ -1,6 +1,8 @@
 package template
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -9,7 +11,7 @@ type Builder struct {
 	BuilderSignatureType string
 	BuilderName          string
 	ObjectName           string
-	Imports              ImportMap
+	Imports              fmt.Stringer
 	ImportAlias          string // alias to the pkg in which the object being built lives.
 	Comments             []string
 	Constructor          Constructor

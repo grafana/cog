@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -50,7 +49,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	packageMapper := func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
@@ -71,7 +70,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		buffer.WriteString("\n")
 	}
 
-	importStatements := formatImports(imports)
+	importStatements := imports.String()
 	if importStatements != "" {
 		importStatements += "\n\n"
 	}
@@ -351,18 +350,4 @@ func formatValue(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
-}
-
-func formatImports(importMap template.ImportMap) string {
-	if len(importMap) == 0 {
-		return ""
-	}
-
-	statements := make([]string, 0, len(importMap))
-
-	for alias, importPath := range importMap {
-		statements = append(statements, fmt.Sprintf(`import * as %s from "%s";`, alias, importPath))
-	}
-
-	return strings.Join(statements, "\n")
 }

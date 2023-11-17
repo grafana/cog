@@ -3,7 +3,6 @@ package golang
 import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
 )
 
 type Runtime struct {
@@ -38,11 +37,11 @@ type Builder[ResourceT any] interface {
 }
 
 func (jenny Runtime) Runtime() (string, error) {
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	imports.Add("cogvariants", jenny.Config.importPath("cog/variants"))
 
 	return renderTemplate("runtime/runtime.tmpl", map[string]any{
-		"imports": formatImports(imports),
+		"imports": imports,
 	})
 }
 

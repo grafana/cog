@@ -13,7 +13,7 @@ import (
 )
 
 type Builder struct {
-	imports          template.ImportMap
+	imports          *common.DirectImportMap
 	typeImportMapper func(string) string
 	typeFormatter    *typeFormatter
 	rawTypes         RawTypes
@@ -49,7 +49,7 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
-	jenny.imports = template.NewImportMap()
+	jenny.imports = NewImportMap()
 	jenny.imports.Add("cog", "../cog")
 	jenny.typeImportMapper = func(pkg string) string {
 		return jenny.imports.Add(pkg, fmt.Sprintf("../%s", pkg))
