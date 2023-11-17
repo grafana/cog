@@ -9,7 +9,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -50,7 +49,7 @@ func (jenny JSONMarshalling) Generate(context common.Context) (codejen.Files, er
 func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	jenny.packageMapper = func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
@@ -98,7 +97,7 @@ func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.
 		return nil, nil
 	}
 
-	importStatements := formatImports(imports)
+	importStatements := imports.String()
 	if importStatements != "" {
 		importStatements += "\n\n"
 	}
