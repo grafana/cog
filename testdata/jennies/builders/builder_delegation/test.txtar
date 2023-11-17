@@ -750,8 +750,8 @@
 
 -- out/jennies/TypescriptBuilder --
 == builder_delegation/dashboardlink_builder_gen.ts
-import * as builder_delegation from '../builder_delegation';
 import * as cog from '../cog';
+import * as builder_delegation from '../builder_delegation';
 
 export class DashboardLinkBuilder implements cog.OptionsBuilder<builder_delegation.DashboardLink> {
     private readonly internal: builder_delegation.DashboardLink;
@@ -775,8 +775,8 @@ export class DashboardLinkBuilder implements cog.OptionsBuilder<builder_delegati
     }
 }
 == builder_delegation/dashboard_builder_gen.ts
-import * as builder_delegation from '../builder_delegation';
 import * as cog from '../cog';
+import * as builder_delegation from '../builder_delegation';
 
 export class DashboardBuilder implements cog.OptionsBuilder<builder_delegation.Dashboard> {
     private readonly internal: builder_delegation.Dashboard;
@@ -816,7 +816,7 @@ export class DashboardBuilder implements cog.OptionsBuilder<builder_delegation.D
 package builder_delegation
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 var _ cog.Builder[DashboardLink] = (*DashboardLinkBuilder)(nil)
@@ -870,7 +870,7 @@ func (builder *DashboardLinkBuilder) applyDefaults() {
 package builder_delegation
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 var _ cog.Builder[Dashboard] = (*DashboardBuilder)(nil)

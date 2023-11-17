@@ -13,14 +13,14 @@ func NewImportMap() *common.DirectImportMap {
 			return strings.ReplaceAll(alias, "/", "")
 		}),
 		common.WithFormatter(func(importMap common.DirectImportMap) string {
-			if len(importMap.Imports) == 0 {
+			if importMap.Imports.Len() == 0 {
 				return ""
 			}
 
-			statements := make([]string, 0, len(importMap.Imports))
-			for alias, importPath := range importMap.Imports {
+			statements := make([]string, 0, importMap.Imports.Len())
+			importMap.Imports.Iterate(func(alias string, importPath string) {
 				statements = append(statements, fmt.Sprintf(`	%s "%s"`, alias, importPath))
-			}
+			})
 
 			return fmt.Sprintf(`import (
 %[1]s

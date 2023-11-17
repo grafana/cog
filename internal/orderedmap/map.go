@@ -17,7 +17,10 @@ func New[K comparable, V any]() *Map[K, V] {
 }
 
 func (orderedMap *Map[K, V]) Set(key K, value V) {
-	orderedMap.order = append(orderedMap.order, key)
+	if _, found := orderedMap.records[key]; !found {
+		orderedMap.order = append(orderedMap.order, key)
+	}
+
 	orderedMap.records[key] = value
 }
 

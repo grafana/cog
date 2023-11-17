@@ -277,7 +277,7 @@ export class SomeStructBuilder implements cog.OptionsBuilder<sandbox.SomeStruct>
 package sandbox
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)

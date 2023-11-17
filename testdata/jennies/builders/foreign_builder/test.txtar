@@ -175,8 +175,8 @@ export class SomeNiceBuilderBuilder implements cog.OptionsBuilder<some_pkg.SomeS
 package builder_pkg
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
-    some_pkg "github.com/grafana/cog/generated/some_pkg"
+	cog "github.com/grafana/cog/generated/cog"
+	some_pkg "github.com/grafana/cog/generated/some_pkg"
 )
 
 var _ cog.Builder[some_pkg.SomeStruct] = (*SomeNiceBuilderBuilder)(nil)
