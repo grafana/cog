@@ -1,0 +1,6 @@
+language: all
+
+builders: ~
+
+options:
+  - promote_to_constructor: { by_name: Folder.title }
