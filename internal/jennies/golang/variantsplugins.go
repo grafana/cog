@@ -4,7 +4,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
 )
 
 type VariantsPlugins struct {
@@ -39,7 +38,7 @@ func (jenny VariantsPlugins) variantModels() (string, error) {
 }
 
 func (jenny VariantsPlugins) variantPlugins(context common.Context) (string, error) {
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	initMap := make(map[string][]*ast.Schema) // variant to schemas
 
 	imports.Add("cog", jenny.Config.importPath("cog"))
@@ -56,6 +55,6 @@ func (jenny VariantsPlugins) variantPlugins(context common.Context) (string, err
 
 	return renderTemplate("runtime/variant_plugins.tmpl", map[string]any{
 		"init_map": initMap,
-		"imports":  formatImports(imports),
+		"imports":  imports,
 	})
 }
