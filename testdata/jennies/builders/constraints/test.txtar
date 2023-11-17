@@ -421,7 +421,7 @@ export class SomeStructBuilder implements cog.OptionsBuilder<constraints.SomeStr
 package constraints
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
