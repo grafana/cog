@@ -2,6 +2,8 @@ package common
 
 import (
 	"fmt"
+
+	"github.com/grafana/cog/internal/orderedmap"
 )
 
 func noopSanitizer(s string) string { return s }
@@ -27,7 +29,7 @@ func WithFormatter[M any](formatter func(M) string) ImportMapOption[M] {
 }
 
 type DirectImportMap struct {
-	Imports map[string]string // alias → importPath
+	Imports *orderedmap.Map[string, string] // alias → importPath
 	config  ImportMapConfig[DirectImportMap]
 }
 
@@ -45,14 +47,14 @@ func NewDirectImportMap(opts ...ImportMapOption[DirectImportMap]) *DirectImportM
 	}
 
 	return &DirectImportMap{
-		Imports: make(map[string]string),
+		Imports: orderedmap.New[string, string](),
 		config:  config,
 	}
 }
 
 func (im DirectImportMap) Add(alias string, importPath string) string {
 	sanitizedAlias := im.config.AliasSanitizer(alias)
-	im.Imports[sanitizedAlias] = im.config.ImportPathSanitizer(importPath)
+	im.Imports.Set(sanitizedAlias, im.config.ImportPathSanitizer(importPath))
 
 	return sanitizedAlias
 }

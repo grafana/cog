@@ -300,8 +300,8 @@
 
 -- out/jennies/TypescriptBuilder --
 == anonymous_struct/somestruct_builder_gen.ts
-import * as anonymous_struct from '../anonymous_struct';
 import * as cog from '../cog';
+import * as anonymous_struct from '../anonymous_struct';
 
 export class SomeStructBuilder implements cog.OptionsBuilder<anonymous_struct.SomeStruct> {
     private readonly internal: anonymous_struct.SomeStruct;
@@ -327,7 +327,7 @@ export class SomeStructBuilder implements cog.OptionsBuilder<anonymous_struct.So
 package anonymous_struct
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
