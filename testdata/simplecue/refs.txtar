@@ -127,6 +127,7 @@ foo: {
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
+                "Default": 2,
                 "Ref": {
                   "ReferredPkg": "grafanatest",
                   "ReferredType": "IntEnum"
