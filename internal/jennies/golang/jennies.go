@@ -50,7 +50,7 @@ func (language *Language) Jennies(targets common.Targets) *codejen.JennyList[com
 
 		common.If[common.Context](targets.Builders, &Builder{Config: language.config}),
 	)
-	jenny.AddPostprocessors(PostProcessFile)
+	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader())
 
 	return jenny
 }
