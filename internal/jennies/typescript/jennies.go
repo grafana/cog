@@ -31,6 +31,7 @@ func (language *Language) Jennies(targets common.Targets) *codejen.JennyList[com
 
 		Index{Targets: targets},
 	)
+	jenny.AddPostprocessors(common.GeneratedCommentHeader())
 
 	return jenny
 }
