@@ -35,6 +35,7 @@ type Pass interface {
 
 func CommonPasses() Passes {
 	return Passes{
+		&DataqueryIdentification{},
 		&Unspec{},
 		&DashboardPanelsRewrite{},
 		&DashboardTargetsRewrite{},
