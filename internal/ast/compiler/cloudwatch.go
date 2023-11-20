@@ -62,7 +62,7 @@ func (pass *Cloudwatch) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 		// types hinted as a dataquery are replaced by a "CloudWatchQuery" disjunction,
 		// serving as a "main entrypoint" for cloudwatch queries.
 		if object.Type.ImplementsVariant() && object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
-			object.Type.Hints[ast.HintSkipVariantPluginRegistration] = true
+			object.Type = pass.processDataquery(object.Name, object.Type)
 		}
 
 		newSchema.Objects = append(newSchema.Objects, object)
@@ -71,6 +71,33 @@ func (pass *Cloudwatch) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 	newSchema.Objects = append(newSchema.Objects, pass.defineQueryDisjunction(schema))
 
 	return &newSchema, nil
+}
+
+func (pass *Cloudwatch) processDataquery(objectName string, typeDef ast.Type) ast.Type {
+	typeDef.Hints[ast.HintSkipVariantPluginRegistration] = true
+
+	if typeDef.Kind != ast.KindStruct {
+		return typeDef
+	}
+
+	for i, field := range typeDef.AsStruct().Fields {
+		if field.Name == "queryMode" {
+			switch objectName {
+			case "CloudWatchMetricsQuery":
+				field.Type.Default = "Metrics"
+			case "CloudWatchLogsQuery":
+				field.Type.Default = "Logs"
+			case "CloudWatchAnnotationQuery":
+				field.Type.Default = "Annotations"
+			}
+
+			field.Type.Nullable = false
+			field.Required = true
+			typeDef.Struct.Fields[i] = field
+		}
+	}
+
+	return typeDef
 }
 
 func (pass *Cloudwatch) defineQueryDisjunction(schema *ast.Schema) ast.Object {

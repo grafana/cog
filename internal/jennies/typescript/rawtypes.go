@@ -157,7 +157,7 @@ func prefixLinesWith(input string, prefix string) string {
 func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pkgMapper) any {
 	switch object.Type.Kind {
 	case ast.KindEnum:
-		return defaultValueForEnumType(object.Name, object.Type)
+		return defaultValueForEnumType(object.Name, object.Type, nil)
 	default:
 		return jenny.defaultValueForType(object.Type, packageMapper)
 	}
@@ -174,7 +174,12 @@ func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper pkgMap
 	case ast.KindStruct:
 		return jenny.defaultValuesForStructType(typeDef, packageMapper)
 	case ast.KindEnum: // anonymous enum
-		return typeDef.AsEnum().Values[0].Value
+		defaultValue := typeDef.AsEnum().Values[0].Value
+		if typeDef.Default != nil {
+			defaultValue = typeDef.Default
+		}
+
+		return defaultValue
 	case ast.KindRef:
 		return jenny.defaultValuesForReference(typeDef, packageMapper)
 	case ast.KindMap:
@@ -218,11 +223,14 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 	return defaults
 }
 
-func defaultValueForEnumType(name string, typeDef ast.Type) any {
+func defaultValueForEnumType(name string, typeDef ast.Type, overrideDefault any) any {
 	enum := typeDef.AsEnum()
 	defaultValue := enum.Values[0].Value
 	if typeDef.Default != nil {
 		defaultValue = typeDef.Default
+	}
+	if overrideDefault != nil {
+		defaultValue = overrideDefault
 	}
 
 	for _, v := range enum.Values {
@@ -300,9 +308,10 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 
 	if referredType.Type.Kind == ast.KindEnum {
 		if pkg != "" {
-			return raw(fmt.Sprintf("%s.%s", pkg, defaultValueForEnumType(ref.ReferredType, referredType.Type)))
+			return raw(fmt.Sprintf("%s.%s", pkg, defaultValueForEnumType(ref.ReferredType, referredType.Type, typeDef.Default)))
 		}
-		return defaultValueForEnumType(ref.ReferredType, referredType.Type)
+
+		return defaultValueForEnumType(ref.ReferredType, referredType.Type, typeDef.Default)
 	}
 
 	if pkg != "" {
