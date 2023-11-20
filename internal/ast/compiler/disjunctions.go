@@ -172,7 +172,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	// if we already generated a new object for this disjunction, let's return
 	// a reference to it.
 	if _, ok := pass.newObjects[newTypeName]; ok {
-		ref := ast.NewRef(schema.Package, newTypeName)
+		ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
 		if def.Nullable || disjunction.Branches.HasNullType() {
 			ref.Nullable = true
 		}
@@ -227,7 +227,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		},
 	}
 
-	ref := ast.NewRef(schema.Package, newTypeName)
+	ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
 	if def.Nullable || disjunction.Branches.HasNullType() {
 		ref.Nullable = true
 	}

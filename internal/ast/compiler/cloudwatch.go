@@ -6,8 +6,7 @@ import (
 
 var _ Pass = (*Cloudwatch)(nil)
 
-// Cloudwatch defines some kind of "types IR veneer",
-// where we use a compiler pass to rewrite a part of the cloudwatch schema.
+// Cloudwatch rewrites a part of the cloudwatch schema.
 //
 // In that schema, the `QueryEditorExpression` type is defined as a disjunction
 // for which the discriminator and mapping can not be inferred.
@@ -18,6 +17,11 @@ var _ Pass = (*Cloudwatch)(nil)
 // `[...#QueryEditorExpression]`.
 // This should be semantically equivalent since `#QueryEditorExpression` is a
 // union type that includes `#QueryEditorArrayExpression`.
+//
+// The Cloudwatch pass also alerts the definition of the `#CloudWatchMetricsQuery`, `#CloudWatchLogsQuery` and
+// `#CloudWatchAnnotationQuery` types.
+// It removes the "dataquery variant" hint they carry, and defines a `CloudWatchQuery` type instead as a disjunction.
+// That disjunction serves as "dataquery entrypoint" for cloudwatch.
 type Cloudwatch struct {
 }
 
@@ -55,10 +59,36 @@ func (pass *Cloudwatch) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 			continue
 		}
 
+		// types hinted as a dataquery are replaced by a "CloudWatchQuery" disjunction,
+		// serving as a "main entrypoint" for cloudwatch queries.
+		if object.Type.ImplementsVariant() && object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
+			object.Type.Hints[ast.HintSkipVariantPluginRegistration] = true
+		}
+
 		newSchema.Objects = append(newSchema.Objects, object)
 	}
 
+	newSchema.Objects = append(newSchema.Objects, pass.defineQueryDisjunction(schema))
+
 	return &newSchema, nil
+}
+
+func (pass *Cloudwatch) defineQueryDisjunction(schema *ast.Schema) ast.Object {
+	cloudwatchQuery := ast.NewDisjunction(ast.Types{
+		ast.NewRef(schema.Package, "CloudWatchMetricsQuery"),
+		ast.NewRef(schema.Package, "CloudWatchLogsQuery"),
+		ast.NewRef(schema.Package, "CloudWatchAnnotationQuery"),
+	})
+	cloudwatchQuery.Hints[ast.HintImplementsVariant] = string(ast.SchemaVariantDataQuery)
+
+	cloudwatchQuery.Disjunction.Discriminator = "queryMode"
+	cloudwatchQuery.Disjunction.DiscriminatorMapping = map[string]string{
+		"Metrics":     "CloudWatchMetricsQuery",
+		"Logs":        "CloudWatchLogsQuery",
+		"Annotations": "CloudWatchAnnotationQuery",
+	}
+
+	return ast.NewObject(schema.Package, "CloudWatchQuery", cloudwatchQuery)
 }
 
 func (pass *Cloudwatch) processQueryEditorExpression(object ast.Object) ast.Object {
