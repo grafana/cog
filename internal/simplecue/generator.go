@@ -268,19 +268,8 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	v = g.removeTautologicalUnification(v)
 
 	// This node is referring to another definition
-	_, path := v.ReferencePath()
-	if path.String() != "" {
-		selectors := path.Selectors()
-
-		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
-		if err != nil {
-			return ast.Type{}, errorWithCueRef(v, err.Error())
-		}
-
-		return ast.NewRef(
-			refPkg,
-			selectorLabel(selectors[len(selectors)-1]),
-		), nil
+	if ok, v, defV := getReference(v); ok {
+		return g.declareReference(v, defV)
 	}
 
 	defVal, err := g.extractDefault(v)
@@ -348,6 +337,49 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
 	}
+}
+
+func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
+	_, path := v.ReferencePath()
+	if path.String() != "" {
+		return true, v, v
+	}
+
+	op, exprs := v.Expr()
+	if len(exprs) != 2 {
+		return false, v, v
+	}
+
+	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
+		return true, exprs[0], exprs[1]
+	}
+
+	return false, v, v
+}
+
+func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, error) {
+	_, path := v.ReferencePath()
+
+	if path.String() != "" {
+		selectors := path.Selectors()
+		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
+		if err != nil {
+			return ast.Type{}, errorWithCueRef(v, err.Error())
+		}
+
+		defValue, err := g.extractDefault(defV)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewRef(
+			refPkg,
+			selectorLabel(selectors[len(selectors)-1]),
+			ast.Default(defValue),
+		), nil
+	}
+
+	return ast.Type{}, nil
 }
 
 func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defaultValue any) (ast.Type, error) {
@@ -754,7 +786,7 @@ func (g *generator) removeTautologicalUnification(v cue.Value) cue.Value {
 
 	// If the branches mutually subsume each other, then they should be the same.
 	// In which case we pick only one and return it.
-	if branches[1].Subsume(branches[0]) == nil && branches[0].Subsume(branches[1]) == nil {
+	if branches[0].Equals(branches[1]) && branches[1].Subsume(branches[0]) == nil && branches[0].Subsume(branches[1]) == nil {
 		return branches[0]
 	}
 

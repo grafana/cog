@@ -1,5 +1,8 @@
 # Defaults
 -- schema.cue --
+StringEnum: "a" | "b" | "c"
+IntEnum: 1 | 2 | 3 @cog(kind="enum", memberNames="one|two|three")
+
 container: {
     from: string | *"now-6h"
     editable: bool | *true
@@ -7,6 +10,8 @@ container: {
     Number: int64 | *5
     repeatDirection: *"h" | "v"
     tags: [...string] | *["default", "tags"]
+    stringEnum: StringEnum & (*"c" | _)
+    intEnum: IntEnum & (*2 | _)
 }
 -- out/simplecue/GenerateAST --
 == ir.json
@@ -14,6 +19,106 @@ container: {
   "Package": "grafanatest",
   "Metadata": {},
   "Objects": [
+    {
+      "Name": "StringEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "c",
+              "Value": "c"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "StringEnum"
+      }
+    },
+    {
+      "Name": "IntEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "one",
+              "Value": 1
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "two",
+              "Value": 2
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "three",
+              "Value": 3
+            }
+          ]
+        },
+        "Hints": {
+          "kind": "enum",
+          "memberNames": "one|two|three"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "IntEnum"
+      }
+    },
     {
       "Name": "container",
       "Type": {
@@ -159,6 +264,32 @@ container: {
                       "ScalarKind": "string"
                     }
                   }
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "stringEnum",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "c",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "StringEnum"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "intEnum",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": 2,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "IntEnum"
                 }
               },
               "Required": true

@@ -16,6 +16,7 @@ type Builder struct {
 	imports          template.ImportMap
 	typeImportMapper func(string) string
 	typeFormatter    *typeFormatter
+	rawTypes         RawTypes
 }
 
 func (jenny *Builder) JennyName() string {
@@ -24,6 +25,9 @@ func (jenny *Builder) JennyName() string {
 
 func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) {
 	files := codejen.Files{}
+	jenny.rawTypes = RawTypes{
+		schemas: context.Schemas,
+	}
 
 	for _, builder := range context.Builders {
 		output, err := jenny.generateBuilder(context, builder)
@@ -66,7 +70,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				return found
 			},
 			"defaultValueForType": func(typeDef ast.Type) string {
-				return formatValue(defaultValueForType(builder.Schema, typeDef, jenny.typeImportMapper))
+				return formatValue(jenny.rawTypes.defaultValueForType(typeDef, jenny.typeImportMapper))
 			},
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
@@ -79,7 +83,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 			Constructor:          jenny.generateConstructor(builder),
 			Properties:           builder.Properties,
 			Options: tools.Map(builder.Options, func(opt ast.Option) template.Option {
-				return jenny.generateOption(builder, opt)
+				return jenny.generateOption(opt)
 			}),
 		})
 
@@ -96,11 +100,11 @@ func (jenny *Builder) generateConstructor(builder ast.Builder) template.Construc
 
 		// FIXME: this is assuming that there's only one argument for that option
 		argsList = append(argsList, opt.Args[0])
-		assignments = append(assignments, jenny.generateAssignment(builder, opt.Assignments[0]))
+		assignments = append(assignments, jenny.generateAssignment(opt.Assignments[0]))
 	}
 
 	for _, init := range builder.Initializations {
-		assignments = append(assignments, jenny.generateAssignment(builder, init))
+		assignments = append(assignments, jenny.generateAssignment(init))
 	}
 
 	return template.Constructor{
@@ -109,9 +113,9 @@ func (jenny *Builder) generateConstructor(builder ast.Builder) template.Construc
 	}
 }
 
-func (jenny *Builder) generateOption(builder ast.Builder, def ast.Option) template.Option {
+func (jenny *Builder) generateOption(def ast.Option) template.Option {
 	assignments := tools.Map(def.Assignments, func(assignment ast.Assignment) template.Assignment {
-		return jenny.generateAssignment(builder, assignment)
+		return jenny.generateAssignment(assignment)
 	})
 
 	return template.Option{
@@ -122,21 +126,21 @@ func (jenny *Builder) generateOption(builder ast.Builder, def ast.Option) templa
 	}
 }
 
-func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Builder, path ast.Path) string {
+func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string {
 	fieldPath := jenny.formatFieldPath(path)
 	valueType := path.Last().Type
 	if path.Last().TypeHint != nil {
 		valueType = *path.Last().TypeHint
 	}
 
-	emptyValue := formatValue(defaultValueForType(currentBuilder.Schema, valueType, jenny.typeImportMapper))
+	emptyValue := formatValue(jenny.rawTypes.defaultValueForType(valueType, jenny.typeImportMapper))
 
 	return fmt.Sprintf(`		if (!this.internal.%[1]s) {
 			this.internal.%[1]s = %[2]s;
 		}`, fieldPath, emptyValue)
 }
 
-func (jenny *Builder) generateAssignment(builder ast.Builder, assign ast.Assignment) template.Assignment {
+func (jenny *Builder) generateAssignment(assign ast.Assignment) template.Assignment {
 	var initSafeGuards []string
 	for i, chunk := range assign.Path {
 		if i == len(assign.Path)-1 && assign.Method != ast.AppendAssignment {
@@ -159,7 +163,7 @@ func (jenny *Builder) generateAssignment(builder ast.Builder, assign ast.Assignm
 		}
 
 		subPath := assign.Path[:i+1]
-		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
+		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(subPath))
 	}
 
 	var constraints []template.Constraint
