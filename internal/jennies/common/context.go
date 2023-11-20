@@ -19,6 +19,16 @@ func (context *Context) ResolveToBuilder(def ast.Type) bool {
 		return context.ResolveToBuilder(def.AsArray().ValueType)
 	}
 
+	if def.Kind == ast.KindDisjunction {
+		for _, branch := range def.AsDisjunction().Branches {
+			if !context.ResolveToBuilder(branch) {
+				return false
+			}
+		}
+
+		return true
+	}
+
 	if def.Kind != ast.KindRef {
 		return false
 	}
