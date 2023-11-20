@@ -16,6 +16,7 @@ type Builder struct {
 	imports          template.ImportMap
 	typeImportMapper func(string) string
 	typeFormatter    *typeFormatter
+	rawTypes         RawTypes
 }
 
 func (jenny *Builder) JennyName() string {
@@ -24,6 +25,9 @@ func (jenny *Builder) JennyName() string {
 
 func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) {
 	files := codejen.Files{}
+	jenny.rawTypes = RawTypes{
+		schemas: context.Schemas,
+	}
 
 	for _, builder := range context.Builders {
 		output, err := jenny.generateBuilder(context, builder)
@@ -66,7 +70,7 @@ func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Buil
 				return found
 			},
 			"defaultValueForType": func(typeDef ast.Type) string {
-				return formatValue(defaultValueForType(builder.Schema, typeDef, jenny.typeImportMapper))
+				return formatValue(jenny.rawTypes.defaultValueForType(typeDef, jenny.typeImportMapper))
 			},
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
@@ -129,7 +133,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Bui
 		valueType = *path.Last().TypeHint
 	}
 
-	emptyValue := formatValue(defaultValueForType(currentBuilder.Schema, valueType, jenny.typeImportMapper))
+	emptyValue := formatValue(jenny.rawTypes.defaultValueForType(valueType, jenny.typeImportMapper))
 
 	return fmt.Sprintf(`		if (!this.internal.%[1]s) {
 			this.internal.%[1]s = %[2]s;
