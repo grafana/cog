@@ -371,7 +371,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 		if err != nil {
 			return ast.Type{}, err
 		}
-		
+
 		return ast.NewRef(
 			refPkg,
 			selectorLabel(selectors[len(selectors)-1]),
