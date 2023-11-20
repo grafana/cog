@@ -16,5 +16,6 @@ func CommonPasses() []Pass {
 		&DashboardTimePicker{},
 		&Cloudwatch{},
 		&LibraryPanels{},
+		&CandlestickColors{},
 	}
 }
