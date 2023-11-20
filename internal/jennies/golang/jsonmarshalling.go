@@ -77,7 +77,7 @@ func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.
 			buffer.WriteString(jsonUnmarshal)
 		}
 
-		if object.Type.ImplementsVariant() && object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
+		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
 			variantUnmarshal, err := jenny.renderDataqueryVariantUnmarshal(schema, object)
 			if err != nil {
 				return nil, err

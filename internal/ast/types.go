@@ -104,6 +104,10 @@ func (t Type) ImplementsVariant() bool {
 }
 
 func (t Type) ImplementedVariant() string {
+	if !t.ImplementsVariant() {
+		return ""
+	}
+
 	return t.Hints[HintImplementsVariant].(string)
 }
 
