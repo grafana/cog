@@ -126,7 +126,7 @@ func (jenny *Builder) generateOption(builder ast.Builder, def ast.Option) templa
 	}
 }
 
-func (jenny *Builder) generatePathInitializationSafeGuard(currentBuilder ast.Builder, path ast.Path) string {
+func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string {
 	fieldPath := jenny.formatFieldPath(path)
 	valueType := path.Last().Type
 	if path.Last().TypeHint != nil {
@@ -163,7 +163,7 @@ func (jenny *Builder) generateAssignment(builder ast.Builder, assign ast.Assignm
 		}
 
 		subPath := assign.Path[:i+1]
-		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(builder, subPath))
+		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(subPath))
 	}
 
 	var constraints []template.Constraint
