@@ -6,6 +6,26 @@ import (
 
 var _ Pass = (*DashboardTargetsRewrite)(nil)
 
+// DashboardTargetsRewrite rewrites any reference to the dashboard.Target type
+// as a ComposableSlot<SchemaVariantDataQuery>.
+//
+// Example:
+//
+//	```
+//	Panel struct {
+//		Targets array(ref(dashboard.Target))
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	Panel struct {
+//		Targets array(composableSlot(SchemaVariantDataQuery))
+//	}
+//	```
+//
+// Note: this compiler pass will only rewrite schemas in the "dashboard" package.
 type DashboardTargetsRewrite struct {
 }
 
