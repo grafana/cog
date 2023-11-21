@@ -13,7 +13,7 @@ func (pass *DashboardTimePicker) Process(schemas []*ast.Schema) ([]*ast.Schema, 
 	newSchemas := make([]*ast.Schema, 0, len(schemas))
 
 	for _, schema := range schemas {
-		if schema.Package != "dashboard" {
+		if schema.Package != dashboardPackage {
 			newSchemas = append(newSchemas, schema)
 			continue
 		}
@@ -31,16 +31,16 @@ func (pass *DashboardTimePicker) Process(schemas []*ast.Schema) ([]*ast.Schema, 
 
 func (pass *DashboardTimePicker) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 	var timepickerObject ast.Object
-	var dashboardObject ast.Object
+	var dashboardObj ast.Object
 
 	for i, object := range schema.Objects {
-		if object.Name != "Dashboard" {
+		if object.Name != dashboardObject {
 			continue
 		}
 
-		dashboardObject, timepickerObject = pass.processDashboard(object)
+		dashboardObj, timepickerObject = pass.processDashboard(object)
 
-		schema.Objects[i] = dashboardObject
+		schema.Objects[i] = dashboardObj
 	}
 
 	// did we actually define a new object?
@@ -57,7 +57,7 @@ func (pass *DashboardTimePicker) processDashboard(object ast.Object) (ast.Object
 	pkg := object.SelfRef.ReferredPkg
 
 	for i, field := range object.Type.AsStruct().Fields {
-		if field.Name != "timepicker" {
+		if field.Name != dashboardTimepickerField {
 			continue
 		}
 
@@ -66,8 +66,8 @@ func (pass *DashboardTimePicker) processDashboard(object ast.Object) (ast.Object
 			continue
 		}
 
-		timepickerObject = ast.NewObject(pkg, "TimePicker", field.Type)
-		object.Type.AsStruct().Fields[i].Type = ast.NewRef(pkg, "TimePicker")
+		timepickerObject = ast.NewObject(pkg, dashboardTimepickerObject, field.Type)
+		object.Type.AsStruct().Fields[i].Type = ast.NewRef(pkg, dashboardTimepickerObject)
 	}
 
 	return object, timepickerObject
