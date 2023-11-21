@@ -6,6 +6,28 @@ import (
 
 var _ Pass = (*DashboardTimePicker)(nil)
 
+// DashboardTimePicker rewrites the definition of "Dashboard.timepicker" field in the "dashboard" package from
+// using an anonymous struct to a named one.
+//
+// In the original schema, the timepicker is defined as follows:
+//
+//	```
+//	# In the Dashboard object
+//	timepicker?: {
+//		# fields...
+//	}
+//	```
+//
+// These definitions become:
+//
+//	```
+//	# In the Dashboard object
+//	timepicker?: TimePicker
+//
+//	#TimePicker: {
+//		# fields...
+//	}
+//	```
 type DashboardTimePicker struct {
 }
 
