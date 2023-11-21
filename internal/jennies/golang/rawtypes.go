@@ -82,6 +82,10 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
+	if len(def.Type.CompilerPassTrail()) != 0 {
+		buffer.WriteString(fmt.Sprintf("// Altered by compiler passes: %s\n", strings.Join(def.Type.CompilerPassTrail(), ", ")))
+	}
+
 	switch def.Type.Kind {
 	case ast.KindEnum:
 		buffer.WriteString(jenny.formatEnumDef(def))

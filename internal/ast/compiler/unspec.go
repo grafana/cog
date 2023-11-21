@@ -40,6 +40,7 @@ func (pass *Unspec) processSchema(schema *ast.Schema) *ast.Schema {
 			}
 
 			newObject.SelfRef.ReferredType = newObject.Name
+			newObject.Type.AddCompilerPassTrail("Unspec")
 		}
 
 		newSchema.Objects = append(newSchema.Objects, newObject)

@@ -96,5 +96,8 @@ func (pass *LibraryPanels) buildModelType(dashboardPanel ast.Object) ast.Type {
 		fields = append(fields, panelField)
 	}
 
-	return ast.NewStruct(fields...)
+	newStruct := ast.NewStruct(fields...)
+	newStruct.AddCompilerPassTrail("LibraryPanels")
+
+	return newStruct
 }

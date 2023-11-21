@@ -83,6 +83,7 @@ func (pass *NotRequiredFieldAsNullableType) processStruct(def ast.Type) ast.Type
 		def.Struct.Fields[i].Type = pass.processType(field.Type)
 		if !field.Required {
 			def.Struct.Fields[i].Type.Nullable = true
+			def.Struct.Fields[i].Type.AddCompilerPassTrail("NotRequiredFieldAsNullableType")
 		}
 	}
 

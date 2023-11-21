@@ -50,12 +50,18 @@ func (pass *RenameNumericEnumValues) processType(def ast.Type) ast.Type {
 }
 
 func (pass *RenameNumericEnumValues) processEnum(def ast.Type) ast.Type {
+	modified := false
 	for i, val := range def.AsEnum().Values {
 		if _, err := strconv.Atoi(val.Name); err != nil {
 			continue
 		}
 
+		modified = true
 		def.AsEnum().Values[i].Name = "N" + tools.UpperCamelCase(val.Name)
+	}
+
+	if modified {
+		def.AddCompilerPassTrail("RenameNumericEnumValues")
 	}
 
 	return def

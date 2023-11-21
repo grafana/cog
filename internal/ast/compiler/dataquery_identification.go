@@ -47,6 +47,7 @@ func (pass *DataqueryIdentification) processObject(object ast.Object, commonData
 
 	if pass.structsIntersect(typeDef, commonDataquery.Type) {
 		object.Type.Hints[ast.HintImplementsVariant] = string(ast.SchemaVariantDataQuery)
+		object.Type.AddCompilerPassTrail("DataqueryIdentification")
 	}
 
 	return object

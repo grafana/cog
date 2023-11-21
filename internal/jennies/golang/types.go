@@ -36,28 +36,33 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 }
 
 func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool) string {
+	compilerPassTrail := strings.Join(def.CompilerPassTrail(), ", ")
+	if len(compilerPassTrail) != 0 {
+		compilerPassTrail = fmt.Sprintf("/* %s */", compilerPassTrail)
+	}
+
 	if def.IsAny() {
-		return "any"
+		return "any " + compilerPassTrail
 	}
 
 	if def.Kind == ast.KindComposableSlot {
 		formatted := formatter.variantInterface(string(def.AsComposableSlot().Variant))
 
 		if !resolveBuilders {
-			return formatted
+			return formatted + " " + compilerPassTrail
 		}
 
 		cogAlias := formatter.packageMapper("cog")
 
-		return fmt.Sprintf("%s.Builder[%s]", cogAlias, formatted)
+		return fmt.Sprintf("%s.Builder[%s] %s", cogAlias, formatted, compilerPassTrail)
 	}
 
 	if def.Kind == ast.KindArray {
-		return formatter.formatArray(def.AsArray(), resolveBuilders)
+		return formatter.formatArray(def.AsArray(), resolveBuilders) + " " + compilerPassTrail
 	}
 
 	if def.Kind == ast.KindMap {
-		return formatter.formatMap(def.AsMap())
+		return formatter.formatMap(def.AsMap()) + " " + compilerPassTrail
 	}
 
 	if def.Kind == ast.KindScalar {
@@ -66,11 +71,11 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			typeName = "*" + typeName
 		}
 
-		return string(typeName)
+		return string(typeName) + " " + compilerPassTrail
 	}
 
 	if def.Kind == ast.KindRef {
-		return formatter.formatRef(def, resolveBuilders)
+		return formatter.formatRef(def, resolveBuilders) + " " + compilerPassTrail
 	}
 
 	// anonymous struct or struct body
@@ -80,15 +85,15 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			output = "*" + output
 		}
 
-		return output
+		return output + " " + compilerPassTrail
 	}
 
 	if def.Kind == ast.KindIntersection {
-		return formatter.formatIntersection(def.AsIntersection())
+		return formatter.formatIntersection(def.AsIntersection()) + " " + compilerPassTrail
 	}
 
 	// FIXME: we should never be here
-	return "unknown"
+	return "unknown " + compilerPassTrail
 }
 
 func (formatter *typeFormatter) variantInterface(variant string) string {

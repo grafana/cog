@@ -19,6 +19,8 @@ const (
 	// HintSkipVariantPluginRegistration preserves the variant hint on a type, but
 	// tells the jennies to not register it as a plugin.
 	HintSkipVariantPluginRegistration = "skip_variant_plugin_registration"
+
+	HintCompilerPassTrail = "compiler_pass_trail"
 )
 
 const DiscriminatorCatchAll = "cog_discriminator_catch_all"

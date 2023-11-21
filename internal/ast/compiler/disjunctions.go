@@ -201,6 +201,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	if len(disjunction.Branches) == 2 && disjunction.Branches.HasNullType() {
 		finalType := disjunction.Branches.NonNullTypes()[0]
 		finalType.Nullable = true
+		finalType.AddCompilerPassTrail("DisjunctionToType")
 
 		return finalType, nil
 	}
@@ -209,8 +210,10 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	if pass.hasOnlySingleTypeScalars(schema, disjunction) {
 		refResolver := pass.makeReferenceResolver(schema)
 		scalarKind := refResolver(disjunction.Branches[0]).AsScalar().ScalarKind
+		scalarType := ast.NewScalar(scalarKind, ast.Default(def.Default))
+		scalarType.AddCompilerPassTrail("DisjunctionToType")
 
-		return ast.NewScalar(scalarKind, ast.Default(def.Default)), nil
+		return scalarType, nil
 	}
 
 	// type | otherType | something (| null)?
@@ -225,6 +228,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		if def.Nullable || disjunction.Branches.HasNullType() {
 			ref.Nullable = true
 		}
+		ref.AddCompilerPassTrail("DisjunctionToType")
 
 		return ref, nil
 	}
@@ -257,6 +261,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	structType := ast.NewStruct(fields...)
 	if disjunction.Branches.HasOnlyScalarOrArray() {
 		structType.Hints[ast.HintDisjunctionOfScalars] = disjunction
+		structType.AddCompilerPassTrail("DisjunctionToType")
 	}
 	if disjunction.Branches.HasOnlyRefs() {
 		newDisjunctionDef, err := pass.ensureDiscriminator(schema, disjunction)
@@ -265,6 +270,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		}
 
 		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = newDisjunctionDef
+		structType.AddCompilerPassTrail("DisjunctionToType")
 	}
 
 	pass.newObjects[newTypeName] = ast.Object{
@@ -280,6 +286,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	if def.Nullable || disjunction.Branches.HasNullType() {
 		ref.Nullable = true
 	}
+	ref.AddCompilerPassTrail("DisjunctionToType")
 
 	return ref, nil
 }

@@ -22,7 +22,7 @@ func TestPrefixEnumValues(t *testing.T) {
 		ast.NewObject("pkg", "VariableRefresh", ast.NewEnum([]ast.EnumValue{
 			{Name: "VariableRefreshNever", Value: "never", Type: ast.String()},
 			{Name: "VariableRefreshAlways", Value: "always", Type: ast.String()},
-		})),
+		}, ast.Hints(ast.JenniesHints{ast.HintCompilerPassTrail: []string{"PrefixEnumValues"}}))),
 
 		ast.NewObject("pkg", "SomeType", ast.String()),
 	}

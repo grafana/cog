@@ -89,7 +89,10 @@ func (pass *DashboardTimePicker) processDashboard(object ast.Object) (ast.Object
 		}
 
 		timepickerObject = ast.NewObject(pkg, dashboardTimepickerObject, field.Type)
+		field.Type.AddCompilerPassTrail("DashboardTimePicker")
+
 		object.Type.AsStruct().Fields[i].Type = ast.NewRef(pkg, dashboardTimepickerObject)
+		object.Type.AsStruct().Fields[i].Type.AddCompilerPassTrail("DashboardTimePicker")
 	}
 
 	return object, timepickerObject

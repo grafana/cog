@@ -89,6 +89,7 @@ func (pass *DashboardTargetsRewrite) processType(def ast.Type) ast.Type {
 		newDef.ComposableSlot = &ast.ComposableSlotType{
 			Variant: ast.SchemaVariantDataQuery,
 		}
+		newDef.AddCompilerPassTrail("DashboardTargetsRewrite")
 
 		return newDef
 	}

@@ -35,32 +35,24 @@ type AnonymousEnumToExplicitType struct {
 }
 
 func (pass *AnonymousEnumToExplicitType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
-		newSchema, err := pass.processSchema(schema)
-		if err != nil {
-			return nil, err
-		}
-
-		newSchemas = append(newSchemas, newSchema)
+	for i, schema := range schemas {
+		schemas[i] = pass.processSchema(schema)
 	}
 
-	return newSchemas, nil
+	return schemas, nil
 }
 
-func (pass *AnonymousEnumToExplicitType) processSchema(schema *ast.Schema) (*ast.Schema, error) {
+func (pass *AnonymousEnumToExplicitType) processSchema(schema *ast.Schema) *ast.Schema {
 	pass.newObjects = nil
 	pass.currentPackage = schema.Package
 
-	newSchema := schema.DeepCopy()
 	for i, object := range schema.Objects {
-		newSchema.Objects[i] = pass.processObject(object)
+		schema.Objects[i] = pass.processObject(object)
 	}
 
-	newSchema.Objects = append(newSchema.Objects, pass.newObjects...)
+	schema.Objects = append(schema.Objects, pass.newObjects...)
 
-	return &newSchema, nil
+	return schema
 }
 
 func (pass *AnonymousEnumToExplicitType) processObject(object ast.Object) ast.Object {
@@ -99,10 +91,7 @@ func (pass *AnonymousEnumToExplicitType) processArray(pkg string, currentObjectN
 
 func (pass *AnonymousEnumToExplicitType) processStruct(pkg string, parentName string, def ast.Type) ast.Type {
 	for i, field := range def.Struct.Fields {
-		newField := field
-		newField.Type = pass.processType(pkg, parentName, tools.UpperCamelCase(parentName)+tools.UpperCamelCase(field.Name), field.Type)
-
-		def.Struct.Fields[i] = newField
+		def.Struct.Fields[i].Type = pass.processType(pkg, parentName, tools.UpperCamelCase(parentName)+tools.UpperCamelCase(field.Name), field.Type)
 	}
 
 	return def
@@ -120,7 +109,10 @@ func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(pkg string, parent
 		})
 	}
 
-	pass.newObjects = append(pass.newObjects, ast.NewObject(pkg, enumTypeName, ast.NewEnum(values)))
+	enumType := ast.NewEnum(values)
+	enumType.AddCompilerPassTrail("AnonymousEnumToExplicitType")
+
+	pass.newObjects = append(pass.newObjects, ast.NewObject(pkg, enumTypeName, enumType))
 
 	return ast.NewRef(pass.currentPackage, enumTypeName)
 }

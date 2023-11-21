@@ -59,6 +59,7 @@ func (pass *PrefixEnumValues) processEnum(parentName string, def ast.Type) ast.T
 	}
 
 	def.Enum.Values = values
+	def.AddCompilerPassTrail("PrefixEnumValues")
 
 	return def
 }

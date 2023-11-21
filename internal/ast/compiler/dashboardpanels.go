@@ -65,14 +65,17 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 				"row":                     dashboardRowPanelObject,
 				ast.DiscriminatorCatchAll: dashboardPanelObject,
 			}
+			disjunction.AddCompilerPassTrail("DashboardPanelsRewrite")
 
 			newPanelsFieldType := ast.NewArray(disjunction)
+			newPanelsFieldType.AddCompilerPassTrail("DashboardPanelsRewrite")
 
 			newSchema.Objects = append(newSchema.Objects, pass.overwritePanelsFieldType(object, newPanelsFieldType))
 			continue
 		}
 		if object.Name == dashboardRowPanelObject {
 			newPanelsFieldType := ast.NewArray(ast.NewRef(schema.Package, "Panel"))
+			newPanelsFieldType.AddCompilerPassTrail("DashboardPanelsRewrite")
 
 			newSchema.Objects = append(newSchema.Objects, pass.overwritePanelsFieldType(object, newPanelsFieldType))
 			continue
@@ -94,6 +97,7 @@ func (pass *DashboardPanelsRewrite) overwritePanelsFieldType(object ast.Object, 
 
 		newField := field
 		newField.Type = newPanelsFieldType
+		newField.Type.AddCompilerPassTrail("DashboardPanelsRewrite")
 
 		newFields[i] = newField
 	}

@@ -99,6 +99,14 @@ type Type struct {
 	Hints JenniesHints `json:",omitempty"`
 }
 
+func (t Type) AddCompilerPassTrail(compilerPassName string) {
+	if t.Hints[HintCompilerPassTrail] == nil {
+		t.Hints[HintCompilerPassTrail] = make([]string, 0)
+	}
+
+	t.Hints[HintCompilerPassTrail] = append(t.Hints[HintCompilerPassTrail].([]string), compilerPassName)
+}
+
 func (t Type) ImplementsVariant() bool {
 	return t.HasHint(HintImplementsVariant)
 }
@@ -109,6 +117,14 @@ func (t Type) ImplementedVariant() string {
 	}
 
 	return t.Hints[HintImplementsVariant].(string)
+}
+
+func (t Type) CompilerPassTrail() []string {
+	if !t.HasHint(HintCompilerPassTrail) {
+		return nil
+	}
+
+	return t.Hints[HintCompilerPassTrail].([]string)
 }
 
 func (t Type) HasHint(hintName string) bool {
