@@ -4,14 +4,6 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-const (
-	LibraryPanelPackage    = "librarypanel"
-	LibraryPanelObject     = "LibraryPanel"
-	LibraryPanelModelField = "model"
-	DashboardPackage       = "dashboard"
-	DashboardPanelObject   = "Panel"
-)
-
 type LibraryPanels struct {
 }
 
@@ -23,7 +15,7 @@ func (lp *LibraryPanels) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 
 	newSchemas := make([]*ast.Schema, len(schemas))
 	for i, schema := range schemas {
-		if schema.Package != LibraryPanelPackage {
+		if schema.Package != libraryPanelPackage {
 			newSchemas[i] = schema
 			continue
 		}
@@ -39,7 +31,7 @@ func (lp *LibraryPanels) parseSchema(schema *ast.Schema, dashboardRef *ast.RefTy
 	newSchema.Objects = nil
 
 	for _, object := range schema.Objects {
-		if object.Name != LibraryPanelObject {
+		if object.Name != libraryPanelObject {
 			newSchema.Objects = append(newSchema.Objects, object)
 			continue
 		}
@@ -59,7 +51,7 @@ func (lp *LibraryPanels) processObject(object ast.Object, dashboardRef *ast.RefT
 	fields := make([]ast.StructField, 0, len(structDef.Fields))
 
 	for _, field := range structDef.Fields {
-		if field.Name != LibraryPanelModelField {
+		if field.Name != libraryPanelModelField {
 			fields = append(fields, field)
 			continue
 		}
@@ -75,8 +67,8 @@ func (lp *LibraryPanels) processObject(object ast.Object, dashboardRef *ast.RefT
 
 func (lp *LibraryPanels) getDashboardSchema(schemas []*ast.Schema) *ast.RefType {
 	for _, schema := range schemas {
-		if schema.Package == DashboardPackage {
-			return &ast.RefType{ReferredPkg: schema.Package, ReferredType: DashboardPanelObject}
+		if schema.Package == dashboardPackage {
+			return &ast.RefType{ReferredPkg: schema.Package, ReferredType: dashboardPanelObject}
 		}
 	}
 
