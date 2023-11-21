@@ -6,6 +6,27 @@ import (
 
 var _ Pass = (*DashboardPanelsRewrite)(nil)
 
+// DashboardPanelsRewrite rewrites the definition of "panels" fields in the "dashboard" package.
+//
+// In the original schema, panels are defined as follows:
+//
+//	```
+//	# In the Dashboard object
+//	panels?: [...#Panel | #RowPanel | #GraphPanel | #HeatmapPanel]
+//
+//	# In the RowPanel object
+//	panels: [...#Panel | #GraphPanel | #HeatmapPanel]
+//	```
+//
+// These definitions become:
+//
+//	```
+//	# In the Dashboard object
+//	panels?: [...#Panel | #RowPanel]
+//
+//	# In the RowPanel object
+//	panels: [...#Panel]
+//	```
 type DashboardPanelsRewrite struct {
 }
 
