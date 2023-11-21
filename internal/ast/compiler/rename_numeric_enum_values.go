@@ -9,37 +9,36 @@ import (
 
 var _ Pass = (*RenameNumericEnumValues)(nil)
 
+// RenameNumericEnumValues turns any numeric enum member name to an alphanumeric name.
+//
+// Example:
+//
+//	```
+//	Position enum(0: 0, 1: 1, 2: 2)
+//	```
+//
+// Will become:
+//
+//	```
+//	Position enum(N0: 0, N1: 1, N2: 2)
+//	```
 type RenameNumericEnumValues struct {
 }
 
 func (pass *RenameNumericEnumValues) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
-		newSchema, err := pass.processSchema(schema)
-		if err != nil {
-			return nil, err
-		}
-
-		newSchemas = append(newSchemas, newSchema)
+	for i, schema := range schemas {
+		schemas[i] = pass.processSchema(schema)
 	}
 
-	return newSchemas, nil
+	return schemas, nil
 }
 
-func (pass *RenameNumericEnumValues) processSchema(schema *ast.Schema) (*ast.Schema, error) {
-	processedObjects := make([]ast.Object, 0, len(schema.Objects))
-	for _, object := range schema.Objects {
-		newObject := object
-		newObject.Type = pass.processType(object.Type)
-
-		processedObjects = append(processedObjects, newObject)
+func (pass *RenameNumericEnumValues) processSchema(schema *ast.Schema) *ast.Schema {
+	for i, object := range schema.Objects {
+		schema.Objects[i].Type = pass.processType(object.Type)
 	}
 
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = processedObjects
-
-	return &newSchema, nil
+	return schema
 }
 
 func (pass *RenameNumericEnumValues) processType(def ast.Type) ast.Type {
@@ -51,23 +50,13 @@ func (pass *RenameNumericEnumValues) processType(def ast.Type) ast.Type {
 }
 
 func (pass *RenameNumericEnumValues) processEnum(def ast.Type) ast.Type {
-	newType := def
-
-	values := make([]ast.EnumValue, 0, len(def.AsEnum().Values))
-	for _, val := range def.AsEnum().Values {
+	for i, val := range def.AsEnum().Values {
 		if _, err := strconv.Atoi(val.Name); err != nil {
-			values = append(values, val)
 			continue
 		}
 
-		values = append(values, ast.EnumValue{
-			Type:  val.Type,
-			Name:  "N" + tools.UpperCamelCase(val.Name),
-			Value: val.Value,
-		})
+		def.AsEnum().Values[i].Name = "N" + tools.UpperCamelCase(val.Name)
 	}
 
-	newType.Enum.Values = values
-
-	return newType
+	return def
 }
