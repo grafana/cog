@@ -60,6 +60,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.AnonymousEnumToExplicitType{},
 		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},
+		&compiler.FlattenDisjunctions{},
 		&compiler.DisjunctionToType{},
 	}
 }
