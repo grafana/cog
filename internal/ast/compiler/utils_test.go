@@ -8,6 +8,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func runPassOnObjects(t *testing.T, pass Pass, input []ast.Object, expectedOutput []ast.Object) {
+	t.Helper()
+
+	inputSchema := &ast.Schema{Package: "test", Objects: input}
+	expectedOutputSchema := &ast.Schema{Package: "test", Objects: expectedOutput}
+
+	runPassOnSchema(t, pass, inputSchema, expectedOutputSchema)
+}
+
 func runPassOnSchema(t *testing.T, pass Pass, input *ast.Schema, expectedOutput *ast.Schema) {
 	t.Helper()
 
