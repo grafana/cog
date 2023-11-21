@@ -3,9 +3,7 @@ package compiler
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/stretchr/testify/require"
 )
 
 func TestDashboardTimePicker(t *testing.T) {
@@ -60,19 +58,5 @@ func TestDashboardTimePicker(t *testing.T) {
 	}
 
 	// Run the compiler pass
-	runDashboardTimePickerPass(t, schemas, expected)
-}
-
-func runDashboardTimePickerPass(t *testing.T, input ast.Schemas, expectedOutput ast.Schemas) {
-	t.Helper()
-
-	req := require.New(t)
-
-	compilerPass := &DashboardTimePicker{}
-	processedFiles, err := compilerPass.Process(input)
-	req.NoError(err)
-	req.Len(processedFiles, len(input))
-	for i := range input {
-		req.Empty(cmp.Diff(expectedOutput[i], processedFiles[i]))
-	}
+	runPassOnSchemas(t, &DashboardTimePicker{}, schemas, expected)
 }
