@@ -153,3 +153,73 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 	req.Equal(ast.NewRef("dashboard", "Row"), modifiedOpts[1].Args[0].Type)
 	req.Equal("Row", modifiedOpts[1].Args[0].Name)
 }
+
+func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
+	req := require.New(t)
+
+	timeType := ast.NewStruct(
+		ast.NewStructField("from", ast.String()),
+		ast.NewStructField("to", ast.String()),
+		ast.NewStructField("auto", ast.Bool()),
+	)
+	ref := ast.NewRef("dashboard", "Time")
+	schema := &ast.Schema{
+		Package: "dashboard",
+		Objects: []ast.Object{
+			ast.NewObject("dashboard", "Time", timeType),
+		},
+	}
+	builder := ast.Builder{Schema: schema}
+
+	option := ast.Option{
+		Name: "Time",
+		Args: []ast.Argument{
+			{Name: "time", Type: ref},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "time", Type: ref},
+				},
+			},
+		},
+	}
+	modifiedOpts := StructFieldsAsOptionsAction("from", "to")(builder, option)
+
+	req.Len(modifiedOpts, 2)
+
+	req.Equal("from", modifiedOpts[0].Name)
+	req.Len(modifiedOpts[0].Args, 1)
+	req.Equal("from", modifiedOpts[0].Args[0].Name)
+	req.Equal(ast.String(), modifiedOpts[0].Args[0].Type)
+	req.Len(modifiedOpts[0].Assignments, 1)
+	req.Equal("time.from", modifiedOpts[0].Assignments[0].Path.String())
+
+	req.Equal("to", modifiedOpts[1].Name)
+	req.Len(modifiedOpts[1].Args, 1)
+	req.Equal("to", modifiedOpts[1].Args[0].Name)
+	req.Equal(ast.String(), modifiedOpts[1].Args[0].Type)
+	req.Len(modifiedOpts[1].Assignments, 1)
+	req.Equal("time.to", modifiedOpts[1].Assignments[0].Path.String())
+}
+
+func TestStructFieldsAsOptionsAction_withRefToStruct(t *testing.T) {
+	req := require.New(t)
+
+	option := ast.Option{
+		Name: "Editable",
+		Args: []ast.Argument{
+			{Name: "editable", Type: ast.Bool()},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "editable", Type: ast.Bool()},
+				},
+			},
+		},
+	}
+	modifiedOpts := StructFieldsAsOptionsAction()(ast.Builder{}, option)
+
+	req.Equal([]ast.Option{option}, modifiedOpts)
+}
