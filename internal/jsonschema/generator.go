@@ -293,5 +293,5 @@ func (g *generator) walkObject(schema *schemaparser.Schema) (ast.Type, error) {
 		})
 	}
 
-	return ast.NewStruct(fields...), nil
+	return ast.NewStruct(fields), nil
 }

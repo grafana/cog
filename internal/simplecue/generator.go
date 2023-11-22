@@ -91,7 +91,7 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 		rootObjectFields = append(rootObjectFields, ast.NewStructField(name, nodeType))
 	}
 
-	structType := ast.NewStruct(rootObjectFields...)
+	structType := ast.NewStruct(rootObjectFields)
 	structType.Hints[ast.HintImplementsVariant] = string(g.schema.Metadata.Variant)
 
 	g.schema.Objects = append(g.schema.Objects, ast.Object{
@@ -221,7 +221,7 @@ func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 			return nil, errorWithCueRef(v, "enums may only be generated from a disjunction of concrete strings or numbers")
 		}
 
-		val, err := cueConcreteToScalar(dv)
+		val, err := g.cueConcreteToScalar(dv)
 		if err != nil {
 			return nil, err
 		}
@@ -244,9 +244,16 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 
 	var fields []ast.StructField
 
+	_, err := g.extractDefault(v)
+	if err != nil {
+		return nil, err
+	}
+
 	// explore struct fields
 	for i, _ := v.Fields(cue.Optional(true), cue.Definitions(true)); i.Next(); {
 		fieldLabel := selectorLabel(i.Selector())
+
+		fmt.Printf("Field: %s\n", fieldLabel)
 
 		node, err := g.declareNode(i.Value())
 		if err != nil {
@@ -333,7 +340,12 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			return ast.Any(), nil
 		}
 
-		return ast.NewStruct(fields...), nil
+		defVal, err := g.extractDefault(v)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewStruct(fields, ast.Default(defVal)), nil
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
 	}
@@ -346,6 +358,11 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 	}
 
 	op, exprs := v.Expr()
+
+	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind && op == cue.NoOp {
+		return true, exprs[0], v
+	}
+
 	if len(exprs) != 2 {
 		return false, v, v
 	}
@@ -454,7 +471,7 @@ func (g *generator) scalarTypeOptions(v cue.Value, defVal any, hints ast.Jennies
 	}
 
 	if v.IsConcrete() {
-		val, err := cueConcreteToScalar(v)
+		val, err := g.cueConcreteToScalar(v)
 		if err != nil {
 			return nil, err
 		}
@@ -491,7 +508,7 @@ func (g *generator) extractDefault(v cue.Value) (any, error) {
 		return nil, nil
 	}
 
-	def, err := cueConcreteToScalar(defaultVal)
+	def, err := g.cueConcreteToScalar(defaultVal)
 	if err != nil {
 		return nil, err
 	}
@@ -536,7 +553,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 		// TODO: support more constraints?
 		switch fmt.Sprint(args[0]) {
 		case "strings.MinRunes":
-			scalar, err := cueConcreteToScalar(args[1])
+			scalar, err := g.cueConcreteToScalar(args[1])
 			if err != nil {
 				return nil, err
 			}
@@ -547,7 +564,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 			})
 
 		case "strings.MaxRunes":
-			scalar, err := cueConcreteToScalar(args[1])
+			scalar, err := g.cueConcreteToScalar(args[1])
 			if err != nil {
 				return nil, err
 			}
@@ -614,7 +631,7 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
-		val, err := cueConcreteToScalar(v)
+		val, err := g.cueConcreteToScalar(v)
 		if err != nil {
 			return typeDef, err
 		}

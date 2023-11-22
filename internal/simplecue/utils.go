@@ -140,7 +140,7 @@ func getTypeHint(v cue.Value) (string, error) {
 
 // ONLY call this function if it has been established that the provided Value is
 // Concrete.
-func cueConcreteToScalar(v cue.Value) (interface{}, error) {
+func (g *generator) cueConcreteToScalar(v cue.Value) (interface{}, error) {
 	switch v.Kind() {
 	case cue.NullKind:
 		return nil, nil //nolint: nilnil
@@ -162,7 +162,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		for it.Next() {
 			current := it.Value()
 
-			val, err := cueConcreteToScalar(current)
+			val, err := g.cueConcreteToScalar(current)
 			if err != nil {
 				return nil, err
 			}
@@ -177,8 +177,14 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 
 		return values, nil
 	case cue.StructKind:
+		fields, err := g.structFields(v)
+		if err != nil {
+			return nil, err
+		}
+
+		return ast.NewStruct(fields), nil
 		// TODO: this would be used for struct-level default values
-		return nil, nil //nolint: nilnil
+		//return nil, nil //nolint: nilnil
 	default:
 		return nil, errorWithCueRef(v, "can not convert kind to scalar: %s", v.Kind())
 	}

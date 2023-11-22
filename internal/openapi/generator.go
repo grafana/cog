@@ -153,7 +153,7 @@ func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
 		return fields[i].Name < fields[j].Name
 	})
 
-	return ast.NewStruct(fields...), nil
+	return ast.NewStruct(fields), nil
 }
 
 func (g *generator) walkArray(schema *openapi3.Schema) (ast.Type, error) {
