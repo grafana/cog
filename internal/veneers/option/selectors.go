@@ -18,9 +18,3 @@ func ByNameCaseInsensitive(objectName string, optionNames ...string) Selector {
 		return builder.For.Name == objectName && tools.StringInListEqualFold(option.Name, optionNames)
 	}
 }
-
-func EveryOption() Selector {
-	return func(builder ast.Builder, option ast.Option) bool {
-		return true
-	}
-}
