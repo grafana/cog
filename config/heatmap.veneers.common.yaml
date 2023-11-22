@@ -1,0 +1,11 @@
+language: all
+
+builders: ~
+
+options:
+  - struct_fields_as_arguments:
+      by_name: Options.legend
+  - struct_fields_as_arguments:
+      by_name: Options.tooltip
+  - struct_fields_as_arguments:
+      by_name: Options.exemplars
