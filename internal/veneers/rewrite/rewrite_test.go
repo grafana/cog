@@ -85,6 +85,7 @@ func testData() []rewriteTestCase {
 									ast.Argument{Name: "type", Type: ast.String()},
 								),
 							},
+							VeneerTrail: []string{"Rename"},
 						},
 					},
 				},
