@@ -47,7 +47,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 
 		Index{Targets: globalConfig},
 	)
-	jenny.AddPostprocessors(common.GeneratedCommentHeader())
+	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
 	return jenny
 }

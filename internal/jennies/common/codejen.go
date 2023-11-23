@@ -31,12 +31,14 @@ func If[Input any](condition bool, innerJenny codejen.OneToMany[Input]) codejen.
 // GeneratedCommentHeader produces a FileMapper that injects a comment header onto
 // a [codejen.File] indicating  the jenny or jennies that constructed the
 // file.
-func GeneratedCommentHeader() codejen.FileMapper {
+func GeneratedCommentHeader(config Config) codejen.FileMapper {
 	genHeader := `// Code generated - EDITING IS FUTILE. DO NOT EDIT.
+{{- with .Using }}
 //
 // Using jennies:
-{{- range .Using }}
+{{- range . }}
 //     {{ .JennyName }}
+{{- end }}
 {{- end }}
 
 `
@@ -53,9 +55,14 @@ func GeneratedCommentHeader() codejen.FileMapper {
 		case ".json", ".yml", ".yaml", ".md":
 			return f, nil
 		default:
+			var from []codejen.NamedJenny
+			if config.Debug {
+				from = f.From
+			}
+
 			buf := new(bytes.Buffer)
 			if err := tmpl.Execute(buf, map[string]any{
-				"Using": f.From,
+				"Using": from,
 			}); err != nil {
 				return codejen.File{}, fmt.Errorf("failed executing GeneratedCommentHeader() template: %w", err)
 			}
