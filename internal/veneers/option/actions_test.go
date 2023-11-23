@@ -40,12 +40,13 @@ func TestUnfoldBooleanAction(t *testing.T) {
 	req := require.New(t)
 
 	option := ast.Option{
+		Args: []ast.Argument{
+			{Name: "editable", Type: ast.Bool()},
+		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "editable", Type: ast.Bool()},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "editable", Type: ast.Bool()},
+			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
 		},
 	}
 	modifiedOpts := UnfoldBooleanAction(BooleanUnfold{
@@ -60,10 +61,12 @@ func TestUnfoldBooleanAction(t *testing.T) {
 
 	req.Equal(editableOpt.Name, "Editable")
 	req.Len(editableOpt.Assignments, 1)
+	req.Len(editableOpt.Args, 0)
 	req.Equal(editableOpt.Assignments[0].Path.String(), "editable")
 	req.Equal(editableOpt.Assignments[0].Value.Constant, true)
 
 	req.Equal(readonlyOpt.Name, "ReadOnly")
+	req.Len(readonlyOpt.Args, 0)
 	req.Len(readonlyOpt.Assignments, 1)
 	req.Equal(readonlyOpt.Assignments[0].Path.String(), "editable")
 	req.Equal(readonlyOpt.Assignments[0].Value.Constant, false)
@@ -83,11 +86,9 @@ func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 			{Name: "panel", Type: disjunctionType},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "panel", Type: disjunctionType},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "panel", Type: disjunctionType},
+			}, ast.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
 	modifiedOpts := DisjunctionAsOptionsAction()(ast.Builder{}, option)
@@ -132,11 +133,9 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 			{Name: "panel", Type: ref},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "panel", Type: ref},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "panel", Type: ref},
+			}, ast.Argument{Name: "tags", Type: ref}),
 		},
 	}
 	modifiedOpts := DisjunctionAsOptionsAction()(builder, option)
@@ -177,11 +176,9 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 			{Name: "time", Type: ref},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "time", Type: ref},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "time", Type: ref},
+			}, ast.Argument{Name: "editable", Type: ref}),
 		},
 	}
 	modifiedOpts := StructFieldsAsOptionsAction("from", "to")(builder, option)
@@ -203,37 +200,14 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 	req.Equal("time.to", modifiedOpts[1].Assignments[0].Path.String())
 }
 
-func TestStructFieldsAsOptionsAction_withRefToStruct(t *testing.T) {
-	req := require.New(t)
-
-	option := ast.Option{
-		Name: "Editable",
-		Args: []ast.Argument{
-			{Name: "editable", Type: ast.Bool()},
-		},
-		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "editable", Type: ast.Bool()},
-				},
-			},
-		},
-	}
-	modifiedOpts := StructFieldsAsOptionsAction()(ast.Builder{}, option)
-
-	req.Equal([]ast.Option{option}, modifiedOpts)
-}
-
 func TestArrayToAppendAction_withNoArgument(t *testing.T) {
 	req := require.New(t)
 
 	option := ast.Option{
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "editable", Type: ast.Bool(ast.Value(true))},
-				},
-			},
+			ast.ConstantAssignment(ast.Path{
+				{Identifier: "editable", Type: ast.Bool()},
+			}, true),
 		},
 	}
 	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
@@ -249,11 +223,9 @@ func TestArrayToAppendAction_withNonArrayArgument(t *testing.T) {
 			{Name: "editable", Type: ast.Bool()},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "editable", Type: ast.Bool()},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "editable", Type: ast.Bool()},
+			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
 		},
 	}
 	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
@@ -270,11 +242,9 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 			{Name: "tags", Type: ast.NewArray(ast.String())},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "tags", Type: ast.NewArray(ast.String())},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "tags", Type: ast.NewArray(ast.String())},
+			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
 		},
 	}
 
@@ -284,12 +254,13 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 			{Name: "tags", Type: ast.String()},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
+			ast.ArgumentAssignment(
+				ast.Path{
 					{Identifier: "tags", Type: ast.NewArray(ast.String())},
 				},
-				Method: ast.AppendAssignment,
-			},
+				ast.Argument{Name: "tags", Type: ast.String()},
+				ast.Method(ast.AppendAssignment),
+			),
 		},
 	}
 
@@ -303,11 +274,9 @@ func TestStructFieldsAsArgumentsAction_withNoArgument(t *testing.T) {
 
 	option := ast.Option{
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "editable", Type: ast.Bool(ast.Value(true))},
-				},
-			},
+			ast.ConstantAssignment(ast.Path{
+				{Identifier: "editable", Type: ast.Bool()},
+			}, true),
 		},
 	}
 	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
@@ -323,11 +292,9 @@ func TestStructFieldsAsArgumentsAction_withNonStructArgument(t *testing.T) {
 			{Name: "tags", Type: ast.NewArray(ast.String())},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "tags", Type: ast.NewArray(ast.String())},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "tags", Type: ast.NewArray(ast.String())},
+			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
 		},
 	}
 	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
@@ -349,14 +316,9 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 			{Name: "time", Type: structType},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "time", Type: structType},
-				},
-				Value: ast.AssignmentValue{
-					Argument: &ast.Argument{Name: "time", Type: structType},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "time", Type: structType},
+			}, ast.Argument{Name: "time", Type: structType}),
 		},
 	}
 
@@ -367,24 +329,14 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 			{Name: "to", Type: ast.String()},
 		},
 		Assignments: []ast.Assignment{
-			{
-				Path: ast.Path{
-					{Identifier: "time", Type: structType},
-					{Identifier: "from", Type: ast.String()},
-				},
-				Value: ast.AssignmentValue{
-					Argument: &ast.Argument{Name: "from", Type: ast.String()},
-				},
-			},
-			{
-				Path: ast.Path{
-					{Identifier: "time", Type: structType},
-					{Identifier: "to", Type: ast.String()},
-				},
-				Value: ast.AssignmentValue{
-					Argument: &ast.Argument{Name: "to", Type: ast.String()},
-				},
-			},
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "time", Type: structType},
+				{Identifier: "from", Type: ast.String()},
+			}, ast.Argument{Name: "from", Type: ast.String()}),
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "time", Type: structType},
+				{Identifier: "to", Type: ast.String()},
+			}, ast.Argument{Name: "to", Type: ast.String()}),
 		},
 	}
 
