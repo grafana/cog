@@ -21,9 +21,14 @@ type Builder struct {
 	Properties      []StructField
 	Options         []Option
 	Initializations []Assignment `json:",omitempty"`
+	VeneerTrail     []string     `json:",omitempty"`
 }
 
-func (builder Builder) MakePath(builders Builders, pathAsString string) (Path, error) {
+func (builder *Builder) AddToVeneerTrail(veneerName string) {
+	builder.VeneerTrail = append(builder.VeneerTrail, veneerName)
+}
+
+func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, error) {
 	if pathAsString == "" {
 		return nil, fmt.Errorf("can not make path from empty input")
 	}
