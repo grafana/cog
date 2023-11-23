@@ -297,3 +297,98 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 
 	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
 }
+
+func TestStructFieldsAsArgumentsAction_withNoArgument(t *testing.T) {
+	req := require.New(t)
+
+	option := ast.Option{
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "editable", Type: ast.Bool(ast.Value(true))},
+				},
+			},
+		},
+	}
+	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
+
+	req.Equal([]ast.Option{option}, modifiedOpts)
+}
+
+func TestStructFieldsAsArgumentsAction_withNonStructArgument(t *testing.T) {
+	req := require.New(t)
+
+	option := ast.Option{
+		Args: []ast.Argument{
+			{Name: "tags", Type: ast.NewArray(ast.String())},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "tags", Type: ast.NewArray(ast.String())},
+				},
+			},
+		},
+	}
+	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
+
+	req.Equal([]ast.Option{option}, modifiedOpts)
+}
+
+func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
+	req := require.New(t)
+
+	structType := ast.NewStruct(
+		ast.NewStructField("from", ast.String()),
+		ast.NewStructField("to", ast.String()),
+	)
+
+	// input
+	option := ast.Option{
+		Args: []ast.Argument{
+			{Name: "time", Type: structType},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "time", Type: structType},
+				},
+				Value: ast.AssignmentValue{
+					Argument: &ast.Argument{Name: "time", Type: structType},
+				},
+			},
+		},
+	}
+
+	// expected
+	expectedOption := ast.Option{
+		Args: []ast.Argument{
+			{Name: "from", Type: ast.String()},
+			{Name: "to", Type: ast.String()},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "time", Type: structType},
+					{Identifier: "from", Type: ast.String()},
+				},
+				Value: ast.AssignmentValue{
+					Argument: &ast.Argument{Name: "from", Type: ast.String()},
+				},
+			},
+			{
+				Path: ast.Path{
+					{Identifier: "time", Type: structType},
+					{Identifier: "to", Type: ast.String()},
+				},
+				Value: ast.AssignmentValue{
+					Argument: &ast.Argument{Name: "to", Type: ast.String()},
+				},
+			},
+		},
+	}
+
+	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
+
+	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
+}
