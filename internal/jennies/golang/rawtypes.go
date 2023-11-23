@@ -7,8 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
-	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -22,7 +21,7 @@ func (jenny RawTypes) JennyName() string {
 	return "GoRawTypes"
 }
 
-func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
@@ -45,7 +44,7 @@ func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) 
 func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	jenny.typeFormatter = defaultTypeFormatter(func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
@@ -64,7 +63,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		buffer.WriteString("\n")
 	}
 
-	importStatements := formatImports(imports)
+	importStatements := imports.String()
 	if importStatements != "" {
 		importStatements += "\n\n"
 	}
@@ -105,7 +104,7 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 
 	buffer.WriteString("\n")
 
-	if def.Type.Kind == ast.KindStruct && def.Type.ImplementsVariant() {
+	if def.Type.ImplementsVariant() {
 		variant := tools.UpperCamelCase(def.Type.ImplementedVariant())
 
 		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", defName, variant))
@@ -131,20 +130,4 @@ func (jenny RawTypes) formatEnumDef(def ast.Object) string {
 	buffer.WriteString(")\n")
 
 	return buffer.String()
-}
-
-func formatImports(importMap template.ImportMap) string {
-	if len(importMap) == 0 {
-		return ""
-	}
-
-	statements := make([]string, 0, len(importMap))
-
-	for alias, importPath := range importMap {
-		statements = append(statements, fmt.Sprintf(`	%s "%s"`, alias, importPath))
-	}
-
-	return fmt.Sprintf(`import (
-%[1]s
-)`, strings.Join(statements, "\n"))
 }

@@ -6,6 +6,27 @@ import (
 
 var _ Pass = (*DashboardPanelsRewrite)(nil)
 
+// DashboardPanelsRewrite rewrites the definition of "panels" fields in the "dashboard" package.
+//
+// In the original schema, panels are defined as follows:
+//
+//	```
+//	# In the Dashboard object
+//	panels?: [...#Panel | #RowPanel | #GraphPanel | #HeatmapPanel]
+//
+//	# In the RowPanel object
+//	panels: [...#Panel | #GraphPanel | #HeatmapPanel]
+//	```
+//
+// These definitions become:
+//
+//	```
+//	# In the Dashboard object
+//	panels?: [...#Panel | #RowPanel]
+//
+//	# In the RowPanel object
+//	panels: [...#Panel]
+//	```
 type DashboardPanelsRewrite struct {
 }
 
@@ -13,7 +34,7 @@ func (pass *DashboardPanelsRewrite) Process(schemas []*ast.Schema) ([]*ast.Schem
 	newSchemas := make([]*ast.Schema, 0, len(schemas))
 
 	for _, schema := range schemas {
-		if schema.Package != "dashboard" {
+		if schema.Package != dashboardPackage {
 			newSchemas = append(newSchemas, schema)
 			continue
 		}
@@ -34,15 +55,15 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 	newSchema.Objects = nil
 
 	for _, object := range schema.Objects {
-		if object.Name == "Dashboard" {
+		if object.Name == dashboardObject {
 			disjunction := ast.NewDisjunction([]ast.Type{
-				ast.NewRef(schema.Package, "Panel"),
-				ast.NewRef(schema.Package, "RowPanel"),
+				ast.NewRef(schema.Package, dashboardPanelObject),
+				ast.NewRef(schema.Package, dashboardRowPanelObject),
 			})
-			disjunction.Disjunction.Discriminator = "type"
+			disjunction.Disjunction.Discriminator = dashboardPanelTypeField
 			disjunction.Disjunction.DiscriminatorMapping = map[string]string{
-				"row":                     "RowPanel",
-				ast.DiscriminatorCatchAll: "Panel",
+				"row":                     dashboardRowPanelObject,
+				ast.DiscriminatorCatchAll: dashboardPanelObject,
 			}
 
 			newPanelsFieldType := ast.NewArray(disjunction)
@@ -50,7 +71,7 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 			newSchema.Objects = append(newSchema.Objects, pass.overwritePanelsFieldType(object, newPanelsFieldType))
 			continue
 		}
-		if object.Name == "RowPanel" {
+		if object.Name == dashboardRowPanelObject {
 			newPanelsFieldType := ast.NewArray(ast.NewRef(schema.Package, "Panel"))
 
 			newSchema.Objects = append(newSchema.Objects, pass.overwritePanelsFieldType(object, newPanelsFieldType))
@@ -66,7 +87,7 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 func (pass *DashboardPanelsRewrite) overwritePanelsFieldType(object ast.Object, newPanelsFieldType ast.Type) ast.Object {
 	newFields := make([]ast.StructField, len(object.Type.AsStruct().Fields))
 	for i, field := range object.Type.AsStruct().Fields {
-		if field.Name != "panels" {
+		if field.Name != dashboardPanelsField {
 			newFields[i] = field
 			continue
 		}

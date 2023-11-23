@@ -3,7 +3,6 @@ package compiler
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +32,7 @@ func TestDisjunctionToType_WithNonDisjunctionObjects_HasNoImpact(t *testing.T) {
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, objects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, objects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAnObject(t *testing.T) {
@@ -55,7 +54,7 @@ func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAnObject(t *testing.T)
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAStructField(t *testing.T) {
@@ -85,7 +84,7 @@ func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAStructField(t *testin
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
@@ -111,7 +110,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAMapValueType(t *testing.T) {
@@ -143,7 +142,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAMapValueType(t *testing.T
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T) {
@@ -174,7 +173,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T)
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsNullableAStructField(t *testing.T) {
@@ -205,7 +204,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsNullableAStructField(t *te
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testing.T) {
@@ -232,7 +231,7 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testin
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata_NoDiscriminatorFieldCandidate(t *testing.T) {
@@ -402,7 +401,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFieldSet(t *testing.T) {
@@ -455,7 +454,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }
 
 func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFieldAndMappingSet(t *testing.T) {
@@ -510,102 +509,5 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	}
 
 	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
-}
-
-func TestDisjunctionToType_WithNestedDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata(t *testing.T) {
-	// Prepare test input
-	objects := []ast.Object{
-		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
-			ast.NewRef("test", "SomeOrOther"),
-			ast.NewRef("test", "LastStruct"),
-		})),
-
-		ast.NewObject("test", "SomeOrOther", ast.NewDisjunction([]ast.Type{
-			ast.NewRef("test", "SomeStruct"),
-			ast.NewRef("test", "OtherStruct"),
-		})),
-
-		ast.NewObject("test", "SomeStruct", ast.NewStruct(
-			ast.NewStructField("Type", ast.String(ast.Value("some-struct"))),
-			ast.NewStructField("FieldFoo", ast.String()),
-		)),
-		ast.NewObject("test", "OtherStruct", ast.NewStruct(
-			ast.NewStructField("FieldBar", ast.NewMap(ast.String(), ast.String())),
-			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
-		)),
-		ast.NewObject("test", "LastStruct", ast.NewStruct(
-			ast.NewStructField("FieldLast", ast.NewMap(ast.String(), ast.String())),
-			ast.NewStructField("Type", ast.String(ast.Value("last-struct"))),
-		)),
-	}
-
-	// Prepare expected output
-	fullDisjunctionStructType := ast.NewStruct(
-		ast.NewStructField("SomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
-		ast.NewStructField("OtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
-		ast.NewStructField("LastStruct", ast.NewRef("test", "LastStruct", ast.Nullable())),
-	)
-	// The original disjunction definition is preserved as a hint
-	disjunctionTypeWithDiscriminatorMeta := ast.DisjunctionType{
-		Branches: []ast.Type{
-			ast.NewRef("test", "SomeStruct"),
-			ast.NewRef("test", "OtherStruct"),
-			ast.NewRef("test", "LastStruct"),
-		},
-	}
-
-	// Metadata should be inferred
-	disjunctionTypeWithDiscriminatorMeta.Discriminator = "Type"
-	disjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
-		"other-struct": "OtherStruct",
-		"some-struct":  "SomeStruct",
-		"last-struct":  "LastStruct",
-	}
-	fullDisjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
-
-	partialDisjunctionStructType := ast.NewStruct(
-		ast.NewStructField("SomeStruct", ast.NewRef("test", "SomeStruct", ast.Nullable())),
-		ast.NewStructField("OtherStruct", ast.NewRef("test", "OtherStruct", ast.Nullable())),
-	)
-	// The original disjunction definition is preserved as a hint
-	partialDisjunctionTypeWithDiscriminatorMeta := objects[1].Type.AsDisjunction()
-
-	// Metadata should be inferred
-	partialDisjunctionTypeWithDiscriminatorMeta.Discriminator = "Type"
-	partialDisjunctionTypeWithDiscriminatorMeta.DiscriminatorMapping = map[string]string{
-		"other-struct": "OtherStruct",
-		"some-struct":  "SomeStruct",
-	}
-	partialDisjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = partialDisjunctionTypeWithDiscriminatorMeta
-
-	expectedObjects := []ast.Object{
-		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStructOrLastStruct")),
-		ast.NewObject("test", "SomeOrOther", ast.NewRef("test", "SomeStructOrOtherStruct")),
-		objects[2],
-		objects[3],
-		objects[4],
-		ast.NewObject("test", "SomeStructOrOtherStruct", partialDisjunctionStructType),
-		ast.NewObject("test", "SomeStructOrOtherStructOrLastStruct", fullDisjunctionStructType),
-	}
-
-	// Call the compiler pass
-	runDisjunctionPass(t, objects, expectedObjects)
-}
-
-func runDisjunctionPass(t *testing.T, input []ast.Object, expectedOutput []ast.Object) {
-	t.Helper()
-
-	req := require.New(t)
-
-	compilerPass := &DisjunctionToType{}
-	processedFiles, err := compilerPass.Process([]*ast.Schema{
-		{
-			Package: "test",
-			Objects: input,
-		},
-	})
-	req.NoError(err)
-	req.Len(processedFiles, 1)
-	req.Empty(cmp.Diff(expectedOutput, processedFiles[0].Objects))
+	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
 }

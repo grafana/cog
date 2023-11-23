@@ -2,8 +2,7 @@ package golang
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/context"
-	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/common"
 )
 
 type Runtime struct {
@@ -14,7 +13,7 @@ func (jenny Runtime) JennyName() string {
 	return "GoRuntime"
 }
 
-func (jenny Runtime) Generate(_ context.Builders) (codejen.Files, error) {
+func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
 	runtime, err := jenny.Runtime()
 	if err != nil {
 		return nil, err
@@ -38,11 +37,11 @@ type Builder[ResourceT any] interface {
 }
 
 func (jenny Runtime) Runtime() (string, error) {
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	imports.Add("cogvariants", jenny.Config.importPath("cog/variants"))
 
 	return renderTemplate("runtime/runtime.tmpl", map[string]any{
-		"imports": formatImports(imports),
+		"imports": imports,
 	})
 }
 

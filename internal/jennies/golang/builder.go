@@ -7,7 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -23,7 +23,7 @@ func (jenny *Builder) JennyName() string {
 	return "GoBuilder"
 }
 
-func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 	files := codejen.Files{}
 
 	for _, builder := range context.Builders {
@@ -43,10 +43,10 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	jenny.typeImportMapper = func(pkg string) string {
 		if pkg == builder.Package {
 			return ""

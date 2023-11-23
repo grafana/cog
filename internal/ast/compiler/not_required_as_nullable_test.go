@@ -3,9 +3,7 @@ package compiler
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/stretchr/testify/require"
 )
 
 func TestNotRequiredFieldAsNullableType(t *testing.T) {
@@ -65,22 +63,5 @@ func TestNotRequiredFieldAsNullableType(t *testing.T) {
 	}
 
 	// Run the compiler pass
-	runNotRequiredAsNullablePass(t, objects, expected)
-}
-
-func runNotRequiredAsNullablePass(t *testing.T, input []ast.Object, expectedOutput []ast.Object) {
-	t.Helper()
-
-	req := require.New(t)
-
-	compilerPass := &NotRequiredFieldAsNullableType{}
-	processedFiles, err := compilerPass.Process([]*ast.Schema{
-		{
-			Package: "test",
-			Objects: input,
-		},
-	})
-	req.NoError(err)
-	req.Len(processedFiles, 1)
-	req.Empty(cmp.Diff(expectedOutput, processedFiles[0].Objects))
+	runPassOnObjects(t, &NotRequiredFieldAsNullableType{}, objects, expected)
 }

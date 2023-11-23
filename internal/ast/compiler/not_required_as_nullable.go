@@ -6,26 +6,25 @@ import (
 
 var _ Pass = (*NotRequiredFieldAsNullableType)(nil)
 
+// NotRequiredFieldAsNullableType identifies all the struct fields marked as not `Required`
+// and rewrites their `Type` to be `Nullable`.
 type NotRequiredFieldAsNullableType struct {
 }
 
 func (pass *NotRequiredFieldAsNullableType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
-		newSchemas = append(newSchemas, pass.processSchema(schema))
+	for i, schema := range schemas {
+		schemas[i] = pass.processSchema(schema)
 	}
 
-	return newSchemas, nil
+	return schemas, nil
 }
 
 func (pass *NotRequiredFieldAsNullableType) processSchema(schema *ast.Schema) *ast.Schema {
-	newSchema := schema.DeepCopy()
 	for i, object := range schema.Objects {
-		newSchema.Objects[i] = pass.processObject(object)
+		schema.Objects[i] = pass.processObject(object)
 	}
 
-	return &newSchema
+	return schema
 }
 
 func (pass *NotRequiredFieldAsNullableType) processObject(object ast.Object) ast.Object {
@@ -51,6 +50,10 @@ func (pass *NotRequiredFieldAsNullableType) processType(def ast.Type) ast.Type {
 		return pass.processStruct(def)
 	}
 
+	if def.Kind == ast.KindDisjunction {
+		return pass.processDisjunction(def)
+	}
+
 	return def
 }
 
@@ -67,17 +70,20 @@ func (pass *NotRequiredFieldAsNullableType) processMap(def ast.Type) ast.Type {
 	return def
 }
 
+func (pass *NotRequiredFieldAsNullableType) processDisjunction(def ast.Type) ast.Type {
+	for i, branch := range def.Disjunction.Branches {
+		def.Disjunction.Branches[i] = pass.processType(branch)
+	}
+
+	return def
+}
+
 func (pass *NotRequiredFieldAsNullableType) processStruct(def ast.Type) ast.Type {
 	for i, field := range def.Struct.Fields {
-		fieldType := pass.processType(field.Type)
+		def.Struct.Fields[i].Type = pass.processType(field.Type)
 		if !field.Required {
-			fieldType.Nullable = true
+			def.Struct.Fields[i].Type.Nullable = true
 		}
-
-		newField := field
-		newField.Type = fieldType
-
-		def.Struct.Fields[i] = newField
 	}
 
 	return def
