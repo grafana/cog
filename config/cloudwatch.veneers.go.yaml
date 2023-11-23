@@ -1,0 +1,8 @@
+language: go
+
+builders: ~
+
+options:
+  - struct_fields_as_arguments:
+      by_name: QueryEditorOperator.value
+      fields: [ ArrayOfQueryEditorOperatorType ]
