@@ -42,6 +42,6 @@ func CommonPasses() Passes {
 		&DashboardTimePicker{},
 		&Cloudwatch{},
 		&LibraryPanels{},
-		&CandlestickColors{},
+		&TestData{},
 	}
 }
