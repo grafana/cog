@@ -207,8 +207,8 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 
 	// Ex: "some concrete value" | "some other value" | string
 	if pass.hasOnlySingleTypeScalars(schema, disjunction) {
-		refResolver := pass.makeReferenceResolver(schema)
-		scalarKind := refResolver(disjunction.Branches[0]).AsScalar().ScalarKind
+		resolvedType, _ := schema.Resolve(disjunction.Branches[0])
+		scalarKind := resolvedType.AsScalar().ScalarKind
 
 		return ast.NewScalar(scalarKind, ast.Default(def.Default)), nil
 	}
@@ -330,12 +330,15 @@ func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def a
 	// map[typeName][fieldName]value
 	candidates := make(map[string]map[string]any)
 
-	refResolver := pass.makeReferenceResolver(schema)
-
 	// Identify candidates from each branch
 	for _, branch := range def.Branches {
 		typeName := branch.AsRef().ReferredType
-		structType := refResolver(branch).AsStruct()
+		referredType, found := schema.Resolve(branch)
+		if !found {
+			continue
+		}
+
+		structType := referredType.AsStruct()
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
@@ -389,11 +392,14 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def
 		return nil, fmt.Errorf("discriminator field is empty: %w", ErrCanNotInferDiscriminator)
 	}
 
-	refResolver := pass.makeReferenceResolver(schema)
-
 	for _, branch := range def.Branches {
 		typeName := branch.AsRef().ReferredType
-		structType := refResolver(branch).AsStruct()
+		referredType, found := schema.Resolve(branch)
+		if !found {
+			return nil, fmt.Errorf("could not resolve reference '%s'", branch.AsRef().String())
+		}
+
+		structType := referredType.AsStruct()
 
 		field, found := structType.FieldByName(def.Discriminator)
 		if !found {
@@ -425,15 +431,21 @@ func (pass *DisjunctionToType) hasOnlySingleTypeScalars(schema *ast.Schema, disj
 		return false
 	}
 
-	refResolver := pass.makeReferenceResolver(schema)
-
-	if refResolver(branches[0]).Kind != ast.KindScalar {
+	firstBranchType, found := schema.Resolve(branches[0])
+	if !found {
 		return false
 	}
 
-	scalarKind := refResolver(branches[0]).AsScalar().ScalarKind
+	if firstBranchType.Kind != ast.KindScalar {
+		return false
+	}
+
+	scalarKind := firstBranchType.AsScalar().ScalarKind
 	for _, t := range branches {
-		resolvedType := refResolver(t)
+		resolvedType, found := schema.Resolve(t)
+		if !found {
+			return false
+		}
 
 		if resolvedType.Kind != ast.KindScalar {
 			return false
@@ -445,18 +457,4 @@ func (pass *DisjunctionToType) hasOnlySingleTypeScalars(schema *ast.Schema, disj
 	}
 
 	return true
-}
-
-func (pass *DisjunctionToType) makeReferenceResolver(schema *ast.Schema) func(typeDef ast.Type) ast.Type {
-	return func(typeDef ast.Type) ast.Type {
-		if typeDef.Kind != ast.KindRef {
-			return typeDef
-		}
-
-		typeName := typeDef.AsRef().ReferredType
-
-		// FIXME: what if the definition is itself a reference? Resolve recursively?
-		// FIXME: we only try to resolve references within the same schema
-		return schema.LocateObject(typeName).Type
-	}
 }

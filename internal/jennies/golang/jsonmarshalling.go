@@ -333,10 +333,13 @@ dataqueryTypeHint = *resource.%[1]s.Type
 func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
 	jenny.packageMapper("cog/variants")
 
+	_, hasOptions := schema.LocateObject("Options")
+	_, hasFieldConfig := schema.LocateObject("FieldConfig")
+
 	return jenny.renderTemplate("types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
 		"schema":         schema,
-		"hasOptions":     schema.LocateObject("Options").Name != "",
-		"hasFieldConfig": schema.LocateObject("FieldConfig").Name != "",
+		"hasOptions":     hasOptions,
+		"hasFieldConfig": hasFieldConfig,
 	})
 }
 
