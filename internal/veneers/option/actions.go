@@ -7,6 +7,7 @@ import (
 
 type RewriteAction func(builder ast.Builder, option ast.Option) []ast.Option
 
+// RenameAction renames an option.
 func RenameAction(newName string) RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		newOption := option
@@ -16,7 +17,29 @@ func RenameAction(newName string) RewriteAction {
 	}
 }
 
-// FIXME: looks at the first arg only, no way to configure that right now
+// ArrayToAppendAction updates the option to perform an "append" assignment.
+//
+// Example:
+//
+//	```
+//	func Tags(tags []string) {
+//		this.resource.tags = tags
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Tags(tags string) {
+//		this.resource.tags.append(tags)
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it has no arguments
+//   - the argument is not an array
+//
+// FIXME: considers the first arg only.
 func ArrayToAppendAction() RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 || option.Args[0].Type.Kind != ast.KindArray {
@@ -54,12 +77,16 @@ func ArrayToAppendAction() RewriteAction {
 	}
 }
 
+// OmitAction removes an option.
 func OmitAction() RewriteAction {
 	return func(_ ast.Builder, _ ast.Option) []ast.Option {
 		return nil
 	}
 }
 
+// PromoteToConstructorAction flag the arguments of the given option as "constructor arguments".
+// This flag indicates builder jennies that the arguments and assignments described by this option
+// should be exposed by the builder's constructor.
 func PromoteToConstructorAction() RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		newOpt := option
@@ -69,7 +96,33 @@ func PromoteToConstructorAction() RewriteAction {
 	}
 }
 
-// FIXME: looks at the first arg only, no way to configure that right now
+// StructFieldsAsArgumentsAction uses the fields of the first argument's struct (assuming it is one) and turns them
+// into arguments.
+//
+// Optionally, an explicit list of fields to turn into arguments can be given.
+//
+// Example:
+//
+//	```
+//	func Time(time {from string, to string) {
+//		this.resource.time = time
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Time(from string, to string) {
+//		this.resource.time.from = from
+//		this.resource.time.to = to
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it has no arguments
+//   - the first argument is not a struct or a reference to one
+//
+// FIXME: considers the first argument only.
 func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 	return func(builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
@@ -159,7 +212,36 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 	}
 }
 
-// FIXME: looks at the first arg only, no way to configure that right now
+// StructFieldsAsOptionsAction uses the fields of the first argument's struct (assuming it is one) and turns them
+// into options.
+//
+// Optionally, an explicit list of fields to turn into options can be given.
+//
+// Example:
+//
+//	```
+//	func GridPos(gridPos {x int, y int) {
+//		this.resource.gridPos = gridPos
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func X(x int) {
+//		this.resource.gridPos.x = x
+//	}
+//
+//	func Y(y int) {
+//		this.resource.gridPos.y = y
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it has no arguments
+//   - the first argument is not a struct or a reference to one
+//
+// FIXME: considers the first argument only.
 func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 	return func(builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
@@ -213,7 +295,34 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 	}
 }
 
-// FIXME: looks at the first arg only, no way to configure that right now
+// DisjunctionAsOptionsAction uses the branches of the first argument's disjunction (assuming it is one) and turns them
+// into options.
+//
+// Example:
+//
+//	```
+//	func Panel(panel Panel|Row) {
+//		this.resource.panels.append(panel)
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Panel(panel Panel) {
+//		this.resource.panels.append(panel)
+//	}
+//
+//	func Row(row Row) {
+//		this.resource.panels.append(row)
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it has no arguments
+//   - the first argument is not a disjunction or a reference to one
+//
+// FIXME: considers the first argument only.
 func DisjunctionAsOptionsAction() RewriteAction {
 	return func(builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
@@ -327,6 +436,27 @@ type BooleanUnfold struct {
 	OptionFalse string
 }
 
+// UnfoldBooleanAction transforms an option accepting a boolean argument into two argument-less options.
+//
+// Example:
+//
+//	```
+//	func Editable(editable bool) {
+//		this.resource.editable = editable
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Editable() {
+//		this.resource.editable = true
+//	}
+//
+//	func ReadOnly() {
+//		this.resource.editable = false
+//	}
+//	```
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		newOpts := []ast.Option{
