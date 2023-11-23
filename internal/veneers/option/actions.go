@@ -9,10 +9,10 @@ type RewriteAction func(builder ast.Builder, option ast.Option) []ast.Option
 
 func RenameAction(newName string) RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
-		newOption := option
-		newOption.Name = newName
+		option.Name = newName
+		option.AddToVeneerTrail("Rename")
 
-		return []ast.Option{newOption}
+		return []ast.Option{option}
 	}
 }
 
@@ -42,6 +42,7 @@ func ArrayToAppendAction() RewriteAction {
 		newOpt := option
 		newOpt.Args = []ast.Argument{newFirstArg}
 		newOpt.Assignments = []ast.Assignment{newFirstAssignment}
+		newOpt.AddToVeneerTrail("ArrayToAppend")
 
 		if len(oldArgs) > 1 {
 			newOpt.Args = append(newOpt.Args, oldArgs[1:]...)
@@ -62,10 +63,10 @@ func OmitAction() RewriteAction {
 
 func PromoteToConstructorAction() RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
-		newOpt := option
-		newOpt.IsConstructorArg = true
+		option.IsConstructorArg = true
+		option.AddToVeneerTrail("PromoteToConstructor")
 
-		return []ast.Option{newOpt}
+		return []ast.Option{option}
 	}
 }
 
@@ -94,6 +95,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 		newOpt := option
 		newOpt.Args = nil
 		newOpt.Assignments = nil
+		newOpt.AddToVeneerTrail("StructFieldsAsArguments")
 
 		assignIntoList := assignmentPathPrefix.Last().Type.Kind == ast.KindArray
 
@@ -197,6 +199,7 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 					ast.FieldAssignment(field),
 				},
 			}
+			newOpt.AddToVeneerTrail("StructFieldsAsOptions")
 
 			newOpt.Assignments[0].Path = assignmentPathPrefix.Append(newOpt.Assignments[0].Path)
 
@@ -278,6 +281,7 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Object)
 				},
 			},
 		}
+		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
 		if field.Type.Default != nil {
 			opt.Default = &ast.OptionDefault{
@@ -309,6 +313,7 @@ func disjunctionAsOptions(option ast.Option) []ast.Option {
 				ast.ArgumentAssignment(firstAssignmentPath, arg, ast.Method(firstAssignmentMethod)),
 			},
 		}
+		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
 		if branch.Default != nil {
 			opt.Default = &ast.OptionDefault{
@@ -354,6 +359,9 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 				newOpts[1].Default = &ast.OptionDefault{}
 			}
 		}
+
+		newOpts[0].AddToVeneerTrail("UnfoldBoolean")
+		newOpts[1].AddToVeneerTrail("UnfoldBoolean")
 
 		return newOpts
 	}

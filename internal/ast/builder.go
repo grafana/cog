@@ -87,10 +87,15 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 type Option struct {
 	Name             string
 	Comments         []string `json:",omitempty"`
+	VeneerTrail      []string `json:",omitempty"`
 	Args             []Argument
 	Assignments      []Assignment
 	Default          *OptionDefault `json:",omitempty"`
 	IsConstructorArg bool
+}
+
+func (opt *Option) AddToVeneerTrail(veneerName string) {
+	opt.VeneerTrail = append(opt.VeneerTrail, veneerName)
 }
 
 type OptionDefault struct {

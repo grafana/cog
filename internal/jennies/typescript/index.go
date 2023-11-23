@@ -10,7 +10,7 @@ import (
 )
 
 type Index struct {
-	Targets common.Targets
+	Targets common.Config
 }
 
 func (jenny Index) JennyName() string {

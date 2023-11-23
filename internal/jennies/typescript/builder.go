@@ -13,6 +13,8 @@ import (
 )
 
 type Builder struct {
+	Config Config
+
 	imports          *common.DirectImportMap
 	typeImportMapper func(string) string
 	typeFormatter    *typeFormatter
@@ -114,13 +116,22 @@ func (jenny *Builder) generateConstructor(builder ast.Builder) template.Construc
 }
 
 func (jenny *Builder) generateOption(def ast.Option) template.Option {
+	comments := def.Comments
+
+	if jenny.Config.Debug {
+		veneerTrail := tools.Map(def.VeneerTrail, func(veneer string) string {
+			return fmt.Sprintf("Modified by veneer '%s'", veneer)
+		})
+		comments = append(def.Comments, veneerTrail...)
+	}
+
 	assignments := tools.Map(def.Assignments, func(assignment ast.Assignment) template.Assignment {
 		return jenny.generateAssignment(assignment)
 	})
 
 	return template.Option{
 		Name:        def.Name,
-		Comments:    def.Comments,
+		Comments:    comments,
 		Args:        def.Args,
 		Assignments: assignments,
 	}
