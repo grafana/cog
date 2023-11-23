@@ -223,3 +223,77 @@ func TestStructFieldsAsOptionsAction_withRefToStruct(t *testing.T) {
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
+
+func TestArrayToAppendAction_withNoArgument(t *testing.T) {
+	req := require.New(t)
+
+	option := ast.Option{
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "editable", Type: ast.Bool(ast.Value(true))},
+				},
+			},
+		},
+	}
+	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
+
+	req.Equal([]ast.Option{option}, modifiedOpts)
+}
+
+func TestArrayToAppendAction_withNonArrayArgument(t *testing.T) {
+	req := require.New(t)
+
+	option := ast.Option{
+		Args: []ast.Argument{
+			{Name: "editable", Type: ast.Bool()},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "editable", Type: ast.Bool()},
+				},
+			},
+		},
+	}
+	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
+
+	req.Equal([]ast.Option{option}, modifiedOpts)
+}
+
+func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
+	req := require.New(t)
+
+	// input
+	option := ast.Option{
+		Args: []ast.Argument{
+			{Name: "tags", Type: ast.NewArray(ast.String())},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "tags", Type: ast.NewArray(ast.String())},
+				},
+			},
+		},
+	}
+
+	// expected output
+	expectedOption := ast.Option{
+		Args: []ast.Argument{
+			{Name: "tags", Type: ast.String()},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Path: ast.Path{
+					{Identifier: "tags", Type: ast.NewArray(ast.String())},
+				},
+				Method: ast.AppendAssignment,
+			},
+		},
+	}
+
+	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
+
+	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
+}
