@@ -61,7 +61,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 
 		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
 	)
-	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader())
+	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 
 	return jenny
 }
