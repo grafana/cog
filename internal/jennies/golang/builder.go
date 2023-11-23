@@ -159,9 +159,18 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 }
 
 func (jenny *Builder) generateOption(def ast.Option) template.Option {
+	comments := def.Comments
+
+	if jenny.Config.Debug {
+		veneerTrail := tools.Map(def.VeneerTrail, func(veneer string) string {
+			return fmt.Sprintf("Modified by veneer '%s'", veneer)
+		})
+		comments = append(def.Comments, veneerTrail...)
+	}
+
 	return template.Option{
 		Name:        tools.UpperCamelCase(def.Name),
-		Comments:    def.Comments,
+		Comments:    comments,
 		Args:        def.Args,
 		Assignments: tools.Map(def.Assignments, jenny.generateAssignment),
 	}

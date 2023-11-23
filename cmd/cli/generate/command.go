@@ -19,7 +19,7 @@ import (
 type Options struct {
 	loaders.Options
 
-	Targets                 common.Targets
+	JenniesConfig           common.Config
 	Languages               []string
 	VeneerConfigFiles       []string
 	VeneerConfigDirectories []string
@@ -65,8 +65,10 @@ func Command() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.Targets.Types, "generate-types", true, "Generate types.")          // TODO: better usage text
-	cmd.Flags().BoolVar(&opts.Targets.Builders, "generate-builders", true, "Generate builders.") // TODO: better usage text
+	cmd.Flags().BoolVar(&opts.JenniesConfig.Debug, "debug", false, "Debugging mode.") // TODO: better usage text
+
+	cmd.Flags().BoolVar(&opts.JenniesConfig.Types, "generate-types", true, "Generate types.")          // TODO: better usage text
+	cmd.Flags().BoolVar(&opts.JenniesConfig.Builders, "generate-builders", true, "Generate builders.") // TODO: better usage text
 
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
@@ -140,7 +142,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		}
 
 		// then delegate the actual codegen to the jennies
-		fs, err := target.Jennies(opts.Targets).GenerateFS(common.Context{
+		fs, err := target.Jennies(opts.JenniesConfig).GenerateFS(common.Context{
 			Schemas:  processedSchemas,
 			Builders: builders,
 		})
