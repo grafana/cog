@@ -78,8 +78,10 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 
 		firstArgType := option.Args[0].Type
 		if firstArgType.Kind == ast.KindRef {
-			referredObject := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
-			firstArgType = referredObject.Type
+			referredObject, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			if found {
+				firstArgType = referredObject.Type
+			}
 		}
 
 		if firstArgType.Kind != ast.KindStruct {
@@ -168,8 +170,10 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 
 		firstArgType := option.Args[0].Type
 		if firstArgType.Kind == ast.KindRef {
-			referredObject := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
-			firstArgType = referredObject.Type
+			referredObject, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			if found {
+				firstArgType = referredObject.Type
+			}
 		}
 
 		if firstArgType.Kind != ast.KindStruct {
@@ -230,10 +234,8 @@ func DisjunctionAsOptionsAction() RewriteAction {
 		// or maybe a reference to a struct that was created to simulate a disjunction?
 		if firstArgType.Kind == ast.KindRef {
 			// FIXME: we only try to resolve the reference within the same package
-			referredObj := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
-			// Object not found
-			// TODO: LocateObject() should return a "found" boolean
-			if referredObj.Name == "" {
+			referredObj, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			if !found {
 				return []ast.Option{option}
 			}
 
