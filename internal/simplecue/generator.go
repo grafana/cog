@@ -247,7 +247,6 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 	}
 
 	var fields []ast.StructField
-	
 	// explore struct fields
 	for i, _ := v.Fields(cue.Optional(true), cue.Definitions(true)); i.Next(); {
 		fieldLabel := selectorLabel(i.Selector())

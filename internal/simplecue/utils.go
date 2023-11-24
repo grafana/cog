@@ -183,6 +183,7 @@ func (g *generator) cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		}
 
 		if len(fields) == 0 {
+			//nolint: nilnil
 			return nil, nil
 		}
 

@@ -178,12 +178,13 @@ func formatDefaultStruct(refPkg, pkg string, structDef ast.StructType) string {
 			name = tools.UpperCamelCase(name)
 		}
 
-		if field.Type.Kind == ast.KindScalar {
+		switch field.Type.Kind {
+		case ast.KindScalar:
 			buffer.WriteString(fmt.Sprintf(format, name, formatScalar(field.Type.AsScalar().Value)))
-		} else if field.Type.Kind == ast.KindArray {
+		case ast.KindArray:
 			// FIXME: Parse array items
 			buffer.WriteString(fmt.Sprintf(format, name, "[]string{}"))
-		} else if field.Type.Kind == ast.KindStruct {
+		case ast.KindStruct:
 			buffer.WriteString(fmt.Sprintf(format, name, formatDefaultStruct(refPkg, pkg, field.Type.AsStruct())))
 		}
 
