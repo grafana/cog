@@ -144,7 +144,7 @@ func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
 			pkg := ""
 			refPkg := ""
 			if opt.Args[i].Type.Kind == ast.KindRef {
-				refPkg = opt.Args[i].Type.AsRef().ReferredPkg
+				refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
 				pkg = opt.Args[i].Type.AsRef().ReferredType
 			}
 			args = append(args, formatDefaultStruct(refPkg, pkg, val.AsStruct()))
