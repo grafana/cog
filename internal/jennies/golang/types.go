@@ -162,6 +162,41 @@ func formatScalar(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
+func formatDefaultStruct(refPkg, pkg string, structDef ast.StructType) string {
+	starter, format, sep, lastSep, ending := "{\n", "%s: %v", ",\n", ",\n", "}"
+	if pkg != "" {
+		starter, format, sep, lastSep, ending = fmt.Sprintf("New%sBuilder().\n", pkg), "%s(%v)", ".\n", ",\n", ""
+		if refPkg != "" {
+			starter = fmt.Sprintf("%s.%s", refPkg, starter)
+		}
+	}
+
+	var buffer strings.Builder
+	for i, field := range structDef.Fields {
+		name := field.Name
+		if pkg != "" {
+			name = tools.UpperCamelCase(name)
+		}
+
+		if field.Type.Kind == ast.KindScalar {
+			buffer.WriteString(fmt.Sprintf(format, name, formatScalar(field.Type.AsScalar().Value)))
+		} else if field.Type.Kind == ast.KindArray {
+			// FIXME: Parse array items
+			buffer.WriteString(fmt.Sprintf(format, name, "[]string{}"))
+		} else if field.Type.Kind == ast.KindStruct {
+			buffer.WriteString(fmt.Sprintf(format, name, formatDefaultStruct(refPkg, pkg, field.Type.AsStruct())))
+		}
+
+		if i != len(structDef.Fields)-1 {
+			buffer.WriteString(sep)
+		} else {
+			buffer.WriteString(lastSep)
+		}
+	}
+
+	return fmt.Sprintf("%s%s%s", starter, buffer.String(), ending)
+}
+
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
 	typeName := tools.UpperCamelCase(def.AsRef().ReferredType)

@@ -95,7 +95,7 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 		return nil
 	}
 
-	structType := ast.NewStruct(rootObjectFields)
+	structType := ast.NewStruct(rootObjectFields...)
 	structType.Hints[ast.HintImplementsVariant] = string(g.schema.Metadata.Variant)
 
 	g.schema.Objects = append(g.schema.Objects, ast.Object{
@@ -257,8 +257,6 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 	for i, _ := v.Fields(cue.Optional(true), cue.Definitions(true)); i.Next(); {
 		fieldLabel := selectorLabel(i.Selector())
 
-		fmt.Printf("Field: %s\n", fieldLabel)
-
 		node, err := g.declareNode(i.Value())
 		if err != nil {
 			return nil, err
@@ -344,12 +342,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			return ast.Any(), nil
 		}
 
-		defVal, err := g.extractDefault(v)
-		if err != nil {
-			return ast.Type{}, err
-		}
-
-		return ast.NewStruct(fields, ast.Default(defVal)), nil
+		return ast.NewStruct(fields...), nil
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
 	}
@@ -363,7 +356,7 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 
 	op, exprs := v.Expr()
 
-	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind && op == cue.NoOp {
+	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind && op != cue.AndOp {
 		return true, exprs[0], v
 	}
 

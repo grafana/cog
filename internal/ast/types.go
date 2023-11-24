@@ -313,20 +313,14 @@ func NewMap(indexType Type, valueType Type, opts ...TypeOption) Type {
 	return def
 }
 
-func NewStruct(fields []StructField, opts ...TypeOption) Type {
-	def := Type{
+func NewStruct(fields ...StructField) Type {
+	return Type{
 		Hints: make(JenniesHints),
 		Kind:  KindStruct,
 		Struct: &StructType{
 			Fields: fields,
 		},
 	}
-
-	for _, opt := range opts {
-		opt(&def)
-	}
-
-	return def
 }
 
 func NewRef(referredPkg string, referredTypeName string, opts ...TypeOption) Type {

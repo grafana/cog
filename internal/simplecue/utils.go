@@ -182,9 +182,11 @@ func (g *generator) cueConcreteToScalar(v cue.Value) (interface{}, error) {
 			return nil, err
 		}
 
-		return ast.NewStruct(fields), nil
-		// TODO: this would be used for struct-level default values
-		//return nil, nil //nolint: nilnil
+		if len(fields) == 0 {
+			return nil, nil
+		}
+
+		return ast.NewStruct(fields...), nil
 	default:
 		return nil, errorWithCueRef(v, "can not convert kind to scalar: %s", v.Kind())
 	}

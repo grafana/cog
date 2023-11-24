@@ -104,6 +104,14 @@ func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.Opt
 			continue
 		}
 
+		if hasTypedDefaults(opt) {
+			calls = append(calls, template.OptionCall{
+				OptionName: opt.Name,
+				Args:       jenny.formatDefaultTypedArgs(opt),
+			})
+			continue
+		}
+
 		calls = append(calls, template.OptionCall{
 			OptionName: opt.Name,
 			Args:       tools.Map(opt.Default.ArgsValues, formatScalar),
@@ -111,6 +119,40 @@ func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.Opt
 	}
 
 	return calls
+}
+
+func hasTypedDefaults(opt ast.Option) bool {
+	for _, defArg := range opt.Default.ArgsValues {
+		if _, ok := defArg.(ast.Type); ok {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
+	args := make([]string, 0)
+	for i, arg := range opt.Default.ArgsValues {
+		val, ok := arg.(ast.Type)
+		if ok {
+			if val.Kind != ast.KindStruct {
+				args = append(args, formatScalar(val))
+				continue
+			}
+
+			pkg := ""
+			refPkg := ""
+			if opt.Args[i].Type.Kind == ast.KindRef {
+				refPkg = opt.Args[i].Type.AsRef().ReferredPkg
+				pkg = opt.Args[i].Type.AsRef().ReferredType
+			}
+			args = append(args, formatDefaultStruct(refPkg, pkg, val.AsStruct()))
+		} else {
+			args = append(args, formatScalar(val))
+		}
+	}
+	return args
 }
 
 func (jenny *Builder) generateConstructor(builder ast.Builder) template.Constructor {
