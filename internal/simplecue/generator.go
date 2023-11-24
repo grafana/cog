@@ -247,12 +247,7 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 	}
 
 	var fields []ast.StructField
-
-	_, err := g.extractDefault(v)
-	if err != nil {
-		return nil, err
-	}
-
+	
 	// explore struct fields
 	for i, _ := v.Fields(cue.Optional(true), cue.Definitions(true)); i.Next(); {
 		fieldLabel := selectorLabel(i.Selector())
