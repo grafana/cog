@@ -262,6 +262,7 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 				ast.Method(ast.AppendAssignment),
 			),
 		},
+		VeneerTrail: []string{"ArrayToAppend"},
 	}
 
 	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
@@ -338,6 +339,7 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 				{Identifier: "to", Type: ast.String()},
 			}, ast.Argument{Name: "to", Type: ast.String()}),
 		},
+		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}
 
 	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
