@@ -91,6 +91,10 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 		rootObjectFields = append(rootObjectFields, ast.NewStructField(name, nodeType))
 	}
 
+	if len(rootObjectFields) == 0 {
+		return nil
+	}
+
 	structType := ast.NewStruct(rootObjectFields)
 	structType.Hints[ast.HintImplementsVariant] = string(g.schema.Metadata.Variant)
 

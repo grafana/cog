@@ -458,8 +458,8 @@
 
 -- out/jennies/TypescriptBuilder --
 == basic_struct/somestruct_builder_gen.ts
-import * as basic_struct from '../basic_struct';
 import * as cog from '../cog';
+import * as basic_struct from '../basic_struct';
 
 // SomeStruct, to hold data.
 export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct.SomeStruct> {
@@ -501,7 +501,7 @@ export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct.SomeSt
 package basic_struct
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)

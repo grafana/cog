@@ -7,37 +7,37 @@ import (
 
 var _ Pass = (*PrefixEnumValues)(nil)
 
+// PrefixEnumValues prefixes enum members with the name of the enum object in
+// which they are defined.
+//
+// Example:
+//
+//	```
+//	VariableRefresh enum(Never: "never", Always: "always")
+//	```
+//
+// Will become:
+//
+//	```
+//	VariableRefresh enum(VariableRefreshNever: "never", VariableRefreshAlways: "always")
+//	```
 type PrefixEnumValues struct {
 }
 
 func (pass *PrefixEnumValues) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
-		newSchema, err := pass.processSchema(schema)
-		if err != nil {
-			return nil, err
-		}
-
-		newSchemas = append(newSchemas, newSchema)
+	for i, schema := range schemas {
+		schemas[i] = pass.processSchema(schema)
 	}
 
-	return newSchemas, nil
+	return schemas, nil
 }
 
-func (pass *PrefixEnumValues) processSchema(schema *ast.Schema) (*ast.Schema, error) {
-	processedObjects := make([]ast.Object, 0, len(schema.Objects))
-	for _, object := range schema.Objects {
-		newObject := object
-		newObject.Type = pass.processType(object.Name, object.Type)
-
-		processedObjects = append(processedObjects, newObject)
+func (pass *PrefixEnumValues) processSchema(schema *ast.Schema) *ast.Schema {
+	for i, object := range schema.Objects {
+		schema.Objects[i].Type = pass.processType(object.Name, object.Type)
 	}
 
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = processedObjects
-
-	return &newSchema, nil
+	return schema
 }
 
 func (pass *PrefixEnumValues) processType(parentObjectName string, def ast.Type) ast.Type {
@@ -49,8 +49,6 @@ func (pass *PrefixEnumValues) processType(parentObjectName string, def ast.Type)
 }
 
 func (pass *PrefixEnumValues) processEnum(parentName string, def ast.Type) ast.Type {
-	newType := def
-
 	values := make([]ast.EnumValue, 0, len(def.AsEnum().Values))
 	for _, val := range def.AsEnum().Values {
 		values = append(values, ast.EnumValue{
@@ -60,7 +58,7 @@ func (pass *PrefixEnumValues) processEnum(parentName string, def ast.Type) ast.T
 		})
 	}
 
-	newType.Enum.Values = values
+	def.Enum.Values = values
 
-	return newType
+	return def
 }

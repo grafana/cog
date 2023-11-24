@@ -296,8 +296,8 @@ export class LokiBuilderBuilder implements cog.OptionsBuilder<composable_slot.Da
 package composable_slot
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
-    cogvariants "github.com/grafana/cog/generated/cog/variants"
+	cog "github.com/grafana/cog/generated/cog"
+	cogvariants "github.com/grafana/cog/generated/cog/variants"
 )
 
 var _ cog.Builder[Dashboard] = (*LokiBuilderBuilder)(nil)

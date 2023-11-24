@@ -8,8 +8,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
-	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -24,7 +23,7 @@ func (jenny JSONMarshalling) JennyName() string {
 	return "GoJSONMarshalling"
 }
 
-func (jenny JSONMarshalling) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny JSONMarshalling) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
@@ -47,10 +46,10 @@ func (jenny JSONMarshalling) Generate(context context.Builders) (codejen.Files, 
 	return files, nil
 }
 
-func (jenny JSONMarshalling) generateSchema(context context.Builders, schema *ast.Schema) ([]byte, error) {
+func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	jenny.packageMapper = func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
@@ -77,7 +76,7 @@ func (jenny JSONMarshalling) generateSchema(context context.Builders, schema *as
 			buffer.WriteString(jsonUnmarshal)
 		}
 
-		if object.Type.ImplementsVariant() && object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
+		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
 			variantUnmarshal, err := jenny.renderDataqueryVariantUnmarshal(schema, object)
 			if err != nil {
 				return nil, err
@@ -98,7 +97,7 @@ func (jenny JSONMarshalling) generateSchema(context context.Builders, schema *as
 		return nil, nil
 	}
 
-	importStatements := formatImports(imports)
+	importStatements := imports.String()
 	if importStatements != "" {
 		importStatements += "\n\n"
 	}
@@ -136,7 +135,7 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	return "", fmt.Errorf("could not determine how to render custom marshal")
 }
 
-func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context context.Builders, obj ast.Object) bool {
+func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context common.Context, obj ast.Object) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
 	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot
@@ -160,7 +159,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context context.Builders
 	return false
 }
 
-func (jenny JSONMarshalling) renderCustomUnmarshal(context context.Builders, obj ast.Object) (string, error) {
+func (jenny JSONMarshalling) renderCustomUnmarshal(context common.Context, obj ast.Object) (string, error) {
 	isStruct := obj.Type.Kind == ast.KindStruct
 
 	if isStruct && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
@@ -179,7 +178,7 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context context.Builders, obj
 	return jenny.renderCustomComposableSlotUnmarshal(context, obj)
 }
 
-func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context context.Builders, obj ast.Object) (string, error) {
+func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.Context, obj ast.Object) (string, error) {
 	var buffer strings.Builder
 	fields := obj.Type.AsStruct().Fields
 
@@ -334,10 +333,13 @@ dataqueryTypeHint = *resource.%[1]s.Type
 func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
 	jenny.packageMapper("cog/variants")
 
+	_, hasOptions := schema.LocateObject("Options")
+	_, hasFieldConfig := schema.LocateObject("FieldConfig")
+
 	return jenny.renderTemplate("types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
 		"schema":         schema,
-		"hasOptions":     schema.LocateObject("Options").Name != "",
-		"hasFieldConfig": schema.LocateObject("FieldConfig").Name != "",
+		"hasOptions":     hasOptions,
+		"hasFieldConfig": hasFieldConfig,
 	})
 }
 

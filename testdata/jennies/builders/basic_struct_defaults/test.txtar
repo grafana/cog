@@ -485,8 +485,8 @@
 }
 -- out/jennies/TypescriptBuilder --
 == basic_struct_defaults/somestruct_builder_gen.ts
-import * as basic_struct_defaults from '../basic_struct_defaults';
 import * as cog from '../cog';
+import * as basic_struct_defaults from '../basic_struct_defaults';
 
 export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct_defaults.SomeStruct> {
     private readonly internal: basic_struct_defaults.SomeStruct;
@@ -524,7 +524,7 @@ export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct_defaul
 package basic_struct_defaults
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)

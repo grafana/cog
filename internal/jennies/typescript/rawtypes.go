@@ -7,8 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
-	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -26,7 +25,7 @@ func (jenny RawTypes) JennyName() string {
 	return "TypescriptRawTypes"
 }
 
-func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	jenny.schemas = context.Schemas
 	files := make(codejen.Files, 0, len(context.Schemas))
 
@@ -50,7 +49,7 @@ func (jenny RawTypes) Generate(context context.Builders) (codejen.Files, error) 
 func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
-	imports := template.NewImportMap()
+	imports := NewImportMap()
 	packageMapper := func(pkg string) string {
 		if pkg == schema.Package {
 			return ""
@@ -71,7 +70,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		buffer.WriteString("\n")
 	}
 
-	importStatements := formatImports(imports)
+	importStatements := imports.String()
 	if importStatements != "" {
 		importStatements += "\n\n"
 	}
@@ -157,7 +156,7 @@ func prefixLinesWith(input string, prefix string) string {
 func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pkgMapper) any {
 	switch object.Type.Kind {
 	case ast.KindEnum:
-		return defaultValueForEnumType(object.Name, object.Type)
+		return defaultValueForEnumType(object.Name, object.Type, nil)
 	default:
 		return jenny.defaultValueForType(object.Type, packageMapper)
 	}
@@ -174,7 +173,12 @@ func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper pkgMap
 	case ast.KindStruct:
 		return jenny.defaultValuesForStructType(typeDef, packageMapper)
 	case ast.KindEnum: // anonymous enum
-		return typeDef.AsEnum().Values[0].Value
+		defaultValue := typeDef.AsEnum().Values[0].Value
+		if typeDef.Default != nil {
+			defaultValue = typeDef.Default
+		}
+
+		return defaultValue
 	case ast.KindRef:
 		return jenny.defaultValuesForReference(typeDef, packageMapper)
 	case ast.KindMap:
@@ -218,11 +222,14 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 	return defaults
 }
 
-func defaultValueForEnumType(name string, typeDef ast.Type) any {
+func defaultValueForEnumType(name string, typeDef ast.Type, overrideDefault any) any {
 	enum := typeDef.AsEnum()
 	defaultValue := enum.Values[0].Value
 	if typeDef.Default != nil {
 		defaultValue = typeDef.Default
+	}
+	if overrideDefault != nil {
+		defaultValue = overrideDefault
 	}
 
 	for _, v := range enum.Values {
@@ -300,9 +307,10 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 
 	if referredType.Type.Kind == ast.KindEnum {
 		if pkg != "" {
-			return raw(fmt.Sprintf("%s.%s", pkg, defaultValueForEnumType(ref.ReferredType, referredType.Type)))
+			return raw(fmt.Sprintf("%s.%s", pkg, defaultValueForEnumType(ref.ReferredType, referredType.Type, typeDef.Default)))
 		}
-		return defaultValueForEnumType(ref.ReferredType, referredType.Type)
+
+		return defaultValueForEnumType(ref.ReferredType, referredType.Type, typeDef.Default)
 	}
 
 	if pkg != "" {
@@ -342,18 +350,4 @@ func formatValue(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
-}
-
-func formatImports(importMap template.ImportMap) string {
-	if len(importMap) == 0 {
-		return ""
-	}
-
-	statements := make([]string, 0, len(importMap))
-
-	for alias, importPath := range importMap {
-		statements = append(statements, fmt.Sprintf(`import * as %s from "%s";`, alias, importPath))
-	}
-
-	return strings.Join(statements, "\n")
 }

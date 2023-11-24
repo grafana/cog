@@ -6,6 +6,26 @@ import (
 
 var _ Pass = (*DashboardTargetsRewrite)(nil)
 
+// DashboardTargetsRewrite rewrites any reference to the dashboard.Target type
+// as a ComposableSlot<SchemaVariantDataQuery>.
+//
+// Example:
+//
+//	```
+//	Panel struct {
+//		Targets array(ref(dashboard.Target))
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	Panel struct {
+//		Targets array(composableSlot(SchemaVariantDataQuery))
+//	}
+//	```
+//
+// Note: this compiler pass will only rewrite schemas in the "dashboard" package.
 type DashboardTargetsRewrite struct {
 }
 
@@ -13,7 +33,7 @@ func (pass *DashboardTargetsRewrite) Process(schemas []*ast.Schema) ([]*ast.Sche
 	newSchemas := make([]*ast.Schema, 0, len(schemas))
 
 	for _, schema := range schemas {
-		if schema.Package != "dashboard" {
+		if schema.Package != dashboardPackage {
 			newSchemas = append(newSchemas, schema)
 			continue
 		}
@@ -29,7 +49,7 @@ func (pass *DashboardTargetsRewrite) processSchema(schema *ast.Schema) *ast.Sche
 	newSchema.Objects = nil
 
 	for _, object := range schema.Objects {
-		if object.Name == "Target" {
+		if object.Name == dashboardTargetObject {
 			continue
 		}
 
@@ -62,7 +82,7 @@ func (pass *DashboardTargetsRewrite) processType(def ast.Type) ast.Type {
 		return pass.processDisjunction(def)
 	}
 
-	if def.Kind == ast.KindRef && def.AsRef().ReferredType == "Target" {
+	if def.Kind == ast.KindRef && def.AsRef().ReferredType == dashboardTargetObject {
 		newDef := def
 		newDef.Kind = ast.KindComposableSlot
 		newDef.Ref = nil

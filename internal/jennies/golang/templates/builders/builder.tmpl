@@ -1,10 +1,6 @@
 package {{ .Package }}
 {{ $options := include "options" . }}
-import (
-{{- range $alias, $importPath := .Imports }}
-    {{ $alias }} "{{ $importPath }}"
-{{- end }}
-)
+{{ .Imports }}
 
 var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .BuilderName }}Builder)(nil)
 {{ range .Comments }}

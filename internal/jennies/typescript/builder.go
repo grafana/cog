@@ -7,13 +7,13 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Builder struct {
-	imports          template.ImportMap
+	imports          *common.DirectImportMap
 	typeImportMapper func(string) string
 	typeFormatter    *typeFormatter
 	rawTypes         RawTypes
@@ -23,7 +23,7 @@ func (jenny *Builder) JennyName() string {
 	return "TypescriptBuilder"
 }
 
-func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 	files := codejen.Files{}
 	jenny.rawTypes = RawTypes{
 		schemas: context.Schemas,
@@ -46,10 +46,10 @@ func (jenny *Builder) Generate(context context.Builders) (codejen.Files, error) 
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context context.Builders, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
-	jenny.imports = template.NewImportMap()
+	jenny.imports = NewImportMap()
 	jenny.imports.Add("cog", "../cog")
 	jenny.typeImportMapper = func(pkg string) string {
 		return jenny.imports.Add(pkg, fmt.Sprintf("../%s", pkg))

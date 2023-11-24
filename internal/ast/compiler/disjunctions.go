@@ -13,6 +13,55 @@ var _ Pass = (*DisjunctionToType)(nil)
 
 var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mapping")
 
+// DisjunctionToType transforms disjunction into a struct, mapping disjunction branches to
+// an optional and nullable field in that struct.
+//
+// This compiler pass also simplifies disjunction of two branches, where one is `null`. For those,
+// it transforms `type | null` into `*type` (optional, nullable reference to `type`).
+//
+// Example:
+//
+//		```
+//		SomeType: {
+//			type: "some-type"
+//	 	}
+//		SomeOtherType: {
+//			type: "other-type"
+//	 	}
+//		SomeStruct: {
+//			foo: string | bool
+//		}
+//		OtherStruct: {
+//			bar: SomeType | SomeOtherType
+//		}
+//		```
+//
+// Will become:
+//
+//	```
+//		SomeType: {
+//			type: "some-type"
+//	 	}
+//		SomeOtherType: {
+//			type: "other-type"
+//	 	}
+//		StringOrBool: {
+//			string: *string
+//			bool: *string
+//		}
+//		SomeStruct: {
+//			foo: StringOrBool
+//		}
+//		SomeTypeOrSomeOtherType: {
+//			SomeType: *SomeType
+//			SomeOtherType: *SomeOtherType
+//		}
+//		OtherStruct: {
+//			bar: SomeTypeOrSomeOtherType
+//		}
+//	```
+//
+// Note: for disjunctions of `Ref`s, the pass attempts to infer a discriminator field and mapping. See https://swagger.io/docs/specification/data-models/inheritance-and-polymorphism/
 type DisjunctionToType struct {
 	newObjects map[string]ast.Object
 }
@@ -146,7 +195,7 @@ func (pass *DisjunctionToType) processStruct(schema *ast.Schema, def ast.Type) (
 }
 
 func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	disjunction := pass.flattenDisjunction(schema, def.AsDisjunction())
+	disjunction := def.AsDisjunction()
 
 	// Ex: type | null
 	if len(disjunction.Branches) == 2 && disjunction.Branches.HasNullType() {
@@ -158,8 +207,8 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 
 	// Ex: "some concrete value" | "some other value" | string
 	if pass.hasOnlySingleTypeScalars(schema, disjunction) {
-		refResolver := pass.makeReferenceResolver(schema)
-		scalarKind := refResolver(disjunction.Branches[0]).AsScalar().ScalarKind
+		resolvedType, _ := schema.Resolve(disjunction.Branches[0])
+		scalarKind := resolvedType.AsScalar().ScalarKind
 
 		return ast.NewScalar(scalarKind, ast.Default(def.Default)), nil
 	}
@@ -172,7 +221,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	// if we already generated a new object for this disjunction, let's return
 	// a reference to it.
 	if _, ok := pass.newObjects[newTypeName]; ok {
-		ref := ast.NewRef(schema.Package, newTypeName)
+		ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
 		if def.Nullable || disjunction.Branches.HasNullType() {
 			ref.Nullable = true
 		}
@@ -227,68 +276,12 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		},
 	}
 
-	ref := ast.NewRef(schema.Package, newTypeName)
+	ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
 	if def.Nullable || disjunction.Branches.HasNullType() {
 		ref.Nullable = true
 	}
 
 	return ref, nil
-}
-
-// flattenDisjunction will traverse all the branches of the given disjunction
-// and, for each disjunction it finds, flatten it into the top-level disjunction.
-//
-// Example input:
-//
-//	SomeStruct: {
-//		foo: string
-//	}
-//	OtherStruct: {
-//		bar: string
-//	}
-//	LastStruct: {
-//		hello: string
-//	}
-//	SomeOrOther: SomeStruct | OtherStruct
-//	AnyStruct: SomeOrOther | LastStruct
-//
-// flattenDisjunction called with `AnyStruct` as an input will return a "flattened"
-// disjunction with for branches `SomeStruct | OtherStruct | LastStruct`
-func (pass *DisjunctionToType) flattenDisjunction(schema *ast.Schema, disjunction ast.DisjunctionType) ast.DisjunctionType {
-	newDisjunction := disjunction.DeepCopy()
-	newDisjunction.Branches = nil
-
-	refResolver := pass.makeReferenceResolver(schema)
-
-	branchMap := make(map[string]struct{})
-	addBranch := func(typeDef ast.Type) {
-		typeName := ast.TypeName(typeDef)
-		if _, exists := branchMap[typeName]; exists {
-			return
-		}
-
-		branchMap[typeName] = struct{}{}
-		newDisjunction.Branches = append(newDisjunction.Branches, typeDef)
-	}
-
-	for _, branch := range disjunction.Branches {
-		if branch.Kind != ast.KindRef {
-			addBranch(branch)
-			continue
-		}
-
-		resolved := refResolver(branch)
-		if resolved.Kind != ast.KindDisjunction {
-			addBranch(branch)
-			continue
-		}
-
-		for _, resolvedBranch := range resolved.AsDisjunction().Branches {
-			addBranch(resolvedBranch)
-		}
-	}
-
-	return newDisjunction
 }
 
 func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) string {
@@ -337,12 +330,15 @@ func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def a
 	// map[typeName][fieldName]value
 	candidates := make(map[string]map[string]any)
 
-	refResolver := pass.makeReferenceResolver(schema)
-
 	// Identify candidates from each branch
 	for _, branch := range def.Branches {
 		typeName := branch.AsRef().ReferredType
-		structType := refResolver(branch).AsStruct()
+		referredType, found := schema.Resolve(branch)
+		if !found {
+			continue
+		}
+
+		structType := referredType.AsStruct()
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
@@ -396,11 +392,14 @@ func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def
 		return nil, fmt.Errorf("discriminator field is empty: %w", ErrCanNotInferDiscriminator)
 	}
 
-	refResolver := pass.makeReferenceResolver(schema)
-
 	for _, branch := range def.Branches {
 		typeName := branch.AsRef().ReferredType
-		structType := refResolver(branch).AsStruct()
+		referredType, found := schema.Resolve(branch)
+		if !found {
+			return nil, fmt.Errorf("could not resolve reference '%s'", branch.AsRef().String())
+		}
+
+		structType := referredType.AsStruct()
 
 		field, found := structType.FieldByName(def.Discriminator)
 		if !found {
@@ -432,15 +431,21 @@ func (pass *DisjunctionToType) hasOnlySingleTypeScalars(schema *ast.Schema, disj
 		return false
 	}
 
-	refResolver := pass.makeReferenceResolver(schema)
-
-	if refResolver(branches[0]).Kind != ast.KindScalar {
+	firstBranchType, found := schema.Resolve(branches[0])
+	if !found {
 		return false
 	}
 
-	scalarKind := refResolver(branches[0]).AsScalar().ScalarKind
+	if firstBranchType.Kind != ast.KindScalar {
+		return false
+	}
+
+	scalarKind := firstBranchType.AsScalar().ScalarKind
 	for _, t := range branches {
-		resolvedType := refResolver(t)
+		resolvedType, found := schema.Resolve(t)
+		if !found {
+			return false
+		}
 
 		if resolvedType.Kind != ast.KindScalar {
 			return false
@@ -452,18 +457,4 @@ func (pass *DisjunctionToType) hasOnlySingleTypeScalars(schema *ast.Schema, disj
 	}
 
 	return true
-}
-
-func (pass *DisjunctionToType) makeReferenceResolver(schema *ast.Schema) func(typeDef ast.Type) ast.Type {
-	return func(typeDef ast.Type) ast.Type {
-		if typeDef.Kind != ast.KindRef {
-			return typeDef
-		}
-
-		typeName := typeDef.AsRef().ReferredType
-
-		// FIXME: what if the definition is itself a reference? Resolve recursively?
-		// FIXME: we only try to resolve references within the same schema
-		return schema.LocateObject(typeName).Type
-	}
 }

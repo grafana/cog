@@ -183,8 +183,8 @@ export class LokiBuilderBuilder implements cog.OptionsBuilder<cog.Dataquery> {
 package dataquery_variant_builder
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
-    cogvariants "github.com/grafana/cog/generated/cog/variants"
+	cog "github.com/grafana/cog/generated/cog"
+	cogvariants "github.com/grafana/cog/generated/cog/variants"
 )
 
 var _ cog.Builder[cogvariants.Dataquery] = (*LokiBuilderBuilder)(nil)

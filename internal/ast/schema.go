@@ -22,10 +22,7 @@ func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 			continue
 		}
 
-		obj := schema.LocateObject(name)
-
-		// TODO: schema.LocateObject() should return a "found" boolean
-		return obj, obj.Name != ""
+		return schema.LocateObject(name)
 	}
 
 	return Object{}, false
@@ -62,14 +59,27 @@ func (schema *Schema) DeepCopy() Schema {
 	return newSchema
 }
 
-func (schema *Schema) LocateObject(name string) Object {
+func (schema *Schema) LocateObject(name string) (Object, bool) {
 	for _, def := range schema.Objects {
 		if def.Name == name {
-			return def
+			return def, true
 		}
 	}
 
-	return Object{}
+	return Object{}, false
+}
+
+func (schema *Schema) Resolve(typeDef Type) (Type, bool) {
+	if typeDef.Kind != KindRef {
+		return typeDef, true
+	}
+
+	referredObj, found := schema.LocateObject(typeDef.AsRef().ReferredType)
+	if !found {
+		return Type{}, false
+	}
+
+	return schema.Resolve(referredObj.Type)
 }
 
 type SchemaMeta struct {

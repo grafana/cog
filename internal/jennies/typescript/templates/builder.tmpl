@@ -1,9 +1,6 @@
 {{- $builder := . -}}
 {{- $options := include "options" . -}}
-{{ range $alias, $importPath := .Imports -}}
-import * as {{ $alias }} from '{{ $importPath }}';
-{{ end }}
-
+{{- .Imports }}
 {{- range .Comments }}
 // {{ . }}
 {{- end }}

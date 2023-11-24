@@ -3,8 +3,7 @@ package golang
 import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/context"
-	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/common"
 )
 
 type VariantsPlugins struct {
@@ -15,7 +14,7 @@ func (jenny VariantsPlugins) JennyName() string {
 	return "GoVariantsPlugins"
 }
 
-func (jenny VariantsPlugins) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny VariantsPlugins) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	registries, err := jenny.variantPlugins(context)
@@ -38,8 +37,8 @@ func (jenny VariantsPlugins) variantModels() (string, error) {
 	return renderTemplate("runtime/variant_models.tmpl", map[string]any{})
 }
 
-func (jenny VariantsPlugins) variantPlugins(context context.Builders) (string, error) {
-	imports := template.NewImportMap()
+func (jenny VariantsPlugins) variantPlugins(context common.Context) (string, error) {
+	imports := NewImportMap()
 	initMap := make(map[string][]*ast.Schema) // variant to schemas
 
 	imports.Add("cog", jenny.Config.importPath("cog"))
@@ -56,6 +55,6 @@ func (jenny VariantsPlugins) variantPlugins(context context.Builders) (string, e
 
 	return renderTemplate("runtime/variant_plugins.tmpl", map[string]any{
 		"init_map": initMap,
-		"imports":  formatImports(imports),
+		"imports":  imports,
 	})
 }

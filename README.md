@@ -37,13 +37,11 @@ For specific schemas:
 ```console
 $ go run cmd/cli/main.go generate \
     --output ./generated \
-    --kindsys-core ./schemas/kindsys/core/dashboard \
     --cue ./schemas/cue/common \
     --include-cue-import ./schemas/cue/common:github.com/grafana/grafana/packages/grafana-schema/src/common \
-    --jsonschema ./schemas/jsonschema/core/playlist/playlist.json \
+    --jsonschema ./schemas/my-json-schemas/playlist.json \
+    --kindsys-core ./schemas/kindsys/core/dashboard \
     --kindsys-composable ./schemas/kindsys/composable/timeseries \
-    --kindsys-composable ./schemas/kindsys/composable/logs \
-    --kindsys-composable ./schemas/kindsys/composable/prometheus \
     --veneers ./config
 ```
 

@@ -104,6 +104,10 @@ func (t Type) ImplementsVariant() bool {
 }
 
 func (t Type) ImplementedVariant() string {
+	if !t.ImplementsVariant() {
+		return ""
+	}
+
 	return t.Hints[HintImplementsVariant].(string)
 }
 
@@ -360,7 +364,8 @@ func NewScalar(kind ScalarKind, opts ...TypeOption) Type {
 
 func NewIntersection(branches []Type) Type {
 	return Type{
-		Kind: KindIntersection,
+		Kind:  KindIntersection,
+		Hints: make(JenniesHints),
 		Intersection: &IntersectionType{
 			Branches: branches,
 		},
@@ -369,7 +374,8 @@ func NewIntersection(branches []Type) Type {
 
 func NewComposableSlot(variant SchemaVariant) Type {
 	return Type{
-		Kind: KindComposableSlot,
+		Kind:  KindComposableSlot,
+		Hints: make(JenniesHints),
 		ComposableSlot: &ComposableSlotType{
 			Variant: variant,
 		},

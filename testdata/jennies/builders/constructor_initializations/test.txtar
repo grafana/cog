@@ -232,7 +232,7 @@ export class SomePanelBuilder implements cog.OptionsBuilder<constructor_initiali
 package constructor_initializations
 
 import (
-    cog "github.com/grafana/cog/generated/cog"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 var _ cog.Builder[SomePanel] = (*SomePanelBuilder)(nil)

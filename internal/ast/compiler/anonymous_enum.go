@@ -7,6 +7,28 @@ import (
 
 var _ Pass = (*AnonymousEnumToExplicitType)(nil)
 
+// AnonymousEnumToExplicitType turns "anonymous enums" into a named
+// object.
+//
+// Example:
+//
+//	```
+//	Panel struct {
+//		Type enum(Foo, Bar, Baz)
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	Panel struct {
+//		Type PanelType
+//	}
+//
+//	PanelType enum(Foo, Bar, Baz)
+//	```
+//
+// Note: this compiler pass looks for anonymous enums in structs and arrays only.
 type AnonymousEnumToExplicitType struct {
 	newObjects     []ast.Object
 	currentPackage string
@@ -46,22 +68,22 @@ func (pass *AnonymousEnumToExplicitType) processObject(object ast.Object) ast.Ob
 		return object
 	}
 
-	object.Type = pass.processType(object.Name, tools.UpperCamelCase(object.Name)+"Enum", object.Type)
+	object.Type = pass.processType(object.SelfRef.ReferredPkg, object.Name, tools.UpperCamelCase(object.Name)+"Enum", object.Type)
 
 	return object
 }
 
-func (pass *AnonymousEnumToExplicitType) processType(currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
+func (pass *AnonymousEnumToExplicitType) processType(pkg string, currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
 	if def.Kind == ast.KindArray {
-		return pass.processArray(currentObjectName, suggestedEnumName, def)
+		return pass.processArray(pkg, currentObjectName, suggestedEnumName, def)
 	}
 
 	if def.Kind == ast.KindStruct {
-		return pass.processStruct(currentObjectName, def)
+		return pass.processStruct(pkg, currentObjectName, def)
 	}
 
 	if def.Kind == ast.KindEnum {
-		return pass.processAnonymousEnum(suggestedEnumName, def.AsEnum())
+		return pass.processAnonymousEnum(pkg, suggestedEnumName, def.AsEnum())
 	}
 
 	// TODO: do the same for disjunctions?
@@ -69,16 +91,16 @@ func (pass *AnonymousEnumToExplicitType) processType(currentObjectName string, s
 	return def
 }
 
-func (pass *AnonymousEnumToExplicitType) processArray(currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
-	def.Array.ValueType = pass.processType(currentObjectName, suggestedEnumName, def.Array.ValueType)
+func (pass *AnonymousEnumToExplicitType) processArray(pkg string, currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
+	def.Array.ValueType = pass.processType(pkg, currentObjectName, suggestedEnumName, def.Array.ValueType)
 
 	return def
 }
 
-func (pass *AnonymousEnumToExplicitType) processStruct(parentName string, def ast.Type) ast.Type {
+func (pass *AnonymousEnumToExplicitType) processStruct(pkg string, parentName string, def ast.Type) ast.Type {
 	for i, field := range def.Struct.Fields {
 		newField := field
-		newField.Type = pass.processType(parentName, tools.UpperCamelCase(parentName)+tools.UpperCamelCase(field.Name), field.Type)
+		newField.Type = pass.processType(pkg, parentName, tools.UpperCamelCase(parentName)+tools.UpperCamelCase(field.Name), field.Type)
 
 		def.Struct.Fields[i] = newField
 	}
@@ -86,7 +108,7 @@ func (pass *AnonymousEnumToExplicitType) processStruct(parentName string, def as
 	return def
 }
 
-func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(parentName string, def ast.EnumType) ast.Type {
+func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(pkg string, parentName string, def ast.EnumType) ast.Type {
 	enumTypeName := tools.UpperCamelCase(parentName)
 
 	values := make([]ast.EnumValue, 0, len(def.Values))
@@ -98,10 +120,7 @@ func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(parentName string,
 		})
 	}
 
-	pass.newObjects = append(pass.newObjects, ast.Object{
-		Name: enumTypeName,
-		Type: ast.NewEnum(values),
-	})
+	pass.newObjects = append(pass.newObjects, ast.NewObject(pkg, enumTypeName, ast.NewEnum(values)))
 
 	return ast.NewRef(pass.currentPackage, enumTypeName)
 }

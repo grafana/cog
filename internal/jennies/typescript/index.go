@@ -6,25 +6,31 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/context"
+	"github.com/grafana/cog/internal/jennies/common"
 )
 
 type Index struct {
+	Targets common.Targets
 }
 
 func (jenny Index) JennyName() string {
 	return "TypescriptIndex"
 }
 
-func (jenny Index) Generate(context context.Builders) (codejen.Files, error) {
+func (jenny Index) Generate(context common.Context) (codejen.Files, error) {
 	packages := make(map[string][]string, len(context.Schemas))
 	files := codejen.Files{}
 
-	for _, schema := range context.Schemas {
-		packages[schema.Package] = []string{"types_gen"}
+	if jenny.Targets.Types {
+		for _, schema := range context.Schemas {
+			packages[schema.Package] = []string{"types_gen"}
+		}
 	}
-	for _, builder := range context.Builders {
-		packages[builder.Package] = append(packages[builder.Package], fmt.Sprintf("%s_builder_gen", strings.ToLower(builder.For.Name)))
+
+	if jenny.Targets.Builders {
+		for _, builder := range context.Builders {
+			packages[builder.Package] = append(packages[builder.Package], fmt.Sprintf("%s_builder_gen", strings.ToLower(builder.For.Name)))
+		}
 	}
 
 	for pkg, refs := range packages {

@@ -3,9 +3,7 @@ package compiler
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/stretchr/testify/require"
 )
 
 func TestUnspec(t *testing.T) {
@@ -80,19 +78,5 @@ func TestUnspec(t *testing.T) {
 	}
 
 	// Run the compiler pass
-	runUnspecPass(t, schemas, expected)
-}
-
-func runUnspecPass(t *testing.T, input ast.Schemas, expectedOutput ast.Schemas) {
-	t.Helper()
-
-	req := require.New(t)
-
-	compilerPass := &Unspec{}
-	processedFiles, err := compilerPass.Process(input)
-	req.NoError(err)
-	req.Len(processedFiles, len(input))
-	for i := range input {
-		req.Empty(cmp.Diff(expectedOutput[i], processedFiles[i]))
-	}
+	runPassOnSchemas(t, &Unspec{}, schemas, expected)
 }
