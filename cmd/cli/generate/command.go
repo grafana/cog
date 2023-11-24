@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/cmd/cli/loaders"
@@ -115,6 +116,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		return err
 	}
 
+	fmt.Printf("Parsing inputs...\n")
 	schemas, err := loaders.LoadAll(opts.Options)
 	if err != nil {
 		return err
@@ -141,8 +143,13 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 			return err
 		}
 
-		// then delegate the actual codegen to the jennies
-		fs, err := target.Jennies(opts.JenniesConfig).GenerateFS(common.Context{
+		// prepare the jennies
+		outputDir := strings.ReplaceAll(opts.OutputDir, "%l", language)
+		languageJennies := target.Jennies(opts.JenniesConfig)
+		languageJennies.AddPostprocessors(common.PathPrefixer(outputDir))
+
+		// then delegate the codegen to the jennies
+		fs, err := languageJennies.GenerateFS(common.Context{
 			Schemas:  processedSchemas,
 			Builders: builders,
 		})
@@ -150,13 +157,12 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 			return err
 		}
 
-		err = rootCodeJenFS.Merge(fs)
-		if err != nil {
+		if err = rootCodeJenFS.Merge(fs); err != nil {
 			return err
 		}
 	}
 
-	err = rootCodeJenFS.Write(context.Background(), opts.OutputDir)
+	err = rootCodeJenFS.Write(context.Background(), "")
 	if err != nil {
 		return err
 	}
