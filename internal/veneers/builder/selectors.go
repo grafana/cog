@@ -1,21 +1,14 @@
 package builder
 
 import (
-	"strings"
-
 	"github.com/grafana/cog/internal/ast"
 )
 
 type Selector func(builder ast.Builder) bool
 
-func ByObjectName(objectName string) Selector {
+func ByObjectName(pkg string, objectName string) Selector {
 	return func(builder ast.Builder) bool {
-		objectPkg, objectNameWithoutPkg, found := strings.Cut(objectName, ".")
-		if !found {
-			return builder.For.Name == objectName
-		}
-
-		return builder.For.SelfRef.ReferredPkg == objectPkg && builder.For.SelfRef.ReferredType == objectNameWithoutPkg
+		return builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == objectName
 	}
 }
 
