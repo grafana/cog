@@ -22,8 +22,8 @@ func TestByName(t *testing.T) {
 		{Name: "TimePicker"},
 	}
 
-	singleSelector := ByName("Dashboard", "Refresh")
-	notFoundSelector := ByName("Dashboard", "refresh")
+	singleSelector := ByName("dashboard", "Dashboard", "Refresh")
+	notFoundSelector := ByName("dashboard", "Dashboard", "refresh")
 
 	selectedForDashboard := filter(singleSelector, dashboardBuilder, options)
 	selectedForPanel := filter(singleSelector, panelBuilder, options)
@@ -51,8 +51,8 @@ func TestByName_withSeveralOptions(t *testing.T) {
 		{Name: "TimePicker"},
 	}
 
-	multiSelector := ByName("Dashboard", "Refresh", "TimePicker")
-	notFoundSelector := ByName("Dashboard", "NotFound", "timepicker")
+	multiSelector := ByName("dashboard", "Dashboard", "Refresh", "TimePicker")
+	notFoundSelector := ByName("dashboard", "Dashboard", "NotFound", "timepicker")
 
 	selectedForDashboard := filter(multiSelector, dashboardBuilder, options)
 	selectedForPanel := filter(notFoundSelector, panelBuilder, options)
@@ -81,8 +81,8 @@ func TestByNameCaseInsensitive(t *testing.T) {
 		{Name: "TimePicker"},
 	}
 
-	singleSelector := ByNameCaseInsensitive("Dashboard", "refresh")
-	notFoundSelector := ByNameCaseInsensitive("Dashboard", "heeey")
+	singleSelector := ByNameCaseInsensitive("dashboard", "Dashboard", "refresh")
+	notFoundSelector := ByNameCaseInsensitive("dashboard", "Dashboard", "heeey")
 
 	selectedForDashboard := filter(singleSelector, dashboardBuilder, options)
 	selectedForPanel := filter(singleSelector, panelBuilder, options)
@@ -110,8 +110,8 @@ func TestByNameCaseInsensitive_withSeveralOptions(t *testing.T) {
 		{Name: "TimePicker"},
 	}
 
-	multiSelector := ByNameCaseInsensitive("Dashboard", "refresh", "timepicker")
-	notFoundSelector := ByNameCaseInsensitive("Dashboard", "NotFound")
+	multiSelector := ByNameCaseInsensitive("dashboard", "Dashboard", "refresh", "timepicker")
+	notFoundSelector := ByNameCaseInsensitive("dashboard", "Dashboard", "NotFound")
 
 	selectedForDashboard := filter(multiSelector, dashboardBuilder, options)
 	selectedForPanel := filter(notFoundSelector, panelBuilder, options)

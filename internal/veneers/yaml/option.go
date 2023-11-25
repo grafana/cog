@@ -22,9 +22,9 @@ type OptionRule struct {
 	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
 }
 
-func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
+func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 	if rule.Omit != nil {
-		selector, err := rule.Omit.AsSelector()
+		selector, err := rule.Omit.AsSelector(pkg)
 		if err != nil {
 			return option.RewriteRule{}, err
 		}
@@ -33,7 +33,7 @@ func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
 	}
 
 	if rule.PromoteToConstructor != nil {
-		selector, err := rule.PromoteToConstructor.AsSelector()
+		selector, err := rule.PromoteToConstructor.AsSelector(pkg)
 		if err != nil {
 			return option.RewriteRule{}, err
 		}
@@ -42,27 +42,27 @@ func (rule OptionRule) AsRewriteRule() (option.RewriteRule, error) {
 	}
 
 	if rule.Rename != nil {
-		return rule.Rename.AsRewriteRule()
+		return rule.Rename.AsRewriteRule(pkg)
 	}
 
 	if rule.UnfoldBoolean != nil {
-		return rule.UnfoldBoolean.AsRewriteRule()
+		return rule.UnfoldBoolean.AsRewriteRule(pkg)
 	}
 
 	if rule.StructFieldsAsArguments != nil {
-		return rule.StructFieldsAsArguments.AsRewriteRule()
+		return rule.StructFieldsAsArguments.AsRewriteRule(pkg)
 	}
 
 	if rule.StructFieldsAsOptions != nil {
-		return rule.StructFieldsAsOptions.AsRewriteRule()
+		return rule.StructFieldsAsOptions.AsRewriteRule(pkg)
 	}
 
 	if rule.ArrayToAppend != nil {
-		return rule.ArrayToAppend.AsRewriteRule()
+		return rule.ArrayToAppend.AsRewriteRule(pkg)
 	}
 
 	if rule.DisjunctionAsOptions != nil {
-		return rule.DisjunctionAsOptions.AsRewriteRule()
+		return rule.DisjunctionAsOptions.AsRewriteRule(pkg)
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
@@ -74,8 +74,8 @@ type RenameOption struct {
 	As string `yaml:"as"`
 }
 
-func (rule RenameOption) AsRewriteRule() (option.RewriteRule, error) {
-	selector, err := rule.AsSelector()
+func (rule RenameOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return option.RewriteRule{}, err
 	}
@@ -90,8 +90,8 @@ type UnfoldBoolean struct {
 	FalseAs string `yaml:"false_as"`
 }
 
-func (rule UnfoldBoolean) AsRewriteRule() (option.RewriteRule, error) {
-	selector, err := rule.AsSelector()
+func (rule UnfoldBoolean) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return option.RewriteRule{}, err
 	}
@@ -107,8 +107,8 @@ type StructFieldsAsArguments struct {
 	Fields         []string `yaml:"fields"`
 }
 
-func (rule StructFieldsAsArguments) AsRewriteRule() (option.RewriteRule, error) {
-	selector, err := rule.AsSelector()
+func (rule StructFieldsAsArguments) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return option.RewriteRule{}, err
 	}
@@ -121,8 +121,8 @@ type StructFieldsAsOptions struct {
 	Fields         []string `yaml:"fields"`
 }
 
-func (rule StructFieldsAsOptions) AsRewriteRule() (option.RewriteRule, error) {
-	selector, err := rule.AsSelector()
+func (rule StructFieldsAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return option.RewriteRule{}, err
 	}
@@ -134,8 +134,8 @@ type ArrayToAppend struct {
 	OptionSelector `yaml:",inline"`
 }
 
-func (rule ArrayToAppend) AsRewriteRule() (option.RewriteRule, error) {
-	selector, err := rule.AsSelector()
+func (rule ArrayToAppend) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return option.RewriteRule{}, err
 	}
@@ -147,8 +147,8 @@ type DisjunctionAsOptions struct {
 	OptionSelector `yaml:",inline"`
 }
 
-func (rule DisjunctionAsOptions) AsRewriteRule() (option.RewriteRule, error) {
-	selector, err := rule.AsSelector()
+func (rule DisjunctionAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return option.RewriteRule{}, err
 	}
@@ -170,14 +170,14 @@ type OptionSelector struct {
 	ByNames *ByNamesSelector `yaml:"by_names"`
 }
 
-func (selector OptionSelector) AsSelector() (option.Selector, error) {
+func (selector OptionSelector) AsSelector(pkg string) (option.Selector, error) {
 	if selector.ByName != nil {
 		objectName, optionName, found := strings.Cut(*selector.ByName, ".")
 		if !found {
 			return nil, fmt.Errorf("option name '%s' is incorrect: no object name found", *selector.ByName)
 		}
 
-		return option.ByName(objectName, optionName), nil
+		return option.ByName(pkg, objectName, optionName), nil
 	}
 
 	if selector.ByNameCaseInsensitive != nil {
@@ -186,11 +186,11 @@ func (selector OptionSelector) AsSelector() (option.Selector, error) {
 			return nil, fmt.Errorf("option name '%s' is incorrect: no object name found", *selector.ByNameCaseInsensitive)
 		}
 
-		return option.ByNameCaseInsensitive(objectName, optionName), nil
+		return option.ByNameCaseInsensitive(pkg, objectName, optionName), nil
 	}
 
 	if selector.ByNames != nil {
-		return selector.ByNames.AsSelector()
+		return selector.ByNames.AsSelector(pkg)
 	}
 
 	return nil, fmt.Errorf("empty selector")
@@ -201,10 +201,10 @@ type ByNamesSelector struct {
 	Options []string `yaml:"options"`
 }
 
-func (selector ByNamesSelector) AsSelector() (option.Selector, error) {
+func (selector ByNamesSelector) AsSelector(pkg string) (option.Selector, error) {
 	if selector.Object == "" {
 		return nil, fmt.Errorf("`object` is required")
 	}
 
-	return option.ByName(selector.Object, selector.Options...), nil
+	return option.ByName(pkg, selector.Object, selector.Options...), nil
 }

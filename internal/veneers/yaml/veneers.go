@@ -1,6 +1,7 @@
 package yaml
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/grafana/cog/internal/veneers/builder"
@@ -11,6 +12,7 @@ import (
 
 type Veneers struct {
 	Language string        `yaml:"language"`
+	Package  string        `yaml:"package"`
 	Builders []BuilderRule `yaml:"builders"`
 	Options  []OptionRule  `yaml:"options"`
 }
@@ -62,12 +64,16 @@ func (loader *Loader) LoadFile(filename string) (rewrite.LanguageRules, error) {
 		return rewrite.LanguageRules{}, err
 	}
 
+	if veneers.Package == "" {
+		return rewrite.LanguageRules{}, fmt.Errorf("missing 'package' statement in veneers file '%s'", filename)
+	}
+
 	builderRules = make([]builder.RewriteRule, 0, len(veneers.Builders))
 	optionRules = make([]option.RewriteRule, 0, len(veneers.Options))
 
 	// convert builder rules
 	for _, rule := range veneers.Builders {
-		builderRule, err := rule.AsRewriteRule()
+		builderRule, err := rule.AsRewriteRule(veneers.Package)
 		if err != nil {
 			return rewrite.LanguageRules{}, err
 		}
@@ -77,7 +83,7 @@ func (loader *Loader) LoadFile(filename string) (rewrite.LanguageRules, error) {
 
 	// convert option rules
 	for _, rule := range veneers.Options {
-		optionRule, err := rule.AsRewriteRule()
+		optionRule, err := rule.AsRewriteRule(veneers.Package)
 		if err != nil {
 			return rewrite.LanguageRules{}, err
 		}

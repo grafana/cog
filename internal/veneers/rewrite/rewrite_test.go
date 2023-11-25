@@ -33,7 +33,7 @@ func testData() []rewriteTestCase {
 			description:   "omit an entire builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules: []builder.RewriteRule{
-				builder.Omit(builder.ByObjectName("Dashboard")),
+				builder.Omit(builder.ByObjectName("test_pkg", "Dashboard")),
 			},
 			optionRules:    nil,
 			outputBuilders: ast.Builders{panelBuilder()},
@@ -45,7 +45,7 @@ func testData() []rewriteTestCase {
 			builderRules:  nil,
 			optionRules: []option.RewriteRule{
 				option.Rename(
-					option.ByName("Panel", "type"),
+					option.ByName("test_pkg", "Panel", "type"),
 					"kind",
 				),
 			},
@@ -98,7 +98,7 @@ func testData() []rewriteTestCase {
 			builderRules:  nil,
 			optionRules: []option.RewriteRule{
 				option.Omit(
-					option.ByName("Dashboard", "title"),
+					option.ByName("test_pkg", "Dashboard", "title"),
 				),
 			},
 			outputBuilders: ast.Builders{

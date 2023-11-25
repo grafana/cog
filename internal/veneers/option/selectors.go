@@ -7,14 +7,18 @@ import (
 
 type Selector func(builder ast.Builder, option ast.Option) bool
 
-func ByName(objectName string, optionNames ...string) Selector {
+func ByName(pkg string, objectName string, optionNames ...string) Selector {
 	return func(builder ast.Builder, option ast.Option) bool {
-		return builder.For.Name == objectName && tools.ItemInList(option.Name, optionNames)
+		return builder.For.SelfRef.ReferredPkg == pkg &&
+			builder.For.Name == objectName &&
+			tools.ItemInList(option.Name, optionNames)
 	}
 }
 
-func ByNameCaseInsensitive(objectName string, optionNames ...string) Selector {
+func ByNameCaseInsensitive(pkg string, objectName string, optionNames ...string) Selector {
 	return func(builder ast.Builder, option ast.Option) bool {
-		return builder.For.Name == objectName && tools.StringInListEqualFold(option.Name, optionNames)
+		return builder.For.SelfRef.ReferredPkg == pkg &&
+			builder.For.Name == objectName &&
+			tools.StringInListEqualFold(option.Name, optionNames)
 	}
 }

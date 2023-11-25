@@ -1,28 +1,30 @@
 language: all
 
+package: dashboard
+
 builders:
   ##############
   # Dashboards #
   ##############
 
   # We don't want these builders at all
-  - omit: { by_object: dashboard.GridPos }
-  - omit: { by_object: dashboard.DataSourceRef }
-  - omit: { by_object: dashboard.LibraryPanelRef }
-  - omit: { by_object: dashboard.VariableOption }
-  - omit: { by_object: dashboard.Threshold }
+  - omit: { by_object: GridPos }
+  - omit: { by_object: DataSourceRef }
+  - omit: { by_object: LibraryPanelRef }
+  - omit: { by_object: VariableOption }
+  - omit: { by_object: Threshold }
   # overrides and transformations related
-  - omit: { by_object: dashboard.MatcherConfig }
-  - omit: { by_object: dashboard.DynamicConfigValue }
-  - omit: { by_object: dashboard.DataTransformerConfig }
+  - omit: { by_object: MatcherConfig }
+  - omit: { by_object: DynamicConfigValue }
+  - omit: { by_object: DataTransformerConfig }
 
   # RowPanel → Row
   - rename:
-      by_object: dashboard.RowPanel
+      by_object: RowPanel
       as: Row
 
   - properties:
-      by_object: dashboard.Dashboard
+      by_object: Dashboard
       set:
         - name: currentY
           type:
@@ -39,8 +41,8 @@ builders:
 
   # Rearrange things a bit
   - merge_into:
-      source: dashboard.FieldConfig
-      destination: dashboard.Panel
+      source: FieldConfig
+      destination: Panel
       under_path: fieldConfig.defaults
       exclude_options: [
         # don't copy these over as they clash with a similarly named options from Panel
@@ -50,8 +52,8 @@ builders:
         "displayNameFromDS", "filterable", "path", "writeable",
       ]
   - merge_into:
-      source: dashboard.FieldConfigSource
-      destination: dashboard.Panel
+      source: FieldConfigSource
+      destination: Panel
       under_path: fieldConfig
 
   # Panels composability
@@ -68,8 +70,8 @@ builders:
       ]
 
   # remove builders that were previously merged into something else
-  - omit: { by_object: dashboard.FieldConfig }
-  - omit: { by_object: dashboard.FieldConfigSource }
+  - omit: { by_object: FieldConfig }
+  - omit: { by_object: FieldConfigSource }
 
   # No need for builders for structs generated from a disjunction
   - omit: { generated_from_disjunction: true }

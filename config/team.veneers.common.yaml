@@ -1,5 +1,7 @@
 language: all
 
+package: team
+
 builders: ~
 
 options:
