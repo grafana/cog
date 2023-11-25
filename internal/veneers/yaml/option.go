@@ -164,9 +164,6 @@ type OptionSelector struct {
 	// objectName.optionName
 	ByName *string `yaml:"by_name"`
 
-	// objectName.optionName
-	ByNameCaseInsensitive *string `yaml:"by_name_case_insensitive"`
-
 	ByNames *ByNamesSelector `yaml:"by_names"`
 }
 
@@ -180,20 +177,11 @@ func (selector OptionSelector) AsSelector(pkg string) (option.Selector, error) {
 		return option.ByName(pkg, objectName, optionName), nil
 	}
 
-	if selector.ByNameCaseInsensitive != nil {
-		objectName, optionName, found := strings.Cut(*selector.ByNameCaseInsensitive, ".")
-		if !found {
-			return nil, fmt.Errorf("option name '%s' is incorrect: no object name found", *selector.ByNameCaseInsensitive)
-		}
-
-		return option.ByNameCaseInsensitive(pkg, objectName, optionName), nil
-	}
-
 	if selector.ByNames != nil {
 		return selector.ByNames.AsSelector(pkg)
 	}
 
-	return nil, fmt.Errorf("empty selector")
+	return nil, fmt.Errorf("empty or unknown selector")
 }
 
 type ByNamesSelector struct {
