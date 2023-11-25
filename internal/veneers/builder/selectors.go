@@ -1,14 +1,18 @@
 package builder
 
 import (
+	"strings"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
 type Selector func(builder ast.Builder) bool
 
+// Note: comparison on object name is case insensitive
 func ByObjectName(pkg string, objectName string) Selector {
 	return func(builder ast.Builder) bool {
-		return builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == objectName
+		return builder.For.SelfRef.ReferredPkg == pkg &&
+			strings.EqualFold(builder.For.SelfRef.ReferredType, objectName)
 	}
 }
 

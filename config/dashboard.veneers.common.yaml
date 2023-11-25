@@ -108,11 +108,11 @@ options:
       by_name: Dashboard.panels
   # Panel() to WithPanel()
   - rename:
-      by_name_case_insensitive: Dashboard.panel
+      by_name: Dashboard.panel
       as: withPanel
   # RowPanel() to WithRow()
   - rename:
-      by_name_case_insensitive: Dashboard.rowPanel
+      by_name: Dashboard.rowPanel
       as: withRow
 
   # Templating([]VariableModel) instead of Templating(struct []struct{List []VariableModel})
@@ -124,7 +124,7 @@ options:
       by_name: Dashboard.templating
   # Templating() to WithVariable()
   - rename:
-      by_name_case_insensitive: Dashboard.templating
+      by_name: Dashboard.templating
       as: withVariable
 
   # We don't want these options at all
@@ -141,7 +141,7 @@ options:
       by_name: Panel.targets
   # Targets() to WithTarget()
   - rename:
-      by_name_case_insensitive: Panel.targets
+      by_name: Panel.targets
       as: withTarget
 
   # Append a single override instead forcing to define all of them at once
@@ -149,7 +149,7 @@ options:
       by_name: Panel.overrides
   # Overrides() to WithOverride()
   - rename:
-      by_name_case_insensitive: Panel.overrides
+      by_name: Panel.overrides
       as: withOverride
   # WithOverride(matcher, properties) instead of WithOverride(struct{...})
   - struct_fields_as_arguments:
@@ -160,7 +160,7 @@ options:
       by_name: Panel.transformations
   # Overrides() to WithOverride()
   - rename:
-      by_name_case_insensitive: Panel.transformations
+      by_name: Panel.transformations
       as: withTransformation
 
   # W(), H() instead of explicit GridPos() definition
@@ -169,11 +169,11 @@ options:
       fields: [w, h]
   # W() → Span()
   - rename:
-      by_name_case_insensitive: Panel.w
+      by_name: Panel.w
       as: span
   # H() → Height()
   - rename:
-      by_name_case_insensitive: Panel.h
+      by_name: Panel.h
       as: height
 
   ##############
