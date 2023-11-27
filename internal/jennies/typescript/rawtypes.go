@@ -3,6 +3,7 @@ package typescript
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -376,13 +377,20 @@ func hasStructDefaults(typeDef ast.Type, defaults any) bool {
 	return ok && typeDef.Kind == ast.KindStruct
 }
 
-func toOrderedMap(defaults any) *orderedmap.Map[string, interface{}] {
-	om := orderedmap.New[string, interface{}]()
+func toOrderedMap(value any) *orderedmap.Map[string, interface{}] {
+	orderedMap := orderedmap.New[string, interface{}]()
+	valueMap, _ := value.(map[string]interface{})
 
-	m, _ := defaults.(map[string]interface{})
-	for k, v := range m {
-		om.Set(k, v)
+	keys := make([]string, 0, len(valueMap))
+	for k, _ := range valueMap {
+		keys = append(keys, k)
 	}
 
-	return om
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		orderedMap.Set(k, valueMap[k])
+	}
+
+	return orderedMap
 }

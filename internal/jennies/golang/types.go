@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -258,10 +259,18 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 }
 
 func toOrderedMap(m map[string]interface{}) *orderedmap.Map[string, interface{}] {
-	om := orderedmap.New[string, interface{}]()
-	for k, v := range m {
-		om.Set(k, v)
+	orderedMap := orderedmap.New[string, interface{}]()
+
+	keys := make([]string, 0, len(m))
+	for k, _ := range m {
+		keys = append(keys, k)
 	}
 
-	return om
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		orderedMap.Set(k, m[k])
+	}
+
+	return orderedMap
 }

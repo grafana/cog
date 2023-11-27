@@ -827,7 +827,6 @@ StringVal("hello"),
 IntVal(4),
 )
 }
-
 -- out/jennies/TypescriptBuilder --
 == struct_with_defaults/nestedstruct_builder_gen.ts
 import * as cog from '../cog';

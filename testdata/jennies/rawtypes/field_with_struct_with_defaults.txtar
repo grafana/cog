@@ -106,42 +106,25 @@ type Struct struct {
 
 -- out/jennies/TypescriptRawTypes --
 == defaults/types_gen.ts
-export interface SomeStruct {
-	fieldBool: boolean;
-	fieldString: string;
-	FieldStringWithConstantValue: "auto";
-	FieldFloat32: number;
-	FieldInt32: number;
 export interface NestedStruct {
 	stringVal: string;
 	intVal: number;
 }
-export const defaultSomeStruct = (): SomeStruct => ({
-	fieldBool: true,
-	fieldString: "foo",
-	FieldStringWithConstantValue: "auto",
-	FieldFloat32: 42.42,
-	FieldInt32: 42,
+
 export const defaultNestedStruct = (): NestedStruct => ({
 	stringVal: "",
 	intVal: 0,
 });
+
 export interface Struct {
 	allFields: NestedStruct;
 	partialFields: NestedStruct;
 	emptyFields: NestedStruct;
 }
-export const defaultStruct = (): Struct => ({
-	allFields: defaultNestedStruct(),
-	partialFields: defaultNestedStruct(),
-	emptyFields: defaultNestedStruct(),
-});
 
-export const defaultSomeStruct = (): SomeStruct => ({
-	fieldBool: true,
-	fieldString: "foo",
-	FieldStringWithConstantValue: "auto",
-	FieldFloat32: 42.42,
-	FieldInt32: 42,
+export const defaultStruct = (): Struct => ({
+	allFields: { intVal: 3, stringVal: "hello", },
+	partialFields: { intVal: 3, },
+	emptyFields: defaultNestedStruct(),
 });
 
