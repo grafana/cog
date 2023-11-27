@@ -225,7 +225,7 @@ func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
 			return nil, errorWithCueRef(v, "enums may only be generated from a disjunction of concrete strings or numbers")
 		}
 
-		val, err := g.cueConcreteToScalar(dv)
+		val, err := cueConcreteToScalar(dv)
 		if err != nil {
 			return nil, err
 		}
@@ -462,7 +462,7 @@ func (g *generator) scalarTypeOptions(v cue.Value, defVal any, hints ast.Jennies
 	}
 
 	if v.IsConcrete() {
-		val, err := g.cueConcreteToScalar(v)
+		val, err := cueConcreteToScalar(v)
 		if err != nil {
 			return nil, err
 		}
@@ -499,7 +499,7 @@ func (g *generator) extractDefault(v cue.Value) (any, error) {
 		return nil, nil
 	}
 
-	def, err := g.cueConcreteToScalar(defaultVal)
+	def, err := cueConcreteToScalar(defaultVal)
 	if err != nil {
 		return nil, err
 	}
@@ -544,7 +544,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 		// TODO: support more constraints?
 		switch fmt.Sprint(args[0]) {
 		case "strings.MinRunes":
-			scalar, err := g.cueConcreteToScalar(args[1])
+			scalar, err := cueConcreteToScalar(args[1])
 			if err != nil {
 				return nil, err
 			}
@@ -555,7 +555,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 			})
 
 		case "strings.MaxRunes":
-			scalar, err := g.cueConcreteToScalar(args[1])
+			scalar, err := cueConcreteToScalar(args[1])
 			if err != nil {
 				return nil, err
 			}
@@ -622,7 +622,7 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 
 	// v.IsConcrete() being true means we're looking at a constant/known value
 	if v.IsConcrete() {
-		val, err := g.cueConcreteToScalar(v)
+		val, err := cueConcreteToScalar(v)
 		if err != nil {
 			return typeDef, err
 		}
@@ -631,7 +631,7 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 	}
 
 	// If the default (all lists have a default, usually self, ugh) differs from the
-	// input list, peel it off. Otherwise our AnyIndex lookup may end up getting
+	// input list, peel it off. Otherwise, our AnyIndex lookup may end up getting
 	// sent on the wrong path.
 
 	// extract constraints

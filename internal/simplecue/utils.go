@@ -140,7 +140,7 @@ func getTypeHint(v cue.Value) (string, error) {
 
 // ONLY call this function if it has been established that the provided Value is
 // Concrete.
-func (g *generator) cueConcreteToScalar(v cue.Value) (interface{}, error) {
+func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 	switch v.Kind() {
 	case cue.NullKind:
 		return nil, nil //nolint: nilnil
@@ -162,7 +162,7 @@ func (g *generator) cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		for it.Next() {
 			current := it.Value()
 
-			val, err := g.cueConcreteToScalar(current)
+			val, err := cueConcreteToScalar(current)
 			if err != nil {
 				return nil, err
 			}
@@ -181,7 +181,7 @@ func (g *generator) cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		iter, _ := v.Fields(cue.Optional(true), cue.Definitions(true))
 		for iter.Next() {
 			fieldLabel := selectorLabel(iter.Selector())
-			value, err := g.cueConcreteToScalar(iter.Value())
+			value, err := cueConcreteToScalar(iter.Value())
 			if err != nil {
 				return nil, err
 			}
