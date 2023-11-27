@@ -65,6 +65,14 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
+	comments := builder.For.Comments
+	if jenny.Config.Debug {
+		veneerTrail := tools.Map(builder.VeneerTrail, func(veneer string) string {
+			return fmt.Sprintf("Modified by veneer '%s'", veneer)
+		})
+		comments = append(comments, veneerTrail...)
+	}
+
 	err := templates.
 		Funcs(map[string]any{
 			"formatPath": jenny.formatFieldPath,
@@ -84,7 +92,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			Imports:              imports,
 			BuilderName:          tools.UpperCamelCase(builder.Name),
 			ObjectName:           fullObjectName,
-			Comments:             builder.For.Comments,
+			Comments:             comments,
 			Constructor:          jenny.generateConstructor(builder),
 			Properties:           builder.Properties,
 			Defaults:             jenny.genDefaultOptionsCalls(builder),
@@ -193,9 +201,18 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 }
 
 func (jenny *Builder) generateOption(def ast.Option) template.Option {
+	comments := def.Comments
+
+	if jenny.Config.Debug {
+		veneerTrail := tools.Map(def.VeneerTrail, func(veneer string) string {
+			return fmt.Sprintf("Modified by veneer '%s'", veneer)
+		})
+		comments = append(comments, veneerTrail...)
+	}
+
 	return template.Option{
 		Name:        tools.UpperCamelCase(def.Name),
-		Comments:    def.Comments,
+		Comments:    comments,
 		Args:        def.Args,
 		Assignments: tools.Map(def.Assignments, jenny.generateAssignment),
 	}

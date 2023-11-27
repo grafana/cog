@@ -88,7 +88,14 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 		}
 
 		// TODO: initializations
-		return mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions)
+		newBuilder, err := mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions)
+		if err != nil {
+			return ast.Builder{}, err
+		}
+
+		newBuilder.AddToVeneerTrail("MergeInto")
+
+		return newBuilder, nil
 	})
 }
 
@@ -198,6 +205,8 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 				return nil, err
 			}
 
+			composedBuilder.AddToVeneerTrail("ComposeDashboardPanel")
+
 			newBuilders = append(newBuilders, composedBuilder)
 		}
 
@@ -213,6 +222,7 @@ func Rename(selector Selector, newName string) RewriteRule {
 			}
 
 			builders[i].Name = newName
+			builders[i].AddToVeneerTrail("Rename")
 		}
 
 		return builders, nil
@@ -227,6 +237,7 @@ func Properties(selector Selector, properties []ast.StructField) RewriteRule {
 			}
 
 			builders[i].Properties = append(builders[i].Properties, properties...)
+			builders[i].AddToVeneerTrail("Properties")
 		}
 
 		return builders, nil

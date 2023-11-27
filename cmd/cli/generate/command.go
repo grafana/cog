@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/cmd/cli/loaders"
@@ -19,7 +20,7 @@ import (
 type Options struct {
 	loaders.Options
 
-	Targets                 common.Targets
+	JenniesConfig           common.Config
 	Languages               []string
 	VeneerConfigFiles       []string
 	VeneerConfigDirectories []string
@@ -65,8 +66,10 @@ func Command() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.Targets.Types, "generate-types", true, "Generate types.")          // TODO: better usage text
-	cmd.Flags().BoolVar(&opts.Targets.Builders, "generate-builders", true, "Generate builders.") // TODO: better usage text
+	cmd.Flags().BoolVar(&opts.JenniesConfig.Debug, "debug", false, "Debugging mode.") // TODO: better usage text
+
+	cmd.Flags().BoolVar(&opts.JenniesConfig.Types, "generate-types", true, "Generate types.")          // TODO: better usage text
+	cmd.Flags().BoolVar(&opts.JenniesConfig.Builders, "generate-builders", true, "Generate builders.") // TODO: better usage text
 
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
@@ -113,6 +116,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		return err
 	}
 
+	fmt.Printf("Parsing inputs...\n")
 	schemas, err := loaders.LoadAll(opts.Options)
 	if err != nil {
 		return err
@@ -139,8 +143,13 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 			return err
 		}
 
-		// then delegate the actual codegen to the jennies
-		fs, err := target.Jennies(opts.Targets).GenerateFS(common.Context{
+		// prepare the jennies
+		outputDir := strings.ReplaceAll(opts.OutputDir, "%l", language)
+		languageJennies := target.Jennies(opts.JenniesConfig)
+		languageJennies.AddPostprocessors(common.PathPrefixer(outputDir))
+
+		// then delegate the codegen to the jennies
+		fs, err := languageJennies.GenerateFS(common.Context{
 			Schemas:  processedSchemas,
 			Builders: builders,
 		})
@@ -148,13 +157,12 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 			return err
 		}
 
-		err = rootCodeJenFS.Merge(fs)
-		if err != nil {
+		if err = rootCodeJenFS.Merge(fs); err != nil {
 			return err
 		}
 	}
 
-	err = rootCodeJenFS.Write(context.Background(), opts.OutputDir)
+	err = rootCodeJenFS.Write(context.Background(), "")
 	if err != nil {
 		return err
 	}

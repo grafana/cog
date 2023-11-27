@@ -12,7 +12,7 @@ import (
 )
 
 type LanguageJenny interface {
-	Jennies(targets common.Targets) *codejen.JennyList[common.Context]
+	Jennies(config common.Config) *codejen.JennyList[common.Context]
 	CompilerPasses() compiler.Passes
 	RegisterCliFlags(cmd *cobra.Command)
 }
