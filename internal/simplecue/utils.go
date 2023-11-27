@@ -177,17 +177,23 @@ func (g *generator) cueConcreteToScalar(v cue.Value) (interface{}, error) {
 
 		return values, nil
 	case cue.StructKind:
-		fields, err := g.structFields(v)
-		if err != nil {
-			return nil, err
+		newMap := make(map[string]interface{})
+		iter, _ := v.Fields(cue.Optional(true), cue.Definitions(true))
+		for iter.Next() {
+			fieldLabel := selectorLabel(iter.Selector())
+			value, err := g.cueConcreteToScalar(iter.Value())
+			if err != nil {
+				return nil, err
+			}
+			newMap[fieldLabel] = value
 		}
 
-		if len(fields) == 0 {
+		if len(newMap) == 0 {
 			//nolint: nilnil
 			return nil, nil
 		}
 
-		return ast.NewStruct(fields...), nil
+		return newMap, nil
 	default:
 		return nil, errorWithCueRef(v, "can not convert kind to scalar: %s", v.Kind())
 	}

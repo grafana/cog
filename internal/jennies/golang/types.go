@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"github.com/grafana/cog/internal/orderedmap"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -162,7 +163,7 @@ func formatScalar(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
-func formatDefaultStruct(refPkg, pkg string, structDef ast.StructType) string {
+func formatDefaultStruct(refPkg, pkg string, structMap *orderedmap.Map[string, interface{}]) string {
 	starter, format, sep, lastSep, ending := "{\n", "%s: %v", ",\n", ",\n", "}"
 	if pkg != "" {
 		starter, format, sep, lastSep, ending = fmt.Sprintf("New%sBuilder().\n", pkg), "%s(%v)", ".\n", ",\n", ""
@@ -172,28 +173,26 @@ func formatDefaultStruct(refPkg, pkg string, structDef ast.StructType) string {
 	}
 
 	var buffer strings.Builder
-	for i, field := range structDef.Fields {
-		name := field.Name
+	count := 0
+	structMap.Iterate(func(key string, value interface{}) {
 		if pkg != "" {
-			name = tools.UpperCamelCase(name)
+			key = tools.UpperCamelCase(key)
 		}
 
-		switch field.Type.Kind {
-		case ast.KindScalar:
-			buffer.WriteString(fmt.Sprintf(format, name, formatScalar(field.Type.AsScalar().Value)))
-		case ast.KindArray:
-			// FIXME: Parse array items
-			buffer.WriteString(fmt.Sprintf(format, name, "[]string{}"))
-		case ast.KindStruct:
-			buffer.WriteString(fmt.Sprintf(format, name, formatDefaultStruct(refPkg, pkg, field.Type.AsStruct())))
+		switch x := value.(type) {
+		case map[string]interface{}:
+			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultStruct(refPkg, pkg, toOrderedMap(x))))
+		default:
+			buffer.WriteString(fmt.Sprintf(format, key, formatScalar(value)))
 		}
 
-		if i != len(structDef.Fields)-1 {
+		if count != structMap.Len()-1 {
 			buffer.WriteString(sep)
 		} else {
 			buffer.WriteString(lastSep)
 		}
-	}
+		count++
+	})
 
 	return fmt.Sprintf("%s%s%s", starter, buffer.String(), ending)
 }
@@ -256,4 +255,13 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	buffer.WriteString("}")
 
 	return buffer.String()
+}
+
+func toOrderedMap(m map[string]interface{}) *orderedmap.Map[string, interface{}] {
+	om := orderedmap.New[string, interface{}]()
+	for k, v := range m {
+		om.Set(k, v)
+	}
+
+	return om
 }

@@ -123,7 +123,7 @@ func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.Opt
 
 func hasTypedDefaults(opt ast.Option) bool {
 	for _, defArg := range opt.Default.ArgsValues {
-		if _, ok := defArg.(ast.Type); ok {
+		if _, ok := defArg.(map[string]interface{}); ok {
 			return true
 		}
 	}
@@ -134,23 +134,15 @@ func hasTypedDefaults(opt ast.Option) bool {
 func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
 	args := make([]string, 0)
 	for i, arg := range opt.Default.ArgsValues {
-		val, ok := arg.(ast.Type)
-		if ok {
-			if val.Kind != ast.KindStruct {
-				args = append(args, formatScalar(val))
-				continue
-			}
+		val, _ := arg.(map[string]interface{})
 
-			pkg := ""
-			refPkg := ""
-			if opt.Args[i].Type.Kind == ast.KindRef {
-				refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
-				pkg = opt.Args[i].Type.AsRef().ReferredType
-			}
-			args = append(args, formatDefaultStruct(refPkg, pkg, val.AsStruct()))
-		} else {
-			args = append(args, formatScalar(val))
+		pkg := ""
+		refPkg := ""
+		if opt.Args[i].Type.Kind == ast.KindRef {
+			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
+			pkg = opt.Args[i].Type.AsRef().ReferredType
 		}
+		args = append(args, formatDefaultStruct(refPkg, pkg, toOrderedMap(val)))
 	}
 	return args
 }
