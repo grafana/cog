@@ -49,7 +49,7 @@ func (opts Options) veneers() (*rewrite.Rewriter, error) {
 		return nil, err
 	}
 
-	return yaml.NewLoader().RewriterFromFiles(veneerFiles)
+	return yaml.NewLoader().RewriterFrom(veneerFiles)
 }
 
 func Command() *cobra.Command {
