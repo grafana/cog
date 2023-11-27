@@ -8,7 +8,9 @@ import (
 
 type Selector func(builder ast.Builder) bool
 
-// Note: comparison on object name is case insensitive
+// ByObjectName matches builders for the given the object (referred to by its
+// package and name).
+// Note: the comparison on object name is case-insensitive.
 func ByObjectName(pkg string, objectName string) Selector {
 	return func(builder ast.Builder) bool {
 		return builder.For.SelfRef.ReferredPkg == pkg &&
@@ -16,6 +18,8 @@ func ByObjectName(pkg string, objectName string) Selector {
 	}
 }
 
+// StructGeneratedFromDisjunction matches builders for structs that were
+// generated from a disjunction (see the Disjunction compiler pass).
 func StructGeneratedFromDisjunction() Selector {
 	return func(builder ast.Builder) bool {
 		resolved, found := builder.Schema.Resolve(builder.For.Type)
@@ -27,24 +31,11 @@ func StructGeneratedFromDisjunction() Selector {
 	}
 }
 
+// ComposableDashboardPanel matches builders for Panel variants.
 func ComposableDashboardPanel() Selector {
 	return func(builder ast.Builder) bool {
 		return builder.Schema.Metadata.Kind == ast.SchemaKindComposable &&
 			builder.Schema.Metadata.Variant == ast.SchemaVariantPanel &&
 			builder.Schema.Metadata.Identifier != ""
-	}
-}
-
-func ComposableDataQuery() Selector {
-	return func(builder ast.Builder) bool {
-		return builder.Schema.Metadata.Kind == ast.SchemaKindComposable &&
-			builder.Schema.Metadata.Variant == ast.SchemaVariantDataQuery &&
-			builder.Schema.Metadata.Identifier != ""
-	}
-}
-
-func EveryBuilder() Selector {
-	return func(builder ast.Builder) bool {
-		return true
 	}
 }
