@@ -117,7 +117,6 @@ type BuilderSelector struct {
 	ByObject *string `yaml:"by_object"`
 
 	GeneratedFromDisjunction *bool `yaml:"generated_from_disjunction"` // noop?
-	Any                      *bool `yaml:"any"`                        // noop?
 }
 
 func (selector BuilderSelector) AsSelector(pkg string) (builder.Selector, error) {
@@ -127,10 +126,6 @@ func (selector BuilderSelector) AsSelector(pkg string) (builder.Selector, error)
 
 	if selector.GeneratedFromDisjunction != nil {
 		return builder.StructGeneratedFromDisjunction(), nil
-	}
-
-	if selector.Any != nil {
-		return builder.EveryBuilder(), nil
 	}
 
 	return nil, fmt.Errorf("empty selector")
