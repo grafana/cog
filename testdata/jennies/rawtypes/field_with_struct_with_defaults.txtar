@@ -1,0 +1,147 @@
+# Fields with struct field with defaults
+-- ir.json --
+{
+    "Package": "defaults",
+    "Objects": [
+        {
+          "Name": "NestedStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "stringVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "intVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          }
+        }, {
+          "Name": "Struct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "allFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Ref": {
+                      "ReferredPkg": "defaults",
+                      "ReferredType": "NestedStruct"
+                    },
+                    "Default": {
+                      "intVal": 3,
+                      "stringVal": "hello"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "partialFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Ref": {
+                      "ReferredPkg": "defaults",
+                      "ReferredType": "NestedStruct"
+                    },
+                    "Default": {
+                      "intVal": 3
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "emptyFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Ref": {
+                      "ReferredPkg": "defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          }
+        }
+    ]
+}
+
+-- out/jennies/GoRawTypes --
+== defaults/types_gen.go
+package defaults
+
+type NestedStruct struct {
+	StringVal string `json:"stringVal"`
+	IntVal int64 `json:"intVal"`
+}
+
+type Struct struct {
+	AllFields NestedStruct `json:"allFields"`
+	PartialFields NestedStruct `json:"partialFields"`
+	EmptyFields NestedStruct `json:"emptyFields"`
+}
+
+-- out/jennies/TypescriptRawTypes --
+== defaults/types_gen.ts
+export interface SomeStruct {
+	fieldBool: boolean;
+	fieldString: string;
+	FieldStringWithConstantValue: "auto";
+	FieldFloat32: number;
+	FieldInt32: number;
+export interface NestedStruct {
+	stringVal: string;
+	intVal: number;
+}
+export const defaultSomeStruct = (): SomeStruct => ({
+	fieldBool: true,
+	fieldString: "foo",
+	FieldStringWithConstantValue: "auto",
+	FieldFloat32: 42.42,
+	FieldInt32: 42,
+export const defaultNestedStruct = (): NestedStruct => ({
+	stringVal: "",
+	intVal: 0,
+});
+export interface Struct {
+	allFields: NestedStruct;
+	partialFields: NestedStruct;
+	emptyFields: NestedStruct;
+}
+export const defaultStruct = (): Struct => ({
+	allFields: defaultNestedStruct(),
+	partialFields: defaultNestedStruct(),
+	emptyFields: defaultNestedStruct(),
+});
+
+export const defaultSomeStruct = (): SomeStruct => ({
+	fieldBool: true,
+	fieldString: "foo",
+	FieldStringWithConstantValue: "auto",
+	FieldFloat32: 42.42,
+	FieldInt32: 42,
+});
+

@@ -827,3 +827,63 @@ StringVal("hello"),
 IntVal(4),
 )
 }
+
+-- out/jennies/TypescriptBuilder --
+== struct_with_defaults/nestedstruct_builder_gen.ts
+import * as cog from '../cog';
+import * as struct_with_defaults from '../struct_with_defaults';
+
+export class NestedStructBuilder implements cog.OptionsBuilder<struct_with_defaults.NestedStruct> {
+    private readonly internal: struct_with_defaults.NestedStruct;
+
+    constructor() {
+        this.internal = struct_with_defaults.defaultNestedStruct();
+    }
+
+    build(): struct_with_defaults.NestedStruct {
+        return this.internal;
+    }
+
+    stringVal(stringVal: string): this {
+        this.internal.stringVal = stringVal;
+        return this;
+    }
+
+    intVal(intVal: number): this {
+        this.internal.intVal = intVal;
+        return this;
+    }
+}
+== struct_with_defaults/struct_builder_gen.ts
+import * as cog from '../cog';
+import * as struct_with_defaults from '../struct_with_defaults';
+
+export class StructBuilder implements cog.OptionsBuilder<struct_with_defaults.Struct> {
+    private readonly internal: struct_with_defaults.Struct;
+
+    constructor() {
+        this.internal = struct_with_defaults.defaultStruct();
+    }
+
+    build(): struct_with_defaults.Struct {
+        return this.internal;
+    }
+
+    allFields(allFields: cog.OptionsBuilder<struct_with_defaults.NestedStruct>): this {
+        const allFieldsResource = allFields.build();
+        this.internal.allFields = allFieldsResource;
+        return this;
+    }
+
+    partialFields(partialFields: cog.OptionsBuilder<struct_with_defaults.NestedStruct>): this {
+        const partialFieldsResource = partialFields.build();
+        this.internal.partialFields = partialFieldsResource;
+        return this;
+    }
+
+    emptyFields(emptyFields: cog.OptionsBuilder<struct_with_defaults.NestedStruct>): this {
+        const emptyFieldsResource = emptyFields.build();
+        this.internal.emptyFields = emptyFieldsResource;
+        return this;
+    }
+}
