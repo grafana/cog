@@ -332,6 +332,8 @@ func defaultValueForStructs(m *orderedmap.Map[string, interface{}]) any {
 		switch value.(type) {
 		case map[string]interface{}:
 			buffer.WriteString(fmt.Sprintf("%s: %v, ", key, defaultValueForStructs(toOrderedMap(value))))
+		case nil:
+			buffer.WriteString(fmt.Sprintf("%s: %v, ", key, formatValue([]any{})))
 		default:
 			buffer.WriteString(fmt.Sprintf("%s: %v, ", key, formatValue(value)))
 		}

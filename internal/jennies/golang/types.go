@@ -183,8 +183,10 @@ func formatDefaultStruct(refPkg, pkg string, structMap *orderedmap.Map[string, i
 		switch x := value.(type) {
 		case map[string]interface{}:
 			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultStruct(refPkg, pkg, toOrderedMap(x))))
+		case nil:
+			buffer.WriteString(fmt.Sprintf(format, key, formatScalar([]any{})))
 		default:
-			buffer.WriteString(fmt.Sprintf(format, key, formatScalar(value)))
+			buffer.WriteString(fmt.Sprintf(format, key, formatScalar(x)))
 		}
 
 		if count != structMap.Len()-1 {
