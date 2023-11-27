@@ -313,11 +313,30 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 		return defaultValueForEnumType(ref.ReferredType, referredType.Type, typeDef.Default)
 	}
 
+	if hasStructDefaults(referredType.Type, typeDef.Default) {
+		return defaultValueForStructs(toOrderedMap(typeDef.Default))
+	}
+
 	if pkg != "" {
 		return raw(fmt.Sprintf("%s.default%s()", ref.ReferredPkg, ref.ReferredType))
 	}
 
 	return raw(fmt.Sprintf("default%s()", ref.ReferredType))
+}
+
+func defaultValueForStructs(m *orderedmap.Map[string, interface{}]) any {
+	var buffer strings.Builder
+
+	m.Iterate(func(key string, value interface{}) {
+		switch value.(type) {
+		case map[string]interface{}:
+			buffer.WriteString(fmt.Sprintf("%s: %v, ", key, defaultValueForStructs(toOrderedMap(value))))
+		default:
+			buffer.WriteString(fmt.Sprintf("%s: %v, ", key, formatValue(value)))
+		}
+	})
+
+	return raw(fmt.Sprintf("{ %s}", buffer.String()))
 }
 
 func formatValue(val any) string {
@@ -350,4 +369,20 @@ func formatValue(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
+}
+
+func hasStructDefaults(typeDef ast.Type, defaults any) bool {
+	_, ok := defaults.(map[string]interface{})
+	return ok && typeDef.Kind == ast.KindStruct
+}
+
+func toOrderedMap(defaults any) *orderedmap.Map[string, interface{}] {
+	om := orderedmap.New[string, interface{}]()
+
+	m, _ := defaults.(map[string]interface{})
+	for k, v := range m {
+		om.Set(k, v)
+	}
+
+	return om
 }
