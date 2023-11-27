@@ -33,3 +33,17 @@ func Map[T any, O any](input []T, mapper func(T) O) []O {
 
 	return output
 }
+
+func Filter[T any](input []T, predicate func(T) bool) []T {
+	output := make([]T, 0, len(input))
+
+	for i := range input {
+		if !predicate(input[i]) {
+			continue
+		}
+
+		output = append(output, input[i])
+	}
+
+	return output
+}
