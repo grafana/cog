@@ -1,0 +1,829 @@
+# Example of structs with defaults
+# Generated using `go run cmd/cli/main.go inspect --cue ./testdata/jennies/builders/struct_with_defaults --builder-ir`
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "struct_with_defaults",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "NestedStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "stringVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "intVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "struct_with_defaults",
+            "ReferredType": "NestedStruct"
+          }
+        },
+        {
+          "Name": "Struct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "allFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Default": {
+                      "intVal": 3,
+                      "stringVal": "hello"
+                    },
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "partialFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Default": {
+                      "intVal": 4
+                    },
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "emptyFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "struct_with_defaults",
+            "ReferredType": "Struct"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "struct_with_defaults",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "NestedStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "stringVal",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "intVal",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int64"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "struct_with_defaults",
+              "ReferredType": "NestedStruct"
+            }
+          },
+          {
+            "Name": "Struct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "allFields",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Default": {
+                        "intVal": 3,
+                        "stringVal": "hello"
+                      },
+                      "Ref": {
+                        "ReferredPkg": "struct_with_defaults",
+                        "ReferredType": "NestedStruct"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "partialFields",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Default": {
+                        "intVal": 4
+                      },
+                      "Ref": {
+                        "ReferredPkg": "struct_with_defaults",
+                        "ReferredType": "NestedStruct"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "emptyFields",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "struct_with_defaults",
+                        "ReferredType": "NestedStruct"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "struct_with_defaults",
+              "ReferredType": "Struct"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "NestedStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "stringVal",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "intVal",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "int64"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "struct_with_defaults",
+          "ReferredType": "NestedStruct"
+        }
+      },
+      "Package": "struct_with_defaults",
+      "Name": "NestedStruct",
+      "Properties": null,
+      "Options": [
+        {
+          "Name": "stringVal",
+          "Args": [
+            {
+              "Name": "stringVal",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "stringVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "stringVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "intVal",
+          "Args": [
+            {
+              "Name": "intVal",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "intVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "intVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    },
+    {
+      "Schema": {
+        "Package": "struct_with_defaults",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "NestedStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "stringVal",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "intVal",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int64"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "struct_with_defaults",
+              "ReferredType": "NestedStruct"
+            }
+          },
+          {
+            "Name": "Struct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "allFields",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Default": {
+                        "intVal": 3,
+                        "stringVal": "hello"
+                      },
+                      "Ref": {
+                        "ReferredPkg": "struct_with_defaults",
+                        "ReferredType": "NestedStruct"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "partialFields",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Default": {
+                        "intVal": 4
+                      },
+                      "Ref": {
+                        "ReferredPkg": "struct_with_defaults",
+                        "ReferredType": "NestedStruct"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "emptyFields",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "struct_with_defaults",
+                        "ReferredType": "NestedStruct"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "struct_with_defaults",
+              "ReferredType": "Struct"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Struct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "allFields",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Default": {
+                    "intVal": 3,
+                    "stringVal": "hello"
+                  },
+                  "Ref": {
+                    "ReferredPkg": "struct_with_defaults",
+                    "ReferredType": "NestedStruct"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "partialFields",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Default": {
+                    "intVal": 4
+                  },
+                  "Ref": {
+                    "ReferredPkg": "struct_with_defaults",
+                    "ReferredType": "NestedStruct"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "emptyFields",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "struct_with_defaults",
+                    "ReferredType": "NestedStruct"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "struct_with_defaults",
+          "ReferredType": "Struct"
+        }
+      },
+      "Package": "struct_with_defaults",
+      "Name": "Struct",
+      "Properties": null,
+      "Options": [
+        {
+          "Name": "allFields",
+          "Args": [
+            {
+              "Name": "allFields",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": {
+                  "intVal": 3,
+                  "stringVal": "hello"
+                },
+                "Ref": {
+                  "ReferredPkg": "struct_with_defaults",
+                  "ReferredType": "NestedStruct"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "allFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Default": {
+                      "intVal": 3,
+                      "stringVal": "hello"
+                    },
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "allFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Default": {
+                      "intVal": 3,
+                      "stringVal": "hello"
+                    },
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              {
+                "intVal": 3,
+                "stringVal": "hello"
+              }
+            ]
+          },
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "partialFields",
+          "Args": [
+            {
+              "Name": "partialFields",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": {
+                  "intVal": 4
+                },
+                "Ref": {
+                  "ReferredPkg": "struct_with_defaults",
+                  "ReferredType": "NestedStruct"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "partialFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Default": {
+                      "intVal": 4
+                    },
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "partialFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Default": {
+                      "intVal": 4
+                    },
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              {
+                "intVal": 4
+              }
+            ]
+          },
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "emptyFields",
+          "Args": [
+            {
+              "Name": "emptyFields",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "struct_with_defaults",
+                  "ReferredType": "NestedStruct"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "emptyFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "emptyFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "struct_with_defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/GoBuilder --
+== struct_with_defaults/nestedstruct_builder_gen.go
+package struct_with_defaults
+
+import (
+	cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[NestedStruct] = (*NestedStructBuilder)(nil)
+
+type NestedStructBuilder struct {
+    internal *NestedStruct
+    errors map[string]cog.BuildErrors
+}
+
+func NewNestedStructBuilder() *NestedStructBuilder {
+	resource := &NestedStruct{}
+	builder := &NestedStructBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *NestedStructBuilder) Build() (NestedStruct, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("NestedStruct", err)...)
+	}
+
+	if len(errs) != 0 {
+		return NestedStruct{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *NestedStructBuilder) StringVal(stringVal string) *NestedStructBuilder {
+    builder.internal.StringVal = stringVal
+
+    return builder
+}
+
+func (builder *NestedStructBuilder) IntVal(intVal int64) *NestedStructBuilder {
+    builder.internal.IntVal = intVal
+
+    return builder
+}
+
+func (builder *NestedStructBuilder) applyDefaults() {
+}
+== struct_with_defaults/struct_builder_gen.go
+package struct_with_defaults
+
+import (
+	cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[Struct] = (*StructBuilder)(nil)
+
+type StructBuilder struct {
+    internal *Struct
+    errors map[string]cog.BuildErrors
+}
+
+func NewStructBuilder() *StructBuilder {
+	resource := &Struct{}
+	builder := &StructBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *StructBuilder) Build() (Struct, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("Struct", err)...)
+	}
+
+	if len(errs) != 0 {
+		return Struct{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *StructBuilder) AllFields(allFields cog.Builder[NestedStruct]) *StructBuilder {
+        allFieldsResource, err := allFields.Build()
+        if err != nil {
+            builder.errors["allFields"] = err.(cog.BuildErrors)
+            return builder
+        }
+    builder.internal.AllFields = allFieldsResource
+
+    return builder
+}
+
+func (builder *StructBuilder) PartialFields(partialFields cog.Builder[NestedStruct]) *StructBuilder {
+        partialFieldsResource, err := partialFields.Build()
+        if err != nil {
+            builder.errors["partialFields"] = err.(cog.BuildErrors)
+            return builder
+        }
+    builder.internal.PartialFields = partialFieldsResource
+
+    return builder
+}
+
+func (builder *StructBuilder) EmptyFields(emptyFields cog.Builder[NestedStruct]) *StructBuilder {
+        emptyFieldsResource, err := emptyFields.Build()
+        if err != nil {
+            builder.errors["emptyFields"] = err.(cog.BuildErrors)
+            return builder
+        }
+    builder.internal.EmptyFields = emptyFieldsResource
+
+    return builder
+}
+
+func (builder *StructBuilder) applyDefaults() {
+    builder.AllFields(NewNestedStructBuilder().
+IntVal(3).
+StringVal("hello"),
+)
+    builder.PartialFields(NewNestedStructBuilder().
+IntVal(4),
+)
+}
