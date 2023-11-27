@@ -264,7 +264,7 @@ func toOrderedMap(m map[string]interface{}) *orderedmap.Map[string, interface{}]
 	orderedMap := orderedmap.New[string, interface{}]()
 
 	keys := make([]string, 0, len(m))
-	for k, _ := range m {
+	for k := range m {
 		keys = append(keys, k)
 	}
 
