@@ -52,7 +52,5 @@ $ git clone https://github.com/grafana/kind-registry schemas/kind-registry
 $ go run cmd/cli/main.go generate \
     --output ./generated \
     --kind-registry ./schemas/kind-registry \
-    --cue ./schemas/cue/common \
-    --include-cue-import ./schemas/cue/common:github.com/grafana/grafana/packages/grafana-schema/src/common \
     --veneers ./config
 ```
