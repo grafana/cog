@@ -166,7 +166,7 @@
 import * as cog from '../cog';
 import * as properties from '../properties';
 
-export class SomeStructBuilder implements cog.OptionsBuilder<properties.SomeStruct> {
+export class SomeStructBuilder implements cog.Builder<properties.SomeStruct> {
     private readonly internal: properties.SomeStruct;
     private someBuilderProperty: string = "";
 

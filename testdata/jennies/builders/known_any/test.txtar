@@ -223,7 +223,7 @@
 import * as cog from '../cog';
 import * as known_any from '../known_any';
 
-export class SomeStructBuilder implements cog.OptionsBuilder<known_any.SomeStruct> {
+export class SomeStructBuilder implements cog.Builder<known_any.SomeStruct> {
     private readonly internal: known_any.SomeStruct;
 
     constructor() {

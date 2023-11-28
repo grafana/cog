@@ -303,7 +303,7 @@
 import * as cog from '../cog';
 import * as anonymous_struct from '../anonymous_struct';
 
-export class SomeStructBuilder implements cog.OptionsBuilder<anonymous_struct.SomeStruct> {
+export class SomeStructBuilder implements cog.Builder<anonymous_struct.SomeStruct> {
     private readonly internal: anonymous_struct.SomeStruct;
 
     constructor() {
