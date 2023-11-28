@@ -4,7 +4,7 @@
 {{- range .Comments }}
 // {{ . }}
 {{- end }}
-export class {{ .BuilderName|upperCamelCase }}Builder implements cog.OptionsBuilder<{{ .BuilderSignatureType }}> {
+export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ .BuilderSignatureType }}> {
     private readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
     {{- range .Properties }}
     private {{ .Name }}: {{ .Type | formatType }} = {{ .Type | defaultValueForType }};

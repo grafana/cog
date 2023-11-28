@@ -56,7 +56,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 		if resolveBuilders && formatter.context.ResolveToBuilder(def) {
 			cogAlias := formatter.packageMapper("cog")
 
-			return fmt.Sprintf("%s.OptionsBuilder<%s>", cogAlias, formatted)
+			return fmt.Sprintf("%s.Builder<%s>", cogAlias, formatted)
 		}
 
 		return formatted
@@ -86,7 +86,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 
 		cogAlias := formatter.packageMapper("cog")
 
-		return fmt.Sprintf("%s.OptionsBuilder<%s>", cogAlias, formatted)
+		return fmt.Sprintf("%s.Builder<%s>", cogAlias, formatted)
 	default:
 		return string(def.Kind)
 	}

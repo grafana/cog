@@ -462,7 +462,7 @@ import * as cog from '../cog';
 import * as basic_struct from '../basic_struct';
 
 // SomeStruct, to hold data.
-export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct.SomeStruct> {
+export class SomeStructBuilder implements cog.Builder<basic_struct.SomeStruct> {
     private readonly internal: basic_struct.SomeStruct;
 
     constructor() {
