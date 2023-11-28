@@ -90,6 +90,7 @@ func locateEntrypoints(opts Options, kind string) ([]string, error) {
 
 func dirExists(dir string) (bool, error) {
 	stat, err := os.Stat(dir)
+	//nolint:gocritic
 	if os.IsNotExist(err) {
 		return false, nil
 	} else if err != nil {
