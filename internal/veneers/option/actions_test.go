@@ -309,6 +309,7 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 	structType := ast.NewStruct(
 		ast.NewStructField("from", ast.String()),
 		ast.NewStructField("to", ast.String()),
+		ast.NewStructField("type", ast.String(ast.Value("time"))),
 	)
 
 	// input
@@ -338,6 +339,10 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 				{Identifier: "time", Type: structType},
 				{Identifier: "to", Type: ast.String()},
 			}, ast.Argument{Name: "to", Type: ast.String()}),
+			ast.ConstantAssignment(ast.Path{
+				{Identifier: "time", Type: structType},
+				{Identifier: "type", Type: ast.String(ast.Value("time"))},
+			}, "time"),
 		},
 		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}

@@ -171,15 +171,27 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 				Type: field.Type,
 			}
 
-			newOpt.Args = append(newOpt.Args, newArg)
+			// if the field has a value, it's a constant and we don't need to add it as an argument
+			isConstant := field.Type.Kind == ast.KindScalar && field.Type.AsScalar().Value != nil
+			if !isConstant {
+				newOpt.Args = append(newOpt.Args, newArg)
+			}
 
 			if !assignIntoList {
-				newAssignment := ast.ArgumentAssignment(
-					assignmentPathPrefix.Append(ast.PathFromStructField(field)),
-					newArg,
-					ast.Constraints(constraints),
-					ast.Method(oldAssignments[0].Method),
-				)
+				var newAssignment ast.Assignment
+				if isConstant {
+					newAssignment = ast.ConstantAssignment(
+						assignmentPathPrefix.Append(ast.PathFromStructField(field)),
+						field.Type.AsScalar().Value,
+					)
+				} else {
+					newAssignment = ast.ArgumentAssignment(
+						assignmentPathPrefix.Append(ast.PathFromStructField(field)),
+						newArg,
+						ast.Constraints(constraints),
+						ast.Method(oldAssignments[0].Method),
+					)
+				}
 
 				newAssignments = append(newAssignments, newAssignment)
 			} else {
