@@ -82,8 +82,6 @@ jobs:
           go run cmd/cli/main.go generate \
             --output ./generated \
             --kind-registry ../kind-registry \
-            --cue ./schemas/cue/common \
-            --include-cue-import ./schemas/cue/common:github.com/grafana/grafana/packages/grafana-schema/src/common \
             --veneers ./config
 
       - name: Run the Go example
