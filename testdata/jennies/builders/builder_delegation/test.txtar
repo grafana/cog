@@ -753,7 +753,7 @@
 import * as cog from '../cog';
 import * as builder_delegation from '../builder_delegation';
 
-export class DashboardLinkBuilder implements cog.OptionsBuilder<builder_delegation.DashboardLink> {
+export class DashboardLinkBuilder implements cog.Builder<builder_delegation.DashboardLink> {
     private readonly internal: builder_delegation.DashboardLink;
 
     constructor() {
@@ -778,7 +778,7 @@ export class DashboardLinkBuilder implements cog.OptionsBuilder<builder_delegati
 import * as cog from '../cog';
 import * as builder_delegation from '../builder_delegation';
 
-export class DashboardBuilder implements cog.OptionsBuilder<builder_delegation.Dashboard> {
+export class DashboardBuilder implements cog.Builder<builder_delegation.Dashboard> {
     private readonly internal: builder_delegation.Dashboard;
 
     constructor() {
@@ -799,13 +799,13 @@ export class DashboardBuilder implements cog.OptionsBuilder<builder_delegation.D
         return this;
     }
 
-    links(links: cog.OptionsBuilder<builder_delegation.DashboardLink>[]): this {
+    links(links: cog.Builder<builder_delegation.DashboardLink>[]): this {
         const linksResources = links.map(builder => builder.build());
         this.internal.links = linksResources;
         return this;
     }
 
-    singleLink(singleLink: cog.OptionsBuilder<builder_delegation.DashboardLink>): this {
+    singleLink(singleLink: cog.Builder<builder_delegation.DashboardLink>): this {
         const singleLinkResource = singleLink.build();
         this.internal.singleLink = singleLinkResource;
         return this;

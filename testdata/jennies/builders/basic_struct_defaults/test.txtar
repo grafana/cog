@@ -488,7 +488,7 @@
 import * as cog from '../cog';
 import * as basic_struct_defaults from '../basic_struct_defaults';
 
-export class SomeStructBuilder implements cog.OptionsBuilder<basic_struct_defaults.SomeStruct> {
+export class SomeStructBuilder implements cog.Builder<basic_struct_defaults.SomeStruct> {
     private readonly internal: basic_struct_defaults.SomeStruct;
 
     constructor() {

@@ -201,7 +201,7 @@ import * as cog from '../cog';
 import * as some_pkg from '../some_pkg';
 import * as other_pkg from '../other_pkg';
 
-export class PersonBuilder implements cog.OptionsBuilder<some_pkg.Person> {
+export class PersonBuilder implements cog.Builder<some_pkg.Person> {
     private readonly internal: some_pkg.Person;
 
     constructor() {
