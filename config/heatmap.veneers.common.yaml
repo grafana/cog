@@ -5,9 +5,32 @@ package: heatmap
 builders: ~
 
 options:
-  - struct_fields_as_arguments:
-      by_name: Options.legend
-  - struct_fields_as_arguments:
-      by_name: Options.tooltip
+    # ExemplarsColor(color: string) instead of Exemplars(exemplarsConfig: ExemplarConfig)
+    # ExemplarConfig only includes (color: string) field.
   - struct_fields_as_arguments:
       by_name: Options.exemplars
+  - rename:
+      by_name: Options.exemplars
+      as: exemplarsColor
+
+    # ShowLegend/HideLegends instead of Legend(show: bool)
+  - struct_fields_as_arguments:
+      by_name: Options.legend
+  - unfold_boolean:
+      by_name: Options.legend
+      true_as: showLegend
+      false_as: hideLegend
+
+    # Tooltip(show: bool, yHistogram: bool) split into:
+    # - ShowTooltip/HideTooltip
+    # - ShowYHistogram/HideYHistogram
+  - struct_fields_as_options:
+      by_name: Options.tooltip
+  - unfold_boolean:
+      by_name: Options.show
+      true_as: showTooltip
+      false_as: hideTooltip
+  - unfold_boolean:
+      by_name: Options.yHistogram
+      true_as: showYHistogram
+      false_as: hideYHistogram
