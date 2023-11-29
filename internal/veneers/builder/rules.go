@@ -71,12 +71,7 @@ func Omit(selector Selector) RewriteRule {
 
 func MergeInto(selector Selector, sourceBuilderName string, underPath string, excludeOptions []string) RewriteRule {
 	return mapToSelected(selector, func(builders ast.Builders, destinationBuilder ast.Builder) (ast.Builder, error) {
-		sourcePkg, sourceBuilderNameWithoutPkg, found := strings.Cut(sourceBuilderName, ".")
-		if !found {
-			return destinationBuilder, fmt.Errorf("sourceBuilderName '%s' is incorrect: no package found", sourceBuilderName)
-		}
-
-		sourceBuilder, found := builders.LocateByObject(sourcePkg, sourceBuilderNameWithoutPkg)
+		sourceBuilder, found := builders.LocateByObject(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
 		if !found {
 			// We couldn't find the source builder: let's return the selected builder untouched.
 			return destinationBuilder, nil
@@ -88,7 +83,14 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 		}
 
 		// TODO: initializations
-		return mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions)
+		newBuilder, err := mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions)
+		if err != nil {
+			return ast.Builder{}, err
+		}
+
+		newBuilder.AddToVeneerTrail("MergeInto")
+
+		return newBuilder, nil
 	})
 }
 
@@ -198,6 +200,8 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 				return nil, err
 			}
 
+			composedBuilder.AddToVeneerTrail("ComposeDashboardPanel")
+
 			newBuilders = append(newBuilders, composedBuilder)
 		}
 
@@ -213,6 +217,7 @@ func Rename(selector Selector, newName string) RewriteRule {
 			}
 
 			builders[i].Name = newName
+			builders[i].AddToVeneerTrail("Rename")
 		}
 
 		return builders, nil
@@ -227,6 +232,7 @@ func Properties(selector Selector, properties []ast.StructField) RewriteRule {
 			}
 
 			builders[i].Properties = append(builders[i].Properties, properties...)
+			builders[i].AddToVeneerTrail("Properties")
 		}
 
 		return builders, nil

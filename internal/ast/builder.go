@@ -21,9 +21,14 @@ type Builder struct {
 	Properties      []StructField
 	Options         []Option
 	Initializations []Assignment `json:",omitempty"`
+	VeneerTrail     []string     `json:",omitempty"`
 }
 
-func (builder Builder) MakePath(builders Builders, pathAsString string) (Path, error) {
+func (builder *Builder) AddToVeneerTrail(veneerName string) {
+	builder.VeneerTrail = append(builder.VeneerTrail, veneerName)
+}
+
+func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, error) {
 	if pathAsString == "" {
 		return nil, fmt.Errorf("can not make path from empty input")
 	}
@@ -87,10 +92,15 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 type Option struct {
 	Name             string
 	Comments         []string `json:",omitempty"`
+	VeneerTrail      []string `json:",omitempty"`
 	Args             []Argument
 	Assignments      []Assignment
 	Default          *OptionDefault `json:",omitempty"`
 	IsConstructorArg bool
+}
+
+func (opt *Option) AddToVeneerTrail(veneerName string) {
+	opt.VeneerTrail = append(opt.VeneerTrail, veneerName)
 }
 
 type OptionDefault struct {

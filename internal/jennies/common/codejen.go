@@ -31,12 +31,14 @@ func If[Input any](condition bool, innerJenny codejen.OneToMany[Input]) codejen.
 // GeneratedCommentHeader produces a FileMapper that injects a comment header onto
 // a [codejen.File] indicating  the jenny or jennies that constructed the
 // file.
-func GeneratedCommentHeader() codejen.FileMapper {
-	genHeader := `// Code generated - EDITING IS FUTILE. DO NOT EDIT.
-//
-// Using jennies:
-{{- range .Using }}
-//     {{ .JennyName }}
+func GeneratedCommentHeader(config Config) codejen.FileMapper {
+	genHeader := `{{ .Leader }} Code generated - EDITING IS FUTILE. DO NOT EDIT.
+{{- with .Using }}
+{{ $.Leader }}
+{{ $.Leader }} Using jennies:
+{{- range . }}
+{{ $.Leader }}     {{ .JennyName }}
+{{- end }}
 {{- end }}
 
 `
@@ -48,21 +50,45 @@ func GeneratedCommentHeader() codejen.FileMapper {
 	}
 
 	return func(f codejen.File) (codejen.File, error) {
-		// Never inject on certain filetypes, it's never valid
+		var leader string
 		switch filepath.Ext(f.RelativePath) {
-		case ".json", ".yml", ".yaml", ".md":
-			return f, nil
+		case ".ts", ".go":
+			leader = "//"
+		case ".yml", ".yaml", ".py":
+			leader = "#"
 		default:
-			buf := new(bytes.Buffer)
-			if err := tmpl.Execute(buf, map[string]any{
-				"Using": f.From,
-			}); err != nil {
-				return codejen.File{}, fmt.Errorf("failed executing GeneratedCommentHeader() template: %w", err)
-			}
-			buf.Write(f.Data)
-
-			f.Data = buf.Bytes()
+			leader = ""
 		}
+
+		if leader == "" {
+			return f, nil
+		}
+
+		var from []codejen.NamedJenny
+		if config.Debug {
+			from = f.From
+		}
+
+		buf := new(bytes.Buffer)
+		if err := tmpl.Execute(buf, map[string]any{
+			"Using":  from,
+			"Leader": leader,
+		}); err != nil {
+			return codejen.File{}, fmt.Errorf("failed executing GeneratedCommentHeader() template: %w", err)
+		}
+		buf.Write(f.Data)
+
+		f.Data = buf.Bytes()
+
+		return f, nil
+	}
+}
+
+// PathPrefixer returns a FileMapper that injects the provided path prefix to files
+// passed through it.
+func PathPrefixer(prefix string) codejen.FileMapper {
+	return func(f codejen.File) (codejen.File, error) {
+		f.RelativePath = filepath.Join(prefix, f.RelativePath)
 		return f, nil
 	}
 }

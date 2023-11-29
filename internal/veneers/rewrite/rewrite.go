@@ -2,6 +2,7 @@ package rewrite
 
 import (
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
 )
@@ -92,19 +93,8 @@ func (engine *Rewriter) applyOptionRules(builders []ast.Builder, language string
 		}
 	}
 
-	return engine.filterDiscardedBuilders(builders)
-}
-
-func (engine *Rewriter) filterDiscardedBuilders(builders []ast.Builder) []ast.Builder {
-	filteredBuilders := make([]ast.Builder, 0, len(builders))
-	for _, b := range builders {
-		// the builder was dismissed
-		if len(b.Options) == 0 {
-			continue
-		}
-
-		filteredBuilders = append(filteredBuilders, b)
-	}
-
-	return filteredBuilders
+	return tools.Filter(builders, func(builder ast.Builder) bool {
+		// "no options" means that the builder was dismissed.
+		return len(builder.Options) != 0
+	})
 }

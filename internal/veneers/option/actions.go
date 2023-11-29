@@ -7,16 +7,39 @@ import (
 
 type RewriteAction func(builder ast.Builder, option ast.Option) []ast.Option
 
+// RenameAction renames an option.
 func RenameAction(newName string) RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
-		newOption := option
-		newOption.Name = newName
+		option.Name = newName
+		option.AddToVeneerTrail("Rename")
 
-		return []ast.Option{newOption}
+		return []ast.Option{option}
 	}
 }
 
-// FIXME: looks at the first arg only, no way to configure that right now
+// ArrayToAppendAction updates the option to perform an "append" assignment.
+//
+// Example:
+//
+//	```
+//	func Tags(tags []string) {
+//		this.resource.tags = tags
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Tags(tags string) {
+//		this.resource.tags.append(tags)
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it has no arguments
+//   - the argument is not an array
+//
+// FIXME: considers the first arg only.
 func ArrayToAppendAction() RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 || option.Args[0].Type.Kind != ast.KindArray {
@@ -42,6 +65,7 @@ func ArrayToAppendAction() RewriteAction {
 		newOpt := option
 		newOpt.Args = []ast.Argument{newFirstArg}
 		newOpt.Assignments = []ast.Assignment{newFirstAssignment}
+		newOpt.AddToVeneerTrail("ArrayToAppend")
 
 		if len(oldArgs) > 1 {
 			newOpt.Args = append(newOpt.Args, oldArgs[1:]...)
@@ -54,22 +78,52 @@ func ArrayToAppendAction() RewriteAction {
 	}
 }
 
+// OmitAction removes an option.
 func OmitAction() RewriteAction {
 	return func(_ ast.Builder, _ ast.Option) []ast.Option {
 		return nil
 	}
 }
 
+// PromoteToConstructorAction flag the arguments of the given option as "constructor arguments".
+// This flag indicates builder jennies that the arguments and assignments described by this option
+// should be exposed by the builder's constructor.
 func PromoteToConstructorAction() RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
-		newOpt := option
-		newOpt.IsConstructorArg = true
+		option.IsConstructorArg = true
+		option.AddToVeneerTrail("PromoteToConstructor")
 
-		return []ast.Option{newOpt}
+		return []ast.Option{option}
 	}
 }
 
-// FIXME: looks at the first arg only, no way to configure that right now
+// StructFieldsAsArgumentsAction uses the fields of the first argument's struct (assuming it is one) and turns them
+// into arguments.
+//
+// Optionally, an explicit list of fields to turn into arguments can be given.
+//
+// Example:
+//
+//	```
+//	func Time(time {from string, to string) {
+//		this.resource.time = time
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Time(from string, to string) {
+//		this.resource.time.from = from
+//		this.resource.time.to = to
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it has no arguments
+//   - the first argument is not a struct or a reference to one
+//
+// FIXME: considers the first argument only.
 func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 	return func(builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
@@ -78,8 +132,10 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 
 		firstArgType := option.Args[0].Type
 		if firstArgType.Kind == ast.KindRef {
-			referredObject := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
-			firstArgType = referredObject.Type
+			referredObject, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			if found {
+				firstArgType = referredObject.Type
+			}
 		}
 
 		if firstArgType.Kind != ast.KindStruct {
@@ -94,6 +150,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 		newOpt := option
 		newOpt.Args = nil
 		newOpt.Assignments = nil
+		newOpt.AddToVeneerTrail("StructFieldsAsArguments")
 
 		assignIntoList := assignmentPathPrefix.Last().Type.Kind == ast.KindArray
 
@@ -159,7 +216,36 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 	}
 }
 
-// FIXME: looks at the first arg only, no way to configure that right now
+// StructFieldsAsOptionsAction uses the fields of the first argument's struct (assuming it is one) and turns them
+// into options.
+//
+// Optionally, an explicit list of fields to turn into options can be given.
+//
+// Example:
+//
+//	```
+//	func GridPos(gridPos {x int, y int) {
+//		this.resource.gridPos = gridPos
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func X(x int) {
+//		this.resource.gridPos.x = x
+//	}
+//
+//	func Y(y int) {
+//		this.resource.gridPos.y = y
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it has no arguments
+//   - the first argument is not a struct or a reference to one
+//
+// FIXME: considers the first argument only.
 func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 	return func(builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
@@ -168,8 +254,10 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 
 		firstArgType := option.Args[0].Type
 		if firstArgType.Kind == ast.KindRef {
-			referredObject := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
-			firstArgType = referredObject.Type
+			referredObject, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			if found {
+				firstArgType = referredObject.Type
+			}
 		}
 
 		if firstArgType.Kind != ast.KindStruct {
@@ -197,6 +285,7 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 					ast.FieldAssignment(field),
 				},
 			}
+			newOpt.AddToVeneerTrail("StructFieldsAsOptions")
 
 			newOpt.Assignments[0].Path = assignmentPathPrefix.Append(newOpt.Assignments[0].Path)
 
@@ -213,7 +302,34 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 	}
 }
 
-// FIXME: looks at the first arg only, no way to configure that right now
+// DisjunctionAsOptionsAction uses the branches of the first argument's disjunction (assuming it is one) and turns them
+// into options.
+//
+// Example:
+//
+//	```
+//	func Panel(panel Panel|Row) {
+//		this.resource.panels.append(panel)
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Panel(panel Panel) {
+//		this.resource.panels.append(panel)
+//	}
+//
+//	func Row(row Row) {
+//		this.resource.panels.append(row)
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it has no arguments
+//   - the first argument is not a disjunction or a reference to one
+//
+// FIXME: considers the first argument only.
 func DisjunctionAsOptionsAction() RewriteAction {
 	return func(builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
@@ -230,10 +346,8 @@ func DisjunctionAsOptionsAction() RewriteAction {
 		// or maybe a reference to a struct that was created to simulate a disjunction?
 		if firstArgType.Kind == ast.KindRef {
 			// FIXME: we only try to resolve the reference within the same package
-			referredObj := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
-			// Object not found
-			// TODO: LocateObject() should return a "found" boolean
-			if referredObj.Name == "" {
+			referredObj, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			if !found {
 				return []ast.Option{option}
 			}
 
@@ -278,6 +392,7 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Object)
 				},
 			},
 		}
+		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
 		if field.Type.Default != nil {
 			opt.Default = &ast.OptionDefault{
@@ -309,6 +424,7 @@ func disjunctionAsOptions(option ast.Option) []ast.Option {
 				ast.ArgumentAssignment(firstAssignmentPath, arg, ast.Method(firstAssignmentMethod)),
 			},
 		}
+		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
 		if branch.Default != nil {
 			opt.Default = &ast.OptionDefault{
@@ -327,6 +443,27 @@ type BooleanUnfold struct {
 	OptionFalse string
 }
 
+// UnfoldBooleanAction transforms an option accepting a boolean argument into two argument-less options.
+//
+// Example:
+//
+//	```
+//	func Editable(editable bool) {
+//		this.resource.editable = editable
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Editable() {
+//		this.resource.editable = true
+//	}
+//
+//	func ReadOnly() {
+//		this.resource.editable = false
+//	}
+//	```
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
 		newOpts := []ast.Option{
@@ -354,6 +491,9 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 				newOpts[1].Default = &ast.OptionDefault{}
 			}
 		}
+
+		newOpts[0].AddToVeneerTrail("UnfoldBoolean")
+		newOpts[1].AddToVeneerTrail("UnfoldBoolean")
 
 		return newOpts
 	}

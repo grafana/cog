@@ -115,8 +115,6 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 	newDisjunction := disjunction.DeepCopy()
 	newDisjunction.Branches = nil
 
-	refResolver := pass.makeReferenceResolver(schema)
-
 	branchMap := make(map[string]struct{})
 	addBranch := func(typeDef ast.Type) {
 		typeName := ast.TypeName(typeDef)
@@ -134,7 +132,12 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 			continue
 		}
 
-		resolved := refResolver(branch)
+		resolved, found := schema.Resolve(branch)
+		if !found {
+			// FIXME: error here?
+			continue
+		}
+
 		if resolved.Kind != ast.KindDisjunction {
 			addBranch(branch)
 			continue
@@ -146,18 +149,4 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 	}
 
 	return &newDisjunction
-}
-
-func (pass *FlattenDisjunctions) makeReferenceResolver(schema *ast.Schema) func(typeDef ast.Type) ast.Type {
-	return func(typeDef ast.Type) ast.Type {
-		if typeDef.Kind != ast.KindRef {
-			return typeDef
-		}
-
-		typeName := typeDef.AsRef().ReferredType
-
-		// FIXME: what if the definition is itself a reference? Resolve recursively?
-		// FIXME: we only try to resolve references within the same schema
-		return schema.LocateObject(typeName).Type
-	}
 }
