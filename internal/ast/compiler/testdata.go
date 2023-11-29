@@ -4,6 +4,41 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
+// TestData creates a new Key struct and builder for anonymous SimulationQuery.key field, and it changes the builder signature.
+//
+// Original signature output (Go):
+//
+//	```
+//
+//	func (builder *SimulationQueryBuilder) Key(key struct {
+//		Type string  `json:"type"`
+//		Tick float64 `json:"tick"`
+//		Uid  *string `json:"uid,omitempty"`
+//	}) *SimulationQueryBuilder {
+//
+//		builder.internal.Key = key
+//
+//		return builder
+//	}
+//
+// ```
+//
+// New signature (Go):
+//
+//	```
+//
+//	func (builder *SimulationQueryBuilder) Key(key cog.Builder[Key]) *SimulationQueryBuilder {
+//		keyResource, err := key.Build()
+//		if err != nil {
+//			builder.errors["key"] = err.(cog.BuildErrors)
+//			return builder
+//		}
+//		builder.internal.Key = keyResource
+//
+//		return builder
+//	}
+//
+//	```
 type TestData struct {
 }
 
