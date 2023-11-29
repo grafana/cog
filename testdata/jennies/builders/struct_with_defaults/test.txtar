@@ -832,7 +832,7 @@ IntVal(4),
 import * as cog from '../cog';
 import * as struct_with_defaults from '../struct_with_defaults';
 
-export class NestedStructBuilder implements cog.OptionsBuilder<struct_with_defaults.NestedStruct> {
+export class NestedStructBuilder implements cog.Builder<struct_with_defaults.NestedStruct> {
     private readonly internal: struct_with_defaults.NestedStruct;
 
     constructor() {
@@ -857,7 +857,7 @@ export class NestedStructBuilder implements cog.OptionsBuilder<struct_with_defau
 import * as cog from '../cog';
 import * as struct_with_defaults from '../struct_with_defaults';
 
-export class StructBuilder implements cog.OptionsBuilder<struct_with_defaults.Struct> {
+export class StructBuilder implements cog.Builder<struct_with_defaults.Struct> {
     private readonly internal: struct_with_defaults.Struct;
 
     constructor() {
@@ -868,19 +868,19 @@ export class StructBuilder implements cog.OptionsBuilder<struct_with_defaults.St
         return this.internal;
     }
 
-    allFields(allFields: cog.OptionsBuilder<struct_with_defaults.NestedStruct>): this {
+    allFields(allFields: cog.Builder<struct_with_defaults.NestedStruct>): this {
         const allFieldsResource = allFields.build();
         this.internal.allFields = allFieldsResource;
         return this;
     }
 
-    partialFields(partialFields: cog.OptionsBuilder<struct_with_defaults.NestedStruct>): this {
+    partialFields(partialFields: cog.Builder<struct_with_defaults.NestedStruct>): this {
         const partialFieldsResource = partialFields.build();
         this.internal.partialFields = partialFieldsResource;
         return this;
     }
 
-    emptyFields(emptyFields: cog.OptionsBuilder<struct_with_defaults.NestedStruct>): this {
+    emptyFields(emptyFields: cog.Builder<struct_with_defaults.NestedStruct>): this {
         const emptyFieldsResource = emptyFields.build();
         this.internal.emptyFields = emptyFieldsResource;
         return this;
