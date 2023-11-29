@@ -3,7 +3,6 @@ language: go
 builders: ~
 
 options:
-  # Refresh(string) instead of Refresh(struct StringOrBool)
   - struct_fields_as_arguments:
       by_name: TraceqlFilter.value
       fields: [ ArrayOfString ]
