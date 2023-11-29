@@ -194,6 +194,12 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		}
 
 		return newMap, nil
+	case cue.BottomKind:
+		// We could reach here when we have an enum default inside a default struct.
+		if defVal, ok := v.Default(); ok {
+			return cueConcreteToScalar(defVal)
+		}
+		return nil, nil
 	default:
 		return nil, errorWithCueRef(v, "can not convert kind to scalar: %s", v.Kind())
 	}

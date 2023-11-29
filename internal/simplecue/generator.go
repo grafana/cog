@@ -351,8 +351,16 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 
 	op, exprs := v.Expr()
 
-	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind && op != cue.AndOp {
-		return true, exprs[0], v
+	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind {
+		// When a struct with defaults is completely filled, it usually has a NoOp op.
+		if op == cue.NoOp {
+			return true, exprs[0], v
+		}
+
+		// Accepts [AStruct | *{ ... }] and skips [AStruct | BStruct]
+		if _, ok := v.Default(); ok {
+			return true, exprs[0], v
+		}
 	}
 
 	if len(exprs) != 2 {
