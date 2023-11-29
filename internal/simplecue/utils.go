@@ -199,6 +199,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		if defVal, ok := v.Default(); ok {
 			return cueConcreteToScalar(defVal)
 		}
+		//nolint: nilnil
 		return nil, nil
 	default:
 		return nil, errorWithCueRef(v, "can not convert kind to scalar: %s", v.Kind())
