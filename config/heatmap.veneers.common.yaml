@@ -1,5 +1,7 @@
 language: all
 
+package: heatmap
+
 builders: ~
 
 options:

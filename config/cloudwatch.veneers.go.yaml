@@ -1,5 +1,7 @@
 language: go
 
+package: cloudwatch
+
 builders: ~
 
 options:
