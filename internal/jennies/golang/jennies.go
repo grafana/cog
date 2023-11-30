@@ -2,6 +2,8 @@ package golang
 
 import (
 	"fmt"
+	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -54,9 +56,35 @@ func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
+	im := NewImportMap()
+	tf := NewFormatter(config.PackageRoot, im)
+
+	cfg := template.Config{
+		Debug:         globalConfig.Debug,
+		FileExtension: "go",
+		TemplateConfig: template.FunctionsConfig{
+			Name: "golang",
+			FuncMap: map[string]any{
+				"maybeAsPointer": func(intoNullable bool, variableName string) string {
+					if intoNullable {
+						return "&" + variableName
+					}
+					return variableName
+				},
+				"isNullableNonArray": func(typeDef ast.Type) bool {
+					return typeDef.Nullable && typeDef.Kind != ast.KindArray
+				},
+			},
+		},
+		ImportMapper:    im,
+		BuilderTemplate: GoTemplate{formatter: tf},
+		Formatter:       tf,
+	}
+
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef
 	})
+
 	jenny.AppendOneToMany(
 		Runtime{Config: config},
 		VariantsPlugins{Config: config},
@@ -66,7 +94,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		common.If[common.Context](globalConfig.Types, RawTypes{Config: config}),
 		common.If[common.Context](globalConfig.Types, JSONMarshalling{Config: config}),
 
-		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
+		common.If[common.Context](globalConfig.Builders, template.NewExecutor(cfg)),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 

@@ -1,0 +1,52 @@
+package {{ .Package }}
+{{ $options := include "options" . }}
+{{ .Imports }}
+
+var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .BuilderName }}Builder)(nil)
+{{ range .Comments }}
+// {{ . }}
+{{- end }}
+type {{ .BuilderName }}Builder struct {
+    internal *{{ .ObjectName }}
+    errors map[string]cog.BuildErrors
+
+    {{- range .Properties }}
+    {{ .Name }} {{ .Type | formatType }}
+    {{- end }}
+}
+
+func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ .BuilderName }}Builder {
+	resource := &{{ .ObjectName }}{}
+	builder := &{{ .BuilderName }}Builder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+    {{- range .Constructor.Assignments }}
+        {{- template "assignment" (dict "Assignment" . "Builder" $ "Option" (dict "Name" "")) }}
+    {{- end }}
+
+	return builder
+}
+
+func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("{{ .BuilderName }}", err)...)
+	}
+
+	if len(errs) != 0 {
+		return {{ .ObjectName }}{}, errs
+	}
+
+	return *builder.internal, nil
+}
+{{- $options }}
+func (builder *{{ .BuilderName }}Builder) applyDefaults() {
+    {{- range .Defaults }}
+    builder.{{ .OptionName|upperCamelCase }}({{ .Args|join ", " }})
+    {{- end }}
+}

@@ -1,0 +1,74 @@
+{{- $builder := . -}}
+{{- $options := include "options" . -}}
+{{- .Imports }}
+{{- range .Comments }}
+// {{ . }}
+{{- end }}
+export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ .BuilderSignatureType }}> {
+    private readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
+    {{- range .Properties }}
+    private {{ .Name }}: {{ .Type | formatType }} = {{ .Type | defaultValueForType }};
+    {{- end }}
+
+    constructor({{ template "args" .Constructor.Args }}) {
+        this.internal = {{ .ImportAlias }}.default{{ .ObjectName | upperCamelCase }}();
+        {{- range $arg := .Constructor.Assignments }}
+        {{- template "constraints" $arg.Constraints }}
+        this.internal.{{ $arg.Path }} = {{ template "assignment_value" $arg }};
+        {{- end }}
+    }
+
+    build(): {{ .ImportAlias }}.{{ .ObjectName }} {
+        return this.internal;
+    }
+{{- $options -}}
+}
+
+{{- define "assignment" }}
+{{- range .Assignment.InitSafeguards }}
+{{ . }}
+{{- end }}
+{{- template "constraints" .Assignment.Constraints }}
+
+    {{- template "assignment_setup" (dict "Value" .Assignment.Value) -}}
+
+    {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
+
+    {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- includeIfExists $preTmpl (dict) -}}
+
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
+
+    {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- includeIfExists $postTmpl (dict) -}}
+{{- end }}
+
+{{- define "assignment_setup" }}
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- if .Type.IsArray }}
+        const {{ .Name }}Resources = {{ .Name }}.map(builder => builder.build());
+        {{- else }}
+        const {{ .Name }}Resource = {{ .Name }}.build();
+        {{- end }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- define "assignment_value" }}
+    {{- if not (eq .Value.Constant nil) }}
+        {{- formatScalar .Value.Constant }}
+    {{- end }}
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- .Name }}{{- .Type.IsArray | ternary "Resources" "Resource" }}
+        {{- else }}
+        {{- .Name }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- define "assignment_method" }}
+        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ .Value }};{{ end -}}
+        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ .Value }});{{ end -}}
+{{- end }}

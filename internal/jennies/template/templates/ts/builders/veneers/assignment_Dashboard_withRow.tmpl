@@ -1,0 +1,19 @@
+{{- define "pre_assignment_Dashboard_withRow" }}
+
+		// Position the row on the grid
+		rowPanelResource.gridPos = {
+			x: 0, // beginning of the line
+			y: this.currentY,
+
+			h: 1,
+			w: 24, // full width
+		};
+{{- end }}
+
+{{- define "post_assignment_Dashboard_withRow" }}
+
+		// Reset the state for the next row
+		this.currentX = 0;
+		this.currentY += rowPanelResource.gridPos.h;
+		this.lastPanelHeight = 0;
+{{- end }}

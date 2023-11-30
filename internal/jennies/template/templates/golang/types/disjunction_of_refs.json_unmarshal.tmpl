@@ -1,0 +1,36 @@
+func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+
+	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
+	parsedAsMap := make(map[string]any)
+	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
+		return err
+	}
+
+	discriminator, found := parsedAsMap["{{ .hint.Discriminator }}"]
+	if !found {
+		return errors.New("discriminator field '{{ .hint.Discriminator }}' not found in payload")
+	}
+
+	switch discriminator {
+{{- range $discriminatorValue, $typeName := .hint.DiscriminatorMapping }}
+    {{- if eq $discriminatorValue "cog_discriminator_catch_all" }}
+    default:
+    {{- else }}
+	case "{{ $discriminatorValue }}":
+	{{- end }}
+		var {{ $typeName|lowerCamelCase }} {{ $typeName|upperCamelCase }}
+		if err := json.Unmarshal(raw, &{{ $typeName|lowerCamelCase }}); err != nil {
+			return err
+		}
+
+		resource.{{ $typeName|upperCamelCase }} = &{{ $typeName|lowerCamelCase }}
+		return nil
+{{- end }}
+	}
+
+	return fmt.Errorf("could not unmarshal resource with `{{ .hint.Discriminator }} = %v`", discriminator)
+}
+

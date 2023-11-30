@@ -1,0 +1,20 @@
+{{- define "pre_assignment_Dashboard_WithPanel" }}
+
+	// Position the panel on the grid
+	panelResource.GridPos.X = builder.currentX
+	panelResource.GridPos.Y = builder.currentY
+{{- end }}
+
+{{- define "post_assignment_Dashboard_WithPanel" }}
+
+	// Prepare the coordinates for the next panel
+	builder.currentX += panelResource.GridPos.W
+	builder.lastPanelHeight = max(builder.lastPanelHeight, panelResource.GridPos.H)
+
+	// Check for grid width overflow?
+	if builder.currentX >= 24 {
+		builder.currentX = 0
+		builder.currentY += builder.lastPanelHeight
+		builder.lastPanelHeight = 0
+	}
+{{- end }}
