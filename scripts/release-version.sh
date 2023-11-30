@@ -14,6 +14,9 @@ source "${__dir}/libs/logs.sh"
 source "${__dir}/libs/git.sh"
 
 # These environment variables can be used to alter the behavior of the release script.
+
+DRY_RUN=${DRY_RUN:-"yes"} # Some kind of fail-safe to ensure that we're only pushing something when we mean it.
+
 GRAFANA_VERSION=${1:-"next"} # version of the schemas/grafana to run the codegen for.
 COG_VERSION="v0.0.x" # hardcoded for now
 
@@ -22,6 +25,12 @@ GH_CLI_CMD=${GH_CLI_CMD:-"gh"} # Command used to run `gh` (GitHub cli)
 
 KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH:-'/tmp/kind-registry'} # Path to the kind-registry
 FOUNDATION_SDK_PATH=${FOUNDATION_SDK_PATH:-'/tmp/grafana-foundation-sdk'} # Path to the grafana-foundation-sdk
+
+#################
+### Usage ###
+#################
+
+# LOG_LEVEL=7 ./scripts/release-version.sh v10.2.x
 
 #################
 ### Utilities ###
@@ -68,6 +77,18 @@ function gh_run() (
   $GH_CLI_CMD "$@"
 )
 
+function run_when_safe() {
+  local command=${1}
+  shift
+
+  if [ "${DRY_RUN}" == "no" ]; then
+    ${command} "$@"
+  else
+    warning "Dry run enabled: skipping execution of \"${command} $*\""
+    info "Run this script with DRY_RUN=no to disable dry-run mode."
+  fi
+}
+
 ############
 ### Main ###
 ############
@@ -87,11 +108,18 @@ fi
 
 pr_branch="${release_branch}-preview-$(date '+%s')"
 
+if [ "${DRY_RUN}" == "no" ]; then
+  warning "Dry-run is OFF."
+else
+  notice "Dry-run is ON."
+fi
+
 notice "Grafana version: ${GRAFANA_VERSION}"
 notice "Cog version: ${COG_VERSION}"
 notice "Release branch in grafana-foundation-sdk: ${release_branch}"
 debug "kind-registry path: ${KIND_REGISTRY_PATH}"
 debug "grafana-foundation-sdk path: ${FOUNDATION_SDK_PATH}"
+debug "workspace path: ${codegen_output_path}"
 
 if [ ! -d "${KIND_REGISTRY_PATH}" ]; then
   info "Cloning kind-registry into ${KIND_REGISTRY_PATH}"
@@ -112,10 +140,10 @@ if [ "$release_branch_exists" != "0" ]; then
   git_create_orphan_branch "${FOUNDATION_SDK_PATH}" "${release_branch}";
   git_run "${FOUNDATION_SDK_PATH}" commit --allow-empty -m "Initialize release branch for Grafana ${GRAFANA_VERSION} and Cog ${COG_VERSION}"
 
-  debug "Pushing release branch ${release_branch}"
-  git_run "${FOUNDATION_SDK_PATH}" push origin "${release_branch}"
+  info "Pushing release branch ${release_branch}"
+  run_when_safe git_run "${FOUNDATION_SDK_PATH}" push origin "${release_branch}"
 else
-  debug "Checking out existing release branch in grafana-foundation-sdk"
+  info "Checking out existing release branch in grafana-foundation-sdk"
   git_run "${FOUNDATION_SDK_PATH}" checkout "${release_branch}"
 fi
 
@@ -146,11 +174,11 @@ fi
 
 git_run "${FOUNDATION_SDK_PATH}" commit -m "Automated release"
 
-debug "Pushing PR branch ${pr_branch}"
-git_run "${FOUNDATION_SDK_PATH}" push origin "${pr_branch}"
+info "Pushing PR branch ${pr_branch}"
+run_when_safe git_run "${FOUNDATION_SDK_PATH}" push origin "${pr_branch}"
 
 info "Opening release Pull Request"
-gh_run "${FOUNDATION_SDK_PATH}" pr create \
+run_when_safe gh_run "${FOUNDATION_SDK_PATH}" pr create \
   --base "${release_branch}" \
   --title "Automated release for Grafana ${GRAFANA_VERSION} and Cog ${COG_VERSION}" \
   --body "Automated release."
