@@ -70,6 +70,7 @@ func Command() *cobra.Command {
 
 	cmd.Flags().BoolVar(&opts.JenniesConfig.Types, "generate-types", true, "Generate types.")          // TODO: better usage text
 	cmd.Flags().BoolVar(&opts.JenniesConfig.Builders, "generate-builders", true, "Generate builders.") // TODO: better usage text
+	cmd.Flags().StringVar(&opts.JenniesConfig.PackageTemplates, "package-templates", "", "Directory used as a template used to generate to fully fledged package.")
 
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
@@ -91,6 +92,7 @@ func Command() *cobra.Command {
 		jenny.RegisterCliFlags(cmd)
 	}
 
+	_ = cmd.MarkFlagDirname("package-templates")
 	_ = cmd.MarkFlagDirname("cue")
 	_ = cmd.MarkFlagDirname("kindsys-core")
 	_ = cmd.MarkFlagDirname("kindsys-custom")
@@ -147,6 +149,13 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		outputDir := strings.ReplaceAll(opts.OutputDir, "%l", language)
 		languageJennies := target.Jennies(opts.JenniesConfig)
 		languageJennies.AddPostprocessors(common.PathPrefixer(outputDir))
+
+		if opts.JenniesConfig.PackageTemplates != "" {
+			languageJennies.AppendOneToMany(&common.PackageTemplate{
+				Language:    language,
+				TemplateDir: opts.JenniesConfig.PackageTemplates,
+			})
+		}
 
 		// then delegate the codegen to the jennies
 		fs, err := languageJennies.GenerateFS(common.Context{
