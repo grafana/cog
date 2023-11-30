@@ -195,9 +195,15 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 
 				newAssignments = append(newAssignments, newAssignment)
 			} else {
+				var assignmentValue ast.AssignmentValue
+				if isConstant {
+					assignmentValue = ast.AssignmentValue{Constant: field.Type.AsScalar().Value}
+				} else {
+					assignmentValue = ast.AssignmentValue{Argument: &newArg}
+				}
 				valuesForEnvelope = append(valuesForEnvelope, ast.EnvelopeFieldValue{
 					Path:  ast.PathFromStructField(field),
-					Value: ast.AssignmentValue{Argument: &newArg},
+					Value: assignmentValue,
 				})
 			}
 		}
