@@ -457,7 +457,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== basic_struct/somestruct_builder_gen.ts
+== src/basic_struct/somestruct_builder_gen.ts
 import * as cog from '../cog';
 import * as basic_struct from '../basic_struct';
 

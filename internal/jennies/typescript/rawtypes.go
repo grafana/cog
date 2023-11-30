@@ -36,6 +36,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 		}
 
 		filename := filepath.Join(
+			"src",
 			strings.ToLower(schema.Package),
 			"types_gen.ts",
 		)

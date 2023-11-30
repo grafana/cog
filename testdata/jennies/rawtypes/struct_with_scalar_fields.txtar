@@ -142,7 +142,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== basic/types_gen.ts
+== src/basic/types_gen.ts
 // This
 // is
 // a

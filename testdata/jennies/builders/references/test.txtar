@@ -196,7 +196,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== some_pkg/person_builder_gen.ts
+== src/some_pkg/person_builder_gen.ts
 import * as cog from '../cog';
 import * as some_pkg from '../some_pkg';
 import * as other_pkg from '../other_pkg';

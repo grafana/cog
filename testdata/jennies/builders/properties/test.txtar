@@ -162,7 +162,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== properties/somestruct_builder_gen.ts
+== src/properties/somestruct_builder_gen.ts
 import * as cog from '../cog';
 import * as properties from '../properties';
 

@@ -34,7 +34,7 @@ func (jenny Index) Generate(context common.Context) (codejen.Files, error) {
 	}
 
 	for pkg, refs := range packages {
-		files = append(files, *codejen.NewFile(filepath.Join(pkg, "index.ts"), jenny.generateIndex(refs), jenny))
+		files = append(files, *codejen.NewFile(filepath.Join("src", pkg, "index.ts"), jenny.generateIndex(refs), jenny))
 	}
 
 	return files, nil

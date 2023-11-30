@@ -299,7 +299,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== anonymous_struct/somestruct_builder_gen.ts
+== src/anonymous_struct/somestruct_builder_gen.ts
 import * as cog from '../cog';
 import * as anonymous_struct from '../anonymous_struct';
 

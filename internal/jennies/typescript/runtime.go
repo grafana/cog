@@ -14,9 +14,9 @@ func (jenny Runtime) JennyName() string {
 
 func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
 	return codejen.Files{
-		*codejen.NewFile("cog/variants_gen.ts", []byte(jenny.generateVariantsFile()), jenny),
-		*codejen.NewFile("cog/builder_gen.ts", []byte(jenny.generateOptionsBuilderFile()), jenny),
-		*codejen.NewFile("cog/index.ts", []byte(jenny.generateIndexFile()), jenny),
+		*codejen.NewFile("src/cog/variants_gen.ts", []byte(jenny.generateVariantsFile()), jenny),
+		*codejen.NewFile("src/cog/builder_gen.ts", []byte(jenny.generateOptionsBuilderFile()), jenny),
+		*codejen.NewFile("src/cog/index.ts", []byte(jenny.generateIndexFile()), jenny),
 	}, nil
 }
 
