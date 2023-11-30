@@ -10,4 +10,6 @@ type Config struct {
 
 	// Builders indicates whether builders should be generated or not.
 	Builders bool
+
+	PackageTemplates string
 }
