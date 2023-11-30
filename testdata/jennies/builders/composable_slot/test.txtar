@@ -264,7 +264,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== composable_slot/dashboard_builder_gen.ts
+== src/composable_slot/dashboard_builder_gen.ts
 import * as cog from '../cog';
 import * as composable_slot from '../composable_slot';
 

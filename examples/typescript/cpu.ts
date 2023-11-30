@@ -1,8 +1,8 @@
-import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/timeseries";
-import {PanelBuilder as GaugePanelBuilder} from "../../generated/gauge";
+import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/src/timeseries";
+import {PanelBuilder as GaugePanelBuilder} from "../../generated/src/gauge";
 import {basicPrometheusQuery, defaultGauge, defaultTimeseries} from "./common";
-import {StackingConfigBuilder, StackingMode} from "../../generated/common";
-import {ThresholdsConfigBuilder, ThresholdsMode} from "../../generated/dashboard";
+import {StackingConfigBuilder, StackingMode} from "../../generated/src/common";
+import {ThresholdsConfigBuilder, ThresholdsMode} from "../../generated/src/dashboard";
 
 export const cpuUsageTimeseries = (): TimeseriesPanelBuilder => {
     const 	query = `(

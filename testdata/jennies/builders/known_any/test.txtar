@@ -219,7 +219,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== known_any/somestruct_builder_gen.ts
+== src/known_any/somestruct_builder_gen.ts
 import * as cog from '../cog';
 import * as known_any from '../known_any';
 

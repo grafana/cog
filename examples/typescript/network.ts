@@ -1,4 +1,4 @@
-import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/timeseries";
+import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/src/timeseries";
 import {basicPrometheusQuery, defaultTimeseries} from "./common";
 
 export const networkReceivedTimeseries = (): TimeseriesPanelBuilder => {

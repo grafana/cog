@@ -126,7 +126,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== enums/types_gen.ts
+== src/enums/types_gen.ts
 // This is a very interesting string enum.
 export enum Operator {
 	GreaterThan = ">",

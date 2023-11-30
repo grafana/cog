@@ -158,7 +158,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== dataquery_variant_builder/loki_builder_gen.ts
+== src/dataquery_variant_builder/loki_builder_gen.ts
 import * as cog from '../cog';
 import * as dataquery_variant_builder from '../dataquery_variant_builder';
 
