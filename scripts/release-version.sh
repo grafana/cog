@@ -54,6 +54,7 @@ function run_codegen() {
     --kind-registry "${kind_registry_dir}" \
     --kind-registry-version "${kind_registry_version}" \
     --veneers "${__dir}/../config" \
+    --package-templates ./package_templates \
     --go-mod \
     --go-package-root github.com/grafana/grafana-foundation-sdk/go
 }
