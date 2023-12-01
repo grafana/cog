@@ -105,10 +105,6 @@ function cleanup() {
 trap cleanup EXIT # run the cleanup() function on exit
 
 release_branch="${GRAFANA_VERSION}+cog-${COG_VERSION}"
-if [ "${GRAFANA_VERSION}" = "next" ]; then
-  release_branch="main"
-fi
-
 pr_branch="${release_branch}-preview-$(date '+%s')"
 
 if [ "${DRY_RUN}" == "no" ]; then
