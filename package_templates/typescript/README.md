@@ -34,21 +34,30 @@ yarn add @grafana/grafana-foundation-sdk
 ## Example usage
 
 ```typescript
-import { DashboardBuilder, TimePickerBuilder } from "@grafana/grafana-foundation-sdk/dashboard";
+import { DashboardBuilder, RowBuilder } from '@grafana/grafana-foundation-sdk/dashboard';
+import { DataqueryBuilder } from '@grafana/grafana-foundation-sdk/prometheus';
+import { PanelBuilder } from '@grafana/grafana-foundation-sdk/timeseries';
 
-const builder = new DashboardBuilder("Sample dashboard")
-    .uid("generated-from-typescript")
-    .tags(["generated", "from", "typescript"])
+const builder = new DashboardBuilder('[TEST] Node Exporter / Raspberry')
+  .uid('test-dashboard-raspberry')
+  .tags(['generated', 'raspberrypi-node-integration'])
 
-    .refresh("30s")
-    .time({from: "now-30m", to: "now"})
-    .timezone("browser")
+  .refresh('1m')
+  .time({from: 'now-30m', to: 'now'})
+  .timezone('browser')
 
-    .timepicker(
-        new TimePickerBuilder()
-            .refresh_intervals(["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"])
-            .time_options(["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]),
-    )
+  .withRow(new RowBuilder('Overview'))
+  .withPanel(
+    new PanelBuilder()
+      .title('Network Received')
+      .unit('bps')
+      .min(0)
+      .withTarget(
+        new DataqueryBuilder()
+          .expr('rate(node_network_receive_bytes_total{job="integrations/raspberrypi-node", device!="lo"}[$__rate_interval]) * 8')
+          .legendFormat('{{ device }}')
+      )
+  )
 ;
 
 console.log(JSON.stringify(builder.build(), null, 2));

@@ -42,19 +42,28 @@ import (
 
 	"github.com/grafana/grafana-foundation-sdk/go/common"
 	"github.com/grafana/grafana-foundation-sdk/go/dashboard"
+	"github.com/grafana/grafana-foundation-sdk/go/prometheus"
+	"github.com/grafana/grafana-foundation-sdk/go/timeseries"
 )
 
 func main() {
 	builder := dashboard.NewDashboardBuilder("Sample dashboard").
 		Uid("generated-from-go").
 		Tags([]string{"generated", "from", "go"}).
-		Refresh("30s").
+		Refresh("1m").
 		Time("now-30m", "now").
 		Timezone(common.TimeZoneBrowser).
-		Timepicker(
-			dashboard.NewTimePickerBuilder().
-				RefreshIntervals([]string{"5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"}).
-				TimeOptions([]string{"5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"}),
+		WithRow(dashboard.NewRowBuilder("Overview")).
+		WithPanel(
+			timeseries.NewPanelBuilder().
+				Title("Network Received").
+				Unit("bps").
+				Min(0).
+				WithTarget(
+					prometheus.NewDataqueryBuilder().
+						Expr(`rate(node_network_receive_bytes_total{job="integrations/raspberrypi-node", device!="lo"}[$__rate_interval]) * 8`).
+						LegendFormat("{{ device }}"),
+				),
 		)
 
 	sampleDashboard, err := builder.Build()
