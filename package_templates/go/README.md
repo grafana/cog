@@ -1,8 +1,9 @@
 # Grafana Foundation SDK – Go
 
-A set of tools, types and libraries for building and manipulating Grafana objects in Go.
+A set of tools, types and *builder libraries* for building and manipulating Grafana objects in TypeScript.
 
-> ℹ️ This branch contains types and builders generated for Grafana {{ .Extra.GrafanaVersion }}
+> ℹ️ This branch contains **types and builders generated for Grafana {{ .Extra.GrafanaVersion }}.**
+> Other supported versions of Grafana can be found at [this repository's root](https://github.com/grafana/grafana-foundation-sdk/).
 
 ## Maturity
 
@@ -62,7 +63,7 @@ func main() {
 				WithTarget(
 					prometheus.NewDataqueryBuilder().
 						Expr(`rate(node_network_receive_bytes_total{job="integrations/raspberrypi-node", device!="lo"}[$__rate_interval]) * 8`).
-						LegendFormat("{{ device }}"),
+						LegendFormat({{ `"{{ device }}"` }}),
 				),
 		)
 
