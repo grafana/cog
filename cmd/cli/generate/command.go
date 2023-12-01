@@ -25,6 +25,27 @@ type Options struct {
 	VeneerConfigFiles       []string
 	VeneerConfigDirectories []string
 	OutputDir               string
+
+	// PackageTemplates is the path to a directory containing "package templates".
+	// These templates are used to add arbitrary files to the generated code, with
+	// the goal of turning it into a fully-fledged package.
+	// Templates in that directory are expected to be organized by language:
+	// ```
+	// package_templates
+	// ├── go
+	// │   ├── LICENSE.md
+	// │   └── README.md
+	// └── typescript
+	//     ├── babel.config.json
+	//     ├── package.json
+	//     ├── README.md
+	//     └── tsconfig.json
+	// ```
+	PackageTemplates string
+
+	// PackageTemplatesData holds data that will be injected into package
+	// templates when rendering them.
+	PackageTemplatesData map[string]string
 }
 
 func (opts Options) veneerFiles() ([]string, error) {
@@ -70,7 +91,8 @@ func Command() *cobra.Command {
 
 	cmd.Flags().BoolVar(&opts.JenniesConfig.Types, "generate-types", true, "Generate types.")          // TODO: better usage text
 	cmd.Flags().BoolVar(&opts.JenniesConfig.Builders, "generate-builders", true, "Generate builders.") // TODO: better usage text
-	cmd.Flags().StringVar(&opts.JenniesConfig.PackageTemplates, "package-templates", "", "Directory used as a template used to generate to fully fledged package.")
+	cmd.Flags().StringVar(&opts.PackageTemplates, "package-templates", "", "Directory used as a template used to generate to fully fledged package.")
+	cmd.Flags().StringToStringVar(&opts.PackageTemplatesData, "package-templates-data", nil, "Data to hand over to package templates.")
 
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
@@ -150,10 +172,11 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		languageJennies := target.Jennies(opts.JenniesConfig)
 		languageJennies.AddPostprocessors(common.PathPrefixer(outputDir))
 
-		if opts.JenniesConfig.PackageTemplates != "" {
+		if opts.PackageTemplates != "" {
 			languageJennies.AppendOneToMany(&common.PackageTemplate{
 				Language:    language,
-				TemplateDir: opts.JenniesConfig.PackageTemplates,
+				TemplateDir: opts.PackageTemplates,
+				ExtraData:   opts.PackageTemplatesData,
 			})
 		}
 

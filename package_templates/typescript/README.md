@@ -2,6 +2,8 @@
 
 A set of tools, types and libraries for building and manipulating Grafana objects in TypeScript.
 
+> ℹ️ This branch contains types and builders generated for Grafana {{ .Extra.GrafanaVersion }}
+
 ## Maturity
 
 > _The code in this repository should be considered experimental. Documentation is only
