@@ -17,6 +17,7 @@ import (
 type PackageTemplate struct {
 	Language    string
 	TemplateDir string
+	ExtraData   map[string]string
 }
 
 func (jenny PackageTemplate) JennyName() string {
@@ -44,6 +45,7 @@ func (jenny PackageTemplate) Generate(context Context) (codejen.Files, error) {
 		}
 
 		tmpl, err := template.New(jenny.JennyName()).
+			Option("missingkey=error").
 			Funcs(sprig.FuncMap()).
 			Parse(string(templateContent))
 		if err != nil {
@@ -74,7 +76,13 @@ func (jenny PackageTemplate) templateData(context Context) map[string]any {
 		packages = append(packages, schema.Package)
 	}
 
+	extra := map[string]string{}
+	if jenny.ExtraData != nil {
+		extra = jenny.ExtraData
+	}
+
 	return map[string]any{
 		"Packages": packages,
+		"Extra":    extra,
 	}
 }

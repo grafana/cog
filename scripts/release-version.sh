@@ -57,6 +57,8 @@ function run_codegen() {
   shift
   local output_dir="${1}"
   shift
+  local templates_data="${1}"
+  shift
 
   $COG_CMD generate \
     --output "${output_dir}/%l" \
@@ -64,6 +66,7 @@ function run_codegen() {
     --kind-registry-version "${kind_registry_version}" \
     --veneers "${__dir}/../config" \
     --package-templates ./package_templates \
+    --package-templates-data "${templates_data}" \
     --go-mod \
     --go-package-root github.com/grafana/grafana-foundation-sdk/go
 }
@@ -132,7 +135,7 @@ if [ ! -d "${FOUNDATION_SDK_PATH}" ]; then
 fi
 
 info "Running cog"
-run_codegen "${KIND_REGISTRY_PATH}" "${GRAFANA_VERSION}" "${codegen_output_path}"
+run_codegen "${KIND_REGISTRY_PATH}" "${GRAFANA_VERSION}" "${codegen_output_path}" "GrafanaVersion=${GRAFANA_VERSION},CogVersion=${COG_VERSION},ReleaseBranch=${release_branch}"
 
 release_branch_exists=$(git_has_branch "${FOUNDATION_SDK_PATH}" "${release_branch}")
 if [ "$release_branch_exists" != "0" ]; then
