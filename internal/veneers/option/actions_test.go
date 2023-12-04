@@ -309,6 +309,7 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 	structType := ast.NewStruct(
 		ast.NewStructField("from", ast.String()),
 		ast.NewStructField("to", ast.String()),
+		ast.NewStructField("type", ast.String(ast.Value("time"))),
 	)
 
 	// input
@@ -338,6 +339,76 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 				{Identifier: "time", Type: structType},
 				{Identifier: "to", Type: ast.String()},
 			}, ast.Argument{Name: "to", Type: ast.String()}),
+			ast.ConstantAssignment(ast.Path{
+				{Identifier: "time", Type: structType},
+				{Identifier: "type", Type: ast.String(ast.Value("time"))},
+			}, "time"),
+		},
+		VeneerTrail: []string{"StructFieldsAsArguments"},
+	}
+
+	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
+
+	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
+}
+
+func TestStructFieldsAsArgumentsAction_withArrayOfStructArgument(t *testing.T) {
+	req := require.New(t)
+
+	structType := ast.NewStruct(
+		ast.NewStructField("from", ast.String()),
+		ast.NewStructField("to", ast.String()),
+		ast.NewStructField("type", ast.String(ast.Value("time"))),
+	)
+
+	// input
+	option := ast.Option{
+		Args: []ast.Argument{
+			{Name: "time", Type: structType},
+		},
+		Assignments: []ast.Assignment{
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "time", Type: ast.NewArray(structType)},
+			}, ast.Argument{Name: "time", Type: structType}),
+		},
+	}
+
+	// expected
+	expectedOption := ast.Option{
+		Args: []ast.Argument{
+			{Name: "from", Type: ast.String()},
+			{Name: "to", Type: ast.String()},
+		},
+		Assignments: []ast.Assignment{
+			{
+				Method: ast.AppendAssignment,
+				Path:   ast.Path{{Identifier: "time", Type: ast.NewArray(structType)}},
+				Value: ast.AssignmentValue{
+					Envelope: &ast.AssignmentEnvelope{
+						Type: structType,
+						Values: []ast.EnvelopeFieldValue{
+							{
+								Path: ast.Path{{Identifier: "from", Type: ast.String()}},
+								Value: ast.AssignmentValue{Argument: &ast.Argument{
+									Name: "from",
+									Type: ast.String(),
+								}},
+							},
+							{
+								Path: ast.Path{{Identifier: "to", Type: ast.String()}},
+								Value: ast.AssignmentValue{Argument: &ast.Argument{
+									Name: "to",
+									Type: ast.String(),
+								}},
+							},
+							{
+								Path:  ast.Path{{Identifier: "type", Type: ast.String(ast.Value("time"))}},
+								Value: ast.AssignmentValue{Constant: "time"},
+							},
+						},
+					},
+				},
+			},
 		},
 		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}
