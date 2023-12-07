@@ -93,17 +93,9 @@ func (jenny PackageTemplate) templateData(context Context) map[string]any {
 // registryToSemver turns a "v10.2.x" input (version string coming from
 // the kind-registry) into a semver-compatible version "10.2.0"
 func (jenny PackageTemplate) registryToSemver(registryVersion string) string {
-	semver := registryVersion
+	semver := strings.TrimPrefix(registryVersion, "v")
 
-	if semver == "" {
-		return semver
-	}
-
-	if semver[0] == 'v' {
-		semver = semver[1:]
-	}
-
-	if semver[len(semver)-1] == 'x' {
+	if strings.HasSuffix(semver, "x") {
 		semver = semver[:len(semver)-1] + "0"
 	}
 
