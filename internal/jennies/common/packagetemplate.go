@@ -47,6 +47,9 @@ func (jenny PackageTemplate) Generate(context Context) (codejen.Files, error) {
 		tmpl, err := template.New(jenny.JennyName()).
 			Option("missingkey=error").
 			Funcs(sprig.FuncMap()).
+			Funcs(template.FuncMap{
+				"registryToSemver": jenny.registryToSemver,
+			}).
 			Parse(string(templateContent))
 		if err != nil {
 			return err
@@ -85,4 +88,24 @@ func (jenny PackageTemplate) templateData(context Context) map[string]any {
 		"Packages": packages,
 		"Extra":    extra,
 	}
+}
+
+// registryToSemver turns a "v10.2.x" input (version string coming from
+// the kind-registry) into a semver-compatible version "10.2.0"
+func (jenny PackageTemplate) registryToSemver(registryVersion string) string {
+	semver := registryVersion
+
+	if semver == "" {
+		return semver
+	}
+
+	if semver[0] == 'v' {
+		semver = semver[1:]
+	}
+
+	if semver[len(semver)-1] == 'x' {
+		semver = semver[:len(semver)-1] + "0"
+	}
+
+	return semver
 }
