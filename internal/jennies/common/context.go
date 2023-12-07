@@ -59,3 +59,7 @@ func (context *Context) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {
 
 	return ast.Type{}, false
 }
+
+type BuildOptions struct {
+	Languages []string
+}
