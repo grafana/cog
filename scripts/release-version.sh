@@ -65,8 +65,9 @@ function run_codegen() {
     --kind-registry "${kind_registry_dir}" \
     --kind-registry-version "${kind_registry_version}" \
     --veneers "${__dir}/../config" \
+    --repository-templates ./repository_templates \
     --package-templates ./package_templates \
-    --package-templates-data "${templates_data}" \
+    --templates-data "${templates_data}" \
     --go-mod \
     --go-package-root github.com/grafana/grafana-foundation-sdk/go
 }
@@ -150,7 +151,7 @@ info "Creating release preview branch in grafana-foundation-sdk"
 git_run "${FOUNDATION_SDK_PATH}" checkout -b "${pr_branch}"
 
 debug "Copying generated language folders to grafana-foundation-sdk"
-for dir in ./"${codegen_output_path}"/*/     # list directories in the form "/tmp/dirname/"
+for dir in ./"${codegen_output_path}"/*/ ./"${codegen_output_path}"/.*/     # list directories in the form "/tmp/dirname/"
 do
   language=${dir%*/}
   language=${language##*/}

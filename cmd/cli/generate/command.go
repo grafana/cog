@@ -43,9 +43,27 @@ type Options struct {
 	// ```
 	PackageTemplates string
 
-	// PackageTemplatesData holds data that will be injected into package
-	// templates when rendering them.
-	PackageTemplatesData map[string]string
+	// RepositoryTemplates is the path to a directory containing
+	// "repository-level templates".
+	// These templates are used to add arbitrary files to the repository, such as CI pipelines.
+	//
+	// Templates in that directory are expected to be organized by language:
+	// ```
+	// repository_templates
+	// ├── go
+	// │   └── .github
+	// │   	   └── workflows
+	// │   	       └── go-ci.yaml
+	// └── typescript
+	//     └── .github
+	//     	   └── workflows
+	//     	       └── typescript-ci.yaml
+	// ```
+	RepositoryTemplates string
+
+	// TemplatesData holds data that will be injected into package and
+	// repository templates when rendering them.
+	TemplatesData map[string]string
 }
 
 func (opts Options) veneerFiles() ([]string, error) {
@@ -91,8 +109,9 @@ func Command() *cobra.Command {
 
 	cmd.Flags().BoolVar(&opts.JenniesConfig.Types, "generate-types", true, "Generate types.")          // TODO: better usage text
 	cmd.Flags().BoolVar(&opts.JenniesConfig.Builders, "generate-builders", true, "Generate builders.") // TODO: better usage text
-	cmd.Flags().StringVar(&opts.PackageTemplates, "package-templates", "", "Directory used as a template used to generate to fully fledged package.")
-	cmd.Flags().StringToStringVar(&opts.PackageTemplatesData, "package-templates-data", nil, "Data to hand over to package templates.")
+	cmd.Flags().StringVar(&opts.PackageTemplates, "package-templates", "", "Directory used as a template used to generate fully fledged packages.")
+	cmd.Flags().StringVar(&opts.RepositoryTemplates, "repository-templates", "", "Directory used as a template used to generate additional content at the repository root.")
+	cmd.Flags().StringToStringVar(&opts.TemplatesData, "templates-data", nil, "Data to hand over to package and repository templates.")
 
 	cmd.Flags().StringVarP(&opts.OutputDir, "output", "o", "generated", "Output directory.") // TODO: better usage text
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
@@ -176,7 +195,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 			languageJennies.AppendOneToMany(&common.PackageTemplate{
 				Language:    language,
 				TemplateDir: opts.PackageTemplates,
-				ExtraData:   opts.PackageTemplatesData,
+				ExtraData:   opts.TemplatesData,
 			})
 		}
 
@@ -184,6 +203,31 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		fs, err := languageJennies.GenerateFS(common.Context{
 			Schemas:  processedSchemas,
 			Builders: builders,
+		})
+		if err != nil {
+			return err
+		}
+
+		if err = rootCodeJenFS.Merge(fs); err != nil {
+			return err
+		}
+	}
+
+	if opts.RepositoryTemplates != "" {
+		globalJenny := codejen.JennyListWithNamer[common.BuildOptions](func(_ common.BuildOptions) string {
+			return "Global"
+		})
+		globalJenny.AppendOneToMany(&common.RepositoryTemplate{
+			TemplateDir: opts.RepositoryTemplates,
+			ExtraData:   opts.TemplatesData,
+		})
+		globalJenny.AddPostprocessors(
+			common.GeneratedCommentHeader(opts.JenniesConfig),
+			common.PathPrefixer(filepath.Clean(strings.ReplaceAll(opts.OutputDir, "%l", "."))),
+		)
+
+		fs, err := globalJenny.GenerateFS(common.BuildOptions{
+			Languages: targetsByLanguage.AsLanguageRefs(),
 		})
 		if err != nil {
 			return err
