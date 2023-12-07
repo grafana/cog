@@ -106,7 +106,8 @@ function cleanup() {
 trap cleanup EXIT # run the cleanup() function on exit
 
 release_branch="${GRAFANA_VERSION}+cog-${COG_VERSION}"
-pr_branch="${release_branch}-preview-$(date '+%s')"
+build_timestamp="$(date '+%s')"
+pr_branch="${release_branch}-preview-${build_timestamp}"
 
 if [ "${DRY_RUN}" == "no" ]; then
   warning "Dry-run is OFF."
@@ -132,7 +133,7 @@ if [ ! -d "${FOUNDATION_SDK_PATH}" ]; then
 fi
 
 info "Running cog"
-run_codegen "${KIND_REGISTRY_PATH}" "${GRAFANA_VERSION}" "${codegen_output_path}" "GrafanaVersion=${GRAFANA_VERSION},CogVersion=${COG_VERSION},ReleaseBranch=${release_branch}"
+run_codegen "${KIND_REGISTRY_PATH}" "${GRAFANA_VERSION}" "${codegen_output_path}" "GrafanaVersion=${GRAFANA_VERSION},CogVersion=${COG_VERSION},ReleaseBranch=${release_branch},BuildTimestamp=${build_timestamp}"
 
 release_branch_exists=$(git_has_branch "${FOUNDATION_SDK_PATH}" "${release_branch}")
 if [ "$release_branch_exists" != "0" ]; then
