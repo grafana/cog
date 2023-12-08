@@ -17,7 +17,6 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
 
     defaults:
       run:
@@ -32,7 +31,7 @@ jobs:
         with:
           node-version: {{ `${{ env.NODE_VERSION }}` }}
           scope: '@grafana'
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: yarn install
@@ -40,7 +39,7 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Publish to GitHub Packages registry
-        run: yarn publish
+      - name: Publish to NPM registry
+        run: yarn publish --access public
         env:
-          NODE_AUTH_TOKEN: {{ `${{ secrets.GITHUB_TOKEN }}` }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
