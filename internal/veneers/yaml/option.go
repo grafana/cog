@@ -164,6 +164,11 @@ type OptionSelector struct {
 	// objectName.optionName
 	ByName *string `yaml:"by_name"`
 
+	// builderName.optionName
+	// TODO: ByName should be called ByObject
+	// and ByBuilder should be called ByName
+	ByBuilder *string `yaml:"by_builder"`
+
 	ByNames *ByNamesSelector `yaml:"by_names"`
 }
 
@@ -175,6 +180,15 @@ func (selector OptionSelector) AsSelector(pkg string) (option.Selector, error) {
 		}
 
 		return option.ByName(pkg, objectName, optionName), nil
+	}
+
+	if selector.ByBuilder != nil {
+		builderName, optionName, found := strings.Cut(*selector.ByBuilder, ".")
+		if !found {
+			return nil, fmt.Errorf("option name '%s' is incorrect: no builder name found", *selector.ByBuilder)
+		}
+
+		return option.ByBuilder(pkg, builderName, optionName), nil
 	}
 
 	if selector.ByNames != nil {
