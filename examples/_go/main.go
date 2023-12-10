@@ -24,26 +24,18 @@ func dashboardBuilder() []byte {
 		Tooltip(dashboard.DashboardCursorSyncCrosshair).
 		// TODO: we should have specific builders for every possible variable type
 		// "Data Source" variable
-		WithVariable(dashboard.NewVariableModelBuilder().
-			Type(dashboard.VariableTypeDatasource).
-			Name("datasource").
+		WithVariable(dashboard.NewDatasourceVariableBuilder("datasource").
 			Label("Data Source").
 			Hide(dashboard.VariableHideDontHide).
-			Refresh(dashboard.VariableRefreshOnDashboardLoad).
-			Query(dashboard.StringOrAny{
-				String: toPtr("prometheus"),
-			}).
+			DatasourceType("prometheus").
 			Current(dashboard.VariableOption{
 				Selected: toPtr(true),
 				Text:     dashboard.StringOrArrayOfString{String: toPtr("grafanacloud-potatopi-prom")},
 				Value:    dashboard.StringOrArrayOfString{String: toPtr("grafanacloud-prom")},
-			}).
-			Sort(dashboard.VariableSortDisabled),
+			}),
 		).
 		// "Instance" variable
-		WithVariable(dashboard.NewVariableModelBuilder().
-			Type(dashboard.VariableTypeQuery).
-			Name("instance").
+		WithVariable(dashboard.NewQueryVariableBuilder("instance").
 			Label("Instance").
 			Hide(dashboard.VariableHideDontHide).
 			Refresh(dashboard.VariableRefreshOnTimeRangeChanged).
