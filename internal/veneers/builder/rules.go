@@ -264,3 +264,30 @@ func Duplicate(selector Selector, duplicateName string, excludeOptions []string)
 		return append(builders, newBuilders...), nil
 	}
 }
+
+type Initialization struct {
+	PropertyPath string
+	Value        any
+}
+
+func Initialize(selector Selector, statements []Initialization) RewriteRule {
+	return func(builders ast.Builders) (ast.Builders, error) {
+		for i, builder := range builders {
+			if !selector(builder) {
+				continue
+			}
+
+			for _, statement := range statements {
+				path, err := builders[i].MakePath(builders, statement.PropertyPath)
+				if err != nil {
+					return nil, err
+				}
+
+				builders[i].Initializations = append(builders[i].Initializations, ast.ConstantAssignment(path, statement.Value))
+			}
+			builders[i].AddToVeneerTrail("Initialize")
+		}
+
+		return builders, nil
+	}
+}

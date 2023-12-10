@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/builder"
 )
 
@@ -18,6 +19,7 @@ type BuilderRule struct {
 	ComposeDashboardPanel *ComposeDashboardPanel `yaml:"compose_dashboard_panel"`
 	Properties            *Properties            `yaml:"properties"`
 	Duplicate             *Duplicate             `yaml:"duplicate"`
+	Initialize            *Initialize            `yaml:"initialize"`
 }
 
 func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -48,6 +50,10 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 	if rule.Duplicate != nil {
 		return rule.Duplicate.AsRewriteRule(pkg)
+	}
+
+	if rule.Initialize != nil {
+		return rule.Initialize.AsRewriteRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -133,12 +139,37 @@ func (rule Duplicate) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	), nil
 }
 
+type Initialization struct {
+	Property string `yaml:"property"`
+	Value    any    `yaml:"value"`
+}
+
+type Initialize struct {
+	BuilderSelector `yaml:",inline"`
+	Set             []Initialization `yaml:"set"`
+}
+
+func (rule Initialize) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.Initialize(
+		selector,
+		tools.Map(rule.Set, func(init Initialization) builder.Initialization {
+			return builder.Initialization{PropertyPath: init.Property, Value: init.Value}
+		}),
+	), nil
+}
+
 /******************************************************************************
  * Selectors
  *****************************************************************************/
 
 type BuilderSelector struct {
 	ByObject *string `yaml:"by_object"`
+	ByName   *string `yaml:"by_name"`
 
 	GeneratedFromDisjunction *bool `yaml:"generated_from_disjunction"` // noop?
 }
@@ -146,6 +177,10 @@ type BuilderSelector struct {
 func (selector BuilderSelector) AsSelector(pkg string) (builder.Selector, error) {
 	if selector.ByObject != nil {
 		return builder.ByObjectName(pkg, *selector.ByObject), nil
+	}
+
+	if selector.ByName != nil {
+		return builder.ByName(pkg, *selector.ByName), nil
 	}
 
 	if selector.GeneratedFromDisjunction != nil {
