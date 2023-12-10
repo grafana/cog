@@ -116,7 +116,8 @@ func (rule Properties) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 type Duplicate struct {
 	BuilderSelector `yaml:",inline"`
-	As              string `yaml:"as"`
+	As              string   `yaml:"as"`
+	ExcludeOptions  []string `yaml:"exclude_options"`
 }
 
 func (rule Duplicate) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -128,6 +129,7 @@ func (rule Duplicate) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	return builder.Duplicate(
 		selector,
 		rule.As,
+		rule.ExcludeOptions,
 	), nil
 }
 

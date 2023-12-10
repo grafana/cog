@@ -239,7 +239,7 @@ func Properties(selector Selector, properties []ast.StructField) RewriteRule {
 	}
 }
 
-func Duplicate(selector Selector, duplicateName string) RewriteRule {
+func Duplicate(selector Selector, duplicateName string, excludeOptions []string) RewriteRule {
 	return func(builders ast.Builders) (ast.Builders, error) {
 		var newBuilders ast.Builders
 
@@ -251,6 +251,12 @@ func Duplicate(selector Selector, duplicateName string) RewriteRule {
 			duplicatedBuilder := builder.DeepCopy()
 			duplicatedBuilder.Name = duplicateName
 			duplicatedBuilder.AddToVeneerTrail("Duplicate")
+
+			if len(excludeOptions) != 0 {
+				duplicatedBuilder.Options = tools.Filter(duplicatedBuilder.Options, func(option ast.Option) bool {
+					return !tools.StringInListEqualFold(option.Name, excludeOptions)
+				})
+			}
 
 			newBuilders = append(newBuilders, duplicatedBuilder)
 		}
