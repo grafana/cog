@@ -238,3 +238,23 @@ func Properties(selector Selector, properties []ast.StructField) RewriteRule {
 		return builders, nil
 	}
 }
+
+func Duplicate(selector Selector, duplicateName string) RewriteRule {
+	return func(builders ast.Builders) (ast.Builders, error) {
+		var newBuilders ast.Builders
+
+		for _, builder := range builders {
+			if !selector(builder) {
+				continue
+			}
+
+			duplicatedBuilder := builder.DeepCopy()
+			duplicatedBuilder.Name = duplicateName
+			duplicatedBuilder.AddToVeneerTrail("Duplicate")
+
+			newBuilders = append(newBuilders, duplicatedBuilder)
+		}
+
+		return append(builders, newBuilders...), nil
+	}
+}

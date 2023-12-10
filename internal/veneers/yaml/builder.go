@@ -17,6 +17,7 @@ type BuilderRule struct {
 	MergeInto             *MergeInto             `yaml:"merge_into"`
 	ComposeDashboardPanel *ComposeDashboardPanel `yaml:"compose_dashboard_panel"`
 	Properties            *Properties            `yaml:"properties"`
+	Duplicate             *Duplicate             `yaml:"duplicate"`
 }
 
 func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -43,6 +44,10 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 	if rule.Properties != nil {
 		return rule.Properties.AsRewriteRule(pkg)
+	}
+
+	if rule.Duplicate != nil {
+		return rule.Duplicate.AsRewriteRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -106,6 +111,23 @@ func (rule Properties) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	return builder.Properties(
 		selector,
 		rule.Set,
+	), nil
+}
+
+type Duplicate struct {
+	BuilderSelector `yaml:",inline"`
+	As              string `yaml:"as"`
+}
+
+func (rule Duplicate) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.Duplicate(
+		selector,
+		rule.As,
 	), nil
 }
 
