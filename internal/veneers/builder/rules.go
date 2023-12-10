@@ -250,7 +250,7 @@ func Duplicate(selector Selector, duplicateName string, excludeOptions []string)
 
 			duplicatedBuilder := builder.DeepCopy()
 			duplicatedBuilder.Name = duplicateName
-			duplicatedBuilder.AddToVeneerTrail("Duplicate")
+			duplicatedBuilder.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s.%s]", builder.Package, builder.Name))
 
 			if len(excludeOptions) != 0 {
 				duplicatedBuilder.Options = tools.Filter(duplicatedBuilder.Options, func(option ast.Option) bool {
@@ -277,6 +277,7 @@ func Initialize(selector Selector, statements []Initialization) RewriteRule {
 				continue
 			}
 
+			veneerDebug := make([]string, 0, len(statements))
 			for _, statement := range statements {
 				path, err := builders[i].MakePath(builders, statement.PropertyPath)
 				if err != nil {
@@ -284,8 +285,9 @@ func Initialize(selector Selector, statements []Initialization) RewriteRule {
 				}
 
 				builders[i].Initializations = append(builders[i].Initializations, ast.ConstantAssignment(path, statement.Value))
+				veneerDebug = append(veneerDebug, fmt.Sprintf("%s = %v", statement.PropertyPath, statement.Value))
 			}
-			builders[i].AddToVeneerTrail("Initialize")
+			builders[i].AddToVeneerTrail(fmt.Sprintf("Initialize[%s]", strings.Join(veneerDebug, ", ")))
 		}
 
 		return builders, nil

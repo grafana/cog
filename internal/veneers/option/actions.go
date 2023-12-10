@@ -1,6 +1,8 @@
 package option
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -10,8 +12,9 @@ type RewriteAction func(builder ast.Builder, option ast.Option) []ast.Option
 // RenameAction renames an option.
 func RenameAction(newName string) RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
+		oldName := option.Name
 		option.Name = newName
-		option.AddToVeneerTrail("Rename")
+		option.AddToVeneerTrail(fmt.Sprintf("Rename[%s → %s]", oldName, newName))
 
 		return []ast.Option{option}
 	}
