@@ -68,6 +68,29 @@ func TestByName_withSeveralOptions(t *testing.T) {
 	req.Equal("Editable", selectedForDashboardWithNotFound[0].Name)
 }
 
+func TestByBuilder(t *testing.T) {
+	req := require.New(t)
+
+	dashboardBuilder := ast.Builder{
+		Name: "EmptyDashboard",
+		For:  ast.NewObject("dashboard", "Dashboard", ast.NewStruct()),
+	}
+	options := []ast.Option{
+		{Name: "Editable"},
+		{Name: "Refresh"},
+		{Name: "TimePicker"},
+	}
+
+	singleSelector := ByBuilder("dashboard", "EmptyDashboard", "Refresh")
+	notFoundSelector := ByBuilder("dashboard", "Dashboard", "Refresh")
+
+	selectedForDashboard := filter(singleSelector, dashboardBuilder, options)
+	req.Len(selectedForDashboard, 1)
+	req.Equal("Refresh", selectedForDashboard[0].Name)
+
+	req.Len(filter(notFoundSelector, dashboardBuilder, options), 0)
+}
+
 func filter(selector Selector, builder ast.Builder, opts []ast.Option) []ast.Option {
 	var selected []ast.Option
 
