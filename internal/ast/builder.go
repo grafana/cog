@@ -36,6 +36,8 @@ func (builder *Builder) DeepCopy() Builder {
 		VeneerTrail:     make([]string, 0, len(builder.VeneerTrail)),
 	}
 
+	clone.VeneerTrail = append(clone.VeneerTrail, builder.VeneerTrail...)
+
 	for _, property := range builder.Properties {
 		clone.Properties = append(clone.Properties, property.DeepCopy())
 	}
@@ -44,9 +46,6 @@ func (builder *Builder) DeepCopy() Builder {
 	}
 	for _, init := range builder.Initializations {
 		clone.Initializations = append(clone.Initializations, init.DeepCopy())
-	}
-	for _, veneer := range builder.VeneerTrail {
-		clone.VeneerTrail = append(clone.VeneerTrail, veneer)
 	}
 
 	return clone
