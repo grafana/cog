@@ -41,6 +41,7 @@ func CommonPasses() Passes {
 		&DashboardTargetsRewrite{},
 		&DashboardTimePicker{},
 		&Cloudwatch{},
+		&GoogleCloudMonitoring{},
 		&LibraryPanels{},
 		&TestData{},
 	}
