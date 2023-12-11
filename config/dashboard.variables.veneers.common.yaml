@@ -83,9 +83,6 @@ options:
   # QueryVariable #
   #################
   - omit: { by_builder: QueryVariable.skipUrlSync }
-  - rename:
-      by_builder: QueryVariable.query
-      as: value
 
   #################
   # AdHocVariable #

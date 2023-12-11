@@ -117,12 +117,20 @@ func (t Type) HasHint(hintName string) bool {
 	return found
 }
 
+func (t Type) IsRef() bool {
+	return t.Kind == KindRef
+}
+
 func (t Type) IsStructOrRef() bool {
 	return t.Kind == KindStruct || t.Kind == KindRef
 }
 
 func (t Type) IsArray() bool {
 	return t.Kind == KindArray
+}
+
+func (t Type) IsEnum() bool {
+	return t.Kind == KindEnum
 }
 
 func (t Type) IsStructGeneratedFromDisjunction() bool {
