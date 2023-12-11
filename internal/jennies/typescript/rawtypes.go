@@ -97,14 +97,14 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
 		for _, val := range def.Type.AsEnum().Values {
 			name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
-			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatScalar(val.Value)))
+			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatValue(val.Value)))
 		}
 		buffer.WriteString("}\n")
 	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, jenny.typeFormatter.formatType(def.Type)))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
-		typeValue := formatScalar(scalarType.Value)
+		typeValue := formatValue(scalarType.Value)
 
 		if !scalarType.IsConcrete() || def.Type.Hints["kind"] == "type" {
 			if !scalarType.IsConcrete() {
@@ -157,7 +157,13 @@ func prefixLinesWith(input string, prefix string) string {
 func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pkgMapper) any {
 	switch object.Type.Kind {
 	case ast.KindEnum:
-		return defaultValueForEnumType(object.Name, object.Type, nil)
+		enum := object.Type.AsEnum()
+		defaultValue := enum.Values[0].Value
+		if object.Type.Default != nil {
+			defaultValue = object.Type.Default
+		}
+
+		return raw(jenny.typeFormatter.formatEnumValue(object, defaultValue))
 	default:
 		return jenny.defaultValueForType(object.Type, packageMapper)
 	}
@@ -221,25 +227,6 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 	}
 
 	return defaults
-}
-
-func defaultValueForEnumType(name string, typeDef ast.Type, overrideDefault any) any {
-	enum := typeDef.AsEnum()
-	defaultValue := enum.Values[0].Value
-	if typeDef.Default != nil {
-		defaultValue = typeDef.Default
-	}
-	if overrideDefault != nil {
-		defaultValue = overrideDefault
-	}
-
-	for _, v := range enum.Values {
-		if v.Value == defaultValue {
-			return raw(fmt.Sprintf("%s.%s", name, tools.CleanupNames(tools.UpperCamelCase(v.Name))))
-		}
-	}
-
-	return raw(fmt.Sprintf("%s.%s", name, tools.CleanupNames(tools.UpperCamelCase(enum.Values[0].Name))))
 }
 
 func defaultValueForScalar(scalar ast.ScalarType) any {
@@ -307,11 +294,7 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	if referredType.Type.Kind == ast.KindEnum {
-		if pkg != "" {
-			return raw(fmt.Sprintf("%s.%s", pkg, defaultValueForEnumType(ref.ReferredType, referredType.Type, typeDef.Default)))
-		}
-
-		return defaultValueForEnumType(ref.ReferredType, referredType.Type, typeDef.Default)
+		return raw(jenny.typeFormatter.formatEnumValue(referredType, typeDef.Default))
 	}
 
 	if pkg != "" {
@@ -319,36 +302,4 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	return raw(fmt.Sprintf("default%s()", ref.ReferredType))
-}
-
-func formatValue(val any) string {
-	if rawVal, ok := val.(raw); ok {
-		return string(rawVal)
-	}
-
-	var buffer strings.Builder
-
-	if array, ok := val.([]any); ok {
-		buffer.WriteString("[\n")
-		for _, v := range array {
-			buffer.WriteString(fmt.Sprintf("%s,\n", formatValue(v)))
-		}
-		buffer.WriteString("]")
-
-		return buffer.String()
-	}
-
-	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
-		buffer.WriteString("{\n")
-
-		orderedMap.Iterate(func(key string, value any) {
-			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(value)))
-		})
-
-		buffer.WriteString("}")
-
-		return buffer.String()
-	}
-
-	return fmt.Sprintf("%#v", val)
 }

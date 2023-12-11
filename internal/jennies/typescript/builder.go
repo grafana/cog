@@ -83,6 +83,16 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			"defaultValueForType": func(typeDef ast.Type) string {
 				return formatValue(jenny.rawTypes.defaultValueForType(typeDef, jenny.typeImportMapper))
 			},
+			"formatValue": func(destinationType ast.Type, value any) string {
+				if destinationType.IsRef() {
+					referredObj, found := context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
+					if found && referredObj.Type.IsEnum() {
+						return jenny.typeFormatter.formatEnumValue(referredObj, value)
+					}
+				}
+
+				return formatValue(value)
+			},
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
 			BuilderName:          builder.Name,
