@@ -82,6 +82,7 @@ jobs:
           go run cmd/cli/main.go generate \
             --output ./generated \
             --kind-registry ../kind-registry \
+            --kind-registry-version v10.2.x \
             --veneers ./config
 
       - name: Run the Go example
