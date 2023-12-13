@@ -105,3 +105,17 @@ type ArrayOfRefs []SomeStruct
 
 type ArrayOfArrayOfNumbers [][]int64
 
+-- out/jennies/PythonRawTypes --
+== models/arrays.py
+# List of tags, maybe?
+ArrayOfStrings = list[str]
+
+
+class SomeStruct:
+    FieldAny: object
+
+
+ArrayOfRefs = list['SomeStruct']
+
+
+ArrayOfArrayOfNumbers = list[list[int]]

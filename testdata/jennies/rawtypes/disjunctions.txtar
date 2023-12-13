@@ -360,3 +360,34 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	return errors.Join(errList...)
 }
 
+-- out/jennies/PythonRawTypes --
+== models/disjunctions.py
+import typing
+
+
+# Refresh rate or disabled.
+RefreshRate = typing.Union[str | bool]
+
+
+StringOrNull = typing.Optional[str]
+
+
+class SomeStruct:
+    Type: typing.Literal["some-struct"]
+    FieldAny: object
+
+
+BoolOrRef = typing.Union[bool | 'SomeStruct']
+
+
+class SomeOtherStruct:
+    Type: typing.Literal["some-other-struct"]
+    Foo: bytes
+
+
+class YetAnotherStruct:
+    Type: typing.Literal["yet-another-struct"]
+    Bar: int
+
+
+SeveralRefs = typing.Union['SomeStruct' | 'SomeOtherStruct' | 'YetAnotherStruct']

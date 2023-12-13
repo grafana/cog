@@ -118,5 +118,8 @@ func (pass *AnonymousStructsToNamed) processDisjunction(pkg string, parentName s
 func (pass *AnonymousStructsToNamed) processStruct(pkg string, parentName string, def ast.Type) ast.Type {
 	pass.newObjects = append(pass.newObjects, ast.NewObject(pkg, parentName, def))
 
-	return ast.NewRef(pkg, parentName)
+	ref := ast.NewRef(pkg, parentName)
+	ref.Nullable = def.Nullable
+
+	return ref
 }

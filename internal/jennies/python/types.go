@@ -107,6 +107,9 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 	if formatter.forBuilder && (def.Kind == ast.KindComposableSlot || (def.Kind == ast.KindRef && formatter.context.ResolveToBuilder(def))) {
 		cogBuilder := formatter.importModule("cogbuilder", "..cog", "builder")
 		result = fmt.Sprintf("%s.Builder[%s]", cogBuilder, result)
+	} else if def.Nullable {
+		typingPkg := formatter.importPkg("typing", "typing")
+		result = fmt.Sprintf("%s.Optional[%s]", typingPkg, result)
 	}
 
 	return result
@@ -188,11 +191,6 @@ func (formatter *typeFormatter) formatStructField(def ast.StructField) string {
 	}
 
 	field := formatter.formatType(def.Type)
-
-	if !def.Required || def.Type.Nullable {
-		typingPkg := formatter.importPkg("typing", "typing")
-		field = fmt.Sprintf("%s.Optional[%s]", typingPkg, field)
-	}
 
 	buffer.WriteString(fmt.Sprintf("    %s: %s", escapeFieldName(def.Name), field))
 
