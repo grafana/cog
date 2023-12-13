@@ -3,7 +3,6 @@ package typescript
 import (
 	"fmt"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -299,7 +298,8 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	if hasStructDefaults(referredType.Type, typeDef.Default) {
-		return defaultValueForStructs(toOrderedMap(typeDef.Default))
+		defaultMap := typeDef.Default.(map[string]interface{})
+		return defaultValueForStructs(orderedmap.FromMap(defaultMap))
 	}
 
 	if pkg != "" {
@@ -313,9 +313,9 @@ func defaultValueForStructs(m *orderedmap.Map[string, interface{}]) any {
 	var buffer strings.Builder
 
 	m.Iterate(func(key string, value interface{}) {
-		switch value.(type) {
+		switch x := value.(type) {
 		case map[string]interface{}:
-			buffer.WriteString(fmt.Sprintf("%s: %v, ", key, defaultValueForStructs(toOrderedMap(value))))
+			buffer.WriteString(fmt.Sprintf("%s: %v, ", key, defaultValueForStructs(orderedmap.FromMap(x))))
 		case nil:
 			buffer.WriteString(fmt.Sprintf("%s: %v, ", key, formatValue([]any{})))
 		default:
@@ -329,22 +329,4 @@ func defaultValueForStructs(m *orderedmap.Map[string, interface{}]) any {
 func hasStructDefaults(typeDef ast.Type, defaults any) bool {
 	_, ok := defaults.(map[string]interface{})
 	return ok && typeDef.Kind == ast.KindStruct
-}
-
-func toOrderedMap(value any) *orderedmap.Map[string, interface{}] {
-	orderedMap := orderedmap.New[string, interface{}]()
-	valueMap, _ := value.(map[string]interface{})
-
-	keys := make([]string, 0, len(valueMap))
-	for k := range valueMap {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-
-	for _, k := range keys {
-		orderedMap.Set(k, valueMap[k])
-	}
-
-	return orderedMap
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -150,7 +151,7 @@ func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
 			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
 			pkg = opt.Args[i].Type.AsRef().ReferredType
 		}
-		args = append(args, formatDefaultStruct(refPkg, pkg, toOrderedMap(val)))
+		args = append(args, formatDefaultStruct(refPkg, pkg, orderedmap.FromMap(val)))
 	}
 	return args
 }

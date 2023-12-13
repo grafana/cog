@@ -2,7 +2,6 @@ package golang
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -182,7 +181,7 @@ func formatDefaultStruct(refPkg, pkg string, structMap *orderedmap.Map[string, i
 
 		switch x := value.(type) {
 		case map[string]interface{}:
-			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultStruct(refPkg, pkg, toOrderedMap(x))))
+			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultStruct(refPkg, pkg, orderedmap.FromMap(x))))
 		case nil:
 			buffer.WriteString(fmt.Sprintf(format, key, formatScalar([]any{})))
 		default:
@@ -258,21 +257,4 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	buffer.WriteString("}")
 
 	return buffer.String()
-}
-
-func toOrderedMap(m map[string]interface{}) *orderedmap.Map[string, interface{}] {
-	orderedMap := orderedmap.New[string, interface{}]()
-
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-
-	sort.Strings(keys)
-
-	for _, k := range keys {
-		orderedMap.Set(k, m[k])
-	}
-
-	return orderedMap
 }

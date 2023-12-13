@@ -828,7 +828,7 @@ IntVal(4),
 )
 }
 -- out/jennies/TypescriptBuilder --
-== struct_with_defaults/nestedstruct_builder_gen.ts
+== src/struct_with_defaults/nestedstruct_builder_gen.ts
 import * as cog from '../cog';
 import * as struct_with_defaults from '../struct_with_defaults';
 
@@ -853,7 +853,7 @@ export class NestedStructBuilder implements cog.Builder<struct_with_defaults.Nes
         return this;
     }
 }
-== struct_with_defaults/struct_builder_gen.ts
+== src/struct_with_defaults/struct_builder_gen.ts
 import * as cog from '../cog';
 import * as struct_with_defaults from '../struct_with_defaults';
 
