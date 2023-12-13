@@ -23,7 +23,6 @@ var _ Pass = (*DisjunctionWithNullToOptional)(nil)
 //	MaybeString?: string
 //	```
 type DisjunctionWithNullToOptional struct {
-	newObjects map[string]ast.Object
 }
 
 func (pass *DisjunctionWithNullToOptional) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
