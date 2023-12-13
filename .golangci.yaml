@@ -33,6 +33,7 @@ linters:
     - gomnd
     - tagliatelle
     - nlreturn
+    - gocyclo
     # deprecated
     - deadcode
     - scopelint

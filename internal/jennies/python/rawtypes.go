@@ -11,7 +11,7 @@ import (
 
 type RawTypes struct {
 	typeFormatter *typeFormatter
-	importModule  func(alias string, pkg string, module string) string
+	importModule  moduleImporter
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -60,7 +60,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 			return nil, err
 		}
 
-		buffer.Write([]byte(objectOutput))
+		buffer.WriteString(objectOutput)
 
 		// we want two blank lines between objects, except at the end of the file
 		if i != len(schema.Objects)-1 {

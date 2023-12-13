@@ -9,27 +9,21 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
+type pkgImporter func(alias string, pkg string) string
+type moduleImporter func(alias string, pkg string, module string) string
+
 type typeFormatter struct {
-	importPkg    func(alias string, pkg string) string
-	importModule func(alias string, pkg string, module string) string
+	importPkg    pkgImporter
+	importModule moduleImporter
 
 	forBuilder bool
 	context    common.Context
 }
 
-func defaultTypeFormatter(importPkg func(alias string, pkg string) string, importModule func(alias string, pkg string, module string) string) *typeFormatter {
+func defaultTypeFormatter(importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
 	return &typeFormatter{
 		importPkg:    importPkg,
 		importModule: importModule,
-	}
-}
-
-func builderTypeFormatter(context common.Context, importPkg func(alias string, pkg string) string, importModule func(alias string, pkg string, module string) string) *typeFormatter {
-	return &typeFormatter{
-		importPkg:    importPkg,
-		importModule: importModule,
-		forBuilder:   true,
-		context:      context,
 	}
 }
 
