@@ -79,6 +79,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.FlattenDisjunctions{},
+		&compiler.DisjunctionWithNullToOptional{},
 		&compiler.DisjunctionToType{},
 	}
 }
