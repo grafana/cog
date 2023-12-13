@@ -240,8 +240,7 @@ func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
 	case ast.KindNull:
 		return "None"
 	case ast.KindAny:
-		typingPkg := formatter.importPkg("typing", "typing")
-		return typingPkg + ".Any"
+		return "object"
 
 	case ast.KindBytes:
 		return "bytes"
