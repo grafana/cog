@@ -6,7 +6,7 @@ import (
 	"github.com/grafana/cog/internal/orderedmap"
 )
 
-func noopSanitizer(s string) string { return s }
+func NoopImportSanitizer(s string) string { return s }
 
 type ImportMapConfig[M any] struct {
 	Formatter           func(importMap M) string
@@ -38,8 +38,8 @@ func NewDirectImportMap(opts ...ImportMapOption[DirectImportMap]) *DirectImportM
 		Formatter: func(importMap DirectImportMap) string {
 			return fmt.Sprintf("%#v\n", importMap.Imports)
 		},
-		AliasSanitizer:      noopSanitizer,
-		ImportPathSanitizer: noopSanitizer,
+		AliasSanitizer:      NoopImportSanitizer,
+		ImportPathSanitizer: NoopImportSanitizer,
 	}
 
 	for _, opt := range opts {

@@ -24,6 +24,9 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
+		ModuleInit{},
+		Runtime{},
+
 		common.If[common.Context](globalConfig.Types, RawTypes{}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
@@ -32,5 +35,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 }
 
 func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{}
+	return compiler.Passes{
+		&compiler.AnonymousStructsToNamed{},
+	}
 }
