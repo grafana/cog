@@ -10,6 +10,8 @@ import (
 )
 
 type RawTypes struct {
+	typeFormatter *typeFormatter
+	importModule  func(alias string, pkg string, module string) string
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -20,7 +22,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
-		output, err := jenny.generateSchema(context, schema)
+		output, err := jenny.generateSchema(schema)
 		if err != nil {
 			return nil, err
 		}
@@ -33,10 +35,45 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(_ common.Context, _ *ast.Schema) ([]byte, error) {
+func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
-	buffer.WriteString("# TODO")
+	imports := NewImportMap()
+	jenny.importModule = func(alias string, pkg string, module string) string {
+		if module == schema.Package {
+			return ""
+		}
 
-	return []byte(buffer.String()), nil
+		return imports.AddModule(alias, pkg, module)
+	}
+	jenny.typeFormatter = defaultTypeFormatter(func(alias string, pkg string) string {
+		if strings.TrimPrefix(pkg, ".") == schema.Package {
+			return ""
+		}
+
+		return imports.AddPackage(alias, pkg)
+	}, jenny.importModule)
+
+	for i, object := range schema.Objects {
+		objectOutput, err := jenny.typeFormatter.formatObject(object)
+		if err != nil {
+			return nil, err
+		}
+
+		buffer.Write([]byte(objectOutput))
+
+		// we want two blank lines between objects, except at the end of the file
+		if i != len(schema.Objects)-1 {
+			buffer.WriteString("\n\n\n")
+		}
+	}
+
+	buffer.WriteString("\n")
+
+	importStatements := imports.String()
+	if importStatements != "" {
+		importStatements += "\n\n\n"
+	}
+
+	return []byte(importStatements + buffer.String()), nil
 }
