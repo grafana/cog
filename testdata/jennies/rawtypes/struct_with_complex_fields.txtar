@@ -5,6 +5,7 @@
     "Objects": [
         {
             "Name": "SomeStruct",
+            "SelfRef": {"ReferredPkg": "struct_complex_fields", "ReferredType": "SomeStruct"},
             "Comments": ["This struct does things."],
             "Type": {
                 "Kind": "struct",
@@ -158,6 +159,7 @@
 
         {
             "Name": "SomeOtherStruct",
+            "SelfRef": {"ReferredPkg": "struct_complex_fields", "ReferredType": "SomeOtherStruct"},
             "Type": {
                 "Kind": "struct",
                 "Struct": {
@@ -297,3 +299,29 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	return errors.Join(errList...)
 }
 
+-- out/jennies/PythonRawTypes --
+== models/struct_complex_fields.py
+import typing
+
+
+class StructComplexFieldsSomeStructFieldAnonymousStruct:
+    FieldAny: object
+
+
+class SomeStruct:
+    """
+    This struct does things.
+    """
+
+    FieldRef: 'SomeOtherStruct'
+    FieldDisjunctionOfScalars: str | bool
+    FieldMixedDisjunction: str | 'SomeOtherStruct'
+    FieldDisjunctionWithNull: typing.Optional[str]
+    Operator: typing.Literal[">", "<"]
+    FieldArrayOfStrings: list[str]
+    FieldMapOfStringToString: dict[str, str]
+    FieldAnonymousStruct: 'StructComplexFieldsSomeStructFieldAnonymousStruct'
+
+
+class SomeOtherStruct:
+    FieldAny: object
