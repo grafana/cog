@@ -1,13 +1,13 @@
 import {
     DashboardBuilder,
     DashboardCursorSync,
+    DatasourceVariableBuilder,
+    QueryVariableBuilder,
     RowBuilder,
     TimePickerBuilder,
     VariableHide,
-    VariableModelBuilder,
     VariableRefresh,
     VariableSort,
-    VariableType
 } from "../../generated/src/dashboard";
 import {cpuTemperatureGauge, cpuUsageTimeseries, loadAverageTimeseries} from "./cpu";
 import {memoryUsageGauge, memoryUsageTimeseries} from "./memory";
@@ -33,24 +33,19 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
 
     // "Data Source" variable
     .withVariable(
-        new VariableModelBuilder()
-            .type(VariableType.Datasource)
-            .name("datasource")
+        new DatasourceVariableBuilder("datasource")
             .label("Data Source")
             .hide(VariableHide.DontHide)
-            .refresh(VariableRefresh.OnDashboardLoad)
-            .query("prometheus")
+            .type("prometheus")
             .current({
                 selected: true,
                 text: "grafanacloud-potatopi-prom",
                 value: "grafanacloud-prom",
             })
-            .sort(VariableSort.Disabled)
     )
     // "Instance" variable
     .withVariable(
-        new VariableModelBuilder()
-            .type(VariableType.Query)
+        new QueryVariableBuilder("instance")
             .name("instance")
             .label("Instance")
             .hide(VariableHide.DontHide)

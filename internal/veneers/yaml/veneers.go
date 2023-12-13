@@ -65,13 +65,10 @@ func (loader *Loader) Load(reader io.Reader) (rewrite.LanguageRules, error) {
 
 	veneers := &Veneers{}
 
-	// read and parse the input file
-	data, err := io.ReadAll(reader)
-	if err != nil {
-		return rewrite.LanguageRules{}, err
-	}
+	decoder := yaml.NewDecoder(reader)
+	decoder.KnownFields(true)
 
-	if err := yaml.Unmarshal(data, &veneers); err != nil {
+	if err := decoder.Decode(&veneers); err != nil {
 		return rewrite.LanguageRules{}, err
 	}
 

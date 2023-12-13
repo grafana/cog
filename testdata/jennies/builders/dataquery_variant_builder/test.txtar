@@ -158,7 +158,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== src/dataquery_variant_builder/loki_builder_gen.ts
+== src/dataquery_variant_builder/lokibuilder_builder_gen.ts
 import * as cog from '../cog';
 import * as dataquery_variant_builder from '../dataquery_variant_builder';
 
@@ -179,7 +179,7 @@ export class LokiBuilderBuilder implements cog.Builder<cog.Dataquery> {
     }
 }
 -- out/jennies/GoBuilder --
-== dataquery_variant_builder/loki_builder_gen.go
+== dataquery_variant_builder/lokibuilder_builder_gen.go
 package dataquery_variant_builder
 
 import (

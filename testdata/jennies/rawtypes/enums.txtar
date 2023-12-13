@@ -28,6 +28,10 @@
                         }
                     ]
                 }
+            },
+            "SelfRef": {
+                "ReferredPkg": "enums",
+                "ReferredType": "Operator"
             }
         },
 
@@ -55,6 +59,10 @@
                         }
                     ]
                 }
+            },
+            "SelfRef": {
+                "ReferredPkg": "enums",
+                "ReferredType": "TableSortOrder"
             }
         },
         {
@@ -81,6 +89,10 @@
                         }
                     ]
                 }
+            },
+            "SelfRef": {
+                "ReferredPkg": "enums",
+                "ReferredType": "LogsSortOrder"
             }
         },
 
@@ -121,6 +133,10 @@
                         }
                     ]
                 }
+            },
+            "SelfRef": {
+                "ReferredPkg": "enums",
+                "ReferredType": "DashboardCursorSync"
             }
         }
     ]

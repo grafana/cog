@@ -238,3 +238,58 @@ func Properties(selector Selector, properties []ast.StructField) RewriteRule {
 		return builders, nil
 	}
 }
+
+func Duplicate(selector Selector, duplicateName string, excludeOptions []string) RewriteRule {
+	return func(builders ast.Builders) (ast.Builders, error) {
+		var newBuilders ast.Builders
+
+		for _, builder := range builders {
+			if !selector(builder) {
+				continue
+			}
+
+			duplicatedBuilder := builder.DeepCopy()
+			duplicatedBuilder.Name = duplicateName
+			duplicatedBuilder.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s.%s]", builder.Package, builder.Name))
+
+			if len(excludeOptions) != 0 {
+				duplicatedBuilder.Options = tools.Filter(duplicatedBuilder.Options, func(option ast.Option) bool {
+					return !tools.StringInListEqualFold(option.Name, excludeOptions)
+				})
+			}
+
+			newBuilders = append(newBuilders, duplicatedBuilder)
+		}
+
+		return append(builders, newBuilders...), nil
+	}
+}
+
+type Initialization struct {
+	PropertyPath string
+	Value        any
+}
+
+func Initialize(selector Selector, statements []Initialization) RewriteRule {
+	return func(builders ast.Builders) (ast.Builders, error) {
+		for i, builder := range builders {
+			if !selector(builder) {
+				continue
+			}
+
+			veneerDebug := make([]string, 0, len(statements))
+			for _, statement := range statements {
+				path, err := builders[i].MakePath(builders, statement.PropertyPath)
+				if err != nil {
+					return nil, err
+				}
+
+				builders[i].Initializations = append(builders[i].Initializations, ast.ConstantAssignment(path, statement.Value))
+				veneerDebug = append(veneerDebug, fmt.Sprintf("%s = %v", statement.PropertyPath, statement.Value))
+			}
+			builders[i].AddToVeneerTrail(fmt.Sprintf("Initialize[%s]", strings.Join(veneerDebug, ", ")))
+		}
+
+		return builders, nil
+	}
+}

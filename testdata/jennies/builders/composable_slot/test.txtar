@@ -264,7 +264,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== src/composable_slot/dashboard_builder_gen.ts
+== src/composable_slot/lokibuilder_builder_gen.ts
 import * as cog from '../cog';
 import * as composable_slot from '../composable_slot';
 
@@ -292,7 +292,7 @@ export class LokiBuilderBuilder implements cog.Builder<composable_slot.Dashboard
     }
 }
 -- out/jennies/GoBuilder --
-== composable_slot/dashboard_builder_gen.go
+== composable_slot/lokibuilder_builder_gen.go
 package composable_slot
 
 import (

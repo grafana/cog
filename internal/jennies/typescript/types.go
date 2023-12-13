@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -71,7 +72,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 	case ast.KindScalar:
 		// This scalar actually refers to a constant
 		if def.AsScalar().Value != nil {
-			return formatScalar(def.AsScalar().Value)
+			return formatValue(def.AsScalar().Value)
 		}
 
 		return formatter.formatScalarKind(def.AsScalar().ScalarKind)
@@ -244,15 +245,51 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	return buffer.String()
 }
 
-func formatScalar(val any) string {
-	if list, ok := val.([]any); ok {
-		items := make([]string, 0, len(list))
+func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
+	enum := enumObj.Type.AsEnum()
 
-		for _, item := range list {
-			items = append(items, formatScalar(item))
+	referredPkg := formatter.packageMapper(enumObj.SelfRef.ReferredPkg)
+	pkgPrefix := ""
+	if referredPkg != "" {
+		pkgPrefix = referredPkg + "."
+	}
+
+	for _, v := range enum.Values {
+		if v.Value == val {
+			return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, tools.CleanupNames(tools.UpperCamelCase(v.Name)))
 		}
+	}
 
-		return fmt.Sprintf("[%s]", strings.Join(items, ", "))
+	return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, tools.CleanupNames(tools.UpperCamelCase(enum.Values[0].Name)))
+}
+
+func formatValue(val any) string {
+	if rawVal, ok := val.(raw); ok {
+		return string(rawVal)
+	}
+
+	var buffer strings.Builder
+
+	if array, ok := val.([]any); ok {
+		buffer.WriteString("[\n")
+		for _, v := range array {
+			buffer.WriteString(fmt.Sprintf("%s,\n", formatValue(v)))
+		}
+		buffer.WriteString("]")
+
+		return buffer.String()
+	}
+
+	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
+		buffer.WriteString("{\n")
+
+		orderedMap.Iterate(func(key string, value any) {
+			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(value)))
+		})
+
+		buffer.WriteString("}")
+
+		return buffer.String()
 	}
 
 	return fmt.Sprintf("%#v", val)

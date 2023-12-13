@@ -31,9 +31,9 @@ func init() {
 			"defaultValueForType": func(_ ast.Type) string {
 				panic("defaultValueForType() needs to be overridden by a jenny")
 			},
-		}).
-		Funcs(template.FuncMap{
-			"formatScalar": formatScalar,
+			"formatValue": func(destinationType ast.Type, value any) string {
+				panic("formatValue() needs to be overridden by a jenny")
+			},
 		})
 	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
 }

@@ -24,6 +24,33 @@ type Builder struct {
 	VeneerTrail     []string     `json:",omitempty"`
 }
 
+func (builder *Builder) DeepCopy() Builder {
+	clone := Builder{
+		Schema:          builder.Schema,
+		For:             builder.For,
+		Package:         builder.Package,
+		Name:            builder.Name,
+		Properties:      make([]StructField, 0, len(builder.Properties)),
+		Options:         make([]Option, 0, len(builder.Options)),
+		Initializations: make([]Assignment, 0, len(builder.Initializations)),
+		VeneerTrail:     make([]string, 0, len(builder.VeneerTrail)),
+	}
+
+	clone.VeneerTrail = append(clone.VeneerTrail, builder.VeneerTrail...)
+
+	for _, property := range builder.Properties {
+		clone.Properties = append(clone.Properties, property.DeepCopy())
+	}
+	for _, opt := range builder.Options {
+		clone.Options = append(clone.Options, opt.DeepCopy())
+	}
+	for _, init := range builder.Initializations {
+		clone.Initializations = append(clone.Initializations, init.DeepCopy())
+	}
+
+	return clone
+}
+
 func (builder *Builder) AddToVeneerTrail(veneerName string) {
 	builder.VeneerTrail = append(builder.VeneerTrail, veneerName)
 }
@@ -99,6 +126,28 @@ type Option struct {
 	IsConstructorArg bool
 }
 
+func (opt *Option) DeepCopy() Option {
+	clone := Option{
+		Name:             opt.Name,
+		Comments:         make([]string, 0, len(opt.Comments)),
+		VeneerTrail:      make([]string, 0, len(opt.VeneerTrail)),
+		Args:             make([]Argument, 0, len(opt.Args)),
+		Assignments:      make([]Assignment, 0, len(opt.Assignments)),
+		IsConstructorArg: opt.IsConstructorArg,
+	}
+
+	clone.Comments = append(clone.Comments, opt.Comments...)
+	clone.VeneerTrail = append(clone.VeneerTrail, opt.VeneerTrail...)
+	for _, arg := range opt.Args {
+		clone.Args = append(clone.Args, arg.DeepCopy())
+	}
+	for _, assignment := range opt.Assignments {
+		clone.Assignments = append(clone.Assignments, assignment.DeepCopy())
+	}
+
+	return clone
+}
+
 func (opt *Option) AddToVeneerTrail(veneerName string) {
 	opt.VeneerTrail = append(opt.VeneerTrail, veneerName)
 }
@@ -112,6 +161,13 @@ type Argument struct {
 	Type Type
 }
 
+func (arg *Argument) DeepCopy() Argument {
+	return Argument{
+		Name: arg.Name,
+		Type: arg.Type.DeepCopy(),
+	}
+}
+
 type PathItem struct {
 	Identifier string
 	Type       Type // any
@@ -120,7 +176,31 @@ type PathItem struct {
 	TypeHint *Type `json:",omitempty"`
 }
 
+func (item PathItem) DeepCopy() PathItem {
+	clone := PathItem{
+		Identifier: item.Identifier,
+		Type:       item.Type.DeepCopy(),
+	}
+
+	if item.TypeHint != nil {
+		hint := item.TypeHint.DeepCopy()
+		clone.TypeHint = &hint
+	}
+
+	return clone
+}
+
 type Path []PathItem
+
+func (path Path) DeepCopy() Path {
+	clone := make([]PathItem, 0, len(path))
+
+	for _, item := range path {
+		clone = append(clone, item.DeepCopy())
+	}
+
+	return clone
+}
 
 func PathFromStructField(field StructField) Path {
 	return Path{
@@ -154,15 +234,53 @@ type EnvelopeFieldValue struct {
 	Value AssignmentValue // what to assign
 }
 
+func (value *EnvelopeFieldValue) DeepCopy() EnvelopeFieldValue {
+	return EnvelopeFieldValue{
+		Path:  value.Path.DeepCopy(),
+		Value: value.Value.DeepCopy(),
+	}
+}
+
 type AssignmentEnvelope struct {
 	Type   Type // Should be a ref or a struct only
 	Values []EnvelopeFieldValue
+}
+
+func (envelope *AssignmentEnvelope) DeepCopy() AssignmentEnvelope {
+	clone := AssignmentEnvelope{
+		Type:   envelope.Type.DeepCopy(),
+		Values: make([]EnvelopeFieldValue, 0, len(envelope.Values)),
+	}
+
+	for _, value := range envelope.Values {
+		clone.Values = append(clone.Values, value.DeepCopy())
+	}
+
+	return clone
 }
 
 type AssignmentValue struct {
 	Argument *Argument           `json:",omitempty"`
 	Constant any                 `json:",omitempty"`
 	Envelope *AssignmentEnvelope `json:",omitempty"`
+}
+
+func (value *AssignmentValue) DeepCopy() AssignmentValue {
+	clone := AssignmentValue{
+		Constant: value.Constant,
+	}
+
+	if value.Argument != nil {
+		arg := value.Argument.DeepCopy()
+		clone.Argument = &arg
+	}
+
+	if value.Envelope != nil {
+		envelope := value.Envelope.DeepCopy()
+		clone.Envelope = &envelope
+	}
+
+	return clone
 }
 
 type AssignmentMethod string
@@ -183,6 +301,21 @@ type Assignment struct {
 	Method AssignmentMethod
 
 	Constraints []TypeConstraint `json:",omitempty"`
+}
+
+func (assignment *Assignment) DeepCopy() Assignment {
+	clone := Assignment{
+		Path:        assignment.Path.DeepCopy(),
+		Value:       assignment.Value.DeepCopy(),
+		Method:      assignment.Method,
+		Constraints: make([]TypeConstraint, 0, len(assignment.Constraints)),
+	}
+
+	for _, constraint := range assignment.Constraints {
+		clone.Constraints = append(clone.Constraints, constraint.DeepCopy())
+	}
+
+	return clone
 }
 
 type AssignmentOpt func(assignment *Assignment)

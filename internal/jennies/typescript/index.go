@@ -29,7 +29,7 @@ func (jenny Index) Generate(context common.Context) (codejen.Files, error) {
 
 	if jenny.Targets.Builders {
 		for _, builder := range context.Builders {
-			packages[builder.Package] = append(packages[builder.Package], fmt.Sprintf("%s_builder_gen", strings.ToLower(builder.For.Name)))
+			packages[builder.Package] = append(packages[builder.Package], fmt.Sprintf("%s_builder_gen", strings.ToLower(builder.Name)))
 		}
 	}
 

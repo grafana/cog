@@ -18,6 +18,15 @@ func ByObjectName(pkg string, objectName string) Selector {
 	}
 }
 
+// ByName matches builders for the given name.
+// Note: the comparison on builder name is case-insensitive.
+func ByName(pkg string, builderName string) Selector {
+	return func(builder ast.Builder) bool {
+		return builder.For.SelfRef.ReferredPkg == pkg &&
+			strings.EqualFold(builder.Name, builderName)
+	}
+}
+
 // StructGeneratedFromDisjunction matches builders for structs that were
 // generated from a disjunction (see the Disjunction compiler pass).
 func StructGeneratedFromDisjunction() Selector {
