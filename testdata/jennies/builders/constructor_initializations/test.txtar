@@ -206,7 +206,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== constructor_initializations/somepanel_builder_gen.ts
+== src/constructor_initializations/somepanel_builder_gen.ts
 import * as cog from '../cog';
 import * as constructor_initializations from '../constructor_initializations';
 

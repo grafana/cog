@@ -110,7 +110,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== struct_optional_fields/types_gen.ts
+== src/struct_optional_fields/types_gen.ts
 export interface SomeStruct {
 	FieldRef?: SomeOtherStruct;
 	FieldString?: string;

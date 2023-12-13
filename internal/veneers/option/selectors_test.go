@@ -22,8 +22,8 @@ func TestByName(t *testing.T) {
 		{Name: "TimePicker"},
 	}
 
-	singleSelector := ByName("Dashboard", "Refresh")
-	notFoundSelector := ByName("Dashboard", "refresh")
+	singleSelector := ByName("dashboard", "Dashboard", "Refresh")
+	notFoundSelector := ByName("dashboard", "Dashboard", "notFound")
 
 	selectedForDashboard := filter(singleSelector, dashboardBuilder, options)
 	selectedForPanel := filter(singleSelector, panelBuilder, options)
@@ -51,8 +51,8 @@ func TestByName_withSeveralOptions(t *testing.T) {
 		{Name: "TimePicker"},
 	}
 
-	multiSelector := ByName("Dashboard", "Refresh", "TimePicker")
-	notFoundSelector := ByName("Dashboard", "NotFound", "timepicker")
+	multiSelector := ByName("dashboard", "Dashboard", "Refresh", "timepicker")
+	notFoundSelector := ByName("dashboard", "Dashboard", "NotFound", "Editable")
 
 	selectedForDashboard := filter(multiSelector, dashboardBuilder, options)
 	selectedForPanel := filter(notFoundSelector, panelBuilder, options)
@@ -63,66 +63,9 @@ func TestByName_withSeveralOptions(t *testing.T) {
 
 	req.Len(selectedForPanel, 0)
 
-	req.Len(filter(notFoundSelector, dashboardBuilder, options), 0)
-}
-
-func TestByNameCaseInsensitive(t *testing.T) {
-	req := require.New(t)
-
-	dashboardBuilder := ast.Builder{
-		For: ast.NewObject("dashboard", "Dashboard", ast.NewStruct()),
-	}
-	panelBuilder := ast.Builder{
-		For: ast.NewObject("dashboard", "Panel", ast.NewStruct()),
-	}
-	options := []ast.Option{
-		{Name: "Editable"},
-		{Name: "Refresh"},
-		{Name: "TimePicker"},
-	}
-
-	singleSelector := ByNameCaseInsensitive("Dashboard", "refresh")
-	notFoundSelector := ByNameCaseInsensitive("Dashboard", "heeey")
-
-	selectedForDashboard := filter(singleSelector, dashboardBuilder, options)
-	selectedForPanel := filter(singleSelector, panelBuilder, options)
-
-	req.Len(selectedForDashboard, 1)
-	req.Equal("Refresh", selectedForDashboard[0].Name)
-
-	req.Len(selectedForPanel, 0)
-
-	req.Len(filter(notFoundSelector, dashboardBuilder, options), 0)
-}
-
-func TestByNameCaseInsensitive_withSeveralOptions(t *testing.T) {
-	req := require.New(t)
-
-	dashboardBuilder := ast.Builder{
-		For: ast.NewObject("dashboard", "Dashboard", ast.NewStruct()),
-	}
-	panelBuilder := ast.Builder{
-		For: ast.NewObject("dashboard", "Panel", ast.NewStruct()),
-	}
-	options := []ast.Option{
-		{Name: "Editable"},
-		{Name: "Refresh"},
-		{Name: "TimePicker"},
-	}
-
-	multiSelector := ByNameCaseInsensitive("Dashboard", "refresh", "timepicker")
-	notFoundSelector := ByNameCaseInsensitive("Dashboard", "NotFound")
-
-	selectedForDashboard := filter(multiSelector, dashboardBuilder, options)
-	selectedForPanel := filter(notFoundSelector, panelBuilder, options)
-
-	req.Len(selectedForDashboard, 2)
-	req.Equal("Refresh", selectedForDashboard[0].Name)
-	req.Equal("TimePicker", selectedForDashboard[1].Name)
-
-	req.Len(selectedForPanel, 0)
-
-	req.Len(filter(notFoundSelector, dashboardBuilder, options), 0)
+	selectedForDashboardWithNotFound := filter(notFoundSelector, dashboardBuilder, options)
+	req.Len(selectedForDashboardWithNotFound, 1)
+	req.Equal("Editable", selectedForDashboardWithNotFound[0].Name)
 }
 
 func filter(selector Selector, builder ast.Builder, opts []ast.Option) []ast.Option {

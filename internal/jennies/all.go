@@ -37,6 +37,14 @@ func (languageJennies LanguageJennies) ForLanguages(languages []string) (Languag
 	return filtered, nil
 }
 
+func (languageJennies LanguageJennies) AsLanguageRefs() []string {
+	result := make([]string, 0, len(languageJennies))
+	for language := range languageJennies {
+		result = append(result, language)
+	}
+	return result
+}
+
 func All() LanguageJennies {
 	return LanguageJennies{
 		golang.LanguageRef:     golang.New(),

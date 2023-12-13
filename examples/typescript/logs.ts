@@ -1,4 +1,4 @@
-import {PanelBuilder as LogsPanelBuilder} from "../../generated/logs";
+import {PanelBuilder as LogsPanelBuilder} from "../../generated/src/logs";
 import {basicLokiQuery, defaultLogs} from "./common";
 
 export const errorsInSystemLogs = (): LogsPanelBuilder => {

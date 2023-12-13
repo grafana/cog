@@ -382,7 +382,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== constraints/somestruct_builder_gen.ts
+== src/constraints/somestruct_builder_gen.ts
 import * as cog from '../cog';
 import * as constraints from '../constraints';
 

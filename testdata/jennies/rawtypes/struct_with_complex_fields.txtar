@@ -177,7 +177,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== struct_complex_fields/types_gen.ts
+== src/struct_complex_fields/types_gen.ts
 // This struct does things.
 export interface SomeStruct {
 	FieldRef: SomeOtherStruct;

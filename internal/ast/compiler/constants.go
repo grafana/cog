@@ -17,4 +17,9 @@ const (
 	dashboardPanelLibraryPanelField = "libraryPanel"
 	dashboardPanelTypeField         = "type"
 	dashboardPanelsField            = "panels"
+
+	testDataPackage                = "testdata"
+	testDataSimulatorQueryObject   = "SimulationQuery"
+	testDataSimulatorQueryKeyField = "key"
+	testDataKeyObject              = "Key"
 )

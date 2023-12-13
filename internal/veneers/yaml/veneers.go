@@ -1,6 +1,8 @@
 package yaml
 
 import (
+	"fmt"
+	"io"
 	"os"
 
 	"github.com/grafana/cog/internal/veneers/builder"
@@ -11,6 +13,7 @@ import (
 
 type Veneers struct {
 	Language string        `yaml:"language"`
+	Package  string        `yaml:"package"`
 	Builders []BuilderRule `yaml:"builders"`
 	Options  []OptionRule  `yaml:"options"`
 }
@@ -22,8 +25,18 @@ func NewLoader() *Loader {
 	return &Loader{}
 }
 
-func (loader *Loader) RewriterFromFiles(filenames []string) (*rewrite.Rewriter, error) {
-	rules, err := loader.LoadFiles(filenames)
+func (loader *Loader) RewriterFrom(filenames []string) (*rewrite.Rewriter, error) {
+	readers := make([]io.Reader, 0, len(filenames))
+	for _, filename := range filenames {
+		reader, err := os.Open(filename)
+		if err != nil {
+			return nil, err
+		}
+
+		readers = append(readers, reader)
+	}
+
+	rules, err := loader.LoadAll(readers)
 	if err != nil {
 		return nil, err
 	}
@@ -31,11 +44,11 @@ func (loader *Loader) RewriterFromFiles(filenames []string) (*rewrite.Rewriter, 
 	return rewrite.NewRewrite(rules), nil
 }
 
-func (loader *Loader) LoadFiles(filenames []string) ([]rewrite.LanguageRules, error) {
-	languageRules := make([]rewrite.LanguageRules, 0, len(filenames))
+func (loader *Loader) LoadAll(readers []io.Reader) ([]rewrite.LanguageRules, error) {
+	languageRules := make([]rewrite.LanguageRules, 0, len(readers))
 
-	for _, filename := range filenames {
-		rules, err := loader.LoadFile(filename)
+	for _, filename := range readers {
+		rules, err := loader.Load(filename)
 		if err != nil {
 			return nil, err
 		}
@@ -46,14 +59,14 @@ func (loader *Loader) LoadFiles(filenames []string) ([]rewrite.LanguageRules, er
 	return languageRules, nil
 }
 
-func (loader *Loader) LoadFile(filename string) (rewrite.LanguageRules, error) {
+func (loader *Loader) Load(reader io.Reader) (rewrite.LanguageRules, error) {
 	var builderRules []builder.RewriteRule
 	var optionRules []option.RewriteRule
 
 	veneers := &Veneers{}
 
 	// read and parse the input file
-	data, err := os.ReadFile(filename)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return rewrite.LanguageRules{}, err
 	}
@@ -62,12 +75,16 @@ func (loader *Loader) LoadFile(filename string) (rewrite.LanguageRules, error) {
 		return rewrite.LanguageRules{}, err
 	}
 
+	if veneers.Package == "" {
+		return rewrite.LanguageRules{}, fmt.Errorf("missing 'package' statement in veneers file '%s'", reader)
+	}
+
 	builderRules = make([]builder.RewriteRule, 0, len(veneers.Builders))
 	optionRules = make([]option.RewriteRule, 0, len(veneers.Options))
 
 	// convert builder rules
 	for _, rule := range veneers.Builders {
-		builderRule, err := rule.AsRewriteRule()
+		builderRule, err := rule.AsRewriteRule(veneers.Package)
 		if err != nil {
 			return rewrite.LanguageRules{}, err
 		}
@@ -77,7 +94,7 @@ func (loader *Loader) LoadFile(filename string) (rewrite.LanguageRules, error) {
 
 	// convert option rules
 	for _, rule := range veneers.Options {
-		optionRule, err := rule.AsRewriteRule()
+		optionRule, err := rule.AsRewriteRule(veneers.Package)
 		if err != nil {
 			return rewrite.LanguageRules{}, err
 		}

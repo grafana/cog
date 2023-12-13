@@ -749,7 +749,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== builder_delegation/dashboardlink_builder_gen.ts
+== src/builder_delegation/dashboardlink_builder_gen.ts
 import * as cog from '../cog';
 import * as builder_delegation from '../builder_delegation';
 
@@ -774,7 +774,7 @@ export class DashboardLinkBuilder implements cog.Builder<builder_delegation.Dash
         return this;
     }
 }
-== builder_delegation/dashboard_builder_gen.ts
+== src/builder_delegation/dashboard_builder_gen.ts
 import * as cog from '../cog';
 import * as builder_delegation from '../builder_delegation';
 

@@ -173,7 +173,7 @@
 }
 
 -- out/jennies/TypescriptBuilder --
-== sandbox/somestruct_builder_gen.ts
+== src/sandbox/somestruct_builder_gen.ts
 import * as cog from '../cog';
 import * as sandbox from '../sandbox';
 

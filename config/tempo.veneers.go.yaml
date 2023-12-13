@@ -1,0 +1,10 @@
+language: go
+
+package: tempo
+
+builders: ~
+
+options:
+  - struct_fields_as_arguments:
+      by_name: TraceqlFilter.value
+      fields: [ ArrayOfString ]

@@ -1,6 +1,6 @@
-import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/timeseries";
-import {PanelBuilder as LogsPanelBuilder} from "../../generated/logs";
-import {PanelBuilder as GaugePanelBuilder} from "../../generated/gauge";
+import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/src/timeseries";
+import {PanelBuilder as LogsPanelBuilder} from "../../generated/src/logs";
+import {PanelBuilder as GaugePanelBuilder} from "../../generated/src/gauge";
 import {
     GraphDrawStyle,
     LegendDisplayMode,
@@ -10,10 +10,10 @@ import {
     VisibilityMode,
     VizLegendOptionsBuilder,
     VizOrientation
-} from "../../generated/common";
-import * as prometheus from "../../generated/prometheus";
-import * as loki from "../../generated/loki";
-import {PromQueryFormat} from "../../generated/prometheus";
+} from "../../generated/src/common";
+import * as prometheus from "../../generated/src/prometheus";
+import * as loki from "../../generated/src/loki";
+import {PromQueryFormat} from "../../generated/src/prometheus";
 
 export const basicPrometheusQuery = (query: string, legend: string): prometheus.DataqueryBuilder => {
     return new prometheus.DataqueryBuilder()

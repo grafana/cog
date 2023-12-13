@@ -163,7 +163,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== disjunctions/types_gen.ts
+== src/disjunctions/types_gen.ts
 // Refresh rate or disabled.
 export type RefreshRate = string | boolean;
 

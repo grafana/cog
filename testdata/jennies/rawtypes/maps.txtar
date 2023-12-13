@@ -101,7 +101,7 @@
     ]
 }
 -- out/jennies/TypescriptRawTypes --
-== maps/types_gen.ts
+== src/maps/types_gen.ts
 // String to... something.
 export type MapOfStringToAny = Record<string, any>;
 

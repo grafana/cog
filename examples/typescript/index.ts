@@ -8,7 +8,7 @@ import {
     VariableRefresh,
     VariableSort,
     VariableType
-} from "../../generated/dashboard";
+} from "../../generated/src/dashboard";
 import {cpuTemperatureGauge, cpuUsageTimeseries, loadAverageTimeseries} from "./cpu";
 import {memoryUsageGauge, memoryUsageTimeseries} from "./memory";
 import {diskIOTimeseries, diskSpaceUsageTable} from "./disk";
