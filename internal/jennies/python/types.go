@@ -47,18 +47,10 @@ func (formatter *typeFormatter) formatObject(def ast.Object) (string, error) {
 		buffer.WriteString(formatter.formatEnum(def))
 	case ast.KindStruct:
 		return formatter.formatStruct(def), nil
-	case ast.KindScalar:
-		scalarType := def.Type.AsScalar()
-
-		var value string
-		if scalarType.IsConcrete() {
-			value = formatValue(scalarType.Value)
-		} else {
-			value = formatter.formatType(def.Type)
-		}
-
-		buffer.WriteString(fmt.Sprintf("%s = %s", defName, value))
-	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindIntersection, ast.KindDisjunction:
+	case ast.KindDisjunction:
+		typingPkg := formatter.importPkg("typing", "typing")
+		buffer.WriteString(fmt.Sprintf("%s = %s.Union[%s]", defName, typingPkg, formatter.formatType(def.Type)))
+	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindIntersection, ast.KindScalar:
 		buffer.WriteString(fmt.Sprintf("%s = %s", defName, formatter.formatType(def.Type)))
 	default:
 		return "", fmt.Errorf("unhandled object of kind: %s", def.Type.Kind)
@@ -115,8 +107,6 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 	if formatter.forBuilder && (def.Kind == ast.KindComposableSlot || (def.Kind == ast.KindRef && formatter.context.ResolveToBuilder(def))) {
 		cogBuilder := formatter.importModule("cogbuilder", "..cog", "builder")
 		result = fmt.Sprintf("%s.Builder[%s]", cogBuilder, result)
-	} else if def.Nullable {
-		result = fmt.Sprintf("%s | None", result)
 	}
 
 	return result
@@ -199,7 +189,7 @@ func (formatter *typeFormatter) formatStructField(def ast.StructField) string {
 
 	field := formatter.formatType(def.Type)
 
-	if !def.Required {
+	if !def.Required || def.Type.Nullable {
 		typingPkg := formatter.importPkg("typing", "typing")
 		field = fmt.Sprintf("%s.Optional[%s]", typingPkg, field)
 	}
@@ -238,12 +228,11 @@ func (formatter *typeFormatter) formatRef(def ast.RefType) string {
 }
 
 func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType) string {
-	typingPkg := formatter.importPkg("typing", "typing")
 	branches := tools.Map(def.Branches, func(branch ast.Type) string {
 		return formatter.formatType(branch)
 	})
 
-	return fmt.Sprintf("%s.Union[%s]", typingPkg, strings.Join(branches, ", "))
+	return strings.Join(branches, " | ")
 }
 
 func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
