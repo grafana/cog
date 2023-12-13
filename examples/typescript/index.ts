@@ -36,7 +36,7 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
         new DatasourceVariableBuilder("datasource")
             .label("Data Source")
             .hide(VariableHide.DontHide)
-            .datasourceType("prometheus")
+            .type("prometheus")
             .current({
                 selected: true,
                 text: "grafanacloud-potatopi-prom",

@@ -27,7 +27,7 @@ func dashboardBuilder() []byte {
 		WithVariable(dashboard.NewDatasourceVariableBuilder("datasource").
 			Label("Data Source").
 			Hide(dashboard.VariableHideDontHide).
-			DatasourceType("prometheus").
+			Type("prometheus").
 			Current(dashboard.VariableOption{
 				Selected: toPtr(true),
 				Text:     dashboard.StringOrArrayOfString{String: toPtr("grafanacloud-potatopi-prom")},
