@@ -91,3 +91,14 @@ type SomeStruct struct {
 	FieldInt32 int32 `json:"FieldInt32"`
 }
 
+-- out/jennies/PythonRawTypes --
+== models/defaults.py
+import typing
+
+
+class SomeStruct:
+    fieldBool: bool
+    fieldString: str
+    FieldStringWithConstantValue: typing.Literal["auto"]
+    FieldFloat32: float
+    FieldInt32: int

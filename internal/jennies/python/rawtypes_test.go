@@ -13,6 +13,9 @@ func TestRawTypes_Generate(t *testing.T) {
 	test := txtartest.TxTarTest{
 		Root: "../../../testdata/jennies/rawtypes",
 		Name: "jennies/PythonRawTypes",
+		Skip: map[string]string{
+			"jennies/rawtypes/intersections": "Intersections are not implemented",
+		},
 	}
 
 	jenny := RawTypes{}
