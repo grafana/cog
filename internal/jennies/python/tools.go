@@ -54,77 +54,19 @@ func escapeFieldName(name string) string {
 
 func isBuiltInFunction(input string) bool {
 	// see: https://docs.python.org/3/library/functions.html
-	return input == "abs" ||
-		input == "aiter" ||
-		input == "all" ||
-		input == "anext" ||
-		input == "any" ||
-		input == "ascii" ||
-		input == "bin" ||
-		input == "bool" ||
-		input == "breakpoint" ||
-		input == "bytearray" ||
-		input == "bytes" ||
-		input == "callable" ||
-		input == "chr" ||
-		input == "classmethod" ||
-		input == "compile" ||
-		input == "complex" ||
-		input == "delattr" ||
-		input == "dict" ||
-		input == "dir" ||
-		input == "divmod" ||
-		input == "enumerate" ||
-		input == "eval" ||
-		input == "exec" ||
-		input == "filter" ||
-		input == "float" ||
-		input == "format" ||
-		input == "frozenset" ||
-		input == "getattr" ||
-		input == "globals" ||
-		input == "hasattr" ||
-		input == "hash" ||
-		input == "help" ||
-		input == "hex" ||
-		input == "id" ||
-		input == "input" ||
-		input == "int" ||
-		input == "isinstance" ||
-		input == "issubclass" ||
-		input == "iter" ||
-		input == "len" ||
-		input == "list" ||
-		input == "locals" ||
-		input == "map" ||
-		input == "max" ||
-		input == "memoryview" ||
-		input == "min" ||
-		input == "next" ||
-		input == "object" ||
-		input == "oct" ||
-		input == "open" ||
-		input == "ord" ||
-		input == "pow" ||
-		input == "print" ||
-		input == "property" ||
-		input == "range" ||
-		input == "repr" ||
-		input == "reversed" ||
-		input == "round" ||
-		input == "set" ||
-		input == "setattr" ||
-		input == "slice" ||
-		input == "sorted" ||
-		input == "staticmethod" ||
-		input == "str" ||
-		input == "sum" ||
-		input == "super" ||
-		input == "tuple" ||
-		input == "type" ||
-		input == "vars" ||
-		input == "zip" ||
-		input == "__import__"
+	switch input {
+	case "abs", "aiter", "all", "anext", "any", "ascii", "bin", "bool", "breakpoint", "bytearray",
+		"bytes", "callable", "chr", "classmethod", "compile", "complex", "delattr", "dict", "dir",
+		"divmod", "enumerate", "eval", "exec", "filter", "float", "format", "frozenset", "getattr",
+		"globals", "hasattr", "hash", "help", "hex", "id", "input", "int", "isinstance",
+		"issubclass", "iter", "len", "list", "locals", "map", "max", "memoryview", "min", "next",
+		"object", "oct", "open", "ord", "pow", "print", "property", "range", "repr", "reversed",
+		"round", "set", "setattr", "slice", "sorted", "staticmethod", "str", "sum", "super",
+		"tuple", "type", "vars", "zip", "__import__":
+		return true
+	default:
+		return false
+	}
 }
 
 func isReservedPythonKeyword(input string) bool {
