@@ -373,21 +373,33 @@ StringOrNull = typing.Optional[str]
 
 
 class SomeStruct:
-    Type: typing.Literal["some-struct"]
-    FieldAny: object
+    type: typing.Literal["some-struct"]
+    field_any: object
+
+    def __init__(self, field_any: typing.Optional[object] = None):
+        self.type = "some-struct"
+        self.field_any = field_any if field_any is not None else {}
 
 
 BoolOrRef = typing.Union[bool | 'SomeStruct']
 
 
 class SomeOtherStruct:
-    Type: typing.Literal["some-other-struct"]
-    Foo: bytes
+    type: typing.Literal["some-other-struct"]
+    foo: bytes
+
+    def __init__(self, foo: bytes = ""):
+        self.type = "some-other-struct"
+        self.foo = foo
 
 
 class YetAnotherStruct:
-    Type: typing.Literal["yet-another-struct"]
-    Bar: int
+    type: typing.Literal["yet-another-struct"]
+    bar: int
+
+    def __init__(self, bar: int = 0):
+        self.type = "yet-another-struct"
+        self.bar = bar
 
 
 SeveralRefs = typing.Union['SomeStruct' | 'SomeOtherStruct' | 'YetAnotherStruct']
