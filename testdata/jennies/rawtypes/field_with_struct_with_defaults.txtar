@@ -90,7 +90,7 @@
 }
 
 -- out/jennies/GoRawTypes --
-== src/defaults/types_gen.ts
+== defaults/types_gen.go
 package defaults
 
 type NestedStruct struct {
