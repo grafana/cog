@@ -260,3 +260,22 @@ class SomeStruct:
         self.field_int16 = field_int16
         self.field_int32 = field_int32
         self.field_int64 = field_int64
+
+    def to_json(self) -> dict[str, object]:
+        return {
+            "FieldAny": self.field_any,
+            "FieldBool": self.field_bool,
+            "FieldBytes": self.field_bytes,
+            "FieldString": self.field_string,
+            "FieldStringWithConstantValue": self.field_string_with_constant_value,
+            "FieldFloat32": self.field_float32,
+            "FieldFloat64": self.field_float64,
+            "FieldUint8": self.field_uint8,
+            "FieldUint16": self.field_uint16,
+            "FieldUint32": self.field_uint32,
+            "FieldUint64": self.field_uint64,
+            "FieldInt8": self.field_int8,
+            "FieldInt16": self.field_int16,
+            "FieldInt32": self.field_int32,
+            "FieldInt64": self.field_int64,
+        }
