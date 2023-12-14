@@ -67,7 +67,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 
 		if object.Type.Kind == ast.KindStruct {
 			buffer.WriteString("\n\n")
-			buffer.Write([]byte(jenny.generateToInitMethod(context.Schemas, object)))
+			buffer.WriteString(jenny.generateToInitMethod(context.Schemas, object))
 		}
 
 		// we want two blank lines between objects, except at the end of the file
