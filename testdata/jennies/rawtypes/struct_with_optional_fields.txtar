@@ -165,16 +165,29 @@ import typing
 
 
 class StructOptionalFieldsSomeStructFieldAnonymousStruct:
-    FieldAny: object
+    field_any: object
+
+    def __init__(self, field_any: typing.Optional[object] = None):
+        self.field_any = field_any if field_any is not None else {}
 
 
 class SomeStruct:
-    FieldRef: typing.Optional['SomeOtherStruct']
-    FieldString: typing.Optional[str]
-    Operator: typing.Optional[typing.Literal[">", "<"]]
-    FieldArrayOfStrings: typing.Optional[list[str]]
-    FieldAnonymousStruct: typing.Optional['StructOptionalFieldsSomeStructFieldAnonymousStruct']
+    field_ref: typing.Optional['SomeOtherStruct']
+    field_string: typing.Optional[str]
+    operator: typing.Optional[typing.Literal[">", "<"]]
+    field_array_of_strings: typing.Optional[list[str]]
+    field_anonymous_struct: typing.Optional['StructOptionalFieldsSomeStructFieldAnonymousStruct']
+
+    def __init__(self, field_ref: typing.Optional['SomeOtherStruct'] = None, field_string: typing.Optional[str] = "", operator: typing.Optional[typing.Literal[">", "<"]] = None, field_array_of_strings: typing.Optional[list[str]] = None, field_anonymous_struct: typing.Optional['StructOptionalFieldsSomeStructFieldAnonymousStruct'] = None):
+        self.field_ref = field_ref if field_ref is not None else SomeOtherStruct()
+        self.field_string = field_string
+        self.operator = operator if operator is not None else ">"
+        self.field_array_of_strings = field_array_of_strings if field_array_of_strings is not None else []
+        self.field_anonymous_struct = field_anonymous_struct if field_anonymous_struct is not None else StructOptionalFieldsSomeStructFieldAnonymousStruct()
 
 
 class SomeOtherStruct:
-    FieldAny: object
+    field_any: object
+
+    def __init__(self, field_any: typing.Optional[object] = None):
+        self.field_any = field_any if field_any is not None else {}

@@ -146,6 +146,9 @@ type MapOfStringToMapOfStringToBool map[string]map[string]bool
 
 -- out/jennies/PythonRawTypes --
 == models/maps.py
+import typing
+
+
 # String to... something.
 MapOfStringToAny = dict[str, object]
 
@@ -154,7 +157,10 @@ MapOfStringToString = dict[str, str]
 
 
 class SomeStruct:
-    FieldAny: object
+    field_any: object
+
+    def __init__(self, field_any: typing.Optional[object] = None):
+        self.field_any = field_any if field_any is not None else {}
 
 
 MapOfStringToRef = dict[str, 'SomeStruct']

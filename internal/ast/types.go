@@ -155,6 +155,10 @@ func (t Type) IsEnum() bool {
 	return t.Kind == KindEnum
 }
 
+func (t Type) IsDisjunction() bool {
+	return t.Kind == KindDisjunction
+}
+
 func (t Type) IsStructGeneratedFromDisjunction() bool {
 	if t.Kind != KindStruct {
 		return false

@@ -186,7 +186,7 @@ func (formatter *typeFormatter) formatStructField(def ast.StructField) string {
 
 	field := formatter.formatType(def.Type)
 
-	buffer.WriteString(fmt.Sprintf("    %s: %s", escapeFieldName(def.Name), field))
+	buffer.WriteString(fmt.Sprintf("    %s: %s", formatFieldName(def.Name), field))
 
 	return buffer.String()
 }
