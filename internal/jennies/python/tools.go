@@ -168,14 +168,15 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule fun
 			for _, enumValue := range referredObj.Type.AsEnum().Values {
 				if enumValue.Value == typeDef.Default {
 					enumName = tools.UpperSnakeCase(enumValue.Name)
+					break
 				}
 			}
 
 			if referredPkg == "" {
 				return raw(fmt.Sprintf("%s.%s", referredObj.Name, enumName))
-			} else {
-				return raw(fmt.Sprintf("%s.%s.%s", referredPkg, referredObj.Name, enumName))
 			}
+
+			return raw(fmt.Sprintf("%s.%s.%s", referredPkg, referredObj.Name, enumName))
 		} else if found && referredObj.Type.IsDisjunction() {
 			return defaultValueForType(schemas, referredObj.Type, importModule)
 		}
