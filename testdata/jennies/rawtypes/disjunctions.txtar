@@ -380,6 +380,12 @@ class SomeStruct:
         self.type = "some-struct"
         self.field_any = field_any if field_any is not None else {}
 
+    def to_json(self) -> dict[str, object]:
+        return {
+            "Type": self.type,
+            "FieldAny": self.field_any,
+        }
+
 
 BoolOrRef = typing.Union[bool | 'SomeStruct']
 
@@ -392,6 +398,12 @@ class SomeOtherStruct:
         self.type = "some-other-struct"
         self.foo = foo
 
+    def to_json(self) -> dict[str, object]:
+        return {
+            "Type": self.type,
+            "Foo": self.foo,
+        }
+
 
 class YetAnotherStruct:
     type: typing.Literal["yet-another-struct"]
@@ -400,6 +412,12 @@ class YetAnotherStruct:
     def __init__(self, bar: int = 0):
         self.type = "yet-another-struct"
         self.bar = bar
+
+    def to_json(self) -> dict[str, object]:
+        return {
+            "Type": self.type,
+            "Bar": self.bar,
+        }
 
 
 SeveralRefs = typing.Union['SomeStruct' | 'SomeOtherStruct' | 'YetAnotherStruct']
