@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
@@ -94,8 +93,7 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 	var assignments []string
 
 	for _, field := range object.Type.AsStruct().Fields {
-		argName := tools.SnakeCase(escapeFieldName(field.Name))
-		fieldName := escapeFieldName(field.Name)
+		fieldName := formatFieldName(field.Name)
 		fieldType := jenny.typeFormatter.formatType(field.Type)
 		defaultValue := defaultValueForType(schemas, field.Type, jenny.importModule)
 
@@ -105,13 +103,13 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 				fieldType = fmt.Sprintf("%s.Optional[%s]", typingPkg, fieldType)
 			}
 
-			args = append(args, fmt.Sprintf("%s: %s = None", argName, fieldType))
-			assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[2]s if %[2]s is not None else %[3]s", fieldName, argName, formatValue(defaultValue)))
+			args = append(args, fmt.Sprintf("%s: %s = None", fieldName, fieldType))
+			assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s if %[1]s is not None else %[2]s", fieldName, formatValue(defaultValue)))
 			continue
 		}
 
-		args = append(args, fmt.Sprintf("%s: %s = %s", argName, fieldType, formatValue(defaultValue)))
-		assignments = append(assignments, fmt.Sprintf("        self.%s = %s", fieldName, argName))
+		args = append(args, fmt.Sprintf("%s: %s = %s", fieldName, fieldType, formatValue(defaultValue)))
+		assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s", fieldName))
 	}
 
 	buffer.WriteString(fmt.Sprintf("    def __init__(self, %s):\n", strings.Join(args, ", ")))
