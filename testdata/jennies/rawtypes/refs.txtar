@@ -76,11 +76,15 @@ type RefToSomeStructFromOtherPackage otherpkg.SomeDistantStruct
 
 -- out/jennies/PythonRawTypes --
 == models/refs.py
+import typing
 from ..models import otherpkg
 
 
 class SomeStruct:
-    FieldAny: object
+    field_any: object
+
+    def __init__(self, field_any: typing.Optional[object] = None):
+        self.field_any = field_any if field_any is not None else {}
 
 
 RefToSomeStruct = 'SomeStruct'
