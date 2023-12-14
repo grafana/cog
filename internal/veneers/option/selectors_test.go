@@ -72,8 +72,9 @@ func TestByBuilder(t *testing.T) {
 	req := require.New(t)
 
 	dashboardBuilder := ast.Builder{
-		Name: "EmptyDashboard",
-		For:  ast.NewObject("dashboard", "Dashboard", ast.NewStruct()),
+		Name:    "Panel",
+		Package: "heatmap",
+		For:     ast.NewObject("dashboard", "Panel", ast.NewStruct()),
 	}
 	options := []ast.Option{
 		{Name: "Editable"},
@@ -81,8 +82,8 @@ func TestByBuilder(t *testing.T) {
 		{Name: "TimePicker"},
 	}
 
-	singleSelector := ByBuilder("dashboard", "EmptyDashboard", "Refresh")
-	notFoundSelector := ByBuilder("dashboard", "Dashboard", "Refresh")
+	singleSelector := ByBuilder("heatmap", "Panel", "Refresh")
+	notFoundSelector := ByBuilder("dashboard", "Panel", "Refresh")
 
 	selectedForDashboard := filter(singleSelector, dashboardBuilder, options)
 	req.Len(selectedForDashboard, 1)
