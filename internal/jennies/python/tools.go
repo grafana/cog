@@ -47,39 +47,14 @@ func escapeFieldName(name string) string {
 
 func isReservedPythonKeyword(input string) bool {
 	// see: https://docs.python.org/3/reference/lexical_analysis.html#keywords
-	return input == "False" ||
-		input == "await" ||
-		input == "else" ||
-		input == "import" ||
-		input == "pass" ||
-		input == "None" ||
-		input == "break" ||
-		input == "except" ||
-		input == "in" ||
-		input == "raise" ||
-		input == "True" ||
-		input == "class" ||
-		input == "finally" ||
-		input == "is" ||
-		input == "return" ||
-		input == "and" ||
-		input == "continue" ||
-		input == "for" ||
-		input == "lambda" ||
-		input == "try" ||
-		input == "as" ||
-		input == "def" ||
-		input == "from" ||
-		input == "nonlocal" ||
-		input == "while" ||
-		input == "assert" ||
-		input == "del" ||
-		input == "global" ||
-		input == "not" ||
-		input == "with" ||
-		input == "async" ||
-		input == "elif" ||
-		input == "if" ||
-		input == "or" ||
-		input == "yield"
+	switch input {
+	case "False", "await", "else", "import", "pass", "None", "break", "except", "in", "raise",
+		"True", "class", "finally", "is", "return", "and", "continue", "for", "lambda", "try",
+		"as", "def", "from", "nonlocal", "while", "assert", "del", "global", "not", "with",
+		"async", "elif", "if", "or", "yield":
+		return true
+
+	default:
+		return false
+	}
 }
