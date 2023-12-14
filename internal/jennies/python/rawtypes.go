@@ -97,7 +97,7 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 		fieldType := jenny.typeFormatter.formatType(field.Type)
 		defaultValue := defaultValueForType(schemas, field.Type, jenny.importModule)
 
-		if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum) {
+		if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray) || field.Type.IsAny() {
 			if !field.Type.Nullable {
 				typingPkg := jenny.importPkg("typing", "typing")
 				fieldType = fmt.Sprintf("%s.Optional[%s]", typingPkg, fieldType)
