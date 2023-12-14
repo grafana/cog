@@ -13,6 +13,10 @@ func UpperSnakeCase(s string) string {
 	return strings.ToUpper(xstrings.ToSnakeCase(s))
 }
 
+func SnakeCase(s string) string {
+	return xstrings.ToSnakeCase(s)
+}
+
 func UpperCamelCase(s string) string {
 	s = LowerCamelCase(s)
 
