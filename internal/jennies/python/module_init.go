@@ -19,7 +19,7 @@ func (jenny ModuleInit) Generate(context common.Context) (codejen.Files, error) 
 
 	files = append(files, *codejen.NewFile("__init__.py", jenny.module("root"), jenny))
 	files = append(files, *codejen.NewFile("models/__init__.py", jenny.module("models"), jenny))
-	files = append(files, *codejen.NewFile("runtime/__init__.py", jenny.module("runtime"), jenny))
+	files = append(files, *codejen.NewFile("cog/__init__.py", jenny.module("runtime"), jenny))
 
 	return files, nil
 }

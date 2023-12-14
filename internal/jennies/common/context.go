@@ -60,6 +60,23 @@ func (context *Context) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {
 	return ast.Type{}, false
 }
 
+func (context *Context) ResolveToStruct(def ast.Type) bool {
+	if def.IsStruct() {
+		return true
+	}
+
+	if !def.IsRef() {
+		return false
+	}
+
+	referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	if !found {
+		return false
+	}
+
+	return context.ResolveToStruct(referredObj.Type)
+}
+
 type BuildOptions struct {
 	Languages []string
 }

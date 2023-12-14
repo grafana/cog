@@ -68,6 +68,9 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 		if object.Type.Kind == ast.KindStruct {
 			buffer.WriteString("\n\n")
 			buffer.WriteString(jenny.generateToInitMethod(context.Schemas, object))
+
+			buffer.WriteString("\n\n")
+			buffer.WriteString(jenny.generateToJSONMethod(context, object))
 		}
 
 		// we want two blank lines between objects, except at the end of the file
@@ -119,4 +122,25 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 	buffer.WriteString(strings.Join(assignments, "\n"))
 
 	return strings.TrimSuffix(buffer.String(), "\n")
+}
+
+func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Object) string {
+	var buffer strings.Builder
+
+	buffer.WriteString("    def to_json(self) -> dict[str, object]:\n")
+	buffer.WriteString("        return {\n")
+
+	for _, field := range object.Type.AsStruct().Fields {
+		fieldName := formatFieldName(field.Name)
+
+		if context.ResolveToStruct(field.Type) {
+			buffer.WriteString(fmt.Sprintf(`            "%[1]s": None if self.%[2]s is None else self.%[2]s.to_json(),`+"\n", field.Name, fieldName))
+		} else {
+			buffer.WriteString(fmt.Sprintf(`            "%s": self.%s,`+"\n", field.Name, fieldName))
+		}
+	}
+
+	buffer.WriteString("        }")
+
+	return buffer.String()
 }

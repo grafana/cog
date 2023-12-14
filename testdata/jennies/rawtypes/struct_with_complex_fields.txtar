@@ -310,6 +310,11 @@ class StructComplexFieldsSomeStructFieldAnonymousStruct:
     def __init__(self, field_any: typing.Optional[object] = None):
         self.field_any = field_any if field_any is not None else {}
 
+    def to_json(self) -> dict[str, object]:
+        return {
+            "FieldAny": self.field_any,
+        }
+
 
 class SomeStruct:
     """
@@ -335,9 +340,26 @@ class SomeStruct:
         self.field_map_of_string_to_string = field_map_of_string_to_string if field_map_of_string_to_string is not None else {}
         self.field_anonymous_struct = field_anonymous_struct if field_anonymous_struct is not None else StructComplexFieldsSomeStructFieldAnonymousStruct()
 
+    def to_json(self) -> dict[str, object]:
+        return {
+            "FieldRef": None if self.field_ref is None else self.field_ref.to_json(),
+            "FieldDisjunctionOfScalars": self.field_disjunction_of_scalars,
+            "FieldMixedDisjunction": self.field_mixed_disjunction,
+            "FieldDisjunctionWithNull": self.field_disjunction_with_null,
+            "Operator": self.operator,
+            "FieldArrayOfStrings": self.field_array_of_strings,
+            "FieldMapOfStringToString": self.field_map_of_string_to_string,
+            "FieldAnonymousStruct": None if self.field_anonymous_struct is None else self.field_anonymous_struct.to_json(),
+        }
+
 
 class SomeOtherStruct:
     field_any: object
 
     def __init__(self, field_any: typing.Optional[object] = None):
         self.field_any = field_any if field_any is not None else {}
+
+    def to_json(self) -> dict[str, object]:
+        return {
+            "FieldAny": self.field_any,
+        }

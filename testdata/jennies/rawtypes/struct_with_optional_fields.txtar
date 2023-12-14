@@ -170,6 +170,11 @@ class StructOptionalFieldsSomeStructFieldAnonymousStruct:
     def __init__(self, field_any: typing.Optional[object] = None):
         self.field_any = field_any if field_any is not None else {}
 
+    def to_json(self) -> dict[str, object]:
+        return {
+            "FieldAny": self.field_any,
+        }
+
 
 class SomeStruct:
     field_ref: typing.Optional['SomeOtherStruct']
@@ -185,9 +190,23 @@ class SomeStruct:
         self.field_array_of_strings = field_array_of_strings if field_array_of_strings is not None else []
         self.field_anonymous_struct = field_anonymous_struct if field_anonymous_struct is not None else StructOptionalFieldsSomeStructFieldAnonymousStruct()
 
+    def to_json(self) -> dict[str, object]:
+        return {
+            "FieldRef": None if self.field_ref is None else self.field_ref.to_json(),
+            "FieldString": self.field_string,
+            "Operator": self.operator,
+            "FieldArrayOfStrings": self.field_array_of_strings,
+            "FieldAnonymousStruct": None if self.field_anonymous_struct is None else self.field_anonymous_struct.to_json(),
+        }
+
 
 class SomeOtherStruct:
     field_any: object
 
     def __init__(self, field_any: typing.Optional[object] = None):
         self.field_any = field_any if field_any is not None else {}
+
+    def to_json(self) -> dict[str, object]:
+        return {
+            "FieldAny": self.field_any,
+        }

@@ -162,6 +162,11 @@ class SomeStruct:
     def __init__(self, field_any: typing.Optional[object] = None):
         self.field_any = field_any if field_any is not None else {}
 
+    def to_json(self) -> dict[str, object]:
+        return {
+            "FieldAny": self.field_any,
+        }
+
 
 MapOfStringToRef = dict[str, 'SomeStruct']
 
