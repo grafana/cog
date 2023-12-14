@@ -494,6 +494,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 				Assignments: []ast.Assignment{
 					ast.ConstantAssignment(option.Assignments[0].Path, true),
 				},
+				VeneerTrail: append([]string{}, option.VeneerTrail...),
 			},
 
 			{
@@ -502,6 +503,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 				Assignments: []ast.Assignment{
 					ast.ConstantAssignment(option.Assignments[0].Path, false),
 				},
+				VeneerTrail: append([]string{}, option.VeneerTrail...),
 			},
 		}
 
