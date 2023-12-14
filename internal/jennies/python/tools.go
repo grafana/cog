@@ -40,6 +40,10 @@ func formatValue(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
+func formatFieldName(name string) string {
+	return tools.SnakeCase(escapeFieldName(name))
+}
+
 func escapeFieldName(name string) string {
 	if isReservedPythonKeyword(name) || isBuiltInFunction(name) {
 		return name + "_val"
