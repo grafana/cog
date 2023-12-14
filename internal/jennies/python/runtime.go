@@ -13,12 +13,18 @@ func (jenny Runtime) JennyName() string {
 }
 
 func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
+	encoder, err := renderTemplate("runtime/encoder.tmpl", map[string]any{})
+	if err != nil {
+		return nil, err
+	}
+
 	models, err := renderTemplate("runtime/variant_models.tmpl", map[string]any{})
 	if err != nil {
 		return nil, err
 	}
 
 	return codejen.Files{
+		*codejen.NewFile("cog/encoder.py", []byte(encoder), jenny),
 		*codejen.NewFile("cog/variants.py", []byte(models), jenny),
 	}, nil
 }
