@@ -49,7 +49,7 @@ builders:
         "description", "links",
 
         # TODO: check if these are actually relevant
-        "displayNameFromDS", "filterable", "path", "writeable",
+        "displayNameFromDS", "filterable", "path", "writeable", "color",
       ]
   - merge_into:
       source: FieldConfigSource
