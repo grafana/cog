@@ -36,6 +36,7 @@ func kernelLogs() *logs.PanelBuilder {
 			basicLokiQuery(`{filename="/var/log/kern.log", job="integrations/raspberrypi-node", instance="$instance"}`),
 		)
 }
+
 func allSystemLogs() *logs.PanelBuilder {
 	return defaultLogs().
 		Title("All system logs").

@@ -96,21 +96,30 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 	var assignments []string
 
 	for _, field := range object.Type.AsStruct().Fields {
-		fieldName := formatFieldName(field.Name)
+		fieldName := formatIdentifier(field.Name)
 		fieldType := jenny.typeFormatter.formatType(field.Type)
-		defaultValue := defaultValueForType(schemas, field.Type, jenny.importModule)
+		defaultValue := (any)(nil)
+
+		if !field.Type.Nullable {
+			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule)
+		}
 
 		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
 			assignments = append(assignments, fmt.Sprintf("        self.%s = %s", fieldName, formatValue(field.Type.AsScalar().Value)))
 			continue
-		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray) || field.Type.IsAny() {
+		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray) {
 			if !field.Type.Nullable {
 				typingPkg := jenny.importPkg("typing", "typing")
 				fieldType = fmt.Sprintf("%s.Optional[%s]", typingPkg, fieldType)
 			}
 
 			args = append(args, fmt.Sprintf("%s: %s = None", fieldName, fieldType))
-			assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s if %[1]s is not None else %[2]s", fieldName, formatValue(defaultValue)))
+
+			if defaultValue == nil {
+				assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s", fieldName))
+			} else {
+				assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s if %[1]s is not None else %[2]s", fieldName, formatValue(defaultValue)))
+			}
 			continue
 		}
 
@@ -128,19 +137,44 @@ func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Ob
 	var buffer strings.Builder
 
 	buffer.WriteString("    def to_json(self) -> dict[str, object]:\n")
-	buffer.WriteString("        return {\n")
+	buffer.WriteString("        payload: dict[str, object] = {\n")
 
-	for _, field := range object.Type.AsStruct().Fields {
-		fieldName := formatFieldName(field.Name)
+	fieldValue := func(field ast.StructField, nilCheck bool) string {
+		fieldName := formatIdentifier(field.Name)
 
 		if context.ResolveToStruct(field.Type) {
-			buffer.WriteString(fmt.Sprintf(`            "%[1]s": None if self.%[2]s is None else self.%[2]s.to_json(),`+"\n", field.Name, fieldName))
-		} else {
-			buffer.WriteString(fmt.Sprintf(`            "%s": self.%s,`+"\n", field.Name, fieldName))
+			if nilCheck {
+				return fmt.Sprintf("None if self.%[1]s is None else self.%[1]s.to_json()", fieldName)
+			}
+
+			return fmt.Sprintf("self.%s.to_json()", fieldName)
 		}
+
+		return fmt.Sprintf("self.%s", fieldName)
 	}
 
-	buffer.WriteString("        }")
+	for _, field := range object.Type.AsStruct().Fields {
+		if !field.Required {
+			continue
+		}
+
+		buffer.WriteString(fmt.Sprintf(`            "%s": %s,`+"\n", field.Name, fieldValue(field, true)))
+	}
+
+	buffer.WriteString("        }\n")
+
+	for _, field := range object.Type.AsStruct().Fields {
+		if field.Required {
+			continue
+		}
+
+		fieldName := formatIdentifier(field.Name)
+
+		buffer.WriteString(fmt.Sprintf("        if self.%s is not None:\n", fieldName))
+		buffer.WriteString(fmt.Sprintf(`            payload["%s"] = %s`+"\n", field.Name, fieldValue(field, false)))
+	}
+
+	buffer.WriteString("        return payload")
 
 	return buffer.String()
 }

@@ -107,9 +107,6 @@ type ArrayOfArrayOfNumbers [][]int64
 
 -- out/jennies/PythonRawTypes --
 == models/arrays.py
-import typing
-
-
 # List of tags, maybe?
 ArrayOfStrings = list[str]
 
@@ -117,13 +114,14 @@ ArrayOfStrings = list[str]
 class SomeStruct:
     field_any: object
 
-    def __init__(self, field_any: typing.Optional[object] = None):
-        self.field_any = field_any if field_any is not None else {}
+    def __init__(self, field_any: object = None):
+        self.field_any = field_any
 
     def to_json(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "FieldAny": self.field_any,
         }
+        return payload
 
 
 ArrayOfRefs = list['SomeStruct']

@@ -1,0 +1,9 @@
+{{- define "comments" }}
+{{- with .Comments }}
+"""
+{{- range . }}
+{{ . }}
+{{- end }}
+"""
+{{ end }}
+{{- end -}}

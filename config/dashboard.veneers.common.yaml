@@ -29,15 +29,15 @@ builders:
         - name: currentY
           type:
             kind: scalar
-            scalar: {scalar_kind: uint32 }
+            scalar: {scalar_kind: uint32}
         - name: currentX
           type:
             kind: scalar
-            scalar: {scalar_kind: uint32 }
+            scalar: {scalar_kind: uint32}
         - name: lastPanelHeight
           type:
             kind: scalar
-            scalar: {scalar_kind: uint32 }
+            scalar: {scalar_kind: uint32}
 
   # Rearrange things a bit
   - merge_into:
