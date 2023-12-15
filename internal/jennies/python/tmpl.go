@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
@@ -23,7 +24,21 @@ func init() {
 	base.
 		Option("missingkey=error").
 		Funcs(sprig.FuncMap()).
-		Funcs(cogtemplate.Helpers(base))
+		Funcs(cogtemplate.Helpers(base)).
+		// placeholder functions, will be overridden by jennies
+		Funcs(template.FuncMap{
+			"formatType": func(_ ast.Type) string {
+				panic("formatType() needs to be overridden by a jenny")
+			},
+			"formatRawType": func(_ ast.Type) string {
+				panic("formatRawType() needs to be overridden by a jenny")
+			},
+		}).
+		Funcs(template.FuncMap{
+			"formatArg":    formatFieldName,
+			"formatScalar": formatValue,
+			"formatPath":   formatFieldPath,
+		})
 
 	templates = template.Must(cogtemplate.FindAndParseTemplates(veneersFS, base, "templates"))
 }
