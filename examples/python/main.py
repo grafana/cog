@@ -17,6 +17,7 @@ from generated.cog.encoder import JSONEncoder
 from examples.python.raspberry.cpu import cpu_usage_timeseries, cpu_load_average_timeseries, cpu_temperature_gauge
 from examples.python.raspberry.logs import errors_in_system_logs, all_system_logs, auth_logs, kernel_logs
 from examples.python.raspberry.memory import memory_usage_timeseries, memory_usage_gauge
+from examples.python.raspberry.network import network_received_timeseries, network_transmitted_timeseries
 
 
 def build_dashboard() -> Dashboard:
@@ -66,6 +67,8 @@ def build_dashboard() -> Dashboard:
         .with_row(Row("Disk"))
         # Network
         .with_row(Row("Network"))
+        .with_panel(network_transmitted_timeseries())
+        .with_panel(network_received_timeseries())
         # Logs
         .with_row(Row("Logs"))
         .with_panel(errors_in_system_logs())
