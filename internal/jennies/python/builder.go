@@ -94,6 +94,9 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 
 				return formatValue(value)
 			},
+			"defaultForType": func(typeDef ast.Type) string {
+				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule))
+			},
 		}).
 		ExecuteTemplate(&buffer, "builders/builder.tmpl", template.Builder{
 			Package:              builder.Package,

@@ -14,7 +14,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/*/*.tmpl
+//go:embed templates/*/*.tmpl templates/builders/veneers/*.tmpl
 //nolint:gochecknoglobals
 var veneersFS embed.FS
 
@@ -35,6 +35,9 @@ func init() {
 			},
 			"formatValue": func(_ ast.Type, _ any) string {
 				panic("formatValue() needs to be overridden by a jenny")
+			},
+			"defaultForType": func(_ ast.Type) string {
+				panic("defaultForType() needs to be overridden by a jenny")
 			},
 		}).
 		Funcs(template.FuncMap{
