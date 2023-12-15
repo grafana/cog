@@ -1,6 +1,6 @@
 {{- define "options" }}
 {{ range .Options }}
-def {{ .Name|formatArg }}(self{{- template "args" .Args }}) -> typing.Self:
+def {{ .Name|formatIdentifier }}(self{{- template "args" .Args }}) -> typing.Self:
     {{- include "comments" . | indent 4 }}
     {{- range .Assignments }}
     {{- include "assignment" (dict "Assignment" .) | indent 4 }}

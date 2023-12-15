@@ -195,7 +195,7 @@ func (formatter *typeFormatter) formatStructField(def ast.StructField) string {
 
 	field := formatter.formatType(def.Type)
 
-	buffer.WriteString(fmt.Sprintf("    %s: %s", formatFieldName(def.Name), field))
+	buffer.WriteString(fmt.Sprintf("    %s: %s", formatIdentifier(def.Name), field))
 
 	return buffer.String()
 }
@@ -235,6 +235,25 @@ func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType) strin
 
 	typingPkg := formatter.importPkg("typing", "typing")
 	return fmt.Sprintf("%s.Union[%s]", typingPkg, strings.Join(branches, ", "))
+}
+
+func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
+	referredPkg := enumObj.SelfRef.ReferredPkg
+	referredPkg = formatter.importModule(referredPkg, "..models", referredPkg)
+
+	enumName := tools.UpperSnakeCase(enumObj.Type.AsEnum().Values[0].Name)
+	for _, enumValue := range enumObj.Type.AsEnum().Values {
+		if enumValue.Value == val {
+			enumName = tools.UpperSnakeCase(enumValue.Name)
+			break
+		}
+	}
+
+	if referredPkg == "" {
+		return fmt.Sprintf("%s.%s", enumObj.Name, enumName)
+	}
+
+	return fmt.Sprintf("%s.%s.%s", referredPkg, enumObj.Name, enumName)
 }
 
 func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
