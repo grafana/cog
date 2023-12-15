@@ -131,20 +131,45 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Object) string {
 	var buffer strings.Builder
 
-	buffer.WriteString("    def to_json(self) -> dict[str, object]:\n")
-	buffer.WriteString("        return {\n")
+	buffer.WriteString(fmt.Sprintf("    def to_json(self) -> dict[str, object]:\n"))
+	buffer.WriteString("        payload: dict[str, object] = {\n")
 
-	for _, field := range object.Type.AsStruct().Fields {
+	fieldValue := func(field ast.StructField, nilCheck bool) string {
 		fieldName := formatIdentifier(field.Name)
 
 		if context.ResolveToStruct(field.Type) {
-			buffer.WriteString(fmt.Sprintf(`            "%[1]s": None if self.%[2]s is None else self.%[2]s.to_json(),`+"\n", field.Name, fieldName))
-		} else {
-			buffer.WriteString(fmt.Sprintf(`            "%s": self.%s,`+"\n", field.Name, fieldName))
+			if nilCheck {
+				return fmt.Sprintf("None if self.%[1]s is None else self.%[1]s.to_json()", fieldName)
+			}
+
+			return fmt.Sprintf("self.%s.to_json()", fieldName)
 		}
+
+		return fmt.Sprintf("self.%s", fieldName)
 	}
 
-	buffer.WriteString("        }")
+	for _, field := range object.Type.AsStruct().Fields {
+		if !field.Required {
+			continue
+		}
+
+		buffer.WriteString(fmt.Sprintf(`            "%s": %s,`+"\n", field.Name, fieldValue(field, true)))
+	}
+
+	buffer.WriteString("        }\n")
+
+	for _, field := range object.Type.AsStruct().Fields {
+		if field.Required {
+			continue
+		}
+
+		fieldName := formatIdentifier(field.Name)
+
+		buffer.WriteString(fmt.Sprintf("        if self.%s is not None:\n", fieldName))
+		buffer.WriteString(fmt.Sprintf(`            payload["%s"] = %s`+"\n", field.Name, fieldValue(field, false)))
+	}
+
+	buffer.WriteString("        return payload")
 
 	return buffer.String()
 }
