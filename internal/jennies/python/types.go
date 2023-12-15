@@ -27,6 +27,15 @@ func defaultTypeFormatter(importPkg pkgImporter, importModule moduleImporter) *t
 	}
 }
 
+func builderTypeFormatter(context common.Context, importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
+	return &typeFormatter{
+		importPkg:    importPkg,
+		importModule: importModule,
+		forBuilder:   true,
+		context:      context,
+	}
+}
+
 func (formatter *typeFormatter) formatObject(def ast.Object) (string, error) {
 	var buffer strings.Builder
 
@@ -224,7 +233,8 @@ func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType) strin
 		return formatter.formatType(branch)
 	})
 
-	return strings.Join(branches, " | ")
+	typingPkg := formatter.importPkg("typing", "typing")
+	return fmt.Sprintf("%s.Union[%s]", typingPkg, strings.Join(branches, ", "))
 }
 
 func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
