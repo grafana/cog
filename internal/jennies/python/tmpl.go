@@ -33,11 +33,13 @@ func init() {
 			"formatRawType": func(_ ast.Type) string {
 				panic("formatRawType() needs to be overridden by a jenny")
 			},
+			"formatValue": func(_ ast.Type, _ any) string {
+				panic("formatValue() needs to be overridden by a jenny")
+			},
 		}).
 		Funcs(template.FuncMap{
-			"formatArg":    formatFieldName,
-			"formatScalar": formatValue,
-			"formatPath":   formatFieldPath,
+			"formatIdentifier": formatIdentifier,
+			"formatPath":       formatFieldPath,
 		})
 
 	templates = template.Must(cogtemplate.FindAndParseTemplates(veneersFS, base, "templates"))
