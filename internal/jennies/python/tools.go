@@ -42,17 +42,17 @@ func formatValue(val any) string {
 
 func formatFieldPath(fieldPath ast.Path) string {
 	parts := tools.Map(fieldPath, func(part ast.PathItem) string {
-		return formatFieldName(part.Identifier)
+		return formatIdentifier(part.Identifier)
 	})
 
 	return strings.Join(parts, ".")
 }
 
-func formatFieldName(name string) string {
-	return tools.SnakeCase(escapeFieldName(name))
+func formatIdentifier(name string) string {
+	return tools.SnakeCase(escapeIdentifier(name))
 }
 
-func escapeFieldName(name string) string {
+func escapeIdentifier(name string) string {
 	if isReservedPythonKeyword(name) || isBuiltInFunction(name) {
 		return name + "_val"
 	}
@@ -95,7 +95,7 @@ func isReservedPythonKeyword(input string) bool {
 * 					 Default and "empty" values management 					  *
 ******************************************************************************/
 
-func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule func(alias string, pkg string, module string) string) any {
+func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule moduleImporter) any {
 	if !typeDef.IsRef() && typeDef.Default != nil {
 		return typeDef.Default
 	}

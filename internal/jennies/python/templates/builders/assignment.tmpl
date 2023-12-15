@@ -6,7 +6,7 @@
 {{- end }}
 
 {{- template "assignment_setup" (dict "Value" .Assignment.Value) -}}
-{{- $value := include "assignment_value" (dict "Value" .Assignment.Value) -}}
+{{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
 
 {{ template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
 {{- end }}
@@ -15,9 +15,9 @@
 {{- with .Value.Argument }}
 {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
 {{- if .Type.IsArray }}
-{{ .Name|formatArg }}_resources = [r.build() for r in {{ .Name|formatArg }}]
+{{ .Name|formatIdentifier }}_resources = [r.build() for r in {{ .Name|formatIdentifier }}]
 {{- else }}
-{{ .Name|formatArg }}_resource = {{ .Name|formatArg }}.build()
+{{ .Name|formatIdentifier }}_resource = {{ .Name|formatIdentifier }}.build()
 {{- end }}
 {{- end }}
 {{- end }}
@@ -30,25 +30,25 @@
 
 {{- define "assignment_value" }}
 {{- if not (eq .Value.Constant nil) }}
-{{- formatScalar .Value.Constant }}
+{{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
 {{- end }}
 {{- with .Value.Argument }}
 {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-{{- .Name|formatArg }}{{- .Type.IsArray | ternary "_resources" "_resource" }}
+{{- .Name|formatIdentifier }}{{- .Type.IsArray | ternary "_resources" "_resource" }}
 {{- else }}
-{{- .Name|formatArg }}
+{{- .Name|formatIdentifier }}
 {{- end }}
 {{- end }}
 {{- with .Value.Envelope }}
-{{- template "value_envelope" (dict "Envelope" .) }}
+{{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
 {{- end }}
 {{- end }}
 
 {{- define "value_envelope" }}
 {{- .Envelope.Type | formatRawType }}(
 {{- range .Envelope.Values }}
-    {{- $value := include "assignment_value" (dict "Value" .Value) }}
-    {{ (index .Path 0).Identifier | formatArg }}={{ $value }},
+    {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
+    {{ (index .Path 0).Identifier | formatIdentifier }}={{ $value }},
 {{- end }}
 )
 {{- end }}
