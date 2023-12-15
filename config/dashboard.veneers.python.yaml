@@ -9,9 +9,7 @@ builders:
 
   # We don't want these builders at all
   - omit: { by_object: DashboardDashboardTime }
-
-  # FIXME: temporary, this builder contains a "from()" method that should be renamed/escaped
-  - omit: { by_object: DashboardRangeMapOptions }
+  - omit: { by_object: ValueMappingResult }
 
 options:
   ##############

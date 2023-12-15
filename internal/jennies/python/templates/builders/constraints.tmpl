@@ -1,6 +1,6 @@
 {{- define "constraints" }}
 {{- range . }}
-{{- $leftOperand := .ArgName|formatArg }}
+{{- $leftOperand := .ArgName|formatIdentifier }}
 {{- $operator := .Op }}
 {{- if eq .Op "minLength" }}
     {{- $leftOperand = print "len(" $leftOperand ")" }}
