@@ -111,10 +111,11 @@ class SomeStruct:
         self.field_int32 = field_int32
 
     def to_json(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "fieldBool": self.field_bool,
             "fieldString": self.field_string,
             "FieldStringWithConstantValue": self.field_string_with_constant_value,
             "FieldFloat32": self.field_float32,
             "FieldInt32": self.field_int32,
         }
+        return payload
