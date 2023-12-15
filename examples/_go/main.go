@@ -22,7 +22,6 @@ func dashboardBuilder() []byte {
 				TimeOptions([]string{"5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"}),
 		).
 		Tooltip(dashboard.DashboardCursorSyncCrosshair).
-		// TODO: we should have specific builders for every possible variable type
 		// "Data Source" variable
 		WithVariable(dashboard.NewDatasourceVariableBuilder("datasource").
 			Label("Data Source").

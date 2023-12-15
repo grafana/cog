@@ -98,7 +98,11 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 	for _, field := range object.Type.AsStruct().Fields {
 		fieldName := formatIdentifier(field.Name)
 		fieldType := jenny.typeFormatter.formatType(field.Type)
-		defaultValue := defaultValueForType(schemas, field.Type, jenny.importModule)
+		defaultValue := (any)(nil)
+
+		if !field.Type.Nullable {
+			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule)
+		}
 
 		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
 			assignments = append(assignments, fmt.Sprintf("        self.%s = %s", fieldName, formatValue(field.Type.AsScalar().Value)))
