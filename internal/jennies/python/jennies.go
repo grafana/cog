@@ -28,6 +28,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		Runtime{},
 
 		common.If[common.Context](globalConfig.Types, RawTypes{}),
+		common.If[common.Context](globalConfig.Builders, &Builder{}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
