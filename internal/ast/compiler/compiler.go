@@ -37,6 +37,7 @@ func CommonPasses() Passes {
 	return Passes{
 		&DataqueryIdentification{},
 		&Unspec{},
+		&Dashboard{},
 		&DashboardPanelsRewrite{},
 		&DashboardTargetsRewrite{},
 		&DashboardTimePicker{},
