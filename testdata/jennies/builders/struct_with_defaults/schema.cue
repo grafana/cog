@@ -14,4 +14,13 @@ package struct_with_defaults
   	intVal: 4
   }
   emptyFields: #NestedStruct | *{}
+
+  complexField: {
+		uid: string
+	} | *{ uid: "myUID" }
+
+	partialComplexField: {
+		uid: string
+		intVal: int64
+	} | *{ uid: "myUID" }
 }

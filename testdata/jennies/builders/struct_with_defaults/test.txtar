@@ -93,6 +93,64 @@
                     }
                   },
                   "Required": true
+                },
+                {
+                  "Name": "complexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string",
+                              "Value": "myUID"
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "partialComplexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "intVal",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "int64"
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
                 }
               ]
             }
@@ -194,6 +252,64 @@
                       "Ref": {
                         "ReferredPkg": "struct_with_defaults",
                         "ReferredType": "NestedStruct"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "complexField",
+                    "Type": {
+                      "Kind": "struct",
+                      "Nullable": false,
+                      "Struct": {
+                        "Fields": [
+                          {
+                            "Name": "uid",
+                            "Type": {
+                              "Kind": "scalar",
+                              "Nullable": false,
+                              "Scalar": {
+                                "ScalarKind": "string",
+                                "Value": "myUID"
+                              }
+                            },
+                            "Required": true
+                          }
+                        ]
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "partialComplexField",
+                    "Type": {
+                      "Kind": "struct",
+                      "Nullable": false,
+                      "Struct": {
+                        "Fields": [
+                          {
+                            "Name": "uid",
+                            "Type": {
+                              "Kind": "scalar",
+                              "Nullable": false,
+                              "Scalar": {
+                                "ScalarKind": "string"
+                              }
+                            },
+                            "Required": true
+                          },
+                          {
+                            "Name": "intVal",
+                            "Type": {
+                              "Kind": "scalar",
+                              "Nullable": false,
+                              "Scalar": {
+                                "ScalarKind": "int64"
+                              }
+                            },
+                            "Required": true
+                          }
+                        ]
                       }
                     },
                     "Required": true
@@ -432,6 +548,64 @@
                       }
                     },
                     "Required": true
+                  },
+                  {
+                    "Name": "complexField",
+                    "Type": {
+                      "Kind": "struct",
+                      "Nullable": false,
+                      "Struct": {
+                        "Fields": [
+                          {
+                            "Name": "uid",
+                            "Type": {
+                              "Kind": "scalar",
+                              "Nullable": false,
+                              "Scalar": {
+                                "ScalarKind": "string",
+                                "Value": "myUID"
+                              }
+                            },
+                            "Required": true
+                          }
+                        ]
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "partialComplexField",
+                    "Type": {
+                      "Kind": "struct",
+                      "Nullable": false,
+                      "Struct": {
+                        "Fields": [
+                          {
+                            "Name": "uid",
+                            "Type": {
+                              "Kind": "scalar",
+                              "Nullable": false,
+                              "Scalar": {
+                                "ScalarKind": "string"
+                              }
+                            },
+                            "Required": true
+                          },
+                          {
+                            "Name": "intVal",
+                            "Type": {
+                              "Kind": "scalar",
+                              "Nullable": false,
+                              "Scalar": {
+                                "ScalarKind": "int64"
+                              }
+                            },
+                            "Required": true
+                          }
+                        ]
+                      }
+                    },
+                    "Required": true
                   }
                 ]
               }
@@ -489,6 +663,64 @@
                   "Ref": {
                     "ReferredPkg": "struct_with_defaults",
                     "ReferredType": "NestedStruct"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "complexField",
+                "Type": {
+                  "Kind": "struct",
+                  "Nullable": false,
+                  "Struct": {
+                    "Fields": [
+                      {
+                        "Name": "uid",
+                        "Type": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string",
+                            "Value": "myUID"
+                          }
+                        },
+                        "Required": true
+                      }
+                    ]
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "partialComplexField",
+                "Type": {
+                  "Kind": "struct",
+                  "Nullable": false,
+                  "Struct": {
+                    "Fields": [
+                      {
+                        "Name": "uid",
+                        "Type": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        },
+                        "Required": true
+                      },
+                      {
+                        "Name": "intVal",
+                        "Type": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "int64"
+                          }
+                        },
+                        "Required": true
+                      }
+                    ]
                   }
                 },
                 "Required": true
@@ -684,6 +916,204 @@
             }
           ],
           "IsConstructorArg": false
+        },
+        {
+          "Name": "complexField",
+          "Args": [
+            {
+              "Name": "complexField",
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "uid",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string",
+                          "Value": "myUID"
+                        }
+                      },
+                      "Required": true
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "complexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string",
+                              "Value": "myUID"
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "complexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string",
+                              "Value": "myUID"
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "partialComplexField",
+          "Args": [
+            {
+              "Name": "partialComplexField",
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "uid",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Required": true
+                    },
+                    {
+                      "Name": "intVal",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "int64"
+                        }
+                      },
+                      "Required": true
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "partialComplexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "intVal",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "int64"
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "partialComplexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "intVal",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "int64"
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
         }
       ]
     }
@@ -818,6 +1248,23 @@ func (builder *StructBuilder) EmptyFields(emptyFields cog.Builder[NestedStruct])
     return builder
 }
 
+func (builder *StructBuilder) ComplexField(complexField struct {
+	Uid string `json:"uid"`
+}) *StructBuilder {
+    builder.internal.ComplexField = complexField
+
+    return builder
+}
+
+func (builder *StructBuilder) PartialComplexField(partialComplexField struct {
+	Uid string `json:"uid"`
+	IntVal int64 `json:"intVal"`
+}) *StructBuilder {
+    builder.internal.PartialComplexField = partialComplexField
+
+    return builder
+}
+
 func (builder *StructBuilder) applyDefaults() {
     builder.AllFields(NewNestedStructBuilder().
 IntVal(3).
@@ -883,6 +1330,21 @@ export class StructBuilder implements cog.Builder<struct_with_defaults.Struct> {
     emptyFields(emptyFields: cog.Builder<struct_with_defaults.NestedStruct>): this {
         const emptyFieldsResource = emptyFields.build();
         this.internal.emptyFields = emptyFieldsResource;
+        return this;
+    }
+
+    complexField(complexField: {
+	uid: "myUID";
+}): this {
+        this.internal.complexField = complexField;
+        return this;
+    }
+
+    partialComplexField(partialComplexField: {
+	uid: string;
+	intVal: number;
+}): this {
+        this.internal.partialComplexField = partialComplexField;
         return this;
     }
 }
