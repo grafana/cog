@@ -136,7 +136,7 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Object) string {
 	var buffer strings.Builder
 
-	buffer.WriteString(fmt.Sprintf("    def to_json(self) -> dict[str, object]:\n"))
+	buffer.WriteString("    def to_json(self) -> dict[str, object]:\n")
 	buffer.WriteString("        payload: dict[str, object] = {\n")
 
 	fieldValue := func(field ast.StructField, nilCheck bool) string {
