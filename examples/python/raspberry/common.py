@@ -4,6 +4,7 @@ from generated.builders.logs import Panel as LogsBuilder
 from generated.builders.prometheus import Dataquery as PrometheusQueryBuilder
 from generated.builders.loki import Dataquery as LokiQueryBuilder
 from generated.models.dashboard import DataSourceRef
+from generated.models.prometheus import PromQueryFormat
 from generated.models.common import GraphDrawStyle, VisibilityMode, LegendPlacement, LegendDisplayMode, VizOrientation, LogsSortOrder
 from generated.builders.common import VizLegendOptions as VizLegendOptionsBuilder, ReduceDataOptions as ReduceDataOptionsBuilder
 
@@ -53,6 +54,16 @@ def basic_prometheus_query(query: str, legend: str) -> PrometheusQueryBuilder:
         PrometheusQueryBuilder()
         .expr(query)
         .legend_format(legend)
+    )
+
+
+def table_prometheus_query(query: str, ref_id: str) -> PrometheusQueryBuilder:
+    return (
+        PrometheusQueryBuilder()
+        .expr(query)
+        .instant(True)
+        .format_val(PromQueryFormat.TABLE)
+        .ref_id(ref_id)
     )
 
 
