@@ -1,6 +1,9 @@
 {{- define "pre_assignment_Dashboard_withPanel" }}
 
 # Position the panel on the grid
+if panel_resource.grid_pos is None:
+    panel_resource.grid_pos = dashboard.GridPos()
+
 panel_resource.grid_pos.x = self.__current_x
 panel_resource.grid_pos.y = self.__current_y
 {{- end }}
