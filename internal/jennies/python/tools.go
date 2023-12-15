@@ -40,6 +40,14 @@ func formatValue(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
+func formatFieldPath(fieldPath ast.Path) string {
+	parts := tools.Map(fieldPath, func(part ast.PathItem) string {
+		return formatFieldName(part.Identifier)
+	})
+
+	return strings.Join(parts, ".")
+}
+
 func formatFieldName(name string) string {
 	return tools.SnakeCase(escapeFieldName(name))
 }
@@ -148,10 +156,8 @@ func defaultValueForScalar(scalar ast.ScalarType) any {
 	}
 
 	switch scalar.ScalarKind {
-	case ast.KindNull:
+	case ast.KindNull, ast.KindAny:
 		return nil
-	case ast.KindAny:
-		return raw("{}")
 
 	case ast.KindBytes, ast.KindString:
 		return ""

@@ -1,0 +1,23 @@
+language: python
+
+package: dashboard
+
+builders:
+  ##############
+  # Dashboards #
+  ##############
+
+  # We don't want these builders at all
+  - omit: { by_object: DashboardDashboardTime }
+
+  # FIXME: temporary, this builder contains a "from()" method that should be renamed/escaped
+  - omit: { by_object: DashboardRangeMapOptions }
+
+options:
+  ##############
+  # Dashboards #
+  ##############
+
+  # Time(from, to) instead of time(struct {From string `json:"from"`, To string `json:"to"`}{From: "lala", To: "lala})
+  - struct_fields_as_arguments:
+      by_name: Dashboard.time
