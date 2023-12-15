@@ -366,7 +366,7 @@ import typing
 
 
 # Refresh rate or disabled.
-RefreshRate = typing.Union[str | bool]
+RefreshRate = typing.Union[typing.Union[str, bool]]
 
 
 StringOrNull = typing.Optional[str]
@@ -376,18 +376,19 @@ class SomeStruct:
     type: typing.Literal["some-struct"]
     field_any: object
 
-    def __init__(self, field_any: typing.Optional[object] = None):
+    def __init__(self, field_any: object = None):
         self.type = "some-struct"
-        self.field_any = field_any if field_any is not None else {}
+        self.field_any = field_any
 
     def to_json(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "Type": self.type,
             "FieldAny": self.field_any,
         }
+        return payload
 
 
-BoolOrRef = typing.Union[bool | 'SomeStruct']
+BoolOrRef = typing.Union[typing.Union[bool, 'SomeStruct']]
 
 
 class SomeOtherStruct:
@@ -399,10 +400,11 @@ class SomeOtherStruct:
         self.foo = foo
 
     def to_json(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "Type": self.type,
             "Foo": self.foo,
         }
+        return payload
 
 
 class YetAnotherStruct:
@@ -414,10 +416,11 @@ class YetAnotherStruct:
         self.bar = bar
 
     def to_json(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "Type": self.type,
             "Bar": self.bar,
         }
+        return payload
 
 
-SeveralRefs = typing.Union['SomeStruct' | 'SomeOtherStruct' | 'YetAnotherStruct']
+SeveralRefs = typing.Union[typing.Union['SomeStruct', 'SomeOtherStruct', 'YetAnotherStruct']]
