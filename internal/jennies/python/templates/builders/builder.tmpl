@@ -1,11 +1,14 @@
 class {{ .BuilderName }}(cogbuilder.Builder[{{ .BuilderSignatureType }}]):
     {{- include "comments" . | indent 4 }}
     __internal: {{ .BuilderSignatureType }}
+    {{- range .Properties }}
+    __{{ .Name|formatIdentifier }}: {{ .Type | formatType }} = {{ defaultForType .Type }}
+    {{- end }}
 
     def __init__(self{{- template "args" .Constructor.Args }}):
         self.__internal = {{ .ObjectName }}()
 {{- range .Constructor.Assignments }}
-{{- include "assignment" (dict "Assignment" .)|indent 8 }}
+{{- include "assignment" (dict "Assignment" . "Builder" $ "Option" (dict "Name" ""))|indent 8 }}
 {{- end }}
 
     def build(self) -> {{ .ObjectName }}:
