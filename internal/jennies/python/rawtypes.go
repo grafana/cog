@@ -96,7 +96,7 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 	var assignments []string
 
 	for _, field := range object.Type.AsStruct().Fields {
-		fieldName := formatFieldName(field.Name)
+		fieldName := formatIdentifier(field.Name)
 		fieldType := jenny.typeFormatter.formatType(field.Type)
 		defaultValue := defaultValueForType(schemas, field.Type, jenny.importModule)
 
@@ -131,7 +131,7 @@ func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Ob
 	buffer.WriteString("        return {\n")
 
 	for _, field := range object.Type.AsStruct().Fields {
-		fieldName := formatFieldName(field.Name)
+		fieldName := formatIdentifier(field.Name)
 
 		if context.ResolveToStruct(field.Type) {
 			buffer.WriteString(fmt.Sprintf(`            "%[1]s": None if self.%[2]s is None else self.%[2]s.to_json(),`+"\n", field.Name, fieldName))

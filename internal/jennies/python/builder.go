@@ -84,6 +84,16 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
 			},
+			"formatValue": func(destinationType ast.Type, value any) string {
+				if destinationType.IsRef() {
+					referredObj, found := context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
+					if found && referredObj.Type.IsEnum() {
+						return jenny.typeFormatter.formatEnumValue(referredObj, value)
+					}
+				}
+
+				return formatValue(value)
+			},
 		}).
 		ExecuteTemplate(&buffer, "builders/builder.tmpl", template.Builder{
 			Package:              builder.Package,
