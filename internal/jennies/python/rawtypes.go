@@ -114,7 +114,12 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 			}
 
 			args = append(args, fmt.Sprintf("%s: %s = None", fieldName, fieldType))
-			assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s if %[1]s is not None else %[2]s", fieldName, formatValue(defaultValue)))
+
+			if defaultValue == nil {
+				assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s", fieldName))
+			} else {
+				assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s if %[1]s is not None else %[2]s", fieldName, formatValue(defaultValue)))
+			}
 			continue
 		}
 
