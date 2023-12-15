@@ -323,7 +323,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 					return ast.Type{}, err
 				}
 
-				return ast.NewMap(ast.String(), typeDef, ast.Hints(hints)), nil
+				return ast.NewMap(ast.String(), typeDef, ast.Hints(hints), ast.Default(defVal)), nil
 			}
 		}
 
@@ -337,7 +337,9 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			return ast.Any(), nil
 		}
 
-		return ast.NewStruct(fields...), nil
+		def := ast.NewStruct(fields...)
+		def.Default = defVal
+		return def, nil
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
 	}
