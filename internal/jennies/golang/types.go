@@ -188,7 +188,7 @@ func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilde
 			buffer.WriteString(fmt.Sprintf(format, key, formatScalar([]any{})))
 		default:
 			val := formatScalar(x)
-			if field.Type.Kind == ast.KindScalar && field.Type.Nullable {
+			if !isBuilder && field.Type.Kind == ast.KindScalar && field.Type.Nullable {
 				val = fmt.Sprintf("cog.ToPtr[%s](%v)", field.Type.AsScalar().ScalarKind, value)
 			}
 			buffer.WriteString(fmt.Sprintf(format, key, val))
