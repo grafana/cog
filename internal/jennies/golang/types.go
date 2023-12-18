@@ -182,6 +182,8 @@ func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilde
 		switch x := value.(type) {
 		case map[string]interface{}:
 			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultReferenceStructForBuilder(refPkg, name, isBuilder, orderedmap.FromMap(x))))
+		case nil:
+			buffer.WriteString(fmt.Sprintf(format, key, formatScalar([]any{})))
 		default:
 			buffer.WriteString(fmt.Sprintf(format, key, formatScalar(x)))
 		}
