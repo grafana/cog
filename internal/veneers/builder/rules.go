@@ -139,9 +139,9 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 		underPath, exists := compositionMap[composableBuilder.For.Name]
 		if !exists {
 			// schemas for composable panels can define more types than just "Options"
-			// and "FieldConfig": we probably want to leave the builders for them untouched.
-			// TODO: or maybe merge these into a single, unified builder?
-			return newBuilder, nil
+			// and "FieldConfig": we need to leave these objects untouched and
+			// compose only the builders that we know of.
+			continue
 		}
 
 		newRoot, err := newBuilder.MakePath(builders, underPath)
