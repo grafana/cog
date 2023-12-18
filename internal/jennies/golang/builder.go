@@ -150,8 +150,14 @@ func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
 		if opt.Args[i].Type.Kind == ast.KindRef {
 			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
 			pkg = opt.Args[i].Type.AsRef().ReferredType
+			args = append(args, formatDefaultReferenceStruct(refPkg, pkg, orderedmap.FromMap(val)))
 		}
-		args = append(args, formatDefaultStruct(refPkg, pkg, orderedmap.FromMap(val)))
+
+		// Anonymous structs
+		if opt.Args[i].Type.Kind == ast.KindStruct {
+			def := opt.Args[i].Type.AsStruct()
+			args = append(args, formatAnonymousDefaultStruct(def, orderedmap.FromMap(val)))
+		}
 	}
 	return args
 }

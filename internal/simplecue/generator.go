@@ -248,6 +248,11 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 
 	var fields []ast.StructField
 
+	// Anonymous structs filled partially iterates only defined defaults fields and removing default's here
+	// it add missing fields.
+	_, exprs := v.Expr()
+	v = exprs[0]
+
 	// explore struct fields
 	for i, _ := v.Fields(cue.Optional(true), cue.Definitions(true)); i.Next(); {
 		fieldLabel := selectorLabel(i.Selector())
@@ -284,7 +289,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	hints := hintsFromCueValue(v)
 
 	op, disjunctionBranches := v.Expr()
-	if op == cue.OrOp && len(disjunctionBranches) > 1 {
+	if op == cue.OrOp && len(disjunctionBranches) > 1 && defVal == nil {
 		return g.declareDisjunction(v, hints, defVal)
 	}
 
@@ -339,6 +344,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 
 		def := ast.NewStruct(fields...)
 		def.Default = defVal
+
 		return def, nil
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())

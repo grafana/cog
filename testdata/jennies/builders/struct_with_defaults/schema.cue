@@ -17,10 +17,14 @@ package struct_with_defaults
 
   complexField: {
 		uid: string
-	} | *{ uid: "myUID" }
+		nested: {
+			nestedVal: string
+		}
+		array: [...string]
+	} | *{ uid: "myUID", nested: { nestedVal: "nested"}, array: ["hello"]}
 
 	partialComplexField: {
 		uid: string
-		intVal: int64
-	} | *{ uid: "myUID" }
+		aVal: int64
+	} | *{ xxxx: "myUID" }
 }

@@ -163,7 +163,7 @@ func formatScalar(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
-func formatDefaultStruct(refPkg, pkg string, structMap *orderedmap.Map[string, interface{}]) string {
+func formatDefaultReferenceStruct(refPkg, pkg string, structMap *orderedmap.Map[string, interface{}]) string {
 	starter, format, sep, lastSep, ending := "{\n", "%s: %v", ",\n", ",\n", "}"
 	if pkg != "" {
 		starter, format, sep, lastSep, ending = fmt.Sprintf("New%sBuilder().\n", pkg), "%s(%v)", ".\n", ",\n", ""
@@ -181,7 +181,7 @@ func formatDefaultStruct(refPkg, pkg string, structMap *orderedmap.Map[string, i
 
 		switch x := value.(type) {
 		case map[string]interface{}:
-			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultStruct(refPkg, pkg, orderedmap.FromMap(x))))
+			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultReferenceStruct(refPkg, pkg, orderedmap.FromMap(x))))
 		case nil:
 			buffer.WriteString(fmt.Sprintf(format, key, formatScalar([]any{})))
 		default:
@@ -197,6 +197,59 @@ func formatDefaultStruct(refPkg, pkg string, structMap *orderedmap.Map[string, i
 	})
 
 	return fmt.Sprintf("%s%s%s", starter, buffer.String(), ending)
+}
+
+func formatAnonymousDefaultStruct(def ast.StructType, structMap *orderedmap.Map[string, interface{}]) string {
+	return fmt.Sprintf("struct %s {\n %s }", defineAnonymousFields(def), defineAnonymousDefaults(def, structMap))
+}
+
+func defineAnonymousFields(def ast.StructType) string {
+	var structDefinition strings.Builder
+
+	for _, f := range def.Fields {
+		key := tools.UpperCamelCase(f.Name)
+
+		switch f.Type.Kind {
+		case ast.KindScalar:
+			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", key, f.Type.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
+		case ast.KindStruct:
+			structFields := defineAnonymousFields(f.Type.AsStruct())
+			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, tools.LowerCamelCase(key)))
+		case ast.KindArray:
+			array := f.Type.AsArray()
+			if array.ValueType.Kind == ast.KindScalar {
+				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
+			}
+		// TODO: Map rest of array cases
+		default:
+			// TODO: Map rest of the cases when necessary. By default it sets any
+			structDefinition.WriteString(fmt.Sprintf("%s any `json:\"%s\"`\n", key, strings.ToLower(key)))
+		}
+	}
+
+	return fmt.Sprintf("{\n %s }", structDefinition.String())
+}
+
+func defineAnonymousDefaults(def ast.StructType, structMap *orderedmap.Map[string, interface{}]) string {
+	var buffer strings.Builder
+	structMap.Iterate(func(key string, value interface{}) {
+		name := tools.UpperCamelCase(key)
+		switch x := value.(type) {
+		case map[string]interface{}:
+			field, ok := def.FieldByName(key)
+			if !ok {
+				// FIXME: Set a default not defined shouldn't happen..
+			}
+			def = field.Type.AsStruct()
+			buffer.WriteString(fmt.Sprintf("%s: struct %v {\n %v},\n", name, defineAnonymousFields(def), defineAnonymousDefaults(def, orderedmap.FromMap(x))))
+		case nil:
+			// Skip
+		default:
+			buffer.WriteString(fmt.Sprintf("%s: %v,\n", name, formatScalar(x)))
+		}
+	})
+
+	return buffer.String()
 }
 
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
