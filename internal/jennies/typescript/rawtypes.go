@@ -206,12 +206,18 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 
 	for _, field := range structType.AsStruct().Fields {
 		if field.Type.Default != nil {
-			if field.Type.Kind == ast.KindRef {
+			switch field.Type.Kind {
+			case ast.KindRef:
 				defaults.Set(field.Name, jenny.defaultValuesForReference(field.Type, packageMapper))
 				continue
+			case ast.KindStruct:
+				defaultMap := field.Type.Default.(map[string]interface{})
+				defaults.Set(field.Name, defaultValueForStructs(orderedmap.FromMap(defaultMap)))
+				continue
+			default:
+				defaults.Set(field.Name, field.Type.Default)
+				continue
 			}
-			defaults.Set(field.Name, field.Type.Default)
-			continue
 		}
 
 		if !field.Required {

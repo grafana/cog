@@ -26,5 +26,5 @@ package struct_with_defaults
 	partialComplexField: {
 		uid: string
 		aVal: int64
-	} | *{ xxxx: "myUID" }
+	} | *{ uid: "myUID" }
 }

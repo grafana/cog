@@ -81,6 +81,115 @@
                     }
                   },
                   "Required": true
+                },
+                {
+                  "Name": "complexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Default": {
+                      "array": [
+                        "hello"
+                      ],
+                      "nested": {
+                        "nestedVal": "nested"
+                      },
+                      "uid": "myUID"
+                    },
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "nested",
+                          "Type": {
+                            "Kind": "struct",
+                            "Nullable": false,
+                            "Struct": {
+                              "Fields": [
+                                {
+                                  "Name": "nestedVal",
+                                  "Type": {
+                                    "Kind": "scalar",
+                                    "Nullable": false,
+                                    "Scalar": {
+                                      "ScalarKind": "string"
+                                    }
+                                  },
+                                  "Required": true
+                                }
+                              ]
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "array",
+                          "Type": {
+                            "Kind": "array",
+                            "Nullable": false,
+                            "Array": {
+                              "ValueType": {
+                                "Kind": "scalar",
+                                "Nullable": false,
+                                "Scalar": {
+                                  "ScalarKind": "string"
+                                }
+                              }
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "partialComplexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Default": {
+                      "xxxx": "myUID"
+                    },
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "intVal",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "int64"
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
                 }
               ]
             }
@@ -120,11 +229,26 @@ export interface Struct {
 	allFields: NestedStruct;
 	partialFields: NestedStruct;
 	emptyFields: NestedStruct;
+	complexField: {
+		uid: string;
+		nested: {
+			nestedVal: string;
+		};
+		array: string[];
+	};
+	partialComplexField: {
+		uid: string;
+		intVal: number;
+	};
 }
 
 export const defaultStruct = (): Struct => ({
 	allFields: { intVal: 3, stringVal: "hello", },
 	partialFields: { intVal: 3, },
 	emptyFields: defaultNestedStruct(),
+	complexField: { array: [
+"hello",
+], nested: { nestedVal: "nested", }, uid: "myUID", },
+	partialComplexField: { xxxx: "myUID", },
 });
 

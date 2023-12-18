@@ -1736,7 +1736,11 @@ export class StructBuilder implements cog.Builder<struct_with_defaults.Struct> {
     }
 
     complexField(complexField: {
-	uid: "myUID";
+	uid: string;
+	nested: {
+		nestedVal: string;
+	};
+	array: string[];
 }): this {
         this.internal.complexField = complexField;
         return this;
