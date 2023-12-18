@@ -236,15 +236,11 @@ func defineAnonymousDefaults(def ast.StructType, structMap *orderedmap.Map[strin
 		name := tools.UpperCamelCase(key)
 		switch x := value.(type) {
 		case map[string]interface{}:
-			field, ok := def.FieldByName(key)
-			if !ok {
-				// FIXME: Set a default not defined shouldn't happen..
-			}
+			// FIXME: Set a default not defined shouldn't happen..
+			field, _ := def.FieldByName(key)
 			def = field.Type.AsStruct()
 			buffer.WriteString(fmt.Sprintf("%s: struct %v {\n %v},\n", name, defineAnonymousFields(def), defineAnonymousDefaults(def, orderedmap.FromMap(x))))
-		case nil:
-			// Skip
-		default:
+		case interface{}, []interface{}:
 			buffer.WriteString(fmt.Sprintf("%s: %v,\n", name, formatScalar(x)))
 		}
 	})
