@@ -18,8 +18,6 @@ type Builder struct {
 
 	typeImportMapper func(pkg string) string
 	typeFormatter    *typeFormatter
-
-	builders ast.Builders
 }
 
 func (jenny *Builder) JennyName() string {
@@ -28,7 +26,6 @@ func (jenny *Builder) JennyName() string {
 
 func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 	files := codejen.Files{}
-	jenny.builders = context.Builders
 
 	for _, builder := range context.Builders {
 		output, err := jenny.generateBuilder(context, builder)
@@ -99,7 +96,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			Comments:             comments,
 			Constructor:          jenny.generateConstructor(builder),
 			Properties:           builder.Properties,
-			Defaults:             jenny.genDefaultOptionsCalls(builder),
+			Defaults:             jenny.genDefaultOptionsCalls(context, builder),
 			Options:              tools.Map(builder.Options, jenny.generateOption),
 		})
 	if err != nil {
@@ -109,7 +106,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	return []byte(buffer.String()), nil
 }
 
-func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.OptionCall {
+func (jenny *Builder) genDefaultOptionsCalls(context common.Context, builder ast.Builder) []template.OptionCall {
 	calls := make([]template.OptionCall, 0)
 	for _, opt := range builder.Options {
 		if opt.Default == nil {
@@ -123,7 +120,7 @@ func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.Opt
 		if hasTypedDefaults(opt) {
 			calls = append(calls, template.OptionCall{
 				OptionName: opt.Name,
-				Args:       jenny.formatDefaultTypedArgs(opt),
+				Args:       jenny.formatDefaultTypedArgs(context, opt),
 			})
 			continue
 		}
@@ -147,7 +144,7 @@ func hasTypedDefaults(opt ast.Option) bool {
 	return false
 }
 
-func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
+func (jenny *Builder) formatDefaultTypedArgs(context common.Context, opt ast.Option) []string {
 	args := make([]string, 0)
 	for i, arg := range opt.Default.ArgsValues {
 		val, _ := arg.(map[string]interface{})
@@ -157,8 +154,12 @@ func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
 		if opt.Args[i].Type.Kind == ast.KindRef {
 			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
 			pkg = opt.Args[i].Type.AsRef().ReferredType
-			_, ok := jenny.builders.LocateByObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
-			args = append(args, formatDefaultReferenceStructForBuilder(refPkg, pkg, ok, orderedmap.FromMap(val)))
+			_, isBuilder := context.Builders.LocateByObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
+			obj, ok := context.LocateObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
+			if !ok {
+				return []string{"unknown"}
+			}
+			args = append(args, formatDefaultReferenceStructForBuilder(refPkg, pkg, isBuilder, obj.Type.AsStruct(), orderedmap.FromMap(val)))
 		}
 
 		// Anonymous structs
