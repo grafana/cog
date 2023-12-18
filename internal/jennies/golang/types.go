@@ -240,7 +240,7 @@ func defineAnonymousDefaults(def ast.StructType, structMap *orderedmap.Map[strin
 			field, _ := def.FieldByName(key)
 			def = field.Type.AsStruct()
 			buffer.WriteString(fmt.Sprintf("%s: struct %v {\n %v},\n", name, defineAnonymousFields(def), defineAnonymousDefaults(def, orderedmap.FromMap(x))))
-		case interface{}, []interface{}:
+		case []interface{}, interface{}:
 			buffer.WriteString(fmt.Sprintf("%s: %v,\n", name, formatScalar(x)))
 		}
 	})

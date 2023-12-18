@@ -248,7 +248,7 @@ func defaultValueForScalar(scalar ast.ScalarType) any {
 		return raw("{}")
 
 	case ast.KindBytes, ast.KindString:
-		return "\"\""
+		return raw("\"\"")
 
 	case ast.KindFloat32, ast.KindFloat64:
 		return 0.0
@@ -340,7 +340,7 @@ func defaultValueForStructs(def ast.StructType, m *orderedmap.Map[string, interf
 		}
 	}
 
-	return raw(fmt.Sprintf("{ %s}", buffer.String()))
+	return raw(fmt.Sprintf("{ %+v}", buffer.String()))
 }
 
 func defaultEmptyValuesForStructs(def ast.StructType) string {
