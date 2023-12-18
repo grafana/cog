@@ -157,7 +157,7 @@ func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
 		if opt.Args[i].Type.Kind == ast.KindRef {
 			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
 			pkg = opt.Args[i].Type.AsRef().ReferredType
-			_, ok := jenny.builders.LocateByObject(refPkg, pkg)
+			_, ok := jenny.builders.LocateByObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
 			args = append(args, formatDefaultReferenceStructForBuilder(refPkg, pkg, ok, orderedmap.FromMap(val)))
 		}
 
