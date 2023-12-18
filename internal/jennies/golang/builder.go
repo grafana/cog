@@ -18,6 +18,8 @@ type Builder struct {
 
 	typeImportMapper func(pkg string) string
 	typeFormatter    *typeFormatter
+
+	builders ast.Builders
 }
 
 func (jenny *Builder) JennyName() string {
@@ -26,6 +28,7 @@ func (jenny *Builder) JennyName() string {
 
 func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 	files := codejen.Files{}
+	jenny.builders = context.Builders
 
 	for _, builder := range context.Builders {
 		output, err := jenny.generateBuilder(context, builder)
@@ -113,6 +116,10 @@ func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.Opt
 			continue
 		}
 
+		if len(opt.Args) == 0 {
+			continue
+		}
+
 		if hasTypedDefaults(opt) {
 			calls = append(calls, template.OptionCall{
 				OptionName: opt.Name,
@@ -150,7 +157,8 @@ func (jenny *Builder) formatDefaultTypedArgs(opt ast.Option) []string {
 		if opt.Args[i].Type.Kind == ast.KindRef {
 			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
 			pkg = opt.Args[i].Type.AsRef().ReferredType
-			args = append(args, formatDefaultReferenceStruct(refPkg, pkg, orderedmap.FromMap(val)))
+			_, ok := jenny.builders.LocateByObject(refPkg, pkg)
+			args = append(args, formatDefaultReferenceStructForBuilder(refPkg, pkg, ok, orderedmap.FromMap(val)))
 		}
 
 		// Anonymous structs

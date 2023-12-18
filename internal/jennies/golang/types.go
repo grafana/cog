@@ -163,10 +163,10 @@ func formatScalar(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
-func formatDefaultReferenceStruct(refPkg, pkg string, structMap *orderedmap.Map[string, interface{}]) string {
-	starter, format, sep, lastSep, ending := "{\n", "%s: %v", ",\n", ",\n", "}"
-	if pkg != "" {
-		starter, format, sep, lastSep, ending = fmt.Sprintf("New%sBuilder().\n", pkg), "%s(%v)", ".\n", ",\n", ""
+func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilder bool, structMap *orderedmap.Map[string, interface{}]) string {
+	starter, format, sep, lastSep, ending := fmt.Sprintf("%s {\n", name), "%s: %v", ",\n", ",\n", "}"
+	if isBuilder {
+		starter, format, sep, lastSep, ending = fmt.Sprintf("New%sBuilder().\n", name), "%s(%v)", ".\n", ",\n", ""
 		if refPkg != "" {
 			starter = fmt.Sprintf("%s.%s", refPkg, starter)
 		}
@@ -175,15 +175,13 @@ func formatDefaultReferenceStruct(refPkg, pkg string, structMap *orderedmap.Map[
 	var buffer strings.Builder
 	count := 0
 	structMap.Iterate(func(key string, value interface{}) {
-		if pkg != "" {
+		if name != "" {
 			key = tools.UpperCamelCase(key)
 		}
 
 		switch x := value.(type) {
 		case map[string]interface{}:
-			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultReferenceStruct(refPkg, pkg, orderedmap.FromMap(x))))
-		case nil:
-			buffer.WriteString(fmt.Sprintf(format, key, formatScalar([]any{})))
+			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultReferenceStructForBuilder(refPkg, name, isBuilder, orderedmap.FromMap(x))))
 		default:
 			buffer.WriteString(fmt.Sprintf(format, key, formatScalar(x)))
 		}
