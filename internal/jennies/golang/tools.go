@@ -12,7 +12,7 @@ func (jenny Tools) JennyName() string {
 	return "GoTools"
 }
 
-func (jenny Tools) Generate(i common.Context) (*codejen.File, error) {
+func (jenny Tools) Generate(_ common.Context) (*codejen.File, error) {
 	return codejen.NewFile("cog/tools.go", []byte(jenny.generateToPtrFunc()), jenny), nil
 }
 
