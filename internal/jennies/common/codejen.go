@@ -52,7 +52,7 @@ func GeneratedCommentHeader(config Config) codejen.FileMapper {
 	return func(f codejen.File) (codejen.File, error) {
 		var leader string
 		switch filepath.Ext(f.RelativePath) {
-		case ".ts", ".go":
+		case ".ts", ".go", ".java":
 			leader = "//"
 		case ".yml", ".yaml", ".py":
 			leader = "#"
