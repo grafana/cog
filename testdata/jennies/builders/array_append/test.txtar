@@ -189,9 +189,9 @@ export class SomeStructBuilder implements cog.Builder<sandbox.SomeStruct> {
     }
 
     tags(tags: string): this {
-		if (!this.internal.tags) {
-			this.internal.tags = [];
-		}
+        if (!this.internal.tags) {
+            this.internal.tags = [];
+        }
         this.internal.tags.push(tags);
         return this;
     }

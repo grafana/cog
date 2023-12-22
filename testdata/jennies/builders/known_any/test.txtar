@@ -235,9 +235,9 @@ export class SomeStructBuilder implements cog.Builder<known_any.SomeStruct> {
     }
 
     title(title: string): this {
-		if (!this.internal.config) {
-			this.internal.config = known_any.defaultConfig();
-		}
+        if (!this.internal.config) {
+            this.internal.config = known_any.defaultConfig();
+        }
         this.internal.config.title = title;
         return this;
     }
