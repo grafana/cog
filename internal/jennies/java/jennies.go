@@ -47,5 +47,9 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 }
 
 func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{}
+	return compiler.Passes{
+		&compiler.AnonymousEnumToExplicitType{},
+		&compiler.FlattenDisjunctions{},
+		&compiler.DisjunctionToType{},
+	}
 }

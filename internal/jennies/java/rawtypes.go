@@ -73,9 +73,12 @@ func (jenny RawTypes) generateSchema(pkg string, object ast.Object) ([]byte, err
 		return jenny.formatStruct(pkg, object.Name, object.Type.AsStruct())
 	case ast.KindEnum:
 		return jenny.formatEnum(pkg, object.Name, object.Type.AsEnum())
-	case ast.KindDisjunction:
-	case ast.KindIntersection:
 	case ast.KindRef:
+		// TODO
+	case ast.KindMap:
+		// TODO
+	case ast.KindScalar:
+		// TODO
 	}
 
 	return nil, nil
@@ -109,25 +112,33 @@ func (jenny RawTypes) formatEnum(pkg string, name string, enum ast.EnumType) ([]
 func (jenny RawTypes) formatStruct(pkg string, name string, def ast.StructType) ([]byte, error) {
 	var buffer strings.Builder
 
-	fields := make([]Field, len(def.Fields))
-
-	for i, field := range def.Fields {
-		fields[i] = Field{
-			Name: field.Name,
-			Type: jenny.typeFormatter.formatFieldType(field.Type),
-		}
-	}
-
-	err := templates.ExecuteTemplate(&buffer, "struct.tmpl", ObjectTemplate{
-		Package: pkg,
-		Imports: jenny.imports,
-		Name:    name,
-		Fields:  fields,
-	})
-
-	if err != nil {
+	if err := templates.ExecuteTemplate(&buffer, "class.tmpl", jenny.formatInnerStruct(pkg, name, def)); err != nil {
 		return nil, err
 	}
 
 	return []byte(buffer.String()), nil
+}
+
+func (jenny RawTypes) formatInnerStruct(pkg string, name string, def ast.StructType) ObjectTemplate {
+	fields := make([]Field, 0)
+	nestedStructs := make([]ObjectTemplate, 0)
+
+	for _, field := range def.Fields {
+		if field.Type.Kind == ast.KindStruct {
+			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Type.AsStruct()))
+		} else {
+			fields = append(fields, Field{
+				Name: field.Name,
+				Type: jenny.typeFormatter.formatFieldType(field.Type),
+			})
+		}
+	}
+
+	return ObjectTemplate{
+		Package:      pkg,
+		Imports:      jenny.imports,
+		Name:         tools.UpperCamelCase(name),
+		Fields:       fields,
+		InnerClasses: nestedStructs,
+	}
 }

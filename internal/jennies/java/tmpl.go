@@ -52,7 +52,8 @@ type ObjectTemplate struct {
 	Imports fmt.Stringer
 	Name    string
 
-	Fields []Field
+	Fields       []Field
+	InnerClasses []ObjectTemplate
 }
 
 type Field struct {
