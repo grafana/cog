@@ -1,0 +1,9 @@
+package {{ .Package }};
+
+{{ .Imports }}
+
+public class {{ .Name }} {
+{{- range .Fields }}
+    private {{ .Type }} {{ .Name }};
+{{- end }}
+}
