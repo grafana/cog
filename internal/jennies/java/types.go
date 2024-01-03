@@ -11,9 +11,10 @@ type typeFormatter struct {
 	context       common.Context
 }
 
-func defaultTypeFormatter(packageMapper func(pkg string, class string) string) *typeFormatter {
+func defaultTypeFormatter(ctx common.Context, packageMapper func(pkg string, class string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
+		context:       ctx,
 	}
 }
 
@@ -33,6 +34,10 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	tf.packageMapper(def.ReferredPkg, def.ReferredType)
+	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	if object.Type.Kind == ast.KindScalar {
+		return formatScalarType(object.Type.AsScalar())
+	}
 	return def.ReferredType
 }
 

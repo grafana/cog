@@ -23,8 +23,19 @@ func (jenny RawTypes) JennyName() string {
 
 func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0)
+	jenny.imports = NewImportMap()
 
 	for _, schema := range context.Schemas {
+		packageMapper := func(pkg string, class string) string {
+			if pkg == schema.Package {
+				return ""
+			}
+
+			return jenny.imports.Add(class, pkg)
+		}
+
+		jenny.typeFormatter = defaultTypeFormatter(context, packageMapper)
+
 		output, err := jenny.genFilesForSchema(schema)
 		if err != nil {
 			return nil, err
@@ -37,19 +48,16 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 }
 
 func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, error) {
-	files := make(codejen.Files, len(schema.Objects))
-	packageMapper := func(pkg string, class string) string {
-		if pkg == schema.Package {
-			return ""
+	files := make(codejen.Files, 0)
+	scalars := make(map[string]ast.ScalarType)
+
+	for _, object := range schema.Objects {
+		jenny.imports = NewImportMap()
+		if object.Type.Kind == ast.KindScalar {
+			scalars[object.Name] = object.Type.AsScalar()
+			continue
 		}
 
-		return jenny.imports.Add(class, pkg)
-	}
-
-	jenny.typeFormatter = defaultTypeFormatter(packageMapper)
-
-	for i, object := range schema.Objects {
-		jenny.imports = NewImportMap()
 		output, err := jenny.generateSchema(schema.Package, object)
 		if err != nil {
 			return nil, err
@@ -60,7 +68,17 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)),
 		)
 
-		files[i] = *codejen.NewFile(filename, output, jenny)
+		files = append(files, *codejen.NewFile(filename, output, jenny))
+	}
+
+	if len(scalars) > 0 {
+		output, err := jenny.formatScalars(schema.Package, scalars)
+		if err != nil {
+			return nil, err
+		}
+
+		filename := filepath.Join(strings.ToLower(schema.Package), "Constants.java")
+		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
 	return files, nil
@@ -75,8 +93,6 @@ func (jenny RawTypes) generateSchema(pkg string, object ast.Object) ([]byte, err
 	case ast.KindRef:
 		// TODO
 	case ast.KindMap:
-		// TODO
-	case ast.KindScalar:
 		// TODO
 	}
 
@@ -145,4 +161,29 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, def ast.StructT
 		Fields:       fields,
 		InnerClasses: nestedStructs,
 	}
+}
+
+func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarType) ([]byte, error) {
+	var buffer strings.Builder
+
+	constants := make([]Constant, 0)
+	for name, scalar := range scalars {
+		if scalar.IsConcrete() {
+			constants = append(constants, Constant{
+				Name:  name,
+				Type:  formatScalarType(scalar),
+				Value: scalar.Value,
+			})
+		}
+	}
+
+	if err := templates.ExecuteTemplate(&buffer, "constants.tmpl", ConstantTemplate{
+		Package:   pkg,
+		Name:      "Constants",
+		Constants: constants,
+	}); err != nil {
+		return nil, err
+	}
+
+	return []byte(buffer.String()), nil
 }

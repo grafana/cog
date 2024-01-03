@@ -60,3 +60,15 @@ type Field struct {
 	Name string
 	Type string
 }
+
+type ConstantTemplate struct {
+	Package   string
+	Name      string
+	Constants []Constant
+}
+
+type Constant struct {
+	Name  string
+	Type  string
+	Value any
+}

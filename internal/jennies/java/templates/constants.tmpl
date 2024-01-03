@@ -1,0 +1,7 @@
+package {{ .Package }};
+
+public class {{ .Name }} {
+    {{- range .Constants }}
+    public static final {{ .Type }} {{ .Name }} = {{ printf "%#v" .Value }};
+    {{- end }}
+}
