@@ -38,8 +38,6 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 
 func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, error) {
 	files := make(codejen.Files, len(schema.Objects))
-
-	jenny.imports = NewImportMap()
 	packageMapper := func(pkg string, class string) string {
 		if pkg == schema.Package {
 			return ""
@@ -51,6 +49,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 	jenny.typeFormatter = defaultTypeFormatter(packageMapper)
 
 	for i, object := range schema.Objects {
+		jenny.imports = NewImportMap()
 		output, err := jenny.generateSchema(schema.Package, object)
 		if err != nil {
 			return nil, err
@@ -95,11 +94,16 @@ func (jenny RawTypes) formatEnum(pkg string, name string, enum ast.EnumType) ([]
 		}
 	}
 
+	enumType := "Integer"
+	if enum.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
+		enumType = "String"
+	}
+
 	err := templates.ExecuteTemplate(&buffer, "enum.tmpl", EnumTemplate{
 		Package: pkg,
 		Name:    name,
 		Values:  values,
-		Type:    formatScalarType(enum.Values[0].Type.AsScalar()),
+		Type:    enumType,
 	})
 
 	if err != nil {

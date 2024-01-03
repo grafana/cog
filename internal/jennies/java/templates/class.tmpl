@@ -1,4 +1,24 @@
 package {{ .Package }};
 
 {{ .Imports }}
-public {{- template "inner_class" . }}
+public class {{ .Name }} {
+    {{- range .Fields }}
+    private {{ .Type }} {{ .Name }};
+    {{- end }}
+
+    {{- range .InnerClasses }}
+    {{- template "inner_class" . }}
+    {{- end }}
+}
+
+{{- define "inner_class" }}
+class {{ .Name }} {
+    {{- range .Fields }}
+    private {{ .Type }} {{ .Name }};
+    {{- end }}
+
+    {{- range .InnerClasses }}
+    {{- template "inner_class" . }}
+    {{- end }}
+}
+{{- end }}

@@ -3,7 +3,7 @@ package {{ .Package }};
 public enum {{ .Name }} {
     {{- range $i, $val := .Values }}
     {{- if gt $i 0 }}, {{- end }}
-    {{ $val.Name }}("{{ $val.Value }}")
+    {{ $val.Name }}({{ printf "%#v" $val.Value }})
     {{- if lastItem $i $.Values }}; {{- end }}
     {{- end }}
 
