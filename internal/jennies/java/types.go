@@ -11,11 +11,13 @@ type typeFormatter struct {
 	context       common.Context
 }
 
-func defaultTypeFormatter(ctx common.Context, packageMapper func(pkg string, class string) string) *typeFormatter {
-	return &typeFormatter{
-		packageMapper: packageMapper,
-		context:       ctx,
-	}
+func createFormatter(ctx common.Context) *typeFormatter {
+	return &typeFormatter{context: ctx}
+}
+
+func (tf *typeFormatter) withPackageMapper(packageMapper func(pkg string, class string) string) *typeFormatter {
+	tf.packageMapper = packageMapper
+	return tf
 }
 
 func (tf *typeFormatter) formatFieldType(def ast.Type) string {
@@ -35,14 +37,37 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	tf.packageMapper(def.ReferredPkg, def.ReferredType)
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
-	if object.Type.Kind == ast.KindScalar {
+	switch object.Type.Kind {
+	case ast.KindScalar:
 		return formatScalarType(object.Type.AsScalar())
+	case ast.KindMap:
+		return tf.formatMap(object.Type.AsMap())
+	default:
+		return def.ReferredType
 	}
-	return def.ReferredType
 }
 
 func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
 	return fmt.Sprintf("%s[]", tf.formatFieldType(def.ValueType))
+}
+
+func (tf *typeFormatter) formatMap(def ast.MapType) string {
+	mapType := "unknown"
+	switch def.ValueType.Kind {
+	case ast.KindRef:
+		ref := def.ValueType.AsRef()
+		tf.packageMapper(ref.ReferredPkg, ref.ReferredType)
+		tf.packageMapper("java.util", "Map")
+		mapType = ref.ReferredType
+	case ast.KindScalar:
+		mapType = formatScalarType(def.ValueType.AsScalar())
+	case ast.KindMap:
+		mapType = tf.formatMap(def.ValueType.AsMap())
+	case ast.KindArray:
+		mapType = tf.formatArray(def.ValueType.AsArray())
+	}
+
+	return fmt.Sprintf("Map<String, %s>", mapType)
 }
 
 func formatScalarType(def ast.ScalarType) string {

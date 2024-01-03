@@ -51,6 +51,7 @@ type ObjectTemplate struct {
 	Package string
 	Imports fmt.Stringer
 	Name    string
+	Extends []string
 
 	Fields       []Field
 	InnerClasses []ObjectTemplate

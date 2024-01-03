@@ -24,18 +24,9 @@ func (jenny RawTypes) JennyName() string {
 func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0)
 	jenny.imports = NewImportMap()
+	jenny.typeFormatter = createFormatter(context)
 
 	for _, schema := range context.Schemas {
-		packageMapper := func(pkg string, class string) string {
-			if pkg == schema.Package {
-				return ""
-			}
-
-			return jenny.imports.Add(class, pkg)
-		}
-
-		jenny.typeFormatter = defaultTypeFormatter(context, packageMapper)
-
 		output, err := jenny.genFilesForSchema(schema)
 		if err != nil {
 			return nil, err
@@ -51,9 +42,23 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 	files := make(codejen.Files, 0)
 	scalars := make(map[string]ast.ScalarType)
 
+	packageMapper := func(pkg string, class string) string {
+		if pkg == schema.Package {
+			return ""
+		}
+
+		fmt.Println(class)
+		return jenny.imports.Add(class, pkg)
+	}
+
+	jenny.typeFormatter = jenny.typeFormatter.withPackageMapper(packageMapper)
+
 	for _, object := range schema.Objects {
 		jenny.imports = NewImportMap()
-		if object.Type.Kind == ast.KindScalar {
+		if object.Type.IsMap() {
+			continue
+		}
+		if object.Type.IsScalar() {
 			scalars[object.Name] = object.Type.AsScalar()
 			continue
 		}
@@ -91,9 +96,7 @@ func (jenny RawTypes) generateSchema(pkg string, object ast.Object) ([]byte, err
 	case ast.KindEnum:
 		return jenny.formatEnum(pkg, object.Name, object.Type.AsEnum())
 	case ast.KindRef:
-		// TODO
-	case ast.KindMap:
-		// TODO
+		return jenny.formatReference(pkg, object.Name, object.Type.AsRef())
 	}
 
 	return nil, nil
@@ -154,6 +157,7 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, def ast.StructT
 		}
 	}
 
+	fmt.Printf("NAME: %s, IMPORTS: %v\n", name, jenny.imports)
 	return ObjectTemplate{
 		Package:      pkg,
 		Imports:      jenny.imports,
@@ -181,6 +185,22 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 		Package:   pkg,
 		Name:      "Constants",
 		Constants: constants,
+	}); err != nil {
+		return nil, err
+	}
+
+	return []byte(buffer.String()), nil
+}
+
+func (jenny RawTypes) formatReference(pkg string, name string, ref ast.RefType) ([]byte, error) {
+	var buffer strings.Builder
+	reference := jenny.typeFormatter.formatReference(ref)
+
+	if err := templates.ExecuteTemplate(&buffer, "class.tmpl", ObjectTemplate{
+		Package: pkg,
+		Imports: jenny.imports,
+		Name:    name,
+		Extends: []string{reference},
 	}); err != nil {
 		return nil, err
 	}
