@@ -65,6 +65,8 @@ func formatScalarType(def ast.ScalarType) string {
 		scalarType = "Double"
 	case ast.KindBool:
 		scalarType = "Boolean"
+	case ast.KindAny:
+		scalarType = "Object"
 	}
 
 	return scalarType
