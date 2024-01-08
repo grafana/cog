@@ -36,10 +36,11 @@ func functions() template.FuncMap {
 }
 
 type EnumTemplate struct {
-	Package string
-	Name    string
-	Values  []EnumValue
-	Type    string
+	Package  string
+	Name     string
+	Values   []EnumValue
+	Type     string
+	Comments []string
 }
 
 type EnumValue struct {
@@ -47,21 +48,23 @@ type EnumValue struct {
 	Value any
 }
 
-type ObjectTemplate struct {
-	Package string
-	Imports fmt.Stringer
-	Name    string
-	Extends []string
+type ClassTemplate struct {
+	Package  string
+	Imports  fmt.Stringer
+	Name     string
+	Extends  []string
+	Comments []string
 
 	Fields       []Field
-	InnerClasses []ObjectTemplate
+	InnerClasses []ClassTemplate
 
 	GenGettersAndSetters bool
 }
 
 type Field struct {
-	Name string
-	Type string
+	Name     string
+	Type     string
+	Comments []string
 }
 
 type ConstantTemplate struct {

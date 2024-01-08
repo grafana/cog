@@ -89,22 +89,24 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 }
 
 func (jenny RawTypes) generateSchema(pkg string, object ast.Object) ([]byte, error) {
+
 	switch object.Type.Kind {
 	case ast.KindStruct:
-		return jenny.formatStruct(pkg, object.Name, object.Type.AsStruct())
+		return jenny.formatStruct(pkg, object)
 	case ast.KindEnum:
-		return jenny.formatEnum(pkg, object.Name, object.Type.AsEnum())
+		return jenny.formatEnum(pkg, object)
 	case ast.KindRef:
-		return jenny.formatReference(pkg, object.Name, object.Type.AsRef())
+		return jenny.formatReference(pkg, object)
 	}
 
 	return nil, nil
 }
 
-func (jenny RawTypes) formatEnum(pkg string, name string, enum ast.EnumType) ([]byte, error) {
+func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
-	values := make([]EnumValue, len(enum.Values))
 
+	enum := object.Type.AsEnum()
+	values := make([]EnumValue, len(enum.Values))
 	for i, value := range enum.Values {
 		values[i] = EnumValue{
 			Name:  strings.ToUpper(value.Name),
@@ -118,10 +120,11 @@ func (jenny RawTypes) formatEnum(pkg string, name string, enum ast.EnumType) ([]
 	}
 
 	err := templates.ExecuteTemplate(&buffer, "enum.tmpl", EnumTemplate{
-		Package: pkg,
-		Name:    name,
-		Values:  values,
-		Type:    enumType,
+		Package:  pkg,
+		Name:     object.Name,
+		Values:   values,
+		Type:     enumType,
+		Comments: object.Comments,
 	})
 
 	if err != nil {
@@ -131,38 +134,40 @@ func (jenny RawTypes) formatEnum(pkg string, name string, enum ast.EnumType) ([]
 	return []byte(buffer.String()), nil
 }
 
-func (jenny RawTypes) formatStruct(pkg string, name string, def ast.StructType) ([]byte, error) {
+func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
 
-	if err := templates.ExecuteTemplate(&buffer, "class.tmpl", jenny.formatInnerStruct(pkg, name, def)); err != nil {
+	if err := templates.ExecuteTemplate(&buffer, "class.tmpl", jenny.formatInnerStruct(pkg, object.Name, object.Comments, object.Type.AsStruct())); err != nil {
 		return nil, err
 	}
 
 	return []byte(buffer.String()), nil
 }
 
-func (jenny RawTypes) formatInnerStruct(pkg string, name string, def ast.StructType) ObjectTemplate {
+func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []string, def ast.StructType) ClassTemplate {
 	fields := make([]Field, 0)
-	nestedStructs := make([]ObjectTemplate, 0)
+	nestedStructs := make([]ClassTemplate, 0)
 
 	for _, field := range def.Fields {
 		if field.Type.Kind == ast.KindStruct {
-			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Type.AsStruct()))
+			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Comments, field.Type.AsStruct()))
 		} else {
 			fields = append(fields, Field{
-				Name: field.Name,
-				Type: jenny.typeFormatter.formatFieldType(field.Type),
+				Name:     field.Name,
+				Type:     jenny.typeFormatter.formatFieldType(field.Type),
+				Comments: field.Comments,
 			})
 		}
 	}
 
-	return ObjectTemplate{
+	return ClassTemplate{
 		Package:              pkg,
 		Imports:              jenny.imports,
 		Name:                 tools.UpperCamelCase(name),
 		Fields:               fields,
 		InnerClasses:         nestedStructs,
 		GenGettersAndSetters: jenny.config.GenGettersAndSetters,
+		Comments:             comments,
 	}
 }
 
@@ -191,15 +196,16 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 	return []byte(buffer.String()), nil
 }
 
-func (jenny RawTypes) formatReference(pkg string, name string, ref ast.RefType) ([]byte, error) {
+func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
-	reference := jenny.typeFormatter.formatReference(ref)
+	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
-	if err := templates.ExecuteTemplate(&buffer, "class.tmpl", ObjectTemplate{
-		Package: pkg,
-		Imports: jenny.imports,
-		Name:    name,
-		Extends: []string{reference},
+	if err := templates.ExecuteTemplate(&buffer, "class.tmpl", ClassTemplate{
+		Package:  pkg,
+		Imports:  jenny.imports,
+		Name:     object.Name,
+		Extends:  []string{reference},
+		Comments: object.Comments,
 	}); err != nil {
 		return nil, err
 	}

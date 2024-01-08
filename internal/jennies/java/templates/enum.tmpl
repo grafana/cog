@@ -1,5 +1,6 @@
 package {{ .Package }};
 
+{{ range .Comments }}// {{ . }}{{ end }}
 public enum {{ .Name }} {
     {{- range $i, $val := .Values }}
     {{- if gt $i 0 }}, {{- end }}

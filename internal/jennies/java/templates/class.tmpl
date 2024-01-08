@@ -1,6 +1,8 @@
 package {{ .Package }};
 
-{{ .Imports }}
+{{- .Imports }}
+
+{{ range .Comments }}// {{ . }}{{ end }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }} {
     {{- template "types" dict "Fields" .Fields "GenGettersAndSetters" .GenGettersAndSetters }}
 
@@ -10,6 +12,7 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
 }
 
 {{- define "inner_class" }}
+    {{ range .Comments }}// {{ . }}{{ end }}
     class {{ .Name }} {
         {{- template "types" dict "Fields" .Fields "GenGettersAndSetters" .GenGettersAndSetters }}
 
@@ -22,6 +25,7 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
 
 {{- define "types" }}
     {{- range .Fields }}
+    {{ range .Comments }}// {{ . }}{{ end }}
     private {{ .Type }} {{ .Name }};
     {{- end }}
     {{ if .GenGettersAndSetters }}
@@ -31,7 +35,7 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     }
     {{ end }}
     {{- range .Fields }}
-    public {{ .Type }} get{{ .Name }}() {
+    public {{ .Type }} get{{ .Name | camelcase }}() {
         return {{ .Name }};
     }
     {{ end }}
