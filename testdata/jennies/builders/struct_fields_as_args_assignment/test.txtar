@@ -1,4 +1,4 @@
-# Envelope assignment.
+# Struct fields as arguments, with init safeguards but no envelope
 -- builders_context.json --
 {
   "Schemas": [
