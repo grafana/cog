@@ -11,9 +11,9 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
-var veneersFS embed.FS
+var templatesFS embed.FS
 
 //nolint:gochecknoinits
 func init() {
@@ -24,7 +24,7 @@ func init() {
 		Funcs(cogtemplate.Helpers(base)).
 		Funcs(functions())
 
-	templates = template.Must(cogtemplate.FindAndParseTemplates(veneersFS, base, "templates"))
+	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
 }
 
 func functions() template.FuncMap {

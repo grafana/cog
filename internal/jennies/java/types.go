@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type typeFormatter struct {
@@ -29,6 +30,7 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 	case ast.KindArray:
 		return tf.formatArray(def.AsArray())
 	case ast.KindComposableSlot:
+		return tf.formatComposable(def.AsComposableSlot())
 	}
 
 	return "unknown"
@@ -68,6 +70,12 @@ func (tf *typeFormatter) formatMap(def ast.MapType) string {
 	}
 
 	return fmt.Sprintf("Map<String, %s>", mapType)
+}
+
+func (tf *typeFormatter) formatComposable(def ast.ComposableSlotType) string {
+	variant := tools.UpperCamelCase(string(def.Variant))
+	tf.packageMapper("cog.variants", variant)
+	return variant
 }
 
 func formatScalarType(def ast.ScalarType) string {

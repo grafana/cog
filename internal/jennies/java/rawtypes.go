@@ -137,7 +137,7 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
 
-	if err := templates.ExecuteTemplate(&buffer, "class.tmpl", jenny.formatInnerStruct(pkg, object.Name, object.Comments, object.Type.AsStruct())); err != nil {
+	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", jenny.formatInnerStruct(pkg, object.Name, object.Comments, object.Type.AsStruct())); err != nil {
 		return nil, err
 	}
 
@@ -185,7 +185,7 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 		}
 	}
 
-	if err := templates.ExecuteTemplate(&buffer, "constants.tmpl", ConstantTemplate{
+	if err := templates.ExecuteTemplate(&buffer, "types/constants.tmpl", ConstantTemplate{
 		Package:   pkg,
 		Name:      "Constants",
 		Constants: constants,
@@ -200,7 +200,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	var buffer strings.Builder
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
-	if err := templates.ExecuteTemplate(&buffer, "class.tmpl", ClassTemplate{
+	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  pkg,
 		Imports:  jenny.imports,
 		Name:     object.Name,
