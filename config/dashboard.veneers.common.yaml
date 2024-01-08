@@ -23,6 +23,11 @@ builders:
       by_object: RowPanel
       as: Row
 
+  # TimePickerConfig → TimePicker
+  - rename:
+      by_name: TimePickerConfig
+      as: TimePicker
+
   - properties:
       by_object: Dashboard
       set:
