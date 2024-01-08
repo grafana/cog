@@ -32,17 +32,17 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
-    private {{ .Type }} {{ .Name }};
+    private {{ .Type }} {{ .Name | escapeVar}};
     {{- end }}
     {{ if .GenGettersAndSetters }}
     {{- range .Fields }}
-    public void set{{ .Name | camelcase }}({{ .Type }} {{ .Name }}) {
-        this.{{ .Name }} = {{ .Name }};
+    public void set{{ .Name | camelcase }}({{ .Type }} {{ .Name | escapeVar }}) {
+        this.{{ .Name | escapeVar }} = {{ .Name | escapeVar }};
     }
     {{ end }}
     {{- range .Fields }}
     public {{ .Type }} get{{ .Name | camelcase }}() {
-        return {{ .Name }};
+        return {{ .Name | escapeVar }};
     }
     {{ end }}
     {{- end }}

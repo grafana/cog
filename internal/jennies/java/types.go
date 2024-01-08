@@ -31,13 +31,19 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 		return tf.formatArray(def.AsArray())
 	case ast.KindComposableSlot:
 		return tf.formatComposable(def.AsComposableSlot())
+	case ast.KindMap:
+		return tf.formatMap(def.AsMap())
+	case ast.KindStruct:
+		// TODO: Manage anonymous structs
+		return "Object"
+	default:
+		fmt.Println(def.Kind)
 	}
 
 	return "unknown"
 }
 
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
-	tf.packageMapper(def.ReferredPkg, def.ReferredType)
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	switch object.Type.Kind {
 	case ast.KindScalar:
@@ -45,11 +51,13 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	case ast.KindMap:
 		return tf.formatMap(object.Type.AsMap())
 	default:
+		tf.packageMapper(def.ReferredPkg, def.ReferredType)
 		return def.ReferredType
 	}
 }
 
 func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
+
 	return fmt.Sprintf("%s[]", tf.formatFieldType(def.ValueType))
 }
 

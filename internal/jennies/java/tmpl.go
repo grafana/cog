@@ -32,6 +32,9 @@ func functions() template.FuncMap {
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
+		"escapeVar": func(varName string) string {
+			return escapeVarName(varName)
+		},
 	}
 }
 
