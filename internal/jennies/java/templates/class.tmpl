@@ -2,9 +2,7 @@ package {{ .Package }};
 
 {{ .Imports }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }} {
-    {{- range .Fields }}
-    private {{ .Type }} {{ .Name }};
-    {{- end }}
+    {{- template "types" dict "Fields" .Fields "GenGettersAndSetters" .GenGettersAndSetters }}
 
     {{- range .InnerClasses }}
     {{- template "inner_class" . }}
@@ -12,13 +10,30 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
 }
 
 {{- define "inner_class" }}
-class {{ .Name }} {
+    class {{ .Name }} {
+        {{- template "types" dict "Fields" .Fields "GenGettersAndSetters" .GenGettersAndSetters }}
+
+        {{- range .InnerClasses }}
+        {{- template "inner_class" . }}
+        {{- end }}
+    }
+{{- end }}
+
+
+{{- define "types" }}
     {{- range .Fields }}
     private {{ .Type }} {{ .Name }};
     {{- end }}
-
-    {{- range .InnerClasses }}
-    {{- template "inner_class" . }}
+    {{ if .GenGettersAndSetters }}
+    {{- range .Fields }}
+    public void set{{ .Name | camelcase }}({{ .Type }} {{ .Name }}) {
+        this.{{ .Name }} = {{ .Name }};
+    }
+    {{ end }}
+    {{- range .Fields }}
+    public {{ .Type }} get{{ .Name }}() {
+        return {{ .Name }};
+    }
+    {{ end }}
     {{- end }}
-}
 {{- end }}

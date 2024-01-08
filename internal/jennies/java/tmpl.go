@@ -55,6 +55,8 @@ type ObjectTemplate struct {
 
 	Fields       []Field
 	InnerClasses []ObjectTemplate
+
+	GenGettersAndSetters bool
 }
 
 type Field struct {

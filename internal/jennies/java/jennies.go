@@ -11,6 +11,8 @@ const LanguageRef = "java"
 
 type Config struct {
 	Debug bool
+
+	GenGettersAndSetters bool
 }
 
 type Language struct {
@@ -28,7 +30,8 @@ func New() *Language {
 	return &Language{config: Config{}}
 }
 
-func (language *Language) RegisterCliFlags(_ *cobra.Command) {
+func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
+	cmd.Flags().BoolVar(&language.config.GenGettersAndSetters, "getters-and-setters", true, "Generate getters and setters for types")
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {

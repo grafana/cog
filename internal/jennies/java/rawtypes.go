@@ -47,7 +47,6 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			return ""
 		}
 
-		fmt.Println(class)
 		return jenny.imports.Add(class, pkg)
 	}
 
@@ -157,13 +156,13 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, def ast.StructT
 		}
 	}
 
-	fmt.Printf("NAME: %s, IMPORTS: %v\n", name, jenny.imports)
 	return ObjectTemplate{
-		Package:      pkg,
-		Imports:      jenny.imports,
-		Name:         tools.UpperCamelCase(name),
-		Fields:       fields,
-		InnerClasses: nestedStructs,
+		Package:              pkg,
+		Imports:              jenny.imports,
+		Name:                 tools.UpperCamelCase(name),
+		Fields:               fields,
+		InnerClasses:         nestedStructs,
+		GenGettersAndSetters: jenny.config.GenGettersAndSetters,
 	}
 }
 
