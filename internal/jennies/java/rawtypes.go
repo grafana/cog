@@ -119,7 +119,7 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 		enumType = "String"
 	}
 
-	err := templates.ExecuteTemplate(&buffer, "enum.tmpl", EnumTemplate{
+	err := templates.ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
 		Package:  pkg,
 		Name:     object.Name,
 		Values:   values,
