@@ -212,4 +212,81 @@ const (
 	DashboardCursorSyncTooltip DashboardCursorSync = 2
 )
 
+-- out/jennies/JavaRawTypes --
+== enums/Operator.java
+package enums;
 
+
+// This is a very interesting string enum.
+public enum Operator {
+    GREATERTHAN(">"),
+    LESSTHAN("<");
+
+    private String value;
+
+    private Operator(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+}
+== enums/TableSortOrder.java
+package enums;
+
+
+public enum TableSortOrder {
+    ASC("asc"),
+    DESC("desc");
+
+    private String value;
+
+    private TableSortOrder(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+}
+== enums/LogsSortOrder.java
+package enums;
+
+
+public enum LogsSortOrder {
+    ASC("time_asc"),
+    DESC("time_desc");
+
+    private String value;
+
+    private LogsSortOrder(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+}
+== enums/DashboardCursorSync.java
+package enums;
+
+
+// 0 for no shared crosshair or tooltip (default).
+// 1 for shared crosshair.
+// 2 for shared crosshair AND shared tooltip.
+public enum DashboardCursorSync {
+    OFF(0),
+    CROSSHAIR(1),
+    TOOLTIP(2);
+
+    private Integer value;
+
+    private DashboardCursorSync(Integer value) {
+        this.value = value;
+    }
+
+    public Integer getValue() {
+        return value;
+    }
+}

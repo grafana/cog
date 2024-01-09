@@ -209,3 +209,10 @@ type ScalarTypeInt32 int32
 
 type ScalarTypeInt64 int64
 
+-- out/jennies/JavaRawTypes --
+== scalars/Constants.java
+package scalars;
+
+public class Constants {
+    public static final String constTypeString = "foo";
+}

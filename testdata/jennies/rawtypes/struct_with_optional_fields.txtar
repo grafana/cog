@@ -156,4 +156,45 @@ const (
 	SomeStructOperatorLessThan SomeStructOperator = "<"
 )
 
+-- out/jennies/JavaRawTypes --
+== struct_optional_fields/SomeStruct.java
+package struct_optional_fields;
 
+
+public class SomeStruct {
+    private SomeOtherStruct FieldRef;
+    private String FieldString;
+    private SomeStructOperator Operator;
+    private String[] FieldArrayOfStrings;
+    
+    class FieldAnonymousStruct {
+    private Object FieldAny;
+    
+    }
+}
+== struct_optional_fields/SomeOtherStruct.java
+package struct_optional_fields;
+
+
+public class SomeOtherStruct {
+    private Object FieldAny;
+    
+}
+== struct_optional_fields/SomeStructOperator.java
+package struct_optional_fields;
+
+
+public enum SomeStructOperator {
+    GREATERTHAN(">"),
+    LESSTHAN("<");
+
+    private String value;
+
+    private SomeStructOperator(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+}

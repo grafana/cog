@@ -105,3 +105,15 @@ type ArrayOfRefs []SomeStruct
 
 type ArrayOfArrayOfNumbers [][]int64
 
+-- out/jennies/JavaRawTypes --
+== arrays/ArrayOfStrings.java
+== arrays/SomeStruct.java
+package arrays;
+
+
+public class SomeStruct {
+    private Object FieldAny;
+    
+}
+== arrays/ArrayOfRefs.java
+== arrays/ArrayOfArrayOfNumbers.java

@@ -91,3 +91,16 @@ type SomeStruct struct {
 	FieldInt32 int32 `json:"FieldInt32"`
 }
 
+-- out/jennies/JavaRawTypes --
+== defaults/SomeStruct.java
+package defaults;
+
+
+public class SomeStruct {
+    private Boolean fieldBool;
+    private String fieldString;
+    private String FieldStringWithConstantValue;
+    private Float FieldFloat32;
+    private Integer FieldInt32;
+    
+}

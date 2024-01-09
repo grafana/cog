@@ -133,6 +133,14 @@ func (t Type) IsEnum() bool {
 	return t.Kind == KindEnum
 }
 
+func (t Type) IsMap() bool {
+	return t.Kind == KindMap
+}
+
+func (t Type) IsScalar() bool {
+	return t.Kind == KindScalar
+}
+
 func (t Type) IsStructGeneratedFromDisjunction() bool {
 	if t.Kind != KindStruct {
 		return false
