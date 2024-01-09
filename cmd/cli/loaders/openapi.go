@@ -1,8 +1,6 @@
 package loaders
 
 import (
-	"path/filepath"
-
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/openapi"
 )
@@ -10,9 +8,8 @@ import (
 func openapiLoader(opts Options) ([]*ast.Schema, error) {
 	allSchemas := make([]*ast.Schema, 0, len(opts.OpenAPIEntrypoints))
 	for _, entrypoint := range opts.OpenAPIEntrypoints {
-		pkg := filepath.Base(filepath.Dir(entrypoint))
 		schemaAst, err := openapi.GenerateAST(entrypoint, openapi.Config{
-			Package:        pkg,
+			Package:        guessPackageFromFilename(entrypoint),
 			SchemaMetadata: ast.SchemaMeta{
 				// TODO: extract these from somewhere
 			},
