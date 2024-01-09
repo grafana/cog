@@ -16,9 +16,6 @@ var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mappin
 // DisjunctionToType transforms disjunction into a struct, mapping disjunction branches to
 // an optional and nullable field in that struct.
 //
-// This compiler pass also simplifies disjunction of two branches, where one is `null`. For those,
-// it transforms `type | null` into `*type` (optional, nullable reference to `type`).
-//
 // Example:
 //
 //		```
@@ -38,7 +35,7 @@ var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mappin
 //
 // Will become:
 //
-//	```
+//		```
 //		SomeType: {
 //			type: "some-type"
 //	 	}
@@ -59,7 +56,7 @@ var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mappin
 //		OtherStruct: {
 //			bar: SomeTypeOrSomeOtherType
 //		}
-//	```
+//		```
 //
 // Note: for disjunctions of `Ref`s, the pass attempts to infer a discriminator field and mapping. See https://swagger.io/docs/specification/data-models/inheritance-and-polymorphism/
 type DisjunctionToType struct {
@@ -196,14 +193,6 @@ func (pass *DisjunctionToType) processStruct(schema *ast.Schema, def ast.Type) (
 
 func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	disjunction := def.AsDisjunction()
-
-	// Ex: type | null
-	if len(disjunction.Branches) == 2 && disjunction.Branches.HasNullType() {
-		finalType := disjunction.Branches.NonNullTypes()[0]
-		finalType.Nullable = true
-
-		return finalType, nil
-	}
 
 	// Ex: "some concrete value" | "some other value" | string
 	if pass.hasOnlySingleTypeScalars(schema, disjunction) {

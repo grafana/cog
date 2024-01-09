@@ -69,7 +69,9 @@ function run_codegen() {
     --package-templates ./package_templates \
     --templates-data "${templates_data}" \
     --go-mod \
-    --go-package-root github.com/grafana/grafana-foundation-sdk/go
+    --go-package-root github.com/grafana/grafana-foundation-sdk/go \
+    --language go \
+    --language typescript
 }
 
 function gh_run() (

@@ -74,3 +74,16 @@ type RefToSomeStruct SomeStruct
 
 type RefToSomeStructFromOtherPackage otherpkg.SomeDistantStruct
 
+-- out/jennies/PythonRawTypes --
+== models/refs.py
+from ..models import otherpkg
+
+
+class SomeStruct:
+    FieldAny: object
+
+
+RefToSomeStruct = 'SomeStruct'
+
+
+RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct

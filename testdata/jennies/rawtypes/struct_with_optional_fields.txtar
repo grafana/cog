@@ -5,6 +5,7 @@
     "Objects": [
         {
             "Name": "SomeStruct",
+            "SelfRef": {"ReferredPkg": "struct_optional_fields", "ReferredType": "SomeStruct"},
             "Type": {
                 "Kind": "struct",
                 "Struct": {
@@ -91,6 +92,7 @@
 
         {
             "Name": "SomeOtherStruct",
+            "SelfRef": {"ReferredPkg": "struct_optional_fields", "ReferredType": "SomeOtherStruct"},
             "Type": {
                 "Kind": "struct",
                 "Struct": {
@@ -157,3 +159,22 @@ const (
 )
 
 
+-- out/jennies/PythonRawTypes --
+== models/struct_optional_fields.py
+import typing
+
+
+class StructOptionalFieldsSomeStructFieldAnonymousStruct:
+    FieldAny: object
+
+
+class SomeStruct:
+    FieldRef: typing.Optional['SomeOtherStruct']
+    FieldString: typing.Optional[str]
+    Operator: typing.Optional[typing.Literal[">", "<"]]
+    FieldArrayOfStrings: typing.Optional[list[str]]
+    FieldAnonymousStruct: typing.Optional['StructOptionalFieldsSomeStructFieldAnonymousStruct']
+
+
+class SomeOtherStruct:
+    FieldAny: object

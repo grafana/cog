@@ -35,58 +35,6 @@ func TestDisjunctionToType_WithNonDisjunctionObjects_HasNoImpact(t *testing.T) {
 	runPassOnObjects(t, &DisjunctionToType{}, objects, objects)
 }
 
-func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAnObject(t *testing.T) {
-	// Prepare test input
-	objects := []ast.Object{
-		ast.NewObject("test", "ScalarWithNull", ast.NewDisjunction([]ast.Type{
-			ast.String(),
-			ast.Null(),
-		})),
-		ast.NewObject("test", "RefWithNull", ast.NewDisjunction([]ast.Type{
-			ast.NewRef("test", "SomeType"),
-			ast.Null(),
-		})),
-	}
-
-	expectedObjects := []ast.Object{
-		ast.NewObject("test", "ScalarWithNull", ast.String(ast.Nullable())),
-		ast.NewObject("test", "RefWithNull", ast.NewRef("test", "SomeType", ast.Nullable())),
-	}
-
-	// Call the compiler pass
-	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
-}
-
-func TestDisjunctionToType_WithDisjunctionOfTypeAndNull_AsAStructField(t *testing.T) {
-	// Prepare test input
-	objects := []ast.Object{
-		ast.NewObject("test", "StructWithScalarWithNull", ast.NewStruct(
-			ast.NewStructField("Field", ast.NewDisjunction([]ast.Type{
-				ast.String(),
-				ast.Null(),
-			})),
-		)),
-		ast.NewObject("test", "StructWithRefWithNull", ast.NewStruct(
-			ast.NewStructField("Field", ast.NewDisjunction([]ast.Type{
-				ast.NewRef("test", "SomeType"),
-				ast.Null(),
-			})),
-		)),
-	}
-
-	expectedObjects := []ast.Object{
-		ast.NewObject("test", "StructWithScalarWithNull", ast.NewStruct(
-			ast.NewStructField("Field", ast.String(ast.Nullable())),
-		)),
-		ast.NewObject("test", "StructWithRefWithNull", ast.NewStruct(
-			ast.NewStructField("Field", ast.NewRef("test", "SomeType", ast.Nullable())),
-		)),
-	}
-
-	// Call the compiler pass
-	runPassOnObjects(t, &DisjunctionToType{}, objects, expectedObjects)
-}
-
 func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{

@@ -144,3 +144,20 @@ type MapOfStringToRef map[string]SomeStruct
 
 type MapOfStringToMapOfStringToBool map[string]map[string]bool
 
+-- out/jennies/PythonRawTypes --
+== models/maps.py
+# String to... something.
+MapOfStringToAny = dict[str, object]
+
+
+MapOfStringToString = dict[str, str]
+
+
+class SomeStruct:
+    FieldAny: object
+
+
+MapOfStringToRef = dict[str, 'SomeStruct']
+
+
+MapOfStringToMapOfStringToBool = dict[str, dict[str, bool]]

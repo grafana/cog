@@ -213,3 +213,33 @@ FieldAny any `json:"FieldAny"`
 	FieldInt64 int64 `json:"FieldInt64"`
 }
 
+-- out/jennies/PythonRawTypes --
+== models/basic.py
+import typing
+
+
+class SomeStruct:
+    """
+    This
+    is
+    a
+    comment
+    """
+
+    # Anything can go in there.
+    # Really, anything.
+    FieldAny: object
+    FieldBool: bool
+    FieldBytes: bytes
+    FieldString: str
+    FieldStringWithConstantValue: typing.Literal["auto"]
+    FieldFloat32: float
+    FieldFloat64: float
+    FieldUint8: int
+    FieldUint16: int
+    FieldUint32: int
+    FieldUint64: int
+    FieldInt8: int
+    FieldInt16: int
+    FieldInt32: int
+    FieldInt64: int
