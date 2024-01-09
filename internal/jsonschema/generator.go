@@ -71,6 +71,10 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 }
 
 func (g *generator) declareDefinition(definitionName string, schema *schemaparser.Schema) error {
+	if _, found := g.schema.LocateObject(definitionName); found {
+		return nil
+	}
+
 	def, err := g.walkDefinition(schema)
 	if err != nil {
 		return fmt.Errorf("%s: %w", definitionName, err)
