@@ -36,8 +36,6 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 	case ast.KindStruct:
 		// TODO: Manage anonymous structs
 		return "Object"
-	default:
-		fmt.Println(def.Kind)
 	}
 
 	return "unknown"
@@ -57,7 +55,6 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 }
 
 func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
-
 	return fmt.Sprintf("%s[]", tf.formatFieldType(def.ValueType))
 }
 
