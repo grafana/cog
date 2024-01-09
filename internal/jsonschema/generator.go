@@ -126,7 +126,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 
 	//nolint: gocritic
 	if len(schema.Types) > 1 {
-		def, err = g.walkDisjunction(schema)
+		def, err = g.walkScalarDisjunction(schema.Types)
 	} else if schema.Enum != nil {
 		def, err = g.walkEnum(schema)
 	} else {
@@ -143,7 +143,6 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 			def, err = g.walkNumber(schema)
 		case typeArray:
 			def, err = g.walkList(schema)
-
 		default:
 			return ast.Type{}, fmt.Errorf("unexpected schema with type '%s'", schema.Types[0])
 		}
@@ -152,9 +151,25 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 	return def, err
 }
 
-func (g *generator) walkDisjunction(_ *schemaparser.Schema) (ast.Type, error) {
-	// TODO: finish implementation
-	return ast.Type{}, nil
+func (g *generator) walkScalarDisjunction(types []string) (ast.Type, error) {
+	branches := make([]ast.Type, 0, len(types))
+
+	for _, typeName := range types {
+		switch typeName {
+		case typeNull:
+			branches = append(branches, ast.Null())
+		case typeBoolean:
+			branches = append(branches, ast.Bool())
+		case typeString:
+			branches = append(branches, ast.String())
+		case typeNumber, typeInteger:
+			branches = append(branches, ast.NewScalar(ast.KindInt64))
+		default:
+			return ast.Type{}, fmt.Errorf("unexpected type in scalar disjunction '%s'", typeName)
+		}
+	}
+
+	return ast.NewDisjunction(branches), nil
 }
 
 func (g *generator) walkDisjunctionBranches(branches []*schemaparser.Schema) ([]ast.Type, error) {
