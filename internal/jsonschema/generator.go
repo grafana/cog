@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -66,6 +67,11 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	}
+
+	// To ensure consistent outputs
+	sort.Slice(g.schema.Objects, func(i, j int) bool {
+		return g.schema.Objects[i].Name < g.schema.Objects[j].Name
+	})
 
 	return g.schema, nil
 }
@@ -306,11 +312,16 @@ func (g *generator) walkObject(schema *schemaparser.Schema) (ast.Type, error) {
 
 		fields = append(fields, ast.StructField{
 			Name:     name,
-			Comments: schemaComments(schema),
+			Comments: schemaComments(property),
 			Required: tools.ItemInList(name, schema.Required),
 			Type:     fieldDef,
 		})
 	}
+
+	// To ensure consistent outputs
+	sort.Slice(fields, func(i, j int) bool {
+		return fields[i].Name < fields[j].Name
+	})
 
 	return ast.NewStruct(fields...), nil
 }
