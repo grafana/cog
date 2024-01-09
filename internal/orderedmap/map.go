@@ -1,5 +1,9 @@
 package orderedmap
 
+import (
+	"sort"
+)
+
 type Pair[K, V any] struct {
 	Key   K
 	Value V
@@ -41,4 +45,21 @@ func (orderedMap *Map[K, V]) Iterate(callback func(key K, value V)) {
 	for _, key := range orderedMap.order {
 		callback(key, orderedMap.records[key])
 	}
+}
+
+func FromMap[K string, V any](original map[K]V) *Map[K, V] {
+	orderedMap := New[K, V]()
+
+	keys := make([]K, 0, len(original))
+	for key := range original {
+		keys = append(keys, key)
+	}
+
+	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
+
+	for _, k := range keys {
+		orderedMap.Set(k, original[k])
+	}
+
+	return orderedMap
 }

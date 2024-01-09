@@ -206,12 +206,18 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 
 	for _, field := range structType.AsStruct().Fields {
 		if field.Type.Default != nil {
-			if field.Type.Kind == ast.KindRef {
+			switch field.Type.Kind {
+			case ast.KindRef:
 				defaults.Set(field.Name, jenny.defaultValuesForReference(field.Type, packageMapper))
 				continue
+			case ast.KindStruct:
+				defaultMap := field.Type.Default.(map[string]interface{})
+				defaults.Set(field.Name, defaultValueForStructs(field.Type.AsStruct(), orderedmap.FromMap(defaultMap)))
+				continue
+			default:
+				defaults.Set(field.Name, field.Type.Default)
+				continue
 			}
-			defaults.Set(field.Name, field.Type.Default)
-			continue
 		}
 
 		if !field.Required {
@@ -242,7 +248,7 @@ func defaultValueForScalar(scalar ast.ScalarType) any {
 		return raw("{}")
 
 	case ast.KindBytes, ast.KindString:
-		return ""
+		return raw("\"\"")
 
 	case ast.KindFloat32, ast.KindFloat64:
 		return 0.0
@@ -297,9 +303,65 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 		return raw(jenny.typeFormatter.formatEnumValue(referredType, typeDef.Default))
 	}
 
+	if hasStructDefaults(referredType.Type, typeDef.Default) {
+		defaultMap := typeDef.Default.(map[string]interface{})
+		return defaultValueForStructs(referredType.Type.AsStruct(), orderedmap.FromMap(defaultMap))
+	}
+
 	if pkg != "" {
 		return raw(fmt.Sprintf("%s.default%s()", ref.ReferredPkg, ref.ReferredType))
 	}
 
 	return raw(fmt.Sprintf("default%s()", ref.ReferredType))
+}
+
+func defaultValueForStructs(def ast.StructType, m *orderedmap.Map[string, interface{}]) any {
+	var buffer strings.Builder
+
+	for _, f := range def.Fields {
+		if m.Has(f.Name) {
+			switch x := m.Get(f.Name).(type) {
+			case map[string]interface{}:
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForStructs(f.Type.AsStruct(), orderedmap.FromMap(x))))
+			case nil:
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue([]any{})))
+			default:
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue(x)))
+			}
+		} else if f.Required {
+			switch f.Type.Kind {
+			case ast.KindStruct:
+				buffer.WriteString(fmt.Sprintf("%s: { %v }, ", f.Name, defaultEmptyValuesForStructs(f.Type.AsStruct())))
+			case ast.KindArray:
+				buffer.WriteString(fmt.Sprintf("%s: []", f.Name))
+			case ast.KindScalar:
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar())))
+			}
+		}
+	}
+
+	return raw(fmt.Sprintf("{ %+v}", buffer.String()))
+}
+
+func defaultEmptyValuesForStructs(def ast.StructType) string {
+	var buffer strings.Builder
+
+	for _, f := range def.Fields {
+		switch f.Type.Kind {
+		case ast.KindStruct:
+			buffer.WriteString(fmt.Sprintf("%s: { %v }, ", f.Name, defaultEmptyValuesForStructs(f.Type.AsStruct())))
+		case ast.KindArray:
+			buffer.WriteString(fmt.Sprintf("%s: []", f.Name))
+		case ast.KindScalar:
+			buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar())))
+		default:
+		}
+	}
+
+	return buffer.String()
+}
+
+func hasStructDefaults(typeDef ast.Type, defaults any) bool {
+	_, ok := defaults.(map[string]interface{})
+	return ok && typeDef.Kind == ast.KindStruct
 }
