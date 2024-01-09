@@ -2,6 +2,7 @@ package loaders
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -100,4 +101,13 @@ func LoadAll(opts Options) ([]*ast.Schema, error) {
 	}
 
 	return allSchemas, nil
+}
+
+func guessPackageFromFilename(filename string) string {
+	pkg := filepath.Base(filepath.Dir(filename))
+	if pkg != "." {
+		return pkg
+	}
+
+	return strings.TrimSuffix(filepath.Base(filename), filepath.Ext(filename))
 }
