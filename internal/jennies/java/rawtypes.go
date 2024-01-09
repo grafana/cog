@@ -137,20 +137,20 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
 
-	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", jenny.formatInnerStruct(pkg, object.Name, object.Comments, object.Type.AsStruct())); err != nil {
+	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", jenny.formatInnerStruct(pkg, object.Name, object.Comments, object.Type.ImplementedVariant(), object.Type.AsStruct())); err != nil {
 		return nil, err
 	}
 
 	return []byte(buffer.String()), nil
 }
 
-func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []string, def ast.StructType) ClassTemplate {
+func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []string, variant string, def ast.StructType) ClassTemplate {
 	fields := make([]Field, 0)
 	nestedStructs := make([]ClassTemplate, 0)
 
 	for _, field := range def.Fields {
 		if field.Type.Kind == ast.KindStruct {
-			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Comments, field.Type.AsStruct()))
+			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Comments, field.Type.ImplementedVariant(), field.Type.AsStruct()))
 		} else {
 			fields = append(fields, Field{
 				Name:     field.Name,
@@ -168,6 +168,7 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []stri
 		InnerClasses:         nestedStructs,
 		GenGettersAndSetters: jenny.config.GenGettersAndSetters,
 		Comments:             comments,
+		Variant:              tools.UpperCamelCase(variant),
 	}
 }
 
@@ -206,6 +207,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 		Name:     object.Name,
 		Extends:  []string{reference},
 		Comments: object.Comments,
+		Variant:  tools.UpperCamelCase(object.Type.ImplementedVariant()),
 	}); err != nil {
 		return nil, err
 	}

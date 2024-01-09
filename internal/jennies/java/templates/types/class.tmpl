@@ -5,11 +5,16 @@ package {{ .Package }};
 {{- range .Comments }}
 // {{ . }}
 {{- end }}
-public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }} {
+public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements cog.variants.{{ .Variant }}{{ end }} {
     {{- template "types" dict "Fields" .Fields "GenGettersAndSetters" .GenGettersAndSetters }}
 
     {{- range .InnerClasses }}
     {{- template "inner_class" . }}
+    {{- end }}
+
+    {{- if .Variant }}
+    @Override
+    public void Implements{{ .Variant }}Variant() {}
     {{- end }}
 }
 

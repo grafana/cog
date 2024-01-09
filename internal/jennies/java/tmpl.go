@@ -62,6 +62,7 @@ type ClassTemplate struct {
 	InnerClasses []ClassTemplate
 
 	GenGettersAndSetters bool
+	Variant              string
 }
 
 type Field struct {
