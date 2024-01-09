@@ -144,3 +144,12 @@ type MapOfStringToRef map[string]SomeStruct
 
 type MapOfStringToMapOfStringToBool map[string]map[string]bool
 
+-- out/jennies/JavaRawTypes --
+== maps/SomeStruct.java
+package maps;
+
+
+public class SomeStruct {
+    private Object FieldAny;
+    
+}

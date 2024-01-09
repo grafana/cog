@@ -213,3 +213,32 @@ FieldAny any `json:"FieldAny"`
 	FieldInt64 int64 `json:"FieldInt64"`
 }
 
+-- out/jennies/JavaRawTypes --
+== basic/SomeStruct.java
+package basic;
+
+
+// This
+// is
+// a
+// comment
+public class SomeStruct {
+    // Anything can go in there.
+    // Really, anything.
+    private Object FieldAny;
+    private Boolean FieldBool;
+    private Byte FieldBytes;
+    private String FieldString;
+    private String FieldStringWithConstantValue;
+    private Float FieldFloat32;
+    private Double FieldFloat64;
+    private Byte FieldUint8;
+    private Short FieldUint16;
+    private Integer FieldUint32;
+    private Long FieldUint64;
+    private Byte FieldInt8;
+    private Short FieldInt16;
+    private Integer FieldInt32;
+    private Long FieldInt64;
+    
+}
