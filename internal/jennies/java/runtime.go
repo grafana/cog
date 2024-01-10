@@ -14,7 +14,7 @@ func (jenny Runtime) JennyName() string {
 	return "JavaRuntime"
 }
 
-func (jenny Runtime) Generate(context common.Context) (codejen.Files, error) {
+func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
 	variants, err := jenny.renderDataQueryVariant("Dataquery")
 	if err != nil {
 		return nil, err
@@ -33,5 +33,5 @@ func (jenny Runtime) renderDataQueryVariant(variant string) ([]byte, error) {
 		return nil, fmt.Errorf("failed executing template: %w", err)
 	}
 
-	return []byte(buf.String()), nil
+	return buf.Bytes(), nil
 }

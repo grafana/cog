@@ -274,5 +274,51 @@ func escapeVarName(varName string) string {
 }
 
 func isReservedGoKeyword(input string) bool {
-	return input == "static" || input == "abstract" || input == "enum" || input == "class" || input == "if" || input == "else" || input == "switch" || input == "final" || input == "public" || input == "private" || input == "protected" || input == "package" || input == "continue" || input == "new" || input == "for" || input == "assert" || input == "do" || input == "default" || input == "goto" || input == "synchronized" || input == "boolean" || input == "double" || input == "int" || input == "short" || input == "char" || input == "float" || input == "long" || input == "byte" || input == "break" || input == "throw" || input == "throws" || input == "this" || input == "implements" || input == "transient" || input == "return" || input == "catch" || input == "extends" || input == "case" || input == "try" || input == "void" || input == "volatile" || input == "super" || input == "native" || input == "finally" || input == "instanceof" || input == "import" || input == "while"
+	return input == "static" ||
+		input == "abstract" ||
+		input == "enum" ||
+		input == "class" ||
+		input == "if" ||
+		input == "else" ||
+		input == "switch" ||
+		input == "final" ||
+		input == "public" ||
+		input == "private" ||
+		input == "protected" ||
+		input == "package" ||
+		input == "continue" ||
+		input == "new" ||
+		input == "for" ||
+		input == "assert" ||
+		input == "do" ||
+		input == "default" ||
+		input == "goto" ||
+		input == "synchronized" ||
+		input == "boolean" ||
+		input == "double" ||
+		input == "int" ||
+		input == "short" ||
+		input == "char" ||
+		input == "float" ||
+		input == "long" ||
+		input == "byte" ||
+		input == "break" ||
+		input == "throw" ||
+		input == "throws" ||
+		input == "this" ||
+		input == "implements" ||
+		input == "transient" ||
+		input == "return" ||
+		input == "catch" ||
+		input == "extends" ||
+		input == "case" ||
+		input == "try" ||
+		input == "void" ||
+		input == "volatile" ||
+		input == "super" ||
+		input == "native" ||
+		input == "finally" ||
+		input == "instanceof" ||
+		input == "import" ||
+		input == "while"
 }
