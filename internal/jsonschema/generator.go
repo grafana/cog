@@ -272,14 +272,18 @@ func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
 func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 	def := ast.String(ast.Default(schema.Default))
 
-	/*
-		if len(schema.Enum) != 0 {
-			def.Constraints = append(def.Constraints, ast.TypeConstraint{
-				Op:   "in",
-				Args: []any{schema.Enum},
-			})
-		}
-	*/
+	if schema.MinLength != -1 {
+		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
+			Op:   ast.MinLengthOp,
+			Args: []any{schema.MinLength},
+		})
+	}
+	if schema.MaxLength != -1 {
+		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
+			Op:   ast.MaxLengthOp,
+			Args: []any{schema.MaxLength},
+		})
+	}
 
 	return def, nil
 }
