@@ -289,8 +289,38 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkNumber(schema *schemaparser.Schema) (ast.Type, error) {
-	// TODO: finish implementation
-	return ast.NewScalar(ast.KindInt64, ast.Default(schema.Default)), nil
+	def := ast.NewScalar(ast.KindInt64, ast.Default(schema.Default))
+
+	if schema.Minimum != nil {
+		value, _ := schema.Minimum.Int64()
+		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
+			Op:   ast.GreaterThanEqualOp,
+			Args: []any{value},
+		})
+	}
+	if schema.ExclusiveMinimum != nil {
+		value, _ := schema.ExclusiveMinimum.Int64()
+		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
+			Op:   ast.GreaterThanOp,
+			Args: []any{value},
+		})
+	}
+	if schema.Maximum != nil {
+		value, _ := schema.Maximum.Int64()
+		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
+			Op:   ast.LessThanEqualOp,
+			Args: []any{value},
+		})
+	}
+	if schema.ExclusiveMaximum != nil {
+		value, _ := schema.ExclusiveMaximum.Int64()
+		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
+			Op:   ast.LessThanOp,
+			Args: []any{value},
+		})
+	}
+
+	return def, nil
 }
 
 func (g *generator) walkList(schema *schemaparser.Schema) (ast.Type, error) {
