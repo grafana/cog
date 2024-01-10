@@ -251,7 +251,7 @@ func (g *generator) walkAnyOf(schema *schemaparser.Schema) (ast.Type, error) {
 
 func (g *generator) walkAllOf(_ *schemaparser.Schema) (ast.Type, error) {
 	// TODO: finish implementation and use correct type
-	return ast.Type{}, nil
+	return ast.Type{}, fmt.Errorf("allOf support is not implemented yet")
 }
 
 func (g *generator) definitionNameFromRef(schema *schemaparser.Schema) string {
