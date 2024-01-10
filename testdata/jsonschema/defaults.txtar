@@ -1,0 +1,144 @@
+-- schema.json --
+{
+    "$ref": "#/definitions/SomeObject",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "SomeObject": {
+            "properties": {
+                "integer": {"type": "integer", "default": 42},
+                "number": {"type": "number", "default": 42},
+                "string": {"type": "string", "default": "default-string"},
+                "boolean": {"type": "boolean", "default": true},
+                "object": {
+                    "type": "object",
+                    "properties": {
+                        "foo": {"type": "string", "default": "foo"}
+                    }
+                },
+                "array": {
+                    "type": "array",
+                    "items": {
+                        "type": ["string"]
+                    },
+                    "default": ["default", "array", "values"]
+                }
+            }
+        }
+    }
+}
+-- out/jsonschema/GenerateAST --
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "SomeObject",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "array",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Default": [
+                  "default",
+                  "array",
+                  "values"
+                ],
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "boolean",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "integer",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 42,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "number",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 42,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "object",
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "foo",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Default": "foo",
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Required": false
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "string",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "default-string",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "SomeObject"
+      }
+    }
+  ]
+}
