@@ -2,8 +2,9 @@ package java
 
 import (
 	"fmt"
-	"github.com/grafana/cog/internal/jennies/common"
 	"strings"
+
+	"github.com/grafana/cog/internal/jennies/common"
 )
 
 func NewImportMap() *common.DirectImportMap {

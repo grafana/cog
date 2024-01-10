@@ -3,9 +3,10 @@ package java
 import (
 	"embed"
 	"fmt"
+	"text/template"
+
 	"github.com/Masterminds/sprig/v3"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
-	"text/template"
 )
 
 //nolint:gochecknoglobals

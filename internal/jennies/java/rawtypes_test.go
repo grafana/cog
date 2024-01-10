@@ -1,11 +1,12 @@
 package java
 
 import (
+	"testing"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/txtartest"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestRawTypes_Generate(t *testing.T) {

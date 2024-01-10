@@ -2,12 +2,13 @@ package java
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
-	"path/filepath"
-	"strings"
 )
 
 type RawTypes struct {
@@ -273,7 +274,9 @@ func escapeVarName(varName string) string {
 	return varName
 }
 
+// nolint: gocyclo
 func isReservedGoKeyword(input string) bool {
+	// see https://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
 	return input == "static" ||
 		input == "abstract" ||
 		input == "enum" ||
