@@ -1,6 +1,7 @@
 package jsonschema
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -127,7 +128,11 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 			return g.walkEnum(schema)
 		}
 
-		return ast.Type{}, errUndescriptiveSchema
+		if len(schema.Constant) != 0 {
+			return g.walkConstant(schema)
+		}
+
+		return ast.Any(), nil
 	}
 
 	//nolint: gocritic
@@ -140,7 +145,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 		case typeNull:
 			def = ast.Null()
 		case typeBoolean:
-			def = ast.Bool()
+			def = ast.Bool(ast.Default(schema.Default))
 		case typeString:
 			def, err = g.walkString(schema)
 		case typeObject:
@@ -192,6 +197,29 @@ func (g *generator) walkDisjunctionBranches(branches []*schemaparser.Schema) ([]
 	return definitions, nil
 }
 
+func (g *generator) walkConstant(schema *schemaparser.Schema) (ast.Type, error) {
+	value := schema.Constant[0]
+
+	switch constant := value.(type) {
+	case json.Number:
+		if val, err := constant.Int64(); err == nil {
+			return ast.NewScalar(ast.KindInt64, ast.Value(val)), nil
+		} else if val, err := constant.Float64(); err == nil {
+			return ast.NewScalar(ast.KindFloat64, ast.Value(val)), nil
+		} else {
+			return ast.Type{}, fmt.Errorf("could not parse json.Number %v", constant)
+		}
+	case bool:
+		return ast.Bool(ast.Value(constant)), nil
+	case string:
+		return ast.String(ast.Value(constant)), nil
+	case nil:
+		return ast.Null(), nil
+	default:
+		return ast.Type{}, fmt.Errorf("unhandled constant type %T", value)
+	}
+}
+
 func (g *generator) walkOneOf(schema *schemaparser.Schema) (ast.Type, error) {
 	if len(schema.OneOf) == 0 {
 		return ast.Type{}, fmt.Errorf("oneOf with no branches")
@@ -241,8 +269,8 @@ func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
 	return ast.NewRef(g.schema.Package, referredKindName), nil
 }
 
-func (g *generator) walkString(_ *schemaparser.Schema) (ast.Type, error) {
-	def := ast.String()
+func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
+	def := ast.String(ast.Default(schema.Default))
 
 	/*
 		if len(schema.Enum) != 0 {
@@ -256,9 +284,9 @@ func (g *generator) walkString(_ *schemaparser.Schema) (ast.Type, error) {
 	return def, nil
 }
 
-func (g *generator) walkNumber(_ *schemaparser.Schema) (ast.Type, error) {
+func (g *generator) walkNumber(schema *schemaparser.Schema) (ast.Type, error) {
 	// TODO: finish implementation
-	return ast.NewScalar(ast.KindInt64), nil
+	return ast.NewScalar(ast.KindInt64, ast.Default(schema.Default)), nil
 }
 
 func (g *generator) walkList(schema *schemaparser.Schema) (ast.Type, error) {
@@ -278,7 +306,7 @@ func (g *generator) walkList(schema *schemaparser.Schema) (ast.Type, error) {
 		}
 	}
 
-	return ast.NewArray(itemsDef), nil
+	return ast.NewArray(itemsDef, ast.Default(schema.Default)), nil
 }
 
 func (g *generator) walkEnum(schema *schemaparser.Schema) (ast.Type, error) {
@@ -286,15 +314,18 @@ func (g *generator) walkEnum(schema *schemaparser.Schema) (ast.Type, error) {
 		return ast.Type{}, fmt.Errorf("enum with no values")
 	}
 
+	// we only want to deal with string or int enums
+	enumType := ast.String()
+	if _, ok := schema.Enum[0].(string); !ok {
+		enumType = ast.NewScalar(ast.KindInt64)
+	}
+
 	values := make([]ast.EnumValue, 0, len(schema.Enum))
 	for _, enumValue := range schema.Enum {
 		values = append(values, ast.EnumValue{
-			Type: ast.String(), // TODO: identify that correctly
-
-			// Simple mapping of all enum values (which we are assuming are in
-			// lowerCamelCase) to corresponding CamelCase
-			Name:  enumValue.(string),
-			Value: enumValue.(string),
+			Type:  enumType,
+			Name:  fmt.Sprintf("%v", enumValue),
+			Value: enumValue,
 		})
 	}
 
@@ -307,7 +338,7 @@ func (g *generator) walkObject(schema *schemaparser.Schema) (ast.Type, error) {
 	for name, property := range schema.Properties {
 		fieldDef, err := g.walkDefinition(property)
 		if err != nil {
-			return ast.Type{}, err
+			return ast.Type{}, fmt.Errorf("%s: %w", name, err)
 		}
 
 		fields = append(fields, ast.StructField{
