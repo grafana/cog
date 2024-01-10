@@ -173,7 +173,9 @@ func (g *generator) walkScalarDisjunction(types []string) (ast.Type, error) {
 			branches = append(branches, ast.Bool())
 		case typeString:
 			branches = append(branches, ast.String())
-		case typeNumber, typeInteger:
+		case typeNumber:
+			branches = append(branches, ast.NewScalar(ast.KindFloat64))
+		case typeInteger:
 			branches = append(branches, ast.NewScalar(ast.KindInt64))
 		default:
 			return ast.Type{}, fmt.Errorf("unexpected type in scalar disjunction '%s'", typeName)
@@ -289,7 +291,12 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkNumber(schema *schemaparser.Schema) (ast.Type, error) {
-	def := ast.NewScalar(ast.KindInt64, ast.Default(schema.Default))
+	scalarKind := ast.KindInt64
+	if schema.Types[0] == typeNumber {
+		scalarKind = ast.KindFloat64
+	}
+
+	def := ast.NewScalar(scalarKind, ast.Default(schema.Default))
 
 	if schema.Minimum != nil {
 		value, _ := schema.Minimum.Int64()

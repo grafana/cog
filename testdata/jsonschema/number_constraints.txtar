@@ -37,7 +37,7 @@
                 "Kind": "scalar",
                 "Nullable": false,
                 "Scalar": {
-                  "ScalarKind": "int64",
+                  "ScalarKind": "float64",
                   "Constraints": [
                     {
                       "Op": "\u003e=",
@@ -62,7 +62,7 @@
                 "Kind": "scalar",
                 "Nullable": false,
                 "Scalar": {
-                  "ScalarKind": "int64",
+                  "ScalarKind": "float64",
                   "Constraints": [
                     {
                       "Op": "\u003e",

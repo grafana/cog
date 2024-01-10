@@ -91,7 +91,7 @@
                 "Nullable": false,
                 "Default": 42,
                 "Scalar": {
-                  "ScalarKind": "int64"
+                  "ScalarKind": "float64"
                 }
               },
               "Required": false
