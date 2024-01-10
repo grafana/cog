@@ -156,6 +156,7 @@ const (
 	SomeStructOperatorLessThan SomeStructOperator = "<"
 )
 
+
 -- out/jennies/JavaRawTypes --
 == struct_optional_fields/SomeStruct.java
 package struct_optional_fields;
