@@ -23,8 +23,8 @@ COG_VERSION="v0.0.x" # hardcoded for now
 COG_CMD=${COG_CMD:-"go run ./cmd/cli"} # Command used to run `cog`
 GH_CLI_CMD=${GH_CLI_CMD:-"gh"} # Command used to run `gh` (GitHub cli)
 
-KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH:-'/tmp/kind-registry'} # Path to the kind-registry
-FOUNDATION_SDK_PATH=${FOUNDATION_SDK_PATH:-'/tmp/grafana-foundation-sdk'} # Path to the grafana-foundation-sdk
+KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH:-'../kind-registry'} # Path to the kind-registry
+FOUNDATION_SDK_PATH=${FOUNDATION_SDK_PATH:-'../grafana-foundation-sdk'} # Path to the grafana-foundation-sdk
 
 #################
 ### Usage ###
@@ -183,3 +183,8 @@ run_when_safe gh_run "${FOUNDATION_SDK_PATH}" pr create \
   --base "${release_branch}" \
   --title "Automated release for Grafana ${GRAFANA_VERSION} and Cog ${COG_VERSION}" \
   --body "Automated release."
+
+if [ "${DRY_RUN}" != "no" ]; then
+  notice "Review the changes on the ${pr_branch} branch in ${FOUNDATION_SDK_PATH} and re-run this script with DRY_RUN=no to disable dry-run mode."
+  notice "Tip: git diff ${release_branch}..${pr_branch}"
+fi
