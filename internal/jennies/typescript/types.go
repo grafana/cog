@@ -280,6 +280,16 @@ func formatValue(val any) string {
 		return buffer.String()
 	}
 
+	if mapVal, ok := val.(map[string]any); ok {
+		buffer.WriteString("{\n")
+		for k, v := range mapVal {
+			buffer.WriteString(fmt.Sprintf("%s: %s,\n", k, formatValue(v)))
+		}
+		buffer.WriteString("}")
+
+		return buffer.String()
+	}
+
 	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
 		buffer.WriteString("{\n")
 

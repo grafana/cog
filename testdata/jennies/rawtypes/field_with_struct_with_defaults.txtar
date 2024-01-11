@@ -254,12 +254,25 @@ export interface Struct {
 }
 
 export const defaultStruct = (): Struct => ({
-	allFields: { stringVal: "hello", intVal: 3, },
-	partialFields: { stringVal: "", intVal: 3, },
+	allFields: {
+intVal: 3,
+stringVal: "hello",
+},
+	partialFields: {
+intVal: 3,
+},
 	emptyFields: defaultNestedStruct(),
-	complexField: { uid: "myUID", nested: { nestedVal: "nested", }, array: [
+	complexField: {
+array: [
 "hello",
-], },
-	partialComplexField: { uid: "", intVal: 0, },
+],
+nested: {
+nestedVal: "nested",
+},
+uid: "myUID",
+},
+	partialComplexField: {
+xxxx: "myUID",
+},
 });
 
