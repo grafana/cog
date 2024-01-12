@@ -23,6 +23,7 @@ func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
 		*codejen.NewFile("cog/builder.go", []byte(jenny.generateBuilderInterface()), jenny),
 		*codejen.NewFile("cog/errors.go", []byte(jenny.generateErrorTools()), jenny),
 		*codejen.NewFile("cog/runtime.go", []byte(runtime), jenny),
+		*codejen.NewFile("cog/tools.go", []byte(jenny.generateToPtrFunc()), jenny),
 	}, nil
 }
 
@@ -94,6 +95,16 @@ func MakeBuildErrors(rootPath string, err error) BuildErrors {
 		Path:    rootPath,
 		Message: err.Error(),
 	}}
+}
+
+`
+}
+
+func (jenny Runtime) generateToPtrFunc() string {
+	return `package cog
+
+func ToPtr[T any](v T) *T {
+  return &v
 }
 
 `
