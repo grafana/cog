@@ -249,9 +249,18 @@ func (g *generator) walkAnyOf(schema *schemaparser.Schema) (ast.Type, error) {
 	return ast.NewDisjunction(branches), nil
 }
 
-func (g *generator) walkAllOf(_ *schemaparser.Schema) (ast.Type, error) {
-	// TODO: finish implementation and use correct type
-	return ast.Type{}, fmt.Errorf("allOf support is not implemented yet")
+func (g *generator) walkAllOf(schema *schemaparser.Schema) (ast.Type, error) {
+	branches := make([]ast.Type, len(schema.AllOf))
+	for i, sch := range schema.AllOf {
+		def, err := g.walkDefinition(sch)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		branches[i] = def
+	}
+
+	return ast.NewIntersection(branches), nil
 }
 
 func (g *generator) definitionNameFromRef(schema *schemaparser.Schema) string {
