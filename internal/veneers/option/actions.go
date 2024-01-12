@@ -508,7 +508,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 		}
 
 		if option.Default != nil {
-			if option.Default.ArgsValues[0].(bool) {
+			if val, ok := option.Default.ArgsValues[0].(bool); ok && val {
 				newOpts[0].Default = &ast.OptionDefault{}
 			} else {
 				newOpts[1].Default = &ast.OptionDefault{}

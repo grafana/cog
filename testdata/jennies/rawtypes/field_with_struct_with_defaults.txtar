@@ -1,0 +1,265 @@
+# Fields with struct field with defaults
+-- ir.json --
+{
+    "Package": "defaults",
+    "Objects": [
+        {
+          "Name": "NestedStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "stringVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "intVal",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          }
+        }, {
+          "Name": "Struct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "allFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Ref": {
+                      "ReferredPkg": "defaults",
+                      "ReferredType": "NestedStruct"
+                    },
+                    "Default": {
+                      "intVal": 3,
+                      "stringVal": "hello"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "partialFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Ref": {
+                      "ReferredPkg": "defaults",
+                      "ReferredType": "NestedStruct"
+                    },
+                    "Default": {
+                      "intVal": 3
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "emptyFields",
+                  "Type": {
+                    "Kind": "ref",
+                    "Ref": {
+                      "ReferredPkg": "defaults",
+                      "ReferredType": "NestedStruct"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "complexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Default": {
+                      "array": [
+                        "hello"
+                      ],
+                      "nested": {
+                        "nestedVal": "nested"
+                      },
+                      "uid": "myUID"
+                    },
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "nested",
+                          "Type": {
+                            "Kind": "struct",
+                            "Nullable": false,
+                            "Struct": {
+                              "Fields": [
+                                {
+                                  "Name": "nestedVal",
+                                  "Type": {
+                                    "Kind": "scalar",
+                                    "Nullable": false,
+                                    "Scalar": {
+                                      "ScalarKind": "string"
+                                    }
+                                  },
+                                  "Required": true
+                                }
+                              ]
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "array",
+                          "Type": {
+                            "Kind": "array",
+                            "Nullable": false,
+                            "Array": {
+                              "ValueType": {
+                                "Kind": "scalar",
+                                "Nullable": false,
+                                "Scalar": {
+                                  "ScalarKind": "string"
+                                }
+                              }
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "partialComplexField",
+                  "Type": {
+                    "Kind": "struct",
+                    "Nullable": false,
+                    "Default": {
+                      "xxxx": "myUID"
+                    },
+                    "Struct": {
+                      "Fields": [
+                        {
+                          "Name": "uid",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Required": true
+                        },
+                        {
+                          "Name": "intVal",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "int64"
+                            }
+                          },
+                          "Required": true
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          }
+        }
+    ]
+}
+
+-- out/jennies/GoRawTypes --
+== defaults/types_gen.go
+package defaults
+
+type NestedStruct struct {
+	StringVal string `json:"stringVal"`
+	IntVal int64 `json:"intVal"`
+}
+
+type Struct struct {
+	AllFields NestedStruct `json:"allFields"`
+	PartialFields NestedStruct `json:"partialFields"`
+	EmptyFields NestedStruct `json:"emptyFields"`
+	ComplexField struct {
+	Uid string `json:"uid"`
+	Nested struct {
+	NestedVal string `json:"nestedVal"`
+} `json:"nested"`
+	Array []string `json:"array"`
+} `json:"complexField"`
+	PartialComplexField struct {
+	Uid string `json:"uid"`
+	IntVal int64 `json:"intVal"`
+} `json:"partialComplexField"`
+}
+
+-- out/jennies/TypescriptRawTypes --
+== src/defaults/types_gen.ts
+export interface NestedStruct {
+	stringVal: string;
+	intVal: number;
+}
+
+export const defaultNestedStruct = (): NestedStruct => ({
+	stringVal: "",
+	intVal: 0,
+});
+
+export interface Struct {
+	allFields: NestedStruct;
+	partialFields: NestedStruct;
+	emptyFields: NestedStruct;
+	complexField: {
+		uid: string;
+		nested: {
+			nestedVal: string;
+		};
+		array: string[];
+	};
+	partialComplexField: {
+		uid: string;
+		intVal: number;
+	};
+}
+
+export const defaultStruct = (): Struct => ({
+	allFields: { stringVal: "hello", intVal: 3, },
+	partialFields: { stringVal: "", intVal: 3, },
+	emptyFields: defaultNestedStruct(),
+	complexField: { uid: "myUID", nested: { nestedVal: "nested", }, array: [
+"hello",
+], },
+	partialComplexField: { uid: "", intVal: 0, },
+});
+

@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -95,7 +96,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			Comments:             comments,
 			Constructor:          jenny.generateConstructor(builder),
 			Properties:           builder.Properties,
-			Defaults:             jenny.genDefaultOptionsCalls(builder),
+			Defaults:             jenny.genDefaultOptionsCalls(context, builder),
 			Options:              tools.Map(builder.Options, jenny.generateOption),
 		})
 	if err != nil {
@@ -105,10 +106,22 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	return []byte(buffer.String()), nil
 }
 
-func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.OptionCall {
+func (jenny *Builder) genDefaultOptionsCalls(context common.Context, builder ast.Builder) []template.OptionCall {
 	calls := make([]template.OptionCall, 0)
 	for _, opt := range builder.Options {
 		if opt.Default == nil {
+			continue
+		}
+
+		if len(opt.Args) == 0 {
+			continue
+		}
+
+		if hasTypedDefaults(opt) {
+			calls = append(calls, template.OptionCall{
+				OptionName: opt.Name,
+				Args:       jenny.formatDefaultTypedArgs(context, opt),
+			})
 			continue
 		}
 
@@ -119,6 +132,43 @@ func (jenny *Builder) genDefaultOptionsCalls(builder ast.Builder) []template.Opt
 	}
 
 	return calls
+}
+
+func hasTypedDefaults(opt ast.Option) bool {
+	for _, defArg := range opt.Default.ArgsValues {
+		if _, ok := defArg.(map[string]interface{}); ok {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (jenny *Builder) formatDefaultTypedArgs(context common.Context, opt ast.Option) []string {
+	args := make([]string, 0)
+	for i, arg := range opt.Default.ArgsValues {
+		val, _ := arg.(map[string]interface{})
+
+		pkg := ""
+		refPkg := ""
+		if opt.Args[i].Type.Kind == ast.KindRef {
+			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
+			pkg = opt.Args[i].Type.AsRef().ReferredType
+			_, isBuilder := context.Builders.LocateByObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
+			obj, ok := context.LocateObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
+			if !ok {
+				return []string{"unknown"}
+			}
+			args = append(args, formatDefaultReferenceStructForBuilder(refPkg, pkg, isBuilder, obj.Type.AsStruct(), orderedmap.FromMap(val)))
+		}
+
+		// Anonymous structs
+		if opt.Args[i].Type.Kind == ast.KindStruct {
+			def := opt.Args[i].Type.AsStruct()
+			args = append(args, formatAnonymousDefaultStruct(def, orderedmap.FromMap(val)))
+		}
+	}
+	return args
 }
 
 func (jenny *Builder) generateConstructor(builder ast.Builder) template.Constructor {
