@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -95,7 +96,7 @@ func isReservedPythonKeyword(input string) bool {
 * 					 Default and "empty" values management 					  *
 ******************************************************************************/
 
-func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule moduleImporter) any {
+func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule moduleImporter, defaultsOverrides *orderedmap.Map[string, any]) any {
 	if !typeDef.IsRef() && typeDef.Default != nil {
 		return typeDef.Default
 	}
@@ -106,7 +107,7 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 			return nil
 		}
 
-		return defaultValueForType(schemas, typeDef.AsDisjunction().Branches[0], importModule)
+		return defaultValueForType(schemas, typeDef.AsDisjunction().Branches[0], importModule, nil)
 	case ast.KindRef:
 		ref := typeDef.AsRef()
 		referredPkg := ref.ReferredPkg
@@ -128,14 +129,41 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 
 			return raw(fmt.Sprintf("%s.%s.%s", referredPkg, referredObj.Name, enumName))
 		} else if found && referredObj.Type.IsDisjunction() {
-			return defaultValueForType(schemas, referredObj.Type, importModule)
+			return defaultValueForType(schemas, referredObj.Type, importModule, nil)
+		}
+
+		var extraDefaults []string
+
+		if defaultsOverrides != nil {
+			extraDefaults = make([]string, 0, defaultsOverrides.Len())
+			defaultsOverrides.Iterate(func(k string, v any) {
+				if !referredObj.Type.IsStruct() {
+					return
+				}
+				field, fieldFound := referredObj.Type.AsStruct().FieldByName(k)
+				if !fieldFound {
+					return
+				}
+
+				value := v
+				if field.Type.IsRef() {
+					var fieldOverrides *orderedmap.Map[string, any]
+					if overrides, ok := value.(map[string]any); ok {
+						fieldOverrides = orderedmap.FromMap(overrides)
+					}
+
+					value = defaultValueForType(schemas, field.Type, importModule, fieldOverrides)
+				}
+
+				extraDefaults = append(extraDefaults, fmt.Sprintf("%s=%s", formatIdentifier(k), formatValue(value)))
+			})
 		}
 
 		if referredPkg == "" {
-			return raw(fmt.Sprintf("%s()", ref.ReferredType))
+			return raw(fmt.Sprintf("%s(%s)", ref.ReferredType, strings.Join(extraDefaults, ", ")))
 		}
 
-		return raw(fmt.Sprintf("%s.%s()", referredPkg, ref.ReferredType))
+		return raw(fmt.Sprintf("%s.%s(%s)", referredPkg, ref.ReferredType, strings.Join(extraDefaults, ", ")))
 	case ast.KindEnum: // anonymous enum
 		return typeDef.AsEnum().Values[0].Value
 	case ast.KindMap:

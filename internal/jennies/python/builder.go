@@ -95,7 +95,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 				return formatValue(value)
 			},
 			"defaultForType": func(typeDef ast.Type) string {
-				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule))
+				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
 			},
 		}).
 		ExecuteTemplate(&buffer, "builders/builder.tmpl", template.Builder{
@@ -163,7 +163,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(context common.Context
 		valueType = *path.Last().TypeHint
 	}
 
-	emptyValue := formatValue(defaultValueForType(context.Schemas, valueType, jenny.importModule))
+	emptyValue := formatValue(defaultValueForType(context.Schemas, valueType, jenny.importModule, nil))
 
 	nonOptionalType := valueType.DeepCopy()
 	nonOptionalType.Nullable = false
