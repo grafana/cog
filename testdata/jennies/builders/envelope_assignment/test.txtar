@@ -1,0 +1,391 @@
+# Envelope assignment.
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "sandbox",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "Dashboard",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "variables",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "Variable"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "Dashboard"
+          }
+        },
+        {
+          "Name": "Variable",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "name",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "Variable"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "sandbox",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "Dashboard",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "variables",
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "ref",
+                          "Nullable": false,
+                          "Ref": {
+                            "ReferredPkg": "sandbox",
+                            "ReferredType": "Variable"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "sandbox",
+              "ReferredType": "Dashboard"
+            }
+          },
+          {
+            "Name": "Variable",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "name",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "value",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "sandbox",
+              "ReferredType": "Variable"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Dashboard",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "variables",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "sandbox",
+                        "ReferredType": "Variable"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "sandbox",
+          "ReferredType": "Dashboard"
+        }
+      },
+      "Package": "sandbox",
+      "Name": "Dashboard",
+      "Options": [
+        {
+          "Name": "withVariable",
+          "Args": [
+            {
+              "Name": "name",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "variables",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "Variable"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Envelope": {
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "sandbox",
+                      "ReferredType": "Variable"
+                    }
+                  },
+                  "Values": [
+                    {
+                      "Path": [{
+                        "Identifier": "name",
+                        "Type": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        }
+                      }],
+                      "Value": {
+                        "Argument": {
+                          "Name": "name",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "Path": [{
+                        "Identifier": "value",
+                        "Type": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        }
+                      }],
+                      "Value": {
+                        "Argument": {
+                          "Name": "value",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "Method": "append"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/TypescriptBuilder --
+== src/sandbox/dashboard_builder_gen.ts
+import * as cog from '../cog';
+import * as sandbox from '../sandbox';
+
+export class DashboardBuilder implements cog.Builder<sandbox.Dashboard> {
+    private readonly internal: sandbox.Dashboard;
+
+    constructor() {
+        this.internal = sandbox.defaultDashboard();
+    }
+
+    build(): sandbox.Dashboard {
+        return this.internal;
+    }
+
+    withVariable(name: string,value: string): this {
+        if (!this.internal.variables) {
+            this.internal.variables = [];
+        }
+        this.internal.variables.push({
+        name: name,
+        value: value,
+    });
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== sandbox/dashboard_builder_gen.go
+package sandbox
+
+import (
+	cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[Dashboard] = (*DashboardBuilder)(nil)
+
+type DashboardBuilder struct {
+    internal *Dashboard
+    errors map[string]cog.BuildErrors
+}
+
+func NewDashboardBuilder() *DashboardBuilder {
+	resource := &Dashboard{}
+	builder := &DashboardBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *DashboardBuilder) Build() (Dashboard, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("Dashboard", err)...)
+	}
+
+	if len(errs) != 0 {
+		return Dashboard{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *DashboardBuilder) WithVariable(name string,value string) *DashboardBuilder {
+    builder.internal.Variables = append(builder.internal.Variables, Variable{
+        Name: name,
+        Value: value,
+    })
+
+    return builder
+}
+
+func (builder *DashboardBuilder) applyDefaults() {
+}

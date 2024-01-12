@@ -1,0 +1,196 @@
+-- schema.json --
+{
+    "$ref": "#/definitions/SomeObject",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "SomeObject": {
+            "required": ["integer", "boolean"],
+            "properties": {
+                "any": {},
+                "integer": {"type": "integer"},
+                "number": {"type": "number"},
+                "string": {"type": "string"},
+                "boolean": {"type": "boolean"},
+                "null": {"type": "null"},
+                "object": {
+                    "type": "object",
+                    "properties": {
+                        "foo": {}
+                    }
+                },
+                "array": {
+                    "type": "array",
+                    "items": {
+                        "type": ["string"]
+                    }
+                },
+                "array-multiple-types": {
+                    "type": "array",
+                    "items": {
+                        "type": ["string", "boolean"]
+                    }
+                }
+            }
+        }
+    }
+}
+-- out/jsonschema/GenerateAST --
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "SomeObject",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "any",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "array",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "array-multiple-types",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "disjunction",
+                    "Nullable": false,
+                    "Disjunction": {
+                      "Branches": [
+                        {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        },
+                        {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "bool"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "boolean",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "integer",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "null",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "null"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "number",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "object",
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "foo",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "any"
+                        }
+                      },
+                      "Required": false
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "string",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "SomeObject"
+      }
+    }
+  ]
+}

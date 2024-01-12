@@ -66,6 +66,19 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
         {{- .Name }}
         {{- end }}
     {{- end }}
+    {{- with .Value.Envelope }}
+        {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+    {{- end }}
+{{- end }}
+
+
+{{- define "value_envelope" -}}
+    {
+    {{- range .Envelope.Values }}
+        {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{ (index .Path 0).Identifier }}: {{ $value }},
+    {{- end }}
+    }
 {{- end }}
 
 {{- define "assignment_method" }}

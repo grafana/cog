@@ -1,0 +1,63 @@
+-- schema.json --
+{
+    "$ref": "#/definitions/SomeObject",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "SomeObject": {
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20
+                }
+            }
+        }
+    }
+}
+-- out/jsonschema/GenerateAST --
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "SomeObject",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "minLength",
+                      "Args": [
+                        1
+                      ]
+                    },
+                    {
+                      "Op": "maxLength",
+                      "Args": [
+                        20
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "SomeObject"
+      }
+    }
+  ]
+}
