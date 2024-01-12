@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/orderedmap"
 )
 
 type RawTypes struct {
@@ -100,8 +101,13 @@ func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Objec
 		fieldType := jenny.typeFormatter.formatType(field.Type)
 		defaultValue := (any)(nil)
 
-		if !field.Type.Nullable {
-			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule)
+		if !field.Type.Nullable || field.Type.Default != nil {
+			var defaultsOverrides map[string]any
+			if overrides, ok := field.Type.Default.(map[string]interface{}); ok {
+				defaultsOverrides = overrides
+			}
+
+			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule, orderedmap.FromMap(defaultsOverrides))
 		}
 
 		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
