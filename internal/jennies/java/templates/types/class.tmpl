@@ -11,11 +11,6 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .InnerClasses }}
     {{- template "inner_class" . }}
     {{- end }}
-
-    {{- if .Variant }}
-    @Override
-    public void Implements{{ .Variant }}Variant() {}
-    {{- end }}
 }
 
 {{- define "inner_class" }}
