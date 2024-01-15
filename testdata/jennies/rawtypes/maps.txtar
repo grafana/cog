@@ -150,7 +150,7 @@ package maps;
 
 
 public class SomeStruct {
-    private Object FieldAny;
+    public Object FieldAny;
     
 }
 -- out/jennies/PythonRawTypes --

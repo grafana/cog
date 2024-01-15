@@ -305,7 +305,7 @@ package struct_complex_fields;
 
 
 public class StructComplexFieldsSomeStructFieldAnonymousStruct {
-    private Object FieldAny;
+    public Object FieldAny;
     
 }
 == struct_complex_fields/SomeStruct.java
@@ -314,14 +314,14 @@ package struct_complex_fields;
 
 // This struct does things.
 public class SomeStruct {
-    private SomeOtherStruct FieldRef;
-    private StringOrBool FieldDisjunctionOfScalars;
-    private StringOrSomeOtherStruct FieldMixedDisjunction;
-    private StringOrNull FieldDisjunctionWithNull;
-    private SomeStructOperator Operator;
-    private String[] FieldArrayOfStrings;
-    private Map<String, String> FieldMapOfStringToString;
-    private StructComplexFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
+    public SomeOtherStruct FieldRef;
+    public StringOrBool FieldDisjunctionOfScalars;
+    public StringOrSomeOtherStruct FieldMixedDisjunction;
+    public StringOrNull FieldDisjunctionWithNull;
+    public SomeStructOperator Operator;
+    public String[] FieldArrayOfStrings;
+    public Map<String, String> FieldMapOfStringToString;
+    public StructComplexFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
     
 }
 == struct_complex_fields/SomeOtherStruct.java
@@ -329,7 +329,7 @@ package struct_complex_fields;
 
 
 public class SomeOtherStruct {
-    private Object FieldAny;
+    public Object FieldAny;
     
 }
 == struct_complex_fields/SomeStructOperator.java
@@ -355,8 +355,8 @@ package struct_complex_fields;
 
 
 public class StringOrBool {
-    private String String;
-    private Boolean Bool;
+    public String String;
+    public Boolean Bool;
     
 }
 == struct_complex_fields/StringOrNull.java
@@ -364,7 +364,7 @@ package struct_complex_fields;
 
 
 public class StringOrNull {
-    private String String;
+    public String String;
     
 }
 == struct_complex_fields/StringOrSomeOtherStruct.java
@@ -372,8 +372,8 @@ package struct_complex_fields;
 
 
 public class StringOrSomeOtherStruct {
-    private String String;
-    private SomeOtherStruct SomeOtherStruct;
+    public String String;
+    public SomeOtherStruct SomeOtherStruct;
     
 }
 -- out/jennies/PythonRawTypes --

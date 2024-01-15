@@ -80,7 +80,7 @@ package refs;
 
 
 public class SomeStruct {
-    private Object FieldAny;
+    public Object FieldAny;
     
 }
 == refs/RefToSomeStruct.java

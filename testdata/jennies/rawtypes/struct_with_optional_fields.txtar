@@ -165,7 +165,7 @@ package struct_optional_fields;
 
 
 public class StructOptionalFieldsSomeStructFieldAnonymousStruct {
-    private Object FieldAny;
+    public Object FieldAny;
     
 }
 == struct_optional_fields/SomeStruct.java
@@ -173,11 +173,11 @@ package struct_optional_fields;
 
 
 public class SomeStruct {
-    private SomeOtherStruct FieldRef;
-    private String FieldString;
-    private SomeStructOperator Operator;
-    private String[] FieldArrayOfStrings;
-    private StructOptionalFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
+    public SomeOtherStruct FieldRef;
+    public String FieldString;
+    public SomeStructOperator Operator;
+    public String[] FieldArrayOfStrings;
+    public StructOptionalFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
     
 }
 == struct_optional_fields/SomeOtherStruct.java
@@ -185,7 +185,7 @@ package struct_optional_fields;
 
 
 public class SomeOtherStruct {
-    private Object FieldAny;
+    public Object FieldAny;
     
 }
 == struct_optional_fields/SomeStructOperator.java

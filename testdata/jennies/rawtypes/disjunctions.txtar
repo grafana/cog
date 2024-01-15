@@ -381,8 +381,8 @@ package disjunctions;
 
 
 public class SomeStruct {
-    private String Type;
-    private Object FieldAny;
+    public String Type;
+    public Object FieldAny;
     
 }
 == disjunctions/BoolOrRef.java
@@ -397,8 +397,8 @@ package disjunctions;
 
 
 public class SomeOtherStruct {
-    private String Type;
-    private Byte Foo;
+    public String Type;
+    public Byte Foo;
     
 }
 == disjunctions/YetAnotherStruct.java
@@ -406,8 +406,8 @@ package disjunctions;
 
 
 public class YetAnotherStruct {
-    private String Type;
-    private Byte Bar;
+    public String Type;
+    public Byte Bar;
     
 }
 == disjunctions/SeveralRefs.java
@@ -422,8 +422,8 @@ package disjunctions;
 
 
 public class BoolOrSomeStruct {
-    private Boolean Bool;
-    private SomeStruct SomeStruct;
+    public Boolean Bool;
+    public SomeStruct SomeStruct;
     
 }
 == disjunctions/SomeStructOrSomeOtherStructOrYetAnotherStruct.java
@@ -431,9 +431,9 @@ package disjunctions;
 
 
 public class SomeStructOrSomeOtherStructOrYetAnotherStruct {
-    private SomeStruct SomeStruct;
-    private SomeOtherStruct SomeOtherStruct;
-    private YetAnotherStruct YetAnotherStruct;
+    public SomeStruct SomeStruct;
+    public SomeOtherStruct SomeOtherStruct;
+    public YetAnotherStruct YetAnotherStruct;
     
 }
 == disjunctions/StringOrBool.java
@@ -441,8 +441,8 @@ package disjunctions;
 
 
 public class StringOrBool {
-    private String String;
-    private Boolean Bool;
+    public String String;
+    public Boolean Bool;
     
 }
 == disjunctions/StringOrNull.java
@@ -450,7 +450,7 @@ package disjunctions;
 
 
 public class StringOrNull {
-    private String String;
+    public String String;
     
 }
 -- out/jennies/PythonRawTypes --

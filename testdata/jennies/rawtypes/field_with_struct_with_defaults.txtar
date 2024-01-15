@@ -277,8 +277,8 @@ package defaults;
 
 
 public class NestedStruct {
-    private String stringVal;
-    private Long intVal;
+    public String stringVal;
+    public Long intVal;
     
 }
 == defaults/DefaultsStructComplexFieldNested.java
@@ -286,7 +286,7 @@ package defaults;
 
 
 public class DefaultsStructComplexFieldNested {
-    private String nestedVal;
+    public String nestedVal;
     
 }
 == defaults/DefaultsStructComplexField.java
@@ -294,9 +294,9 @@ package defaults;
 
 
 public class DefaultsStructComplexField {
-    private String uid;
-    private DefaultsStructComplexFieldNested nested;
-    private String[] array;
+    public String uid;
+    public DefaultsStructComplexFieldNested nested;
+    public String[] array;
     
 }
 == defaults/DefaultsStructPartialComplexField.java
@@ -304,8 +304,8 @@ package defaults;
 
 
 public class DefaultsStructPartialComplexField {
-    private String uid;
-    private Long intVal;
+    public String uid;
+    public Long intVal;
     
 }
 == defaults/Struct.java
@@ -313,11 +313,11 @@ package defaults;
 
 
 public class Struct {
-    private NestedStruct allFields;
-    private NestedStruct partialFields;
-    private NestedStruct emptyFields;
-    private DefaultsStructComplexField complexField;
-    private DefaultsStructPartialComplexField partialComplexField;
+    public NestedStruct allFields;
+    public NestedStruct partialFields;
+    public NestedStruct emptyFields;
+    public DefaultsStructComplexField complexField;
+    public DefaultsStructPartialComplexField partialComplexField;
     
 }
 -- out/jennies/PythonRawTypes --

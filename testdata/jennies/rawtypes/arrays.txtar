@@ -112,7 +112,7 @@ package arrays;
 
 
 public class SomeStruct {
-    private Object FieldAny;
+    public Object FieldAny;
     
 }
 == arrays/ArrayOfRefs.java
