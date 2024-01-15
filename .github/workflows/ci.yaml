@@ -51,6 +51,51 @@ jobs:
       - name: Tests
         run: make tests
 
+  registry:
+    name: Generate registry
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        kind_version: [next, v10.2.x, v10.1.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install ts-node
+        run: npm install -g ts-node
+
+      - name: Clone kind-registry
+        run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
+
+      - name: Run code generation
+        run: |
+          go run cmd/cli/main.go generate \
+            --output ./generated/%l \
+            --kind-registry ../kind-registry \
+            --kind-registry-version ${{ matrix.kind_version }} \
+            --go-package-root github.com/grafana/cog/generated/go \
+            --veneers ./config
+
+      - name: Compile generated Go code
+        run: |
+          for d in generated/go/*/ ; do
+            echo "Building $d"
+            go build "./$d"
+          done
+
+      - name: Compile generated Typescript code
+        run: |
+          for d in generated/typescript/src/*/ ; do
+            echo "Building $d"
+            ts-node "./$d"
+          done
+
   examples:
     name: Run examples
     runs-on: ubuntu-latest
