@@ -1,0 +1,497 @@
+# Builder with initialization safeguards.
+-- builders_context.json --
+{
+  "Schemas": [
+    {
+      "Package": "initialization_safeguards",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "LegendOptions",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "show",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "initialization_safeguards",
+            "ReferredType": "LegendOptions"
+          }
+        },
+        {
+          "Name": "Options",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "legend",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Default": {
+                      "show": true
+                    },
+                    "Ref": {
+                      "ReferredPkg": "initialization_safeguards",
+                      "ReferredType": "LegendOptions"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "initialization_safeguards",
+            "ReferredType": "Options"
+          }
+        },
+        {
+          "Name": "SomePanel",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "options",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "initialization_safeguards",
+                      "ReferredType": "Options"
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "initialization_safeguards",
+            "ReferredType": "SomePanel"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "initialization_safeguards",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "LegendOptions",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "show",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "bool"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "initialization_safeguards",
+              "ReferredType": "LegendOptions"
+            }
+          },
+          {
+            "Name": "Options",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "legend",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Default": {
+                        "show": true
+                      },
+                      "Ref": {
+                        "ReferredPkg": "initialization_safeguards",
+                        "ReferredType": "LegendOptions"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "initialization_safeguards",
+              "ReferredType": "Options"
+            }
+          },
+          {
+            "Name": "SomePanel",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "options",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": true,
+                      "Ref": {
+                        "ReferredPkg": "initialization_safeguards",
+                        "ReferredType": "Options"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "initialization_safeguards",
+              "ReferredType": "SomePanel"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomePanel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "options",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": true,
+                  "Ref": {
+                    "ReferredPkg": "initialization_safeguards",
+                    "ReferredType": "Options"
+                  }
+                },
+                "Required": false
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "initialization_safeguards",
+          "ReferredType": "SomePanel"
+        }
+      },
+      "Package": "initialization_safeguards",
+      "Name": "SomePanel",
+      "Properties": null,
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "showLegend",
+          "Args": [
+            {
+              "Name": "show",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "boolean"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "options",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "initialization_safeguards",
+                      "ReferredType": "Options"
+                    }
+                  }
+                },
+                {
+                  "Identifier": "legend",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Default": {
+                      "show": true
+                    },
+                    "Ref": {
+                      "ReferredPkg": "initialization_safeguards",
+                      "ReferredType": "LegendOptions"
+                    }
+                  }
+                },
+                {
+                  "Identifier": "show",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "show",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "boolean"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
+
+-- out/jennies/TypescriptBuilder --
+== src/initialization_safeguards/somepanel_builder_gen.ts
+import * as cog from '../cog';
+import * as initialization_safeguards from '../initialization_safeguards';
+
+export class SomePanelBuilder implements cog.Builder<initialization_safeguards.SomePanel> {
+    private readonly internal: initialization_safeguards.SomePanel;
+
+    constructor() {
+        this.internal = initialization_safeguards.defaultSomePanel();
+    }
+
+    build(): initialization_safeguards.SomePanel {
+        return this.internal;
+    }
+
+    title(title: string): this {
+        this.internal.title = title;
+        return this;
+    }
+
+    showLegend(show: boolean): this {
+        if (!this.internal.options) {
+            this.internal.options = initialization_safeguards.defaultOptions();
+        }
+        if (!this.internal.options.legend) {
+            this.internal.options.legend = {
+	show: true,
+};
+        }
+        this.internal.options.legend.show = show;
+        return this;
+    }
+}
+-- out/jennies/GoBuilder --
+== initialization_safeguards/somepanel_builder_gen.go
+package initialization_safeguards
+
+import (
+	cog "github.com/grafana/cog/generated/cog"
+)
+
+var _ cog.Builder[SomePanel] = (*SomePanelBuilder)(nil)
+
+type SomePanelBuilder struct {
+    internal *SomePanel
+    errors map[string]cog.BuildErrors
+}
+
+func NewSomePanelBuilder() *SomePanelBuilder {
+	resource := &SomePanel{}
+	builder := &SomePanelBuilder{
+		internal: resource,
+		errors: make(map[string]cog.BuildErrors),
+	}
+
+	builder.applyDefaults()
+
+	return builder
+}
+
+func (builder *SomePanelBuilder) Build() (SomePanel, error) {
+	var errs cog.BuildErrors
+
+	for _, err := range builder.errors {
+		errs = append(errs, cog.MakeBuildErrors("SomePanel", err)...)
+	}
+
+	if len(errs) != 0 {
+		return SomePanel{}, errs
+	}
+
+	return *builder.internal, nil
+}
+
+func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
+    builder.internal.Title = title
+
+    return builder
+}
+
+func (builder *SomePanelBuilder) ShowLegend(show boolean) *SomePanelBuilder {
+    if builder.internal.Options == nil {
+	builder.internal.Options = &Options{}
+}
+    builder.internal.Options.Legend.Show = show
+
+    return builder
+}
+
+func (builder *SomePanelBuilder) applyDefaults() {
+}
+-- out/jennies/PythonBuilder --
+== builders/initialization_safeguards.py
+import typing
+from ..cog import builder as cogbuilder
+from ..models import initialization_safeguards
+
+
+class SomePanel(cogbuilder.Builder[initialization_safeguards.SomePanel]):    
+    __internal: initialization_safeguards.SomePanel
+
+    def __init__(self):
+        self.__internal = initialization_safeguards.SomePanel()
+
+    def build(self) -> initialization_safeguards.SomePanel:
+        return self.__internal    
+    
+    def title(self, title: str) -> typing.Self:        
+        self.__internal.title = title
+    
+        return self
+    
+    def show_legend(self, show: boolean) -> typing.Self:        
+        if self.__internal.options is None:
+            self.__internal.options = initialization_safeguards.Options()
+        
+        assert isinstance(self.__internal.options, initialization_safeguards.Options)
+        
+        if self.__internal.options.legend is None:
+            self.__internal.options.legend = initialization_safeguards.LegendOptions()
+        
+        assert isinstance(self.__internal.options.legend, initialization_safeguards.LegendOptions)
+        
+        self.__internal.options.legend.show = show
+    
+        return self
+    
