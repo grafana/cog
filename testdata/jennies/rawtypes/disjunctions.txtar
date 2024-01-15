@@ -369,6 +369,13 @@ package disjunctions;
 public class RefreshRate extends StringOrBool {
     
 }
+== disjunctions/StringOrNull.java
+package disjunctions;
+
+
+public class StringOrNull extends StringOrNull {
+    
+}
 == disjunctions/SomeStruct.java
 package disjunctions;
 
@@ -438,8 +445,14 @@ public class StringOrBool {
     private Boolean Bool;
     
 }
-== disjunctions/Constants.java
+== disjunctions/StringOrNull.java
+package disjunctions;
 
+
+public class StringOrNull {
+    private String String;
+    
+}
 -- out/jennies/PythonRawTypes --
 == models/disjunctions.py
 import typing

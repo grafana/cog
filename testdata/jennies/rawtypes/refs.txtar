@@ -98,7 +98,6 @@ import otherpkg.SomeDistantStruct;
 public class RefToSomeStructFromOtherPackage extends SomeDistantStruct {
     
 }
-
 -- out/jennies/PythonRawTypes --
 == models/refs.py
 from ..models import otherpkg

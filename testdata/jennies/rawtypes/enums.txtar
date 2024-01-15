@@ -220,8 +220,8 @@ package enums;
 
 // This is a very interesting string enum.
 public enum Operator {
-    GREATERTHAN(">"),
-    LESSTHAN("<");
+    GREATER_THAN(">"),
+    LESS_THAN("<");
 
     private String value;
 
@@ -291,7 +291,6 @@ public enum DashboardCursorSync {
         return value;
     }
 }
-
 -- out/jennies/PythonRawTypes --
 == models/enums.py
 import enum

@@ -153,7 +153,6 @@ public class SomeStruct {
     private Object FieldAny;
     
 }
-
 -- out/jennies/PythonRawTypes --
 == models/maps.py
 # String to... something.

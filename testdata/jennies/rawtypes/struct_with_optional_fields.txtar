@@ -160,6 +160,14 @@ const (
 
 
 -- out/jennies/JavaRawTypes --
+== struct_optional_fields/StructOptionalFieldsSomeStructFieldAnonymousStruct.java
+package struct_optional_fields;
+
+
+public class StructOptionalFieldsSomeStructFieldAnonymousStruct {
+    private Object FieldAny;
+    
+}
 == struct_optional_fields/SomeStruct.java
 package struct_optional_fields;
 
@@ -169,11 +177,8 @@ public class SomeStruct {
     private String FieldString;
     private SomeStructOperator Operator;
     private String[] FieldArrayOfStrings;
+    private StructOptionalFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
     
-    class FieldAnonymousStruct {
-    private Object FieldAny;
-    
-    }
 }
 == struct_optional_fields/SomeOtherStruct.java
 package struct_optional_fields;
@@ -188,8 +193,8 @@ package struct_optional_fields;
 
 
 public enum SomeStructOperator {
-    GREATERTHAN(">"),
-    LESSTHAN("<");
+    GREATER_THAN(">"),
+    LESS_THAN("<");
 
     private String value;
 
@@ -201,7 +206,6 @@ public enum SomeStructOperator {
         return value;
     }
 }
-
 -- out/jennies/PythonRawTypes --
 == models/struct_optional_fields.py
 import typing

@@ -300,6 +300,14 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 }
 
 -- out/jennies/JavaRawTypes --
+== struct_complex_fields/StructComplexFieldsSomeStructFieldAnonymousStruct.java
+package struct_complex_fields;
+
+
+public class StructComplexFieldsSomeStructFieldAnonymousStruct {
+    private Object FieldAny;
+    
+}
 == struct_complex_fields/SomeStruct.java
 package struct_complex_fields;
 
@@ -309,15 +317,12 @@ public class SomeStruct {
     private SomeOtherStruct FieldRef;
     private StringOrBool FieldDisjunctionOfScalars;
     private StringOrSomeOtherStruct FieldMixedDisjunction;
-    private String FieldDisjunctionWithNull;
+    private StringOrNull FieldDisjunctionWithNull;
     private SomeStructOperator Operator;
     private String[] FieldArrayOfStrings;
     private Map<String, String> FieldMapOfStringToString;
+    private StructComplexFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
     
-    class FieldAnonymousStruct {
-    private Object FieldAny;
-    
-    }
 }
 == struct_complex_fields/SomeOtherStruct.java
 package struct_complex_fields;
@@ -332,8 +337,8 @@ package struct_complex_fields;
 
 
 public enum SomeStructOperator {
-    GREATERTHAN(">"),
-    LESSTHAN("<");
+    GREATER_THAN(">"),
+    LESS_THAN("<");
 
     private String value;
 
@@ -354,6 +359,14 @@ public class StringOrBool {
     private Boolean Bool;
     
 }
+== struct_complex_fields/StringOrNull.java
+package struct_complex_fields;
+
+
+public class StringOrNull {
+    private String String;
+    
+}
 == struct_complex_fields/StringOrSomeOtherStruct.java
 package struct_complex_fields;
 
@@ -363,7 +376,6 @@ public class StringOrSomeOtherStruct {
     private SomeOtherStruct SomeOtherStruct;
     
 }
-
 -- out/jennies/PythonRawTypes --
 == models/struct_complex_fields.py
 import typing

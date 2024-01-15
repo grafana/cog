@@ -58,8 +58,10 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 		if object.Type.IsMap() {
 			continue
 		}
-		if object.Type.IsScalar() && object.Type.AsScalar().IsConcrete() {
-			scalars[object.Name] = object.Type.AsScalar()
+		if object.Type.IsScalar() {
+			if object.Type.AsScalar().IsConcrete() {
+				scalars[object.Name] = object.Type.AsScalar()
+			}
 			continue
 		}
 
@@ -111,7 +113,7 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	values := make([]EnumValue, len(enum.Values))
 	for i, value := range enum.Values {
 		values[i] = EnumValue{
-			Name:  strings.ToUpper(value.Name),
+			Name:  tools.UpperSnakeCase(value.Name),
 			Value: value.Value,
 		}
 	}

@@ -242,7 +242,6 @@ public class SomeStruct {
     private Long FieldInt64;
     
 }
-
 -- out/jennies/PythonRawTypes --
 == models/basic.py
 import typing

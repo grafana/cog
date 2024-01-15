@@ -104,7 +104,6 @@ public class SomeStruct {
     private Integer FieldInt32;
     
 }
-
 -- out/jennies/PythonRawTypes --
 == models/defaults.py
 import typing
