@@ -58,7 +58,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 		if object.Type.IsMap() {
 			continue
 		}
-		if object.Type.IsScalar() {
+		if object.Type.IsScalar() && object.Type.AsScalar().IsConcrete() {
 			scalars[object.Name] = object.Type.AsScalar()
 			continue
 		}
@@ -179,17 +179,11 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 
 	constants := make([]Constant, 0)
 	for name, scalar := range scalars {
-		if scalar.IsConcrete() {
-			constants = append(constants, Constant{
-				Name:  name,
-				Type:  formatScalarType(scalar),
-				Value: scalar.Value,
-			})
-		}
-	}
-
-	if len(constants) == 0 {
-		return nil, nil
+		constants = append(constants, Constant{
+			Name:  name,
+			Type:  formatScalarType(scalar),
+			Value: scalar.Value,
+		})
 	}
 
 	if err := templates.ExecuteTemplate(&buffer, "types/constants.tmpl", ConstantTemplate{
@@ -278,7 +272,7 @@ func escapeVarName(varName string) string {
 func isReservedJavaKeyword(input string) bool {
 	// see https://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
 	switch input {
-	case "stat", "abstract", "enum", "class", "if", "else", "switch", "final", "public", "private", "protected", "package", "continue", "new", "for", "assert",
+	case "static", "abstract", "enum", "class", "if", "else", "switch", "final", "public", "private", "protected", "package", "continue", "new", "for", "assert",
 		"do", "default", "goto", "synchronized", "boolean", "double", "int", "short", "char", "float", "long", "byte", "break", "throw", "throws", "this",
 		"implements", "transient", "return", "catch", "extends", "case", "try", "void", "volatile", "super", "native", "finally", "instanceof", "import", "while":
 		return true
