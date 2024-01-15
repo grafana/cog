@@ -267,7 +267,7 @@ func (jenny RawTypes) formatFields(def ast.StructType) []Field {
 
 // TODO: Need to say to the serializer the correct name.
 func escapeVarName(varName string) string {
-	if isReservedGoKeyword(varName) {
+	if isReservedJavaKeyword(varName) {
 		return varName + "Arg"
 	}
 
@@ -275,53 +275,13 @@ func escapeVarName(varName string) string {
 }
 
 // nolint: gocyclo
-func isReservedGoKeyword(input string) bool {
+func isReservedJavaKeyword(input string) bool {
 	// see https://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
-	return input == "static" ||
-		input == "abstract" ||
-		input == "enum" ||
-		input == "class" ||
-		input == "if" ||
-		input == "else" ||
-		input == "switch" ||
-		input == "final" ||
-		input == "public" ||
-		input == "private" ||
-		input == "protected" ||
-		input == "package" ||
-		input == "continue" ||
-		input == "new" ||
-		input == "for" ||
-		input == "assert" ||
-		input == "do" ||
-		input == "default" ||
-		input == "goto" ||
-		input == "synchronized" ||
-		input == "boolean" ||
-		input == "double" ||
-		input == "int" ||
-		input == "short" ||
-		input == "char" ||
-		input == "float" ||
-		input == "long" ||
-		input == "byte" ||
-		input == "break" ||
-		input == "throw" ||
-		input == "throws" ||
-		input == "this" ||
-		input == "implements" ||
-		input == "transient" ||
-		input == "return" ||
-		input == "catch" ||
-		input == "extends" ||
-		input == "case" ||
-		input == "try" ||
-		input == "void" ||
-		input == "volatile" ||
-		input == "super" ||
-		input == "native" ||
-		input == "finally" ||
-		input == "instanceof" ||
-		input == "import" ||
-		input == "while"
+	switch input {
+	case "stat", "abstract", "enum", "class", "if", "else", "switch", "final", "public", "private", "protected", "package", "continue", "new", "for", "assert",
+		"do", "default", "goto", "synchronized", "boolean", "double", "int", "short", "char", "float", "long", "byte", "break", "throw", "throws", "this",
+		"implements", "transient", "return", "catch", "extends", "case", "try", "void", "volatile", "super", "native", "finally", "instanceof", "import", "while":
+		return true
+	}
+	return false
 }
