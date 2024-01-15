@@ -163,9 +163,9 @@ func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string 
 
 	emptyValue := formatValue(jenny.rawTypes.defaultValueForType(valueType, jenny.typeImportMapper))
 
-	return fmt.Sprintf(`		if (!this.internal.%[1]s) {
-			this.internal.%[1]s = %[2]s;
-		}`, fieldPath, emptyValue)
+	return fmt.Sprintf(`        if (!this.internal.%[1]s) {
+            this.internal.%[1]s = %[2]s;
+        }`, fieldPath, emptyValue)
 }
 
 func (jenny *Builder) generateAssignment(assign ast.Assignment) template.Assignment {

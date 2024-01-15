@@ -323,7 +323,7 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 					return ast.Type{}, err
 				}
 
-				return ast.NewMap(ast.String(), typeDef, ast.Hints(hints)), nil
+				return ast.NewMap(ast.String(), typeDef, ast.Hints(hints), ast.Default(defVal)), nil
 			}
 		}
 
@@ -337,7 +337,10 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 			return ast.Any(), nil
 		}
 
-		return ast.NewStruct(fields...), nil
+		def := ast.NewStruct(fields...)
+		def.Default = defVal
+
+		return def, nil
 	default:
 		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
 	}
@@ -350,8 +353,22 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 	}
 
 	op, exprs := v.Expr()
+
 	if len(exprs) != 2 {
 		return false, v, v
+	}
+
+	_, path = exprs[0].ReferencePath()
+	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind && path.String() != "" {
+		// When a struct with defaults is completely filled, it usually has a NoOp op.
+		if op == cue.NoOp {
+			return true, exprs[0], v
+		}
+
+		// Accepts [AStruct | *{ ... }] and skips [AStruct | BStruct]
+		if _, ok := v.Default(); ok {
+			return true, exprs[0], v
+		}
 	}
 
 	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
@@ -627,7 +644,7 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 	}
 
 	// If the default (all lists have a default, usually self, ugh) differs from the
-	// input list, peel it off. Otherwise our AnyIndex lookup may end up getting
+	// input list, peel it off. Otherwise, our AnyIndex lookup may end up getting
 	// sent on the wrong path.
 
 	// extract constraints

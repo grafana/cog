@@ -99,6 +99,16 @@ type Type struct {
 	Hints JenniesHints `json:",omitempty"`
 }
 
+func (t Type) IsAnyOf(kinds ...Kind) bool {
+	for _, kind := range kinds {
+		if t.Kind == kind {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (t Type) ImplementsVariant() bool {
 	return t.HasHint(HintImplementsVariant)
 }
@@ -125,20 +135,28 @@ func (t Type) IsStructOrRef() bool {
 	return t.Kind == KindStruct || t.Kind == KindRef
 }
 
-func (t Type) IsArray() bool {
-	return t.Kind == KindArray
+func (t Type) IsStruct() bool {
+	return t.Kind == KindStruct
 }
 
-func (t Type) IsEnum() bool {
-	return t.Kind == KindEnum
+func (t Type) IsScalar() bool {
+	return t.Kind == KindScalar
+}
+
+func (t Type) IsArray() bool {
+	return t.Kind == KindArray
 }
 
 func (t Type) IsMap() bool {
 	return t.Kind == KindMap
 }
 
-func (t Type) IsScalar() bool {
-	return t.Kind == KindScalar
+func (t Type) IsEnum() bool {
+	return t.Kind == KindEnum
+}
+
+func (t Type) IsDisjunction() bool {
+	return t.Kind == KindDisjunction
 }
 
 func (t Type) IsStructGeneratedFromDisjunction() bool {

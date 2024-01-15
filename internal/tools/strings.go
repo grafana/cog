@@ -4,9 +4,18 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/huandu/xstrings"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
+
+func UpperSnakeCase(s string) string {
+	return strings.ToUpper(xstrings.ToSnakeCase(s))
+}
+
+func SnakeCase(s string) string {
+	return xstrings.ToSnakeCase(s)
+}
 
 func UpperCamelCase(s string) string {
 	s = LowerCamelCase(s)

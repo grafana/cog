@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
+	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/spf13/cobra"
 )
@@ -49,6 +50,7 @@ func (languageJennies LanguageJennies) AsLanguageRefs() []string {
 func All() LanguageJennies {
 	return LanguageJennies{
 		golang.LanguageRef:     golang.New(),
+		python.LanguageRef:     python.New(),
 		typescript.LanguageRef: typescript.New(),
 		java.LanguageRef:       java.New(),
 	}

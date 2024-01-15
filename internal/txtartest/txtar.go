@@ -190,7 +190,7 @@ func (t *Test) BuildersContext() common.Context {
 		}
 
 		if err := json.Unmarshal(f.Data, &buildersContext); err != nil {
-			t.Fatal("could not unmarshal test input into context.Context{}")
+			t.Fatal("could not unmarshal test input into context.Context{}", err)
 		}
 
 		return buildersContext
