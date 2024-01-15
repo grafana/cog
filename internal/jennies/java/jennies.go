@@ -31,7 +31,7 @@ func New() *Language {
 }
 
 func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
-	cmd.Flags().BoolVar(&language.config.GenGettersAndSetters, "getters-and-setters", true, "Generate getters and setters for types")
+	cmd.Flags().BoolVar(&language.config.GenGettersAndSetters, "java-getters-and-setters", true, "Generate getters and setters for types")
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
