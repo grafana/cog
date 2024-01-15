@@ -19,7 +19,7 @@ type RawTypes struct {
 }
 
 func (jenny RawTypes) JennyName() string {
-	return "JavaBuilder"
+	return "JavaRawTypes"
 }
 
 func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
