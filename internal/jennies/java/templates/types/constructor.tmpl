@@ -2,7 +2,7 @@
 
     public {{ .Name }}({{ .Name }}Builder builder) {
         {{- range .Fields }}
-        this.{{ .Name }} = builder.get{{ camelcase .Name }}();
+        this.{{ .Name }} = builder.{{ .Name }};
         {{- end }}
     }
 

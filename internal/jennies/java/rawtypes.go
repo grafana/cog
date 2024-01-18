@@ -164,10 +164,6 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []stri
 		}
 	}
 
-	if jenny.config.GenBuilderConstructor {
-		jenny.imports.Add("Builder", "cog.variants")
-	}
-
 	return ClassTemplate{
 		Package:               pkg,
 		Imports:               jenny.imports,

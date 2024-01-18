@@ -42,7 +42,6 @@ func functions() template.FuncMap {
 			panic("formatType() needs to be overridden by a jenny")
 		},
 		"isBuilder": func(name string, def ast.Type) bool {
-			fmt.Printf("Name: %s, Kind: %s\n", name, def.Kind)
 			return def.Kind == ast.KindComposableSlot || def.Kind == ast.KindRef
 		},
 	}

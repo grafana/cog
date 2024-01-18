@@ -4,7 +4,7 @@ package {{ .Package }};
 
 public class {{ .Name }}Builder implements Builder<{{ .ObjectSignature }}> {
     {{- range .Fields }}
-    private {{ .Type }} {{ .Name }};
+    protected {{ .Type }} {{ .Name }};
     {{- end }}
     
     public {{ .Name }}Builder() {
