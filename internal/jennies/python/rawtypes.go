@@ -202,6 +202,12 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 		fieldName := formatIdentifier(field.Name)
 		value := fmt.Sprintf(`data["%s"]`, field.Name)
 
+		// No need to unmarshal constant scalar fields since they're set in
+		// the object's constructor
+		if field.Type.IsConcreteScalar() {
+			continue
+		}
+
 		if field.Type.IsRef() {
 			ref := field.Type.AsRef()
 			referredObject, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
