@@ -36,6 +36,7 @@ func functions() template.FuncMap {
 			return len(values)-1 == index
 		},
 		"escapeVar":      escapeVarName,
+		"formatScalar":   formatScalar,
 		"lowerCamelCase": tools.LowerCamelCase,
 		"formatType": func(_ ast.Type) string {
 			panic("formatType() needs to be overridden by a jenny")
@@ -92,11 +93,12 @@ type Constant struct {
 }
 
 type BuilderTemplate struct {
-	Package string
-	Imports fmt.Stringer
-	Name    string
-	Fields  []Field
-	Options []Option
+	Package         string
+	Imports         fmt.Stringer
+	Name            string
+	ObjectSignature string
+	Fields          []Field
+	Options         []Option
 }
 
 type Option struct {

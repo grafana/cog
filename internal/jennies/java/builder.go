@@ -27,7 +27,7 @@ func (jenny Builder) Generate(context common.Context) (codejen.Files, error) {
 	jenny.typeFormatter = createFormatter(context)
 
 	for i, builder := range context.Builders {
-		output, err := jenny.genFilesForBuilder(builder)
+		output, err := jenny.genFilesForBuilder(context, builder)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +43,7 @@ func (jenny Builder) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny Builder) genFilesForBuilder(builder ast.Builder) ([]byte, error) {
+func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
 	jenny.imports = NewImportMap()
@@ -56,7 +56,7 @@ func (jenny Builder) genFilesForBuilder(builder ast.Builder) ([]byte, error) {
 		return jenny.imports.Add(class, pkg)
 	})
 
-	object, _ := jenny.typeFormatter.locateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
+	object, _ := context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 	options := make([]Option, len(builder.Options))
 	for i, option := range builder.Options {
 		options[i] = Option{
@@ -69,11 +69,12 @@ func (jenny Builder) genFilesForBuilder(builder ast.Builder) ([]byte, error) {
 	err := templates.Funcs(map[string]any{
 		"formatType": jenny.typeFormatter.formatBuilderArgs,
 	}).ExecuteTemplate(&buffer, "builders/builder.tmpl", BuilderTemplate{
-		Package: builder.Package,
-		Imports: jenny.imports,
-		Name:    builder.Name,
-		Options: options,
-		Fields:  jenny.genFields(object),
+		Package:         builder.Package,
+		Imports:         jenny.imports,
+		Name:            builder.Name,
+		ObjectSignature: jenny.getFullObjectName(builder.For.SelfRef),
+		Options:         options,
+		Fields:          jenny.genFields(context, object),
 	})
 
 	if err != nil {
@@ -81,6 +82,11 @@ func (jenny Builder) genFilesForBuilder(builder ast.Builder) ([]byte, error) {
 	}
 
 	return []byte(buffer.String()), nil
+}
+
+func (jenny Builder) getFullObjectName(ref ast.RefType) string {
+	jenny.typeFormatter.packageMapper(ref.ReferredPkg, ref.ReferredType)
+	return ref.ReferredType
 }
 
 func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {
@@ -93,6 +99,8 @@ func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {
 			constraints = jenny.genConstraints(argName, assignment.Constraints)
 		}
 
+		//fmt.Printf("Assigment for path: %s, method: %s, envelope: %v\n", assignment.Path.Last().Identifier, assignment.Method, assignment.Value.Envelope)
+
 		assign[i] = Assignment{
 			Path:        assignment.Path,
 			Method:      assignment.Method,
@@ -104,7 +112,7 @@ func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {
 	return assign
 }
 
-func (jenny Builder) genFields(object ast.Object) []Field {
+func (jenny Builder) genFields(context common.Context, object ast.Object) []Field {
 	fields := make([]Field, 0)
 	switch object.Type.Kind {
 	case ast.KindStruct:
@@ -117,11 +125,11 @@ func (jenny Builder) genFields(object ast.Object) []Field {
 		}
 	case ast.KindRef:
 		ref := object.Type.AsRef()
-		obj, ok := jenny.typeFormatter.locateObject(ref.ReferredPkg, ref.ReferredType)
+		obj, ok := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 		if !ok {
 			break
 		}
-		fields = append(fields, jenny.genFields(obj)...)
+		fields = append(fields, jenny.genFields(context, obj)...)
 	default:
 		// Shouldn't reach here...
 		return nil

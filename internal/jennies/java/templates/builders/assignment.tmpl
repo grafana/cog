@@ -4,50 +4,20 @@
     {{ . }}
     {{- end }}
 
-    {{- template "assignment_setup" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
-
     {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
-
-    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) -}}
+    
 {{- end }}
 
 {{- define "assignment_value" }}
     {{- if not (eq .Value.Constant nil) }}
-        {{- .Value.Constant }}
+        {{- formatScalar .Value.Constant }};
     {{- end }}
     {{- with .Value.Argument }}
-        {{- $argName := escapeVar .Name }}
-
-        {{- if or (isBuilder .Type) (resolvesToComposableSlot .Type) }}
-            {{- .Type.IsArray | ternary (print $argName "Resources") (print $argName "Resource") }}
-        {{- end }}
+        {{- escapeVar .Name }}{{ if isBuilder .Type }}.build(){{ end }}
     {{- end }}
     {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
-    {{- end }}
-{{- end }}
-
-{{- define "assignment_setup" }}
-    {{- if not (eq .Value.Constant nil) }}
-        this.{{ .Assignment.Path.Last.Identifier | lowerCamelCase }} = {{ .Value.Constant }};
-    {{- end }}
-    {{- with .Value.Argument }}
-        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- if .Type.IsArray }}
-        {{ escapeVar .Name }} = new LinkedList<>();
-        for (string n : {{ escapeVar .Name }}) {
-            {{ escapeVar .Name }} = n.build();
-            {{ escapeVar .Name}}.add({{ escapeVar .Name }});
-        }
-        {{- else }}
-        this.{{ .Name | lowerCamelCase }} = {{ .Name | lowerCamelCase}}.build();
-        {{- end }}
-        {{- end }}
-    {{- end }}
-    {{- with .Value.Envelope }}
-        {{- range .Values }}
-        {{- template "assignment_setup" (dict "Assignment" $.Assignment "Value" .Value) }}
-        {{- end }}
     {{- end }}
 {{- end }}
 
@@ -55,12 +25,12 @@
     {{- .Envelope.Type | formatType }}{
         {{- range .Envelope.Values }}
         {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
-        {{ (index .Path 0).Identifier | upperCamelCase }}: {{ $value }},
+        {{ (index .Path 0).Identifier }} = {{ $value }},
         {{- end }}
     }
 {{- end }}
 
 {{- define "assignment_method" }}
-    {{ if eq .Method "direct" }}this.{{ .Path.Last.Identifier }} = {{ .Path.Last.Identifier }};{{ end -}}
-    {{ if eq .Method "append" }}this.{{ .Path.Last.Identifier }}.add({{ .Path.Last.Identifier }}){{ end -}}
+    {{ if eq .Method "direct" }}this.{{ .Path.Last.Identifier }} = {{ .Value }};{{ end -}}
+    {{ if eq .Method "append" }}this.{{ .Path.Last.Identifier }}.add({{ .Path.Last.Identifier }});{{ end -}}
 {{- end }}

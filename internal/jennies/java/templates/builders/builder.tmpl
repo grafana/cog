@@ -2,7 +2,7 @@ package {{ .Package }};
 
 {{ .Imports }}
 
-public class {{ .Name }}Builder implements Builder<{{ .Name }}> {
+public class {{ .Name }}Builder implements Builder<{{ .ObjectSignature }}> {
     {{- range .Fields }}
     private {{ .Type }} {{ .Name }};
     {{- end }}
@@ -20,7 +20,7 @@ public class {{ .Name }}Builder implements Builder<{{ .Name }}> {
     }
     {{- end }}
     
-    public {{ .Name }} build() {
+    public {{ .ObjectSignature }} build() {
         return new {{ .Name }}(this);
     }
 }

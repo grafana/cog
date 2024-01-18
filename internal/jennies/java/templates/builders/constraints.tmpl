@@ -10,8 +10,8 @@
         {{- $leftOperand = print "" .ArgName ".length()" }}
         {{- $operator = "<=" }}
     {{- end }}
-    if !({{ $leftOperand }} {{ $operator }} {{ .Parameter }}) {
-        return this
+    if ({{ $leftOperand }} {{ $operator }} {{ .Parameter }} == false) {
+        return this;
     }
 {{- end }}
 {{- end }}

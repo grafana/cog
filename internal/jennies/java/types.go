@@ -93,10 +93,6 @@ func (tf *typeFormatter) formatComposable(def ast.ComposableSlotType) string {
 	return variant
 }
 
-func (tf *typeFormatter) locateObject(pkg string, class string) (ast.Object, bool) {
-	return tf.context.LocateObject(pkg, class)
-}
-
 func formatScalarType(def ast.ScalarType) string {
 	scalarType := "unknown"
 
@@ -122,4 +118,8 @@ func formatScalarType(def ast.ScalarType) string {
 	}
 
 	return scalarType
+}
+
+func formatScalar(val any) string {
+	return fmt.Sprintf("%#v", val)
 }
