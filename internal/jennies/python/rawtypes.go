@@ -72,6 +72,9 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 
 			buffer.WriteString("\n\n")
 			buffer.WriteString(jenny.generateToJSONMethod(context, object))
+
+			buffer.WriteString("\n\n")
+			buffer.WriteString(jenny.generateFromJSONMethod(context, object))
 		}
 
 		// we want two blank lines between objects, except at the end of the file
@@ -181,6 +184,51 @@ func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Ob
 	}
 
 	buffer.WriteString("        return payload")
+
+	return buffer.String()
+}
+
+func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.Object) string {
+	var buffer strings.Builder
+
+	typingPkg := jenny.importPkg("typing", "typing")
+
+	buffer.WriteString("    @classmethod\n")
+	buffer.WriteString(fmt.Sprintf("    def from_json(cls, data: dict[str, %[1]s.Any]) -> %[1]s.Self:\n", typingPkg))
+
+	buffer.WriteString("        args = {\n")
+	var optionalFields []string
+	for _, field := range object.Type.AsStruct().Fields {
+		fieldName := formatIdentifier(field.Name)
+		value := fmt.Sprintf(`data["%s"]`, field.Name)
+
+		if field.Type.IsRef() {
+			ref := field.Type.AsRef()
+			referredObject, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+			if found && referredObject.Type.IsStruct() {
+				formattedRef := strings.Trim(jenny.typeFormatter.formatRef(ref), "'") // TODO: remove this hack
+				value = fmt.Sprintf(`%s.from_json(data["%s"])`, formattedRef, field.Name)
+			}
+		}
+
+		if field.Required {
+			buffer.WriteString(fmt.Sprintf(`            "%s": %s,`+"\n", fieldName, value))
+		} else {
+			assignment := fmt.Sprintf(`        if "%s" in data:
+            args["%s"] = %s`, field.Name, fieldName, value)
+
+			optionalFields = append(optionalFields, assignment)
+		}
+	}
+	buffer.WriteString("        }\n")
+
+	if len(optionalFields) != 0 {
+		buffer.WriteString("        \n")
+		buffer.WriteString(strings.Join(optionalFields, "\n"))
+		buffer.WriteString("        \n\n")
+	}
+
+	buffer.WriteString("        return cls(**args)")
 
 	return buffer.String()
 }
