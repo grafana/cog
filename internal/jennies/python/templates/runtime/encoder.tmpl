@@ -1,14 +1,10 @@
 from json import JSONEncoder as BaseJSONEncoder
 
 
-def _to_json_method(obj):
-    obj_to_json = getattr(obj, "to_json", None)
-    if callable(obj_to_json):
-        return obj_to_json()
-
-    return BaseJSONEncoder.default(obj, obj)
-
-
 class JSONEncoder(BaseJSONEncoder):
-    def __init__(self, **kwargs):
-        super(JSONEncoder, self).__init__(**kwargs, default=_to_json_method)
+    def default(self, obj):
+        obj_to_json = getattr(obj, "to_json", None)
+        if callable(obj_to_json):
+            return obj_to_json()
+
+        return BaseJSONEncoder.default(self, obj)
