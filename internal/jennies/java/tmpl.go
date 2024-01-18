@@ -41,7 +41,8 @@ func functions() template.FuncMap {
 		"formatType": func(_ ast.Type) string {
 			panic("formatType() needs to be overridden by a jenny")
 		},
-		"isBuilder": func(def ast.Type) bool {
+		"isBuilder": func(name string, def ast.Type) bool {
+			fmt.Printf("Name: %s, Kind: %s\n", name, def.Kind)
 			return def.Kind == ast.KindComposableSlot || def.Kind == ast.KindRef
 		},
 	}
@@ -70,8 +71,9 @@ type ClassTemplate struct {
 	Fields       []Field
 	InnerClasses []ClassTemplate
 
-	GenGettersAndSetters bool
-	Variant              string
+	GenGettersAndSetters  bool
+	GenBuilderConstructor bool
+	Variant               string
 }
 
 type Field struct {

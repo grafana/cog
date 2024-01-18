@@ -65,7 +65,8 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 }
 
 func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
-	return fmt.Sprintf("%s[]", tf.formatFieldType(def.ValueType))
+	tf.packageMapper("java.util", "List")
+	return fmt.Sprintf("List<%s>", tf.formatFieldType(def.ValueType))
 }
 
 func (tf *typeFormatter) formatMap(def ast.MapType) string {

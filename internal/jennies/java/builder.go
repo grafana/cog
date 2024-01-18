@@ -85,8 +85,9 @@ func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Buil
 }
 
 func (jenny Builder) getFullObjectName(ref ast.RefType) string {
-	jenny.typeFormatter.packageMapper(ref.ReferredPkg, ref.ReferredType)
-	return ref.ReferredType
+	refType := tools.UpperCamelCase(ref.ReferredType)
+	jenny.typeFormatter.packageMapper(ref.ReferredPkg, refType)
+	return refType
 }
 
 func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {

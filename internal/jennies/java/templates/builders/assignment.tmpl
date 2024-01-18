@@ -11,10 +11,10 @@
 
 {{- define "assignment_value" }}
     {{- if not (eq .Value.Constant nil) }}
-        {{- formatScalar .Value.Constant }};
+        {{- formatScalar .Value.Constant }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- escapeVar .Name }}{{ if isBuilder .Type }}.build(){{ end }}
+        {{- escapeVar .Name }}{{ if isBuilder .Name .Type }}.build(){{ end }}
     {{- end }}
     {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}

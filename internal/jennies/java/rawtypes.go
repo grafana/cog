@@ -157,22 +157,27 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []stri
 			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Comments, field.Type.ImplementedVariant(), field.Type.AsStruct()))
 		} else {
 			fields = append(fields, Field{
-				Name:     field.Name,
+				Name:     tools.LowerCamelCase(field.Name),
 				Type:     jenny.typeFormatter.formatFieldType(field.Type),
 				Comments: field.Comments,
 			})
 		}
 	}
 
+	if jenny.config.GenBuilderConstructor {
+		jenny.imports.Add("Builder", "cog.variants")
+	}
+
 	return ClassTemplate{
-		Package:              pkg,
-		Imports:              jenny.imports,
-		Name:                 tools.UpperCamelCase(name),
-		Fields:               fields,
-		InnerClasses:         nestedStructs,
-		GenGettersAndSetters: jenny.config.GenGettersAndSetters,
-		Comments:             comments,
-		Variant:              tools.UpperCamelCase(variant),
+		Package:               pkg,
+		Imports:               jenny.imports,
+		Name:                  tools.UpperCamelCase(name),
+		Fields:                fields,
+		InnerClasses:          nestedStructs,
+		GenGettersAndSetters:  jenny.config.GenGettersAndSetters,
+		Comments:              comments,
+		GenBuilderConstructor: jenny.config.GenBuilderConstructor,
+		Variant:               tools.UpperCamelCase(variant),
 	}
 }
 

@@ -12,7 +12,8 @@ const LanguageRef = "java"
 type Config struct {
 	Debug bool
 
-	GenGettersAndSetters bool
+	GenGettersAndSetters  bool
+	GenBuilderConstructor bool
 }
 
 type Language struct {
@@ -22,7 +23,7 @@ type Language struct {
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
 	newConfig.Debug = global.Debug
-
+	newConfig.GenBuilderConstructor = global.Builders
 	return newConfig
 }
 
