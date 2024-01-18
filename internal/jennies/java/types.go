@@ -42,6 +42,15 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 	return "unknown"
 }
 
+func (tf *typeFormatter) formatBuilderArgs(def ast.Type) string {
+	value := tf.formatFieldType(def)
+	if def.Kind == ast.KindComposableSlot || def.Kind == ast.KindRef {
+		value = fmt.Sprintf("Builder<%s>", value)
+	}
+
+	return value
+}
+
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	switch object.Type.Kind {
@@ -82,6 +91,10 @@ func (tf *typeFormatter) formatComposable(def ast.ComposableSlotType) string {
 	variant := tools.UpperCamelCase(string(def.Variant))
 	tf.packageMapper("cog.variants", variant)
 	return variant
+}
+
+func (tf *typeFormatter) locateObject(pkg string, class string) (ast.Object, bool) {
+	return tf.context.LocateObject(pkg, class)
 }
 
 func formatScalarType(def ast.ScalarType) string {
