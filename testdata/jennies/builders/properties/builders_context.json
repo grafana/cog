@@ -1,0 +1,160 @@
+{
+  "Schemas": [
+    {
+      "Package": "properties",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "properties",
+            "ReferredType": "SomeStruct"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "properties",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomeStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int64"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "properties",
+              "ReferredType": "SomeStruct"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "id",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "int64"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "properties",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "properties",
+      "Name": "SomeStruct",
+      "Properties": [
+        {
+          "Name": "someBuilderProperty",
+          "Type": {
+            "Kind": "scalar",
+            "Nullable": false,
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          },
+          "Required": true
+        }
+      ],
+      "Options": [
+        {
+          "Name": "id",
+          "Args": [
+            {
+              "Name": "id",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

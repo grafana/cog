@@ -1,0 +1,86 @@
+{
+  "Package": "intersections",
+  "Objects": [
+    {
+      "Name": "Intersections",
+      "Type": {
+        "Kind": "intersection",
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Ref": {
+                "ReferredPkg": "intersections",
+                "ReferredType": "SomeStruct"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Ref": {
+                "ReferredPkg": "externalPkg",
+                "ReferredType": "AnotherStruct"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "fieldString",
+                    "Required": true,
+                    "Type": {
+                      "Kind": "scalar",
+                      "Default": "hello",
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Kind": "struct",
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "fieldInteger",
+                    "Required": true,
+                    "Type": {
+                      "Kind": "scalar",
+                      "Default": 32,
+                      "Scalar": {
+                        "ScalarKind": "int32"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "SomeStruct",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "fieldBool",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

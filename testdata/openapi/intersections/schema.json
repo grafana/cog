@@ -1,0 +1,77 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "intersection",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Structs": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Value1"
+          },
+          {
+            "$ref": "#/components/schemas/Value2"
+          },
+          {
+            "$ref": "#/components/schemas/Value3"
+          }
+        ]
+      },
+      "Mixed": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Enum"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "Value1": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value1"
+          }
+        }
+      },
+      "Value2": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value2"
+          }
+        }
+      },
+      "Value3": {
+        "type": "object",
+        "properties": {
+          "discriminator": {
+            "type": "string",
+            "default": "value3"
+          }
+        }
+      },
+      "Enum": {
+        "type": "string",
+        "enum": [
+          "a",
+          "b"
+        ]
+      }
+    }
+  }
+}

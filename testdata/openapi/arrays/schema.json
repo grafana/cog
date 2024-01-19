@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "arrays",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Arrays": {
+        "type": "object",
+        "required": [
+          "arrayString"
+        ],
+        "properties": {
+          "arrayString": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "arrayInt": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "arrayRef": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Test"
+            }
+          }
+        }
+      },
+      "Test": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

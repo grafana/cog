@@ -1,0 +1,99 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Arrays",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "arrayInt",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "arrayRef",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "grafanatest",
+                      "ReferredType": "Test"
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "arrayString",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Arrays"
+      }
+    },
+    {
+      "Name": "Test",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "a",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Test"
+      }
+    }
+  ]
+}

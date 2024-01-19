@@ -1,0 +1,379 @@
+{
+  "Schemas": [
+    {
+      "Package": "constraints",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "uint64",
+                      "Constraints": [
+                        {
+                          "Op": "\u003e=",
+                          "Args": [
+                            5
+                          ]
+                        },
+                        {
+                          "Op": "\u003c",
+                          "Args": [
+                            10
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "constraints",
+            "ReferredType": "SomeStruct"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "constraints",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomeStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "uint64",
+                        "Constraints": [
+                          {
+                            "Op": "\u003e=",
+                            "Args": [
+                              5
+                            ]
+                          },
+                          {
+                            "Op": "\u003c",
+                            "Args": [
+                              10
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Constraints": [
+                          {
+                            "Op": "minLength",
+                            "Args": [
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "constraints",
+              "ReferredType": "SomeStruct"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "id",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "uint64",
+                    "Constraints": [
+                      {
+                        "Op": "\u003e=",
+                        "Args": [
+                          5
+                        ]
+                      },
+                      {
+                        "Op": "\u003c",
+                        "Args": [
+                          10
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Constraints": [
+                      {
+                        "Op": "minLength",
+                        "Args": [
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constraints",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "constraints",
+      "Name": "SomeStruct",
+      "Options": [
+        {
+          "Name": "id",
+          "Args": [
+            {
+              "Name": "id",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        5
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        10
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "uint64",
+                      "Constraints": [
+                        {
+                          "Op": "\u003e=",
+                          "Args": [
+                            5
+                          ]
+                        },
+                        {
+                          "Op": "\u003c",
+                          "Args": [
+                            10
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "id",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "uint64",
+                      "Constraints": [
+                        {
+                          "Op": "\u003e=",
+                          "Args": [
+                            5
+                          ]
+                        },
+                        {
+                          "Op": "\u003c",
+                          "Args": [
+                            10
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Method": "direct",
+              "Constraints": [
+                {
+                  "Op": "\u003e=",
+                  "Args": [
+                    5
+                  ]
+                },
+                {
+                  "Op": "\u003c",
+                  "Args": [
+                    10
+                  ]
+                }
+              ]
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "minLength",
+                      "Args": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Method": "direct",
+              "Constraints": [
+                {
+                  "Op": "minLength",
+                  "Args": [
+                    1
+                  ]
+                }
+              ]
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

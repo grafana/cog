@@ -1,0 +1,707 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "AdHocVariableFilter",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "condition",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "key",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "operator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "AdHocVariableFilter"
+      }
+    },
+    {
+      "Name": "DataSourceRef",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Comments": [
+                "The plugin type-id"
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "uid",
+              "Comments": [
+                "Specific datasource instance"
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "DataSourceRef"
+      }
+    },
+    {
+      "Name": "InfluxQuery",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "adhocFilters",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "grafanatest",
+                      "ReferredType": "AdHocVariableFilter"
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "alias",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "datasource",
+              "Comments": [
+                "For mixed data sources the selected datasource is on the query level.",
+                "For non mixed scenarios this is undefined.",
+                "TODO find a better way to do this ^ that's friendly to schema",
+                "TODO this shouldn't be unknown but DataSourceRef | null"
+              ],
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "DataSourceRef"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "null"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "fill",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "fromAnnotations",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "groupBy",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "grafanatest",
+                      "ReferredType": "InfluxQueryPart"
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "hide",
+              "Comments": [
+                "true if query is disabled (ie should not be returned to the dashboard)",
+                "Note this does not always imply that the query should not be executed since",
+                "the results from a hidden query may be used as the input to other queries (SSE etc)"
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "key",
+              "Comments": [
+                "Unique, guid like, string (used only in explore mode)"
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "limit",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "float64"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "matchAny",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "measurement",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "name",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "orderByTime",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "policy",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "query",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "queryType",
+              "Comments": [
+                "Specify the query flavor",
+                "TODO make this required and give it a default"
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "rawQuery",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "refId",
+              "Comments": [
+                "A unique identifier for the query within the list of targets.",
+                "In server side expressions, the refId is used as a variable name to identify results.",
+                "By default, the UI will assign A-\u003eZ; however setting meaningful names may be useful."
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "resultFormat",
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "logs",
+                      "Value": "logs"
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "table",
+                      "Value": "table"
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "time_series",
+                      "Value": "time_series"
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "select",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "grafanatest",
+                          "ReferredType": "InfluxQueryPart"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "slimit",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "float64"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "tags",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "grafanatest",
+                      "ReferredType": "InfluxQueryTag"
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "tagsColumn",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "textColumn",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "textEditor",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "timeEndColumn",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "titleColumn",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "tz",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "InfluxQuery"
+      }
+    },
+    {
+      "Name": "InfluxQueryPart",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "interval",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "params",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "disjunction",
+                    "Nullable": false,
+                    "Disjunction": {
+                      "Branches": [
+                        {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        },
+                        {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "float64"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "InfluxQueryPart"
+      }
+    },
+    {
+      "Name": "InfluxQueryTag",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "condition",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "key",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "operator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "InfluxQueryTag"
+      }
+    }
+  ]
+}

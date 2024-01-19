@@ -1,0 +1,18 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "external_schema",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Partial": {
+        "$ref": "./refs/partial.json"
+      },
+      "Array": {
+        "$ref": "./refs/partial2.json"
+      }
+    }
+  }
+}

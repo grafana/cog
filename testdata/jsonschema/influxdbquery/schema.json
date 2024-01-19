@@ -1,0 +1,203 @@
+{
+  "$ref": "#/definitions/InfluxQuery",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "AdHocVariableFilter": {
+      "properties": {
+        "condition": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataSourceRef": {
+      "properties": {
+        "type": {
+          "description": "The plugin type-id",
+          "type": "string"
+        },
+        "uid": {
+          "description": "Specific datasource instance",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "InfluxQuery": {
+      "properties": {
+        "adhocFilters": {
+          "items": {
+            "$ref": "#/definitions/AdHocVariableFilter"
+          },
+          "type": "array"
+        },
+        "alias": {
+          "type": "string"
+        },
+        "datasource": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/DataSourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "For mixed data sources the selected datasource is on the query level.\nFor non mixed scenarios this is undefined.\nTODO find a better way to do this ^ that's friendly to schema\nTODO this shouldn't be unknown but DataSourceRef | null"
+        },
+        "fill": {
+          "type": "string"
+        },
+        "fromAnnotations": {
+          "type": "boolean"
+        },
+        "groupBy": {
+          "items": {
+            "$ref": "#/definitions/InfluxQueryPart"
+          },
+          "type": "array"
+        },
+        "hide": {
+          "description": "true if query is disabled (ie should not be returned to the dashboard)\nNote this does not always imply that the query should not be executed since\nthe results from a hidden query may be used as the input to other queries (SSE etc)",
+          "type": "boolean"
+        },
+        "key": {
+          "description": "Unique, guid like, string (used only in explore mode)",
+          "type": "string"
+        },
+        "limit": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "matchAny": {
+          "type": "boolean"
+        },
+        "measurement": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "orderByTime": {
+          "type": "string"
+        },
+        "policy": {
+          "type": "string"
+        },
+        "query": {
+          "type": "string"
+        },
+        "queryType": {
+          "description": "Specify the query flavor\nTODO make this required and give it a default",
+          "type": "string"
+        },
+        "rawQuery": {
+          "type": "boolean"
+        },
+        "refId": {
+          "description": "A unique identifier for the query within the list of targets.\nIn server side expressions, the refId is used as a variable name to identify results.\nBy default, the UI will assign A->Z; however setting meaningful names may be useful.",
+          "type": "string"
+        },
+        "resultFormat": {
+          "enum": [
+            "logs",
+            "table",
+            "time_series"
+          ],
+          "type": "string"
+        },
+        "select": {
+          "items": {
+            "items": {
+              "$ref": "#/definitions/InfluxQueryPart"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "slimit": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/definitions/InfluxQueryTag"
+          },
+          "type": "array"
+        },
+        "tagsColumn": {
+          "type": "string"
+        },
+        "textColumn": {
+          "type": "string"
+        },
+        "textEditor": {
+          "type": "boolean"
+        },
+        "timeEndColumn": {
+          "type": "string"
+        },
+        "titleColumn": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "tz": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "InfluxQueryPart": {
+      "properties": {
+        "interval": {
+          "type": "string"
+        },
+        "params": {
+          "items": {
+            "type": [
+              "string",
+              "number"
+            ]
+          },
+          "type": "array"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "InfluxQueryTag": {
+      "properties": {
+        "condition": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  }
+}

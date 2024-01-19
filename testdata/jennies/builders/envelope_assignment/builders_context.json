@@ -1,0 +1,313 @@
+{
+  "Schemas": [
+    {
+      "Package": "sandbox",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "Dashboard",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "variables",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "Variable"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "Dashboard"
+          }
+        },
+        {
+          "Name": "Variable",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "name",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "Variable"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "sandbox",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "Dashboard",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "variables",
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "ref",
+                          "Nullable": false,
+                          "Ref": {
+                            "ReferredPkg": "sandbox",
+                            "ReferredType": "Variable"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "sandbox",
+              "ReferredType": "Dashboard"
+            }
+          },
+          {
+            "Name": "Variable",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "name",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "value",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "sandbox",
+              "ReferredType": "Variable"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Dashboard",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "variables",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "sandbox",
+                        "ReferredType": "Variable"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "sandbox",
+          "ReferredType": "Dashboard"
+        }
+      },
+      "Package": "sandbox",
+      "Name": "Dashboard",
+      "Options": [
+        {
+          "Name": "withVariable",
+          "Args": [
+            {
+              "Name": "name",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "variables",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "Variable"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Envelope": {
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "sandbox",
+                      "ReferredType": "Variable"
+                    }
+                  },
+                  "Values": [
+                    {
+                      "Path": [
+                        {
+                          "Identifier": "name",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          }
+                        }
+                      ],
+                      "Value": {
+                        "Argument": {
+                          "Name": "name",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "Path": [
+                        {
+                          "Identifier": "value",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          }
+                        }
+                      ],
+                      "Value": {
+                        "Argument": {
+                          "Name": "value",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "Method": "append"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

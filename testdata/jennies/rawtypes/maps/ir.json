@@ -1,0 +1,120 @@
+{
+  "Package": "maps",
+  "Objects": [
+    {
+      "Name": "MapOfStringToAny",
+      "Comments": [
+        "String to... something."
+      ],
+      "Type": {
+        "Kind": "map",
+        "Map": {
+          "IndexType": {
+            "Kind": "scalar",
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          },
+          "ValueType": {
+            "Kind": "scalar",
+            "Scalar": {
+              "ScalarKind": "any"
+            }
+          }
+        }
+      }
+    },
+    {
+      "Name": "MapOfStringToString",
+      "Type": {
+        "Kind": "map",
+        "Map": {
+          "IndexType": {
+            "Kind": "scalar",
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          },
+          "ValueType": {
+            "Kind": "scalar",
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "Name": "SomeStruct",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "FieldAny",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "MapOfStringToRef",
+      "Type": {
+        "Kind": "map",
+        "Map": {
+          "IndexType": {
+            "Kind": "scalar",
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          },
+          "ValueType": {
+            "Kind": "ref",
+            "Ref": {
+              "ReferredPkg": "maps",
+              "ReferredType": "SomeStruct"
+            }
+          }
+        }
+      }
+    },
+    {
+      "Name": "MapOfStringToMapOfStringToBool",
+      "Type": {
+        "Kind": "map",
+        "Map": {
+          "IndexType": {
+            "Kind": "scalar",
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          },
+          "ValueType": {
+            "Kind": "map",
+            "Map": {
+              "IndexType": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "ValueType": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

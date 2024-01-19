@@ -1,0 +1,59 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Refs",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "ref",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "Test"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Refs"
+      }
+    },
+    {
+      "Name": "Test",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "a",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Test"
+      }
+    }
+  ]
+}

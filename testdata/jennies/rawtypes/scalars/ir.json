@@ -1,0 +1,141 @@
+{
+  "Package": "scalars",
+  "Objects": [
+    {
+      "Name": "constTypeString",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "string",
+          "Value": "foo"
+        }
+      }
+    },
+    {
+      "Name": "scalarTypeAny",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "any"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeBool",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "bool"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeBytes",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "bytes"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeString",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "string"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeFloat32",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "float32"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeFloat64",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "float64"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeUint8",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "uint8"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeUint16",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "uint16"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeUint32",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "uint32"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeUint64",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "uint64"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeInt8",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "int8"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeInt16",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "int16"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeInt32",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "int32"
+        }
+      }
+    },
+    {
+      "Name": "ScalarTypeInt64",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "int64"
+        }
+      }
+    }
+  ]
+}

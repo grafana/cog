@@ -1,0 +1,156 @@
+{
+  "Schemas": [
+    {
+      "Package": "dataquery_variant_builder",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "Loki",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Hints": {
+              "implements_variant": "dataquery"
+            },
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "expr",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "dataquery_variant_builder",
+            "ReferredType": "Loki"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "dataquery_variant_builder",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "Loki",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Hints": {
+                "implements_variant": "dataquery"
+              },
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "expr",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "dataquery_variant_builder",
+              "ReferredType": "Loki"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Loki",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Hints": {
+            "implements_variant": "dataquery"
+          },
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "expr",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "dataquery_variant_builder",
+          "ReferredType": "Loki"
+        }
+      },
+      "Package": "dataquery_variant_builder",
+      "Name": "LokiBuilder",
+      "Options": [
+        {
+          "Name": "expr",
+          "Args": [
+            {
+              "Name": "expr",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "expr",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "expr",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

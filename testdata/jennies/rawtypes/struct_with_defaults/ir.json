@@ -1,0 +1,70 @@
+{
+  "Package": "defaults",
+  "Objects": [
+    {
+      "Name": "SomeStruct",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "fieldBool",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            },
+            {
+              "Name": "fieldString",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Default": "foo",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "FieldStringWithConstantValue",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "auto"
+                }
+              }
+            },
+            {
+              "Name": "FieldFloat32",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Default": 42.42,
+                "Scalar": {
+                  "ScalarKind": "float32"
+                }
+              }
+            },
+            {
+              "Name": "FieldInt32",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Default": 42,
+                "Scalar": {
+                  "ScalarKind": "int32"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

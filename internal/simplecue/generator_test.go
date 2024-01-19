@@ -5,25 +5,27 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"testing"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
+	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/txtartest"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 	"github.com/yalue/merged_fs"
 )
 
 func TestGenerateAST(t *testing.T) {
-	test := txtartest.TxTarTest{
-		Root: "../../testdata/simplecue",
-		Name: "simplecue/GenerateAST",
+	test := testutils.GoldenFilesTestSuite{
+		TestDataRoot: "../../testdata/simplecue",
+		Name:         "GenerateAST",
 	}
 
-	test.Run(t, func(tc *txtartest.Test) {
+	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)
 
 		schemaAst, err := GenerateAST(txtarTestToCueInstance(tc), Config{Package: "grafanatest"})
@@ -72,35 +74,27 @@ func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 	return nil
 }
 
-func writeIR(irFile *ast.Schema, tc *txtartest.Test) {
+func writeIR(irFile *ast.Schema, tc *testutils.Test) {
 	tc.Helper()
-
-	// TODO: use FileWriter instead in separate CL.
-	_, err := fmt.Fprintln(tc, "==", "ir.json")
-	require.NoError(tc, err)
 
 	marshaledIR, err := json.MarshalIndent(irFile, "", "  ")
 	require.NoError(tc, err)
 
-	_, err = tc.Write(marshaledIR)
-	require.NoError(tc, err)
+	tc.WriteFile(&codejen.File{
+		RelativePath: "ir.json",
+		Data:         marshaledIR,
+	})
 }
 
-func txtarTestToCueInstance(tc *txtartest.Test) cue.Value {
+func txtarTestToCueInstance(tc *testutils.Test) cue.Value {
 	tc.Helper()
 
-	for _, f := range tc.Archive.Files {
-		if f.Name != "schema.cue" {
-			continue
-		}
-
-		return bytesToCueValue(tc.T, f.Data)
+	content, err := os.ReadFile(filepath.Join(tc.RootDir, "schema.cue"))
+	if err != nil {
+		tc.Fatalf("could not open schema: %s", err)
 	}
 
-	// the ir.json file wasn't found, let's fail hard.
-	tc.Fatal("could not load types IR: file 'ir.json' not found in test archive")
-
-	return cue.Value{}
+	return bytesToCueValue(tc.T, content)
 }
 
 func bytesToCueValue(t *testing.T, input []byte) cue.Value {

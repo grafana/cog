@@ -2,22 +2,22 @@ package openapi
 
 import (
 	"encoding/json"
-	"os"
-	"strings"
+	"path/filepath"
 	"testing"
 
+	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/txtartest"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateAST(t *testing.T) {
-	test := txtartest.TxTarTest{
-		Root: "../../testdata/openapi",
-		Name: "openapi/GenerateAST",
+	test := testutils.GoldenFilesTestSuite{
+		TestDataRoot: "../../testdata/openapi",
+		Name:         "GenerateAST",
 	}
 
-	test.Run(t, func(tc *txtartest.Test) {
+	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)
 
 		schemaAst, err := GenerateAST(getFilePath(tc), Config{Package: "grafanatest"})
@@ -28,31 +28,20 @@ func TestGenerateAST(t *testing.T) {
 	})
 }
 
-func getFilePath(tc *txtartest.Test) string {
+func getFilePath(tc *testutils.Test) string {
 	tc.Helper()
 
-	for _, f := range tc.Archive.Files {
-		if strings.HasSuffix(f.Name, ".json") {
-			file, _ := os.CreateTemp("../../testdata/openapi", "tmp.json")
-			_, _ = file.Write(f.Data)
-			tc.Cleanup(func() {
-				_ = os.Remove(file.Name())
-			})
-			return file.Name()
-		}
-	}
-
-	tc.Fatal("could not load types IR: file '*.json' not found in test archive")
-
-	return ""
+	return filepath.Join(tc.RootDir, "schema.json")
 }
 
-func writeIR(irFile *ast.Schema, tc *txtartest.Test) {
+func writeIR(irFile *ast.Schema, tc *testutils.Test) {
 	tc.Helper()
 
 	marshaledIR, err := json.MarshalIndent(irFile, "", "  ")
 	require.NoError(tc, err)
 
-	_, err = tc.Write(marshaledIR)
-	require.NoError(tc, err)
+	tc.WriteFile(&codejen.File{
+		RelativePath: "ir.json",
+		Data:         marshaledIR,
+	})
 }

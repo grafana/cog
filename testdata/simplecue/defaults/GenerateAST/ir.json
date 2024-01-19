@@ -1,0 +1,289 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "StringEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "c",
+              "Value": "c"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "StringEnum"
+      }
+    },
+    {
+      "Name": "IntEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "one",
+              "Value": 1
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "two",
+              "Value": 2
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "three",
+              "Value": 3
+            }
+          ]
+        },
+        "Hints": {
+          "kind": "enum",
+          "memberNames": "one|two|three"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "IntEnum"
+      }
+    },
+    {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "from",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "now-6h",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "editable",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "IntEnum",
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Default": 2,
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "int64"
+                        }
+                      },
+                      "Name": "firstValue",
+                      "Value": 0
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "int64"
+                        }
+                      },
+                      "Name": "secondValue",
+                      "Value": 1
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "int64"
+                        }
+                      },
+                      "Name": "thirdValue",
+                      "Value": 2
+                    }
+                  ]
+                },
+                "Hints": {
+                  "kind": "enum",
+                  "memberNames": "firstValue|secondValue|thirdValue"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "Number",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 5,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "repeatDirection",
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Default": "h",
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "h",
+                      "Value": "h"
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "v",
+                      "Value": "v"
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "tags",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Default": [
+                  "default",
+                  "tags"
+                ],
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "stringEnum",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "c",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "StringEnum"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "intEnum",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": 2,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "IntEnum"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  ]
+}

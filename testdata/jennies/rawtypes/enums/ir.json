@@ -1,0 +1,159 @@
+{
+  "Package": "enums",
+  "Objects": [
+    {
+      "Name": "Operator",
+      "Comments": [
+        "This is a very interesting string enum."
+      ],
+      "Type": {
+        "Kind": "enum",
+        "Enum": {
+          "Values": [
+            {
+              "Name": "GreaterThan",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Value": ">"
+            },
+            {
+              "Name": "LessThan",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Value": "<"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "enums",
+        "ReferredType": "Operator"
+      }
+    },
+    {
+      "Name": "TableSortOrder",
+      "Type": {
+        "Kind": "enum",
+        "Enum": {
+          "Values": [
+            {
+              "Name": "Asc",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Value": "asc"
+            },
+            {
+              "Name": "Desc",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Value": "desc"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "enums",
+        "ReferredType": "TableSortOrder"
+      }
+    },
+    {
+      "Name": "LogsSortOrder",
+      "Type": {
+        "Kind": "enum",
+        "Enum": {
+          "Values": [
+            {
+              "Name": "Asc",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Value": "time_asc"
+            },
+            {
+              "Name": "Desc",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Value": "time_desc"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "enums",
+        "ReferredType": "LogsSortOrder"
+      }
+    },
+    {
+      "Name": "DashboardCursorSync",
+      "Comments": [
+        "0 for no shared crosshair or tooltip (default).",
+        "1 for shared crosshair.",
+        "2 for shared crosshair AND shared tooltip."
+      ],
+      "Type": {
+        "Kind": "enum",
+        "Enum": {
+          "Values": [
+            {
+              "Name": "Off",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "int8"
+                }
+              },
+              "Value": 0
+            },
+            {
+              "Name": "Crosshair",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "int8"
+                }
+              },
+              "Value": 1
+            },
+            {
+              "Name": "Tooltip",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "int8"
+                }
+              },
+              "Value": 2
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "enums",
+        "ReferredType": "DashboardCursorSync"
+      }
+    }
+  ]
+}

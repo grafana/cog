@@ -1,0 +1,131 @@
+{
+  "Package": "struct_optional_fields",
+  "Objects": [
+    {
+      "Name": "SomeStruct",
+      "SelfRef": {
+        "ReferredPkg": "struct_optional_fields",
+        "ReferredType": "SomeStruct"
+      },
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "FieldRef",
+              "Required": false,
+              "Type": {
+                "Kind": "ref",
+                "Ref": {
+                  "ReferredPkg": "struct_optional_fields",
+                  "ReferredType": "SomeOtherStruct"
+                }
+              }
+            },
+            {
+              "Name": "FieldString",
+              "Required": false,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "Operator",
+              "Required": false,
+              "Type": {
+                "Kind": "enum",
+                "Enum": {
+                  "Values": [
+                    {
+                      "Name": "GreaterThan",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Value": ">"
+                    },
+                    {
+                      "Name": "LessThan",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Value": "<"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Name": "FieldArrayOfStrings",
+              "Required": false,
+              "Type": {
+                "Kind": "array",
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "Name": "FieldAnonymousStruct",
+              "Required": false,
+              "Type": {
+                "Kind": "struct",
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "FieldAny",
+                      "Required": true,
+                      "Type": {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "ScalarKind": "any"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "SomeOtherStruct",
+      "SelfRef": {
+        "ReferredPkg": "struct_optional_fields",
+        "ReferredType": "SomeOtherStruct"
+      },
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "FieldAny",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

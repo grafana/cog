@@ -1,0 +1,47 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "defaults",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "String": {
+        "type": "string",
+        "default": "default value"
+      },
+      "Integer": {
+        "type": "integer",
+        "format": "int64",
+        "default": 32
+      },
+      "Float": {
+        "type": "number",
+        "format": "float",
+        "default": 32.32
+      },
+      "Boolean": {
+        "type": "boolean",
+        "default": true
+      },
+      "Enum": {
+        "type": "string",
+        "enum": [
+          "foo",
+          "bar"
+        ],
+        "default": "bar"
+      },
+      "Array": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [
+          "anything"
+        ]
+      }
+    }
+  }
+}
