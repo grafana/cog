@@ -148,6 +148,7 @@ if [ "$release_branch_exists" != "0" ]; then
 else
   info "Checking out existing release branch in grafana-foundation-sdk"
   git_run "${FOUNDATION_SDK_PATH}" checkout "${release_branch}"
+  git_run "${FOUNDATION_SDK_PATH}" pull --ff-only origin "${release_branch}"
 fi
 
 info "Creating release preview branch in grafana-foundation-sdk"
