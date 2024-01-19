@@ -165,15 +165,14 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []stri
 	}
 
 	return ClassTemplate{
-		Package:               pkg,
-		Imports:               jenny.imports,
-		Name:                  tools.UpperCamelCase(name),
-		Fields:                fields,
-		InnerClasses:          nestedStructs,
-		GenGettersAndSetters:  jenny.config.GenGettersAndSetters,
-		Comments:              comments,
-		GenBuilderConstructor: jenny.config.GenBuilderConstructor,
-		Variant:               tools.UpperCamelCase(variant),
+		Package:              pkg,
+		Imports:              jenny.imports,
+		Name:                 tools.UpperCamelCase(name),
+		Fields:               fields,
+		InnerClasses:         nestedStructs,
+		GenGettersAndSetters: jenny.config.GenGettersAndSetters,
+		Comments:             comments,
+		Variant:              tools.UpperCamelCase(variant),
 	}
 }
 

@@ -67,7 +67,13 @@ func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Buil
 	}
 
 	err := templates.Funcs(map[string]any{
-		"formatType": jenny.typeFormatter.formatBuilderArgs,
+		"formatType":     jenny.typeFormatter.formatBuilderArgs,
+		"lowerCamelCase": tools.LowerCamelCase,
+		"typeHasBuilder": context.ResolveToBuilder,
+		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
+			_, found := context.ResolveToComposableSlot(typeDef)
+			return found
+		},
 	}).ExecuteTemplate(&buffer, "builders/builder.tmpl", BuilderTemplate{
 		Package:         builder.Package,
 		Imports:         jenny.imports,
@@ -100,13 +106,12 @@ func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {
 			constraints = jenny.genConstraints(argName, assignment.Constraints)
 		}
 
-		//fmt.Printf("Assigment for path: %s, method: %s, envelope: %v\n", assignment.Path.Last().Identifier, assignment.Method, assignment.Value.Envelope)
-
 		assign[i] = Assignment{
-			Path:        assignment.Path,
-			Method:      assignment.Method,
-			Constraints: constraints,
-			Value:       assignment.Value,
+			Path:           assignment.Path,
+			Method:         assignment.Method,
+			Constraints:    constraints,
+			Value:          assignment.Value,
+			InitSafeguards: jenny.getSafeGuards(assignment),
 		}
 	}
 
@@ -147,4 +152,39 @@ func (jenny Builder) genConstraints(name string, constraints []ast.TypeConstrain
 			Parameter: t.Args[0],
 		}
 	})
+}
+
+func (jenny Builder) getSafeGuards(assignment ast.Assignment) []string {
+	var initSafeGuards []string
+	for i, chunk := range assignment.Path {
+		if i == len(assignment.Path)-1 && assignment.Method != ast.AppendAssignment {
+			continue
+		}
+
+		canNullPointer := chunk.Type.IsAnyOf(ast.KindMap, ast.KindArray, ast.KindRef, ast.KindStruct) || chunk.Type.IsAny()
+
+		if !canNullPointer {
+			continue
+		}
+
+		subPath := assignment.Path[:i+1]
+		initSafeGuards = append(initSafeGuards, jenny.initSafeGuard(subPath))
+	}
+
+	return initSafeGuards
+}
+
+func (jenny Builder) initSafeGuard(path ast.Path) string {
+	fieldPath := formatFieldPath(path)
+	valueType := path.Last().Type
+	if path.Last().TypeHint != nil {
+		valueType = *path.Last().TypeHint
+	}
+
+	emptyValue := jenny.typeFormatter.defaultValueFor(valueType)
+
+	return fmt.Sprintf(
+		`	if (this.%[1]s == null) {
+			this.%[1]s = %[2]s;
+		}`, fieldPath, emptyValue)
 }

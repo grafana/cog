@@ -2,25 +2,29 @@ package {{ .Package }};
 
 {{ .Imports }}
 
+{{- $className := .ObjectSignature | lowerCamelCase }}
 public class {{ .Name }}Builder implements Builder<{{ .ObjectSignature }}> {
     {{- range .Fields }}
     protected {{ .Type }} {{ .Name }};
     {{- end }}
     
     public {{ .Name }}Builder() {
-    
     }
     
     {{- range .Options }}
     public {{ $.Name }}Builder set{{ .Name }}({{ template "args" .Args }}) {
         {{- range .Assignments }}
-            {{- template "assignment" (dict "Assignment" . "Builder" $ "Option" (dict "Name" "")) }}
+            {{- template "assignment" (dict "Assignment" .) }}
         {{- end }}
         return this;
     }
     {{- end }}
     
     public {{ .ObjectSignature }} build() {
-        return new {{ .Name }}(this);
+        {{ .ObjectSignature }} {{ $className }} = new {{ .ObjectSignature }}();
+        {{- range .Fields }}
+        {{ $className }}.set{{ .Name | camelcase }}({{ .Name }});
+        {{- end }}
+        return {{ $className }};
     }
 }

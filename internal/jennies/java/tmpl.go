@@ -41,8 +41,11 @@ func functions() template.FuncMap {
 		"formatType": func(_ ast.Type) string {
 			panic("formatType() needs to be overridden by a jenny")
 		},
-		"isBuilder": func(name string, def ast.Type) bool {
-			return def.Kind == ast.KindComposableSlot || def.Kind == ast.KindRef
+		"typeHasBuilder": func(_ ast.Type) bool {
+			panic("typeHasBuilder() needs to be overridden by a jenny")
+		},
+		"resolvesToComposableSlot": func(_ ast.Type) bool {
+			panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 		},
 	}
 }
@@ -70,9 +73,8 @@ type ClassTemplate struct {
 	Fields       []Field
 	InnerClasses []ClassTemplate
 
-	GenGettersAndSetters  bool
-	GenBuilderConstructor bool
-	Variant               string
+	GenGettersAndSetters bool
+	Variant              string
 }
 
 type Field struct {

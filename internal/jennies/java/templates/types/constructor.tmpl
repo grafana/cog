@@ -1,9 +1,0 @@
-{{- define "constructor" }}
-
-    public {{ .Name }}({{ .Name }}Builder builder) {
-        {{- range .Fields }}
-        this.{{ .Name }} = builder.{{ .Name }};
-        {{- end }}
-    }
-
-{{- end }}

@@ -94,6 +94,23 @@ func (tf *typeFormatter) formatComposable(def ast.ComposableSlotType) string {
 	return variant
 }
 
+func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
+	switch def.Kind {
+	case ast.KindArray:
+		tf.packageMapper("java.util", "LinkedList")
+		return "new LinkedList<>()"
+	case ast.KindMap:
+		tf.packageMapper("java.util", "HashMap")
+		return "new Hashmap<>()"
+	case ast.KindRef:
+		return fmt.Sprintf("new %s()", def.AsRef().ReferredType)
+	case ast.KindStruct:
+		return "new Object()"
+	default:
+		return "unknown"
+	}
+}
+
 func formatScalarType(def ast.ScalarType) string {
 	scalarType := "unknown"
 

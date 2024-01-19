@@ -9,12 +9,23 @@
     
 {{- end }}
 
+{{- define "assignment_setup" }}
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- if .Type.IsArray }}
+        {{- else }}
+        
+        {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}
+
 {{- define "assignment_value" }}
     {{- if not (eq .Value.Constant nil) }}
         {{- formatScalar .Value.Constant }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- escapeVar .Name }}{{ if isBuilder .Name .Type }}.build(){{ end }}
+        {{- escapeVar .Name }}{{ if typeHasBuilder .Type }}.build(){{ end }}
     {{- end }}
     {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
