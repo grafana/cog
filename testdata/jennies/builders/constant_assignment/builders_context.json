@@ -1,0 +1,235 @@
+{
+  "Schemas": [
+    {
+      "Package": "sandbox",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "editable",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "boolean"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "autoRefresh",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": true,
+                    "Scalar": {
+                      "ScalarKind": "boolean"
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "SomeStruct"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "sandbox",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomeStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "editable",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "boolean"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "autoRefresh",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": true,
+                      "Scalar": {
+                        "ScalarKind": "boolean"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "sandbox",
+              "ReferredType": "SomeStruct"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "editable",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "boolean"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "autoRefresh",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": true,
+                  "Scalar": {
+                    "ScalarKind": "boolean"
+                  }
+                },
+                "Required": false
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "sandbox",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "sandbox",
+      "Name": "SomeStruct",
+      "Options": [
+        {
+          "Name": "editable",
+          "Args": [],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "editable",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "boolean"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Constant": true
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "readonly",
+          "Args": [],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "editable",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "boolean"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Constant": false
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "autoRefresh",
+          "Args": [],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "autoRefresh",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": true,
+                    "Scalar": {
+                      "ScalarKind": "boolean"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Constant": true
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "noAutoRefresh",
+          "Args": [],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "autoRefresh",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": true,
+                    "Scalar": {
+                      "ScalarKind": "boolean"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Constant": false
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Enums",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "enumInt",
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "int64"
+                        }
+                      },
+                      "Name": "3",
+                      "Value": 3
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "int64"
+                        }
+                      },
+                      "Name": "4",
+                      "Value": 4
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "enumString",
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "a",
+                      "Value": "a"
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "b",
+                      "Value": "b"
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "enumWithDefault",
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Default": "a",
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "a",
+                      "Value": "a"
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "b",
+                      "Value": "b"
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Enums"
+      }
+    }
+  ]
+}

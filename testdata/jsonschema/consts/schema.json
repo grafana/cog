@@ -1,0 +1,19 @@
+{
+  "$ref": "#/definitions/SomeObject",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeObject": {
+      "properties": {
+        "integer": {
+          "const": 42
+        },
+        "string": {
+          "const": "constant"
+        },
+        "boolean": {
+          "const": true
+        }
+      }
+    }
+  }
+}

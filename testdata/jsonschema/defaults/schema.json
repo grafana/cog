@@ -1,0 +1,48 @@
+{
+  "$ref": "#/definitions/SomeObject",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeObject": {
+      "properties": {
+        "integer": {
+          "type": "integer",
+          "default": 42
+        },
+        "number": {
+          "type": "number",
+          "default": 42
+        },
+        "string": {
+          "type": "string",
+          "default": "default-string"
+        },
+        "boolean": {
+          "type": "boolean",
+          "default": true
+        },
+        "object": {
+          "type": "object",
+          "properties": {
+            "foo": {
+              "type": "string",
+              "default": "foo"
+            }
+          }
+        },
+        "array": {
+          "type": "array",
+          "items": {
+            "type": [
+              "string"
+            ]
+          },
+          "default": [
+            "default",
+            "array",
+            "values"
+          ]
+        }
+      }
+    }
+  }
+}

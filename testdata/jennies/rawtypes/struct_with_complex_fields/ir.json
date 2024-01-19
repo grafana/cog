@@ -1,0 +1,215 @@
+{
+  "Package": "struct_complex_fields",
+  "Objects": [
+    {
+      "Name": "SomeStruct",
+      "SelfRef": {
+        "ReferredPkg": "struct_complex_fields",
+        "ReferredType": "SomeStruct"
+      },
+      "Comments": [
+        "This struct does things."
+      ],
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "FieldRef",
+              "Required": true,
+              "Type": {
+                "Kind": "ref",
+                "Ref": {
+                  "ReferredPkg": "struct_complex_fields",
+                  "ReferredType": "SomeOtherStruct"
+                }
+              }
+            },
+            {
+              "Name": "FieldDisjunctionOfScalars",
+              "Required": true,
+              "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Scalar": {
+                        "ScalarKind": "bool"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Name": "FieldMixedDisjunction",
+              "Required": true,
+              "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Ref": {
+                        "ReferredPkg": "struct_complex_fields",
+                        "ReferredType": "SomeOtherStruct"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Name": "FieldDisjunctionWithNull",
+              "Required": true,
+              "Type": {
+                "Kind": "disjunction",
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Scalar": {
+                        "ScalarKind": "null"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Name": "Operator",
+              "Required": true,
+              "Type": {
+                "Kind": "enum",
+                "Enum": {
+                  "Values": [
+                    {
+                      "Name": "GreaterThan",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Value": ">"
+                    },
+                    {
+                      "Name": "LessThan",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Value": "<"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Name": "FieldArrayOfStrings",
+              "Required": true,
+              "Type": {
+                "Kind": "array",
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "Name": "FieldMapOfStringToString",
+              "Required": true,
+              "Type": {
+                "Kind": "map",
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "Name": "FieldAnonymousStruct",
+              "Required": true,
+              "Type": {
+                "Kind": "struct",
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "FieldAny",
+                      "Required": true,
+                      "Type": {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "ScalarKind": "any"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "SomeOtherStruct",
+      "SelfRef": {
+        "ReferredPkg": "struct_complex_fields",
+        "ReferredType": "SomeOtherStruct"
+      },
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "FieldAny",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

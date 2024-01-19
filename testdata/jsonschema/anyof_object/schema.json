@@ -1,0 +1,16 @@
+{
+  "$ref": "#/definitions/AnyOf",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "AnyOf": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+}

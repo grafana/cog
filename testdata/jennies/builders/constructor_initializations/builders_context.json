@@ -1,0 +1,303 @@
+{
+  "Schemas": [
+    {
+      "Package": "constructor_initializations",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomePanel",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "panel_type"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "cursor",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "constructor_initializations",
+                      "ReferredType": "CursorMode"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "constructor_initializations",
+            "ReferredType": "SomePanel"
+          }
+        },
+        {
+          "Name": "CursorMode",
+          "Type": {
+            "Kind": "enum",
+            "Enum": {
+              "Values": [
+                {
+                  "Name": "Off",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Value": "off"
+                },
+                {
+                  "Name": "Tooltip",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Value": "tooltip"
+                },
+                {
+                  "Name": "Crosshair",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Value": "crosshair"
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "constructor_initializations",
+            "ReferredType": "CursorMode"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "constructor_initializations",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomePanel",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "type",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": "panel_type"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "cursor",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "constructor_initializations",
+                        "ReferredType": "CursorMode"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "constructor_initializations",
+              "ReferredType": "SomePanel"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomePanel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "type",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "panel_type"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "cursor",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "constructor_initializations",
+                    "ReferredType": "CursorMode"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constructor_initializations",
+          "ReferredType": "SomePanel"
+        }
+      },
+      "Package": "constructor_initializations",
+      "Name": "SomePanel",
+      "Initializations": [
+        {
+          "Path": [
+            {
+              "Identifier": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "panel_type"
+                }
+              }
+            }
+          ],
+          "Value": {
+            "Constant": "panel_type"
+          },
+          "Method": "direct"
+        },
+        {
+          "Path": [
+            {
+              "Identifier": "cursor",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "constructor_initializations",
+                  "ReferredType": "CursorMode"
+                }
+              }
+            }
+          ],
+          "Value": {
+            "Constant": "tooltip"
+          },
+          "Method": "direct"
+        }
+      ],
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

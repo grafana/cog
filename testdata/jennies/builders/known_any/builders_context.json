@@ -1,0 +1,217 @@
+{
+  "Schemas": [
+    {
+      "Package": "known_any",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "config",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": true,
+                    "Scalar": {
+                      "ScalarKind": "any"
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "known_any",
+            "ReferredType": "SomeStruct"
+          }
+        },
+        {
+          "Name": "Config",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "known_any",
+            "ReferredType": "Config"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "known_any",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "SomeStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "config",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": true,
+                      "Scalar": {
+                        "ScalarKind": "any"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "known_any",
+              "ReferredType": "SomeStruct"
+            }
+          },
+          {
+            "Name": "Config",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "known_any",
+              "ReferredType": "Config"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "config",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "any"
+                  }
+                },
+                "Required": false
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "known_any",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "known_any",
+      "Name": "SomeStruct",
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "config",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "any"
+                    }
+                  },
+                  "TypeHint": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "known_any",
+                      "ReferredType": "Config"
+                    }
+                  }
+                },
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

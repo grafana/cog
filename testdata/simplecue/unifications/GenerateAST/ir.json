@@ -1,0 +1,148 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "InlineScript",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "string"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "inline",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "InlineScript"
+      }
+    },
+    {
+      "Name": "MetricAggregationWithInlineScript",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "settings",
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "script",
+                      "Type": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "grafanatest",
+                          "ReferredType": "InlineScript"
+                        }
+                      },
+                      "Required": false
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "MetricAggregationWithInlineScript"
+      }
+    },
+    {
+      "Name": "Average",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "avg"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "settings",
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "script",
+                      "Type": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "grafanatest",
+                          "ReferredType": "InlineScript"
+                        }
+                      },
+                      "Required": false
+                    },
+                    {
+                      "Name": "missing",
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Required": false
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Average"
+      }
+    }
+  ]
+}

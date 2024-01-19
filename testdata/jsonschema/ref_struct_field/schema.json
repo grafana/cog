@@ -1,0 +1,12 @@
+{
+  "properties": {
+    "title": {
+      "$ref": "#/definitions/is-string"
+    }
+  },
+  "definitions": {
+    "is-string": {
+      "type": "string"
+    }
+  }
+}

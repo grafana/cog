@@ -1,0 +1,153 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "str",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "trueOrFalse",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "anything",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "data",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bytes"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_unit8",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint8"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_int8",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int8"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_uint16",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint16"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_int16",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int16"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_uint32",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint32"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_int32",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int32"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_uint64",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "num_int64",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  ]
+}

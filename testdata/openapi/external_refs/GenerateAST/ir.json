@@ -1,0 +1,98 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "WithOneRef",
+      "Type": {
+        "Kind": "intersection",
+        "Nullable": false,
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "./refs/refs",
+                "ReferredType": "ReferenceA"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "description",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "WithOneRef"
+      }
+    },
+    {
+      "Name": "WithTwoRef",
+      "Type": {
+        "Kind": "intersection",
+        "Nullable": false,
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "./refs/refs",
+                "ReferredType": "ReferenceA"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "./refs/refs",
+                "ReferredType": "ReferenceB"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "description",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "WithTwoRef"
+      }
+    }
+  ]
+}

@@ -5,14 +5,14 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/txtartest"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestJSONMarshalling_Generate(t *testing.T) {
-	test := txtartest.TxTarTest{
-		Root: "../../../testdata/jennies/rawtypes",
-		Name: "jennies/GoJSONMarshalling",
+	test := testutils.GoldenFilesTestSuite{
+		TestDataRoot: "../../../testdata/jennies/rawtypes",
+		Name:         "GoJSONMarshalling",
 	}
 
 	jenny := JSONMarshalling{
@@ -22,7 +22,7 @@ func TestJSONMarshalling_Generate(t *testing.T) {
 	}
 	compilerPasses := New().CompilerPasses()
 
-	test.Run(t, func(tc *txtartest.Test) {
+	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)
 
 		// We run the compiler passes defined fo Go since without them, we
