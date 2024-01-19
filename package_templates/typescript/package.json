@@ -26,6 +26,10 @@
     "package.json"
   ],
   "exports": {
+    "./cog": {
+      "types": "./dist/cog/index.d.ts",
+      "default": "./dist/cog/index.js"
+    },
 {{- range $i, $pkg := .Packages }}
     "./{{ $pkg }}": {
       "types": "./dist/{{ $pkg }}/index.d.ts",
