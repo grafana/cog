@@ -55,7 +55,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	for _, object := range schema.Objects {
 		jenny.imports = NewImportMap()
-		if object.Type.IsMap() {
+		if object.Type.IsMap() || object.Type.IsArray() {
 			continue
 		}
 		if object.Type.IsScalar() {

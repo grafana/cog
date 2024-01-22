@@ -311,6 +311,7 @@ public class StructComplexFieldsSomeStructFieldAnonymousStruct {
 == struct_complex_fields/SomeStruct.java
 package struct_complex_fields;
 
+import java.util.List;
 
 // This struct does things.
 public class SomeStruct {
@@ -319,7 +320,7 @@ public class SomeStruct {
     public StringOrSomeOtherStruct FieldMixedDisjunction;
     public StringOrNull FieldDisjunctionWithNull;
     public SomeStructOperator Operator;
-    public String[] FieldArrayOfStrings;
+    public List<String> FieldArrayOfStrings;
     public Map<String, String> FieldMapOfStringToString;
     public StructComplexFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
     

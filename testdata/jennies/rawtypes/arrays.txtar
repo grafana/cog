@@ -106,7 +106,6 @@ type ArrayOfRefs []SomeStruct
 type ArrayOfArrayOfNumbers [][]int64
 
 -- out/jennies/JavaRawTypes --
-== arrays/ArrayOfStrings.java
 == arrays/SomeStruct.java
 package arrays;
 
@@ -115,8 +114,6 @@ public class SomeStruct {
     public Object FieldAny;
     
 }
-== arrays/ArrayOfRefs.java
-== arrays/ArrayOfArrayOfNumbers.java
 -- out/jennies/PythonRawTypes --
 == models/arrays.py
 # List of tags, maybe?
