@@ -18,7 +18,7 @@ public class {{ .Name }}Builder implements Builder<{{ .ObjectSignature }}> {
         {{- end }}
         return this;
     }
-    {{- end }}
+    {{ end }}
     
     public {{ .ObjectSignature }} build() {
         {{ .ObjectSignature }} {{ $className }} = new {{ .ObjectSignature }}();
