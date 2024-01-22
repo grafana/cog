@@ -80,6 +80,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.FlattenDisjunctions{},
 		&compiler.DisjunctionWithNullToOptional{},
+		&compiler.DisjunctionInferMapping{},
 		&compiler.DisjunctionToType{},
 	}
 }

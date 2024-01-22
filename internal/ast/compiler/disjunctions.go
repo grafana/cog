@@ -11,8 +11,6 @@ import (
 
 var _ Pass = (*DisjunctionToType)(nil)
 
-var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mapping")
-
 // DisjunctionToType transforms disjunction into a struct, mapping disjunction branches to
 // an optional and nullable field in that struct.
 //
@@ -57,8 +55,6 @@ var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mappin
 //			bar: SomeTypeOrSomeOtherType
 //		}
 //		```
-//
-// Note: for disjunctions of `Ref`s, the pass attempts to infer a discriminator field and mapping. See https://swagger.io/docs/specification/data-models/inheritance-and-polymorphism/
 type DisjunctionToType struct {
 	newObjects map[string]ast.Object
 }
@@ -221,7 +217,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	/*
 		TODO: return an error here. Some jennies won't be able to handle
 		this type of disjunction.
-		if !def.Branches.HasOnlyScalarOrArray() || !def.Branches.HasOnlyRefs() {
+		if !disjunction.Branches.HasOnlyScalarOrArray() || !disjunction.Branches.HasOnlyRefs() {
 		}
 	*/
 
@@ -248,12 +244,13 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		structType.Hints[ast.HintDisjunctionOfScalars] = disjunction
 	}
 	if disjunction.Branches.HasOnlyRefs() {
-		newDisjunctionDef, err := pass.ensureDiscriminator(schema, disjunction)
-		if err != nil {
-			return ast.Type{}, err
+		if len(disjunction.Discriminator) == 0 {
+			return ast.Type{}, fmt.Errorf("discriminator not set")
 		}
-
-		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = newDisjunctionDef
+		if len(disjunction.DiscriminatorMapping) == 0 {
+			return ast.Type{}, fmt.Errorf("discriminator mapping not set")
+		}
+		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunction
 	}
 
 	pass.newObjects[newTypeName] = ast.Object{
@@ -281,136 +278,6 @@ func (pass *DisjunctionToType) disjunctionTypeName(def ast.DisjunctionType) stri
 	}
 
 	return strings.Join(parts, "Or")
-}
-
-func (pass *DisjunctionToType) ensureDiscriminator(schema *ast.Schema, def ast.DisjunctionType) (ast.DisjunctionType, error) {
-	// discriminator-related data was set during parsing: nothing to do.
-	if def.Discriminator != "" && len(def.DiscriminatorMapping) != 0 {
-		return def, nil
-	}
-
-	newDef := def
-
-	if def.Discriminator == "" {
-		newDef.Discriminator = pass.inferDiscriminatorField(schema, newDef)
-	}
-
-	if len(def.DiscriminatorMapping) == 0 {
-		mapping, err := pass.buildDiscriminatorMapping(schema, newDef)
-		if err != nil {
-			return newDef, err
-		}
-
-		newDef.DiscriminatorMapping = mapping
-	}
-
-	return newDef, nil
-}
-
-// inferDiscriminatorField tries to identify a field that might be used
-// as a way to distinguish between the types in the disjunction branches.
-// Such a field must:
-//   - exist in all structs referred by the disjunction
-//   - have a concrete, scalar value
-//
-// Note: this function assumes a disjunction of references to structs.
-func (pass *DisjunctionToType) inferDiscriminatorField(schema *ast.Schema, def ast.DisjunctionType) string {
-	fieldName := ""
-	// map[typeName][fieldName]value
-	candidates := make(map[string]map[string]any)
-
-	// Identify candidates from each branch
-	for _, branch := range def.Branches {
-		typeName := branch.AsRef().ReferredType
-		referredType, found := schema.Resolve(branch)
-		if !found {
-			continue
-		}
-
-		structType := referredType.AsStruct()
-		candidates[typeName] = make(map[string]any)
-
-		for _, field := range structType.Fields {
-			if field.Type.Kind != ast.KindScalar {
-				continue
-			}
-
-			scalarField := field.Type.AsScalar()
-			if !scalarField.IsConcrete() {
-				continue
-			}
-			if field.Type.AsScalar().ScalarKind != ast.KindString {
-				continue
-			}
-
-			candidates[typeName][field.Name] = scalarField.Value
-		}
-	}
-
-	// At this point, if a discriminator exists, it will be listed under the candidates
-	// of any type in our map.
-	// We need to check if all other types have a similar field.
-	someType := def.Branches[0].AsRef().ReferredType
-	allTypes := make([]string, 0, len(candidates))
-
-	for typeName := range candidates {
-		allTypes = append(allTypes, typeName)
-	}
-
-	for candidateFieldName := range candidates[someType] {
-		existsInAllBranches := true
-		for _, branchTypeName := range allTypes {
-			if _, ok := candidates[branchTypeName][candidateFieldName]; !ok {
-				existsInAllBranches = false
-				break
-			}
-		}
-
-		if existsInAllBranches {
-			fieldName = candidateFieldName
-			break
-		}
-	}
-
-	return fieldName
-}
-
-func (pass *DisjunctionToType) buildDiscriminatorMapping(schema *ast.Schema, def ast.DisjunctionType) (map[string]string, error) {
-	mapping := make(map[string]string, len(def.Branches))
-	if def.Discriminator == "" {
-		return nil, fmt.Errorf("discriminator field is empty: %w", ErrCanNotInferDiscriminator)
-	}
-
-	for _, branch := range def.Branches {
-		typeName := branch.AsRef().ReferredType
-		referredType, found := schema.Resolve(branch)
-		if !found {
-			return nil, fmt.Errorf("could not resolve reference '%s'", branch.AsRef().String())
-		}
-
-		structType := referredType.AsStruct()
-
-		field, found := structType.FieldByName(def.Discriminator)
-		if !found {
-			return nil, fmt.Errorf("discriminator field '%s' not found in Object '%s': %w", def.Discriminator, typeName, ErrCanNotInferDiscriminator)
-		}
-
-		// trust, but verify: we need the field to be an actual scalar with a concrete value?
-		if field.Type.Kind != ast.KindScalar {
-			return nil, fmt.Errorf("discriminator field is not a scalar: %w", ErrCanNotInferDiscriminator)
-		}
-
-		switch {
-		case field.Type.AsScalar().IsConcrete():
-			mapping[field.Type.AsScalar().Value.(string)] = typeName
-		case field.Type.Default != nil:
-			mapping[field.Type.Default.(string)] = typeName
-		default:
-			return nil, fmt.Errorf("discriminator field is not concrete: %w", ErrCanNotInferDiscriminator)
-		}
-	}
-
-	return mapping, nil
 }
 
 func (pass *DisjunctionToType) hasOnlySingleTypeScalars(schema *ast.Schema, disjunction ast.DisjunctionType) bool {
