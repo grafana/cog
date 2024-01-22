@@ -1,0 +1,49 @@
+package {{ .Package }};
+
+{{ .Imports }}
+
+{{- range .Comments }}
+// {{ . }}
+{{- end }}
+public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements cog.variants.{{ .Variant }}{{ end }} {
+    {{- template "types" dict "Fields" .Fields "GenGettersAndSetters" .GenGettersAndSetters }}
+
+    {{- range .InnerClasses }}
+    {{- template "inner_class" . }}
+    {{- end }}
+}
+
+{{- define "inner_class" }}
+    {{- range .Comments }}
+    // {{ . }}
+    {{- end }}
+    class {{ .Name }} {
+        {{- template "types" dict "Fields" .Fields "GenGettersAndSetters" .GenGettersAndSetters }}
+
+        {{- range .InnerClasses }}
+        {{- template "inner_class" . }}
+        {{- end }}
+    }
+{{- end }}
+
+
+{{- define "types" }}
+    {{- range .Fields }}
+    {{- range .Comments }}
+    // {{ . }}
+    {{- end }}
+    {{ $.GenGettersAndSetters | ternary "private" "public" }} {{ .Type }} {{ .Name | escapeVar }};
+    {{- end }}
+    {{ if .GenGettersAndSetters }}
+    {{- range .Fields }}
+    public void set{{ .Name | camelcase }}({{ .Type }} {{ .Name | escapeVar }}) {
+        this.{{ .Name | escapeVar }} = {{ .Name | escapeVar }};
+    }
+    {{ end }}
+    {{- range .Fields }}
+    public {{ .Type }} get{{ .Name | camelcase }}() {
+        return {{ .Name | escapeVar }};
+    }
+    {{ end }}
+    {{- end }}
+{{- end }}

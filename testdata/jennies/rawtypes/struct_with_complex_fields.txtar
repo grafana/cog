@@ -299,6 +299,84 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	return errors.Join(errList...)
 }
 
+-- out/jennies/JavaRawTypes --
+== struct_complex_fields/StructComplexFieldsSomeStructFieldAnonymousStruct.java
+package struct_complex_fields;
+
+
+public class StructComplexFieldsSomeStructFieldAnonymousStruct {
+    public Object FieldAny;
+    
+}
+== struct_complex_fields/SomeStruct.java
+package struct_complex_fields;
+
+import java.util.List;
+
+// This struct does things.
+public class SomeStruct {
+    public SomeOtherStruct FieldRef;
+    public StringOrBool FieldDisjunctionOfScalars;
+    public StringOrSomeOtherStruct FieldMixedDisjunction;
+    public StringOrNull FieldDisjunctionWithNull;
+    public SomeStructOperator Operator;
+    public List<String> FieldArrayOfStrings;
+    public Map<String, String> FieldMapOfStringToString;
+    public StructComplexFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
+    
+}
+== struct_complex_fields/SomeOtherStruct.java
+package struct_complex_fields;
+
+
+public class SomeOtherStruct {
+    public Object FieldAny;
+    
+}
+== struct_complex_fields/SomeStructOperator.java
+package struct_complex_fields;
+
+
+public enum SomeStructOperator {
+    GREATER_THAN(">"),
+    LESS_THAN("<");
+
+    private String value;
+
+    private SomeStructOperator(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+}
+== struct_complex_fields/StringOrBool.java
+package struct_complex_fields;
+
+
+public class StringOrBool {
+    public String String;
+    public Boolean Bool;
+    
+}
+== struct_complex_fields/StringOrNull.java
+package struct_complex_fields;
+
+
+public class StringOrNull {
+    public String String;
+    
+}
+== struct_complex_fields/StringOrSomeOtherStruct.java
+package struct_complex_fields;
+
+
+public class StringOrSomeOtherStruct {
+    public String String;
+    public SomeOtherStruct SomeOtherStruct;
+    
+}
 -- out/jennies/PythonRawTypes --
 == models/struct_complex_fields.py
 import typing

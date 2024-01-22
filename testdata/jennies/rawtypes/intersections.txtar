@@ -118,3 +118,22 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	fieldBool: true,
 });
 
+-- out/jennies/JavaRawTypes --
+== intersections/Intersections.java
+package intersections;
+
+import externalPkg.AnotherStruct;
+
+public class Intersections extends SomeStruct, AnotherStruct {
+    public String fieldString;
+    public Integer fieldInteger;
+    
+}
+== intersections/SomeStruct.java
+package intersections;
+
+
+public class SomeStruct {
+    public Boolean fieldBool;
+    
+}

@@ -91,6 +91,19 @@ type SomeStruct struct {
 	FieldInt32 int32 `json:"FieldInt32"`
 }
 
+-- out/jennies/JavaRawTypes --
+== defaults/SomeStruct.java
+package defaults;
+
+
+public class SomeStruct {
+    public Boolean fieldBool;
+    public String fieldString;
+    public String FieldStringWithConstantValue;
+    public Float FieldFloat32;
+    public Integer FieldInt32;
+    
+}
 -- out/jennies/PythonRawTypes --
 == models/defaults.py
 import typing

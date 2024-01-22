@@ -74,6 +74,30 @@ type RefToSomeStruct SomeStruct
 
 type RefToSomeStructFromOtherPackage otherpkg.SomeDistantStruct
 
+-- out/jennies/JavaRawTypes --
+== refs/SomeStruct.java
+package refs;
+
+
+public class SomeStruct {
+    public Object FieldAny;
+    
+}
+== refs/RefToSomeStruct.java
+package refs;
+
+
+public class RefToSomeStruct extends SomeStruct {
+    
+}
+== refs/RefToSomeStructFromOtherPackage.java
+package refs;
+
+import otherpkg.SomeDistantStruct;
+
+public class RefToSomeStructFromOtherPackage extends SomeDistantStruct {
+    
+}
 -- out/jennies/PythonRawTypes --
 == models/refs.py
 from ..models import otherpkg

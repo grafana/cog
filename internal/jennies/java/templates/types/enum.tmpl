@@ -1,0 +1,22 @@
+package {{ .Package }};
+
+{{ range .Comments }}
+// {{ . }}
+{{- end }}
+public enum {{ .Name }} {
+    {{- range $i, $val := .Values }}
+    {{- if gt $i 0 }}, {{- end }}
+    {{ $val.Name }}({{ printf "%#v" $val.Value }})
+    {{- if lastItem $i $.Values }}; {{- end }}
+    {{- end }}
+
+    private {{ .Type }} value;
+
+    private {{ .Name }}({{ .Type }} value) {
+        this.value = value;
+    }
+
+    public {{ .Type }} getValue() {
+        return value;
+    }
+}

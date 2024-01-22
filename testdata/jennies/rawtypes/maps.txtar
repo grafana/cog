@@ -144,6 +144,15 @@ type MapOfStringToRef map[string]SomeStruct
 
 type MapOfStringToMapOfStringToBool map[string]map[string]bool
 
+-- out/jennies/JavaRawTypes --
+== maps/SomeStruct.java
+package maps;
+
+
+public class SomeStruct {
+    public Object FieldAny;
+    
+}
 -- out/jennies/PythonRawTypes --
 == models/maps.py
 # String to... something.

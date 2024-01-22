@@ -271,6 +271,56 @@ export const defaultStruct = (): Struct => ({
 	partialComplexField: { uid: "", intVal: 0, },
 });
 
+-- out/jennies/JavaRawTypes --
+== defaults/NestedStruct.java
+package defaults;
+
+
+public class NestedStruct {
+    public String stringVal;
+    public Long intVal;
+    
+}
+== defaults/DefaultsStructComplexFieldNested.java
+package defaults;
+
+
+public class DefaultsStructComplexFieldNested {
+    public String nestedVal;
+    
+}
+== defaults/DefaultsStructComplexField.java
+package defaults;
+
+import java.util.List;
+
+public class DefaultsStructComplexField {
+    public String uid;
+    public DefaultsStructComplexFieldNested nested;
+    public List<String> array;
+    
+}
+== defaults/DefaultsStructPartialComplexField.java
+package defaults;
+
+
+public class DefaultsStructPartialComplexField {
+    public String uid;
+    public Long intVal;
+    
+}
+== defaults/Struct.java
+package defaults;
+
+
+public class Struct {
+    public NestedStruct allFields;
+    public NestedStruct partialFields;
+    public NestedStruct emptyFields;
+    public DefaultsStructComplexField complexField;
+    public DefaultsStructPartialComplexField partialComplexField;
+    
+}
 -- out/jennies/PythonRawTypes --
 == models/defaults.py
 import typing

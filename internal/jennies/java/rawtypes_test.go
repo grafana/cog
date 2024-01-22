@@ -1,4 +1,4 @@
-package typescript
+package java
 
 import (
 	"testing"
@@ -12,7 +12,7 @@ import (
 func TestRawTypes_Generate(t *testing.T) {
 	test := txtartest.TxTarTest{
 		Root: "../../../testdata/jennies/rawtypes",
-		Name: "jennies/TypescriptRawTypes",
+		Name: "jennies/JavaRawTypes",
 	}
 
 	jenny := RawTypes{}
@@ -22,7 +22,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		req := require.New(tc)
 
 		// We run the compiler passes defined fo Go since without them, we
-		// might not be able to translate some of the IR's semantics into TS.
+		// might not be able to translate some of the IR's semantics into Java.
 		// Example: disjunctions.
 		processedAsts, err := compilerPasses.Process(ast.Schemas{tc.TypesIR()})
 		req.NoError(err)

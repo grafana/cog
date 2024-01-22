@@ -360,6 +360,99 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	return errors.Join(errList...)
 }
 
+-- out/jennies/JavaRawTypes --
+== disjunctions/RefreshRate.java
+package disjunctions;
+
+
+// Refresh rate or disabled.
+public class RefreshRate extends StringOrBool {
+    
+}
+== disjunctions/StringOrNull.java
+package disjunctions;
+
+
+public class StringOrNull extends StringOrNull {
+    
+}
+== disjunctions/SomeStruct.java
+package disjunctions;
+
+
+public class SomeStruct {
+    public String Type;
+    public Object FieldAny;
+    
+}
+== disjunctions/BoolOrRef.java
+package disjunctions;
+
+
+public class BoolOrRef extends BoolOrSomeStruct {
+    
+}
+== disjunctions/SomeOtherStruct.java
+package disjunctions;
+
+
+public class SomeOtherStruct {
+    public String Type;
+    public Byte Foo;
+    
+}
+== disjunctions/YetAnotherStruct.java
+package disjunctions;
+
+
+public class YetAnotherStruct {
+    public String Type;
+    public Byte Bar;
+    
+}
+== disjunctions/SeveralRefs.java
+package disjunctions;
+
+
+public class SeveralRefs extends SomeStructOrSomeOtherStructOrYetAnotherStruct {
+    
+}
+== disjunctions/BoolOrSomeStruct.java
+package disjunctions;
+
+
+public class BoolOrSomeStruct {
+    public Boolean Bool;
+    public SomeStruct SomeStruct;
+    
+}
+== disjunctions/SomeStructOrSomeOtherStructOrYetAnotherStruct.java
+package disjunctions;
+
+
+public class SomeStructOrSomeOtherStructOrYetAnotherStruct {
+    public SomeStruct SomeStruct;
+    public SomeOtherStruct SomeOtherStruct;
+    public YetAnotherStruct YetAnotherStruct;
+    
+}
+== disjunctions/StringOrBool.java
+package disjunctions;
+
+
+public class StringOrBool {
+    public String String;
+    public Boolean Bool;
+    
+}
+== disjunctions/StringOrNull.java
+package disjunctions;
+
+
+public class StringOrNull {
+    public String String;
+    
+}
 -- out/jennies/PythonRawTypes --
 == models/disjunctions.py
 import typing
