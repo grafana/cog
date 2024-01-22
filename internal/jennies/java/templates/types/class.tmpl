@@ -32,7 +32,7 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
-    protected {{ .Type }} {{ .Name | escapeVar }};
+    {{ $.GenGettersAndSetters | ternary "private" "public" }} {{ .Type }} {{ .Name | escapeVar }};
     {{- end }}
     {{ if .GenGettersAndSetters }}
     {{- range .Fields }}
