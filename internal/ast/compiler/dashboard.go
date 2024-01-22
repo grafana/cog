@@ -23,8 +23,12 @@ func (pass *Dashboard) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 
 func (pass *Dashboard) processSchema(schema *ast.Schema) *ast.Schema {
 	for i, object := range schema.Objects {
-		if object.Name == dashboardObject {
+		if schema.Package == dashboardPackage && object.Name == dashboardObject {
 			schema.Objects[i] = pass.processDashboard(object)
+			continue
+		}
+		if schema.Package == dashboardPackage && object.Name == dashboardVariableModelObject {
+			schema.Objects[i] = pass.processVariableModel(object)
 			continue
 		}
 	}
@@ -47,6 +51,21 @@ func (pass *Dashboard) processDashboard(object ast.Object) ast.Object {
 			object.Type.Struct.Fields[i] = field
 		}
 	}
+
+	return object
+}
+
+// TODO: remove this once https://github.com/grafana/grafana/pull/79236 is merged
+func (pass *Dashboard) processVariableModel(object ast.Object) ast.Object {
+	if !object.Type.IsStruct() {
+		return object
+	}
+
+	object.Type.Struct.Fields = append(object.Type.Struct.Fields,
+		ast.NewStructField("allValue", ast.String()),
+		ast.NewStructField("regex", ast.String()),
+		ast.NewStructField("includeAll", ast.Bool(ast.Default(false))),
+	)
 
 	return object
 }

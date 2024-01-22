@@ -212,7 +212,7 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 				continue
 			case ast.KindStruct:
 				defaultMap := field.Type.Default.(map[string]interface{})
-				defaults.Set(field.Name, defaultValueForStructs(field.Type.AsStruct(), orderedmap.FromMap(defaultMap)))
+				defaults.Set(field.Name, jenny.defaultValueForStructs(field.Type.AsStruct(), orderedmap.FromMap(defaultMap)))
 				continue
 			default:
 				defaults.Set(field.Name, field.Type.Default)
@@ -304,8 +304,8 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	if hasStructDefaults(referredType.Type, typeDef.Default) {
-		defaultMap := typeDef.Default.(map[string]interface{})
-		return defaultValueForStructs(referredType.Type.AsStruct(), orderedmap.FromMap(defaultMap))
+		defaultMap := typeDef.Default.(map[string]any)
+		return jenny.defaultValueForStructs(referredType.Type.AsStruct(), orderedmap.FromMap(defaultMap))
 	}
 
 	if pkg != "" {
@@ -315,17 +315,27 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	return raw(fmt.Sprintf("default%s()", ref.ReferredType))
 }
 
-func defaultValueForStructs(def ast.StructType, m *orderedmap.Map[string, interface{}]) any {
+func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.Map[string, any]) any {
 	var buffer strings.Builder
 
 	for _, f := range def.Fields {
 		if m.Has(f.Name) {
 			switch x := m.Get(f.Name).(type) {
-			case map[string]interface{}:
-				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForStructs(f.Type.AsStruct(), orderedmap.FromMap(x))))
+			case map[string]any:
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.defaultValueForStructs(f.Type.AsStruct(), orderedmap.FromMap(x))))
 			case nil:
 				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue([]any{})))
 			default:
+				if f.Type.IsRef() {
+					ref := f.Type.AsRef()
+					referredType, refFound := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
+
+					if refFound && referredType.Type.IsEnum() {
+						buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.typeFormatter.formatEnumValue(referredType, x)))
+						continue
+					}
+				}
+
 				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue(x)))
 			}
 		} else if f.Required {

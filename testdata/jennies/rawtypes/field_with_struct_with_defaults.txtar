@@ -292,11 +292,12 @@ public class DefaultsStructComplexFieldNested {
 == defaults/DefaultsStructComplexField.java
 package defaults;
 
+import java.util.List;
 
 public class DefaultsStructComplexField {
     public String uid;
     public DefaultsStructComplexFieldNested nested;
-    public String[] array;
+    public List<String> array;
     
 }
 == defaults/DefaultsStructPartialComplexField.java

@@ -83,6 +83,7 @@ options:
   # QueryVariable #
   #################
   - omit: { by_builder: QueryVariable.skipUrlSync }
+  - omit: { by_builder: QueryVariable.regex }
 
   #################
   # AdHocVariable #
@@ -94,6 +95,9 @@ options:
   - omit: { by_builder: AdHocVariable.options }
   - omit: { by_builder: AdHocVariable.refresh }
   - omit: { by_builder: AdHocVariable.sort }
+  - omit: { by_builder: AdHocVariable.allValue }
+  - omit: { by_builder: AdHocVariable.regex }
+  - omit: { by_builder: AdHocVariable.includeAll }
 
   ####################
   # ConstantVariable #
@@ -106,6 +110,9 @@ options:
   - omit: { by_builder: ConstantVariable.options }
   - omit: { by_builder: ConstantVariable.current }
   - omit: { by_builder: ConstantVariable.hide }
+  - omit: { by_builder: ConstantVariable.allValue }
+  - omit: { by_builder: ConstantVariable.regex }
+  - omit: { by_builder: ConstantVariable.includeAll }
   - rename:
       by_builder: ConstantVariable.query
       as: value
@@ -134,6 +141,9 @@ options:
   - omit: { by_builder: IntervalVariable.multi }
   - omit: { by_builder: IntervalVariable.sort }
   - omit: { by_builder: IntervalVariable.refresh }
+  - omit: { by_builder: IntervalVariable.allValue }
+  - omit: { by_builder: IntervalVariable.regex }
+  - omit: { by_builder: IntervalVariable.includeAll }
   - rename:
       by_builder: IntervalVariable.query
       as: values
@@ -146,6 +156,9 @@ options:
   - omit: { by_builder: TextBoxVariable.sort }
   - omit: { by_builder: TextBoxVariable.refresh }
   - omit: { by_builder: TextBoxVariable.multi }
+  - omit: { by_builder: TextBoxVariable.allValue }
+  - omit: { by_builder: TextBoxVariable.regex }
+  - omit: { by_builder: TextBoxVariable.includeAll }
   - rename:
       by_builder: TextBoxVariable.query
       as: defaultValue
@@ -157,6 +170,7 @@ options:
   - omit: { by_builder: CustomVariable.datasource }
   - omit: { by_builder: CustomVariable.sort }
   - omit: { by_builder: CustomVariable.refresh }
+  - omit: { by_builder: CustomVariable.regex }
   - rename:
       by_builder: CustomVariable.query
       as: values
