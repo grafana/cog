@@ -14,7 +14,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/builders/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/builders/*.tmpl templates/builders/veneers/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -35,11 +35,15 @@ func functions() template.FuncMap {
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
-		"escapeVar":      escapeVarName,
-		"formatScalar":   formatScalar,
-		"lowerCamelCase": tools.LowerCamelCase,
+		"escapeVar":            escapeVarName,
+		"formatScalar":         formatScalar,
+		"lowerCamelCase":       tools.LowerCamelCase,
+		"formatAssignmentPath": formatAssignmentPath,
 		"formatType": func(_ ast.Type) string {
 			panic("formatType() needs to be overridden by a jenny")
+		},
+		"formatArgsType": func(_ ast.Type) string {
+			panic("formatArgsType() needs to be overridden by a jenny")
 		},
 		"typeHasBuilder": func(_ ast.Type) bool {
 			panic("typeHasBuilder() needs to be overridden by a jenny")

@@ -1,0 +1,18 @@
+{{- define "pre_assignment_Dashboard_WithRow" }}
+
+    // Position the row on the grid
+    GridPos gridPos = new GridPos();
+    gridPos.setX(0); // beginning of the line
+    gridPos.SetY(this.currentY);
+    gridPos.setH(1);
+    gridPos.setW(24); // full width
+    rowPanelResource.setGridPos(gridPos);
+{{- end }}
+
+{{- define "post_assignment_Dashboard_WithRow" }}
+
+    // Reset the state for the next row
+	this.currentX = 0
+	this.currentY += panel.gridPos.H
+	this.lastPanelHeight = 0
+{{- end }}

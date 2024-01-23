@@ -1,0 +1,23 @@
+{{- define "pre_assignment_Dashboard_WithPanel" }}
+
+    if (panelResource.getGridPos() == null) {
+        panelResource.setGridPos(new GridPos());
+    }
+	// Position the panel on the grid
+	panelResource.getGridPos().setX(this.currentX);
+	panelResource.getGridPos().setY(this.currentY);
+{{- end }}
+
+{{- define "post_assignment_Dashboard_WithPanel" }}
+
+	// Prepare the coordinates for the next panel
+	this.currentX += panelResource.getGridPos().getW();
+	this.lastPanelHeight = java.lang.Math.max(this.lastPanelHeight, panelResource.getGridPos().getH());
+
+	// Check for grid width overflow?
+	if (this.currentX >= 24) {
+		this.currentX = 0
+		this.currentY += this.lastPanelHeight
+		this.lastPanelHeight = 0
+	}
+{{- end }}

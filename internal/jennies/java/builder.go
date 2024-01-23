@@ -67,7 +67,8 @@ func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Buil
 	}
 
 	err := templates.Funcs(map[string]any{
-		"formatType":     jenny.typeFormatter.formatBuilderArgs,
+		"formatType":     jenny.typeFormatter.formatFieldType,
+		"formatArgsType": jenny.typeFormatter.formatBuilderArgs,
 		"lowerCamelCase": tools.LowerCamelCase,
 		"typeHasBuilder": context.ResolveToBuilder,
 		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
@@ -175,16 +176,39 @@ func (jenny Builder) getSafeGuards(assignment ast.Assignment) []string {
 }
 
 func (jenny Builder) initSafeGuard(path ast.Path) string {
-	fieldPath := formatFieldPath(path)
+	paths := formatFieldPath(path)
 	valueType := path.Last().Type
 	if path.Last().TypeHint != nil {
 		valueType = *path.Last().TypeHint
 	}
 
 	emptyValue := jenny.typeFormatter.defaultValueFor(valueType)
+	if len(paths) == 1 {
+		return fmt.Sprintf(
+			`	if (this.%[1]s == null) {
+			this.%[1]s = %[2]s;
+		}`, tools.LowerCamelCase(paths[0]), emptyValue)
+	}
+
+	getters := make([]string, len(paths))
+	setters := make([]string, len(paths))
+	for i, p := range paths {
+		if i == 0 {
+			getters[i] = tools.LowerCamelCase(p)
+			setters[i] = tools.LowerCamelCase(p)
+			continue
+		}
+
+		if i == len(paths)-1 {
+			setters[i] = fmt.Sprintf("set%s", p)
+		} else {
+			setters[i] = fmt.Sprintf("get%s()", p)
+		}
+		getters[i] = fmt.Sprintf("get%s()", p)
+	}
 
 	return fmt.Sprintf(
 		`	if (this.%[1]s == null) {
-			this.%[1]s = %[2]s;
-		}`, fieldPath, emptyValue)
+			this.%[2]s(%[3]s);
+		}`, strings.Join(getters, "."), strings.Join(setters, "."), emptyValue)
 }

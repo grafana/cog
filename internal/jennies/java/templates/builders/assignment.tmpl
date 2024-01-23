@@ -7,13 +7,31 @@
     {{- template "assignment_setup" (dict "Assignment" .Assignment "Value" .Assignment.Value) }}
 
     {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
+
+    {{- $preTmpl := print "pre_assignment_" .BuilderName "_" .OptionName }}
+    {{- includeIfExists $preTmpl (dict) -}}
+
     {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) -}}
+    
+    {{- $postTmpl := print "post_assignment_" .BuilderName "_" .OptionName }}
+    {{- includeIfExists $postTmpl (dict) -}}
     
 {{- end }}
 
 {{- define "assignment_setup" }}
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{ .Type | formatType }} {{ .Name | lowerCamelCase }}Resource = {{ .Name | lowerCamelCase }}.build();
+        {{- else }}
+        {{ .Type | formatType }} {{ .Name | lowerCamelCase }}Resource = {{ .Name | lowerCamelCase }};
+        {{- end }}
+    {{- end }}
     {{- with .Value.Envelope }}
-        {{ template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+        {{- range .Values }}
+        {{- template "assignment_setup" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{- end }}
+        
+        {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
     {{- end }}
 {{- end }}
 
@@ -22,11 +40,7 @@
         {{- formatScalar .Value.Constant }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- escapeVar .Name }}.build()
-        {{- else }}
-        {{- escapeVar .Name }}
-        {{- end }}
+        {{- escapeVar .Name }}Resource
     {{- end }}
     {{- with .Value.Envelope }}
         {{- .Type | formatType | lowerCamelCase }}
@@ -35,14 +49,15 @@
 
 {{- define "value_envelope" }}
     {{ $envelopeType := .Envelope.Type | formatType }}
-            {{- $envelopeType }} {{ $envelopeType | lowerCamelCase }} = new {{ $envelopeType }}();
+        {{- $envelopeType }} {{ $envelopeType | lowerCamelCase }} = new {{ $envelopeType }}();
     {{- range .Envelope.Values }}
         {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
-        {{ $envelopeType | lowerCamelCase }}.{{ (index .Path 0).Identifier | lowerCamelCase }} = {{ $value | lowerCamelCase }};
+        {{ $envelopeType | lowerCamelCase }}.set{{ (index .Path 0).Identifier }}({{ $value | lowerCamelCase }});
     {{- end }}
 {{- end }}
 
 {{- define "assignment_method" }}
-        {{ if eq .Method "direct" }}this.{{ .Path }} = {{ .Value }};{{ end -}}
-        {{ if eq .Method "append" }}this.{{ .Path }}.add({{ .Value }});{{ end -}}
+        {{ $path := formatAssignmentPath .Path .Method }}
+        {{ if eq .Method "direct" }}this.{{ $path }}{{ if eq (len .Path) 1 }} = {{ .Value }}{{ else }}({{ .Value }}){{ end }};{{ end -}}
+        {{ if eq .Method "append" }}this.{{ $path }}.add({{ .Value }});{{ end -}}
 {{- end }}
