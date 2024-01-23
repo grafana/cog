@@ -212,6 +212,10 @@ func (formatter *typeFormatter) formatMap(def ast.MapType) string {
 }
 
 func (formatter *typeFormatter) formatRef(def ast.RefType) string {
+	return formatter.formatFullyQualifiedRef(def, !formatter.forBuilder)
+}
+
+func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeForwardRef bool) string {
 	formatted := tools.UpperCamelCase(def.ReferredType)
 
 	referredPkg := def.ReferredPkg
@@ -220,7 +224,7 @@ func (formatter *typeFormatter) formatRef(def ast.RefType) string {
 		formatted = referredPkg + "." + formatted
 	}
 
-	if formatter.forBuilder || referredPkg != "" {
+	if !escapeForwardRef || referredPkg != "" {
 		return formatted
 	}
 
