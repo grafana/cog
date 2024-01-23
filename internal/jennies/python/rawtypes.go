@@ -212,7 +212,8 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 			ref := field.Type.AsRef()
 			referredObject, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 			if found && referredObject.Type.IsStruct() {
-				formattedRef := strings.Trim(jenny.typeFormatter.formatRef(ref), "'") // TODO: remove this hack
+				formattedRef := jenny.typeFormatter.formatFullyQualifiedRef(ref, false)
+
 				value = fmt.Sprintf(`%s.from_json(data["%s"])`, formattedRef, field.Name)
 			}
 		}
