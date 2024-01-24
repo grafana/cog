@@ -9,6 +9,10 @@ public class {{ .Name }}Builder implements Builder<{{ .ObjectSignature }}> {
     private {{ .Type }} {{ .Name }};
     {{- end }}
     
+    {{- range .Properties }}
+    private {{ .Type }} {{ .Name }};
+    {{- end }}
+    
     public {{ .Name }}Builder() {
     }
     

@@ -15,7 +15,7 @@ func formatFieldPath(fieldPath ast.Path) []string {
 }
 
 func formatAssignmentPath(fieldPath ast.Path, method ast.AssignmentMethod) string {
-	path := fieldPath[0].Identifier
+	path := tools.LowerCamelCase(fieldPath[0].Identifier)
 	for i, p := range fieldPath[1:] {
 		identifier := tools.UpperCamelCase(p.Identifier)
 		if i == len(fieldPath[1:])-1 && method != ast.AppendAssignment {

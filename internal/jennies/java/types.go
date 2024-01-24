@@ -44,12 +44,7 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 
 func (tf *typeFormatter) formatBuilderArgs(def ast.Type) string {
 	value := tf.formatFieldType(def)
-	switch def.Kind {
-	case ast.KindRef:
-		if tf.context.ResolveToBuilder(def) {
-			value = fmt.Sprintf("Builder<%s>", value)
-		}
-	case ast.KindComposableSlot, ast.KindArray:
+	if _, ok := tf.context.ResolveToComposableSlot(def); ok || tf.context.ResolveToBuilder(def) {
 		value = fmt.Sprintf("Builder<%s>", value)
 	}
 

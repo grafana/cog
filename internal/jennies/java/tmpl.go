@@ -42,9 +42,6 @@ func functions() template.FuncMap {
 		"formatType": func(_ ast.Type) string {
 			panic("formatType() needs to be overridden by a jenny")
 		},
-		"formatArgsType": func(_ ast.Type) string {
-			panic("formatArgsType() needs to be overridden by a jenny")
-		},
 		"typeHasBuilder": func(_ ast.Type) bool {
 			panic("typeHasBuilder() needs to be overridden by a jenny")
 		},
@@ -105,14 +102,20 @@ type BuilderTemplate struct {
 	Name            string
 	ObjectSignature string
 	Fields          []Field
+	Properties      []Field
 	Options         []Option
 }
 
 type Option struct {
 	Name        string
-	Args        []ast.Argument
+	Args        []Arg
 	Assignments []Assignment
 	Type        any
+}
+
+type Arg struct {
+	Name string
+	Type string
 }
 
 type Assignment struct {

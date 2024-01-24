@@ -40,7 +40,7 @@
         {{- formatScalar .Value.Constant }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- escapeVar .Name }}Resource
+        {{- .Name | escapeVar | lowerCamelCase }}Resource
     {{- end }}
     {{- with .Value.Envelope }}
         {{- .Type | formatType | lowerCamelCase }}

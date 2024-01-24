@@ -57,18 +57,8 @@ func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Buil
 	})
 
 	object, _ := context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
-	options := make([]Option, len(builder.Options))
-	for i, option := range builder.Options {
-		options[i] = Option{
-			Name:        tools.UpperCamelCase(option.Name),
-			Args:        option.Args,
-			Assignments: jenny.genAssignments(option.Assignments),
-		}
-	}
-
 	err := templates.Funcs(map[string]any{
 		"formatType":     jenny.typeFormatter.formatFieldType,
-		"formatArgsType": jenny.typeFormatter.formatBuilderArgs,
 		"lowerCamelCase": tools.LowerCamelCase,
 		"typeHasBuilder": context.ResolveToBuilder,
 		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
@@ -80,8 +70,9 @@ func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Buil
 		Imports:         jenny.imports,
 		Name:            builder.Name,
 		ObjectSignature: jenny.getFullObjectName(builder.For.SelfRef),
-		Options:         options,
-		Fields:          jenny.genFields(context, object),
+		Options:         jenny.genOptions(builder.Options),
+		Fields:          jenny.genFields(context, builder.Package, object),
+		Properties:      jenny.genProperties(builder.Properties),
 	})
 
 	if err != nil {
@@ -95,6 +86,31 @@ func (jenny Builder) getFullObjectName(ref ast.RefType) string {
 	refType := tools.UpperCamelCase(ref.ReferredType)
 	jenny.typeFormatter.packageMapper(ref.ReferredPkg, refType)
 	return refType
+}
+
+func (jenny Builder) genOptions(opts []ast.Option) []Option {
+	options := make([]Option, len(opts))
+	for i, option := range opts {
+		options[i] = Option{
+			Name:        tools.UpperCamelCase(option.Name),
+			Args:        jenny.genArgs(option.Args),
+			Assignments: jenny.genAssignments(option.Assignments),
+		}
+	}
+
+	return options
+}
+
+func (jenny Builder) genArgs(arguments []ast.Argument) []Arg {
+	args := make([]Arg, len(arguments))
+	for i, arg := range arguments {
+		args[i] = Arg{
+			Name: tools.LowerCamelCase(arg.Name),
+			Type: jenny.typeFormatter.formatBuilderArgs(arg.Type),
+		}
+	}
+
+	return args
 }
 
 func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {
@@ -119,14 +135,14 @@ func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {
 	return assign
 }
 
-func (jenny Builder) genFields(context common.Context, object ast.Object) []Field {
+func (jenny Builder) genFields(context common.Context, builderPkg string, object ast.Object) []Field {
 	fields := make([]Field, 0)
 	switch object.Type.Kind {
 	case ast.KindStruct:
 		for _, field := range object.Type.AsStruct().Fields {
 			fields = append(fields, Field{
 				Name:     tools.LowerCamelCase(field.Name),
-				Type:     jenny.typeFormatter.formatFieldType(field.Type),
+				Type:     jenny.genFieldType(context, builderPkg, field),
 				Comments: field.Comments,
 			})
 		}
@@ -136,10 +152,33 @@ func (jenny Builder) genFields(context common.Context, object ast.Object) []Fiel
 		if !ok {
 			break
 		}
-		fields = append(fields, jenny.genFields(context, obj)...)
+		fields = append(fields, jenny.genFields(context, builderPkg, obj)...)
 	default:
 		// Shouldn't reach here...
 		return nil
+	}
+
+	return fields
+}
+
+func (jenny Builder) genFieldType(context common.Context, builderPkg string, field ast.StructField) string {
+	if field.Name == "options" && field.Type.IsAny() {
+		if obj, ok := context.LocateObject(builderPkg, "Options"); ok {
+			return obj.Name
+		}
+	}
+
+	return jenny.typeFormatter.formatFieldType(field.Type)
+}
+
+func (jenny Builder) genProperties(properties []ast.StructField) []Field {
+	fields := make([]Field, len(properties))
+	for i, field := range properties {
+		fields[i] = Field{
+			Name:     tools.LowerCamelCase(field.Name),
+			Type:     jenny.typeFormatter.formatFieldType(field.Type),
+			Comments: field.Comments,
+		}
 	}
 
 	return fields
