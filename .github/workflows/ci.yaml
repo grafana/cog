@@ -57,7 +57,7 @@ jobs:
 
     strategy:
       matrix:
-        kind_version: [next, v10.2.x, v10.1.x]
+        kind_version: [next, v10.3.x, v10.2.x, v10.1.x]
 
     steps:
       - uses: actions/checkout@v4
