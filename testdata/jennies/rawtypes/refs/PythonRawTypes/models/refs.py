@@ -1,3 +1,4 @@
+import typing
 from ..models import otherpkg
 
 
@@ -12,6 +13,13 @@ class SomeStruct:
             "FieldAny": self.field_any,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_any": data["FieldAny"],
+        }
+        return cls(**args)
 
 
 RefToSomeStruct = 'SomeStruct'

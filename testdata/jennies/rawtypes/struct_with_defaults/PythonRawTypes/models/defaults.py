@@ -24,3 +24,13 @@ class SomeStruct:
             "FieldInt32": self.field_int32,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_bool": data["fieldBool"],
+            "field_string": data["fieldString"],
+            "field_float32": data["FieldFloat32"],
+            "field_int32": data["FieldInt32"],
+        }
+        return cls(**args)

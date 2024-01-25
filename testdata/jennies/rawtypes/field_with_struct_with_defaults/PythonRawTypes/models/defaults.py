@@ -16,6 +16,14 @@ class NestedStruct:
         }
         return payload
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "string_val": data["stringVal"],
+            "int_val": data["intVal"],
+        }
+        return cls(**args)
+
 
 class DefaultsStructComplexFieldNested:
     nested_val: str
@@ -28,6 +36,13 @@ class DefaultsStructComplexFieldNested:
             "nestedVal": self.nested_val,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "nested_val": data["nestedVal"],
+        }
+        return cls(**args)
 
 
 class DefaultsStructComplexField:
@@ -48,6 +63,15 @@ class DefaultsStructComplexField:
         }
         return payload
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "uid": data["uid"],
+            "nested": DefaultsStructComplexFieldNested.from_json(data["nested"]),
+            "array": data["array"],
+        }
+        return cls(**args)
+
 
 class DefaultsStructPartialComplexField:
     uid: str
@@ -63,6 +87,14 @@ class DefaultsStructPartialComplexField:
             "intVal": self.int_val,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "uid": data["uid"],
+            "int_val": data["intVal"],
+        }
+        return cls(**args)
 
 
 class Struct:
@@ -88,3 +120,14 @@ class Struct:
             "partialComplexField": None if self.partial_complex_field is None else self.partial_complex_field.to_json(),
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "all_fields": NestedStruct.from_json(data["allFields"]),
+            "partial_fields": NestedStruct.from_json(data["partialFields"]),
+            "empty_fields": NestedStruct.from_json(data["emptyFields"]),
+            "complex_field": DefaultsStructComplexField.from_json(data["complexField"]),
+            "partial_complex_field": DefaultsStructPartialComplexField.from_json(data["partialComplexField"]),
+        }
+        return cls(**args)

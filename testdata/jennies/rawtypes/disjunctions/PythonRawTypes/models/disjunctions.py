@@ -23,6 +23,13 @@ class SomeStruct:
         }
         return payload
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_any": data["FieldAny"],
+        }
+        return cls(**args)
+
 
 BoolOrRef = typing.Union[typing.Union[bool, 'SomeStruct']]
 
@@ -42,6 +49,13 @@ class SomeOtherStruct:
         }
         return payload
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "foo": data["Foo"],
+        }
+        return cls(**args)
+
 
 class YetAnotherStruct:
     type: typing.Literal["yet-another-struct"]
@@ -57,6 +71,13 @@ class YetAnotherStruct:
             "Bar": self.bar,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "bar": data["Bar"],
+        }
+        return cls(**args)
 
 
 SeveralRefs = typing.Union[typing.Union['SomeStruct', 'SomeOtherStruct', 'YetAnotherStruct']]

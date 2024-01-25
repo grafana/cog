@@ -13,6 +13,13 @@ class StructOptionalFieldsSomeStructFieldAnonymousStruct:
         }
         return payload
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_any": data["FieldAny"],
+        }
+        return cls(**args)
+
 
 class SomeStruct:
     field_ref: typing.Optional['SomeOtherStruct']
@@ -43,6 +50,24 @@ class SomeStruct:
             payload["FieldAnonymousStruct"] = self.field_anonymous_struct.to_json()
         return payload
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+        }
+        
+        if "FieldRef" in data:
+            args["field_ref"] = SomeOtherStruct.from_json(data["FieldRef"])
+        if "FieldString" in data:
+            args["field_string"] = data["FieldString"]
+        if "Operator" in data:
+            args["operator"] = data["Operator"]
+        if "FieldArrayOfStrings" in data:
+            args["field_array_of_strings"] = data["FieldArrayOfStrings"]
+        if "FieldAnonymousStruct" in data:
+            args["field_anonymous_struct"] = StructOptionalFieldsSomeStructFieldAnonymousStruct.from_json(data["FieldAnonymousStruct"])        
+
+        return cls(**args)
+
 
 class SomeOtherStruct:
     field_any: object
@@ -55,3 +80,10 @@ class SomeOtherStruct:
             "FieldAny": self.field_any,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_any": data["FieldAny"],
+        }
+        return cls(**args)
