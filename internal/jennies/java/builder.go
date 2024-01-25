@@ -71,7 +71,7 @@ func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Buil
 		Name:            builder.Name,
 		ObjectSignature: jenny.getFullObjectName(builder.For.SelfRef),
 		Options:         jenny.genOptions(builder.Options),
-		Fields:          jenny.genFields(context, builder.Package, object),
+		Fields:          jenny.genFields(context, object),
 		Properties:      jenny.genProperties(builder.Properties),
 	})
 
@@ -135,14 +135,14 @@ func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {
 	return assign
 }
 
-func (jenny Builder) genFields(context common.Context, builderPkg string, object ast.Object) []Field {
+func (jenny Builder) genFields(context common.Context, object ast.Object) []Field {
 	fields := make([]Field, 0)
 	switch object.Type.Kind {
 	case ast.KindStruct:
 		for _, field := range object.Type.AsStruct().Fields {
 			fields = append(fields, Field{
 				Name:     tools.LowerCamelCase(field.Name),
-				Type:     jenny.genFieldType(context, builderPkg, field),
+				Type:     jenny.typeFormatter.formatFieldType(field.Type),
 				Comments: field.Comments,
 			})
 		}
@@ -152,23 +152,13 @@ func (jenny Builder) genFields(context common.Context, builderPkg string, object
 		if !ok {
 			break
 		}
-		fields = append(fields, jenny.genFields(context, builderPkg, obj)...)
+		fields = append(fields, jenny.genFields(context, obj)...)
 	default:
 		// Shouldn't reach here...
 		return nil
 	}
 
 	return fields
-}
-
-func (jenny Builder) genFieldType(context common.Context, builderPkg string, field ast.StructField) string {
-	if field.Name == "options" && field.Type.IsAny() {
-		if obj, ok := context.LocateObject(builderPkg, "Options"); ok {
-			return obj.Name
-		}
-	}
-
-	return jenny.typeFormatter.formatFieldType(field.Type)
 }
 
 func (jenny Builder) genProperties(properties []ast.StructField) []Field {
@@ -215,35 +205,35 @@ func (jenny Builder) getSafeGuards(assignment ast.Assignment) []string {
 }
 
 func (jenny Builder) initSafeGuard(path ast.Path) string {
-	paths := formatFieldPath(path)
+	parts := formatFieldPath(path)
 	valueType := path.Last().Type
 	if path.Last().TypeHint != nil {
 		valueType = *path.Last().TypeHint
 	}
 
 	emptyValue := jenny.typeFormatter.defaultValueFor(valueType)
-	if len(paths) == 1 {
+	if len(parts) == 1 {
 		return fmt.Sprintf(
 			`	if (this.%[1]s == null) {
 			this.%[1]s = %[2]s;
-		}`, tools.LowerCamelCase(paths[0]), emptyValue)
+		}`, tools.LowerCamelCase(parts[0]), emptyValue)
 	}
 
-	getters := make([]string, len(paths))
-	setters := make([]string, len(paths))
-	for i, p := range paths {
+	getters := make([]string, len(parts))
+	setters := make([]string, len(parts))
+	for i, p := range parts {
 		if i == 0 {
 			getters[i] = tools.LowerCamelCase(p)
 			setters[i] = tools.LowerCamelCase(p)
 			continue
 		}
 
-		if i == len(paths)-1 {
+		getters[i] = fmt.Sprintf("get%s()", p)
+		if i == len(parts)-1 {
 			setters[i] = fmt.Sprintf("set%s", p)
 		} else {
 			setters[i] = fmt.Sprintf("get%s()", p)
 		}
-		getters[i] = fmt.Sprintf("get%s()", p)
 	}
 
 	return fmt.Sprintf(

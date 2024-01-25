@@ -25,6 +25,11 @@
         {{- else }}
         {{ .Type | formatType }} {{ .Name | lowerCamelCase }}Resource = {{ .Name | lowerCamelCase }};
         {{- end }}
+        {{- $castPath := formatCastValue $.Assignment.Path }}
+        {{- if not (eq $castPath.Value "") }}
+        {{ $castPath.Class }} {{ $castPath.Value | lowerCamelCase }}Resource = ({{- $castPath.Class }}) this.{{ $castPath.Path }};
+        {{ $castPath.Value | lowerCamelCase }}Resource.set{{ .Name | camelcase }}({{ .Name | lowerCamelCase }}Resource);
+        {{- end }}
     {{- end }}
     {{- with .Value.Envelope }}
         {{- range .Values }}
@@ -40,7 +45,12 @@
         {{- formatScalar .Value.Constant }}
     {{- end }}
     {{- with .Value.Argument }}
+        {{- $castPath := formatCastValue $.Assignment.Path }}
+        {{- if not (eq $castPath.Value "") }}
+        {{- $castPath.Value | lowerCamelCase }}Resource
+        {{- else }}
         {{- .Name | escapeVar | lowerCamelCase }}Resource
+        {{- end }}
     {{- end }}
     {{- with .Value.Envelope }}
         {{- .Type | formatType | lowerCamelCase }}
@@ -58,6 +68,13 @@
 
 {{- define "assignment_method" }}
         {{ $path := formatAssignmentPath .Path .Method }}
-        {{ if eq .Method "direct" }}this.{{ $path }}{{ if eq (len .Path) 1 }} = {{ .Value }}{{ else }}({{ .Value }}){{ end }};{{ end -}}
+        {{- if eq .Method "direct" }}
+        {{- $castPath := formatCastValue .Path }}
+        {{- if not (eq $castPath.Value "") }}
+        this.{{ $path }}{{ if eq (len .Path) 2 }} = {{ .Value }}{{ else }}({{ .Value }}){{ end }};
+        {{- else }} 
+        this.{{ $path }}{{ if eq (len .Path) 1 }} = {{ .Value }}{{ else }}({{ .Value }}){{ end }};
+        {{- end }}
+        {{- end }}
         {{ if eq .Method "append" }}this.{{ $path }}.add({{ .Value }});{{ end -}}
 {{- end }}

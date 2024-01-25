@@ -4,7 +4,7 @@ package {{ .Package }};
 
 {{- $className := .ObjectSignature | lowerCamelCase }}
 {{- $builderName := .Name }}
-public class {{ .Name }}Builder implements Builder<{{ .ObjectSignature }}> {
+public class {{ .Name | camelcase }}Builder implements Builder<{{ .ObjectSignature }}> {
     {{- range .Fields }}
     private {{ .Type }} {{ .Name }};
     {{- end }}
@@ -13,11 +13,11 @@ public class {{ .Name }}Builder implements Builder<{{ .ObjectSignature }}> {
     private {{ .Type }} {{ .Name }};
     {{- end }}
     
-    public {{ .Name }}Builder() {
+    public {{ .Name | camelcase }}Builder() {
     }
     
     {{- range $opt := .Options }}
-    public {{ $.Name }}Builder set{{ $opt.Name }}({{ template "args" $opt.Args }}) {
+    public {{ $.Name | camelcase }}Builder set{{ $opt.Name }}({{ template "args" $opt.Args }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $builderName "OptionName" $opt.Name) }}
         {{- end }}

@@ -42,6 +42,7 @@ func functions() template.FuncMap {
 		"formatType": func(_ ast.Type) string {
 			panic("formatType() needs to be overridden by a jenny")
 		},
+		"formatCastValue": formatCastValue,
 		"typeHasBuilder": func(_ ast.Type) bool {
 			panic("typeHasBuilder() needs to be overridden by a jenny")
 		},

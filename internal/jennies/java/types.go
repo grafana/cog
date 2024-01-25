@@ -2,7 +2,6 @@ package java
 
 import (
 	"fmt"
-
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
@@ -103,8 +102,8 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		tf.packageMapper("java.util", "HashMap")
 		return "new Hashmap<>()"
 	case ast.KindRef:
-		tf.packageMapper(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
-		return fmt.Sprintf("new %s()", def.AsRef().ReferredType)
+		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		return fmt.Sprintf("new %s()", refDef)
 	case ast.KindStruct:
 		return "new Object()"
 	default:
