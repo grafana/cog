@@ -69,6 +69,7 @@ func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Buil
 		Package:         builder.Package,
 		Imports:         jenny.imports,
 		Name:            builder.Name,
+		Constructor:     jenny.genConstructor(context, builder),
 		ObjectSignature: jenny.getFullObjectName(builder.For.SelfRef),
 		Options:         jenny.genOptions(builder.Options),
 		Fields:          jenny.genFields(context, object),
@@ -86,6 +87,39 @@ func (jenny Builder) getFullObjectName(ref ast.RefType) string {
 	refType := tools.UpperCamelCase(ref.ReferredType)
 	jenny.typeFormatter.packageMapper(ref.ReferredPkg, refType)
 	return refType
+}
+
+func (jenny Builder) genConstructor(context common.Context, builder ast.Builder) Constructor {
+	var argsList []Arg
+	var assignmentList = jenny.genAssignments(builder.Initializations)
+
+	for i, assign := range assignmentList {
+		if assign.Value.Constant == nil {
+			continue
+		}
+		if class, enum, ok := getEnumValues(context, builder.For.SelfRef, assign.Path.Last().Identifier); ok {
+			for _, v := range enum.Values {
+				if v.Value == assign.Value.Constant {
+					assignmentList[i].Value.Constant = class + "." + tools.UpperSnakeCase(v.Name)
+					break
+				}
+			}
+		}
+	}
+
+	for _, opt := range builder.Options {
+		if !opt.IsConstructorArg {
+			continue
+		}
+
+		argsList = jenny.genArgs(opt.Args)
+		assignmentList = append(assignmentList, jenny.genAssignments(opt.Assignments)...)
+	}
+
+	return Constructor{
+		Args:        argsList,
+		Assignments: assignmentList,
+	}
 }
 
 func (jenny Builder) genOptions(opts []ast.Option) []Option {

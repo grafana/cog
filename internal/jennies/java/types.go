@@ -5,6 +5,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
+	"strings"
 )
 
 type typeFormatter struct {
@@ -138,6 +139,10 @@ func formatScalarType(def ast.ScalarType) string {
 	return scalarType
 }
 
-func formatScalar(val any) string {
-	return fmt.Sprintf("%#v", val)
+func formatScalar(val any) any {
+	newVal := fmt.Sprintf("%#v", val)
+	if len(strings.Split(newVal, ".")) > 1 {
+		return val
+	}
+	return newVal
 }

@@ -3,6 +3,7 @@ package java
 import (
 	"fmt"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -72,4 +73,21 @@ func formatCastValue(fieldPath ast.Path) CastPath {
 		Value: refType,
 		Path:  castedPath,
 	}
+}
+
+func getEnumValues(context common.Context, ref ast.RefType, identifier string) (string, ast.EnumType, bool) {
+	obj, _ := context.LocateObject(ref.ReferredPkg, tools.UpperCamelCase(ref.ReferredType))
+	if obj.Type.IsEnum() {
+		return ref.ReferredType, obj.Type.AsEnum(), true
+	}
+
+	if obj.Type.IsStruct() {
+		for _, field := range obj.Type.AsStruct().Fields {
+			if identifier == field.Name && field.Type.IsRef() {
+				return getEnumValues(context, field.Type.AsRef(), identifier)
+			}
+		}
+	}
+
+	return "", ast.EnumType{}, false
 }

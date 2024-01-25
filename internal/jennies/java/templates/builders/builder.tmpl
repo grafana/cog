@@ -13,7 +13,10 @@ public class {{ .Name | camelcase }}Builder implements Builder<{{ .ObjectSignatu
     private {{ .Type }} {{ .Name }};
     {{- end }}
     
-    public {{ .Name | camelcase }}Builder() {
+    public {{ .Name | camelcase }}Builder({{- template "args" .Constructor.Args }}) {
+    {{- range .Constructor.Assignments }}
+        {{- template "assignment" (dict "Assignment" . "BuilderName" $builderName "OptionName" "") }}
+    {{- end }}
     }
     
     {{- range $opt := .Options }}

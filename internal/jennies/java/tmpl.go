@@ -102,9 +102,15 @@ type BuilderTemplate struct {
 	Imports         fmt.Stringer
 	Name            string
 	ObjectSignature string
+	Constructor     Constructor
 	Fields          []Field
 	Properties      []Field
 	Options         []Option
+}
+
+type Constructor struct {
+	Args        []Arg
+	Assignments []Assignment
 }
 
 type Option struct {
