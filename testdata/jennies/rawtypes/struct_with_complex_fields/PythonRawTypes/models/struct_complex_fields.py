@@ -13,6 +13,13 @@ class StructComplexFieldsSomeStructFieldAnonymousStruct:
         }
         return payload
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_any": data["FieldAny"],
+        }
+        return cls(**args)
+
 
 class SomeStruct:
     """
@@ -51,6 +58,20 @@ class SomeStruct:
         }
         return payload
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_ref": SomeOtherStruct.from_json(data["FieldRef"]),
+            "field_disjunction_of_scalars": data["FieldDisjunctionOfScalars"],
+            "field_mixed_disjunction": data["FieldMixedDisjunction"],
+            "field_disjunction_with_null": data["FieldDisjunctionWithNull"],
+            "operator": data["Operator"],
+            "field_array_of_strings": data["FieldArrayOfStrings"],
+            "field_map_of_string_to_string": data["FieldMapOfStringToString"],
+            "field_anonymous_struct": StructComplexFieldsSomeStructFieldAnonymousStruct.from_json(data["FieldAnonymousStruct"]),
+        }
+        return cls(**args)
+
 
 class SomeOtherStruct:
     field_any: object
@@ -63,3 +84,10 @@ class SomeOtherStruct:
             "FieldAny": self.field_any,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_any": data["FieldAny"],
+        }
+        return cls(**args)

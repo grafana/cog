@@ -1,3 +1,6 @@
+import typing
+
+
 # List of tags, maybe?
 ArrayOfStrings = list[str]
 
@@ -13,6 +16,13 @@ class SomeStruct:
             "FieldAny": self.field_any,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_any": data["FieldAny"],
+        }
+        return cls(**args)
 
 
 ArrayOfRefs = list['SomeStruct']

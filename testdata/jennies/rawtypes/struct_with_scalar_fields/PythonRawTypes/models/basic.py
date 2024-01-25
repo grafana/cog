@@ -63,3 +63,23 @@ class SomeStruct:
             "FieldInt64": self.field_int64,
         }
         return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "field_any": data["FieldAny"],
+            "field_bool": data["FieldBool"],
+            "field_bytes": data["FieldBytes"],
+            "field_string": data["FieldString"],
+            "field_float32": data["FieldFloat32"],
+            "field_float64": data["FieldFloat64"],
+            "field_uint8": data["FieldUint8"],
+            "field_uint16": data["FieldUint16"],
+            "field_uint32": data["FieldUint32"],
+            "field_uint64": data["FieldUint64"],
+            "field_int8": data["FieldInt8"],
+            "field_int16": data["FieldInt16"],
+            "field_int32": data["FieldInt32"],
+            "field_int64": data["FieldInt64"],
+        }
+        return cls(**args)
