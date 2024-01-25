@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/grafana/codejen"
@@ -24,10 +25,39 @@ func TestGenerateAST(t *testing.T) {
 
 		schemaAst, err := GenerateAST(getSchemaAsReader(tc), Config{Package: "grafanatest"})
 		req.NoError(err)
-		require.NotNil(t, schemaAst)
+		req.NotNil(schemaAst)
 
 		writeIR(schemaAst, tc)
 	})
+}
+
+func TestGenerateAST_parsesEnumValues(t *testing.T) {
+	req := require.New(t)
+
+	input := strings.NewReader(`{
+  "$ref": "#/definitions/SortOrder",
+  "definitions": {
+    "SortOrder": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}`)
+
+	schemaAst, err := GenerateAST(input, Config{Package: "grafanatest"})
+	req.NoError(err)
+	req.NotNil(t, schemaAst)
+
+	enumType := schemaAst.Objects[0].Type.Enum
+
+	req.Equal(int64(1), enumType.Values[0].Value)
 }
 
 func getSchemaAsReader(tc *testutils.Test) io.Reader {

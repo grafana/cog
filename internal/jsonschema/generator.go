@@ -375,7 +375,7 @@ func (g *generator) walkEnum(schema *schemaparser.Schema) (ast.Type, error) {
 		values = append(values, ast.EnumValue{
 			Type:  enumType,
 			Name:  fmt.Sprintf("%v", enumValue),
-			Value: enumValue,
+			Value: unwrapJSONNumber(enumValue),
 		})
 	}
 
