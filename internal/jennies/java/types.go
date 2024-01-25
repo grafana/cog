@@ -2,10 +2,11 @@ package java
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
-	"strings"
 )
 
 type typeFormatter struct {

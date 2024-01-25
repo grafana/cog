@@ -150,7 +150,6 @@ func (jenny Builder) genArgs(arguments []ast.Argument) []Arg {
 func (jenny Builder) genAssignments(assignments []ast.Assignment) []Assignment {
 	assign := make([]Assignment, len(assignments))
 	for i, assignment := range assignments {
-
 		var constraints []Constraint
 		if assignment.Value.Argument != nil {
 			argName := escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
