@@ -10,7 +10,22 @@
         "string": {
           "const": "constant"
         },
+        "string_with_type": {
+          "type": "string",
+          "const": "constant"
+        },
+        "number": {
+          "const": 3
+        },
+        "number_with_type": {
+          "type": "number",
+          "const": 3.2
+        },
         "boolean": {
+          "const": true
+        },
+        "boolean_with_type": {
+          "type": "boolean",
           "const": true
         }
       }
