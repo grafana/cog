@@ -1,0 +1,194 @@
+{
+  "Schemas": [
+    {
+      "Package": "some_pkg",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "Person",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "name",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "other_pkg",
+                      "ReferredType": "Name"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "some_pkg",
+            "ReferredType": "Person"
+          }
+        }
+      ]
+    },
+    {
+      "Package": "other_pkg",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "Name",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "first_name",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "last_name",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "other_pkg",
+            "ReferredType": "Name"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "some_pkg",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "Person",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "name",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "other_pkg",
+                        "ReferredType": "Name"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "some_pkg",
+              "ReferredType": "Person"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Person",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "name",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "other_pkg",
+                    "ReferredType": "Name"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "some_pkg",
+          "ReferredType": "Person"
+        }
+      },
+      "Package": "some_pkg",
+      "Name": "Person",
+      "Options": [
+        {
+          "Name": "name",
+          "Args": [
+            {
+              "Name": "name",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "other_pkg",
+                  "ReferredType": "Name"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "name",
+                  "Type": {
+                    "Ref": {
+                      "ReferredPkg": "other_pkg",
+                      "ReferredType": "Name"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "name",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "other_pkg",
+                      "ReferredType": "Name"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

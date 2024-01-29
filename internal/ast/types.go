@@ -143,6 +143,10 @@ func (t Type) IsScalar() bool {
 	return t.Kind == KindScalar
 }
 
+func (t Type) IsConcreteScalar() bool {
+	return t.IsScalar() && t.AsScalar().IsConcrete()
+}
+
 func (t Type) IsArray() bool {
 	return t.Kind == KindArray
 }

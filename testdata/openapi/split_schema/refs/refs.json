@@ -1,0 +1,31 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DataQuery",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "ReferenceA": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "An identifier",
+            "type": "string"
+          }
+        }
+      },
+      "ReferenceB": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "A value",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,105 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "SomeObject",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "boolean",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool",
+                  "Value": true
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "boolean_with_type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "bool",
+                  "Value": true
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "integer",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Value": 42
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "number",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Value": 3
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "number_with_type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64",
+                  "Value": 3.2
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "string",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "constant"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "string_with_type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "constant"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "SomeObject"
+      }
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "SomeObject",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "minute",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        59
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "seconds",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        -1
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        60
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "SomeObject"
+      }
+    }
+  ]
+}

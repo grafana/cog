@@ -1,0 +1,199 @@
+{
+  "Package": "disjunctions",
+  "Objects": [
+    {
+      "Name": "RefreshRate",
+      "Comments": [
+        "Refresh rate or disabled."
+      ],
+      "Type": {
+        "Kind": "disjunction",
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Scalar": {
+                "ScalarKind": "string"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Scalar": {
+                "ScalarKind": "bool"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "StringOrNull",
+      "Type": {
+        "Kind": "disjunction",
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Scalar": {
+                "ScalarKind": "string"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Scalar": {
+                "ScalarKind": "null"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "SomeStruct",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "Type",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "some-struct"
+                }
+              }
+            },
+            {
+              "Name": "FieldAny",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "BoolOrRef",
+      "Type": {
+        "Kind": "disjunction",
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Scalar": {
+                "ScalarKind": "bool"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Ref": {
+                "ReferredPkg": "disjunctions",
+                "ReferredType": "SomeStruct"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "SomeOtherStruct",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "Type",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "some-other-struct"
+                }
+              }
+            },
+            {
+              "Name": "Foo",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "bytes"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "YetAnotherStruct",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "Type",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "yet-another-struct"
+                }
+              }
+            },
+            {
+              "Name": "Bar",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "uint8"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "SeveralRefs",
+      "Type": {
+        "Kind": "disjunction",
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Ref": {
+                "ReferredPkg": "disjunctions",
+                "ReferredType": "SomeStruct"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Ref": {
+                "ReferredPkg": "disjunctions",
+                "ReferredType": "SomeOtherStruct"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Ref": {
+                "ReferredPkg": "disjunctions",
+                "ReferredType": "YetAnotherStruct"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

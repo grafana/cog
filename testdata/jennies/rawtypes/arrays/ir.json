@@ -1,0 +1,76 @@
+{
+  "Package": "arrays",
+  "Objects": [
+    {
+      "Name": "ArrayOfStrings",
+      "Comments": [
+        "List of tags, maybe?"
+      ],
+      "Type": {
+        "Kind": "array",
+        "Array": {
+          "ValueType": {
+            "Kind": "scalar",
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "Name": "someStruct",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "FieldAny",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Name": "ArrayOfRefs",
+      "Type": {
+        "Kind": "array",
+        "Array": {
+          "ValueType": {
+            "Kind": "ref",
+            "Ref": {
+              "ReferredPkg": "arrays",
+              "ReferredType": "someStruct"
+            }
+          }
+        }
+      }
+    },
+    {
+      "Name": "ArrayOfArrayOfNumbers",
+      "Type": {
+        "Kind": "array",
+        "Array": {
+          "ValueType": {
+            "Kind": "array",
+            "Array": {
+              "ValueType": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

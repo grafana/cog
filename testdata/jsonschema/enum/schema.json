@@ -1,0 +1,23 @@
+{
+  "$ref": "#/definitions/SomeObject",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeObject": {
+      "properties": {
+        "sort": {
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        "loglevel": {
+          "enum": [
+            1,
+            2,
+            3
+          ]
+        }
+      }
+    }
+  }
+}

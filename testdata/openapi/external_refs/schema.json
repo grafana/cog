@@ -1,0 +1,45 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "external_refs",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "WithOneRef": {
+        "allOf": [
+          {
+            "$ref": "./refs/refs.json/#/components/schemas/ReferenceA"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "WithTwoRef": {
+        "allOf": [
+          {
+            "$ref": "./refs/refs.json/#/components/schemas/ReferenceA"
+          },
+          {
+            "$ref": "./refs/refs.json/#/components/schemas/ReferenceB"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

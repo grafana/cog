@@ -1,0 +1,217 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Discriminator",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "mapping",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value1"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value2"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value3"
+                      }
+                    }
+                  ],
+                  "Discriminator": "type",
+                  "DiscriminatorMapping": {
+                    "value1": "#/components/schemas/Value1",
+                    "value2": "#/components/schemas/Value2",
+                    "value3": "#/components/schemas/Value3"
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "no-discriminator",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value1"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value2"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value3"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "only-property",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value1"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value2"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "Value3"
+                      }
+                    }
+                  ],
+                  "Discriminator": "discriminator"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Discriminator"
+      }
+    },
+    {
+      "Name": "Value1",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value1",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value1"
+      }
+    },
+    {
+      "Name": "Value2",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value2",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value2"
+      }
+    },
+    {
+      "Name": "Value3",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "discriminator",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "value3",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Value3"
+      }
+    }
+  ]
+}

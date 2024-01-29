@@ -5,23 +5,23 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/txtartest"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRawTypes_Generate(t *testing.T) {
-	test := txtartest.TxTarTest{
-		Root: "../../../testdata/jennies/rawtypes",
-		Name: "jennies/PythonRawTypes",
+	test := testutils.GoldenFilesTestSuite{
+		TestDataRoot: "../../../testdata/jennies/rawtypes",
+		Name:         "PythonRawTypes",
 		Skip: map[string]string{
-			"jennies/rawtypes/intersections": "Intersections are not implemented",
+			"intersections": "Intersections are not implemented",
 		},
 	}
 
 	jenny := RawTypes{}
 	compilerPasses := New().CompilerPasses()
 
-	test.Run(t, func(tc *txtartest.Test) {
+	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)
 
 		// We run the compiler passes defined fo Python since without them, we

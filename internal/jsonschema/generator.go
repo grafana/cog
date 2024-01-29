@@ -129,7 +129,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 		}
 
 		if len(schema.Constant) != 0 {
-			return g.walkConstant(schema)
+			return g.walkUntypedConstant(schema)
 		}
 
 		return ast.Any(), nil
@@ -145,7 +145,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 		case typeNull:
 			def = ast.Null()
 		case typeBoolean:
-			def = ast.Bool(ast.Default(schema.Default))
+			def, err = g.walkBool(schema)
 		case typeString:
 			def, err = g.walkString(schema)
 		case typeObject:
@@ -199,7 +199,7 @@ func (g *generator) walkDisjunctionBranches(branches []*schemaparser.Schema) ([]
 	return definitions, nil
 }
 
-func (g *generator) walkConstant(schema *schemaparser.Schema) (ast.Type, error) {
+func (g *generator) walkUntypedConstant(schema *schemaparser.Schema) (ast.Type, error) {
 	value := schema.Constant[0]
 
 	switch constant := value.(type) {
@@ -283,6 +283,10 @@ func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
 func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 	def := ast.String(ast.Default(schema.Default))
 
+	if schema.Constant != nil {
+		def.Scalar.Value = schema.Constant[0]
+	}
+
 	if schema.MinLength != -1 {
 		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
 			Op:   ast.MinLengthOp,
@@ -299,6 +303,16 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 	return def, nil
 }
 
+func (g *generator) walkBool(schema *schemaparser.Schema) (ast.Type, error) {
+	def := ast.Bool(ast.Default(schema.Default))
+
+	if schema.Constant != nil {
+		def.Scalar.Value = schema.Constant[0]
+	}
+
+	return def, nil
+}
+
 func (g *generator) walkNumber(schema *schemaparser.Schema) (ast.Type, error) {
 	scalarKind := ast.KindInt64
 	if schema.Types[0] == typeNumber {
@@ -306,6 +320,10 @@ func (g *generator) walkNumber(schema *schemaparser.Schema) (ast.Type, error) {
 	}
 
 	def := ast.NewScalar(scalarKind, ast.Default(schema.Default))
+
+	if schema.Constant != nil {
+		def.Scalar.Value = unwrapJSONNumber(schema.Constant[0])
+	}
 
 	if schema.Minimum != nil {
 		value, _ := schema.Minimum.Int64()
@@ -375,7 +393,7 @@ func (g *generator) walkEnum(schema *schemaparser.Schema) (ast.Type, error) {
 		values = append(values, ast.EnumValue{
 			Type:  enumType,
 			Name:  fmt.Sprintf("%v", enumValue),
-			Value: enumValue,
+			Value: unwrapJSONNumber(enumValue),
 		})
 	}
 

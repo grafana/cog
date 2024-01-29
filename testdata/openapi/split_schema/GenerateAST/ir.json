@@ -1,0 +1,53 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Array",
+      "Type": {
+        "Kind": "array",
+        "Nullable": false,
+        "Array": {
+          "ValueType": {
+            "Kind": "ref",
+            "Nullable": false,
+            "Ref": {
+              "ReferredPkg": "./refs",
+              "ReferredType": "ReferenceA"
+            }
+          }
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Array"
+      }
+    },
+    {
+      "Name": "Partial",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "id",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Partial"
+      }
+    }
+  ]
+}

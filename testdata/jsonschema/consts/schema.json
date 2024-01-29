@@ -1,0 +1,34 @@
+{
+  "$ref": "#/definitions/SomeObject",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeObject": {
+      "properties": {
+        "integer": {
+          "const": 42
+        },
+        "string": {
+          "const": "constant"
+        },
+        "string_with_type": {
+          "type": "string",
+          "const": "constant"
+        },
+        "number": {
+          "const": 3
+        },
+        "number_with_type": {
+          "type": "number",
+          "const": 3.2
+        },
+        "boolean": {
+          "const": true
+        },
+        "boolean_with_type": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    }
+  }
+}

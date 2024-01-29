@@ -1,0 +1,56 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": [
+    {
+      "Name": "Nested",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "nested",
+              "Type": {
+                "Kind": "struct",
+                "Nullable": false,
+                "Struct": {
+                  "Fields": [
+                    {
+                      "Name": "nested",
+                      "Type": {
+                        "Kind": "struct",
+                        "Nullable": false,
+                        "Struct": {
+                          "Fields": [
+                            {
+                              "Name": "value",
+                              "Type": {
+                                "Kind": "scalar",
+                                "Nullable": false,
+                                "Scalar": {
+                                  "ScalarKind": "string"
+                                }
+                              },
+                              "Required": false
+                            }
+                          ]
+                        }
+                      },
+                      "Required": false
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Nested"
+      }
+    }
+  ]
+}

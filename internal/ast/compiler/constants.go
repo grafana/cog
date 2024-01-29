@@ -8,7 +8,6 @@ const (
 	dashboardPackage                = "dashboard"
 	dashboardObject                 = "Dashboard"
 	dashboardPanelObject            = "Panel"
-	dashboardVariableModelObject    = "VariableModel"
 	dashboardRowPanelObject         = "RowPanel"
 	dashboardTargetObject           = "Target"
 	dashboardTimepickerObject       = "TimePicker"

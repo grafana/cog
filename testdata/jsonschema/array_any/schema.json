@@ -1,0 +1,13 @@
+{
+  "$ref": "#/definitions/SomeObject",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeObject": {
+      "properties": {
+        "array": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

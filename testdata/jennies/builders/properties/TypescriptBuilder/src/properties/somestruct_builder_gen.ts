@@ -1,0 +1,20 @@
+import * as cog from '../cog';
+import * as properties from '../properties';
+
+export class SomeStructBuilder implements cog.Builder<properties.SomeStruct> {
+    private readonly internal: properties.SomeStruct;
+    private someBuilderProperty: string = "";
+
+    constructor() {
+        this.internal = properties.defaultSomeStruct();
+    }
+
+    build(): properties.SomeStruct {
+        return this.internal;
+    }
+
+    id(id: number): this {
+        this.internal.id = id;
+        return this;
+    }
+}

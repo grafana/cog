@@ -1,0 +1,261 @@
+{
+  "Schemas": [
+    {
+      "Package": "composable_slot",
+      "Metadata": {},
+      "Objects": [
+        {
+          "Name": "Dashboard",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "target",
+                  "Type": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "composable_slot",
+            "ReferredType": "Dashboard"
+          }
+        }
+      ]
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "composable_slot",
+        "Metadata": {},
+        "Objects": [
+          {
+            "Name": "Dashboard",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "target",
+                    "Type": {
+                      "Kind": "composable_slot",
+                      "Nullable": false,
+                      "ComposableSlot": {
+                        "Variant": "dataquery"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "targets",
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "composable_slot",
+                          "Nullable": false,
+                          "ComposableSlot": {
+                            "Variant": "dataquery"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "composable_slot",
+              "ReferredType": "Dashboard"
+            }
+          }
+        ]
+      },
+      "For": {
+        "Name": "Dashboard",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "target",
+                "Type": {
+                  "Kind": "composable_slot",
+                  "Nullable": false,
+                  "ComposableSlot": {
+                    "Variant": "dataquery"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "targets",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "composable_slot",
+                      "Nullable": false,
+                      "ComposableSlot": {
+                        "Variant": "dataquery"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "composable_slot",
+          "ReferredType": "Dashboard"
+        }
+      },
+      "Package": "composable_slot",
+      "Name": "LokiBuilder",
+      "Options": [
+        {
+          "Name": "target",
+          "Args": [
+            {
+              "Name": "target",
+              "Type": {
+                "Kind": "composable_slot",
+                "Nullable": false,
+                "ComposableSlot": {
+                  "Variant": "dataquery"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "target",
+                  "Type": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "target",
+                  "Type": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "targets",
+          "Args": [
+            {
+              "Name": "targets",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "composable_slot",
+                    "Nullable": false,
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "targets",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "composable_slot",
+                        "Nullable": false,
+                        "ComposableSlot": {
+                          "Variant": "dataquery"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}

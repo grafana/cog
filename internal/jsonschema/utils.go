@@ -1,6 +1,7 @@
 package jsonschema
 
 import (
+	"encoding/json"
 	"strings"
 
 	schemaparser "github.com/santhosh-tekuri/jsonschema"
@@ -21,4 +22,22 @@ func schemaComments(schema *schemaparser.Schema) []string {
 	}
 
 	return filtered
+}
+
+func unwrapJSONNumber(input any) any {
+	if val, ok := input.(json.Number); ok {
+		asInt, err := val.Int64()
+		if err == nil {
+			return asInt
+		}
+
+		asFloat, err := val.Float64()
+		if err == nil {
+			return asFloat
+		}
+
+		return val.String()
+	}
+
+	return input
 }
