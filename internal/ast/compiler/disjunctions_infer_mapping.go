@@ -173,6 +173,10 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 			continue
 		}
 
+		if !referredType.IsStruct() {
+			continue
+		}
+
 		typeName := branch.AsRef().ReferredType
 		structType := referredType.AsStruct()
 		candidates[typeName] = make(map[string]any)
