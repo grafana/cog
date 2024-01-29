@@ -2,7 +2,7 @@ package disjunctions;
 
 
 public class BoolOrSomeStruct {
-    public Boolean Bool;
-    public SomeStruct SomeStruct;
+    public Boolean bool;
+    public SomeStruct someStruct;
     
 }
