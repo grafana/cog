@@ -10,17 +10,6 @@
         "Struct": {
           "Fields": [
             {
-              "Name": "value",
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
-                }
-              },
-              "Required": false
-            },
-            {
               "Name": "edges",
               "Type": {
                 "Kind": "array",
@@ -34,6 +23,17 @@
                       "ReferredType": "Node"
                     }
                   }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
                 }
               },
               "Required": false
