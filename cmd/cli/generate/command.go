@@ -125,6 +125,7 @@ func Command() *cobra.Command {
 	cmd.Flags().StringArrayVar(&opts.JSONSchemaEntrypoints, "jsonschema", nil, "Jsonschema input schema.")                             // TODO: better usage text
 	cmd.Flags().StringArrayVar(&opts.OpenAPIEntrypoints, "openapi", nil, "Openapi input schema.")                                      // TODO: better usage text
 	cmd.Flags().StringVar(&opts.KindRegistryPath, "kind-registry", "", "Kind registry input.")                                         // TODO: better usage text
+	cmd.Flags().StringVar(&opts.JSONSchemaRegistryPath, "jsonschema-registry", "", "JSONschema registry input.")                       // TODO: better usage text
 
 	cmd.Flags().StringArrayVarP(&opts.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
 	cmd.Flags().StringVar(&opts.KindRegistryVersion, "kind-registry-version", "next", "Schemas version")
@@ -138,6 +139,7 @@ func Command() *cobra.Command {
 	_ = cmd.MarkFlagDirname("kindsys-core")
 	_ = cmd.MarkFlagDirname("kindsys-custom")
 	_ = cmd.MarkFlagDirname("kind-registry")
+	_ = cmd.MarkFlagDirname("jsonschema-registry")
 	_ = cmd.MarkFlagFilename("jsonschema")
 	_ = cmd.MarkFlagDirname("openapi")
 	_ = cmd.MarkFlagDirname("output")
