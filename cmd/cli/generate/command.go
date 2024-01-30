@@ -168,6 +168,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 	}
 
 	rootCodeJenFS := codejen.NewFS()
+	schemas = schemas.Consolidate()
 
 	for language, target := range targetsByLanguage {
 		fmt.Printf("Running '%s' jennies...\n", language)

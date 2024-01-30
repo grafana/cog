@@ -28,7 +28,37 @@ func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	return Object{}, false
 }
 
-func (schemas Schemas) DeepCopy() []*Schema {
+func (schemas Schemas) Consolidate() Schemas {
+	byPackage := make(map[string]Schemas, len(schemas))
+
+	for _, schema := range schemas {
+		byPackage[schema.Package] = append(byPackage[schema.Package], schema)
+	}
+
+	newSchemas := make([]*Schema, 0, len(schemas))
+	for pkg, groupedSchemas := range byPackage {
+		if len(groupedSchemas) == 1 {
+			newSchemas = append(newSchemas, groupedSchemas...)
+			continue
+		}
+
+		newSchema := &Schema{
+			Package:  pkg,
+			Metadata: groupedSchemas[0].Metadata, // metadata _should_ be the same
+		}
+		for _, schema := range groupedSchemas {
+			for _, object := range schema.Objects {
+				newSchema.AddObject(object)
+			}
+		}
+
+		newSchemas = append(newSchemas, newSchema)
+	}
+
+	return newSchemas
+}
+
+func (schemas Schemas) DeepCopy() Schemas {
 	newSchemas := make([]*Schema, 0, len(schemas))
 
 	for _, schema := range schemas {
@@ -67,6 +97,14 @@ func (schema *Schema) LocateObject(name string) (Object, bool) {
 	}
 
 	return Object{}, false
+}
+
+func (schema *Schema) AddObject(object Object) {
+	if _, exists := schema.LocateObject(object.Name); exists {
+		return
+	}
+
+	schema.Objects = append(schema.Objects, object)
 }
 
 func (schema *Schema) Resolve(typeDef Type) (Type, bool) {

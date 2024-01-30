@@ -86,7 +86,7 @@ func ForSchemaType(schemaType LoaderRef) (Loader, error) {
 	return loader, nil
 }
 
-func LoadAll(opts Options) ([]*ast.Schema, error) {
+func LoadAll(opts Options) (ast.Schemas, error) {
 	var allSchemas []*ast.Schema
 
 	for loaderRef := range loadersMap() {

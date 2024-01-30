@@ -71,8 +71,6 @@ func loadJSONEntryPoints(entrypoints []string, schemaMeta ast.SchemaMeta) ([]*as
 			return nil, err
 		}
 
-		fmt.Println(entrypoint)
-
 		pkg := guessPackageFromFilename(entrypoint)
 
 		meta := schemaMeta
