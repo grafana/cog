@@ -43,6 +43,7 @@ func init() {
 			"formatArgName": func(name string) string {
 				return escapeVarName(tools.LowerCamelCase(name))
 			},
+			"formatPkgName": formatPackageName,
 			"maybeAsPointer": func(intoNullable bool, variableName string) string {
 				if intoNullable {
 					return "&" + variableName

@@ -10,7 +10,7 @@ import (
 func NewImportMap() *common.DirectImportMap {
 	return common.NewDirectImportMap(
 		common.WithAliasSanitizer[common.DirectImportMap](func(alias string) string {
-			return strings.ReplaceAll(alias, "/", "")
+			return formatPackageName(strings.ReplaceAll(alias, "/", ""))
 		}),
 		common.WithFormatter(func(importMap common.DirectImportMap) string {
 			if importMap.Imports.Len() == 0 {

@@ -34,8 +34,8 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(builder.Package),
-			fmt.Sprintf("%s_builder_gen.go", strings.ToLower(builder.Name)),
+			formatPackageName(builder.Package),
+			fmt.Sprintf("%s_builder_gen.go", formatPackageName(builder.Name)),
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
@@ -334,6 +334,10 @@ func escapeVarName(varName string) string {
 	}
 
 	return varName
+}
+
+func formatPackageName(pkg string) string {
+	return strings.ToLower(strings.ReplaceAll(pkg, "-", ""))
 }
 
 func isReservedGoKeyword(input string) bool {
