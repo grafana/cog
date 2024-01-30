@@ -34,6 +34,7 @@ type Config struct {
 
 type generator struct {
 	schema *ast.Schema
+	seen   map[string]struct{}
 }
 
 func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
@@ -42,6 +43,7 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 			Package:  c.Package,
 			Metadata: c.SchemaMetadata,
 		},
+		seen: make(map[string]struct{}),
 	}
 
 	compiler := schemaparser.NewCompiler()
@@ -78,9 +80,11 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 }
 
 func (g *generator) declareDefinition(definitionName string, schema *schemaparser.Schema) error {
-	if _, found := g.schema.LocateObject(definitionName); found {
+	if _, found := g.seen[definitionName]; found {
 		return nil
 	}
+
+	g.seen[definitionName] = struct{}{}
 
 	def, err := g.walkDefinition(schema)
 	if err != nil {
