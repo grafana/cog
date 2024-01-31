@@ -24,11 +24,26 @@ func TestMap_Basic(t *testing.T) {
 	req.Equal("", orderedMap.Get("unknown-key"))
 
 	iteratedKeyOrder := make([]string, 0, orderedMap.Len())
-	orderedMap.Iterate(func(key string, _ string) {
+	orderedMap.Iterate(func(key string, value string) {
+		req.Equal(orderedMap.Get(key), value)
 		iteratedKeyOrder = append(iteratedKeyOrder, key)
 	})
-
 	req.Equal([]string{"first-key", "second-key", "third-key"}, iteratedKeyOrder)
+
+	iteratedKeyOrder = make([]string, 0, orderedMap.Len())
+	afterMap := orderedMap.Map(func(key string, value string) string {
+		iteratedKeyOrder = append(iteratedKeyOrder, key)
+		return "after-" + value
+	})
+	req.Equal([]string{"first-key", "second-key", "third-key"}, iteratedKeyOrder)
+	req.Equal("after-second-value", afterMap.Get("second-key"))
+
+	filteredMap := orderedMap.Filter(func(key string, value string) bool {
+		return key != "second-key"
+	})
+	req.Equal(2, filteredMap.Len())
+	req.Equal("first-value", filteredMap.At(0))
+	req.Equal("third-value", filteredMap.At(1))
 }
 
 func TestMap_MarshalJSON(t *testing.T) {
