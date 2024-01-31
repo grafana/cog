@@ -3,6 +3,7 @@ package orderedmap
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -178,8 +179,8 @@ func (orderedMap *Map[K, V]) UnmarshalJSON(raw []byte) error {
 	}
 
 	t, err = decoder.Token()
-	if err != io.EOF {
-		return fmt.Errorf("expect end of JSON object but got more token: %T: %v or err: %v", t, t, err)
+	if !errors.Is(err, io.EOF) {
+		return fmt.Errorf("expect end of JSON object but got more token: %T: %v or err: %w", t, t, err)
 	}
 
 	return nil
