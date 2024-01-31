@@ -74,6 +74,24 @@ func (orderedMap *Map[K, V]) Iterate(callback func(key K, value V)) {
 	}
 }
 
+func (orderedMap *Map[K, V]) Map(callback func(key K, value V) V) *Map[K, V] {
+	newMap := New[K, V]()
+	for _, key := range orderedMap.order {
+		newMap.Set(key, callback(key, orderedMap.records[key]))
+	}
+	return newMap
+}
+
+func (orderedMap *Map[K, V]) Filter(callback func(key K, value V) bool) *Map[K, V] {
+	newMap := New[K, V]()
+	for _, key := range orderedMap.order {
+		if callback(key, orderedMap.records[key]) {
+			newMap.Set(key, orderedMap.records[key])
+		}
+	}
+	return newMap
+}
+
 func (orderedMap *Map[K, V]) Equal(other *Map[K, V]) bool {
 	return cmp.Equal(orderedMap.order, other.order) &&
 		cmp.Equal(orderedMap.records, other.records)
