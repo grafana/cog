@@ -1,4 +1,4 @@
-package {{ .Package }}
+package {{ .Package | formatPackageName }}
 {{ $options := include "options" . }}
 {{ .Imports }}
 

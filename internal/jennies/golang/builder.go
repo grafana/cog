@@ -34,7 +34,7 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(builder.Package),
+			formatPackageName(builder.Package),
 			fmt.Sprintf("%s_builder_gen.go", strings.ToLower(builder.Name)),
 		)
 

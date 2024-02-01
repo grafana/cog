@@ -49,7 +49,7 @@ func (jenny VariantsPlugins) variantPlugins(context common.Context) (string, err
 		}
 
 		variant := string(schema.Metadata.Variant)
-		imports.Add(schema.Package, jenny.Config.importPath(schema.Package))
+		imports.Add(schema.Package, jenny.Config.importPath(formatPackageName(schema.Package)))
 		initMap[variant] = append(initMap[variant], schema)
 	}
 

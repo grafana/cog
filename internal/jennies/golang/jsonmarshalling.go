@@ -36,7 +36,7 @@ func (jenny JSONMarshalling) Generate(context common.Context) (codejen.Files, er
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(schema.Package),
+			formatPackageName(schema.Package),
 			"types_json_marshalling_gen.go",
 		)
 
@@ -103,7 +103,7 @@ func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.
 	}
 
 	return []byte(fmt.Sprintf(`package %[1]s
-%[2]s%[3]s`, strings.ToLower(schema.Package), importStatements, buffer.String())), nil
+%[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
 }
 
 func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
