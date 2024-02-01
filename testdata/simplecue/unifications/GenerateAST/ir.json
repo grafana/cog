@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "InlineScript": {
       "Name": "InlineScript",
       "Type": {
         "Kind": "disjunction",
@@ -43,7 +43,7 @@
         "ReferredType": "InlineScript"
       }
     },
-    {
+    "MetricAggregationWithInlineScript": {
       "Name": "MetricAggregationWithInlineScript",
       "Type": {
         "Kind": "struct",
@@ -82,7 +82,7 @@
         "ReferredType": "MetricAggregationWithInlineScript"
       }
     },
-    {
+    "Average": {
       "Name": "Average",
       "Type": {
         "Kind": "struct",
@@ -144,5 +144,5 @@
         "ReferredType": "Average"
       }
     }
-  ]
+  }
 }

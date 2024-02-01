@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "Enum": {
       "Name": "Enum",
       "Type": {
         "Kind": "enum",
@@ -39,7 +39,7 @@
         "ReferredType": "Enum"
       }
     },
-    {
+    "Mixed": {
       "Name": "Mixed",
       "Type": {
         "Kind": "intersection",
@@ -81,7 +81,7 @@
         "ReferredType": "Mixed"
       }
     },
-    {
+    "Structs": {
       "Name": "Structs",
       "Type": {
         "Kind": "intersection",
@@ -120,7 +120,7 @@
         "ReferredType": "Structs"
       }
     },
-    {
+    "Value1": {
       "Name": "Value1",
       "Type": {
         "Kind": "struct",
@@ -147,7 +147,7 @@
         "ReferredType": "Value1"
       }
     },
-    {
+    "Value2": {
       "Name": "Value2",
       "Type": {
         "Kind": "struct",
@@ -174,7 +174,7 @@
         "ReferredType": "Value2"
       }
     },
-    {
+    "Value3": {
       "Name": "Value3",
       "Type": {
         "Kind": "struct",
@@ -201,5 +201,5 @@
         "ReferredType": "Value3"
       }
     }
-  ]
+  }
 }

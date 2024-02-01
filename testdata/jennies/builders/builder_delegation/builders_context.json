@@ -3,8 +3,8 @@
     {
       "Package": "builder_delegation",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "DashboardLink": {
           "Name": "DashboardLink",
           "Type": {
             "Kind": "struct",
@@ -41,7 +41,7 @@
             "ReferredType": "DashboardLink"
           }
         },
-        {
+        "Dashboard": {
           "Name": "Dashboard",
           "Type": {
             "Kind": "struct",
@@ -72,6 +72,9 @@
                 },
                 {
                   "Name": "links",
+                  "Comments": [
+                    "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+                  ],
                   "Type": {
                     "Kind": "array",
                     "Nullable": false,
@@ -90,6 +93,9 @@
                 },
                 {
                   "Name": "singleLink",
+                  "Comments": [
+                    "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+                  ],
                   "Type": {
                     "Kind": "ref",
                     "Nullable": false,
@@ -108,7 +114,7 @@
             "ReferredType": "Dashboard"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -116,8 +122,8 @@
       "Schema": {
         "Package": "builder_delegation",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "DashboardLink": {
             "Name": "DashboardLink",
             "Type": {
               "Kind": "struct",
@@ -154,7 +160,7 @@
               "ReferredType": "DashboardLink"
             }
           },
-          {
+          "Dashboard": {
             "Name": "Dashboard",
             "Type": {
               "Kind": "struct",
@@ -185,6 +191,9 @@
                   },
                   {
                     "Name": "links",
+                    "Comments": [
+                      "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+                    ],
                     "Type": {
                       "Kind": "array",
                       "Nullable": false,
@@ -203,6 +212,9 @@
                   },
                   {
                     "Name": "singleLink",
+                    "Comments": [
+                      "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+                    ],
                     "Type": {
                       "Kind": "ref",
                       "Nullable": false,
@@ -221,7 +233,7 @@
               "ReferredType": "Dashboard"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "DashboardLink",
@@ -359,8 +371,8 @@
       "Schema": {
         "Package": "builder_delegation",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "DashboardLink": {
             "Name": "DashboardLink",
             "Type": {
               "Kind": "struct",
@@ -397,7 +409,7 @@
               "ReferredType": "DashboardLink"
             }
           },
-          {
+          "Dashboard": {
             "Name": "Dashboard",
             "Type": {
               "Kind": "struct",
@@ -428,6 +440,9 @@
                   },
                   {
                     "Name": "links",
+                    "Comments": [
+                      "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+                    ],
                     "Type": {
                       "Kind": "array",
                       "Nullable": false,
@@ -446,6 +461,9 @@
                   },
                   {
                     "Name": "singleLink",
+                    "Comments": [
+                      "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+                    ],
                     "Type": {
                       "Kind": "ref",
                       "Nullable": false,
@@ -464,7 +482,7 @@
               "ReferredType": "Dashboard"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "Dashboard",
@@ -497,6 +515,9 @@
               },
               {
                 "Name": "links",
+                "Comments": [
+                  "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+                ],
                 "Type": {
                   "Kind": "array",
                   "Nullable": false,
@@ -515,6 +536,9 @@
               },
               {
                 "Name": "singleLink",
+                "Comments": [
+                  "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+                ],
                 "Type": {
                   "Kind": "ref",
                   "Nullable": false,
@@ -628,6 +652,9 @@
         },
         {
           "Name": "links",
+          "Comments": [
+            "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+          ],
           "Args": [
             {
               "Name": "links",
@@ -694,6 +721,9 @@
         },
         {
           "Name": "singleLink",
+          "Comments": [
+            "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+          ],
           "Args": [
             {
               "Name": "singleLink",

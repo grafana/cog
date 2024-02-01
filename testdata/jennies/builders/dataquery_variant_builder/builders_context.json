@@ -3,8 +3,8 @@
     {
       "Package": "dataquery_variant_builder",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "Loki": {
           "Name": "Loki",
           "Type": {
             "Kind": "struct",
@@ -33,7 +33,7 @@
             "ReferredType": "Loki"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -41,8 +41,8 @@
       "Schema": {
         "Package": "dataquery_variant_builder",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "Loki": {
             "Name": "Loki",
             "Type": {
               "Kind": "struct",
@@ -71,7 +71,7 @@
               "ReferredType": "Loki"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "Loki",

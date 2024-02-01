@@ -9,6 +9,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -55,6 +56,10 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	if err := g.declareDefinition(oapi.Components.Schemas); err != nil {
 		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
+
+	// To ensure a consistent output, since github.com/getkin/kin-openapi/openapi3
+	// doesn't guarantee the order of the definitions it parses.
+	g.schema.Objects.Sort(orderedmap.SortStrings)
 
 	return g.schema, nil
 }

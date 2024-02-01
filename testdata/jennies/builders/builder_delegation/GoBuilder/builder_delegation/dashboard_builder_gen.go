@@ -49,6 +49,7 @@ func (builder *DashboardBuilder) Title(title string) *DashboardBuilder {
     return builder
 }
 
+// will be expanded to []cog.Builder<DashboardLink>
 func (builder *DashboardBuilder) Links(links []cog.Builder[DashboardLink]) *DashboardBuilder {
         linksResources := make([]DashboardLink, 0, len(links))
         for _, r := range links {
@@ -64,6 +65,7 @@ func (builder *DashboardBuilder) Links(links []cog.Builder[DashboardLink]) *Dash
     return builder
 }
 
+// will be expanded to cog.Builder<DashboardLink>
 func (builder *DashboardBuilder) SingleLink(singleLink cog.Builder[DashboardLink]) *DashboardBuilder {
         singleLinkResource, err := singleLink.Build()
         if err != nil {

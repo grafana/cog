@@ -3,8 +3,8 @@
     {
       "Package": "sandbox",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "Dashboard": {
           "Name": "Dashboard",
           "Type": {
             "Kind": "struct",
@@ -37,7 +37,7 @@
             "ReferredType": "Dashboard"
           }
         },
-        {
+        "Variable": {
           "Name": "Variable",
           "Type": {
             "Kind": "struct",
@@ -74,7 +74,7 @@
             "ReferredType": "Variable"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -82,8 +82,8 @@
       "Schema": {
         "Package": "sandbox",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "Dashboard": {
             "Name": "Dashboard",
             "Type": {
               "Kind": "struct",
@@ -116,7 +116,7 @@
               "ReferredType": "Dashboard"
             }
           },
-          {
+          "Variable": {
             "Name": "Variable",
             "Type": {
               "Kind": "struct",
@@ -153,7 +153,7 @@
               "ReferredType": "Variable"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "Dashboard",

@@ -19,11 +19,13 @@ func (pass *PrometheusDataquery) Process(schemas []*ast.Schema) ([]*ast.Schema, 
 }
 
 func (pass *PrometheusDataquery) processSchema(schema *ast.Schema) *ast.Schema {
-	for i, object := range schema.Objects {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if schema.Package == prometheusPackage && object.Name == prometheusDataqueryObject {
-			schema.Objects[i] = pass.processDataquery(object)
+			return pass.processDataquery(object)
 		}
-	}
+
+		return object
+	})
 
 	return schema
 }

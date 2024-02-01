@@ -3,8 +3,8 @@
     {
       "Package": "known_any",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "SomeStruct": {
           "Name": "SomeStruct",
           "Type": {
             "Kind": "struct",
@@ -30,7 +30,7 @@
             "ReferredType": "SomeStruct"
           }
         },
-        {
+        "Config": {
           "Name": "Config",
           "Type": {
             "Kind": "struct",
@@ -56,7 +56,7 @@
             "ReferredType": "Config"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -64,8 +64,8 @@
       "Schema": {
         "Package": "known_any",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "SomeStruct": {
             "Name": "SomeStruct",
             "Type": {
               "Kind": "struct",
@@ -91,7 +91,7 @@
               "ReferredType": "SomeStruct"
             }
           },
-          {
+          "Config": {
             "Name": "Config",
             "Type": {
               "Kind": "struct",
@@ -117,7 +117,7 @@
               "ReferredType": "Config"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "SomeStruct",

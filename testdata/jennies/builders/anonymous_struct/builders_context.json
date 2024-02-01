@@ -3,8 +3,8 @@
     {
       "Package": "anonymous_struct",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "SomeStruct": {
           "Name": "SomeStruct",
           "Type": {
             "Kind": "struct",
@@ -55,7 +55,7 @@
             "ReferredType": "SomeStruct"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -63,8 +63,8 @@
       "Schema": {
         "Package": "anonymous_struct",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "SomeStruct": {
             "Name": "SomeStruct",
             "Type": {
               "Kind": "struct",
@@ -115,7 +115,7 @@
               "ReferredType": "SomeStruct"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "SomeStruct",

@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "AnyOf": {
       "Name": "AnyOf",
       "Type": {
         "Kind": "disjunction",
@@ -31,5 +31,5 @@
         "ReferredType": "AnyOf"
       }
     }
-  ]
+  }
 }

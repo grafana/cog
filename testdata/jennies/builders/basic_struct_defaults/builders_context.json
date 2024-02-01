@@ -3,8 +3,8 @@
     {
       "Package": "basic_struct_defaults",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "SomeStruct": {
           "Name": "SomeStruct",
           "Type": {
             "Kind": "struct",
@@ -76,7 +76,7 @@
             "ReferredType": "SomeStruct"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -84,8 +84,8 @@
       "Schema": {
         "Package": "basic_struct_defaults",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "SomeStruct": {
             "Name": "SomeStruct",
             "Type": {
               "Kind": "struct",
@@ -157,7 +157,7 @@
               "ReferredType": "SomeStruct"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "SomeStruct",

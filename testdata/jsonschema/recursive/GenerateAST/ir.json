@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "Node": {
       "Name": "Node",
       "Type": {
         "Kind": "struct",
@@ -46,5 +46,5 @@
         "ReferredType": "Node"
       }
     }
-  ]
+  }
 }

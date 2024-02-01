@@ -3,8 +3,8 @@
     {
       "Package": "composable_slot",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "Dashboard": {
           "Name": "Dashboard",
           "Type": {
             "Kind": "struct",
@@ -47,7 +47,7 @@
             "ReferredType": "Dashboard"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -55,8 +55,8 @@
       "Schema": {
         "Package": "composable_slot",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "Dashboard": {
             "Name": "Dashboard",
             "Type": {
               "Kind": "struct",
@@ -99,7 +99,7 @@
               "ReferredType": "Dashboard"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "Dashboard",

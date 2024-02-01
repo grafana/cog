@@ -3,8 +3,8 @@
     {
       "Package": "struct_with_defaults",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "NestedStruct": {
           "Name": "NestedStruct",
           "Type": {
             "Kind": "struct",
@@ -41,7 +41,7 @@
             "ReferredType": "NestedStruct"
           }
         },
-        {
+        "Struct": {
           "Name": "Struct",
           "Type": {
             "Kind": "struct",
@@ -208,7 +208,7 @@
             "ReferredType": "Struct"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -216,8 +216,8 @@
       "Schema": {
         "Package": "struct_with_defaults",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "NestedStruct": {
             "Name": "NestedStruct",
             "Type": {
               "Kind": "struct",
@@ -254,7 +254,7 @@
               "ReferredType": "NestedStruct"
             }
           },
-          {
+          "Struct": {
             "Name": "Struct",
             "Type": {
               "Kind": "struct",
@@ -421,7 +421,7 @@
               "ReferredType": "Struct"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "NestedStruct",
@@ -462,7 +462,6 @@
       },
       "Package": "struct_with_defaults",
       "Name": "NestedStruct",
-      "Properties": null,
       "Options": [
         {
           "Name": "stringVal",
@@ -560,8 +559,8 @@
       "Schema": {
         "Package": "struct_with_defaults",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "NestedStruct": {
             "Name": "NestedStruct",
             "Type": {
               "Kind": "struct",
@@ -598,7 +597,7 @@
               "ReferredType": "NestedStruct"
             }
           },
-          {
+          "Struct": {
             "Name": "Struct",
             "Type": {
               "Kind": "struct",
@@ -765,7 +764,7 @@
               "ReferredType": "Struct"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "Struct",
@@ -936,7 +935,6 @@
       },
       "Package": "struct_with_defaults",
       "Name": "Struct",
-      "Properties": null,
       "Options": [
         {
           "Name": "allFields",
