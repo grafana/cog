@@ -55,7 +55,7 @@ func TestGenerateAST_parsesEnumValues(t *testing.T) {
 	req.NoError(err)
 	req.NotNil(t, schemaAst)
 
-	enumType := schemaAst.Objects[0].Type.Enum
+	enumType := schemaAst.Objects.At(0).Type.Enum
 
 	req.Equal(int64(1), enumType.Values[0].Value)
 }

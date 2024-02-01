@@ -55,19 +55,19 @@ func (pass *DashboardTimePicker) processSchema(schema *ast.Schema) (*ast.Schema,
 	var timepickerObject ast.Object
 	var dashboardObj ast.Object
 
-	for i, object := range schema.Objects {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if object.Name != dashboardObject {
-			continue
+			return object
 		}
 
 		dashboardObj, timepickerObject = pass.processDashboard(object)
 
-		schema.Objects[i] = dashboardObj
-	}
+		return dashboardObj
+	})
 
 	// did we actually define a new object?
 	if timepickerObject.Name != "" {
-		schema.Objects = append(schema.Objects, timepickerObject)
+		schema.AddObject(timepickerObject)
 	}
 
 	return schema, nil

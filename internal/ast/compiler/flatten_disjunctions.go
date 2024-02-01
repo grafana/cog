@@ -52,9 +52,9 @@ func (pass *FlattenDisjunctions) Process(schemas []*ast.Schema) ([]*ast.Schema, 
 }
 
 func (pass *FlattenDisjunctions) processSchema(schema *ast.Schema) *ast.Schema {
-	for i, object := range schema.Objects {
-		schema.Objects[i] = pass.processObject(schema, object)
-	}
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		return pass.processObject(schema, object)
+	})
 
 	return schema
 }

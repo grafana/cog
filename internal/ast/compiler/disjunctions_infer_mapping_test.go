@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -60,7 +61,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	req := require.New(t)
 
 	// Prepare test input
-	objects := []ast.Object{
+	objects := testutils.ObjectsMap(
 		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
 			ast.NewRef("test", "SomeStruct"),
 			ast.NewRef("test", "OtherStruct"),
@@ -74,7 +75,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
-	}
+	)
 
 	compilerPass := &DisjunctionInferMapping{}
 	_, err := compilerPass.Process([]*ast.Schema{
@@ -95,7 +96,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	})
 	disjunctionType.Disjunction.Discriminator = "MapOfString"
 
-	objects := []ast.Object{
+	objects := testutils.ObjectsMap(
 		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("test", "SomeStruct", ast.NewStruct(
@@ -106,7 +107,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 			ast.NewStructField("FieldBar", ast.Bool()),
 			ast.NewStructField("MapOfString", ast.NewMap(ast.String(), ast.String())),
 		)),
-	}
+	)
 
 	compilerPass := &DisjunctionInferMapping{}
 	_, err := compilerPass.Process([]*ast.Schema{
@@ -127,7 +128,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	})
 	disjunctionType.Disjunction.Discriminator = "Type"
 
-	objects := []ast.Object{
+	objects := testutils.ObjectsMap(
 		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("test", "SomeStruct", ast.NewStruct(
@@ -138,7 +139,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
-	}
+	)
 
 	compilerPass := &DisjunctionInferMapping{}
 	_, err := compilerPass.Process([]*ast.Schema{
@@ -159,7 +160,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	})
 	disjunctionType.Disjunction.Discriminator = "DoesNotExist"
 
-	objects := []ast.Object{
+	objects := testutils.ObjectsMap(
 		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("test", "SomeStruct", ast.NewStruct(
@@ -170,7 +171,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
-	}
+	)
 
 	compilerPass := &DisjunctionInferMapping{}
 	_, err := compilerPass.Process([]*ast.Schema{

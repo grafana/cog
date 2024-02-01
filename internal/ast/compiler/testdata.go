@@ -57,20 +57,20 @@ func (t TestData) processSchema(schema *ast.Schema) *ast.Schema {
 		return schema
 	}
 
-	var obj ast.Object
+	var processed ast.Object
 	var keyObject ast.Object
 
-	for i, object := range schema.Objects {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if object.Name != testDataSimulatorQueryObject {
-			continue
+			return object
 		}
 
-		obj, keyObject = t.processObject(object)
-		schema.Objects[i] = obj
-	}
+		processed, keyObject = t.processObject(object)
+		return processed
+	})
 
 	if keyObject.Name != "" {
-		schema.Objects = append(schema.Objects, keyObject)
+		schema.AddObject(keyObject)
 	}
 
 	return schema

@@ -33,9 +33,11 @@ func (pass *PrefixEnumValues) Process(schemas []*ast.Schema) ([]*ast.Schema, err
 }
 
 func (pass *PrefixEnumValues) processSchema(schema *ast.Schema) *ast.Schema {
-	for i, object := range schema.Objects {
-		schema.Objects[i].Type = pass.processType(object.Name, object.Type)
-	}
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		object.Type = pass.processType(object.Name, object.Type)
+
+		return object
+	})
 
 	return schema
 }

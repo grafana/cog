@@ -35,32 +35,29 @@ type AnonymousEnumToExplicitType struct {
 }
 
 func (pass *AnonymousEnumToExplicitType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
+	for i, schema := range schemas {
 		newSchema, err := pass.processSchema(schema)
 		if err != nil {
 			return nil, err
 		}
 
-		newSchemas = append(newSchemas, newSchema)
+		schemas[i] = newSchema
 	}
 
-	return newSchemas, nil
+	return schemas, nil
 }
 
 func (pass *AnonymousEnumToExplicitType) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 	pass.newObjects = nil
 	pass.currentPackage = schema.Package
 
-	newSchema := schema.DeepCopy()
-	for i, object := range schema.Objects {
-		newSchema.Objects[i] = pass.processObject(object)
-	}
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		return pass.processObject(object)
+	})
 
-	newSchema.Objects = append(newSchema.Objects, pass.newObjects...)
+	schema.AddObjects(pass.newObjects...)
 
-	return &newSchema, nil
+	return schema, nil
 }
 
 func (pass *AnonymousEnumToExplicitType) processObject(object ast.Object) ast.Object {

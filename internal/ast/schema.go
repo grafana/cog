@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"github.com/grafana/cog/internal/orderedmap"
+)
+
 type SchemaKind string
 
 const (
@@ -42,31 +46,51 @@ func (schemas Schemas) DeepCopy() []*Schema {
 type Schema struct { //nolint: musttag
 	Package  string
 	Metadata SchemaMeta `json:",omitempty"`
-	Objects  []Object
+	Objects  *orderedmap.Map[string, Object]
+}
+
+func NewSchema(pkg string, metadata SchemaMeta) *Schema {
+	return &Schema{
+		Package:  pkg,
+		Metadata: metadata,
+		Objects:  orderedmap.New[string, Object](),
+	}
+}
+
+func (schema *Schema) AddObject(object Object) {
+	if _, exists := schema.LocateObject(object.Name); exists {
+		return
+	}
+
+	schema.Objects.Set(object.Name, object)
+}
+
+func (schema *Schema) AddObjects(objects ...Object) {
+	for _, object := range objects {
+		schema.AddObject(object)
+	}
 }
 
 func (schema *Schema) DeepCopy() Schema {
 	newSchema := Schema{
 		Package:  schema.Package,
 		Metadata: schema.Metadata,
-		Objects:  make([]Object, 0, len(schema.Objects)),
+		Objects:  orderedmap.New[string, Object](),
 	}
 
-	for _, def := range schema.Objects {
-		newSchema.Objects = append(newSchema.Objects, def.DeepCopy())
-	}
+	schema.Objects.Iterate(func(_ string, object Object) {
+		newSchema.AddObject(object.DeepCopy())
+	})
 
 	return newSchema
 }
 
 func (schema *Schema) LocateObject(name string) (Object, bool) {
-	for _, def := range schema.Objects {
-		if def.Name == name {
-			return def, true
-		}
+	if !schema.Objects.Has(name) {
+		return Object{}, false
 	}
 
-	return Object{}, false
+	return schema.Objects.Get(name), true
 }
 
 func (schema *Schema) Resolve(typeDef Type) (Type, bool) {

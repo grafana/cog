@@ -45,18 +45,14 @@ func (pass *DashboardTargetsRewrite) Process(schemas []*ast.Schema) ([]*ast.Sche
 }
 
 func (pass *DashboardTargetsRewrite) processSchema(schema *ast.Schema) *ast.Schema {
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = nil
+	schema.Objects = schema.Objects.Filter(func(_ string, object ast.Object) bool {
+		return object.Name != dashboardTargetObject
+	})
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		return pass.processObject(object)
+	})
 
-	for _, object := range schema.Objects {
-		if object.Name == dashboardTargetObject {
-			continue
-		}
-
-		newSchema.Objects = append(newSchema.Objects, pass.processObject(object))
-	}
-
-	return &newSchema
+	return schema
 }
 
 func (pass *DashboardTargetsRewrite) processObject(object ast.Object) ast.Object {

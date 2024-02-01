@@ -34,9 +34,11 @@ func (pass *RenameNumericEnumValues) Process(schemas []*ast.Schema) ([]*ast.Sche
 }
 
 func (pass *RenameNumericEnumValues) processSchema(schema *ast.Schema) *ast.Schema {
-	for i, object := range schema.Objects {
-		schema.Objects[i].Type = pass.processType(object.Type)
-	}
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		object.Type = pass.processType(object.Type)
+
+		return object
+	})
 
 	return schema
 }

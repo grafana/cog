@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 )
 
 func TestLibraryPanels_withNoLibraryPanel(t *testing.T) {
@@ -11,11 +12,11 @@ func TestLibraryPanels_withNoLibraryPanel(t *testing.T) {
 	schemas := ast.Schemas{
 		&ast.Schema{
 			Package: dashboardPackage,
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject(dashboardPackage, dashboardPanelObject, ast.NewStruct(
 					ast.NewStructField("AString", ast.String()),
 				)),
-			},
+			),
 		},
 	}
 
@@ -28,11 +29,11 @@ func TestLibraryPanels_withNoPanel(t *testing.T) {
 	schemas := ast.Schemas{
 		&ast.Schema{
 			Package: libraryPanelPackage,
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject(libraryPanelObject, libraryPanelObject, ast.NewStruct(
 					ast.NewStructField(libraryPanelModelField, ast.Any()),
 				)),
-			},
+			),
 		},
 	}
 
@@ -45,7 +46,7 @@ func TestLibraryPanels_rewrite(t *testing.T) {
 	schemas := ast.Schemas{
 		&ast.Schema{
 			Package: dashboardPackage,
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject(dashboardPackage, dashboardPanelObject, ast.NewStruct(
 					ast.NewStructField(dashboardPanelIDField, ast.String()),
 					ast.NewStructField(dashboardPanelGridPosField, ast.Any()),
@@ -53,17 +54,17 @@ func TestLibraryPanels_rewrite(t *testing.T) {
 					ast.NewStructField(dashboardPanelTypeField, ast.String()),
 					ast.NewStructField(dashboardPanelsField, ast.NewArray(ast.Any())),
 				)),
-			},
+			),
 		},
 
 		&ast.Schema{
 			Package: libraryPanelPackage,
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject(libraryPanelObject, libraryPanelObject, ast.NewStruct(
 					ast.NewStructField("uid", ast.String()),
 					ast.NewStructField(libraryPanelModelField, ast.Any()),
 				)),
-			},
+			),
 		},
 	}
 
@@ -74,7 +75,7 @@ func TestLibraryPanels_rewrite(t *testing.T) {
 
 		&ast.Schema{
 			Package: libraryPanelPackage,
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject(libraryPanelObject, libraryPanelObject, ast.NewStruct(
 					ast.NewStructField("uid", ast.String()),
 					ast.NewStructField(libraryPanelModelField, ast.NewStruct(
@@ -82,7 +83,7 @@ func TestLibraryPanels_rewrite(t *testing.T) {
 						ast.NewStructField(dashboardPanelsField, ast.NewArray(ast.Any())),
 					)),
 				)),
-			},
+			),
 		},
 	}
 

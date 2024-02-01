@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/orderedmap"
 )
 
 var _ Pass = (*Unspec)(nil)
@@ -23,27 +24,25 @@ func (pass *Unspec) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 }
 
 func (pass *Unspec) processSchema(schema *ast.Schema) *ast.Schema {
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = nil
+	schema.Objects = schema.Objects.Filter(func(_ string, object ast.Object) bool {
+		return !strings.EqualFold(object.Name, "metadata")
+	})
 
-	for _, object := range schema.Objects {
-		if strings.EqualFold(object.Name, "metadata") {
-			continue
-		}
+	originalObjects := schema.Objects
+	schema.Objects = orderedmap.New[string, ast.Object]()
 
-		newObject := object.DeepCopy()
-
+	originalObjects.Iterate(func(name string, object ast.Object) {
 		if strings.EqualFold(object.Name, "spec") && object.Type.Kind == ast.KindStruct {
-			newObject.Name = schema.Package
+			object.Name = schema.Package
 			if schema.Metadata.Identifier != "" {
-				newObject.Name = schema.Metadata.Identifier
+				object.Name = schema.Metadata.Identifier
 			}
 
-			newObject.SelfRef.ReferredType = newObject.Name
+			object.SelfRef.ReferredType = object.Name
 		}
 
-		newSchema.Objects = append(newSchema.Objects, newObject)
-	}
+		schema.AddObject(object)
+	})
 
-	return &newSchema
+	return schema
 }

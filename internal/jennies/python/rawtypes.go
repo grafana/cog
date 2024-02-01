@@ -40,6 +40,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 
 func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
+	var err error
 
 	imports := NewImportMap()
 	jenny.importModule = func(alias string, pkg string, module string) string {
@@ -58,10 +59,12 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.importPkg, jenny.importModule)
 
-	for i, object := range schema.Objects {
-		objectOutput, err := jenny.typeFormatter.formatObject(object)
-		if err != nil {
-			return nil, err
+	i := 0
+	schema.Objects.Iterate(func(_ string, object ast.Object) {
+		objectOutput, innerErr := jenny.typeFormatter.formatObject(object)
+		if innerErr != nil {
+			err = innerErr
+			return
 		}
 
 		buffer.WriteString(objectOutput)
@@ -78,9 +81,12 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 		}
 
 		// we want two blank lines between objects, except at the end of the file
-		if i != len(schema.Objects)-1 {
+		if i != schema.Objects.Len()-1 {
 			buffer.WriteString("\n\n\n")
 		}
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	buffer.WriteString("\n")
