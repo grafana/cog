@@ -1,12 +1,12 @@
 package intersections
 
 import (
-	externalPkg "github.com/grafana/cog/generated/externalPkg"
+	externalpkg "github.com/grafana/cog/generated/externalPkg"
 )
 
 type Intersections struct {
 	SomeStruct
-	externalPkg.AnotherStruct
+	externalpkg.AnotherStruct
 
 	FieldString string `json:"fieldString"`
 	FieldInteger int32 `json:"fieldInteger"`

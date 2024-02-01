@@ -39,7 +39,8 @@ func init() {
 			},
 		}).
 		Funcs(map[string]any{
-			"formatScalar": formatScalar,
+			"formatPackageName": formatPackageName,
+			"formatScalar":      formatScalar,
 			"formatArgName": func(name string) string {
 				return escapeVarName(tools.LowerCamelCase(name))
 			},
