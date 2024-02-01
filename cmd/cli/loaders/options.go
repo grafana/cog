@@ -35,7 +35,7 @@ func loadersMap() map[LoaderRef]Loader {
 	}
 }
 
-type Loader func(opts Options) ([]*ast.Schema, error)
+type Loader func(opts Options) (ast.Schemas, error)
 
 type Options struct {
 	CueEntrypoints               []string
@@ -86,8 +86,8 @@ func ForSchemaType(schemaType LoaderRef) (Loader, error) {
 	return loader, nil
 }
 
-func LoadAll(opts Options) ([]*ast.Schema, error) {
-	var allSchemas []*ast.Schema
+func LoadAll(opts Options) (ast.Schemas, error) {
+	var allSchemas ast.Schemas
 
 	for loaderRef := range loadersMap() {
 		loader, err := ForSchemaType(loaderRef)
@@ -103,7 +103,7 @@ func LoadAll(opts Options) ([]*ast.Schema, error) {
 		allSchemas = append(allSchemas, schemas...)
 	}
 
-	return allSchemas, nil
+	return allSchemas.Consolidate()
 }
 
 func guessPackageFromFilename(filename string) string {

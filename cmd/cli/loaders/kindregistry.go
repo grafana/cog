@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-func kindRegistryLoader(opts Options) ([]*ast.Schema, error) {
+func kindRegistryLoader(opts Options) (ast.Schemas, error) {
 	var allSchemas []*ast.Schema
 
 	if opts.KindRegistryPath == "" {

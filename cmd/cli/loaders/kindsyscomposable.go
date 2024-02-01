@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/cog/internal/simplecue"
 )
 
-func kindsysComposableLoader(opts Options) ([]*ast.Schema, error) {
+func kindsysComposableLoader(opts Options) (ast.Schemas, error) {
 	libraries, err := opts.cueIncludeImports()
 	if err != nil {
 		return nil, err
