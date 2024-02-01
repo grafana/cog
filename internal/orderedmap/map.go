@@ -11,6 +11,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func SortStrings(i string, j string) bool {
+	return i < j
+}
+
 type Pair[K, V any] struct {
 	Key   K
 	Value V
@@ -96,6 +100,14 @@ func (orderedMap *Map[K, V]) Filter(callback func(key K, value V) bool) *Map[K, 
 func (orderedMap *Map[K, V]) Equal(other *Map[K, V]) bool {
 	return cmp.Equal(orderedMap.order, other.order) &&
 		cmp.Equal(orderedMap.records, other.records)
+}
+
+// Sort sorts the keys using the provided less function, keeping equal elements
+// in their original order.
+func (orderedMap *Map[K, V]) Sort(lessFunc func(i K, j K) bool) {
+	sort.SliceStable(orderedMap.order, func(i, j int) bool {
+		return lessFunc(orderedMap.order[i], orderedMap.order[j])
+	})
 }
 
 func (orderedMap *Map[K, V]) MarshalJSON() ([]byte, error) {
