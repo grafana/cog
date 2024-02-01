@@ -40,23 +40,18 @@ func (pass *GoogleCloudMonitoring) Process(schemas []*ast.Schema) ([]*ast.Schema
 }
 
 func (pass *GoogleCloudMonitoring) processSchema(schema *ast.Schema) (*ast.Schema, error) {
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = nil
-
-	for _, object := range schema.Objects {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if object.Name == "CloudMonitoringQuery" {
-			newSchema.Objects = append(newSchema.Objects, pass.processCloudMonitoringQuery(object))
-			continue
+			return pass.processCloudMonitoringQuery(object)
 		}
 		if object.Name == "TimeSeriesList" {
-			newSchema.Objects = append(newSchema.Objects, pass.processTimeSeriesList(object))
-			continue
+			return pass.processTimeSeriesList(object)
 		}
 
-		newSchema.Objects = append(newSchema.Objects, object)
-	}
+		return object
+	})
 
-	return &newSchema, nil
+	return schema, nil
 }
 
 func (pass *GoogleCloudMonitoring) processCloudMonitoringQuery(object ast.Object) ast.Object {

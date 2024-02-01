@@ -45,19 +45,15 @@ func (pass *LibraryPanels) Process(schemas []*ast.Schema) ([]*ast.Schema, error)
 }
 
 func (pass *LibraryPanels) parseSchema(schema *ast.Schema, dashboardPanel ast.Object) *ast.Schema {
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = nil
-
-	for _, object := range schema.Objects {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if object.Name != libraryPanelObject {
-			newSchema.Objects = append(newSchema.Objects, object)
-			continue
+			return object
 		}
 
-		newSchema.Objects = append(newSchema.Objects, pass.processLibraryPanel(object, dashboardPanel))
-	}
+		return pass.processLibraryPanel(object, dashboardPanel)
+	})
 
-	return &newSchema
+	return schema
 }
 
 func (pass *LibraryPanels) processLibraryPanel(object ast.Object, dashboardPanel ast.Object) ast.Object {

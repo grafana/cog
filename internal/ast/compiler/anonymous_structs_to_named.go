@@ -44,13 +44,12 @@ func (pass *AnonymousStructsToNamed) Process(schemas []*ast.Schema) ([]*ast.Sche
 }
 
 func (pass *AnonymousStructsToNamed) processSchema(schema *ast.Schema) *ast.Schema {
-	pass.newObjects = make([]ast.Object, 0, len(schema.Objects))
-	for _, object := range schema.Objects {
-		newObj := pass.processObject(object)
-		pass.newObjects = append(pass.newObjects, newObj)
-	}
+	pass.newObjects = nil
 
-	schema.Objects = pass.newObjects
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		return pass.processObject(object)
+	})
+	schema.AddObjects(pass.newObjects...)
 
 	return schema
 }

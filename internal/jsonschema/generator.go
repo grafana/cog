@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 	schemaparser "github.com/santhosh-tekuri/jsonschema"
 )
@@ -39,11 +40,8 @@ type generator struct {
 
 func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 	g := &generator{
-		schema: &ast.Schema{
-			Package:  c.Package,
-			Metadata: c.SchemaMetadata,
-		},
-		seen: make(map[string]struct{}),
+		seen:   make(map[string]struct{}),
+		schema: ast.NewSchema(c.Package, c.SchemaMetadata),
 	}
 
 	compiler := schemaparser.NewCompiler()
@@ -80,10 +78,9 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		}
 	}
 
-	// To ensure consistent outputs
-	sort.Slice(g.schema.Objects, func(i, j int) bool {
-		return g.schema.Objects[i].Name < g.schema.Objects[j].Name
-	})
+	// To ensure a consistent output, since github.com/santhosh-tekuri/jsonschema
+	// doesn't guarantee the order of the definitions it parses.
+	g.schema.Objects.Sort(orderedmap.SortStrings)
 
 	return g.schema, nil
 }
@@ -100,7 +97,7 @@ func (g *generator) declareDefinition(definitionName string, schema *schemaparse
 		return fmt.Errorf("%s: %w", definitionName, err)
 	}
 
-	g.schema.Objects = append(g.schema.Objects, ast.Object{
+	g.schema.AddObject(ast.Object{
 		Name: definitionName,
 		Type: def,
 		SelfRef: ast.RefType{

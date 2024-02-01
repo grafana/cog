@@ -45,10 +45,7 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	}
 
 	g := &generator{
-		schema: &ast.Schema{
-			Package:  cfg.Package,
-			Metadata: cfg.SchemaMetadata,
-		},
+		schema: ast.NewSchema(cfg.Package, cfg.SchemaMetadata),
 	}
 
 	if oapi.Components == nil {
@@ -69,7 +66,7 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 			return err
 		}
 
-		g.schema.Objects = append(g.schema.Objects, ast.Object{
+		g.schema.AddObject(ast.Object{
 			Name:     name,
 			Comments: schemaComments(schemaRef.Value),
 			Type:     def,
@@ -79,10 +76,6 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 			},
 		})
 	}
-
-	sort.Slice(g.schema.Objects, func(i, j int) bool {
-		return g.schema.Objects[i].Name < g.schema.Objects[j].Name
-	})
 
 	return nil
 }

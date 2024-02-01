@@ -34,12 +34,17 @@ func (pass *DisjunctionInferMapping) Process(schemas []*ast.Schema) ([]*ast.Sche
 
 func (pass *DisjunctionInferMapping) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 	var err error
-
-	for i, object := range schema.Objects {
-		schema.Objects[i], err = pass.processObject(schema, object)
-		if err != nil {
-			return nil, err
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		processedObject, innerErr := pass.processObject(schema, object)
+		if innerErr != nil {
+			err = innerErr
+			return object
 		}
+
+		return processedObject
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return schema, nil

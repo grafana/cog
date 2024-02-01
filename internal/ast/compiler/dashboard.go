@@ -22,12 +22,13 @@ func (pass *Dashboard) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 }
 
 func (pass *Dashboard) processSchema(schema *ast.Schema) *ast.Schema {
-	for i, object := range schema.Objects {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if schema.Package == dashboardPackage && object.Name == dashboardObject {
-			schema.Objects[i] = pass.processDashboard(object)
-			continue
+			return pass.processDashboard(object)
 		}
-	}
+
+		return object
+	})
 
 	return schema
 }

@@ -46,17 +46,12 @@ func (pass *Cloudwatch) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 }
 
 func (pass *Cloudwatch) processSchema(schema *ast.Schema) (*ast.Schema, error) {
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = nil
-
-	for _, object := range schema.Objects {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if object.Name == "QueryEditorExpression" {
-			newSchema.Objects = append(newSchema.Objects, pass.processQueryEditorExpression(object))
-			continue
+			return pass.processQueryEditorExpression(object)
 		}
 		if object.Name == "QueryEditorArrayExpression" {
-			newSchema.Objects = append(newSchema.Objects, pass.processQueryEditorArrayExpression(object))
-			continue
+			return pass.processQueryEditorArrayExpression(object)
 		}
 
 		// types hinted as a dataquery are replaced by a "CloudWatchQuery" disjunction,
@@ -65,12 +60,12 @@ func (pass *Cloudwatch) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 			object.Type = pass.processDataquery(object.Name, object.Type)
 		}
 
-		newSchema.Objects = append(newSchema.Objects, object)
-	}
+		return object
+	})
 
-	newSchema.Objects = append(newSchema.Objects, pass.defineQueryDisjunction(schema))
+	schema.AddObject(pass.defineQueryDisjunction(schema))
 
-	return &newSchema, nil
+	return schema, nil
 }
 
 func (pass *Cloudwatch) processDataquery(objectName string, typeDef ast.Type) ast.Type {

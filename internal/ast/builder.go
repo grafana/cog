@@ -18,7 +18,7 @@ type Builder struct {
 	// by veneers.
 	Package         string
 	Name            string
-	Properties      []StructField
+	Properties      []StructField `json:",omitempty"`
 	Options         []Option
 	Initializations []Assignment `json:",omitempty"`
 	VeneerTrail     []string     `json:",omitempty"`
@@ -384,26 +384,26 @@ func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
 	builders := make([]Builder, 0, len(schemas))
 
 	for _, schema := range schemas {
-		for _, object := range schema.Objects {
+		schema.Objects.Iterate(func(_ string, object Object) {
 			// we only want builders for structs or references to structs
 			if object.Type.Kind == KindRef {
 				ref := object.Type.AsRef()
 				referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 				if !found {
-					continue
+					return
 				}
 
 				if referredObj.Type.Kind != KindStruct {
-					continue
+					return
 				}
 			}
 
 			if object.Type.Kind != KindStruct && object.Type.Kind != KindRef {
-				continue
+				return
 			}
 
 			builders = append(builders, generator.structObjectToBuilder(schemas, schema, object))
-		}
+		})
 	}
 
 	return builders

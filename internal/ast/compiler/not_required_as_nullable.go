@@ -20,9 +20,9 @@ func (pass *NotRequiredFieldAsNullableType) Process(schemas []*ast.Schema) ([]*a
 }
 
 func (pass *NotRequiredFieldAsNullableType) processSchema(schema *ast.Schema) *ast.Schema {
-	for i, object := range schema.Objects {
-		schema.Objects[i] = pass.processObject(object)
-	}
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		return pass.processObject(object)
+	})
 
 	return schema
 }

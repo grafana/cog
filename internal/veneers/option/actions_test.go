@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -119,11 +120,11 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 	ref := ast.NewRef("dashboard", "PanelOrRow")
 	schema := &ast.Schema{
 		Package: "dashboard",
-		Objects: []ast.Object{
+		Objects: testutils.ObjectsMap(
 			ast.NewObject("dashboard", "PanelOrRow", panelOrRow),
 			ast.NewObject("dashboard", "Row", rowType),
 			ast.NewObject("dashboard", "Panel", panelType),
-		},
+		),
 	}
 	builder := ast.Builder{Schema: schema}
 
@@ -164,9 +165,9 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 	ref := ast.NewRef("dashboard", "Time")
 	schema := &ast.Schema{
 		Package: "dashboard",
-		Objects: []ast.Object{
+		Objects: testutils.ObjectsMap(
 			ast.NewObject("dashboard", "Time", timeType),
-		},
+		),
 	}
 	builder := ast.Builder{Schema: schema}
 

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 )
 
 func TestDashboardPanelsRewrite(t *testing.T) {
@@ -11,16 +12,16 @@ func TestDashboardPanelsRewrite(t *testing.T) {
 	schemas := ast.Schemas{
 		&ast.Schema{
 			Package: "team",
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject("team", "Team", ast.NewStruct(
 					ast.NewStructField("Name", ast.String()),
 				)),
-			},
+			),
 		},
 
 		&ast.Schema{
 			Package: "dashboard",
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject("dashboard", "Panel", ast.NewStruct(
 					ast.NewStructField("Title", ast.String()),
 					ast.NewStructField("Type", ast.String()),
@@ -45,7 +46,7 @@ func TestDashboardPanelsRewrite(t *testing.T) {
 						ast.NewRef("dashboard", "GraphPanel"),
 					}))),
 				)),
-			},
+			),
 		},
 	}
 
@@ -57,7 +58,7 @@ func TestDashboardPanelsRewrite(t *testing.T) {
 		// The panels field are rewritten for RowPanel and Dashboard
 		&ast.Schema{
 			Package: "dashboard",
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject("dashboard", "Panel", ast.NewStruct(
 					ast.NewStructField("Title", ast.String()),
 					ast.NewStructField("Type", ast.String()),
@@ -81,7 +82,7 @@ func TestDashboardPanelsRewrite(t *testing.T) {
 						ast.DiscriminatorCatchAll: "Panel",
 					})))),
 				)),
-			},
+			),
 		},
 	}
 

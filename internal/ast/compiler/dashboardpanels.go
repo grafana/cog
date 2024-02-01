@@ -51,10 +51,7 @@ func (pass *DashboardPanelsRewrite) Process(schemas []*ast.Schema) ([]*ast.Schem
 }
 
 func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Schema, error) {
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = nil
-
-	for _, object := range schema.Objects {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if object.Name == dashboardObject {
 			disjunction := ast.NewDisjunction([]ast.Type{
 				ast.NewRef(schema.Package, dashboardPanelObject),
@@ -68,20 +65,18 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 
 			newPanelsFieldType := ast.NewArray(disjunction)
 
-			newSchema.Objects = append(newSchema.Objects, pass.overwritePanelsFieldType(object, newPanelsFieldType))
-			continue
+			return pass.overwritePanelsFieldType(object, newPanelsFieldType)
 		}
 		if object.Name == dashboardRowPanelObject {
 			newPanelsFieldType := ast.NewArray(ast.NewRef(schema.Package, "Panel"))
 
-			newSchema.Objects = append(newSchema.Objects, pass.overwritePanelsFieldType(object, newPanelsFieldType))
-			continue
+			return pass.overwritePanelsFieldType(object, newPanelsFieldType)
 		}
 
-		newSchema.Objects = append(newSchema.Objects, object)
-	}
+		return object
+	})
 
-	return &newSchema, nil
+	return schema, nil
 }
 
 func (pass *DashboardPanelsRewrite) overwritePanelsFieldType(object ast.Object, newPanelsFieldType ast.Type) ast.Object {

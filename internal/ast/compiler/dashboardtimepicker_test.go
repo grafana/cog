@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 )
 
 func TestDashboardTimePicker(t *testing.T) {
@@ -11,16 +12,16 @@ func TestDashboardTimePicker(t *testing.T) {
 	schemas := ast.Schemas{
 		&ast.Schema{
 			Package: "team",
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject("team", "Team", ast.NewStruct(
 					ast.NewStructField("Name", ast.String()),
 				)),
-			},
+			),
 		},
 
 		&ast.Schema{
 			Package: "dashboard",
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject("dashboard", "Panel", ast.NewStruct(
 					ast.NewStructField("Title", ast.String()),
 				)),
@@ -30,7 +31,7 @@ func TestDashboardTimePicker(t *testing.T) {
 						ast.NewStructField("refresh_intervals", ast.NewArray(ast.String())),
 					)),
 				)),
-			},
+			),
 		},
 	}
 
@@ -42,7 +43,7 @@ func TestDashboardTimePicker(t *testing.T) {
 		// The timepicker is no longer an anonymous struct
 		&ast.Schema{
 			Package: "dashboard",
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject("dashboard", "Panel", ast.NewStruct(
 					ast.NewStructField("Title", ast.String()),
 				)),
@@ -53,7 +54,7 @@ func TestDashboardTimePicker(t *testing.T) {
 				ast.NewObject("dashboard", "TimePicker", ast.NewStruct(
 					ast.NewStructField("refresh_intervals", ast.NewArray(ast.String())),
 				)),
-			},
+			),
 		},
 	}
 

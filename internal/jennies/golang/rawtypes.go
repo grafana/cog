@@ -43,6 +43,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 
 func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
+	var err error
 
 	imports := NewImportMap()
 	jenny.typeFormatter = defaultTypeFormatter(func(pkg string) string {
@@ -53,14 +54,18 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	})
 
-	for _, object := range schema.Objects {
-		objectOutput, err := jenny.formatObject(object)
-		if err != nil {
-			return nil, err
+	schema.Objects.Iterate(func(_ string, object ast.Object) {
+		objectOutput, innerErr := jenny.formatObject(object)
+		if innerErr != nil {
+			err = innerErr
+			return
 		}
 
 		buffer.Write(objectOutput)
 		buffer.WriteString("\n")
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	importStatements := imports.String()

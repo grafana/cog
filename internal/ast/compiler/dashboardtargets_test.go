@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 )
 
 func TestDashboardTargetsRewrite_withNoRefToTarget(t *testing.T) {
@@ -11,24 +12,24 @@ func TestDashboardTargetsRewrite_withNoRefToTarget(t *testing.T) {
 	schemas := ast.Schemas{
 		&ast.Schema{
 			Package: dashboardPackage,
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject(dashboardPackage, "RefToStruct", ast.NewRef(dashboardPackage, "AStruct")),
 
 				ast.NewObject(dashboardPackage, "AStruct", ast.NewStruct(
 					ast.NewStructField("AString", ast.String()),
 				)),
-			},
+			),
 		},
 
 		&ast.Schema{
 			Package: "not_dashboard_package",
-			Objects: []ast.Object{
+			Objects: testutils.ObjectsMap(
 				ast.NewObject("not_dashboard_package", "RefToTarget", ast.NewRef("not_dashboard_package", dashboardTargetObject)),
 
 				ast.NewObject("not_dashboard_package", "AStruct", ast.NewStruct(
 					ast.NewStructField("AString", ast.String()),
 				)),
-			},
+			),
 		},
 	}
 
@@ -40,7 +41,7 @@ func TestDashboardTargetsRewrite_withRefToTarget(t *testing.T) {
 	// Prepare test input
 	schema := &ast.Schema{
 		Package: dashboardPackage,
-		Objects: []ast.Object{
+		Objects: testutils.ObjectsMap(
 			ast.NewObject(dashboardPackage, "RefToTarget", ast.NewRef(dashboardPackage, dashboardTargetObject)),
 
 			ast.NewObject(dashboardPackage, "AStruct", ast.NewStruct(
@@ -52,7 +53,7 @@ func TestDashboardTargetsRewrite_withRefToTarget(t *testing.T) {
 					ast.NewRef(dashboardPackage, dashboardTargetObject),
 				})),
 			)),
-		},
+		),
 	}
 
 	dataqueryComposableSlotType := ast.NewComposableSlot(ast.SchemaVariantDataQuery)
@@ -60,7 +61,7 @@ func TestDashboardTargetsRewrite_withRefToTarget(t *testing.T) {
 	// Prepare expected output
 	expected := &ast.Schema{
 		Package: dashboardPackage,
-		Objects: []ast.Object{
+		Objects: testutils.ObjectsMap(
 			ast.NewObject(dashboardPackage, "RefToTarget", dataqueryComposableSlotType),
 
 			ast.NewObject(dashboardPackage, "AStruct", ast.NewStruct(
@@ -72,7 +73,7 @@ func TestDashboardTargetsRewrite_withRefToTarget(t *testing.T) {
 					dataqueryComposableSlotType,
 				})),
 			)),
-		},
+		),
 	}
 
 	// Run the compiler pass
