@@ -5,7 +5,7 @@ go 1.21
 require (
 	cuelang.org/go v0.7.0
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/getkin/kin-openapi v0.122.0
+	github.com/getkin/kin-openapi v0.123.0
 	github.com/google/go-cmp v0.6.0
 	github.com/grafana/codejen v0.0.4-0.20230321061741-77f656893a3d
 	github.com/huandu/xstrings v1.4.0
@@ -26,7 +26,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/proto v1.13.0 // indirect
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
-	github.com/go-openapi/swag v0.22.7 // indirect
+	github.com/go-openapi/swag v0.22.8 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
