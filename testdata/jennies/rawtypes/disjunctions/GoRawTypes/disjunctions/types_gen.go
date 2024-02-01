@@ -24,6 +24,11 @@ type YetAnotherStruct struct {
 
 type SeveralRefs = SomeStructOrSomeOtherStructOrYetAnotherStruct
 
+type StringOrBool struct {
+	String *string `json:"String,omitempty"`
+	Bool *bool `json:"Bool,omitempty"`
+}
+
 type BoolOrSomeStruct struct {
 	Bool *bool `json:"Bool,omitempty"`
 	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
@@ -33,10 +38,5 @@ type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
 	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
 	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
 	YetAnotherStruct *YetAnotherStruct `json:"YetAnotherStruct,omitempty"`
-}
-
-type StringOrBool struct {
-	String *string `json:"String,omitempty"`
-	Bool *bool `json:"Bool,omitempty"`
 }
 

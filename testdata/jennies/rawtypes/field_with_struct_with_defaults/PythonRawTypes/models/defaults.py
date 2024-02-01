@@ -25,6 +25,42 @@ class NestedStruct:
         return cls(**args)
 
 
+class Struct:
+    all_fields: 'NestedStruct'
+    partial_fields: 'NestedStruct'
+    empty_fields: 'NestedStruct'
+    complex_field: 'DefaultsStructComplexField'
+    partial_complex_field: 'DefaultsStructPartialComplexField'
+
+    def __init__(self, all_fields: typing.Optional['NestedStruct'] = None, partial_fields: typing.Optional['NestedStruct'] = None, empty_fields: typing.Optional['NestedStruct'] = None, complex_field: typing.Optional['DefaultsStructComplexField'] = None, partial_complex_field: typing.Optional['DefaultsStructPartialComplexField'] = None):
+        self.all_fields = all_fields if all_fields is not None else NestedStruct(int_val=3, string_val="hello")
+        self.partial_fields = partial_fields if partial_fields is not None else NestedStruct(int_val=3)
+        self.empty_fields = empty_fields if empty_fields is not None else NestedStruct()
+        self.complex_field = complex_field if complex_field is not None else DefaultsStructComplexField(array=["hello"], nested=DefaultsStructComplexFieldNested(nested_val="nested"), uid="myUID")
+        self.partial_complex_field = partial_complex_field if partial_complex_field is not None else DefaultsStructPartialComplexField()
+
+    def to_json(self) -> dict[str, object]:
+        payload: dict[str, object] = {
+            "allFields": None if self.all_fields is None else self.all_fields.to_json(),
+            "partialFields": None if self.partial_fields is None else self.partial_fields.to_json(),
+            "emptyFields": None if self.empty_fields is None else self.empty_fields.to_json(),
+            "complexField": None if self.complex_field is None else self.complex_field.to_json(),
+            "partialComplexField": None if self.partial_complex_field is None else self.partial_complex_field.to_json(),
+        }
+        return payload
+
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        args = {
+            "all_fields": NestedStruct.from_json(data["allFields"]),
+            "partial_fields": NestedStruct.from_json(data["partialFields"]),
+            "empty_fields": NestedStruct.from_json(data["emptyFields"]),
+            "complex_field": DefaultsStructComplexField.from_json(data["complexField"]),
+            "partial_complex_field": DefaultsStructPartialComplexField.from_json(data["partialComplexField"]),
+        }
+        return cls(**args)
+
+
 class DefaultsStructComplexFieldNested:
     nested_val: str
 
@@ -97,37 +133,4 @@ class DefaultsStructPartialComplexField:
         return cls(**args)
 
 
-class Struct:
-    all_fields: 'NestedStruct'
-    partial_fields: 'NestedStruct'
-    empty_fields: 'NestedStruct'
-    complex_field: 'DefaultsStructComplexField'
-    partial_complex_field: 'DefaultsStructPartialComplexField'
 
-    def __init__(self, all_fields: typing.Optional['NestedStruct'] = None, partial_fields: typing.Optional['NestedStruct'] = None, empty_fields: typing.Optional['NestedStruct'] = None, complex_field: typing.Optional['DefaultsStructComplexField'] = None, partial_complex_field: typing.Optional['DefaultsStructPartialComplexField'] = None):
-        self.all_fields = all_fields if all_fields is not None else NestedStruct(int_val=3, string_val="hello")
-        self.partial_fields = partial_fields if partial_fields is not None else NestedStruct(int_val=3)
-        self.empty_fields = empty_fields if empty_fields is not None else NestedStruct()
-        self.complex_field = complex_field if complex_field is not None else DefaultsStructComplexField(array=["hello"], nested=DefaultsStructComplexFieldNested(nested_val="nested"), uid="myUID")
-        self.partial_complex_field = partial_complex_field if partial_complex_field is not None else DefaultsStructPartialComplexField()
-
-    def to_json(self) -> dict[str, object]:
-        payload: dict[str, object] = {
-            "allFields": None if self.all_fields is None else self.all_fields.to_json(),
-            "partialFields": None if self.partial_fields is None else self.partial_fields.to_json(),
-            "emptyFields": None if self.empty_fields is None else self.empty_fields.to_json(),
-            "complexField": None if self.complex_field is None else self.complex_field.to_json(),
-            "partialComplexField": None if self.partial_complex_field is None else self.partial_complex_field.to_json(),
-        }
-        return payload
-
-    @classmethod
-    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
-            "all_fields": NestedStruct.from_json(data["allFields"]),
-            "partial_fields": NestedStruct.from_json(data["partialFields"]),
-            "empty_fields": NestedStruct.from_json(data["emptyFields"]),
-            "complex_field": DefaultsStructComplexField.from_json(data["complexField"]),
-            "partial_complex_field": DefaultsStructPartialComplexField.from_json(data["partialComplexField"]),
-        }
-        return cls(**args)

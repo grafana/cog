@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "intStringMap": {
       "Name": "intStringMap",
       "Type": {
         "Kind": "map",
@@ -29,7 +29,7 @@
         "ReferredType": "intStringMap"
       }
     },
-    {
+    "stringStringMap": {
       "Name": "stringStringMap",
       "Type": {
         "Kind": "map",
@@ -56,7 +56,7 @@
         "ReferredType": "stringStringMap"
       }
     },
-    {
+    "foo": {
       "Name": "foo",
       "Type": {
         "Kind": "struct",
@@ -82,7 +82,7 @@
         "ReferredType": "foo"
       }
     },
-    {
+    "stringRefMap": {
       "Name": "stringRefMap",
       "Type": {
         "Kind": "map",
@@ -110,7 +110,7 @@
         "ReferredType": "stringRefMap"
       }
     },
-    {
+    "stringToMapOfMap": {
       "Name": "stringToMapOfMap",
       "Type": {
         "Kind": "map",
@@ -150,5 +150,5 @@
         "ReferredType": "stringToMapOfMap"
       }
     }
-  ]
+  }
 }

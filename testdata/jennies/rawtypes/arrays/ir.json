@@ -1,7 +1,7 @@
 {
   "Package": "arrays",
-  "Objects": [
-    {
+  "Objects": {
+    "ArrayOfStrings": {
       "Name": "ArrayOfStrings",
       "Comments": [
         "List of tags, maybe?"
@@ -18,7 +18,7 @@
         }
       }
     },
-    {
+    "someStruct": {
       "Name": "someStruct",
       "Type": {
         "Kind": "struct",
@@ -38,7 +38,7 @@
         }
       }
     },
-    {
+    "ArrayOfRefs": {
       "Name": "ArrayOfRefs",
       "Type": {
         "Kind": "array",
@@ -53,7 +53,7 @@
         }
       }
     },
-    {
+    "ArrayOfArrayOfNumbers": {
       "Name": "ArrayOfArrayOfNumbers",
       "Type": {
         "Kind": "array",
@@ -72,5 +72,5 @@
         }
       }
     }
-  ]
+  }
 }

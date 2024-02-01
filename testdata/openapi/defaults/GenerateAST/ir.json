@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "Array": {
       "Name": "Array",
       "Type": {
         "Kind": "array",
@@ -25,7 +25,7 @@
         "ReferredType": "Array"
       }
     },
-    {
+    "Boolean": {
       "Name": "Boolean",
       "Type": {
         "Kind": "scalar",
@@ -40,7 +40,7 @@
         "ReferredType": "Boolean"
       }
     },
-    {
+    "Enum": {
       "Name": "Enum",
       "Type": {
         "Kind": "enum",
@@ -78,7 +78,7 @@
         "ReferredType": "Enum"
       }
     },
-    {
+    "Float": {
       "Name": "Float",
       "Type": {
         "Kind": "scalar",
@@ -93,7 +93,7 @@
         "ReferredType": "Float"
       }
     },
-    {
+    "Integer": {
       "Name": "Integer",
       "Type": {
         "Kind": "scalar",
@@ -108,7 +108,7 @@
         "ReferredType": "Integer"
       }
     },
-    {
+    "String": {
       "Name": "String",
       "Type": {
         "Kind": "scalar",
@@ -123,5 +123,5 @@
         "ReferredType": "String"
       }
     }
-  ]
+  }
 }

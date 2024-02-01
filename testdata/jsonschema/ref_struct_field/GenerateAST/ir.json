@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "grafanatest": {
       "Name": "grafanatest",
       "Type": {
         "Kind": "struct",
@@ -29,7 +29,7 @@
         "ReferredType": "grafanatest"
       }
     },
-    {
+    "is-string": {
       "Name": "is-string",
       "Type": {
         "Kind": "scalar",
@@ -43,5 +43,5 @@
         "ReferredType": "is-string"
       }
     }
-  ]
+  }
 }

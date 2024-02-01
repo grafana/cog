@@ -3,8 +3,8 @@
     {
       "Package": "some_pkg",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "Person": {
           "Name": "Person",
           "Type": {
             "Kind": "struct",
@@ -31,13 +31,13 @@
             "ReferredType": "Person"
           }
         }
-      ]
+      }
     },
     {
       "Package": "other_pkg",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "Name": {
           "Name": "Name",
           "Type": {
             "Kind": "struct",
@@ -74,7 +74,7 @@
             "ReferredType": "Name"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -82,8 +82,8 @@
       "Schema": {
         "Package": "some_pkg",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "Person": {
             "Name": "Person",
             "Type": {
               "Kind": "struct",
@@ -110,7 +110,7 @@
               "ReferredType": "Person"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "Person",

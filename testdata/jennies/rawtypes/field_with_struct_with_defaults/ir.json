@@ -1,7 +1,7 @@
 {
   "Package": "defaults",
-  "Objects": [
-    {
+  "Objects": {
+    "NestedStruct": {
       "Name": "NestedStruct",
       "SelfRef": {
         "ReferredPkg": "defaults",
@@ -38,7 +38,7 @@
         }
       }
     },
-    {
+    "Struct": {
       "Name": "Struct",
       "SelfRef": {
         "ReferredPkg": "defaults",
@@ -202,5 +202,5 @@
         }
       }
     }
-  ]
+  }
 }

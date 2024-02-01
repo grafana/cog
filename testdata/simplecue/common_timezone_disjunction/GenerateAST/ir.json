@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "TimeZoneUtc": {
       "Name": "TimeZoneUtc",
       "Comments": [
         "Use UTC/GMT timezone"
@@ -23,7 +23,7 @@
         "ReferredType": "TimeZoneUtc"
       }
     },
-    {
+    "TimeZoneBrowser": {
       "Name": "TimeZoneBrowser",
       "Comments": [
         "Use the timezone defined by end user web browser"
@@ -44,7 +44,7 @@
         "ReferredType": "TimeZoneBrowser"
       }
     },
-    {
+    "TimeZone": {
       "Name": "TimeZone",
       "Comments": [
         "A specific timezone from https://en.wikipedia.org/wiki/Tz_database"
@@ -89,7 +89,7 @@
         "ReferredType": "TimeZone"
       }
     },
-    {
+    "DisjunctionWithOnlyConcreteValues": {
       "Name": "DisjunctionWithOnlyConcreteValues",
       "Comments": [
         "This should become an enum"
@@ -140,5 +140,5 @@
         "ReferredType": "DisjunctionWithOnlyConcreteValues"
       }
     }
-  ]
+  }
 }

@@ -23,3 +23,6 @@ class SomeStruct:
 
 # Refresh rate or disabled.
 RefreshRate = typing.Union[typing.Union[str, bool]]
+
+
+

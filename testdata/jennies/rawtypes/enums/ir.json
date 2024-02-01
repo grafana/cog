@@ -1,7 +1,7 @@
 {
   "Package": "enums",
-  "Objects": [
-    {
+  "Objects": {
+    "Operator": {
       "Name": "Operator",
       "Comments": [
         "This is a very interesting string enum."
@@ -38,7 +38,7 @@
         "ReferredType": "Operator"
       }
     },
-    {
+    "TableSortOrder": {
       "Name": "TableSortOrder",
       "Type": {
         "Kind": "enum",
@@ -72,7 +72,7 @@
         "ReferredType": "TableSortOrder"
       }
     },
-    {
+    "LogsSortOrder": {
       "Name": "LogsSortOrder",
       "Type": {
         "Kind": "enum",
@@ -106,7 +106,7 @@
         "ReferredType": "LogsSortOrder"
       }
     },
-    {
+    "DashboardCursorSync": {
       "Name": "DashboardCursorSync",
       "Comments": [
         "0 for no shared crosshair or tooltip (default).",
@@ -155,5 +155,5 @@
         "ReferredType": "DashboardCursorSync"
       }
     }
-  ]
+  }
 }

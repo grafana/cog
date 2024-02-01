@@ -1,7 +1,7 @@
 {
   "Package": "scalars",
-  "Objects": [
-    {
+  "Objects": {
+    "constTypeString": {
       "Name": "constTypeString",
       "Type": {
         "Kind": "scalar",
@@ -11,7 +11,7 @@
         }
       }
     },
-    {
+    "scalarTypeAny": {
       "Name": "scalarTypeAny",
       "Type": {
         "Kind": "scalar",
@@ -20,7 +20,7 @@
         }
       }
     },
-    {
+    "ScalarTypeBool": {
       "Name": "ScalarTypeBool",
       "Type": {
         "Kind": "scalar",
@@ -29,7 +29,7 @@
         }
       }
     },
-    {
+    "ScalarTypeBytes": {
       "Name": "ScalarTypeBytes",
       "Type": {
         "Kind": "scalar",
@@ -38,7 +38,7 @@
         }
       }
     },
-    {
+    "ScalarTypeString": {
       "Name": "ScalarTypeString",
       "Type": {
         "Kind": "scalar",
@@ -47,7 +47,7 @@
         }
       }
     },
-    {
+    "ScalarTypeFloat32": {
       "Name": "ScalarTypeFloat32",
       "Type": {
         "Kind": "scalar",
@@ -56,7 +56,7 @@
         }
       }
     },
-    {
+    "ScalarTypeFloat64": {
       "Name": "ScalarTypeFloat64",
       "Type": {
         "Kind": "scalar",
@@ -65,7 +65,7 @@
         }
       }
     },
-    {
+    "ScalarTypeUint8": {
       "Name": "ScalarTypeUint8",
       "Type": {
         "Kind": "scalar",
@@ -74,7 +74,7 @@
         }
       }
     },
-    {
+    "ScalarTypeUint16": {
       "Name": "ScalarTypeUint16",
       "Type": {
         "Kind": "scalar",
@@ -83,7 +83,7 @@
         }
       }
     },
-    {
+    "ScalarTypeUint32": {
       "Name": "ScalarTypeUint32",
       "Type": {
         "Kind": "scalar",
@@ -92,7 +92,7 @@
         }
       }
     },
-    {
+    "ScalarTypeUint64": {
       "Name": "ScalarTypeUint64",
       "Type": {
         "Kind": "scalar",
@@ -101,7 +101,7 @@
         }
       }
     },
-    {
+    "ScalarTypeInt8": {
       "Name": "ScalarTypeInt8",
       "Type": {
         "Kind": "scalar",
@@ -110,7 +110,7 @@
         }
       }
     },
-    {
+    "ScalarTypeInt16": {
       "Name": "ScalarTypeInt16",
       "Type": {
         "Kind": "scalar",
@@ -119,7 +119,7 @@
         }
       }
     },
-    {
+    "ScalarTypeInt32": {
       "Name": "ScalarTypeInt32",
       "Type": {
         "Kind": "scalar",
@@ -128,7 +128,7 @@
         }
       }
     },
-    {
+    "ScalarTypeInt64": {
       "Name": "ScalarTypeInt64",
       "Type": {
         "Kind": "scalar",
@@ -137,5 +137,5 @@
         }
       }
     }
-  ]
+  }
 }

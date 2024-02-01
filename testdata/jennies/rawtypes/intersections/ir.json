@@ -1,7 +1,7 @@
 {
   "Package": "intersections",
-  "Objects": [
-    {
+  "Objects": {
+    "Intersections": {
       "Name": "Intersections",
       "Type": {
         "Kind": "intersection",
@@ -61,7 +61,7 @@
         }
       }
     },
-    {
+    "SomeStruct": {
       "Name": "SomeStruct",
       "Type": {
         "Kind": "struct",
@@ -82,5 +82,5 @@
         }
       }
     }
-  ]
+  }
 }

@@ -1,7 +1,7 @@
 {
   "Package": "refs",
-  "Objects": [
-    {
+  "Objects": {
+    "SomeStruct": {
       "Name": "SomeStruct",
       "Type": {
         "Kind": "struct",
@@ -21,7 +21,7 @@
         }
       }
     },
-    {
+    "RefToSomeStruct": {
       "Name": "RefToSomeStruct",
       "Type": {
         "Kind": "ref",
@@ -31,7 +31,7 @@
         }
       }
     },
-    {
+    "RefToSomeStructFromOtherPackage": {
       "Name": "RefToSomeStructFromOtherPackage",
       "Type": {
         "Kind": "ref",
@@ -41,5 +41,5 @@
         }
       }
     }
-  ]
+  }
 }

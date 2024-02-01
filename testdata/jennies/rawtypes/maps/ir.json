@@ -1,7 +1,7 @@
 {
   "Package": "maps",
-  "Objects": [
-    {
+  "Objects": {
+    "MapOfStringToAny": {
       "Name": "MapOfStringToAny",
       "Comments": [
         "String to... something."
@@ -24,7 +24,7 @@
         }
       }
     },
-    {
+    "MapOfStringToString": {
       "Name": "MapOfStringToString",
       "Type": {
         "Kind": "map",
@@ -44,7 +44,7 @@
         }
       }
     },
-    {
+    "SomeStruct": {
       "Name": "SomeStruct",
       "Type": {
         "Kind": "struct",
@@ -64,7 +64,7 @@
         }
       }
     },
-    {
+    "MapOfStringToRef": {
       "Name": "MapOfStringToRef",
       "Type": {
         "Kind": "map",
@@ -85,7 +85,7 @@
         }
       }
     },
-    {
+    "MapOfStringToMapOfStringToBool": {
       "Name": "MapOfStringToMapOfStringToBool",
       "Type": {
         "Kind": "map",
@@ -116,5 +116,5 @@
         }
       }
     }
-  ]
+  }
 }

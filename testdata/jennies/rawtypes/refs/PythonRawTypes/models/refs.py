@@ -26,3 +26,6 @@ RefToSomeStruct = 'SomeStruct'
 
 
 RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct
+
+
+

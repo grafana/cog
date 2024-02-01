@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "HelloMsg": {
       "Name": "HelloMsg",
       "Type": {
         "Kind": "struct",
@@ -40,7 +40,7 @@
         "ReferredType": "HelloMsg"
       }
     },
-    {
+    "ByeMsg": {
       "Name": "ByeMsg",
       "Type": {
         "Kind": "struct",
@@ -78,7 +78,7 @@
         "ReferredType": "ByeMsg"
       }
     },
-    {
+    "QuestionMsg": {
       "Name": "QuestionMsg",
       "Type": {
         "Kind": "struct",
@@ -116,7 +116,7 @@
         "ReferredType": "QuestionMsg"
       }
     },
-    {
+    "AnswerMsg": {
       "Name": "AnswerMsg",
       "Type": {
         "Kind": "struct",
@@ -154,7 +154,7 @@
         "ReferredType": "AnswerMsg"
       }
     },
-    {
+    "ChitChat": {
       "Name": "ChitChat",
       "Type": {
         "Kind": "disjunction",
@@ -185,7 +185,7 @@
         "ReferredType": "ChitChat"
       }
     },
-    {
+    "Message": {
       "Name": "Message",
       "Type": {
         "Kind": "disjunction",
@@ -224,5 +224,5 @@
         "ReferredType": "Message"
       }
     }
-  ]
+  }
 }

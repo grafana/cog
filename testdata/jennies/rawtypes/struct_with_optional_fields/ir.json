@@ -1,7 +1,7 @@
 {
   "Package": "struct_optional_fields",
-  "Objects": [
-    {
+  "Objects": {
+    "SomeStruct": {
       "Name": "SomeStruct",
       "SelfRef": {
         "ReferredPkg": "struct_optional_fields",
@@ -103,7 +103,7 @@
         }
       }
     },
-    {
+    "SomeOtherStruct": {
       "Name": "SomeOtherStruct",
       "SelfRef": {
         "ReferredPkg": "struct_optional_fields",
@@ -127,5 +127,5 @@
         }
       }
     }
-  ]
+  }
 }

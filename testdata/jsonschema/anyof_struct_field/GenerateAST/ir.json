@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "AnyOfField": {
       "Name": "AnyOfField",
       "Type": {
         "Kind": "struct",
@@ -43,5 +43,5 @@
         "ReferredType": "AnyOfField"
       }
     }
-  ]
+  }
 }

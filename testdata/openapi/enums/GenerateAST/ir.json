@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "Enums": {
       "Name": "Enums",
       "Type": {
         "Kind": "struct",
@@ -120,5 +120,5 @@
         "ReferredType": "Enums"
       }
     }
-  ]
+  }
 }
