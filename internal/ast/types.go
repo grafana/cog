@@ -2,6 +2,8 @@ package ast
 
 import (
 	"fmt"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 type Kind string
@@ -475,6 +477,13 @@ func NewObject(pkg string, name string, objectType Type) Object {
 			ReferredType: name,
 		},
 	}
+}
+
+func (object Object) Equal(other Object) bool {
+	return object.Name == other.Name &&
+		cmp.Equal(object.Comments, other.Comments) &&
+		cmp.Equal(object.Type, other.Type) &&
+		cmp.Equal(object.SelfRef, other.SelfRef)
 }
 
 func (object Object) DeepCopy() Object {

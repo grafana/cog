@@ -11,7 +11,7 @@ import (
 	"github.com/grafana/cog/internal/jsonschema"
 )
 
-func jsonschemaRegistryLoader(opts Options) ([]*ast.Schema, error) {
+func jsonschemaRegistryLoader(opts Options) (ast.Schemas, error) {
 	var allSchemas []*ast.Schema
 
 	if opts.JSONSchemaRegistryPath == "" {

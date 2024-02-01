@@ -5,7 +5,7 @@ import (
 	"github.com/grafana/cog/internal/openapi"
 )
 
-func openapiLoader(opts Options) ([]*ast.Schema, error) {
+func openapiLoader(opts Options) (ast.Schemas, error) {
 	allSchemas := make([]*ast.Schema, 0, len(opts.OpenAPIEntrypoints))
 	for _, entrypoint := range opts.OpenAPIEntrypoints {
 		schemaAst, err := openapi.GenerateAST(entrypoint, openapi.Config{

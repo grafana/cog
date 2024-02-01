@@ -1,8 +1,13 @@
 package ast
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/grafana/cog/internal/orderedmap"
 )
+
+var ErrCannotMergeSchemas = errors.New("can not merge schemas")
 
 type SchemaKind string
 
@@ -30,6 +35,28 @@ func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	}
 
 	return Object{}, false
+}
+
+func (schemas Schemas) Consolidate() (Schemas, error) {
+	byPackage := make(map[string]Schemas, len(schemas))
+
+	for _, schema := range schemas {
+		byPackage[schema.Package] = append(byPackage[schema.Package], schema)
+	}
+
+	newSchemas := make([]*Schema, 0, len(schemas))
+	for pkg, groupedSchemas := range byPackage {
+		newSchema := NewSchema(pkg, groupedSchemas[0].Metadata)
+		for _, schema := range groupedSchemas {
+			if err := newSchema.Merge(schema); err != nil {
+				return nil, err
+			}
+		}
+
+		newSchemas = append(newSchemas, newSchema)
+	}
+
+	return newSchemas, nil
 }
 
 func (schemas Schemas) DeepCopy() []*Schema {
@@ -71,18 +98,43 @@ func (schema *Schema) AddObjects(objects ...Object) {
 	}
 }
 
-func (schema *Schema) DeepCopy() Schema {
-	newSchema := Schema{
-		Package:  schema.Package,
-		Metadata: schema.Metadata,
-		Objects:  orderedmap.New[string, Object](),
+func (schema *Schema) Merge(other *Schema) error {
+	if schema.Package != other.Package {
+		return fmt.Errorf("schemas originate from different packages ('%s', '%s'): %w", schema.Package, other.Package, ErrCannotMergeSchemas)
 	}
 
-	schema.Objects.Iterate(func(_ string, object Object) {
-		newSchema.AddObject(object.DeepCopy())
-	})
+	if !schema.Metadata.Equal(other.Metadata) {
+		return fmt.Errorf("conflicting metadata: %w", ErrCannotMergeSchemas)
+	}
 
-	return newSchema
+	var err error
+	other.Objects.Iterate(func(objectName string, remoteObject Object) {
+		if !schema.Objects.Has(objectName) {
+			schema.AddObject(remoteObject)
+			return
+		}
+
+		object := schema.Objects.Get(objectName)
+
+		if !object.Equal(remoteObject) {
+			err = fmt.Errorf("conflicting definition for object '%s': %w", object.SelfRef.String(), ErrCannotMergeSchemas)
+		}
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (schema *Schema) DeepCopy() Schema {
+	return Schema{
+		Package:  schema.Package,
+		Metadata: schema.Metadata,
+		Objects: schema.Objects.Map(func(_ string, object Object) Object {
+			return object.DeepCopy()
+		}),
+	}
 }
 
 func (schema *Schema) LocateObject(name string) (Object, bool) {
@@ -110,4 +162,10 @@ type SchemaMeta struct {
 	Kind       SchemaKind    `json:",omitempty"`
 	Variant    SchemaVariant `json:",omitempty"`
 	Identifier string        `json:",omitempty"`
+}
+
+func (meta SchemaMeta) Equal(other SchemaMeta) bool {
+	return meta.Identifier == other.Identifier &&
+		meta.Kind == other.Kind &&
+		meta.Variant == other.Variant
 }
