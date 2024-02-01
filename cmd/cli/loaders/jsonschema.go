@@ -7,7 +7,7 @@ import (
 	"github.com/grafana/cog/internal/jsonschema"
 )
 
-func jsonschemaLoader(opts Options) ([]*ast.Schema, error) {
+func jsonschemaLoader(opts Options) (ast.Schemas, error) {
 	allSchemas := make([]*ast.Schema, 0, len(opts.JSONSchemaEntrypoints))
 	for _, entrypoint := range opts.JSONSchemaEntrypoints {
 		reader, err := os.Open(entrypoint)

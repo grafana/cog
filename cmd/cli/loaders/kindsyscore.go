@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/cog/internal/simplecue"
 )
 
-func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
+func kindsysCoreLoader(opts Options) (ast.Schemas, error) {
 	libraries, err := opts.cueIncludeImports()
 	if err != nil {
 		return nil, err
