@@ -104,6 +104,14 @@ options:
       by_name: Dashboard.refresh
       fields: [String]
 
+  # Append a single `link` value instead of a list of everything
+  - array_to_append:
+      by_name: Dashboard.links
+  # Links() to Link()
+  - rename:
+      by_name: Dashboard.links
+      as: link
+
   # Append a single `panel|row` value instead of a list of everything
   - array_to_append:
       by_name: Dashboard.panels
@@ -185,3 +193,10 @@ options:
 
   # Make the constructor more friendly
   - promote_to_constructor: { by_name: RowPanel.title }
+
+  #################
+  # DashboardLink #
+  #################
+
+  # Make the constructor more friendly
+  - promote_to_constructor: { by_name: DashboardLink.title }
