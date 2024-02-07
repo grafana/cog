@@ -8,7 +8,7 @@ type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-type RefToSomeStruct SomeStruct
+type RefToSomeStruct = SomeStruct
 
-type RefToSomeStructFromOtherPackage otherpkg.SomeDistantStruct
+type RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct
 

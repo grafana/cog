@@ -5,7 +5,7 @@ type SomeStruct struct {
 }
 
 // Refresh rate or disabled.
-type RefreshRate StringOrBool
+type RefreshRate = StringOrBool
 
 type StringOrBool struct {
 	String *string `json:"String,omitempty"`
