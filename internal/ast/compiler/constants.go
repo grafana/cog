@@ -5,6 +5,9 @@ const (
 	libraryPanelObject     = "LibraryPanel"
 	libraryPanelModelField = "model"
 
+	prometheusPackage         = "prometheus"
+	prometheusDataqueryObject = "dataquery"
+
 	dashboardPackage                = "dashboard"
 	dashboardObject                 = "Dashboard"
 	dashboardPanelObject            = "Panel"
