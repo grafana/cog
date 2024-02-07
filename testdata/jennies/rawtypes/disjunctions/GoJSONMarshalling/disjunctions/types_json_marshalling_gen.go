@@ -1,5 +1,5 @@
 package disjunctions
-func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]byte, error) {
+func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]byte, error) {
 	if resource.SomeStruct != nil {
 		return json.Marshal(resource.SomeStruct)
 	}
@@ -59,7 +59,7 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 	return fmt.Errorf("could not unmarshal resource with `Type = %v`", discriminator)
 }
 
-func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
+func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {
 		return json.Marshal(resource.String)
 	}
