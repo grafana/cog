@@ -96,7 +96,9 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 		} else {
 			buffer.WriteString(fmt.Sprintf("type %s %s", defName, jenny.typeFormatter.formatType(def.Type)))
 		}
-	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindStruct, ast.KindIntersection:
+	case ast.KindRef:
+		buffer.WriteString(fmt.Sprintf("type %s = %s", defName, jenny.typeFormatter.formatType(def.Type)))
+	case ast.KindMap, ast.KindArray, ast.KindStruct, ast.KindIntersection:
 		buffer.WriteString(fmt.Sprintf("type %s %s", defName, jenny.typeFormatter.formatType(def.Type)))
 	default:
 		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
