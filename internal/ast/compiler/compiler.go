@@ -43,6 +43,7 @@ func CommonPasses() Passes {
 		&DashboardTimePicker{},
 		&Cloudwatch{},
 		&GoogleCloudMonitoring{},
+		&PrometheusDataquery{},
 		&LibraryPanels{},
 		&TestData{},
 	}

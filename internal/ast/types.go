@@ -690,6 +690,12 @@ func Required() StructFieldOption {
 	}
 }
 
+func Comments(comments []string) StructFieldOption {
+	return func(field *StructField) {
+		field.Comments = comments
+	}
+}
+
 func NewStructField(name string, fieldType Type, opts ...StructFieldOption) StructField {
 	field := StructField{
 		Name: name,
