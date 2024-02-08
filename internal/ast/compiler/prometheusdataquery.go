@@ -8,8 +8,7 @@ var _ Pass = (*PrometheusDataquery)(nil)
 
 // PrometheusDataquery rewrites the definition of the prometheus.Dataquery type and adds a few missing fields.
 // Note: this pass is meant to be removed once the schema is up-to-date.
-type PrometheusDataquery struct {
-}
+type PrometheusDataquery struct{}
 
 func (pass *PrometheusDataquery) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 	for i, schema := range schemas {
@@ -23,7 +22,6 @@ func (pass *PrometheusDataquery) processSchema(schema *ast.Schema) *ast.Schema {
 	for i, object := range schema.Objects {
 		if schema.Package == prometheusPackage && object.Name == prometheusDataqueryObject {
 			schema.Objects[i] = pass.processDataquery(object)
-			continue
 		}
 	}
 
