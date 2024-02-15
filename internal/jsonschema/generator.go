@@ -57,17 +57,26 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		return nil, fmt.Errorf("[%s] %w", c.Package, err)
 	}
 
+	rootObjectName := c.Package
+
 	// The root of the schema is an actual type/object
 	if schema.Ref == nil {
-		if err := g.declareDefinition(c.Package, schema); err != nil {
+		if err := g.declareDefinition(rootObjectName, schema); err != nil {
 			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	} else {
-		definitionName := g.definitionNameFromRef(schema)
+		rootObjectName = g.definitionNameFromRef(schema)
 
 		// The root of the schema contains definitions, and a reference to the "main" object
-		if err := g.declareDefinition(definitionName, schema.Ref); err != nil {
+		if err := g.declareDefinition(rootObjectName, schema.Ref); err != nil {
 			return nil, fmt.Errorf("[%s] %w", c.Package, err)
+		}
+	}
+
+	if c.SchemaMetadata.Variant == ast.SchemaVariantDataQuery || c.SchemaMetadata.Variant == ast.SchemaVariantPanel {
+		root, found := g.schema.LocateObject(rootObjectName)
+		if found {
+			root.Type.Hints[ast.HintImplementsVariant] = string(c.SchemaMetadata.Variant)
 		}
 	}
 
