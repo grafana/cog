@@ -72,10 +72,7 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 	}
 
 	if c.SchemaMetadata.Variant == ast.SchemaVariantDataQuery || c.SchemaMetadata.Variant == ast.SchemaVariantPanel {
-		root, found := g.schema.LocateObject(rootObjectName)
-		if found {
-			root.Type.Hints[ast.HintImplementsVariant] = string(c.SchemaMetadata.Variant)
-		}
+		g.schema.Objects.Get(rootObjectName).Type.Hints[ast.HintImplementsVariant] = string(c.SchemaMetadata.Variant)
 	}
 
 	// To ensure a consistent output, since github.com/santhosh-tekuri/jsonschema
