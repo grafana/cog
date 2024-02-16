@@ -22,11 +22,29 @@ type Config struct {
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string
+
+	// Optional output file name
+	OutputName string
+
+	// UtilsPath is the destination path for runtime, variants, etc. necessary code to make
+	// code work properly
+	UtilsPath string
 }
 
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
 	newConfig.Debug = global.Debug
+	newConfig.OutputName = global.OutputFilename
+	newConfig.UtilsPath = global.UtilsPath
+	if newConfig.PackageRoot == "" {
+		newConfig.PackageRoot = global.PackageRoot
+	}
+	if newConfig.OutputName == "" {
+		newConfig.OutputName = "types_gen"
+	}
+	if newConfig.UtilsPath == "" {
+		newConfig.UtilsPath = "cog"
+	}
 
 	return newConfig
 }
