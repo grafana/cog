@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "Entrypoint": {
       "Name": "Entrypoint",
       "Type": {
         "Kind": "struct",
@@ -53,7 +53,7 @@
         "ReferredType": "Entrypoint"
       }
     },
-    {
+    "ObjectAdditionalPropertiesWithSchema": {
       "Name": "ObjectAdditionalPropertiesWithSchema",
       "Type": {
         "Kind": "map",
@@ -80,7 +80,7 @@
         "ReferredType": "ObjectAdditionalPropertiesWithSchema"
       }
     },
-    {
+    "ObjectNoAdditionalProperties": {
       "Name": "ObjectNoAdditionalProperties",
       "Type": {
         "Kind": "scalar",
@@ -94,7 +94,7 @@
         "ReferredType": "ObjectNoAdditionalProperties"
       }
     },
-    {
+    "ObjectNoProperties": {
       "Name": "ObjectNoProperties",
       "Type": {
         "Kind": "scalar",
@@ -108,5 +108,5 @@
         "ReferredType": "ObjectNoProperties"
       }
     }
-  ]
+  }
 }
