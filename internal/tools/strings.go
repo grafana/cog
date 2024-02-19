@@ -9,6 +9,8 @@ import (
 	"golang.org/x/text/language"
 )
 
+var nonAlphaNumRegex = regexp.MustCompile("[^a-zA-Z0-9 ]+")
+
 func UpperSnakeCase(s string) string {
 	return strings.ToUpper(xstrings.ToSnakeCase(s))
 }
@@ -29,9 +31,8 @@ func UpperCamelCase(s string) string {
 }
 
 func LowerCamelCase(s string) string {
-	// Replace all underscores/dashes with spaces
-	s = strings.ReplaceAll(s, "_", " ")
-	s = strings.ReplaceAll(s, "-", " ")
+	// Replace all non-alphanumeric characters by spaces
+	s = nonAlphaNumRegex.ReplaceAllString(s, " ")
 
 	// Title case s
 	s = cases.Title(language.AmericanEnglish, cases.NoLower).String(s)
@@ -49,6 +50,5 @@ func LowerCamelCase(s string) string {
 
 // CleanupNames removes all non-alphanumeric characters
 func CleanupNames(s string) string {
-	rgx := regexp.MustCompile("[^a-zA-Z0-9 ]+")
-	return rgx.ReplaceAllString(s, "")
+	return nonAlphaNumRegex.ReplaceAllString(s, "")
 }
