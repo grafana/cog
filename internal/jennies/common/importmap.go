@@ -22,6 +22,12 @@ func WithAliasSanitizer[M any](sanitizer func(string) string) ImportMapOption[M]
 	}
 }
 
+func WithImportPathSanitizer[M any](sanitizer func(string) string) ImportMapOption[M] {
+	return func(importMap *ImportMapConfig[M]) {
+		importMap.ImportPathSanitizer = sanitizer
+	}
+}
+
 func WithFormatter[M any](formatter func(M) string) ImportMapOption[M] {
 	return func(importMap *ImportMapConfig[M]) {
 		importMap.Formatter = formatter
