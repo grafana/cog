@@ -67,7 +67,6 @@ func (g *Gen) Generate() (codejen.Files, error) {
 			Debug:       g.cfg.Debug,
 			Builders:    false,
 			Types:       true,
-			UtilsPath:   g.cfg.UtilsPath,
 			PackageRoot: g.cfg.PackageRoot,
 		},
 		Languages:               g.cfg.Languages.languages(),
@@ -90,7 +89,6 @@ func doGenerate(allTargets jennies.LanguageJennies, opts generate.Options) (code
 		return nil, err
 	}
 
-	fmt.Printf("Parsing inputs...\n")
 	schemas, err := loaders.LoadAll(opts.Options)
 	if err != nil {
 		return nil, err

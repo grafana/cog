@@ -32,7 +32,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 
 		filename := filepath.Join(
 			formatPackageName(schema.Package),
-			fmt.Sprintf("%s.go", jenny.Config.OutputName),
+			"types_gen.go",
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))

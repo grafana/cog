@@ -11,12 +11,6 @@ type Config struct {
 	// Builders indicates whether builders should be generated or not.
 	Builders bool
 
-	// Optional filename output name
-	OutputFilename string
-
-	// Optional path for runtime, variants, etc. necessary code
-	UtilsPath string
-
 	// Path for package imports
 	PackageRoot string
 }

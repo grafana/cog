@@ -9,7 +9,7 @@ const CustomKind Kind = "custom"
 type Language string
 
 const GoLanguage Language = "go"
-const TSLanguage Language = "ts"
+const TSLanguage Language = "typescript"
 
 type Languages []Language
 
@@ -30,5 +30,4 @@ type Config struct {
 	Kind      Kind
 	// Go configuration
 	PackageRoot string
-	UtilsPath   string
 }
