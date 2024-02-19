@@ -133,7 +133,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 			return g.walkAllOf(schema)
 		}
 
-		if schema.Properties != nil || schema.PatternProperties != nil {
+		if schema.Properties != nil || schema.PatternProperties != nil || schema.AdditionalProperties != nil {
 			return g.walkObject(schema)
 		}
 
@@ -414,6 +414,21 @@ func (g *generator) walkEnum(schema *schemaparser.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkObject(schema *schemaparser.Schema) (ast.Type, error) {
+	if len(schema.Properties) == 0 {
+		// `schema.AdditionalProperties` is nil or false or *schemaparser.Schema
+		_, ok := schema.AdditionalProperties.(bool)
+		if schema.AdditionalProperties == nil || ok {
+			return ast.Any(), nil
+		}
+
+		valueType, err := g.walkDefinition(schema.AdditionalProperties.(*schemaparser.Schema))
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewMap(ast.String(), valueType), nil
+	}
+
 	// TODO: finish implementation
 	fields := make([]ast.StructField, 0, len(schema.Properties))
 	for name, property := range schema.Properties {
