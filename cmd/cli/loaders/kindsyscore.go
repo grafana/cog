@@ -1,7 +1,6 @@
 package loaders
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"cuelang.org/go/cue"
@@ -19,7 +18,6 @@ func kindsysCoreLoader(opts Options) ([]*ast.Schema, error) {
 	for _, entrypoint := range opts.KindsysCoreEntrypoints {
 		pkg := filepath.Base(entrypoint)
 
-		fmt.Println(entrypoint)
 		schemaRootValue, err := parseCueEntrypoint(opts, entrypoint)
 		if err != nil {
 			return nil, err
