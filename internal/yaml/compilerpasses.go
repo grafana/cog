@@ -10,6 +10,7 @@ type CompilerPass struct {
 	DataqueryIdentification *DataqueryIdentification `yaml:"dataquery_identification"`
 	Unspec                  *Unspec                  `yaml:"unspec"`
 	FieldsSetRequired       *FieldsSetRequired       `yaml:"fields_set_required"`
+	Omit                    *Omit                    `yaml:"omit"`
 
 	DashboardPanels     *DashboardPanels     `yaml:"dashboard_panels"`
 	DashboardTargets    *DashboardTargets    `yaml:"dashboard_targets"`
@@ -31,6 +32,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.FieldsSetRequired != nil {
 		return pass.FieldsSetRequired.AsCompilerPass()
+	}
+	if pass.Omit != nil {
+		return pass.Omit.AsCompilerPass()
 	}
 
 	if pass.DashboardPanels != nil {
@@ -92,9 +96,26 @@ func (pass FieldsSetRequired) AsCompilerPass() (compiler.Pass, error) {
 		fieldRefs = append(fieldRefs, fieldRef)
 	}
 
-	return &compiler.FieldsSetRequired{
-		Fields: fieldRefs,
-	}, nil
+	return &compiler.FieldsSetRequired{Fields: fieldRefs}, nil
+}
+
+type Omit struct {
+	Objects []string // Expected format: [package].[object]
+}
+
+func (pass Omit) AsCompilerPass() (compiler.Pass, error) {
+	objectRefs := make([]compiler.ObjectReference, 0, len(pass.Objects))
+
+	for _, ref := range pass.Objects {
+		objectRef, err := compiler.ObjectReferenceFromString(ref)
+		if err != nil {
+			return nil, err
+		}
+
+		objectRefs = append(objectRefs, objectRef)
+	}
+
+	return &compiler.Omit{Objects: objectRefs}, nil
 }
 
 type DashboardPanels struct {

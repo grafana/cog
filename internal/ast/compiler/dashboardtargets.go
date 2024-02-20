@@ -45,20 +45,13 @@ func (pass *DashboardTargetsRewrite) Process(schemas []*ast.Schema) ([]*ast.Sche
 }
 
 func (pass *DashboardTargetsRewrite) processSchema(schema *ast.Schema) *ast.Schema {
-	schema.Objects = schema.Objects.Filter(func(_ string, object ast.Object) bool {
-		return object.Name != dashboardTargetObject
-	})
 	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		return pass.processObject(object)
+		object.Type = pass.processType(object.Type)
+
+		return object
 	})
 
 	return schema
-}
-
-func (pass *DashboardTargetsRewrite) processObject(object ast.Object) ast.Object {
-	object.Type = pass.processType(object.Type)
-
-	return object
 }
 
 func (pass *DashboardTargetsRewrite) processType(def ast.Type) ast.Type {
