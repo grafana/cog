@@ -13,7 +13,7 @@ import (
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/veneers/rewrite"
-	"github.com/grafana/cog/internal/veneers/yaml"
+	"github.com/grafana/cog/internal/yaml"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +24,7 @@ type Options struct {
 	Languages               []string
 	VeneerConfigFiles       []string
 	VeneerConfigDirectories []string
+	CompilerConfigFiles     []string
 	OutputDir               string
 
 	// PackageTemplates is the path to a directory containing "package templates".
@@ -89,7 +90,11 @@ func (opts Options) veneers() (*rewrite.Rewriter, error) {
 		return nil, err
 	}
 
-	return yaml.NewLoader().RewriterFrom(veneerFiles)
+	return yaml.NewVeneersLoader().RewriterFrom(veneerFiles)
+}
+
+func (opts Options) commonCompilerPasses() (compiler.Passes, error) {
+	return yaml.NewCompilerLoader().PassesFrom(opts.CompilerConfigFiles)
 }
 
 func Command() *cobra.Command {
@@ -117,6 +122,7 @@ func Command() *cobra.Command {
 	cmd.Flags().StringArrayVarP(&opts.Languages, "language", "l", nil, "Language to generate. If left empty, all supported languages will be generated.")
 	cmd.Flags().StringArrayVarP(&opts.VeneerConfigFiles, "veneer", "c", nil, "Veneer configuration file.")
 	cmd.Flags().StringArrayVar(&opts.VeneerConfigDirectories, "veneers", nil, "Veneer configuration directories.")
+	cmd.Flags().StringArrayVar(&opts.CompilerConfigFiles, "compiler-config", nil, "Compiler configuration file.")
 
 	cmd.Flags().StringArrayVar(&opts.CueEntrypoints, "cue", nil, "CUE input schema.")                                                                                                           // TODO: better usage text
 	cmd.Flags().StringArrayVar(&opts.KindsysCoreEntrypoints, "kindsys-core", nil, "Kindys core kinds input schema.")                                                                            // TODO: better usage text
@@ -155,6 +161,11 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		return err
 	}
 
+	commonCompilerPasses, err := opts.commonCompilerPasses()
+	if err != nil {
+		return err
+	}
+
 	// Here begins the code generation setup
 	targetsByLanguage, err := allTargets.ForLanguages(opts.Languages)
 	if err != nil {
@@ -171,7 +182,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 	for language, target := range targetsByLanguage {
 		fmt.Printf("Running '%s' jennies...\n", language)
 
-		compilerPasses := compiler.CommonPasses().Concat(target.CompilerPasses())
+		compilerPasses := commonCompilerPasses.Concat(target.CompilerPasses())
 		processedSchemas, err := compilerPasses.Process(schemas)
 		if err != nil {
 			return err

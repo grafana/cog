@@ -18,14 +18,14 @@ type Veneers struct {
 	Options  []OptionRule  `yaml:"options"`
 }
 
-type Loader struct {
+type VeneersLoader struct {
 }
 
-func NewLoader() *Loader {
-	return &Loader{}
+func NewVeneersLoader() *VeneersLoader {
+	return &VeneersLoader{}
 }
 
-func (loader *Loader) RewriterFrom(filenames []string) (*rewrite.Rewriter, error) {
+func (loader *VeneersLoader) RewriterFrom(filenames []string) (*rewrite.Rewriter, error) {
 	readers := make([]io.Reader, 0, len(filenames))
 	for _, filename := range filenames {
 		reader, err := os.Open(filename)
@@ -44,7 +44,7 @@ func (loader *Loader) RewriterFrom(filenames []string) (*rewrite.Rewriter, error
 	return rewrite.NewRewrite(rules), nil
 }
 
-func (loader *Loader) LoadAll(readers []io.Reader) ([]rewrite.LanguageRules, error) {
+func (loader *VeneersLoader) LoadAll(readers []io.Reader) ([]rewrite.LanguageRules, error) {
 	languageRules := make([]rewrite.LanguageRules, 0, len(readers))
 
 	for _, filename := range readers {
@@ -59,7 +59,7 @@ func (loader *Loader) LoadAll(readers []io.Reader) ([]rewrite.LanguageRules, err
 	return languageRules, nil
 }
 
-func (loader *Loader) Load(reader io.Reader) (rewrite.LanguageRules, error) {
+func (loader *VeneersLoader) Load(reader io.Reader) (rewrite.LanguageRules, error) {
 	var builderRules []builder.RewriteRule
 	var optionRules []option.RewriteRule
 
