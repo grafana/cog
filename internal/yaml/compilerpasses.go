@@ -13,15 +13,14 @@ type CompilerPass struct {
 	FieldsSetRequired       *FieldsSetRequired       `yaml:"fields_set_required"`
 	Omit                    *Omit                    `yaml:"omit"`
 	AddFields               *AddFields               `yaml:"add_fields"`
+	NameAnonymousStruct     *NameAnonymousStruct     `yaml:"name_anonymous_struct"`
 
-	DashboardPanels     *DashboardPanels     `yaml:"dashboard_panels"`
-	DashboardTargets    *DashboardTargets    `yaml:"dashboard_targets"`
-	DashboardTimePicker *DashboardTimePicker `yaml:"dashboard_timepicker"`
+	DashboardPanels  *DashboardPanels  `yaml:"dashboard_panels"`
+	DashboardTargets *DashboardTargets `yaml:"dashboard_targets"`
 
 	Cloudwatch            *Cloudwatch            `yaml:"cloudwatch"`
 	GoogleCloudMonitoring *GoogleCloudMonitoring `yaml:"google_cloud_monitoring"`
 	LibraryPanels         *LibraryPanels         `yaml:"library_panels"`
-	TestData              *TestData              `yaml:"test_data"`
 }
 
 func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
@@ -41,15 +40,15 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.AddFields != nil {
 		return pass.AddFields.AsCompilerPass()
 	}
+	if pass.NameAnonymousStruct != nil {
+		return pass.NameAnonymousStruct.AsCompilerPass()
+	}
 
 	if pass.DashboardPanels != nil {
 		return pass.DashboardPanels.AsCompilerPass(), nil
 	}
 	if pass.DashboardTargets != nil {
 		return pass.DashboardTargets.AsCompilerPass(), nil
-	}
-	if pass.DashboardTimePicker != nil {
-		return pass.DashboardTimePicker.AsCompilerPass(), nil
 	}
 
 	if pass.Cloudwatch != nil {
@@ -60,9 +59,6 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.LibraryPanels != nil {
 		return pass.LibraryPanels.AsCompilerPass(), nil
-	}
-	if pass.TestData != nil {
-		return pass.TestData.AsCompilerPass(), nil
 	}
 
 	return nil, fmt.Errorf("empty compiler pass")
@@ -137,6 +133,23 @@ func (pass AddFields) AsCompilerPass() (compiler.Pass, error) {
 	}, nil
 }
 
+type NameAnonymousStruct struct {
+	Field string // Expected format: [package].[object].[field]
+	As    string
+}
+
+func (pass NameAnonymousStruct) AsCompilerPass() (compiler.Pass, error) {
+	fieldRef, err := compiler.FieldReferenceFromString(pass.Field)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.NameAnonymousStruct{
+		Field: fieldRef,
+		As:    pass.As,
+	}, nil
+}
+
 type DashboardPanels struct {
 }
 
@@ -149,13 +162,6 @@ type DashboardTargets struct {
 
 func (pass DashboardTargets) AsCompilerPass() compiler.Pass {
 	return &compiler.DashboardTargetsRewrite{}
-}
-
-type DashboardTimePicker struct {
-}
-
-func (pass DashboardTimePicker) AsCompilerPass() compiler.Pass {
-	return &compiler.DashboardTimePicker{}
 }
 
 type Cloudwatch struct {
@@ -177,11 +183,4 @@ type LibraryPanels struct {
 
 func (pass LibraryPanels) AsCompilerPass() compiler.Pass {
 	return &compiler.LibraryPanels{}
-}
-
-type TestData struct {
-}
-
-func (pass TestData) AsCompilerPass() compiler.Pass {
-	return &compiler.TestData{}
 }

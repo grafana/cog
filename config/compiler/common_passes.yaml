@@ -21,13 +21,19 @@ passes:
         dashboard.Target
       ]
 
+  - name_anonymous_struct:
+      field: dashboard.Dashboard.timepicker
+      as: TimePicker
+
   - dashboard_panels: {}
   - dashboard_targets: {}
-  - dashboard_timepicker: {}
 
   ########################
   # Prometheus dataquery #
   ########################
+
+  # Add a few missing fields.
+  # This is meant to be removed once the schema is updated.
   - add_fields:
       to: prometheus.dataquery
       fields:
@@ -37,6 +43,14 @@ passes:
             kind: scalar
             scalar: {scalar_kind: string}
 
+  ######################
+  # testdata dataquery #
+  ######################
+
+  - name_anonymous_struct:
+      field: testdata.SimulationQuery.key
+      as: Key
+
   ##########
   # Others #
   ##########
@@ -44,4 +58,3 @@ passes:
   - cloudwatch: {}
   - google_cloud_monitoring: {}
   - library_panels: {}
-  - test_data: {}
