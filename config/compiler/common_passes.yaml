@@ -2,10 +2,25 @@ passes:
   - dataquery_identification: {}
   - unspec: {}
 
-  - dashboard: {}
+  #############
+  # Dashboard #
+  #############
+
+  # These fields are incorrectly set as non-required in the CUE schema.
+  # Loading a dashboard with these set to null will fail.
+  - fields_set_required:
+      fields: [
+        dashboard.Dashboard.annotations,
+        dashboard.Dashboard.templating,
+      ]
+
   - dashboard_panels: {}
   - dashboard_targets: {}
   - dashboard_timepicker: {}
+
+  ##########
+  # Others #
+  ##########
 
   - cloudwatch: {}
   - google_cloud_monitoring: {}

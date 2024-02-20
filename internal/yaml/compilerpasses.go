@@ -9,8 +9,8 @@ import (
 type CompilerPass struct {
 	DataqueryIdentification *DataqueryIdentification `yaml:"dataquery_identification"`
 	Unspec                  *Unspec                  `yaml:"unspec"`
+	FieldsSetRequired       *FieldsSetRequired       `yaml:"fields_set_required"`
 
-	Dashboard           *Dashboard           `yaml:"dashboard"`
 	DashboardPanels     *DashboardPanels     `yaml:"dashboard_panels"`
 	DashboardTargets    *DashboardTargets    `yaml:"dashboard_targets"`
 	DashboardTimePicker *DashboardTimePicker `yaml:"dashboard_timepicker"`
@@ -29,10 +29,10 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.Unspec != nil {
 		return pass.Unspec.AsCompilerPass(), nil
 	}
-
-	if pass.Dashboard != nil {
-		return pass.Dashboard.AsCompilerPass(), nil
+	if pass.FieldsSetRequired != nil {
+		return pass.FieldsSetRequired.AsCompilerPass()
 	}
+
 	if pass.DashboardPanels != nil {
 		return pass.DashboardPanels.AsCompilerPass(), nil
 	}
@@ -76,11 +76,25 @@ func (pass Unspec) AsCompilerPass() compiler.Pass {
 	return &compiler.Unspec{}
 }
 
-type Dashboard struct {
+type FieldsSetRequired struct {
+	Fields []string // Expected format: [package].[object].[field]
 }
 
-func (pass Dashboard) AsCompilerPass() compiler.Pass {
-	return &compiler.Dashboard{}
+func (pass FieldsSetRequired) AsCompilerPass() (compiler.Pass, error) {
+	fieldRefs := make([]compiler.FieldReference, 0, len(pass.Fields))
+
+	for _, ref := range pass.Fields {
+		fieldRef, err := compiler.FieldReferenceFromString(ref)
+		if err != nil {
+			return nil, err
+		}
+
+		fieldRefs = append(fieldRefs, fieldRef)
+	}
+
+	return &compiler.FieldsSetRequired{
+		Fields: fieldRefs,
+	}, nil
 }
 
 type DashboardPanels struct {
