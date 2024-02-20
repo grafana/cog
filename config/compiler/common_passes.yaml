@@ -25,6 +25,18 @@ passes:
   - dashboard_targets: {}
   - dashboard_timepicker: {}
 
+  ########################
+  # Prometheus dataquery #
+  ########################
+  - add_fields:
+      to: prometheus.dataquery
+      fields:
+        - name: interval
+          comments: ['An additional lower limit for the step parameter of the Prometheus query and for the", "`$__interval` and `$__rate_interval` variables.']
+          type:
+            kind: scalar
+            scalar: {scalar_kind: string}
+
   ##########
   # Others #
   ##########
@@ -32,5 +44,4 @@ passes:
   - cloudwatch: {}
   - google_cloud_monitoring: {}
   - library_panels: {}
-  - prometheus_dataquery: {}
   - test_data: {}

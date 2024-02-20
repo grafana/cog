@@ -13,7 +13,7 @@ type ObjectReference struct {
 }
 
 func (ref ObjectReference) Matches(object ast.Object) bool {
-	return object.SelfRef.ReferredPkg == ref.Package && object.Name == ref.Object
+	return object.SelfRef.ReferredPkg == ref.Package && strings.EqualFold(object.Name, ref.Object)
 }
 
 func ObjectReferenceFromString(ref string) (ObjectReference, error) {
@@ -36,8 +36,8 @@ type FieldReference struct {
 
 func (ref FieldReference) Matches(object ast.Object, field ast.StructField) bool {
 	return object.SelfRef.ReferredPkg == ref.Package &&
-		object.Name == ref.Object &&
-		field.Name == ref.Field
+		strings.EqualFold(object.Name, ref.Object) &&
+		strings.EqualFold(field.Name, ref.Field)
 }
 
 func FieldReferenceFromString(ref string) (FieldReference, error) {

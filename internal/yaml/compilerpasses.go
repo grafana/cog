@@ -3,6 +3,7 @@ package yaml
 import (
 	"fmt"
 
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 )
 
@@ -11,6 +12,7 @@ type CompilerPass struct {
 	Unspec                  *Unspec                  `yaml:"unspec"`
 	FieldsSetRequired       *FieldsSetRequired       `yaml:"fields_set_required"`
 	Omit                    *Omit                    `yaml:"omit"`
+	AddFields               *AddFields               `yaml:"add_fields"`
 
 	DashboardPanels     *DashboardPanels     `yaml:"dashboard_panels"`
 	DashboardTargets    *DashboardTargets    `yaml:"dashboard_targets"`
@@ -18,7 +20,6 @@ type CompilerPass struct {
 
 	Cloudwatch            *Cloudwatch            `yaml:"cloudwatch"`
 	GoogleCloudMonitoring *GoogleCloudMonitoring `yaml:"google_cloud_monitoring"`
-	PrometheusDataquery   *PrometheusDataquery   `yaml:"prometheus_dataquery"`
 	LibraryPanels         *LibraryPanels         `yaml:"library_panels"`
 	TestData              *TestData              `yaml:"test_data"`
 }
@@ -30,11 +31,15 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.Unspec != nil {
 		return pass.Unspec.AsCompilerPass(), nil
 	}
+
 	if pass.FieldsSetRequired != nil {
 		return pass.FieldsSetRequired.AsCompilerPass()
 	}
 	if pass.Omit != nil {
 		return pass.Omit.AsCompilerPass()
+	}
+	if pass.AddFields != nil {
+		return pass.AddFields.AsCompilerPass()
 	}
 
 	if pass.DashboardPanels != nil {
@@ -52,9 +57,6 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.GoogleCloudMonitoring != nil {
 		return pass.GoogleCloudMonitoring.AsCompilerPass(), nil
-	}
-	if pass.PrometheusDataquery != nil {
-		return pass.PrometheusDataquery.AsCompilerPass(), nil
 	}
 	if pass.LibraryPanels != nil {
 		return pass.LibraryPanels.AsCompilerPass(), nil
@@ -118,6 +120,23 @@ func (pass Omit) AsCompilerPass() (compiler.Pass, error) {
 	return &compiler.Omit{Objects: objectRefs}, nil
 }
 
+type AddFields struct {
+	To     string // Expected format: [package].[object]
+	Fields []ast.StructField
+}
+
+func (pass AddFields) AsCompilerPass() (compiler.Pass, error) {
+	objectRef, err := compiler.ObjectReferenceFromString(pass.To)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.AddFields{
+		Object: objectRef,
+		Fields: pass.Fields,
+	}, nil
+}
+
 type DashboardPanels struct {
 }
 
@@ -151,13 +170,6 @@ type GoogleCloudMonitoring struct {
 
 func (pass GoogleCloudMonitoring) AsCompilerPass() compiler.Pass {
 	return &compiler.GoogleCloudMonitoring{}
-}
-
-type PrometheusDataquery struct {
-}
-
-func (pass PrometheusDataquery) AsCompilerPass() compiler.Pass {
-	return &compiler.PrometheusDataquery{}
 }
 
 type LibraryPanels struct {
