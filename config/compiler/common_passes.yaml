@@ -14,6 +14,13 @@ passes:
         dashboard.Dashboard.templating,
       ]
 
+  # Defined as an empty type in the CUE schemas.
+  # It is also not used at all: references to this type are replaced by a "composable slot"
+  - omit:
+      objects: [
+        dashboard.Target
+      ]
+
   - dashboard_panels: {}
   - dashboard_targets: {}
   - dashboard_timepicker: {}
