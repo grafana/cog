@@ -1,0 +1,13 @@
+passes:
+  - dataquery_identification: {}
+  - unspec: {}
+
+  - dashboard: {}
+  - dashboard_panels: {}
+  - dashboard_targets: {}
+  - dashboard_timepicker: {}
+
+  - cloudwatch: {}
+  - google_cloud_monitoring: {}
+  - prometheus_dataquery: {}
+  - test_data: {}

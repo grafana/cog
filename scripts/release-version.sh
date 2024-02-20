@@ -64,7 +64,8 @@ function run_codegen() {
     --output "${output_dir}/%l" \
     --kind-registry "${kind_registry_dir}" \
     --kind-registry-version "${kind_registry_version}" \
-    --veneers "${__dir}/../config" \
+    --veneers "${__dir}/../config/veneers" \
+    --compiler-config "${__dir}/../config/compiler/common_passes.yaml" \
     --repository-templates ./repository_templates \
     --package-templates ./package_templates \
     --templates-data "${templates_data}" \

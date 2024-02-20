@@ -32,19 +32,3 @@ func (passes Passes) Process(schemas ast.Schemas) (ast.Schemas, error) {
 type Pass interface {
 	Process(schemas []*ast.Schema) ([]*ast.Schema, error)
 }
-
-func CommonPasses() Passes {
-	return Passes{
-		&DataqueryIdentification{},
-		&Unspec{},
-		&Dashboard{},
-		&DashboardPanelsRewrite{},
-		&DashboardTargetsRewrite{},
-		&DashboardTimePicker{},
-		&Cloudwatch{},
-		&GoogleCloudMonitoring{},
-		&PrometheusDataquery{},
-		&LibraryPanels{},
-		&TestData{},
-	}
-}

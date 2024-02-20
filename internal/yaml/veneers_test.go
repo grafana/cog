@@ -60,7 +60,7 @@ options:
 		t.Run(tc.desc, func(t *testing.T) {
 			req := require.New(t)
 
-			rules, err := NewLoader().Load(strings.NewReader(tc.input))
+			rules, err := NewVeneersLoader().Load(strings.NewReader(tc.input))
 			req.NoError(err)
 
 			tc.check(req, rules)
@@ -74,7 +74,7 @@ func TestLoader_Load_withNoPackage(t *testing.T) {
 builders: ~
 options: ~`
 
-	_, err := NewLoader().Load(strings.NewReader(input))
+	_, err := NewVeneersLoader().Load(strings.NewReader(input))
 	req.Error(err)
 	req.ErrorContains(err, "missing 'package'")
 }
