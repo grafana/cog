@@ -2,14 +2,11 @@ package cog
 
 import (
 	"fmt"
-	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/cmd/cli/generate"
 	"github.com/grafana/cog/cmd/cli/loaders"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -53,7 +50,6 @@ func NewGen(cfg Config) (*Gen, error) {
 }
 
 func (g *Gen) Generate() (codejen.Files, error) {
-	_, b, _, _ := runtime.Caller(0)
 	opts := generate.Options{
 		Options: loaders.Options{
 			CueEntrypoints:               g.cueEntries,
@@ -64,25 +60,28 @@ func (g *Gen) Generate() (codejen.Files, error) {
 			JSONSchemaEntrypoints:        g.jsonSchemaEntries,
 		},
 		JenniesConfig: common.Config{
-			Debug:       g.cfg.Debug,
-			Builders:    false,
-			Types:       true,
-			PackageRoot: g.cfg.PackageRoot,
+			Debug:    g.cfg.Debug,
+			Builders: false,
+			Types:    true,
+			GoConfig: common.GoConfig{
+				PackageRoot: g.cfg.GoConfig.PackageRoot,
+			},
+			TSConfig: common.TSConfig{
+				GenTSIndex:   g.cfg.TSConfig.GenTSIndex,
+				GenRuntime:   g.cfg.TSConfig.GenRuntime,
+				RuntimePath:  g.cfg.TSConfig.RuntimePath,
+				ImportMapper: g.cfg.TSConfig.ImportMapper,
+			},
+			RenameOutputFunc: g.cfg.RenameOutputFunc,
 		},
-		Languages:               g.cfg.Languages.languages(),
-		OutputDir:               g.cfg.OutputDir,
-		VeneerConfigDirectories: []string{filepath.Join(filepath.Dir(b), "../config")},
+		Languages: g.cfg.Languages.languages(),
+		OutputDir: g.cfg.OutputDir,
 	}
 
 	return doGenerate(jennies.All(), opts)
 }
 
 func doGenerate(allTargets jennies.LanguageJennies, opts generate.Options) (codejen.Files, error) {
-	veneers, err := opts.Veneers()
-	if err != nil {
-		return nil, err
-	}
-
 	// Here begins the code generation setup
 	targetsByLanguage, err := allTargets.ForLanguages(opts.Languages)
 	if err != nil {
@@ -100,16 +99,6 @@ func doGenerate(allTargets jennies.LanguageJennies, opts generate.Options) (code
 
 		compilerPasses := compiler.CommonPasses().Concat(target.CompilerPasses())
 		processedSchemas, err := compilerPasses.Process(schemas)
-		if err != nil {
-			return nil, err
-		}
-
-		// from these types, create builders
-		builderGenerator := &ast.BuilderGenerator{}
-		builders := builderGenerator.FromAST(processedSchemas)
-
-		// apply the builder veneers
-		builders, err = veneers.ApplyTo(builders, language)
 		if err != nil {
 			return nil, err
 		}

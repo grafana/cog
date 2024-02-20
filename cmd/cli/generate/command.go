@@ -83,7 +83,7 @@ func (opts Options) veneerFiles() ([]string, error) {
 	return veneers, nil
 }
 
-func (opts Options) Veneers() (*rewrite.Rewriter, error) {
+func (opts Options) veneers() (*rewrite.Rewriter, error) {
 	veneerFiles, err := opts.veneerFiles()
 	if err != nil {
 		return nil, err
@@ -148,7 +148,7 @@ func Command() *cobra.Command {
 }
 
 func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
-	veneers, err := opts.Veneers()
+	veneers, err := opts.veneers()
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		builderGenerator := &ast.BuilderGenerator{}
 		builders := builderGenerator.FromAST(processedSchemas)
 
-		// apply the builder Veneers
+		// apply the builder veneers
 		builders, err = veneers.ApplyTo(builders, language)
 		if err != nil {
 			return err

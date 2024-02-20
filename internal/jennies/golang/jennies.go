@@ -22,14 +22,17 @@ type Config struct {
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string
+
+	RenameOutputFunc func(pkg string) string
 }
 
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
 	newConfig.Debug = global.Debug
 	if newConfig.PackageRoot == "" {
-		newConfig.PackageRoot = global.PackageRoot
+		newConfig.PackageRoot = global.GoConfig.PackageRoot
 	}
+	newConfig.RenameOutputFunc = global.RenameOutputFunc
 
 	return newConfig
 }

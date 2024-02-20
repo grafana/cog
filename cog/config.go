@@ -23,11 +23,24 @@ func (l Languages) languages() []string {
 }
 
 type Config struct {
-	Debug     bool
-	FileDirs  []string
-	OutputDir string
-	Languages Languages
-	Kind      Kind
-	// Go configuration
+	Debug            bool
+	FileDirs         []string
+	OutputDir        string
+	Languages        Languages
+	Kind             Kind
+	RenameOutputFunc func(pkg string) string
+
+	GoConfig GoConfig
+	TSConfig TSConfig
+}
+
+type GoConfig struct {
 	PackageRoot string
+}
+
+type TSConfig struct {
+	GenTSIndex   bool
+	GenRuntime   bool
+	RuntimePath  *string
+	ImportMapper func(pkg string) string
 }

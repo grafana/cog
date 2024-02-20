@@ -17,6 +17,7 @@ type raw string
 type pkgMapper func(string) string
 
 type RawTypes struct {
+	Config        Config
 	typeFormatter *typeFormatter
 	schemas       ast.Schemas
 }
@@ -41,6 +42,10 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 			"types_gen.ts",
 		)
 
+		if jenny.Config.RenameOutputFunc != nil {
+			filename = jenny.Config.RenameOutputFunc(schema.Package)
+		}
+
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
@@ -56,7 +61,12 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 			return ""
 		}
 
-		return imports.Add(pkg, fmt.Sprintf("../%s", pkg))
+		format := fmt.Sprintf("../%s", pkg)
+		if jenny.Config.ImportMapper != nil {
+			format = jenny.Config.ImportMapper(pkg)
+		}
+
+		return imports.Add(pkg, format)
 	}
 
 	jenny.typeFormatter = defaultTypeFormatter(packageMapper)
