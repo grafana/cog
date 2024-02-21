@@ -1,0 +1,66 @@
+name: Foundation-sdk diff preview
+on:
+  pull_request: ~
+
+env:
+  GO_VERSION: '1.21'
+  NODE_VERSION: '18'
+
+jobs:
+  sdk_diff:
+    name: Generate diff
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Dry-run release
+        shell: bash
+        run: |
+          git config --global user.email "cog-ci@grafana.com"
+          git config --global user.name "cog - CI"
+          
+          ./scripts/release-version.sh next
+        env:
+          FOUNDATION_SDK_PATH: ./grafana-foundation-sdk
+          FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
+          LOG_LEVEL: '7' # debug
+
+      - name: Preview diff
+        run: |
+          cd ./grafana-foundation-sdk
+          
+          echo -e '<!-- grafana-foundation-sdk-diff-preview-marker -->\n\n' >> preview.md          
+          echo -e '**Note:** in addition to the changes introduced by this PR, the diff includes unreleased changes living in `main`. \n\n' >> preview.md
+          echo -e "<details>\n" >> preview.md
+          echo -e "<summary>\n" >> preview.md
+          echo -e '### 🔎 Changes to `grafana-foundation-sdk@next+cog-v0.0.x`\n' >> preview.md
+          echo -e "</summary>\n" >> preview.md
+          echo '```patch' >> preview.md
+          
+          git diff next+cog-v0.0.x..HEAD >> preview.md
+          
+          echo '```' >> preview.md
+          echo "\n" >> preview.md
+          echo -e "</details>\n\n" >> preview.md
+
+      - name: Find preview comment
+        uses: peter-evans/find-comment@v3
+        id: preview-comment-find
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'grafana-foundation-sdk-diff-preview-marker'
+
+      - name: Upsert preview comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.preview-comment-find.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body-path: './grafana-foundation-sdk/preview.md'
