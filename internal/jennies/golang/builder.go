@@ -49,7 +49,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 
 	imports := NewImportMap()
 	jenny.typeImportMapper = func(pkg string) string {
-		if pkg == builder.Package {
+		if imports.IsIdentical(pkg, builder.Package) {
 			return ""
 		}
 

@@ -58,6 +58,10 @@ func NewDirectImportMap(opts ...ImportMapOption[DirectImportMap]) *DirectImportM
 	}
 }
 
+func (im DirectImportMap) IsIdentical(aliasA string, aliasB string) bool {
+	return im.config.AliasSanitizer(aliasA) == im.config.AliasSanitizer(aliasB)
+}
+
 func (im DirectImportMap) Add(alias string, importPath string) string {
 	sanitizedAlias := im.config.AliasSanitizer(alias)
 	im.Imports.Set(sanitizedAlias, im.config.ImportPathSanitizer(importPath))

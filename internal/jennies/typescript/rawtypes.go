@@ -53,7 +53,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 
 	imports := NewImportMap()
 	packageMapper := func(pkg string) string {
-		if pkg == schema.Package {
+		if imports.IsIdentical(pkg, schema.Package) {
 			return ""
 		}
 
