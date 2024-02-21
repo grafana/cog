@@ -14,9 +14,9 @@ type CompilerPass struct {
 	Omit                    *Omit                    `yaml:"omit"`
 	AddFields               *AddFields               `yaml:"add_fields"`
 	NameAnonymousStruct     *NameAnonymousStruct     `yaml:"name_anonymous_struct"`
+	RetypeField             *RetypeField             `yaml:"retype_field"`
 
-	DashboardPanels  *DashboardPanels  `yaml:"dashboard_panels"`
-	DashboardTargets *DashboardTargets `yaml:"dashboard_targets"`
+	DashboardPanels *DashboardPanels `yaml:"dashboard_panels"`
 
 	Cloudwatch            *Cloudwatch            `yaml:"cloudwatch"`
 	GoogleCloudMonitoring *GoogleCloudMonitoring `yaml:"google_cloud_monitoring"`
@@ -43,12 +43,12 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.NameAnonymousStruct != nil {
 		return pass.NameAnonymousStruct.AsCompilerPass()
 	}
+	if pass.RetypeField != nil {
+		return pass.RetypeField.AsCompilerPass()
+	}
 
 	if pass.DashboardPanels != nil {
 		return pass.DashboardPanels.AsCompilerPass(), nil
-	}
-	if pass.DashboardTargets != nil {
-		return pass.DashboardTargets.AsCompilerPass(), nil
 	}
 
 	if pass.Cloudwatch != nil {
@@ -150,18 +150,28 @@ func (pass NameAnonymousStruct) AsCompilerPass() (compiler.Pass, error) {
 	}, nil
 }
 
+type RetypeField struct {
+	Field string // Expected format: [package].[object].[field]
+	As    ast.Type
+}
+
+func (pass RetypeField) AsCompilerPass() (compiler.Pass, error) {
+	fieldRef, err := compiler.FieldReferenceFromString(pass.Field)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.RetypeField{
+		Field: fieldRef,
+		As:    pass.As,
+	}, nil
+}
+
 type DashboardPanels struct {
 }
 
 func (pass DashboardPanels) AsCompilerPass() compiler.Pass {
 	return &compiler.DashboardPanelsRewrite{}
-}
-
-type DashboardTargets struct {
-}
-
-func (pass DashboardTargets) AsCompilerPass() compiler.Pass {
-	return &compiler.DashboardTargetsRewrite{}
 }
 
 type Cloudwatch struct {
