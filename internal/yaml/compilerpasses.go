@@ -15,6 +15,7 @@ type CompilerPass struct {
 	AddFields               *AddFields               `yaml:"add_fields"`
 	NameAnonymousStruct     *NameAnonymousStruct     `yaml:"name_anonymous_struct"`
 	RetypeField             *RetypeField             `yaml:"retype_field"`
+	SchemaSetIdentifier     *SchemaSetIdentifier     `yaml:"schema_set_identifier"`
 
 	DashboardPanels *DashboardPanels `yaml:"dashboard_panels"`
 
@@ -45,6 +46,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.RetypeField != nil {
 		return pass.RetypeField.AsCompilerPass()
+	}
+	if pass.SchemaSetIdentifier != nil {
+		return pass.SchemaSetIdentifier.AsCompilerPass()
 	}
 
 	if pass.DashboardPanels != nil {
@@ -164,6 +168,18 @@ func (pass RetypeField) AsCompilerPass() (compiler.Pass, error) {
 	return &compiler.RetypeField{
 		Field: fieldRef,
 		As:    pass.As,
+	}, nil
+}
+
+type SchemaSetIdentifier struct {
+	Package    string
+	Identifier string
+}
+
+func (pass SchemaSetIdentifier) AsCompilerPass() (compiler.Pass, error) {
+	return &compiler.SchemaSetIdentifier{
+		Package:    pass.Package,
+		Identifier: pass.Identifier,
 	}, nil
 }
 

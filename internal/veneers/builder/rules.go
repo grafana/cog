@@ -97,7 +97,7 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders, panelOptionsToExclude []string) (ast.Builder, error) {
 	newBuilder := ast.Builder{
 		Schema:  panelBuilder.Schema,
-		Package: panelType,
+		Package: composableBuilders[0].Package,
 		For:     panelBuilder.For,
 		Name:    panelBuilder.For.Name,
 	}
@@ -186,7 +186,7 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 		for _, builder := range builders {
 			// the builder is for a composable type
 			if selector(builder) {
-				panelType := strings.ToLower(builder.Schema.Metadata.Identifier)
+				panelType := builder.Schema.Metadata.Identifier
 				composableBuilders[panelType] = append(composableBuilders[panelType], builder)
 				continue
 			}

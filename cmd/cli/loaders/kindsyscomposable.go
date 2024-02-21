@@ -83,5 +83,5 @@ func inferComposableKindIdentifier(kindRoot cue.Value) (string, error) {
 		return "", err
 	}
 
-	return strings.TrimSuffix(kindName, schemaInterface), nil
+	return strings.ToLower(strings.TrimSuffix(kindName, schemaInterface)), nil
 }

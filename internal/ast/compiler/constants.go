@@ -9,7 +9,6 @@ const (
 	dashboardObject                 = "Dashboard"
 	dashboardPanelObject            = "Panel"
 	dashboardRowPanelObject         = "RowPanel"
-	dashboardTargetObject           = "Target"
 	dashboardPanelIDField           = "id"
 	dashboardPanelGridPosField      = "gridPos"
 	dashboardPanelLibraryPanelField = "libraryPanel"
