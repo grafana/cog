@@ -45,7 +45,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 	scalars := make(map[string]ast.ScalarType)
 
 	packageMapper := func(pkg string, class string) string {
-		if pkg == schema.Package {
+		if jenny.imports.IsIdentical(pkg, schema.Package) {
 			return ""
 		}
 
