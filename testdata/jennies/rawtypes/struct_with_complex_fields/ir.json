@@ -182,9 +182,36 @@
                   ]
                 }
               }
+            },
+            {
+              "Name": "fieldRefToConstant",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "struct_complex_fields",
+                  "ReferredType": "ConnectionPath"
+                }
+              },
+              "Required": true
             }
           ]
         }
+      }
+    },
+    "ConnectionPath": {
+      "Name": "ConnectionPath",
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "string",
+          "Value": "straight"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "struct_complex_fields",
+        "ReferredType": "ConnectionPath"
       }
     },
     "SomeOtherStruct": {
