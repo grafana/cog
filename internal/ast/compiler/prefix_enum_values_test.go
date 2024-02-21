@@ -30,3 +30,24 @@ func TestPrefixEnumValues(t *testing.T) {
 	// Run the compiler pass
 	runPassOnObjects(t, &PrefixEnumValues{}, objects, expected)
 }
+
+func TestPrefixEnumValuesWithNegativeIntegerName(t *testing.T) {
+	// Prepare test input
+	objects := []ast.Object{
+		ast.NewObject("pkg", "BarAlignment", ast.NewEnum([]ast.EnumValue{
+			{Name: "1", Value: 1, Type: ast.NewScalar(ast.KindInt64)},
+			{Name: "-1", Value: -1, Type: ast.NewScalar(ast.KindInt64)},
+		})),
+	}
+
+	// Prepare expected output
+	expected := []ast.Object{
+		ast.NewObject("pkg", "BarAlignment", ast.NewEnum([]ast.EnumValue{
+			{Name: "BarAlignment1", Value: 1, Type: ast.NewScalar(ast.KindInt64)},
+			{Name: "BarAlignmentNegative1", Value: -1, Type: ast.NewScalar(ast.KindInt64)},
+		})),
+	}
+
+	// Run the compiler pass
+	runPassOnObjects(t, &PrefixEnumValues{}, objects, expected)
+}
