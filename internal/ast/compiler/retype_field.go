@@ -1,0 +1,44 @@
+package compiler
+
+import (
+	"github.com/grafana/cog/internal/ast"
+)
+
+var _ Pass = (*RetypeField)(nil)
+
+type RetypeField struct {
+	Field FieldReference
+	As    ast.Type
+}
+
+func (pass *RetypeField) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	for i, schema := range schemas {
+		schemas[i] = pass.processSchema(schema)
+	}
+
+	return schemas, nil
+}
+
+func (pass *RetypeField) processSchema(schema *ast.Schema) *ast.Schema {
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		return pass.processObject(object)
+	})
+
+	return schema
+}
+
+func (pass *RetypeField) processObject(object ast.Object) ast.Object {
+	if !object.Type.IsStruct() {
+		return object
+	}
+
+	for i, field := range object.Type.Struct.Fields {
+		if !pass.Field.Matches(object, field) {
+			continue
+		}
+
+		object.Type.Struct.Fields[i].Type = pass.As
+	}
+
+	return object
+}

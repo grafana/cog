@@ -96,7 +96,7 @@ type Type struct {
 	Ref            *RefType            `json:",omitempty"`
 	Scalar         *ScalarType         `json:",omitempty"`
 	Intersection   *IntersectionType   `json:",omitempty"`
-	ComposableSlot *ComposableSlotType `json:",omitempty"`
+	ComposableSlot *ComposableSlotType `json:",omitempty" yaml:"composable_slot"`
 
 	Hints JenniesHints `json:",omitempty"`
 }
@@ -584,7 +584,7 @@ func (t DisjunctionType) DeepCopy() DisjunctionType {
 }
 
 type ArrayType struct {
-	ValueType Type
+	ValueType Type `yaml:"value_type"`
 }
 
 func (t ArrayType) DeepCopy() ArrayType {
