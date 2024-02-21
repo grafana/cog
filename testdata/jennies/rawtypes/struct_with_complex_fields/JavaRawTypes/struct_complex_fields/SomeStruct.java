@@ -12,5 +12,6 @@ public class SomeStruct {
     public List<String> FieldArrayOfStrings;
     public Map<String, String> FieldMapOfStringToString;
     public StructComplexFieldsSomeStructFieldAnonymousStruct FieldAnonymousStruct;
+    public String fieldRefToConstant;
     
 }

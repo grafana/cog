@@ -58,7 +58,7 @@ func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.
 
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
-	jenny.typeFormatter = defaultTypeFormatter(jenny.packageMapper)
+	jenny.typeFormatter = defaultTypeFormatter(context, jenny.packageMapper)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		if jenny.objectNeedsCustomMarshal(object) {

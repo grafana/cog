@@ -30,7 +30,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
-		output, err := jenny.generateSchema(schema)
+		output, err := jenny.generateSchema(context, schema)
 		if err != nil {
 			return nil, err
 		}
@@ -47,7 +47,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
+func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 	var err error
 
@@ -60,7 +60,7 @@ func (jenny RawTypes) generateSchema(schema *ast.Schema) ([]byte, error) {
 		return imports.Add(pkg, fmt.Sprintf("../%s", pkg))
 	}
 
-	jenny.typeFormatter = defaultTypeFormatter(packageMapper)
+	jenny.typeFormatter = defaultTypeFormatter(context, packageMapper)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		typeDefGen, innerErr := jenny.formatObject(object, packageMapper)
@@ -301,7 +301,11 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 
 	// is the reference to a constant?
 	if referredType.Type.Kind == ast.KindScalar && referredType.Type.AsScalar().IsConcrete() {
-		return raw(fmt.Sprintf("%s.%s", ref.ReferredPkg, ref.ReferredType))
+		if pkg != "" {
+			return raw(fmt.Sprintf("%s.%s", pkg, ref.ReferredType))
+		}
+
+		return raw(ref.ReferredType)
 	}
 
 	if referredType.Type.Kind == ast.KindEnum {
@@ -314,7 +318,7 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	if pkg != "" {
-		return raw(fmt.Sprintf("%s.default%s()", ref.ReferredPkg, ref.ReferredType))
+		return raw(fmt.Sprintf("%s.default%s()", pkg, ref.ReferredType))
 	}
 
 	return raw(fmt.Sprintf("default%s()", ref.ReferredType))

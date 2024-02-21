@@ -17,10 +17,10 @@ type typeFormatter struct {
 	context    common.Context
 }
 
-func defaultTypeFormatter(packageMapper func(pkg string) string) *typeFormatter {
+func defaultTypeFormatter(context common.Context, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
-		context:       common.Context{},
+		context:       context,
 	}
 }
 
@@ -58,6 +58,16 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			cogAlias := formatter.packageMapper("cog")
 
 			return fmt.Sprintf("%s.Builder<%s>", cogAlias, formatted)
+		}
+
+		// if the field's type is a reference to a constant,
+		// we need to use the constant's value instead.
+		// ie: `SomeField: "foo"` instead of `SomeField: MyStringConstant`
+		if def.IsRef() {
+			referredType, found := formatter.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+			if found && referredType.Type.IsConcreteScalar() {
+				return formatter.doFormatType(referredType.Type, resolveBuilders)
+			}
 		}
 
 		return formatted

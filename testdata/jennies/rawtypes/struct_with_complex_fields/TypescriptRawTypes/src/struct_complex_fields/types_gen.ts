@@ -10,6 +10,7 @@ export interface SomeStruct {
 	FieldAnonymousStruct: {
 		FieldAny: any;
 	};
+	fieldRefToConstant: "straight";
 }
 
 export const defaultSomeStruct = (): SomeStruct => ({
@@ -23,7 +24,10 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	FieldAnonymousStruct: {
 	FieldAny: {},
 },
+	fieldRefToConstant: ConnectionPath,
 });
+
+export const ConnectionPath = "straight";
 
 export interface SomeOtherStruct {
 	FieldAny: any;
