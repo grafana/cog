@@ -15,18 +15,13 @@ type NameAnonymousStruct struct {
 
 func (pass *NameAnonymousStruct) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 	for i, schema := range schemas {
-		newsSchema, err := pass.processSchema(schema)
-		if err != nil {
-			return nil, err
-		}
-
-		schemas[i] = newsSchema
+		schemas[i] = pass.processSchema(schema)
 	}
 
 	return schemas, nil
 }
 
-func (pass *NameAnonymousStruct) processSchema(schema *ast.Schema) (*ast.Schema, error) {
+func (pass *NameAnonymousStruct) processSchema(schema *ast.Schema) *ast.Schema {
 	var newObject ast.Object
 
 	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
@@ -43,7 +38,7 @@ func (pass *NameAnonymousStruct) processSchema(schema *ast.Schema) (*ast.Schema,
 		schema.AddObject(newObject)
 	}
 
-	return schema, nil
+	return schema
 }
 
 func (pass *NameAnonymousStruct) processObject(object ast.Object) (ast.Object, ast.Object) {
