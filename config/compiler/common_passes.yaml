@@ -9,5 +9,6 @@ passes:
 
   - cloudwatch: {}
   - google_cloud_monitoring: {}
+  - library_panels: {}
   - prometheus_dataquery: {}
   - test_data: {}
