@@ -117,7 +117,10 @@ func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(pkg string, parent
 		})
 	}
 
-	pass.newObjects = append(pass.newObjects, ast.NewObject(pkg, enumTypeName, ast.NewEnum(values)))
+	newObject := ast.NewObject(pkg, enumTypeName, ast.NewEnum(values))
+	newObject.AddToPassesTrail("AnonymousEnumToExplicitType")
+
+	pass.newObjects = append(pass.newObjects, newObject)
 
 	return ast.NewRef(pass.currentPackage, enumTypeName)
 }

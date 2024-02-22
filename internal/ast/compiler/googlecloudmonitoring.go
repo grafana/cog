@@ -20,11 +20,8 @@ type GoogleCloudMonitoring struct {
 }
 
 func (pass *GoogleCloudMonitoring) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
+	for i, schema := range schemas {
 		if schema.Package != "googlecloudmonitoring" {
-			newSchemas = append(newSchemas, schema)
 			continue
 		}
 
@@ -33,10 +30,10 @@ func (pass *GoogleCloudMonitoring) Process(schemas []*ast.Schema) ([]*ast.Schema
 			return nil, err
 		}
 
-		newSchemas = append(newSchemas, newSchema)
+		schemas[i] = newSchema
 	}
 
-	return newSchemas, nil
+	return schemas, nil
 }
 
 func (pass *GoogleCloudMonitoring) processSchema(schema *ast.Schema) (*ast.Schema, error) {
@@ -77,6 +74,7 @@ func (pass *GoogleCloudMonitoring) processCloudMonitoringQuery(object ast.Object
 		// to `timeSeriesList?: #TimeSeriesList`
 		newField := field.DeepCopy()
 		newField.Type = newField.Type.Disjunction.Branches[0]
+		newField.AddToPassesTrail("GoogleCloudMonitoring[removed disjunction]")
 
 		fields = append(fields, newField)
 	}
@@ -96,12 +94,14 @@ func (pass *GoogleCloudMonitoring) processTimeSeriesList(object ast.Object) ast.
 	if _, found := structDef.FieldByName("title"); !found {
 		field := ast.NewStructField("title", ast.String(ast.Nullable()))
 		field.Comments = []string{"Annotation title."}
+		field.AddToPassesTrail("GoogleCloudMonitoring[created]")
 
 		structDef.Fields = append(structDef.Fields, field)
 	}
 	if _, found := structDef.FieldByName("text"); !found {
 		field := ast.NewStructField("text", ast.String(ast.Nullable()))
 		field.Comments = []string{"Annotation text."}
+		field.AddToPassesTrail("GoogleCloudMonitoring[created]")
 
 		structDef.Fields = append(structDef.Fields, field)
 	}

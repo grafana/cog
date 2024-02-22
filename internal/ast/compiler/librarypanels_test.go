@@ -81,7 +81,7 @@ func TestLibraryPanels_rewrite(t *testing.T) {
 					ast.NewStructField(libraryPanelModelField, ast.NewStruct(
 						ast.NewStructField(dashboardPanelTypeField, ast.String()),
 						ast.NewStructField(dashboardPanelsField, ast.NewArray(ast.Any())),
-					)),
+					), ast.PassesTrail("LibraryPanels[changed type]")),
 				)),
 			),
 		},

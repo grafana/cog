@@ -81,8 +81,9 @@ func (pass *NotRequiredFieldAsNullableType) processDisjunction(def ast.Type) ast
 func (pass *NotRequiredFieldAsNullableType) processStruct(def ast.Type) ast.Type {
 	for i, field := range def.Struct.Fields {
 		def.Struct.Fields[i].Type = pass.processType(field.Type)
-		if !field.Required {
+		if !field.Required && !def.Struct.Fields[i].Type.Nullable {
 			def.Struct.Fields[i].Type.Nullable = true
+			def.Struct.Fields[i].AddToPassesTrail("NotRequiredFieldAsNullableType[nullable=true]")
 		}
 	}
 

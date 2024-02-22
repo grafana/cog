@@ -25,9 +25,9 @@ func TestFieldsSetRequired(t *testing.T) {
 		Objects: testutils.ObjectsMap(
 			ast.NewObject("set_required", "AString", ast.String()),
 			ast.NewObject("set_required", "SomeObject", ast.NewStruct(
-				ast.NewStructField("AString", ast.String(), ast.Required()),
+				ast.NewStructField("AString", ast.String(), ast.Required(), ast.PassesTrail("FieldsSetRequired[nullable=false, required=true]")),
 				ast.NewStructField("AnotherString", ast.String(ast.Nullable())),
-				ast.NewStructField("ABool", ast.String(), ast.Required()),
+				ast.NewStructField("ABool", ast.String(), ast.Required(), ast.PassesTrail("FieldsSetRequired[nullable=false, required=true]")),
 			)),
 		),
 	}

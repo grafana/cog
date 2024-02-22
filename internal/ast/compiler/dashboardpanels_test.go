@@ -66,7 +66,7 @@ func TestDashboardPanelsRewrite(t *testing.T) {
 				ast.NewObject("dashboard", "RowPanel", ast.NewStruct(
 					ast.NewStructField("Title", ast.String()),
 					ast.NewStructField("Type", ast.String(ast.Value("row"))),
-					ast.NewStructField("panels", ast.NewArray(ast.NewRef("dashboard", "Panel"))),
+					ast.NewStructField("panels", ast.NewArray(ast.NewRef("dashboard", "Panel")), ast.PassesTrail("DashboardPanelsRewrite[changed type]")),
 				)),
 				ast.NewObject("dashboard", "GraphPanel", ast.NewStruct(
 					ast.NewStructField("Title", ast.String()),
@@ -80,7 +80,7 @@ func TestDashboardPanelsRewrite(t *testing.T) {
 					}, ast.Discriminator("type", map[string]string{
 						"row":                     "RowPanel",
 						ast.DiscriminatorCatchAll: "Panel",
-					})))),
+					}))), ast.PassesTrail("DashboardPanelsRewrite[changed type]")),
 				)),
 			),
 		},

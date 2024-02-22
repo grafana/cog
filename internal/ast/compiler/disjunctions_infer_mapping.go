@@ -129,7 +129,7 @@ func (pass *DisjunctionInferMapping) processDisjunction(schema *ast.Schema, def 
 		return def, nil
 	}
 
-	def.Disjunction, err = pass.ensureDiscriminator(schema, def.Disjunction)
+	def.Disjunction, err = pass.ensureDiscriminator(schema, def)
 	if err != nil {
 		return ast.Type{}, err
 	}
@@ -137,26 +137,30 @@ func (pass *DisjunctionInferMapping) processDisjunction(schema *ast.Schema, def 
 	return def, nil
 }
 
-func (pass *DisjunctionInferMapping) ensureDiscriminator(schema *ast.Schema, def *ast.DisjunctionType) (*ast.DisjunctionType, error) {
+func (pass *DisjunctionInferMapping) ensureDiscriminator(schema *ast.Schema, def ast.Type) (*ast.DisjunctionType, error) {
+	disjunction := def.Disjunction
+
 	// discriminator-related data was set during parsing: nothing to do.
-	if def.Discriminator != "" && len(def.DiscriminatorMapping) != 0 {
-		return def, nil
+	if disjunction.Discriminator != "" && len(disjunction.DiscriminatorMapping) != 0 {
+		return disjunction, nil
 	}
 
-	if def.Discriminator == "" {
-		def.Discriminator = pass.inferDiscriminatorField(schema, def)
+	if disjunction.Discriminator == "" {
+		disjunction.Discriminator = pass.inferDiscriminatorField(schema, disjunction)
+		def.AddToPassesTrail("DisjunctionInferMapping[discriminator inferred]")
 	}
 
-	if len(def.DiscriminatorMapping) == 0 {
-		mapping, err := pass.buildDiscriminatorMapping(schema, def)
+	if len(disjunction.DiscriminatorMapping) == 0 {
+		mapping, err := pass.buildDiscriminatorMapping(schema, disjunction)
 		if err != nil {
-			return def, err
+			return disjunction, err
 		}
 
-		def.DiscriminatorMapping = mapping
+		disjunction.DiscriminatorMapping = mapping
+		def.AddToPassesTrail("DisjunctionInferMapping[mapping inferred]")
 	}
 
-	return def, nil
+	return disjunction, nil
 }
 
 // inferDiscriminatorField tries to identify a field that might be used

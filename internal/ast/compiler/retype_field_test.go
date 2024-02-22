@@ -21,7 +21,7 @@ func TestRetypeField(t *testing.T) {
 		Package: "retype_field",
 		Objects: testutils.ObjectsMap(
 			ast.NewObject("retype_field", "SomeObject", ast.NewStruct(
-				ast.NewStructField("AString", ast.Bool()),
+				ast.NewStructField("AString", ast.Bool(), ast.PassesTrail("RetypeField[String → Bool]")),
 			)),
 		),
 	}

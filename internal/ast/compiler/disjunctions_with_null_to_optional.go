@@ -101,6 +101,7 @@ func (pass *DisjunctionWithNullToOptional) processDisjunction(def ast.Type) ast.
 	if len(disjunction.Branches) == 2 && disjunction.Branches.HasNullType() {
 		finalType := disjunction.Branches.NonNullTypes()[0]
 		finalType.Nullable = true
+		finalType.AddToPassesTrail(fmt.Sprintf("DisjunctionWithNullToOptional[%[1]s|null → %[1]s?]", ast.TypeName(finalType)))
 
 		return finalType
 	}

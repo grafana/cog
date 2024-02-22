@@ -54,8 +54,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnObject(t *testing.T) {
 	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = objects[0].Type.AsDisjunction()
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewRef("test", "StringOrBool")),
-		ast.NewObject("test", "StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewRef("test", "StringOrBool", ast.Trail("DisjunctionToType[disjunction → ref]"))),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType, "DisjunctionToType[created]"),
 	}
 
 	// Call the compiler pass
@@ -85,9 +85,9 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAMapValueType(t *testing.T
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfScalars", ast.NewMap(
 			ast.String(),
-			ast.NewRef("test", "StringOrBool"),
+			ast.NewRef("test", "StringOrBool", ast.Trail("DisjunctionToType[disjunction → ref]")),
 		)),
-		ast.NewObject("test", "StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType, "DisjunctionToType[created]"),
 	}
 
 	// Call the compiler pass
@@ -116,9 +116,9 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAStructField(t *testing.T)
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "AStructWithADisjunctionOfScalars", ast.NewStruct(
-			ast.NewStructField("AFieldWithADisjunctionOfScalars", ast.NewRef("test", "StringOrBool")),
+			ast.NewStructField("AFieldWithADisjunctionOfScalars", ast.NewRef("test", "StringOrBool", ast.Trail("DisjunctionToType[disjunction → ref]"))),
 		)),
-		ast.NewObject("test", "StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType, "DisjunctionToType[created]"),
 	}
 
 	// Call the compiler pass
@@ -147,9 +147,9 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsNullableAStructField(t *te
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "AStructWithADisjunctionOfScalars", ast.NewStruct(
-			ast.NewStructField("AFieldWithADisjunctionOfScalars", ast.NewRef("test", "StringOrBool", ast.Nullable())),
+			ast.NewStructField("AFieldWithADisjunctionOfScalars", ast.NewRef("test", "StringOrBool", ast.Nullable(), ast.Trail("DisjunctionToType[disjunction → ref]"))),
 		)),
-		ast.NewObject("test", "StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType, "DisjunctionToType[created]"),
 	}
 
 	// Call the compiler pass
@@ -175,8 +175,8 @@ func TestDisjunctionToType_WithDisjunctionOfScalars_AsAnArrayValueType(t *testin
 	disjunctionStructType.Hints[ast.HintDisjunctionOfScalars] = disjunctionType.AsDisjunction()
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("test", "AnArrayWithADisjunctionOfScalars", ast.NewArray(ast.NewRef("test", "StringOrBool"))),
-		ast.NewObject("test", "StringOrBool", disjunctionStructType),
+		ast.NewObject("test", "AnArrayWithADisjunctionOfScalars", ast.NewArray(ast.NewRef("test", "StringOrBool", ast.Trail("DisjunctionToType[disjunction → ref]")))),
+		ast.NewObject("test", "StringOrBool", disjunctionStructType, "DisjunctionToType[created]"),
 	}
 
 	// Call the compiler pass
@@ -291,7 +291,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	disjunctionStructType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunctionTypeWithDiscriminatorMeta
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct")),
+		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct", ast.Trail("DisjunctionToType[disjunction → ref]"))),
 		objects[1],
 		objects[2],
 		ast.NewObject("test", "SomeStructOrOtherStruct", disjunctionStructType),

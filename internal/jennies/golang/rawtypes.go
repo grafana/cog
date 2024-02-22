@@ -46,7 +46,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 	var err error
 
 	imports := NewImportMap()
-	jenny.typeFormatter = defaultTypeFormatter(context, func(pkg string) string {
+	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, func(pkg string) string {
 		if imports.IsIdentical(pkg, schema.Package) {
 			return ""
 		}
@@ -83,7 +83,15 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 
 	defName := tools.UpperCamelCase(def.Name)
 
-	for _, commentLine := range def.Comments {
+	comments := def.Comments
+	if jenny.Config.Debug {
+		passesTrail := tools.Map(def.PassesTrail, func(trail string) string {
+			return fmt.Sprintf("Modified by compiler pass '%s'", trail)
+		})
+		comments = append(comments, passesTrail...)
+	}
+
+	for _, commentLine := range comments {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 

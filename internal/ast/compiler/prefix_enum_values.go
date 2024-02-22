@@ -36,20 +36,17 @@ func (pass *PrefixEnumValues) Process(schemas []*ast.Schema) ([]*ast.Schema, err
 
 func (pass *PrefixEnumValues) processSchema(schema *ast.Schema) *ast.Schema {
 	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		object.Type = pass.processType(object.Name, object.Type)
+		if !object.Type.IsEnum() {
+			return object
+		}
+
+		object.Type = pass.processEnum(object.Name, object.Type)
+		object.AddToPassesTrail("PrefixEnumValues")
 
 		return object
 	})
 
 	return schema
-}
-
-func (pass *PrefixEnumValues) processType(parentObjectName string, def ast.Type) ast.Type {
-	if def.Kind != ast.KindEnum {
-		return def
-	}
-
-	return pass.processEnum(parentObjectName, def)
 }
 
 func (pass *PrefixEnumValues) processEnum(parentName string, def ast.Type) ast.Type {

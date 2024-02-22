@@ -55,7 +55,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
-	jenny.typeFormatter = builderTypeFormatter(context, jenny.typeImportMapper)
+	jenny.typeFormatter = builderTypeFormatter(jenny.Config, context, jenny.typeImportMapper)
 
 	// every builder has a dependency on cog's runtime, so let's make sure it's declared.
 	jenny.typeImportMapper("cog")

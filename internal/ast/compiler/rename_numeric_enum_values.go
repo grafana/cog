@@ -36,7 +36,16 @@ func (pass *RenameNumericEnumValues) Process(schemas []*ast.Schema) ([]*ast.Sche
 
 func (pass *RenameNumericEnumValues) processSchema(schema *ast.Schema) *ast.Schema {
 	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		object.Type = pass.processType(object.Type)
+		if !object.Type.IsEnum() {
+			return object
+		}
+
+		newType, changed := pass.processEnum(object.Type)
+		object.Type = newType
+
+		if changed {
+			object.AddToPassesTrail("RenameNumericEnumValues")
+		}
 
 		return object
 	})
@@ -44,24 +53,19 @@ func (pass *RenameNumericEnumValues) processSchema(schema *ast.Schema) *ast.Sche
 	return schema
 }
 
-func (pass *RenameNumericEnumValues) processType(def ast.Type) ast.Type {
-	if def.Kind != ast.KindEnum {
-		return def
-	}
+func (pass *RenameNumericEnumValues) processEnum(def ast.Type) (ast.Type, bool) {
+	changed := false
 
-	return pass.processEnum(def)
-}
-
-func (pass *RenameNumericEnumValues) processEnum(def ast.Type) ast.Type {
 	for i, val := range def.AsEnum().Values {
 		if _, err := strconv.Atoi(val.Name); err != nil {
 			continue
 		}
 
 		def.Enum.Values[i].Name = pass.enumMemberNameFromValue(val)
+		changed = true
 	}
 
-	return def
+	return def, changed
 }
 
 func (pass *RenameNumericEnumValues) enumMemberNameFromValue(member ast.EnumValue) string {

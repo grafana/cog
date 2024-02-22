@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -32,13 +33,14 @@ func (pass *Unspec) processSchema(schema *ast.Schema) *ast.Schema {
 	schema.Objects = orderedmap.New[string, ast.Object]()
 
 	originalObjects.Iterate(func(name string, object ast.Object) {
-		if strings.EqualFold(object.Name, "spec") && object.Type.Kind == ast.KindStruct {
+		if strings.EqualFold(object.Name, "spec") && object.Type.IsStruct() {
 			object.Name = schema.Package
 			if schema.Metadata.Identifier != "" {
 				object.Name = schema.Metadata.Identifier
 			}
 
 			object.SelfRef.ReferredType = object.Name
+			object.AddToPassesTrail(fmt.Sprintf("Unspec[%s → %s]", name, object.Name))
 		}
 
 		schema.AddObject(object)

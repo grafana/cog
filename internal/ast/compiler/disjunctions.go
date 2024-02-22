@@ -200,6 +200,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	// a reference to it.
 	if pass.newObjects.Has(newTypeName) {
 		ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
+		ref.AddToPassesTrail("DisjunctionToType[disjunction → ref]")
 		if def.Nullable || disjunction.Branches.HasNullType() {
 			ref.Nullable = true
 		}
@@ -246,16 +247,13 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunction
 	}
 
-	pass.newObjects.Set(newTypeName, ast.Object{
-		Name: newTypeName,
-		Type: structType,
-		SelfRef: ast.RefType{
-			ReferredPkg:  schema.Package,
-			ReferredType: newTypeName,
-		},
-	})
+	newObject := ast.NewObject(schema.Package, newTypeName, structType)
+	newObject.AddToPassesTrail("DisjunctionToType[created]")
+
+	pass.newObjects.Set(newTypeName, newObject)
 
 	ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
+	ref.AddToPassesTrail("DisjunctionToType[disjunction → ref]")
 	if def.Nullable || disjunction.Branches.HasNullType() {
 		ref.Nullable = true
 	}
