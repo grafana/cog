@@ -38,6 +38,7 @@ func (pass *FieldsSetRequired) processObject(_ string, object ast.Object) ast.Ob
 
 			field.Type.Nullable = false
 			field.Required = true
+			field.AddToPassesTrail("FieldsSetRequired[nullable=false, required=true]")
 
 			object.Type.Struct.Fields[i] = field
 		}

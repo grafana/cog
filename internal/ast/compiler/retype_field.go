@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -37,6 +39,7 @@ func (pass *RetypeField) processObject(object ast.Object) ast.Object {
 			continue
 		}
 
+		object.Type.Struct.Fields[i].AddToPassesTrail(fmt.Sprintf("RetypeField[%s → %s]", ast.TypeName(field.Type), ast.TypeName(pass.As)))
 		object.Type.Struct.Fields[i].Type = pass.As
 	}
 

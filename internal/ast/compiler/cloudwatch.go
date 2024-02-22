@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -88,6 +90,8 @@ func (pass *Cloudwatch) processDataquery(objectName string, typeDef ast.Type) as
 
 			field.Type.Nullable = false
 			field.Required = true
+			field.AddToPassesTrail(fmt.Sprintf("Cloudwatch[set default=%s, nullable=false, required=true]", field.Type.Default))
+
 			typeDef.Struct.Fields[i] = field
 		}
 	}
@@ -110,7 +114,10 @@ func (pass *Cloudwatch) defineQueryDisjunction(schema *ast.Schema) ast.Object {
 		"Annotations": "CloudWatchAnnotationQuery",
 	}
 
-	return ast.NewObject(schema.Package, "CloudWatchQuery", cloudwatchQuery)
+	newObject := ast.NewObject(schema.Package, "CloudWatchQuery", cloudwatchQuery)
+	newObject.AddToPassesTrail("Cloudwatch[created]")
+
+	return newObject
 }
 
 func (pass *Cloudwatch) processQueryEditorExpression(object ast.Object) ast.Object {
@@ -128,6 +135,7 @@ func (pass *Cloudwatch) processQueryEditorExpression(object ast.Object) ast.Obje
 		"functionParameter": "QueryEditorFunctionParameterExpression",
 		"operator":          "QueryEditorOperatorExpression",
 	}
+	object.AddToPassesTrail("Cloudwatch[set discriminator field + mapping]")
 
 	return object
 }
@@ -148,6 +156,7 @@ func (pass *Cloudwatch) processQueryEditorArrayExpression(object ast.Object) ast
 
 		newField := field.DeepCopy()
 		newField.Type = newField.Type.Disjunction.Branches[0]
+		newField.AddToPassesTrail("Cloudwatch[removed disjunction]")
 
 		fields = append(fields, newField)
 	}

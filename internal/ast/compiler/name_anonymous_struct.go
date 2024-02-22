@@ -61,6 +61,8 @@ func (pass *NameAnonymousStruct) processObject(object ast.Object) (ast.Object, a
 		}
 
 		newObject = ast.NewObject(pkg, pass.As, field.Type)
+		newObject.AddToPassesTrail("NameAnonymousStruct")
+
 		object.Type.AsStruct().Fields[i].Type = ast.NewRef(pkg, pass.As)
 	}
 

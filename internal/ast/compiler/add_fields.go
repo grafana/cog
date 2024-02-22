@@ -44,6 +44,8 @@ func (pass *AddFields) processObject(object ast.Object) ast.Object {
 			continue
 		}
 
+		field.AddToPassesTrail("AddFields[created]")
+
 		object.Type.Struct.Fields = append(object.Type.Struct.Fields, field)
 	}
 

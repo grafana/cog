@@ -13,21 +13,24 @@ import (
 
 type typeFormatter struct {
 	packageMapper func(pkg string) string
+	config        Config
 
 	forBuilder bool
 	context    common.Context
 }
 
-func defaultTypeFormatter(context common.Context, packageMapper func(pkg string) string) *typeFormatter {
+func defaultTypeFormatter(config Config, context common.Context, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
+		config:        config,
 		context:       context,
 	}
 }
 
-func builderTypeFormatter(context common.Context, packageMapper func(pkg string) string) *typeFormatter {
+func builderTypeFormatter(config Config, context common.Context, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
+		config:        config,
 		forBuilder:    true,
 		context:       context,
 	}
@@ -38,59 +41,68 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 }
 
 func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool) string {
-	if def.IsAny() {
-		return "any"
-	}
-
-	if def.Kind == ast.KindComposableSlot {
-		formatted := formatter.variantInterface(string(def.AsComposableSlot().Variant))
-
-		if !resolveBuilders {
-			return formatted
+	actualFormatter := func() string {
+		if def.IsAny() {
+			return "any"
 		}
 
-		cogAlias := formatter.packageMapper("cog")
+		if def.Kind == ast.KindComposableSlot {
+			formatted := formatter.variantInterface(string(def.AsComposableSlot().Variant))
 
-		return fmt.Sprintf("%s.Builder[%s]", cogAlias, formatted)
-	}
+			if !resolveBuilders {
+				return formatted
+			}
 
-	if def.Kind == ast.KindArray {
-		return formatter.formatArray(def.AsArray(), resolveBuilders)
-	}
+			cogAlias := formatter.packageMapper("cog")
 
-	if def.Kind == ast.KindMap {
-		return formatter.formatMap(def.AsMap())
-	}
-
-	if def.Kind == ast.KindScalar {
-		typeName := def.AsScalar().ScalarKind
-		if def.Nullable {
-			typeName = "*" + typeName
+			return fmt.Sprintf("%s.Builder[%s]", cogAlias, formatted)
 		}
 
-		return string(typeName)
-	}
-
-	if def.Kind == ast.KindRef {
-		return formatter.formatRef(def, resolveBuilders)
-	}
-
-	// anonymous struct or struct body
-	if def.Kind == ast.KindStruct {
-		output := formatter.formatStructBody(def.AsStruct())
-		if def.Nullable {
-			output = "*" + output
+		if def.Kind == ast.KindArray {
+			return formatter.formatArray(def.AsArray(), resolveBuilders)
 		}
 
-		return output
+		if def.Kind == ast.KindMap {
+			return formatter.formatMap(def.AsMap())
+		}
+
+		if def.Kind == ast.KindScalar {
+			typeName := def.AsScalar().ScalarKind
+			if def.Nullable {
+				typeName = "*" + typeName
+			}
+
+			return string(typeName)
+		}
+
+		if def.Kind == ast.KindRef {
+			return formatter.formatRef(def, resolveBuilders)
+		}
+
+		// anonymous struct or struct body
+		if def.Kind == ast.KindStruct {
+			output := formatter.formatStructBody(def.AsStruct())
+			if def.Nullable {
+				output = "*" + output
+			}
+
+			return output
+		}
+
+		if def.Kind == ast.KindIntersection {
+			return formatter.formatIntersection(def.AsIntersection())
+		}
+
+		// FIXME: we should never be here
+		return "unknown"
 	}
 
-	if def.Kind == ast.KindIntersection {
-		return formatter.formatIntersection(def.AsIntersection())
+	passesTrail := ""
+	if formatter.config.Debug && len(def.PassesTrail) != 0 {
+		passesTrail = fmt.Sprintf(" /* %s */", strings.Join(def.PassesTrail, ", "))
 	}
 
-	// FIXME: we should never be here
-	return "unknown"
+	return actualFormatter() + passesTrail
 }
 
 func (formatter *typeFormatter) variantInterface(variant string) string {
@@ -116,7 +128,15 @@ func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
 func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	var buffer strings.Builder
 
-	for _, commentLine := range def.Comments {
+	comments := def.Comments
+	if formatter.config.Debug {
+		passesTrail := tools.Map(def.PassesTrail, func(trail string) string {
+			return fmt.Sprintf("Modified by compiler pass '%s'", trail)
+		})
+		comments = append(comments, passesTrail...)
+	}
+
+	for _, commentLine := range comments {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 

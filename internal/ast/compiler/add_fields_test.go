@@ -24,7 +24,7 @@ func TestAddFields(t *testing.T) {
 			ast.NewObject("add_fields", "AString", ast.String()),
 			ast.NewObject("add_fields", "SomeObject", ast.NewStruct(
 				ast.NewStructField("AString", ast.String()),
-				ast.NewStructField("addedByPass", ast.Bool()),
+				ast.NewStructField("addedByPass", ast.Bool(), ast.PassesTrail("AddFields[created]")),
 			)),
 		),
 	}

@@ -120,7 +120,10 @@ func (pass *AnonymousStructsToNamed) processStruct(pkg string, parentName string
 		def.Struct.Fields[i].Type = pass.processType(pkg, name, field.Type)
 	}
 
-	pass.newObjects = append(pass.newObjects, ast.NewObject(pkg, parentName, def))
+	newObject := ast.NewObject(pkg, parentName, def)
+	newObject.AddToPassesTrail("AnonymousStructsToNamed")
+
+	pass.newObjects = append(pass.newObjects, newObject)
 
 	ref := ast.NewRef(pkg, parentName)
 	ref.Nullable = def.Nullable

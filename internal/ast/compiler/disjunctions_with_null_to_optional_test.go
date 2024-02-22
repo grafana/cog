@@ -20,8 +20,8 @@ func TestDisjunctionWithNullToOptional_WithDisjunctionOfTypeAndNull_AsAnObject(t
 	}
 
 	expectedObjects := []ast.Object{
-		ast.NewObject("test", "ScalarWithNull", ast.String(ast.Nullable())),
-		ast.NewObject("test", "RefWithNull", ast.NewRef("test", "SomeType", ast.Nullable())),
+		ast.NewObject("test", "ScalarWithNull", ast.String(ast.Nullable(), ast.Trail("DisjunctionWithNullToOptional[String|null → String?]"))),
+		ast.NewObject("test", "RefWithNull", ast.NewRef("test", "SomeType", ast.Nullable(), ast.Trail("DisjunctionWithNullToOptional[SomeType|null → SomeType?]"))),
 	}
 
 	// Call the compiler pass
@@ -47,10 +47,10 @@ func TestDisjunctionWithNullToOptional_WithDisjunctionOfTypeAndNull_AsAStructFie
 
 	expectedObjects := []ast.Object{
 		ast.NewObject("test", "StructWithScalarWithNull", ast.NewStruct(
-			ast.NewStructField("Field", ast.String(ast.Nullable())),
+			ast.NewStructField("Field", ast.String(ast.Nullable(), ast.Trail("DisjunctionWithNullToOptional[String|null → String?]"))),
 		)),
 		ast.NewObject("test", "StructWithRefWithNull", ast.NewStruct(
-			ast.NewStructField("Field", ast.NewRef("test", "SomeType", ast.Nullable())),
+			ast.NewStructField("Field", ast.NewRef("test", "SomeType", ast.Nullable(), ast.Trail("DisjunctionWithNullToOptional[SomeType|null → SomeType?]"))),
 		)),
 	}
 

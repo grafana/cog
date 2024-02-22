@@ -69,6 +69,8 @@ func (pass *LibraryPanels) processLibraryPanel(object ast.Object, dashboardPanel
 		}
 
 		structDef.Fields[i].Type = pass.buildModelType(dashboardPanel)
+		structDef.Fields[i].AddToPassesTrail("LibraryPanels[changed type]")
+
 		break
 	}
 

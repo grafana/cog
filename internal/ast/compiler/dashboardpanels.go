@@ -80,21 +80,14 @@ func (pass *DashboardPanelsRewrite) processSchema(schema *ast.Schema) (*ast.Sche
 }
 
 func (pass *DashboardPanelsRewrite) overwritePanelsFieldType(object ast.Object, newPanelsFieldType ast.Type) ast.Object {
-	newFields := make([]ast.StructField, len(object.Type.AsStruct().Fields))
-	for i, field := range object.Type.AsStruct().Fields {
+	for i, field := range object.Type.Struct.Fields {
 		if field.Name != dashboardPanelsField {
-			newFields[i] = field
 			continue
 		}
 
-		newField := field
-		newField.Type = newPanelsFieldType
-
-		newFields[i] = newField
+		object.Type.Struct.Fields[i].Type = newPanelsFieldType
+		object.Type.Struct.Fields[i].AddToPassesTrail("DashboardPanelsRewrite[changed type]")
 	}
 
-	newObject := object
-	newObject.Type.Struct.Fields = newFields
-
-	return newObject
+	return object
 }

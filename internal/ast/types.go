@@ -98,7 +98,12 @@ type Type struct {
 	Intersection   *IntersectionType   `json:",omitempty"`
 	ComposableSlot *ComposableSlotType `json:",omitempty" yaml:"composable_slot"`
 
-	Hints JenniesHints `json:",omitempty"`
+	Hints       JenniesHints `json:",omitempty"`
+	PassesTrail []string     `json:",omitempty"`
+}
+
+func (t *Type) AddToPassesTrail(trail string) {
+	t.PassesTrail = append(t.PassesTrail, trail)
 }
 
 func (t Type) IsAnyOf(kinds ...Kind) bool {
@@ -223,6 +228,8 @@ func (t Type) DeepCopy() Type {
 		newType.Hints[k] = v
 	}
 
+	newType.PassesTrail = append(newType.PassesTrail, t.PassesTrail...)
+
 	return newType
 }
 
@@ -243,6 +250,12 @@ func Default(value any) TypeOption {
 func Hints(hints JenniesHints) TypeOption {
 	return func(def *Type) {
 		def.Hints = hints
+	}
+}
+
+func Trail(trail string) TypeOption {
+	return func(def *Type) {
+		def.PassesTrail = append(def.PassesTrail, trail)
 	}
 }
 
@@ -462,21 +475,27 @@ func (t Type) AsComposableSlot() ComposableSlotType {
 
 // named declaration of a type
 type Object struct {
-	Name     string
-	Comments []string `json:",omitempty"`
-	Type     Type
-	SelfRef  RefType
+	Name        string
+	Comments    []string `json:",omitempty"`
+	Type        Type
+	SelfRef     RefType
+	PassesTrail []string `json:",omitempty"`
 }
 
-func NewObject(pkg string, name string, objectType Type) Object {
+func NewObject(pkg string, name string, objectType Type, passesTrail ...string) Object {
 	return Object{
-		Name: name,
-		Type: objectType,
+		Name:        name,
+		Type:        objectType,
+		PassesTrail: passesTrail,
 		SelfRef: RefType{
 			ReferredPkg:  pkg,
 			ReferredType: name,
 		},
 	}
+}
+
+func (object *Object) AddToPassesTrail(trail string) {
+	object.PassesTrail = append(object.PassesTrail, trail)
 }
 
 func (object Object) Equal(other Object) bool {
@@ -493,6 +512,7 @@ func (object Object) DeepCopy() Object {
 		SelfRef: object.SelfRef.DeepCopy(),
 	}
 
+	newObject.PassesTrail = append(newObject.PassesTrail, object.PassesTrail...)
 	newObject.Comments = append(newObject.Comments, object.Comments...)
 
 	return newObject
@@ -673,10 +693,15 @@ func (structType StructType) FieldByName(name string) (StructField, bool) {
 }
 
 type StructField struct {
-	Name     string
-	Comments []string `json:",omitempty"`
-	Type     Type
-	Required bool
+	Name        string
+	Comments    []string `json:",omitempty"`
+	Type        Type
+	Required    bool
+	PassesTrail []string `json:",omitempty"`
+}
+
+func (structField *StructField) AddToPassesTrail(trail string) {
+	structField.PassesTrail = append(structField.PassesTrail, trail)
 }
 
 func (structField StructField) DeepCopy() StructField {
@@ -687,6 +712,7 @@ func (structField StructField) DeepCopy() StructField {
 	}
 
 	newT.Comments = append(newT.Comments, structField.Comments...)
+	newT.PassesTrail = append(newT.PassesTrail, structField.PassesTrail...)
 
 	return newT
 }
@@ -702,6 +728,12 @@ func Required() StructFieldOption {
 func Comments(comments []string) StructFieldOption {
 	return func(field *StructField) {
 		field.Comments = comments
+	}
+}
+
+func PassesTrail(trail string) StructFieldOption {
+	return func(field *StructField) {
+		field.PassesTrail = append(field.PassesTrail, trail)
 	}
 }
 
