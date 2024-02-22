@@ -39,11 +39,11 @@ func (builder *LokiBuilderBuilder) Build() (Dashboard, error) {
 }
 
 func (builder *LokiBuilderBuilder) Target(target cog.Builder[cogvariants.Dataquery]) *LokiBuilderBuilder {
-        targetResource, err := target.Build()
-        if err != nil {
-            builder.errors["target"] = err.(cog.BuildErrors)
-            return builder
-        }
+    targetResource, err := target.Build()
+    if err != nil {
+        builder.errors["target"] = err.(cog.BuildErrors)
+        return builder
+    }
     builder.internal.Target = targetResource
 
     return builder
@@ -51,13 +51,13 @@ func (builder *LokiBuilderBuilder) Target(target cog.Builder[cogvariants.Dataque
 
 func (builder *LokiBuilderBuilder) Targets(targets []cog.Builder[cogvariants.Dataquery]) *LokiBuilderBuilder {
         targetsResources := make([]cogvariants.Dataquery, 0, len(targets))
-        for _, r := range targets {
-            targetsResource, err := r.Build()
-            if err != nil {
-                builder.errors["targets"] = err.(cog.BuildErrors)
-                return builder
-            }
-            targetsResources = append(targetsResources, targetsResource)
+        for _, r1 := range targets {
+                targetsDepth1, err := r1.Build()
+                if err != nil {
+                    builder.errors["targets"] = err.(cog.BuildErrors)
+                    return builder
+                }
+                targetsResources = append(targetsResources, targetsDepth1)
         }
     builder.internal.Targets = targetsResources
 

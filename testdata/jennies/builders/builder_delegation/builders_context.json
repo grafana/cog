@@ -92,6 +92,33 @@
                   "Required": true
                 },
                 {
+                  "Name": "linksOfLinks",
+                  "Comments": [
+                    "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+                  ],
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "builder_delegation",
+                              "ReferredType": "DashboardLink"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                },
+                {
                   "Name": "singleLink",
                   "Comments": [
                     "will be expanded to cog.Builder\u003cDashboardLink\u003e"
@@ -204,6 +231,33 @@
                           "Ref": {
                             "ReferredPkg": "builder_delegation",
                             "ReferredType": "DashboardLink"
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "linksOfLinks",
+                    "Comments": [
+                      "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+                    ],
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "array",
+                          "Nullable": false,
+                          "Array": {
+                            "ValueType": {
+                              "Kind": "ref",
+                              "Nullable": false,
+                              "Ref": {
+                                "ReferredPkg": "builder_delegation",
+                                "ReferredType": "DashboardLink"
+                              }
+                            }
                           }
                         }
                       }
@@ -460,6 +514,33 @@
                     "Required": true
                   },
                   {
+                    "Name": "linksOfLinks",
+                    "Comments": [
+                      "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+                    ],
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "array",
+                          "Nullable": false,
+                          "Array": {
+                            "ValueType": {
+                              "Kind": "ref",
+                              "Nullable": false,
+                              "Ref": {
+                                "ReferredPkg": "builder_delegation",
+                                "ReferredType": "DashboardLink"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
                     "Name": "singleLink",
                     "Comments": [
                       "will be expanded to cog.Builder\u003cDashboardLink\u003e"
@@ -528,6 +609,33 @@
                       "Ref": {
                         "ReferredPkg": "builder_delegation",
                         "ReferredType": "DashboardLink"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "linksOfLinks",
+                "Comments": [
+                  "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+                ],
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "ref",
+                          "Nullable": false,
+                          "Ref": {
+                            "ReferredPkg": "builder_delegation",
+                            "ReferredType": "DashboardLink"
+                          }
+                        }
                       }
                     }
                   }
@@ -708,6 +816,93 @@
                         "Ref": {
                           "ReferredPkg": "builder_delegation",
                           "ReferredType": "DashboardLink"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
+          "Name": "linksOfLinks",
+          "Comments": [
+            "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+          ],
+          "Args": [
+            {
+              "Name": "linksOfLinks",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "builder_delegation",
+                          "ReferredType": "DashboardLink"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "linksOfLinks",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "builder_delegation",
+                              "ReferredType": "DashboardLink"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "linksOfLinks",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "builder_delegation",
+                              "ReferredType": "DashboardLink"
+                            }
+                          }
                         }
                       }
                     }
