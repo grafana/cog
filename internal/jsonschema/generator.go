@@ -420,6 +420,10 @@ func (g *generator) walkObject(schema *schemaparser.Schema) (ast.Type, error) {
 			return ast.Type{}, err
 		}
 
+		if valueType.IsAny() {
+			return ast.Any(), nil
+		}
+
 		return ast.NewMap(ast.String(), valueType), nil
 	}
 

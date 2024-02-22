@@ -30,6 +30,26 @@
             "foo": {}
           }
         },
+        "objectEmptyPropertiesIsAny": {
+          "type": "object",
+          "properties": {
+          }
+        },
+        "objectNoPropertiesIsAny": {
+          "type": "object"
+        },
+        "objectAdditionalPropertiesAny": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "objectAdditionalPropertiesTyped": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "array": {
           "type": "array",
           "items": {

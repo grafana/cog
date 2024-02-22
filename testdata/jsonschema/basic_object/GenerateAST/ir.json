@@ -137,6 +137,63 @@
               "Required": false
             },
             {
+              "Name": "objectAdditionalPropertiesAny",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "objectAdditionalPropertiesTyped",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "objectEmptyPropertiesIsAny",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "objectNoPropertiesIsAny",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              },
+              "Required": false
+            },
+            {
               "Name": "string",
               "Type": {
                 "Kind": "scalar",
