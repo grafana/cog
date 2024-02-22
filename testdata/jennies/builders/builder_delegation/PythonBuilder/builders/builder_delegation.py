@@ -52,6 +52,16 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
     
         return self
     
+    def links_of_links(self, links_of_links: list[list[cogbuilder.Builder[builder_delegation.DashboardLink]]]) -> typing.Self:    
+        """
+        will be expanded to [][]cog.Builder<DashboardLink>
+        """
+            
+        links_of_links_resources = [r.build() for r in links_of_links]
+        self.__internal.links_of_links = links_of_links_resources
+    
+        return self
+    
     def single_link(self, single_link: cogbuilder.Builder[builder_delegation.DashboardLink]) -> typing.Self:    
         """
         will be expanded to cog.Builder<DashboardLink>

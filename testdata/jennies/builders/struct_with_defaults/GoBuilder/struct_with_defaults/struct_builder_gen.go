@@ -38,33 +38,33 @@ func (builder *StructBuilder) Build() (Struct, error) {
 }
 
 func (builder *StructBuilder) AllFields(allFields cog.Builder[NestedStruct]) *StructBuilder {
-        allFieldsResource, err := allFields.Build()
-        if err != nil {
-            builder.errors["allFields"] = err.(cog.BuildErrors)
-            return builder
-        }
+    allFieldsResource, err := allFields.Build()
+    if err != nil {
+        builder.errors["allFields"] = err.(cog.BuildErrors)
+        return builder
+    }
     builder.internal.AllFields = allFieldsResource
 
     return builder
 }
 
 func (builder *StructBuilder) PartialFields(partialFields cog.Builder[NestedStruct]) *StructBuilder {
-        partialFieldsResource, err := partialFields.Build()
-        if err != nil {
-            builder.errors["partialFields"] = err.(cog.BuildErrors)
-            return builder
-        }
+    partialFieldsResource, err := partialFields.Build()
+    if err != nil {
+        builder.errors["partialFields"] = err.(cog.BuildErrors)
+        return builder
+    }
     builder.internal.PartialFields = partialFieldsResource
 
     return builder
 }
 
 func (builder *StructBuilder) EmptyFields(emptyFields cog.Builder[NestedStruct]) *StructBuilder {
-        emptyFieldsResource, err := emptyFields.Build()
-        if err != nil {
-            builder.errors["emptyFields"] = err.(cog.BuildErrors)
-            return builder
-        }
+    emptyFieldsResource, err := emptyFields.Build()
+    if err != nil {
+        builder.errors["emptyFields"] = err.(cog.BuildErrors)
+        return builder
+    }
     builder.internal.EmptyFields = emptyFieldsResource
 
     return builder
