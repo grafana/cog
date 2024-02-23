@@ -487,6 +487,12 @@ type BooleanUnfold struct {
 //	```
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
+		intoType := option.Assignments[0].Path.Last().Type
+
+		if !intoType.IsScalar() || intoType.Scalar.ScalarKind != ast.KindBool {
+			return []ast.Option{option}
+		}
+
 		newOpts := []ast.Option{
 			{
 				Name:     unfoldOpts.OptionTrue,
