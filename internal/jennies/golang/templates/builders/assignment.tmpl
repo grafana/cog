@@ -32,7 +32,7 @@
             {{- $argName = .Type.IsArray | ternary (print $argName "Resources") (print $argName "Resource") }}
         {{- end }}
 
-        {{- maybeAsPointer (isNullableNonArray $.Assignment.Path.Last.Type) $argName }}
+        {{- maybeAsPointer $.Assignment.Path.Last.Type $argName }}
     {{- end }}
     {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
@@ -77,7 +77,7 @@
     {{- .Envelope.Type | formatType }}{
         {{- range .Envelope.Values }}
         {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
-        {{- $value = maybeAsPointer (.Path.Last.Type.Nullable) $value }}
+        {{- $value = maybeAsPointer (.Path.Last.Type) $value }}
         {{ (index .Path 0).Identifier | upperCamelCase }}: {{ $value }},
         {{- end }}
     }

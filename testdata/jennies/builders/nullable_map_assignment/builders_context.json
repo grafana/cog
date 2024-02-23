@@ -1,0 +1,225 @@
+{
+  "Schemas": [
+    {
+      "Package": "nullable_map_assignment",
+      "Metadata": {},
+      "Objects": {
+        "SomeStruct": {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "config",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": true,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "nullable_map_assignment",
+            "ReferredType": "SomeStruct"
+          }
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "Schema": {
+        "Package": "nullable_map_assignment",
+        "Metadata": {},
+        "Objects": {
+          "SomeStruct": {
+            "Name": "SomeStruct",
+            "Type": {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "config",
+                    "Type": {
+                      "Kind": "map",
+                      "Nullable": true,
+                      "Map": {
+                        "IndexType": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        },
+                        "ValueType": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        }
+                      }
+                    },
+                    "Required": false
+                  }
+                ]
+              }
+            },
+            "SelfRef": {
+              "ReferredPkg": "nullable_map_assignment",
+              "ReferredType": "SomeStruct"
+            }
+          }
+        }
+      },
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "config",
+                "Type": {
+                  "Kind": "map",
+                  "Nullable": true,
+                  "Map": {
+                    "IndexType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "ValueType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    }
+                  }
+                },
+                "Required": false
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "nullable_map_assignment",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "nullable_map_assignment",
+      "Name": "SomeStruct",
+      "Options": [
+        {
+          "Name": "config",
+          "Args": [
+            {
+              "Name": "config",
+              "Type": {
+                "Kind": "map",
+                "Nullable": true,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "config",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": true,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "config",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": true,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        }
+      ]
+    }
+  ]
+}
