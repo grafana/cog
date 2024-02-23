@@ -73,6 +73,28 @@ func TestUnfoldBooleanAction(t *testing.T) {
 	req.Equal(readonlyOpt.Assignments[0].Value.Constant, false)
 }
 
+func TestUnfoldBooleanAction_onNonBooleanDoesNothing(t *testing.T) {
+	req := require.New(t)
+
+	option := ast.Option{
+		Args: []ast.Argument{
+			{Name: "tags", Type: ast.NewArray(ast.String())},
+		},
+		Assignments: []ast.Assignment{
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "tags", Type: ast.NewArray(ast.String())},
+			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
+		},
+	}
+	modifiedOpts := UnfoldBooleanAction(BooleanUnfold{
+		OptionTrue:  "TrueOpt",
+		OptionFalse: "FalseOpt",
+	})(ast.Builder{}, option)
+
+	req.Len(modifiedOpts, 1)
+	req.Equal(option, modifiedOpts[0])
+}
+
 func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 	req := require.New(t)
 
