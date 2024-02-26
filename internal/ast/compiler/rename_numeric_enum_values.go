@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/grafana/cog/internal/ast"
@@ -57,8 +58,16 @@ func (pass *RenameNumericEnumValues) processEnum(def ast.Type) ast.Type {
 			continue
 		}
 
-		def.AsEnum().Values[i].Name = "N" + tools.UpperCamelCase(val.Name)
+		def.Enum.Values[i].Name = pass.enumMemberNameFromValue(val)
 	}
 
 	return def
+}
+
+func (pass *RenameNumericEnumValues) enumMemberNameFromValue(member ast.EnumValue) string {
+	if member.Name[0] == '-' {
+		return tools.UpperCamelCase(fmt.Sprintf("negative%s", member.Name[1:]))
+	}
+
+	return "N" + tools.UpperCamelCase(member.Name)
 }
