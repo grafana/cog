@@ -20,11 +20,8 @@
 {{- define "assignment_setup" }}
 {{- with .Value.Argument }}
 {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-{{- if .Type.IsArray }}
-{{ .Name|formatIdentifier }}_resources = [r.build() for r in {{ .Name|formatIdentifier }}]
-{{- else }}
-{{ .Name|formatIdentifier }}_resource = {{ .Name|formatIdentifier }}.build()
-{{- end }}
+{{- $builtResultSuffix := ternary "_resources" "_resource" .Type.IsArray }}
+{{ .Name|formatIdentifier }}{{ $builtResultSuffix }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (formatIdentifier .Name) "Depth" 1) }}
 {{- end }}
 {{- end }}
 {{- with .Value.Envelope }}
@@ -32,6 +29,14 @@
 {{- template "assignment_setup" (dict "Value" .Value) }}
 {{- end }}
 {{- end }}
+{{- end }}
+
+{{- define "unfold_builders" }}
+{{- if .InputType.IsArray -}}
+[{{ template "unfold_builders" (dict "InputType" .InputType.Array.ValueType "InputVar" (print "r" .Depth ) "Depth" (add1 .Depth)) }} for r{{ .Depth }} in {{ .InputVar }}]
+{{- else -}}
+{{ .InputVar }}.build()
+{{- end -}}
 {{- end }}
 
 {{- define "assignment_value" }}
