@@ -9,33 +9,17 @@ import (
 
 const LanguageRef = "typescript"
 
-type Config struct {
-	Debug bool
-}
-
-func (config Config) MergeWithGlobal(global common.Config) Config {
-	newConfig := config
-	newConfig.Debug = global.Debug
-
-	return newConfig
-}
-
 type Language struct {
-	config Config
 }
 
 func New() *Language {
-	return &Language{
-		config: Config{},
-	}
+	return &Language{}
 }
 
 func (language *Language) RegisterCliFlags(_ *cobra.Command) {
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
-	config := language.config.MergeWithGlobal(globalConfig)
-
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef
 	})
@@ -43,7 +27,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		Runtime{},
 
 		common.If[common.Context](globalConfig.Types, RawTypes{}),
-		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
+		common.If[common.Context](globalConfig.Builders, &Builder{}),
 
 		Index{Targets: globalConfig},
 	)

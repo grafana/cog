@@ -10,20 +10,11 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	Debug bool
-
 	GenGettersAndSetters bool
 }
 
 type Language struct {
 	config Config
-}
-
-func (config Config) MergeWithGlobal(global common.Config) Config {
-	newConfig := config
-	newConfig.Debug = global.Debug
-
-	return newConfig
 }
 
 func New() *Language {
@@ -35,15 +26,13 @@ func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
-	config := language.config.MergeWithGlobal(globalConfig)
-
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef
 	})
 
 	jenny.AppendOneToMany(
 		Runtime{},
-		common.If[common.Context](globalConfig.Types, RawTypes{config: config}),
+		common.If[common.Context](globalConfig.Types, RawTypes{config: language.config}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

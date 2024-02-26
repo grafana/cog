@@ -13,8 +13,6 @@ import (
 )
 
 type Builder struct {
-	Config Config
-
 	imports          *common.DirectImportMap
 	typeImportMapper func(string) string
 	typeFormatter    *typeFormatter
@@ -64,14 +62,6 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
-	comments := builder.For.Comments
-	if jenny.Config.Debug {
-		veneerTrail := tools.Map(builder.VeneerTrail, func(veneer string) string {
-			return fmt.Sprintf("Modified by veneer '%s'", veneer)
-		})
-		comments = append(comments, veneerTrail...)
-	}
-
 	err := templates.
 		Funcs(map[string]any{
 			"typeHasBuilder": context.ResolveToBuilder,
@@ -100,7 +90,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			BuilderSignatureType: buildObjectSignature,
 			Imports:              jenny.imports,
 			ImportAlias:          jenny.importType(builder.For.SelfRef),
-			Comments:             comments,
+			Comments:             builder.For.Comments,
 			Constructor:          jenny.generateConstructor(builder),
 			Properties:           builder.Properties,
 			Options:              tools.Map(builder.Options, jenny.generateOption),
@@ -133,24 +123,11 @@ func (jenny *Builder) generateConstructor(builder ast.Builder) template.Construc
 }
 
 func (jenny *Builder) generateOption(def ast.Option) template.Option {
-	comments := def.Comments
-
-	if jenny.Config.Debug {
-		veneerTrail := tools.Map(def.VeneerTrail, func(veneer string) string {
-			return fmt.Sprintf("Modified by veneer '%s'", veneer)
-		})
-		comments = append(comments, veneerTrail...)
-	}
-
-	assignments := tools.Map(def.Assignments, func(assignment ast.Assignment) template.Assignment {
-		return jenny.generateAssignment(assignment)
-	})
-
 	return template.Option{
 		Name:        def.Name,
-		Comments:    comments,
+		Comments:    def.Comments,
 		Args:        def.Args,
-		Assignments: assignments,
+		Assignments: tools.Map(def.Assignments, jenny.generateAssignment),
 	}
 }
 

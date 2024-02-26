@@ -228,7 +228,7 @@ func TestRewriter_ApplyTo(t *testing.T) {
 					BuilderRules: tc.builderRules,
 					OptionRules:  tc.optionRules,
 				},
-			})
+			}, Config{Debug: false})
 
 			// save our original/expected states
 			originalBuildersJSONBeforeApply := mustMarshalJSON(t, tc.inputBuilders)

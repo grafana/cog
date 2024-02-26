@@ -13,8 +13,6 @@ import (
 const LanguageRef = "go"
 
 type Config struct {
-	Debug bool
-
 	// GenerateGoMod indicates whether a go.mod file should be generated.
 	// If enabled, PackageRoot is used as module path.
 	GenerateGoMod bool
@@ -22,13 +20,6 @@ type Config struct {
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string
-}
-
-func (config Config) MergeWithGlobal(global common.Config) Config {
-	newConfig := config
-	newConfig.Debug = global.Debug
-
-	return newConfig
 }
 
 func (config Config) importPath(suffix string) string {
@@ -52,21 +43,19 @@ func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
-	config := language.config.MergeWithGlobal(globalConfig)
-
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		Runtime{Config: config},
-		VariantsPlugins{Config: config},
+		Runtime{Config: language.config},
+		VariantsPlugins{Config: language.config},
 
-		common.If[common.Context](language.config.GenerateGoMod, GoMod{Config: config}),
+		common.If[common.Context](language.config.GenerateGoMod, GoMod{Config: language.config}),
 
-		common.If[common.Context](globalConfig.Types, RawTypes{Config: config}),
-		common.If[common.Context](globalConfig.Types, JSONMarshalling{Config: config}),
+		common.If[common.Context](globalConfig.Types, RawTypes{Config: language.config}),
+		common.If[common.Context](globalConfig.Types, JSONMarshalling{Config: language.config}),
 
-		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
+		common.If[common.Context](globalConfig.Builders, &Builder{Config: language.config}),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 
