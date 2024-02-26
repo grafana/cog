@@ -12,6 +12,7 @@ func NewImportMap() *common.DirectImportMap {
 		common.WithAliasSanitizer[common.DirectImportMap](func(alias string) string {
 			return formatPackageName(strings.ReplaceAll(alias, "/", ""))
 		}),
+		common.WithImportPathSanitizer[common.DirectImportMap](strings.ToLower),
 		common.WithFormatter(func(importMap common.DirectImportMap) string {
 			if importMap.Imports.Len() == 0 {
 				return ""
