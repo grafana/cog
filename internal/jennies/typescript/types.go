@@ -47,7 +47,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 	case ast.KindDisjunction:
 		return formatter.formatDisjunction(def.AsDisjunction(), resolveBuilders)
 	case ast.KindRef:
-		formatted := def.AsRef().ReferredType
+		formatted := tools.CleanupNames(def.AsRef().ReferredType)
 
 		referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
 		if referredPkg != "" {
@@ -315,4 +315,8 @@ func formatValue(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
+}
+
+func formatPackageName(pkg string) string {
+	return tools.LowerCamelCase(pkg)
 }

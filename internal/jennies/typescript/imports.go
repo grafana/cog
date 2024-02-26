@@ -5,12 +5,22 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/tools"
 )
 
 func NewImportMap() *common.DirectImportMap {
 	return common.NewDirectImportMap(
-		common.WithAliasSanitizer[common.DirectImportMap](func(alias string) string {
-			return strings.ReplaceAll(alias, "/", "")
+		common.WithAliasSanitizer[common.DirectImportMap](formatPackageName),
+		common.WithImportPathSanitizer[common.DirectImportMap](func(importPath string) string {
+			parts := strings.Split(importPath, "/")
+
+			return strings.Join(tools.Map(parts, func(input string) string {
+				if input == ".." {
+					return input
+				}
+
+				return formatPackageName(input)
+			}), "/")
 		}),
 		common.WithFormatter(func(importMap common.DirectImportMap) string {
 			if importMap.Imports.Len() == 0 {

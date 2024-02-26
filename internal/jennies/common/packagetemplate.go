@@ -12,6 +12,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type PackageTemplate struct {
@@ -49,6 +50,7 @@ func (jenny PackageTemplate) Generate(context Context) (codejen.Files, error) {
 			Funcs(sprig.FuncMap()).
 			Funcs(template.FuncMap{
 				"registryToSemver": jenny.registryToSemver,
+				"lowerCamelCase":   tools.LowerCamelCase,
 			}).
 			Parse(string(templateContent))
 		if err != nil {
