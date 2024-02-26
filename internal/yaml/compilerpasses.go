@@ -10,6 +10,7 @@ import (
 type CompilerPass struct {
 	DataqueryIdentification *DataqueryIdentification `yaml:"dataquery_identification"`
 	Unspec                  *Unspec                  `yaml:"unspec"`
+	FieldsSetDefault        *FieldsSetDefault        `yaml:"fields_set_default"`
 	FieldsSetRequired       *FieldsSetRequired       `yaml:"fields_set_required"`
 	Omit                    *Omit                    `yaml:"omit"`
 	AddFields               *AddFields               `yaml:"add_fields"`
@@ -33,6 +34,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 		return pass.Unspec.AsCompilerPass(), nil
 	}
 
+	if pass.FieldsSetDefault != nil {
+		return pass.FieldsSetDefault.AsCompilerPass()
+	}
 	if pass.FieldsSetRequired != nil {
 		return pass.FieldsSetRequired.AsCompilerPass()
 	}
@@ -84,6 +88,25 @@ type Unspec struct {
 
 func (pass Unspec) AsCompilerPass() compiler.Pass {
 	return &compiler.Unspec{}
+}
+
+type FieldsSetDefault struct {
+	Defaults map[string]any // Expected format: [package].[object].[field] → value
+}
+
+func (pass FieldsSetDefault) AsCompilerPass() (compiler.Pass, error) {
+	defaults := make(map[compiler.FieldReference]any, len(pass.Defaults))
+
+	for ref, value := range pass.Defaults {
+		fieldRef, err := compiler.FieldReferenceFromString(ref)
+		if err != nil {
+			return nil, err
+		}
+
+		defaults[fieldRef] = value
+	}
+
+	return &compiler.FieldsSetDefault{DefaultValues: defaults}, nil
 }
 
 type FieldsSetRequired struct {
