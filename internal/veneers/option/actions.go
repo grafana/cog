@@ -88,6 +88,19 @@ func OmitAction() RewriteAction {
 	}
 }
 
+// VeneerTrailAsCommentsAction removes an option.
+func VeneerTrailAsCommentsAction() RewriteAction {
+	return func(_ ast.Builder, opt ast.Option) []ast.Option {
+		veneerTrail := tools.Map(opt.VeneerTrail, func(veneer string) string {
+			return fmt.Sprintf("Modified by veneer '%s'", veneer)
+		})
+
+		opt.Comments = append(opt.Comments, veneerTrail...)
+
+		return []ast.Option{opt}
+	}
+}
+
 // PromoteToConstructorAction flag the arguments of the given option as "constructor arguments".
 // This flag indicates builder jennies that the arguments and assignments described by this option
 // should be exposed by the builder's constructor.

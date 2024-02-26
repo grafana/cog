@@ -25,7 +25,7 @@ func NewVeneersLoader() *VeneersLoader {
 	return &VeneersLoader{}
 }
 
-func (loader *VeneersLoader) RewriterFrom(filenames []string) (*rewrite.Rewriter, error) {
+func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Config) (*rewrite.Rewriter, error) {
 	readers := make([]io.Reader, 0, len(filenames))
 	for _, filename := range filenames {
 		reader, err := os.Open(filename)
@@ -41,7 +41,7 @@ func (loader *VeneersLoader) RewriterFrom(filenames []string) (*rewrite.Rewriter
 		return nil, err
 	}
 
-	return rewrite.NewRewrite(rules), nil
+	return rewrite.NewRewrite(rules, config), nil
 }
 
 func (loader *VeneersLoader) LoadAll(readers []io.Reader) ([]rewrite.LanguageRules, error) {

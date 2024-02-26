@@ -90,7 +90,8 @@ func (opts Options) veneers() (*rewrite.Rewriter, error) {
 		return nil, err
 	}
 
-	return yaml.NewVeneersLoader().RewriterFrom(veneerFiles)
+	config := rewrite.Config{Debug: opts.JenniesConfig.Debug}
+	return yaml.NewVeneersLoader().RewriterFrom(veneerFiles, config)
 }
 
 func (opts Options) commonCompilerPasses() (compiler.Passes, error) {

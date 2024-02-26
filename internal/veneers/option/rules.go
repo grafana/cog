@@ -26,6 +26,13 @@ func Omit(selector Selector) RewriteRule {
 	}
 }
 
+func VeneerTrailAsComments(selector Selector) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   VeneerTrailAsCommentsAction(),
+	}
+}
+
 func UnfoldBoolean(selector Selector, unfoldOpts BooleanUnfold) RewriteRule {
 	return RewriteRule{
 		Selector: selector,

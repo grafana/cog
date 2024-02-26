@@ -224,6 +224,24 @@ func Rename(selector Selector, newName string) RewriteRule {
 	}
 }
 
+func VeneerTrailAsComments(selector Selector) RewriteRule {
+	return func(builders ast.Builders) (ast.Builders, error) {
+		for i, builder := range builders {
+			if !selector(builder) {
+				continue
+			}
+
+			veneerTrail := tools.Map(builder.VeneerTrail, func(veneer string) string {
+				return fmt.Sprintf("Modified by veneer '%s'", veneer)
+			})
+
+			builders[i].For.Comments = append(builders[i].For.Comments, veneerTrail...)
+		}
+
+		return builders, nil
+	}
+}
+
 func Properties(selector Selector, properties []ast.StructField) RewriteRule {
 	return func(builders ast.Builders) (ast.Builders, error) {
 		for i, builder := range builders {

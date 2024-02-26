@@ -9,6 +9,10 @@ import (
 
 const AllLanguages = "all"
 
+type Config struct {
+	Debug bool
+}
+
 type LanguageRules struct {
 	Language     string
 	BuilderRules []builder.RewriteRule
@@ -16,13 +20,15 @@ type LanguageRules struct {
 }
 
 type Rewriter struct {
+	config Config
+
 	// Rules applied to `Builder` objects, grouped by language
 	builderRules map[string][]builder.RewriteRule
 	// Rules applied to `Option` objects, grouped by language
 	optionRules map[string][]option.RewriteRule
 }
 
-func NewRewrite(languageRules []LanguageRules) *Rewriter {
+func NewRewrite(languageRules []LanguageRules, config Config) *Rewriter {
 	builderRules := make(map[string][]builder.RewriteRule)
 	optionRules := make(map[string][]option.RewriteRule)
 
@@ -32,6 +38,7 @@ func NewRewrite(languageRules []LanguageRules) *Rewriter {
 	}
 
 	return &Rewriter{
+		config:       config,
 		builderRules: builderRules,
 		optionRules:  optionRules,
 	}
@@ -45,27 +52,32 @@ func (engine *Rewriter) ApplyTo(builders []ast.Builder, language string) ([]ast.
 
 	// start by applying veneers common to all languages, then
 	// apply language-specific ones.
-	languages := []string{
-		AllLanguages,
-		language,
-	}
-
-	for _, l := range languages {
-		newBuilders, err = engine.applyBuilderRules(newBuilders, l)
+	for _, l := range []string{AllLanguages, language} {
+		newBuilders, err = engine.applyBuilderRules(newBuilders, engine.builderRules[l])
 		if err != nil {
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules(newBuilders, l)
+		newBuilders = engine.applyOptionRules(newBuilders, engine.optionRules[l])
+	}
+
+	// and optionally, apply "debug" veneers
+	if engine.config.Debug {
+		newBuilders, err = engine.applyBuilderRules(newBuilders, engine.debugBuilderRules())
+		if err != nil {
+			return nil, err
+		}
+
+		newBuilders = engine.applyOptionRules(newBuilders, engine.debugOptionRules())
 	}
 
 	return newBuilders, nil
 }
 
-func (engine *Rewriter) applyBuilderRules(builders []ast.Builder, language string) ([]ast.Builder, error) {
+func (engine *Rewriter) applyBuilderRules(builders []ast.Builder, rules []builder.RewriteRule) ([]ast.Builder, error) {
 	var err error
 
-	for _, rule := range engine.builderRules[language] {
+	for _, rule := range rules {
 		builders, err = rule(builders)
 		if err != nil {
 			return nil, err
@@ -75,8 +87,8 @@ func (engine *Rewriter) applyBuilderRules(builders []ast.Builder, language strin
 	return builders, nil
 }
 
-func (engine *Rewriter) applyOptionRules(builders []ast.Builder, language string) []ast.Builder {
-	for _, rule := range engine.optionRules[language] {
+func (engine *Rewriter) applyOptionRules(builders []ast.Builder, rules []option.RewriteRule) []ast.Builder {
+	for _, rule := range rules {
 		for i, b := range builders {
 			processedOptions := make([]ast.Option, 0, len(b.Options))
 
@@ -97,4 +109,16 @@ func (engine *Rewriter) applyOptionRules(builders []ast.Builder, language string
 		// "no options" means that the builder was dismissed.
 		return len(builder.Options) != 0
 	})
+}
+
+func (engine *Rewriter) debugBuilderRules() []builder.RewriteRule {
+	return []builder.RewriteRule{
+		builder.VeneerTrailAsComments(builder.EveryBuilder()),
+	}
+}
+
+func (engine *Rewriter) debugOptionRules() []option.RewriteRule {
+	return []option.RewriteRule{
+		option.VeneerTrailAsComments(option.EveryOption()),
+	}
 }

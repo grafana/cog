@@ -9,6 +9,13 @@ import (
 
 type Selector func(builder ast.Builder, option ast.Option) bool
 
+// EveryOption accepts any given option.
+func EveryOption() Selector {
+	return func(_ ast.Builder, _ ast.Option) bool {
+		return true
+	}
+}
+
 // ByName matches options by their name, defined for builders for the given
 // object (referred to by its package and name).
 // Note: the comparison on object and options names is case-insensitive.
