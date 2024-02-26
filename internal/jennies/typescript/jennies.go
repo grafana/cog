@@ -11,11 +11,16 @@ const LanguageRef = "typescript"
 
 type Config struct {
 	Debug bool
+
+	RenameOutputFunc func(pkg string) string
+	ImportMapper     func(pkg string) string
 }
 
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
 	newConfig.Debug = global.Debug
+	newConfig.RenameOutputFunc = global.RenameOutputFunc
+	newConfig.ImportMapper = global.TSConfig.ImportMapper
 
 	return newConfig
 }
@@ -40,12 +45,12 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		Runtime{},
+		common.If[common.Context](globalConfig.TSConfig.GenRuntime, Runtime{RuntimePath: globalConfig.TSConfig.RuntimePath}),
 
-		common.If[common.Context](globalConfig.Types, RawTypes{}),
+		common.If[common.Context](globalConfig.Types, RawTypes{Config: config}),
 		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
 
-		Index{Targets: globalConfig},
+		common.If[common.Context](globalConfig.TSConfig.GenTSIndex, Index{Targets: globalConfig}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

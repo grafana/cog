@@ -1,11 +1,14 @@
 package typescript
 
 import (
+	"fmt"
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
+	"strings"
 )
 
 type Runtime struct {
+	RuntimePath *string
 }
 
 func (jenny Runtime) JennyName() string {
@@ -13,10 +16,11 @@ func (jenny Runtime) JennyName() string {
 }
 
 func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
+	path := getPath(jenny.RuntimePath)
 	return codejen.Files{
-		*codejen.NewFile("src/cog/variants_gen.ts", []byte(jenny.generateVariantsFile()), jenny),
-		*codejen.NewFile("src/cog/builder_gen.ts", []byte(jenny.generateOptionsBuilderFile()), jenny),
-		*codejen.NewFile("src/cog/index.ts", []byte(jenny.generateIndexFile()), jenny),
+		*codejen.NewFile(fmt.Sprintf("%scog/variants_gen.ts", path), []byte(jenny.generateVariantsFile()), jenny),
+		*codejen.NewFile(fmt.Sprintf("%scog/builder_gen.ts", path), []byte(jenny.generateOptionsBuilderFile()), jenny),
+		*codejen.NewFile(fmt.Sprintf("%scog/index.ts", path), []byte(jenny.generateIndexFile()), jenny),
 	}, nil
 }
 
@@ -39,4 +43,17 @@ func (jenny Runtime) generateOptionsBuilderFile() string {
   build: () => T;
 }
 `
+}
+
+func getPath(runtimePath *string) string {
+	if runtimePath == nil {
+		return "src"
+	}
+
+	path := *runtimePath
+	if path != "" && !strings.HasSuffix(path, "/") {
+		path = path + "/"
+	}
+
+	return path
 }

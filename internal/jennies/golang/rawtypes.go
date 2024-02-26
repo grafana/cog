@@ -35,6 +35,10 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 			"types_gen.go",
 		)
 
+		if jenny.Config.RenameOutputFunc != nil {
+			filename = jenny.Config.RenameOutputFunc(schema.Package)
+		}
+
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
