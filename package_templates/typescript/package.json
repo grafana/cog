@@ -31,9 +31,9 @@
       "default": "./dist/cog/index.js"
     },
 {{- range $i, $pkg := .Packages }}
-    "./{{ $pkg }}": {
-      "types": "./dist/{{ $pkg }}/index.d.ts",
-      "default": "./dist/{{ $pkg }}/index.js"
+    "./{{ $pkg | lowerCamelCase }}": {
+      "types": "./dist/{{ $pkg | lowerCamelCase }}/index.d.ts",
+      "default": "./dist/{{ $pkg | lowerCamelCase }}/index.js"
     }{{- if ne (add1 $i) (len $.Packages) }},{{- end }}
 {{- end }}
   },

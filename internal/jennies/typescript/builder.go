@@ -39,8 +39,8 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 
 		filename := filepath.Join(
 			"src",
-			strings.ToLower(builder.Package),
-			fmt.Sprintf("%s_builder_gen.ts", strings.ToLower(builder.Name)),
+			formatPackageName(builder.Package),
+			fmt.Sprintf("%sBuilder.gen.ts", tools.LowerCamelCase(builder.Name)),
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
@@ -59,7 +59,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	}
 	jenny.typeFormatter = builderTypeFormatter(context, jenny.typeImportMapper)
 
-	buildObjectSignature := builder.For.SelfRef.ReferredPkg + "." + tools.UpperCamelCase(builder.For.Name)
+	buildObjectSignature := formatPackageName(builder.For.SelfRef.ReferredPkg) + "." + tools.CleanupNames(builder.For.Name)
 	if builder.For.Type.ImplementsVariant() {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
