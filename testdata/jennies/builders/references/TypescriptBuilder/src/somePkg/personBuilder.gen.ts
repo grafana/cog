@@ -1,0 +1,20 @@
+import * as cog from '../cog';
+import * as somePkg from '../somePkg';
+import * as otherPkg from '../otherPkg';
+
+export class PersonBuilder implements cog.Builder<somePkg.Person> {
+    private readonly internal: somePkg.Person;
+
+    constructor() {
+        this.internal = somePkg.defaultPerson();
+    }
+
+    build(): somePkg.Person {
+        return this.internal;
+    }
+
+    name(name: otherPkg.Name): this {
+        this.internal.name = name;
+        return this;
+    }
+}

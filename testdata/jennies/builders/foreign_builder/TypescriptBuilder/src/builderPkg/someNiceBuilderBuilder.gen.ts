@@ -1,0 +1,19 @@
+import * as cog from '../cog';
+import * as somePkg from '../somePkg';
+
+export class SomeNiceBuilderBuilder implements cog.Builder<somePkg.SomeStruct> {
+    private readonly internal: somePkg.SomeStruct;
+
+    constructor() {
+        this.internal = somePkg.defaultSomeStruct();
+    }
+
+    build(): somePkg.SomeStruct {
+        return this.internal;
+    }
+
+    title(title: string): this {
+        this.internal.title = title;
+        return this;
+    }
+}
