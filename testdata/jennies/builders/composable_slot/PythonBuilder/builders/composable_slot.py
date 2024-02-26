@@ -20,7 +20,7 @@ class LokiBuilder(cogbuilder.Builder[composable_slot.Dashboard]):
         return self
     
     def targets(self, targets: list[cogbuilder.Builder[cogvariants.Dataquery]]) -> typing.Self:        
-        targets_resources = [r.build() for r in targets]
+        targets_resources = [r1.build() for r1 in targets]
         self.__internal.targets = targets_resources
     
         return self

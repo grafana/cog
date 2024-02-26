@@ -47,7 +47,7 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
         will be expanded to []cog.Builder<DashboardLink>
         """
             
-        links_resources = [r.build() for r in links]
+        links_resources = [r1.build() for r1 in links]
         self.__internal.links = links_resources
     
         return self
@@ -57,7 +57,7 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
         will be expanded to [][]cog.Builder<DashboardLink>
         """
             
-        links_of_links_resources = [r.build() for r in links_of_links]
+        links_of_links_resources = [[r2.build() for r2 in r1] for r1 in links_of_links]
         self.__internal.links_of_links = links_of_links_resources
     
         return self
