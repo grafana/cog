@@ -4,6 +4,6 @@ func (resource {{ .def.Name|upperCamelCase }}) MarshalJSON() ([]byte, error) {
 		return json.Marshal(resource.{{ .Name|upperCamelCase }})
 	}
 {{ end }}
-	return nil, nil
+	return []byte("null"), nil
 }
 
