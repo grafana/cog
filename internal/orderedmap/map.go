@@ -69,6 +69,21 @@ func (orderedMap *Map[K, V]) Has(key K) bool {
 	return exists
 }
 
+func (orderedMap *Map[K, V]) Remove(key K) {
+	delete(orderedMap.records, key)
+
+	newOrder := make([]K, 0, len(orderedMap.order)-1)
+	for _, elem := range orderedMap.order {
+		if elem == key {
+			continue
+		}
+
+		newOrder = append(newOrder, elem)
+	}
+
+	orderedMap.order = newOrder
+}
+
 func (orderedMap *Map[K, V]) Len() int {
 	return len(orderedMap.order)
 }

@@ -23,6 +23,12 @@ func TestMap_Basic(t *testing.T) {
 	req.False(orderedMap.Has("unknown-key"))
 	req.Equal("", orderedMap.Get("unknown-key"))
 
+	orderedMap.Set("fourth-key", "fourth-value")
+	req.Equal(4, orderedMap.Len())
+
+	orderedMap.Remove("fourth-key")
+	req.Equal(3, orderedMap.Len())
+
 	iteratedKeyOrder := make([]string, 0, orderedMap.Len())
 	orderedMap.Iterate(func(key string, value string) {
 		req.Equal(orderedMap.Get(key), value)
