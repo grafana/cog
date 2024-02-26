@@ -24,14 +24,14 @@ export class DashboardBuilder implements cog.Builder<builder_delegation.Dashboar
 
     // will be expanded to []cog.Builder<DashboardLink>
     links(links: cog.Builder<builder_delegation.DashboardLink>[]): this {
-        const linksResources = links.map(builder => builder.build());
+        const linksResources = links.map(builder1 => builder1.build());
         this.internal.links = linksResources;
         return this;
     }
 
     // will be expanded to [][]cog.Builder<DashboardLink>
     linksOfLinks(linksOfLinks: cog.Builder<builder_delegation.DashboardLink>[][]): this {
-        const linksOfLinksResources = linksOfLinks.map(builder => builder.build());
+        const linksOfLinksResources = linksOfLinks.map(builder1 => builder1.map(builder2 => builder2.build()));
         this.internal.linksOfLinks = linksOfLinksResources;
         return this;
     }

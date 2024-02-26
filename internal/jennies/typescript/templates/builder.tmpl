@@ -46,13 +46,18 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
 {{- define "assignment_setup" }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- if .Type.IsArray }}
-        const {{ .Name }}Resources = {{ .Name }}.map(builder => builder.build());
-        {{- else }}
-        const {{ .Name }}Resource = {{ .Name }}.build();
-        {{- end }}
+        {{- $builtResultSuffix := ternary "Resources" "Resource" .Type.IsArray }}
+        const {{ .Name }}{{ $builtResultSuffix }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" .Name "Depth" 1) }};
         {{- end }}
     {{- end }}
+{{- end }}
+
+{{- define "unfold_builders" }}
+    {{- if .InputType.IsArray -}}
+        {{ .InputVar }}.map(builder{{ .Depth }} => {{ template "unfold_builders" (dict "InputType" .InputType.Array.ValueType "InputVar" (print "builder" .Depth ) "Depth" (add1 .Depth)) }})
+    {{- else -}}
+        {{ .InputVar }}.build()
+    {{- end -}}
 {{- end }}
 
 {{- define "assignment_value" }}

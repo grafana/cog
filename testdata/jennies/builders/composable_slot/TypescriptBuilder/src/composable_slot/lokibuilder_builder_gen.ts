@@ -19,7 +19,7 @@ export class LokiBuilderBuilder implements cog.Builder<composable_slot.Dashboard
     }
 
     targets(targets: cog.Builder<cog.Dataquery>[]): this {
-        const targetsResources = targets.map(builder => builder.build());
+        const targetsResources = targets.map(builder1 => builder1.build());
         this.internal.targets = targetsResources;
         return this;
     }
