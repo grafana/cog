@@ -1,7 +1,7 @@
 package intersections
 
 import (
-	externalpkg "github.com/grafana/cog/generated/externalPkg"
+	externalpkg "github.com/grafana/cog/generated/externalpkg"
 )
 
 type Intersections struct {
