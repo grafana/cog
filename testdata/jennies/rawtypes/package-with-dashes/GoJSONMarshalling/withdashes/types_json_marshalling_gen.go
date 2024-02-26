@@ -8,7 +8,7 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 		return json.Marshal(resource.Bool)
 	}
 
-	return nil, nil
+	return []byte("null"), nil
 }
 
 func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
