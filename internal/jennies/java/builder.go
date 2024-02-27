@@ -66,7 +66,7 @@ func (jenny Builder) genFilesForBuilder(context common.Context, builder ast.Buil
 			return found
 		},
 	}).ExecuteTemplate(&buffer, "builders/builder.tmpl", BuilderTemplate{
-		Package:         builder.Package,
+		Package:         formatPackageName(builder.Package),
 		Imports:         jenny.imports,
 		Name:            builder.Name,
 		Constructor:     jenny.genConstructor(context, builder),

@@ -2,6 +2,8 @@ package java
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -91,4 +93,10 @@ func getEnumValues(context common.Context, ref ast.RefType, identifier string) (
 	}
 
 	return "", ast.EnumType{}, false
+}
+
+func formatPackageName(pkg string) string {
+	rgx := regexp.MustCompile("[^a-zA-Z0-9_]+")
+
+	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
 }
