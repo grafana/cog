@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -37,6 +39,7 @@ func (pass *FieldsSetDefault) processObject(_ string, object ast.Object) ast.Obj
 			}
 
 			field.Type.Default = value
+			field.AddToPassesTrail(fmt.Sprintf("FieldsSetDefault[default=%v]", value))
 
 			object.Type.Struct.Fields[i] = field
 		}
