@@ -11,6 +11,9 @@ func TestBuilder_Generate(t *testing.T) {
 	test := testutils.GoldenFilesTestSuite{
 		TestDataRoot: "../../../testdata/jennies/builders",
 		Name:         "GoBuilder",
+		Skip: map[string]string{
+			"builder_delegation_in_disjunction": "disjunctions are eliminated with compiler passes",
+		},
 	}
 
 	jenny := Builder{
