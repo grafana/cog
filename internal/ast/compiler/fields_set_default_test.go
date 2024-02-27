@@ -23,9 +23,9 @@ func TestFieldsSetDefault(t *testing.T) {
 		Package: "set_required",
 		Objects: testutils.ObjectsMap(
 			ast.NewObject("set_required", "SomeObject", ast.NewStruct(
-				ast.NewStructField("AString", ast.String(ast.Nullable(), ast.Default("default-foo"))),
+				ast.NewStructField("AString", ast.String(ast.Nullable(), ast.Default("default-foo")), ast.PassesTrail("FieldsSetDefault[default=default-foo]")),
 				ast.NewStructField("AnotherString", ast.String(ast.Nullable())),
-				ast.NewStructField("ABool", ast.String(ast.Nullable(), ast.Default(true))),
+				ast.NewStructField("ABool", ast.String(ast.Nullable(), ast.Default(true)), ast.PassesTrail("FieldsSetDefault[default=true]")),
 			)),
 		),
 	}
