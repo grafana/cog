@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -80,6 +81,8 @@ func (jenny PackageTemplate) templateData(context Context) map[string]any {
 	for _, schema := range context.Schemas {
 		packages = append(packages, schema.Package)
 	}
+
+	sort.Strings(packages)
 
 	extra := map[string]string{}
 	if jenny.ExtraData != nil {
