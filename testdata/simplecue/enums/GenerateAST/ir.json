@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "IntEnum": {
       "Name": "IntEnum",
       "Type": {
         "Kind": "enum",
@@ -54,7 +54,7 @@
         "ReferredType": "IntEnum"
       }
     },
-    {
+    "StringEnum": {
       "Name": "StringEnum",
       "Type": {
         "Kind": "enum",
@@ -102,7 +102,7 @@
         "ReferredType": "StringEnum"
       }
     },
-    {
+    "Operator": {
       "Name": "Operator",
       "Type": {
         "Kind": "enum",
@@ -139,5 +139,5 @@
         "ReferredType": "Operator"
       }
     }
-  ]
+  }
 }

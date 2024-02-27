@@ -81,3 +81,6 @@ class YetAnotherStruct:
 
 
 SeveralRefs = typing.Union[typing.Union['SomeStruct', 'SomeOtherStruct', 'YetAnotherStruct']]
+
+
+

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 	schemaparser "github.com/santhosh-tekuri/jsonschema"
 )
@@ -34,14 +35,13 @@ type Config struct {
 
 type generator struct {
 	schema *ast.Schema
+	seen   map[string]struct{}
 }
 
 func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 	g := &generator{
-		schema: &ast.Schema{
-			Package:  c.Package,
-			Metadata: c.SchemaMetadata,
-		},
+		seen:   make(map[string]struct{}),
+		schema: ast.NewSchema(c.Package, c.SchemaMetadata),
 	}
 
 	compiler := schemaparser.NewCompiler()
@@ -55,39 +55,46 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		return nil, fmt.Errorf("[%s] %w", c.Package, err)
 	}
 
+	rootObjectName := c.Package
+
 	// The root of the schema is an actual type/object
 	if schema.Ref == nil {
-		if err := g.declareDefinition(c.Package, schema); err != nil {
+		if err := g.declareDefinition(rootObjectName, schema); err != nil {
 			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	} else {
-		definitionName := g.definitionNameFromRef(schema)
+		rootObjectName = g.definitionNameFromRef(schema)
 
 		// The root of the schema contains definitions, and a reference to the "main" object
-		if err := g.declareDefinition(definitionName, schema.Ref); err != nil {
+		if err := g.declareDefinition(rootObjectName, schema.Ref); err != nil {
 			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	}
 
-	// To ensure consistent outputs
-	sort.Slice(g.schema.Objects, func(i, j int) bool {
-		return g.schema.Objects[i].Name < g.schema.Objects[j].Name
-	})
+	if c.SchemaMetadata.Variant == ast.SchemaVariantDataQuery || c.SchemaMetadata.Variant == ast.SchemaVariantPanel {
+		g.schema.Objects.Get(rootObjectName).Type.Hints[ast.HintImplementsVariant] = string(c.SchemaMetadata.Variant)
+	}
+
+	// To ensure a consistent output, since github.com/santhosh-tekuri/jsonschema
+	// doesn't guarantee the order of the definitions it parses.
+	g.schema.Objects.Sort(orderedmap.SortStrings)
 
 	return g.schema, nil
 }
 
 func (g *generator) declareDefinition(definitionName string, schema *schemaparser.Schema) error {
-	if _, found := g.schema.LocateObject(definitionName); found {
+	if _, found := g.seen[definitionName]; found {
 		return nil
 	}
+
+	g.seen[definitionName] = struct{}{}
 
 	def, err := g.walkDefinition(schema)
 	if err != nil {
 		return fmt.Errorf("%s: %w", definitionName, err)
 	}
 
-	g.schema.Objects = append(g.schema.Objects, ast.Object{
+	g.schema.AddObject(ast.Object{
 		Name: definitionName,
 		Type: def,
 		SelfRef: ast.RefType{
@@ -120,7 +127,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 			return g.walkAllOf(schema)
 		}
 
-		if schema.Properties != nil || schema.PatternProperties != nil {
+		if schema.Properties != nil || schema.PatternProperties != nil || schema.AdditionalProperties != nil {
 			return g.walkObject(schema)
 		}
 
@@ -401,6 +408,21 @@ func (g *generator) walkEnum(schema *schemaparser.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkObject(schema *schemaparser.Schema) (ast.Type, error) {
+	if len(schema.Properties) == 0 {
+		// `schema.AdditionalProperties` is nil or false or *schemaparser.Schema
+		_, ok := schema.AdditionalProperties.(bool)
+		if schema.AdditionalProperties == nil || ok {
+			return ast.Any(), nil
+		}
+
+		valueType, err := g.walkDefinition(schema.AdditionalProperties.(*schemaparser.Schema))
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewMap(ast.String(), valueType), nil
+	}
+
 	// TODO: finish implementation
 	fields := make([]ast.StructField, 0, len(schema.Properties))
 	for name, property := range schema.Properties {

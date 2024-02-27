@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "WithOneRef": {
       "Name": "WithOneRef",
       "Type": {
         "Kind": "intersection",
@@ -44,7 +44,7 @@
         "ReferredType": "WithOneRef"
       }
     },
-    {
+    "WithTwoRef": {
       "Name": "WithTwoRef",
       "Type": {
         "Kind": "intersection",
@@ -94,5 +94,5 @@
         "ReferredType": "WithTwoRef"
       }
     }
-  ]
+  }
 }

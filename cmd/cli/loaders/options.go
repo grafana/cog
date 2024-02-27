@@ -12,28 +12,30 @@ import (
 type LoaderRef string
 
 const (
-	CUE               LoaderRef = "cue"
-	KindsysCore       LoaderRef = "kindsys-core"
-	KindsysComposable LoaderRef = "kindsys-composable"
-	KindsysCustom     LoaderRef = "kindsys-custom"
-	JSONSchema        LoaderRef = "jsonschema"
-	OpenAPI           LoaderRef = "openapi"
-	KindRegistry      LoaderRef = "kind-registry"
+	CUE                LoaderRef = "cue"
+	KindsysCore        LoaderRef = "kindsys-core"
+	KindsysComposable  LoaderRef = "kindsys-composable"
+	KindsysCustom      LoaderRef = "kindsys-custom"
+	JSONSchema         LoaderRef = "jsonschema"
+	OpenAPI            LoaderRef = "openapi"
+	KindRegistry       LoaderRef = "kind-registry"
+	JSONSchemaRegistry LoaderRef = "jsonschema-registry"
 )
 
 func loadersMap() map[LoaderRef]Loader {
 	return map[LoaderRef]Loader{
-		CUE:               cueLoader,
-		KindsysCore:       kindsysCoreLoader,
-		KindsysComposable: kindsysComposableLoader,
-		KindsysCustom:     kindsysCustomLoader,
-		JSONSchema:        jsonschemaLoader,
-		OpenAPI:           openapiLoader,
-		KindRegistry:      kindRegistryLoader,
+		CUE:                cueLoader,
+		KindsysCore:        kindsysCoreLoader,
+		KindsysComposable:  kindsysComposableLoader,
+		KindsysCustom:      kindsysCustomLoader,
+		JSONSchema:         jsonschemaLoader,
+		OpenAPI:            openapiLoader,
+		KindRegistry:       kindRegistryLoader,
+		JSONSchemaRegistry: jsonschemaRegistryLoader,
 	}
 }
 
-type Loader func(opts Options) ([]*ast.Schema, error)
+type Loader func(opts Options) (ast.Schemas, error)
 
 type Options struct {
 	CueEntrypoints               []string
@@ -43,6 +45,7 @@ type Options struct {
 	JSONSchemaEntrypoints        []string
 	OpenAPIEntrypoints           []string
 	KindRegistryPath             string
+	JSONSchemaRegistryPath       string
 
 	// Cue-specific options
 	CueImports []string
@@ -83,8 +86,8 @@ func ForSchemaType(schemaType LoaderRef) (Loader, error) {
 	return loader, nil
 }
 
-func LoadAll(opts Options) ([]*ast.Schema, error) {
-	var allSchemas []*ast.Schema
+func LoadAll(opts Options) (ast.Schemas, error) {
+	var allSchemas ast.Schemas
 
 	for loaderRef := range loadersMap() {
 		loader, err := ForSchemaType(loaderRef)
@@ -100,7 +103,7 @@ func LoadAll(opts Options) ([]*ast.Schema, error) {
 		allSchemas = append(allSchemas, schemas...)
 	}
 
-	return allSchemas, nil
+	return allSchemas.Consolidate()
 }
 
 func guessPackageFromFilename(filename string) string {

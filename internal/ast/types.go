@@ -2,6 +2,8 @@ package ast
 
 import (
 	"fmt"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 type Kind string
@@ -94,7 +96,7 @@ type Type struct {
 	Ref            *RefType            `json:",omitempty"`
 	Scalar         *ScalarType         `json:",omitempty"`
 	Intersection   *IntersectionType   `json:",omitempty"`
-	ComposableSlot *ComposableSlotType `json:",omitempty"`
+	ComposableSlot *ComposableSlotType `json:",omitempty" yaml:"composable_slot"`
 
 	Hints JenniesHints `json:",omitempty"`
 }
@@ -477,6 +479,13 @@ func NewObject(pkg string, name string, objectType Type) Object {
 	}
 }
 
+func (object Object) Equal(other Object) bool {
+	return object.Name == other.Name &&
+		cmp.Equal(object.Comments, other.Comments) &&
+		cmp.Equal(object.Type, other.Type) &&
+		cmp.Equal(object.SelfRef, other.SelfRef)
+}
+
 func (object Object) DeepCopy() Object {
 	newObject := Object{
 		Name:    object.Name,
@@ -575,7 +584,7 @@ func (t DisjunctionType) DeepCopy() DisjunctionType {
 }
 
 type ArrayType struct {
-	ValueType Type
+	ValueType Type `yaml:"value_type"`
 }
 
 func (t ArrayType) DeepCopy() ArrayType {
@@ -687,6 +696,12 @@ type StructFieldOption func(field *StructField)
 func Required() StructFieldOption {
 	return func(field *StructField) {
 		field.Required = true
+	}
+}
+
+func Comments(comments []string) StructFieldOption {
+	return func(field *StructField) {
+		field.Comments = comments
 	}
 }
 

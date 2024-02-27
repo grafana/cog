@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/cog/internal/simplecue"
 )
 
-func kindsysComposableLoader(opts Options) ([]*ast.Schema, error) {
+func kindsysComposableLoader(opts Options) (ast.Schemas, error) {
 	libraries, err := opts.cueIncludeImports()
 	if err != nil {
 		return nil, err
@@ -83,5 +83,5 @@ func inferComposableKindIdentifier(kindRoot cue.Value) (string, error) {
 		return "", err
 	}
 
-	return strings.TrimSuffix(kindName, schemaInterface), nil
+	return strings.ToLower(strings.TrimSuffix(kindName, schemaInterface)), nil
 }

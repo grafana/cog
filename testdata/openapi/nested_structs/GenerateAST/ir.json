@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "Nested": {
       "Name": "Nested",
       "Type": {
         "Kind": "struct",
@@ -52,5 +52,5 @@
         "ReferredType": "Nested"
       }
     }
-  ]
+  }
 }

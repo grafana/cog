@@ -11,8 +11,11 @@ import (
 func runPassOnObjects(t *testing.T, pass Pass, input []ast.Object, expectedOutput []ast.Object) {
 	t.Helper()
 
-	inputSchema := &ast.Schema{Package: "test", Objects: input}
-	expectedOutputSchema := &ast.Schema{Package: "test", Objects: expectedOutput}
+	inputSchema := ast.NewSchema("test", ast.SchemaMeta{})
+	inputSchema.AddObjects(input...)
+
+	expectedOutputSchema := ast.NewSchema("test", ast.SchemaMeta{})
+	expectedOutputSchema.AddObjects(expectedOutput...)
 
 	runPassOnSchema(t, pass, inputSchema, expectedOutputSchema)
 }

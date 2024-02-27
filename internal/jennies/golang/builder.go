@@ -34,7 +34,7 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(builder.Package),
+			formatPackageName(builder.Package),
 			fmt.Sprintf("%s_builder_gen.go", strings.ToLower(builder.Name)),
 		)
 
@@ -49,7 +49,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 
 	imports := NewImportMap()
 	jenny.typeImportMapper = func(pkg string) string {
-		if pkg == builder.Package {
+		if imports.IsIdentical(pkg, builder.Package) {
 			return ""
 		}
 

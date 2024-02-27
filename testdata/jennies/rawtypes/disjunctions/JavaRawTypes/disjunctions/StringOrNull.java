@@ -1,7 +1,6 @@
 package disjunctions;
 
 
-public class StringOrNull {
-    public String string;
+public class StringOrNull extends StringOrNull {
     
 }

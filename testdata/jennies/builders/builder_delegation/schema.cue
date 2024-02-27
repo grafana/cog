@@ -9,5 +9,6 @@ Dashboard: {
 	id: int64
 	title: string
 	links: [...#DashboardLink] // will be expanded to []cog.Builder<DashboardLink>
+	linksOfLinks: [...[...#DashboardLink]] // will be expanded to [][]cog.Builder<DashboardLink>
 	singleLink: #DashboardLink // will be expanded to cog.Builder<DashboardLink>
 }

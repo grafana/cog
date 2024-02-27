@@ -22,6 +22,12 @@ func WithAliasSanitizer[M any](sanitizer func(string) string) ImportMapOption[M]
 	}
 }
 
+func WithImportPathSanitizer[M any](sanitizer func(string) string) ImportMapOption[M] {
+	return func(importMap *ImportMapConfig[M]) {
+		importMap.ImportPathSanitizer = sanitizer
+	}
+}
+
 func WithFormatter[M any](formatter func(M) string) ImportMapOption[M] {
 	return func(importMap *ImportMapConfig[M]) {
 		importMap.Formatter = formatter
@@ -50,6 +56,10 @@ func NewDirectImportMap(opts ...ImportMapOption[DirectImportMap]) *DirectImportM
 		Imports: orderedmap.New[string, string](),
 		config:  config,
 	}
+}
+
+func (im DirectImportMap) IsIdentical(aliasA string, aliasB string) bool {
+	return im.config.AliasSanitizer(aliasA) == im.config.AliasSanitizer(aliasB)
 }
 
 func (im DirectImportMap) Add(alias string, importPath string) string {

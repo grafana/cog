@@ -40,10 +40,7 @@ type generator struct {
 
 func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 	g := &generator{
-		schema: &ast.Schema{
-			Package:  c.Package,
-			Metadata: c.SchemaMetadata,
-		},
+		schema: ast.NewSchema(c.Package, c.SchemaMetadata),
 		refResolver: newReferenceResolver(val, referenceResolverConfig{
 			Libraries: c.Libraries,
 		}),
@@ -79,7 +76,7 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 				return err
 			}
 
-			g.schema.Objects = append(g.schema.Objects, n)
+			g.schema.AddObject(n)
 			continue
 		}
 
@@ -98,7 +95,7 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 	structType := ast.NewStruct(rootObjectFields...)
 	structType.Hints[ast.HintImplementsVariant] = string(g.schema.Metadata.Variant)
 
-	g.schema.Objects = append(g.schema.Objects, ast.Object{
+	g.schema.AddObject(ast.Object{
 		Name:     string(g.schema.Metadata.Variant),
 		Comments: commentsFromCueValue(v),
 		Type:     structType,
@@ -125,7 +122,7 @@ func (g *generator) walkCueSchema(v cue.Value) error {
 			return err
 		}
 
-		g.schema.Objects = append(g.schema.Objects, n)
+		g.schema.AddObject(n)
 	}
 
 	return nil

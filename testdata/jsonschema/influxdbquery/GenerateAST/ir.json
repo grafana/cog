@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "AdHocVariableFilter": {
       "Name": "AdHocVariableFilter",
       "Type": {
         "Kind": "struct",
@@ -61,7 +61,7 @@
         "ReferredType": "AdHocVariableFilter"
       }
     },
-    {
+    "DataSourceRef": {
       "Name": "DataSourceRef",
       "Type": {
         "Kind": "struct",
@@ -104,7 +104,7 @@
         "ReferredType": "DataSourceRef"
       }
     },
-    {
+    "InfluxQuery": {
       "Name": "InfluxQuery",
       "Type": {
         "Kind": "struct",
@@ -575,7 +575,7 @@
         "ReferredType": "InfluxQuery"
       }
     },
-    {
+    "InfluxQueryPart": {
       "Name": "InfluxQueryPart",
       "Type": {
         "Kind": "struct",
@@ -644,7 +644,7 @@
         "ReferredType": "InfluxQueryPart"
       }
     },
-    {
+    "InfluxQueryTag": {
       "Name": "InfluxQueryTag",
       "Type": {
         "Kind": "struct",
@@ -703,5 +703,5 @@
         "ReferredType": "InfluxQueryTag"
       }
     }
-  ]
+  }
 }

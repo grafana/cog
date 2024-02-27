@@ -25,12 +25,11 @@ func (pass *DataqueryIdentification) Process(schemas []*ast.Schema) ([]*ast.Sche
 }
 
 func (pass *DataqueryIdentification) processSchema(schema *ast.Schema, commonDataquery ast.Object) *ast.Schema {
-	newSchema := schema.DeepCopy()
-	for i, object := range schema.Objects {
-		newSchema.Objects[i] = pass.processObject(object, commonDataquery)
-	}
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		return pass.processObject(object, commonDataquery)
+	})
 
-	return &newSchema
+	return schema
 }
 
 func (pass *DataqueryIdentification) processObject(object ast.Object, commonDataquery ast.Object) ast.Object {

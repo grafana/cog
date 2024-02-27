@@ -9,6 +9,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -45,10 +46,7 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	}
 
 	g := &generator{
-		schema: &ast.Schema{
-			Package:  cfg.Package,
-			Metadata: cfg.SchemaMetadata,
-		},
+		schema: ast.NewSchema(cfg.Package, cfg.SchemaMetadata),
 	}
 
 	if oapi.Components == nil {
@@ -58,6 +56,10 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 	if err := g.declareDefinition(oapi.Components.Schemas); err != nil {
 		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
+
+	// To ensure a consistent output, since github.com/getkin/kin-openapi/openapi3
+	// doesn't guarantee the order of the definitions it parses.
+	g.schema.Objects.Sort(orderedmap.SortStrings)
 
 	return g.schema, nil
 }
@@ -69,7 +71,7 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 			return err
 		}
 
-		g.schema.Objects = append(g.schema.Objects, ast.Object{
+		g.schema.AddObject(ast.Object{
 			Name:     name,
 			Comments: schemaComments(schemaRef.Value),
 			Type:     def,
@@ -79,10 +81,6 @@ func (g *generator) declareDefinition(schemas openapi3.Schemas) error {
 			},
 		})
 	}
-
-	sort.Slice(g.schema.Objects, func(i, j int) bool {
-		return g.schema.Objects[i].Name < g.schema.Objects[j].Name
-	})
 
 	return nil
 }

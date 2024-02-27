@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -72,6 +73,28 @@ func TestUnfoldBooleanAction(t *testing.T) {
 	req.Equal(readonlyOpt.Assignments[0].Value.Constant, false)
 }
 
+func TestUnfoldBooleanAction_onNonBooleanDoesNothing(t *testing.T) {
+	req := require.New(t)
+
+	option := ast.Option{
+		Args: []ast.Argument{
+			{Name: "tags", Type: ast.NewArray(ast.String())},
+		},
+		Assignments: []ast.Assignment{
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "tags", Type: ast.NewArray(ast.String())},
+			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
+		},
+	}
+	modifiedOpts := UnfoldBooleanAction(BooleanUnfold{
+		OptionTrue:  "TrueOpt",
+		OptionFalse: "FalseOpt",
+	})(ast.Builder{}, option)
+
+	req.Len(modifiedOpts, 1)
+	req.Equal(option, modifiedOpts[0])
+}
+
 func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 	req := require.New(t)
 
@@ -119,11 +142,11 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 	ref := ast.NewRef("dashboard", "PanelOrRow")
 	schema := &ast.Schema{
 		Package: "dashboard",
-		Objects: []ast.Object{
+		Objects: testutils.ObjectsMap(
 			ast.NewObject("dashboard", "PanelOrRow", panelOrRow),
 			ast.NewObject("dashboard", "Row", rowType),
 			ast.NewObject("dashboard", "Panel", panelType),
-		},
+		),
 	}
 	builder := ast.Builder{Schema: schema}
 
@@ -164,9 +187,9 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 	ref := ast.NewRef("dashboard", "Time")
 	schema := &ast.Schema{
 		Package: "dashboard",
-		Objects: []ast.Object{
+		Objects: testutils.ObjectsMap(
 			ast.NewObject("dashboard", "Time", timeType),
-		},
+		),
 	}
 	builder := ast.Builder{Schema: schema}
 

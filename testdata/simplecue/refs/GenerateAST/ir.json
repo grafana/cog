@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "IntEnum": {
       "Name": "IntEnum",
       "Type": {
         "Kind": "enum",
@@ -55,7 +55,7 @@
         "ReferredType": "IntEnum"
       }
     },
-    {
+    "container": {
       "Name": "container",
       "Type": {
         "Kind": "struct",
@@ -128,7 +128,7 @@
         "ReferredType": "container"
       }
     },
-    {
+    "anything": {
       "Name": "anything",
       "Type": {
         "Kind": "scalar",
@@ -142,7 +142,7 @@
         "ReferredType": "anything"
       }
     },
-    {
+    "foo": {
       "Name": "foo",
       "Type": {
         "Kind": "struct",
@@ -174,5 +174,5 @@
         "ReferredType": "foo"
       }
     }
-  ]
+  }
 }

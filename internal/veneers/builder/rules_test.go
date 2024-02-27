@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +19,7 @@ func TestDuplicate(t *testing.T) {
 		{
 			Schema: &ast.Schema{
 				Package: "pkg",
-				Objects: []ast.Object{originalObject},
+				Objects: testutils.ObjectsMap(originalObject),
 			},
 			For:     originalObject,
 			Package: "pkg",
@@ -57,7 +58,7 @@ func TestInitialize(t *testing.T) {
 		{
 			Schema: &ast.Schema{
 				Package: "pkg",
-				Objects: []ast.Object{originalObject},
+				Objects: testutils.ObjectsMap(originalObject),
 			},
 			For:     originalObject,
 			Package: "pkg",
@@ -77,10 +78,7 @@ func TestInitialize(t *testing.T) {
 	rule := Initialize(
 		ByName("pkg", "Dashboard"),
 		[]Initialization{
-			{
-				PropertyPath: "name",
-				Value:        "great name, isn't it?",
-			},
+			{PropertyPath: "name", Value: "great name, isn't it?"},
 		},
 	)
 	updatedBuilders, err := rule(originalBuilders)

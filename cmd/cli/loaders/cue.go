@@ -16,7 +16,7 @@ import (
 	"github.com/yalue/merged_fs"
 )
 
-func cueLoader(opts Options) ([]*ast.Schema, error) {
+func cueLoader(opts Options) (ast.Schemas, error) {
 	libraries, err := opts.cueIncludeImports()
 	if err != nil {
 		return nil, err

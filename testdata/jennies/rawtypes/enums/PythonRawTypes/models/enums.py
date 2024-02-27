@@ -30,3 +30,6 @@ class DashboardCursorSync(enum.IntEnum):
     OFF = 0
     CROSSHAIR = 1
     TOOLTIP = 2
+
+
+

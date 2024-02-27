@@ -3,10 +3,10 @@ package compiler
 import (
 	"errors"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/orderedmap"
 )
 
 var _ Pass = (*DisjunctionToType)(nil)
@@ -56,7 +56,7 @@ var _ Pass = (*DisjunctionToType)(nil)
 //		}
 //		```
 type DisjunctionToType struct {
-	newObjects map[string]ast.Object
+	newObjects *orderedmap.Map[string, ast.Object]
 }
 
 func (pass *DisjunctionToType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
@@ -75,34 +75,27 @@ func (pass *DisjunctionToType) Process(schemas []*ast.Schema) ([]*ast.Schema, er
 }
 
 func (pass *DisjunctionToType) processSchema(schema *ast.Schema) (*ast.Schema, error) {
-	pass.newObjects = make(map[string]ast.Object)
+	var err error
+	pass.newObjects = orderedmap.New[string, ast.Object]()
 
-	processedObjects := make([]ast.Object, 0, len(schema.Objects))
-	for _, object := range schema.Objects {
-		processedObject, err := pass.processObject(schema, object)
-		if err != nil {
-			return nil, err
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		processedObject, innerErr := pass.processObject(schema, object)
+		if innerErr != nil {
+			err = innerErr
+			return object
 		}
 
-		processedObjects = append(processedObjects, processedObject)
+		return processedObject
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	newObjects := make([]ast.Object, 0, len(pass.newObjects))
-	for _, obj := range pass.newObjects {
-		newObjects = append(newObjects, obj)
-	}
-
-	// Since newly created objects are temporarily stored in a map, we need to
-	// sort them to have a deterministic output.
-	sort.SliceStable(newObjects, func(i, j int) bool {
-		return newObjects[i].Name < newObjects[j].Name
+	pass.newObjects.Iterate(func(_ string, object ast.Object) {
+		schema.AddObject(object)
 	})
 
-	newSchema := schema.DeepCopy()
-	newSchema.Objects = processedObjects
-	newSchema.Objects = append(newSchema.Objects, newObjects...)
-
-	return &newSchema, nil
+	return schema, nil
 }
 
 func (pass *DisjunctionToType) processObject(schema *ast.Schema, object ast.Object) (ast.Object, error) {
@@ -205,7 +198,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 
 	// if we already generated a new object for this disjunction, let's return
 	// a reference to it.
-	if _, ok := pass.newObjects[newTypeName]; ok {
+	if pass.newObjects.Has(newTypeName) {
 		ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
 		if def.Nullable || disjunction.Branches.HasNullType() {
 			ref.Nullable = true
@@ -253,14 +246,14 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunction
 	}
 
-	pass.newObjects[newTypeName] = ast.Object{
+	pass.newObjects.Set(newTypeName, ast.Object{
 		Name: newTypeName,
 		Type: structType,
 		SelfRef: ast.RefType{
 			ReferredPkg:  schema.Package,
 			ReferredType: newTypeName,
 		},
-	}
+	})
 
 	ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
 	if def.Nullable || disjunction.Branches.HasNullType() {

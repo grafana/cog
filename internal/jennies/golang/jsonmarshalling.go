@@ -36,7 +36,7 @@ func (jenny JSONMarshalling) Generate(context common.Context) (codejen.Files, er
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(schema.Package),
+			formatPackageName(schema.Package),
 			"types_json_marshalling_gen.go",
 		)
 
@@ -48,6 +48,7 @@ func (jenny JSONMarshalling) Generate(context common.Context) (codejen.Files, er
 
 func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
+	var err error
 
 	imports := NewImportMap()
 	jenny.packageMapper = func(pkg string) string {
@@ -57,32 +58,38 @@ func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.
 
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
-	jenny.typeFormatter = defaultTypeFormatter(jenny.packageMapper)
+	jenny.typeFormatter = defaultTypeFormatter(context, jenny.packageMapper)
 
-	for _, object := range schema.Objects {
+	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		if jenny.objectNeedsCustomMarshal(object) {
-			jsonMarshal, err := jenny.renderCustomMarshal(object)
-			if err != nil {
-				return nil, err
+			jsonMarshal, innerErr := jenny.renderCustomMarshal(object)
+			if innerErr != nil {
+				err = innerErr
+				return
 			}
 			buffer.WriteString(jsonMarshal)
 		}
 
 		if jenny.objectNeedsCustomUnmarshal(context, object) {
-			jsonUnmarshal, err := jenny.renderCustomUnmarshal(context, object)
-			if err != nil {
-				return nil, err
+			jsonUnmarshal, innerErr := jenny.renderCustomUnmarshal(context, object)
+			if innerErr != nil {
+				err = innerErr
+				return
 			}
 			buffer.WriteString(jsonUnmarshal)
 		}
 
 		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
-			variantUnmarshal, err := jenny.renderDataqueryVariantUnmarshal(schema, object)
-			if err != nil {
-				return nil, err
+			variantUnmarshal, innerErr := jenny.renderDataqueryVariantUnmarshal(schema, object)
+			if innerErr != nil {
+				err = innerErr
+				return
 			}
 			buffer.WriteString(variantUnmarshal)
 		}
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	if schema.Metadata.Kind == ast.SchemaKindComposable && schema.Metadata.Variant == ast.SchemaVariantPanel {
@@ -103,7 +110,7 @@ func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.
 	}
 
 	return []byte(fmt.Sprintf(`package %[1]s
-%[2]s%[3]s`, strings.ToLower(schema.Package), importStatements, buffer.String())), nil
+%[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
 }
 
 func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {

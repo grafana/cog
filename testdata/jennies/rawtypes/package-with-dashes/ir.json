@@ -1,0 +1,50 @@
+{
+  "Package": "with-dashes",
+  "Objects": {
+    "someStruct": {
+      "Name": "someStruct",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "FieldAny",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "RefreshRate": {
+      "Name": "RefreshRate",
+      "Comments": [
+        "Refresh rate or disabled."
+      ],
+      "Type": {
+        "Kind": "disjunction",
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Scalar": {
+                "ScalarKind": "string"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Scalar": {
+                "ScalarKind": "bool"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

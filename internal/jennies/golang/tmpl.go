@@ -39,12 +39,13 @@ func init() {
 			},
 		}).
 		Funcs(map[string]any{
-			"formatScalar": formatScalar,
+			"formatPackageName": formatPackageName,
+			"formatScalar":      formatScalar,
 			"formatArgName": func(name string) string {
 				return escapeVarName(tools.LowerCamelCase(name))
 			},
-			"maybeAsPointer": func(intoNullable bool, variableName string) string {
-				if intoNullable {
+			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
+				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap()) {
 					return "&" + variableName
 				}
 

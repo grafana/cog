@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type Index struct {
@@ -23,18 +24,18 @@ func (jenny Index) Generate(context common.Context) (codejen.Files, error) {
 
 	if jenny.Targets.Types {
 		for _, schema := range context.Schemas {
-			packages[schema.Package] = []string{"types_gen"}
+			packages[schema.Package] = []string{"types.gen"}
 		}
 	}
 
 	if jenny.Targets.Builders {
 		for _, builder := range context.Builders {
-			packages[builder.Package] = append(packages[builder.Package], fmt.Sprintf("%s_builder_gen", strings.ToLower(builder.Name)))
+			packages[builder.Package] = append(packages[builder.Package], fmt.Sprintf("%sBuilder.gen", tools.LowerCamelCase(builder.Name)))
 		}
 	}
 
 	for pkg, refs := range packages {
-		files = append(files, *codejen.NewFile(filepath.Join("src", pkg, "index.ts"), jenny.generateIndex(refs), jenny))
+		files = append(files, *codejen.NewFile(filepath.Join("src", formatPackageName(pkg), "index.ts"), jenny.generateIndex(refs), jenny))
 	}
 
 	return files, nil

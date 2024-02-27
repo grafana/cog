@@ -3,8 +3,8 @@
     {
       "Package": "basic_struct",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "SomeStruct": {
           "Name": "SomeStruct",
           "Comments": [
             "SomeStruct, to hold data."
@@ -79,7 +79,7 @@
             "ReferredType": "SomeStruct"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -87,8 +87,8 @@
       "Schema": {
         "Package": "basic_struct",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "SomeStruct": {
             "Name": "SomeStruct",
             "Comments": [
               "SomeStruct, to hold data."
@@ -163,7 +163,7 @@
               "ReferredType": "SomeStruct"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "SomeStruct",

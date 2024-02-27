@@ -1,5 +1,5 @@
 package struct_complex_fields
-func (resource *StringOrBool) MarshalJSON() ([]byte, error) {
+func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {
 		return json.Marshal(resource.String)
 	}

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -186,7 +187,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 	req := require.New(t)
 
 	// Prepare test input
-	objects := []ast.Object{
+	objects := testutils.ObjectsMap(
 		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
 			ast.NewRef("test", "SomeStruct"),
 			ast.NewRef("test", "OtherStruct"),
@@ -200,7 +201,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetad
 			ast.NewStructField("FieldBar", ast.NewMap(ast.String(), ast.String())),
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 		)),
-	}
+	)
 
 	compilerPass := &DisjunctionToType{}
 	_, err := compilerPass.Process([]*ast.Schema{
@@ -222,7 +223,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 	// Mapping omitted: it will be inferred
 	disjunctionType.Disjunction.Discriminator = "Kind"
 
-	objects := []ast.Object{
+	objects := testutils.ObjectsMap(
 		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("test", "SomeStruct", ast.NewStruct(
@@ -235,7 +236,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 			ast.NewStructField("Kind", ast.String(ast.Value("other-kind"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
-	}
+	)
 
 	compilerPass := &DisjunctionToType{}
 	_, err := compilerPass.Process([]*ast.Schema{

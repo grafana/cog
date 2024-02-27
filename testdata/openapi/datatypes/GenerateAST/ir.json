@@ -1,8 +1,8 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "Objects": [
-    {
+  "Objects": {
+    "DataTypes": {
       "Name": "DataTypes",
       "Type": {
         "Kind": "struct",
@@ -96,5 +96,5 @@
         "ReferredType": "DataTypes"
       }
     }
-  ]
+  }
 }

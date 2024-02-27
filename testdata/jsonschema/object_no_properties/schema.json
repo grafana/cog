@@ -1,0 +1,31 @@
+{
+  "$ref": "#/definitions/Entrypoint",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Entrypoint": {
+      "type": "object",
+      "properties": {
+        "ObjectNoProperties": {
+          "$ref": "#/definitions/ObjectNoProperties"
+        },
+        "ObjectNoAdditionalProperties": {
+          "$ref": "#/definitions/ObjectNoAdditionalProperties"
+        },
+        "ObjectAdditionalPropertiesWithSchema": {
+          "$ref": "#/definitions/ObjectAdditionalPropertiesWithSchema"
+        }
+      }
+    },
+    "ObjectNoProperties": {
+      "type": "object"
+    },
+    "ObjectNoAdditionalProperties": {
+      "additionalProperties": false
+    },
+    "ObjectAdditionalPropertiesWithSchema": {
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

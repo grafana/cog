@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -33,9 +35,11 @@ func (pass *PrefixEnumValues) Process(schemas []*ast.Schema) ([]*ast.Schema, err
 }
 
 func (pass *PrefixEnumValues) processSchema(schema *ast.Schema) *ast.Schema {
-	for i, object := range schema.Objects {
-		schema.Objects[i].Type = pass.processType(object.Name, object.Type)
-	}
+	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+		object.Type = pass.processType(object.Name, object.Type)
+
+		return object
+	})
 
 	return schema
 }
@@ -53,7 +57,7 @@ func (pass *PrefixEnumValues) processEnum(parentName string, def ast.Type) ast.T
 	for _, val := range def.AsEnum().Values {
 		values = append(values, ast.EnumValue{
 			Type:  val.Type,
-			Name:  tools.UpperCamelCase(parentName) + tools.UpperCamelCase(val.Name),
+			Name:  tools.UpperCamelCase(parentName) + pass.enumMemberNameFromValue(val),
 			Value: val.Value,
 		})
 	}
@@ -61,4 +65,16 @@ func (pass *PrefixEnumValues) processEnum(parentName string, def ast.Type) ast.T
 	def.Enum.Values = values
 
 	return def
+}
+
+func (pass *PrefixEnumValues) enumMemberNameFromValue(member ast.EnumValue) string {
+	if member.Type.Scalar.ScalarKind != ast.KindInt64 {
+		return tools.UpperCamelCase(member.Name)
+	}
+
+	if member.Name[0] == '-' {
+		return tools.UpperCamelCase(fmt.Sprintf("negative%s", member.Name[1:]))
+	}
+
+	return tools.UpperCamelCase(member.Name)
 }

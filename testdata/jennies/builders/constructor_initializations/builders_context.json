@@ -3,8 +3,8 @@
     {
       "Package": "constructor_initializations",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "SomePanel": {
           "Name": "SomePanel",
           "Type": {
             "Kind": "struct",
@@ -54,7 +54,7 @@
             "ReferredType": "SomePanel"
           }
         },
-        {
+        "CursorMode": {
           "Name": "CursorMode",
           "Type": {
             "Kind": "enum",
@@ -98,7 +98,7 @@
             "ReferredType": "CursorMode"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -106,8 +106,8 @@
       "Schema": {
         "Package": "constructor_initializations",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "SomePanel": {
             "Name": "SomePanel",
             "Type": {
               "Kind": "struct",
@@ -157,7 +157,7 @@
               "ReferredType": "SomePanel"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "SomePanel",

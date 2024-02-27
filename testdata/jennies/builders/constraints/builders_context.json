@@ -3,8 +3,8 @@
     {
       "Package": "constraints",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "SomeStruct": {
           "Name": "SomeStruct",
           "Type": {
             "Kind": "struct",
@@ -63,7 +63,7 @@
             "ReferredType": "SomeStruct"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -71,8 +71,8 @@
       "Schema": {
         "Package": "constraints",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "SomeStruct": {
             "Name": "SomeStruct",
             "Type": {
               "Kind": "struct",
@@ -131,7 +131,7 @@
               "ReferredType": "SomeStruct"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "SomeStruct",

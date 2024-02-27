@@ -3,8 +3,8 @@
     {
       "Package": "initialization_safeguards",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "LegendOptions": {
           "Name": "LegendOptions",
           "Type": {
             "Kind": "struct",
@@ -30,7 +30,7 @@
             "ReferredType": "LegendOptions"
           }
         },
-        {
+        "Options": {
           "Name": "Options",
           "Type": {
             "Kind": "struct",
@@ -60,7 +60,7 @@
             "ReferredType": "Options"
           }
         },
-        {
+        "SomePanel": {
           "Name": "SomePanel",
           "Type": {
             "Kind": "struct",
@@ -98,7 +98,7 @@
             "ReferredType": "SomePanel"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -106,8 +106,8 @@
       "Schema": {
         "Package": "initialization_safeguards",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "LegendOptions": {
             "Name": "LegendOptions",
             "Type": {
               "Kind": "struct",
@@ -133,7 +133,7 @@
               "ReferredType": "LegendOptions"
             }
           },
-          {
+          "Options": {
             "Name": "Options",
             "Type": {
               "Kind": "struct",
@@ -163,7 +163,7 @@
               "ReferredType": "Options"
             }
           },
-          {
+          "SomePanel": {
             "Name": "SomePanel",
             "Type": {
               "Kind": "struct",
@@ -201,7 +201,7 @@
               "ReferredType": "SomePanel"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "SomePanel",
@@ -243,7 +243,6 @@
       },
       "Package": "initialization_safeguards",
       "Name": "SomePanel",
-      "Properties": null,
       "Options": [
         {
           "Name": "title",

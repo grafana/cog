@@ -1,7 +1,7 @@
 {
   "Package": "basic",
-  "Objects": [
-    {
+  "Objects": {
+    "SomeStruct": {
       "Name": "SomeStruct",
       "Comments": [
         "This",
@@ -172,5 +172,5 @@
         }
       }
     }
-  ]
+  }
 }

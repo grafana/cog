@@ -26,7 +26,7 @@ jobs:
         run: make deps
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
           version: v1.54.2
           # Done by setup-go
@@ -80,7 +80,8 @@ jobs:
             --kind-registry ../kind-registry \
             --kind-registry-version ${{ matrix.kind_version }} \
             --go-package-root github.com/grafana/cog/generated/go \
-            --veneers ./config
+            --veneers ./config/veneers \
+            --compiler-config ./config/compiler/common_passes.yaml
 
       - name: Compile generated Go code
         run: |
@@ -127,7 +128,8 @@ jobs:
           go run cmd/cli/main.go generate \
             --output ./generated \
             --kind-registry ../kind-registry \
-            --veneers ./config
+            --veneers ./config/veneers \
+            --compiler-config ./config/compiler/common_passes.yaml
 
       - name: Run the Go example
         run: |

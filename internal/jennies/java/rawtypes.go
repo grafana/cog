@@ -40,11 +40,12 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 }
 
 func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, error) {
+	var err error
 	files := make(codejen.Files, 0)
 	scalars := make(map[string]ast.ScalarType)
 
 	packageMapper := func(pkg string, class string) string {
-		if pkg == schema.Package {
+		if jenny.imports.IsIdentical(pkg, schema.Package) {
 			return ""
 		}
 
@@ -53,21 +54,22 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	jenny.typeFormatter = jenny.typeFormatter.withPackageMapper(packageMapper)
 
-	for _, object := range schema.Objects {
+	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		jenny.imports = NewImportMap()
 		if object.Type.IsMap() || object.Type.IsArray() {
-			continue
+			return
 		}
 		if object.Type.IsScalar() {
 			if object.Type.AsScalar().IsConcrete() {
 				scalars[object.Name] = object.Type.AsScalar()
 			}
-			continue
+			return
 		}
 
-		output, err := jenny.generateSchema(schema.Package, object)
-		if err != nil {
-			return nil, err
+		output, innerErr := jenny.generateSchema(schema.Package, object)
+		if innerErr != nil {
+			err = innerErr
+			return
 		}
 
 		filename := filepath.Join(
@@ -76,6 +78,9 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	if len(scalars) > 0 {

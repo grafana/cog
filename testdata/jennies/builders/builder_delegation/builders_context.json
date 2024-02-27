@@ -3,8 +3,8 @@
     {
       "Package": "builder_delegation",
       "Metadata": {},
-      "Objects": [
-        {
+      "Objects": {
+        "DashboardLink": {
           "Name": "DashboardLink",
           "Type": {
             "Kind": "struct",
@@ -41,7 +41,7 @@
             "ReferredType": "DashboardLink"
           }
         },
-        {
+        "Dashboard": {
           "Name": "Dashboard",
           "Type": {
             "Kind": "struct",
@@ -72,6 +72,9 @@
                 },
                 {
                   "Name": "links",
+                  "Comments": [
+                    "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+                  ],
                   "Type": {
                     "Kind": "array",
                     "Nullable": false,
@@ -89,7 +92,37 @@
                   "Required": true
                 },
                 {
+                  "Name": "linksOfLinks",
+                  "Comments": [
+                    "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+                  ],
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "builder_delegation",
+                              "ReferredType": "DashboardLink"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                },
+                {
                   "Name": "singleLink",
+                  "Comments": [
+                    "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+                  ],
                   "Type": {
                     "Kind": "ref",
                     "Nullable": false,
@@ -108,7 +141,7 @@
             "ReferredType": "Dashboard"
           }
         }
-      ]
+      }
     }
   ],
   "Builders": [
@@ -116,8 +149,8 @@
       "Schema": {
         "Package": "builder_delegation",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "DashboardLink": {
             "Name": "DashboardLink",
             "Type": {
               "Kind": "struct",
@@ -154,7 +187,7 @@
               "ReferredType": "DashboardLink"
             }
           },
-          {
+          "Dashboard": {
             "Name": "Dashboard",
             "Type": {
               "Kind": "struct",
@@ -185,6 +218,9 @@
                   },
                   {
                     "Name": "links",
+                    "Comments": [
+                      "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+                    ],
                     "Type": {
                       "Kind": "array",
                       "Nullable": false,
@@ -202,7 +238,37 @@
                     "Required": true
                   },
                   {
+                    "Name": "linksOfLinks",
+                    "Comments": [
+                      "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+                    ],
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "array",
+                          "Nullable": false,
+                          "Array": {
+                            "ValueType": {
+                              "Kind": "ref",
+                              "Nullable": false,
+                              "Ref": {
+                                "ReferredPkg": "builder_delegation",
+                                "ReferredType": "DashboardLink"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
                     "Name": "singleLink",
+                    "Comments": [
+                      "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+                    ],
                     "Type": {
                       "Kind": "ref",
                       "Nullable": false,
@@ -221,7 +287,7 @@
               "ReferredType": "Dashboard"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "DashboardLink",
@@ -359,8 +425,8 @@
       "Schema": {
         "Package": "builder_delegation",
         "Metadata": {},
-        "Objects": [
-          {
+        "Objects": {
+          "DashboardLink": {
             "Name": "DashboardLink",
             "Type": {
               "Kind": "struct",
@@ -397,7 +463,7 @@
               "ReferredType": "DashboardLink"
             }
           },
-          {
+          "Dashboard": {
             "Name": "Dashboard",
             "Type": {
               "Kind": "struct",
@@ -428,6 +494,9 @@
                   },
                   {
                     "Name": "links",
+                    "Comments": [
+                      "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+                    ],
                     "Type": {
                       "Kind": "array",
                       "Nullable": false,
@@ -445,7 +514,37 @@
                     "Required": true
                   },
                   {
+                    "Name": "linksOfLinks",
+                    "Comments": [
+                      "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+                    ],
+                    "Type": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "array",
+                          "Nullable": false,
+                          "Array": {
+                            "ValueType": {
+                              "Kind": "ref",
+                              "Nullable": false,
+                              "Ref": {
+                                "ReferredPkg": "builder_delegation",
+                                "ReferredType": "DashboardLink"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
                     "Name": "singleLink",
+                    "Comments": [
+                      "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+                    ],
                     "Type": {
                       "Kind": "ref",
                       "Nullable": false,
@@ -464,7 +563,7 @@
               "ReferredType": "Dashboard"
             }
           }
-        ]
+        }
       },
       "For": {
         "Name": "Dashboard",
@@ -497,6 +596,9 @@
               },
               {
                 "Name": "links",
+                "Comments": [
+                  "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+                ],
                 "Type": {
                   "Kind": "array",
                   "Nullable": false,
@@ -514,7 +616,37 @@
                 "Required": true
               },
               {
+                "Name": "linksOfLinks",
+                "Comments": [
+                  "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+                ],
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "ref",
+                          "Nullable": false,
+                          "Ref": {
+                            "ReferredPkg": "builder_delegation",
+                            "ReferredType": "DashboardLink"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              },
+              {
                 "Name": "singleLink",
+                "Comments": [
+                  "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+                ],
                 "Type": {
                   "Kind": "ref",
                   "Nullable": false,
@@ -628,6 +760,9 @@
         },
         {
           "Name": "links",
+          "Comments": [
+            "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
+          ],
           "Args": [
             {
               "Name": "links",
@@ -693,7 +828,97 @@
           "IsConstructorArg": false
         },
         {
+          "Name": "linksOfLinks",
+          "Comments": [
+            "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
+          ],
+          "Args": [
+            {
+              "Name": "linksOfLinks",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "builder_delegation",
+                          "ReferredType": "DashboardLink"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "linksOfLinks",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "builder_delegation",
+                              "ReferredType": "DashboardLink"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "linksOfLinks",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "array",
+                        "Nullable": false,
+                        "Array": {
+                          "ValueType": {
+                            "Kind": "ref",
+                            "Nullable": false,
+                            "Ref": {
+                              "ReferredPkg": "builder_delegation",
+                              "ReferredType": "DashboardLink"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "IsConstructorArg": false
+        },
+        {
           "Name": "singleLink",
+          "Comments": [
+            "will be expanded to cog.Builder\u003cDashboardLink\u003e"
+          ],
           "Args": [
             {
               "Name": "singleLink",

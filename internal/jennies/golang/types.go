@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -17,10 +18,10 @@ type typeFormatter struct {
 	context    common.Context
 }
 
-func defaultTypeFormatter(packageMapper func(pkg string) string) *typeFormatter {
+func defaultTypeFormatter(context common.Context, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
-		context:       common.Context{},
+		context:       context,
 	}
 }
 
@@ -124,10 +125,22 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 		jsonOmitEmpty = ",omitempty"
 	}
 
+	fieldType := def.Type
+
+	// if the field's type is a reference to a constant,
+	// we need to use the constant's type instead.
+	// ie: `SomeField string` instead of `SomeField MyStringConstant`
+	if def.Type.IsRef() {
+		referredType, found := formatter.context.LocateObject(def.Type.AsRef().ReferredPkg, def.Type.AsRef().ReferredType)
+		if found && referredType.Type.IsConcreteScalar() {
+			fieldType = referredType.Type
+		}
+	}
+
 	buffer.WriteString(fmt.Sprintf(
 		"%s %s `json:\"%s%s\"`\n",
 		tools.UpperCamelCase(def.Name),
-		formatter.doFormatType(def.Type, false),
+		formatter.doFormatType(fieldType, false),
 		def.Name,
 		jsonOmitEmpty,
 	))
@@ -312,4 +325,10 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	buffer.WriteString("}")
 
 	return buffer.String()
+}
+
+func formatPackageName(pkg string) string {
+	rgx := regexp.MustCompile("[^a-zA-Z0-9_]+")
+
+	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
 }
