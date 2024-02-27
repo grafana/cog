@@ -8,6 +8,13 @@ import (
 
 type Selector func(builder ast.Builder) bool
 
+// EveryBuilder accepts any given builder.
+func EveryBuilder() Selector {
+	return func(_ ast.Builder) bool {
+		return true
+	}
+}
+
 // ByObjectName matches builders for the given the object (referred to by its
 // package and name).
 // Note: the comparison on object name is case-insensitive.
