@@ -21,12 +21,12 @@ func (context *Context) ResolveToBuilder(def ast.Type) bool {
 
 	if def.Kind == ast.KindDisjunction {
 		for _, branch := range def.AsDisjunction().Branches {
-			if !context.ResolveToBuilder(branch) {
-				return false
+			if context.ResolveToBuilder(branch) {
+				return true
 			}
 		}
 
-		return true
+		return false
 	}
 
 	if def.Kind != ast.KindRef {
@@ -37,6 +37,20 @@ func (context *Context) ResolveToBuilder(def ast.Type) bool {
 	_, found := context.Builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
 
 	return found
+}
+
+func (context *Context) IsDisjunctionOfBuilders(def ast.Type) bool {
+	if def.Kind != ast.KindDisjunction {
+		return false
+	}
+
+	for _, branch := range def.AsDisjunction().Branches {
+		if !context.ResolveToBuilder(branch) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (context *Context) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {

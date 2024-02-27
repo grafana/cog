@@ -55,6 +55,10 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
 {{- define "unfold_builders" }}
     {{- if .InputType.IsArray -}}
         {{ .InputVar }}.map(builder{{ .Depth }} => {{ template "unfold_builders" (dict "InputType" .InputType.Array.ValueType "InputVar" (print "builder" .Depth ) "Depth" (add1 .Depth)) }})
+    {{- else if typeIsDisjunctionOfBuilders .InputType -}}
+        {{ .InputVar }}.build()
+    {{- else if .InputType.IsDisjunction -}}
+        cog.isBuilder({{ .InputVar }}) ? {{ .InputVar }}.build() : {{ .InputVar }}
     {{- else -}}
         {{ .InputVar }}.build()
     {{- end -}}
@@ -75,7 +79,6 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
     {{- end }}
 {{- end }}
-
 
 {{- define "value_envelope" -}}
     {

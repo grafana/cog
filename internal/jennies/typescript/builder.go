@@ -64,8 +64,9 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 
 	err := templates.
 		Funcs(map[string]any{
-			"typeHasBuilder": context.ResolveToBuilder,
-			"formatType":     jenny.typeFormatter.formatType,
+			"typeHasBuilder":              context.ResolveToBuilder,
+			"typeIsDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
+			"formatType":                  jenny.typeFormatter.formatType,
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
@@ -86,7 +87,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
 			BuilderName:          builder.Name,
-			ObjectName:           builder.For.Name,
+			ObjectName:           tools.CleanupNames(builder.For.Name),
 			BuilderSignatureType: buildObjectSignature,
 			Imports:              jenny.imports,
 			ImportAlias:          jenny.importType(builder.For.SelfRef),
