@@ -22,7 +22,7 @@ func TestPrefixEnumValues(t *testing.T) {
 		ast.NewObject("pkg", "VariableRefresh", ast.NewEnum([]ast.EnumValue{
 			{Name: "VariableRefreshNever", Value: "never", Type: ast.String()},
 			{Name: "VariableRefreshAlways", Value: "always", Type: ast.String()},
-		})),
+		}), "PrefixEnumValues"),
 
 		ast.NewObject("pkg", "SomeType", ast.String()),
 	}
@@ -45,7 +45,7 @@ func TestPrefixEnumValuesWithNegativeIntegerName(t *testing.T) {
 		ast.NewObject("pkg", "BarAlignment", ast.NewEnum([]ast.EnumValue{
 			{Name: "BarAlignment1", Value: 1, Type: ast.NewScalar(ast.KindInt64)},
 			{Name: "BarAlignmentNegative1", Value: -1, Type: ast.NewScalar(ast.KindInt64)},
-		})),
+		}), "PrefixEnumValues"),
 	}
 
 	// Run the compiler pass

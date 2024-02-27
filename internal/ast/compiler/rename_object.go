@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -24,7 +26,8 @@ func (pass *RenameObject) processSchema(schema *ast.Schema) *ast.Schema {
 
 	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if pass.From.Matches(object) {
-			// object.AddToPassesTrail(fmt.Sprintf("RenameObject[%s → %s]", object.Name, pass.To))
+			object.AddToPassesTrail(fmt.Sprintf("RenameObject[%s → %s]", object.Name, pass.To))
+
 			object.Name = pass.To
 			object.SelfRef.ReferredType = pass.To
 

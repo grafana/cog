@@ -30,7 +30,7 @@ func TestRenameObject(t *testing.T) {
 			)),
 			ast.NewObject("rename_object", "ReallyNiceName", ast.NewStruct(
 				ast.NewStructField("AString", ast.String(ast.Nullable())),
-			)),
+			), "RenameObject[NotANiceName → ReallyNiceName]"),
 		),
 	}
 
