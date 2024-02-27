@@ -58,7 +58,7 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInStruct(t *testing.T) {
 			ast.NewObject("with_enums", "PanelType", ast.NewEnum([]ast.EnumValue{
 				{Name: "Foo", Value: "foo", Type: ast.String()},
 				{Name: "Bar", Value: "bar", Type: ast.String()},
-			})),
+			}), "AnonymousEnumToExplicitType"),
 		),
 	}
 
@@ -92,7 +92,7 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInArray(t *testing.T) {
 			ast.NewObject("in_array", "TypesListEnum", ast.NewEnum([]ast.EnumValue{
 				{Name: "Foo", Value: "foo", Type: ast.String()},
 				{Name: "Bar", Value: "bar", Type: ast.String()},
-			})),
+			}), "AnonymousEnumToExplicitType"),
 		),
 	}
 

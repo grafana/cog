@@ -502,7 +502,8 @@ func (object Object) Equal(other Object) bool {
 	return object.Name == other.Name &&
 		cmp.Equal(object.Comments, other.Comments) &&
 		cmp.Equal(object.Type, other.Type) &&
-		cmp.Equal(object.SelfRef, other.SelfRef)
+		cmp.Equal(object.SelfRef, other.SelfRef) &&
+		cmp.Equal(object.PassesTrail, other.PassesTrail)
 }
 
 func (object Object) DeepCopy() Object {

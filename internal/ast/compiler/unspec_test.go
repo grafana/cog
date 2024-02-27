@@ -60,7 +60,7 @@ func TestUnspec(t *testing.T) {
 			Objects: testutils.ObjectsMap(
 				ast.NewObject("with_spec_no_meta_id", "with_spec_no_meta_id", ast.NewStruct(
 					ast.NewStructField("title", ast.String()),
-				)),
+				), "Unspec[Spec → with_spec_no_meta_id]"),
 			),
 		},
 
@@ -73,7 +73,7 @@ func TestUnspec(t *testing.T) {
 			Objects: testutils.ObjectsMap(
 				ast.NewObject("with_spec_and_meta_id", "Dashboard", ast.NewStruct(
 					ast.NewStructField("title", ast.String()),
-				)),
+				), "Unspec[Spec → Dashboard]"),
 			),
 		},
 	}

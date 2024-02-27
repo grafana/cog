@@ -294,7 +294,7 @@ func TestDisjunctionToType_WithDisjunctionOfRefs_AsAnObject_WithDiscriminatorFie
 		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewRef("test", "SomeStructOrOtherStruct", ast.Trail("DisjunctionToType[disjunction → ref]"))),
 		objects[1],
 		objects[2],
-		ast.NewObject("test", "SomeStructOrOtherStruct", disjunctionStructType),
+		ast.NewObject("test", "SomeStructOrOtherStruct", disjunctionStructType, "DisjunctionToType[created]"),
 	}
 
 	// Call the compiler pass

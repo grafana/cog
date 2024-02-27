@@ -27,7 +27,7 @@ func TestNameAnonymousStruct(t *testing.T) {
 			)),
 			ast.NewObject("name_anonymous_struct", "Inner", ast.NewStruct(
 				ast.NewStructField("title", ast.String()),
-			)),
+			), "NameAnonymousStruct"),
 		),
 	}
 
