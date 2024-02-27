@@ -1,6 +1,8 @@
 package golang
 
 import (
+	"sort"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -39,7 +41,8 @@ func (jenny VariantsPlugins) variantModels() (string, error) {
 
 func (jenny VariantsPlugins) variantPlugins(context common.Context) (string, error) {
 	imports := NewImportMap()
-	initMap := make(map[string][]*ast.Schema) // variant to schemas
+	var panelSchemas []*ast.Schema
+	var dataquerySchemas []*ast.Schema
 
 	imports.Add("cog", jenny.Config.importPath("cog"))
 
@@ -48,13 +51,26 @@ func (jenny VariantsPlugins) variantPlugins(context common.Context) (string, err
 			continue
 		}
 
-		variant := string(schema.Metadata.Variant)
+		if schema.Metadata.Variant == ast.SchemaVariantPanel {
+			panelSchemas = append(panelSchemas, schema)
+		} else if schema.Metadata.Variant == ast.SchemaVariantDataQuery {
+			dataquerySchemas = append(dataquerySchemas, schema)
+		}
+
 		imports.Add(schema.Package, jenny.Config.importPath(formatPackageName(schema.Package)))
-		initMap[variant] = append(initMap[variant], schema)
 	}
 
+	// to guarantee a consistent output for this jenny
+	sort.SliceStable(panelSchemas, func(i, j int) bool {
+		return panelSchemas[i].Package < panelSchemas[j].Package
+	})
+	sort.SliceStable(dataquerySchemas, func(i, j int) bool {
+		return dataquerySchemas[i].Package < dataquerySchemas[j].Package
+	})
+
 	return renderTemplate("runtime/variant_plugins.tmpl", map[string]any{
-		"init_map": initMap,
-		"imports":  imports,
+		"panel_schemas":     panelSchemas,
+		"dataquery_schemas": dataquerySchemas,
+		"imports":           imports,
 	})
 }
