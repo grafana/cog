@@ -11,7 +11,7 @@ require (
 	github.com/huandu/xstrings v1.4.0
 	github.com/santhosh-tekuri/jsonschema v1.2.4
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/yalue/merged_fs v1.3.0
 	golang.org/x/text v0.14.0
 	golang.org/x/tools v0.18.0
