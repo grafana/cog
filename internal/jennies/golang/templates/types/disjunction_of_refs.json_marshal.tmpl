@@ -5,6 +5,5 @@ func (resource {{ .def.Name|upperCamelCase }}) MarshalJSON() ([]byte, error) {
 	}
 {{- end }}
 
-	return []byte("null"), nil
+	return nil, fmt.Errorf("no value for disjunction of refs")
 }
-

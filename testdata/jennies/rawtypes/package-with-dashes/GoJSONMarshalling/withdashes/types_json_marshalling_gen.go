@@ -8,7 +8,7 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 		return json.Marshal(resource.Bool)
 	}
 
-	return []byte("null"), nil
+	return nil, fmt.Errorf("no value for disjunction of scalars")
 }
 
 func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
