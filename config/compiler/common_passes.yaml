@@ -80,6 +80,13 @@ passes:
       field: testdata.SimulationQuery.key
       as: Key
 
+  ###############
+  # table panel #
+  ###############
+
+  - fields_set_not_required:
+      fields: [ common.TableFieldOptions.CellOptions ]
+
   ##########
   # Others #
   ##########

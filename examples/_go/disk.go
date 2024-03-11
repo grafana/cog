@@ -43,11 +43,6 @@ func diskSpaceUsageTable() *table.PanelBuilder {
 	return table.NewPanelBuilder().
 		Title("Disk Space Usage").
 		Align(common.FieldTextAlignmentAuto).
-		CellOptions(common.TableCellOptions{
-			TableAutoCellOptions: &common.TableAutoCellOptions{
-				Type: "auto",
-			},
-		}).
 		Unit("decbytes").
 		CellHeight(common.TableCellHeightSm).
 		Footer(common.NewTableFooterOptionsBuilder().CountRows(false).Reducer([]string{"sum"})).
