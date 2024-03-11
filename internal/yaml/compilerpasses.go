@@ -12,6 +12,7 @@ type CompilerPass struct {
 	Unspec                  *Unspec                  `yaml:"unspec"`
 	FieldsSetDefault        *FieldsSetDefault        `yaml:"fields_set_default"`
 	FieldsSetRequired       *FieldsSetRequired       `yaml:"fields_set_required"`
+	FieldsSetNotRequired    *FieldsSetNotRequired    `yaml:"fields_set_not_required"`
 	Omit                    *Omit                    `yaml:"omit"`
 	AddFields               *AddFields               `yaml:"add_fields"`
 	NameAnonymousStruct     *NameAnonymousStruct     `yaml:"name_anonymous_struct"`
@@ -39,6 +40,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.FieldsSetRequired != nil {
 		return pass.FieldsSetRequired.AsCompilerPass()
+	}
+	if pass.FieldsSetNotRequired != nil {
+		return pass.FieldsSetNotRequired.AsCompilerPass()
 	}
 	if pass.Omit != nil {
 		return pass.Omit.AsCompilerPass()
@@ -126,6 +130,25 @@ func (pass FieldsSetRequired) AsCompilerPass() (compiler.Pass, error) {
 	}
 
 	return &compiler.FieldsSetRequired{Fields: fieldRefs}, nil
+}
+
+type FieldsSetNotRequired struct {
+	Fields []string // Expected format: [package].[object].[field]
+}
+
+func (pass FieldsSetNotRequired) AsCompilerPass() (compiler.Pass, error) {
+	fieldRefs := make([]compiler.FieldReference, 0, len(pass.Fields))
+
+	for _, ref := range pass.Fields {
+		fieldRef, err := compiler.FieldReferenceFromString(ref)
+		if err != nil {
+			return nil, err
+		}
+
+		fieldRefs = append(fieldRefs, fieldRef)
+	}
+
+	return &compiler.FieldsSetNotRequired{Fields: fieldRefs}, nil
 }
 
 type Omit struct {
