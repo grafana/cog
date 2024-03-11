@@ -103,7 +103,8 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 	case ast.KindEnum:
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", objectName))
 		for _, val := range def.Type.AsEnum().Values {
-			name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
+			name := tools.CleanupNames(tools.UpperCamelCase(escapeEnumMemberName(val.Name)))
+
 			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatValue(val.Value)))
 		}
 		buffer.WriteString("}\n")
@@ -386,4 +387,12 @@ func defaultEmptyValuesForStructs(def ast.StructType) string {
 func hasStructDefaults(typeDef ast.Type, defaults any) bool {
 	_, ok := defaults.(map[string]interface{})
 	return ok && typeDef.Kind == ast.KindStruct
+}
+
+func escapeEnumMemberName(identifier string) string {
+	if strings.EqualFold("nan", identifier) {
+		return "not_a_number"
+	}
+
+	return identifier
 }
