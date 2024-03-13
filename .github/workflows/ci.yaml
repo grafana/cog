@@ -73,6 +73,12 @@ jobs:
       - name: Clone kind-registry
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
 
+      - name: Consolidate kind-registry
+        run: ./scripts/consolidate-schema-registry.sh
+        env:
+          GRAFANA_VERSION: ${{ matrix.kind_version }}
+          LOG_LEVEL: '7' # debug
+
       - name: Run code generation
         run: |
           go run cmd/cli/main.go generate \
@@ -122,6 +128,11 @@ jobs:
 
       - name: Clone kind-registry
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
+
+      - name: Consolidate kind-registry
+        run: ./scripts/consolidate-schema-registry.sh
+        env:
+          LOG_LEVEL: '7' # debug
 
       - name: Run code generation
         run: |

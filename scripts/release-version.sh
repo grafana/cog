@@ -138,6 +138,9 @@ if [ ! -d "${FOUNDATION_SDK_PATH}" ]; then
   clone_foundation_sdk "${FOUNDATION_SDK_PATH}"
 fi
 
+info "Consolidating kind-registry"
+GRAFANA_VERSION=${GRAFANA_VERSION} KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH} "${__dir}/consolidate-schema-registry.sh"
+
 info "Running cog"
 run_codegen "${KIND_REGISTRY_PATH}" "${GRAFANA_VERSION}" "${codegen_output_path}" "GrafanaVersion=${GRAFANA_VERSION},CogVersion=${COG_VERSION},ReleaseBranch=${release_branch},BuildTimestamp=${build_timestamp}"
 
