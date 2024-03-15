@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
+	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/spf13/cobra"
@@ -53,6 +54,7 @@ func All() LanguageJennies {
 		golang.LanguageRef:     golang.New(),
 		java.LanguageRef:       java.New(),
 		jsonschema.LanguageRef: jsonschema.New(),
+		openapi.LanguageRef:    openapi.New(),
 		python.LanguageRef:     python.New(),
 		typescript.LanguageRef: typescript.New(),
 	}
