@@ -105,6 +105,8 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 		},
 	})
 
+	g.schema.EntryPoint = string(g.schema.Metadata.Variant)
+
 	return nil
 }
 

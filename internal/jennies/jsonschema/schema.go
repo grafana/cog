@@ -46,6 +46,13 @@ func (jenny Schema) GenerateSchema(schema *ast.Schema) Definition {
 	jsonSchema := orderedmap.New[string, any]()
 	jsonSchema.Set("$schema", "http://json-schema.org/draft-07/schema#")
 
+	if schema.EntryPoint != "" {
+		jsonSchema.Set("$ref", jenny.ReferenceFormatter(ast.RefType{
+			ReferredPkg:  schema.Package,
+			ReferredType: schema.EntryPoint,
+		}))
+	}
+
 	definitions := orderedmap.New[string, Definition]()
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {

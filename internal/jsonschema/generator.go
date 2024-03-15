@@ -75,6 +75,8 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		g.schema.Objects.Get(rootObjectName).Type.Hints[ast.HintImplementsVariant] = string(c.SchemaMetadata.Variant)
 	}
 
+	g.schema.EntryPoint = rootObjectName
+
 	// To ensure a consistent output, since github.com/santhosh-tekuri/jsonschema
 	// doesn't guarantee the order of the definitions it parses.
 	g.schema.Objects.Sort(orderedmap.SortStrings)

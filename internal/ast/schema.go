@@ -71,9 +71,10 @@ func (schemas Schemas) DeepCopy() []*Schema {
 }
 
 type Schema struct { //nolint: musttag
-	Package  string
-	Metadata SchemaMeta `json:",omitempty"`
-	Objects  *orderedmap.Map[string, Object]
+	Package    string
+	Metadata   SchemaMeta `json:",omitempty"`
+	EntryPoint string     `json:",omitempty"`
+	Objects    *orderedmap.Map[string, Object]
 }
 
 func NewSchema(pkg string, metadata SchemaMeta) *Schema {
