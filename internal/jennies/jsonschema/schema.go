@@ -17,6 +17,10 @@ type Definition = *orderedmap.Map[string, any]
 type Schema struct {
 	Config             Config
 	ReferenceFormatter func(ref ast.RefType) string
+
+	foreignObjects     *orderedmap.Map[string, ast.Object]
+	referenceResolver  func(ref ast.RefType) (ast.Object, bool)
+	isForeignReference func(ref ast.RefType) bool
 }
 
 func (jenny Schema) JennyName() string {
@@ -31,7 +35,7 @@ func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 	}
 
 	for _, schema := range context.Schemas {
-		output, err := jenny.toJSON(jenny.GenerateSchema(schema))
+		output, err := jenny.toJSON(jenny.GenerateSchema(context, schema))
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +54,16 @@ func (jenny Schema) toJSON(input any) ([]byte, error) {
 	return json.Marshal(input)
 }
 
-func (jenny Schema) GenerateSchema(schema *ast.Schema) Definition {
+func (jenny Schema) GenerateSchema(context common.Context, schema *ast.Schema) Definition {
+	jenny.foreignObjects = orderedmap.New[string, ast.Object]()
+
+	jenny.isForeignReference = func(ref ast.RefType) bool {
+		return ref.ReferredPkg != schema.Package
+	}
+	jenny.referenceResolver = func(ref ast.RefType) (ast.Object, bool) {
+		return context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	}
+
 	jsonSchema := orderedmap.New[string, any]()
 	jsonSchema.Set("$schema", "http://json-schema.org/draft-07/schema#")
 
@@ -65,6 +78,20 @@ func (jenny Schema) GenerateSchema(schema *ast.Schema) Definition {
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		definitions.Set(object.Name, jenny.objectToDefinition(object))
 	})
+
+	for {
+		if jenny.foreignObjects.Len() == 0 {
+			break
+		}
+
+		foreignObjects := jenny.foreignObjects
+		jenny.foreignObjects = orderedmap.New[string, ast.Object]()
+
+		foreignObjects.Iterate(func(_ string, foreignObject ast.Object) {
+			definitions.Set(foreignObject.Name, jenny.objectToDefinition(foreignObject))
+		})
+	}
+
 	jsonSchema.Set("definitions", definitions)
 
 	return jsonSchema
@@ -173,9 +200,18 @@ func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
 
 func (jenny Schema) formatRef(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
+	ref := typeDef.AsRef()
+
+	if jenny.isForeignReference(ref) {
+		referredObject, found := jenny.referenceResolver(ref)
+
+		if found {
+			jenny.foreignObjects.Set(referredObject.SelfRef.String(), referredObject)
+		}
+	}
 
 	// TODO: handle foreign refs
-	definition.Set("$ref", jenny.ReferenceFormatter(typeDef.AsRef()))
+	definition.Set("$ref", jenny.ReferenceFormatter(ref))
 
 	return definition
 }
