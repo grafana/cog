@@ -1,6 +1,7 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
+  "EntryPoint": "OneOfField",
   "Objects": {
     "OneOfField": {
       "Name": "OneOfField",
