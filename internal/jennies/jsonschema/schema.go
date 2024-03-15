@@ -31,7 +31,7 @@ func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 	}
 
 	for _, schema := range context.Schemas {
-		output, err := json.Marshal(jenny.GenerateSchema(schema))
+		output, err := jenny.toJSON(jenny.GenerateSchema(schema))
 		if err != nil {
 			return nil, err
 		}
@@ -40,6 +40,14 @@ func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 	}
 
 	return files, nil
+}
+
+func (jenny Schema) toJSON(input any) ([]byte, error) {
+	if jenny.Config.Debug {
+		return json.MarshalIndent(input, "", "  ")
+	}
+
+	return json.Marshal(input)
 }
 
 func (jenny Schema) GenerateSchema(schema *ast.Schema) Definition {
@@ -54,11 +62,9 @@ func (jenny Schema) GenerateSchema(schema *ast.Schema) Definition {
 	}
 
 	definitions := orderedmap.New[string, Definition]()
-
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		definitions.Set(object.Name, jenny.objectToDefinition(object))
 	})
-
 	jsonSchema.Set("definitions", definitions)
 
 	return jsonSchema
@@ -140,10 +146,8 @@ func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
 	for _, field := range typeDef.AsStruct().Fields {
 		fieldDef := jenny.formatType(field.Type)
 
-		// TODO: correctly handle passes trail
-
-		if comments := strings.Join(field.Comments, "\n"); len(comments) != 0 {
-			definition.Set("description", comments)
+		if comments := jenny.fieldComments(field); len(comments) != 0 {
+			fieldDef.Set("description", comments)
 		}
 
 		properties.Set(field.Name, fieldDef)
@@ -239,4 +243,18 @@ func (jenny Schema) objectComments(object ast.Object) string {
 	}
 
 	return strings.Join(comments, "\n")
+}
+
+func (jenny Schema) fieldComments(field ast.StructField) string {
+	comments := field.Comments
+	if jenny.Config.Debug {
+		comments = append(comments, tools.Map(field.PassesTrail, jenny.passTrailFormatter)...)
+		comments = append(comments, tools.Map(field.Type.PassesTrail, jenny.passTrailFormatter)...)
+	}
+
+	return strings.Join(comments, "\n")
+}
+
+func (jenny Schema) passTrailFormatter(trail string) string {
+	return fmt.Sprintf("Modified by compiler pass '%s'", trail)
 }
