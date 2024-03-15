@@ -12,10 +12,11 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type objectDefinition = *orderedmap.Map[string, any]
+type Definition = *orderedmap.Map[string, any]
 
 type Schema struct {
-	Config Config
+	Config             Config
+	ReferenceFormatter func(ref ast.RefType) string
 }
 
 func (jenny Schema) JennyName() string {
@@ -25,23 +26,27 @@ func (jenny Schema) JennyName() string {
 func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
+	if jenny.ReferenceFormatter == nil {
+		jenny.ReferenceFormatter = jenny.defaultRefFormatter
+	}
+
 	for _, schema := range context.Schemas {
-		output, err := jenny.generateSchema(schema)
+		output, err := json.Marshal(jenny.GenerateSchema(schema))
 		if err != nil {
 			return nil, err
 		}
 
-		files = append(files, *codejen.NewFile(schema.Package+".json", output, jenny))
+		files = append(files, *codejen.NewFile(schema.Package+".jsonschema.json", output, jenny))
 	}
 
 	return files, nil
 }
 
-func (jenny Schema) generateSchema(schema *ast.Schema) ([]byte, error) {
+func (jenny Schema) GenerateSchema(schema *ast.Schema) Definition {
 	jsonSchema := orderedmap.New[string, any]()
 	jsonSchema.Set("$schema", "http://json-schema.org/draft-07/schema#")
 
-	definitions := orderedmap.New[string, objectDefinition]()
+	definitions := orderedmap.New[string, Definition]()
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		definitions.Set(object.Name, jenny.objectToDefinition(object))
@@ -49,10 +54,10 @@ func (jenny Schema) generateSchema(schema *ast.Schema) ([]byte, error) {
 
 	jsonSchema.Set("definitions", definitions)
 
-	return json.Marshal(jsonSchema)
+	return jsonSchema
 }
 
-func (jenny Schema) objectToDefinition(object ast.Object) objectDefinition {
+func (jenny Schema) objectToDefinition(object ast.Object) Definition {
 	definition := jenny.formatType(object.Type)
 
 	if comments := jenny.objectComments(object); len(comments) != 0 {
@@ -62,7 +67,7 @@ func (jenny Schema) objectToDefinition(object ast.Object) objectDefinition {
 	return definition
 }
 
-func (jenny Schema) formatType(typeDef ast.Type) objectDefinition {
+func (jenny Schema) formatType(typeDef ast.Type) Definition {
 	switch typeDef.Kind {
 	case ast.KindStruct:
 		return jenny.formatStruct(typeDef)
@@ -85,7 +90,7 @@ func (jenny Schema) formatType(typeDef ast.Type) objectDefinition {
 	return orderedmap.New[string, any]()
 }
 
-func (jenny Schema) formatScalar(typeDef ast.Type) objectDefinition {
+func (jenny Schema) formatScalar(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	switch typeDef.AsScalar().ScalarKind {
@@ -116,7 +121,7 @@ func (jenny Schema) formatScalar(typeDef ast.Type) objectDefinition {
 	return definition
 }
 
-func (jenny Schema) formatStruct(typeDef ast.Type) objectDefinition {
+func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	definition.Set("type", "object")
@@ -155,16 +160,20 @@ func (jenny Schema) formatStruct(typeDef ast.Type) objectDefinition {
 	return definition
 }
 
-func (jenny Schema) formatRef(typeDef ast.Type) objectDefinition {
+func (jenny Schema) formatRef(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	// TODO: handle foreign refs
-	definition.Set("$ref", "#/definitions/"+typeDef.AsRef().ReferredType)
+	definition.Set("$ref", jenny.ReferenceFormatter(typeDef.AsRef()))
 
 	return definition
 }
 
-func (jenny Schema) formatEnum(typeDef ast.Type) objectDefinition {
+func (jenny Schema) defaultRefFormatter(ref ast.RefType) string {
+	return fmt.Sprintf("#/definitions/%s", ref.ReferredType)
+}
+
+func (jenny Schema) formatEnum(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	values := tools.Map(typeDef.AsEnum().Values, func(value ast.EnumValue) any {
@@ -176,7 +185,7 @@ func (jenny Schema) formatEnum(typeDef ast.Type) objectDefinition {
 	return definition
 }
 
-func (jenny Schema) formatArray(typeDef ast.Type) objectDefinition {
+func (jenny Schema) formatArray(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	definition.Set("type", "array")
@@ -185,7 +194,7 @@ func (jenny Schema) formatArray(typeDef ast.Type) objectDefinition {
 	return definition
 }
 
-func (jenny Schema) formatMap(typeDef ast.Type) objectDefinition {
+func (jenny Schema) formatMap(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	definition.Set("type", "object")
@@ -194,7 +203,7 @@ func (jenny Schema) formatMap(typeDef ast.Type) objectDefinition {
 	return definition
 }
 
-func (jenny Schema) formatDisjunction(typeDef ast.Type) objectDefinition {
+func (jenny Schema) formatDisjunction(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 	branches := tools.Map(typeDef.AsDisjunction().Branches, jenny.formatType)
 
@@ -203,7 +212,7 @@ func (jenny Schema) formatDisjunction(typeDef ast.Type) objectDefinition {
 	return definition
 }
 
-func (jenny Schema) formatComposableSlot() objectDefinition {
+func (jenny Schema) formatComposableSlot() Definition {
 	definition := orderedmap.New[string, any]()
 
 	// Same as "any"
