@@ -23,7 +23,7 @@ func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
-		output, err := jenny.generateSchema(schema)
+		output, err := jenny.generateSchema(context, schema)
 		if err != nil {
 			return nil, err
 		}
@@ -34,7 +34,7 @@ func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny Schema) generateSchema(schema *ast.Schema) ([]byte, error) {
+func (jenny Schema) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
 	jsonschemaJenny := jsonschema.Schema{
 		Config: jsonschema.Config{
 			Debug: jenny.Config.Debug,
@@ -44,7 +44,7 @@ func (jenny Schema) generateSchema(schema *ast.Schema) ([]byte, error) {
 		},
 	}
 
-	jsonSchema := jsonschemaJenny.GenerateSchema(schema)
+	jsonSchema := jsonschemaJenny.GenerateSchema(context, schema)
 
 	info := orderedmap.New[string, any]()
 	info.Set("title", schema.Package)
