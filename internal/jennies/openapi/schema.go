@@ -63,5 +63,13 @@ func (jenny Schema) generateSchema(schema *ast.Schema) ([]byte, error) {
 		"schemas": jsonSchema.Get("definitions"),
 	})
 
-	return json.Marshal(openapiSchema)
+	return jenny.toJSON(openapiSchema)
+}
+
+func (jenny Schema) toJSON(input any) ([]byte, error) {
+	if jenny.Config.Debug {
+		return json.MarshalIndent(input, "", "  ")
+	}
+
+	return json.Marshal(input)
 }
