@@ -1,6 +1,7 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
+  "EntryPoint": "InfluxQuery",
   "Objects": {
     "AdHocVariableFilter": {
       "Name": "AdHocVariableFilter",

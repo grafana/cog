@@ -1,6 +1,7 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
+  "EntryPoint": "AnyOf",
   "Objects": {
     "AnyOf": {
       "Name": "AnyOf",

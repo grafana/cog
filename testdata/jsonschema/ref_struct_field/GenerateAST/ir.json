@@ -1,6 +1,7 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
+  "EntryPoint": "grafanatest",
   "Objects": {
     "grafanatest": {
       "Name": "grafanatest",
