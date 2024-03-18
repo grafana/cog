@@ -47,7 +47,7 @@ func (formatter *typeFormatter) formatObject(def ast.Object) (string, error) {
 	}
 
 	if def.Type.IsConcreteScalar() {
-		buffer.WriteString(fmt.Sprintf("%s = %s", defName, formatValue(def.Type.AsScalar().Value)))
+		buffer.WriteString(fmt.Sprintf("%s: %s = %s", defName, formatter.formatType(def.Type), formatValue(def.Type.AsScalar().Value)))
 
 		return buffer.String(), nil
 	}
