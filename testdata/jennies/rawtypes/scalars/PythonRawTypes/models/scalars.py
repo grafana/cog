@@ -1,7 +1,7 @@
 import typing
 
 
-ConstTypeString = typing.Literal["foo"]
+ConstTypeString: typing.Literal["foo"] = "foo"
 
 
 ScalarTypeAny = object
