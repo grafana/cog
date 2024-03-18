@@ -41,11 +41,11 @@ class Struct:
 
     def to_json(self) -> dict[str, object]:
         payload: dict[str, object] = {
-            "allFields": None if self.all_fields is None else self.all_fields.to_json(),
-            "partialFields": None if self.partial_fields is None else self.partial_fields.to_json(),
-            "emptyFields": None if self.empty_fields is None else self.empty_fields.to_json(),
-            "complexField": None if self.complex_field is None else self.complex_field.to_json(),
-            "partialComplexField": None if self.partial_complex_field is None else self.partial_complex_field.to_json(),
+            "allFields": self.all_fields,
+            "partialFields": self.partial_fields,
+            "emptyFields": self.empty_fields,
+            "complexField": self.complex_field,
+            "partialComplexField": self.partial_complex_field,
         }
         return payload
 
@@ -94,7 +94,7 @@ class DefaultsStructComplexField:
     def to_json(self) -> dict[str, object]:
         payload: dict[str, object] = {
             "uid": self.uid,
-            "nested": None if self.nested is None else self.nested.to_json(),
+            "nested": self.nested,
             "array": self.array,
         }
         return payload
