@@ -4,11 +4,24 @@ from . import variants as cogvariants
 
 class Runtime:
     _instance = None
+    dataquery_variants: dict[str, typing.Type[cogvariants.Dataquery]]
 
     def __new__(cls, *args, **kwargs):
-        if not isinstance(cls._instance, cls):
+        if cls._instance is None:
             cls._instance = object.__new__(cls, *args, **kwargs)
+            cls.dataquery_variants = {}
+
         return cls._instance
+
+    def register_dataquery_variant(self, identifier: str, variant_cls: typing.Type[cogvariants.Dataquery]):
+        self.dataquery_variants[identifier] = variant_cls
+
+    def dataquery_from_json(self, data: dict[str, typing.Any], dataquery_type_hint: str) -> cogvariants.Dataquery:
+        if dataquery_type_hint != "" and dataquery_type_hint in self.dataquery_variants:
+            return self.dataquery_variants[dataquery_type_hint].from_json(data)
+
+        # We have no idea what type the dataquery is: use our `UnknownDataquery` bag to not lose data.
+        return UnknownDataquery(data)
 
 
 class UnknownDataquery(cogvariants.Dataquery):
@@ -20,7 +33,14 @@ class UnknownDataquery(cogvariants.Dataquery):
     def to_json(self) -> dict[str, object]:
         return self.data
 
+    @classmethod
+    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
+        return cls(data)
+
 
 def dataquery_from_json(data: dict[str, typing.Any], dataquery_type_hint: str) -> cogvariants.Dataquery:
-    # We have no idea what type the dataquery is: use our `UnknownDataquery` bag to not lose data.
-    return UnknownDataquery(data)
+    return Runtime().dataquery_from_json(data, dataquery_type_hint)
+
+
+def register_dataquery_variant(identifier: str, variant_cls: typing.Type[cogvariants.Dataquery]):
+    Runtime().register_dataquery_variant(identifier, variant_cls)
