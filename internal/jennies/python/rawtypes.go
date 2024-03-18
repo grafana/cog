@@ -153,26 +153,12 @@ func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Ob
 	buffer.WriteString("    def to_json(self) -> dict[str, object]:\n")
 	buffer.WriteString("        payload: dict[str, object] = {\n")
 
-	fieldValue := func(field ast.StructField, nilCheck bool) string {
-		fieldName := formatIdentifier(field.Name)
-
-		if context.ResolveToStruct(field.Type) {
-			if nilCheck {
-				return fmt.Sprintf("None if self.%[1]s is None else self.%[1]s.to_json()", fieldName)
-			}
-
-			return fmt.Sprintf("self.%s.to_json()", fieldName)
-		}
-
-		return fmt.Sprintf("self.%s", fieldName)
-	}
-
 	for _, field := range object.Type.AsStruct().Fields {
 		if !field.Required {
 			continue
 		}
 
-		buffer.WriteString(fmt.Sprintf(`            "%s": %s,`+"\n", field.Name, fieldValue(field, true)))
+		buffer.WriteString(fmt.Sprintf(`            "%s": self.%s,`+"\n", field.Name, formatIdentifier(field.Name)))
 	}
 
 	buffer.WriteString("        }\n")
@@ -185,7 +171,7 @@ func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Ob
 		fieldName := formatIdentifier(field.Name)
 
 		buffer.WriteString(fmt.Sprintf("        if self.%s is not None:\n", fieldName))
-		buffer.WriteString(fmt.Sprintf(`            payload["%s"] = %s`+"\n", field.Name, fieldValue(field, false)))
+		buffer.WriteString(fmt.Sprintf(`            payload["%s"] = self.%s`+"\n", field.Name, fieldName))
 	}
 
 	buffer.WriteString("        return payload")
@@ -223,6 +209,13 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 
 				value = fmt.Sprintf(`%s.from_json(data["%s"])`, formattedRef, field.Name)
 			}
+		} else if field.Type.IsArray() && field.Type.Array.ValueType.IsDisjunction() {
+			valueType := field.Type.Array.ValueType
+			disjunctionFromJSON := jenny.disjunctionFromJSON(valueType.AsDisjunction(), "item")
+
+			value = fmt.Sprintf(`[%[2]s for item in data["%[1]s"]]`, field.Name, disjunctionFromJSON)
+		} else if field.Type.IsDisjunction() {
+			value = jenny.disjunctionFromJSON(field.Type.AsDisjunction(), fmt.Sprintf(`data["%s"]`, field.Name))
 		}
 
 		if field.Required {
@@ -245,6 +238,32 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 	buffer.WriteString("        return cls(**args)")
 
 	return buffer.String()
+}
+
+func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, inputVar string) string {
+	// this potentially generates incorrect code, but there isn't much we can do without more information.
+	if disjunction.Discriminator == "" || disjunction.DiscriminatorMapping == nil {
+		return inputVar
+	}
+
+	decodingMap := "({"
+	defaultBranch := ""
+	for discriminator, objectRef := range disjunction.DiscriminatorMapping {
+		if discriminator == ast.DiscriminatorCatchAll {
+			continue
+		}
+
+		decodingMap += fmt.Sprintf(`"%s": %s, `, discriminator, objectRef)
+	}
+
+	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ast.DiscriminatorCatchAll]; ok {
+		defaultBranch = fmt.Sprintf(`, %s`, defaultBranchType)
+	}
+
+	decodingMap = strings.TrimSuffix(decodingMap, ", ")
+	decodingMap += fmt.Sprintf(`}.get("%s"%s)).from_json(%s)`, disjunction.Discriminator, defaultBranch, inputVar)
+
+	return decodingMap
 }
 
 func (jenny RawTypes) composableSlotFromJSON(context common.Context, parentStruct ast.StructType, field ast.StructField) string {
@@ -272,7 +291,7 @@ func (jenny RawTypes) composableSlotFromJSON(context common.Context, parentStruc
 	// then: unmarshalling boilerplate
 	hintValue := `""`
 	if hintField != nil {
-		hintValue = fmt.Sprintf(`data["%[1]s"]["type"] if data["%[1]s"] is not None and data["%[1]s"]["type"] != "" else ""`, hintField.Name)
+		hintValue = fmt.Sprintf(`data["%[1]s"]["type"] if data.get("%[1]s") is not None and data["%[1]s"].get("type", "") != "" else ""`, hintField.Name)
 	}
 
 	if field.Type.Kind == ast.KindArray {
