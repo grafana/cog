@@ -13,6 +13,9 @@ from generated.models.dashboard import (
     DataSourceRef,
     VariableSort,
 )
+from generated.models.common import (
+    TimeZoneBrowser,
+)
 from generated.cog.encoder import JSONEncoder
 from examples.python.raspberry.cpu import cpu_usage_timeseries, cpu_load_average_timeseries, cpu_temperature_gauge
 from examples.python.raspberry.disk import disk_io_timeseries, disk_space_usage_table
@@ -28,7 +31,7 @@ def build_dashboard() -> Dashboard:
         .tags(["generated", "raspberrypi-node-integration"])
         .refresh("30s")
         .time("now-30m", "now")
-        #.timezone(TimeZoneBrowser)
+        .timezone(TimeZoneBrowser)
         .timezone("browser")
         .timepicker(
             TimePicker()
