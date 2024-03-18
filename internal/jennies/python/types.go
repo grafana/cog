@@ -20,8 +20,9 @@ type typeFormatter struct {
 	context    common.Context
 }
 
-func defaultTypeFormatter(importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
+func defaultTypeFormatter(context common.Context, importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
 	return &typeFormatter{
+		context:      context,
 		importPkg:    importPkg,
 		importModule: importModule,
 	}
@@ -45,18 +46,19 @@ func (formatter *typeFormatter) formatObject(def ast.Object) (string, error) {
 		buffer.WriteString(formatter.formatComments(def.Comments))
 	}
 
+	if def.Type.IsConcreteScalar() {
+		buffer.WriteString(fmt.Sprintf("%s = %s", defName, formatValue(def.Type.AsScalar().Value)))
+
+		return buffer.String(), nil
+	}
+
 	switch def.Type.Kind {
 	case ast.KindEnum:
 		buffer.WriteString(formatter.formatEnum(def))
 	case ast.KindStruct:
 		return formatter.formatStruct(def), nil
-	case ast.KindDisjunction:
-		typingPkg := formatter.importPkg("typing", "typing")
-		buffer.WriteString(fmt.Sprintf("%s = %s.Union[%s]", defName, typingPkg, formatter.formatType(def.Type)))
-	case ast.KindMap, ast.KindRef, ast.KindArray, ast.KindIntersection, ast.KindScalar:
-		buffer.WriteString(fmt.Sprintf("%s = %s", defName, formatter.formatType(def.Type)))
 	default:
-		return "", fmt.Errorf("unhandled object of kind: %s", def.Type.Kind)
+		buffer.WriteString(fmt.Sprintf("%s = %s", defName, formatter.formatType(def.Type)))
 	}
 
 	return buffer.String(), nil
@@ -216,6 +218,11 @@ func (formatter *typeFormatter) formatRef(def ast.RefType) string {
 }
 
 func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeForwardRef bool) string {
+	referredObject, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	if found && referredObject.Type.IsConcreteScalar() {
+		return formatter.formatType(referredObject.Type)
+	}
+
 	formatted := tools.UpperCamelCase(def.ReferredType)
 
 	referredPkg := def.ReferredPkg
