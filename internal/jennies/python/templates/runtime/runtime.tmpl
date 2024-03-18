@@ -1,0 +1,26 @@
+import typing
+from . import variants as cogvariants
+
+
+class Runtime:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not isinstance(cls._instance, cls):
+            cls._instance = object.__new__(cls, *args, **kwargs)
+        return cls._instance
+
+
+class UnknownDataquery(cogvariants.Dataquery):
+    data: dict[str, typing.Any]
+
+    def __init__(self, data: dict[str, typing.Any]):
+        self.data = data
+
+    def to_json(self) -> dict[str, object]:
+        return self.data
+
+
+def dataquery_from_json(data: dict[str, typing.Any], dataquery_type_hint: str) -> cogvariants.Dataquery:
+    # We have no idea what type the dataquery is: use our `UnknownDataquery` bag to not lose data.
+    return UnknownDataquery(data)

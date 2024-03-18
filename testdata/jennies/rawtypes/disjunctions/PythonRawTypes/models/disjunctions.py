@@ -25,7 +25,7 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "field_any": data["FieldAny"],
         }
         return cls(**args)
@@ -51,7 +51,7 @@ class SomeOtherStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "foo": data["Foo"],
         }
         return cls(**args)
@@ -74,7 +74,7 @@ class YetAnotherStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "bar": data["Bar"],
         }
         return cls(**args)

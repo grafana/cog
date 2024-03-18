@@ -32,7 +32,7 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
         }
         
         if "FieldRef" in data:
@@ -63,7 +63,7 @@ class SomeOtherStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "field_any": data["FieldAny"],
         }
         return cls(**args)
@@ -83,7 +83,7 @@ class StructOptionalFieldsSomeStructFieldAnonymousStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "field_any": data["FieldAny"],
         }
         return cls(**args)

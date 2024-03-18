@@ -43,7 +43,7 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "field_ref": SomeOtherStruct.from_json(data["FieldRef"]),
             "field_disjunction_of_scalars": data["FieldDisjunctionOfScalars"],
             "field_mixed_disjunction": data["FieldMixedDisjunction"],
@@ -74,7 +74,7 @@ class SomeOtherStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "field_any": data["FieldAny"],
         }
         return cls(**args)
@@ -94,7 +94,7 @@ class StructComplexFieldsSomeStructFieldAnonymousStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "field_any": data["FieldAny"],
         }
         return cls(**args)
