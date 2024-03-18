@@ -201,7 +201,7 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 	buffer.WriteString("    @classmethod\n")
 	buffer.WriteString(fmt.Sprintf("    def from_json(cls, data: dict[str, %[1]s.Any]) -> %[1]s.Self:\n", typingPkg))
 
-	buffer.WriteString("        args = {\n")
+	buffer.WriteString(fmt.Sprintf("        args: dict[str, %s.Any] = {\n", typingPkg))
 	var optionalFields []string
 	for _, field := range object.Type.AsStruct().Fields {
 		fieldName := formatIdentifier(field.Name)
@@ -213,7 +213,9 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 			continue
 		}
 
-		if field.Type.IsRef() {
+		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
+			value = jenny.composableSlotFromJSON(context, object.Type.AsStruct(), field)
+		} else if field.Type.IsRef() {
 			ref := field.Type.AsRef()
 			referredObject, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 			if found && referredObject.Type.IsStruct() {
@@ -243,4 +245,39 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 	buffer.WriteString("        return cls(**args)")
 
 	return buffer.String()
+}
+
+func (jenny RawTypes) composableSlotFromJSON(context common.Context, parentStruct ast.StructType, field ast.StructField) string {
+	slot, _ := context.ResolveToComposableSlot(field.Type)
+	if slot.AsComposableSlot().Variant != ast.SchemaVariantDataQuery {
+		return "unknown composable slot variant"
+	}
+
+	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+
+	// First: try to locate a field that would contain the type of datasource being used.
+	// We're looking for a field defined as a reference to the `DataSourceRef` type.
+	var hintField *ast.StructField
+	for i, candidate := range parentStruct.Fields {
+		if candidate.Type.Kind != ast.KindRef {
+			continue
+		}
+		if candidate.Type.AsRef().ReferredType != "DataSourceRef" {
+			continue
+		}
+
+		hintField = &parentStruct.Fields[i]
+	}
+
+	// then: unmarshalling boilerplate
+	hintValue := `""`
+	if hintField != nil {
+		hintValue = fmt.Sprintf(`data["%[1]s"]["type"] if data["%[1]s"] is not None and data["%[1]s"]["type"] != "" else ""`, hintField.Name)
+	}
+
+	if field.Type.Kind == ast.KindArray {
+		return fmt.Sprintf(`[%[3]s.dataquery_from_json(dataquery_json, %[2]s) for dataquery_json in data["%[1]s"]]`, field.Name, hintValue, cogruntime)
+	}
+
+	return fmt.Sprintf(`%[3]s.dataquery_from_json(data["%[1]s"], %[2]s)`, field.Name, hintValue, cogruntime)
 }

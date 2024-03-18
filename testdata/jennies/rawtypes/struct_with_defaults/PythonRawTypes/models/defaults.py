@@ -27,7 +27,7 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "field_bool": data["fieldBool"],
             "field_string": data["fieldString"],
             "field_float32": data["FieldFloat32"],

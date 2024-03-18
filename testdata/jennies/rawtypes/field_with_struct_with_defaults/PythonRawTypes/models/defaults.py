@@ -18,7 +18,7 @@ class NestedStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "string_val": data["stringVal"],
             "int_val": data["intVal"],
         }
@@ -51,7 +51,7 @@ class Struct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "all_fields": NestedStruct.from_json(data["allFields"]),
             "partial_fields": NestedStruct.from_json(data["partialFields"]),
             "empty_fields": NestedStruct.from_json(data["emptyFields"]),
@@ -75,7 +75,7 @@ class DefaultsStructComplexFieldNested:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "nested_val": data["nestedVal"],
         }
         return cls(**args)
@@ -101,7 +101,7 @@ class DefaultsStructComplexField:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "uid": data["uid"],
             "nested": DefaultsStructComplexFieldNested.from_json(data["nested"]),
             "array": data["array"],
@@ -126,7 +126,7 @@ class DefaultsStructPartialComplexField:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args = {
+        args: dict[str, typing.Any] = {
             "uid": data["uid"],
             "int_val": data["intVal"],
         }
