@@ -29,14 +29,14 @@ class SomeStruct:
 
     def to_json(self) -> dict[str, object]:
         payload: dict[str, object] = {
-            "FieldRef": None if self.field_ref is None else self.field_ref.to_json(),
+            "FieldRef": self.field_ref,
             "FieldDisjunctionOfScalars": self.field_disjunction_of_scalars,
             "FieldMixedDisjunction": self.field_mixed_disjunction,
             "FieldDisjunctionWithNull": self.field_disjunction_with_null,
             "Operator": self.operator,
             "FieldArrayOfStrings": self.field_array_of_strings,
             "FieldMapOfStringToString": self.field_map_of_string_to_string,
-            "FieldAnonymousStruct": None if self.field_anonymous_struct is None else self.field_anonymous_struct.to_json(),
+            "FieldAnonymousStruct": self.field_anonymous_struct,
             "fieldRefToConstant": self.field_ref_to_constant,
         }
         return payload

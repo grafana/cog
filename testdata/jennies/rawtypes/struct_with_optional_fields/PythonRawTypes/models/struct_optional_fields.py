@@ -19,7 +19,7 @@ class SomeStruct:
         payload: dict[str, object] = {
         }
         if self.field_ref is not None:
-            payload["FieldRef"] = self.field_ref.to_json()
+            payload["FieldRef"] = self.field_ref
         if self.field_string is not None:
             payload["FieldString"] = self.field_string
         if self.operator is not None:
@@ -27,7 +27,7 @@ class SomeStruct:
         if self.field_array_of_strings is not None:
             payload["FieldArrayOfStrings"] = self.field_array_of_strings
         if self.field_anonymous_struct is not None:
-            payload["FieldAnonymousStruct"] = self.field_anonymous_struct.to_json()
+            payload["FieldAnonymousStruct"] = self.field_anonymous_struct
         return payload
 
     @classmethod
