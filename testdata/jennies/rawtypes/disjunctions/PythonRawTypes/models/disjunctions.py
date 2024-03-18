@@ -2,7 +2,7 @@ import typing
 
 
 # Refresh rate or disabled.
-RefreshRate = typing.Union[typing.Union[str, bool]]
+RefreshRate = typing.Union[str, bool]
 
 
 StringOrNull = typing.Optional[str]
@@ -31,7 +31,7 @@ class SomeStruct:
         return cls(**args)
 
 
-BoolOrRef = typing.Union[typing.Union[bool, 'SomeStruct']]
+BoolOrRef = typing.Union[bool, 'SomeStruct']
 
 
 class SomeOtherStruct:
@@ -80,7 +80,7 @@ class YetAnotherStruct:
         return cls(**args)
 
 
-SeveralRefs = typing.Union[typing.Union['SomeStruct', 'SomeOtherStruct', 'YetAnotherStruct']]
+SeveralRefs = typing.Union['SomeStruct', 'SomeOtherStruct', 'YetAnotherStruct']
 
 
 
