@@ -57,7 +57,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 
 		return imports.AddPackage(alias, pkg)
 	}
-	jenny.typeFormatter = defaultTypeFormatter(jenny.importPkg, jenny.importModule)
+	jenny.typeFormatter = defaultTypeFormatter(context, jenny.importPkg, jenny.importModule)
 
 	i := 0
 	schema.Objects.Iterate(func(_ string, object ast.Object) {

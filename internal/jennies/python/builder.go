@@ -41,7 +41,7 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 		jenny.typeFormatter = builderTypeFormatter(context, func(alias string, pkg string) string {
 			return jenny.imports.AddPackage(alias, pkg)
 		}, jenny.importModule)
-		jenny.rawTypeFormatter = defaultTypeFormatter(func(alias string, pkg string) string {
+		jenny.rawTypeFormatter = defaultTypeFormatter(context, func(alias string, pkg string) string {
 			return jenny.imports.AddPackage(alias, pkg)
 		}, jenny.importModule)
 
