@@ -87,6 +87,42 @@ passes:
   - fields_set_not_required:
       fields: [ common.TableFieldOptions.CellOptions ]
 
+  #####################
+  # candlestick panel #
+  #####################
+
+  # This field is parsed incorrectly from the CUE schema: its definition and
+  # defaults are merged for some reason.
+  # TODO: remove once the parser is fixed.
+  # See: https://github.com/grafana/cog/issues/292
+  - retype_field:
+      field: candlestick.Options.colors
+      as:
+        kind: ref
+        ref: { referred_pkg: candlestick, referred_type: CandlestickColors }
+        default: { down: "red", up: "green", flat: "gray" }
+
+  #################
+  # heatmap panel #
+  #################
+
+  # These fields are parsed incorrectly from the CUE schema: their definitions and
+  # defaults are merged for some reason.
+  # TODO: remove once the parser is fixed.
+  # See: https://github.com/grafana/cog/issues/292
+  - retype_field:
+      field: heatmap.Options.legend
+      as:
+        kind: ref
+        ref: { referred_pkg: heatmap, referred_type: HeatmapLegend }
+        default: { show: true }
+  - retype_field:
+      field: heatmap.Options.exemplars
+      as:
+        kind: ref
+        ref: { referred_pkg: heatmap, referred_type: ExemplarConfig }
+        default: { color: "rgba(255,0,255,0.7)" }
+
   ##########
   # Others #
   ##########
