@@ -66,12 +66,11 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 			err = innerErr
 			return
 		}
-
 		buffer.WriteString(objectOutput)
 
 		if object.Type.Kind == ast.KindStruct {
 			buffer.WriteString("\n\n")
-			buffer.WriteString(jenny.generateToInitMethod(context.Schemas, object))
+			buffer.WriteString(jenny.generateInitMethod(context.Schemas, object))
 
 			buffer.WriteString("\n\n")
 			buffer.WriteString(jenny.generateToJSONMethod(context, object))
@@ -99,7 +98,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 	return []byte(importStatements + buffer.String()), nil
 }
 
-func (jenny RawTypes) generateToInitMethod(schemas ast.Schemas, object ast.Object) string {
+func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object) string {
 	var buffer strings.Builder
 
 	var args []string

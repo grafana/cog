@@ -159,11 +159,16 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 			})
 		}
 
-		if referredPkg == "" {
-			return raw(fmt.Sprintf("%s(%s)", ref.ReferredType, strings.Join(extraDefaults, ", ")))
+		formattedRef := ref.ReferredType
+		if referredPkg != "" {
+			formattedRef = fmt.Sprintf("%s.%s", referredPkg, ref.ReferredType)
 		}
 
-		return raw(fmt.Sprintf("%s.%s(%s)", referredPkg, ref.ReferredType, strings.Join(extraDefaults, ", ")))
+		if referredObj.Type.IsConcreteScalar() {
+			return raw(formattedRef)
+		}
+
+		return raw(fmt.Sprintf("%s(%s)", formattedRef, strings.Join(extraDefaults, ", ")))
 	case ast.KindEnum: // anonymous enum
 		return typeDef.AsEnum().Values[0].Value
 	case ast.KindMap:
