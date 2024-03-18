@@ -73,7 +73,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 			buffer.WriteString(jenny.generateInitMethod(context.Schemas, object))
 
 			buffer.WriteString("\n\n")
-			buffer.WriteString(jenny.generateToJSONMethod(context, object))
+			buffer.WriteString(jenny.generateToJSONMethod(object))
 
 			buffer.WriteString("\n\n")
 			buffer.WriteString(jenny.generateFromJSONMethod(context, object))
@@ -147,7 +147,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 	return strings.TrimSuffix(buffer.String(), "\n")
 }
 
-func (jenny RawTypes) generateToJSONMethod(context common.Context, object ast.Object) string {
+func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("    def to_json(self) -> dict[str, object]:\n")
