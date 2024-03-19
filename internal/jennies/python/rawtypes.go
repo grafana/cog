@@ -307,10 +307,11 @@ func (jenny RawTypes) generateDataqueryVariantConfigFunc(schema *ast.Schema, obj
 	objectName := tools.UpperCamelCase(object.Name)
 	identifier := schema.Metadata.Identifier
 
-	// TODO: the `from_json_hook` needs to be generated differently if `object.Type` is a disjunction
+	// The `from_json_hook` needs to be generated differently if `object.Type` is a disjunction
+	// since there is no "from_json" method to call
 	fromJSONHook := fmt.Sprintf("%s.from_json", objectName)
 	if object.Type.IsDisjunction() {
-		fromJSONHook = `lambda x: {}`
+		fromJSONHook = "lambda data: " + jenny.disjunctionFromJSON(object.Type.AsDisjunction(), "data")
 	}
 
 	return fmt.Sprintf(`def variant_config():
