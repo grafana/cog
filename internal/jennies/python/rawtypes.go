@@ -246,7 +246,7 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 
 		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
 			value = jenny.composableSlotFromJSON(context, object.Type.AsStruct(), field)
-		} else if field.Type.IsRef() {
+		} else if field.Type.IsRef() { //nolint:gocritic
 			ref := field.Type.AsRef()
 			referredObject, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 			if found && referredObject.Type.IsStruct() {
