@@ -342,7 +342,7 @@ func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, input
 	}
 
 	decodingMap = strings.TrimSuffix(decodingMap, ", ")
-	decodingMap += fmt.Sprintf(`}.get("%s"%s)).from_json(%s)`, disjunction.Discriminator, defaultBranch, inputVar)
+	decodingMap += fmt.Sprintf(`}.get(%[3]s["%[1]s"]%[2]s)).from_json(%[3]s)`, disjunction.Discriminator, defaultBranch, inputVar)
 
 	return decodingMap
 }
