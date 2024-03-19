@@ -198,11 +198,45 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 	buffer.WriteString("    @classmethod\n")
 	buffer.WriteString(fmt.Sprintf("    def from_json(cls, data: dict[str, %[1]s.Any]) -> %[1]s.Self:\n", typingPkg))
 
-	buffer.WriteString(fmt.Sprintf("        args: dict[str, %s.Any] = {\n", typingPkg))
-	var optionalFields []string
+	buffer.WriteString(fmt.Sprintf("        args: dict[str, %s.Any] = {}\n", typingPkg))
+	var assignments []string
 	for _, field := range object.Type.AsStruct().Fields {
 		fieldName := formatIdentifier(field.Name)
 		value := fmt.Sprintf(`data["%s"]`, field.Name)
+
+		// Special cases to properly parse dashboard.Panel options
+		if object.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(object.Name, "panel") && field.Name == "options" {
+			cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+			assignment := fmt.Sprintf(`        if "options" in data:
+            config = %[1]s.panelcfg_config(data.get("type", ""))
+            if config is not None and config.options_from_json_hook is not None:
+                args["%[2]s"] = config.options_from_json_hook(data["options"])
+            else:
+                args["%[2]s"] = data["options"]`, cogruntime, fieldName)
+
+			assignments = append(assignments, assignment)
+			continue
+		}
+
+		// Special cases to properly parse dashboard.Panel fieldConfig
+		if object.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(object.Name, "panel") && field.Name == "fieldConfig" {
+			cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+			assignment := fmt.Sprintf(`        if "fieldConfig" in data:
+            config = %[1]s.panelcfg_config(data.get("type", ""))
+
+            if config is not None and config.field_config_from_json_hook is not None:
+                field_config = FieldConfigSource.from_json(data["fieldConfig"])
+
+                custom_field_config = data["fieldConfig"].get("defaults", {}).get("custom", {})
+                field_config.defaults.custom = config.field_config_from_json_hook(custom_field_config)
+
+                args["%[2]s"] = field_config
+            else:
+                args["%[2]s"] = data["fieldConfig"]`, cogruntime, fieldName)
+
+			assignments = append(assignments, assignment)
+			continue
+		}
 
 		// No need to unmarshal constant scalar fields since they're set in
 		// the object's constructor
@@ -229,20 +263,15 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 			value = jenny.disjunctionFromJSON(field.Type.AsDisjunction(), fmt.Sprintf(`data["%s"]`, field.Name))
 		}
 
-		if field.Required {
-			buffer.WriteString(fmt.Sprintf(`            "%s": %s,`+"\n", fieldName, value))
-		} else {
-			assignment := fmt.Sprintf(`        if "%s" in data:
+		assignment := fmt.Sprintf(`        if "%s" in data:
             args["%s"] = %s`, field.Name, fieldName, value)
 
-			optionalFields = append(optionalFields, assignment)
-		}
+		assignments = append(assignments, assignment)
 	}
-	buffer.WriteString("        }\n")
 
-	if len(optionalFields) != 0 {
+	if len(assignments) != 0 {
 		buffer.WriteString("        \n")
-		buffer.WriteString(strings.Join(optionalFields, "\n"))
+		buffer.WriteString(strings.Join(assignments, "\n"))
 		buffer.WriteString("        \n\n")
 	}
 
