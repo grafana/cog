@@ -4,7 +4,7 @@ from . import runtime as cogruntime
 def register_default_plugins():
     # Panelcfg variants
 {{- range $pkg := .panel_schemas }}
-    #cogruntime.register_panelcfg_variant({{ $pkg }}.variant_config())
+    cogruntime.register_panelcfg_variant({{ $pkg }}.variant_config())
 {{- end }}
 
     # Dataquery variants

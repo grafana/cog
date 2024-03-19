@@ -82,7 +82,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 
 		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
 			buffer.WriteString("\n\n\n")
-			buffer.WriteString(jenny.generateVariantConfigFunc(schema, object))
+			buffer.WriteString(jenny.generateDataqueryVariantConfigFunc(schema, object))
 		}
 
 		// we want two blank lines between objects, except at the end of the file
@@ -92,6 +92,11 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	if schema.Metadata.Kind == ast.SchemaKindComposable && schema.Metadata.Variant == ast.SchemaVariantPanel {
+		buffer.WriteString("\n\n\n")
+		buffer.WriteString(jenny.generatePanelCfgVariantConfigFunc(schema))
 	}
 
 	buffer.WriteString("\n")
@@ -246,7 +251,29 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 	return buffer.String()
 }
 
-func (jenny RawTypes) generateVariantConfigFunc(schema *ast.Schema, object ast.Object) string {
+func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) string {
+	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+	identifier := schema.Metadata.Identifier
+
+	options := "Options.from_json"
+	if _, hasOptions := schema.LocateObject("Options"); !hasOptions {
+		options = "None"
+	}
+
+	fieldConfig := "FieldConfig.from_json"
+	if _, hasFieldConfig := schema.LocateObject("FieldConfig"); !hasFieldConfig {
+		fieldConfig = "None"
+	}
+
+	return fmt.Sprintf(`def variant_config():
+    return %[1]s.PanelCfgConfig(
+        identifier="%[2]s",
+        options_from_json_hook=%[3]s,
+        field_config_from_json_hook=%[4]s,
+    )`, cogruntime, identifier, options, fieldConfig)
+}
+
+func (jenny RawTypes) generateDataqueryVariantConfigFunc(schema *ast.Schema, object ast.Object) string {
 	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
 	objectName := tools.UpperCamelCase(object.Name)
 	identifier := schema.Metadata.Identifier
