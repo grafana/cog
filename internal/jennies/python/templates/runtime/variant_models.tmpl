@@ -1,9 +1,5 @@
-import typing
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 class Dataquery(ABC):
-    @classmethod
-    @abstractmethod
-    def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        ...
+    ...

@@ -160,7 +160,7 @@ func (formatter *typeFormatter) formatStruct(def ast.Object) string {
 	var buffer strings.Builder
 
 	classBases := ""
-	if def.Type.Kind == ast.KindStruct && def.Type.ImplementsVariant() {
+	if def.Type.IsStruct() && def.Type.ImplementsVariant() {
 		cogVariants := formatter.importModule("cogvariants", "..cog", "variants")
 		variant := tools.UpperCamelCase(def.Type.ImplementedVariant())
 

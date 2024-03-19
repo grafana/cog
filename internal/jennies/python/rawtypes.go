@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/orderedmap"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
@@ -77,6 +78,11 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 
 			buffer.WriteString("\n\n")
 			buffer.WriteString(jenny.generateFromJSONMethod(context, object))
+		}
+
+		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
+			buffer.WriteString("\n\n\n")
+			buffer.WriteString(jenny.generateVariantConfigFunc(schema, object))
 		}
 
 		// we want two blank lines between objects, except at the end of the file
@@ -238,6 +244,24 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 	buffer.WriteString("        return cls(**args)")
 
 	return buffer.String()
+}
+
+func (jenny RawTypes) generateVariantConfigFunc(schema *ast.Schema, object ast.Object) string {
+	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+	objectName := tools.UpperCamelCase(object.Name)
+	identifier := schema.Metadata.Identifier
+
+	// TODO: the `from_json_hook` needs to be generated differently if `object.Type` is a disjunction
+	fromJSONHook := fmt.Sprintf("%s.from_json", objectName)
+	if object.Type.IsDisjunction() {
+		fromJSONHook = `lambda x: {}`
+	}
+
+	return fmt.Sprintf(`def variant_config():
+    return %[2]s.DataqueryConfig(
+        identifier="%[3]s",
+        from_json_hook=%[1]s,
+    )`, fromJSONHook, cogruntime, identifier)
 }
 
 func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, inputVar string) string {
