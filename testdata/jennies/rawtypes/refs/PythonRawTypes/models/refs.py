@@ -16,9 +16,11 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "field_any": data["FieldAny"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "FieldAny" in data:
+            args["field_any"] = data["FieldAny"]        
+
         return cls(**args)
 
 

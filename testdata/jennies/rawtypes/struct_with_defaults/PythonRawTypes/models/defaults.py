@@ -27,10 +27,15 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "field_bool": data["fieldBool"],
-            "field_string": data["fieldString"],
-            "field_float32": data["FieldFloat32"],
-            "field_int32": data["FieldInt32"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "fieldBool" in data:
+            args["field_bool"] = data["fieldBool"]
+        if "fieldString" in data:
+            args["field_string"] = data["fieldString"]
+        if "FieldFloat32" in data:
+            args["field_float32"] = data["FieldFloat32"]
+        if "FieldInt32" in data:
+            args["field_int32"] = data["FieldInt32"]        
+
         return cls(**args)

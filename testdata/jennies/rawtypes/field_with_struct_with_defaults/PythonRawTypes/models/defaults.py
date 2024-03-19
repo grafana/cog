@@ -18,10 +18,13 @@ class NestedStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "string_val": data["stringVal"],
-            "int_val": data["intVal"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "stringVal" in data:
+            args["string_val"] = data["stringVal"]
+        if "intVal" in data:
+            args["int_val"] = data["intVal"]        
+
         return cls(**args)
 
 
@@ -51,13 +54,19 @@ class Struct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "all_fields": NestedStruct.from_json(data["allFields"]),
-            "partial_fields": NestedStruct.from_json(data["partialFields"]),
-            "empty_fields": NestedStruct.from_json(data["emptyFields"]),
-            "complex_field": DefaultsStructComplexField.from_json(data["complexField"]),
-            "partial_complex_field": DefaultsStructPartialComplexField.from_json(data["partialComplexField"]),
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "allFields" in data:
+            args["all_fields"] = NestedStruct.from_json(data["allFields"])
+        if "partialFields" in data:
+            args["partial_fields"] = NestedStruct.from_json(data["partialFields"])
+        if "emptyFields" in data:
+            args["empty_fields"] = NestedStruct.from_json(data["emptyFields"])
+        if "complexField" in data:
+            args["complex_field"] = DefaultsStructComplexField.from_json(data["complexField"])
+        if "partialComplexField" in data:
+            args["partial_complex_field"] = DefaultsStructPartialComplexField.from_json(data["partialComplexField"])        
+
         return cls(**args)
 
 
@@ -75,9 +84,11 @@ class DefaultsStructComplexFieldNested:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "nested_val": data["nestedVal"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "nestedVal" in data:
+            args["nested_val"] = data["nestedVal"]        
+
         return cls(**args)
 
 
@@ -101,11 +112,15 @@ class DefaultsStructComplexField:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "uid": data["uid"],
-            "nested": DefaultsStructComplexFieldNested.from_json(data["nested"]),
-            "array": data["array"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "uid" in data:
+            args["uid"] = data["uid"]
+        if "nested" in data:
+            args["nested"] = DefaultsStructComplexFieldNested.from_json(data["nested"])
+        if "array" in data:
+            args["array"] = data["array"]        
+
         return cls(**args)
 
 
@@ -126,10 +141,13 @@ class DefaultsStructPartialComplexField:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "uid": data["uid"],
-            "int_val": data["intVal"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "uid" in data:
+            args["uid"] = data["uid"]
+        if "intVal" in data:
+            args["int_val"] = data["intVal"]        
+
         return cls(**args)
 
 
