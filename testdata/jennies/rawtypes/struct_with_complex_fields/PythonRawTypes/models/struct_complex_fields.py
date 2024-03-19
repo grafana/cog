@@ -43,17 +43,27 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "field_ref": SomeOtherStruct.from_json(data["FieldRef"]),
-            "field_disjunction_of_scalars": data["FieldDisjunctionOfScalars"],
-            "field_mixed_disjunction": data["FieldMixedDisjunction"],
-            "field_disjunction_with_null": data["FieldDisjunctionWithNull"],
-            "operator": data["Operator"],
-            "field_array_of_strings": data["FieldArrayOfStrings"],
-            "field_map_of_string_to_string": data["FieldMapOfStringToString"],
-            "field_anonymous_struct": StructComplexFieldsSomeStructFieldAnonymousStruct.from_json(data["FieldAnonymousStruct"]),
-            "field_ref_to_constant": data["fieldRefToConstant"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "FieldRef" in data:
+            args["field_ref"] = SomeOtherStruct.from_json(data["FieldRef"])
+        if "FieldDisjunctionOfScalars" in data:
+            args["field_disjunction_of_scalars"] = data["FieldDisjunctionOfScalars"]
+        if "FieldMixedDisjunction" in data:
+            args["field_mixed_disjunction"] = data["FieldMixedDisjunction"]
+        if "FieldDisjunctionWithNull" in data:
+            args["field_disjunction_with_null"] = data["FieldDisjunctionWithNull"]
+        if "Operator" in data:
+            args["operator"] = data["Operator"]
+        if "FieldArrayOfStrings" in data:
+            args["field_array_of_strings"] = data["FieldArrayOfStrings"]
+        if "FieldMapOfStringToString" in data:
+            args["field_map_of_string_to_string"] = data["FieldMapOfStringToString"]
+        if "FieldAnonymousStruct" in data:
+            args["field_anonymous_struct"] = StructComplexFieldsSomeStructFieldAnonymousStruct.from_json(data["FieldAnonymousStruct"])
+        if "fieldRefToConstant" in data:
+            args["field_ref_to_constant"] = data["fieldRefToConstant"]        
+
         return cls(**args)
 
 
@@ -74,9 +84,11 @@ class SomeOtherStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "field_any": data["FieldAny"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "FieldAny" in data:
+            args["field_any"] = data["FieldAny"]        
+
         return cls(**args)
 
 
@@ -94,9 +106,11 @@ class StructComplexFieldsSomeStructFieldAnonymousStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "field_any": data["FieldAny"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "FieldAny" in data:
+            args["field_any"] = data["FieldAny"]        
+
         return cls(**args)
 
 

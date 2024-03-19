@@ -66,20 +66,35 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "field_any": data["FieldAny"],
-            "field_bool": data["FieldBool"],
-            "field_bytes": data["FieldBytes"],
-            "field_string": data["FieldString"],
-            "field_float32": data["FieldFloat32"],
-            "field_float64": data["FieldFloat64"],
-            "field_uint8": data["FieldUint8"],
-            "field_uint16": data["FieldUint16"],
-            "field_uint32": data["FieldUint32"],
-            "field_uint64": data["FieldUint64"],
-            "field_int8": data["FieldInt8"],
-            "field_int16": data["FieldInt16"],
-            "field_int32": data["FieldInt32"],
-            "field_int64": data["FieldInt64"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "FieldAny" in data:
+            args["field_any"] = data["FieldAny"]
+        if "FieldBool" in data:
+            args["field_bool"] = data["FieldBool"]
+        if "FieldBytes" in data:
+            args["field_bytes"] = data["FieldBytes"]
+        if "FieldString" in data:
+            args["field_string"] = data["FieldString"]
+        if "FieldFloat32" in data:
+            args["field_float32"] = data["FieldFloat32"]
+        if "FieldFloat64" in data:
+            args["field_float64"] = data["FieldFloat64"]
+        if "FieldUint8" in data:
+            args["field_uint8"] = data["FieldUint8"]
+        if "FieldUint16" in data:
+            args["field_uint16"] = data["FieldUint16"]
+        if "FieldUint32" in data:
+            args["field_uint32"] = data["FieldUint32"]
+        if "FieldUint64" in data:
+            args["field_uint64"] = data["FieldUint64"]
+        if "FieldInt8" in data:
+            args["field_int8"] = data["FieldInt8"]
+        if "FieldInt16" in data:
+            args["field_int16"] = data["FieldInt16"]
+        if "FieldInt32" in data:
+            args["field_int32"] = data["FieldInt32"]
+        if "FieldInt64" in data:
+            args["field_int64"] = data["FieldInt64"]        
+
         return cls(**args)

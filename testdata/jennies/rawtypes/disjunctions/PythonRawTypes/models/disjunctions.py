@@ -25,9 +25,11 @@ class SomeStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "field_any": data["FieldAny"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "FieldAny" in data:
+            args["field_any"] = data["FieldAny"]        
+
         return cls(**args)
 
 
@@ -51,9 +53,11 @@ class SomeOtherStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "foo": data["Foo"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "Foo" in data:
+            args["foo"] = data["Foo"]        
+
         return cls(**args)
 
 
@@ -74,9 +78,11 @@ class YetAnotherStruct:
 
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
-        args: dict[str, typing.Any] = {
-            "bar": data["Bar"],
-        }
+        args: dict[str, typing.Any] = {}
+        
+        if "Bar" in data:
+            args["bar"] = data["Bar"]        
+
         return cls(**args)
 
 
