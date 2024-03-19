@@ -42,6 +42,9 @@ class Runtime:
         # We have no idea what type the dataquery is: use our `UnknownDataquery` bag to not lose data.
         return UnknownDataquery(data)
 
+    def panelcfg_config(self, variant: str) -> Optional[PanelCfgConfig]:
+        return self.panelcfg_variants.get(variant, None)
+
 
 class UnknownDataquery(cogvariants.Dataquery):
     data: dict[str, Any]
@@ -59,6 +62,10 @@ class UnknownDataquery(cogvariants.Dataquery):
 
 def dataquery_from_json(data: dict[str, Any], dataquery_type_hint: str) -> cogvariants.Dataquery:
     return Runtime().dataquery_from_json(data, dataquery_type_hint)
+
+
+def panelcfg_config(variant: str) -> Optional[PanelCfgConfig]:
+    return Runtime().panelcfg_config(variant)
 
 
 def register_panelcfg_variant(variant: PanelCfgConfig):
