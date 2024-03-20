@@ -9,14 +9,22 @@ import (
 
 const LanguageRef = "python"
 
+type Config struct {
+	PathPrefix string
+}
+
 type Language struct {
+	config Config
 }
 
 func New() *Language {
-	return &Language{}
+	return &Language{
+		config: Config{},
+	}
 }
 
-func (language *Language) RegisterCliFlags(_ *cobra.Command) {
+func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVar(&language.config.PathPrefix, "python-path-prefix", "", "Python path prefix.")
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
@@ -31,6 +39,10 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		common.If[common.Context](globalConfig.Builders, &Builder{}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+
+	if language.config.PathPrefix != "" {
+		jenny.AddPostprocessors(common.PathPrefixer(language.config.PathPrefix))
+	}
 
 	return jenny
 }
