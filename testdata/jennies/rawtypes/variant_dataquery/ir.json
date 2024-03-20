@@ -1,0 +1,46 @@
+{
+  "Package": "variant_dataquery",
+  "Metadata": {
+    "Kind": "composable",
+    "Variant": "dataquery",
+    "Identifier": "prometheus"
+  },
+  "Objects": {
+    "Query": {
+      "Name": "Query",
+      "Type": {
+        "Kind": "struct",
+        "Hints": {
+          "implements_variant": "dataquery"
+        },
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "expr",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "instant",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "variant_dataquery",
+        "ReferredType": "Query"
+      }
+    }
+  }
+}
