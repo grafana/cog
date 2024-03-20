@@ -12,6 +12,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	"github.com/grafana/cog/internal/yaml"
 	"github.com/spf13/cobra"
@@ -65,6 +66,10 @@ type Options struct {
 	// TemplatesData holds data that will be injected into package and
 	// repository templates when rendering them.
 	TemplatesData map[string]string
+}
+
+func (opts Options) languageOutputDir(language string) string {
+	return strings.ReplaceAll(opts.OutputDir, "%l", language)
 }
 
 func (opts Options) veneerFiles() ([]string, error) {
@@ -200,53 +205,35 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 		}
 
 		// prepare the jennies
-		outputDir := strings.ReplaceAll(opts.OutputDir, "%l", language)
 		languageJennies := target.Jennies(opts.JenniesConfig)
-		languageJennies.AddPostprocessors(common.PathPrefixer(outputDir))
+		languageJennies.AddPostprocessors(common.PathPrefixer(opts.languageOutputDir(language)))
 
-		if opts.PackageTemplates != "" {
-			languageJennies.AppendOneToMany(&common.PackageTemplate{
-				Language:    language,
-				TemplateDir: opts.PackageTemplates,
-				ExtraData:   opts.TemplatesData,
-			})
+		jenniesInput := common.Context{
+			Schemas:  processedSchemas,
+			Builders: builders,
 		}
 
 		// then delegate the codegen to the jennies
-		fs, err := languageJennies.GenerateFS(common.Context{
-			Schemas:  processedSchemas,
-			Builders: builders,
-		})
-		if err != nil {
+		if err := runJenny(languageJennies, jenniesInput, rootCodeJenFS); err != nil {
 			return err
 		}
 
-		if err = rootCodeJenFS.Merge(fs); err != nil {
-			return err
+		if opts.PackageTemplates != "" {
+			packageJennies := packageTemplatesJenny(language, opts)
+
+			if err := runJenny(packageJennies, jenniesInput, rootCodeJenFS); err != nil {
+				return err
+			}
 		}
 	}
 
 	if opts.RepositoryTemplates != "" {
-		globalJenny := codejen.JennyListWithNamer[common.BuildOptions](func(_ common.BuildOptions) string {
-			return "Global"
-		})
-		globalJenny.AppendOneToMany(&common.RepositoryTemplate{
-			TemplateDir: opts.RepositoryTemplates,
-			ExtraData:   opts.TemplatesData,
-		})
-		globalJenny.AddPostprocessors(
-			common.GeneratedCommentHeader(opts.JenniesConfig),
-			common.PathPrefixer(filepath.Clean(strings.ReplaceAll(opts.OutputDir, "%l", "."))),
-		)
-
-		fs, err := globalJenny.GenerateFS(common.BuildOptions{
+		repoTemplatesJenny := repositoryTemplatesJenny(opts)
+		jennyInput := common.BuildOptions{
 			Languages: targetsByLanguage.AsLanguageRefs(),
-		})
-		if err != nil {
-			return err
 		}
 
-		if err = rootCodeJenFS.Merge(fs); err != nil {
+		if err := runJenny(repoTemplatesJenny, jennyInput, rootCodeJenFS); err != nil {
 			return err
 		}
 	}
@@ -257,4 +244,45 @@ func doGenerate(allTargets jennies.LanguageJennies, opts Options) error {
 	}
 
 	return nil
+}
+
+func repositoryTemplatesJenny(opts Options) *codejen.JennyList[common.BuildOptions] {
+	repoTemplatesJenny := codejen.JennyListWithNamer[common.BuildOptions](func(_ common.BuildOptions) string {
+		return "RepositoryTemplates"
+	})
+	repoTemplatesJenny.AppendOneToMany(&common.RepositoryTemplate{
+		TemplateDir: opts.RepositoryTemplates,
+		ExtraData:   opts.TemplatesData,
+	})
+	repoTemplatesJenny.AddPostprocessors(
+		common.GeneratedCommentHeader(opts.JenniesConfig),
+		common.PathPrefixer(filepath.Clean(strings.ReplaceAll(opts.OutputDir, "%l", "."))),
+	)
+
+	return repoTemplatesJenny
+}
+
+func packageTemplatesJenny(language string, opts Options) *codejen.JennyList[common.Context] {
+	pkgTemplatesJenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
+		return "PackageTemplates" + tools.UpperCamelCase(language)
+	})
+	pkgTemplatesJenny.AppendOneToMany(&common.PackageTemplate{
+		Language:    language,
+		TemplateDir: opts.PackageTemplates,
+		ExtraData:   opts.TemplatesData,
+	})
+	pkgTemplatesJenny.AddPostprocessors(
+		common.PathPrefixer(opts.languageOutputDir(language)),
+	)
+
+	return pkgTemplatesJenny
+}
+
+func runJenny[I any](jenny *codejen.JennyList[I], input I, destinationFS *codejen.FS) error {
+	fs, err := jenny.GenerateFS(input)
+	if err != nil {
+		return err
+	}
+
+	return destinationFS.Merge(fs)
 }
