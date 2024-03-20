@@ -1,0 +1,34 @@
+{
+  "Package": "variant_panelcfg_only_options",
+  "Metadata": {
+    "Kind": "composable",
+    "Variant": "panelcfg",
+    "Identifier": "text"
+  },
+  "Objects": {
+    "Options": {
+      "Name": "Options",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "content",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "variant_panelcfg_only_options",
+        "ReferredType": "Options"
+      }
+    }
+  }
+}

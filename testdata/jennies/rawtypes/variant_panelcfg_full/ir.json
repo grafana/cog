@@ -1,0 +1,58 @@
+{
+  "Package": "variant_panelcfg_full",
+  "Metadata": {
+    "Kind": "composable",
+    "Variant": "panelcfg",
+    "Identifier": "timeseries"
+  },
+  "Objects": {
+    "Options": {
+      "Name": "Options",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "timeseries_option",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "variant_panelcfg_full",
+        "ReferredType": "Options"
+      }
+    },
+    "FieldConfig": {
+      "Name": "FieldConfig",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "timeseries_field_config_option",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "variant_panelcfg_full",
+        "ReferredType": "FieldConfig"
+      }
+    }
+  }
+}
