@@ -223,16 +223,13 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 			cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
 			assignment := fmt.Sprintf(`        if "fieldConfig" in data:
             config = %[1]s.panelcfg_config(data.get("type", ""))
+            field_config = FieldConfigSource.from_json(data["fieldConfig"])
 
             if config is not None and config.field_config_from_json_hook is not None:
-                field_config = FieldConfigSource.from_json(data["fieldConfig"])
-
                 custom_field_config = data["fieldConfig"].get("defaults", {}).get("custom", {})
                 field_config.defaults.custom = config.field_config_from_json_hook(custom_field_config)
 
-                args["%[2]s"] = field_config
-            else:
-                args["%[2]s"] = data["fieldConfig"]`, cogruntime, fieldName)
+            args["%[2]s"] = field_config`, cogruntime, fieldName)
 
 			assignments = append(assignments, assignment)
 			continue
