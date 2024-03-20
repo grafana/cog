@@ -1,3 +1,4 @@
+import json
 from generated.builders.dashboard import (
     Dashboard,
     TimePicker,
@@ -6,6 +7,7 @@ from generated.builders.dashboard import (
     QueryVariable,
 )
 from generated.models.dashboard import (
+    Dashboard as DashboardModel,
     DashboardCursorSync,
     VariableHide,
     VariableOption,
@@ -17,6 +19,7 @@ from generated.models.common import (
     TimeZoneBrowser,
 )
 from generated.cog.encoder import JSONEncoder
+from generated.cog.plugins import register_default_plugins
 from examples.python.raspberry.cpu import cpu_usage_timeseries, cpu_load_average_timeseries, cpu_temperature_gauge
 from examples.python.raspberry.disk import disk_io_timeseries, disk_space_usage_table
 from examples.python.raspberry.logs import errors_in_system_logs, all_system_logs, auth_logs, kernel_logs
@@ -90,6 +93,14 @@ if __name__ == '__main__':
     dashboard = build_dashboard().build()
     encoder = JSONEncoder(sort_keys=True, indent=2)
 
-    print(
-        encoder.encode(dashboard)
+    dashboard_json = encoder.encode(dashboard)
+
+    print(dashboard_json)
+
+    register_default_plugins()
+
+    decoded_dashboard = DashboardModel.from_json(
+        json.loads(dashboard_json)
     )
+
+    print(decoded_dashboard)
