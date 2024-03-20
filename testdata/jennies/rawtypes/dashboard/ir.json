@@ -1,0 +1,212 @@
+{
+  "Package": "dashboard",
+  "Metadata": {
+    "Kind": "core"
+  },
+  "Objects": {
+    "Dashboard": {
+      "Name": "Dashboard",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "title",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "panels",
+              "Type": {
+                "Kind": "array",
+                "Array": {
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Ref": {
+                      "ReferredPkg": "dashboard",
+                      "ReferredType": "Panel"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "dashboard",
+        "ReferredType": "Dashboard"
+      }
+    },
+    "DataSourceRef": {
+      "Name": "DataSourceRef",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "uid",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "dashboard",
+        "ReferredType": "DataSourceRef"
+      }
+    },
+    "FieldConfigSource": {
+      "Name": "FieldConfigSource",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "defaults",
+              "Type": {
+                "Kind": "ref",
+                "Ref": {
+                  "ReferredPkg": "dashboard",
+                  "ReferredType": "FieldConfig"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "dashboard",
+        "ReferredType": "FieldConfigSource"
+      }
+    },
+    "FieldConfig": {
+      "Name": "FieldConfig",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "unit",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "custom",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "dashboard",
+        "ReferredType": "FieldConfig"
+      }
+    },
+    "Panel": {
+      "Name": "Panel",
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "title",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "type",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "datasource",
+              "Type": {
+                "Kind": "ref",
+                "Ref": {
+                  "ReferredPkg": "dashboard",
+                  "ReferredType": "DataSourceRef"
+                }
+              }
+            },
+            {
+              "Name": "options",
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            },
+            {
+              "Name": "targets",
+              "Type": {
+                "Kind": "array",
+                "Array": {
+                  "ValueType": {
+                    "Kind": "composable_slot",
+                    "ComposableSlot": {
+                      "Variant": "dataquery"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "Name": "fieldConfig",
+              "Type": {
+                "Kind": "ref",
+                "Ref": {
+                  "ReferredPkg": "dashboard",
+                  "ReferredType": "FieldConfigSource"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "dashboard",
+        "ReferredType": "Panel"
+      }
+    }
+  }
+}
