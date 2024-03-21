@@ -29,7 +29,7 @@ environments, and the risks are unknown/high.
 ## Installing
 
 ```shell
-python3 -m pip install grafana_foundation_sdk
+python3 -m pip install grafana_foundation_sdk=={{ .Extra.GrafanaVersion|registryToSemver }}+cog{{ .Extra.CogVersion }}.{{ .Extra.BuildTimestamp }}
 ```
 
 ## Example usage
