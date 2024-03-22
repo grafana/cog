@@ -13,7 +13,7 @@ keywords = [
     "traces",
     "metrics"
 ]
-version = "{{ .Extra.GrafanaVersion|registryToSemver }}+cog{{ .Extra.CogVersion }}.{{ .Extra.BuildTimestamp }}"
+version = "{{ .Extra.BuildTimestamp }}!{{ .Extra.GrafanaVersion|registryToSemver }}"
 dependencies = []
 requires-python = ">=3.11"
 classifiers = [
