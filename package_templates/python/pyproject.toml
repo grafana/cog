@@ -28,7 +28,6 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 readme = "README.md"
-license = { file = "LICENSE.md" }
 authors = [
     { name = "Grafana Labs" },
 ]
