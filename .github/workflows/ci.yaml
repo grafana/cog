@@ -7,7 +7,7 @@ on:
 env:
   GO_VERSION: '1.21'
   NODE_VERSION: '18'
-  PYTHON_VERSION: '3.11'
+  PYTHON_VERSION: '3.12'
   DOCKER_TOOLS: false
 
 jobs:
