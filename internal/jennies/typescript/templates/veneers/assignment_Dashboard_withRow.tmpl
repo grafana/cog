@@ -3,7 +3,7 @@
 		// Position the row on the grid
 		rowPanelResource.gridPos = {
 			x: 0, // beginning of the line
-			y: this.currentY,
+			y: this.currentY + this.lastPanelHeight,
 
 			h: 1,
 			w: 24, // full width
@@ -14,6 +14,6 @@
 
 		// Reset the state for the next row
 		this.currentX = 0;
-		this.currentY += rowPanelResource.gridPos.h;
+		this.currentY = rowPanelResource.gridPos.y + 1;
 		this.lastPanelHeight = 0;
 {{- end }}
