@@ -16,4 +16,26 @@
 		this.currentX = 0;
 		this.currentY = rowPanelResource.gridPos.y + 1;
 		this.lastPanelHeight = 0;
+
+		// Position the row's panels on the grid
+		rowPanelResource.panels.forEach(panel => {
+			if (!panel.gridPos) {
+				panel.gridPos = dashboard.defaultGridPos();
+			}
+
+			// Position the panel on the grid
+			panel.gridPos.x = this.currentX;
+			panel.gridPos.y = this.currentY;
+
+			// Prepare the coordinates for the next panel
+			this.currentX += panel.gridPos.w;
+			this.lastPanelHeight = Math.max(this.lastPanelHeight, panel.gridPos.h);
+
+			// Check for grid width overflow?
+			if (this.currentX >= 24) {
+				this.currentX = 0;
+				this.currentY += this.lastPanelHeight;
+				this.lastPanelHeight = 0;
+			}
+		});
 {{- end }}
