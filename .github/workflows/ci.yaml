@@ -7,6 +7,7 @@ on:
 env:
   GO_VERSION: '1.21'
   NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
   DOCKER_TOOLS: false
 
 jobs:
@@ -67,6 +68,14 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install mypy
+        run: python3 -m pip install mypy
+
       - name: Install ts-node
         run: npm install -g ts-node
 
@@ -102,6 +111,9 @@ jobs:
             echo "Building $d"
             ts-node "./$d"
           done
+
+      - name: Lint generated Python code
+        run: mypy generated/python/
 
   examples:
     name: Run examples
