@@ -3,7 +3,7 @@
     // Position the row on the grid
     rowPanelResource.GridPos = &GridPos{
         X: 0, // beginning of the line
-        Y: builder.currentY,
+        Y: builder.currentY + builder.lastPanelHeight,
 
         H: 1,
         W: 24, // full width
@@ -14,6 +14,6 @@
 
     // Reset the state for the next row
 	builder.currentX = 0
-	builder.currentY += rowPanelResource.GridPos.H
+	builder.currentY = rowPanelResource.GridPos.Y + 1
 	builder.lastPanelHeight = 0
 {{- end }}
