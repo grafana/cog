@@ -253,11 +253,27 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 			}
 		} else if field.Type.IsArray() && field.Type.Array.ValueType.IsDisjunction() {
 			valueType := field.Type.Array.ValueType
-			disjunctionFromJSON := jenny.disjunctionFromJSON(valueType.AsDisjunction(), "item")
+			decodingMap, decodingCall := jenny.disjunctionFromJSON(valueType.AsDisjunction(), "item")
+			if decodingMap != "" {
+				decodingMap += "\n            "
+			}
 
-			value = fmt.Sprintf(`[%[2]s for item in data["%[1]s"]]`, field.Name, disjunctionFromJSON)
+			value = fmt.Sprintf(`[%[2]s for item in data["%[1]s"]]`, field.Name, decodingCall)
+
+			assignment := fmt.Sprintf(`        if "%s" in data:
+            %sargs["%s"] = %s`, field.Name, decodingMap, fieldName, value)
+			assignments = append(assignments, assignment)
+			continue
 		} else if field.Type.IsDisjunction() {
-			value = jenny.disjunctionFromJSON(field.Type.AsDisjunction(), fmt.Sprintf(`data["%s"]`, field.Name))
+			decodingMap, decodingCall := jenny.disjunctionFromJSON(field.Type.AsDisjunction(), fmt.Sprintf(`data["%s"]`, field.Name))
+			if decodingMap != "" {
+				decodingMap += "\n            "
+			}
+
+			assignment := fmt.Sprintf(`        if "%s" in data:
+            %sargs["%s"] = %s`, field.Name, decodingMap, fieldName, decodingCall)
+			assignments = append(assignments, assignment)
+			continue
 		}
 
 		assignment := fmt.Sprintf(`        if "%s" in data:
@@ -304,27 +320,35 @@ func (jenny RawTypes) generateDataqueryVariantConfigFunc(schema *ast.Schema, obj
 	objectName := tools.UpperCamelCase(object.Name)
 	identifier := schema.Metadata.Identifier
 
+	setup := ""
+
 	// The `from_json_hook` needs to be generated differently if `object.Type` is a disjunction
 	// since there is no "from_json" method to call
 	fromJSONHook := fmt.Sprintf("%s.from_json", objectName)
 	if object.Type.IsDisjunction() {
-		fromJSONHook = "lambda data: " + jenny.disjunctionFromJSON(object.Type.AsDisjunction(), "data")
+		decodingMap, decodingCall := jenny.disjunctionFromJSON(object.Type.AsDisjunction(), "data")
+		fromJSONHook = "lambda data: " + decodingCall
+
+		setup = decodingMap + "\n    "
 	}
 
-	return fmt.Sprintf(`def variant_config():
-    return %[2]s.DataqueryConfig(
+	return fmt.Sprintf(`def variant_config() -> %[2]s.DataqueryConfig:
+    %[4]sreturn %[2]s.DataqueryConfig(
         identifier="%[3]s",
         from_json_hook=%[1]s,
-    )`, fromJSONHook, cogruntime, identifier)
+    )`, fromJSONHook, cogruntime, identifier, setup)
 }
 
-func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, inputVar string) string {
+func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, inputVar string) (string, string) {
 	// this potentially generates incorrect code, but there isn't much we can do without more information.
 	if disjunction.Discriminator == "" || disjunction.DiscriminatorMapping == nil {
-		return inputVar
+		return "", inputVar
 	}
 
-	decodingMap := "({"
+	typingPkg := jenny.importPkg("typing", "typing")
+
+	decodingMap := "{"
+	branchTypes := make([]string, 0, len(disjunction.Branches))
 	defaultBranch := ""
 	for discriminator, objectRef := range disjunction.DiscriminatorMapping {
 		if discriminator == ast.DiscriminatorCatchAll {
@@ -332,16 +356,23 @@ func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, input
 		}
 
 		decodingMap += fmt.Sprintf(`"%s": %s, `, discriminator, objectRef)
+		branchTypes = append(branchTypes, fmt.Sprintf("%s.Type[%s]", typingPkg, objectRef))
 	}
+
+	decodingMap = strings.TrimSuffix(decodingMap, ", ") + "}"
+
+	typeDecl := fmt.Sprintf("dict[str, %s.Union[%s]]", typingPkg, strings.Join(branchTypes, ", "))
+
+	decodingMap = fmt.Sprintf("decoding_map: %s = %s", typeDecl, decodingMap)
+	decodingCall := fmt.Sprintf(`decoding_map[%[2]s["%[1]s"]].from_json(%[2]s)`, disjunction.Discriminator, inputVar)
 
 	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ast.DiscriminatorCatchAll]; ok {
 		defaultBranch = fmt.Sprintf(`, %s`, defaultBranchType)
+
+		decodingCall = fmt.Sprintf(`decoding_map.get(%[3]s["%[1]s"]%[2]s).from_json(%[3]s)`, disjunction.Discriminator, defaultBranch, inputVar)
 	}
 
-	decodingMap = strings.TrimSuffix(decodingMap, ", ")
-	decodingMap += fmt.Sprintf(`}.get(%[3]s["%[1]s"]%[2]s)).from_json(%[3]s)`, disjunction.Discriminator, defaultBranch, inputVar)
-
-	return decodingMap
+	return decodingMap, decodingCall
 }
 
 func (jenny RawTypes) composableSlotFromJSON(context common.Context, parentStruct ast.StructType, field ast.StructField) string {
