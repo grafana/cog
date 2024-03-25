@@ -1,0 +1,47 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "defaults",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "SomeStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fieldBool",
+          "fieldString",
+          "FieldStringWithConstantValue",
+          "FieldFloat32",
+          "FieldInt32"
+        ],
+        "properties": {
+          "fieldBool": {
+            "type": "boolean",
+            "default": true
+          },
+          "fieldString": {
+            "type": "string",
+            "default": "foo"
+          },
+          "FieldStringWithConstantValue": {
+            "type": "string",
+            "const": "auto"
+          },
+          "FieldFloat32": {
+            "type": "number",
+            "default": 42.42
+          },
+          "FieldInt32": {
+            "type": "integer",
+            "default": 42
+          }
+        }
+      }
+    }
+  }
+}

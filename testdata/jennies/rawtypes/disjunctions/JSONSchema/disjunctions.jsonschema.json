@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "RefreshRate": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
+      "description": "Refresh rate or disabled."
+    },
+    "StringOrNull": {
+      "type": "string"
+    },
+    "SomeStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Type",
+        "FieldAny"
+      ],
+      "properties": {
+        "Type": {
+          "type": "string",
+          "const": "some-struct"
+        },
+        "FieldAny": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "BoolOrRef": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/definitions/SomeStruct"
+        }
+      ]
+    },
+    "SomeOtherStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Type",
+        "Foo"
+      ],
+      "properties": {
+        "Type": {
+          "type": "string",
+          "const": "some-other-struct"
+        },
+        "Foo": {
+          "type": "string"
+        }
+      }
+    },
+    "YetAnotherStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Type",
+        "Bar"
+      ],
+      "properties": {
+        "Type": {
+          "type": "string",
+          "const": "yet-another-struct"
+        },
+        "Bar": {
+          "type": "integer"
+        }
+      }
+    },
+    "SeveralRefs": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/SomeStruct"
+        },
+        {
+          "$ref": "#/definitions/SomeOtherStruct"
+        },
+        {
+          "$ref": "#/definitions/YetAnotherStruct"
+        }
+      ]
+    }
+  }
+}

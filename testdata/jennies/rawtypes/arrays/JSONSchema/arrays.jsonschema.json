@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ArrayOfStrings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of tags, maybe?"
+    },
+    "someStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "FieldAny"
+      ],
+      "properties": {
+        "FieldAny": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "ArrayOfRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/someStruct"
+      }
+    },
+    "ArrayOfArrayOfNumbers": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

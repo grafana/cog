@@ -1,0 +1,49 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "arrays",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "ArrayOfStrings": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "List of tags, maybe?"
+      },
+      "someStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "FieldAny"
+        ],
+        "properties": {
+          "FieldAny": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
+      "ArrayOfRefs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/someStruct"
+        }
+      },
+      "ArrayOfArrayOfNumbers": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

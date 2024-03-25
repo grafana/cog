@@ -1,0 +1,30 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "variant_dataquery",
+    "version": "0.0.0",
+    "x-schema-identifier": "prometheus",
+    "x-schema-kind": "composable",
+    "x-schema-variant": "dataquery"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Query": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expr"
+        ],
+        "properties": {
+          "expr": {
+            "type": "string"
+          },
+          "instant": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "FieldRef": {
+          "$ref": "#/definitions/SomeOtherStruct"
+        },
+        "FieldString": {
+          "type": "string"
+        },
+        "Operator": {
+          "enum": [
+            "\u003e",
+            "\u003c"
+          ]
+        },
+        "FieldArrayOfStrings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "FieldAnonymousStruct": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "FieldAny"
+          ],
+          "properties": {
+            "FieldAny": {
+              "type": "object",
+              "additionalProperties": {}
+            }
+          }
+        }
+      }
+    },
+    "SomeOtherStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "FieldAny"
+      ],
+      "properties": {
+        "FieldAny": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    }
+  }
+}

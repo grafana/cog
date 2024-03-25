@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "FieldAny"
+      ],
+      "properties": {
+        "FieldAny": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "RefToSomeStruct": {
+      "$ref": "#/definitions/SomeStruct"
+    },
+    "RefToSomeStructFromOtherPackage": {
+      "$ref": "#/definitions/SomeDistantStruct"
+    }
+  }
+}
