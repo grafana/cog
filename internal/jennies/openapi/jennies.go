@@ -35,14 +35,11 @@ func (language *Language) RegisterCliFlags(_ *cobra.Command) {
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
-
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef
 	})
 
-	jenny.AppendOneToMany(
-		Schema{Config: config},
-	)
+	jenny.AppendOneToMany(Schema{Config: config})
 
 	return jenny
 }
