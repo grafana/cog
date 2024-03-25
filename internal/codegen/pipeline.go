@@ -124,9 +124,10 @@ func (pipeline *Pipeline) interpolate(input string) string {
 
 func (pipeline *Pipeline) jenniesConfig() languages.Config {
 	return languages.Config{
-		Debug:    pipeline.Debug,
-		Types:    pipeline.Output.Types,
-		Builders: pipeline.Output.Builders,
+		Debug:      pipeline.Debug,
+		Types:      pipeline.Output.Types,
+		Builders:   pipeline.Output.Builders,
+		Converters: pipeline.Output.Converters,
 	}
 }
 

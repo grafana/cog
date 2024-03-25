@@ -13,7 +13,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/builders/veneers/*.tmpl templates/types/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/converters/*.tmpl templates/builders/veneers/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
 var veneersFS embed.FS
 
@@ -54,6 +54,13 @@ func init() {
 				}
 
 				return variableName
+			},
+			"maybeDereference": func(typeDef ast.Type) string {
+				if typeDef.Nullable && !typeDef.IsAnyOf(ast.KindArray, ast.KindMap) {
+					return "*"
+				}
+
+				return ""
 			},
 			"isNullableNonArray": func(typeDef ast.Type) bool {
 				return typeDef.Nullable && !typeDef.IsArray()

@@ -1,0 +1,46 @@
+package {{ .Converter.Package | formatPackageName }}
+
+import (
+    "fmt"
+    "strings"
+)
+
+{{- define "guard" }}
+    {{- if .NotNull -}}
+        input.{{ .Path | formatPath }} != nil
+    {{- else -}}
+        {{ .Path.Last.Type | maybeDereference }}input.{{ .Path | formatPath }} {{ .Op }} {{ .Value }}
+    {{- end -}}
+{{- end }}
+
+{{- define "guards" }}
+    {{- $guardsCount := (sub (len .) 1) -}}
+    {{- range $i, $guard := . }}{{- template "guard" $guard }}{{ if ne $i $guardsCount }} && {{ end }}{{ end }}
+{{- end }}
+
+func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }}) string {
+    {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) -}}
+    calls := []string{
+        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.Builder.Name }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $path := . }}fmt.Sprintf("%#v", {{ $path.Last.Type | maybeDereference }}input.{{ $path | formatPath }}){{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
+    }
+
+    {{- range .Converter.Mappings }}
+    {{ with .Guards }}if {{ template "guards" . }}{{ end }}{
+        var buffer strings.Builder
+
+        buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
+        {{- $pathsCount := (sub (len .Paths) 1) -}}
+        {{- range $i, $path := .Paths }}
+        buffer.WriteString(fmt.Sprintf("%#v", {{ $path.Last.Type | maybeDereference }}input.{{ $path | formatPath }}))
+        {{- if ne $i $pathsCount }}
+        buffer.WriteString(", ")
+        {{- end }}
+        {{- end }}
+        buffer.WriteString(")")
+
+        calls = append(calls, buffer.String())
+    }
+    {{- end }}
+
+    return strings.Join(calls, ".\n")
+}

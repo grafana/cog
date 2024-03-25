@@ -78,6 +78,7 @@ output:
 
   types: true
   builders: true
+  converters: true
 
   languages:
     - go:
