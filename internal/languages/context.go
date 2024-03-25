@@ -19,28 +19,32 @@ func (context *Context) LocateObjectByRef(ref ast.RefType) (ast.Object, bool) {
 }
 
 func (context *Context) ResolveToBuilder(def ast.Type) bool {
+	_, ok := context.ResolveAsBuilder(def)
+
+	return ok
+}
+
+func (context *Context) ResolveAsBuilder(def ast.Type) (ast.Builder, bool) {
 	if def.IsArray() {
-		return context.ResolveToBuilder(def.AsArray().ValueType)
+		return context.ResolveAsBuilder(def.AsArray().ValueType)
 	}
 
 	if def.IsDisjunction() {
 		for _, branch := range def.AsDisjunction().Branches {
-			if context.ResolveToBuilder(branch) {
-				return true
+			if builder, found := context.ResolveAsBuilder(branch); found {
+				return builder, true
 			}
 		}
 
-		return false
+		return ast.Builder{}, false
 	}
 
 	if !def.IsRef() {
-		return false
+		return ast.Builder{}, false
 	}
 
 	ref := def.AsRef()
-	_, found := context.Builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
-
-	return found
+	return context.Builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
 }
 
 func (context *Context) IsDisjunctionOfBuilders(def ast.Type) bool {

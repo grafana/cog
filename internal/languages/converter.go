@@ -1,18 +1,19 @@
-package ast
+package languages
 
 import (
 	"fmt"
 
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type MappingGuard struct {
-	Path Path
+	Path ast.Path
 
 	NotNull bool
 	// Or
-	Op    Op
+	Op    ast.Op
 	Value any
 }
 
@@ -24,19 +25,25 @@ func (guard MappingGuard) String() string {
 	return fmt.Sprintf("%s %s %v", guard.Path, guard.Op, guard.Value)
 }
 
+type ArgumentMapping struct {
+	ValuePath ast.Path     // direct mapping between a JSON value and an argument
+	Builder   *ast.Builder //  the argument is built with a builder
+}
+
 type OptionMapping struct {
-	Option Option // option in the builder
-	Paths  []Path // paths assigned by the option
+	Option ast.Option // option in the builder
+
 	Guards []MappingGuard
+	Args   []ArgumentMapping
 }
 
 type Converter struct {
 	Package string
 
-	Object  *Object
-	Builder *Builder
+	Object  *ast.Object
+	Builder *ast.Builder
 
-	ConstructorArgs []Path
+	ConstructorArgs []ArgumentMapping
 
 	Mappings []OptionMapping
 }
@@ -44,7 +51,7 @@ type Converter struct {
 type ConverterGenerator struct {
 }
 
-func (generator *ConverterGenerator) FromBuilder(builder Builder) Converter {
+func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Builder) Converter {
 	return Converter{
 		Package: builder.Package,
 
@@ -53,32 +60,43 @@ func (generator *ConverterGenerator) FromBuilder(builder Builder) Converter {
 
 		ConstructorArgs: generator.constructorArgs(builder),
 
-		Mappings: tools.Map(builder.Options, generator.convertOption),
+		Mappings: tools.Map(builder.Options, func(option ast.Option) OptionMapping {
+			return generator.convertOption(context, option)
+		}),
 	}
 }
 
-func (generator *ConverterGenerator) constructorArgs(builder Builder) []Path {
-	constructorOpts := tools.Filter(builder.Options, func(option Option) bool {
-		return option.IsConstructorArg
-	})
-
-	return tools.Map(constructorOpts, func(option Option) Path {
+func (generator *ConverterGenerator) constructorArgs(builder ast.Builder) []ArgumentMapping {
+	return tools.Map(builder.Constructor.Assignments, func(assignment ast.Assignment) ArgumentMapping {
 		// "constructor options" are expected to only have a single assignment
-		return option.Assignments[0].Path
+		return ArgumentMapping{
+			ValuePath: assignment.Path,
+		}
 	})
 }
 
-func (generator *ConverterGenerator) convertOption(option Option) OptionMapping {
+func (generator *ConverterGenerator) convertOption(context Context, option ast.Option) OptionMapping {
 	mapping := OptionMapping{
 		Option: option,
-		Paths: tools.Map(option.Assignments, func(assignment Assignment) Path {
-			return assignment.Path
+		Args: tools.Map(option.Assignments, func(assignment ast.Assignment) ArgumentMapping {
+			builder, found := context.ResolveAsBuilder(assignment.Path.Last().Type)
+			if !found {
+				return ArgumentMapping{
+					ValuePath: assignment.Path,
+				}
+			}
+
+			return ArgumentMapping{
+				ValuePath: assignment.Path,
+				Builder:   &builder,
+			}
 		}),
 	}
 
+	// conditions safeguarding the conversion of the current option
 	guards := orderedmap.New[string, MappingGuard]()
 
-	// TODO: define guards other than "not null" checks (0, "", ...)
+	// TODO: define guards other than "not null" checks? (0, "", ...)
 	// TODO: assignment method (direct vs append)
 	for _, assignment := range option.Assignments {
 		nullPathChunksGuards := generator.pathNotNullGuards(assignment.Path)
@@ -89,7 +107,7 @@ func (generator *ConverterGenerator) convertOption(option Option) OptionMapping 
 		if assignment.Value.Constant != nil {
 			guard := MappingGuard{
 				Path:  assignment.Path,
-				Op:    EqualOp,
+				Op:    ast.EqualOp,
 				Value: assignment.Value.Constant,
 			}
 			guards.Set(guard.String(), guard)
@@ -110,7 +128,7 @@ func (generator *ConverterGenerator) convertOption(option Option) OptionMapping 
 	return mapping
 }
 
-func (generator *ConverterGenerator) pathNotNullGuards(path Path) []MappingGuard {
+func (generator *ConverterGenerator) pathNotNullGuards(path ast.Path) []MappingGuard {
 	var guards []MappingGuard
 
 	for i, chunk := range path {
@@ -120,7 +138,7 @@ func (generator *ConverterGenerator) pathNotNullGuards(path Path) []MappingGuard
 		}
 
 		// TODO: this is language-specific
-		maybeNull := chunkType.Nullable || chunkType.IsAnyOf(KindMap, KindArray)
+		maybeNull := chunkType.Nullable || chunkType.IsAnyOf(ast.KindMap, ast.KindArray)
 		if !maybeNull {
 			continue
 		}

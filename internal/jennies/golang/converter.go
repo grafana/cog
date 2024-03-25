@@ -7,7 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -19,7 +19,7 @@ func (jenny *Converter) JennyName() string {
 	return "GoConverter"
 }
 
-func (jenny *Converter) Generate(context common.Context) (codejen.Files, error) {
+func (jenny *Converter) Generate(context languages.Context) (codejen.Files, error) {
 	files := codejen.Files{}
 
 	for _, builder := range context.Builders {
@@ -39,10 +39,10 @@ func (jenny *Converter) Generate(context common.Context) (codejen.Files, error) 
 	return files, nil
 }
 
-func (jenny *Converter) generateConverter(context common.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
-	converter := (&ast.ConverterGenerator{}).FromBuilder(builder)
+	converter := (&languages.ConverterGenerator{}).FromBuilder(context, builder)
 
 	imports := NewImportMap()
 	typeImportMapper := func(pkg string) string {

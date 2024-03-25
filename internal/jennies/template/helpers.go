@@ -45,6 +45,7 @@ func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 			}
 			return dict
 		},
+		"sub": func(a, b int) int { return a - b },
 		"ternary": func(valTrue any, valFalse any, condition bool) any {
 			if condition {
 				return valTrue

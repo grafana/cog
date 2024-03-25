@@ -18,10 +18,18 @@ import (
     {{- range $i, $guard := . }}{{- template "guard" $guard }}{{ if ne $i $guardsCount }} && {{ end }}{{ end }}
 {{- end }}
 
+{{- define "arg" -}}
+    {{- if ne .Builder nil -}}
+    {{ .Builder.Name }}Converter({{ if not .ValuePath.Last.Type.Nullable}}&{{ end }}input.{{ .ValuePath | formatPath }})
+    {{- else -}}
+    fmt.Sprintf("%#v", {{ .ValuePath.Last.Type | maybeDereference }}input.{{ .ValuePath | formatPath }})
+    {{- end -}}
+{{- end }}
+
 func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }}) string {
     {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) -}}
     calls := []string{
-        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.Builder.Name }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $path := . }}fmt.Sprintf("%#v", {{ $path.Last.Type | maybeDereference }}input.{{ $path | formatPath }}){{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
+        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.Builder.Name }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ template "arg" $arg }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
     }
 
     {{- range .Converter.Mappings }}
@@ -29,10 +37,10 @@ func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }})
         var buffer strings.Builder
 
         buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
-        {{- $pathsCount := (sub (len .Paths) 1) -}}
-        {{- range $i, $path := .Paths }}
-        buffer.WriteString(fmt.Sprintf("%#v", {{ $path.Last.Type | maybeDereference }}input.{{ $path | formatPath }}))
-        {{- if ne $i $pathsCount }}
+        {{- $argsCount := (sub (len .Args) 1) -}}
+        {{- range $i, $arg := .Args }}
+        buffer.WriteString({{ template "arg" $arg }})
+        {{- if ne $i $argsCount }}
         buffer.WriteString(", ")
         {{- end }}
         {{- end }}
@@ -42,5 +50,5 @@ func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }})
     }
     {{- end }}
 
-    return strings.Join(calls, ".\n")
+    return strings.Join(calls, ".\t\n")
 }
