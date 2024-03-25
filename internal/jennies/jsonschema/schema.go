@@ -141,16 +141,16 @@ func (jenny Schema) formatScalar(typeDef ast.Type) Definition {
 		definition.Set("additionalProperties", map[string]any{})
 	case ast.KindBytes, ast.KindString:
 		definition.Set("type", "string")
-		// TODO: constraints
+		jenny.addStringConstraints(definition, typeDef)
 	case ast.KindBool:
 		definition.Set("type", "boolean")
 	case ast.KindFloat32, ast.KindFloat64:
 		definition.Set("type", "number")
-		// TODO: constraints
+		jenny.addNumberConstraints(definition, typeDef)
 	case ast.KindUint8, ast.KindUint16, ast.KindUint32, ast.KindUint64,
 		ast.KindInt8, ast.KindInt16, ast.KindInt32, ast.KindInt64:
 		definition.Set("type", "integer")
-		// TODO: constraints
+		jenny.addNumberConstraints(definition, typeDef)
 	}
 
 	// constant value?
@@ -159,6 +159,34 @@ func (jenny Schema) formatScalar(typeDef ast.Type) Definition {
 	}
 
 	return definition
+}
+
+func (jenny Schema) addStringConstraints(definition *orderedmap.Map[string, any], typeDef ast.Type) {
+	for _, constraint := range typeDef.AsScalar().Constraints {
+		switch constraint.Op {
+		case ast.MinLengthOp:
+			definition.Set("minLength", constraint.Args[0])
+		case ast.MaxLengthOp:
+			definition.Set("maxLength", constraint.Args[0])
+		}
+	}
+}
+
+func (jenny Schema) addNumberConstraints(definition *orderedmap.Map[string, any], typeDef ast.Type) {
+	for _, constraint := range typeDef.AsScalar().Constraints {
+		switch constraint.Op {
+		case ast.LessThanOp:
+			definition.Set("exclusiveMaximum", constraint.Args[0])
+		case ast.LessThanEqualOp:
+			definition.Set("maximum", constraint.Args[0])
+		case ast.GreaterThanOp:
+			definition.Set("exclusiveMinimum", constraint.Args[0])
+		case ast.GreaterThanEqualOp:
+			definition.Set("minimum", constraint.Args[0])
+		case ast.MultipleOfOp:
+			definition.Set("multipleOf", constraint.Args[0])
+		}
+	}
 }
 
 func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
