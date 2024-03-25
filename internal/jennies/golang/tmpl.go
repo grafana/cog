@@ -66,6 +66,20 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 
 				return variableName
 			},
+			"maybeUnptr": func(variableName string, intoType ast.Type) string {
+				if !intoType.Nullable || intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot() {
+					return variableName
+				}
+
+				return "cog.Unptr(" + variableName + ")"
+			},
+			"maybeDereference": func(typeDef ast.Type) string {
+				if typeDef.Nullable && !typeDef.IsAnyOf(ast.KindArray, ast.KindMap) {
+					return "*"
+				}
+
+				return ""
+			},
 			"isNullableNonArray": func(typeDef ast.Type) bool {
 				return typeDef.Nullable && !typeDef.IsArray()
 			},

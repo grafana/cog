@@ -1,6 +1,8 @@
 package typescript
 
 import (
+	"strings"
+
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -28,4 +30,15 @@ func isReservedTypescriptKeyword(input string) bool {
 	default:
 		return false
 	}
+}
+
+func prefixLinesWith(input string, prefix string) string {
+	lines := strings.Split(input, "\n")
+	prefixed := make([]string, 0, len(lines))
+
+	for _, line := range lines {
+		prefixed = append(prefixed, prefix+line)
+	}
+
+	return strings.Join(prefixed, "\n")
 }

@@ -22,7 +22,7 @@ func VariantConfig() variants.DataqueryConfig {
             }
 
             return dataquery, nil
-       },
+        },
 	}
 }
 

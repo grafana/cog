@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/template"
 )
 
-//go:embed templates/*.tmpl
+//go:embed templates/*.tmpl templates/converters/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -18,6 +18,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
+			"formatRawRef": func(_ ast.Type) string {
+				panic("formatRawRef() needs to be overridden by a jenny")
+			},
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},

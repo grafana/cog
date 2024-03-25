@@ -4,11 +4,13 @@ type PanelcfgConfig struct {
 	Identifier             string
 	OptionsUnmarshaler     func(raw []byte) (any, error)
 	FieldConfigUnmarshaler func(raw []byte) (any, error)
+	GoConverter            func(inputPanel any) string
 }
 
 type DataqueryConfig struct {
 	Identifier           string
 	DataqueryUnmarshaler func(raw []byte) (Dataquery, error)
+	GoConverter          func(inputPanel any) string
 }
 
 type Dataquery interface {

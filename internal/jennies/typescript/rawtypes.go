@@ -147,17 +147,6 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 	return []byte(buffer.String()), nil
 }
 
-func prefixLinesWith(input string, prefix string) string {
-	lines := strings.Split(input, "\n")
-	prefixed := make([]string, 0, len(lines))
-
-	for _, line := range lines {
-		prefixed = append(prefixed, prefix+line)
-	}
-
-	return strings.Join(prefixed, "\n")
-}
-
 /******************************************************************************
 * 					 Default and "empty" values management 					  *
 ******************************************************************************/
