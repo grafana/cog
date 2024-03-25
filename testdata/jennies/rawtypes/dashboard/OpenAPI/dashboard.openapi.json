@@ -1,0 +1,99 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "dashboard",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": "core"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Dashboard": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "panels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Panel"
+            }
+          }
+        }
+      },
+      "DataSourceRef": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          }
+        }
+      },
+      "FieldConfigSource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "defaults": {
+            "$ref": "#/components/schemas/FieldConfig"
+          }
+        }
+      },
+      "FieldConfig": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "unit": {
+            "type": "string"
+          },
+          "custom": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
+      "Panel": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "type"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "datasource": {
+            "$ref": "#/components/schemas/DataSourceRef"
+          },
+          "options": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            }
+          },
+          "fieldConfig": {
+            "$ref": "#/components/schemas/FieldConfigSource"
+          }
+        }
+      }
+    }
+  }
+}

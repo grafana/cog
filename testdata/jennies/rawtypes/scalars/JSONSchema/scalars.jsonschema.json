@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "constTypeString": {
+      "type": "string",
+      "const": "foo"
+    },
+    "scalarTypeAny": {
+      "type": "object",
+      "additionalProperties": {}
+    },
+    "ScalarTypeBool": {
+      "type": "boolean"
+    },
+    "ScalarTypeBytes": {
+      "type": "string"
+    },
+    "ScalarTypeString": {
+      "type": "string"
+    },
+    "ScalarTypeFloat32": {
+      "type": "number"
+    },
+    "ScalarTypeFloat64": {
+      "type": "number"
+    },
+    "ScalarTypeUint8": {
+      "type": "integer"
+    },
+    "ScalarTypeUint16": {
+      "type": "integer"
+    },
+    "ScalarTypeUint32": {
+      "type": "integer"
+    },
+    "ScalarTypeUint64": {
+      "type": "integer"
+    },
+    "ScalarTypeInt8": {
+      "type": "integer"
+    },
+    "ScalarTypeInt16": {
+      "type": "integer"
+    },
+    "ScalarTypeInt32": {
+      "type": "integer"
+    },
+    "ScalarTypeInt64": {
+      "type": "integer"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "enums",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Operator": {
+        "enum": [
+          "\u003e",
+          "\u003c"
+        ],
+        "description": "This is a very interesting string enum."
+      },
+      "TableSortOrder": {
+        "enum": [
+          "asc",
+          "desc"
+        ]
+      },
+      "LogsSortOrder": {
+        "enum": [
+          "time_asc",
+          "time_desc"
+        ]
+      },
+      "DashboardCursorSync": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "description": "0 for no shared crosshair or tooltip (default).\n1 for shared crosshair.\n2 for shared crosshair AND shared tooltip."
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "basic",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "SomeStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "FieldAny",
+          "FieldBool",
+          "FieldBytes",
+          "FieldString",
+          "FieldStringWithConstantValue",
+          "FieldFloat32",
+          "FieldFloat64",
+          "FieldUint8",
+          "FieldUint16",
+          "FieldUint32",
+          "FieldUint64",
+          "FieldInt8",
+          "FieldInt16",
+          "FieldInt32",
+          "FieldInt64"
+        ],
+        "properties": {
+          "FieldAny": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Anything can go in there.\nReally, anything."
+          },
+          "FieldBool": {
+            "type": "boolean"
+          },
+          "FieldBytes": {
+            "type": "string"
+          },
+          "FieldString": {
+            "type": "string"
+          },
+          "FieldStringWithConstantValue": {
+            "type": "string",
+            "const": "auto"
+          },
+          "FieldFloat32": {
+            "type": "number"
+          },
+          "FieldFloat64": {
+            "type": "number"
+          },
+          "FieldUint8": {
+            "type": "integer"
+          },
+          "FieldUint16": {
+            "type": "integer"
+          },
+          "FieldUint32": {
+            "type": "integer"
+          },
+          "FieldUint64": {
+            "type": "integer"
+          },
+          "FieldInt8": {
+            "type": "integer"
+          },
+          "FieldInt16": {
+            "type": "integer"
+          },
+          "FieldInt32": {
+            "type": "integer"
+          },
+          "FieldInt64": {
+            "type": "integer"
+          }
+        },
+        "description": "This\nis\na\ncomment"
+      }
+    }
+  }
+}

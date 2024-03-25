@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "refs",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "SomeStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "FieldAny"
+        ],
+        "properties": {
+          "FieldAny": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
+      "RefToSomeStruct": {
+        "$ref": "#/components/schemas/SomeStruct"
+      },
+      "RefToSomeStructFromOtherPackage": {
+        "$ref": "#/components/schemas/SomeDistantStruct"
+      }
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "struct_complex_fields",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "SomeStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "FieldRef",
+          "FieldDisjunctionOfScalars",
+          "FieldMixedDisjunction",
+          "FieldDisjunctionWithNull",
+          "Operator",
+          "FieldArrayOfStrings",
+          "FieldMapOfStringToString",
+          "FieldAnonymousStruct",
+          "fieldRefToConstant"
+        ],
+        "properties": {
+          "FieldRef": {
+            "$ref": "#/components/schemas/SomeOtherStruct"
+          },
+          "FieldDisjunctionOfScalars": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "FieldMixedDisjunction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/SomeOtherStruct"
+              }
+            ]
+          },
+          "FieldDisjunctionWithNull": {
+            "type": "string",
+            "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[String|null → String?]'"
+          },
+          "Operator": {
+            "enum": [
+              "\u003e",
+              "\u003c"
+            ]
+          },
+          "FieldArrayOfStrings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "FieldMapOfStringToString": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "FieldAnonymousStruct": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "FieldAny"
+            ],
+            "properties": {
+              "FieldAny": {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            }
+          },
+          "fieldRefToConstant": {
+            "$ref": "#/components/schemas/ConnectionPath"
+          }
+        },
+        "description": "This struct does things."
+      },
+      "ConnectionPath": {
+        "type": "string",
+        "const": "straight"
+      },
+      "SomeOtherStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "FieldAny"
+        ],
+        "properties": {
+          "FieldAny": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      }
+    }
+  }
+}

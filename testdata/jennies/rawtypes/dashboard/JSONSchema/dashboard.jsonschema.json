@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/Dashboard",
+  "definitions": {
+    "Dashboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "panels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Panel"
+          }
+        }
+      }
+    },
+    "DataSourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string"
+        }
+      }
+    },
+    "FieldConfigSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defaults": {
+          "$ref": "#/definitions/FieldConfig"
+        }
+      }
+    },
+    "FieldConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "custom": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "Panel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "type"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "datasource": {
+          "$ref": "#/definitions/DataSourceRef"
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "fieldConfig": {
+          "$ref": "#/definitions/FieldConfigSource"
+        }
+      }
+    }
+  }
+}

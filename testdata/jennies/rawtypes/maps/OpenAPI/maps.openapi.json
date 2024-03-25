@@ -1,0 +1,56 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "maps",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "MapOfStringToAny": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "description": "String to... something."
+      },
+      "MapOfStringToString": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "SomeStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "FieldAny"
+        ],
+        "properties": {
+          "FieldAny": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
+      "MapOfStringToRef": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/SomeStruct"
+        }
+      },
+      "MapOfStringToMapOfStringToBool": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "NestedStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stringVal",
+        "intVal"
+      ],
+      "properties": {
+        "stringVal": {
+          "type": "string"
+        },
+        "intVal": {
+          "type": "integer"
+        }
+      }
+    },
+    "Struct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allFields",
+        "partialFields",
+        "emptyFields",
+        "complexField",
+        "partialComplexField"
+      ],
+      "properties": {
+        "allFields": {
+          "$ref": "#/definitions/NestedStruct",
+          "default": {
+            "intVal": 3,
+            "stringVal": "hello"
+          }
+        },
+        "partialFields": {
+          "$ref": "#/definitions/NestedStruct",
+          "default": {
+            "intVal": 3
+          }
+        },
+        "emptyFields": {
+          "$ref": "#/definitions/NestedStruct"
+        },
+        "complexField": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "uid",
+            "nested",
+            "array"
+          ],
+          "properties": {
+            "uid": {
+              "type": "string"
+            },
+            "nested": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "nestedVal"
+              ],
+              "properties": {
+                "nestedVal": {
+                  "type": "string"
+                }
+              }
+            },
+            "array": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "array": [
+              "hello"
+            ],
+            "nested": {
+              "nestedVal": "nested"
+            },
+            "uid": "myUID"
+          }
+        },
+        "partialComplexField": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "uid",
+            "intVal"
+          ],
+          "properties": {
+            "uid": {
+              "type": "string"
+            },
+            "intVal": {
+              "type": "integer"
+            }
+          },
+          "default": {
+            "xxxx": "myUID"
+          }
+        }
+      }
+    }
+  }
+}

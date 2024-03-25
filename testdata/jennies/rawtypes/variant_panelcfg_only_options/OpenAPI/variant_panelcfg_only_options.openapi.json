@@ -1,0 +1,27 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "variant_panelcfg_only_options",
+    "version": "0.0.0",
+    "x-schema-identifier": "text",
+    "x-schema-kind": "composable",
+    "x-schema-variant": "panelcfg"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Options": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
