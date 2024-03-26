@@ -19,34 +19,47 @@ import (
 {{- end }}
 
 {{- define "arg" -}}
-    {{- if ne .Builder nil -}}
-    {{ .Builder.Name }}Converter({{ if not .ValuePath.Last.Type.Nullable}}&{{ end }}input.{{ .ValuePath | formatPath }})
+    {{- if ne .Arg.Builder nil -}}
+    {{ .Arg.Builder.Name }}Converter({{- if not .Type.Nullable}}&{{ end }}{{ .Var }})
     {{- else -}}
-    fmt.Sprintf("%#v", {{ .ValuePath.Last.Type | maybeDereference }}input.{{ .ValuePath | formatPath }})
+    fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }})
     {{- end -}}
 {{- end }}
 
 func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }}) string {
-    {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) -}}
+    {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) }}
     calls := []string{
-        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.Builder.Name }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ template "arg" $arg }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
+        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.Builder.Name }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ $var := (print "input." (formatPath $arg.ValuePath)) }}{{ template "arg" (dict "Arg" $arg "Var" $var "Type" $arg.ValuePath.Last.Type) }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
     }
 
     {{- range .Converter.Mappings }}
     {{ with .Guards }}if {{ template "guards" . }}{{ end }}{
         var buffer strings.Builder
 
+        {{ if .Repeat -}}
+        {{- $arg := index .Args 0 -}}
+        for _, item := range input.{{ $arg.ValuePath | formatPath }} {
+            buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
+            buffer.WriteString({{ template "arg" (dict "Arg" $arg "Var" "item" "Type" $arg.ValuePath.Last.Type.Array.ValueType) }})
+            buffer.WriteString(")")
+
+            calls = append(calls, buffer.String())
+            buffer.Reset()
+        }
+        {{- else }}
         buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
         {{- $argsCount := (sub (len .Args) 1) -}}
         {{- range $i, $arg := .Args }}
-        buffer.WriteString({{ template "arg" $arg }})
-        {{- if ne $i $argsCount }}
-        buffer.WriteString(", ")
-        {{- end }}
+            {{- $var := (print "input." (formatPath $arg.ValuePath)) }}
+            buffer.WriteString({{ template "arg" (dict "Arg" $arg "Var" $var "Type" $arg.ValuePath.Last.Type) }})
+            {{- if ne $i $argsCount }}
+                buffer.WriteString(", ")
+            {{- end }}
         {{- end }}
         buffer.WriteString(")")
 
         calls = append(calls, buffer.String())
+        {{- end }}
     }
     {{- end }}
 

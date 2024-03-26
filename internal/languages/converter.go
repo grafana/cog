@@ -33,6 +33,8 @@ type ArgumentMapping struct {
 type OptionMapping struct {
 	Option ast.Option // option in the builder
 
+	Repeat bool
+
 	Guards []MappingGuard
 	Args   []ArgumentMapping
 }
@@ -76,9 +78,13 @@ func (generator *ConverterGenerator) constructorArgs(builder ast.Builder) []Argu
 }
 
 func (generator *ConverterGenerator) convertOption(context Context, option ast.Option) OptionMapping {
+	repeat := false
+
 	mapping := OptionMapping{
 		Option: option,
 		Args: tools.Map(option.Assignments, func(assignment ast.Assignment) ArgumentMapping {
+			repeat = repeat || assignment.Method == ast.AppendAssignment
+
 			builder, found := context.ResolveAsBuilder(assignment.Path.Last().Type)
 			if !found {
 				return ArgumentMapping{
@@ -93,11 +99,16 @@ func (generator *ConverterGenerator) convertOption(context Context, option ast.O
 		}),
 	}
 
+	mapping.Repeat = repeat && len(mapping.Args) == 1
+
 	// conditions safeguarding the conversion of the current option
 	guards := orderedmap.New[string, MappingGuard]()
 
 	// TODO: define guards other than "not null" checks? (0, "", ...)
 	// TODO: assignment method (direct vs append)
+	// TODO: builders + array of builders (and array of array of builders, ...)
+	// TODO: disjunctions
+	// TODO: envelopes?
 	for _, assignment := range option.Assignments {
 		nullPathChunksGuards := generator.pathNotNullGuards(assignment.Path)
 		for _, guard := range nullPathChunksGuards {
