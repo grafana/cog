@@ -1,0 +1,80 @@
+{{- define "assignment" }}
+    {{- template "constraints" .Assignment.Constraints }}
+    {{- range .Assignment.InitSafeguards }}
+    {{ . }}
+    {{- end }}
+    
+    {{- template "assignment_setup" (dict "Assignment" .Assignment "Value" .Assignment.Value) }}
+
+    {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
+
+    {{- $preTmpl := print "pre_assignment_" .BuilderName "_" .OptionName }}
+    {{- includeIfExists $preTmpl (dict) -}}
+
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) -}}
+    
+    {{- $postTmpl := print "post_assignment_" .BuilderName "_" .OptionName }}
+    {{- includeIfExists $postTmpl (dict) -}}
+    
+{{- end }}
+
+{{- define "assignment_setup" }}
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{ .Type | formatType }} {{ .Name | lowerCamelCase }}Resource = {{ .Name | lowerCamelCase }}.build();
+        {{- else }}
+        {{ .Type | formatType }} {{ .Name | lowerCamelCase }}Resource = {{ .Name | lowerCamelCase }};
+        {{- end }}
+        {{- $castPath := formatCastValue $.Assignment.Path }}
+        {{- if not (eq $castPath.Value "") }}
+        {{ $castPath.Class }} {{ $castPath.Value | lowerCamelCase }}Resource = ({{- $castPath.Class }}) this.{{ $castPath.Path }};
+        {{ $castPath.Value | lowerCamelCase }}Resource.set{{ .Name | camelcase }}({{ .Name | lowerCamelCase }}Resource);
+        {{- end }}
+    {{- end }}
+    {{- with .Value.Envelope }}
+        {{- range .Values }}
+        {{- template "assignment_setup" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{- end }}
+        
+        {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+    {{- end }}
+{{- end }}
+
+{{- define "assignment_value" }}
+    {{- if not (eq .Value.Constant nil) }}
+        {{- formatScalar .Value.Constant }}
+    {{- end }}
+    {{- with .Value.Argument }}
+        {{- $castPath := formatCastValue $.Assignment.Path }}
+        {{- if not (eq $castPath.Value "") }}
+        {{- $castPath.Value | lowerCamelCase }}Resource
+        {{- else }}
+        {{- .Name | escapeVar | lowerCamelCase }}Resource
+        {{- end }}
+    {{- end }}
+    {{- with .Value.Envelope }}
+        {{- .Type | formatType | lowerCamelCase }}
+    {{- end }}
+{{- end }}
+
+{{- define "value_envelope" }}
+    {{ $envelopeType := .Envelope.Type | formatType }}
+        {{- $envelopeType }} {{ $envelopeType | lowerCamelCase }} = new {{ $envelopeType }}();
+    {{- range .Envelope.Values }}
+        {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{ $envelopeType | lowerCamelCase }}.set{{ (index .Path 0).Identifier }}({{ $value | lowerCamelCase }});
+    {{- end }}
+{{- end }}
+
+{{- define "assignment_method" }}
+        {{ $path := formatAssignmentPath .Path .Method }}
+        {{- if eq .Method "direct" }}
+        {{- $castPath := formatCastValue .Path }}
+        {{- if not (eq $castPath.Value "") }}
+        this.{{ $path }}{{ if eq (len .Path) 2 }} = {{ .Value }}{{ else }}({{ .Value }}){{ end }};
+        {{- else }} 
+        this.{{ $path }}{{ if eq (len .Path) 1 }} = {{ .Value }}{{ else }}({{ .Value }}){{ end }};
+        {{- end }}
+        {{- end }}
+        {{ if eq .Method "append" }}this.{{ $path }}.add({{ .Value }});{{ end -}}
+{{- end }}

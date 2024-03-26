@@ -2,7 +2,7 @@ package disjunctions;
 
 
 public class SomeStruct {
-    public String Type;
-    public Object FieldAny;
+    public String type;
+    public Object fieldAny;
     
 }

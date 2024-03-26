@@ -1,7 +1,7 @@
-package with-dashes;
+package withdashes;
 
 
 public class SomeStruct {
-    public Object FieldAny;
+    public Object fieldAny;
     
 }

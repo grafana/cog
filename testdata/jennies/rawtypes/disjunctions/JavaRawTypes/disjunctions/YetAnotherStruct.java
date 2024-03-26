@@ -2,7 +2,7 @@ package disjunctions;
 
 
 public class YetAnotherStruct {
-    public String Type;
-    public Byte Bar;
+    public String type;
+    public Byte bar;
     
 }

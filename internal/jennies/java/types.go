@@ -2,6 +2,7 @@ package java
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -40,6 +41,15 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 	}
 
 	return "unknown"
+}
+
+func (tf *typeFormatter) formatBuilderArgs(def ast.Type) string {
+	value := tf.formatFieldType(def)
+	if _, ok := tf.context.ResolveToComposableSlot(def); ok || tf.context.ResolveToBuilder(def) {
+		value = fmt.Sprintf("Builder<%s>", value)
+	}
+
+	return value
 }
 
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
@@ -85,6 +95,24 @@ func (tf *typeFormatter) formatComposable(def ast.ComposableSlotType) string {
 	return variant
 }
 
+func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
+	switch def.Kind {
+	case ast.KindArray:
+		tf.packageMapper("java.util", "LinkedList")
+		return "new LinkedList<>()"
+	case ast.KindMap:
+		tf.packageMapper("java.util", "HashMap")
+		return "new Hashmap<>()"
+	case ast.KindRef:
+		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		return fmt.Sprintf("new %s()", refDef)
+	case ast.KindStruct:
+		return "new Object()"
+	default:
+		return "unknown"
+	}
+}
+
 func formatScalarType(def ast.ScalarType) string {
 	scalarType := "unknown"
 
@@ -110,4 +138,12 @@ func formatScalarType(def ast.ScalarType) string {
 	}
 
 	return scalarType
+}
+
+func formatScalar(val any) any {
+	newVal := fmt.Sprintf("%#v", val)
+	if len(strings.Split(newVal, ".")) > 1 {
+		return val
+	}
+	return newVal
 }

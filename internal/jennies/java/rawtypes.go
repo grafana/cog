@@ -129,7 +129,7 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	}
 
 	err := templates.ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
-		Package:  pkg,
+		Package:  formatPackageName(pkg),
 		Name:     object.Name,
 		Values:   values,
 		Type:     enumType,
@@ -162,7 +162,7 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []stri
 			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Comments, field.Type.ImplementedVariant(), field.Type.AsStruct()))
 		} else {
 			fields = append(fields, Field{
-				Name:     field.Name,
+				Name:     tools.LowerCamelCase(field.Name),
 				Type:     jenny.typeFormatter.formatFieldType(field.Type),
 				Comments: field.Comments,
 			})
@@ -170,7 +170,7 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []stri
 	}
 
 	return ClassTemplate{
-		Package:              pkg,
+		Package:              formatPackageName(pkg),
 		Imports:              jenny.imports,
 		Name:                 tools.UpperCamelCase(name),
 		Fields:               fields,
@@ -209,7 +209,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
 	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:  pkg,
+		Package:  formatPackageName(pkg),
 		Imports:  jenny.imports,
 		Name:     object.Name,
 		Extends:  []string{reference},
