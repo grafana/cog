@@ -9,19 +9,12 @@ import (
 )
 
 type MappingGuard struct {
-	Path ast.Path
-
-	NotNull bool
-	// Or
+	Path  ast.Path
 	Op    ast.Op
 	Value any
 }
 
 func (guard MappingGuard) String() string {
-	if guard.NotNull {
-		return fmt.Sprintf("%s != nil", guard.Path)
-	}
-
 	return fmt.Sprintf("%s %s %v", guard.Path, guard.Op, guard.Value)
 }
 
@@ -46,8 +39,8 @@ type OptionMapping struct {
 type Converter struct {
 	Package string
 
-	Object  *ast.Object
-	Builder *ast.Builder
+	For         *ast.Object
+	BuilderName string
 
 	ConstructorArgs []ArgumentMapping
 
@@ -61,8 +54,8 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 	return Converter{
 		Package: builder.Package,
 
-		Object:  &builder.For,
-		Builder: &builder,
+		For:         &builder.For,
+		BuilderName: builder.Name,
 
 		ConstructorArgs: generator.constructorArgs(builder),
 
@@ -155,6 +148,15 @@ func (generator *ConverterGenerator) convertOption(context Context, option ast.O
 
 		// TODO: Envelope assignment?
 		if assignment.Value.Envelope != nil {
+			/*
+				for _, envelopePath := range assignment.Value.Envelope.Values {
+					guard := MappingGuard{
+						Path:    assignment.Path.Append(envelopePath.Path),
+						NotNull: true,
+					}
+					guards.Set(guard.String(), guard)
+				}
+			*/
 			continue
 		}
 	}
@@ -183,8 +185,9 @@ func (generator *ConverterGenerator) pathNotNullGuards(path ast.Path) []MappingG
 		}
 
 		guards = append(guards, MappingGuard{
-			Path:    path[:i+1],
-			NotNull: true,
+			Path:  path[:i+1],
+			Op:    ast.NotEqualOp,
+			Value: nil,
 		})
 	}
 

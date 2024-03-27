@@ -6,7 +6,7 @@ import (
 )
 
 {{- define "guard" }}
-    {{- if .NotNull -}}
+    {{- if and (eq .Op "!=") (eq .Value nil) -}}
         input.{{ .Path | formatPath }} != nil
     {{- else -}}
         {{- $leftOperand := print (.Path.Last.Type | maybeDereference) "input." (.Path | formatPath) -}}
@@ -48,14 +48,20 @@ import (
             {{ .IntoVar }} := {{ .Arg.Builder.Name }}Converter({{- if not .Type.Nullable}}&{{ end }}{{ .Var }})
         {{ end }}
     {{- else -}}
-        {{ .IntoVar }} := fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }})
+        {{ if .Type.IsRef }}
+            {{ .IntoVar }} := fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }}) // ref
+        {{ else if .Type.IsStruct }}
+            {{ .IntoVar }} := fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }}) // struct
+        {{ else }}
+            {{ .IntoVar }} := fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }})
+        {{ end }}
     {{- end -}}
 {{- end }}
 
-func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }}) string {
+func {{ .Converter.BuilderName }}Converter(input *{{ .Converter.For.Name }}) string {
     {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) }}
     calls := []string{
-        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.Builder.Name }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ $var := (print "input." (formatPath $arg.ValuePath)) }}{{ template "arg" (dict "Arg" $arg "Var" $var "Type" $arg.ValueType) }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
+        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ $var := (print "input." (formatPath $arg.ValuePath)) }}{{ template "arg" (dict "Arg" $arg "Var" $var "Type" $arg.ValueType) }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
     }
 
     {{- range .Converter.Mappings }}
