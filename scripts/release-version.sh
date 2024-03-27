@@ -75,9 +75,9 @@ function run_codegen() {
     --go-mod \
     --go-package-root github.com/grafana/grafana-foundation-sdk/go \
     --language go \
-    --language typescript \
-    --language jsonschema \
-    --language openapi
+    --language typescript
+    #--language jsonschema \
+    #--language openapi
     #--python-path-prefix grafana_foundation_sdk \
     #--language python \
 }
