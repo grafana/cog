@@ -31,7 +31,7 @@ class Query(cogvariants.Dataquery):
         return cls(**args)
 
 
-def variant_config():
+def variant_config() -> cogruntime.DataqueryConfig:
     return cogruntime.DataqueryConfig(
         identifier="prometheus",
         from_json_hook=Query.from_json,
