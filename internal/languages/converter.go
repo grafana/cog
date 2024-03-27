@@ -30,6 +30,10 @@ type ArgumentMapping struct {
 	Builder   *ast.Builder //  the argument is built with a builder
 }
 
+func (argMapping ArgumentMapping) ValueType() ast.Type {
+	return argMapping.ValuePath.Last().Type
+}
+
 type OptionMapping struct {
 	Option ast.Option // option in the builder
 
@@ -80,9 +84,13 @@ func (generator *ConverterGenerator) constructorArgs(builder ast.Builder) []Argu
 func (generator *ConverterGenerator) convertOption(context Context, option ast.Option) OptionMapping {
 	repeat := false
 
+	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
+		return assignment.Value.Constant == nil
+	})
+
 	mapping := OptionMapping{
 		Option: option,
-		Args: tools.Map(option.Assignments, func(assignment ast.Assignment) ArgumentMapping {
+		Args: tools.Map(assignments, func(assignment ast.Assignment) ArgumentMapping {
 			repeat = repeat || assignment.Method == ast.AppendAssignment
 
 			builder, found := context.ResolveAsBuilder(assignment.Path.Last().Type)
@@ -123,6 +131,26 @@ func (generator *ConverterGenerator) convertOption(context Context, option ast.O
 			}
 			guards.Set(guard.String(), guard)
 			continue
+		}
+
+		// For arrays: ensure they're not empty
+		if assignment.Path.Last().Type.IsArray() {
+			guard := MappingGuard{
+				Path:  assignment.Path,
+				Op:    ast.MinLengthOp,
+				Value: 1,
+			}
+			guards.Set(guard.String(), guard)
+		}
+
+		// For strings: ensure they're not empty
+		if assignment.Path.Last().Type.IsScalar() && assignment.Path.Last().Type.AsScalar().ScalarKind == ast.KindString {
+			guard := MappingGuard{
+				Path:  assignment.Path,
+				Op:    ast.NotEqualOp,
+				Value: "",
+			}
+			guards.Set(guard.String(), guard)
 		}
 
 		// TODO: Envelope assignment?

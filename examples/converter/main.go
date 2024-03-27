@@ -41,18 +41,5 @@ func main() {
 }
 
 func foo() {
-	dashboard.NewDashboardBuilder("[TEST] blocky").
-		Uid("test-dashboard-blocky").
-		Title("[TEST] blocky").
-		Timezone("browser").
-		Tooltip(1).
-		Time("now-30m", "now").
-		Timepicker(dashboard.NewTimePickerBuilder().
-			Hidden(false).
-			RefreshIntervals([]string{"5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"}).
-			TimeOptions([]string{"5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"})).
-		FiscalYearStartMonth(0x0).
-		Refresh("30s").
-		Annotations(dashboard.NewAnnotationContainerBuilder())
 
 }

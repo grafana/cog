@@ -9,7 +9,17 @@ import (
     {{- if .NotNull -}}
         input.{{ .Path | formatPath }} != nil
     {{- else -}}
-        {{ .Path.Last.Type | maybeDereference }}input.{{ .Path | formatPath }} {{ .Op }} {{ .Value }}
+        {{- $leftOperand := print (.Path.Last.Type | maybeDereference) "input." (.Path | formatPath) -}}
+        {{- $operator := .Op -}}
+        {{- if eq .Op "minLength" -}}
+            {{- $leftOperand = print "len(" $leftOperand ")" -}}
+            {{- $operator = ">=" -}}
+        {{- end -}}
+        {{- if eq .Op "maxLength" -}}
+            {{- $leftOperand = print "len(" $leftOperand ")" -}}
+            {{- $operator = "<=" -}}
+        {{- end -}}
+        {{- $leftOperand }} {{ $operator}} {{ .Value | formatScalar -}}
     {{- end -}}
 {{- end }}
 
@@ -20,16 +30,33 @@ import (
 
 {{- define "arg" -}}
     {{- if ne .Arg.Builder nil -}}
-    {{ .Arg.Builder.Name }}Converter({{- if not .Type.Nullable}}&{{ end }}{{ .Var }})
+        {{ .Arg.Builder.Name }}Converter({{- if not .Type.Nullable}}&{{ end }}{{ .Var }})
     {{- else -}}
-    fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }})
+        fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }})
+    {{- end -}}
+{{- end }}
+
+{{- define "prepare_arg" -}}
+    {{- if ne .Arg.Builder nil -}}
+        {{ if .Type.IsArray }}
+            tmp{{ .IntoVar }} := []string{"[]{{ .Type | formatType }}{"}
+            for i := range {{ .Var }} {
+                tmp{{ .IntoVar }} = append(tmp{{ .IntoVar }}, {{ .Arg.Builder.Name }}Converter({{- if not .Type.Array.ValueType.Nullable}}&{{ end }}{{ .Var }}[i]))
+            }
+            tmp{{ .IntoVar }} = append(tmp{{ .IntoVar }}, "}")
+            {{ .IntoVar }} := strings.Join(tmp{{ .IntoVar }}, ",\n")
+        {{ else }}
+            {{ .IntoVar }} := {{ .Arg.Builder.Name }}Converter({{- if not .Type.Nullable}}&{{ end }}{{ .Var }})
+        {{ end }}
+    {{- else -}}
+        {{ .IntoVar }} := fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }})
     {{- end -}}
 {{- end }}
 
 func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }}) string {
     {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) }}
     calls := []string{
-        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.Builder.Name }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ $var := (print "input." (formatPath $arg.ValuePath)) }}{{ template "arg" (dict "Arg" $arg "Var" $var "Type" $arg.ValuePath.Last.Type) }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
+        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.Builder.Name }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ $var := (print "input." (formatPath $arg.ValuePath)) }}{{ template "arg" (dict "Arg" $arg "Var" $var "Type" $arg.ValueType) }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
     }
 
     {{- range .Converter.Mappings }}
@@ -40,7 +67,8 @@ func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }})
         {{- $arg := index .Args 0 -}}
         for _, item := range input.{{ $arg.ValuePath | formatPath }} {
             buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
-            buffer.WriteString({{ template "arg" (dict "Arg" $arg "Var" "item" "Type" $arg.ValuePath.Last.Type.Array.ValueType) }})
+            {{ template "prepare_arg" (dict "IntoVar" "arg" "Arg" $arg "Var" "item" "Type" $arg.ValueType.Array.ValueType) }}
+            buffer.WriteString(arg)
             buffer.WriteString(")")
 
             calls = append(calls, buffer.String())
@@ -50,8 +78,9 @@ func {{ .Converter.Builder.Name }}Converter(input *{{ .Converter.Object.Name }})
         buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
         {{- $argsCount := (sub (len .Args) 1) -}}
         {{- range $i, $arg := .Args }}
-            {{- $var := (print "input." (formatPath $arg.ValuePath)) }}
-            buffer.WriteString({{ template "arg" (dict "Arg" $arg "Var" $var "Type" $arg.ValuePath.Last.Type) }})
+            {{- $var := print "input." (formatPath $arg.ValuePath) }}
+            {{ template "prepare_arg" (dict "IntoVar" (print "arg" $i) "Arg" $arg "Var" $var "Type" $arg.ValueType) }}
+            buffer.WriteString({{ print "arg" $i }})
             {{- if ne $i $argsCount }}
                 buffer.WriteString(", ")
             {{- end }}
