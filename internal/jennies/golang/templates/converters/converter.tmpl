@@ -39,12 +39,11 @@ import (
 {{- define "prepare_arg" -}}
     {{- if ne .Arg.Builder nil -}}
         {{ if .Type.IsArray }}
-            tmp{{ .IntoVar }} := []string{"[]{{ .Type | formatType }}{"}
+            tmp{{ .IntoVar }} := []string{}
             for i := range {{ .Var }} {
                 tmp{{ .IntoVar }} = append(tmp{{ .IntoVar }}, {{ .Arg.Builder.Name }}Converter({{- if not .Type.Array.ValueType.Nullable}}&{{ end }}{{ .Var }}[i]))
             }
-            tmp{{ .IntoVar }} = append(tmp{{ .IntoVar }}, "}")
-            {{ .IntoVar }} := strings.Join(tmp{{ .IntoVar }}, ",\n")
+            {{ .IntoVar }} := "{{ .Type | formatType }}{" + strings.Join(tmp{{ .IntoVar }}, ",\n") + "}"
         {{ else }}
             {{ .IntoVar }} := {{ .Arg.Builder.Name }}Converter({{- if not .Type.Nullable}}&{{ end }}{{ .Var }})
         {{ end }}
