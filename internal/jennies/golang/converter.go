@@ -79,11 +79,17 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 		return strings.Join(parts, ".")
 	}
 
+	formatRawRef := func(pkg string, ref string) string {
+		return typeFormatter.formatRef(ast.NewRef(pkg, ref), false)
+	}
+
 	err := templates.
 		Funcs(map[string]any{
-			"formatPath": formatFieldPath,
+			"formatPath":   formatFieldPath,
+			"formatRawRef": formatRawRef,
 		}).
 		ExecuteTemplate(&buffer, "converters/converter.tmpl", map[string]any{
+			"Imports":   imports,
 			"Converter": converter,
 		})
 	if err != nil {

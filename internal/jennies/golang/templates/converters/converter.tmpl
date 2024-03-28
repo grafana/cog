@@ -1,9 +1,10 @@
 package {{ .Converter.Package | formatPackageName }}
 
-import (
-    "fmt"
-    "strings"
-)
+{{ $converter := include "converter" . }}
+
+{{ .Imports }}
+
+{{ $converter }}
 
 {{- define "guard" }}
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
@@ -32,38 +33,16 @@ import (
     fmt.Sprintf("%#v", {{ .ValueType | maybeDereference }}{{ .ValuePath | formatPath }})
 {{- end }}
 
-{{- define "old_prepare_arg" -}}
-    {{- if ne .Arg.Builder nil -}}
-        {{ if .Type.IsArray }}
-            tmp{{ .IntoVar }} := []string{}
-            for i := range {{ .Var }} {
-            tmp{{ .IntoVar }} = append(tmp{{ .IntoVar }}, {{ .Arg.Builder.Name }}Converter({{- if not .Type.Array.ValueType.Nullable}}&{{ end }}{{ .Var }}[i]))
-            }
-            {{ .IntoVar }} := "{{ .Type | formatType }}{" + strings.Join(tmp{{ .IntoVar }}, ",\n") + "}"
-        {{ else }}
-            {{ .IntoVar }} := {{ .Arg.Builder.Name }}Converter({{- if not .Type.Nullable}}&{{ end }}{{ .Var }})
-        {{ end }}
-    {{- else -}}
-        {{ if .Type.IsRef }}
-            {{ .IntoVar }} := fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }}) // ref
-        {{ else if .Type.IsStruct }}
-            {{ .IntoVar }} := fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }}) // struct
-        {{ else }}
-            {{ .IntoVar }} := fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }})
-        {{ end }}
-    {{- end -}}
-{{- end }}
-
 {{- define "prepare_arg" -}}
     {{- with .Arg.Builder -}}
         {{ if .ValueType.IsArray }}
             tmp{{ $.IntoVar }} := []string{}
             for i := range {{ .ValuePath | formatPath }} {
-            tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{ .BuilderName }}Converter({{- if not .ValueType.Array.ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }}[i]))
+            tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if not .ValueType.Array.ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }}[i]))
             }
             {{ $.IntoVar }} := "{{ .ValueType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
         {{ else }}
-        {{ $.IntoVar }} := {{ .BuilderName }}Converter({{- if not .ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }})
+        {{ $.IntoVar }} := {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if not .ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }})
         {{ end }}
     {{- end -}}
     {{- with .Arg.Direct -}}
@@ -71,7 +50,8 @@ import (
     {{- end -}}
 {{- end }}
 
-func {{ .Converter.BuilderName }}Converter(input *{{ .Converter.For.Name }}) string {
+{{- define "converter" -}}
+func {{ .Converter.BuilderName }}Converter(input *{{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
     {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) }}
     calls := []string{
         `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ template "constructor_arg" $arg }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
@@ -117,3 +97,4 @@ func {{ .Converter.BuilderName }}Converter(input *{{ .Converter.For.Name }}) str
 
     return strings.Join(calls, ".\t\n")
 }
+{{- end }}

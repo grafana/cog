@@ -43,6 +43,9 @@ func init() {
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
+			"formatRawRef": func(_ ast.Type) string {
+				panic("formatRawRef() needs to be overridden by a jenny")
+			},
 		}).
 		Funcs(map[string]any{
 			"formatPackageName": formatPackageName,

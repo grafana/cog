@@ -3,7 +3,6 @@ package languages
 import (
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
@@ -28,6 +27,7 @@ type DirectArgMapping struct {
 type BuilderArgMapping struct {
 	ValuePath   ast.Path
 	ValueType   ast.Type
+	BuilderPkg  string
 	BuilderName string
 }
 
@@ -61,7 +61,6 @@ type ConverterInput struct {
 type Converter struct {
 	Package string
 
-	For         *ast.Object
 	BuilderName string
 	Input       ConverterInput
 
@@ -86,9 +85,7 @@ type ConverterGenerator struct {
 
 func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Builder) Converter {
 	converter := Converter{
-		Package: builder.Package,
-
-		For:         &builder.For,
+		Package:     builder.Package,
 		BuilderName: builder.Name,
 
 		Input: ConverterInput{
@@ -130,13 +127,6 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		mapping.RepeatAs = "item"
 	}
 
-	/*
-		if converter.Package == "dashboard" && strings.EqualFold(option.Name, "withPanel") {
-			spew.Dump(assignmentsFromArg[0])
-			panic("stop")
-		}
-	*/
-
 	mapping.Args = tools.Map(assignmentsFromArg, func(assignment ast.Assignment) ArgumentMapping {
 		valueType := assignment.Path.Last().Type
 		valuePath := converter.inputRootPath().Append(assignment.Path)
@@ -148,9 +138,6 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		}
 
 		if argument, ok := generator.argumentFromDisjunctionStruct(context, valuePath, assignment); ok {
-			spew.Dump(assignment)
-			//panic("stop")
-
 			return argument
 		}
 
@@ -167,6 +154,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, valuePath 
 			Builder: &BuilderArgMapping{
 				ValuePath:   valuePath,
 				ValueType:   typeDef,
+				BuilderPkg:  builder.Package,
 				BuilderName: builder.Name,
 			},
 		}
@@ -218,9 +206,7 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 	guards := orderedmap.New[string, MappingGuard]()
 
 	// TODO: define guards other than "not null" checks? (0, "", ...)
-	// TODO: assignment method (direct vs append)
 	// TODO: builders + array of builders (and array of array of builders, ...)
-	// TODO: disjunctions
 	// TODO: envelopes?
 	for _, assignment := range option.Assignments {
 		nullPathChunksGuards := generator.pathNotNullGuards(converter, assignment.Path)
