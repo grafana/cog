@@ -84,6 +84,11 @@ func {{ .Converter.BuilderName }}Converter(input *{{ .Converter.For.Name }}) str
         {{ if ne .RepeatFor nil -}}
         {{- $arg := index .Args 0 -}}
         for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} {
+            {{ with $arg.Guards -}}
+                if !({{ template "guards" . }}) {
+                    continue
+                }
+            {{ end }}
             buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
             {{ template "prepare_arg" (dict "IntoVar" "arg" "Arg" $arg) }}
             buffer.WriteString(arg)

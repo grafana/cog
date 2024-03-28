@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/grafana/cog/generated/cog/plugins"
 	"github.com/grafana/cog/generated/dashboard"
 	"github.com/grafana/cog/generated/role"
 )
@@ -21,6 +22,8 @@ func main() {
 		Description: toPtr("description"),
 		Hidden:      true,
 	}
+
+	plugins.RegisterDefaultPlugins()
 
 	converted := role.RoleConverter(someRole)
 
@@ -41,5 +44,5 @@ func main() {
 }
 
 func foo() {
-	
+
 }

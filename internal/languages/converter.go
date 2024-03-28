@@ -3,6 +3,7 @@ package languages
 import (
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
@@ -33,6 +34,8 @@ type BuilderArgMapping struct {
 type ArgumentMapping struct {
 	Direct  *DirectArgMapping
 	Builder *BuilderArgMapping
+
+	Guards []MappingGuard
 }
 
 type ConstructorArgMapping struct {
@@ -127,6 +130,13 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		mapping.RepeatAs = "item"
 	}
 
+	/*
+		if converter.Package == "dashboard" && strings.EqualFold(option.Name, "withPanel") {
+			spew.Dump(assignmentsFromArg[0])
+			panic("stop")
+		}
+	*/
+
 	mapping.Args = tools.Map(assignmentsFromArg, func(assignment ast.Assignment) ArgumentMapping {
 		valueType := assignment.Path.Last().Type
 		valuePath := converter.inputRootPath().Append(assignment.Path)
@@ -137,26 +147,70 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 			}
 		}
 
-		builder, found := context.ResolveAsBuilder(assignment.Path.Last().Type)
-		if found {
-			return ArgumentMapping{
-				Builder: &BuilderArgMapping{
-					ValuePath:   valuePath,
-					ValueType:   valueType,
-					BuilderName: builder.Name,
-				},
-			}
+		if argument, ok := generator.argumentFromDisjunctionStruct(context, valuePath, assignment); ok {
+			spew.Dump(assignment)
+			//panic("stop")
+
+			return argument
 		}
 
-		return ArgumentMapping{
-			Direct: &DirectArgMapping{
-				ValuePath: valuePath,
-				ValueType: valueType,
-			},
-		}
+		return generator.argumentForType(context, valuePath, valueType)
 	})
 
 	return mapping
+}
+
+func (generator *ConverterGenerator) argumentForType(context Context, valuePath ast.Path, typeDef ast.Type) ArgumentMapping {
+	builder, found := context.ResolveAsBuilder(typeDef)
+	if found {
+		return ArgumentMapping{
+			Builder: &BuilderArgMapping{
+				ValuePath:   valuePath,
+				ValueType:   typeDef,
+				BuilderName: builder.Name,
+			},
+		}
+	}
+
+	return ArgumentMapping{
+		Direct: &DirectArgMapping{
+			ValuePath: valuePath,
+			ValueType: typeDef,
+		},
+	}
+}
+
+func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+	if assignment.Value.Envelope == nil {
+		return ArgumentMapping{}, false
+	}
+
+	envelopedType := assignment.Value.Envelope.Type
+	if envelopedType.IsRef() {
+		referredObject, _ := context.LocateObject(envelopedType.Ref.ReferredPkg, envelopedType.Ref.ReferredType)
+		envelopedType = referredObject.Type
+	}
+
+	if !envelopedType.IsStructGeneratedFromDisjunction() {
+		return ArgumentMapping{}, false
+	}
+
+	envelopeValues := assignment.Value.Envelope.Values
+
+	guards := make([]MappingGuard, 0, len(envelopeValues))
+	for _, envelopePath := range envelopeValues {
+		guard := MappingGuard{
+			Path:  valuePath.Append(envelopePath.Path),
+			Op:    ast.NotEqualOp,
+			Value: nil,
+		}
+		guards = append(guards, guard)
+	}
+
+	arg := generator.argumentForType(context, valuePath.Append(envelopeValues[0].Path), envelopeValues[0].Path.Last().Type)
+	arg.Guards = guards
+
+	return arg, true
 }
 
 func (generator *ConverterGenerator) optionGuards(converter Converter, option ast.Option) []MappingGuard {
@@ -204,17 +258,16 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 			guards.Set(guard.String(), guard)
 		}
 
-		// TODO: Envelope assignment?
-		if assignment.Value.Envelope != nil {
-			/*
-				for _, envelopePath := range assignment.Value.Envelope.Values {
-					guard := MappingGuard{
-						Path:    assignment.Path.Append(envelopePath.Path),
-						NotNull: true,
-					}
-					guards.Set(guard.String(), guard)
+		// TODO: is that correct/needed?
+		if assignment.Method != ast.AppendAssignment && assignment.Value.Envelope != nil {
+			for _, envelopePath := range assignment.Value.Envelope.Values {
+				guard := MappingGuard{
+					Path:  converter.inputRootPath().Append(assignment.Path.Append(envelopePath.Path)),
+					Op:    ast.NotEqualOp,
+					Value: nil,
 				}
-			*/
+				guards.Set(guard.String(), guard)
+			}
 			continue
 		}
 	}
