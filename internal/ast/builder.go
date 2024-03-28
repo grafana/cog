@@ -196,12 +196,15 @@ type PathItem struct {
 	// useful mostly for composability purposes, when a field Type is "any"
 	// and we're trying to "compose in" something of a known type.
 	TypeHint *Type `json:",omitempty"`
+	// Is this element of the path the root? (ie: a variable, not a member of a struct)
+	Root bool
 }
 
 func (item PathItem) DeepCopy() PathItem {
 	clone := PathItem{
 		Identifier: item.Identifier,
 		Type:       item.Type.DeepCopy(),
+		Root:       item.Root,
 	}
 
 	if item.TypeHint != nil {

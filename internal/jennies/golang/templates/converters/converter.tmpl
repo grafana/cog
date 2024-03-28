@@ -7,9 +7,9 @@ import (
 
 {{- define "guard" }}
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
-        input.{{ .Path | formatPath }} != nil
+        {{ .Path | formatPath }} != nil
     {{- else -}}
-        {{- $leftOperand := print (.Path.Last.Type | maybeDereference) "input." (.Path | formatPath) -}}
+        {{- $leftOperand := print (.Path.Last.Type | maybeDereference) (.Path | formatPath) -}}
         {{- $operator := .Op -}}
         {{- if eq .Op "minLength" -}}
             {{- $leftOperand = print "len(" $leftOperand ")" -}}
@@ -28,20 +28,16 @@ import (
     {{- range $i, $guard := . }}{{- template "guard" $guard }}{{ if ne $i $guardsCount }} && {{ end }}{{ end }}
 {{- end }}
 
-{{- define "arg" -}}
-    {{- if ne .Arg.Builder nil -}}
-        {{ .Arg.Builder.Name }}Converter({{- if not .Type.Nullable}}&{{ end }}{{ .Var }})
-    {{- else -}}
-        fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Var }})
-    {{- end -}}
+{{- define "constructor_arg" -}}
+    fmt.Sprintf("%#v", {{ .ValueType | maybeDereference }}{{ .ValuePath | formatPath }})
 {{- end }}
 
-{{- define "prepare_arg" -}}
+{{- define "old_prepare_arg" -}}
     {{- if ne .Arg.Builder nil -}}
         {{ if .Type.IsArray }}
             tmp{{ .IntoVar }} := []string{}
             for i := range {{ .Var }} {
-                tmp{{ .IntoVar }} = append(tmp{{ .IntoVar }}, {{ .Arg.Builder.Name }}Converter({{- if not .Type.Array.ValueType.Nullable}}&{{ end }}{{ .Var }}[i]))
+            tmp{{ .IntoVar }} = append(tmp{{ .IntoVar }}, {{ .Arg.Builder.Name }}Converter({{- if not .Type.Array.ValueType.Nullable}}&{{ end }}{{ .Var }}[i]))
             }
             {{ .IntoVar }} := "{{ .Type | formatType }}{" + strings.Join(tmp{{ .IntoVar }}, ",\n") + "}"
         {{ else }}
@@ -58,21 +54,38 @@ import (
     {{- end -}}
 {{- end }}
 
+{{- define "prepare_arg" -}}
+    {{- with .Arg.Builder -}}
+        {{ if .ValueType.IsArray }}
+            tmp{{ $.IntoVar }} := []string{}
+            for i := range {{ .ValuePath | formatPath }} {
+            tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{ .BuilderName }}Converter({{- if not .ValueType.Array.ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }}[i]))
+            }
+            {{ $.IntoVar }} := "{{ .ValueType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
+        {{ else }}
+        {{ $.IntoVar }} := {{ .BuilderName }}Converter({{- if not .ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }})
+        {{ end }}
+    {{- end -}}
+    {{- with .Arg.Direct -}}
+        {{ $.IntoVar }} := fmt.Sprintf("%#v", {{ .ValueType | maybeDereference }}{{ .ValuePath | formatPath }})
+    {{- end -}}
+{{- end }}
+
 func {{ .Converter.BuilderName }}Converter(input *{{ .Converter.For.Name }}) string {
     {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) }}
     calls := []string{
-        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ $var := (print "input." (formatPath $arg.ValuePath)) }}{{ template "arg" (dict "Arg" $arg "Var" $var "Type" $arg.ValueType) }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
+        `{{ .Converter.Package|formatPackageName }}.New{{ .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{ template "constructor_arg" $arg }}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
     }
 
     {{- range .Converter.Mappings }}
     {{ with .Guards }}if {{ template "guards" . }}{{ end }}{
         var buffer strings.Builder
 
-        {{ if .Repeat -}}
+        {{ if ne .RepeatFor nil -}}
         {{- $arg := index .Args 0 -}}
-        for _, item := range input.{{ $arg.ValuePath | formatPath }} {
+        for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} {
             buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
-            {{ template "prepare_arg" (dict "IntoVar" "arg" "Arg" $arg "Var" "item" "Type" $arg.ValueType.Array.ValueType) }}
+            {{ template "prepare_arg" (dict "IntoVar" "arg" "Arg" $arg) }}
             buffer.WriteString(arg)
             buffer.WriteString(")")
 
@@ -83,8 +96,8 @@ func {{ .Converter.BuilderName }}Converter(input *{{ .Converter.For.Name }}) str
         buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
         {{- $argsCount := (sub (len .Args) 1) -}}
         {{- range $i, $arg := .Args }}
-            {{- $var := print "input." (formatPath $arg.ValuePath) }}
-            {{ template "prepare_arg" (dict "IntoVar" (print "arg" $i) "Arg" $arg "Var" $var "Type" $arg.ValueType) }}
+            {{- $intoVar := print "arg" $i }}
+            {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
             buffer.WriteString({{ print "arg" $i }})
             {{- if ne $i $argsCount }}
                 buffer.WriteString(", ")

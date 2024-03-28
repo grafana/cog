@@ -58,7 +58,10 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 		parts := make([]string, len(fieldPath))
 
 		for i := range fieldPath {
-			output := tools.UpperCamelCase(fieldPath[i].Identifier)
+			output := fieldPath[i].Identifier
+			if !fieldPath[i].Root {
+				output = tools.UpperCamelCase(output)
+			}
 
 			// don't generate type hints if:
 			// * there isn't one defined
