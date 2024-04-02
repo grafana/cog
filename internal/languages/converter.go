@@ -96,7 +96,18 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 
 	converter.ConstructorArgs = generator.constructorArgs(converter, builder)
 
-	converter.Mappings = tools.Map(builder.Options, func(option ast.Option) OptionMapping {
+	validOptions := tools.Filter(builder.Options, func(option ast.Option) bool {
+		for _, arg := range option.Args {
+			// we don't know what to do with "any" arguments
+			if arg.Type.IsAny() {
+				return false
+			}
+		}
+
+		return true
+	})
+
+	converter.Mappings = tools.Map(validOptions, func(option ast.Option) OptionMapping {
 		return generator.convertOption(context, converter, option)
 	})
 

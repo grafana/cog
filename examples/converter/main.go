@@ -7,27 +7,10 @@ import (
 
 	"github.com/grafana/cog/generated/cog/plugins"
 	"github.com/grafana/cog/generated/dashboard"
-	"github.com/grafana/cog/generated/role"
 )
 
-func toPtr[T any](input T) *T {
-	return &input
-}
-
 func main() {
-	someRole := &role.Role{
-		Name:        "Role-name",
-		DisplayName: toPtr("display name"),
-		GroupName:   toPtr("group name"),
-		Description: toPtr("description"),
-		Hidden:      true,
-	}
-
 	plugins.RegisterDefaultPlugins()
-
-	converted := role.RoleConverter(someRole)
-
-	fmt.Println(converted)
 
 	dashboardJSON, err := os.ReadFile("/home/kevin/sandbox/work/cog/examples/converter/dashboard.json")
 	if err != nil {

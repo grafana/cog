@@ -80,7 +80,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 		common.If[languages.Context](globalConfig.Converters, &Converter{Config: config}),
 	)
-	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
+	//jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 
 	return jenny
 }
