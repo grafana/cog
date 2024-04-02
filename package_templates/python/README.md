@@ -1,4 +1,4 @@
-# Grafana Foundation SDK – TypeScript
+# Grafana Foundation SDK – Python
 
 A set of tools, types and *builder libraries* for building and manipulating Grafana objects in Python.
 
