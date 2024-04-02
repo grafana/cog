@@ -1,9 +1,7 @@
 {{- define "comments" }}
 {{- with .Comments }}
 """
-{{- range . }}
-{{ . }}
-{{- end }}
+{{ . | join "\n" }}
 """
 {{ end }}
 {{- end -}}
