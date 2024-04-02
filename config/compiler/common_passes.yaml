@@ -122,6 +122,11 @@ passes:
         kind: ref
         ref: { referred_pkg: heatmap, referred_type: ExemplarConfig }
         default: { color: "rgba(255,0,255,0.7)" }
+  - retype_field:
+      field: heatmap.Options.tooltip
+      as:
+        kind: ref
+        ref: { referred_pkg: heatmap, referred_type: HeatmapTooltip }
 
   ##########
   # Others #
