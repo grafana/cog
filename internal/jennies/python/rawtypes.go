@@ -14,8 +14,7 @@ import (
 
 type RawTypes struct {
 	typeFormatter *typeFormatter
-	importModule  moduleImporter
-	importPkg     pkgImporter
+	imports       *ModuleImportMap
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -43,22 +42,8 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 	var buffer strings.Builder
 	var err error
 
-	imports := NewImportMap()
-	jenny.importModule = func(alias string, pkg string, module string) string {
-		if module == schema.Package {
-			return ""
-		}
-
-		return imports.AddModule(alias, pkg, module)
-	}
-	jenny.importPkg = func(alias string, pkg string) string {
-		if strings.TrimPrefix(pkg, ".") == schema.Package {
-			return ""
-		}
-
-		return imports.AddPackage(alias, pkg)
-	}
-	jenny.typeFormatter = defaultTypeFormatter(context, jenny.importPkg, jenny.importModule)
+	jenny.imports = NewImportMap(common.WithCurrentPkg[ModuleImportMap](schema.Package))
+	jenny.typeFormatter = defaultTypeFormatter(context, jenny.imports)
 
 	i := 0
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
@@ -101,7 +86,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 
 	buffer.WriteString("\n")
 
-	importStatements := imports.String()
+	importStatements := jenny.imports.String()
 	if importStatements != "" {
 		importStatements += "\n\n\n"
 	}
@@ -126,7 +111,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 				defaultsOverrides = overrides
 			}
 
-			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule, orderedmap.FromMap(defaultsOverrides))
+			defaultValue = defaultValueForType(schemas, field.Type, jenny.imports, orderedmap.FromMap(defaultsOverrides))
 		}
 
 		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
@@ -134,7 +119,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 			continue
 		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray) {
 			if !field.Type.Nullable {
-				typingPkg := jenny.importPkg("typing", "typing")
+				typingPkg := jenny.imports.Import("typing")
 				fieldType = fmt.Sprintf("%s.Optional[%s]", typingPkg, fieldType)
 			}
 
@@ -193,7 +178,7 @@ func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.Object) string {
 	var buffer strings.Builder
 
-	typingPkg := jenny.importPkg("typing", "typing")
+	typingPkg := jenny.imports.Import("typing")
 
 	buffer.WriteString("    @classmethod\n")
 	buffer.WriteString(fmt.Sprintf("    def from_json(cls, data: dict[str, %[1]s.Any]) -> %[1]s.Self:\n", typingPkg))
@@ -206,7 +191,7 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 
 		// Special cases to properly parse dashboard.Panel options
 		if object.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(object.Name, "panel") && field.Name == "options" {
-			cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+			cogruntime := jenny.imports.FromImportAs("..cog", "runtime", "cogruntime")
 			assignment := fmt.Sprintf(`        if "options" in data:
             config = %[1]s.panelcfg_config(data.get("type", ""))
             if config is not None and config.options_from_json_hook is not None:
@@ -220,7 +205,7 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 
 		// Special cases to properly parse dashboard.Panel fieldConfig
 		if object.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(object.Name, "panel") && field.Name == "fieldConfig" {
-			cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+			cogruntime := jenny.imports.FromImportAs("..cog", "runtime", "cogruntime")
 			assignment := fmt.Sprintf(`        if "fieldConfig" in data:
             config = %[1]s.panelcfg_config(data.get("type", ""))
             field_config = FieldConfigSource.from_json(data["fieldConfig"])
@@ -294,7 +279,7 @@ func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.
 }
 
 func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) string {
-	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+	cogruntime := jenny.imports.FromImportAs("..cog", "runtime", "cogruntime")
 	identifier := schema.Metadata.Identifier
 
 	options := "Options.from_json"
@@ -316,7 +301,7 @@ func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) stri
 }
 
 func (jenny RawTypes) generateDataqueryVariantConfigFunc(schema *ast.Schema, object ast.Object) string {
-	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+	cogruntime := jenny.imports.FromImportAs("..cog", "runtime", "cogruntime")
 	objectName := tools.UpperCamelCase(object.Name)
 	identifier := schema.Metadata.Identifier
 
@@ -345,7 +330,7 @@ func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, input
 		return "", inputVar
 	}
 
-	typingPkg := jenny.importPkg("typing", "typing")
+	typingPkg := jenny.imports.Import("typing")
 
 	decodingMap := "{"
 	branchTypes := make([]string, 0, len(disjunction.Branches))
@@ -381,7 +366,7 @@ func (jenny RawTypes) composableSlotFromJSON(context common.Context, parentStruc
 		return "unknown composable slot variant"
 	}
 
-	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
+	cogruntime := jenny.imports.FromImportAs("..cog", "runtime", "cogruntime")
 
 	// First: try to locate a field that would contain the type of datasource being used.
 	// We're looking for a field defined as a reference to the `DataSourceRef` type.

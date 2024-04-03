@@ -16,7 +16,6 @@ type Builder struct {
 	imports          *ModuleImportMap
 	typeFormatter    *typeFormatter
 	rawTypeFormatter *typeFormatter
-	importModule     func(alias string, pkg string, module string) string
 }
 
 func (jenny *Builder) JennyName() string {
@@ -35,15 +34,8 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 		var source strings.Builder
 
 		jenny.imports = NewImportMap()
-		jenny.importModule = func(alias string, pkg string, module string) string {
-			return jenny.imports.AddModule(alias, pkg, module)
-		}
-		jenny.typeFormatter = builderTypeFormatter(context, func(alias string, pkg string) string {
-			return jenny.imports.AddPackage(alias, pkg)
-		}, jenny.importModule)
-		jenny.rawTypeFormatter = defaultTypeFormatter(context, func(alias string, pkg string) string {
-			return jenny.imports.AddPackage(alias, pkg)
-		}, jenny.importModule)
+		jenny.typeFormatter = builderTypeFormatter(context, jenny.imports)
+		jenny.rawTypeFormatter = defaultTypeFormatter(context, jenny.imports)
 
 		for _, builder := range builders {
 			source.WriteString("\n\n")
@@ -69,8 +61,8 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	var buffer strings.Builder
 
 	// every builder uses the following imports
-	jenny.imports.AddPackage("typing", "typing")
-	jenny.importModule("cogbuilder", "..cog", "builder")
+	jenny.imports.Import("typing")
+	jenny.imports.FromImportAs("..cog", "builder", "cogbuilder")
 
 	fullObjectName := jenny.typeFormatter.formatRef(builder.For.SelfRef)
 	buildObjectSignature := fullObjectName
@@ -95,7 +87,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 				return formatValue(value)
 			},
 			"defaultForType": func(typeDef ast.Type) string {
-				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
+				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.imports, nil))
 			},
 		}).
 		ExecuteTemplate(&buffer, "builders/builder.tmpl", template.Builder{
@@ -163,7 +155,7 @@ func (jenny *Builder) generatePathInitializationSafeGuard(context common.Context
 		valueType = *path.Last().TypeHint
 	}
 
-	emptyValue := formatValue(defaultValueForType(context.Schemas, valueType, jenny.importModule, nil))
+	emptyValue := formatValue(defaultValueForType(context.Schemas, valueType, jenny.imports, nil))
 
 	nonOptionalType := valueType.DeepCopy()
 	nonOptionalType.Nullable = false

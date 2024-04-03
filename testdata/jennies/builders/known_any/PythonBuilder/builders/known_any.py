@@ -1,6 +1,6 @@
-import typing
 from ..cog import builder as cogbuilder
 from ..models import known_any
+import typing
 
 
 class SomeStruct(cogbuilder.Builder[known_any.SomeStruct]):    

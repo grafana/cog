@@ -1,6 +1,6 @@
+from ..cog import runtime as cogruntime
 from ..cog import variants as cogvariants
 import typing
-from ..cog import runtime as cogruntime
 
 
 class Query(cogvariants.Dataquery):

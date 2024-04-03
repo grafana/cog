@@ -1,6 +1,6 @@
-import typing
 from ..cog import builder as cogbuilder
 from ..models import constructor_initializations
+import typing
 
 
 class SomePanel(cogbuilder.Builder[constructor_initializations.SomePanel]):    

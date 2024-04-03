@@ -60,7 +60,7 @@ func (jenny Runtime) variantPlugins(context common.Context) (string, error) {
 			continue
 		}
 
-		importAlias := imports.AddModule(schema.Package, "..models", schema.Package)
+		importAlias := imports.FromImport("..models", schema.Package)
 
 		if schema.Metadata.Variant == ast.SchemaVariantPanel {
 			panelSchemas = append(panelSchemas, importAlias)

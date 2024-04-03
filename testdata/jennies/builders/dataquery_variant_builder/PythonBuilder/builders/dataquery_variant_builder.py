@@ -1,6 +1,6 @@
-import typing
 from ..cog import builder as cogbuilder
 from ..models import dataquery_variant_builder
+import typing
 
 
 class LokiBuilder(cogbuilder.Builder[dataquery_variant_builder.Loki]):    

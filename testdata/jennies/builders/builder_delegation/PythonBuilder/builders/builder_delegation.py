@@ -1,6 +1,6 @@
-import typing
-from ..cog import builder as cogbuilder
 from ..models import builder_delegation
+from ..cog import builder as cogbuilder
+import typing
 
 
 class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):    

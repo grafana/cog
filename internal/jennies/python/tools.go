@@ -96,7 +96,7 @@ func isReservedPythonKeyword(input string) bool {
 * 					 Default and "empty" values management 					  *
 ******************************************************************************/
 
-func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule moduleImporter, defaultsOverrides *orderedmap.Map[string, any]) any {
+func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, imports *ModuleImportMap, defaultsOverrides *orderedmap.Map[string, any]) any {
 	if !typeDef.IsRef() && typeDef.Default != nil {
 		return typeDef.Default
 	}
@@ -107,11 +107,11 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 			return nil
 		}
 
-		return defaultValueForType(schemas, typeDef.AsDisjunction().Branches[0], importModule, nil)
+		return defaultValueForType(schemas, typeDef.AsDisjunction().Branches[0], imports, nil)
 	case ast.KindRef:
 		ref := typeDef.AsRef()
 		referredPkg := ref.ReferredPkg
-		referredPkg = importModule(referredPkg, "..models", referredPkg)
+		referredPkg = imports.FromImport("..models", referredPkg)
 
 		referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 		if found && referredObj.Type.IsEnum() {
@@ -129,7 +129,7 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 
 			return raw(fmt.Sprintf("%s.%s.%s", referredPkg, referredObj.Name, enumName))
 		} else if found && referredObj.Type.IsDisjunction() {
-			return defaultValueForType(schemas, referredObj.Type, importModule, nil)
+			return defaultValueForType(schemas, referredObj.Type, imports, nil)
 		}
 
 		var extraDefaults []string
@@ -152,7 +152,7 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 						fieldOverrides = orderedmap.FromMap(overrides)
 					}
 
-					value = defaultValueForType(schemas, field.Type, importModule, fieldOverrides)
+					value = defaultValueForType(schemas, field.Type, imports, fieldOverrides)
 				}
 
 				extraDefaults = append(extraDefaults, fmt.Sprintf("%s=%s", formatIdentifier(k), formatValue(value)))
