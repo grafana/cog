@@ -75,7 +75,7 @@ func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, 
 
 	pathParts := strings.Split(pathAsString, ".")
 	for _, part := range pathParts {
-		if currentType.Kind == KindRef {
+		if currentType.IsRef() {
 			referredObjBuilder, err := resolveRef(currentType.AsRef())
 			if err != nil {
 				return nil, err
@@ -84,7 +84,7 @@ func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, 
 			currentType = referredObjBuilder.For.Type
 		}
 
-		if currentType.Kind != KindStruct {
+		if !currentType.IsStruct() {
 			return nil, fmt.Errorf("could not make path '%s': type at path '%s' is not a struct or a ref", pathAsString, path.String())
 		}
 
@@ -366,7 +366,7 @@ func ArgumentAssignment(path Path, argument Argument, opts ...AssignmentOpt) Ass
 
 func FieldAssignment(field StructField, opts ...AssignmentOpt) Assignment {
 	var constraints []TypeConstraint
-	if field.Type.Kind == KindScalar {
+	if field.Type.IsScalar() {
 		constraints = field.Type.AsScalar().Constraints
 	}
 
@@ -386,19 +386,19 @@ func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
 	for _, schema := range schemas {
 		schema.Objects.Iterate(func(_ string, object Object) {
 			// we only want builders for structs or references to structs
-			if object.Type.Kind == KindRef {
+			if object.Type.IsRef() {
 				ref := object.Type.AsRef()
 				referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 				if !found {
 					return
 				}
 
-				if referredObj.Type.Kind != KindStruct {
+				if !referredObj.Type.IsStruct() {
 					return
 				}
 			}
 
-			if object.Type.Kind != KindStruct && object.Type.Kind != KindRef {
+			if !object.Type.IsAnyOf(KindStruct, KindRef) {
 				return
 			}
 
@@ -418,7 +418,7 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 	}
 
 	var structType StructType
-	if object.Type.Kind == KindStruct {
+	if object.Type.IsStruct() {
 		structType = object.Type.AsStruct()
 	} else {
 		ref := object.Type.AsRef()

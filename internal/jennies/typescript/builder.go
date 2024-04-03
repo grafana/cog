@@ -159,10 +159,7 @@ func (jenny *Builder) generateAssignment(assign ast.Assignment) template.Assignm
 		}
 
 		maybeUndefined := chunkType.Nullable ||
-			chunkType.Kind == ast.KindMap ||
-			chunkType.Kind == ast.KindArray ||
-			chunkType.Kind == ast.KindRef ||
-			chunkType.Kind == ast.KindStruct
+			chunkType.IsAnyOf(ast.KindMap, ast.KindArray, ast.KindRef, ast.KindStruct)
 
 		if !maybeUndefined {
 			continue

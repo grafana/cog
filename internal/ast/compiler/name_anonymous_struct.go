@@ -56,7 +56,7 @@ func (pass *NameAnonymousStruct) processObject(object ast.Object) (ast.Object, a
 		}
 
 		// we expect the target field to be defined an inline struct
-		if field.Type.Kind != ast.KindStruct {
+		if !field.Type.IsStruct() {
 			continue
 		}
 

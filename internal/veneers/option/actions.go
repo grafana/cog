@@ -45,7 +45,7 @@ func RenameAction(newName string) RewriteAction {
 // FIXME: considers the first arg only.
 func ArrayToAppendAction() RewriteAction {
 	return func(_ ast.Builder, option ast.Option) []ast.Option {
-		if len(option.Args) < 1 || option.Args[0].Type.Kind != ast.KindArray {
+		if len(option.Args) < 1 || !option.Args[0].Type.IsArray() {
 			return []ast.Option{option}
 		}
 
@@ -147,14 +147,14 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 		}
 
 		firstArgType := option.Args[0].Type
-		if firstArgType.Kind == ast.KindRef {
+		if firstArgType.IsRef() {
 			referredObject, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
 			if found {
 				firstArgType = referredObject.Type
 			}
 		}
 
-		if firstArgType.Kind != ast.KindStruct {
+		if !firstArgType.IsStruct() {
 			return []ast.Option{option}
 		}
 
@@ -168,7 +168,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 		newOpt.Assignments = nil
 		newOpt.AddToVeneerTrail("StructFieldsAsArguments")
 
-		assignIntoList := assignmentPathPrefix.Last().Type.Kind == ast.KindArray
+		assignIntoList := assignmentPathPrefix.Last().Type.IsArray()
 
 		newAssignments := make([]ast.Assignment, 0, len(structType.Fields))
 		valuesForEnvelope := make([]ast.EnvelopeFieldValue, 0, len(structType.Fields))
@@ -178,7 +178,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 			}
 
 			var constraints []ast.TypeConstraint
-			if field.Type.Kind == ast.KindScalar {
+			if field.Type.IsScalar() {
 				constraints = field.Type.AsScalar().Constraints
 			}
 
@@ -188,7 +188,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 			}
 
 			// if the field has a value, it's a constant and we don't need to add it as an argument
-			isConstant := field.Type.Kind == ast.KindScalar && field.Type.AsScalar().Value != nil
+			isConstant := field.Type.IsConcreteScalar()
 			if !isConstant {
 				newOpt.Args = append(newOpt.Args, newArg)
 			}
@@ -287,14 +287,14 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 		}
 
 		firstArgType := option.Args[0].Type
-		if firstArgType.Kind == ast.KindRef {
+		if firstArgType.IsRef() {
 			referredObject, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
 			if found {
 				firstArgType = referredObject.Type
 			}
 		}
 
-		if firstArgType.Kind != ast.KindStruct {
+		if !firstArgType.IsStruct() {
 			return []ast.Option{option}
 		}
 
@@ -373,12 +373,12 @@ func DisjunctionAsOptionsAction() RewriteAction {
 		firstArgType := option.Args[0].Type
 
 		// "proper" disjunction
-		if firstArgType.Kind == ast.KindDisjunction {
+		if firstArgType.IsDisjunction() {
 			return disjunctionAsOptions(option)
 		}
 
 		// or maybe a reference to a struct that was created to simulate a disjunction?
-		if firstArgType.Kind == ast.KindRef {
+		if firstArgType.IsRef() {
 			// FIXME: we only try to resolve the reference within the same package
 			referredObj, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
 			if !found {

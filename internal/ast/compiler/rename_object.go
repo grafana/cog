@@ -48,27 +48,27 @@ func (pass *RenameObject) processSchema(schema *ast.Schema) *ast.Schema {
 }
 
 func (pass *RenameObject) processType(def ast.Type) ast.Type {
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return pass.processArray(def)
 	}
 
-	if def.Kind == ast.KindMap {
+	if def.IsMap() {
 		return pass.processMap(def)
 	}
 
-	if def.Kind == ast.KindStruct {
+	if def.IsStruct() {
 		return pass.processStruct(def)
 	}
 
-	if def.Kind == ast.KindDisjunction {
+	if def.IsDisjunction() {
 		return pass.processDisjunction(def)
 	}
 
-	if def.Kind == ast.KindIntersection {
+	if def.IsIntersection() {
 		return pass.processIntersection(def)
 	}
 
-	if def.Kind == ast.KindRef {
+	if def.IsRef() {
 		return pass.processRef(def)
 	}
 

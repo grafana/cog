@@ -66,19 +66,19 @@ func (pass *FlattenDisjunctions) processObject(schema *ast.Schema, object ast.Ob
 }
 
 func (pass *FlattenDisjunctions) processType(schema *ast.Schema, def ast.Type) ast.Type {
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return pass.processArray(schema, def)
 	}
 
-	if def.Kind == ast.KindMap {
+	if def.IsMap() {
 		return pass.processMap(schema, def)
 	}
 
-	if def.Kind == ast.KindStruct {
+	if def.IsStruct() {
 		return pass.processStruct(schema, def)
 	}
 
-	if def.Kind == ast.KindDisjunction {
+	if def.IsDisjunction() {
 		return pass.processDisjunction(schema, def)
 	}
 
@@ -127,7 +127,7 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 	}
 
 	for _, branch := range disjunction.Branches {
-		if branch.Kind != ast.KindRef {
+		if !branch.IsRef() {
 			addBranch(branch)
 			continue
 		}
@@ -138,7 +138,7 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 			continue
 		}
 
-		if resolved.Kind != ast.KindDisjunction {
+		if !resolved.IsDisjunction() {
 			addBranch(branch)
 			continue
 		}

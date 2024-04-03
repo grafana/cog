@@ -65,19 +65,19 @@ func (pass *DisjunctionInferMapping) processObject(schema *ast.Schema, object as
 }
 
 func (pass *DisjunctionInferMapping) processType(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return pass.processArray(schema, def)
 	}
 
-	if def.Kind == ast.KindMap {
+	if def.IsMap() {
 		return pass.processMap(schema, def)
 	}
 
-	if def.Kind == ast.KindStruct {
+	if def.IsStruct() {
 		return pass.processStruct(schema, def)
 	}
 
-	if def.Kind == ast.KindDisjunction {
+	if def.IsDisjunction() {
 		return pass.processDisjunction(schema, def)
 	}
 
@@ -191,15 +191,12 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
-			if field.Type.Kind != ast.KindScalar {
+			if !field.Type.IsConcreteScalar() {
 				continue
 			}
 
 			scalarField := field.Type.AsScalar()
-			if !scalarField.IsConcrete() {
-				continue
-			}
-			if field.Type.AsScalar().ScalarKind != ast.KindString {
+			if scalarField.ScalarKind != ast.KindString {
 				continue
 			}
 
@@ -256,7 +253,7 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 		}
 
 		// trust, but verify: we need the field to be an actual scalar with a concrete value?
-		if field.Type.Kind != ast.KindScalar {
+		if !field.Type.IsScalar() {
 			return nil, fmt.Errorf("discriminator field is not a scalar: %w", ErrCanNotInferDiscriminator)
 		}
 

@@ -158,7 +158,7 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []stri
 	nestedStructs := make([]ClassTemplate, 0)
 
 	for _, field := range def.Fields {
-		if field.Type.Kind == ast.KindStruct {
+		if field.Type.IsStruct() {
 			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Comments, field.Type.ImplementedVariant(), field.Type.AsStruct()))
 		} else {
 			fields = append(fields, Field{

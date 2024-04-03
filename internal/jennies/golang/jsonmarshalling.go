@@ -125,15 +125,13 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
 	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
 	// 	  structs and these structs have a common "discriminator" field.
-	isStruct := obj.Type.Kind == ast.KindStruct
-
-	if isStruct && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
 		return jenny.renderTemplate("types/disjunction_of_scalars.json_marshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
-	if isStruct && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
 		return jenny.renderTemplate("types/disjunction_of_refs.json_marshal.tmpl", map[string]any{
 			"def": obj,
 		})
@@ -147,7 +145,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context common.Context, 
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
 	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot
 
-	if obj.Type.Kind != ast.KindStruct {
+	if !obj.Type.IsStruct() {
 		return false
 	}
 
@@ -167,15 +165,13 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context common.Context, 
 }
 
 func (jenny JSONMarshalling) renderCustomUnmarshal(context common.Context, obj ast.Object) (string, error) {
-	isStruct := obj.Type.Kind == ast.KindStruct
-
-	if isStruct && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
 		return jenny.renderTemplate("types/disjunction_of_scalars.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
-	if isStruct && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
 		return jenny.renderTemplate("types/disjunction_of_refs.json_unmarshal.tmpl", map[string]any{
 			"def":  obj,
 			"hint": obj.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs],
@@ -295,7 +291,7 @@ func (jenny JSONMarshalling) renderUnmarshalDataqueryField(parentStruct ast.Obje
 	// We're looking for a field defined as a reference to the `DataSourceRef` type.
 	var hintField *ast.StructField
 	for i, candidate := range parentStruct.Type.AsStruct().Fields {
-		if candidate.Type.Kind != ast.KindRef {
+		if !candidate.Type.IsRef() {
 			continue
 		}
 		if candidate.Type.AsRef().ReferredType != "DataSourceRef" {
@@ -316,7 +312,7 @@ dataqueryTypeHint = *resource.%[1]s.Type
 `, tools.UpperCamelCase(hintField.Name))
 	}
 
-	if field.Type.Kind == ast.KindArray {
+	if field.Type.IsArray() {
 		return fmt.Sprintf(`
 	%[3]s
 	%[2]s, err := cog.UnmarshalDataqueryArray(fields["%[2]s"], dataqueryTypeHint)

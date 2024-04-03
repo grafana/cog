@@ -133,7 +133,7 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 		return nil, fmt.Errorf("unhandled object of type: %s", def.Type.Kind)
 	}
 	// generate a "default value factory" for every object, except for constants or composability slots
-	if (def.Type.Kind != ast.KindScalar && def.Type.Kind != ast.KindComposableSlot) || (def.Type.Kind == ast.KindScalar && !def.Type.AsScalar().IsConcrete()) {
+	if (!def.Type.IsScalar() && !def.Type.IsComposableSlot()) || (def.Type.IsScalar() && !def.Type.AsScalar().IsConcrete()) {
 		buffer.WriteString("\n")
 
 		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(objectName), objectName))
@@ -304,7 +304,7 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	referredTypeName := tools.CleanupNames(referredType.Name)
 
 	// is the reference to a constant?
-	if referredType.Type.Kind == ast.KindScalar && referredType.Type.AsScalar().IsConcrete() {
+	if referredType.Type.IsConcreteScalar() {
 		if pkg != "" {
 			return raw(fmt.Sprintf("%s.%s", pkg, referredTypeName))
 		}
@@ -312,7 +312,7 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 		return raw(referredTypeName)
 	}
 
-	if referredType.Type.Kind == ast.KindEnum {
+	if referredType.Type.IsEnum() {
 		return raw(jenny.typeFormatter.formatEnumValue(referredType, typeDef.Default))
 	}
 
@@ -386,7 +386,7 @@ func defaultEmptyValuesForStructs(def ast.StructType) string {
 
 func hasStructDefaults(typeDef ast.Type, defaults any) bool {
 	_, ok := defaults.(map[string]interface{})
-	return ok && typeDef.Kind == ast.KindStruct
+	return ok && typeDef.IsStruct()
 }
 
 func escapeEnumMemberName(identifier string) string {

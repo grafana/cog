@@ -74,19 +74,19 @@ func (pass *AnonymousStructsToNamed) processObject(object ast.Object) ast.Object
 }
 
 func (pass *AnonymousStructsToNamed) processType(pkg string, parentName string, def ast.Type) ast.Type {
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return pass.processArray(pkg, parentName, def)
 	}
 
-	if def.Kind == ast.KindMap {
+	if def.IsMap() {
 		return pass.processMap(pkg, parentName, def)
 	}
 
-	if def.Kind == ast.KindDisjunction {
+	if def.IsDisjunction() {
 		return pass.processDisjunction(pkg, parentName, def)
 	}
 
-	if def.Kind == ast.KindStruct {
+	if def.IsStruct() {
 		return pass.processStruct(pkg, parentName, def)
 	}
 

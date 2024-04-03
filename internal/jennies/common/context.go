@@ -15,11 +15,11 @@ func (context *Context) LocateObject(pkg string, name string) (ast.Object, bool)
 }
 
 func (context *Context) ResolveToBuilder(def ast.Type) bool {
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return context.ResolveToBuilder(def.AsArray().ValueType)
 	}
 
-	if def.Kind == ast.KindDisjunction {
+	if def.IsDisjunction() {
 		for _, branch := range def.AsDisjunction().Branches {
 			if context.ResolveToBuilder(branch) {
 				return true
@@ -29,7 +29,7 @@ func (context *Context) ResolveToBuilder(def ast.Type) bool {
 		return false
 	}
 
-	if def.Kind != ast.KindRef {
+	if !def.IsRef() {
 		return false
 	}
 
@@ -40,7 +40,7 @@ func (context *Context) ResolveToBuilder(def ast.Type) bool {
 }
 
 func (context *Context) IsDisjunctionOfBuilders(def ast.Type) bool {
-	if def.Kind != ast.KindDisjunction {
+	if !def.IsDisjunction() {
 		return false
 	}
 
@@ -54,15 +54,15 @@ func (context *Context) IsDisjunctionOfBuilders(def ast.Type) bool {
 }
 
 func (context *Context) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {
-	if def.Kind == ast.KindComposableSlot {
+	if def.IsComposableSlot() {
 		return def, true
 	}
 
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return context.ResolveToComposableSlot(def.AsArray().ValueType)
 	}
 
-	if def.Kind == ast.KindRef {
+	if def.IsRef() {
 		referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if !found {
 			return ast.Type{}, false

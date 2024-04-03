@@ -73,7 +73,7 @@ func (pass *Cloudwatch) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 func (pass *Cloudwatch) processDataquery(objectName string, typeDef ast.Type) ast.Type {
 	typeDef.Hints[ast.HintSkipVariantPluginRegistration] = true
 
-	if typeDef.Kind != ast.KindStruct {
+	if !typeDef.IsStruct() {
 		return typeDef
 	}
 
@@ -121,7 +121,7 @@ func (pass *Cloudwatch) defineQueryDisjunction(schema *ast.Schema) ast.Object {
 }
 
 func (pass *Cloudwatch) processQueryEditorExpression(object ast.Object) ast.Object {
-	if object.Type.Kind != ast.KindDisjunction {
+	if !object.Type.IsDisjunction() {
 		return object
 	}
 
@@ -141,7 +141,7 @@ func (pass *Cloudwatch) processQueryEditorExpression(object ast.Object) ast.Obje
 }
 
 func (pass *Cloudwatch) processQueryEditorArrayExpression(object ast.Object) ast.Object {
-	if object.Type.Kind != ast.KindStruct {
+	if !object.Type.IsStruct() {
 		return object
 	}
 

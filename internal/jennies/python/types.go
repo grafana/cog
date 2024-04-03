@@ -67,7 +67,7 @@ func (formatter *typeFormatter) formatObject(def ast.Object) (string, error) {
 func (formatter *typeFormatter) formatType(def ast.Type) string {
 	result := "unknown"
 
-	if def.Kind == ast.KindComposableSlot {
+	if def.IsComposableSlot() {
 		formatted := tools.UpperCamelCase(string(def.AsComposableSlot().Variant))
 		cogVariants := formatter.importModule("cogvariants", "..cog", "variants")
 
@@ -101,15 +101,15 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 		result = formatter.formatAnonymousEnum(def)
 	}
 
-	if def.Kind == ast.KindIntersection {
+	if def.IsIntersection() {
 		panic("formatting intersection type is not implemented for python")
 	}
 
-	if def.Kind == ast.KindDisjunction {
+	if def.IsDisjunction() {
 		result = formatter.formatDisjunction(def.AsDisjunction())
 	}
 
-	if formatter.forBuilder && (def.Kind == ast.KindComposableSlot || (def.Kind == ast.KindRef && formatter.context.ResolveToBuilder(def))) {
+	if formatter.forBuilder && (def.IsComposableSlot() || (def.IsRef() && formatter.context.ResolveToBuilder(def))) {
 		cogBuilder := formatter.importModule("cogbuilder", "..cog", "builder")
 		result = fmt.Sprintf("%s.Builder[%s]", cogBuilder, result)
 	} else if def.Nullable {
@@ -240,11 +240,9 @@ func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeF
 }
 
 func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType) string {
-	branches := tools.Map(def.Branches, func(branch ast.Type) string {
-		return formatter.formatType(branch)
-	})
-
+	branches := tools.Map(def.Branches, formatter.formatType)
 	typingPkg := formatter.importPkg("typing", "typing")
+
 	return fmt.Sprintf("%s.Union[%s]", typingPkg, strings.Join(branches, ", "))
 }
 

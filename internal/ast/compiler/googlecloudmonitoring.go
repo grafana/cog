@@ -52,7 +52,7 @@ func (pass *GoogleCloudMonitoring) processSchema(schema *ast.Schema) (*ast.Schem
 }
 
 func (pass *GoogleCloudMonitoring) processCloudMonitoringQuery(object ast.Object) ast.Object {
-	if object.Type.Kind != ast.KindStruct {
+	if !object.Type.IsStruct() {
 		return object
 	}
 
@@ -65,7 +65,7 @@ func (pass *GoogleCloudMonitoring) processCloudMonitoringQuery(object ast.Object
 			continue
 		}
 
-		if field.Type.Kind != ast.KindDisjunction {
+		if !field.Type.IsDisjunction() {
 			fields = append(fields, field)
 			continue
 		}
@@ -85,7 +85,7 @@ func (pass *GoogleCloudMonitoring) processCloudMonitoringQuery(object ast.Object
 }
 
 func (pass *GoogleCloudMonitoring) processTimeSeriesList(object ast.Object) ast.Object {
-	if object.Type.Kind != ast.KindStruct {
+	if !object.Type.IsStruct() {
 		return object
 	}
 
