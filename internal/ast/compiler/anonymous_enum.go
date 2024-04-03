@@ -61,7 +61,7 @@ func (pass *AnonymousEnumToExplicitType) processSchema(schema *ast.Schema) (*ast
 }
 
 func (pass *AnonymousEnumToExplicitType) processObject(object ast.Object) ast.Object {
-	if object.Type.Kind == ast.KindEnum {
+	if object.Type.IsEnum() {
 		return object
 	}
 
@@ -71,15 +71,15 @@ func (pass *AnonymousEnumToExplicitType) processObject(object ast.Object) ast.Ob
 }
 
 func (pass *AnonymousEnumToExplicitType) processType(pkg string, currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return pass.processArray(pkg, currentObjectName, suggestedEnumName, def)
 	}
 
-	if def.Kind == ast.KindStruct {
+	if def.IsStruct() {
 		return pass.processStruct(pkg, currentObjectName, def)
 	}
 
-	if def.Kind == ast.KindEnum {
+	if def.IsEnum() {
 		return pass.processAnonymousEnum(pkg, suggestedEnumName, def.AsEnum())
 	}
 

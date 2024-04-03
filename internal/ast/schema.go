@@ -147,7 +147,7 @@ func (schema *Schema) LocateObject(name string) (Object, bool) {
 }
 
 func (schema *Schema) Resolve(typeDef Type) (Type, bool) {
-	if typeDef.Kind != KindRef {
+	if !typeDef.IsRef() {
 		return typeDef, true
 	}
 

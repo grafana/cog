@@ -5,13 +5,13 @@ import (
 )
 
 func TypeName(typeDef Type) string {
-	if typeDef.Kind == KindRef {
+	if typeDef.IsRef() {
 		return tools.UpperCamelCase(typeDef.AsRef().ReferredType)
 	}
-	if typeDef.Kind == KindScalar {
+	if typeDef.IsScalar() {
 		return tools.UpperCamelCase(string(typeDef.AsScalar().ScalarKind))
 	}
-	if typeDef.Kind == KindArray {
+	if typeDef.IsArray() {
 		return "ArrayOf" + TypeName(typeDef.AsArray().ValueType)
 	}
 

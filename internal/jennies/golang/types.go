@@ -46,7 +46,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			return "any"
 		}
 
-		if def.Kind == ast.KindComposableSlot {
+		if def.IsComposableSlot() {
 			formatted := formatter.variantInterface(string(def.AsComposableSlot().Variant))
 
 			if !resolveBuilders {
@@ -58,15 +58,15 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			return fmt.Sprintf("%s.Builder[%s]", cogAlias, formatted)
 		}
 
-		if def.Kind == ast.KindArray {
+		if def.IsArray() {
 			return formatter.formatArray(def.AsArray(), resolveBuilders)
 		}
 
-		if def.Kind == ast.KindMap {
+		if def.IsMap() {
 			return formatter.formatMap(def.AsMap())
 		}
 
-		if def.Kind == ast.KindScalar {
+		if def.IsScalar() {
 			typeName := def.AsScalar().ScalarKind
 			if def.Nullable {
 				typeName = "*" + typeName
@@ -75,12 +75,12 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			return string(typeName)
 		}
 
-		if def.Kind == ast.KindRef {
+		if def.IsRef() {
 			return formatter.formatRef(def, resolveBuilders)
 		}
 
 		// anonymous struct or struct body
-		if def.Kind == ast.KindStruct {
+		if def.IsStruct() {
 			output := formatter.formatStructBody(def.AsStruct())
 			if def.Nullable {
 				output = "*" + output
@@ -89,7 +89,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			return output
 		}
 
-		if def.Kind == ast.KindIntersection {
+		if def.IsIntersection() {
 			return formatter.formatIntersection(def.AsIntersection())
 		}
 
@@ -221,7 +221,7 @@ func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilde
 			buffer.WriteString(fmt.Sprintf(format, key, formatScalar([]any{})))
 		default:
 			val := formatScalar(x)
-			if !isBuilder && field.Type.Kind == ast.KindScalar && field.Type.Nullable {
+			if !isBuilder && field.Type.IsScalar() && field.Type.Nullable {
 				val = fmt.Sprintf("cog.ToPtr[%s](%v)", field.Type.AsScalar().ScalarKind, value)
 			}
 			buffer.WriteString(fmt.Sprintf(format, key, val))
@@ -256,7 +256,7 @@ func defineAnonymousFields(def ast.StructType) string {
 			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, tools.LowerCamelCase(key)))
 		case ast.KindArray:
 			array := f.Type.AsArray()
-			if array.ValueType.Kind == ast.KindScalar {
+			if array.ValueType.IsScalar() {
 				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
 			}
 		// TODO: Map rest of array cases

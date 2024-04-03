@@ -179,7 +179,7 @@ func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
 func (formatter *typeFormatter) formatArray(def ast.ArrayType, resolveBuilders bool) string {
 	subTypeString := formatter.doFormatType(def.ValueType, resolveBuilders)
 
-	if def.ValueType.Kind == ast.KindDisjunction {
+	if def.ValueType.IsDisjunction() {
 		return fmt.Sprintf("(%s)[]", subTypeString)
 	}
 

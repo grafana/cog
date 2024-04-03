@@ -52,7 +52,7 @@ func init() {
 				return variableName
 			},
 			"isNullableNonArray": func(typeDef ast.Type) bool {
-				return typeDef.Nullable && typeDef.Kind != ast.KindArray
+				return typeDef.Nullable && !typeDef.IsArray()
 			},
 		})
 

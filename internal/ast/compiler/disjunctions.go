@@ -114,19 +114,19 @@ func (pass *DisjunctionToType) processObject(schema *ast.Schema, object ast.Obje
 }
 
 func (pass *DisjunctionToType) processType(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return pass.processArray(schema, def)
 	}
 
-	if def.Kind == ast.KindMap {
+	if def.IsMap() {
 		return pass.processMap(schema, def)
 	}
 
-	if def.Kind == ast.KindStruct {
+	if def.IsStruct() {
 		return pass.processStruct(schema, def)
 	}
 
-	if def.Kind == ast.KindDisjunction {
+	if def.IsDisjunction() {
 		return pass.processDisjunction(schema, def)
 	}
 
@@ -283,7 +283,7 @@ func (pass *DisjunctionToType) hasOnlySingleTypeScalars(schema *ast.Schema, disj
 		return false
 	}
 
-	if firstBranchType.Kind != ast.KindScalar {
+	if !firstBranchType.IsScalar() {
 		return false
 	}
 
@@ -294,7 +294,7 @@ func (pass *DisjunctionToType) hasOnlySingleTypeScalars(schema *ast.Schema, disj
 			return false
 		}
 
-		if resolvedType.Kind != ast.KindScalar {
+		if !resolvedType.IsScalar() {
 			return false
 		}
 

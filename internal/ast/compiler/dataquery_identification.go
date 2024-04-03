@@ -33,7 +33,7 @@ func (pass *DataqueryIdentification) processSchema(schema *ast.Schema, commonDat
 }
 
 func (pass *DataqueryIdentification) processObject(object ast.Object, commonDataquery ast.Object) ast.Object {
-	if object.Type.Kind != ast.KindStruct {
+	if !object.Type.IsStruct() {
 		return object
 	}
 

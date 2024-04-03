@@ -28,7 +28,7 @@ func (pass *NotRequiredFieldAsNullableType) processSchema(schema *ast.Schema) *a
 }
 
 func (pass *NotRequiredFieldAsNullableType) processObject(object ast.Object) ast.Object {
-	if object.Type.Kind != ast.KindStruct {
+	if !object.Type.IsStruct() {
 		return object
 	}
 
@@ -38,19 +38,19 @@ func (pass *NotRequiredFieldAsNullableType) processObject(object ast.Object) ast
 }
 
 func (pass *NotRequiredFieldAsNullableType) processType(def ast.Type) ast.Type {
-	if def.Kind == ast.KindArray {
+	if def.IsArray() {
 		return pass.processArray(def)
 	}
 
-	if def.Kind == ast.KindMap {
+	if def.IsMap() {
 		return pass.processMap(def)
 	}
 
-	if def.Kind == ast.KindStruct {
+	if def.IsStruct() {
 		return pass.processStruct(def)
 	}
 
-	if def.Kind == ast.KindDisjunction {
+	if def.IsDisjunction() {
 		return pass.processDisjunction(def)
 	}
 

@@ -143,7 +143,7 @@ func (jenny *Builder) formatDefaultTypedArgs(context common.Context, opt ast.Opt
 
 		pkg := ""
 		refPkg := ""
-		if opt.Args[i].Type.Kind == ast.KindRef {
+		if opt.Args[i].Type.IsRef() {
 			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
 			pkg = opt.Args[i].Type.AsRef().ReferredType
 			_, isBuilder := context.Builders.LocateByObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
@@ -155,7 +155,7 @@ func (jenny *Builder) formatDefaultTypedArgs(context common.Context, opt ast.Opt
 		}
 
 		// Anonymous structs
-		if opt.Args[i].Type.Kind == ast.KindStruct {
+		if opt.Args[i].Type.IsStruct() {
 			def := opt.Args[i].Type.AsStruct()
 			args = append(args, formatAnonymousDefaultStruct(def, orderedmap.FromMap(val)))
 		}
@@ -247,8 +247,7 @@ func (jenny *Builder) generateAssignment(assignment ast.Assignment) template.Ass
 		}
 
 		nullable := chunk.Type.Nullable ||
-			chunk.Type.Kind == ast.KindMap ||
-			chunk.Type.Kind == ast.KindArray ||
+			chunk.Type.IsAnyOf(ast.KindMap, ast.KindArray) ||
 			chunk.Type.IsAny()
 		if nullable {
 			subPath := assignment.Path[:i+1]
@@ -273,14 +272,10 @@ func (jenny *Builder) generateAssignment(assignment ast.Assignment) template.Ass
 
 func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	switch typeDef.Kind {
-	case ast.KindRef:
-		return jenny.typeFormatter.formatType(typeDef) + "{}"
-	case ast.KindStruct:
+	case ast.KindRef, ast.KindStruct, ast.KindArray, ast.KindMap:
 		return jenny.typeFormatter.formatType(typeDef) + "{}"
 	case ast.KindEnum:
 		return formatScalar(typeDef.AsEnum().Values[0].Value)
-	case ast.KindArray, ast.KindMap:
-		return jenny.typeFormatter.formatType(typeDef) + "{}"
 	case ast.KindScalar:
 		return "" // no need to do anything here
 

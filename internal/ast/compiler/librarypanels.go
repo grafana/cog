@@ -57,7 +57,7 @@ func (pass *LibraryPanels) parseSchema(schema *ast.Schema, dashboardPanel ast.Ob
 }
 
 func (pass *LibraryPanels) processLibraryPanel(object ast.Object, dashboardPanel ast.Object) ast.Object {
-	if object.Type.Kind != ast.KindStruct {
+	if !object.Type.IsStruct() {
 		return object
 	}
 

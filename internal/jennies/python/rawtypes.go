@@ -69,7 +69,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 		}
 		buffer.WriteString(objectOutput)
 
-		if object.Type.Kind == ast.KindStruct {
+		if object.Type.IsStruct() {
 			buffer.WriteString("\n\n")
 			buffer.WriteString(jenny.generateInitMethod(context.Schemas, object))
 
@@ -129,7 +129,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule, orderedmap.FromMap(defaultsOverrides))
 		}
 
-		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
+		if field.Type.IsConcreteScalar() {
 			assignments = append(assignments, fmt.Sprintf("        self.%s = %s", fieldName, formatValue(field.Type.AsScalar().Value)))
 			continue
 		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray) {
@@ -387,7 +387,7 @@ func (jenny RawTypes) composableSlotFromJSON(context common.Context, parentStruc
 	// We're looking for a field defined as a reference to the `DataSourceRef` type.
 	var hintField *ast.StructField
 	for i, candidate := range parentStruct.Fields {
-		if candidate.Type.Kind != ast.KindRef {
+		if !candidate.Type.IsRef() {
 			continue
 		}
 		if candidate.Type.AsRef().ReferredType != "DataSourceRef" {
@@ -403,7 +403,7 @@ func (jenny RawTypes) composableSlotFromJSON(context common.Context, parentStruc
 		hintValue = fmt.Sprintf(`data["%[1]s"]["type"] if data.get("%[1]s") is not None and data["%[1]s"].get("type", "") != "" else ""`, hintField.Name)
 	}
 
-	if field.Type.Kind == ast.KindArray {
+	if field.Type.IsArray() {
 		return fmt.Sprintf(`[%[3]s.dataquery_from_json(dataquery_json, %[2]s) for dataquery_json in data["%[1]s"]]`, field.Name, hintValue, cogruntime)
 	}
 

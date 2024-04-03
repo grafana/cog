@@ -170,6 +170,14 @@ func (t Type) IsDisjunction() bool {
 	return t.Kind == KindDisjunction
 }
 
+func (t Type) IsIntersection() bool {
+	return t.Kind == KindIntersection
+}
+
+func (t Type) IsComposableSlot() bool {
+	return t.Kind == KindComposableSlot
+}
+
 func (t Type) IsStructGeneratedFromDisjunction() bool {
 	if t.Kind != KindStruct {
 		return false
