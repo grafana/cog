@@ -54,5 +54,6 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.DisjunctionInferMapping{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.AnonymousStructsToNamed{},
+		&compiler.RenameNumericEnumValues{},
 	}
 }
