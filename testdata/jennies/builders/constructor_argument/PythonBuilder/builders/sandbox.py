@@ -1,6 +1,6 @@
-import typing
 from ..cog import builder as cogbuilder
 from ..models import sandbox
+import typing
 
 
 class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):    

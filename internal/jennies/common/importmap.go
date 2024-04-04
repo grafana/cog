@@ -12,6 +12,7 @@ type ImportMapConfig[M any] struct {
 	Formatter           func(importMap M) string
 	AliasSanitizer      func(string) string
 	ImportPathSanitizer func(string) string
+	CurrentPkg          string
 }
 
 type ImportMapOption[M any] func(importMap *ImportMapConfig[M])
@@ -19,6 +20,12 @@ type ImportMapOption[M any] func(importMap *ImportMapConfig[M])
 func WithAliasSanitizer[M any](sanitizer func(string) string) ImportMapOption[M] {
 	return func(importMap *ImportMapConfig[M]) {
 		importMap.AliasSanitizer = sanitizer
+	}
+}
+
+func WithCurrentPkg[M any](currentPkg string) ImportMapOption[M] {
+	return func(importMap *ImportMapConfig[M]) {
+		importMap.CurrentPkg = currentPkg
 	}
 }
 

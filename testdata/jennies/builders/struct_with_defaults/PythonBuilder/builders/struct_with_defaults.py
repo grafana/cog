@@ -1,6 +1,6 @@
-import typing
 from ..cog import builder as cogbuilder
 from ..models import struct_with_defaults
+import typing
 
 
 class NestedStruct(cogbuilder.Builder[struct_with_defaults.NestedStruct]):    

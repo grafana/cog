@@ -1,5 +1,5 @@
-import typing
 from ..models import otherpkg
+import typing
 
 
 class SomeStruct:

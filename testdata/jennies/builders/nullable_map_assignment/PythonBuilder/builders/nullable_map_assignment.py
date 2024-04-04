@@ -1,6 +1,6 @@
-import typing
 from ..cog import builder as cogbuilder
 from ..models import nullable_map_assignment
+import typing
 
 
 class SomeStruct(cogbuilder.Builder[nullable_map_assignment.SomeStruct]):    

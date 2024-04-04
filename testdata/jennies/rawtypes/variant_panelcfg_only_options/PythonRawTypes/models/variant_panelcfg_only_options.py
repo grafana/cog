@@ -1,5 +1,5 @@
-import typing
 from ..cog import runtime as cogruntime
+import typing
 
 
 class Options:

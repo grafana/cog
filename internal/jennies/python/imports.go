@@ -8,18 +8,18 @@ import (
 	"github.com/grafana/cog/internal/orderedmap"
 )
 
-func NewImportMap() *ModuleImportMap {
-	return NewModuleImportMap(
+func NewImportMap(opts ...common.ImportMapOption[ModuleImportMap]) *ModuleImportMap {
+	allOpts := []common.ImportMapOption[ModuleImportMap]{
 		common.WithAliasSanitizer[ModuleImportMap](func(alias string) string {
 			return strings.ReplaceAll(alias, "/", "")
 		}),
 		common.WithFormatter(func(importMap ModuleImportMap) string {
-			if importMap.Imports.Len() == 0 {
+			if importMap.imports.Len() == 0 {
 				return ""
 			}
 
-			statements := make([]string, 0, importMap.Imports.Len())
-			importMap.Imports.Iterate(func(alias string, stmt ImportStmt) {
+			statements := make([]string, 0, importMap.imports.Len())
+			importMap.imports.Iterate(func(alias string, stmt ImportStmt) {
 				var importStmt string
 				if stmt.Module == "" {
 					if stmt.Package == alias {
@@ -40,7 +40,9 @@ func NewImportMap() *ModuleImportMap {
 
 			return strings.Join(statements, "\n")
 		}),
-	)
+	}
+
+	return NewModuleImportMap(append(allOpts, opts...)...)
 }
 
 type ImportStmt struct {
@@ -50,14 +52,15 @@ type ImportStmt struct {
 
 type ModuleImportMap struct {
 	// alias → ImportStmt
-	Imports *orderedmap.Map[string, ImportStmt]
-	config  common.ImportMapConfig[ModuleImportMap]
+	imports         *orderedmap.Map[string, ImportStmt]
+	config          common.ImportMapConfig[ModuleImportMap]
+	currentPkgGuard func(pkg string) bool
 }
 
 func NewModuleImportMap(opts ...common.ImportMapOption[ModuleImportMap]) *ModuleImportMap {
 	config := common.ImportMapConfig[ModuleImportMap]{
 		Formatter: func(importMap ModuleImportMap) string {
-			return fmt.Sprintf("%#v\n", importMap.Imports)
+			return fmt.Sprintf("%#v\n", importMap.imports)
 		},
 		AliasSanitizer:      common.NoopImportSanitizer,
 		ImportPathSanitizer: common.NoopImportSanitizer,
@@ -68,25 +71,48 @@ func NewModuleImportMap(opts ...common.ImportMapOption[ModuleImportMap]) *Module
 	}
 
 	return &ModuleImportMap{
-		Imports: orderedmap.New[string, ImportStmt](),
+		imports: orderedmap.New[string, ImportStmt](),
 		config:  config,
+		currentPkgGuard: func(pkg string) bool {
+			if config.CurrentPkg == "" {
+				return false
+			}
+
+			return strings.TrimPrefix(pkg, ".") == config.CurrentPkg
+		},
 	}
 }
 
-func (im ModuleImportMap) AddPackage(alias string, pkg string) string {
+func (im ModuleImportMap) Import(pkg string) string {
+	return im.ImportAs(pkg, pkg)
+}
+
+func (im ModuleImportMap) ImportAs(pkg string, alias string) string {
+	if im.currentPkgGuard(pkg) {
+		return ""
+	}
+
 	sanitizedAlias := im.config.AliasSanitizer(alias)
 
-	im.Imports.Set(sanitizedAlias, ImportStmt{
+	im.imports.Set(sanitizedAlias, ImportStmt{
 		Package: pkg,
 	})
 
 	return sanitizedAlias
 }
 
-func (im ModuleImportMap) AddModule(alias string, pkg string, module string) string {
+func (im ModuleImportMap) FromImport(pkg string, module string) string {
+	return im.FromImportAs(pkg, module, module)
+}
+
+func (im ModuleImportMap) FromImportAs(pkg string, module string, alias string) string {
+	if im.currentPkgGuard(module) {
+		return ""
+	}
+
 	sanitizedAlias := im.config.AliasSanitizer(alias)
 
-	im.Imports.Set(sanitizedAlias, ImportStmt{
+	im.imports.Set(sanitizedAlias, ImportStmt{
 		Package: pkg,
 		Module:  module,
 	})
@@ -95,5 +121,7 @@ func (im ModuleImportMap) AddModule(alias string, pkg string, module string) str
 }
 
 func (im ModuleImportMap) String() string {
+	im.imports.Sort(orderedmap.SortStrings)
+
 	return im.config.Formatter(im)
 }

@@ -1,7 +1,7 @@
-import typing
 from ..cog import builder as cogbuilder
-from ..models import composable_slot
 from ..cog import variants as cogvariants
+from ..models import composable_slot
+import typing
 
 
 class LokiBuilder(cogbuilder.Builder[composable_slot.Dashboard]):    

@@ -9,31 +9,24 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type pkgImporter func(alias string, pkg string) string
-type moduleImporter func(alias string, pkg string, module string) string
-
 type typeFormatter struct {
-	importPkg    pkgImporter
-	importModule moduleImporter
-
-	forBuilder bool
+	imports    *ModuleImportMap
 	context    common.Context
+	forBuilder bool
 }
 
-func defaultTypeFormatter(context common.Context, importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
+func defaultTypeFormatter(context common.Context, imports *ModuleImportMap) *typeFormatter {
 	return &typeFormatter{
-		context:      context,
-		importPkg:    importPkg,
-		importModule: importModule,
+		imports: imports,
+		context: context,
 	}
 }
 
-func builderTypeFormatter(context common.Context, importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
+func builderTypeFormatter(context common.Context, imports *ModuleImportMap) *typeFormatter {
 	return &typeFormatter{
-		importPkg:    importPkg,
-		importModule: importModule,
-		forBuilder:   true,
-		context:      context,
+		imports:    imports,
+		context:    context,
+		forBuilder: true,
 	}
 }
 
@@ -69,7 +62,7 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 
 	if def.Kind == ast.KindComposableSlot {
 		formatted := tools.UpperCamelCase(string(def.AsComposableSlot().Variant))
-		cogVariants := formatter.importModule("cogvariants", "..cog", "variants")
+		cogVariants := formatter.imports.FromImportAs("..cog", "variants", "cogvariants")
 
 		result = fmt.Sprintf("%s.%s", cogVariants, formatted)
 	}
@@ -85,7 +78,7 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 	if def.IsScalar() {
 		// This scalar actually refers to a constant
 		if def.AsScalar().IsConcrete() {
-			typingPkg := formatter.importPkg("typing", "typing")
+			typingPkg := formatter.imports.Import("typing")
 			result = fmt.Sprintf("%s.Literal[%s]", typingPkg, formatValue(def.AsScalar().Value))
 		} else {
 			result = formatter.formatScalarKind(def.AsScalar().ScalarKind)
@@ -110,10 +103,10 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 	}
 
 	if formatter.forBuilder && (def.Kind == ast.KindComposableSlot || (def.Kind == ast.KindRef && formatter.context.ResolveToBuilder(def))) {
-		cogBuilder := formatter.importModule("cogbuilder", "..cog", "builder")
+		cogBuilder := formatter.imports.FromImportAs("..cog", "builder", "cogbuilder")
 		result = fmt.Sprintf("%s.Builder[%s]", cogBuilder, result)
 	} else if def.Nullable {
-		typingPkg := formatter.importPkg("typing", "typing")
+		typingPkg := formatter.imports.Import("typing")
 		result = fmt.Sprintf("%s.Optional[%s]", typingPkg, result)
 	}
 
@@ -123,7 +116,7 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 func (formatter *typeFormatter) formatEnum(def ast.Object) string {
 	var buffer strings.Builder
 
-	enumPkg := formatter.importPkg("enum", "enum")
+	enumPkg := formatter.imports.Import("enum")
 
 	enumName := tools.UpperCamelCase(def.Name)
 	enumType := def.Type.AsEnum()
@@ -148,7 +141,7 @@ func (formatter *typeFormatter) formatEnum(def ast.Object) string {
 }
 
 func (formatter *typeFormatter) formatAnonymousEnum(typeDef ast.Type) string {
-	typingPkg := formatter.importPkg("typing", "typing")
+	typingPkg := formatter.imports.Import("typing")
 	literalValues := tools.Map(typeDef.AsEnum().Values, func(val ast.EnumValue) string {
 		return formatValue(val.Value)
 	})
@@ -161,7 +154,7 @@ func (formatter *typeFormatter) formatStruct(def ast.Object) string {
 
 	classBases := ""
 	if def.Type.IsStruct() && def.Type.ImplementsVariant() {
-		cogVariants := formatter.importModule("cogvariants", "..cog", "variants")
+		cogVariants := formatter.imports.FromImportAs("..cog", "variants", "cogvariants")
 		variant := tools.UpperCamelCase(def.Type.ImplementedVariant())
 
 		classBases = fmt.Sprintf("(%s.%s)", cogVariants, variant)
@@ -226,7 +219,7 @@ func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeF
 	formatted := tools.UpperCamelCase(def.ReferredType)
 
 	referredPkg := def.ReferredPkg
-	referredPkg = formatter.importModule(referredPkg, "..models", referredPkg)
+	referredPkg = formatter.imports.FromImport("..models", referredPkg)
 	if referredPkg != "" {
 		formatted = referredPkg + "." + formatted
 	}
@@ -244,13 +237,13 @@ func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType) strin
 		return formatter.formatType(branch)
 	})
 
-	typingPkg := formatter.importPkg("typing", "typing")
+	typingPkg := formatter.imports.Import("typing")
 	return fmt.Sprintf("%s.Union[%s]", typingPkg, strings.Join(branches, ", "))
 }
 
 func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
 	referredPkg := enumObj.SelfRef.ReferredPkg
-	referredPkg = formatter.importModule(referredPkg, "..models", referredPkg)
+	referredPkg = formatter.imports.FromImport("..models", referredPkg)
 
 	enumName := tools.UpperSnakeCase(enumObj.Type.AsEnum().Values[0].Name)
 	for _, enumValue := range enumObj.Type.AsEnum().Values {

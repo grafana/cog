@@ -1,7 +1,7 @@
-import typing
 from ..cog import builder as cogbuilder
-from ..models import some_pkg
 from ..models import other_pkg
+from ..models import some_pkg
+import typing
 
 
 class Person(cogbuilder.Builder[some_pkg.Person]):    

@@ -1,6 +1,6 @@
-import typing
-from ..cog import variants as cogvariants
 from ..cog import runtime as cogruntime
+from ..cog import variants as cogvariants
+import typing
 
 
 class Dashboard:
