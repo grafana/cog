@@ -244,6 +244,10 @@ func (path Path) Append(suffix Path) Path {
 	return newPath
 }
 
+func (path Path) AppendStructField(field StructField) Path {
+	return path.Append(PathFromStructField(field))
+}
+
 func (path Path) Last() PathItem {
 	return path[len(path)-1]
 }

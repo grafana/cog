@@ -502,6 +502,10 @@ func NewObject(pkg string, name string, objectType Type, passesTrail ...string) 
 	}
 }
 
+func (object *Object) AsRef() Type {
+	return NewRef(object.SelfRef.ReferredPkg, object.SelfRef.ReferredType)
+}
+
 func (object *Object) AddToPassesTrail(trail string) {
 	object.PassesTrail = append(object.PassesTrail, trail)
 }

@@ -30,7 +30,7 @@ package {{ .Converter.Package | formatPackageName }}
     {{- else if (and .Type.IsArray .Type.Array.IsArrayOfScalars) -}}
         fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
     {{- else -}}
-        {{ .Type.Kind }}
+        {{ .Path | formatPath }}.encodeToGo()
     {{- end -}}
 {{- end }}
 
@@ -52,7 +52,15 @@ package {{ .Converter.Package | formatPackageName }}
         {{ end }}
     {{- end -}}
     {{- with .Arg.Direct -}}
+        {{ if .ValueType.IsArray }}
+            tmp{{ $.IntoVar }} := []string{}
+            for i := range {{ .ValuePath | formatPath }} {
+            tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{- template "value_formatter" (dict "Type" .ValueType.Array.ValueType "Path" .ValuePath ) -}})
+            }
+            {{ $.IntoVar }} := "{{ .ValueType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
+        {{ else }}
         {{ $.IntoVar }} := {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath ) -}}
+        {{ end }}
     {{- end -}}
 {{- end }}
 
