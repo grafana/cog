@@ -31,21 +31,26 @@ type BuilderArgMapping struct {
 	BuilderName string
 }
 
+type ArrayArgMapping struct {
+	For       ast.Path
+	ForType   ast.Type
+	ForArg    *ArgumentMapping
+	ValueAs   ast.Path
+	ValueType ast.Type
+}
+
 type ArgumentMapping struct {
 	Direct  *DirectArgMapping
 	Builder *BuilderArgMapping
+	Array   *ArrayArgMapping
 
 	Guards []MappingGuard
-}
-
-type ConstructorArgMapping struct {
-	ValuePath ast.Path // direct mapping between a JSON value and an argument
-	ValueType ast.Type
 }
 
 type OptionMapping struct {
 	Option ast.Option // option in the builder
 
+	// for _, panel := range input.Panels { WithPanel(panel) }
 	RepeatFor ast.Path
 	RepeatAs  string
 
@@ -102,6 +107,16 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 			if arg.Type.IsAny() {
 				return false
 			}
+
+			// TODO: not handled properly
+			if arg.Type.IsMap() && !arg.Type.Map.ValueType.IsScalar() {
+				return false
+			}
+
+			// TODO: not handled properly
+			if arg.Type.IsComposableSlot() {
+				return false
+			}
 		}
 
 		return true
@@ -129,16 +144,20 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		Guards: generator.optionGuards(converter, option),
 	}
 
-	assignmentsFromArg := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
+	nonConstantAssignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
 		return assignment.Value.Constant == nil
 	})
 
-	if len(assignmentsFromArg) == 1 && assignmentsFromArg[0].Method == ast.AppendAssignment {
-		mapping.RepeatFor = converter.inputRootPath().Append(assignmentsFromArg[0].Path)
+	if len(nonConstantAssignments) == 1 && nonConstantAssignments[0].Method == ast.AppendAssignment {
+		mapping.RepeatFor = converter.inputRootPath().Append(nonConstantAssignments[0].Path)
 		mapping.RepeatAs = "item"
 	}
 
-	mapping.Args = tools.Map(assignmentsFromArg, func(assignment ast.Assignment) ArgumentMapping {
+	i := 0
+	mapping.Args = tools.Map(nonConstantAssignments, func(assignment ast.Assignment) ArgumentMapping {
+		i++
+
+		argName := fmt.Sprintf("arg%d", i)
 		valueType := assignment.Path.Last().Type
 		valuePath := converter.inputRootPath().Append(assignment.Path)
 		if mapping.RepeatFor != nil {
@@ -148,17 +167,35 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 			}
 		}
 
-		if argument, ok := generator.argumentFromDisjunctionStruct(context, valuePath, assignment); ok {
+		if argument, ok := generator.argumentFromDisjunctionStruct(context, argName, valuePath, assignment); ok {
 			return argument
 		}
 
-		return generator.argumentForType(context, valuePath, valueType)
+		return generator.argumentForType(context, argName, valuePath, valueType)
 	})
 
 	return mapping
 }
 
-func (generator *ConverterGenerator) argumentForType(context Context, valuePath ast.Path, typeDef ast.Type) ArgumentMapping {
+func (generator *ConverterGenerator) argumentForType(context Context, argName string, valuePath ast.Path, typeDef ast.Type) ArgumentMapping {
+	if typeDef.IsArray() {
+		valueAs := ast.Path{
+			{Identifier: argName, Type: typeDef.Array.ValueType, Root: true},
+		}
+
+		forArg := generator.argumentForType(context, argName+"Value", valueAs, typeDef.Array.ValueType)
+
+		return ArgumentMapping{
+			Array: &ArrayArgMapping{
+				For:       valuePath,
+				ForType:   typeDef,
+				ForArg:    &forArg,
+				ValueAs:   valueAs,
+				ValueType: typeDef.Array.ValueType,
+			},
+		}
+	}
+
 	builder, found := context.ResolveAsBuilder(typeDef)
 	if found {
 		return ArgumentMapping{
@@ -179,7 +216,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, valuePath 
 	}
 }
 
-func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, argName string, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
 	if assignment.Value.Envelope == nil {
 		return ArgumentMapping{}, false
 	}
@@ -206,7 +243,7 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Conte
 		guards = append(guards, guard)
 	}
 
-	arg := generator.argumentForType(context, valuePath.Append(envelopeValues[0].Path), envelopeValues[0].Path.Last().Type)
+	arg := generator.argumentForType(context, argName, valuePath.Append(envelopeValues[0].Path), envelopeValues[0].Path.Last().Type)
 	arg.Guards = guards
 
 	return arg, true

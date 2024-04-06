@@ -5,8 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -17,7 +19,7 @@ func (jenny Encoding) JennyName() string {
 	return "GoEncoding"
 }
 
-func (jenny Encoding) Generate(context ast.Context) (codejen.Files, error) {
+func (jenny Encoding) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
@@ -40,12 +42,12 @@ func (jenny Encoding) Generate(context ast.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny Encoding) generateSchema(context ast.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny Encoding) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 	var err error
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		if context.ResolveToBuilder(object.AsRef()) || !jenny.typeNeedsEncoding(context, object.Type) {
+		if context.ResolveToBuilder(object.AsRef()) || !typeNeedsEncoding(context, object.Type) {
 			return
 		}
 
@@ -54,8 +56,19 @@ func (jenny Encoding) generateSchema(context ast.Context, schema *ast.Schema) ([
 			err = innerErr
 			return
 		}
+
+		valueName := tools.LowerCamelCase(object.Name)
+		objectName := tools.UpperCamelCase(object.Name)
+
+		buffer.WriteString(fmt.Sprintf(`func (%[1]s *%[2]s) EncodeToGo() string {
+	if %[1]s == nil {
+		return "nil"
+	}
+`, valueName, objectName))
+
 		buffer.WriteString(encode)
-		buffer.WriteString("\n")
+
+		buffer.WriteString("\n}\n\n")
 	})
 	if err != nil {
 		return nil, err
@@ -69,7 +82,7 @@ func (jenny Encoding) generateSchema(context ast.Context, schema *ast.Schema) ([
 %[2]s`, formatPackageName(schema.Package), buffer.String())), nil
 }
 
-func (jenny Encoding) typeNeedsEncoding(context ast.Context, typeDef ast.Type) bool {
+func typeNeedsEncoding(context languages.Context, typeDef ast.Type) bool {
 	if context.ResolveToBuilder(typeDef) {
 		return false
 	}
@@ -86,10 +99,14 @@ func (jenny Encoding) typeNeedsEncoding(context ast.Context, typeDef ast.Type) b
 		return false
 	}
 
+	if typeDef.IsRef() {
+		return false
+	}
+
 	return true
 }
 
-func (jenny Encoding) renderEncode(context ast.Context, obj ast.Object) (string, error) {
+func (jenny Encoding) renderEncode(context languages.Context, obj ast.Object) (string, error) {
 	if obj.Type.IsEnum() {
 		return jenny.renderEnumEncode(obj)
 	}
@@ -102,59 +119,67 @@ func (jenny Encoding) renderEncode(context ast.Context, obj ast.Object) (string,
 		return jenny.renderStructEncode(context, obj)
 	}
 
-	return "", nil
+	spew.Dump(obj)
+	return "", fmt.Errorf("could not determine how to render encoding function for object of type %s", obj.Type.Kind)
 
 	//return "", fmt.Errorf("could not determine how to render encoding function for object of type %s", obj.Type.Kind)
 }
 
-func (jenny Encoding) renderStructEncode(context ast.Context, obj ast.Object) (string, error) {
+func (jenny Encoding) renderStructEncode(context languages.Context, obj ast.Object) (string, error) {
 	valueName := tools.LowerCamelCase(obj.Name)
 	objectName := tools.UpperCamelCase(obj.Name)
 
 	fields := make([]string, 0, len(obj.Type.Struct.Fields))
 	for _, field := range obj.Type.Struct.Fields {
 		fieldName := tools.UpperCamelCase(field.Name)
+		valuePath := fmt.Sprintf("%s.%s", valueName, fieldName)
 
-		valueFormatter := fmt.Sprintf(`fmt.Sprintf(\"%%#v\", %s.%s)`, valueName, fieldName) // TODO: what if value is a list?
-		if jenny.typeNeedsEncoding(context, field.Type) {
-			valueFormatter = fmt.Sprintf(`%s.%s.encodeToGo()`, valueName, fieldName)
+		if typeNeedsEncoding(context, field.Type) {
+			fields = append(fields, fmt.Sprintf(`buffer.WriteString("%s: %s.EncodeToGo(),\n")`, fieldName, valuePath))
+			continue
 		}
 
-		fields = append(fields, fmt.Sprintf(`buffer.WriteString("%s: %s,\n")`, fieldName, valueFormatter))
+		if field.Type.IsAny() {
+			// TODO: what to do here?
+			continue
+		}
+
+		val := valuePath
+		encodedVal := "%#v"
+		if field.Type.Nullable && !field.Type.IsAnyOf(ast.KindArray, ast.KindMap) {
+			val = "*" + val
+			encodedVal = "cog.ToPtr(%#v)"
+		}
+
+		assignment := fmt.Sprintf(`buffer.WriteString(fmt.Sprintf("%[1]s: %[2]s,\n", %[3]s))`, fieldName, encodedVal, val) // TODO: what if value is a list?
+		if field.Type.Nullable {
+			assignment = fmt.Sprintf(`if %s != nil {
+	%s
+}`, valuePath, assignment)
+		}
+
+		fields = append(fields, assignment)
 	}
 
-	return fmt.Sprintf(`func (%[1]s *%[2]s) encodeToGo() string {
-	if %[1]s == nil {
-		return "nil"
-	}
-
-	var buffer strings.Builder
+	return fmt.Sprintf(`var buffer strings.Builder
 	
-	buffer.WriteString("\"")
-	buffer.WriteString("%[2]s{\n")
+	buffer.WriteString("%[1]s.%[2]s{\n")
 	%[3]s
-	buffer.WriteString("\n}\n")
-	buffer.WriteString("\"")
+	buffer.WriteString("\n}")
 
-	return buffer.String()
-}`, valueName, objectName, strings.Join(fields, "\n")), nil
+	return buffer.String()`, obj.SelfRef.ReferredPkg, objectName, strings.Join(fields, "\n")), nil
 }
 
-func (jenny Encoding) renderMapEncode(context ast.Context, obj ast.Object) (string, error) {
+func (jenny Encoding) renderMapEncode(context languages.Context, obj ast.Object) (string, error) {
 	valueName := tools.LowerCamelCase(obj.Name)
 	objectName := tools.UpperCamelCase(obj.Name)
 
 	valueFormatter := `fmt.Sprintf("%#v", value)` // TODO: what if value is a list?
-	if jenny.typeNeedsEncoding(context, obj.Type.Map.ValueType) {
-		valueFormatter = `value.encodeToGo()`
+	if typeNeedsEncoding(context, obj.Type.Map.ValueType) {
+		valueFormatter = `value.EncodeToGo()`
 	}
 
-	return fmt.Sprintf(`func (%[1]s *%[2]s) encodeToGo() string {
-	if %[1]s == nil {
-		return "nil"
-	}
-
-	var buffer strings.Builder
+	return fmt.Sprintf(`var buffer strings.Builder
 	
 	buffer.WriteString("\"")
 	buffer.WriteString("%[2]s{\n")
@@ -166,30 +191,22 @@ func (jenny Encoding) renderMapEncode(context ast.Context, obj ast.Object) (stri
 	buffer.WriteString("\n}\n")
 	buffer.WriteString("\"")
 
-	return buffer.String()
-}`, valueName, objectName, valueFormatter), nil
+	return buffer.String()`, valueName, objectName, valueFormatter), nil
 }
 
 func (jenny Encoding) renderEnumEncode(obj ast.Object) (string, error) {
 	valueName := tools.LowerCamelCase(obj.Name)
-	objectName := tools.UpperCamelCase(obj.Name)
 
 	cases := make([]string, 0, len(obj.Type.Enum.Values))
 
 	for _, member := range obj.Type.Enum.Values {
-		cases = append(cases, fmt.Sprintf(`if *%[1]s == %[2]s {
-	return "%[2]s"
+		cases = append(cases, fmt.Sprintf(`if *%[1]s == %[3]s {
+	return "%[2]s.%[3]s"
 }
-`, valueName, member.Name))
+`, valueName, obj.SelfRef.ReferredPkg, member.Name))
 	}
 
-	return fmt.Sprintf(`func (%[1]s *%[2]s) encodeToGo() string {
-	if %[1]s == nil {
-		return "nil"
-	}
+	return fmt.Sprintf(`%[1]s
 
-	%[3]s
-
-	return "unknown"
-}`, valueName, objectName, strings.Join(cases, "\n")), nil
+	return "unknown"`, strings.Join(cases, "\n")), nil
 }

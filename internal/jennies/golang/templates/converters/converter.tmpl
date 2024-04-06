@@ -25,12 +25,10 @@ package {{ .Converter.Package | formatPackageName }}
 {{- end }}
 
 {{- define "value_formatter" }}
-    {{- if .Type.IsScalar -}}
-        fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
-    {{- else if (and .Type.IsArray .Type.Array.IsArrayOfScalars) -}}
-        fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
+    {{- if .Type | typeNeedsEncoding -}}
+        {{ .Path | formatPath }}.EncodeToGo()
     {{- else -}}
-        {{ .Path | formatPath }}.encodeToGo()
+        fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
     {{- end -}}
 {{- end }}
 
@@ -41,26 +39,19 @@ package {{ .Converter.Package | formatPackageName }}
 
 {{- define "prepare_arg" -}}
     {{- with .Arg.Builder -}}
-        {{ if .ValueType.IsArray }}
-            tmp{{ $.IntoVar }} := []string{}
-            for i := range {{ .ValuePath | formatPath }} {
-            tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if not .ValueType.Array.ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }}[i]))
-            }
-            {{ $.IntoVar }} := "{{ .ValueType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
-        {{ else }}
         {{ $.IntoVar }} := {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if not .ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }})
-        {{ end }}
+    {{- end -}}
+    {{- with .Arg.Array -}}
+        tmp{{ $.IntoVar }} := []string{}
+        for _, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
+            {{- $subIntoVar := print "tmp" (.ValueAs | formatPath) }}
+            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
+            tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{ $subIntoVar }})
+        }
+        {{ $.IntoVar }} := "{{ .ForType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
     {{- end -}}
     {{- with .Arg.Direct -}}
-        {{ if .ValueType.IsArray }}
-            tmp{{ $.IntoVar }} := []string{}
-            for i := range {{ .ValuePath | formatPath }} {
-            tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{- template "value_formatter" (dict "Type" .ValueType.Array.ValueType "Path" .ValuePath ) -}})
-            }
-            {{ $.IntoVar }} := "{{ .ValueType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
-        {{ else }}
         {{ $.IntoVar }} := {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath ) -}}
-        {{ end }}
     {{- end -}}
 {{- end }}
 
