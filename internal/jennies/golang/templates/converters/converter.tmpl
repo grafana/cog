@@ -25,7 +25,7 @@ package {{ .Converter.Package | formatPackageName }}
 {{- end }}
 
 {{- define "value_formatter" }}
-    {{- if .Type | typeNeedsEncoding -}}
+    {{- if .Type | typeHasEncoder -}}
         {{ .Path | formatPath }}.EncodeToGo()
     {{- else -}}
         fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})

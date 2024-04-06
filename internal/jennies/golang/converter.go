@@ -85,8 +85,8 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 	err := templates.
 		Funcs(map[string]any{
-			"typeNeedsEncoding": func(typeDef ast.Type) bool {
-				return typeNeedsEncoding(context, context.ResolveRefs(typeDef))
+			"typeHasEncoder": func(typeDef ast.Type) bool {
+				return typeHasEncoder(context, typeDef)
 			},
 			"formatPath":   formatFieldPath,
 			"formatRawRef": formatRawRef,

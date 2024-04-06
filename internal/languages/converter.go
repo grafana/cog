@@ -233,18 +233,14 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Conte
 
 	envelopeValues := assignment.Value.Envelope.Values
 
-	guards := make([]MappingGuard, 0, len(envelopeValues))
-	for _, envelopePath := range envelopeValues {
-		guard := MappingGuard{
-			Path:  valuePath.Append(envelopePath.Path),
+	arg := generator.argumentForType(context, argName, valuePath.Append(envelopeValues[0].Path), envelopeValues[0].Path.Last().Type)
+	arg.Guards = tools.Map(envelopeValues, func(envelopedField ast.EnvelopeFieldValue) MappingGuard {
+		return MappingGuard{
+			Path:  valuePath.Append(envelopedField.Path),
 			Op:    ast.NotEqualOp,
 			Value: nil,
 		}
-		guards = append(guards, guard)
-	}
-
-	arg := generator.argumentForType(context, argName, valuePath.Append(envelopeValues[0].Path), envelopeValues[0].Path.Last().Type)
-	arg.Guards = guards
+	})
 
 	return arg, true
 }

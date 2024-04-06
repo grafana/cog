@@ -43,8 +43,8 @@ func init() {
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
-			"typeNeedsEncoding": func(_ ast.Type) bool {
-				panic("typeNeedsEncoding() needs to be overridden by a jenny")
+			"typeHasEncoder": func(_ ast.Type) bool {
+				panic("typeHasEncoder() needs to be overridden by a jenny")
 			},
 			"formatRawRef": func(_ ast.Type) string {
 				panic("formatRawRef() needs to be overridden by a jenny")
