@@ -52,6 +52,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
+	typeImportMapper("cog")
 	typeFormatter := builderTypeFormatter(jenny.Config, context, typeImportMapper)
 
 	formatFieldPath := func(fieldPath ast.Path) string {

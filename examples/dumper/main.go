@@ -35,7 +35,7 @@ func dumpValue(value reflect.Value) string {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return fmt.Sprintf("%d", value.Int())
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return fmt.Sprintf("%d", value.Int())
+		return fmt.Sprintf("%d", value.Uint())
 	case reflect.Float32, reflect.Float64:
 		return fmt.Sprintf("%#v", value.Float())
 	case reflect.String:
@@ -95,16 +95,21 @@ func dumpMap(value reflect.Value) string {
 
 func dumpStruct(value reflect.Value) string {
 	parts := make([]string, 0, value.NumField())
-
-	valueType := value.Type()
+	structType := value.Type()
 
 	for i := 0; i < value.NumField(); i++ {
-		field := valueType.Field(i)
+		field := structType.Field(i)
 		if !field.IsExported() {
 			continue
 		}
 
-		line := fmt.Sprintf("%s: %s", field.Name, dumpValue(value.Field(i)))
+		fieldValue := value.Field(i)
+		fieldValueKind := fieldValue.Kind()
+		if (fieldValueKind == reflect.Pointer || fieldValueKind == reflect.Interface || fieldValueKind == reflect.Array || fieldValueKind == reflect.Slice || fieldValueKind == reflect.Map) && fieldValue.IsNil() {
+			continue
+		}
+
+		line := fmt.Sprintf("%s: %s", field.Name, dumpValue(fieldValue))
 		parts = append(parts, line)
 	}
 
@@ -137,6 +142,22 @@ func main() {
 	}))
 
 	spew.Dump(Dump(SomeStruct{
+		Id:      "some-id",
+		Title:   cog.ToPtr("some-title"),
+		Options: "foo",
+		private: "private stuff is private",
+	}))
+
+	spew.Dump(Dump(struct {
+		Id string `json:"id"`
+
+		Title         *string
+		LeaveMeNilPlz *string
+
+		Options any
+
+		private string
+	}{
 		Id:      "some-id",
 		Title:   cog.ToPtr("some-title"),
 		Options: "foo",

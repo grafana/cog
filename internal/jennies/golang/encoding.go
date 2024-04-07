@@ -172,7 +172,7 @@ func (jenny Encoding) renderStructEncode(context languages.Context, obj ast.Obje
 		}
 
 		if typeHasEncoder(context, field.Type) {
-			fields = append(fields, fmt.Sprintf(`buffer.WriteString(fmt.Sprintf("%s: %%s,\n", %s.EncodeToGo()))`, fieldName, valuePath))
+			fields = append(fields, fmt.Sprintf(`buffer.WriteString(fmt.Sprintf("%s: %%s,\n", cog.Dump(%s)))`, fieldName, valuePath))
 			continue
 		}
 

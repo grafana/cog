@@ -78,7 +78,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config}),
 
-		common.If[languages.Context](globalConfig.Converters, &Encoding{}),
+		//common.If[languages.Context](globalConfig.Converters, &Encoding{}),
 		common.If[languages.Context](globalConfig.Converters, &Converter{Config: config}),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))

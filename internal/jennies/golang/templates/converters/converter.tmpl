@@ -24,11 +24,13 @@ package {{ .Converter.Package | formatPackageName }}
     {{- end -}}
 {{- end }}
 
-{{- define "value_formatter" }}
-    {{- if .Type | typeHasEncoder -}}
-        {{ .Path | formatPath }}.EncodeToGo()
-    {{- else -}}
+{{- define "value_formatter" -}}
+    {{- if and .Type.IsScalar (eq .Type.Scalar.ScalarKind "string") -}}
+        {{ .Type | maybeDereference }}{{ .Path | formatPath }}
+    {{- else if .Type.IsScalar -}}
         fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
+    {{- else -}}
+        cog.Dump({{ .Type | maybeDereference }}{{ .Path | formatPath }})
     {{- end -}}
 {{- end }}
 
