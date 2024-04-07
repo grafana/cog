@@ -2,6 +2,7 @@ package languages
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -39,8 +40,14 @@ type ArrayArgMapping struct {
 	ValueType ast.Type
 }
 
+type RuntimeArgMapping struct {
+	FuncName string
+	Args     []*DirectArgMapping
+}
+
 type ArgumentMapping struct {
 	Direct  *DirectArgMapping
+	Runtime *RuntimeArgMapping
 	Builder *BuilderArgMapping
 	Array   *ArrayArgMapping
 
@@ -197,6 +204,19 @@ func (generator *ConverterGenerator) argumentForType(context Context, argName st
 	}
 
 	builder, found := context.ResolveAsBuilder(typeDef)
+	if found && strings.EqualFold(builder.Package, "dashboard") && strings.EqualFold("panel", builder.For.Name) {
+		typeField, _ := builder.For.Type.Struct.FieldByName("type")
+
+		return ArgumentMapping{
+			Runtime: &RuntimeArgMapping{
+				FuncName: "ConvertPanelToGo",
+				Args: []*DirectArgMapping{
+					{ValuePath: valuePath, ValueType: typeDef},
+					{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
+				},
+			},
+		}
+	}
 	if found {
 		return ArgumentMapping{
 			Builder: &BuilderArgMapping{

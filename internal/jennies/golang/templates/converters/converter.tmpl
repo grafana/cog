@@ -25,9 +25,7 @@ package {{ .Converter.Package | formatPackageName }}
 {{- end }}
 
 {{- define "value_formatter" -}}
-    {{- if and .Type.IsScalar (eq .Type.Scalar.ScalarKind "string") -}}
-        {{ .Type | maybeDereference }}{{ .Path | formatPath }}
-    {{- else if .Type.IsScalar -}}
+    {{- if .Type.IsScalar -}}
         fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
     {{- else -}}
         cog.Dump({{ .Type | maybeDereference }}{{ .Path | formatPath }})
@@ -51,6 +49,9 @@ package {{ .Converter.Package | formatPackageName }}
             tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{ $subIntoVar }})
         }
         {{ $.IntoVar }} := "{{ .ForType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
+    {{- end -}}
+    {{- with .Arg.Runtime -}}
+        {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $runtimeArg := .Args }}{{ $runtimeArg.ValuePath | formatPath }}, {{ end }})
     {{- end -}}
     {{- with .Arg.Direct -}}
         {{ $.IntoVar }} := {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath ) -}}

@@ -78,6 +78,19 @@ func (runtime *Runtime) UnmarshalDataquery(raw []byte, dataqueryTypeHint string)
 	return dataquery, nil
 }
 
+func (runtime *Runtime) ConvertPanelToGo(inputPanel any, panelType string) string {
+	config, found := runtime.panelcfgVariants[panelType]
+	if found && config.GoConverter != nil {
+		return config.GoConverter(inputPanel)
+	}
+
+	return ""
+}
+
+func ConvertPanelToGo(inputPanel any, panelType string) string {
+	return NewRuntime().ConvertPanelToGo(inputPanel, panelType)
+}
+
 func UnmarshalDataqueryArray(raw []byte, dataqueryTypeHint string) ([]cogvariants.Dataquery, error) {
 	return NewRuntime().UnmarshalDataqueryArray(raw, dataqueryTypeHint)
 }

@@ -55,6 +55,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, packageMapper)
 	unmarshallerGenerator := JSONMarshalling{
+		config:        jenny.Config,
 		packageMapper: packageMapper,
 		typeFormatter: jenny.typeFormatter,
 	}

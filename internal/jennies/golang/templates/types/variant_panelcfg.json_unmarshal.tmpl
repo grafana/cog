@@ -3,9 +3,9 @@ func VariantConfig() cogvariants.PanelcfgConfig {
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",
 		{{- if .hasOptions }}
 		OptionsUnmarshaler: func (raw []byte) (any, error) {
-			options := Options{}
+			options := &Options{}
 
-			if err := json.Unmarshal(raw, &options); err != nil {
+			if err := json.Unmarshal(raw, options); err != nil {
 				return nil, err
 			}
 
@@ -14,13 +14,18 @@ func VariantConfig() cogvariants.PanelcfgConfig {
 		{{- end }}
 		{{- if .hasFieldConfig }}
 		FieldConfigUnmarshaler: func (raw []byte) (any, error) {
-			fieldConfig := FieldConfig{}
+			fieldConfig := &FieldConfig{}
 
-			if err := json.Unmarshal(raw, &fieldConfig); err != nil {
+			if err := json.Unmarshal(raw, fieldConfig); err != nil {
 				return nil, err
 			}
 
 			return fieldConfig, nil
+		},
+		{{- end }}
+		{{- if .hasConverter }}
+		GoConverter: func(inputPanel any) string {
+			return PanelConverter(inputPanel.(*dashboard.Panel))
 		},
 		{{- end }}
 	}

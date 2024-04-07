@@ -11,6 +11,7 @@ import (
 )
 
 type JSONMarshalling struct {
+	config        Config
 	packageMapper func(string) string
 	typeFormatter *typeFormatter
 }
@@ -294,6 +295,7 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 		"schema":         schema,
 		"hasOptions":     hasOptions,
 		"hasFieldConfig": hasFieldConfig,
+		"hasConverter":   jenny.config.generateConverters,
 	})
 }
 
