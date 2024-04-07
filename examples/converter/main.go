@@ -167,7 +167,10 @@ func foo() {
 			MaxDataPoints(100).
 			HideTimeOverride(true).
 			Unit("none").
-			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: dashboard.DashboardSpecialValueMapOptions{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
+			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: struct {
+				Match  dashboard.SpecialValueMatch  "json:\"match\""
+				Result dashboard.ValueMappingResult "json:\"result\""
+			}{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
 			Thresholds(dashboard.NewThresholdsConfigBuilder().
 				Mode("absolute").
 				Steps([]dashboard.Threshold{dashboard.Threshold{Color: "green"}})).
@@ -191,7 +194,10 @@ func foo() {
 			Span(0x6).
 			MaxDataPoints(100).
 			Unit("ms").
-			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: dashboard.DashboardSpecialValueMapOptions{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
+			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: struct {
+				Match  dashboard.SpecialValueMatch  "json:\"match\""
+				Result dashboard.ValueMappingResult "json:\"result\""
+			}{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
 			Thresholds(dashboard.NewThresholdsConfigBuilder().
 				Mode("absolute").
 				Steps([]dashboard.Threshold{dashboard.Threshold{Color: "green"},
@@ -216,7 +222,10 @@ func foo() {
 			Span(0x6).
 			MaxDataPoints(100).
 			Unit("none").
-			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: dashboard.DashboardSpecialValueMapOptions{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
+			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: struct {
+				Match  dashboard.SpecialValueMatch  "json:\"match\""
+				Result dashboard.ValueMappingResult "json:\"result\""
+			}{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
 			Thresholds(dashboard.NewThresholdsConfigBuilder().
 				Mode("absolute").
 				Steps([]dashboard.Threshold{dashboard.Threshold{Color: "green"}})).
@@ -265,7 +274,10 @@ func foo() {
 			MaxDataPoints(100).
 			Unit("short").
 			Decimals(0).
-			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: dashboard.DashboardSpecialValueMapOptions{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
+			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: struct {
+				Match  dashboard.SpecialValueMatch  "json:\"match\""
+				Result dashboard.ValueMappingResult "json:\"result\""
+			}{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
 			Thresholds(dashboard.NewThresholdsConfigBuilder().
 				Mode("absolute").
 				Steps([]dashboard.Threshold{dashboard.Threshold{Color: "green"},
@@ -293,7 +305,10 @@ func foo() {
 			Decimals(2).
 			Min(0).
 			Max(1).
-			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: dashboard.DashboardSpecialValueMapOptions{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
+			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: struct {
+				Match  dashboard.SpecialValueMatch  "json:\"match\""
+				Result dashboard.ValueMappingResult "json:\"result\""
+			}{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
 			Thresholds(dashboard.NewThresholdsConfigBuilder().
 				Mode("absolute").
 				Steps([]dashboard.Threshold{dashboard.Threshold{Color: "green"},
@@ -339,7 +354,10 @@ func foo() {
 			MaxDataPoints(100).
 			Unit("bytes").
 			Decimals(2).
-			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: dashboard.DashboardSpecialValueMapOptions{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
+			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{SpecialValueMap: cog.ToPtr[dashboard.SpecialValueMap](dashboard.SpecialValueMap{Type: "special", Options: struct {
+				Match  dashboard.SpecialValueMatch  "json:\"match\""
+				Result dashboard.ValueMappingResult "json:\"result\""
+			}{Match: "null", Result: dashboard.ValueMappingResult{Text: cog.ToPtr[string]("N/A")}}})}}).
 			Thresholds(dashboard.NewThresholdsConfigBuilder().
 				Mode("absolute").
 				Steps([]dashboard.Threshold{dashboard.Threshold{Color: "green"}})).
