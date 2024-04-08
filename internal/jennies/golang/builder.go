@@ -273,7 +273,7 @@ func (jenny *Builder) generateAssignment(assignment ast.Assignment) template.Ass
 func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	switch typeDef.Kind {
 	case ast.KindRef, ast.KindStruct, ast.KindArray, ast.KindMap:
-		return jenny.typeFormatter.formatType(typeDef) + "{}"
+		return jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
 	case ast.KindEnum:
 		return formatScalar(typeDef.AsEnum().Values[0].Value)
 	case ast.KindScalar:

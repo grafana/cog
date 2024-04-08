@@ -92,7 +92,7 @@
 {{- end }}
 
 {{- define "value_envelope" }}
-    {{- .Envelope.Type | formatType }}{
+    {{- .Envelope.Type | formatTypeNoBuilder }}{
         {{- range .Envelope.Values }}
         {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
         {{- $value = maybeAsPointer (.Path.Last.Type) $value }}
