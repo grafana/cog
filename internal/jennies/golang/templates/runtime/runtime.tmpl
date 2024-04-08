@@ -84,11 +84,26 @@ func (runtime *Runtime) ConvertPanelToGo(inputPanel any, panelType string) strin
 		return config.GoConverter(inputPanel)
 	}
 
-	return ""
+	return "/* could not convert panel to go */"
+}
+
+func (runtime *Runtime) ConvertDataqueryToGo(inputPanel any, dataqueryTypeHints ...string) string {
+	for _, dataqueryTypeHint := range dataqueryTypeHints {
+		config, found := runtime.dataqueryVariants[dataqueryTypeHint]
+		if found && config.GoConverter != nil {
+			return config.GoConverter(inputPanel)
+		}
+	}
+
+	return "/* could not convert dataquery to go */"
 }
 
 func ConvertPanelToGo(inputPanel any, panelType string) string {
 	return NewRuntime().ConvertPanelToGo(inputPanel, panelType)
+}
+
+func ConvertDataqueryToGo(inputPanel any, dataqueryTypeHints ...string) string {
+	return NewRuntime().ConvertDataqueryToGo(inputPanel, dataqueryTypeHints...)
 }
 
 func UnmarshalDataqueryArray(raw []byte, dataqueryTypeHint string) ([]cogvariants.Dataquery, error) {

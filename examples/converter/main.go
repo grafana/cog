@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/cog/generated/dashboard"
 	"github.com/grafana/cog/generated/heatmap"
 	"github.com/grafana/cog/generated/piechart"
+	"github.com/grafana/cog/generated/prometheus"
 	"github.com/grafana/cog/generated/stat"
 	"github.com/grafana/cog/generated/timeseries"
 )
@@ -57,6 +58,13 @@ func foo() {
 		Version(0x12).
 		WithPanel(stat.NewPanelBuilder().
 			Id(0x37).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr("blocky_build_info ").
+				Instant(true).
+				Exemplar(false).
+				Format("table").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Version").
 			Description("Blocky [version](https://github.com/0xERR0R/blocky) number").
 			Transparent(true).
@@ -83,6 +91,13 @@ func foo() {
 			Orientation("auto")).
 		WithPanel(stat.NewPanelBuilder().
 			Id(0x1a).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr("sum(up{job=~\"$job\"})").
+				Instant(true).
+				Exemplar(false).
+				Format("table").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("State").
 			Description("current service state").
 			Transparent(true).
@@ -109,6 +124,13 @@ func foo() {
 			Orientation("horizontal")).
 		WithPanel(stat.NewPanelBuilder().
 			Id(0x2b).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr("blocky_blocking_enabled").
+				Instant(true).
+				Exemplar(false).
+				Format("table").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Blocking").
 			Description("Is blocking enabled?").
 			Transparent(true).
@@ -135,6 +157,13 @@ func foo() {
 			Orientation("horizontal")).
 		WithPanel(stat.NewPanelBuilder().
 			Id(0x39).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr("sum(time() -blocky_last_list_group_refresh)/ sum(up{job=~\"$job\"})").
+				Instant(true).
+				Exemplar(false).
+				Format("table").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Last list refresh").
 			Description("Time since last list refresh").
 			Transparent(true).
@@ -461,6 +490,15 @@ func foo() {
 			Orientation("auto")).
 		WithPanel(timeseries.NewPanelBuilder().
 			Id(0x34).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr("sum by (client) (rate(blocky_query_total[$__rate_interval])) * 60").
+				Instant(false).
+				Exemplar(true).
+				EditorMode("code").
+				Format("time_series").
+				LegendFormat(" {{client}}").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Request rate per client").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -505,6 +543,14 @@ func foo() {
 			AxisBorderShow(false)).
 		WithPanel(piechart.NewPanelBuilder().
 			Id(0x2).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr(" sort_desc(sum by (type) (ceil(increase(blocky_query_total[$__range]))))").
+				Instant(true).
+				Exemplar(false).
+				Format("time_series").
+				LegendFormat("{{ type }}").
+				RefId("A").
+				Datasource(map[string]interface{}{"uid": "grafanacloud-prom", "type": "prometheus"})).
 			Title("Query by type").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -529,6 +575,14 @@ func foo() {
 				Viz(false))).
 		WithPanel(piechart.NewPanelBuilder().
 			Id(0x8).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr("sort_desc(sum by (client) (ceil(increase(blocky_query_total[$__range]))))").
+				Instant(true).
+				Exemplar(false).
+				Format("time_series").
+				LegendFormat("{{ client }}").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Query per Client").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -553,6 +607,14 @@ func foo() {
 				Viz(false))).
 		WithPanel(piechart.NewPanelBuilder().
 			Id(0x20).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr("topk(1, blocky_blacklist_cache) by (group)").
+				Instant(true).
+				Exemplar(false).
+				Format("time_series").
+				LegendFormat("{{ group }}").
+				RefId("A").
+				Datasource(map[string]interface{}{"uid": "grafanacloud-prom", "type": "prometheus"})).
 			Title("Blacklist by group").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -577,6 +639,14 @@ func foo() {
 				Viz(false))).
 		WithPanel(piechart.NewPanelBuilder().
 			Id(0x26).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr(" sort_desc(sum by (response_type) (ceil(increase(blocky_response_total[$__range]))))").
+				Instant(true).
+				Exemplar(false).
+				Format("time_series").
+				LegendFormat("{{response_type}}").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Response Type").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -601,6 +671,14 @@ func foo() {
 				Viz(false))).
 		WithPanel(piechart.NewPanelBuilder().
 			Id(0xe).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr(" sort_desc(sum by (reason) (ceil(increase(blocky_response_total[$__range]))))").
+				Instant(true).
+				Exemplar(false).
+				Format("time_series").
+				LegendFormat("{{reason}}").
+				RefId("A").
+				Datasource(map[string]interface{}{"uid": "grafanacloud-prom", "type": "prometheus"})).
 			Title("Response Reasons").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -625,6 +703,14 @@ func foo() {
 				Viz(false))).
 		WithPanel(piechart.NewPanelBuilder().
 			Id(0xc).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr(" sort_desc(sum by (response_code) (ceil(increase(blocky_response_total[$__range]))))").
+				Instant(true).
+				Exemplar(false).
+				Format("time_series").
+				LegendFormat("{{response_code}}").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Response status").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -649,6 +735,16 @@ func foo() {
 				Viz(false))).
 		WithPanel(heatmap.NewPanelBuilder().
 			Id(0x16).
+			WithTarget(prometheus.NewDataqueryBuilder().
+				Expr("sum(increase(blocky_request_duration_ms_bucket{response_type=\"RESOLVED\"}[$__rate_interval])) by (le)").
+				Instant(false).
+				Range(true).
+				Exemplar(false).
+				EditorMode("code").
+				Format("heatmap").
+				LegendFormat("{{le}}").
+				RefId("A").
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("request duration (upstream)").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).

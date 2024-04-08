@@ -2,14 +2,19 @@ func VariantConfig() cogvariants.DataqueryConfig {
 	return cogvariants.DataqueryConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",
 	    DataqueryUnmarshaler: func (raw []byte) (cogvariants.Dataquery, error) {
-            dataquery := {{ .object.Name|upperCamelCase }}{}
+            dataquery := &{{ .object.Name | upperCamelCase }}{}
 
-            if err := json.Unmarshal(raw, &dataquery); err != nil {
+            if err := json.Unmarshal(raw, dataquery); err != nil {
                 return nil, err
             }
 
             return dataquery, nil
-       },
+        },
+        {{- if .hasConverter }}
+        GoConverter: func(inputPanel any) string {
+            return {{ .object.Name | upperCamelCase }}Converter(inputPanel.(*{{ .object.Name | upperCamelCase }}))
+        },
+        {{- end }}
 	}
 }
 

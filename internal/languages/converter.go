@@ -108,28 +108,8 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 
 	converter.ConstructorArgs = generator.constructorArgs(converter, builder)
 
-	validOptions := tools.Filter(builder.Options, func(option ast.Option) bool {
-		for _, arg := range option.Args {
-			// we don't know what to do with "any" arguments
-			if arg.Type.IsAny() {
-				return false
-			}
-
-			// TODO: not handled properly
-			if arg.Type.IsMap() && !arg.Type.Map.ValueType.IsScalar() {
-				return false
-			}
-
-			// TODO: not handled properly
-			if arg.Type.IsComposableSlot() {
-				return false
-			}
-		}
-
-		return true
-	})
-
-	converter.Mappings = tools.Map(validOptions, func(option ast.Option) OptionMapping {
+	// these are handled separately
+	converter.Mappings = tools.Map(builder.Options, func(option ast.Option) OptionMapping {
 		return generator.convertOption(context, converter, option)
 	})
 
@@ -174,23 +154,63 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 			}
 		}
 
-		if argument, ok := generator.argumentFromDisjunctionStruct(context, argName, valuePath, assignment); ok {
+		if argument, ok := generator.argumentFromDisjunctionStruct(context, converter, argName, valuePath, assignment); ok {
 			return argument
 		}
 
-		return generator.argumentForType(context, argName, valuePath, valueType)
+		return generator.argumentForType(context, converter, argName, valuePath, valueType)
 	})
 
 	return mapping
 }
 
-func (generator *ConverterGenerator) argumentForType(context Context, argName string, valuePath ast.Path, typeDef ast.Type) ArgumentMapping {
+func (generator *ConverterGenerator) argumentForType(context Context, converter Converter, argName string, valuePath ast.Path, typeDef ast.Type) ArgumentMapping {
+	if typeDef.IsComposableSlot() {
+		var slotTypeHintsArgs []*DirectArgMapping
+		var guards []MappingGuard
+		converterRootType := context.ResolveRefs(converter.inputRootPath().Last().Type)
+
+		if converterRootType.IsStruct() {
+			for _, field := range converterRootType.Struct.Fields {
+				if !field.Type.IsRef() || field.Type.AsRef().ReferredType != "DataSourceRef" {
+					continue
+				}
+
+				refPath := ast.PathFromStructField(field)
+				datasourceRefType := context.ResolveRefs(field.Type)
+
+				typeField, found := datasourceRefType.Struct.FieldByName("type")
+				if !found {
+					continue
+				}
+
+				typePath := refPath.AppendStructField(typeField)
+				guards = append(guards, generator.pathNotNullGuards(converter, typePath)...)
+
+				slotTypeHintsArgs = append(slotTypeHintsArgs, &DirectArgMapping{
+					ValuePath: converter.inputRootPath().Append(typePath),
+					ValueType: typeField.Type,
+				})
+			}
+		}
+
+		return ArgumentMapping{
+			Runtime: &RuntimeArgMapping{
+				FuncName: fmt.Sprintf("Convert%sToGo", tools.UpperCamelCase(string(typeDef.AsComposableSlot().Variant))),
+				Args: append([]*DirectArgMapping{
+					{ValuePath: valuePath, ValueType: typeDef},
+				}, slotTypeHintsArgs...),
+			},
+			Guards: guards,
+		}
+	}
+
 	if typeDef.IsArray() {
 		valueAs := ast.Path{
 			{Identifier: argName, Type: typeDef.Array.ValueType, Root: true},
 		}
 
-		forArg := generator.argumentForType(context, argName+"Value", valueAs, typeDef.Array.ValueType)
+		forArg := generator.argumentForType(context, converter, argName+"Value", valueAs, typeDef.Array.ValueType)
 
 		return ArgumentMapping{
 			Array: &ArrayArgMapping{
@@ -236,7 +256,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, argName st
 	}
 }
 
-func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, argName string, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, converter Converter, argName string, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
 	if assignment.Value.Envelope == nil {
 		return ArgumentMapping{}, false
 	}
@@ -253,7 +273,7 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Conte
 
 	envelopeValues := assignment.Value.Envelope.Values
 
-	arg := generator.argumentForType(context, argName, valuePath.Append(envelopeValues[0].Path), envelopeValues[0].Path.Last().Type)
+	arg := generator.argumentForType(context, converter, argName, valuePath.Append(envelopeValues[0].Path), envelopeValues[0].Path.Last().Type)
 	arg.Guards = tools.Map(envelopeValues, func(envelopedField ast.EnvelopeFieldValue) MappingGuard {
 		return MappingGuard{
 			Path:  valuePath.Append(envelopedField.Path),
