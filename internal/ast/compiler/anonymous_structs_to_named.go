@@ -115,12 +115,15 @@ func (pass *AnonymousStructsToNamed) processDisjunction(pkg string, parentName s
 }
 
 func (pass *AnonymousStructsToNamed) processStruct(pkg string, parentName string, def ast.Type) ast.Type {
+	objectDef := def.DeepCopy()
+	objectDef.Nullable = false
+
 	for i, field := range def.AsStruct().Fields {
 		name := parentName + tools.UpperCamelCase(field.Name)
-		def.Struct.Fields[i].Type = pass.processType(pkg, name, field.Type)
+		objectDef.Struct.Fields[i].Type = pass.processType(pkg, name, field.Type)
 	}
 
-	newObject := ast.NewObject(pkg, parentName, def)
+	newObject := ast.NewObject(pkg, parentName, objectDef)
 	newObject.AddToPassesTrail("AnonymousStructsToNamed")
 
 	pass.newObjects = append(pass.newObjects, newObject)
