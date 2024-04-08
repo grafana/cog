@@ -306,10 +306,20 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
 	jenny.packageMapper("cog/variants")
 
+	var disjunctionStruct *ast.StructType
+
+	if obj.Type.IsRef() {
+		resolved, _ := schema.Resolve(obj.Type)
+		if resolved.IsStructGeneratedFromDisjunction() {
+			disjunctionStruct = resolved.Struct
+		}
+	}
+
 	return jenny.renderTemplate("types/variant_dataquery.json_unmarshal.tmpl", map[string]any{
-		"schema":       schema,
-		"object":       obj,
-		"hasConverter": jenny.config.generateConverters,
+		"schema":            schema,
+		"object":            obj,
+		"hasConverter":      jenny.config.generateConverters,
+		"disjunctionStruct": disjunctionStruct,
 	})
 }
 

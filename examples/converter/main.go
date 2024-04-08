@@ -64,7 +64,7 @@ func foo() {
 				Exemplar(false).
 				Format("table").
 				RefId("A").
-				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
+				Datasource(map[string]interface{}{"uid": "grafanacloud-prom", "type": "prometheus"})).
 			Title("Version").
 			Description("Blocky [version](https://github.com/0xERR0R/blocky) number").
 			Transparent(true).
@@ -139,7 +139,7 @@ func foo() {
 			Span(0x6).
 			MaxDataPoints(100).
 			Unit("none").
-			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{ValueMap: cog.ToPtr[dashboard.ValueMap](dashboard.ValueMap{Type: "value", Options: map[string]dashboard.ValueMappingResult{"0": dashboard.ValueMappingResult{Text: cog.ToPtr[string]("off")}, "1": dashboard.ValueMappingResult{Text: cog.ToPtr[string]("on")}}})}}).
+			Mappings([]dashboard.ValueMapping{dashboard.ValueMapOrRangeMapOrRegexMapOrSpecialValueMap{ValueMap: cog.ToPtr[dashboard.ValueMap](dashboard.ValueMap{Type: "value", Options: map[string]dashboard.ValueMappingResult{"1": dashboard.ValueMappingResult{Text: cog.ToPtr[string]("on")}, "0": dashboard.ValueMappingResult{Text: cog.ToPtr[string]("off")}}})}}).
 			Thresholds(dashboard.NewThresholdsConfigBuilder().
 				Mode("absolute").
 				Steps([]dashboard.Threshold{dashboard.Threshold{Color: "#d44a3a"},
@@ -163,7 +163,7 @@ func foo() {
 				Exemplar(false).
 				Format("table").
 				RefId("A").
-				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
+				Datasource(map[string]interface{}{"uid": "grafanacloud-prom", "type": "prometheus"})).
 			Title("Last list refresh").
 			Description("Time since last list refresh").
 			Transparent(true).
@@ -550,7 +550,7 @@ func foo() {
 				Format("time_series").
 				LegendFormat("{{ type }}").
 				RefId("A").
-				Datasource(map[string]interface{}{"uid": "grafanacloud-prom", "type": "prometheus"})).
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Query by type").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -614,7 +614,7 @@ func foo() {
 				Format("time_series").
 				LegendFormat("{{ group }}").
 				RefId("A").
-				Datasource(map[string]interface{}{"uid": "grafanacloud-prom", "type": "prometheus"})).
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Blacklist by group").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -678,7 +678,7 @@ func foo() {
 				Format("time_series").
 				LegendFormat("{{reason}}").
 				RefId("A").
-				Datasource(map[string]interface{}{"uid": "grafanacloud-prom", "type": "prometheus"})).
+				Datasource(map[string]interface{}{"type": "prometheus", "uid": "grafanacloud-prom"})).
 			Title("Response Reasons").
 			Transparent(true).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
@@ -780,7 +780,7 @@ func foo() {
 		WithVariable(dashboard.NewQueryVariableBuilder("job").
 			Label("job").
 			Hide(0).
-			Query(dashboard.StringOrAny{Any: cog.ToPtr[interface{}](map[string]interface{}{"qryType": 1, "query": "label_values(blocky_blocking_enabled,job)", "refId": "PrometheusVariableQueryEditor-VariableQuery"})}).
+			Query(dashboard.StringOrAny{Any: cog.ToPtr[interface{}](map[string]interface{}{"refId": "PrometheusVariableQueryEditor-VariableQuery", "qryType": 1, "query": "label_values(blocky_blocking_enabled,job)"})}).
 			Datasource(dashboard.DataSourceRef{Type: cog.ToPtr[string]("prometheus"), Uid: cog.ToPtr[string]("grafanacloud-prom")}).
 			Current(dashboard.VariableOption{Selected: cog.ToPtr[bool](false), Text: dashboard.StringOrArrayOfString{String: cog.ToPtr[string]("All")}, Value: dashboard.StringOrArrayOfString{String: cog.ToPtr[string]("$__all")}}).
 			Multi(false).
