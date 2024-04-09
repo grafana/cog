@@ -52,7 +52,7 @@ jobs:
       - name: Find preview comment
         uses: peter-evans/find-comment@v3
         id: preview-comment-find
-        if: github.actor != 'dependabot[bot]' && github.repository == 'grafana/cog' # only run on main repo, and not on dependabot PRs
+        if: not contains(github.actor, 'dependabot[bot]') && github.repository == 'grafana/cog' # only run on main repo, and not on dependabot PRs
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
@@ -60,7 +60,7 @@ jobs:
 
       - name: Upsert preview comment
         uses: peter-evans/create-or-update-comment@v4
-        if: github.actor != 'dependabot[bot]' && github.repository == 'grafana/cog' # only run on main repo, and not on dependabot PRs
+        if: not contains(github.actor, 'dependabot[bot]') && github.repository == 'grafana/cog' # only run on main repo, and not on dependabot PRs
         with:
           comment-id: ${{ steps.preview-comment-find.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
