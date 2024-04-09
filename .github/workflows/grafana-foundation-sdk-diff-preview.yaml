@@ -10,6 +10,7 @@ jobs:
   sdk_diff:
     name: Generate diff
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
 
     steps:
       - uses: actions/checkout@v4
