@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type Converter struct {
@@ -55,31 +54,6 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	typeImportMapper("cog")
 	typeFormatter := builderTypeFormatter(jenny.Config, context, typeImportMapper)
 
-	formatFieldPath := func(fieldPath ast.Path) string {
-		parts := make([]string, len(fieldPath))
-
-		for i := range fieldPath {
-			output := fieldPath[i].Identifier
-			if !fieldPath[i].Root {
-				output = tools.UpperCamelCase(output)
-			}
-
-			// don't generate type hints if:
-			// * there isn't one defined
-			// * the type isn't "any"
-			// * as a trailing element in the path
-			if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
-				parts[i] = output
-				continue
-			}
-
-			formattedTypeHint := typeFormatter.formatType(*fieldPath[i].TypeHint)
-			parts[i] = output + fmt.Sprintf(".(*%s)", formattedTypeHint)
-		}
-
-		return strings.Join(parts, ".")
-	}
-
 	formatRawRef := func(pkg string, ref string) string {
 		return typeFormatter.formatRef(ast.NewRef(pkg, ref), false)
 	}
@@ -89,7 +63,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			"typeHasEncoder": func(typeDef ast.Type) bool {
 				return typeHasEncoder(context, typeDef)
 			},
-			"formatPath":   formatFieldPath,
+			"formatPath":   makePathFormatter(typeFormatter),
 			"formatRawRef": formatRawRef,
 		}).
 		ExecuteTemplate(&buffer, "converters/converter.tmpl", map[string]any{

@@ -17,6 +17,7 @@ type Builder struct {
 	Config Config
 
 	typeImportMapper func(pkg string) string
+	pathFormatter    func(path ast.Path) string
 	typeFormatter    *typeFormatter
 }
 
@@ -56,6 +57,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
 	jenny.typeFormatter = builderTypeFormatter(jenny.Config, context, jenny.typeImportMapper)
+	jenny.pathFormatter = makePathFormatter(jenny.typeFormatter)
 
 	// every builder has a dependency on cog's runtime, so let's make sure it's declared.
 	jenny.typeImportMapper("cog")
@@ -68,7 +70,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 	err := templates.
 		Funcs(map[string]any{
-			"formatPath": jenny.formatFieldPath,
+			"formatPath": jenny.pathFormatter,
 			"formatType": jenny.typeFormatter.formatType,
 			"formatTypeNoBuilder": func(typeDef ast.Type) string {
 				return jenny.typeFormatter.doFormatType(typeDef, false)
@@ -175,28 +177,6 @@ func (jenny *Builder) formatDefaultTypedArgs(context languages.Context, opt ast.
 		}
 	}
 	return args
-}
-
-func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
-	parts := make([]string, len(fieldPath))
-
-	for i := range fieldPath {
-		output := tools.UpperCamelCase(fieldPath[i].Identifier)
-
-		// don't generate type hints if:
-		// * there isn't one defined
-		// * the type isn't "any"
-		// * as a trailing element in the path
-		if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
-			parts[i] = output
-			continue
-		}
-
-		formattedTypeHint := jenny.typeFormatter.formatType(*fieldPath[i].TypeHint)
-		parts[i] = output + fmt.Sprintf(".(*%s)", formattedTypeHint)
-	}
-
-	return strings.Join(parts, ".")
 }
 
 func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
