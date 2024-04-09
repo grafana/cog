@@ -1,0 +1,101 @@
+{{ $converter := include "converter" . }}
+
+{{ .Imports }}
+
+{{ $converter }}
+
+{{- define "guard" }}
+    {{- if and (eq .Op "!=") (eq .Value nil) -}}
+        {{ .Path }} != null
+    {{- else -}}
+        {{- $leftOperand := .Path -}}
+        {{- $operator := .Op -}}
+        {{- if eq .Op "minLength" -}}
+            {{- $leftOperand = print $leftOperand ".length" -}}
+            {{- $operator = ">=" -}}
+        {{- end -}}
+        {{- if eq .Op "maxLength" -}}
+            {{- $leftOperand = print $leftOperand ".length" -}}
+            {{- $operator = "<=" -}}
+        {{- end -}}
+        {{- $leftOperand }} {{ $operator}} {{ .Value | formatValue -}}
+    {{- end -}}
+{{- end }}
+
+{{- define "value_formatter" -}}
+    JSON.stringify({{ .Path }})
+{{- end }}
+
+{{- define "guards" }}
+    {{- $guardsCount := (sub (len .) 1) -}}
+    {{- range $i, $guard := . }}{{- template "guard" $guard }}{{ if ne $i $guardsCount }} && {{ end }}{{ end }}
+{{- end }}
+
+{{- define "prepare_arg" -}}
+    {{- with .Arg.Builder -}}
+        const {{ $.IntoVar }} = {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{ .ValuePath }});
+    {{- end -}}
+    {{- with .Arg.Array -}}
+        const tmp{{ $.IntoVar }}: string[] = [];
+        for (const {{ .ValueAs }} of {{ .For }}) {
+            {{- $subIntoVar := print "tmp" .ValueAs }}
+            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
+            tmp{{ $.IntoVar }}.push({{ $subIntoVar }});
+        }
+        const {{ $.IntoVar }} = "[" + tmp{{ $.IntoVar }}.join(",\n") + "]";
+    {{- end -}}
+    {{- with .Arg.Runtime -}}
+        const {{ $.IntoVar }} = cog.{{ .FuncName }}({{ range $runtimeArg := .Args }}{{ $runtimeArg.ValuePath }}, {{ end }});
+    {{- end -}}
+    {{- with .Arg.Direct -}}
+        const {{ $.IntoVar }} = {{ template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath ) -}};
+    {{- end -}}
+{{- end }}
+
+{{- define "converter" -}}
+export function {{ .Converter.BuilderName | upperCamelCase }}Converter(input: {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType }}): string {
+    {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) }}
+    const calls: string[] = [
+        `new {{ .Converter.Package }}.{{ .Converter.BuilderName | upperCamelCase }}Builder({{ range $i, $arg := .Converter.ConstructorArgs }}${ {{ $arg.ValuePath }} }{{- if ne $i $constructorArgsCount }}, {{ end }}{{ end }})`,
+    ];
+
+    {{- range .Converter.Mappings }}
+    {{ with .Guards }}if ({{ template "guards" . }}){{ end }}{
+        {{ if ne .RepeatFor nil -}}
+        {{- $arg := index .Args 0 -}}
+        for (const {{ .RepeatAs }} of {{ .RepeatFor }}) {
+            let buffer: string = "";
+            {{ with $arg.Guards -}}
+                if (!({{ template "guards" . }})) {
+                    continue;
+                }
+            {{ end }}
+            buffer += `{{ .Option.Name }}(`;
+            {{ template "prepare_arg" (dict "IntoVar" "arg" "Arg" $arg) }}
+            buffer += arg;
+            buffer += ")";
+
+            calls.push(buffer);
+        }
+        {{- else }}
+        let buffer: string = "";
+        buffer += `{{ .Option.Name }}(`;
+        {{- $argsCount := (sub (len .Args) 1) -}}
+        {{- range $i, $arg := .Args }}
+            {{- $intoVar := print "arg" $i }}
+            {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
+            buffer += {{ $intoVar }};
+            {{- if ne $i $argsCount }}
+                buffer += ", ";
+            {{- end }}
+        {{- end }}
+        buffer += ")";
+
+        calls.push(buffer);
+        {{- end }}
+    }
+    {{- end }}
+
+    return calls.join(".\t\n");
+}
+{{- end }}

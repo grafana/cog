@@ -45,6 +45,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 		common.If[languages.Context](globalConfig.Types, RawTypes{}),
 		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
+		common.If[languages.Context](globalConfig.Converters, &Converter{}),
 
 		common.If[languages.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
 	)

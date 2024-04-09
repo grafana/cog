@@ -11,7 +11,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/*.tmpl templates/veneers/*.tmpl
+//go:embed templates/*.tmpl templates/converters/*.tmpl templates/veneers/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -23,6 +23,9 @@ func init() {
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(template.FuncMap{
+			"formatRawRef": func(_ ast.Type) string {
+				panic("formatRawRef() needs to be overridden by a jenny")
+			},
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
