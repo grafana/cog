@@ -43,7 +43,7 @@ jobs:
           echo -e "</summary>\n" >> preview.md
           echo '```patch' >> preview.md
           
-          git diff next+cog-v0.0.x..HEAD ':(exclude,glob)*/README.md' >> preview.md
+          git diff next+cog-v0.0.x..HEAD ':(exclude,glob)*/README.md' | tee -a preview.md
           
           echo '```' >> preview.md
           echo -e "\n" >> preview.md
