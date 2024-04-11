@@ -10,7 +10,6 @@ jobs:
   sdk_diff:
     name: Generate diff
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]'
 
     steps:
       - uses: actions/checkout@v4
@@ -53,6 +52,7 @@ jobs:
       - name: Find preview comment
         uses: peter-evans/find-comment@v3
         id: preview-comment-find
+        if: "!contains(github.actor, 'dependabot') && github.repository == 'grafana/cog'" # only run on main repo, and not on dependabot PRs
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
@@ -60,6 +60,7 @@ jobs:
 
       - name: Upsert preview comment
         uses: peter-evans/create-or-update-comment@v4
+        if: "!contains(github.actor, 'dependabot') && github.repository == 'grafana/cog'" # only run on main repo, and not on dependabot PRs
         with:
           comment-id: ${{ steps.preview-comment-find.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
