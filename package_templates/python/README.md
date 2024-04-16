@@ -14,6 +14,8 @@ python3 -m pip install 'grafana_foundation_sdk=={{ .Extra.BuildTimestamp }}!{{ .
 
 ## Example usage
 
+### Building a dashboard
+
 ```python
 from grafana_foundation_sdk.builders.dashboard import Dashboard, Row
 from grafana_foundation_sdk.builders.prometheus import Dataquery as PrometheusQuery
@@ -53,6 +55,26 @@ if __name__ == '__main__':
     encoder = JSONEncoder(sort_keys=True, indent=2)
 
     print(encoder.encode(dashboard))
+```
+
+### Unmarshaling a dashboard
+
+```python
+import json
+
+from grafana_foundation_sdk.cog.plugins import register_default_plugins
+from grafana_foundation_sdk.models.dashboard import Dashboard as DashboardModel
+
+
+if __name__ == '__main__':
+    # Required to correctly unmarshal panels and dataqueries
+    register_default_plugins()
+
+    decoded_dashboard = DashboardModel.from_json(
+        json.load(open("dashboard.json", "r"))
+    )
+
+    print(decoded_dashboard)
 ```
 
 ## Maturity
