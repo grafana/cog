@@ -70,14 +70,17 @@ export interface CustomQuery {
     _implementsDataqueryVariant(): void;
 }
 
+export const defaultCustomQuery = (): CustomQuery => ({
+    query: "",
+    _implementsDataqueryVariant() {},
+});
+
 export class CustomQueryBuilder implements Builder<Dataquery> {
     private readonly internal: CustomQuery;
 
     constructor(query: string) {
-        this.internal = {
-            query: query,
-            _implementsDataqueryVariant() {},
-        };
+        this.internal = defaultCustomQuery();
+        this.internal.query = query;
     }
 
     build(): CustomQuery {
@@ -94,6 +97,7 @@ export class CustomQueryBuilder implements Builder<Dataquery> {
         return this;
     }
 }
+
 ```
 
 The custom query type can now be used as usual to build a dashboard:
@@ -116,6 +120,84 @@ const builder = new DashboardBuilder('Custom query type')
             .withTarget(
                 new CustomQueryBuilder("query here")
             )
+    );
+
+console.log(JSON.stringify(builder.build(), null, 2));
+```
+
+### Defining a custom panel type
+
+While the SDK ships with support for all core panels, it can be extended for
+private/third-party plugins.
+
+To do so, define a type and a builder for the custom panel's options:
+
+```typescript
+// customPanel.ts
+import { Builder, Dataquery } from '@grafana/grafana-foundation-sdk/cog';
+import { Panel, defaultPanel } from '@grafana/grafana-foundation-sdk/dashboard';
+
+export interface CustomPanelOptions {
+    makeBeautiful?: boolean;
+}
+
+export const defaultCustomPanelOptions = (): CustomPanelOptions => ({
+});
+
+export class CustomPanelBuilder implements Builder<Panel> {
+    private readonly internal: Panel;
+
+    constructor() {
+        this.internal = defaultPanel();
+        this.internal.type = "custom-panel"; // panel plugin ID
+    }
+
+    build(): Panel {
+        return this.internal;
+    }
+
+    withTarget(target: Builder<Dataquery>): this {
+        if (!this.internal.targets) {
+            this.internal.targets = [];
+        }
+        this.internal.targets.push(target.build());
+        return this;
+    }
+
+    title(title: string): this {
+        this.internal.title = title;
+        return this;
+    }
+
+    // [other panel options omitted for brevity]
+
+    makeBeautiful(): this {
+        if (!this.internal.options) {
+            this.internal.options = defaultCustomPanelOptions();
+        }
+        this.internal.options.makeBeautiful = true;
+        return this;
+    }
+}
+```
+
+The custom panel type can now be used as usual to build a dashboard:
+
+```typescript
+import { DashboardBuilder, RowBuilder } from '@grafana/grafana-foundation-sdk/dashboard';
+import { CustomPanelBuilder } from "./customPanel";
+
+const builder = new DashboardBuilder('Custom panel type')
+    .uid('test-custom-panel-type')
+
+    .refresh('1m')
+    .time({ from: 'now-30m', to: 'now' })
+
+    .withRow(new RowBuilder('Overview'))
+    .withPanel(
+        new CustomPanelBuilder()
+            .title('Sample custom panel')
+            .makeBeautiful()
     );
 
 console.log(JSON.stringify(builder.build(), null, 2));
