@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as sandbox from '../sandbox';
 
 export class DashboardBuilder implements cog.Builder<sandbox.Dashboard> {
-    private readonly internal: sandbox.Dashboard;
+    protected readonly internal: sandbox.Dashboard;
 
     constructor() {
         this.internal = sandbox.defaultDashboard();

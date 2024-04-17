@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as basicStructDefaults from '../basicStructDefaults';
 
 export class SomeStructBuilder implements cog.Builder<basicStructDefaults.SomeStruct> {
-    private readonly internal: basicStructDefaults.SomeStruct;
+    protected readonly internal: basicStructDefaults.SomeStruct;
 
     constructor() {
         this.internal = basicStructDefaults.defaultSomeStruct();

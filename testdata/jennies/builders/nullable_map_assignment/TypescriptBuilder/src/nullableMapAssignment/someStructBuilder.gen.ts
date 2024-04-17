@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as nullableMapAssignment from '../nullableMapAssignment';
 
 export class SomeStructBuilder implements cog.Builder<nullableMapAssignment.SomeStruct> {
-    private readonly internal: nullableMapAssignment.SomeStruct;
+    protected readonly internal: nullableMapAssignment.SomeStruct;
 
     constructor() {
         this.internal = nullableMapAssignment.defaultSomeStruct();

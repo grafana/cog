@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as builderDelegationInDisjunction from '../builderDelegationInDisjunction';
 
 export class DashboardLinkBuilder implements cog.Builder<builderDelegationInDisjunction.DashboardLink> {
-    private readonly internal: builderDelegationInDisjunction.DashboardLink;
+    protected readonly internal: builderDelegationInDisjunction.DashboardLink;
 
     constructor() {
         this.internal = builderDelegationInDisjunction.defaultDashboardLink();

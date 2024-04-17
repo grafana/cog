@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as builderDelegation from '../builderDelegation';
 
 export class DashboardLinkBuilder implements cog.Builder<builderDelegation.DashboardLink> {
-    private readonly internal: builderDelegation.DashboardLink;
+    protected readonly internal: builderDelegation.DashboardLink;
 
     constructor() {
         this.internal = builderDelegation.defaultDashboardLink();

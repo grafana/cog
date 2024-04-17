@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as dataqueryVariantBuilder from '../dataqueryVariantBuilder';
 
 export class LokiBuilderBuilder implements cog.Builder<cog.Dataquery> {
-    private readonly internal: dataqueryVariantBuilder.Loki;
+    protected readonly internal: dataqueryVariantBuilder.Loki;
 
     constructor() {
         this.internal = dataqueryVariantBuilder.defaultLoki();
