@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as withDashes from '../withDashes';
 
 export class SomeNiceBuilderBuilder implements cog.Builder<withDashes.SomeStruct> {
-    private readonly internal: withDashes.SomeStruct;
+    protected readonly internal: withDashes.SomeStruct;
 
     constructor() {
         this.internal = withDashes.defaultSomeStruct();

@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as sandbox from '../sandbox';
 
 export class SomeStructBuilder implements cog.Builder<sandbox.SomeStruct> {
-    private readonly internal: sandbox.SomeStruct;
+    protected readonly internal: sandbox.SomeStruct;
 
     constructor() {
         this.internal = sandbox.defaultSomeStruct();

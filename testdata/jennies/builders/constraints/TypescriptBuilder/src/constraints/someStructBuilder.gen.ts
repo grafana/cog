@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as constraints from '../constraints';
 
 export class SomeStructBuilder implements cog.Builder<constraints.SomeStruct> {
-    private readonly internal: constraints.SomeStruct;
+    protected readonly internal: constraints.SomeStruct;
 
     constructor() {
         this.internal = constraints.defaultSomeStruct();

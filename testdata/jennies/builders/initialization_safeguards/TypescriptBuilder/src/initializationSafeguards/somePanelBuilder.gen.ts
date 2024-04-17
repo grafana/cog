@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as initializationSafeguards from '../initializationSafeguards';
 
 export class SomePanelBuilder implements cog.Builder<initializationSafeguards.SomePanel> {
-    private readonly internal: initializationSafeguards.SomePanel;
+    protected readonly internal: initializationSafeguards.SomePanel;
 
     constructor() {
         this.internal = initializationSafeguards.defaultSomePanel();

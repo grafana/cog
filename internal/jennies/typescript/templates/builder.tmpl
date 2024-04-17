@@ -5,7 +5,7 @@
 // {{ . }}
 {{- end }}
 export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ .BuilderSignatureType }}> {
-    private readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
+    protected readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
     {{- range .Properties }}
     private {{ .Name }}: {{ .Type | formatType }} = {{ .Type | defaultValueForType }};
     {{- end }}

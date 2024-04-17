@@ -3,7 +3,7 @@ import * as basicStruct from '../basicStruct';
 
 // SomeStruct, to hold data.
 export class SomeStructBuilder implements cog.Builder<basicStruct.SomeStruct> {
-    private readonly internal: basicStruct.SomeStruct;
+    protected readonly internal: basicStruct.SomeStruct;
 
     constructor() {
         this.internal = basicStruct.defaultSomeStruct();

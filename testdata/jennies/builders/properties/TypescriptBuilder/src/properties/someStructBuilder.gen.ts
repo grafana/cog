@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as properties from '../properties';
 
 export class SomeStructBuilder implements cog.Builder<properties.SomeStruct> {
-    private readonly internal: properties.SomeStruct;
+    protected readonly internal: properties.SomeStruct;
     private someBuilderProperty: string = "";
 
     constructor() {

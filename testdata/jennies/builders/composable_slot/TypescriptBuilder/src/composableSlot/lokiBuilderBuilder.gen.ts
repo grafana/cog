@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as composableSlot from '../composableSlot';
 
 export class LokiBuilderBuilder implements cog.Builder<composableSlot.Dashboard> {
-    private readonly internal: composableSlot.Dashboard;
+    protected readonly internal: composableSlot.Dashboard;
 
     constructor() {
         this.internal = composableSlot.defaultDashboard();

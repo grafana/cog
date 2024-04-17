@@ -2,7 +2,7 @@ import * as cog from '../cog';
 import * as knownAny from '../knownAny';
 
 export class SomeStructBuilder implements cog.Builder<knownAny.SomeStruct> {
-    private readonly internal: knownAny.SomeStruct;
+    protected readonly internal: knownAny.SomeStruct;
 
     constructor() {
         this.internal = knownAny.defaultSomeStruct();

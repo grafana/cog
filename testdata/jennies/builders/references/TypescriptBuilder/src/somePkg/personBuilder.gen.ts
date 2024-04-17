@@ -3,7 +3,7 @@ import * as somePkg from '../somePkg';
 import * as otherPkg from '../otherPkg';
 
 export class PersonBuilder implements cog.Builder<somePkg.Person> {
-    private readonly internal: somePkg.Person;
+    protected readonly internal: somePkg.Person;
 
     constructor() {
         this.internal = somePkg.defaultPerson();
