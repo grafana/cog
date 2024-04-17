@@ -70,11 +70,9 @@ if __name__ == '__main__':
     # Required to correctly unmarshal panels and dataqueries
     register_default_plugins()
 
-    decoded_dashboard = DashboardModel.from_json(
-        json.load(open("dashboard.json", "r"))
-    )
-
-    print(decoded_dashboard)
+    with open("dashboard.json", "r") as f:
+        decoded_dashboard = DashboardModel.from_json(json.load(f))
+        print(decoded_dashboard)
 ```
 
 ### Defining a custom query type
