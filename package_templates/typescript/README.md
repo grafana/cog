@@ -14,6 +14,8 @@ yarn add '@grafana/grafana-foundation-sdk@~{{ .Extra.GrafanaVersion|registryToSe
 
 ## Example usage
 
+[More examples](https://github.com/grafana/grafana-foundation-sdk/tree/main/examples/typescript) can be found at the repository root.
+
 ### Building a dashboard
 
 ```typescript
