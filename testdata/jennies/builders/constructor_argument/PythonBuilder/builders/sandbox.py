@@ -4,17 +4,17 @@ from ..models import sandbox
 
 
 class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):    
-    __internal: sandbox.SomeStruct
+    _internal: sandbox.SomeStruct
 
     def __init__(self, title: str):
-        self.__internal = sandbox.SomeStruct()        
-        self.__internal.title = title
+        self._internal = sandbox.SomeStruct()        
+        self._internal.title = title
 
     def build(self) -> sandbox.SomeStruct:
-        return self.__internal    
+        return self._internal    
     
     def title(self, title: str) -> typing.Self:        
-        self.__internal.title = title
+        self._internal.title = title
     
         return self
     

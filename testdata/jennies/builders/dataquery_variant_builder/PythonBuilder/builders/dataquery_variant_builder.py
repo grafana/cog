@@ -4,16 +4,16 @@ from ..models import dataquery_variant_builder
 
 
 class LokiBuilder(cogbuilder.Builder[dataquery_variant_builder.Loki]):    
-    __internal: dataquery_variant_builder.Loki
+    _internal: dataquery_variant_builder.Loki
 
     def __init__(self):
-        self.__internal = dataquery_variant_builder.Loki()
+        self._internal = dataquery_variant_builder.Loki()
 
     def build(self) -> dataquery_variant_builder.Loki:
-        return self.__internal    
+        return self._internal    
     
     def expr(self, expr: str) -> typing.Self:        
-        self.__internal.expr = expr
+        self._internal.expr = expr
     
         return self
     

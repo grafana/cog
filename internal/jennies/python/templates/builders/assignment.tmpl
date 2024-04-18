@@ -65,6 +65,6 @@
 {{- end }}
 
 {{- define "assignment_method" }}
-{{ if eq .Method "direct" }}self.__internal.{{ .Path|formatPath }} = {{ .Value }}{{ end -}}
-{{ if eq .Method "append" }}self.__internal.{{ .Path|formatPath }}.append({{ .Value }}){{ end -}}
+{{ if eq .Method "direct" }}self._internal.{{ .Path|formatPath }} = {{ .Value }}{{ end -}}
+{{ if eq .Method "append" }}self._internal.{{ .Path|formatPath }}.append({{ .Value }}){{ end -}}
 {{- end }}

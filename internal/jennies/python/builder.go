@@ -168,12 +168,12 @@ func (jenny *Builder) generatePathInitializationSafeGuard(context common.Context
 	nonOptionalType := valueType.DeepCopy()
 	nonOptionalType.Nullable = false
 
-	guard := fmt.Sprintf(`if self.__internal.%[1]s is None:
-    self.__internal.%[1]s = %[2]s
+	guard := fmt.Sprintf(`if self._internal.%[1]s is None:
+    self._internal.%[1]s = %[2]s
 `, fieldPath, emptyValue)
 
 	if !nonOptionalType.IsArray() {
-		guard += fmt.Sprintf("\nassert isinstance(self.__internal.%s, %s)\n", fieldPath, jenny.rawTypeFormatter.formatType(nonOptionalType))
+		guard += fmt.Sprintf("\nassert isinstance(self._internal.%s, %s)\n", fieldPath, jenny.rawTypeFormatter.formatType(nonOptionalType))
 	}
 
 	return guard

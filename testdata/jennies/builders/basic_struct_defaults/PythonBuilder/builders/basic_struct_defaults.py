@@ -4,31 +4,31 @@ from ..models import basic_struct_defaults
 
 
 class SomeStruct(cogbuilder.Builder[basic_struct_defaults.SomeStruct]):    
-    __internal: basic_struct_defaults.SomeStruct
+    _internal: basic_struct_defaults.SomeStruct
 
     def __init__(self):
-        self.__internal = basic_struct_defaults.SomeStruct()
+        self._internal = basic_struct_defaults.SomeStruct()
 
     def build(self) -> basic_struct_defaults.SomeStruct:
-        return self.__internal    
+        return self._internal    
     
     def id_val(self, id_val: int) -> typing.Self:        
-        self.__internal.id_val = id_val
+        self._internal.id_val = id_val
     
         return self
     
     def uid(self, uid: str) -> typing.Self:        
-        self.__internal.uid = uid
+        self._internal.uid = uid
     
         return self
     
     def tags(self, tags: list[str]) -> typing.Self:        
-        self.__internal.tags = tags
+        self._internal.tags = tags
     
         return self
     
     def live_now(self, live_now: bool) -> typing.Self:        
-        self.__internal.live_now = live_now
+        self._internal.live_now = live_now
     
         return self
     
