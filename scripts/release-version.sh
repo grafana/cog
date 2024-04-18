@@ -78,8 +78,8 @@ function run_codegen() {
     --language typescript \
     --python-path-prefix grafana_foundation_sdk \
     --language python \
-    #--language jsonschema \
-    #--language openapi
+    --language jsonschema \
+    --language openapi
 }
 
 function gh_run() (
