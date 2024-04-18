@@ -5,16 +5,16 @@ from ..models import other_pkg
 
 
 class Person(cogbuilder.Builder[some_pkg.Person]):    
-    __internal: some_pkg.Person
+    _internal: some_pkg.Person
 
     def __init__(self):
-        self.__internal = some_pkg.Person()
+        self._internal = some_pkg.Person()
 
     def build(self) -> some_pkg.Person:
-        return self.__internal    
+        return self._internal    
     
     def name(self, name: other_pkg.Name) -> typing.Self:        
-        self.__internal.name = name
+        self._internal.name = name
     
         return self
     

@@ -4,31 +4,31 @@ from ..models import sandbox
 
 
 class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):    
-    __internal: sandbox.SomeStruct
+    _internal: sandbox.SomeStruct
 
     def __init__(self):
-        self.__internal = sandbox.SomeStruct()
+        self._internal = sandbox.SomeStruct()
 
     def build(self) -> sandbox.SomeStruct:
-        return self.__internal    
+        return self._internal    
     
     def editable(self) -> typing.Self:        
-        self.__internal.editable = True
+        self._internal.editable = True
     
         return self
     
     def readonly(self) -> typing.Self:        
-        self.__internal.editable = False
+        self._internal.editable = False
     
         return self
     
     def auto_refresh(self) -> typing.Self:        
-        self.__internal.auto_refresh = True
+        self._internal.auto_refresh = True
     
         return self
     
     def no_auto_refresh(self) -> typing.Self:        
-        self.__internal.auto_refresh = False
+        self._internal.auto_refresh = False
     
         return self
     

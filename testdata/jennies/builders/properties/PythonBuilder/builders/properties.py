@@ -4,17 +4,17 @@ from ..models import properties
 
 
 class SomeStruct(cogbuilder.Builder[properties.SomeStruct]):    
-    __internal: properties.SomeStruct
+    _internal: properties.SomeStruct
     __some_builder_property: str = ""
 
     def __init__(self):
-        self.__internal = properties.SomeStruct()
+        self._internal = properties.SomeStruct()
 
     def build(self) -> properties.SomeStruct:
-        return self.__internal    
+        return self._internal    
     
     def id_val(self, id_val: int) -> typing.Self:        
-        self.__internal.id_val = id_val
+        self._internal.id_val = id_val
     
         return self
     

@@ -4,16 +4,16 @@ from ..models import with-dashes
 
 
 class SomeNiceBuilder(cogbuilder.Builder[with-dashes.SomeStruct]):    
-    __internal: with-dashes.SomeStruct
+    _internal: with-dashes.SomeStruct
 
     def __init__(self):
-        self.__internal = with-dashes.SomeStruct()
+        self._internal = with-dashes.SomeStruct()
 
     def build(self) -> with-dashes.SomeStruct:
-        return self.__internal    
+        return self._internal    
     
     def title(self, title: str) -> typing.Self:        
-        self.__internal.title = title
+        self._internal.title = title
     
         return self
     

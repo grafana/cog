@@ -4,41 +4,41 @@ from ..models import builder_delegation
 
 
 class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):    
-    __internal: builder_delegation.DashboardLink
+    _internal: builder_delegation.DashboardLink
 
     def __init__(self):
-        self.__internal = builder_delegation.DashboardLink()
+        self._internal = builder_delegation.DashboardLink()
 
     def build(self) -> builder_delegation.DashboardLink:
-        return self.__internal    
+        return self._internal    
     
     def title(self, title: str) -> typing.Self:        
-        self.__internal.title = title
+        self._internal.title = title
     
         return self
     
     def url(self, url: str) -> typing.Self:        
-        self.__internal.url = url
+        self._internal.url = url
     
         return self
     
 
 class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):    
-    __internal: builder_delegation.Dashboard
+    _internal: builder_delegation.Dashboard
 
     def __init__(self):
-        self.__internal = builder_delegation.Dashboard()
+        self._internal = builder_delegation.Dashboard()
 
     def build(self) -> builder_delegation.Dashboard:
-        return self.__internal    
+        return self._internal    
     
     def id_val(self, id_val: int) -> typing.Self:        
-        self.__internal.id_val = id_val
+        self._internal.id_val = id_val
     
         return self
     
     def title(self, title: str) -> typing.Self:        
-        self.__internal.title = title
+        self._internal.title = title
     
         return self
     
@@ -48,7 +48,7 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
         """
             
         links_resources = [r1.build() for r1 in links]
-        self.__internal.links = links_resources
+        self._internal.links = links_resources
     
         return self
     
@@ -58,7 +58,7 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
         """
             
         links_of_links_resources = [[r2.build() for r2 in r1] for r1 in links_of_links]
-        self.__internal.links_of_links = links_of_links_resources
+        self._internal.links_of_links = links_of_links_resources
     
         return self
     
@@ -68,7 +68,7 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
         """
             
         single_link_resource = single_link.build()
-        self.__internal.single_link = single_link_resource
+        self._internal.single_link = single_link_resource
     
         return self
     
