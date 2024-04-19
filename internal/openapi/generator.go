@@ -107,7 +107,8 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 		return g.walkEnum(schema)
 	}
 
-	switch schema.Type {
+	schemaType := getSchemaType(schema)
+	switch schemaType {
 	case openapi3.TypeString:
 		return g.walkString(schema)
 	case openapi3.TypeBoolean:
@@ -249,11 +250,12 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	// Nullable enums? https://swagger.io/docs/specification/data-models/enums/
 	enums := make([]ast.EnumValue, 0, len(schema.Enum))
 	format := "%#v"
-	if schema.Type == openapi3.TypeString {
+	schemaType := getSchemaType(schema)
+	if schemaType == openapi3.TypeString {
 		format = "%s"
 	}
 
-	enumType, err := getEnumType(schema.Type)
+	enumType, err := getEnumType(schemaType)
 	if err != nil {
 		return ast.Type{}, err
 	}
