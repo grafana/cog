@@ -315,21 +315,25 @@ dataqueryTypeHint = *resource.%[1]s.Type
 	if field.Type.IsArray() {
 		return fmt.Sprintf(`
 	%[3]s
-	%[2]s, err := cog.UnmarshalDataqueryArray(fields["%[2]s"], dataqueryTypeHint)
-	if err != nil {
-		return err
+	if fields["%[2]s"] != nil {
+		%[2]s, err := cog.UnmarshalDataqueryArray(fields["%[2]s"], dataqueryTypeHint)
+		if err != nil {
+			return err
+		}
+		resource.%[1]s = %[2]s
 	}
-	resource.%[1]s = %[2]s
 `, tools.UpperCamelCase(field.Name), field.Name, hintValue)
 	}
 
 	return fmt.Sprintf(`
 	%[3]s
-	%[2]s, err := cog.UnmarshalDataquery(fields["%[2]s"], dataqueryTypeHint)
-	if err != nil {
-		return err
+	if fields["%[2]s"] != nil {
+		%[2]s, err := cog.UnmarshalDataquery(fields["%[2]s"], dataqueryTypeHint)
+		if err != nil {
+			return err
+		}
+		resource.%[1]s = %[2]s
 	}
-	resource.%[1]s = %[2]s
 `, tools.UpperCamelCase(field.Name), field.Name, hintValue)
 }
 
