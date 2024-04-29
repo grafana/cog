@@ -35,6 +35,18 @@
               "Required": false
             },
             {
+              "Name": "const_disguised_as_regex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "surprise"
+                }
+              },
+              "Required": false
+            },
+            {
               "Name": "integer",
               "Type": {
                 "Kind": "scalar",
