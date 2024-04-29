@@ -41,7 +41,7 @@ func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
 		return nil, err
 	}
 
-	if err := oapi.Validate(context.Background()); err != nil {
+	if err := oapi.Validate(context.Background(), openapi3.DisableExamplesValidation()); err != nil {
 		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
 
