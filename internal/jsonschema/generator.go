@@ -296,6 +296,17 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 		def.Scalar.Value = schema.Constant[0]
 	}
 
+	// to handle constant values defined as a string with a "static" regex:
+	// ```
+	// "someField": {
+	// 	  "type": "string",
+	// 	  "pattern": "^math$"
+	// }
+	// ```
+	if schema.Pattern != nil && tools.RegexMatchesConstantString(schema.Pattern.String()) {
+		def.Scalar.Value = tools.ConstantStringFromRegex(schema.Pattern.String())
+	}
+
 	if schema.MinLength != -1 {
 		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
 			Op:   ast.MinLengthOp,

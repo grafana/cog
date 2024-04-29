@@ -27,6 +27,10 @@
         "boolean_with_type": {
           "type": "boolean",
           "const": true
+        },
+        "const_disguised_as_regex": {
+          "type": "string",
+          "pattern": "^surprise$"
         }
       }
     }

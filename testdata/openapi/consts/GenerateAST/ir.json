@@ -1,0 +1,33 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": {
+    "Constants": {
+      "Name": "Constants",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "const_disguised_as_regex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "surprise"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Constants"
+      }
+    }
+  }
+}

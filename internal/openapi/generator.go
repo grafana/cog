@@ -188,6 +188,10 @@ func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
 		t = ast.String()
 	}
 
+	if schema.Pattern != "" && tools.RegexMatchesConstantString(schema.Pattern) {
+		t.Scalar.Value = tools.ConstantStringFromRegex(schema.Pattern)
+	}
+
 	t.Scalar.Constraints = getConstraints(schema)
 	t.Nullable = schema.Nullable
 	t.Default = schema.Default

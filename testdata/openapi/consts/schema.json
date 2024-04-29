@@ -1,0 +1,21 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "consts",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Constants": {
+        "type": "object",
+        "properties": {
+          "const_disguised_as_regex": {
+            "type": "string",
+            "pattern": "^surprise$"
+          }
+        }
+      }
+    }
+  }
+}
