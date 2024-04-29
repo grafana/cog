@@ -75,6 +75,10 @@ func (pass *AnonymousEnumToExplicitType) processType(pkg string, currentObjectNa
 		return pass.processArray(pkg, currentObjectName, suggestedEnumName, def)
 	}
 
+	if def.IsMap() {
+		return pass.processMap(pkg, currentObjectName, suggestedEnumName, def)
+	}
+
 	if def.IsStruct() {
 		return pass.processStruct(pkg, currentObjectName, def)
 	}
@@ -83,13 +87,42 @@ func (pass *AnonymousEnumToExplicitType) processType(pkg string, currentObjectNa
 		return pass.processAnonymousEnum(pkg, suggestedEnumName, def.AsEnum())
 	}
 
-	// TODO: do the same for disjunctions?
+	if def.IsDisjunction() {
+		return pass.processDisjunction(pkg, currentObjectName, suggestedEnumName, def)
+	}
+
+	if def.IsIntersection() {
+		return pass.processIntersection(pkg, currentObjectName, suggestedEnumName, def)
+	}
 
 	return def
 }
 
 func (pass *AnonymousEnumToExplicitType) processArray(pkg string, currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
 	def.Array.ValueType = pass.processType(pkg, currentObjectName, suggestedEnumName, def.Array.ValueType)
+
+	return def
+}
+
+func (pass *AnonymousEnumToExplicitType) processMap(pkg string, currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
+	def.Map.IndexType = pass.processType(pkg, currentObjectName, suggestedEnumName, def.Map.IndexType)
+	def.Map.ValueType = pass.processType(pkg, currentObjectName, suggestedEnumName, def.Map.ValueType)
+
+	return def
+}
+
+func (pass *AnonymousEnumToExplicitType) processDisjunction(pkg string, currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
+	def.Disjunction.Branches = tools.Map(def.Disjunction.Branches, func(branch ast.Type) ast.Type {
+		return pass.processType(pkg, currentObjectName, suggestedEnumName, branch)
+	})
+
+	return def
+}
+
+func (pass *AnonymousEnumToExplicitType) processIntersection(pkg string, currentObjectName string, suggestedEnumName string, def ast.Type) ast.Type {
+	def.Intersection.Branches = tools.Map(def.Intersection.Branches, func(branch ast.Type) ast.Type {
+		return pass.processType(pkg, currentObjectName, suggestedEnumName, branch)
+	})
 
 	return def
 }
