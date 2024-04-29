@@ -99,3 +99,111 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInArray(t *testing.T) {
 	// Run the compiler pass
 	runPassOnSchema(t, &AnonymousEnumToExplicitType{}, schema, expected)
 }
+
+func TestAnonymousEnumToExplicitType_withAnonymousEnumInMap(t *testing.T) {
+	// Prepare test input
+	schema := &ast.Schema{
+		Package: "in_map",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("in_map", "MapOfThings", ast.NewMap(
+				ast.String(),
+				ast.NewEnum([]ast.EnumValue{
+					{Name: "Foo", Value: "foo", Type: ast.String()},
+					{Name: "Bar", Value: "bar", Type: ast.String()},
+				}),
+			)),
+		),
+	}
+
+	// Prepare expected output
+	expected := &ast.Schema{
+		Package: "in_map",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("in_map", "MapOfThings", ast.NewMap(
+				ast.String(),
+				ast.NewRef("in_map", "MapOfThingsEnum")),
+			),
+
+			// the anonymous enum, turned into an object
+			ast.NewObject("in_map", "MapOfThingsEnum", ast.NewEnum([]ast.EnumValue{
+				{Name: "Foo", Value: "foo", Type: ast.String()},
+				{Name: "Bar", Value: "bar", Type: ast.String()},
+			}), "AnonymousEnumToExplicitType"),
+		),
+	}
+
+	// Run the compiler pass
+	runPassOnSchema(t, &AnonymousEnumToExplicitType{}, schema, expected)
+}
+
+func TestAnonymousEnumToExplicitType_withAnonymousEnumInDisjunction(t *testing.T) {
+	// Prepare test input
+	schema := &ast.Schema{
+		Package: "in_disjunction",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("in_disjunction", "DisjunctionOfThings", ast.NewDisjunction([]ast.Type{
+				ast.String(),
+				ast.NewEnum([]ast.EnumValue{
+					{Name: "Foo", Value: "foo", Type: ast.String()},
+					{Name: "Bar", Value: "bar", Type: ast.String()},
+				}),
+			})),
+		),
+	}
+
+	// Prepare expected output
+	expected := &ast.Schema{
+		Package: "in_disjunction",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("in_disjunction", "DisjunctionOfThings", ast.NewDisjunction([]ast.Type{
+				ast.String(),
+				ast.NewRef("in_disjunction", "DisjunctionOfThingsEnum"),
+			})),
+
+			// the anonymous enum, turned into an object
+			ast.NewObject("in_disjunction", "DisjunctionOfThingsEnum", ast.NewEnum([]ast.EnumValue{
+				{Name: "Foo", Value: "foo", Type: ast.String()},
+				{Name: "Bar", Value: "bar", Type: ast.String()},
+			}), "AnonymousEnumToExplicitType"),
+		),
+	}
+
+	// Run the compiler pass
+	runPassOnSchema(t, &AnonymousEnumToExplicitType{}, schema, expected)
+}
+
+func TestAnonymousEnumToExplicitType_withAnonymousEnumInIntersection(t *testing.T) {
+	// Prepare test input
+	schema := &ast.Schema{
+		Package: "in_intersection",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("in_intersection", "IntersectionOfThings", ast.NewIntersection([]ast.Type{
+				ast.String(),
+				ast.NewEnum([]ast.EnumValue{
+					{Name: "Foo", Value: "foo", Type: ast.String()},
+					{Name: "Bar", Value: "bar", Type: ast.String()},
+				}),
+			})),
+		),
+	}
+
+	// Prepare expected output
+	expected := &ast.Schema{
+		Package: "in_intersection",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("in_intersection", "IntersectionOfThings", ast.NewIntersection([]ast.Type{
+				ast.String(),
+				ast.NewRef("in_intersection", "IntersectionOfThingsEnum"),
+			})),
+
+			// the anonymous enum, turned into an object
+			ast.NewObject("in_intersection", "IntersectionOfThingsEnum", ast.NewEnum([]ast.EnumValue{
+				{Name: "Foo", Value: "foo", Type: ast.String()},
+				{Name: "Bar", Value: "bar", Type: ast.String()},
+			}), "AnonymousEnumToExplicitType"),
+		),
+	}
+
+	// Run the compiler pass
+	runPassOnSchema(t, &AnonymousEnumToExplicitType{}, schema, expected)
+}
