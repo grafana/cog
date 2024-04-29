@@ -155,29 +155,21 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 
 func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []string, variant string, def ast.StructType) ClassTemplate {
 	fields := make([]Field, 0)
-	nestedStructs := make([]ClassTemplate, 0)
-
 	for _, field := range def.Fields {
-		if field.Type.IsStruct() {
-			nestedStructs = append(nestedStructs, jenny.formatInnerStruct(pkg, field.Name, field.Comments, field.Type.ImplementedVariant(), field.Type.AsStruct()))
-		} else {
-			fields = append(fields, Field{
-				Name:     field.Name,
-				Type:     jenny.typeFormatter.formatFieldType(field.Type),
-				Comments: field.Comments,
-			})
-		}
+		fields = append(fields, Field{
+			Name:     field.Name,
+			Type:     jenny.typeFormatter.formatFieldType(field.Type),
+			Comments: field.Comments,
+		})
 	}
 
 	return ClassTemplate{
-		Package:              pkg,
-		Imports:              jenny.imports,
-		Name:                 tools.UpperCamelCase(name),
-		Fields:               fields,
-		InnerClasses:         nestedStructs,
-		GenGettersAndSetters: jenny.config.GenGettersAndSetters,
-		Comments:             comments,
-		Variant:              tools.UpperCamelCase(variant),
+		Package:  pkg,
+		Imports:  jenny.imports,
+		Name:     tools.UpperCamelCase(name),
+		Fields:   fields,
+		Comments: comments,
+		Variant:  tools.UpperCamelCase(variant),
 	}
 }
 
