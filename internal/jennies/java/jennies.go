@@ -9,15 +9,14 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	GenGettersAndSetters bool `yaml:"getters_and_setters"`
 }
 
 type Language struct {
 	config Config
 }
 
-func New(config Config) *Language {
-	return &Language{config: config}
+func New() *Language {
+	return &Language{config: Config{}}
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
@@ -27,7 +26,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 
 	jenny.AppendOneToMany(
 		Runtime{},
-		common.If[common.Context](globalConfig.Types, RawTypes{config: language.config}),
+		RawTypes{config: language.config},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

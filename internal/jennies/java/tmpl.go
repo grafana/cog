@@ -57,11 +57,9 @@ type ClassTemplate struct {
 	Extends  []string
 	Comments []string
 
-	Fields       []Field
-	InnerClasses []ClassTemplate
+	Fields []Field
 
-	GenGettersAndSetters bool
-	Variant              string
+	Variant string
 }
 
 type Field struct {
