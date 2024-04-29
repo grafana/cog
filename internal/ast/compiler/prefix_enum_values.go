@@ -65,6 +65,10 @@ func (pass *PrefixEnumValues) processEnum(parentName string, def ast.Type) ast.T
 }
 
 func (pass *PrefixEnumValues) enumMemberNameFromValue(member ast.EnumValue) string {
+	if member.Type.Scalar.ScalarKind == ast.KindString && member.Value.(string) == "" {
+		return "None"
+	}
+
 	if member.Type.Scalar.ScalarKind != ast.KindInt64 {
 		return tools.UpperCamelCase(member.Name)
 	}

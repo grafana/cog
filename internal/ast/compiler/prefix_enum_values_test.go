@@ -51,3 +51,24 @@ func TestPrefixEnumValuesWithNegativeIntegerName(t *testing.T) {
 	// Run the compiler pass
 	runPassOnObjects(t, &PrefixEnumValues{}, objects, expected)
 }
+
+func TestPrefixEnumValuesWithEmptyStringMember(t *testing.T) {
+	// Prepare test input
+	objects := []ast.Object{
+		ast.NewObject("pkg", "BarAlignment", ast.NewEnum([]ast.EnumValue{
+			{Name: "", Value: "", Type: ast.String()},
+			{Name: "foo", Value: "foo", Type: ast.String()},
+		})),
+	}
+
+	// Prepare expected output
+	expected := []ast.Object{
+		ast.NewObject("pkg", "BarAlignment", ast.NewEnum([]ast.EnumValue{
+			{Name: "BarAlignmentNone", Value: "", Type: ast.String()},
+			{Name: "BarAlignmentFoo", Value: "foo", Type: ast.String()},
+		}), "PrefixEnumValues"),
+	}
+
+	// Run the compiler pass
+	runPassOnObjects(t, &PrefixEnumValues{}, objects, expected)
+}
