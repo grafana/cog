@@ -134,6 +134,19 @@ func (g *generator) walkRef(schema *openapi3.SchemaRef) (ast.Type, error) {
 }
 
 func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
+	if len(schema.Properties) == 0 {
+		if schema.AdditionalProperties.Schema == nil {
+			return ast.Any(), nil
+		}
+
+		valueType, err := g.walkSchemaRef(schema.AdditionalProperties.Schema)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewMap(ast.String(), valueType), nil
+	}
+
 	fields := make([]ast.StructField, 0, len(schema.Properties))
 	for name, schemaRef := range schema.Properties {
 		def, err := g.walkSchemaRef(schemaRef)

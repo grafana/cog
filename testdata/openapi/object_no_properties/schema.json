@@ -1,0 +1,24 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "object_no_properties",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "ObjectNoProperties": {
+        "type": "object"
+      },
+      "ObjectNoAdditionalProperties": {
+        "additionalProperties": false
+      },
+      "ObjectAdditionalPropertiesWithSchema": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      }
+    }
+  }
+}

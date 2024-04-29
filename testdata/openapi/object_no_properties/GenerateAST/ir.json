@@ -1,0 +1,61 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": {
+    "ObjectAdditionalPropertiesWithSchema": {
+      "Name": "ObjectAdditionalPropertiesWithSchema",
+      "Type": {
+        "Kind": "map",
+        "Nullable": false,
+        "Map": {
+          "IndexType": {
+            "Kind": "scalar",
+            "Nullable": false,
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          },
+          "ValueType": {
+            "Kind": "scalar",
+            "Nullable": false,
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          }
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "ObjectAdditionalPropertiesWithSchema"
+      }
+    },
+    "ObjectNoAdditionalProperties": {
+      "Name": "ObjectNoAdditionalProperties",
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "any"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "ObjectNoAdditionalProperties"
+      }
+    },
+    "ObjectNoProperties": {
+      "Name": "ObjectNoProperties",
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "any"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "ObjectNoProperties"
+      }
+    }
+  }
+}
