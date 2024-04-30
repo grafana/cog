@@ -1,8 +1,44 @@
 {
-  "$ref": "#/definitions/AllOf",
+  "$ref": "#/definitions/Entry",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
+    "Entry": {
+      "type": "object",
+      "properties": {
+        "allOf": {
+          "$ref": "#/definitions/AllOf"
+        },
+        "allOfObj": {
+          "$ref": "#/definitions/AllOfObject"
+        }
+      }
+    },
     "AllOf": {
+      "allOf": [
+        {
+          "properties": {
+            "bar": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "bar"
+          ]
+        },
+        {
+          "properties": {
+            "foo": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "foo"
+          ]
+        }
+      ]
+    },
+    "AllOfObject": {
+      "type": "object",
       "allOf": [
         {
           "properties": {

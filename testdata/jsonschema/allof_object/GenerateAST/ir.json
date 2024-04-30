@@ -1,7 +1,7 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
-  "EntryPoint": "AllOf",
+  "EntryPoint": "Entry",
   "Objects": {
     "AllOf": {
       "Name": "AllOf",
@@ -54,6 +54,98 @@
       "SelfRef": {
         "ReferredPkg": "grafanatest",
         "ReferredType": "AllOf"
+      }
+    },
+    "AllOfObject": {
+      "Name": "AllOfObject",
+      "Type": {
+        "Kind": "intersection",
+        "Nullable": false,
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "bar",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int64"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "foo",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "AllOfObject"
+      }
+    },
+    "Entry": {
+      "Name": "Entry",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "allOf",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "AllOf"
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "allOfObj",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "AllOfObject"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Entry"
       }
     }
   }
