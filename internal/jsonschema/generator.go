@@ -112,29 +112,29 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 	var def ast.Type
 	var err error
 
+	if schema.Ref != nil {
+		return g.walkRef(schema)
+	}
+
+	if schema.OneOf != nil {
+		return g.walkOneOf(schema)
+	}
+
+	if schema.AnyOf != nil {
+		return g.walkAnyOf(schema)
+	}
+
+	if schema.AllOf != nil {
+		return g.walkAllOf(schema)
+	}
+
+	if schema.Enum != nil {
+		return g.walkEnum(schema)
+	}
+
 	if len(schema.Types) == 0 {
-		if schema.Ref != nil {
-			return g.walkRef(schema)
-		}
-
-		if schema.OneOf != nil {
-			return g.walkOneOf(schema)
-		}
-
-		if schema.AnyOf != nil {
-			return g.walkAnyOf(schema)
-		}
-
-		if schema.AllOf != nil {
-			return g.walkAllOf(schema)
-		}
-
 		if schema.Properties != nil || schema.PatternProperties != nil || schema.AdditionalProperties != nil {
 			return g.walkObject(schema)
-		}
-
-		if schema.Enum != nil {
-			return g.walkEnum(schema)
 		}
 
 		if len(schema.Constant) != 0 {
