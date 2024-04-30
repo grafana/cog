@@ -50,3 +50,56 @@ func TestFlattenDisjunctions_WithNestedDisjunctionOfRefs_AsAnObject(t *testing.T
 	// Call the compiler pass
 	runPassOnObjects(t, &FlattenDisjunctions{}, objects, expectedObjects)
 }
+
+func TestFlattenDisjunctions_WithDisjunctionsOfAnonymousStructs(t *testing.T) {
+	// Prepare test input
+	objects := []ast.Object{
+		ast.NewObject("test", "ADisjunctionOfStructs", ast.NewDisjunction([]ast.Type{
+			ast.NewStruct(
+				ast.NewStructField("Type", ast.String(ast.Value("root"))),
+				ast.NewStructField("FieldRoot", ast.String()),
+			),
+			ast.NewRef("test", "SomeOrOther"),
+			ast.NewStruct(
+				ast.NewStructField("FieldLast", ast.Any()),
+				ast.NewStructField("Type", ast.String(ast.Value("last-struct"))),
+			),
+		})),
+
+		ast.NewObject("test", "SomeOrOther", ast.NewDisjunction([]ast.Type{
+			ast.NewRef("test", "SomeStruct"),
+			ast.NewRef("test", "OtherStruct"),
+		})),
+
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
+			ast.NewStructField("Type", ast.String(ast.Value("some-struct"))),
+			ast.NewStructField("FieldFoo", ast.String()),
+		)),
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
+			ast.NewStructField("FieldBar", ast.NewMap(ast.String(), ast.String())),
+			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
+		)),
+	}
+
+	// Prepare expected output
+	expectedObjects := []ast.Object{
+		ast.NewObject("test", "ADisjunctionOfStructs", ast.NewDisjunction([]ast.Type{
+			ast.NewStruct(
+				ast.NewStructField("Type", ast.String(ast.Value("root"))),
+				ast.NewStructField("FieldRoot", ast.String()),
+			),
+			ast.NewRef("test", "SomeStruct"),
+			ast.NewRef("test", "OtherStruct"),
+			ast.NewStruct(
+				ast.NewStructField("FieldLast", ast.Any()),
+				ast.NewStructField("Type", ast.String(ast.Value("last-struct"))),
+			),
+		})),
+		objects[1],
+		objects[2],
+		objects[3],
+	}
+
+	// Call the compiler pass
+	runPassOnObjects(t, &FlattenDisjunctions{}, objects, expectedObjects)
+}

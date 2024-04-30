@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -116,8 +118,7 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 	newDisjunction.Branches = nil
 
 	branchMap := make(map[string]struct{})
-	addBranch := func(typeDef ast.Type) {
-		typeName := ast.TypeName(typeDef)
+	addBranch := func(typeName string, typeDef ast.Type) {
 		if _, exists := branchMap[typeName]; exists {
 			return
 		}
@@ -126,9 +127,14 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 		newDisjunction.Branches = append(newDisjunction.Branches, typeDef)
 	}
 
-	for _, branch := range disjunction.Branches {
+	for i, branch := range disjunction.Branches {
+		typeName := ast.TypeName(branch)
+		if branch.IsStruct() {
+			typeName = fmt.Sprintf("branch_%d", i)
+		}
+
 		if !branch.IsRef() {
-			addBranch(branch)
+			addBranch(typeName, branch)
 			continue
 		}
 
@@ -139,12 +145,16 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 		}
 
 		if !resolved.IsDisjunction() {
-			addBranch(branch)
+			addBranch(typeName, branch)
 			continue
 		}
 
-		for _, resolvedBranch := range resolved.AsDisjunction().Branches {
-			addBranch(resolvedBranch)
+		for innerI, resolvedBranch := range resolved.AsDisjunction().Branches {
+			innerTypeName := ast.TypeName(resolvedBranch)
+			if branch.IsStruct() {
+				innerTypeName = fmt.Sprintf("inner_branch_%d", innerI)
+			}
+			addBranch(innerTypeName, resolvedBranch)
 		}
 	}
 
