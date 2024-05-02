@@ -12,6 +12,11 @@ type OpenAPIInput struct {
 	Package string `yaml:"package"`
 }
 
+func (input *OpenAPIInput) InterpolateParameters(interpolator ParametersInterpolator) {
+	input.Path = interpolator(input.Path)
+	input.Package = interpolator(input.Package)
+}
+
 func (input OpenAPIInput) LoadSchemas(config Config) (ast.Schemas, error) {
 	pkg := input.Package
 	if pkg == "" {
