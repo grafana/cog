@@ -1,18 +1,16 @@
-debug: true
+debug: false
 
 parameters:
+  output_dir: '../generated'
+  kind_registry_path: '../../kind-registry'
   kind_registry_version: 'v10.4.x'
+  cog_version: 'v0.0.x'
   release_branch: 'release_branch'
   build_timestamp: 'build_timestamp'
 
 inputs:
-  - jsonschema:
-      path: ../expr.json
-      package: expr
-#  - openapi:
-#      path: ../grafana-openapi3.json
   - kind_registry:
-      path: '../../kind-registry'
+      path: '%kind_registry_path%'
       version: '%kind_registry_version%'
 
 transformations:
@@ -23,7 +21,7 @@ transformations:
     - ./veneers
 
 output:
-  directory: '../generated/%l'
+  directory: '%output_dir%'
 
   types: true
   builders: true
@@ -32,16 +30,17 @@ output:
   repository_templates: ../repository_templates
   templates_data:
     GrafanaVersion: '%kind_registry_version%'
+    CogVersion: '%cog_version%'
     ReleaseBranch: '%release_branch%'
     BuildTimestamp: '%build_timestamp%'
 
   languages:
     - go:
         go_mod: true
-        package_root: 'github.com/grafana/cog/foo'
+        package_root: 'github.com/grafana/grafana-foundation-sdk/go'
 #    - java: {}
     - jsonschema: {}
-#    - openapi: {}
-#    - python:
-#        path_prefix: grafana_foundation_sdk
-#    - typescript: {}
+    - openapi: {}
+    - python:
+        path_prefix: grafana_foundation_sdk
+    - typescript: {}
