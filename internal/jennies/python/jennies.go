@@ -4,7 +4,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/spf13/cobra"
 )
 
 const LanguageRef = "python"
@@ -17,14 +16,10 @@ type Language struct {
 	config Config
 }
 
-func New() *Language {
+func New(config Config) *Language {
 	return &Language{
-		config: Config{},
+		config: config,
 	}
-}
-
-func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&language.config.PathPrefix, "python-path-prefix", "", "Python path prefix.")
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {

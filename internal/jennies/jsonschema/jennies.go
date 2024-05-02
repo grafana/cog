@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	schemaparser "github.com/santhosh-tekuri/jsonschema"
-	"github.com/spf13/cobra"
 )
 
 const LanguageRef = "jsonschema"
@@ -32,9 +31,6 @@ func New() *Language {
 	return &Language{
 		config: Config{},
 	}
-}
-
-func (language *Language) RegisterCliFlags(_ *cobra.Command) {
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {

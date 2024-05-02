@@ -8,51 +8,50 @@ import (
 	"cuelang.org/go/cue"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
+	"github.com/grafana/cog/internal/tools"
 )
 
-func kindsysComposableLoader(opts Options) (ast.Schemas, error) {
-	libraries, err := opts.cueIncludeImports()
+func kindsysComposableLoader(config Config, input CueInput) (ast.Schemas, error) {
+	libraries, err := simplecue.ParseImports(input.CueImports)
 	if err != nil {
 		return nil, err
 	}
 
-	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysComposableEntrypoints))
-	for _, entrypoint := range opts.KindsysComposableEntrypoints {
-		pkg := filepath.Base(entrypoint)
+	libraries = tools.Map(libraries, func(library simplecue.LibraryInclude) simplecue.LibraryInclude {
+		library.FSPath = config.Path(library.FSPath)
+		return library
+	})
 
-		schemaRootValue, err := parseCueEntrypoint(opts, entrypoint)
-		if err != nil {
-			return nil, err
-		}
-
-		variant, err := schemaVariant(schemaRootValue)
-		if err != nil {
-			return nil, err
-		}
-
-		kindIdentifier, err := inferComposableKindIdentifier(schemaRootValue)
-		if err != nil {
-			return nil, err
-		}
-
-		schemaAst, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
-			Package:              pkg, // TODO: extract from somewhere else?
-			ForceVariantEnvelope: variant == ast.SchemaVariantDataQuery,
-			SchemaMetadata: ast.SchemaMeta{
-				Kind:       ast.SchemaKindComposable,
-				Variant:    variant,
-				Identifier: kindIdentifier,
-			},
-			Libraries: libraries,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		allSchemas = append(allSchemas, schemaAst)
+	schemaRootValue, err := parseCueEntrypoint(config.Path(input.Entrypoint), libraries, "grafanaplugin")
+	if err != nil {
+		return nil, err
 	}
 
-	return allSchemas, nil
+	variant, err := schemaVariant(schemaRootValue)
+	if err != nil {
+		return nil, err
+	}
+
+	kindIdentifier, err := inferComposableKindIdentifier(schemaRootValue)
+	if err != nil {
+		return nil, err
+	}
+
+	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
+		Package:              filepath.Base(input.Entrypoint), // TODO: extract from somewhere else?
+		ForceVariantEnvelope: variant == ast.SchemaVariantDataQuery,
+		SchemaMetadata: ast.SchemaMeta{
+			Kind:       ast.SchemaKindComposable,
+			Variant:    variant,
+			Identifier: kindIdentifier,
+		},
+		Libraries: libraries,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return ast.Schemas{schema}, nil
 }
 
 func schemaVariant(kindRoot cue.Value) (ast.SchemaVariant, error) {

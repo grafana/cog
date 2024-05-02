@@ -10,13 +10,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type inspectOptions struct {
-	LoaderOptions loaders.Options
-	BuilderIR     bool
+type options struct {
+	BuilderIR  bool
+	ConfigPath string
 }
 
 func Command() *cobra.Command {
-	opts := inspectOptions{}
+	opts := options{}
 
 	// TODO:
 	// 	- support inspecting our different IRs: types, builders
@@ -33,31 +33,20 @@ func Command() *cobra.Command {
 
 	cmd.Flags().BoolVar(&opts.BuilderIR, "builder-ir", false, "Inspect the \"builder IR\" instead of the \"types\" one.") // TODO: better usage text
 
-	cmd.Flags().StringArrayVar(&opts.LoaderOptions.CueEntrypoints, "cue", nil, "CUE input schema.")                                                  // TODO: better usage text
-	cmd.Flags().StringArrayVar(&opts.LoaderOptions.KindsysCoreEntrypoints, "kindsys-core", nil, "Kindys core kinds input schema.")                   // TODO: better usage text
-	cmd.Flags().StringArrayVar(&opts.LoaderOptions.KindsysComposableEntrypoints, "kindsys-composable", nil, "Kindys composable kinds input schema.") // TODO: better usage text
-	cmd.Flags().StringArrayVar(&opts.LoaderOptions.KindsysCustomEntrypoints, "kindsys-custom", nil, "Kindys custom kinds input schema.")             // TODO: better usage text
-	cmd.Flags().StringArrayVar(&opts.LoaderOptions.JSONSchemaEntrypoints, "jsonschema", nil, "Jsonschema input schema.")                             // TODO: better usage text
-	cmd.Flags().StringArrayVar(&opts.LoaderOptions.OpenAPIEntrypoints, "openapi", nil, "Openapi input schema.")                                      // TODO: better usage text
-	cmd.Flags().StringVar(&opts.LoaderOptions.KindRegistryPath, "kind-registry", "", "Kind registry input.")                                         // TODO: better usage text
-	cmd.Flags().StringVar(&opts.LoaderOptions.JSONSchemaRegistryPath, "jsonschema-registry", "", "JSONschema registry input.")                       // TODO: better usage text
-
-	cmd.Flags().StringArrayVarP(&opts.LoaderOptions.CueImports, "include-cue-import", "I", nil, "Specify an additional library import directory. Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common")
-	cmd.Flags().StringVar(&opts.LoaderOptions.KindRegistryVersion, "kind-registry-version", "next", "Schemas version")
-
-	_ = cmd.MarkFlagDirname("cue")
-	_ = cmd.MarkFlagDirname("kindsys-core")
-	_ = cmd.MarkFlagDirname("kindsys-custom")
-	_ = cmd.MarkFlagDirname("kind-registry")
-	_ = cmd.MarkFlagDirname("jsonschema-registry")
-	_ = cmd.MarkFlagFilename("jsonschema")
-	_ = cmd.MarkFlagDirname("openapi")
+	cmd.Flags().StringVar(&opts.ConfigPath, "config", "", "Configuration file.")
+	_ = cmd.MarkFlagFilename("config")
+	_ = cmd.MarkFlagRequired("config")
 
 	return cmd
 }
 
-func doInspect(opts inspectOptions) error {
-	schemas, err := loaders.LoadAll(opts.LoaderOptions)
+func doInspect(opts options) error {
+	config, err := loaders.ConfigFromFile(opts.ConfigPath)
+	if err != nil {
+		return err
+	}
+
+	schemas, err := config.LoadSchemas()
 	if err != nil {
 		return err
 	}
