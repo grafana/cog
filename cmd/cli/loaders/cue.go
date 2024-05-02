@@ -13,71 +13,79 @@ import (
 	"cuelang.org/go/cue/load"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
+	"github.com/grafana/cog/internal/tools"
 	"github.com/yalue/merged_fs"
 )
 
-func cueLoader(opts Options) (ast.Schemas, error) {
-	libraries, err := opts.cueIncludeImports()
+type CueInput struct {
+	// Entrypoint refers to a directory containing CUE files.
+	Entrypoint string   `yaml:"entrypoint"`
+	CueImports []string `yaml:"cue_imports"`
+}
+
+func cueLoader(config Config, input CueInput) (ast.Schemas, error) {
+	libraries, err := simplecue.ParseImports(input.CueImports)
 	if err != nil {
 		return nil, err
 	}
 
-	allSchemas := make([]*ast.Schema, 0, len(opts.CueEntrypoints))
-	for _, entrypoint := range opts.CueEntrypoints {
-		pkg := filepath.Base(entrypoint)
+	libraries = tools.Map(libraries, func(library simplecue.LibraryInclude) simplecue.LibraryInclude {
+		library.FSPath = config.Path(library.FSPath)
+		return library
+	})
 
-		schemaRootValue, err := parseCueEntrypoint(opts, entrypoint)
-		if err != nil {
-			return nil, err
-		}
+	pkg := filepath.Base(input.Entrypoint)
 
-		schemaAst, err := simplecue.GenerateAST(schemaRootValue, simplecue.Config{
-			Package:        pkg, // TODO: extract from input schema/?
-			SchemaMetadata: ast.SchemaMeta{
-				// TODO: extract these from somewhere
-			},
-			Libraries: libraries,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		allSchemas = append(allSchemas, schemaAst)
+	schemaRootValue, err := parseCueEntrypoint(config.Path(input.Entrypoint), libraries, pkg)
+	if err != nil {
+		return nil, err
 	}
 
-	return allSchemas, nil
+	schema, err := simplecue.GenerateAST(schemaRootValue, simplecue.Config{
+		Package:        pkg,              // TODO: extract from input schema/?
+		SchemaMetadata: ast.SchemaMeta{}, // TODO: extract these from somewhere
+		Libraries:      libraries,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return ast.Schemas{schema}, nil
 }
 
-func parseCueEntrypoint(opts Options, entrypoint string) (cue.Value, error) {
-	// this is wasteful: we rebuild this overlay for every entrypoint we parse
-	cueFsOverlay, err := buildCueOverlay(opts)
+func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, expectedCuePkgName string) (cue.Value, error) {
+	cueFsOverlay, err := buildCueOverlay(imports, entrypoint, expectedCuePkgName)
 	if err != nil {
 		return cue.Value{}, err
 	}
 
 	// Load Cue files into Cue build.Instances slice
-	// the second arg is a configuration object, we'll see this later
-	bis := load.Instances([]string{entrypoint}, &load.Config{
+	bis := load.Instances([]string{"/" + expectedCuePkgName}, &load.Config{
 		Overlay:    cueFsOverlay,
 		ModuleRoot: "/",
 	})
 
-	values, err := cuecontext.New().BuildInstances(bis)
-	if err != nil {
+	value := cuecontext.New().BuildInstance(bis[0])
+	if err := value.Err(); err != nil {
 		return cue.Value{}, err
 	}
 
-	return values[0], nil
+	return value, nil
 }
 
-func buildCueOverlay(opts Options) (map[string]load.Source, error) {
+func buildCueOverlay(imports []simplecue.LibraryInclude, entrypoint string, expectedCuePkgName string) (map[string]load.Source, error) {
 	mockKindsysFS := buildMockKindsysFS()
-	libFs, err := buildBaseFSWithLibraries(opts)
+	libFs, err := buildBaseFSWithLibraries(imports)
 	if err != nil {
 		return nil, err
 	}
 
-	mergedFS := merged_fs.MergeMultiple(append(libFs, mockKindsysFS)...)
+	entrypointFS, err := dirToPrefixedFS(entrypoint, expectedCuePkgName)
+	if err != nil {
+		return nil, err
+	}
+
+	mergedFS := merged_fs.MergeMultiple(append(libFs, mockKindsysFS, entrypointFS)...)
 
 	overlay := make(map[string]load.Source)
 	if err := toCueOverlay("/", mergedFS, overlay); err != nil {
@@ -88,7 +96,7 @@ func buildCueOverlay(opts Options) (map[string]load.Source, error) {
 }
 
 func buildMockKindsysFS() fs.FS {
-	mockFS := fstest.MapFS{
+	return fstest.MapFS{
 		"cue.mod/pkg/github.com/grafana/kindsys/composable.cue": &fstest.MapFile{
 			Data: []byte(`package kindsys
 Composable: {
@@ -108,18 +116,11 @@ Custom: {
 }`),
 		},
 	}
-
-	return mockFS
 }
 
-func buildBaseFSWithLibraries(opts Options) ([]fs.FS, error) {
-	importDefinitions, err := opts.cueIncludeImports()
-	if err != nil {
-		return nil, err
-	}
-
+func buildBaseFSWithLibraries(imports []simplecue.LibraryInclude) ([]fs.FS, error) {
 	var librariesFS []fs.FS
-	for _, importDefinition := range importDefinitions {
+	for _, importDefinition := range imports {
 		absPath, err := filepath.Abs(importDefinition.FSPath)
 		if err != nil {
 			return nil, err

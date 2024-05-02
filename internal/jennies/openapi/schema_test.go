@@ -17,7 +17,7 @@ func TestSchema_Generate(t *testing.T) {
 
 	jenny := Schema{
 		Config: Config{
-			Debug: true,
+			debug: true,
 		},
 	}
 	compilerPasses := New().CompilerPasses()

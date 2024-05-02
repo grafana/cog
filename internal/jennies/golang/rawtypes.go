@@ -84,7 +84,7 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 	defName := tools.UpperCamelCase(def.Name)
 
 	comments := def.Comments
-	if jenny.Config.Debug {
+	if jenny.Config.debug {
 		passesTrail := tools.Map(def.PassesTrail, func(trail string) string {
 			return fmt.Sprintf("Modified by compiler pass '%s'", trail)
 		})

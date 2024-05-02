@@ -8,69 +8,83 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-func kindRegistryLoader(opts Options) (ast.Schemas, error) {
-	var allSchemas []*ast.Schema
+type KindRegistryInput struct {
+	Path    string `yaml:"path"`
+	Version string `yaml:"version"`
+}
 
-	if opts.KindRegistryPath == "" {
+func (input KindRegistryInput) LoadSchemas(config Config) (ast.Schemas, error) {
+	var allSchemas ast.Schemas
+	var cueImports []string
+	var cueEntrypoints []string
+
+	if input.Path == "" {
 		return nil, nil
 	}
 
-	coreKindEntrypoints, err := locateEntrypoints(opts, "core")
+	coreKindEntrypoints, err := locateEntrypoints(config, input, "core")
 	if err != nil {
 		return nil, fmt.Errorf("could not locate core kind entrypoints: %w", err)
 	}
 
-	composableKindEntrypoints, err := locateEntrypoints(opts, "composable")
+	composableKindEntrypoints, err := locateEntrypoints(config, input, "composable")
 	if err != nil {
 		return nil, fmt.Errorf("could not locate composable kind entrypoints: %w", err)
 	}
 
-	newOpts := opts
-	newOpts.KindsysCoreEntrypoints = coreKindEntrypoints
-	newOpts.KindsysComposableEntrypoints = composableKindEntrypoints
-
-	commonPkgPath := kindRegistryKindPath(opts, "common")
+	commonPkgPath := kindRegistryKindPath(config, input, "common")
 	commonPkgExists, err := dirExists(commonPkgPath)
 	if err != nil {
 		return nil, fmt.Errorf("could not locate common package: %w", err)
 	}
 	if commonPkgExists {
-		newOpts.CueEntrypoints = append(newOpts.CueEntrypoints, commonPkgPath)
-		newOpts.CueImports = append(newOpts.CueImports, fmt.Sprintf("%s:%s", commonPkgPath, "github.com/grafana/grafana/packages/grafana-schema/src/common"))
+		cueEntrypoints = append(cueEntrypoints, commonPkgPath)
+		cueImports = append(cueImports, fmt.Sprintf("%s:%s", commonPkgPath, "github.com/grafana/grafana/packages/grafana-schema/src/common"))
 	}
 
-	cueSchemas, err := cueLoader(newOpts)
-	if err != nil {
+	kindLoader := func(loader func(config Config, input CueInput) (ast.Schemas, error), entrypoints []string) error {
+		for _, entrypoint := range entrypoints {
+			schemas, err := loader(config, CueInput{
+				Entrypoint: entrypoint,
+				CueImports: cueImports,
+			})
+			if err != nil {
+				return err
+			}
+			allSchemas = append(allSchemas, schemas...)
+		}
+
+		return nil
+	}
+
+	// CUE entrypoints
+	if err := kindLoader(cueLoader, cueEntrypoints); err != nil {
 		return nil, err
 	}
 
-	coreSchemas, err := kindsysCoreLoader(newOpts)
-	if err != nil {
+	// Core kinds
+	if err := kindLoader(kindsysCoreLoader, coreKindEntrypoints); err != nil {
 		return nil, err
 	}
 
-	composableSchemas, err := kindsysComposableLoader(newOpts)
-	if err != nil {
+	// Composable kinds
+	if err := kindLoader(kindsysComposableLoader, composableKindEntrypoints); err != nil {
 		return nil, err
 	}
-
-	allSchemas = append(allSchemas, cueSchemas...)
-	allSchemas = append(allSchemas, coreSchemas...)
-	allSchemas = append(allSchemas, composableSchemas...)
 
 	return allSchemas, nil
 }
 
-func kindRegistryRoot(opts Options) string {
-	return filepath.Join(opts.KindRegistryPath, "grafana")
+func kindRegistryRoot(config Config, input KindRegistryInput) string {
+	return filepath.Join(config.Path(input.Path), "grafana")
 }
 
-func kindRegistryKindPath(opts Options, kind string) string {
-	return filepath.Join(kindRegistryRoot(opts), opts.KindRegistryVersion, kind)
+func kindRegistryKindPath(config Config, input KindRegistryInput, kind string) string {
+	return filepath.Join(kindRegistryRoot(config, input), input.Version, kind)
 }
 
-func locateEntrypoints(opts Options, kind string) ([]string, error) {
-	directory := kindRegistryKindPath(opts, kind)
+func locateEntrypoints(config Config, input KindRegistryInput, kind string) ([]string, error) {
+	directory := kindRegistryKindPath(config, input, kind)
 	files, err := os.ReadDir(directory)
 	if err != nil {
 		return nil, fmt.Errorf("could not open directory '%s': %w", directory, err)

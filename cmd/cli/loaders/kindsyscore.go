@@ -6,44 +6,43 @@ import (
 	"cuelang.org/go/cue"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
+	"github.com/grafana/cog/internal/tools"
 )
 
-func kindsysCoreLoader(opts Options) (ast.Schemas, error) {
-	libraries, err := opts.cueIncludeImports()
+func kindsysCoreLoader(config Config, input CueInput) (ast.Schemas, error) {
+	libraries, err := simplecue.ParseImports(input.CueImports)
 	if err != nil {
 		return nil, err
 	}
 
-	allSchemas := make([]*ast.Schema, 0, len(opts.KindsysCoreEntrypoints))
-	for _, entrypoint := range opts.KindsysCoreEntrypoints {
-		pkg := filepath.Base(entrypoint)
+	libraries = tools.Map(libraries, func(library simplecue.LibraryInclude) simplecue.LibraryInclude {
+		library.FSPath = config.Path(library.FSPath)
+		return library
+	})
 
-		schemaRootValue, err := parseCueEntrypoint(opts, entrypoint)
-		if err != nil {
-			return nil, err
-		}
-
-		kindIdentifier, err := inferCoreKindIdentifier(schemaRootValue)
-		if err != nil {
-			return nil, err
-		}
-
-		schemaAst, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
-			Package: pkg, // TODO: extract from somewhere else?
-			SchemaMetadata: ast.SchemaMeta{
-				Kind:       ast.SchemaKindCore,
-				Identifier: kindIdentifier,
-			},
-			Libraries: libraries,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		allSchemas = append(allSchemas, schemaAst)
+	schemaRootValue, err := parseCueEntrypoint(config.Path(input.Entrypoint), libraries, "kind")
+	if err != nil {
+		return nil, err
 	}
 
-	return allSchemas, nil
+	kindIdentifier, err := inferCoreKindIdentifier(schemaRootValue)
+	if err != nil {
+		return nil, err
+	}
+
+	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
+		Package: filepath.Base(input.Entrypoint), // TODO: extract from somewhere else?
+		SchemaMetadata: ast.SchemaMeta{
+			Kind:       ast.SchemaKindCore,
+			Identifier: kindIdentifier,
+		},
+		Libraries: libraries,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return ast.Schemas{schema}, nil
 }
 
 func inferCoreKindIdentifier(kindRoot cue.Value) (string, error) {

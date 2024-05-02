@@ -98,7 +98,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 	}
 
 	passesTrail := ""
-	if formatter.config.Debug && len(def.PassesTrail) != 0 {
+	if formatter.config.debug && len(def.PassesTrail) != 0 {
 		passesTrail = fmt.Sprintf(" /* %s */", strings.Join(def.PassesTrail, ", "))
 	}
 
@@ -129,7 +129,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	var buffer strings.Builder
 
 	comments := def.Comments
-	if formatter.config.Debug {
+	if formatter.config.debug {
 		passesTrail := tools.Map(def.PassesTrail, func(trail string) string {
 			return fmt.Sprintf("Modified by compiler pass '%s'", trail)
 		})
