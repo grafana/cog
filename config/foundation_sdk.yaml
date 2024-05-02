@@ -1,5 +1,10 @@
 debug: true
 
+parameters:
+  kind_registry_version: 'v10.4.x'
+  release_branch: 'release_branch'
+  build_timestamp: 'build_timestamp'
+
 inputs:
   - jsonschema:
       path: ../expr.json
@@ -8,13 +13,13 @@ inputs:
 #      path: ../grafana-openapi3.json
   - kind_registry:
       path: '../../kind-registry'
-      version: 'v10.4.x'
+      version: '%kind_registry_version%'
 
-transforms:
-  compiler_passes:
+transformations:
+  schemas:
     - ./compiler/common_passes.yaml
 
-  veneers:
+  builders:
     - ./veneers
 
 output:
@@ -26,14 +31,14 @@ output:
   package_templates: ../package_templates
   repository_templates: ../repository_templates
   templates_data:
-    GrafanaVersion: 'v10.4.x'
-    ReleaseBranch: foo
-    BuildTimestamp: bar
+    GrafanaVersion: '%kind_registry_version%'
+    ReleaseBranch: '%release_branch%'
+    BuildTimestamp: '%build_timestamp%'
 
   languages:
-#    - go:
-#        go_mod: true
-#        package_root: github.com/grafana/cog/foo
+    - go:
+        go_mod: true
+        package_root: 'github.com/grafana/cog/foo'
 #    - java: {}
     - jsonschema: {}
 #    - openapi: {}
