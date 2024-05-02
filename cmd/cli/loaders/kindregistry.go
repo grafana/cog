@@ -18,7 +18,7 @@ func (input *KindRegistryInput) InterpolateParameters(interpolator ParametersInt
 	input.Version = interpolator(input.Version)
 }
 
-func (input *KindRegistryInput) LoadSchemas(config Config) (ast.Schemas, error) {
+func (input *KindRegistryInput) LoadSchemas() (ast.Schemas, error) {
 	var allSchemas ast.Schemas
 	var cueImports []string
 	var cueEntrypoints []string
@@ -27,17 +27,17 @@ func (input *KindRegistryInput) LoadSchemas(config Config) (ast.Schemas, error) 
 		return nil, nil
 	}
 
-	coreKindEntrypoints, err := locateEntrypoints(config, input, "core")
+	coreKindEntrypoints, err := locateEntrypoints(input, "core")
 	if err != nil {
 		return nil, fmt.Errorf("could not locate core kind entrypoints: %w", err)
 	}
 
-	composableKindEntrypoints, err := locateEntrypoints(config, input, "composable")
+	composableKindEntrypoints, err := locateEntrypoints(input, "composable")
 	if err != nil {
 		return nil, fmt.Errorf("could not locate composable kind entrypoints: %w", err)
 	}
 
-	commonPkgPath := kindRegistryKindPath(config, input, "common")
+	commonPkgPath := kindRegistryKindPath(input, "common")
 	commonPkgExists, err := dirExists(commonPkgPath)
 	if err != nil {
 		return nil, fmt.Errorf("could not locate common package: %w", err)
@@ -47,9 +47,9 @@ func (input *KindRegistryInput) LoadSchemas(config Config) (ast.Schemas, error) 
 		cueImports = append(cueImports, fmt.Sprintf("%s:%s", commonPkgPath, "github.com/grafana/grafana/packages/grafana-schema/src/common"))
 	}
 
-	kindLoader := func(loader func(config Config, input CueInput) (ast.Schemas, error), entrypoints []string) error {
+	kindLoader := func(loader func(input CueInput) (ast.Schemas, error), entrypoints []string) error {
 		for _, entrypoint := range entrypoints {
-			schemas, err := loader(config, CueInput{
+			schemas, err := loader(CueInput{
 				Entrypoint: entrypoint,
 				CueImports: cueImports,
 			})
@@ -80,16 +80,16 @@ func (input *KindRegistryInput) LoadSchemas(config Config) (ast.Schemas, error) 
 	return allSchemas, nil
 }
 
-func kindRegistryRoot(config Config, input *KindRegistryInput) string {
-	return filepath.Join(config.Path(input.Path), "grafana")
+func kindRegistryRoot(input *KindRegistryInput) string {
+	return filepath.Join(input.Path, "grafana")
 }
 
-func kindRegistryKindPath(config Config, input *KindRegistryInput, kind string) string {
-	return filepath.Join(kindRegistryRoot(config, input), input.Version, kind)
+func kindRegistryKindPath(input *KindRegistryInput, kind string) string {
+	return filepath.Join(kindRegistryRoot(input), input.Version, kind)
 }
 
-func locateEntrypoints(config Config, input *KindRegistryInput, kind string) ([]string, error) {
-	directory := kindRegistryKindPath(config, input, kind)
+func locateEntrypoints(input *KindRegistryInput, kind string) ([]string, error) {
+	directory := kindRegistryKindPath(input, kind)
 	files, err := os.ReadDir(directory)
 	if err != nil {
 		return nil, fmt.Errorf("could not open directory '%s': %w", directory, err)
@@ -105,18 +105,4 @@ func locateEntrypoints(config Config, input *KindRegistryInput, kind string) ([]
 	}
 
 	return results, nil
-}
-
-func dirExists(dir string) (bool, error) {
-	stat, err := os.Stat(dir)
-	//nolint:gocritic
-	if os.IsNotExist(err) {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	} else if !stat.IsDir() {
-		return false, fmt.Errorf("'%s' is not a directory", dir)
-	}
-
-	return true, nil
 }

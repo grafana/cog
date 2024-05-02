@@ -17,13 +17,13 @@ func (input *OpenAPIInput) InterpolateParameters(interpolator ParametersInterpol
 	input.Package = interpolator(input.Package)
 }
 
-func (input OpenAPIInput) LoadSchemas(config Config) (ast.Schemas, error) {
+func (input OpenAPIInput) LoadSchemas() (ast.Schemas, error) {
 	pkg := input.Package
 	if pkg == "" {
 		pkg = guessPackageFromFilename(input.Path)
 	}
 
-	schema, err := openapi.GenerateAST(config.Path(input.Path), openapi.Config{
+	schema, err := openapi.GenerateAST(input.Path, openapi.Config{
 		Package:        pkg,
 		SchemaMetadata: ast.SchemaMeta{}, // TODO: extract these from somewhere
 	})

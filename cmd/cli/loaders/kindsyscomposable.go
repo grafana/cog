@@ -8,21 +8,15 @@ import (
 	"cuelang.org/go/cue"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
-	"github.com/grafana/cog/internal/tools"
 )
 
-func kindsysComposableLoader(config Config, input CueInput) (ast.Schemas, error) {
+func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
 	libraries, err := simplecue.ParseImports(input.CueImports)
 	if err != nil {
 		return nil, err
 	}
 
-	libraries = tools.Map(libraries, func(library simplecue.LibraryInclude) simplecue.LibraryInclude {
-		library.FSPath = config.Path(library.FSPath)
-		return library
-	})
-
-	schemaRootValue, err := parseCueEntrypoint(config.Path(input.Entrypoint), libraries, "grafanaplugin")
+	schemaRootValue, err := parseCueEntrypoint(input.Entrypoint, libraries, "grafanaplugin")
 	if err != nil {
 		return nil, err
 	}
