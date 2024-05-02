@@ -15,7 +15,8 @@ import (
 )
 
 type options struct {
-	ConfigPath string
+	ConfigPath      string
+	ExtraParameters map[string]string
 }
 
 func Command() *cobra.Command {
@@ -34,6 +35,8 @@ func Command() *cobra.Command {
 	_ = cmd.MarkFlagFilename("config")
 	_ = cmd.MarkFlagRequired("config")
 
+	cmd.Flags().StringToStringVar(&opts.ExtraParameters, "parameters", nil, "Sets or overrides parameters used in the config file.")
+
 	return cmd
 }
 
@@ -42,6 +45,9 @@ func doGenerate(opts options) error {
 	if err != nil {
 		return err
 	}
+
+	config = config.WithParameters(opts.ExtraParameters)
+	config = config.InterpolateParameters()
 
 	workingDir, err := os.Getwd()
 	if err != nil {
@@ -53,7 +59,7 @@ func doGenerate(opts options) error {
 		return err
 	}
 
-	commonCompilerPasses, err := config.CommonCompilerPasses()
+	commonCompilerPasses, err := config.CompilerPasses()
 	if err != nil {
 		return err
 	}

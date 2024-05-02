@@ -23,6 +23,11 @@ type CueInput struct {
 	CueImports []string `yaml:"cue_imports"`
 }
 
+func (input *CueInput) InterpolateParameters(interpolator ParametersInterpolator) {
+	input.Entrypoint = interpolator(input.Entrypoint)
+	input.CueImports = tools.Map(input.CueImports, interpolator)
+}
+
 func cueLoader(config Config, input CueInput) (ast.Schemas, error) {
 	libraries, err := simplecue.ParseImports(input.CueImports)
 	if err != nil {

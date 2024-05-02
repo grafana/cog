@@ -24,6 +24,10 @@ type Config struct {
 	PackageRoot string `yaml:"package_root"`
 }
 
+func (config *Config) InterpolateParameters(interpolator func(input string) string) {
+	config.PackageRoot = interpolator(config.PackageRoot)
+}
+
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug

@@ -13,7 +13,12 @@ type KindRegistryInput struct {
 	Version string `yaml:"version"`
 }
 
-func (input KindRegistryInput) LoadSchemas(config Config) (ast.Schemas, error) {
+func (input *KindRegistryInput) InterpolateParameters(interpolator ParametersInterpolator) {
+	input.Path = interpolator(input.Path)
+	input.Version = interpolator(input.Version)
+}
+
+func (input *KindRegistryInput) LoadSchemas(config Config) (ast.Schemas, error) {
 	var allSchemas ast.Schemas
 	var cueImports []string
 	var cueEntrypoints []string
@@ -75,15 +80,15 @@ func (input KindRegistryInput) LoadSchemas(config Config) (ast.Schemas, error) {
 	return allSchemas, nil
 }
 
-func kindRegistryRoot(config Config, input KindRegistryInput) string {
+func kindRegistryRoot(config Config, input *KindRegistryInput) string {
 	return filepath.Join(config.Path(input.Path), "grafana")
 }
 
-func kindRegistryKindPath(config Config, input KindRegistryInput, kind string) string {
+func kindRegistryKindPath(config Config, input *KindRegistryInput, kind string) string {
 	return filepath.Join(kindRegistryRoot(config, input), input.Version, kind)
 }
 
-func locateEntrypoints(config Config, input KindRegistryInput, kind string) ([]string, error) {
+func locateEntrypoints(config Config, input *KindRegistryInput, kind string) ([]string, error) {
 	directory := kindRegistryKindPath(config, input, kind)
 	files, err := os.ReadDir(directory)
 	if err != nil {

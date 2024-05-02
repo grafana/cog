@@ -12,6 +12,10 @@ type Config struct {
 	PathPrefix string `yaml:"path_prefix"`
 }
 
+func (config *Config) InterpolateParameters(interpolator func(input string) string) {
+	config.PathPrefix = interpolator(config.PathPrefix)
+}
+
 type Language struct {
 	config Config
 }

@@ -14,7 +14,12 @@ type JSONSchemaInput struct {
 	Package string `yaml:"package"`
 }
 
-func (input JSONSchemaInput) LoadSchemas(config Config) (ast.Schemas, error) {
+func (input *JSONSchemaInput) InterpolateParameters(interpolator ParametersInterpolator) {
+	input.Path = interpolator(input.Path)
+	input.Package = interpolator(input.Package)
+}
+
+func (input *JSONSchemaInput) LoadSchemas(config Config) (ast.Schemas, error) {
 	reader, err := os.Open(config.Path(input.Path))
 	if err != nil {
 		return nil, err
