@@ -17,11 +17,11 @@ type Config struct {
 
 	// GenerateGoMod indicates whether a go.mod file should be generated.
 	// If enabled, PackageRoot is used as module path.
-	GenerateGoMod bool
+	GenerateGoMod bool `yaml:"go_mod"`
 
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
-	PackageRoot string
+	PackageRoot string `yaml:"package_root"`
 }
 
 func (config Config) MergeWithGlobal(global common.Config) Config {

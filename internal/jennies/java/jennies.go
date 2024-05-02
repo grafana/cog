@@ -9,7 +9,7 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	GenGettersAndSetters bool
+	GenGettersAndSetters bool `yaml:"getters_and_setters"`
 }
 
 type Language struct {
