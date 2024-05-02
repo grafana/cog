@@ -15,12 +15,13 @@ func TestJSONMarshalling_Generate(t *testing.T) {
 		Name:         "GoJSONMarshalling",
 	}
 
-	jenny := JSONMarshalling{
-		Config: Config{
-			PackageRoot: "github.com/grafana/cog/generated",
-		},
+	config := Config{
+		PackageRoot: "github.com/grafana/cog/generated",
 	}
-	compilerPasses := New().CompilerPasses()
+	jenny := JSONMarshalling{
+		Config: config,
+	}
+	compilerPasses := New(config).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)
