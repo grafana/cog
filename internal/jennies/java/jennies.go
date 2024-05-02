@@ -4,7 +4,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/spf13/cobra"
 )
 
 const LanguageRef = "java"
@@ -17,12 +16,8 @@ type Language struct {
 	config Config
 }
 
-func New() *Language {
-	return &Language{config: Config{}}
-}
-
-func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
-	cmd.Flags().BoolVar(&language.config.GenGettersAndSetters, "java-getters-and-setters", true, "Generate getters and setters for types")
+func New(config Config) *Language {
+	return &Language{config: config}
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {

@@ -21,6 +21,27 @@ type LibraryInclude struct {
 	ImportPath string // path used in CUE files to import that library
 }
 
+func ParseImports(cueImports []string) ([]LibraryInclude, error) {
+	if len(cueImports) == 0 {
+		return nil, nil
+	}
+
+	imports := make([]LibraryInclude, len(cueImports))
+	for i, importDefinition := range cueImports {
+		parts := strings.Split(importDefinition, ":")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("'%s' is not a valid import definition", importDefinition)
+		}
+
+		imports[i] = LibraryInclude{
+			FSPath:     parts[0],
+			ImportPath: parts[1],
+		}
+	}
+
+	return imports, nil
+}
+
 type Config struct {
 	// Package name used to generate code into.
 	Package string

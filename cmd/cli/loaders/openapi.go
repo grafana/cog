@@ -5,21 +5,26 @@ import (
 	"github.com/grafana/cog/internal/openapi"
 )
 
-func openapiLoader(opts Options) (ast.Schemas, error) {
-	allSchemas := make([]*ast.Schema, 0, len(opts.OpenAPIEntrypoints))
-	for _, entrypoint := range opts.OpenAPIEntrypoints {
-		schemaAst, err := openapi.GenerateAST(entrypoint, openapi.Config{
-			Package:        guessPackageFromFilename(entrypoint),
-			SchemaMetadata: ast.SchemaMeta{
-				// TODO: extract these from somewhere
-			},
-		})
-		if err != nil {
-			return nil, err
-		}
+type OpenAPIInput struct {
+	// Path to an OpenAPI file.
+	Path string `yaml:"path"`
 
-		allSchemas = append(allSchemas, schemaAst)
+	Package string `yaml:"package"`
+}
+
+func (input OpenAPIInput) LoadSchemas(config Config) (ast.Schemas, error) {
+	pkg := input.Package
+	if pkg == "" {
+		pkg = guessPackageFromFilename(input.Path)
 	}
 
-	return allSchemas, nil
+	schema, err := openapi.GenerateAST(config.Path(input.Path), openapi.Config{
+		Package:        pkg,
+		SchemaMetadata: ast.SchemaMeta{}, // TODO: extract these from somewhere
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return ast.Schemas{schema}, nil
 }

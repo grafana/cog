@@ -4,18 +4,17 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/spf13/cobra"
 )
 
 const LanguageRef = "openapi"
 
 type Config struct {
-	Debug bool
+	debug bool
 }
 
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
-	newConfig.Debug = global.Debug
+	newConfig.debug = global.Debug
 
 	return newConfig
 }
@@ -28,9 +27,6 @@ func New() *Language {
 	return &Language{
 		config: Config{},
 	}
-}
-
-func (language *Language) RegisterCliFlags(_ *cobra.Command) {
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {

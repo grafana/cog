@@ -13,7 +13,7 @@ import (
 const LanguageRef = "go"
 
 type Config struct {
-	Debug bool
+	debug bool
 
 	// GenerateGoMod indicates whether a go.mod file should be generated.
 	// If enabled, PackageRoot is used as module path.
@@ -26,7 +26,7 @@ type Config struct {
 
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
-	newConfig.Debug = global.Debug
+	newConfig.debug = global.Debug
 
 	return newConfig
 }
@@ -40,9 +40,9 @@ type Language struct {
 	config Config
 }
 
-func New() *Language {
+func New(config Config) *Language {
 	return &Language{
-		config: Config{},
+		config: config,
 	}
 }
 

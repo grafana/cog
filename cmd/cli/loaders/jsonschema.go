@@ -7,26 +7,32 @@ import (
 	"github.com/grafana/cog/internal/jsonschema"
 )
 
-func jsonschemaLoader(opts Options) (ast.Schemas, error) {
-	allSchemas := make([]*ast.Schema, 0, len(opts.JSONSchemaEntrypoints))
-	for _, entrypoint := range opts.JSONSchemaEntrypoints {
-		reader, err := os.Open(entrypoint)
-		if err != nil {
-			return nil, err
-		}
+type JSONSchemaInput struct {
+	// Path to a JSONSchema file.
+	Path string `yaml:"path"`
 
-		schemaAst, err := jsonschema.GenerateAST(reader, jsonschema.Config{
-			Package:        guessPackageFromFilename(entrypoint),
-			SchemaMetadata: ast.SchemaMeta{
-				// TODO: extract these from somewhere
-			},
-		})
-		if err != nil {
-			return nil, err
-		}
+	Package string `yaml:"package"`
+}
 
-		allSchemas = append(allSchemas, schemaAst)
+func (input JSONSchemaInput) LoadSchemas(config Config) (ast.Schemas, error) {
+	reader, err := os.Open(config.Path(input.Path))
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = reader.Close() }()
+
+	pkg := input.Package
+	if pkg == "" {
+		pkg = guessPackageFromFilename(input.Path)
 	}
 
-	return allSchemas, nil
+	schema, err := jsonschema.GenerateAST(reader, jsonschema.Config{
+		Package:        pkg,
+		SchemaMetadata: ast.SchemaMeta{}, // TODO: extract these from somewhere
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return ast.Schemas{schema}, nil
 }

@@ -1,0 +1,42 @@
+debug: true
+
+inputs:
+  - jsonschema:
+      path: ../expr.json
+      package: expr
+#  - openapi:
+#      path: ../grafana-openapi3.json
+  - kind_registry:
+      path: '../../kind-registry'
+      version: 'v10.4.x'
+
+transforms:
+  compiler_passes:
+    - ./compiler/common_passes.yaml
+
+  veneers:
+    - ./veneers
+
+output:
+  directory: '../generated/%l'
+
+  types: true
+  builders: true
+
+  package_templates: ../package_templates
+  repository_templates: ../repository_templates
+  templates_data:
+    GrafanaVersion: 'v10.4.x'
+    ReleaseBranch: foo
+    BuildTimestamp: bar
+
+  languages:
+#    - go:
+#        go_mod: true
+#        package_root: github.com/grafana/cog/foo
+#    - java: {}
+    - jsonschema: {}
+#    - openapi: {}
+#    - python:
+#        path_prefix: grafana_foundation_sdk
+#    - typescript: {}

@@ -4,7 +4,6 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/spf13/cobra"
 )
 
 const LanguageRef = "typescript"
@@ -14,9 +13,6 @@ type Language struct {
 
 func New() *Language {
 	return &Language{}
-}
-
-func (language *Language) RegisterCliFlags(_ *cobra.Command) {
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
