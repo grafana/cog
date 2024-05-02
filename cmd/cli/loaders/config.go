@@ -142,22 +142,15 @@ func (config Config) OutputLanguages() (jennies.LanguageJennies, error) {
 
 	for _, output := range config.Output.Languages {
 		if output.Go != nil {
-			outputs[golang.LanguageRef] = golang.New(golang.Config{
-				GenerateGoMod: output.Go.GenerateGoMod,
-				PackageRoot:   output.Go.PackageRoot,
-			})
+			outputs[golang.LanguageRef] = golang.New(*output.Go)
 		} else if output.Java != nil {
-			outputs[java.LanguageRef] = java.New(java.Config{
-				GenGettersAndSetters: output.Java.GenGettersAndSetters,
-			})
+			outputs[java.LanguageRef] = java.New(*output.Java)
 		} else if output.JSONSchema != nil {
 			outputs[jsonschema.LanguageRef] = jsonschema.New()
 		} else if output.OpenAPI != nil {
 			outputs[openapi.LanguageRef] = openapi.New()
 		} else if output.Python != nil {
-			outputs[python.LanguageRef] = python.New(python.Config{
-				PathPrefix: output.Python.PathPrefix,
-			})
+			outputs[python.LanguageRef] = python.New(*output.Python)
 		} else if output.Typescript != nil {
 			outputs[typescript.LanguageRef] = typescript.New()
 		} else {
@@ -255,37 +248,13 @@ type Output struct {
 }
 
 type OutputLanguage struct {
-	Go         *OutputGo         `yaml:"go"`
-	Java       *OutputJava       `yaml:"java"`
-	JSONSchema *OutputJSONSchema `yaml:"jsonschema"`
-	OpenAPI    *OutputOpenAPI    `yaml:"openapi"`
-	Python     *OutputPython     `yaml:"python"`
-	Typescript *OutputTypescript `yaml:"typescript"`
+	Go         *golang.Config `yaml:"go"`
+	Java       *java.Config   `yaml:"java"`
+	JSONSchema *NoConfig      `yaml:"jsonschema"`
+	OpenAPI    *NoConfig      `yaml:"openapi"`
+	Python     *python.Config `yaml:"python"`
+	Typescript *NoConfig      `yaml:"typescript"`
 }
 
-type OutputGo struct {
-	// GenerateGoMod indicates whether a go.mod file should be generated.
-	// If enabled, PackageRoot is used as module path.
-	GenerateGoMod bool `yaml:"go_mod"`
-
-	// Root path for imports.
-	// Ex: github.com/grafana/cog/generated
-	PackageRoot string `yaml:"package_root"`
-}
-
-type OutputJava struct {
-	GenGettersAndSetters bool `yaml:"getters_and_setters"`
-}
-
-type OutputJSONSchema struct {
-}
-
-type OutputOpenAPI struct {
-}
-
-type OutputPython struct {
-	PathPrefix string `yaml:"path_prefix"`
-}
-
-type OutputTypescript struct {
+type NoConfig struct {
 }

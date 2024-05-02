@@ -9,7 +9,7 @@ import (
 const LanguageRef = "python"
 
 type Config struct {
-	PathPrefix string
+	PathPrefix string `yaml:"path_prefix"`
 }
 
 type Language struct {
