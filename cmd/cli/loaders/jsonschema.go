@@ -19,8 +19,8 @@ func (input *JSONSchemaInput) InterpolateParameters(interpolator ParametersInter
 	input.Package = interpolator(input.Package)
 }
 
-func (input *JSONSchemaInput) LoadSchemas(config Config) (ast.Schemas, error) {
-	reader, err := os.Open(config.Path(input.Path))
+func (input *JSONSchemaInput) LoadSchemas() (ast.Schemas, error) {
+	reader, err := os.Open(input.Path)
 	if err != nil {
 		return nil, err
 	}
