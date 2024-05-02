@@ -15,12 +15,13 @@ func TestRawTypes_Generate(t *testing.T) {
 		Name:         "GoRawTypes",
 	}
 
-	jenny := RawTypes{
-		Config: Config{
-			PackageRoot: "github.com/grafana/cog/generated",
-		},
+	config := Config{
+		PackageRoot: "github.com/grafana/cog/generated",
 	}
-	compilerPasses := New().CompilerPasses()
+	jenny := RawTypes{
+		Config: config,
+	}
+	compilerPasses := New(config).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)
