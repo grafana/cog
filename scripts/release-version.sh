@@ -23,7 +23,7 @@ COG_VERSION="v0.0.x" # hardcoded for now
 COG_CMD=${COG_CMD:-"go run ./cmd/cli"} # Command used to run `cog`
 GH_CLI_CMD=${GH_CLI_CMD:-"gh"} # Command used to run `gh` (GitHub cli)
 
-KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH:-'../kind-registry'} # Path to the kind-registry
+KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH:-'../../kind-registry'} # Path to the kind-registry, relative to the ./config/foundation_sdk.yaml file
 FOUNDATION_SDK_PATH=${FOUNDATION_SDK_PATH:-'../grafana-foundation-sdk'} # Path to the grafana-foundation-sdk
 
 KIND_REGISTRY_REPO=${KIND_REGISTRY_REPO:-'https://github.com/grafana/kind-registry.git'}
@@ -54,32 +54,16 @@ function clone_foundation_sdk() {
 }
 
 function run_codegen() {
-  local kind_registry_dir="${1}"
-  shift
-  local kind_registry_version="${1}"
-  shift
-  local output_dir="${1}"
-  shift
-  local templates_data="${1}"
+  local extra_parameters="${1}"
   shift
 
+  echo $COG_CMD generate \
+         --config "${__dir}/../config/foundation_sdk.yaml" \
+         --parameters "${extra_parameters}"
+
   $COG_CMD generate \
-    --output "${output_dir}/%l" \
-    --kind-registry "${kind_registry_dir}" \
-    --kind-registry-version "${kind_registry_version}" \
-    --veneers "${__dir}/../config/veneers" \
-    --compiler-config "${__dir}/../config/compiler/common_passes.yaml" \
-    --repository-templates ./repository_templates \
-    --package-templates ./package_templates \
-    --templates-data "${templates_data}" \
-    --go-mod \
-    --go-package-root github.com/grafana/grafana-foundation-sdk/go \
-    --language go \
-    --language typescript \
-    --python-path-prefix grafana_foundation_sdk \
-    --language python \
-    --language jsonschema \
-    --language openapi
+    --config "${__dir}/../config/foundation_sdk.yaml" \
+    --parameters "${extra_parameters}"
 }
 
 function gh_run() (
@@ -146,7 +130,7 @@ info "Consolidating kind-registry"
 GRAFANA_VERSION=${GRAFANA_VERSION} KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH} "${__dir}/consolidate-schema-registry.sh"
 
 info "Running cog"
-run_codegen "${KIND_REGISTRY_PATH}" "${GRAFANA_VERSION}" "${codegen_output_path}" "GrafanaVersion=${GRAFANA_VERSION},CogVersion=${COG_VERSION},ReleaseBranch=${release_branch},BuildTimestamp=${build_timestamp}"
+run_codegen "output_dir=../${codegen_output_path}/%l,kind_registry_path=${KIND_REGISTRY_PATH},kind_registry_version=${GRAFANA_VERSION},cog_version=${COG_VERSION},release_branch=${release_branch},build_timestamp=${build_timestamp}"
 
 release_branch_exists=$(git_has_branch "${FOUNDATION_SDK_PATH}" "${release_branch}")
 if [ "$release_branch_exists" != "0" ]; then
