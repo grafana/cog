@@ -141,19 +141,20 @@ func (config Config) OutputLanguages() (jennies.LanguageJennies, error) {
 	outputs := make(jennies.LanguageJennies)
 
 	for _, output := range config.Output.Languages {
-		if output.Go != nil {
+		switch {
+		case output.Go != nil:
 			outputs[golang.LanguageRef] = golang.New(*output.Go)
-		} else if output.Java != nil {
+		case output.Java != nil:
 			outputs[java.LanguageRef] = java.New(*output.Java)
-		} else if output.JSONSchema != nil {
+		case output.JSONSchema != nil:
 			outputs[jsonschema.LanguageRef] = jsonschema.New()
-		} else if output.OpenAPI != nil {
+		case output.OpenAPI != nil:
 			outputs[openapi.LanguageRef] = openapi.New()
-		} else if output.Python != nil {
+		case output.Python != nil:
 			outputs[python.LanguageRef] = python.New(*output.Python)
-		} else if output.Typescript != nil {
+		case output.Typescript != nil:
 			outputs[typescript.LanguageRef] = typescript.New()
-		} else {
+		default:
 			return nil, fmt.Errorf("empty language configuration")
 		}
 	}
