@@ -28,20 +28,15 @@ func (input *CueInput) InterpolateParameters(interpolator ParametersInterpolator
 	input.CueImports = tools.Map(input.CueImports, interpolator)
 }
 
-func cueLoader(config Config, input CueInput) (ast.Schemas, error) {
+func cueLoader(input CueInput) (ast.Schemas, error) {
 	libraries, err := simplecue.ParseImports(input.CueImports)
 	if err != nil {
 		return nil, err
 	}
 
-	libraries = tools.Map(libraries, func(library simplecue.LibraryInclude) simplecue.LibraryInclude {
-		library.FSPath = config.Path(library.FSPath)
-		return library
-	})
-
 	pkg := filepath.Base(input.Entrypoint)
 
-	schemaRootValue, err := parseCueEntrypoint(config.Path(input.Entrypoint), libraries, pkg)
+	schemaRootValue, err := parseCueEntrypoint(input.Entrypoint, libraries, pkg)
 	if err != nil {
 		return nil, err
 	}

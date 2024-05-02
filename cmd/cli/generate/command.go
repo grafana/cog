@@ -159,7 +159,7 @@ func repositoryTemplatesJenny(config loaders.Config, workDir string) (*codejen.J
 		return "RepositoryTemplates"
 	})
 	repoTemplatesJenny.AppendOneToMany(&common.RepositoryTemplate{
-		TemplateDir: config.Path(config.Output.RepositoryTemplates),
+		TemplateDir: config.Output.RepositoryTemplates,
 		ExtraData:   config.Output.TemplatesData,
 	})
 	repoTemplatesJenny.AddPostprocessors(
@@ -181,7 +181,7 @@ func packageTemplatesJenny(language string, config loaders.Config, workDir strin
 	})
 	pkgTemplatesJenny.AppendOneToMany(&common.PackageTemplate{
 		Language:    language,
-		TemplateDir: config.Path(config.Output.PackageTemplates),
+		TemplateDir: config.Output.PackageTemplates,
 		ExtraData:   config.Output.TemplatesData,
 	})
 	pkgTemplatesJenny.AddPostprocessors(common.PathPrefixer(outputDir))

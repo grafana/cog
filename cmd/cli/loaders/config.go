@@ -3,7 +3,6 @@ package loaders
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -34,6 +33,11 @@ func ConfigFromFile(configFile string) (Config, error) {
 		}
 	}
 
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return Config{}, err
+	}
+
 	file, err := os.Open(configFile)
 	if err != nil {
 		return Config{}, err
@@ -44,8 +48,10 @@ func ConfigFromFile(configFile string) (Config, error) {
 	decoder.KnownFields(true)
 
 	config := Config{
-		RootDir:    filepath.Dir(configFile),
-		Parameters: make(map[string]string),
+		Parameters: map[string]string{
+			"__config_dir":  filepath.Dir(configFile),
+			"__current_dir": currentDir,
+		},
 	}
 	if err := decoder.Decode(&config); err != nil {
 		return Config{}, err
@@ -55,8 +61,7 @@ func ConfigFromFile(configFile string) (Config, error) {
 }
 
 type Config struct {
-	RootDir string `yaml:"-"`
-	Debug   bool   `yaml:"debug"`
+	Debug bool `yaml:"debug"`
 
 	Inputs     []Input    `yaml:"inputs"`
 	Transforms Transforms `yaml:"transformations"`
@@ -96,14 +101,6 @@ func (config Config) interpolate(input string) string {
 	return interpolated
 }
 
-func (config Config) Path(inputPath string) string {
-	if path.IsAbs(inputPath) {
-		return inputPath
-	}
-
-	return filepath.Clean(path.Join(config.RootDir, inputPath))
-}
-
 func (config Config) JenniesConfig() common.Config {
 	return common.Config{
 		Debug:    config.Debug,
@@ -113,16 +110,14 @@ func (config Config) JenniesConfig() common.Config {
 }
 
 func (config Config) CompilerPasses() (compiler.Passes, error) {
-	return cogyaml.NewCompilerLoader().PassesFrom(
-		tools.Map(config.Transforms.CompilerPassesFiles, config.Path),
-	)
+	return cogyaml.NewCompilerLoader().PassesFrom(config.Transforms.CompilerPassesFiles)
 }
 
 func (config Config) Veneers() (*rewrite.Rewriter, error) {
 	var veneers []string
 
 	for _, dir := range config.Transforms.VeneersDirectories {
-		globPattern := filepath.Join(config.Path(dir), "*.yaml")
+		globPattern := filepath.Join(dir, "*.yaml")
 		matches, err := filepath.Glob(globPattern)
 		if err != nil {
 			return nil, err
@@ -137,7 +132,11 @@ func (config Config) Veneers() (*rewrite.Rewriter, error) {
 }
 
 func (config Config) OutputDir(relativeToDir string) (string, error) {
-	return filepath.Rel(relativeToDir, config.Path(config.Output.Directory))
+	if !filepath.IsAbs(config.Output.Directory) {
+		return config.Output.Directory, nil
+	}
+
+	return filepath.Rel(relativeToDir, config.Output.Directory)
 }
 
 func (config Config) LanguageOutputDir(relativeToDir string, language string) (string, error) {
@@ -153,7 +152,7 @@ func (config Config) LoadSchemas() (ast.Schemas, error) {
 	var allSchemas ast.Schemas
 
 	for _, input := range config.Inputs {
-		schemas, err := input.LoadSchemas(config)
+		schemas, err := input.LoadSchemas()
 		if err != nil {
 			return nil, err
 		}
@@ -220,24 +219,24 @@ func (input *Input) InterpolateParameters(interpolator ParametersInterpolator) {
 	}
 }
 
-func (input *Input) LoadSchemas(config Config) (ast.Schemas, error) {
+func (input *Input) LoadSchemas() (ast.Schemas, error) {
 	if input.JSONSchema != nil {
-		return input.JSONSchema.LoadSchemas(config)
+		return input.JSONSchema.LoadSchemas()
 	}
 	if input.OpenAPI != nil {
-		return input.OpenAPI.LoadSchemas(config)
+		return input.OpenAPI.LoadSchemas()
 	}
 	if input.KindRegistry != nil {
-		return input.KindRegistry.LoadSchemas(config)
+		return input.KindRegistry.LoadSchemas()
 	}
 	if input.KindsysCore != nil {
-		return kindsysCoreLoader(config, *input.KindsysCore)
+		return kindsysCoreLoader(*input.KindsysCore)
 	}
 	if input.KindsysComposable != nil {
-		return kindsysComposableLoader(config, *input.KindsysCore)
+		return kindsysComposableLoader(*input.KindsysCore)
 	}
 	if input.Cue != nil {
-		return cueLoader(config, *input.Cue)
+		return cueLoader(*input.Cue)
 	}
 
 	return nil, fmt.Errorf("empty input")

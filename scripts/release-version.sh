@@ -130,7 +130,7 @@ info "Consolidating kind-registry"
 GRAFANA_VERSION=${GRAFANA_VERSION} KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH} "${__dir}/consolidate-schema-registry.sh"
 
 info "Running cog"
-run_codegen "output_dir=../${codegen_output_path}/%l,kind_registry_path=${KIND_REGISTRY_PATH},kind_registry_version=${GRAFANA_VERSION},cog_version=${COG_VERSION},release_branch=${release_branch},build_timestamp=${build_timestamp}"
+run_codegen "output_dir=${codegen_output_path}/%l,kind_registry_path=${KIND_REGISTRY_PATH},kind_registry_version=${GRAFANA_VERSION},cog_version=${COG_VERSION},release_branch=${release_branch},build_timestamp=${build_timestamp}"
 
 release_branch_exists=$(git_has_branch "${FOUNDATION_SDK_PATH}" "${release_branch}")
 if [ "$release_branch_exists" != "0" ]; then
