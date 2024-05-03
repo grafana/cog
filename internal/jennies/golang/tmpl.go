@@ -45,7 +45,7 @@ func init() {
 				return escapeVarName(tools.LowerCamelCase(name))
 			},
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
-				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap()) {
+				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot()) {
 					return "&" + variableName
 				}
 
