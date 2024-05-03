@@ -19,13 +19,22 @@ import (
 
 type CueInput struct {
 	// Entrypoint refers to a directory containing CUE files.
-	Entrypoint string   `yaml:"entrypoint"`
+	Entrypoint string `yaml:"entrypoint"`
+
+	// CueImports allows importing additional libraries.
+	// Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common
 	CueImports []string `yaml:"cue_imports"`
+
+	// AllowedObjects is a list of object names that will be allowed when
+	// parsing the input schema.
+	// Note: if AllowedObjects is empty, no filter is applied.
+	AllowedObjects []string `yaml:"allowed_objects"`
 }
 
 func (input *CueInput) InterpolateParameters(interpolator ParametersInterpolator) {
 	input.Entrypoint = interpolator(input.Entrypoint)
 	input.CueImports = tools.Map(input.CueImports, interpolator)
+	input.AllowedObjects = tools.Map(input.AllowedObjects, interpolator)
 }
 
 func cueLoader(input CueInput) (ast.Schemas, error) {
@@ -50,7 +59,7 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 		return nil, err
 	}
 
-	return ast.Schemas{schema}, nil
+	return filterSchema(schema, input.AllowedObjects)
 }
 
 func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, expectedCuePkgName string) (cue.Value, error) {
