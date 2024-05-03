@@ -23,6 +23,42 @@ passes:
   - schema_set_identifier: { package: microsoftsqlserver, identifier: mssql }
   - schema_set_identifier: { package: postgresql, identifier: postgres }
 
+  ############
+  # Alerting #
+  ############
+
+  - rename_object:
+      from: alerting.AlertRuleGroup
+      to: RuleGroup
+  - rename_object:
+      from: alerting.ProvisionedAlertRule
+      to: Rule
+  - rename_object:
+      from: alerting.AlertRuleNotificationSettings
+      to: NotificationSettings
+
+  - rename_object:
+      from: alerting.EmbeddedContactPoint
+      to: ContactPoint
+  - rename_object:
+      from: alerting.Route
+      to: NotificationPolicy
+  - rename_object:
+      from: alerting.MuteTimeInterval
+      to: MuteTiming
+
+  - retype_field:
+      field: alerting.AlertQuery.model
+      as:
+        kind: composable_slot
+        composable_slot: { variant: dataquery }
+
+#  - retype_object:
+#      object: alerting.Duration
+#      as:
+#        kind: scalar
+#        scalar: { scalar_kind: string }
+
   #############
   # Dashboard #
   #############

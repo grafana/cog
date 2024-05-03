@@ -10,6 +10,18 @@ inputs:
   - kind_registry:
       path: '%kind_registry_path%'
       version: '%kind_registry_version%'
+  - jsonschema:
+      path: '%__config_dir%/../schemas/expr.json'
+      package: expr
+  - openapi:
+      url: 'https://raw.githubusercontent.com/grafana/grafana/%kind_registry_version%/public/openapi3.json'
+      package: alerting
+      allowed_objects:
+        - AlertRuleGroup
+        - EmbeddedContactPoint
+        - Route
+        - MuteTimeInterval
+        - NotificationTemplate
 
 transformations:
   schemas:
