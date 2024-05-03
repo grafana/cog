@@ -5,18 +5,27 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jsonschema"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type JSONSchemaInput struct {
 	// Path to a JSONSchema file.
 	Path string `yaml:"path"`
 
+	// Package name to use for the input schema. If empty, it will be guessed
+	// from the input file name.
 	Package string `yaml:"package"`
+
+	// AllowedObjects is a list of object names that will be allowed when
+	// parsing the input schema.
+	// Note: if AllowedObjects is empty, no filter is applied.
+	AllowedObjects []string `yaml:"allowed_objects"`
 }
 
 func (input *JSONSchemaInput) InterpolateParameters(interpolator ParametersInterpolator) {
 	input.Path = interpolator(input.Path)
 	input.Package = interpolator(input.Package)
+	input.AllowedObjects = tools.Map(input.AllowedObjects, interpolator)
 }
 
 func (input *JSONSchemaInput) LoadSchemas() (ast.Schemas, error) {
@@ -39,5 +48,5 @@ func (input *JSONSchemaInput) LoadSchemas() (ast.Schemas, error) {
 		return nil, err
 	}
 
-	return ast.Schemas{schema}, nil
+	return filterSchema(schema, input.AllowedObjects)
 }
