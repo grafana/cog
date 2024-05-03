@@ -1,6 +1,7 @@
 package inspect
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -41,12 +42,14 @@ func Command() *cobra.Command {
 }
 
 func doInspect(opts options) error {
+	ctx := context.Background()
+
 	config, err := loaders.ConfigFromFile(opts.ConfigPath)
 	if err != nil {
 		return err
 	}
 
-	schemas, err := config.LoadSchemas()
+	schemas, err := config.LoadSchemas(ctx)
 	if err != nil {
 		return err
 	}

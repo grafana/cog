@@ -1,6 +1,8 @@
 package loaders
 
 import (
+	"context"
+	"io"
 	"os"
 
 	"github.com/grafana/cog/internal/ast"
@@ -11,6 +13,9 @@ import (
 type JSONSchemaInput struct {
 	// Path to a JSONSchema file.
 	Path string `yaml:"path"`
+
+	// URL to a JSONSchema file.
+	URL string `yaml:"url"`
 
 	// Package name to use for the input schema. If empty, it will be guessed
 	// from the input file name.
@@ -24,24 +29,36 @@ type JSONSchemaInput struct {
 
 func (input *JSONSchemaInput) InterpolateParameters(interpolator ParametersInterpolator) {
 	input.Path = interpolator(input.Path)
+	input.URL = interpolator(input.URL)
 	input.Package = interpolator(input.Package)
 	input.AllowedObjects = tools.Map(input.AllowedObjects, interpolator)
 }
 
-func (input *JSONSchemaInput) LoadSchemas() (ast.Schemas, error) {
-	reader, err := os.Open(input.Path)
+func (input *JSONSchemaInput) schemaReader(ctx context.Context) (io.ReadCloser, error) {
+	if input.Path != "" {
+		return os.Open(input.Path)
+	}
+
+	return loadURL(ctx, input.URL)
+}
+
+func (input *JSONSchemaInput) packageName() string {
+	if input.Package != "" {
+		return input.Package
+	}
+
+	return guessPackageFromFilename(input.Path)
+}
+
+func (input *JSONSchemaInput) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
+	schemaReader, err := input.schemaReader(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = reader.Close() }()
+	defer func() { _ = schemaReader.Close() }()
 
-	pkg := input.Package
-	if pkg == "" {
-		pkg = guessPackageFromFilename(input.Path)
-	}
-
-	schema, err := jsonschema.GenerateAST(reader, jsonschema.Config{
-		Package:        pkg,
+	schema, err := jsonschema.GenerateAST(schemaReader, jsonschema.Config{
+		Package:        input.packageName(),
 		SchemaMetadata: ast.SchemaMeta{}, // TODO: extract these from somewhere
 	})
 	if err != nil {

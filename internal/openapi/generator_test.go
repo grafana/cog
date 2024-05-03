@@ -1,12 +1,11 @@
 package openapi
 
 import (
-	"encoding/json"
+	"context"
 	"path/filepath"
 	"testing"
 
-	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -19,29 +18,26 @@ func TestGenerateAST(t *testing.T) {
 
 	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)
+		ctx := context.TODO()
 
-		schemaAst, err := GenerateAST(getFilePath(tc), Config{Package: "grafanatest"})
+		schemaAst, err := GenerateAST(ctx, getSchemaAsReader(tc), Config{Package: "grafanatest"})
 		req.NoError(err)
 		require.NotNil(t, schemaAst)
 
-		writeIR(schemaAst, tc)
+		testutils.WriteIR(schemaAst, tc)
 	})
 }
 
-func getFilePath(tc *testutils.Test) string {
+func getSchemaAsReader(tc *testutils.Test) *openapi3.T {
 	tc.Helper()
 
-	return filepath.Join(tc.RootDir, "schema.json")
-}
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
 
-func writeIR(irFile *ast.Schema, tc *testutils.Test) {
-	tc.Helper()
+	oapi, err := loader.LoadFromFile(filepath.Join(tc.RootDir, "schema.json"))
+	if err != nil {
+		tc.Fatalf("could not open schema: %s", err)
+	}
 
-	marshaledIR, err := json.MarshalIndent(irFile, "", "  ")
-	require.NoError(tc, err)
-
-	tc.WriteFile(&codejen.File{
-		RelativePath: "ir.json",
-		Data:         marshaledIR,
-	})
+	return oapi
 }

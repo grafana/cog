@@ -15,6 +15,7 @@ import (
 	"github.com/grafana/cog/internal/envvars"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type FileComparator func(t *testing.T, expectedContent []byte, gotContent []byte, filename string)
@@ -232,4 +233,16 @@ func (x *GoldenFilesTestSuite) Run(t *testing.T, f func(tc *Test)) {
 			}
 		})
 	}
+}
+
+func WriteIR(irFile *ast.Schema, tc *Test) {
+	tc.Helper()
+
+	marshaledIR, err := json.MarshalIndent(irFile, "", "  ")
+	require.NoError(tc, err)
+
+	tc.WriteFile(&codejen.File{
+		RelativePath: "ir.json",
+		Data:         marshaledIR,
+	})
 }
