@@ -1,6 +1,7 @@
 package loaders
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -148,11 +149,11 @@ func (config Config) LanguageOutputDir(relativeToDir string, language string) (s
 	return strings.ReplaceAll(outputDir, "%l", language), nil
 }
 
-func (config Config) LoadSchemas() (ast.Schemas, error) {
+func (config Config) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	var allSchemas ast.Schemas
 
 	for _, input := range config.Inputs {
-		schemas, err := input.LoadSchemas()
+		schemas, err := input.LoadSchemas(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -219,12 +220,12 @@ func (input *Input) InterpolateParameters(interpolator ParametersInterpolator) {
 	}
 }
 
-func (input *Input) LoadSchemas() (ast.Schemas, error) {
+func (input *Input) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	if input.JSONSchema != nil {
-		return input.JSONSchema.LoadSchemas()
+		return input.JSONSchema.LoadSchemas(ctx)
 	}
 	if input.OpenAPI != nil {
-		return input.OpenAPI.LoadSchemas()
+		return input.OpenAPI.LoadSchemas(ctx)
 	}
 	if input.KindRegistry != nil {
 		return input.KindRegistry.LoadSchemas()
