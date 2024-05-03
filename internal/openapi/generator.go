@@ -33,15 +33,8 @@ type generator struct {
 	schema *ast.Schema
 }
 
-func GenerateAST(filePath string, cfg Config) (*ast.Schema, error) {
-	loader := openapi3.NewLoader()
-	loader.IsExternalRefsAllowed = true
-	oapi, err := loader.LoadFromFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := oapi.Validate(context.Background(), openapi3.DisableExamplesValidation()); err != nil {
+func GenerateAST(ctx context.Context, oapi *openapi3.T, cfg Config) (*ast.Schema, error) {
+	if err := oapi.Validate(ctx, openapi3.DisableExamplesValidation()); err != nil {
 		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
 	}
 
