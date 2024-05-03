@@ -1,7 +1,10 @@
 package loaders
 
 import (
+	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -46,4 +49,24 @@ func filterSchema(schema *ast.Schema, allowedObjects []string) (ast.Schemas, err
 	}
 
 	return filter.Process(ast.Schemas{schema})
+}
+
+func loadURL(ctx context.Context, url string) (io.ReadCloser, error) {
+	client := http.DefaultClient
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("expecting 200 when loading '%s', got %d", url, resp.StatusCode)
+	}
+
+	return resp.Body, nil
 }

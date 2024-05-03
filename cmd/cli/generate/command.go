@@ -41,6 +41,8 @@ func Command() *cobra.Command {
 }
 
 func doGenerate(opts options) error {
+	ctx := context.Background()
+
 	config, err := loaders.ConfigFromFile(opts.ConfigPath)
 	if err != nil {
 		return err
@@ -71,7 +73,7 @@ func doGenerate(opts options) error {
 	}
 
 	fmt.Printf("Parsing inputs...\n")
-	schemas, err := config.LoadSchemas()
+	schemas, err := config.LoadSchemas(ctx)
 	if err != nil {
 		return err
 	}
