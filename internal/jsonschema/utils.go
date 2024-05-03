@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	schemaparser "github.com/santhosh-tekuri/jsonschema"
+	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
 )
 
 func schemaComments(schema *schemaparser.Schema) []string {
