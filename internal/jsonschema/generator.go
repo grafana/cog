@@ -11,7 +11,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
-	schemaparser "github.com/santhosh-tekuri/jsonschema"
+	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
 )
 
 var errUndescriptiveSchema = fmt.Errorf("the schema does not appear to be describing anything")
@@ -273,7 +273,7 @@ func (g *generator) walkAllOf(schema *schemaparser.Schema) (ast.Type, error) {
 }
 
 func (g *generator) definitionNameFromRef(schema *schemaparser.Schema) string {
-	parts := strings.Split(schema.Ref.Ptr, "/")
+	parts := strings.Split(schema.Ref.Location, "/")
 
 	return parts[len(parts)-1] // Very naive
 }
@@ -346,28 +346,28 @@ func (g *generator) walkNumber(schema *schemaparser.Schema) (ast.Type, error) {
 	}
 
 	if schema.Minimum != nil {
-		value, _ := schema.Minimum.Int64()
+		value, _ := schema.Minimum.Float64()
 		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
 			Op:   ast.GreaterThanEqualOp,
 			Args: []any{value},
 		})
 	}
 	if schema.ExclusiveMinimum != nil {
-		value, _ := schema.ExclusiveMinimum.Int64()
+		value, _ := schema.ExclusiveMinimum.Float64()
 		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
 			Op:   ast.GreaterThanOp,
 			Args: []any{value},
 		})
 	}
 	if schema.Maximum != nil {
-		value, _ := schema.Maximum.Int64()
+		value, _ := schema.Maximum.Float64()
 		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
 			Op:   ast.LessThanEqualOp,
 			Args: []any{value},
 		})
 	}
 	if schema.ExclusiveMaximum != nil {
-		value, _ := schema.ExclusiveMaximum.Int64()
+		value, _ := schema.ExclusiveMaximum.Float64()
 		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
 			Op:   ast.LessThanOp,
 			Args: []any{value},

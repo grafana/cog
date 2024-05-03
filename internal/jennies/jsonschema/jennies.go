@@ -7,7 +7,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
-	schemaparser "github.com/santhosh-tekuri/jsonschema"
+	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
 	"github.com/spf13/cobra"
 )
 
