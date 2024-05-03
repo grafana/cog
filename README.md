@@ -32,25 +32,11 @@ environments, and the risks are unknown/high.
 
 ## Usage
 
-For specific schemas:
-
-```console
-$ go run cmd/cli/main.go generate \
-    --output ./generated \
-    --cue ./schemas/cue/common \
-    --include-cue-import ./schemas/cue/common:github.com/grafana/grafana/packages/grafana-schema/src/common \
-    --jsonschema ./schemas/my-json-schemas/playlist.json \
-    --kindsys-core ./schemas/kindsys/core/dashboard \
-    --kindsys-composable ./schemas/kindsys/composable/timeseries \
-    --veneers ./config
-```
-
 For the [`kind-registry`](https://github.com/grafana/kind-registry):
 
 ```console
-$ git clone https://github.com/grafana/kind-registry schemas/kind-registry
+$ git clone https://github.com/grafana/kind-registry ../kind-registry
 $ go run cmd/cli/main.go generate \
-    --output ./generated \
-    --kind-registry ./schemas/kind-registry \
-    --veneers ./config
+    --config ./config/foundation_sdk.dev.yaml \
+    --parameters kind_registry_version=v10.4.x
 ```
