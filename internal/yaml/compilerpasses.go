@@ -17,6 +17,7 @@ type CompilerPass struct {
 	AddFields               *AddFields               `yaml:"add_fields"`
 	NameAnonymousStruct     *NameAnonymousStruct     `yaml:"name_anonymous_struct"`
 	RenameObject            *RenameObject            `yaml:"rename_object"`
+	RetypeObject            *RetypeObject            `yaml:"retype_object"`
 	RetypeField             *RetypeField             `yaml:"retype_field"`
 	SchemaSetIdentifier     *SchemaSetIdentifier     `yaml:"schema_set_identifier"`
 
@@ -52,6 +53,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.NameAnonymousStruct != nil {
 		return pass.NameAnonymousStruct.AsCompilerPass()
+	}
+	if pass.RetypeObject != nil {
+		return pass.RetypeObject.AsCompilerPass()
 	}
 	if pass.RenameObject != nil {
 		return pass.RenameObject.AsCompilerPass()
@@ -201,6 +205,23 @@ func (pass NameAnonymousStruct) AsCompilerPass() (compiler.Pass, error) {
 	return &compiler.NameAnonymousStruct{
 		Field: fieldRef,
 		As:    pass.As,
+	}, nil
+}
+
+type RetypeObject struct {
+	Object string // Expected format: [package].[object]
+	As     ast.Type
+}
+
+func (pass RetypeObject) AsCompilerPass() (compiler.Pass, error) {
+	objectRef, err := compiler.ObjectReferenceFromString(pass.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.RetypeObject{
+		Object: objectRef,
+		As:     pass.As,
 	}, nil
 }
 
