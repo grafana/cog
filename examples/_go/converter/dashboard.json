@@ -118,7 +118,6 @@
         "cellHeight": "sm",
         "footer": {
           "countRows": false,
-          "fields": "",
           "reducer": [
             "sum"
           ],
