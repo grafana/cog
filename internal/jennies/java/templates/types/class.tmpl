@@ -7,9 +7,15 @@ package {{ .Package }};
 {{- end }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements cog.variants.{{ .Variant }}{{ end }} {
     {{- template "types" dict "Fields" .Fields }}
+    
+    {{- if .ShouldHasConstructor }}
+    public {{ .Name }}(Builder builder) {
+        super(builder);
+    }
+    {{- end }}
 
-    {{ if .HasBuilder }}
-    protected {{ .Name }}(Builder builder) {
+    {{- if .HasBuilder }}
+    public {{ .Name }}(Builder builder) {
         {{- if .Extends }}
         super(builder);
         {{- else }}

@@ -42,18 +42,22 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 	return "unknown"
 }
 
+func (tf *typeFormatter) typeHasBuilder(def ast.Type) bool {
+	return tf.context.ResolveToBuilder(def)
+}
+
+func (tf *typeFormatter) resolvesToComposableSlot(typeDef ast.Type) bool {
+	_, found := tf.context.ResolveToComposableSlot(typeDef)
+	return found
+}
+
 func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
-	if tf.context.ResolveToBuilder(def) {
-		if def.IsComposableSlot() {
-			variant := tools.UpperCamelCase(string(def.AsComposableSlot().Variant))
-			return fmt.Sprintf("cog.Builder<%s>", variant)
-		}
-		if def.IsRef() {
-			return fmt.Sprintf("cog.Builder<%s>", def.AsRef().ReferredType)
-		}
+	value := tf.formatFieldType(def)
+	if tf.resolvesToComposableSlot(def) || tf.typeHasBuilder(def) {
+		value = fmt.Sprintf("cog.Builder<%s>", value)
 	}
 
-	return tf.formatFieldType(def)
+	return value
 }
 
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
@@ -126,15 +130,6 @@ func formatScalarType(def ast.ScalarType) string {
 	return scalarType
 }
 
-func (tf *typeFormatter) formatBuilderArgs(def ast.Type) string {
-	value := tf.formatFieldType(def)
-	if _, ok := tf.context.ResolveToComposableSlot(def); ok || tf.context.ResolveToBuilder(def) {
-		value = fmt.Sprintf("Builder<%s>", value)
-	}
-
-	return value
-}
-
 func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	switch def.Kind {
 	case ast.KindArray:
@@ -145,6 +140,9 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		return "new Hashmap<>()"
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		if tf.typeHasBuilder(def) {
+			return fmt.Sprintf("new %s.Builder().build()", refDef)
+		}
 		return fmt.Sprintf("new %s()", refDef)
 	case ast.KindStruct:
 		return "new Object()"

@@ -1,0 +1,60 @@
+{{- define "assignment" }}
+    {{- template "constraints" .Assignment.Constraints }}
+    {{- range .Assignment.InitSafeguards }}
+    {{ . }}
+    {{- end }}
+
+    {{- template "assignment_setup" (dict "Assignment" .Assignment "Value" .Assignment.Value) }}
+
+    {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
+
+    {{- $preTmpl := print "pre_assignment_" .BuilderName "_" .OptionName }}
+    {{- includeIfExists $preTmpl (dict) -}}
+
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) -}}
+
+    {{- $postTmpl := print "post_assignment_" .BuilderName "_" .OptionName }}
+    {{- includeIfExists $postTmpl (dict) -}}
+
+{{- end }}
+
+{{- define "assignment_setup" }}
+    {{- with .Value.Envelope }}
+        {{- range .Values }}
+        {{- template "assignment_setup" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{- end }}
+
+        {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+    {{- end }}
+{{- end }}
+
+{{- define "assignment_value" }}
+    {{- if not (eq .Value.Constant nil) }}
+        {{- formatScalar .Value.Constant }}
+    {{- end }}
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+            {{- .Name | escapeVar | lowerCamelCase }}.build()
+        {{- else }}
+            {{- .Name | escapeVar | lowerCamelCase }}
+        {{- end }}
+    {{- end }}
+    {{- with .Value.Envelope }}
+        {{- .Type | formatType | lowerCamelCase }}
+    {{- end }}
+{{- end }}
+
+{{- define "value_envelope" }}
+    {{ $envelopeType := .Envelope.Type | formatType }}
+        {{- $envelopeType }} {{ $envelopeType | lowerCamelCase }} = new {{ $envelopeType }}();
+    {{- range .Envelope.Values }}
+        {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{ $envelopeType | lowerCamelCase }}.{{ (index .Path 0).Identifier | lowerCamelCase }} = {{ $value }};
+    {{- end }}
+{{- end }}
+
+{{- define "assignment_method" }}
+    {{ $path := formatAssignmentPath .Path }}
+    {{- if eq .Method "direct" }}this.{{ $path }} = {{ .Value }};{{ end }}
+    {{- if eq .Method "append" }}this.{{ $path }}.add({{ .Value }});{{ end -}}
+{{- end }}

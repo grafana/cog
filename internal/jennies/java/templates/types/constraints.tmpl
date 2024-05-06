@@ -1,0 +1,17 @@
+{{- define "constraints" }}
+{{- range . }}
+    {{- $leftOperand := .ArgName }}
+    {{- $operator := .Op }}
+    {{- if eq .Op "minLength" }}
+        {{- $leftOperand = print "" .ArgName ".length()" }}
+        {{- $operator = ">=" }}
+    {{- end }}
+    {{- if eq .Op "maxLength" }}
+        {{- $leftOperand = print "" .ArgName ".length()" }}
+        {{- $operator = "<=" }}
+    {{- end }}
+        if ({{ $leftOperand }} {{ $operator }} {{ .Parameter }} == false) {
+            return this;
+        }
+{{- end }}
+{{- end }}
