@@ -13,7 +13,6 @@ import (
 
 type OptionRule struct {
 	Omit                    *OptionSelector          `yaml:"omit"`
-	PromoteToConstructor    *OptionSelector          `yaml:"promote_to_constructor"`
 	Rename                  *RenameOption            `yaml:"rename"`
 	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean"`
 	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
@@ -31,15 +30,6 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 		}
 
 		return option.Omit(selector), nil
-	}
-
-	if rule.PromoteToConstructor != nil {
-		selector, err := rule.PromoteToConstructor.AsSelector(pkg)
-		if err != nil {
-			return option.RewriteRule{}, err
-		}
-
-		return option.PromoteToConstructor(selector), nil
 	}
 
 	if rule.Rename != nil {

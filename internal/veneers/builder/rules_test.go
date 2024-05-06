@@ -53,7 +53,7 @@ func TestInitialize(t *testing.T) {
 	originalObject := ast.NewObject("pkg", "Dashboard", ast.NewStruct(
 		ast.NewStructField("name", ast.String()),
 	))
-	argument := ast.Argument{Name: "title", Type: ast.String()}
+	argument := ast.Argument{Name: "name", Type: ast.String()}
 	originalBuilders := ast.Builders{
 		{
 			Schema: &ast.Schema{
@@ -93,5 +93,48 @@ func TestInitialize(t *testing.T) {
 	}
 
 	req.Len(updatedBuilders, 1)
-	req.Equal(expectedAssignments, updatedBuilders[0].Initializations)
+	req.Equal(expectedAssignments, updatedBuilders[0].Constructor.Assignments)
+}
+
+func TestPromoteOptionsToConstructor(t *testing.T) {
+	req := require.New(t)
+
+	originalObject := ast.NewObject("pkg", "Dashboard", ast.NewStruct(
+		ast.NewStructField("uid", ast.String()),
+		ast.NewStructField("name", ast.String()),
+	))
+	argument := ast.Argument{Name: "name", Type: ast.String()}
+	assignment := ast.ArgumentAssignment(ast.PathFromStructField(originalObject.Type.Struct.Fields[0]), argument)
+	originalBuilders := ast.Builders{
+		{
+			Schema: &ast.Schema{
+				Package: "pkg",
+				Objects: testutils.ObjectsMap(originalObject),
+			},
+			For:     originalObject,
+			Package: "pkg",
+			Name:    "Dashboard",
+			Options: []ast.Option{
+				{
+					Name:        "name",
+					Args:        []ast.Argument{argument},
+					Assignments: []ast.Assignment{assignment},
+				},
+			},
+		},
+	}
+
+	rule := PromoteOptionsToConstructor(
+		ByName("pkg", "Dashboard"),
+		[]string{"name"},
+	)
+	updatedBuilders, err := rule(originalBuilders)
+	req.NoError(err)
+
+	expectedArgs := []ast.Argument{argument}
+	expectedAssignments := []ast.Assignment{assignment}
+
+	req.Len(updatedBuilders, 1)
+	req.Equal(expectedArgs, updatedBuilders[0].Constructor.Args)
+	req.Equal(expectedAssignments, updatedBuilders[0].Constructor.Assignments)
 }

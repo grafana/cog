@@ -101,18 +101,6 @@ func VeneerTrailAsCommentsAction() RewriteAction {
 	}
 }
 
-// PromoteToConstructorAction flag the arguments of the given option as "constructor arguments".
-// This flag indicates builder jennies that the arguments and assignments described by this option
-// should be exposed by the builder's constructor.
-func PromoteToConstructorAction() RewriteAction {
-	return func(_ ast.Builder, option ast.Option) []ast.Option {
-		option.IsConstructorArg = true
-		option.AddToVeneerTrail("PromoteToConstructor")
-
-		return []ast.Option{option}
-	}
-}
-
 // StructFieldsAsArgumentsAction uses the fields of the first argument's struct (assuming it is one) and turns them
 // into arguments.
 //

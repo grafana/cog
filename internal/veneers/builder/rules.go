@@ -108,7 +108,7 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 	}
 
 	typeAssignment := ast.ConstantAssignment(ast.PathFromStructField(typeField), panelType)
-	newBuilder.Initializations = append(newBuilder.Initializations, typeAssignment)
+	newBuilder.Constructor.Assignments = append(newBuilder.Constructor.Assignments, typeAssignment)
 
 	// re-add panel-related options
 	for _, panelOpt := range panelBuilder.Options {
@@ -302,10 +302,38 @@ func Initialize(selector Selector, statements []Initialization) RewriteRule {
 					return nil, err
 				}
 
-				builders[i].Initializations = append(builders[i].Initializations, ast.ConstantAssignment(path, statement.Value))
+				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, ast.ConstantAssignment(path, statement.Value))
 				veneerDebug = append(veneerDebug, fmt.Sprintf("%s = %v", statement.PropertyPath, statement.Value))
 			}
 			builders[i].AddToVeneerTrail(fmt.Sprintf("Initialize[%s]", strings.Join(veneerDebug, ", ")))
+		}
+
+		return builders, nil
+	}
+}
+
+// PromoteOptionsToConstructor promotes the given options as constructor
+// parameters. Both arguments and assignments described by the options
+// will be exposed in the builder's constructor.
+func PromoteOptionsToConstructor(selector Selector, optionNames []string) RewriteRule {
+	return func(builders ast.Builders) (ast.Builders, error) {
+		for i, builder := range builders {
+			if !selector(builder) {
+				continue
+			}
+
+			for _, optName := range optionNames {
+				opt, ok := builder.OptionByName(optName)
+				if !ok {
+					continue
+				}
+
+				// TODO: do it for every argument/assignment?
+				builders[i].Constructor.Args = append(builders[i].Constructor.Args, opt.Args[0])
+				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, opt.Assignments[0])
+
+				builders[i].AddToVeneerTrail(fmt.Sprintf("PromoteOptionsToConstructor[%s]", optName))
+			}
 		}
 
 		return builders, nil

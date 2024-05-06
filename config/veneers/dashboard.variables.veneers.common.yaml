@@ -6,6 +6,9 @@ builders:
   #################
   # VariableModel #
   #################
+  - promote_options_to_constructor:
+      by_object: VariableModel
+      options: [name]
 
   - duplicate:
       by_name: VariableModel
@@ -74,11 +77,6 @@ builders:
   - omit: { by_name: VariableModel }
 
 options:
-  #################
-  # VariableModel #
-  #################
-  - promote_to_constructor: { by_name: VariableModel.name }
-
   #################
   # QueryVariable #
   #################
