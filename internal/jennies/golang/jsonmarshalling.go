@@ -216,6 +216,10 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.
 		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.Name == "fieldConfig" {
 			buffer.WriteString(fmt.Sprintf(`
 	if fields["%[1]s"] != nil {
+		if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
+			return err
+		}
+
 		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Type)
 		if found && variantCfg.FieldConfigUnmarshaler != nil {
 			fakeFieldConfigSource := struct{
@@ -226,18 +230,14 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.
 			if err := json.Unmarshal(fields["%[1]s"], &fakeFieldConfigSource); err != nil {
 				return err
 			}
-			customFieldConfig, err := variantCfg.FieldConfigUnmarshaler(fakeFieldConfigSource.Defaults.Custom)
-			if err != nil {
-				return err
-			}
-			if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
-				return err
-			}
-	
-			resource.%[2]s.Defaults.Custom = customFieldConfig
-		} else {
-			if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
-				return err
+
+			if fakeFieldConfigSource.Defaults.Custom != nil {
+				customFieldConfig, err := variantCfg.FieldConfigUnmarshaler(fakeFieldConfigSource.Defaults.Custom)
+				if err != nil {
+					return err
+				}
+
+				resource.%[2]s.Defaults.Custom = customFieldConfig
 			}
 		}
 	}
