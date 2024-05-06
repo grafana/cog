@@ -4,18 +4,24 @@
         public {{ .Type }} {{ .Name }};
         {{- end }}
         
+        {{- range .Properties }}
+        public {{ .Type | formatBuilderFieldType }} {{ .Name | escapeVar }};
+        {{- end }}
+        
         public Builder({{- template "args" .Constructor.Args }}) {
-            {{- range .Constructor.Args }}
-            this.{{ .Name | escapeVar }} = {{ .Name | escapeVar }};
-            {{- end }}
+        {{- range .Constructor.Assignments }}
+            {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
+        {{- end }}
         }
         
-        {{- range .Options }}
-        public Builder set{{ .Name | camelcase }}({{- template "args" .Args }}) {
-            this.{{ .Name | escapeVar }} = {{ .Name | escapeVar }};
-            return this;
-        }
+    {{- range $opt := .Options }}
+    public Builder set{{ .Name | camelcase }}({{- template "args" .Args }}) {
+        {{- range .Assignments }}
+            {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" $opt.Name) }}
         {{- end }}
+        return this;
+    }
+    {{ end -}}
         
         public {{ .ObjectName }} build() {
             return new {{ .ObjectName }}(this);

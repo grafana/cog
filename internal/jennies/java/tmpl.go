@@ -13,7 +13,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/veneers/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -31,12 +31,21 @@ func init() {
 
 func functions() template.FuncMap {
 	return template.FuncMap{
+		"escapeVar":            escapeVarName,
+		"formatCastValue":      formatCastValue,
+		"formatScalar":         formatScalar,
+		"formatAssignmentPath": formatAssignmentPath,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
-		"escapeVar": escapeVarName,
 		"formatBuilderFieldType": func(_ ast.Type) string {
 			panic("formatBuilderFieldType() needs to be overridden by a jenny")
+		},
+		"formatType": func(_ ast.Type) string {
+			panic("formatType() needs to be overridden by a jenny")
+		},
+		"typeHasBuilder": func(_ ast.Type) bool {
+			panic("typeHasBuilder() needs to be overridden by a jenny")
 		},
 	}
 }
@@ -55,11 +64,12 @@ type EnumValue struct {
 }
 
 type ClassTemplate struct {
-	Package  string
-	Imports  fmt.Stringer
-	Name     string
-	Extends  []string
-	Comments []string
+	Package              string
+	Imports              fmt.Stringer
+	Name                 string
+	Extends              []string
+	ShouldHasConstructor bool
+	Comments             []string
 
 	Fields     []Field
 	Builder    Builder
