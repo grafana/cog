@@ -42,6 +42,20 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 	return "unknown"
 }
 
+func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
+	if tf.context.ResolveToBuilder(def) {
+		if def.IsComposableSlot() {
+			variant := tools.UpperCamelCase(string(def.AsComposableSlot().Variant))
+			return fmt.Sprintf("cog.Builder<%s>", variant)
+		}
+		if def.IsRef() {
+			return fmt.Sprintf("cog.Builder<%s>", def.AsRef().ReferredType)
+		}
+	}
+
+	return tf.formatFieldType(def)
+}
+
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	switch object.Type.Kind {
@@ -110,4 +124,31 @@ func formatScalarType(def ast.ScalarType) string {
 	}
 
 	return scalarType
+}
+
+func (tf *typeFormatter) formatBuilderArgs(def ast.Type) string {
+	value := tf.formatFieldType(def)
+	if _, ok := tf.context.ResolveToComposableSlot(def); ok || tf.context.ResolveToBuilder(def) {
+		value = fmt.Sprintf("Builder<%s>", value)
+	}
+
+	return value
+}
+
+func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
+	switch def.Kind {
+	case ast.KindArray:
+		tf.packageMapper("java.util", "LinkedList")
+		return "new LinkedList<>()"
+	case ast.KindMap:
+		tf.packageMapper("java.util", "HashMap")
+		return "new Hashmap<>()"
+	case ast.KindRef:
+		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		return fmt.Sprintf("new %s()", refDef)
+	case ast.KindStruct:
+		return "new Object()"
+	default:
+		return "unknown"
+	}
 }

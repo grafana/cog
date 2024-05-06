@@ -7,6 +7,21 @@ package {{ .Package }};
 {{- end }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements cog.variants.{{ .Variant }}{{ end }} {
     {{- template "types" dict "Fields" .Fields }}
+
+    {{ if .HasBuilder }}
+    protected {{ .Name }}(Builder builder) {
+        {{- if .Extends }}
+        super(builder);
+        {{- else }}
+        {{- range .Fields }}
+        this.{{ .Name | escapeVar }} = builder.{{ .Name | escapeVar }};
+        {{- end }}
+        {{- end }}
+    }
+    {{- if not .Extends }}
+    {{ template "builder" .Builder }}
+    {{- end }}
+    {{- end }}
 }
 
 {{- define "types" }}
@@ -14,12 +29,6 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
-    private {{ .Type }} {{ .Name | escapeVar }};
+    public {{ .Type }} {{ .Name | escapeVar }};
     {{- end }}
-
-    {{ range .Fields -}}
-    public {{ .Type }} get{{ .Name | camelcase }}() {
-        return {{ .Name | escapeVar }};
-    }
-    {{ end -}}
 {{- end }}

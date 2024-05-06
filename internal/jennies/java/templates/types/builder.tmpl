@@ -1,0 +1,32 @@
+{{- define "builder" }}
+    public static class Builder {
+        {{- range .Fields }}
+        public {{ .Type }} {{ .Name }};
+        {{- end }}
+        
+        public Builder({{- template "args" .Constructor.Args }}) {
+            {{- range .Constructor.Args }}
+            this.{{ .Name | escapeVar }} = {{ .Name | escapeVar }};
+            {{- end }}
+        }
+        
+        {{- range .Options }}
+        public Builder set{{ .Name | camelcase }}({{- template "args" .Args }}) {
+            this.{{ .Name | escapeVar }} = {{ .Name | escapeVar }};
+            return this;
+        }
+        {{- end }}
+        
+        public {{ .ObjectName }} build() {
+            return new {{ .ObjectName }}(this);
+        }
+    }
+{{- end }}
+
+
+{{- define "args" }}
+    {{- range $i, $arg := . }}
+         {{- if gt $i 0 }}, {{- end }}
+         {{- $arg.Type | formatBuilderFieldType }} {{ $arg.Name | escapeVar }}
+    {{- end }}
+{{- end }}

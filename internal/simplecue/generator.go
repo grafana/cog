@@ -528,7 +528,7 @@ func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHint
 func (g *generator) extractDefault(v cue.Value) (any, error) {
 	defaultVal, ok := v.Default()
 	if !ok {
-		//nolint: nilnil
+		// nolint: nilnil
 		return nil, nil
 	}
 

@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
@@ -34,6 +35,9 @@ func functions() template.FuncMap {
 			return len(values)-1 == index
 		},
 		"escapeVar": escapeVarName,
+		"formatBuilderFieldType": func(_ ast.Type) string {
+			panic("formatBuilderFieldType() needs to be overridden by a jenny")
+		},
 	}
 }
 
@@ -57,9 +61,16 @@ type ClassTemplate struct {
 	Extends  []string
 	Comments []string
 
-	Fields []Field
+	Fields     []Field
+	Builder    Builder
+	HasBuilder bool
 
 	Variant string
+}
+
+type Builder struct {
+	cogtemplate.Builder
+	Fields []Field
 }
 
 type Field struct {
