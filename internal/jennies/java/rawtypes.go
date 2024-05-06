@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -16,6 +17,7 @@ type RawTypes struct {
 	imports *common.DirectImportMap
 
 	typeFormatter *typeFormatter
+	builders      Builders
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -26,6 +28,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0)
 	jenny.imports = NewImportMap()
 	jenny.typeFormatter = createFormatter(context)
+	jenny.builders = parseBuilders(context, jenny.typeFormatter)
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.genFilesForSchema(schema)
@@ -79,6 +82,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -146,16 +150,8 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
 
-	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", jenny.formatInnerStruct(pkg, object.Name, object.Comments, object.Type.ImplementedVariant(), object.Type.AsStruct())); err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
-}
-
-func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []string, variant string, def ast.StructType) ClassTemplate {
 	fields := make([]Field, 0)
-	for _, field := range def.Fields {
+	for _, field := range object.Type.AsStruct().Fields {
 		fields = append(fields, Field{
 			Name:     field.Name,
 			Type:     jenny.typeFormatter.formatFieldType(field.Type),
@@ -163,14 +159,24 @@ func (jenny RawTypes) formatInnerStruct(pkg string, name string, comments []stri
 		})
 	}
 
-	return ClassTemplate{
-		Package:  pkg,
-		Imports:  jenny.imports,
-		Name:     tools.UpperCamelCase(name),
-		Fields:   fields,
-		Comments: comments,
-		Variant:  tools.UpperCamelCase(variant),
+	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name, fields)
+
+	if err := templates.Funcs(template.FuncMap{
+		"formatBuilderFieldType": jenny.typeFormatter.formatBuilderFieldType,
+	}).ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+		Package:    pkg,
+		Imports:    jenny.imports,
+		Name:       tools.UpperCamelCase(object.Name),
+		Fields:     fields,
+		Comments:   object.Comments,
+		Variant:    tools.UpperCamelCase(object.Type.ImplementedVariant()),
+		Builder:    builder,
+		HasBuilder: hasBuilder,
+	}); err != nil {
+		return nil, err
 	}
+
+	return []byte(buffer.String()), nil
 }
 
 func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarType) ([]byte, error) {

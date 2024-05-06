@@ -26,7 +26,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 
 	jenny.AppendOneToMany(
 		Runtime{},
-		RawTypes{config: language.config},
+		RawTypes{},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
