@@ -27,6 +27,7 @@ const (
 type Config struct {
 	Package        string
 	SchemaMetadata ast.SchemaMeta
+	Validate       bool
 }
 
 type generator struct {
@@ -34,8 +35,10 @@ type generator struct {
 }
 
 func GenerateAST(ctx context.Context, oapi *openapi3.T, cfg Config) (*ast.Schema, error) {
-	if err := oapi.Validate(ctx, openapi3.DisableExamplesValidation()); err != nil {
-		return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
+	if cfg.Validate {
+		if err := oapi.Validate(ctx, openapi3.DisableExamplesValidation()); err != nil {
+			return nil, fmt.Errorf("[%s] %w", cfg.Package, err)
+		}
 	}
 
 	g := &generator{

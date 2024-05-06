@@ -21,6 +21,9 @@ type OpenAPIInput struct {
 	// from the input file name.
 	Package string `yaml:"package"`
 
+	// NoValidate disables validation of the OpenAPI spec.
+	NoValidate bool `yaml:"no_validate"`
+
 	// AllowedObjects is a list of object names that will be allowed when
 	// parsing the input schema.
 	// Note: if AllowedObjects is empty, no filter is applied.
@@ -68,6 +71,7 @@ func (input OpenAPIInput) LoadSchemas(ctx context.Context) (ast.Schemas, error) 
 	schema, err := openapi.GenerateAST(ctx, oapiSchema, openapi.Config{
 		Package:        input.packageName(),
 		SchemaMetadata: ast.SchemaMeta{}, // TODO: extract these from somewhere
+		Validate:       !input.NoValidate,
 	})
 	if err != nil {
 		return nil, err
