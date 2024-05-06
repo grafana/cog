@@ -440,3 +440,14 @@ func TestStructFieldsAsArgumentsAction_withArrayOfStructArgument(t *testing.T) {
 
 	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
 }
+
+func TestDuplicateAction(t *testing.T) {
+	req := require.New(t)
+
+	option := ast.Option{Name: "Name"}
+	modifiedOpts := DuplicateAction("Duplicated")(ast.Builder{}, option)
+
+	req.Len(modifiedOpts, 2)
+	req.Equal("Name", modifiedOpts[0].Name)
+	req.Equal("Duplicated", modifiedOpts[1].Name)
+}
