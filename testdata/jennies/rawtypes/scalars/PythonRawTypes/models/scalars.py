@@ -4,46 +4,46 @@ import typing
 ConstTypeString: typing.Literal["foo"] = "foo"
 
 
-ScalarTypeAny = object
+ScalarTypeAny: typing.TypeAlias = object
 
 
-ScalarTypeBool = bool
+ScalarTypeBool: typing.TypeAlias = bool
 
 
-ScalarTypeBytes = bytes
+ScalarTypeBytes: typing.TypeAlias = bytes
 
 
-ScalarTypeString = str
+ScalarTypeString: typing.TypeAlias = str
 
 
-ScalarTypeFloat32 = float
+ScalarTypeFloat32: typing.TypeAlias = float
 
 
-ScalarTypeFloat64 = float
+ScalarTypeFloat64: typing.TypeAlias = float
 
 
-ScalarTypeUint8 = int
+ScalarTypeUint8: typing.TypeAlias = int
 
 
-ScalarTypeUint16 = int
+ScalarTypeUint16: typing.TypeAlias = int
 
 
-ScalarTypeUint32 = int
+ScalarTypeUint32: typing.TypeAlias = int
 
 
-ScalarTypeUint64 = int
+ScalarTypeUint64: typing.TypeAlias = int
 
 
-ScalarTypeInt8 = int
+ScalarTypeInt8: typing.TypeAlias = int
 
 
-ScalarTypeInt16 = int
+ScalarTypeInt16: typing.TypeAlias = int
 
 
-ScalarTypeInt32 = int
+ScalarTypeInt32: typing.TypeAlias = int
 
 
-ScalarTypeInt64 = int
+ScalarTypeInt64: typing.TypeAlias = int
 
 
 

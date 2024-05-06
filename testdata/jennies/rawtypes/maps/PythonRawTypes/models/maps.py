@@ -2,10 +2,10 @@ import typing
 
 
 # String to... something.
-MapOfStringToAny = dict[str, object]
+MapOfStringToAny: typing.TypeAlias = dict[str, object]
 
 
-MapOfStringToString = dict[str, str]
+MapOfStringToString: typing.TypeAlias = dict[str, str]
 
 
 class SomeStruct:
@@ -30,10 +30,10 @@ class SomeStruct:
         return cls(**args)
 
 
-MapOfStringToRef = dict[str, 'SomeStruct']
+MapOfStringToRef: typing.TypeAlias = dict[str, 'SomeStruct']
 
 
-MapOfStringToMapOfStringToBool = dict[str, dict[str, bool]]
+MapOfStringToMapOfStringToBool: typing.TypeAlias = dict[str, dict[str, bool]]
 
 
 

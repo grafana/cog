@@ -24,10 +24,10 @@ class SomeStruct:
         return cls(**args)
 
 
-RefToSomeStruct = 'SomeStruct'
+RefToSomeStruct: typing.TypeAlias = 'SomeStruct'
 
 
-RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct
+RefToSomeStructFromOtherPackage: typing.TypeAlias = otherpkg.SomeDistantStruct
 
 
 

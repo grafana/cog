@@ -2,7 +2,7 @@ import typing
 
 
 # List of tags, maybe?
-ArrayOfStrings = list[str]
+ArrayOfStrings: typing.TypeAlias = list[str]
 
 
 class SomeStruct:
@@ -27,10 +27,10 @@ class SomeStruct:
         return cls(**args)
 
 
-ArrayOfRefs = list['SomeStruct']
+ArrayOfRefs: typing.TypeAlias = list['SomeStruct']
 
 
-ArrayOfArrayOfNumbers = list[list[int]]
+ArrayOfArrayOfNumbers: typing.TypeAlias = list[list[int]]
 
 
 

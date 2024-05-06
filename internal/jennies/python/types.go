@@ -58,7 +58,8 @@ func (formatter *typeFormatter) formatObject(def ast.Object) (string, error) {
 	case ast.KindStruct:
 		return formatter.formatStruct(def), nil
 	default:
-		buffer.WriteString(fmt.Sprintf("%s = %s", defName, formatter.formatType(def.Type)))
+		typingPkg := formatter.importPkg("typing", "typing")
+		buffer.WriteString(fmt.Sprintf("%s: %s.TypeAlias = %s", defName, typingPkg, formatter.formatType(def.Type)))
 	}
 
 	return buffer.String(), nil

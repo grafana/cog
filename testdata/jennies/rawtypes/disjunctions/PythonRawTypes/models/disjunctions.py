@@ -2,10 +2,10 @@ import typing
 
 
 # Refresh rate or disabled.
-RefreshRate = typing.Union[str, bool]
+RefreshRate: typing.TypeAlias = typing.Union[str, bool]
 
 
-StringOrNull = typing.Optional[str]
+StringOrNull: typing.TypeAlias = typing.Optional[str]
 
 
 class SomeStruct:
@@ -33,7 +33,7 @@ class SomeStruct:
         return cls(**args)
 
 
-BoolOrRef = typing.Union[bool, 'SomeStruct']
+BoolOrRef: typing.TypeAlias = typing.Union[bool, 'SomeStruct']
 
 
 class SomeOtherStruct:
@@ -86,7 +86,7 @@ class YetAnotherStruct:
         return cls(**args)
 
 
-SeveralRefs = typing.Union['SomeStruct', 'SomeOtherStruct', 'YetAnotherStruct']
+SeveralRefs: typing.TypeAlias = typing.Union['SomeStruct', 'SomeOtherStruct', 'YetAnotherStruct']
 
 
 
