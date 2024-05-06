@@ -125,7 +125,7 @@ func (jenny *Builder) generateConstructor(builder ast.Builder) template.Construc
 
 func (jenny *Builder) generateOption(def ast.Option) template.Option {
 	return template.Option{
-		Name:        def.Name,
+		Name:        formatIdentifier(def.Name),
 		Comments:    def.Comments,
 		Args:        def.Args,
 		Assignments: tools.Map(def.Assignments, jenny.generateAssignment),
@@ -171,7 +171,7 @@ func (jenny *Builder) generateAssignment(assign ast.Assignment) template.Assignm
 
 	var constraints []template.Constraint
 	if assign.Value.Argument != nil {
-		argName := tools.LowerCamelCase(assign.Value.Argument.Name)
+		argName := formatIdentifier(assign.Value.Argument.Name)
 		constraints = jenny.constraints(argName, assign.Constraints)
 	}
 

@@ -47,7 +47,7 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- $builtResultSuffix := ternary "Resources" "Resource" .Type.IsArray }}
-        const {{ .Name }}{{ $builtResultSuffix }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" .Name "Depth" 1) }};
+        const {{ .Name|formatIdentifier }}{{ $builtResultSuffix }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (.Name|formatIdentifier) "Depth" 1) }};
         {{- end }}
     {{- end }}
 {{- end }}
@@ -70,9 +70,9 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
     {{- end }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- .Name }}{{- .Type.IsArray | ternary "Resources" "Resource" }}
+        {{- .Name|formatIdentifier }}{{- .Type.IsArray | ternary "Resources" "Resource" }}
         {{- else }}
-        {{- .Name }}
+        {{- .Name|formatIdentifier }}
         {{- end }}
     {{- end }}
     {{- with .Value.Envelope }}
