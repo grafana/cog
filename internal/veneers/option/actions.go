@@ -540,3 +540,13 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 		return newOpts
 	}
 }
+
+func DuplicateAction(duplicateName string) RewriteAction {
+	return func(builder ast.Builder, option ast.Option) []ast.Option {
+		duplicateOpt := option.DeepCopy()
+		duplicateOpt.Name = duplicateName
+		duplicateOpt.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s]", option.Name))
+
+		return []ast.Option{option, duplicateOpt}
+	}
+}

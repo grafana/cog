@@ -20,6 +20,7 @@ type OptionRule struct {
 	StructFieldsAsOptions   *StructFieldsAsOptions   `yaml:"struct_fields_as_options"`
 	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append"`
 	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
+	Duplicate               *DuplicateOption         `yaml:"duplicate"`
 }
 
 func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -63,6 +64,10 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 
 	if rule.DisjunctionAsOptions != nil {
 		return rule.DisjunctionAsOptions.AsRewriteRule(pkg)
+	}
+
+	if rule.Duplicate != nil {
+		return rule.Duplicate.AsRewriteRule(pkg)
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
@@ -154,6 +159,20 @@ func (rule DisjunctionAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, 
 	}
 
 	return option.DisjunctionAsOptions(selector), nil
+}
+
+type DuplicateOption struct {
+	OptionSelector `yaml:",inline"`
+	As             string `yaml:"as"`
+}
+
+func (rule DuplicateOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.Duplicate(selector, rule.As), nil
 }
 
 /******************************************************************************

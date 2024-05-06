@@ -67,3 +67,10 @@ func DisjunctionAsOptions(selector Selector) RewriteRule {
 		Action:   DisjunctionAsOptionsAction(),
 	}
 }
+
+func Duplicate(selector Selector, duplicateName string) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   DuplicateAction(duplicateName),
+	}
+}
