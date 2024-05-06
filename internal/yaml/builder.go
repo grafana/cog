@@ -13,13 +13,14 @@ import (
  *****************************************************************************/
 
 type BuilderRule struct {
-	Omit                  *BuilderSelector       `yaml:"omit"`
-	Rename                *RenameBuilder         `yaml:"rename"`
-	MergeInto             *MergeInto             `yaml:"merge_into"`
-	ComposeDashboardPanel *ComposeDashboardPanel `yaml:"compose_dashboard_panel"`
-	Properties            *Properties            `yaml:"properties"`
-	Duplicate             *Duplicate             `yaml:"duplicate"`
-	Initialize            *Initialize            `yaml:"initialize"`
+	Omit                     *BuilderSelector          `yaml:"omit"`
+	Rename                   *RenameBuilder            `yaml:"rename"`
+	MergeInto                *MergeInto                `yaml:"merge_into"`
+	ComposeDashboardPanel    *ComposeDashboardPanel    `yaml:"compose_dashboard_panel"`
+	Properties               *Properties               `yaml:"properties"`
+	Duplicate                *Duplicate                `yaml:"duplicate"`
+	Initialize               *Initialize               `yaml:"initialize"`
+	PromoteOptsToConstructor *PromoteOptsToConstructor `yaml:"promote_options_to_constructor"`
 }
 
 func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -54,6 +55,10 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 	if rule.Initialize != nil {
 		return rule.Initialize.AsRewriteRule(pkg)
+	}
+
+	if rule.PromoteOptsToConstructor != nil {
+		return rule.PromoteOptsToConstructor.AsRewriteRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -161,6 +166,20 @@ func (rule Initialize) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 			return builder.Initialization{PropertyPath: init.Property, Value: init.Value}
 		}),
 	), nil
+}
+
+type PromoteOptsToConstructor struct {
+	BuilderSelector `yaml:",inline"`
+	Options         []string `yaml:"options"`
+}
+
+func (rule PromoteOptsToConstructor) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.PromoteOptionsToConstructor(selector, rule.Options), nil
 }
 
 /******************************************************************************

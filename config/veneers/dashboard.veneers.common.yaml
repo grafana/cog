@@ -84,13 +84,25 @@ builders:
   # No need for builders for structs generated from a disjunction
   - omit: { generated_from_disjunction: true }
 
+  ################
+  # Constructors #
+  ################
+  - promote_options_to_constructor:
+      by_object: Dashboard
+      options: [title]
+
+  - promote_options_to_constructor:
+      by_object: RowPanel
+      options: [title]
+
+  - promote_options_to_constructor:
+      by_object: DashboardLink
+      options: [title]
+
 options:
   ##############
   # Dashboards #
   ##############
-
-  # Make the dashboard constructor more friendly
-  - promote_to_constructor: { by_name: Dashboard.title }
 
   # `Tooltip` looks better than `GraphTooltip`
   - rename:
@@ -214,12 +226,3 @@ options:
 
   - omit: { by_name: RowPanel.gridPos }
 
-  # Make the constructor more friendly
-  - promote_to_constructor: { by_name: RowPanel.title }
-
-  #################
-  # DashboardLink #
-  #################
-
-  # Make the constructor more friendly
-  - promote_to_constructor: { by_name: DashboardLink.title }

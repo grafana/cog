@@ -2,8 +2,12 @@ language: all
 
 package: team
 
-builders: ~
+builders:
+  ################
+  # Constructors #
+  ################
+  - promote_options_to_constructor:
+      by_name: Team
+      options: [name]
 
-options:
-  # Make the constructor more friendly
-  - promote_to_constructor: { by_name: Team.name }
+options: ~

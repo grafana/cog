@@ -2,7 +2,12 @@ language: all
 
 package: folder
 
-builders: ~
+builders:
+  ################
+  # Constructors #
+  ################
+  - promote_options_to_constructor:
+      by_name: Folder
+      options: [name]
 
-options:
-  - promote_to_constructor: { by_name: Folder.title }
+options: ~

@@ -16,24 +16,34 @@ type Builder struct {
 	// The builder itself
 	// These fields are completely derived from the fields above and can be freely manipulated
 	// by veneers.
-	Package         string
-	Name            string
-	Properties      []StructField `json:",omitempty"`
-	Options         []Option
-	Initializations []Assignment `json:",omitempty"`
-	VeneerTrail     []string     `json:",omitempty"`
+	Package     string
+	Name        string
+	Properties  []StructField `json:",omitempty"`
+	Constructor Constructor   `json:",omitempty"`
+	Options     []Option
+	VeneerTrail []string `json:",omitempty"`
+}
+
+func (builder *Builder) OptionByName(name string) (Option, bool) {
+	for _, opt := range builder.Options {
+		if strings.EqualFold(opt.Name, name) {
+			return opt, true
+		}
+	}
+
+	return Option{}, false
 }
 
 func (builder *Builder) DeepCopy() Builder {
 	clone := Builder{
-		Schema:          builder.Schema,
-		For:             builder.For,
-		Package:         builder.Package,
-		Name:            builder.Name,
-		Properties:      make([]StructField, 0, len(builder.Properties)),
-		Options:         make([]Option, 0, len(builder.Options)),
-		Initializations: make([]Assignment, 0, len(builder.Initializations)),
-		VeneerTrail:     make([]string, 0, len(builder.VeneerTrail)),
+		Schema:      builder.Schema,
+		For:         builder.For,
+		Package:     builder.Package,
+		Name:        builder.Name,
+		Properties:  make([]StructField, 0, len(builder.Properties)),
+		Constructor: builder.Constructor.DeepCopy(),
+		Options:     make([]Option, 0, len(builder.Options)),
+		VeneerTrail: make([]string, 0, len(builder.VeneerTrail)),
 	}
 
 	clone.VeneerTrail = append(clone.VeneerTrail, builder.VeneerTrail...)
@@ -43,9 +53,6 @@ func (builder *Builder) DeepCopy() Builder {
 	}
 	for _, opt := range builder.Options {
 		clone.Options = append(clone.Options, opt.DeepCopy())
-	}
-	for _, init := range builder.Initializations {
-		clone.Initializations = append(clone.Initializations, init.DeepCopy())
 	}
 
 	return clone
@@ -104,6 +111,27 @@ func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, 
 	return path, nil
 }
 
+type Constructor struct {
+	Args        []Argument
+	Assignments []Assignment
+}
+
+func (constructor *Constructor) DeepCopy() Constructor {
+	clone := Constructor{
+		Args:        make([]Argument, 0, len(constructor.Args)),
+		Assignments: make([]Assignment, 0, len(constructor.Assignments)),
+	}
+
+	for _, arg := range constructor.Args {
+		clone.Args = append(clone.Args, arg.DeepCopy())
+	}
+	for _, assignment := range constructor.Assignments {
+		clone.Assignments = append(clone.Assignments, assignment.DeepCopy())
+	}
+
+	return clone
+}
+
 type Builders []Builder
 
 func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool) {
@@ -117,23 +145,21 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 }
 
 type Option struct {
-	Name             string
-	Comments         []string `json:",omitempty"`
-	VeneerTrail      []string `json:",omitempty"`
-	Args             []Argument
-	Assignments      []Assignment
-	Default          *OptionDefault `json:",omitempty"`
-	IsConstructorArg bool
+	Name        string
+	Comments    []string `json:",omitempty"`
+	VeneerTrail []string `json:",omitempty"`
+	Args        []Argument
+	Assignments []Assignment
+	Default     *OptionDefault `json:",omitempty"`
 }
 
 func (opt *Option) DeepCopy() Option {
 	clone := Option{
-		Name:             opt.Name,
-		Comments:         make([]string, 0, len(opt.Comments)),
-		VeneerTrail:      make([]string, 0, len(opt.VeneerTrail)),
-		Args:             make([]Argument, 0, len(opt.Args)),
-		Assignments:      make([]Assignment, 0, len(opt.Assignments)),
-		IsConstructorArg: opt.IsConstructorArg,
+		Name:        opt.Name,
+		Comments:    make([]string, 0, len(opt.Comments)),
+		VeneerTrail: make([]string, 0, len(opt.VeneerTrail)),
+		Args:        make([]Argument, 0, len(opt.Args)),
+		Assignments: make([]Assignment, 0, len(opt.Assignments)),
 	}
 
 	clone.Comments = append(clone.Comments, opt.Comments...)
@@ -429,14 +455,15 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 	for _, field := range structType.Fields {
 		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
 			constantAssignment := ConstantAssignment(PathFromStructField(field), field.Type.AsScalar().Value)
-			builder.Initializations = append(builder.Initializations, constantAssignment)
+
+			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
 			continue
 		}
 		if field.Required && !field.Type.Nullable && generator.fieldIsRefToConcrete(schemas, field) {
 			referredObj, _ := schemas.LocateObject(field.Type.Ref.ReferredPkg, field.Type.Ref.ReferredType)
 
 			constantAssignment := ConstantAssignment(PathFromStructField(field), referredObj.Type.AsScalar().Value)
-			builder.Initializations = append(builder.Initializations, constantAssignment)
+			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
 			continue
 		}
 

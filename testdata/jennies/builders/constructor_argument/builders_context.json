@@ -95,6 +95,49 @@
       },
       "Package": "sandbox",
       "Name": "SomeStruct",
+      "Constructor": {
+        "Args": [
+          {
+            "Name": "title",
+            "Type": {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "string"
+              }
+            }
+          }
+        ],
+        "Assignments": [
+          {
+            "Path": [
+              {
+                "Identifier": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                }
+              }
+            ],
+            "Value": {
+              "Argument": {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                }
+              }
+            },
+            "Method": "direct"
+          }
+        ]
+      },
       "Options": [
         {
           "Name": "title",
@@ -138,8 +181,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": true
+          ]
         }
       ]
     }

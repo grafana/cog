@@ -27,16 +27,6 @@ func TestOmitAction(t *testing.T) {
 	req.Empty(modifiedOpts)
 }
 
-func TestPromoteToConstructorAction(t *testing.T) {
-	req := require.New(t)
-
-	option := ast.Option{Name: "Name", IsConstructorArg: false}
-	modifiedOpts := PromoteToConstructorAction()(ast.Builder{}, option)
-
-	req.Len(modifiedOpts, 1)
-	req.True(modifiedOpts[0].IsConstructorArg)
-}
-
 func TestUnfoldBooleanAction(t *testing.T) {
 	req := require.New(t)
 

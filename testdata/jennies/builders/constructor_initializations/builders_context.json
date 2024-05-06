@@ -211,46 +211,48 @@
       },
       "Package": "constructor_initializations",
       "Name": "SomePanel",
-      "Initializations": [
-        {
-          "Path": [
-            {
-              "Identifier": "type",
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string",
-                  "Value": "panel_type"
+      "Constructor": {
+        "Assignments": [
+          {
+            "Path": [
+              {
+                "Identifier": "type",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "panel_type"
+                  }
                 }
               }
-            }
-          ],
-          "Value": {
-            "Constant": "panel_type"
+            ],
+            "Value": {
+              "Constant": "panel_type"
+            },
+            "Method": "direct"
           },
-          "Method": "direct"
-        },
-        {
-          "Path": [
-            {
-              "Identifier": "cursor",
-              "Type": {
-                "Kind": "ref",
-                "Nullable": false,
-                "Ref": {
-                  "ReferredPkg": "constructor_initializations",
-                  "ReferredType": "CursorMode"
+          {
+            "Path": [
+              {
+                "Identifier": "cursor",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "constructor_initializations",
+                    "ReferredType": "CursorMode"
+                  }
                 }
               }
-            }
-          ],
-          "Value": {
-            "Constant": "tooltip"
-          },
-          "Method": "direct"
-        }
-      ],
+            ],
+            "Value": {
+              "Constant": "tooltip"
+            },
+            "Method": "direct"
+          }
+        ]
+      },
       "Options": [
         {
           "Name": "title",

@@ -40,13 +40,6 @@ func UnfoldBoolean(selector Selector, unfoldOpts BooleanUnfold) RewriteRule {
 	}
 }
 
-func PromoteToConstructor(selector Selector) RewriteRule {
-	return RewriteRule{
-		Selector: selector,
-		Action:   PromoteToConstructorAction(),
-	}
-}
-
 func StructFieldsAsArguments(selector Selector, explicitFields ...string) RewriteRule {
 	return RewriteRule{
 		Selector: selector,

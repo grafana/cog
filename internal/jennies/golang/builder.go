@@ -164,25 +164,9 @@ func (jenny *Builder) formatDefaultTypedArgs(context common.Context, opt ast.Opt
 }
 
 func (jenny *Builder) generateConstructor(builder ast.Builder) template.Constructor {
-	var argsList []ast.Argument
-	var assignmentList []template.Assignment
-	for _, opt := range builder.Options {
-		if !opt.IsConstructorArg {
-			continue
-		}
-
-		// FIXME: this is assuming that there's only one argument for that option
-		argsList = append(argsList, opt.Args[0])
-		assignmentList = append(assignmentList, jenny.generateAssignment(opt.Assignments[0]))
-	}
-
-	for _, init := range builder.Initializations {
-		assignmentList = append(assignmentList, jenny.generateAssignment(init))
-	}
-
 	return template.Constructor{
-		Args:        argsList,
-		Assignments: assignmentList,
+		Args:        builder.Constructor.Args,
+		Assignments: tools.Map(builder.Constructor.Assignments, jenny.generateAssignment),
 	}
 }
 
