@@ -13,7 +13,6 @@ import (
 )
 
 type RawTypes struct {
-	config  Config
 	imports *common.DirectImportMap
 
 	typeFormatter *typeFormatter
