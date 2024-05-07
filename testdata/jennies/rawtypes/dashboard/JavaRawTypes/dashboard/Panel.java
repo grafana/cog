@@ -10,5 +10,4 @@ public class Panel {
     public Object options;
     public List<Dataquery> targets;
     public FieldConfigSource fieldConfig;
-    
 }

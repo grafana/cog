@@ -8,20 +8,19 @@ package basic;
 public class SomeStruct {
     // Anything can go in there.
     // Really, anything.
-    public Object FieldAny;
-    public Boolean FieldBool;
-    public Byte FieldBytes;
-    public String FieldString;
-    public String FieldStringWithConstantValue;
-    public Float FieldFloat32;
-    public Double FieldFloat64;
-    public Byte FieldUint8;
-    public Short FieldUint16;
-    public Integer FieldUint32;
-    public Long FieldUint64;
-    public Byte FieldInt8;
-    public Short FieldInt16;
-    public Integer FieldInt32;
-    public Long FieldInt64;
-    
+    public Object fieldAny;
+    public Boolean fieldBool;
+    public Byte fieldBytes;
+    public String fieldString;
+    public String fieldStringWithConstantValue;
+    public Float fieldFloat32;
+    public Double fieldFloat64;
+    public Byte fieldUint8;
+    public Short fieldUint16;
+    public Integer fieldUint32;
+    public Long fieldUint64;
+    public Byte fieldInt8;
+    public Short fieldInt16;
+    public Integer fieldInt32;
+    public Long fieldInt64;
 }
