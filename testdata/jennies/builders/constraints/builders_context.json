@@ -194,6 +194,7 @@
       },
       "Package": "constraints",
       "Name": "SomeStruct",
+      "Constructor": {},
       "Options": [
         {
           "Name": "id",
@@ -280,21 +281,64 @@
               "Method": "direct",
               "Constraints": [
                 {
+                  "Argument": {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "uint64",
+                        "Constraints": [
+                          {
+                            "Op": "\u003e=",
+                            "Args": [
+                              5
+                            ]
+                          },
+                          {
+                            "Op": "\u003c",
+                            "Args": [
+                              10
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
                   "Op": "\u003e=",
-                  "Args": [
-                    5
-                  ]
+                  "Parameter": 5
                 },
                 {
+                  "Argument": {
+                    "Name": "id",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "uint64",
+                        "Constraints": [
+                          {
+                            "Op": "\u003e=",
+                            "Args": [
+                              5
+                            ]
+                          },
+                          {
+                            "Op": "\u003c",
+                            "Args": [
+                              10
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
                   "Op": "\u003c",
-                  "Args": [
-                    10
-                  ]
+                  "Parameter": 10
                 }
               ]
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "title",
@@ -363,15 +407,30 @@
               "Method": "direct",
               "Constraints": [
                 {
+                  "Argument": {
+                    "Name": "title",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Constraints": [
+                          {
+                            "Op": "minLength",
+                            "Args": [
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
                   "Op": "minLength",
-                  "Args": [
-                    1
-                  ]
+                  "Parameter": 1
                 }
               ]
             }
-          ],
-          "IsConstructorArg": false
+          ]
         }
       ]
     }

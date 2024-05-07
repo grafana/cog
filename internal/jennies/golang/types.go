@@ -2,7 +2,6 @@ package golang
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -345,10 +344,4 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	buffer.WriteString("}")
 
 	return buffer.String()
-}
-
-func formatPackageName(pkg string) string {
-	rgx := regexp.MustCompile("[^a-zA-Z0-9_]+")
-
-	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
 }

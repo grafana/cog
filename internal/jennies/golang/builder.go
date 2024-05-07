@@ -239,16 +239,10 @@ func (jenny *Builder) generateAssignment(assignment ast.Assignment) template.Ass
 		}
 	}
 
-	var constraints []template.Constraint
-	if assignment.Value.Argument != nil {
-		argName := escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
-		constraints = jenny.constraints(argName, assignment.Constraints)
-	}
-
 	return template.Assignment{
 		Path:           assignment.Path,
 		InitSafeguards: initSafeGuards,
-		Constraints:    constraints,
+		Constraints:    assignment.Constraints,
 		Method:         assignment.Method,
 		Value:          assignment.Value,
 	}
@@ -268,16 +262,6 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	}
 }
 
-func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
-	return tools.Map(constraints, func(constraint ast.TypeConstraint) template.Constraint {
-		return template.Constraint{
-			ArgName:   argumentName,
-			Op:        constraint.Op,
-			Parameter: constraint.Args[0],
-		}
-	})
-}
-
 // importType declares an import statement for the type definition of
 // the given object and returns a fully qualified type name for it.
 func (jenny *Builder) importType(typeRef ast.RefType) string {
@@ -288,42 +272,4 @@ func (jenny *Builder) importType(typeRef ast.RefType) string {
 	}
 
 	return fmt.Sprintf("%s.%s", pkg, typeName)
-}
-
-func escapeVarName(varName string) string {
-	if isReservedGoKeyword(varName) {
-		return varName + "Arg"
-	}
-
-	return varName
-}
-
-func isReservedGoKeyword(input string) bool {
-	// see: https://go.dev/ref/spec#Keywords
-	return input == "break" ||
-		input == "case" ||
-		input == "chan" ||
-		input == "continue" ||
-		input == "const" ||
-		input == "default" ||
-		input == "defer" ||
-		input == "else" ||
-		input == "error" ||
-		input == "fallthrough" ||
-		input == "for" ||
-		input == "func" ||
-		input == "go" ||
-		input == "goto" ||
-		input == "if" ||
-		input == "import" ||
-		input == "interface" ||
-		input == "map" ||
-		input == "package" ||
-		input == "range" ||
-		input == "return" ||
-		input == "select" ||
-		input == "struct" ||
-		input == "switch" ||
-		input == "type" ||
-		input == "var"
 }

@@ -153,29 +153,13 @@ func (jenny *Builder) generateAssignment(assign ast.Assignment) template.Assignm
 		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(subPath))
 	}
 
-	var constraints []template.Constraint
-	if assign.Value.Argument != nil {
-		argName := formatIdentifier(assign.Value.Argument.Name)
-		constraints = jenny.constraints(argName, assign.Constraints)
-	}
-
 	return template.Assignment{
 		Path:           assign.Path,
 		InitSafeguards: initSafeGuards,
-		Constraints:    constraints,
+		Constraints:    assign.Constraints,
 		Method:         assign.Method,
 		Value:          assign.Value,
 	}
-}
-
-func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
-	return tools.Map(constraints, func(constraint ast.TypeConstraint) template.Constraint {
-		return template.Constraint{
-			ArgName:   argumentName,
-			Op:        constraint.Op,
-			Parameter: constraint.Args[0],
-		}
-	})
 }
 
 // importType declares an import statement for the type definition of

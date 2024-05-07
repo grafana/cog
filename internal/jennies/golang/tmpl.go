@@ -9,7 +9,6 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
-	"github.com/grafana/cog/internal/tools"
 )
 
 //nolint:gochecknoglobals
@@ -41,9 +40,7 @@ func init() {
 		Funcs(map[string]any{
 			"formatPackageName": formatPackageName,
 			"formatScalar":      formatScalar,
-			"formatArgName": func(name string) string {
-				return escapeVarName(tools.LowerCamelCase(name))
-			},
+			"formatArgName":     formatArgName,
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
 				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot()) {
 					return "&" + variableName
