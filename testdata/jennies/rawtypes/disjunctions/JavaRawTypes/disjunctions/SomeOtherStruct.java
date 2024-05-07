@@ -2,7 +2,6 @@ package disjunctions;
 
 
 public class SomeOtherStruct {
-    public String Type;
-    public Byte Foo;
-    
+    public String type;
+    public Byte foo;
 }

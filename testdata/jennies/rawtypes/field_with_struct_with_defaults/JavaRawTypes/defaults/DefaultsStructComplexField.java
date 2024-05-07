@@ -6,5 +6,4 @@ public class DefaultsStructComplexField {
     public String uid;
     public DefaultsStructComplexFieldNested nested;
     public List<String> array;
-    
 }

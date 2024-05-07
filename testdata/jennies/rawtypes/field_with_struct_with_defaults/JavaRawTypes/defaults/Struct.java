@@ -7,5 +7,4 @@ public class Struct {
     public NestedStruct emptyFields;
     public DefaultsStructComplexField complexField;
     public DefaultsStructPartialComplexField partialComplexField;
-    
 }
