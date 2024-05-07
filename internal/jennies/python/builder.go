@@ -189,26 +189,11 @@ func (jenny *Builder) generateAssignment(context common.Context, assignment ast.
 		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(context, subPath))
 	}
 
-	var constraints []template.Constraint
-	if assignment.Value.Argument != nil {
-		constraints = jenny.constraints(assignment.Value.Argument.Name, assignment.Constraints)
-	}
-
 	return template.Assignment{
 		Path:           assignment.Path,
 		InitSafeguards: initSafeGuards,
-		Constraints:    constraints,
+		Constraints:    assignment.Constraints,
 		Method:         assignment.Method,
 		Value:          assignment.Value,
 	}
-}
-
-func (jenny *Builder) constraints(argumentName string, constraints []ast.TypeConstraint) []template.Constraint {
-	return tools.Map(constraints, func(constraint ast.TypeConstraint) template.Constraint {
-		return template.Constraint{
-			ArgName:   argumentName,
-			Op:        constraint.Op,
-			Parameter: constraint.Args[0],
-		}
-	})
 }

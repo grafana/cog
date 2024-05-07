@@ -1,14 +1,14 @@
 {{- define "constraints" }}
     {{- range $c := . }}
-        {{- $leftOperand := .ArgName }}
+        {{- $leftOperand := .Argument.Name|formatIdentifier }}
         {{- $operator := .Op }}
 
         {{- if eq .Op "minLength" }}
-            {{- $leftOperand = print .ArgName ".length" }}
+            {{- $leftOperand = print $leftOperand ".length" }}
             {{- $operator = ">=" }}
         {{- end }}
         {{- if eq .Op "maxLength" }}
-            {{- $leftOperand = print .ArgName ".length" }}
+            {{- $leftOperand = print $leftOperand ".length" }}
             {{- $operator = "<=" }}
         {{- end }}
         if (!({{ $leftOperand }} {{ $operator }} {{ .Parameter }})) {

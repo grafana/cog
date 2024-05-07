@@ -1,17 +1,18 @@
 {{- define "constraints" }}
 {{- range . }}
-    {{- $leftOperand := .ArgName }}
+    {{- $argName := .Argument.Name|formatArgName }}
+    {{- $leftOperand := $argName }}
     {{- $operator := .Op }}
     {{- if eq .Op "minLength" }}
-        {{- $leftOperand = print "len([]rune(" .ArgName "))" }}
+        {{- $leftOperand = print "len([]rune(" $leftOperand "))" }}
         {{- $operator = ">=" }}
     {{- end }}
     {{- if eq .Op "maxLength" }}
-        {{- $leftOperand = print "len([]rune(" .ArgName "))" }}
+        {{- $leftOperand = print "len([]rune(" $leftOperand "))" }}
         {{- $operator = "<=" }}
     {{- end }}
     if !({{ $leftOperand }} {{ $operator }} {{ .Parameter }}) {
-        builder.errors["{{ .ArgName }}"] = cog.MakeBuildErrors("{{ .ArgName }}", errors.New("{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}"))
+        builder.errors["{{ $argName }}"] = cog.MakeBuildErrors("{{ $argName }}", errors.New("{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}"))
         return builder
     }
 {{- end }}

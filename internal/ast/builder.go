@@ -112,8 +112,8 @@ func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, 
 }
 
 type Constructor struct {
-	Args        []Argument
-	Assignments []Assignment
+	Args        []Argument   `json:",omitempty"`
+	Assignments []Assignment `json:",omitempty"`
 }
 
 func (constructor *Constructor) DeepCopy() Constructor {
@@ -326,7 +326,7 @@ type Assignment struct {
 	// How
 	Method AssignmentMethod
 
-	Constraints []TypeConstraint `json:",omitempty"`
+	Constraints []AssignmentConstraint `json:",omitempty"`
 }
 
 func (assignment *Assignment) DeepCopy() Assignment {
@@ -334,7 +334,7 @@ func (assignment *Assignment) DeepCopy() Assignment {
 		Path:        assignment.Path.DeepCopy(),
 		Value:       assignment.Value.DeepCopy(),
 		Method:      assignment.Method,
-		Constraints: make([]TypeConstraint, 0, len(assignment.Constraints)),
+		Constraints: make([]AssignmentConstraint, 0, len(assignment.Constraints)),
 	}
 
 	for _, constraint := range assignment.Constraints {
@@ -344,11 +344,31 @@ func (assignment *Assignment) DeepCopy() Assignment {
 	return clone
 }
 
+type AssignmentConstraint struct {
+	Argument  Argument
+	Op        Op
+	Parameter any
+}
+
+func (constraint AssignmentConstraint) DeepCopy() AssignmentConstraint {
+	return AssignmentConstraint{
+		Argument:  constraint.Argument.DeepCopy(),
+		Op:        constraint.Op,
+		Parameter: constraint.Argument,
+	}
+}
+
 type AssignmentOpt func(assignment *Assignment)
 
-func Constraints(constraints []TypeConstraint) AssignmentOpt {
+func WithTypeConstraints(constraints []TypeConstraint) AssignmentOpt {
 	return func(assignment *Assignment) {
-		assignment.Constraints = constraints
+		assignment.Constraints = tools.Map(constraints, func(constraint TypeConstraint) AssignmentConstraint {
+			return AssignmentConstraint{
+				Argument:  *assignment.Value.Argument,
+				Op:        constraint.Op,
+				Parameter: constraint.Args[0],
+			}
+		})
 	}
 }
 
@@ -397,7 +417,7 @@ func FieldAssignment(field StructField, opts ...AssignmentOpt) Assignment {
 	}
 
 	argument := Argument{Name: field.Name, Type: field.Type}
-	allOpts := []AssignmentOpt{Constraints(constraints)}
+	allOpts := []AssignmentOpt{WithTypeConstraints(constraints)}
 	allOpts = append(allOpts, opts...)
 
 	return ArgumentAssignment(PathFromStructField(field), argument, allOpts...)

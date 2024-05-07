@@ -192,7 +192,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 					newAssignment = ast.ArgumentAssignment(
 						assignmentPathPrefix.Append(ast.PathFromStructField(field)),
 						newArg,
-						ast.Constraints(constraints),
+						ast.WithTypeConstraints(constraints),
 						ast.Method(oldAssignments[0].Method),
 					)
 				}

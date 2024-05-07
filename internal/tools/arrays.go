@@ -25,6 +25,10 @@ func StringInListEqualFold(needle string, haystack []string) bool {
 }
 
 func Map[T any, O any](input []T, mapper func(T) O) []O {
+	if input == nil {
+		return nil
+	}
+
 	output := make([]O, len(input))
 
 	for i := range input {
@@ -35,6 +39,10 @@ func Map[T any, O any](input []T, mapper func(T) O) []O {
 }
 
 func Filter[T any](input []T, predicate func(T) bool) []T {
+	if input == nil {
+		return nil
+	}
+
 	output := make([]T, 0, len(input))
 
 	for i := range input {
