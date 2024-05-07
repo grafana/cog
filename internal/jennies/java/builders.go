@@ -62,20 +62,9 @@ func (b Builders) getBuilder(pkg string, name string) (ast.Builder, bool) {
 }
 
 func (b Builders) genConstructor(builder ast.Builder) template.Constructor {
-	var argsList []ast.Argument
-	var assignmentList []template.Assignment
-	for _, opt := range builder.Options {
-		if !opt.IsConstructorArg {
-			continue
-		}
-
-		argsList = append(argsList, opt.Args[0])
-		assignmentList = append(assignmentList, b.genAssignments(opt.Assignments)...)
-	}
-
 	return template.Constructor{
-		Args:        argsList,
-		Assignments: assignmentList,
+		Args:        builder.Constructor.Args,
+		Assignments: tools.Map(builder.Constructor.Assignments, b.genAssignment),
 	}
 }
 
@@ -85,7 +74,7 @@ func (b Builders) genOptions(opts []ast.Option) []template.Option {
 		options[i] = template.Option{
 			Name:        tools.LowerCamelCase(option.Name),
 			Args:        b.genArgs(option.Args),
-			Assignments: b.genAssignments(option.Assignments),
+			Assignments: tools.Map(option.Assignments, b.genAssignment),
 		}
 	}
 
@@ -104,25 +93,20 @@ func (b Builders) genArgs(arguments []ast.Argument) []ast.Argument {
 	return args
 }
 
-func (b Builders) genAssignments(assignments []ast.Assignment) []template.Assignment {
-	assign := make([]template.Assignment, len(assignments))
-	for i, assignment := range assignments {
-		var constraints []template.Constraint
-		if assignment.Value.Argument != nil {
-			argName := escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
-			constraints = b.genConstraints(argName, assignment.Constraints)
-		}
-
-		assign[i] = template.Assignment{
-			Path:           assignment.Path,
-			Method:         assignment.Method,
-			Constraints:    constraints,
-			Value:          assignment.Value,
-			InitSafeguards: b.getSafeGuards(assignment),
-		}
+func (b Builders) genAssignment(assignment ast.Assignment) template.Assignment {
+	var constraints []template.Constraint
+	if assignment.Value.Argument != nil {
+		argName := escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
+		constraints = b.genConstraints(argName, assignment.Constraints)
 	}
 
-	return assign
+	return template.Assignment{
+		Path:           assignment.Path,
+		Method:         assignment.Method,
+		Constraints:    constraints,
+		Value:          assignment.Value,
+		InitSafeguards: b.getSafeGuards(assignment),
+	}
 }
 
 func (b Builders) genConstraints(name string, constraints []ast.TypeConstraint) []template.Constraint {
