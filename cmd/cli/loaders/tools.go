@@ -8,10 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/tools"
 )
 
 func guessPackageFromFilename(filename string) string {
@@ -35,20 +31,6 @@ func dirExists(dir string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func filterSchema(schema *ast.Schema, allowedObjects []string) (ast.Schemas, error) {
-	if len(allowedObjects) == 0 {
-		return ast.Schemas{schema}, nil
-	}
-
-	filter := compiler.FilterSchemas{
-		AllowedObjects: tools.Map(allowedObjects, func(objectName string) compiler.ObjectReference {
-			return compiler.ObjectReference{Package: schema.Package, Object: objectName}
-		}),
-	}
-
-	return filter.Process(ast.Schemas{schema})
 }
 
 func loadURL(ctx context.Context, url string) (io.ReadCloser, error) {

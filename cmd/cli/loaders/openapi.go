@@ -7,10 +7,11 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/openapi"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type OpenAPIInput struct {
+	InputBase `yaml:",inline"`
+
 	// Path to an OpenAPI file.
 	Path string `yaml:"path"`
 
@@ -23,11 +24,6 @@ type OpenAPIInput struct {
 
 	// NoValidate disables validation of the OpenAPI spec.
 	NoValidate bool `yaml:"no_validate"`
-
-	// AllowedObjects is a list of object names that will be allowed when
-	// parsing the input schema.
-	// Note: if AllowedObjects is empty, no filter is applied.
-	AllowedObjects []string `yaml:"allowed_objects"`
 }
 
 func (input *OpenAPIInput) loadSchema(ctx context.Context) (*openapi3.T, error) {
@@ -56,13 +52,14 @@ func (input *OpenAPIInput) packageName() string {
 }
 
 func (input *OpenAPIInput) InterpolateParameters(interpolator ParametersInterpolator) {
+	input.InputBase.InterpolateParameters(interpolator)
+
 	input.Path = interpolator(input.Path)
 	input.URL = interpolator(input.URL)
 	input.Package = interpolator(input.Package)
-	input.AllowedObjects = tools.Map(input.AllowedObjects, interpolator)
 }
 
-func (input OpenAPIInput) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
+func (input *OpenAPIInput) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	oapiSchema, err := input.loadSchema(ctx)
 	if err != nil {
 		return nil, err
@@ -77,5 +74,5 @@ func (input OpenAPIInput) LoadSchemas(ctx context.Context) (ast.Schemas, error) 
 		return nil, err
 	}
 
-	return filterSchema(schema, input.AllowedObjects)
+	return input.filterSchema(schema)
 }

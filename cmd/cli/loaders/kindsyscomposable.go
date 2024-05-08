@@ -45,7 +45,7 @@ func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
 		return nil, err
 	}
 
-	return ast.Schemas{schema}, nil
+	return input.filterSchema(schema)
 }
 
 func schemaVariant(kindRoot cue.Value) (ast.SchemaVariant, error) {

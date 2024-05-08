@@ -1,6 +1,7 @@
 package loaders
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,16 +10,20 @@ import (
 )
 
 type KindRegistryInput struct {
+	InputBase `yaml:",inline"`
+
 	Path    string `yaml:"path"`
 	Version string `yaml:"version"`
 }
 
 func (input *KindRegistryInput) InterpolateParameters(interpolator ParametersInterpolator) {
+	input.InputBase.InterpolateParameters(interpolator)
+
 	input.Path = interpolator(input.Path)
 	input.Version = interpolator(input.Version)
 }
 
-func (input *KindRegistryInput) LoadSchemas() (ast.Schemas, error) {
+func (input *KindRegistryInput) LoadSchemas(_ context.Context) (ast.Schemas, error) {
 	var allSchemas ast.Schemas
 	var cueImports []string
 	var cueEntrypoints []string
@@ -50,6 +55,7 @@ func (input *KindRegistryInput) LoadSchemas() (ast.Schemas, error) {
 	kindLoader := func(loader func(input CueInput) (ast.Schemas, error), entrypoints []string) error {
 		for _, entrypoint := range entrypoints {
 			schemas, err := loader(CueInput{
+				InputBase:  input.InputBase,
 				Entrypoint: entrypoint,
 				CueImports: cueImports,
 			})

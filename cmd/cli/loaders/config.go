@@ -25,6 +25,18 @@ import (
 
 type ParametersInterpolator func(input string) string
 
+type transformable interface {
+	CompilerPasses() (compiler.Passes, error)
+}
+
+type interpolable interface {
+	InterpolateParameters(interpolator ParametersInterpolator)
+}
+
+type schemaLoader interface {
+	LoadSchemas(ctx context.Context) (ast.Schemas, error)
+}
+
 func ConfigFromFile(configFile string) (Config, error) {
 	var err error
 	if !filepath.IsAbs(configFile) {
@@ -83,7 +95,10 @@ func (config Config) InterpolateParameters() Config {
 	interpolated := config
 
 	for _, input := range config.Inputs {
-		input.InterpolateParameters(config.interpolate)
+		// An error can only happen with the input isn't descriptive.
+		// This case should have already been handled before
+		// InterpolateParameters() is called.
+		_ = input.InterpolateParameters(config.interpolate)
 	}
 
 	interpolated.Transforms.InterpolateParameters(config.interpolate)
@@ -161,6 +176,10 @@ func (config Config) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 		allSchemas = append(allSchemas, schemas...)
 	}
 
+	if allSchemas == nil {
+		return nil, nil
+	}
+
 	return allSchemas.Consolidate()
 }
 
@@ -189,6 +208,42 @@ func (config Config) OutputLanguages() (jennies.LanguageJennies, error) {
 	return outputs, nil
 }
 
+// InputBase provides common options and behavior, meant to be re-used across
+// all input types.
+type InputBase struct {
+	// AllowedObjects is a list of object names that will be allowed when
+	// parsing the input schema.
+	// Note: if AllowedObjects is empty, no filter is applied.
+	AllowedObjects []string `yaml:"allowed_objects"`
+
+	// Transforms holds a list of paths to files containing compiler passes
+	// to apply to the input.
+	Transforms []string `yaml:"transformations"`
+}
+
+func (input *InputBase) CompilerPasses() (compiler.Passes, error) {
+	return cogyaml.NewCompilerLoader().PassesFrom(input.Transforms)
+}
+
+func (input *InputBase) InterpolateParameters(interpolator ParametersInterpolator) {
+	input.AllowedObjects = tools.Map(input.AllowedObjects, interpolator)
+	input.Transforms = tools.Map(input.Transforms, interpolator)
+}
+
+func (input *InputBase) filterSchema(schema *ast.Schema) (ast.Schemas, error) {
+	if len(input.AllowedObjects) == 0 {
+		return ast.Schemas{schema}, nil
+	}
+
+	filterPass := compiler.FilterSchemas{
+		AllowedObjects: tools.Map(input.AllowedObjects, func(objectName string) compiler.ObjectReference {
+			return compiler.ObjectReference{Package: schema.Package, Object: objectName}
+		}),
+	}
+
+	return filterPass.Process(ast.Schemas{schema})
+}
+
 type Input struct {
 	JSONSchema *JSONSchemaInput `yaml:"jsonschema"`
 	OpenAPI    *OpenAPIInput    `yaml:"openapi"`
@@ -199,53 +254,78 @@ type Input struct {
 	Cue               *CueInput          `yaml:"cue"`
 }
 
-func (input *Input) InterpolateParameters(interpolator ParametersInterpolator) {
-	if input.JSONSchema != nil {
-		input.JSONSchema.InterpolateParameters(interpolator)
+func (input *Input) InterpolateParameters(interpolator ParametersInterpolator) error {
+	loader, err := input.loader()
+	if err != nil {
+		return err
 	}
-	if input.OpenAPI != nil {
-		input.OpenAPI.InterpolateParameters(interpolator)
+
+	if interpolableLoader, ok := loader.(interpolable); ok {
+		interpolableLoader.InterpolateParameters(interpolator)
 	}
-	if input.KindRegistry != nil {
-		input.KindRegistry.InterpolateParameters(interpolator)
-	}
-	if input.KindsysCore != nil {
-		input.KindsysCore.InterpolateParameters(interpolator)
-	}
-	if input.KindsysComposable != nil {
-		input.KindsysComposable.InterpolateParameters(interpolator)
-	}
-	if input.Cue != nil {
-		input.Cue.InterpolateParameters(interpolator)
-	}
+
+	return nil
 }
 
-func (input *Input) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
+func (input *Input) loader() (schemaLoader, error) {
 	if input.JSONSchema != nil {
-		return input.JSONSchema.LoadSchemas(ctx)
+		return input.JSONSchema, nil
 	}
 	if input.OpenAPI != nil {
-		return input.OpenAPI.LoadSchemas(ctx)
+		return input.OpenAPI, nil
 	}
 	if input.KindRegistry != nil {
-		return input.KindRegistry.LoadSchemas()
+		return input.KindRegistry, nil
 	}
 	if input.KindsysCore != nil {
-		return kindsysCoreLoader(*input.KindsysCore)
+		return &genericCueLoader{CueInput: input.KindsysCore, loader: kindsysCoreLoader}, nil
 	}
 	if input.KindsysComposable != nil {
-		return kindsysComposableLoader(*input.KindsysCore)
+		return &genericCueLoader{CueInput: input.KindsysComposable, loader: kindsysComposableLoader}, nil
 	}
 	if input.Cue != nil {
-		return cueLoader(*input.Cue)
+		return &genericCueLoader{CueInput: input.Cue, loader: cueLoader}, nil
 	}
 
 	return nil, fmt.Errorf("empty input")
 }
 
+func (input *Input) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
+	var err error
+
+	loader, err := input.loader()
+	if err != nil {
+		return nil, err
+	}
+
+	schemas, err := loader.LoadSchemas(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if transformableLoader, ok := loader.(transformable); ok {
+		passes, err := transformableLoader.CompilerPasses()
+		if err != nil {
+			return nil, err
+		}
+
+		schemas, err = passes.Process(schemas)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return schemas, err
+}
+
 type Transforms struct {
+	// CompilerPassesFiles holds a list of paths to files containing compiler
+	// passes to apply to all the schemas.
 	CompilerPassesFiles []string `yaml:"schemas"`
-	VeneersDirectories  []string `yaml:"builders"`
+
+	// VeneersDirectories holds a list of paths to directories containing
+	// veneers to apply to all the builders.
+	VeneersDirectories []string `yaml:"builders"`
 }
 
 func (transforms *Transforms) InterpolateParameters(interpolator ParametersInterpolator) {
