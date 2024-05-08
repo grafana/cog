@@ -1,0 +1,8 @@
+language: typescript
+
+package: alerting
+
+options:
+  - rename:
+      by_name: Rule.for
+      as: forDuration

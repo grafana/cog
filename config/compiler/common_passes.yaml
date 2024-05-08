@@ -1,13 +1,14 @@
 passes:
-  - dataquery_identification: {}
   - unspec: {}
+  - entrypoint_identification: {}
+  - dataquery_identification: {}
 
-  ###########################################################################
-  # We don't have an explicit way to acces the "identifier" (ie: plugin ID) #
-  # for panels and dataqueries.                                             #
-  # The heuristic we use sometimes gets things wrong, so we have to fix     #
-  # things here.                                                            #
-  ###########################################################################
+  ############################################################################
+  # We don't have an explicit way to access the "identifier" (ie: plugin ID) #
+  # for panels and dataqueries.                                              #
+  # The heuristic we use sometimes gets things wrong, so we have to fix      #
+  # things here.                                                             #
+  ############################################################################
 
   # Panels
   - schema_set_identifier: { package: alertgroups, identifier: alertGroups }
@@ -22,6 +23,63 @@ passes:
   - schema_set_identifier: { package: azuremonitor, identifier: grafana-azure-monitor-datasource }
   - schema_set_identifier: { package: microsoftsqlserver, identifier: mssql }
   - schema_set_identifier: { package: postgresql, identifier: postgres }
+
+  ############
+  # Alerting #
+  ############
+
+  - rename_object:
+      from: alerting.AlertRuleGroup
+      to: RuleGroup
+  - rename_object:
+      from: alerting.ProvisionedAlertRule
+      to: Rule
+  - rename_object:
+      from: alerting.AlertRuleNotificationSettings
+      to: NotificationSettings
+  - rename_object:
+      from: alerting.AlertQuery
+      to: Query
+
+  - rename_object:
+      from: alerting.EmbeddedContactPoint
+      to: ContactPoint
+  - rename_object:
+      from: alerting.Route
+      to: NotificationPolicy
+  - rename_object:
+      from: alerting.MuteTimeInterval
+      to: MuteTiming
+
+  - retype_field:
+      field: alerting.Query.model
+      as:
+        kind: composable_slot
+        composable_slot: { variant: dataquery }
+
+  - retype_object:
+      object: alerting.Duration
+      as:
+        kind: scalar
+        scalar: { scalar_kind: int64 }
+      comments:
+        - 'Duration in seconds.'
+  - retype_field:
+      field: alerting.RuleGroup.interval
+      as:
+        kind: ref
+        ref: { referred_pkg: alerting, referred_type: Duration }
+      comments:
+        - 'The interval, in seconds, at which all rules in the group are evaluated.'
+        - 'If a group contains many rules, the rules are evaluated sequentially.'
+  - retype_field:
+      field: alerting.Rule.for
+      as:
+        kind: scalar
+        scalar: { scalar_kind: string }
+      comments:
+        - 'The amount of time, in seconds, for which the rule must be breached for the rule to be considered to be Firing.'
+        - 'Before this time has elapsed, the rule is only considered to be Pending.'
 
   #############
   # Dashboard #

@@ -1,0 +1,24 @@
+language: all
+
+package: alerting
+
+builders:
+  - omit: { by_object: RelativeTimeRange }
+
+  # Make some constructors more friendly
+  - promote_options_to_constructor:
+      by_object: RuleGroup
+      options: [title]
+  - promote_options_to_constructor:
+      by_object: Rule
+      options: [title]
+  - promote_options_to_constructor:
+      by_object: Query
+      options: [refId]
+
+options:
+  - duplicate:
+      by_name: RuleGroup.rules
+      as: rule
+  - array_to_append:
+      by_name: RuleGroup.rule
