@@ -19,6 +19,15 @@ builders:
 options:
   - duplicate:
       by_name: RuleGroup.rules
-      as: rule
+      as: withRule
   - array_to_append:
-      by_name: RuleGroup.rule
+      by_name: RuleGroup.withRule
+
+  - rename:
+      by_name: Rule.data
+      as: queries
+  - duplicate:
+      by_name: Rule.queries
+      as: withQuery
+  - array_to_append:
+      by_name: Rule.withQuery
