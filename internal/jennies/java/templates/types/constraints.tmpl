@@ -1,16 +1,16 @@
 {{- define "constraints" }}
 {{- range . }}
-    {{- $leftOperand := .ArgName }}
+    {{- $leftOperand := .Argument.Name }}
     {{- $operator := .Op }}
     {{- if eq .Op "minLength" }}
-        {{- $leftOperand = print "" .ArgName ".length()" }}
+        {{- $leftOperand = print $leftOperand ".length()" }}
         {{- $operator = ">=" }}
     {{- end }}
     {{- if eq .Op "maxLength" }}
-        {{- $leftOperand = print "" .ArgName ".length()" }}
+        {{- $leftOperand = print $leftOperand ".length()" }}
         {{- $operator = "<=" }}
     {{- end }}
-        if ({{ $leftOperand }} {{ $operator }} {{ .Parameter }} == false) {
+        if ({{ $leftOperand }} {{ $operator }} {{ .Parameter }}) {
             return this;
         }
 {{- end }}

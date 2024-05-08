@@ -91,29 +91,13 @@ func (b Builders) genArgs(arguments []ast.Argument) []ast.Argument {
 }
 
 func (b Builders) genAssignment(assignment ast.Assignment) template.Assignment {
-	var constraints []template.Constraint
-	if assignment.Value.Argument != nil {
-		argName := escapeVarName(tools.LowerCamelCase(assignment.Value.Argument.Name))
-		constraints = b.genConstraints(argName, assignment.Constraints)
-	}
-
 	return template.Assignment{
 		Path:           assignment.Path,
 		Method:         assignment.Method,
-		Constraints:    constraints,
+		Constraints:    assignment.Constraints,
 		Value:          assignment.Value,
 		InitSafeguards: b.getSafeGuards(assignment),
 	}
-}
-
-func (b Builders) genConstraints(name string, constraints []ast.TypeConstraint) []template.Constraint {
-	return tools.Map(constraints, func(t ast.TypeConstraint) template.Constraint {
-		return template.Constraint{
-			ArgName:   tools.LowerCamelCase(name),
-			Op:        t.Op,
-			Parameter: t.Args[0],
-		}
-	})
 }
 
 func (b Builders) getSafeGuards(assignment ast.Assignment) []string {
