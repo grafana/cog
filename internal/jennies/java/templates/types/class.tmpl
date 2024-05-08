@@ -15,15 +15,6 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- end }}
 
     {{- if .HasBuilder }}
-    public {{ .Name }}(Builder builder) {
-        {{- if .Extends }}
-        super(builder);
-        {{- else }}
-        {{- range .Fields }}
-        this.{{ .Name | escapeVar }} = builder.{{ .Name | escapeVar }};
-        {{- end }}
-        {{- end }}
-    }
     {{- if not .Extends }}
     {{ template "builder" .Builder }}
     {{- end }}

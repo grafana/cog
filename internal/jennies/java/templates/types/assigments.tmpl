@@ -55,6 +55,6 @@
 
 {{- define "assignment_method" }}
     {{ $path := formatAssignmentPath .Path }}
-    {{- if eq .Method "direct" }}this.{{ $path }} = {{ .Value }};{{ end }}
-    {{- if eq .Method "append" }}this.{{ $path }}.add({{ .Value }});{{ end -}}
+    {{- if eq .Method "direct" }}this.internal.{{ $path }} = {{ .Value }};{{ end }}
+    {{- if eq .Method "append" }}this.internal.{{ $path }}.add({{ .Value }});{{ end -}}
 {{- end }}
