@@ -1,14 +1,13 @@
 {{- define "builder" }}
     public static class Builder {
-        {{- range .Fields }}
-        public {{ .Type }} {{ .Name }};
-        {{- end }}
+        private {{ .ObjectName }} internal;
         
         {{- range .Properties }}
-        public {{ .Type | formatBuilderFieldType }} {{ .Name | escapeVar }};
+        private {{ .Type | formatBuilderFieldType }} {{ .Name | escapeVar }};
         {{- end }}
         
         public Builder({{- template "args" .Constructor.Args }}) {
+            this.internal = new {{ .ObjectName }}();
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
@@ -24,7 +23,7 @@
     {{ end -}}
         
         public {{ .ObjectName }} build() {
-            return new {{ .ObjectName }}(this);
+            return this.internal;
         }
     }
 {{- end }}
