@@ -1,0 +1,7 @@
+language: go
+
+package: alerting
+
+options:
+  - struct_fields_as_arguments:
+      by_name: Query.relativeTimeRange
