@@ -8,19 +8,24 @@ import (
 )
 
 type CompilerPass struct {
-	DataqueryIdentification *DataqueryIdentification `yaml:"dataquery_identification"`
-	Unspec                  *Unspec                  `yaml:"unspec"`
-	FieldsSetDefault        *FieldsSetDefault        `yaml:"fields_set_default"`
-	FieldsSetRequired       *FieldsSetRequired       `yaml:"fields_set_required"`
-	FieldsSetNotRequired    *FieldsSetNotRequired    `yaml:"fields_set_not_required"`
-	Omit                    *Omit                    `yaml:"omit"`
-	AddFields               *AddFields               `yaml:"add_fields"`
-	NameAnonymousStruct     *NameAnonymousStruct     `yaml:"name_anonymous_struct"`
-	RenameObject            *RenameObject            `yaml:"rename_object"`
-	RetypeObject            *RetypeObject            `yaml:"retype_object"`
-	HintObject              *HintObject              `yaml:"hint_object"`
-	RetypeField             *RetypeField             `yaml:"retype_field"`
-	SchemaSetIdentifier     *SchemaSetIdentifier     `yaml:"schema_set_identifier"`
+	EntrypointIdentification *EntrypointIdentification `yaml:"entrypoint_identification"`
+	DataqueryIdentification  *DataqueryIdentification  `yaml:"dataquery_identification"`
+	Unspec                   *Unspec                   `yaml:"unspec"`
+	FieldsSetDefault         *FieldsSetDefault         `yaml:"fields_set_default"`
+	FieldsSetRequired        *FieldsSetRequired        `yaml:"fields_set_required"`
+	FieldsSetNotRequired     *FieldsSetNotRequired     `yaml:"fields_set_not_required"`
+	Omit                     *Omit                     `yaml:"omit"`
+	AddFields                *AddFields                `yaml:"add_fields"`
+	NameAnonymousStruct      *NameAnonymousStruct      `yaml:"name_anonymous_struct"`
+	RenameObject             *RenameObject             `yaml:"rename_object"`
+	RetypeObject             *RetypeObject             `yaml:"retype_object"`
+	HintObject               *HintObject               `yaml:"hint_object"`
+	RetypeField              *RetypeField              `yaml:"retype_field"`
+	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
+
+	DisjunctionToType                       *DisjunctionToType                       `yaml:"disjunction_to_type"`
+	DisjunctionOfAnonymousStructsToExplicit *DisjunctionOfAnonymousStructsToExplicit `yaml:"disjunction_of_anonymous_structs_to_explicit"`
+	DisjunctionInferMapping                 *DisjunctionInferMapping                 `yaml:"disjunction_infer_mapping"`
 
 	DashboardPanels *DashboardPanels `yaml:"dashboard_panels"`
 
@@ -30,6 +35,9 @@ type CompilerPass struct {
 }
 
 func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
+	if pass.EntrypointIdentification != nil {
+		return pass.EntrypointIdentification.AsCompilerPass(), nil
+	}
 	if pass.DataqueryIdentification != nil {
 		return pass.DataqueryIdentification.AsCompilerPass(), nil
 	}
@@ -71,6 +79,16 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 		return pass.SchemaSetIdentifier.AsCompilerPass()
 	}
 
+	if pass.DisjunctionToType != nil {
+		return pass.DisjunctionToType.AsCompilerPass()
+	}
+	if pass.DisjunctionOfAnonymousStructsToExplicit != nil {
+		return pass.DisjunctionOfAnonymousStructsToExplicit.AsCompilerPass()
+	}
+	if pass.DisjunctionInferMapping != nil {
+		return pass.DisjunctionInferMapping.AsCompilerPass()
+	}
+
 	if pass.DashboardPanels != nil {
 		return pass.DashboardPanels.AsCompilerPass(), nil
 	}
@@ -86,6 +104,13 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 
 	return nil, fmt.Errorf("empty compiler pass")
+}
+
+type EntrypointIdentification struct {
+}
+
+func (pass EntrypointIdentification) AsCompilerPass() compiler.Pass {
+	return &compiler.InferEntrypoint{}
 }
 
 type DataqueryIdentification struct {
@@ -294,6 +319,27 @@ func (pass SchemaSetIdentifier) AsCompilerPass() (compiler.Pass, error) {
 		Package:    pass.Package,
 		Identifier: pass.Identifier,
 	}, nil
+}
+
+type DisjunctionToType struct {
+}
+
+func (pass DisjunctionToType) AsCompilerPass() (compiler.Pass, error) {
+	return &compiler.DisjunctionToType{}, nil
+}
+
+type DisjunctionOfAnonymousStructsToExplicit struct {
+}
+
+func (pass DisjunctionOfAnonymousStructsToExplicit) AsCompilerPass() (compiler.Pass, error) {
+	return &compiler.DisjunctionOfAnonymousStructsToExplicit{}, nil
+}
+
+type DisjunctionInferMapping struct {
+}
+
+func (pass DisjunctionInferMapping) AsCompilerPass() (compiler.Pass, error) {
+	return &compiler.DisjunctionInferMapping{}, nil
 }
 
 type DashboardPanels struct {
