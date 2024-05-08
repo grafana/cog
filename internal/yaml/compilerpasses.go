@@ -213,8 +213,9 @@ func (pass NameAnonymousStruct) AsCompilerPass() (compiler.Pass, error) {
 }
 
 type RetypeObject struct {
-	Object string // Expected format: [package].[object]
-	As     ast.Type
+	Object   string // Expected format: [package].[object]
+	As       ast.Type
+	Comments []string
 }
 
 func (pass RetypeObject) AsCompilerPass() (compiler.Pass, error) {
@@ -224,8 +225,9 @@ func (pass RetypeObject) AsCompilerPass() (compiler.Pass, error) {
 	}
 
 	return &compiler.RetypeObject{
-		Object: objectRef,
-		As:     pass.As,
+		Object:   objectRef,
+		As:       pass.As,
+		Comments: pass.Comments,
 	}, nil
 }
 
@@ -264,8 +266,9 @@ func (pass RenameObject) AsCompilerPass() (compiler.Pass, error) {
 }
 
 type RetypeField struct {
-	Field string // Expected format: [package].[object].[field]
-	As    ast.Type
+	Field    string // Expected format: [package].[object].[field]
+	As       ast.Type
+	Comments []string
 }
 
 func (pass RetypeField) AsCompilerPass() (compiler.Pass, error) {
@@ -275,8 +278,9 @@ func (pass RetypeField) AsCompilerPass() (compiler.Pass, error) {
 	}
 
 	return &compiler.RetypeField{
-		Field: fieldRef,
-		As:    pass.As,
+		Field:    fieldRef,
+		As:       pass.As,
+		Comments: pass.Comments,
 	}, nil
 }
 
