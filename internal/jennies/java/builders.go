@@ -32,22 +32,19 @@ func parseBuilders(context common.Context, formatter *typeFormatter) Builders {
 	}
 }
 
-func (b Builders) genBuilder(pkg string, name string, fields []Field) (Builder, bool) {
+func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 	builder, ok := b.getBuilder(pkg, name)
 	if !ok {
-		return Builder{}, false
+		return template.Builder{}, false
 	}
 
 	object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
-	return Builder{
-		Builder: template.Builder{
-			ObjectName:  tools.UpperCamelCase(object.Name),
-			BuilderName: builder.Name,
-			Constructor: b.genConstructor(builder),
-			Options:     b.genOptions(builder.Options),
-			Properties:  builder.Properties,
-		},
-		Fields: fields,
+	return template.Builder{
+		ObjectName:  tools.UpperCamelCase(object.Name),
+		BuilderName: builder.Name,
+		Constructor: b.genConstructor(builder),
+		Options:     b.genOptions(builder.Options),
+		Properties:  builder.Properties,
 	}, true
 }
 

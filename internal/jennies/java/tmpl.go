@@ -64,23 +64,17 @@ type EnumValue struct {
 }
 
 type ClassTemplate struct {
-	Package              string
-	Imports              fmt.Stringer
-	Name                 string
-	Extends              []string
-	ShouldHasConstructor bool
-	Comments             []string
+	Package  string
+	Imports  fmt.Stringer
+	Name     string
+	Extends  []string
+	Comments []string
 
 	Fields     []Field
-	Builder    Builder
+	Builder    cogtemplate.Builder
 	HasBuilder bool
 
 	Variant string
-}
-
-type Builder struct {
-	cogtemplate.Builder
-	Fields []Field
 }
 
 type Field struct {
