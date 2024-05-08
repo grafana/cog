@@ -7,7 +7,7 @@ public class SomeStruct {
     public SomeOtherStruct fieldRef;
     public StringOrBool fieldDisjunctionOfScalars;
     public StringOrSomeOtherStruct fieldMixedDisjunction;
-    public StringOrNull fieldDisjunctionWithNull;
+    public String fieldDisjunctionWithNull;
     public SomeStructOperator operator;
     public List<String> fieldArrayOfStrings;
     public Map<String, String> fieldMapOfStringToString;
