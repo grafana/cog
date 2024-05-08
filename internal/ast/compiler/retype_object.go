@@ -9,8 +9,9 @@ import (
 var _ Pass = (*RetypeObject)(nil)
 
 type RetypeObject struct {
-	Object ObjectReference
-	As     ast.Type
+	Object   ObjectReference
+	As       ast.Type
+	Comments []string
 }
 
 func (pass *RetypeObject) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
@@ -38,6 +39,10 @@ func (pass *RetypeObject) processObject(object ast.Object) ast.Object {
 
 	object.Type = pass.As
 	object.AddToPassesTrail(trailMessage)
+
+	if pass.Comments != nil {
+		object.Comments = pass.Comments
+	}
 
 	return object
 }
