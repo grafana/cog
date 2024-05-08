@@ -37,6 +37,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
 		&compiler.AnonymousEnumToExplicitType{},
 		&compiler.AnonymousStructsToNamed{},
+		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.FlattenDisjunctions{},
 		&compiler.DisjunctionWithNullToOptional{},
 		&compiler.DisjunctionInferMapping{},
