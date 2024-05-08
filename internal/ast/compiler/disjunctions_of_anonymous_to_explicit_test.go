@@ -9,15 +9,15 @@ import (
 func TestDisjunctionOfAnonymousStructsToExplicit(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
-		ast.NewObject("test", "DisjunctionOfThings", ast.NewDisjunction([]ast.Type{
-			ast.NewRef("test", "SomeStruct"),
+		ast.NewObject("test", "disjunctionOfThings", ast.NewDisjunction([]ast.Type{
+			ast.NewRef("test", "someStruct"),
 			ast.NewStruct(
 				ast.NewStructField("Type", ast.String(ast.Value("anonymous-struct"))),
 				ast.NewStructField("FieldFoo", ast.String()),
 			),
 		})),
 
-		ast.NewObject("test", "SomeStruct", ast.NewStruct(
+		ast.NewObject("test", "someStruct", ast.NewStruct(
 			ast.NewStructField("Type", ast.String(ast.Value("some-struct"))),
 			ast.NewStructField("FieldFoo", ast.String()),
 		)),
@@ -25,8 +25,8 @@ func TestDisjunctionOfAnonymousStructsToExplicit(t *testing.T) {
 
 	// Prepare expected output
 	expectedObjects := []ast.Object{
-		ast.NewObject("test", "DisjunctionOfThings", ast.NewDisjunction([]ast.Type{
-			ast.NewRef("test", "SomeStruct"),
+		ast.NewObject("test", "disjunctionOfThings", ast.NewDisjunction([]ast.Type{
+			ast.NewRef("test", "someStruct"),
 			ast.NewRef("test", "TypeAnonymousStruct"),
 		})),
 
