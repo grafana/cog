@@ -2,6 +2,7 @@ package java
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -149,4 +150,17 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	default:
 		return "unknown"
 	}
+}
+
+func (tf *typeFormatter) formatDefaultValue(v any) string {
+	if values, ok := v.([]any); ok {
+		items := make([]string, 0, len(values))
+
+		for _, value := range values {
+			items = append(items, tf.formatDefaultValue(value))
+		}
+		return fmt.Sprintf("new LinkedList<>(List.of(%s))", strings.Join(items, ","))
+	}
+
+	return fmt.Sprintf("%#v", v)
 }

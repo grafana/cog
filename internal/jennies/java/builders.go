@@ -130,13 +130,29 @@ func (b Builders) initSafeGuard(path ast.Path) string {
 	emptyValue := b.typeFormatter.defaultValueFor(valueType)
 	if len(parts) == 1 {
 		return fmt.Sprintf(
-			`	if (this.%[1]s == null) {
-			this.%[1]s = %[2]s;
+			`	if (this.internal.%[1]s == null) {
+			this.internal.%[1]s = %[2]s;
 		}`, tools.LowerCamelCase(parts[0]), emptyValue)
 	}
 
 	return fmt.Sprintf(
-		`	if (this.%[1]s == null) {
-			this.%[1]s = %[2]s;
+		`	if (this.internal.%[1]s == null) {
+			this.internal.%[1]s = %[2]s;
 		}`, strings.Join(parts, "."), emptyValue)
+}
+
+func (b Builders) genDefaults(builder ast.Builder) []template.OptionCall {
+	calls := make([]template.OptionCall, 0)
+	for _, opt := range builder.Options {
+		if opt.Default == nil || len(opt.Args) == 0 {
+			continue
+		}
+
+		calls = append(calls, template.OptionCall{
+			OptionName: opt.Name,
+			Args:       tools.Map(opt.Default.ArgsValues, b.typeFormatter.formatDefaultValue),
+		})
+	}
+
+	return calls
 }
