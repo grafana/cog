@@ -158,7 +158,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		})
 	}
 
-	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name, fields)
+	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name)
 
 	if err := templates.Funcs(template.FuncMap{
 		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
@@ -209,13 +209,12 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
 	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:              pkg,
-		Imports:              jenny.imports,
-		Name:                 object.Name,
-		Extends:              []string{reference},
-		ShouldHasConstructor: jenny.typeFormatter.typeHasBuilder(object.Type),
-		Comments:             object.Comments,
-		Variant:              tools.UpperCamelCase(object.Type.ImplementedVariant()),
+		Package:  pkg,
+		Imports:  jenny.imports,
+		Name:     object.Name,
+		Extends:  []string{reference},
+		Comments: object.Comments,
+		Variant:  tools.UpperCamelCase(object.Type.ImplementedVariant()),
 	}); err != nil {
 		return nil, err
 	}
