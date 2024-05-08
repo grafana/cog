@@ -36,7 +36,7 @@ func kindsysCoreLoader(input CueInput) (ast.Schemas, error) {
 		return nil, err
 	}
 
-	return ast.Schemas{schema}, nil
+	return input.filterSchema(schema)
 }
 
 func inferCoreKindIdentifier(kindRoot cue.Value) (string, error) {
