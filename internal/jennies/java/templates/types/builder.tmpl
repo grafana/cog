@@ -11,6 +11,10 @@
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
+        
+        {{- range .Defaults }}
+        this.set{{ .OptionName }}({{ .Args|join ", " }});
+        {{- end }}
         }
         
     {{- range $opt := .Options }}
@@ -25,10 +29,6 @@
         public {{ .ObjectName }} build() {
             return this.internal;
         }
-    }
-    
-    private void setDefaults() {
-    
     }
 {{- end }}
 

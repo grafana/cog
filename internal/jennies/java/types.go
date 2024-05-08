@@ -2,7 +2,6 @@ package java
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -110,11 +109,11 @@ func formatScalarType(def ast.ScalarType) string {
 	switch def.ScalarKind {
 	case ast.KindString:
 		scalarType = "String"
-	case ast.KindBytes, ast.KindInt8, ast.KindUint8:
+	case ast.KindBytes:
 		scalarType = "Byte"
 	case ast.KindInt16, ast.KindUint16:
 		scalarType = "Short"
-	case ast.KindInt32, ast.KindUint32:
+	case ast.KindInt8, ast.KindUint8, ast.KindInt32, ast.KindUint32:
 		scalarType = "Integer"
 	case ast.KindInt64, ast.KindUint64:
 		scalarType = "Long"
@@ -150,17 +149,4 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	default:
 		return "unknown"
 	}
-}
-
-func (tf *typeFormatter) formatDefaultValue(v any) string {
-	if values, ok := v.([]any); ok {
-		items := make([]string, 0, len(values))
-
-		for _, value := range values {
-			items = append(items, tf.formatDefaultValue(value))
-		}
-		return fmt.Sprintf("new LinkedList<>(List.of(%s))", strings.Join(items, ","))
-	}
-
-	return fmt.Sprintf("%#v", v)
 }

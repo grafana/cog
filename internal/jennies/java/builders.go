@@ -45,6 +45,7 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 		Constructor: b.genConstructor(builder),
 		Options:     b.genOptions(builder.Options),
 		Properties:  builder.Properties,
+		Defaults:    b.genDefaults(builder.Options),
 	}, true
 }
 
@@ -141,18 +142,46 @@ func (b Builders) initSafeGuard(path ast.Path) string {
 		}`, strings.Join(parts, "."), emptyValue)
 }
 
-func (b Builders) genDefaults(builder ast.Builder) []template.OptionCall {
+func (b Builders) genDefaults(options []ast.Option) []template.OptionCall {
 	calls := make([]template.OptionCall, 0)
-	for _, opt := range builder.Options {
+	for _, opt := range options {
 		if opt.Default == nil || len(opt.Args) == 0 {
 			continue
 		}
 
 		calls = append(calls, template.OptionCall{
-			OptionName: opt.Name,
-			Args:       tools.Map(opt.Default.ArgsValues, b.typeFormatter.formatDefaultValue),
+			OptionName: tools.UpperCamelCase(opt.Name),
+			Args:       b.formatDefaultValues(opt.Args),
 		})
 	}
 
 	return calls
+}
+
+func (b Builders) formatDefaultValues(args []ast.Argument) []string {
+	argumentList := make([]string, 0, len(args))
+	for _, arg := range args {
+		if arg.Type.IsRef() {
+			ref := arg.Type.AsRef()
+			object, _ := b.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+			if object.Type.IsEnum() {
+				for _, v := range object.Type.AsEnum().Values {
+					if arg.Type.Default == v.Value {
+						argumentList = append(argumentList, fmt.Sprintf("%s.%s", object.Name, strings.ToUpper(v.Name)))
+						break
+					}
+				}
+			}
+			continue
+		}
+
+		scalar := arg.Type.AsScalar()
+		if scalar.ScalarKind == ast.KindFloat32 || scalar.ScalarKind == ast.KindFloat64 {
+			argumentList = append(argumentList, fmt.Sprintf("%.1f", float64(arg.Type.Default.(int64))))
+		} else {
+			argumentList = append(argumentList, fmt.Sprintf("%#v", arg.Type.Default))
+		}
+	}
+
+	return argumentList
 }
