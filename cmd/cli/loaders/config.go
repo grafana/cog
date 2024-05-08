@@ -309,13 +309,10 @@ func (input *Input) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 			return nil, err
 		}
 
-		schemas, err = passes.Process(schemas)
-		if err != nil {
-			return nil, err
-		}
+		return passes.Process(schemas)
 	}
 
-	return schemas, err
+	return schemas, nil
 }
 
 type Transforms struct {
