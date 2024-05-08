@@ -11,6 +11,8 @@ inputs:
   - kind_registry:
       path: '%kind_registry_path%'
       version: '%kind_registry_version%'
+      transformations:
+        - '%__config_dir%/compiler/kind_registry.yaml'
   - jsonschema:
       url: 'https://raw.githubusercontent.com/grafana/grafana/main/pkg/expr/query.request.schema.json'
       package: expr
@@ -26,6 +28,8 @@ inputs:
         - Route
         - MuteTimeInterval
         - NotificationTemplate
+      transformations:
+        - '%__config_dir%/compiler/alerting.yaml'
 
 transformations:
   schemas:
