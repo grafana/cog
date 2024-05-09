@@ -2,6 +2,7 @@ package java
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -149,4 +150,19 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	default:
 		return "unknown"
 	}
+}
+
+func (tf *typeFormatter) formatScalar(v any) string {
+	if list, ok := v.([]any); ok {
+		items := make([]string, 0, len(list))
+
+		for _, item := range list {
+			items = append(items, tf.formatScalar(item))
+		}
+
+		// FIXME: this is wrong, we can't just assume a list of strings.
+		return strings.Join(items, ", ")
+	}
+
+	return fmt.Sprintf("%#v", v)
 }

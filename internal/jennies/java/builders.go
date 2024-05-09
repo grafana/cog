@@ -161,7 +161,8 @@ func (b Builders) genDefaults(options []ast.Option) []template.OptionCall {
 func (b Builders) formatDefaultValues(args []ast.Argument) []string {
 	argumentList := make([]string, 0, len(args))
 	for _, arg := range args {
-		if arg.Type.IsRef() {
+		switch arg.Type.Kind {
+		case ast.KindRef:
 			ref := arg.Type.AsRef()
 			object, _ := b.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 			if object.Type.IsEnum() {
@@ -172,15 +173,21 @@ func (b Builders) formatDefaultValues(args []ast.Argument) []string {
 					}
 				}
 			}
-			continue
+			// TODO: Implement no enum's case if any
+		case ast.KindScalar:
+			scalar := arg.Type.AsScalar()
+			if scalar.ScalarKind == ast.KindFloat32 || scalar.ScalarKind == ast.KindFloat64 {
+				argumentList = append(argumentList, fmt.Sprintf("%.1f", float64(arg.Type.Default.(int64))))
+			} else {
+				argumentList = append(argumentList, fmt.Sprintf("%#v", arg.Type.Default))
+			}
+		case ast.KindArray:
+			array := arg.Type.AsArray()
+			if array.IsArrayOfScalars() {
+				argumentList = append(argumentList, fmt.Sprintf("List.of(%s)", b.typeFormatter.formatScalar(arg.Type.Default)))
+			}
 		}
-
-		scalar := arg.Type.AsScalar()
-		if scalar.ScalarKind == ast.KindFloat32 || scalar.ScalarKind == ast.KindFloat64 {
-			argumentList = append(argumentList, fmt.Sprintf("%.1f", float64(arg.Type.Default.(int64))))
-		} else {
-			argumentList = append(argumentList, fmt.Sprintf("%#v", arg.Type.Default))
-		}
+		// TODO: Implement the rest of types if any
 	}
 
 	return argumentList
