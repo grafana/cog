@@ -168,7 +168,7 @@ func (b Builders) formatDefaultValues(args []ast.Argument) []string {
 			if object.Type.IsEnum() {
 				for _, v := range object.Type.AsEnum().Values {
 					if arg.Type.Default == v.Value {
-						argumentList = append(argumentList, fmt.Sprintf("%s.%s", object.Name, strings.ToUpper(v.Name)))
+						argumentList = append(argumentList, fmt.Sprintf("%s.%s", object.Name, tools.UpperSnakeCase(v.Name)))
 						break
 					}
 				}
