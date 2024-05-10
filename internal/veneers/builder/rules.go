@@ -29,8 +29,12 @@ func mapToSelected(selector Selector, mapFunc func(builders ast.Builders, builde
 	}
 }
 
-func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath ast.Path, excludeOptions []string) (ast.Builder, error) {
+func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath ast.Path, excludeOptions []string, renameOptions map[string]string) (ast.Builder, error) {
 	newBuilder := intoBuilder
+
+	if renameOptions == nil {
+		renameOptions = map[string]string{}
+	}
 
 	for _, opt := range fromBuilder.Options {
 		if tools.ItemInList(opt.Name, excludeOptions) {
@@ -39,6 +43,10 @@ func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath as
 
 		newOpt := opt
 		newOpt.Assignments = nil
+
+		if as, found := renameOptions[newOpt.Name]; found {
+			newOpt.Name = as
+		}
 
 		for _, assignment := range opt.Assignments {
 			newAssignment := assignment
@@ -69,7 +77,7 @@ func Omit(selector Selector) RewriteRule {
 	}
 }
 
-func MergeInto(selector Selector, sourceBuilderName string, underPath string, excludeOptions []string) RewriteRule {
+func MergeInto(selector Selector, sourceBuilderName string, underPath string, excludeOptions []string, renameOptions map[string]string) RewriteRule {
 	return mapToSelected(selector, func(builders ast.Builders, destinationBuilder ast.Builder) (ast.Builder, error) {
 		sourceBuilder, found := builders.LocateByObject(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
 		if !found {
@@ -83,7 +91,7 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 		}
 
 		// TODO: initializations
-		newBuilder, err := mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions)
+		newBuilder, err := mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions, renameOptions)
 		if err != nil {
 			return ast.Builder{}, err
 		}
@@ -153,7 +161,7 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 		refType := ast.NewRef(ref.ReferredPkg, ref.ReferredType)
 		newRoot[len(newRoot)-1].TypeHint = &refType
 
-		newBuilder, err = mergeOptions(composableBuilder, newBuilder, newRoot, nil)
+		newBuilder, err = mergeOptions(composableBuilder, newBuilder, newRoot, nil, nil)
 		if err != nil {
 			return newBuilder, err
 		}
