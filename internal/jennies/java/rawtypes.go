@@ -68,14 +68,15 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			return
 		}
 
-		output, innerErr := jenny.generateSchema(schema.Package, object)
+		pkg := formatPackageName(schema.Package)
+		output, innerErr := jenny.generateSchema(pkg, object)
 		if innerErr != nil {
 			err = innerErr
 			return
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(schema.Package),
+			pkg,
 			fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)),
 		)
 
