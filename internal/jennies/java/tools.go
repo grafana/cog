@@ -21,6 +21,8 @@ type CastPath struct {
 	Path  string
 }
 
+// formatCastValue identifies if the object to set is a generic one, so it needs
+// to do a cast to the desired object to be able their values.
 func formatCastValue(fieldPath ast.Path) CastPath {
 	refPkg := ""
 	refType := ""
@@ -55,6 +57,8 @@ func formatScalar(val any) any {
 	return newVal
 }
 
+// formatAssignmentPath generates the pad to assign the value. When the value is a generic one (Object) like Custom or FieldConfig
+// we should return until this pad to set the object to it.
 func formatAssignmentPath(fieldPath ast.Path) string {
 	path := tools.LowerCamelCase(fieldPath[0].Identifier)
 
@@ -62,13 +66,12 @@ func formatAssignmentPath(fieldPath ast.Path) string {
 		return tools.LowerCamelCase(path)
 	}
 
-	for i, p := range fieldPath[1:] {
-		identifier := tools.LowerCamelCase(p.Identifier)
-		if i == 0 && p.TypeHint != nil && p.TypeHint.Kind == ast.KindRef {
-			return tools.LowerCamelCase(identifier)
-		}
+	for _, p := range fieldPath[1:] {
+		path = fmt.Sprintf("%s.%s", path, tools.LowerCamelCase(p.Identifier))
 
-		path = fmt.Sprintf("%s.%s", path, identifier)
+		if p.TypeHint != nil {
+			return path
+		}
 	}
 
 	return path

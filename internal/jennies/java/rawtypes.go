@@ -56,6 +56,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	jenny.typeFormatter = jenny.typeFormatter.withPackageMapper(packageMapper)
 
+	alreadyValidatedPanel := make(map[string]bool)
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		jenny.imports = NewImportMap()
 		if object.Type.IsMap() || object.Type.IsArray() {
@@ -80,6 +81,22 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
+
+		// Because we need to check the package only, it could have multiple files and we want to generate
+		// the builder once.
+		if !alreadyValidatedPanel[schema.Package] {
+			panelOutput, innerErr := jenny.generatePanelBuilder(schema.Package)
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+
+			if panelOutput != nil {
+				alreadyValidatedPanel[schema.Package] = true
+				filename := filepath.Join(strings.ToLower(schema.Package), "PanelBuilder.java")
+				files = append(files, *codejen.NewFile(filename, panelOutput, jenny))
+			}
+		}
 	})
 
 	if err != nil {
@@ -112,6 +129,24 @@ func (jenny RawTypes) generateSchema(pkg string, object ast.Object) ([]byte, err
 	}
 
 	return nil, nil
+}
+
+// generatePanelBuilder generates the builder for the panels. Panels don't have a main schema where to put the builder,
+// and it is why we need to generate it in a different file 🤷
+func (jenny RawTypes) generatePanelBuilder(pkg string) ([]byte, error) {
+	builder, hasBuilder := jenny.builders.genPanelBuilder(pkg)
+	if !hasBuilder {
+		return nil, nil
+	}
+
+	builder.Imports = jenny.imports
+
+	var buffer strings.Builder
+	if err := templates.ExecuteTemplate(&buffer, "types/panel_builder.tmpl", builder); err != nil {
+		return nil, err
+	}
+
+	return []byte(buffer.String()), nil
 }
 
 func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) {
