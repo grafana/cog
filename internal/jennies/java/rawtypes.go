@@ -119,12 +119,15 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	var buffer strings.Builder
 
 	enum := object.Type.AsEnum()
-	values := make([]EnumValue, len(enum.Values))
-	for i, value := range enum.Values {
-		values[i] = EnumValue{
+	values := make([]EnumValue, 0, len(enum.Values))
+	for _, value := range enum.Values {
+		if value.Name == "" {
+			continue
+		}
+		values = append(values, EnumValue{
 			Name:  tools.UpperSnakeCase(value.Name),
 			Value: value.Value,
-		}
+		})
 	}
 
 	enumType := "Integer"
@@ -212,7 +215,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  pkg,
 		Imports:  jenny.imports,
-		Name:     object.Name,
+		Name:     tools.UpperCamelCase(object.Name),
 		Extends:  []string{reference},
 		Comments: object.Comments,
 		Variant:  tools.UpperCamelCase(object.Type.ImplementedVariant()),
