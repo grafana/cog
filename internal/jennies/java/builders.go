@@ -146,13 +146,13 @@ func (b Builders) initSafeGuard(path ast.Path) string {
 	emptyValue := b.typeFormatter.defaultValueFor(valueType)
 	if len(parts) == 1 {
 		return fmt.Sprintf(
-			`	if (this.internal.%[1]s == null) {
-			this.internal.%[1]s = %[2]s;
+			`	if (this.%[1]s == null) {
+			this.%[1]s = %[2]s;
 		}`, tools.LowerCamelCase(parts[0]), emptyValue)
 	}
 
 	return fmt.Sprintf(
-		`	if (this.internal.%[1]s == null) {
-			this.internal.%[1]s = %[2]s;
+		`	if (this.%[1]s == null) {
+			this.%[1]s = %[2]s;
 		}`, strings.Join(parts, "."), emptyValue)
 }
