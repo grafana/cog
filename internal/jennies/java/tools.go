@@ -22,7 +22,7 @@ type CastPath struct {
 }
 
 // formatCastValue identifies if the object to set is a generic one, so it needs
-// to do a cast to the desired object to be able their values.
+// to do a cast to the desired object to be able to set their values.
 func formatCastValue(fieldPath ast.Path) CastPath {
 	refPkg := ""
 	refType := ""

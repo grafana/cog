@@ -131,8 +131,8 @@ func (jenny RawTypes) generateSchema(pkg string, object ast.Object) ([]byte, err
 	return nil, nil
 }
 
-// generatePanelBuilder generates the builder for the panels. Panels don't have a main schema where to put the builder,
-// and it is why we need to generate it in a different file 🤷
+// generatePanelBuilder generates the builder for the panels. Panel's builders uses generic "Panel" name, and they don't match
+// with any Schema name. These builders accept values from the different models of the panels, being easier to make it them independent.
 func (jenny RawTypes) generatePanelBuilder(pkg string) ([]byte, error) {
 	builder, hasBuilder := jenny.builders.genPanelBuilder(pkg)
 	if !hasBuilder {
