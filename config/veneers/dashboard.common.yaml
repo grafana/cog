@@ -54,8 +54,10 @@ builders:
         "description", "links",
 
         # TODO: check if these are actually relevant
-        "displayNameFromDS", "filterable", "path", "writeable", "color",
+        "displayNameFromDS", "filterable", "path", "writeable"
       ]
+      rename_options:
+        color: colorScheme
   - merge_into:
       source: FieldConfigSource
       destination: Panel
