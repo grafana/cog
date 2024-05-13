@@ -135,8 +135,6 @@ if [ "${grafana_version_or_main}" == "next" ]; then
   grafana_version_or_main="main"
 fi
 
-echo $grafana_version_or_main
-
 run_codegen "output_dir=${codegen_output_path}/%l,kind_registry_path=${KIND_REGISTRY_PATH},kind_registry_version=${GRAFANA_VERSION},grafana_version=${grafana_version_or_main},cog_version=${COG_VERSION},release_branch=${release_branch},build_timestamp=${build_timestamp}"
 
 release_branch_exists=$(git_has_branch "${FOUNDATION_SDK_PATH}" "${release_branch}")
