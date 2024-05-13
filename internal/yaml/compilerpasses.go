@@ -26,6 +26,7 @@ type CompilerPass struct {
 	DisjunctionToType                       *DisjunctionToType                       `yaml:"disjunction_to_type"`
 	DisjunctionOfAnonymousStructsToExplicit *DisjunctionOfAnonymousStructsToExplicit `yaml:"disjunction_of_anonymous_structs_to_explicit"`
 	DisjunctionInferMapping                 *DisjunctionInferMapping                 `yaml:"disjunction_infer_mapping"`
+	DisjunctionWithConstantToDefault        *DisjunctionWithConstantToDefault        `yaml:"disjunction_with_constant_to_default"`
 
 	DashboardPanels *DashboardPanels `yaml:"dashboard_panels"`
 
@@ -87,6 +88,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DisjunctionInferMapping != nil {
 		return pass.DisjunctionInferMapping.AsCompilerPass()
+	}
+	if pass.DisjunctionWithConstantToDefault != nil {
+		return pass.DisjunctionWithConstantToDefault.AsCompilerPass()
 	}
 
 	if pass.DashboardPanels != nil {
@@ -340,6 +344,13 @@ type DisjunctionInferMapping struct {
 
 func (pass DisjunctionInferMapping) AsCompilerPass() (compiler.Pass, error) {
 	return &compiler.DisjunctionInferMapping{}, nil
+}
+
+type DisjunctionWithConstantToDefault struct {
+}
+
+func (pass DisjunctionWithConstantToDefault) AsCompilerPass() (compiler.Pass, error) {
+	return &compiler.DisjunctionWithConstantToDefault{}, nil
 }
 
 type DashboardPanels struct {
