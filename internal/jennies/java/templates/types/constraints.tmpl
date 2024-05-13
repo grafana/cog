@@ -10,8 +10,8 @@
         {{- $leftOperand = print $leftOperand ".length()" }}
         {{- $operator = "<=" }}
     {{- end }}
-        if ({{ $leftOperand }} {{ $operator }} {{ .Parameter }}) {
-            return this;
+        if (!({{ $leftOperand }} {{ $operator }} {{ .Parameter }})) {
+            throw new RuntimeException("{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}");
         }
 {{- end }}
 {{- end }}
