@@ -5,6 +5,7 @@ go 1.21
 require (
 	cuelang.org/go v0.8.2
 	github.com/Masterminds/sprig/v3 v3.2.3
+	github.com/expr-lang/expr v1.16.7
 	github.com/getkin/kin-openapi v0.124.0
 	github.com/google/go-cmp v0.6.0
 	github.com/grafana/codejen v0.0.4-0.20230321061741-77f656893a3d
