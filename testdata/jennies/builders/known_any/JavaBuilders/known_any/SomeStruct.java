@@ -14,7 +14,9 @@ public class SomeStruct {
     	if (this.config == null) {
 			this.config = new known_any.Config();
 		}
-    this.internal.config = title;
+        known_any.Config configResource = (known_any.Config) this.internal.config;
+        configResource.title = title;
+    this.internal.config = configResource;
         return this;
     }
     public SomeStruct build() {
