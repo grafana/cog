@@ -23,6 +23,8 @@ type CompilerPass struct {
 	RetypeField              *RetypeField              `yaml:"retype_field"`
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
 
+	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
+
 	DisjunctionToType                       *DisjunctionToType                       `yaml:"disjunction_to_type"`
 	DisjunctionOfAnonymousStructsToExplicit *DisjunctionOfAnonymousStructsToExplicit `yaml:"disjunction_of_anonymous_structs_to_explicit"`
 	DisjunctionInferMapping                 *DisjunctionInferMapping                 `yaml:"disjunction_infer_mapping"`
@@ -78,6 +80,10 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.SchemaSetIdentifier != nil {
 		return pass.SchemaSetIdentifier.AsCompilerPass()
+	}
+
+	if pass.AnonymousStructsToNamed != nil {
+		return pass.AnonymousStructsToNamed.AsCompilerPass()
 	}
 
 	if pass.DisjunctionToType != nil {
@@ -323,6 +329,13 @@ func (pass SchemaSetIdentifier) AsCompilerPass() (compiler.Pass, error) {
 		Package:    pass.Package,
 		Identifier: pass.Identifier,
 	}, nil
+}
+
+type AnonymousStructsToNamed struct {
+}
+
+func (pass AnonymousStructsToNamed) AsCompilerPass() (compiler.Pass, error) {
+	return &compiler.AnonymousStructsToNamed{}, nil
 }
 
 type DisjunctionToType struct {
