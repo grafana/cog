@@ -247,7 +247,12 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	var buffer strings.Builder
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
-	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+	if err := templates.Funcs(template.FuncMap{
+		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
+		"formatType":               jenny.typeFormatter.formatFieldType,
+		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
+		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
+	}).ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  pkg,
 		Imports:  jenny.imports,
 		Name:     tools.UpperCamelCase(object.Name),
@@ -277,7 +282,12 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 		}
 	}
 
-	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+	if err := templates.Funcs(template.FuncMap{
+		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
+		"formatType":               jenny.typeFormatter.formatFieldType,
+		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
+		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
+	}).ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  pkg,
 		Imports:  jenny.imports,
 		Name:     object.Name,
