@@ -163,17 +163,7 @@ func (b Builders) formatDefaultValues(args []ast.Argument) []string {
 	for _, arg := range args {
 		switch arg.Type.Kind {
 		case ast.KindRef:
-			ref := arg.Type.AsRef()
-			object, _ := b.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
-			if object.Type.IsEnum() {
-				for _, v := range object.Type.AsEnum().Values {
-					if arg.Type.Default == v.Value {
-						argumentList = append(argumentList, fmt.Sprintf("%s.%s", object.Name, tools.UpperSnakeCase(v.Name)))
-						break
-					}
-				}
-			}
-			// TODO: Implement no enum's case if any
+			argumentList = append(argumentList, b.formatDefaultReference(arg.Type.AsRef(), arg.Type.Default))
 		case ast.KindScalar:
 			scalar := arg.Type.AsScalar()
 			if scalar.ScalarKind == ast.KindFloat32 || scalar.ScalarKind == ast.KindFloat64 {
@@ -186,9 +176,37 @@ func (b Builders) formatDefaultValues(args []ast.Argument) []string {
 			if array.IsArrayOfScalars() {
 				argumentList = append(argumentList, fmt.Sprintf("List.of(%s)", b.typeFormatter.formatScalar(arg.Type.Default)))
 			}
+		case ast.KindStruct:
+			// TODO: Java is using veneers to avoid anonymous structs but it should be detailed if we need it at any moment.
+			argumentList = append(argumentList, "new Object()")
 		}
 		// TODO: Implement the rest of types if any
 	}
 
 	return argumentList
+}
+
+func (b Builders) formatDefaultReference(ref ast.RefType, defValue any) string {
+	object, _ := b.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	switch object.Type.Kind {
+	case ast.KindEnum:
+		for _, v := range object.Type.AsEnum().Values {
+			if defValue == v.Value {
+				return fmt.Sprintf("%s.%s", object.Name, tools.UpperSnakeCase(v.Name))
+			}
+		}
+	case ast.KindStruct:
+		// TODO: Builder could have arguments 🙃
+		builder := fmt.Sprintf("new %s.Builder()", tools.UpperCamelCase(object.Name))
+		structType := object.Type.AsStruct()
+		defValues := defValue.(map[string]interface{})
+		for _, field := range structType.Fields {
+			if f, ok := defValues[field.Name]; ok {
+				builder = fmt.Sprintf("%s.set%s(%#v)", builder, tools.UpperCamelCase(field.Name), f)
+			}
+		}
+		return builder + ".build()"
+	}
+
+	return ""
 }
