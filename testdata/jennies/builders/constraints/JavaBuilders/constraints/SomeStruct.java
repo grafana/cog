@@ -12,19 +12,19 @@ public class SomeStruct {
             this.internal = new SomeStruct();
         }
     public Builder setId(Long id) {
-        if (id >= 5) {
-            return this;
+        if (!(id >= 5)) {
+            throw new RuntimeException("id must be >= 5");
         }
-        if (id < 10) {
-            return this;
+        if (!(id < 10)) {
+            throw new RuntimeException("id must be < 10");
         }
     this.internal.id = id;
         return this;
     }
     
     public Builder setTitle(String title) {
-        if (title.length() >= 1) {
-            return this;
+        if (!(title.length() >= 1)) {
+            throw new RuntimeException("title.length() must be >= 1");
         }
     this.internal.title = title;
         return this;
