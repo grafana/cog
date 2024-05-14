@@ -12,8 +12,9 @@ import (
 )
 
 type options struct {
-	BuilderIR  bool
-	ConfigPath string
+	BuilderIR       bool
+	ConfigPath      string
+	ExtraParameters map[string]string
 }
 
 func Command() *cobra.Command {
@@ -33,6 +34,7 @@ func Command() *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&opts.BuilderIR, "builder-ir", false, "Inspect the \"builder IR\" instead of the \"types\" one.") // TODO: better usage text
+	cmd.Flags().StringToStringVar(&opts.ExtraParameters, "parameters", nil, "Sets or overrides parameters used in the config file.")
 
 	cmd.Flags().StringVar(&opts.ConfigPath, "config", "", "Configuration file.")
 	_ = cmd.MarkFlagFilename("config")
@@ -48,6 +50,9 @@ func doInspect(opts options) error {
 	if err != nil {
 		return err
 	}
+
+	config = config.WithParameters(opts.ExtraParameters)
+	config = config.InterpolateParameters()
 
 	schemas, err := config.LoadSchemas(ctx)
 	if err != nil {
