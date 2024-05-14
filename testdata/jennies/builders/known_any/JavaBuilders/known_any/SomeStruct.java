@@ -11,8 +11,8 @@ public class SomeStruct {
             this.internal = new SomeStruct();
         }
     public Builder setTitle(String title) {
-    	if (this.config == null) {
-			this.config = new known_any.Config();
+    	if (this.internal.config == null) {
+			this.internal.config = new known_any.Config();
 		}
     this.internal.config = title;
         return this;

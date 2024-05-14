@@ -13,6 +13,10 @@ public class Struct {
         
         public Builder() {
             this.internal = new Struct();
+        this.setAllFields();
+        this.setPartialFields();
+        this.setComplexField();
+        this.setPartialComplexField();
         }
     public Builder setAllFields(cog.Builder<NestedStruct> allFields) {
     this.internal.allFields = allFields.build();

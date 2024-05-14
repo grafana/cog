@@ -13,6 +13,10 @@ public class SomeStruct {
         
         public Builder() {
             this.internal = new SomeStruct();
+        this.setId(42);
+        this.setUid("default-uid");
+        this.setTags(List.of("generated", "cog"));
+        this.setLiveNow(true);
         }
     public Builder setId(Long id) {
     this.internal.id = id;

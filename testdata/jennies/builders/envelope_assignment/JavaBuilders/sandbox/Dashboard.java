@@ -13,8 +13,8 @@ public class Dashboard {
             this.internal = new Dashboard();
         }
     public Builder setWithVariable(String name,String value) {
-    	if (this.variables == null) {
-			this.variables = new LinkedList<>();
+    	if (this.internal.variables == null) {
+			this.internal.variables = new LinkedList<>();
 		}
     Variable variable = new Variable();
         variable.name = name;
