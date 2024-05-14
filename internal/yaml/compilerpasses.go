@@ -23,9 +23,12 @@ type CompilerPass struct {
 	RetypeField              *RetypeField              `yaml:"retype_field"`
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
 
+	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
+
 	DisjunctionToType                       *DisjunctionToType                       `yaml:"disjunction_to_type"`
 	DisjunctionOfAnonymousStructsToExplicit *DisjunctionOfAnonymousStructsToExplicit `yaml:"disjunction_of_anonymous_structs_to_explicit"`
 	DisjunctionInferMapping                 *DisjunctionInferMapping                 `yaml:"disjunction_infer_mapping"`
+	DisjunctionWithConstantToDefault        *DisjunctionWithConstantToDefault        `yaml:"disjunction_with_constant_to_default"`
 
 	DashboardPanels *DashboardPanels `yaml:"dashboard_panels"`
 
@@ -79,6 +82,10 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 		return pass.SchemaSetIdentifier.AsCompilerPass()
 	}
 
+	if pass.AnonymousStructsToNamed != nil {
+		return pass.AnonymousStructsToNamed.AsCompilerPass()
+	}
+
 	if pass.DisjunctionToType != nil {
 		return pass.DisjunctionToType.AsCompilerPass()
 	}
@@ -87,6 +94,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DisjunctionInferMapping != nil {
 		return pass.DisjunctionInferMapping.AsCompilerPass()
+	}
+	if pass.DisjunctionWithConstantToDefault != nil {
+		return pass.DisjunctionWithConstantToDefault.AsCompilerPass()
 	}
 
 	if pass.DashboardPanels != nil {
@@ -321,6 +331,13 @@ func (pass SchemaSetIdentifier) AsCompilerPass() (compiler.Pass, error) {
 	}, nil
 }
 
+type AnonymousStructsToNamed struct {
+}
+
+func (pass AnonymousStructsToNamed) AsCompilerPass() (compiler.Pass, error) {
+	return &compiler.AnonymousStructsToNamed{}, nil
+}
+
 type DisjunctionToType struct {
 }
 
@@ -340,6 +357,13 @@ type DisjunctionInferMapping struct {
 
 func (pass DisjunctionInferMapping) AsCompilerPass() (compiler.Pass, error) {
 	return &compiler.DisjunctionInferMapping{}, nil
+}
+
+type DisjunctionWithConstantToDefault struct {
+}
+
+func (pass DisjunctionWithConstantToDefault) AsCompilerPass() (compiler.Pass, error) {
+	return &compiler.DisjunctionWithConstantToDefault{}, nil
 }
 
 type DashboardPanels struct {

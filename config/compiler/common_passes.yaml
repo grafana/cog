@@ -1,3 +1,4 @@
 passes:
   - entrypoint_identification: {}
   - dataquery_identification: {}
+  - disjunction_with_constant_to_default: {}

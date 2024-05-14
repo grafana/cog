@@ -1,4 +1,4 @@
-package with-dashes;
+package withdashes;
 
 
 public class StringOrBool {

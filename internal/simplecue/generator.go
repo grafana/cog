@@ -106,7 +106,7 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 			return err
 		}
 
-		rootObjectFields = append(rootObjectFields, ast.NewStructField(name, nodeType))
+		rootObjectFields = append(rootObjectFields, ast.NewStructField(name, nodeType, ast.Comments(commentsFromCueValue(i.Value()))))
 	}
 
 	if len(rootObjectFields) == 0 {
