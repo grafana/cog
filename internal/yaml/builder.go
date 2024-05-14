@@ -80,10 +80,11 @@ func (rule RenameBuilder) AsRewriteRule(pkg string) (builder.RewriteRule, error)
 }
 
 type MergeInto struct {
-	Destination    string   `yaml:"destination"`
-	Source         string   `yaml:"source"`
-	UnderPath      string   `yaml:"under_path"`
-	ExcludeOptions []string `yaml:"exclude_options"`
+	Destination    string            `yaml:"destination"`
+	Source         string            `yaml:"source"`
+	UnderPath      string            `yaml:"under_path"`
+	ExcludeOptions []string          `yaml:"exclude_options"`
+	RenameOptions  map[string]string `yaml:"rename_options"`
 }
 
 func (rule MergeInto) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -92,6 +93,7 @@ func (rule MergeInto) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 		rule.Source,
 		rule.UnderPath,
 		rule.ExcludeOptions,
+		rule.RenameOptions,
 	), nil
 }
 

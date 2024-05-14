@@ -27,7 +27,7 @@ jobs:
         run: make deps
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v5
+        uses: golangci/golangci-lint-action@v6
         with:
           version: v1.54.2
           # Done by setup-go
@@ -92,7 +92,7 @@ jobs:
         run: |
           go run cmd/cli/main.go generate \
             --config ./config/foundation_sdk.dev.yaml \
-            --parameters output_dir=./generated/%l,kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
+            --parameters output_dir=./generated/%l,grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
 
       - name: Compile generated Go code
         run: |
@@ -146,7 +146,7 @@ jobs:
         run: |
           go run cmd/cli/main.go generate \
             --config ./config/foundation_sdk.dev.yaml \
-            --parameters kind_registry_version=next
+            --parameters kind_registry_version=next,grafana_version=main
 
       - name: Run the Go example
         run: |

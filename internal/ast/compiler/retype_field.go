@@ -9,8 +9,9 @@ import (
 var _ Pass = (*RetypeField)(nil)
 
 type RetypeField struct {
-	Field FieldReference
-	As    ast.Type
+	Field    FieldReference
+	As       ast.Type
+	Comments []string
 }
 
 func (pass *RetypeField) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
@@ -41,6 +42,12 @@ func (pass *RetypeField) processObject(object ast.Object) ast.Object {
 
 		object.Type.Struct.Fields[i].AddToPassesTrail(fmt.Sprintf("RetypeField[%s → %s]", ast.TypeName(field.Type), ast.TypeName(pass.As)))
 		object.Type.Struct.Fields[i].Type = pass.As
+
+		if pass.Comments != nil {
+			object.Type.Struct.Fields[i].Comments = pass.Comments
+		}
+
+		break
 	}
 
 	return object

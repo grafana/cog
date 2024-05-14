@@ -68,14 +68,15 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			return
 		}
 
-		output, innerErr := jenny.generateSchema(schema.Package, object)
+		pkg := formatPackageName(schema.Package)
+		output, innerErr := jenny.generateSchema(pkg, object)
 		if innerErr != nil {
 			err = innerErr
 			return
 		}
 
 		filename := filepath.Join(
-			strings.ToLower(schema.Package),
+			pkg,
 			fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)),
 		)
 
@@ -120,6 +121,9 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	enum := object.Type.AsEnum()
 	values := make([]EnumValue, len(enum.Values))
 	for i, value := range enum.Values {
+		if value.Name == "" {
+			value.Name = "None"
+		}
 		values[i] = EnumValue{
 			Name:  tools.UpperSnakeCase(value.Name),
 			Value: value.Value,
@@ -211,7 +215,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	if err := templates.ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  pkg,
 		Imports:  jenny.imports,
-		Name:     object.Name,
+		Name:     tools.UpperCamelCase(object.Name),
 		Extends:  []string{reference},
 		Comments: object.Comments,
 		Variant:  tools.UpperCamelCase(object.Type.ImplementedVariant()),

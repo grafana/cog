@@ -128,9 +128,9 @@ func (pass *DisjunctionOfAnonymousStructsToExplicit) generateBranchName(branch a
 	for _, field := range branch.Struct.Fields {
 		if field.Type.IsConcreteScalar() {
 			val := fmt.Sprintf("%v", field.Type.Scalar.Value)
-			return fmt.Sprintf("%s%s", field.Name, tools.UpperCamelCase(val))
+			return fmt.Sprintf("%s%s", tools.UpperCamelCase(field.Name), tools.UpperCamelCase(val))
 		}
 	}
 
-	return fmt.Sprintf("branch%d", index)
+	return fmt.Sprintf("Branch%d", index)
 }
