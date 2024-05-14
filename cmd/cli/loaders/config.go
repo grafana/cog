@@ -191,7 +191,7 @@ func (config Config) OutputLanguages() (jennies.LanguageJennies, error) {
 		case output.Go != nil:
 			outputs[golang.LanguageRef] = golang.New(*output.Go)
 		case output.Java != nil:
-			outputs[java.LanguageRef] = java.New()
+			outputs[java.LanguageRef] = java.New(*output.Java)
 		case output.JSONSchema != nil:
 			outputs[jsonschema.LanguageRef] = jsonschema.New()
 		case output.OpenAPI != nil:

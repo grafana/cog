@@ -9,24 +9,40 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
+	GeneratePOM  bool   `yaml:"gen_pom"`
+	MavenVersion string `yaml:"maven_version"`
+	ProjectPath  string
+}
+
+func (config Config) mergeWithGlobal(global common.Config) Config {
+	newConfig := config
+	if config.GeneratePOM {
+		newConfig.ProjectPath = "src/main/java/com/grafana/foundation"
+	}
+
+	return newConfig
 }
 
 type Language struct {
 	config Config
 }
 
-func New() *Language {
-	return &Language{config: Config{}}
+func New(config Config) *Language {
+	return &Language{
+		config: config,
+	}
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
+	config := language.config.mergeWithGlobal(globalConfig)
+
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef
 	})
-
 	jenny.AppendOneToMany(
-		Runtime{},
-		RawTypes{},
+		Runtime{config},
+		RawTypes{config: config},
+		common.If[common.Context](config.GeneratePOM, Pom{config}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

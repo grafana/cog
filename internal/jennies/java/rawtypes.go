@@ -13,6 +13,7 @@ import (
 )
 
 type RawTypes struct {
+	config  Config
 	imports *common.DirectImportMap
 
 	typeFormatter *typeFormatter
@@ -75,7 +76,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			return
 		}
 
-		filename := filepath.Join(
+		filename := filepath.Join(jenny.config.ProjectPath,
 			pkg,
 			fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)),
 		)
@@ -93,7 +94,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			return nil, err
 		}
 
-		filename := filepath.Join(strings.ToLower(schema.Package), "Constants.java")
+		filename := filepath.Join(jenny.config.ProjectPath, strings.ToLower(schema.Package), "Constants.java")
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
