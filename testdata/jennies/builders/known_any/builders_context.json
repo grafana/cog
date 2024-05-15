@@ -61,64 +61,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "known_any",
-        "Metadata": {},
-        "Objects": {
-          "SomeStruct": {
-            "Name": "SomeStruct",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "config",
-                    "Type": {
-                      "Kind": "scalar",
-                      "Nullable": true,
-                      "Scalar": {
-                        "ScalarKind": "any"
-                      }
-                    },
-                    "Required": false
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "known_any",
-              "ReferredType": "SomeStruct"
-            }
-          },
-          "Config": {
-            "Name": "Config",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "title",
-                    "Type": {
-                      "Kind": "scalar",
-                      "Nullable": false,
-                      "Scalar": {
-                        "ScalarKind": "string"
-                      }
-                    },
-                    "Required": false
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "known_any",
-              "ReferredType": "Config"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "SomeStruct",
         "Type": {

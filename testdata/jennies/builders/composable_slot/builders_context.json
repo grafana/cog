@@ -52,55 +52,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "composable_slot",
-        "Metadata": {},
-        "Objects": {
-          "Dashboard": {
-            "Name": "Dashboard",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "target",
-                    "Type": {
-                      "Kind": "composable_slot",
-                      "Nullable": false,
-                      "ComposableSlot": {
-                        "Variant": "dataquery"
-                      }
-                    },
-                    "Required": true
-                  },
-                  {
-                    "Name": "targets",
-                    "Type": {
-                      "Kind": "array",
-                      "Nullable": false,
-                      "Array": {
-                        "ValueType": {
-                          "Kind": "composable_slot",
-                          "Nullable": false,
-                          "ComposableSlot": {
-                            "Variant": "dataquery"
-                          }
-                        }
-                      }
-                    },
-                    "Required": true
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "composable_slot",
-              "ReferredType": "Dashboard"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "Dashboard",
         "Type": {

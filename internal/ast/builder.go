@@ -8,10 +8,7 @@ import (
 )
 
 type Builder struct {
-	// Original data used to derive the builder, stored for read-only access
-	// for the jennies and veneers.
-	Schema *Schema
-	For    Object
+	For Object
 
 	// The builder itself
 	// These fields are completely derived from the fields above and can be freely manipulated
@@ -36,7 +33,6 @@ func (builder *Builder) OptionByName(name string) (Option, bool) {
 
 func (builder *Builder) DeepCopy() Builder {
 	clone := Builder{
-		Schema:      builder.Schema,
 		For:         builder.For,
 		Package:     builder.Package,
 		Name:        builder.Name,
@@ -458,7 +454,6 @@ func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
 func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema *Schema, object Object) Builder {
 	builder := Builder{
 		Package: schema.Package,
-		Schema:  schema,
 		For:     object,
 		Name:    object.Name,
 	}
