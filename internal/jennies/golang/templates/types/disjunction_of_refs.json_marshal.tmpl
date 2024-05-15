@@ -1,7 +1,7 @@
-func (resource {{ .def.Name|upperCamelCase }}) MarshalJSON() ([]byte, error) {
+func (resource {{ .def.Name }}) MarshalJSON() ([]byte, error) {
 {{- range .def.Type.Struct.Fields }}
-	if resource.{{ .Name|upperCamelCase }} != nil {
-		return json.Marshal(resource.{{ .Name|upperCamelCase }})
+	if resource.{{ .Name }} != nil {
+		return json.Marshal(resource.{{ .Name }})
 	}
 {{- end }}
 

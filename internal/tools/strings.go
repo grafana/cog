@@ -48,8 +48,8 @@ func LowerCamelCase(s string) string {
 	return s
 }
 
-// CleanupNames removes all non-alphanumeric characters
-func CleanupNames(s string) string {
+// StripNonAlphaNumeric removes all non-alphanumeric characters
+func StripNonAlphaNumeric(s string) string {
 	return nonAlphaNumRegex.ReplaceAllString(s, "")
 }
 

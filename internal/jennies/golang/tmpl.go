@@ -22,6 +22,7 @@ func init() {
 	base := template.New("golang")
 	base.
 		Option("missingkey=error").
+		Funcs(cogtemplate.FormatterHelpers(ast.NewIdentifierFormatter())).
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(template.FuncMap{
@@ -45,9 +46,8 @@ func init() {
 			},
 		}).
 		Funcs(map[string]any{
-			"formatPackageName": formatPackageName,
-			"formatScalar":      formatScalar,
-			"formatArgName":     formatArgName,
+			"formatScalar":  formatScalar,
+			"formatArgName": formatArgName,
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
 				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot()) {
 					return "&" + variableName

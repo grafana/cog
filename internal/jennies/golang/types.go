@@ -248,23 +248,21 @@ func defineAnonymousFields(def ast.StructType) string {
 	var structDefinition strings.Builder
 
 	for _, f := range def.Fields {
-		key := tools.UpperCamelCase(f.Name)
-
 		switch f.Type.Kind {
 		case ast.KindScalar:
-			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", key, f.Type.AsScalar().ScalarKind, f.OriginalName))
+			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", f.Name, f.Type.AsScalar().ScalarKind, f.OriginalName))
 		case ast.KindStruct:
 			structFields := defineAnonymousFields(f.Type.AsStruct())
-			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, f.OriginalName))
+			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", f.Name, structFields, f.OriginalName))
 		case ast.KindArray:
 			array := f.Type.AsArray()
 			if array.ValueType.IsScalar() {
-				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, f.OriginalName))
+				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", f.Name, array.ValueType.AsScalar().ScalarKind, f.OriginalName))
 			}
 		// TODO: Map rest of array cases
 		default:
 			// TODO: Map rest of the cases when necessary. By default it sets any
-			structDefinition.WriteString(fmt.Sprintf("%s any `json:\"%s\"`\n", key, strings.ToLower(key)))
+			structDefinition.WriteString(fmt.Sprintf("%s any `json:\"%s\"`\n", f.Name, f.OriginalName))
 		}
 	}
 

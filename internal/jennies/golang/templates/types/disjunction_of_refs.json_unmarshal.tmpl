@@ -1,4 +1,4 @@
-func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error {
+func (resource *{{ .def.Name }}) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

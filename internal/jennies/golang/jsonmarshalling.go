@@ -7,12 +7,13 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/tools"
+	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
 type JSONMarshalling struct {
-	packageMapper func(string) string
-	typeFormatter *typeFormatter
+	identifiersFormatter *ast.IdentifierFormatter
+	packageMapper        func(string) string
+	typeFormatter        *typeFormatter
 }
 
 func (jenny JSONMarshalling) generateForSchema(buffer *strings.Builder, schema *ast.Schema) error {
@@ -140,7 +141,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.
 			continue
 		}
 
-		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.Name == "options" {
+		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.OriginalName == "options" {
 			buffer.WriteString(fmt.Sprintf(`
 	if fields["%[1]s"] != nil {
 		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Type)
@@ -156,11 +157,11 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.
 			}
 		}
 	}
-`, field.Name, tools.UpperCamelCase(field.Name)))
+`, field.OriginalName, field.Name))
 			continue
 		}
 
-		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.Name == "fieldConfig" {
+		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.OriginalName == "fieldConfig" {
 			buffer.WriteString(fmt.Sprintf(`
 	if fields["%[1]s"] != nil {
 		if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
@@ -188,7 +189,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.
 			}
 		}
 	}
-`, field.Name, tools.UpperCamelCase(field.Name)))
+`, field.OriginalName, field.Name))
 			continue
 		}
 
@@ -198,7 +199,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.
 			return err
 		}
 	}
-`, field.Name, tools.UpperCamelCase(field.Name)))
+`, field.OriginalName, field.Name))
 	}
 
 	// unmarshal "composable slot" fields
@@ -230,7 +231,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.
 	%[2]s
 	return nil
 }
-`, tools.UpperCamelCase(obj.Name), buffer.String()), nil
+`, obj.Name, buffer.String()), nil
 }
 
 func (jenny JSONMarshalling) renderUnmarshalDataqueryField(parentStruct ast.Object, field ast.StructField) string {
@@ -256,7 +257,7 @@ func (jenny JSONMarshalling) renderUnmarshalDataqueryField(parentStruct ast.Obje
 		hintValue += fmt.Sprintf(`if resource.%[1]s != nil && resource.%[1]s.Type != nil {
 dataqueryTypeHint = *resource.%[1]s.Type
 }
-`, tools.UpperCamelCase(hintField.Name))
+`, hintField.Name)
 	}
 
 	if field.Type.IsArray() {
@@ -269,7 +270,7 @@ dataqueryTypeHint = *resource.%[1]s.Type
 		}
 		resource.%[1]s = %[2]s
 	}
-`, tools.UpperCamelCase(field.Name), field.Name, hintValue)
+`, field.Name, field.OriginalName, hintValue)
 	}
 
 	return fmt.Sprintf(`
@@ -281,7 +282,7 @@ dataqueryTypeHint = *resource.%[1]s.Type
 		}
 		resource.%[1]s = %[2]s
 	}
-`, tools.UpperCamelCase(field.Name), field.Name, hintValue)
+`, field.Name, field.OriginalName, hintValue)
 }
 
 func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
@@ -309,9 +310,11 @@ func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema,
 func (jenny JSONMarshalling) renderTemplate(templateFile string, data map[string]any) (string, error) {
 	buf := bytes.Buffer{}
 
-	tmpls := templates.Funcs(map[string]any{
-		"formatType": jenny.typeFormatter.formatType,
-	})
+	tmpls := templates.
+		Funcs(cogtemplate.FormatterHelpers(jenny.identifiersFormatter)).
+		Funcs(map[string]any{
+			"formatType": jenny.typeFormatter.formatType,
+		})
 
 	if err := tmpls.ExecuteTemplate(&buf, templateFile, data); err != nil {
 		return "", fmt.Errorf("failed executing template: %w", err)
