@@ -46,8 +46,7 @@ func init() {
 			},
 		}).
 		Funcs(map[string]any{
-			"formatScalar":  formatScalar,
-			"formatArgName": formatArgName,
+			"formatScalar": formatScalar,
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
 				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot()) {
 					return "&" + variableName

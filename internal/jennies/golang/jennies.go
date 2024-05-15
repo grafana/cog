@@ -111,12 +111,16 @@ func (language *Language) IdentifiersFormatter() *ast.IdentifierFormatter {
 	return ast.NewIdentifierFormatter(
 		ast.PackageFormatter(formatPackageName),
 		ast.ObjectFormatter(tools.UpperCamelCase),
-		ast.ObjectFieldFormatter(tools.UpperCamelCase),
+		ast.ObjectPublicFieldFormatter(tools.UpperCamelCase),
+		ast.ObjectPrivateFieldFormatter(tools.LowerCamelCase),
+		ast.ConstantFormatter(tools.UpperCamelCase),
+		ast.OptionFormatter(tools.UpperCamelCase),
 		ast.EnumFormatter(tools.UpperCamelCase),
 		ast.EnumMemberFormatter(func(s string) string {
 			return tools.StripNonAlphaNumeric(tools.UpperCamelCase(s))
 		}),
-		ast.ConstantFormatter(tools.UpperCamelCase),
-		ast.VariableFormatter(formatArgName),
+		ast.VariableFormatter(func(name string) string {
+			return escapeVarName(tools.LowerCamelCase(name))
+		}),
 	)
 }

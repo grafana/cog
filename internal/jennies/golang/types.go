@@ -166,7 +166,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 		"%s %s `json:\"%s%s\"`\n",
 		def.Name,
 		formatter.doFormatType(fieldType, false),
-		def.Name,
+		def.OriginalName,
 		jsonOmitEmpty,
 	))
 
@@ -215,6 +215,7 @@ func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilde
 	count := 0
 	structMap.Iterate(func(key string, value interface{}) {
 		field, _ := def.FieldByName(key)
+		key = tools.UpperCamelCase(key)
 
 		switch x := value.(type) {
 		case map[string]interface{}:

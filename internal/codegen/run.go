@@ -100,27 +100,22 @@ func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, s
 		return common.Context{}, err
 	}
 
-	// if the language defines an identifier formatter, let's apply it.
-	if formatterProvider, ok := language.(interface {
-		IdentifiersFormatter() *ast.IdentifierFormatter
-	}); ok {
-		formatter := ast.NewIdentifierFormatterPass(formatterProvider.IdentifiersFormatter())
-		jenniesInput.Schemas, err = formatter.Process(jenniesInput.Schemas)
-		if err != nil {
-			return common.Context{}, err
-		}
-	}
-
 	if !pipeline.Output.Builders {
-		return jenniesInput, nil
+		return pipeline.formatIdentifiers(language, jenniesInput)
 	}
 
-	// from schemas, derive builders
+	// from these types, create builders
 	builderGenerator := &ast.BuilderGenerator{}
-	jenniesInput.Builders = builderGenerator.FromAST(jenniesInput.Schemas)
+	builders := builderGenerator.FromAST(jenniesInput.Schemas)
 
-	// apply veneers to builders
-	jenniesInput.Builders, err = veneers.ApplyTo(jenniesInput.Schemas, jenniesInput.Builders, language.Name())
+	// apply the builder veneers
+	builders, err = veneers.ApplyTo(jenniesInput.Schemas, builders, language.Name())
+	if err != nil {
+		return common.Context{}, err
+	}
+
+	// ensure identifiers are properly formatted
+	jenniesInput, err = pipeline.formatIdentifiers(language, jenniesInput)
 	if err != nil {
 		return common.Context{}, err
 	}
@@ -130,6 +125,32 @@ func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, s
 	if err != nil {
 		return common.Context{}, err
 	}
+
+	return jenniesInput, nil
+}
+
+func (pipeline *Pipeline) formatIdentifiers(language languages.Language, jenniesInput common.Context) (common.Context, error) {
+	var err error
+
+	// if the language defines an identifier formatter, let's apply it.
+	formatterProvider, ok := language.(interface {
+		IdentifiersFormatter() *ast.IdentifierFormatter
+	})
+
+	if !ok {
+		return jenniesInput, nil
+	}
+
+	formatter := formatterProvider.IdentifiersFormatter()
+
+	formatterPass := ast.NewIdentifierFormatterPass(formatter)
+	jenniesInput.Schemas, err = formatterPass.Process(jenniesInput.Schemas)
+	if err != nil {
+		return jenniesInput, err
+	}
+
+	buildersRewriter := ast.NewIdentifierFormatterBuilderRewriter(formatter)
+	jenniesInput.Builders = buildersRewriter.Rewrite(jenniesInput.Schemas, jenniesInput.Builders)
 
 	return jenniesInput, nil
 }

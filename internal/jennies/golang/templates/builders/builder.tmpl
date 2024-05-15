@@ -47,6 +47,6 @@ func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, 
 {{- $options }}
 func (builder *{{ .BuilderName }}Builder) applyDefaults() {
     {{- range .Defaults }}
-    builder.{{ .OptionName|upperCamelCase }}({{ .Args|join ", " }})
+    builder.{{ .OptionName }}({{ .Args|join ", " }})
     {{- end }}
 }
