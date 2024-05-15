@@ -57,7 +57,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	}
 	jenny.typeFormatter = builderTypeFormatter(context, jenny.typeImportMapper)
 
-	buildObjectSignature := formatPackageName(builder.For.SelfRef.ReferredPkg) + "." + tools.CleanupNames(builder.For.Name)
+	buildObjectSignature := formatPackageName(builder.For.SelfRef.ReferredPkg) + "." + tools.StripNonAlphaNumeric(builder.For.Name)
 	if builder.For.Type.ImplementsVariant() {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
@@ -87,7 +87,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
 			BuilderName:          builder.Name,
-			ObjectName:           tools.CleanupNames(builder.For.Name),
+			ObjectName:           tools.StripNonAlphaNumeric(builder.For.Name),
 			BuilderSignatureType: buildObjectSignature,
 			Imports:              jenny.imports,
 			ImportAlias:          jenny.importType(builder.For.SelfRef),

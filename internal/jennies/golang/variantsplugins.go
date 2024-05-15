@@ -57,7 +57,7 @@ func (jenny VariantsPlugins) variantPlugins(context common.Context) (string, err
 			dataquerySchemas = append(dataquerySchemas, schema)
 		}
 
-		imports.Add(schema.Package, jenny.Config.importPath(formatPackageName(schema.Package)))
+		imports.Add(schema.Package, jenny.Config.importPath(schema.Package))
 	}
 
 	// to guarantee a consistent output for this jenny

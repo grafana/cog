@@ -13,6 +13,18 @@ import (
 
 const recursionMaxNums = 1000
 
+func FormatterHelpers(formatter *ast.IdentifierFormatter) gotemplate.FuncMap {
+	return gotemplate.FuncMap{
+		"formatPackageName":    formatter.Package,
+		"formatObjectName":     formatter.Object,
+		"formatFieldName":      formatter.ObjectField,
+		"formatEnumName":       formatter.Enum,
+		"formatEnumMemberName": formatter.EnumMember,
+		"formatConstantName":   formatter.Constant,
+		"formatVariableName":   formatter.Variable,
+	}
+}
+
 func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 	includedNames := make(map[string]int)
 

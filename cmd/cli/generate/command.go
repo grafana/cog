@@ -97,7 +97,7 @@ func doGenerate(opts options) error {
 		if formatterProvider, ok := target.(interface {
 			IdentifiersFormatter() *ast.IdentifierFormatter
 		}); ok {
-			formatter := formatterProvider.IdentifiersFormatter()
+			formatter := ast.NewIdentifierFormatterPass(formatterProvider.IdentifiersFormatter())
 			processedSchemas, err = formatter.Process(processedSchemas)
 			if err != nil {
 				return err

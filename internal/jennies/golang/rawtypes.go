@@ -12,7 +12,8 @@ import (
 )
 
 type RawTypes struct {
-	Config Config
+	Config               Config
+	IdentifiersFormatter *ast.IdentifierFormatter
 
 	typeFormatter *typeFormatter
 }
@@ -30,11 +31,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 			return nil, err
 		}
 
-		filename := filepath.Join(
-			formatPackageName(schema.Package),
-			"types_gen.go",
-		)
-
+		filename := filepath.Join(schema.Package, "types_gen.go")
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
@@ -75,7 +72,7 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 
 	return []byte(fmt.Sprintf(`package %[1]s
 
-%[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
+%[2]s%[3]s`, schema.Package, importStatements, buffer.String())), nil
 }
 
 func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
@@ -118,7 +115,7 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 	buffer.WriteString("\n")
 
 	if def.Type.ImplementsVariant() {
-		variant := tools.UpperCamelCase(def.Type.ImplementedVariant())
+		variant := jenny.IdentifiersFormatter.Object(def.Type.ImplementedVariant())
 
 		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", def.Name, variant))
 		buffer.WriteString("\n")

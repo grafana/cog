@@ -93,7 +93,7 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 
 	buffer.WriteString("export ")
 
-	objectName := tools.CleanupNames(def.Name)
+	objectName := tools.StripNonAlphaNumeric(def.Name)
 
 	switch def.Type.Kind {
 	case ast.KindStruct:
@@ -103,7 +103,7 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 	case ast.KindEnum:
 		buffer.WriteString(fmt.Sprintf("enum %s {\n", objectName))
 		for _, val := range def.Type.AsEnum().Values {
-			name := tools.CleanupNames(tools.UpperCamelCase(escapeEnumMemberName(val.Name)))
+			name := tools.StripNonAlphaNumeric(tools.UpperCamelCase(escapeEnumMemberName(val.Name)))
 
 			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatValue(val.Value)))
 		}
@@ -301,7 +301,7 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 
 	pkg := packageMapper(ref.ReferredPkg)
 	referredType, _ := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
-	referredTypeName := tools.CleanupNames(referredType.Name)
+	referredTypeName := tools.StripNonAlphaNumeric(referredType.Name)
 
 	// is the reference to a constant?
 	if referredType.Type.IsConcreteScalar() {

@@ -53,6 +53,7 @@ func New(config Config) *Language {
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
+	identifiersFormatter := language.IdentifiersFormatter()
 
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef
@@ -63,8 +64,8 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 
 		common.If[common.Context](config.GenerateGoMod, GoMod{Config: config}),
 
-		common.If[common.Context](globalConfig.Types, RawTypes{Config: config}),
-		common.If[common.Context](globalConfig.Types, JSONMarshalling{Config: config}),
+		common.If[common.Context](globalConfig.Types, RawTypes{Config: config, IdentifiersFormatter: identifiersFormatter}),
+		common.If[common.Context](globalConfig.Types, JSONMarshalling{Config: config, IdentifiersFormatter: identifiersFormatter}),
 
 		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
 	)
@@ -89,11 +90,11 @@ func (language *Language) CompilerPasses() compiler.Passes {
 func (language *Language) IdentifiersFormatter() *ast.IdentifierFormatter {
 	return ast.NewIdentifierFormatter(
 		ast.PackageFormatter(formatPackageName),
-		ast.ClassFormatter(tools.UpperCamelCase),
-		ast.ClassFieldFormatter(tools.UpperCamelCase),
+		ast.ObjectFormatter(tools.UpperCamelCase),
+		ast.ObjectFieldFormatter(tools.UpperCamelCase),
 		ast.EnumFormatter(tools.UpperCamelCase),
 		ast.EnumMemberFormatter(func(s string) string {
-			return tools.CleanupNames(tools.UpperCamelCase(s))
+			return tools.StripNonAlphaNumeric(tools.UpperCamelCase(s))
 		}),
 		ast.ConstantFormatter(tools.UpperCamelCase),
 		ast.VariableFormatter(formatArgName),
