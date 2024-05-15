@@ -46,71 +46,17 @@ type FlattenDisjunctions struct {
 }
 
 func (pass *FlattenDisjunctions) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	for i, schema := range schemas {
-		schemas[i] = pass.processSchema(schema)
+	visitor := &Visitor{
+		OnDisjunction: pass.processDisjunction,
 	}
 
-	return schemas, nil
+	return visitor.VisitSchemas(schemas)
 }
 
-func (pass *FlattenDisjunctions) processSchema(schema *ast.Schema) *ast.Schema {
-	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		return pass.processObject(schema, object)
-	})
-
-	return schema
-}
-
-func (pass *FlattenDisjunctions) processObject(schema *ast.Schema, object ast.Object) ast.Object {
-	object.Type = pass.processType(schema, object.Type)
-
-	return object
-}
-
-func (pass *FlattenDisjunctions) processType(schema *ast.Schema, def ast.Type) ast.Type {
-	if def.IsArray() {
-		return pass.processArray(schema, def)
-	}
-
-	if def.IsMap() {
-		return pass.processMap(schema, def)
-	}
-
-	if def.IsStruct() {
-		return pass.processStruct(schema, def)
-	}
-
-	if def.IsDisjunction() {
-		return pass.processDisjunction(schema, def)
-	}
-
-	return def
-}
-
-func (pass *FlattenDisjunctions) processArray(schema *ast.Schema, def ast.Type) ast.Type {
-	def.Array.ValueType = pass.processType(schema, def.AsArray().ValueType)
-
-	return def
-}
-
-func (pass *FlattenDisjunctions) processMap(schema *ast.Schema, def ast.Type) ast.Type {
-	def.Map.ValueType = pass.processType(schema, def.AsMap().ValueType)
-
-	return def
-}
-
-func (pass *FlattenDisjunctions) processStruct(schema *ast.Schema, def ast.Type) ast.Type {
-	for i, field := range def.AsStruct().Fields {
-		def.Struct.Fields[i].Type = pass.processType(schema, field.Type)
-	}
-
-	return def
-}
-
-func (pass *FlattenDisjunctions) processDisjunction(schema *ast.Schema, def ast.Type) ast.Type {
+func (pass *FlattenDisjunctions) processDisjunction(_ *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	def.Disjunction = pass.flattenDisjunction(schema, def.AsDisjunction())
 
-	return def
+	return def, nil
 }
 
 func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunction ast.DisjunctionType) *ast.DisjunctionType {
