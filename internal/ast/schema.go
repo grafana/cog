@@ -49,6 +49,16 @@ func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	return Object{}, false
 }
 
+func (schemas Schemas) Locate(pkg string) (*Schema, bool) {
+	for _, schema := range schemas {
+		if schema.Package == pkg {
+			return schema, true
+		}
+	}
+
+	return nil, false
+}
+
 func (schemas Schemas) Consolidate() (Schemas, error) {
 	byPackage := make(map[string]Schemas, len(schemas))
 

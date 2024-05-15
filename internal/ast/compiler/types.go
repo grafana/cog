@@ -16,6 +16,10 @@ func (ref ObjectReference) Matches(object ast.Object) bool {
 	return object.SelfRef.ReferredPkg == ref.Package && strings.EqualFold(object.Name, ref.Object)
 }
 
+func (ref ObjectReference) String() string {
+	return fmt.Sprintf("%s.%s", ref.Package, ref.Object)
+}
+
 func ObjectReferenceFromString(ref string) (ObjectReference, error) {
 	parts := strings.Split(ref, ".")
 	if len(parts) != 2 {
