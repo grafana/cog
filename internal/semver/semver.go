@@ -3,7 +3,6 @@ package semver
 import (
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/mod/semver"
 )
 
@@ -50,7 +49,5 @@ func (v Version) MoreThan(other Version) bool {
 
 func (v Version) MoreThanEqual(other Version) bool {
 	cmp := semver.Compare(v.version, other.version)
-	spew.Dump(v.version, other.version, cmp)
-
 	return cmp == 1 || cmp == 0
 }
