@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 const LanguageRef = "go"
@@ -103,4 +104,18 @@ func (language *Language) NullableKinds() languages.NullableConfig {
 		ProtectArrayAppend: false,
 		AnyIsNullable:      true,
 	}
+}
+
+func (language *Language) IdentifiersFormatter() *ast.IdentifierFormatter {
+	return ast.NewIdentifierFormatter(
+		ast.PackageFormatter(formatPackageName),
+		ast.ClassFormatter(tools.UpperCamelCase),
+		ast.ClassFieldFormatter(tools.UpperCamelCase),
+		ast.EnumFormatter(tools.UpperCamelCase),
+		ast.EnumMemberFormatter(func(s string) string {
+			return tools.CleanupNames(tools.UpperCamelCase(s))
+		}),
+		ast.ConstantFormatter(tools.UpperCamelCase),
+		ast.VariableFormatter(formatArgName),
+	)
 }

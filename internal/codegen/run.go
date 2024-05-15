@@ -100,6 +100,17 @@ func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, s
 		return common.Context{}, err
 	}
 
+	// if the language defines an identifier formatter, let's apply it.
+	if formatterProvider, ok := language.(interface {
+		IdentifiersFormatter() *ast.IdentifierFormatter
+	}); ok {
+		formatter := formatterProvider.IdentifiersFormatter()
+		jenniesInput.Schemas, err = formatter.Process(jenniesInput.Schemas)
+		if err != nil {
+			return common.Context{}, err
+		}
+	}
+
 	if !pipeline.Output.Builders {
 		return jenniesInput, nil
 	}

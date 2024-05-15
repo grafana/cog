@@ -164,7 +164,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 
 	buffer.WriteString(fmt.Sprintf(
 		"%s %s `json:\"%s%s\"`\n",
-		tools.UpperCamelCase(def.Name),
+		def.Name,
 		formatter.doFormatType(fieldType, false),
 		def.Name,
 		jsonOmitEmpty,
@@ -215,9 +215,6 @@ func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilde
 	count := 0
 	structMap.Iterate(func(key string, value interface{}) {
 		field, _ := def.FieldByName(key)
-		if name != "" {
-			key = tools.UpperCamelCase(key)
-		}
 
 		switch x := value.(type) {
 		case map[string]interface{}:
@@ -255,14 +252,14 @@ func defineAnonymousFields(def ast.StructType) string {
 
 		switch f.Type.Kind {
 		case ast.KindScalar:
-			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", key, f.Type.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
+			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", key, f.Type.AsScalar().ScalarKind, f.OriginalName))
 		case ast.KindStruct:
 			structFields := defineAnonymousFields(f.Type.AsStruct())
-			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, tools.LowerCamelCase(key)))
+			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, f.OriginalName))
 		case ast.KindArray:
 			array := f.Type.AsArray()
 			if array.ValueType.IsScalar() {
-				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
+				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, f.OriginalName))
 			}
 		// TODO: Map rest of array cases
 		default:
@@ -294,7 +291,7 @@ func defineAnonymousDefaults(def ast.StructType, structMap *orderedmap.Map[strin
 
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
-	typeName := tools.UpperCamelCase(def.AsRef().ReferredType)
+	typeName := def.AsRef().ReferredType
 
 	if referredPkg != "" {
 		typeName = referredPkg + "." + typeName
