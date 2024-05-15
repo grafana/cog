@@ -93,6 +93,17 @@ func doGenerate(opts options) error {
 			return err
 		}
 
+		// if the target defined an identifier formatter, let's apply it.
+		if formatterProvider, ok := target.(interface {
+			IdentifiersFormatter() *ast.IdentifierFormatter
+		}); ok {
+			formatter := formatterProvider.IdentifiersFormatter()
+			processedSchemas, err = formatter.Process(processedSchemas)
+			if err != nil {
+				return err
+			}
+		}
+
 		// from these types, create builders
 		builderGenerator := &ast.BuilderGenerator{}
 		builders := builderGenerator.FromAST(processedSchemas)

@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/spf13/cobra"
+	"github.com/grafana/cog/internal/tools"
 )
 
 const LanguageRef = "go"
@@ -50,11 +51,6 @@ func New(config Config) *Language {
 	}
 }
 
-func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&language.config.PackageRoot, "go-package-root", "github.com/grafana/cog/generated", "Go package root.")
-	cmd.Flags().BoolVar(&language.config.GenerateGoMod, "go-mod", false, "Generate a go.mod file. If enabled, 'go-package-root' is used as module path.")
-}
-
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
@@ -88,4 +84,18 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.DisjunctionInferMapping{},
 		&compiler.DisjunctionToType{},
 	}
+}
+
+func (language *Language) IdentifiersFormatter() *ast.IdentifierFormatter {
+	return ast.NewIdentifierFormatter(
+		ast.PackageFormatter(formatPackageName),
+		ast.ClassFormatter(tools.UpperCamelCase),
+		ast.ClassFieldFormatter(tools.UpperCamelCase),
+		ast.EnumFormatter(tools.UpperCamelCase),
+		ast.EnumMemberFormatter(func(s string) string {
+			return tools.CleanupNames(tools.UpperCamelCase(s))
+		}),
+		ast.ConstantFormatter(tools.UpperCamelCase),
+		ast.VariableFormatter(formatArgName),
+	)
 }

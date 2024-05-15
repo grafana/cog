@@ -702,11 +702,12 @@ func (structType StructType) FieldByName(name string) (StructField, bool) {
 }
 
 type StructField struct {
-	Name        string
-	Comments    []string `json:",omitempty"`
-	Type        Type
-	Required    bool
-	PassesTrail []string `json:",omitempty"`
+	OriginalName string   // as given in the schema
+	Name         string   // might be formatted to follow language-specific conventions
+	Comments     []string `json:",omitempty"`
+	Type         Type
+	Required     bool
+	PassesTrail  []string `json:",omitempty"`
 }
 
 func (structField *StructField) AddToPassesTrail(trail string) {
@@ -715,9 +716,10 @@ func (structField *StructField) AddToPassesTrail(trail string) {
 
 func (structField StructField) DeepCopy() StructField {
 	newT := StructField{
-		Name:     structField.Name,
-		Type:     structField.Type.DeepCopy(),
-		Required: structField.Required,
+		OriginalName: structField.OriginalName,
+		Name:         structField.Name,
+		Type:         structField.Type.DeepCopy(),
+		Required:     structField.Required,
 	}
 
 	newT.Comments = append(newT.Comments, structField.Comments...)
@@ -748,8 +750,9 @@ func PassesTrail(trail string) StructFieldOption {
 
 func NewStructField(name string, fieldType Type, opts ...StructFieldOption) StructField {
 	field := StructField{
-		Name: name,
-		Type: fieldType,
+		Name:         name,
+		OriginalName: name,
+		Type:         fieldType,
 	}
 
 	for _, opt := range opts {

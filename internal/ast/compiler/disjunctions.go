@@ -110,11 +110,7 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 		processedBranch := branch
 		processedBranch.Nullable = true
 
-		fields = append(fields, ast.StructField{
-			Name:     ast.TypeName(processedBranch),
-			Type:     processedBranch,
-			Required: false,
-		})
+		fields = append(fields, ast.NewStructField(ast.TypeName(processedBranch), processedBranch))
 	}
 
 	structType := ast.NewStruct(fields...)

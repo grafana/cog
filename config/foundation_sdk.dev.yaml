@@ -43,8 +43,8 @@ transformations:
   schemas:
     - '%__config_dir%/compiler/common_passes.yaml'
 
-  builders:
-    - '%__config_dir%/veneers'
+  #builders:
+  #  - '%__config_dir%/veneers'
 
 output:
   directory: '%output_dir%'
@@ -55,9 +55,9 @@ output:
   languages:
     - go:
         package_root: '%go_package_root%'
-    - jsonschema: {}
-    - openapi: {}
-    - python:
-        path_prefix: grafana_foundation_sdk
-    - typescript: {}
-    - java: {}
+#    - jsonschema: {}
+#    - openapi: {}
+#    - python:
+#        path_prefix: grafana_foundation_sdk
+#    - typescript: {}
+#    - java: {}

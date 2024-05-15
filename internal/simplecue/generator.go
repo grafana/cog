@@ -277,12 +277,10 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 			return nil, err
 		}
 
-		fields = append(fields, ast.StructField{
-			Name:     fieldLabel,
-			Comments: commentsFromCueValue(i.Value()),
-			Required: !i.IsOptional(),
-			Type:     node,
-		})
+		field := ast.NewStructField(fieldLabel, node, ast.Comments(commentsFromCueValue(i.Value())))
+		field.Required = !i.IsOptional()
+
+		fields = append(fields, field)
 	}
 
 	return fields, nil
