@@ -12,7 +12,7 @@ func TestRenameAction(t *testing.T) {
 	req := require.New(t)
 
 	option := ast.Option{Name: "Name"}
-	modifiedOpts := RenameAction("NewName")(ast.Builder{}, option)
+	modifiedOpts := RenameAction("NewName")(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 1)
 	req.Equal("NewName", modifiedOpts[0].Name)
@@ -22,7 +22,7 @@ func TestOmitAction(t *testing.T) {
 	req := require.New(t)
 
 	option := ast.Option{Name: "Name"}
-	modifiedOpts := OmitAction()(ast.Builder{}, option)
+	modifiedOpts := OmitAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Empty(modifiedOpts)
 }
@@ -43,7 +43,7 @@ func TestUnfoldBooleanAction(t *testing.T) {
 	modifiedOpts := UnfoldBooleanAction(BooleanUnfold{
 		OptionTrue:  "Editable",
 		OptionFalse: "ReadOnly",
-	})(ast.Builder{}, option)
+	})(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 2)
 
@@ -79,7 +79,7 @@ func TestUnfoldBooleanAction_onNonBooleanDoesNothing(t *testing.T) {
 	modifiedOpts := UnfoldBooleanAction(BooleanUnfold{
 		OptionTrue:  "TrueOpt",
 		OptionFalse: "FalseOpt",
-	})(ast.Builder{}, option)
+	})(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 1)
 	req.Equal(option, modifiedOpts[0])
@@ -104,7 +104,7 @@ func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
-	modifiedOpts := DisjunctionAsOptionsAction()(ast.Builder{}, option)
+	modifiedOpts := DisjunctionAsOptionsAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 2)
 
@@ -138,8 +138,6 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 			ast.NewObject("dashboard", "Panel", panelType),
 		),
 	}
-	builder := ast.Builder{Schema: schema}
-
 	option := ast.Option{
 		Name: "Panel",
 		Args: []ast.Argument{
@@ -151,7 +149,7 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: ref}),
 		},
 	}
-	modifiedOpts := DisjunctionAsOptionsAction()(builder, option)
+	modifiedOpts := DisjunctionAsOptionsAction()(ast.Schemas{schema}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 2)
 
@@ -181,8 +179,6 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 			ast.NewObject("dashboard", "Time", timeType),
 		),
 	}
-	builder := ast.Builder{Schema: schema}
-
 	option := ast.Option{
 		Name: "Time",
 		Args: []ast.Argument{
@@ -194,7 +190,7 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 			}, ast.Argument{Name: "editable", Type: ref}),
 		},
 	}
-	modifiedOpts := StructFieldsAsOptionsAction("from", "to")(builder, option)
+	modifiedOpts := StructFieldsAsOptionsAction("from", "to")(ast.Schemas{schema}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 2)
 
@@ -223,7 +219,7 @@ func TestArrayToAppendAction_withNoArgument(t *testing.T) {
 			}, true),
 		},
 	}
-	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
+	modifiedOpts := ArrayToAppendAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
@@ -241,7 +237,7 @@ func TestArrayToAppendAction_withNonArrayArgument(t *testing.T) {
 			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
 		},
 	}
-	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
+	modifiedOpts := ArrayToAppendAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
@@ -278,7 +274,7 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 		VeneerTrail: []string{"ArrayToAppend"},
 	}
 
-	modifiedOpts := ArrayToAppendAction()(ast.Builder{}, option)
+	modifiedOpts := ArrayToAppendAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
 }
@@ -293,7 +289,7 @@ func TestStructFieldsAsArgumentsAction_withNoArgument(t *testing.T) {
 			}, true),
 		},
 	}
-	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
+	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
@@ -311,7 +307,7 @@ func TestStructFieldsAsArgumentsAction_withNonStructArgument(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
 		},
 	}
-	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
+	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
@@ -360,7 +356,7 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}
 
-	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
+	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
 }
@@ -426,7 +422,7 @@ func TestStructFieldsAsArgumentsAction_withArrayOfStructArgument(t *testing.T) {
 		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}
 
-	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Builder{}, option)
+	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
 }
@@ -435,7 +431,7 @@ func TestDuplicateAction(t *testing.T) {
 	req := require.New(t)
 
 	option := ast.Option{Name: "Name"}
-	modifiedOpts := DuplicateAction("Duplicated")(ast.Builder{}, option)
+	modifiedOpts := DuplicateAction("Duplicated")(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 2)
 	req.Equal("Name", modifiedOpts[0].Name)

@@ -25,6 +25,18 @@ const (
 
 type Schemas []*Schema
 
+func (schemas Schemas) Locate(pkg string) (*Schema, bool) {
+	for _, schema := range schemas {
+		if schema.Package != pkg {
+			continue
+		}
+
+		return schema, true
+	}
+
+	return nil, false
+}
+
 func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	for _, schema := range schemas {
 		if schema.Package != pkg {
