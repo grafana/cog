@@ -17,11 +17,12 @@ func FormatterHelpers(formatter *ast.IdentifierFormatter) gotemplate.FuncMap {
 	return gotemplate.FuncMap{
 		"formatPackageName":    formatter.Package,
 		"formatObjectName":     formatter.Object,
-		"formatFieldName":      formatter.ObjectField,
+		"formatFieldName":      formatter.ObjectPublicField,
 		"formatEnumName":       formatter.Enum,
 		"formatEnumMemberName": formatter.EnumMember,
 		"formatConstantName":   formatter.Constant,
 		"formatVariableName":   formatter.Variable,
+		"formatOptionName":     formatter.Option,
 	}
 }
 

@@ -5,29 +5,36 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
+// region Identifier formatter
+
 type IdentifierFormatterOpt func(*IdentifierFormatter)
 
 type Formatter func(string) string
 
 type IdentifierFormatter struct {
-	Package     Formatter
-	Object      Formatter
-	ObjectField Formatter
-	Enum        Formatter
-	EnumMember  Formatter
-	Constant    Formatter
-	Variable    Formatter
+	Package            Formatter
+	Object             Formatter
+	ObjectPublicField  Formatter
+	ObjectPrivateField Formatter
+	Enum               Formatter
+	EnumMember         Formatter
+	Constant           Formatter
+	Variable           Formatter
+	Option             Formatter
 }
 
 func NewIdentifierFormatter(opts ...IdentifierFormatterOpt) *IdentifierFormatter {
 	noopFormatter := func(input string) string { return input }
 	formatter := &IdentifierFormatter{
-		Package:    noopFormatter,
-		Object:     noopFormatter,
-		Enum:       noopFormatter,
-		EnumMember: noopFormatter,
-		Constant:   noopFormatter,
-		Variable:   noopFormatter,
+		Package:            noopFormatter,
+		Object:             noopFormatter,
+		ObjectPublicField:  noopFormatter,
+		ObjectPrivateField: noopFormatter,
+		Enum:               noopFormatter,
+		EnumMember:         noopFormatter,
+		Constant:           noopFormatter,
+		Variable:           noopFormatter,
+		Option:             noopFormatter,
 	}
 
 	for _, opt := range opts {
@@ -49,9 +56,15 @@ func ObjectFormatter(formatter Formatter) IdentifierFormatterOpt {
 	}
 }
 
-func ObjectFieldFormatter(formatter Formatter) IdentifierFormatterOpt {
+func ObjectPublicFieldFormatter(formatter Formatter) IdentifierFormatterOpt {
 	return func(pass *IdentifierFormatter) {
-		pass.ObjectField = formatter
+		pass.ObjectPublicField = formatter
+	}
+}
+
+func ObjectPrivateFieldFormatter(formatter Formatter) IdentifierFormatterOpt {
+	return func(pass *IdentifierFormatter) {
+		pass.ObjectPrivateField = formatter
 	}
 }
 
@@ -78,6 +91,16 @@ func VariableFormatter(formatter Formatter) IdentifierFormatterOpt {
 		pass.Variable = formatter
 	}
 }
+
+func OptionFormatter(formatter Formatter) IdentifierFormatterOpt {
+	return func(pass *IdentifierFormatter) {
+		pass.Option = formatter
+	}
+}
+
+// endregion
+
+// region Identifier formatter compiler pass
 
 type IdentifierFormatterPass struct {
 	formatter *IdentifierFormatter
@@ -221,9 +244,134 @@ func (pass *IdentifierFormatterPass) processRef(originalSchemas Schemas, def Typ
 
 func (pass *IdentifierFormatterPass) processStruct(originalSchemas Schemas, def Type) Type {
 	for i, field := range def.Struct.Fields {
-		def.Struct.Fields[i].Name = pass.formatter.ObjectField(field.Name)
-		def.Struct.Fields[i].Type = pass.processType(originalSchemas, field.Type)
+		def.Struct.Fields[i] = pass.processStructField(originalSchemas, field)
 	}
 
 	return def
 }
+
+func (pass *IdentifierFormatterPass) processStructField(originalSchemas Schemas, field StructField) StructField {
+	field.Name = pass.formatter.ObjectPublicField(field.Name)
+	field.Type = pass.processType(originalSchemas, field.Type)
+
+	return field
+}
+
+//endregion
+
+// region Identifier formatter builder rewriter
+
+type IdentifierFormatterBuilderRewriter struct {
+	formatter     *IdentifierFormatter
+	formatterPass *IdentifierFormatterPass
+}
+
+func NewIdentifierFormatterBuilderRewriter(formatter *IdentifierFormatter) *IdentifierFormatterBuilderRewriter {
+	return &IdentifierFormatterBuilderRewriter{
+		formatter:     formatter,
+		formatterPass: NewIdentifierFormatterPass(formatter),
+	}
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) Rewrite(schemas Schemas, builders Builders) Builders {
+	for i, builder := range builders {
+		builders[i] = rewriter.rewriteBuilder(schemas, builder)
+	}
+
+	return builders
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) rewriteBuilder(schemas Schemas, builder Builder) Builder {
+	builder.Package = rewriter.formatter.Package(builder.Package)
+	builder.Name = rewriter.formatter.Object(builder.Name)
+	builder.For = rewriter.formatterPass.processObject(schemas, builder.For)
+	builder.Constructor = rewriter.rewriteConstructor(schemas, builder.Constructor)
+	builder.Properties = tools.Map(builder.Properties, func(property StructField) StructField {
+		structField := rewriter.formatterPass.processStructField(schemas, property)
+		structField.Name = rewriter.formatter.ObjectPrivateField(structField.Name)
+		return structField
+	})
+	builder.Options = tools.Map(builder.Options, func(option Option) Option {
+		return rewriter.rewriteOption(schemas, option)
+	})
+
+	return builder
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) rewriteConstructor(schemas Schemas, constructor Constructor) Constructor {
+	constructor.Args = tools.Map(constructor.Args, func(argument Argument) Argument {
+		return rewriter.rewriteArgument(schemas, argument)
+	})
+	constructor.Assignments = tools.Map(constructor.Assignments, func(assignment Assignment) Assignment {
+		return rewriter.rewriteAssignment(schemas, assignment)
+	})
+
+	return constructor
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) rewriteArgument(schemas Schemas, argument Argument) Argument {
+	argument.Name = rewriter.formatter.Variable(argument.Name)
+	argument.Type = rewriter.formatterPass.processType(schemas, argument.Type)
+
+	return argument
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) rewriteAssignment(schemas Schemas, assignment Assignment) Assignment {
+	assignment.Path = rewriter.rewritePath(schemas, assignment.Path)
+	assignment.Value = rewriter.rewriteAssignmentValue(schemas, assignment.Value)
+	assignment.Constraints = tools.Map(assignment.Constraints, func(constraint AssignmentConstraint) AssignmentConstraint {
+		constraint.Argument = rewriter.rewriteArgument(schemas, constraint.Argument)
+		return constraint
+	})
+
+	return assignment
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) rewriteAssignmentValue(schemas Schemas, value AssignmentValue) AssignmentValue {
+	if value.Argument != nil {
+		arg := rewriter.rewriteArgument(schemas, *value.Argument)
+		value.Argument = &arg
+	} else if value.Envelope != nil {
+		value.Envelope.Type = rewriter.formatterPass.processType(schemas, value.Envelope.Type)
+		value.Envelope.Values = tools.Map(value.Envelope.Values, func(envelopeField EnvelopeFieldValue) EnvelopeFieldValue {
+			return rewriter.rewriteEnvelopeFieldValue(schemas, envelopeField)
+		})
+	}
+
+	return value
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) rewriteEnvelopeFieldValue(schemas Schemas, fieldValue EnvelopeFieldValue) EnvelopeFieldValue {
+	fieldValue.Path = rewriter.rewritePath(schemas, fieldValue.Path)
+	fieldValue.Value = rewriter.rewriteAssignmentValue(schemas, fieldValue.Value)
+	return fieldValue
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) rewritePath(schemas Schemas, path Path) Path {
+	return tools.Map(path, func(item PathItem) PathItem {
+		item.Identifier = rewriter.formatter.ObjectPublicField(item.Identifier)
+		item.Type = rewriter.formatterPass.processType(schemas, item.Type)
+
+		if item.TypeHint != nil {
+			typeHint := *item.TypeHint
+			typeHint = rewriter.formatterPass.processType(schemas, typeHint)
+			item.TypeHint = &typeHint
+		}
+
+		return item
+	})
+}
+
+func (rewriter *IdentifierFormatterBuilderRewriter) rewriteOption(schemas Schemas, option Option) Option {
+	option.Name = rewriter.formatter.Option(option.Name)
+	option.Args = tools.Map(option.Args, func(arg Argument) Argument {
+		return rewriter.rewriteArgument(schemas, arg)
+	})
+	option.Assignments = tools.Map(option.Assignments, func(assignment Assignment) Assignment {
+		return rewriter.rewriteAssignment(schemas, assignment)
+	})
+
+	return option
+}
+
+// endregion

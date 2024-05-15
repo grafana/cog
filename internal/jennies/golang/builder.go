@@ -60,7 +60,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	// every builder has a dependency on cog's runtime, so let's make sure it's declared.
 	jenny.typeImportMapper("cog")
 
-	fullObjectName := jenny.importType(builder.For.SelfRef)
+	fullObjectName := jenny.typeFormatter.formatRef(builder.For.SelfRef.AsType(), false)
 	buildObjectSignature := fullObjectName
 	if builder.For.Type.ImplementsVariant() {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
@@ -83,7 +83,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			Package:              builder.Package,
 			BuilderSignatureType: buildObjectSignature,
 			Imports:              imports,
-			BuilderName:          tools.UpperCamelCase(builder.Name),
+			BuilderName:          builder.Name,
 			ObjectName:           fullObjectName,
 			Comments:             builder.For.Comments,
 			Constructor:          jenny.generateConstructor(builder),
@@ -174,7 +174,7 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	parts := make([]string, len(fieldPath))
 
 	for i := range fieldPath {
-		output := tools.UpperCamelCase(fieldPath[i].Identifier)
+		output := fieldPath[i].Identifier
 
 		// don't generate type hints if:
 		// * there isn't one defined
@@ -194,7 +194,7 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 
 func (jenny *Builder) generateOption(def ast.Option) template.Option {
 	return template.Option{
-		Name:        tools.UpperCamelCase(def.Name),
+		Name:        def.Name,
 		Comments:    def.Comments,
 		Args:        def.Args,
 		Assignments: tools.Map(def.Assignments, jenny.generateAssignment),
@@ -260,16 +260,4 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	default:
 		return "unknown"
 	}
-}
-
-// importType declares an import statement for the type definition of
-// the given object and returns a fully qualified type name for it.
-func (jenny *Builder) importType(typeRef ast.RefType) string {
-	pkg := jenny.typeImportMapper(typeRef.ReferredPkg)
-	typeName := tools.UpperCamelCase(typeRef.ReferredType)
-	if pkg == "" {
-		return typeName
-	}
-
-	return fmt.Sprintf("%s.%s", pkg, typeName)
 }

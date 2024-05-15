@@ -691,7 +691,7 @@ func (structType StructType) DeepCopy() StructType {
 func (structType StructType) FieldByName(name string) (StructField, bool) {
 	// FIXME: we don't have a way to directly get a struct field by name :(
 	for _, field := range structType.Fields {
-		if field.Name != name {
+		if field.Name != name && field.OriginalName != name {
 			continue
 		}
 
@@ -769,6 +769,10 @@ type RefType struct {
 
 func (t RefType) String() string {
 	return fmt.Sprintf("%s.%s", t.ReferredPkg, t.ReferredType)
+}
+
+func (t RefType) AsType() Type {
+	return NewRef(t.ReferredPkg, t.ReferredType)
 }
 
 func (t RefType) DeepCopy() RefType {

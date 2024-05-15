@@ -10,10 +10,6 @@ func formatPackageName(pkg string) string {
 	return strings.ToLower(tools.StripNonAlphaNumeric(pkg))
 }
 
-func formatArgName(name string) string {
-	return escapeVarName(tools.LowerCamelCase(name))
-}
-
 func escapeVarName(varName string) string {
 	if isReservedGoKeyword(varName) {
 		return varName + "Arg"

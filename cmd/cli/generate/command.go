@@ -93,17 +93,6 @@ func doGenerate(opts options) error {
 			return err
 		}
 
-		// if the target defined an identifier formatter, let's apply it.
-		if formatterProvider, ok := target.(interface {
-			IdentifiersFormatter() *ast.IdentifierFormatter
-		}); ok {
-			formatter := ast.NewIdentifierFormatterPass(formatterProvider.IdentifiersFormatter())
-			processedSchemas, err = formatter.Process(processedSchemas)
-			if err != nil {
-				return err
-			}
-		}
-
 		// from these types, create builders
 		builderGenerator := &ast.BuilderGenerator{}
 		builders := builderGenerator.FromAST(processedSchemas)
@@ -112,6 +101,22 @@ func doGenerate(opts options) error {
 		builders, err = veneers.ApplyTo(processedSchemas, builders, language)
 		if err != nil {
 			return err
+		}
+
+		// if the target defined an identifier formatter, let's apply it to the schemas and builders.
+		if formatterProvider, ok := target.(interface {
+			IdentifiersFormatter() *ast.IdentifierFormatter
+		}); ok {
+			formatter := formatterProvider.IdentifiersFormatter()
+
+			formatterPass := ast.NewIdentifierFormatterPass(formatter)
+			processedSchemas, err = formatterPass.Process(processedSchemas)
+			if err != nil {
+				return err
+			}
+
+			buildersRewriter := ast.NewIdentifierFormatterBuilderRewriter(formatter)
+			builders = buildersRewriter.Rewrite(processedSchemas, builders)
 		}
 
 		// prepare the jennies
