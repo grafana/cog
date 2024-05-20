@@ -63,6 +63,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "StringEnum",
               "Name": "StringEnum",
               "Type": {
                 "Kind": "enum",
@@ -108,6 +109,7 @@
               "Required": true
             },
             {
+              "OriginalName": "TheIntEnum",
               "Name": "TheIntEnum",
               "Type": {
                 "Kind": "ref",
@@ -150,6 +152,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "arrayOfAnything",
               "Name": "arrayOfAnything",
               "Type": {
                 "Kind": "array",

@@ -64,6 +64,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "bar",
               "Name": "bar",
               "Type": {
                 "Kind": "scalar",

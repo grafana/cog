@@ -58,6 +58,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "scheme",
               "Name": "scheme",
               "Type": {
                 "Kind": "scalar",
@@ -69,6 +70,7 @@
               "Required": true
             },
             {
+              "OriginalName": "fill",
               "Name": "fill",
               "Type": {
                 "Kind": "scalar",
@@ -80,6 +82,7 @@
               "Required": true
             },
             {
+              "OriginalName": "exponent",
               "Name": "exponent",
               "Type": {
                 "Kind": "scalar",
@@ -91,6 +94,7 @@
               "Required": true
             },
             {
+              "OriginalName": "min",
               "Name": "min",
               "Type": {
                 "Kind": "scalar",
@@ -102,6 +106,7 @@
               "Required": false
             },
             {
+              "OriginalName": "max",
               "Name": "max",
               "Type": {
                 "Kind": "scalar",
@@ -113,6 +118,7 @@
               "Required": false
             },
             {
+              "OriginalName": "enum",
               "Name": "enum",
               "Type": {
                 "Kind": "ref",
@@ -140,6 +146,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "color",
               "Name": "color",
               "Type": {
                 "Kind": "ref",

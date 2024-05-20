@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "type",
               "Name": "type",
               "Type": {
                 "Kind": "scalar",
@@ -22,6 +23,7 @@
               "Required": true
             },
             {
+              "OriginalName": "salutation",
               "Name": "salutation",
               "Type": {
                 "Kind": "scalar",
@@ -48,6 +50,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "type",
               "Name": "type",
               "Type": {
                 "Kind": "scalar",
@@ -60,6 +63,7 @@
               "Required": true
             },
             {
+              "OriginalName": "reason",
               "Name": "reason",
               "Type": {
                 "Kind": "scalar",
@@ -86,6 +90,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "type",
               "Name": "type",
               "Type": {
                 "Kind": "scalar",
@@ -98,6 +103,7 @@
               "Required": true
             },
             {
+              "OriginalName": "question",
               "Name": "question",
               "Type": {
                 "Kind": "scalar",
@@ -124,6 +130,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "type",
               "Name": "type",
               "Type": {
                 "Kind": "scalar",
@@ -136,6 +143,7 @@
               "Required": true
             },
             {
+              "OriginalName": "content",
               "Name": "content",
               "Type": {
                 "Kind": "scalar",
