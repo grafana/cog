@@ -118,7 +118,7 @@ func doGenerate(opts options) error {
 		}
 
 		nilChecksVisitor := ast.BuilderVisitor{
-			OnAssignment: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, assignment ast.Assignment) ast.Assignment {
+			OnAssignment: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, assignment ast.Assignment) (ast.Assignment, error) {
 				for i, chunk := range assignment.Path {
 					if i == len(assignment.Path)-1 {
 						continue
@@ -141,10 +141,14 @@ func doGenerate(opts options) error {
 					}
 				}
 
-				return assignment
+				return assignment, nil
 			},
 		}
-		jenniesInput.Builders = nilChecksVisitor.Visit(jenniesInput.Schemas, jenniesInput.Builders)
+		builders, err = nilChecksVisitor.Visit(jenniesInput.Schemas, jenniesInput.Builders)
+		if err != nil {
+			return err
+		}
+		jenniesInput.Builders = builders
 
 		// if the target defined an identifier formatter, let's apply it to the schemas and builders.
 		if formatterProvider, ok := target.(languages.IdentifiersFormatterProvider); ok {
