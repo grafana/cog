@@ -25,8 +25,8 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
 }
 
 {{- define "assignment" }}
-{{- range .Assignment.InitSafeguards }}
-{{ . }}
+{{- range .Assignment.NilChecks }}
+    {{- template "nil_check" . }}
 {{- end }}
 {{- template "constraints" .Assignment.Constraints }}
 

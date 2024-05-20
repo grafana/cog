@@ -84,6 +84,10 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 
 				return formatValue(value)
 			},
+			"formatPath": jenny.formatFieldPath,
+			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
+				return formatValue(jenny.rawTypes.defaultValueForType(guard.EmptyValueType, jenny.typeImportMapper))
+			},
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
 			BuilderName:          builder.Name,
@@ -92,75 +96,12 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			Imports:              jenny.imports,
 			ImportAlias:          jenny.importType(builder.For.SelfRef),
 			Comments:             builder.For.Comments,
-			Constructor:          jenny.generateConstructor(builder),
+			Constructor:          builder.Constructor,
 			Properties:           builder.Properties,
-			Options:              tools.Map(builder.Options, jenny.generateOption),
+			Options:              builder.Options,
 		})
 
 	return []byte(buffer.String()), err
-}
-
-func (jenny *Builder) generateConstructor(builder ast.Builder) template.Constructor {
-	return template.Constructor{
-		Args:        builder.Constructor.Args,
-		Assignments: tools.Map(builder.Constructor.Assignments, jenny.generateAssignment),
-	}
-}
-
-func (jenny *Builder) generateOption(def ast.Option) template.Option {
-	return template.Option{
-		Name:        formatIdentifier(def.Name),
-		Comments:    def.Comments,
-		Args:        def.Args,
-		Assignments: tools.Map(def.Assignments, jenny.generateAssignment),
-	}
-}
-
-func (jenny *Builder) generatePathInitializationSafeGuard(path ast.Path) string {
-	fieldPath := jenny.formatFieldPath(path)
-	valueType := path.Last().Type
-	if path.Last().TypeHint != nil {
-		valueType = *path.Last().TypeHint
-	}
-
-	emptyValue := formatValue(jenny.rawTypes.defaultValueForType(valueType, jenny.typeImportMapper))
-
-	return fmt.Sprintf(`        if (!this.internal.%[1]s) {
-            this.internal.%[1]s = %[2]s;
-        }`, fieldPath, emptyValue)
-}
-
-func (jenny *Builder) generateAssignment(assign ast.Assignment) template.Assignment {
-	var initSafeGuards []string
-	for i, chunk := range assign.Path {
-		if i == len(assign.Path)-1 && assign.Method != ast.AppendAssignment {
-			continue
-		}
-
-		chunkType := chunk.Type
-		if chunk.TypeHint != nil {
-			chunkType = *chunk.TypeHint
-		}
-
-		maybeUndefined := chunkType.Nullable ||
-			chunkType.IsAnyOf(ast.KindMap, ast.KindArray, ast.KindRef, ast.KindStruct)
-
-		if !maybeUndefined {
-			continue
-		}
-
-		subPath := assign.Path[:i+1]
-		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(subPath))
-	}
-
-	return template.Assignment{
-		Path: assign.Path,
-		// TODO(kgz)
-		// InitSafeguards: initSafeGuards,
-		Constraints: assign.Constraints,
-		Method:      assign.Method,
-		Value:       assign.Value,
-	}
 }
 
 // importType declares an import statement for the type definition of

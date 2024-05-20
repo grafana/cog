@@ -7,21 +7,25 @@ import (
 
 func GenerateBuilderNilChecks(language Language, context common.Context) (common.Context, error) {
 	var err error
-	var languageSpecificNilTypes []ast.Kind
+	nullableKinds := NullableConfig{
+		Kinds:              nil,
+		ProtectArrayAppend: false,
+		AnyIsNullable:      true,
+	}
 	if nilTypesProvider, ok := language.(NullableKindsProvider); ok {
-		languageSpecificNilTypes = nilTypesProvider.NullableKinds()
+		nullableKinds = nilTypesProvider.NullableKinds()
 	}
 
 	nilChecksVisitor := ast.BuilderVisitor{
 		OnAssignment: func(_ *ast.BuilderVisitor, _ ast.Schemas, _ ast.Builder, assignment ast.Assignment) (ast.Assignment, error) {
 			for i, chunk := range assignment.Path {
-				if i == len(assignment.Path)-1 {
+				if i == len(assignment.Path)-1 && (nullableKinds.ProtectArrayAppend && assignment.Method != ast.AppendAssignment) {
 					continue
 				}
 
 				nullable := chunk.Type.Nullable ||
-					chunk.Type.IsAny() || // this assumes that "any" is nullable in every language
-					chunk.Type.IsAnyOf(languageSpecificNilTypes...)
+					(chunk.Type.IsAny() && nullableKinds.AnyIsNullable) ||
+					chunk.Type.IsAnyOf(nullableKinds.Kinds...)
 				if nullable {
 					subPath := assignment.Path[:i+1]
 					valueType := subPath.Last().Type
