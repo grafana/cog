@@ -1,4 +1,4 @@
-package constructor_initializations
+package initializationsafeguards
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
@@ -19,8 +19,6 @@ func NewSomePanelBuilder() *SomePanelBuilder {
 	}
 
 	builder.applyDefaults()
-    builder.internal.Type = "panel_type"
-    builder.internal.Cursor = "tooltip"
 
 	return builder
 }
@@ -41,6 +39,15 @@ func (builder *SomePanelBuilder) Build() (SomePanel, error) {
 
 func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
     builder.internal.Title = title
+
+    return builder
+}
+
+func (builder *SomePanelBuilder) ShowLegend(show bool) *SomePanelBuilder {
+if builder.internal.Options == nil {
+    builder.internal.Options = &Options{}
+}
+    builder.internal.Options.Legend.Show = show
 
     return builder
 }

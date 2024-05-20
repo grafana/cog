@@ -38,6 +38,7 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 }
 
 func (builder *SomeStructBuilder) Time(from string,to string) *SomeStructBuilder {
+<<<<<<< HEAD
 if builder.internal.Time == nil {
     builder.internal.Time = &struct {
 	From string `json:"from"`
@@ -49,6 +50,19 @@ if builder.internal.Time == nil {
     builder.internal.Time = &struct {
 	From string `json:"from"`
 	To string `json:"to"`
+=======
+    if builder.internal.Time == nil {
+	builder.internal.Time = &struct {
+	From string `json:""`
+	To string `json:""`
+}{}
+}
+    builder.internal.Time.From = from
+    if builder.internal.Time == nil {
+	builder.internal.Time = &struct {
+	From string `json:""`
+	To string `json:""`
+>>>>>>> a2493e55 (Start fixing tests)
 }{}
 }
     builder.internal.Time.To = to

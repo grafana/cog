@@ -1,4 +1,4 @@
-package basic_struct_defaults
+package knownany
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
@@ -37,33 +37,14 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	return *builder.internal, nil
 }
 
-func (builder *SomeStructBuilder) Id(id int64) *SomeStructBuilder {
-    builder.internal.Id = id
-
-    return builder
+func (builder *SomeStructBuilder) Title(title string) *SomeStructBuilder {
+if builder.internal.Config == nil {
+    builder.internal.Config = &Config{}
 }
-
-func (builder *SomeStructBuilder) Uid(uid string) *SomeStructBuilder {
-    builder.internal.Uid = uid
-
-    return builder
-}
-
-func (builder *SomeStructBuilder) Tags(tags []string) *SomeStructBuilder {
-    builder.internal.Tags = tags
-
-    return builder
-}
-
-func (builder *SomeStructBuilder) LiveNow(liveNow bool) *SomeStructBuilder {
-    builder.internal.LiveNow = liveNow
+    builder.internal.Config.(*Config).Title = title
 
     return builder
 }
 
 func (builder *SomeStructBuilder) applyDefaults() {
-    builder.Id(42)
-    builder.Uid("default-uid")
-    builder.Tags([]string{"generated", "cog"})
-    builder.LiveNow(true)
 }

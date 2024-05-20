@@ -120,6 +120,14 @@ func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, s
 		return common.Context{}, err
 	}
 
+	// if the language defines an identifier formatter, let's apply it.
+	if formatterProvider, ok := language.(languages.IdentifiersFormatterProvider); ok {
+		jenniesInput, err = languages.FormatIdentifiers(formatterProvider, jenniesInput)
+		if err != nil {
+			return common.Context{}, err
+		}
+	}
+
 	// with the veneers applied, generate "nil-checks" for assignments
 	jenniesInput, err = languages.GenerateBuilderNilChecks(language, jenniesInput)
 	if err != nil {

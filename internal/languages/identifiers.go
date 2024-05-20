@@ -3,27 +3,28 @@ package languages
 import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 )
 
-func FormatIdentifiers(formatterProvider IdentifiersFormatterProvider, schemas ast.Schemas, builders ast.Builders) (ast.Schemas, ast.Builders, error) {
+func FormatIdentifiers(formatterProvider IdentifiersFormatterProvider, context common.Context) (common.Context, error) {
 	var err error
 
 	formatter := formatterProvider.IdentifiersFormatter()
 
-	formatterPass := NewIdentifierFormatterPass(schemas, formatter)
-	schemas, err = formatterPass.Process(schemas)
+	formatterPass := NewIdentifierFormatterPass(context.Schemas, formatter)
+	context.Schemas, err = formatterPass.Process(context.Schemas)
 	if err != nil {
-		return nil, nil, err
+		return context, err
 	}
 
-	buildersRewriter := NewIdentifierFormatterBuilderRewriter(schemas, formatter)
-	builders, err = buildersRewriter.Rewrite(schemas, builders)
+	buildersRewriter := NewIdentifierFormatterBuilderRewriter(context.Schemas, formatter)
+	context.Builders, err = buildersRewriter.Rewrite(context.Schemas, context.Builders)
 	if err != nil {
-		return nil, nil, err
+		return context, err
 	}
 
-	return schemas, builders, nil
+	return context, nil
 }
 
 // region Identifier formatter

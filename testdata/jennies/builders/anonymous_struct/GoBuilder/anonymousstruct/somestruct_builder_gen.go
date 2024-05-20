@@ -1,4 +1,4 @@
-package anonymous_struct
+package anonymousstruct
 
 import (
 	cog "github.com/grafana/cog/generated/cog"

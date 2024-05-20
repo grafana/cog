@@ -9,7 +9,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-var nonAlphaNumRegex = regexp.MustCompile("[^a-zA-Z0-9 ]+")
+var nonAlphaNumRegex = regexp.MustCompile("[^a-zA-Z0-9]+")
 
 func UpperSnakeCase(s string) string {
 	return strings.ToUpper(xstrings.ToSnakeCase(s))
