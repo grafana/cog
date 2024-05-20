@@ -23,6 +23,10 @@ type NullableKindsProvider interface {
 	NullableKinds() NullableConfig
 }
 
+type IdentifiersFormatterProvider interface {
+	IdentifiersFormatter() *IdentifierFormatter
+}
+
 type Languages map[string]Language
 
 func (languages Languages) AsLanguageRefs() []string {

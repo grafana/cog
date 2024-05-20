@@ -107,19 +107,19 @@ func (language *Language) NullableKinds() languages.NullableConfig {
 	}
 }
 
-func (language *Language) IdentifiersFormatter() *ast.IdentifierFormatter {
-	return ast.NewIdentifierFormatter(
-		ast.PackageFormatter(formatPackageName),
-		ast.ObjectFormatter(tools.UpperCamelCase),
-		ast.ObjectPublicFieldFormatter(tools.UpperCamelCase),
-		ast.ObjectPrivateFieldFormatter(tools.LowerCamelCase),
-		ast.ConstantFormatter(tools.UpperCamelCase),
-		ast.OptionFormatter(tools.UpperCamelCase),
-		ast.EnumFormatter(tools.UpperCamelCase),
-		ast.EnumMemberFormatter(func(s string) string {
+func (language *Language) IdentifiersFormatter() *languages.IdentifierFormatter {
+	return languages.NewIdentifierFormatter(
+		languages.PackageFormatter(formatPackageName),
+		languages.ObjectFormatter(tools.UpperCamelCase),
+		languages.ObjectPublicFieldFormatter(tools.UpperCamelCase),
+		languages.ObjectPrivateFieldFormatter(tools.LowerCamelCase),
+		languages.ConstantFormatter(tools.UpperCamelCase),
+		languages.OptionFormatter(tools.UpperCamelCase),
+		languages.EnumFormatter(tools.UpperCamelCase),
+		languages.EnumMemberFormatter(func(s string) string {
 			return tools.StripNonAlphaNumeric(tools.UpperCamelCase(s))
 		}),
-		ast.VariableFormatter(func(name string) string {
+		languages.VariableFormatter(func(name string) string {
 			return escapeVarName(tools.LowerCamelCase(name))
 		}),
 	)

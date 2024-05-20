@@ -8,12 +8,13 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
 	Config               Config
-	IdentifiersFormatter *ast.IdentifierFormatter
+	IdentifiersFormatter *languages.IdentifierFormatter
 
 	typeFormatter *typeFormatter
 }

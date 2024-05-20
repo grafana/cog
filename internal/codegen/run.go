@@ -133,9 +133,7 @@ func (pipeline *Pipeline) formatIdentifiers(language languages.Language, jennies
 	var err error
 
 	// if the language defines an identifier formatter, let's apply it.
-	formatterProvider, ok := language.(interface {
-		IdentifiersFormatter() *ast.IdentifierFormatter
-	})
+	formatterProvider, ok := language.(languages.IdentifiersFormatterProvider)
 
 	if !ok {
 		return jenniesInput, nil
@@ -143,14 +141,17 @@ func (pipeline *Pipeline) formatIdentifiers(language languages.Language, jennies
 
 	formatter := formatterProvider.IdentifiersFormatter()
 
-	formatterPass := ast.NewIdentifierFormatterPass(formatter)
+	formatterPass := languages.NewIdentifierFormatterPass(jenniesInput.Schemas, formatter)
 	jenniesInput.Schemas, err = formatterPass.Process(jenniesInput.Schemas)
 	if err != nil {
 		return jenniesInput, err
 	}
 
-	buildersRewriter := ast.NewIdentifierFormatterBuilderRewriter(formatter)
-	jenniesInput.Builders = buildersRewriter.Rewrite(jenniesInput.Schemas, jenniesInput.Builders)
+	buildersRewriter := languages.NewIdentifierFormatterBuilderRewriter(jenniesInput.Schemas, formatter)
+	jenniesInput.Builders, err = buildersRewriter.Rewrite(jenniesInput.Schemas, jenniesInput.Builders)
+	if err != nil {
+		return jenniesInput, err
+	}
 
 	return jenniesInput, nil
 }
