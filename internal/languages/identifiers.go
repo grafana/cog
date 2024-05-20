@@ -184,11 +184,12 @@ func (pass *IdentifierFormatterPass) processSchema(visitor *compiler.Visitor, sc
 }
 
 func (pass *IdentifierFormatterPass) processObject(visitor *compiler.Visitor, schema *ast.Schema, object ast.Object) (ast.Object, error) {
-	if object.Type.IsEnum() {
+	switch {
+	case object.Type.IsEnum():
 		object.Name = pass.formatter.EnumMember(object.Name)
-	} else if object.Type.IsConcreteScalar() {
+	case object.Type.IsConcreteScalar():
 		object.Name = pass.formatter.Constant(object.Name)
-	} else {
+	default:
 		object.Name = pass.formatter.Object(object.Name)
 	}
 
@@ -222,12 +223,13 @@ func (pass *IdentifierFormatterPass) processRef(_ *compiler.Visitor, _ *ast.Sche
 
 	def.Ref.ReferredPkg = pass.formatter.Package(def.Ref.ReferredPkg)
 
-	if referredObj.Type.IsEnum() {
+	switch {
+	case referredObj.Type.IsEnum():
 		def.Ref.ReferredType = pass.formatter.Enum(referredObj.Name)
-	} else if referredObj.Type.IsStruct() {
-		def.Ref.ReferredType = pass.formatter.Object(referredObj.Name)
-	} else if referredObj.Type.IsConcreteScalar() {
+	case referredObj.Type.IsConcreteScalar():
 		def.Ref.ReferredType = pass.formatter.Constant(referredObj.Name)
+	default:
+		def.Ref.ReferredType = pass.formatter.Object(referredObj.Name)
 	}
 
 	return def, nil
@@ -245,7 +247,7 @@ func (pass *IdentifierFormatterPass) processStructField(visitor *compiler.Visito
 	return field, nil
 }
 
-//endregion
+// endregion
 
 // region Identifier formatter builder rewriter
 
