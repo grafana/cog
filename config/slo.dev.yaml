@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+debug: true
+
+parameters:
+  output_dir: './generated'
+  go_package_root: 'github.com/grafana/cog/generated'
+
+inputs:
+  - openapi:
+      url: 'https://grafana.com/docs/grafana-cloud/alerting-and-irm/slo/api/slo-api.yaml'
+      package: slo
+
+transformations:
+  schemas:
+    - '%__config_dir%/compiler/common_passes.yaml'
+
+  builders:
+    - '%__config_dir%/veneers'
+
+output:
+  directory: '%output_dir%'
+
+  types: true
+  builders: true
+
+  languages:
+    - go:
+        package_root: '%go_package_root%'
