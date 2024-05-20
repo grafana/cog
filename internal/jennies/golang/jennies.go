@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
@@ -103,4 +104,11 @@ func (language *Language) IdentifiersFormatter() *languages.IdentifierFormatter 
 			return escapeVarName(tools.LowerCamelCase(name))
 		}),
 	)
+}
+
+func (language *Language) NullableKinds() []ast.Kind {
+	return []ast.Kind{
+		ast.KindMap,
+		ast.KindArray,
+	}
 }

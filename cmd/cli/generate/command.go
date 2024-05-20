@@ -109,6 +109,43 @@ func doGenerate(opts options) error {
 			Builders: builders,
 		}
 
+		// with the veneers applied, generate "nil-checks" for assignments
+		var languageSpecificNilTypes []ast.Kind
+		if nilTypesProvider, ok := target.(interface {
+			NullableKinds() []ast.Kind
+		}); ok {
+			languageSpecificNilTypes = nilTypesProvider.NullableKinds()
+		}
+
+		nilChecksVisitor := ast.BuilderVisitor{
+			OnAssignment: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, assignment ast.Assignment) ast.Assignment {
+				for i, chunk := range assignment.Path {
+					if i == len(assignment.Path)-1 {
+						continue
+					}
+
+					nullable := chunk.Type.Nullable ||
+						chunk.Type.IsAny() || // this assumes that "any" is nullable in every language
+						chunk.Type.IsAnyOf(languageSpecificNilTypes...)
+					if nullable {
+						subPath := assignment.Path[:i+1]
+						valueType := subPath.Last().Type
+						if subPath.Last().TypeHint != nil {
+							valueType = *subPath.Last().TypeHint
+						}
+
+						assignment.NilChecks = append(assignment.NilChecks, ast.AssignmentNilCheck{
+							Path:           subPath,
+							EmptyValueType: valueType,
+						})
+					}
+				}
+
+				return assignment
+			},
+		}
+		jenniesInput.Builders = nilChecksVisitor.Visit(jenniesInput.Schemas, jenniesInput.Builders)
+
 		// if the target defined an identifier formatter, let's apply it to the schemas and builders.
 		if formatterProvider, ok := target.(languages.IdentifiersFormatterProvider); ok {
 			jenniesInput, err = languages.FormatIdentifiers(formatterProvider, jenniesInput)
