@@ -198,7 +198,7 @@
                 "Kind": "scalar",
                 "Nullable": false,
                 "Scalar": {
-                  "ScalarKind": "boolean"
+                  "ScalarKind": "bool"
                 }
               }
             }
@@ -249,7 +249,7 @@
                     "Kind": "scalar",
                     "Nullable": false,
                     "Scalar": {
-                      "ScalarKind": "boolean"
+                      "ScalarKind": "bool"
                     }
                   }
                 }
