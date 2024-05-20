@@ -60,6 +60,7 @@
               "Struct": {
                 "Fields": [
                   {
+                    "OriginalName": "id",
                     "Name": "id",
                     "Type": {
                       "Kind": "scalar",
@@ -128,6 +129,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "discriminator",
               "Name": "discriminator",
               "Type": {
                 "Kind": "scalar",
@@ -155,6 +157,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "discriminator",
               "Name": "discriminator",
               "Type": {
                 "Kind": "scalar",
@@ -182,6 +185,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "discriminator",
               "Name": "discriminator",
               "Type": {
                 "Kind": "scalar",

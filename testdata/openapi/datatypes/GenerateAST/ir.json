@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "boolean",
               "Name": "boolean",
               "Type": {
                 "Kind": "scalar",
@@ -21,6 +22,7 @@
               "Required": false
             },
             {
+              "OriginalName": "bytes",
               "Name": "bytes",
               "Type": {
                 "Kind": "scalar",
@@ -32,6 +34,7 @@
               "Required": true
             },
             {
+              "OriginalName": "float32",
               "Name": "float32",
               "Type": {
                 "Kind": "scalar",
@@ -44,6 +47,7 @@
               "Required": false
             },
             {
+              "OriginalName": "float64",
               "Name": "float64",
               "Type": {
                 "Kind": "scalar",
@@ -55,6 +59,7 @@
               "Required": false
             },
             {
+              "OriginalName": "int32",
               "Name": "int32",
               "Type": {
                 "Kind": "scalar",
@@ -67,6 +72,7 @@
               "Required": false
             },
             {
+              "OriginalName": "int64",
               "Name": "int64",
               "Type": {
                 "Kind": "scalar",
@@ -78,6 +84,7 @@
               "Required": false
             },
             {
+              "OriginalName": "string",
               "Name": "string",
               "Type": {
                 "Kind": "scalar",

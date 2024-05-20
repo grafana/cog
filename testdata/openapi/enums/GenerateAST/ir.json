@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "enumInt",
               "Name": "enumInt",
               "Type": {
                 "Kind": "enum",
@@ -44,6 +45,7 @@
               "Required": false
             },
             {
+              "OriginalName": "enumString",
               "Name": "enumString",
               "Type": {
                 "Kind": "enum",
@@ -78,6 +80,7 @@
               "Required": true
             },
             {
+              "OriginalName": "enumWithDefault",
               "Name": "enumWithDefault",
               "Type": {
                 "Kind": "enum",

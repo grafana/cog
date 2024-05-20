@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "ref",
               "Name": "ref",
               "Type": {
                 "Kind": "ref",
@@ -37,6 +38,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "a",
               "Name": "a",
               "Type": {
                 "Kind": "scalar",

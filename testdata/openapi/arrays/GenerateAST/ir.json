@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "arrayInt",
               "Name": "arrayInt",
               "Type": {
                 "Kind": "array",
@@ -27,6 +28,7 @@
               "Required": false
             },
             {
+              "OriginalName": "arrayRef",
               "Name": "arrayRef",
               "Type": {
                 "Kind": "array",
@@ -45,6 +47,7 @@
               "Required": false
             },
             {
+              "OriginalName": "arrayString",
               "Name": "arrayString",
               "Type": {
                 "Kind": "array",
@@ -77,6 +80,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "a",
               "Name": "a",
               "Type": {
                 "Kind": "scalar",
