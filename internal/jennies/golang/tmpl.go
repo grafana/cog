@@ -37,7 +37,7 @@ func init() {
 				panic("formatType() needs to be overridden by a jenny")
 			},
 			"emptyValueForGuard": func(_ ast.Type) string {
-				panic("emptyValueForType() needs to be overridden by a jenny")
+				panic("emptyValueForGuard() needs to be overridden by a jenny")
 			},
 		}).
 		Funcs(map[string]any{

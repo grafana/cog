@@ -12,8 +12,14 @@ type Language interface {
 	CompilerPasses() compiler.Passes
 }
 
+type NullableConfig struct {
+	Kinds              []ast.Kind
+	ProtectArrayAppend bool
+	AnyIsNullable      bool
+}
+
 type NullableKindsProvider interface {
-	NullableKinds() []ast.Kind
+	NullableKinds() NullableConfig
 }
 
 type Languages map[string]Language

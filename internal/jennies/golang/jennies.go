@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/spf13/cobra"
 )
 
@@ -91,9 +92,10 @@ func (language *Language) CompilerPasses() compiler.Passes {
 	}
 }
 
-func (language *Language) NullableKinds() []ast.Kind {
-	return []ast.Kind{
-		ast.KindMap,
-		ast.KindArray,
+func (language *Language) NullableKinds() languages.NullableConfig {
+	return languages.NullableConfig{
+		Kinds:              []ast.Kind{ast.KindMap, ast.KindArray},
+		ProtectArrayAppend: false,
+		AnyIsNullable:      true,
 	}
 }
