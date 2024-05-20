@@ -26,7 +26,6 @@ func init() {
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
-			"formatIdentifier": formatIdentifier,
 			"typeIsDisjunctionOfBuilders": func(_ ast.Type) string {
 				panic("typeIsDisjunctionOfBuilders() needs to be overridden by a jenny")
 			},

@@ -2,7 +2,7 @@ package somepkg
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
-	otherpkg "github.com/grafana/cog/generated/other_pkg"
+	otherpkg "github.com/grafana/cog/generated/otherpkg"
 )
 
 var _ cog.Builder[Person] = (*PersonBuilder)(nil)

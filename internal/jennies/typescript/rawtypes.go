@@ -35,12 +35,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 			return nil, err
 		}
 
-		filename := filepath.Join(
-			"src",
-			formatPackageName(schema.Package),
-			"types.gen.ts",
-		)
-
+		filename := filepath.Join("src", schema.Package, "types.gen.ts")
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
@@ -93,23 +88,19 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 
 	buffer.WriteString("export ")
 
-	objectName := tools.StripNonAlphaNumeric(def.Name)
-
 	switch def.Type.Kind {
 	case ast.KindStruct:
-		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
+		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
 		buffer.WriteString(jenny.typeFormatter.formatStructFields(def.Type))
 		buffer.WriteString("\n")
 	case ast.KindEnum:
-		buffer.WriteString(fmt.Sprintf("enum %s {\n", objectName))
+		buffer.WriteString(fmt.Sprintf("enum %s {\n", def.Name))
 		for _, val := range def.Type.AsEnum().Values {
-			name := tools.StripNonAlphaNumeric(tools.UpperCamelCase(escapeEnumMemberName(val.Name)))
-
-			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatValue(val.Value)))
+			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", val.Name, formatValue(val.Value)))
 		}
 		buffer.WriteString("}\n")
 	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, jenny.typeFormatter.formatType(def.Type)))
+		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, jenny.typeFormatter.formatType(def.Type)))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
 		typeValue := formatValue(scalarType.Value)
@@ -119,16 +110,16 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 				typeValue = jenny.typeFormatter.formatScalarKind(scalarType.ScalarKind)
 			}
 
-			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, typeValue))
+			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", def.Name, typeValue))
 		} else {
-			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", objectName, typeValue))
+			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", def.Name, typeValue))
 		}
 	case ast.KindIntersection:
-		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
+		buffer.WriteString(fmt.Sprintf("interface %s ", def.Name))
 		buffer.WriteString(jenny.typeFormatter.formatType(def.Type))
 		buffer.WriteString("\n")
 	case ast.KindComposableSlot:
-		buffer.WriteString(fmt.Sprintf("interface %s %s\n", objectName, jenny.typeFormatter.variantInterface(string(def.Type.AsComposableSlot().Variant))))
+		buffer.WriteString(fmt.Sprintf("interface %s %s\n", def.Name, jenny.typeFormatter.variantInterface(string(def.Type.AsComposableSlot().Variant))))
 	default:
 		return nil, fmt.Errorf("unhandled object of type: %s", def.Type.Kind)
 	}
@@ -136,7 +127,7 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 	if (!def.Type.IsScalar() && !def.Type.IsComposableSlot()) || (def.Type.IsScalar() && !def.Type.AsScalar().IsConcrete()) {
 		buffer.WriteString("\n")
 
-		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(objectName), objectName))
+		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(def.Name), def.Name))
 
 		formattedDefaults := formatValue(jenny.defaultValueForObject(def, packageMapper))
 		buffer.WriteString(formattedDefaults)
@@ -301,15 +292,14 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 
 	pkg := packageMapper(ref.ReferredPkg)
 	referredType, _ := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
-	referredTypeName := tools.StripNonAlphaNumeric(referredType.Name)
 
 	// is the reference to a constant?
 	if referredType.Type.IsConcreteScalar() {
 		if pkg != "" {
-			return raw(fmt.Sprintf("%s.%s", pkg, referredTypeName))
+			return raw(fmt.Sprintf("%s.%s", pkg, referredType.Name))
 		}
 
-		return raw(referredTypeName)
+		return raw(referredType.Name)
 	}
 
 	if referredType.Type.IsEnum() {
@@ -322,10 +312,10 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	if pkg != "" {
-		return raw(fmt.Sprintf("%s.default%s()", pkg, referredTypeName))
+		return raw(fmt.Sprintf("%s.default%s()", pkg, referredType.Name))
 	}
 
-	return raw(fmt.Sprintf("default%s()", tools.UpperCamelCase(referredTypeName)))
+	return raw(fmt.Sprintf("default%s()", tools.UpperCamelCase(referredType.Name)))
 }
 
 func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.Map[string, any]) any {

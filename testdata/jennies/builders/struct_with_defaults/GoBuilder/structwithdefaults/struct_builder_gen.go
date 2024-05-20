@@ -37,20 +37,35 @@ func (builder *StructBuilder) Build() (Struct, error) {
 	return *builder.internal, nil
 }
 
-func (builder *StructBuilder) AllFields(allFields NestedStruct) *StructBuilder {
-    builder.internal.AllFields = allFields
+func (builder *StructBuilder) AllFields(allFields cog.Builder[NestedStruct]) *StructBuilder {
+    allFieldsResource, err := allFields.Build()
+    if err != nil {
+        builder.errors["AllFields"] = err.(cog.BuildErrors)
+        return builder
+    }
+    builder.internal.AllFields = allFieldsResource
 
     return builder
 }
 
-func (builder *StructBuilder) PartialFields(partialFields NestedStruct) *StructBuilder {
-    builder.internal.PartialFields = partialFields
+func (builder *StructBuilder) PartialFields(partialFields cog.Builder[NestedStruct]) *StructBuilder {
+    partialFieldsResource, err := partialFields.Build()
+    if err != nil {
+        builder.errors["PartialFields"] = err.(cog.BuildErrors)
+        return builder
+    }
+    builder.internal.PartialFields = partialFieldsResource
 
     return builder
 }
 
-func (builder *StructBuilder) EmptyFields(emptyFields NestedStruct) *StructBuilder {
-    builder.internal.EmptyFields = emptyFields
+func (builder *StructBuilder) EmptyFields(emptyFields cog.Builder[NestedStruct]) *StructBuilder {
+    emptyFieldsResource, err := emptyFields.Build()
+    if err != nil {
+        builder.errors["EmptyFields"] = err.(cog.BuildErrors)
+        return builder
+    }
+    builder.internal.EmptyFields = emptyFieldsResource
 
     return builder
 }
@@ -77,8 +92,13 @@ func (builder *StructBuilder) PartialComplexField(partialComplexField struct {
 }
 
 func (builder *StructBuilder) applyDefaults() {
-    builder.AllFields(unknown)
-    builder.PartialFields(unknown)
+    builder.AllFields(NewNestedStructBuilder().
+IntVal(3).
+StringVal("hello"),
+)
+    builder.PartialFields(NewNestedStructBuilder().
+IntVal(4),
+)
     builder.ComplexField(struct {
  Uid string `json:"uid"`
 Nested struct {

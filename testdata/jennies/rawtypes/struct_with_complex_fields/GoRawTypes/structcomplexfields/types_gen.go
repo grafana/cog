@@ -12,7 +12,7 @@ type SomeStruct struct {
 	FieldAnonymousStruct struct {
 	FieldAny any `json:"FieldAny"`
 } `json:"FieldAnonymousStruct"`
-	FieldRefToConstant ConnectionPath `json:"fieldRefToConstant"`
+	FieldRefToConstant string `json:"fieldRefToConstant"`
 }
 
 const ConnectionPath = "straight"

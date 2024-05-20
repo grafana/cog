@@ -114,6 +114,7 @@ func (language *Language) IdentifiersFormatter() *languages.IdentifierFormatter 
 		languages.ObjectPublicFieldFormatter(tools.UpperCamelCase),
 		languages.ObjectPrivateFieldFormatter(tools.LowerCamelCase),
 		languages.ConstantFormatter(tools.UpperCamelCase),
+		languages.BuilderFormatter(tools.UpperCamelCase),
 		languages.OptionFormatter(tools.UpperCamelCase),
 		languages.EnumFormatter(tools.UpperCamelCase),
 		languages.EnumMemberFormatter(func(s string) string {

@@ -42,6 +42,7 @@ type IdentifierFormatter struct {
 	EnumMember         Formatter
 	Constant           Formatter
 	Variable           Formatter
+	Builder            Formatter
 	Option             Formatter
 }
 
@@ -56,6 +57,7 @@ func NewIdentifierFormatter(opts ...IdentifierFormatterOpt) *IdentifierFormatter
 		EnumMember:         noopFormatter,
 		Constant:           noopFormatter,
 		Variable:           noopFormatter,
+		Builder:            noopFormatter,
 		Option:             noopFormatter,
 	}
 
@@ -111,6 +113,12 @@ func ConstantFormatter(formatter Formatter) IdentifierFormatterOpt {
 func VariableFormatter(formatter Formatter) IdentifierFormatterOpt {
 	return func(pass *IdentifierFormatter) {
 		pass.Variable = formatter
+	}
+}
+
+func BuilderFormatter(formatter Formatter) IdentifierFormatterOpt {
+	return func(pass *IdentifierFormatter) {
+		pass.Builder = formatter
 	}
 }
 
@@ -216,12 +224,13 @@ func (pass *IdentifierFormatterPass) processEnum(_ *compiler.Visitor, _ *ast.Sch
 }
 
 func (pass *IdentifierFormatterPass) processRef(_ *compiler.Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
+	def.Ref.ReferredPkg = pass.formatter.Package(def.Ref.ReferredPkg)
+	def.Ref.ReferredType = pass.formatter.Object(def.Ref.ReferredType)
+
 	referredObj, found := pass.originalSchemas.LocateObject(def.Ref.ReferredPkg, def.Ref.ReferredType)
 	if !found {
 		return def, nil
 	}
-
-	def.Ref.ReferredPkg = pass.formatter.Package(def.Ref.ReferredPkg)
 
 	switch {
 	case referredObj.Type.IsEnum():
@@ -279,7 +288,7 @@ func (rewriter *IdentifierFormatterBuilderRewriter) rewriteBuilder(visitor *ast.
 	var err error
 
 	builder.Package = rewriter.formatter.Package(builder.Package)
-	builder.Name = rewriter.formatter.Object(builder.Name)
+	builder.Name = rewriter.formatter.Builder(builder.Name)
 
 	forObj, err := rewriter.formatterPass.ProcessObject(builder.For)
 	if err != nil {

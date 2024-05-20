@@ -47,7 +47,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 	case ast.KindDisjunction:
 		return formatter.formatDisjunction(def.AsDisjunction(), resolveBuilders)
 	case ast.KindRef:
-		formatted := tools.StripNonAlphaNumeric(def.AsRef().ReferredType)
+		formatted := def.AsRef().ReferredType
 
 		referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
 		if referredPkg != "" {
@@ -266,11 +266,11 @@ func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) str
 
 	for _, v := range enum.Values {
 		if v.Value == val {
-			return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, tools.StripNonAlphaNumeric(tools.UpperCamelCase(v.Name)))
+			return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, v.Name)
 		}
 	}
 
-	return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, tools.StripNonAlphaNumeric(tools.UpperCamelCase(enum.Values[0].Name)))
+	return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, enum.Values[0].Name)
 }
 
 func formatValue(val any) string {
@@ -315,8 +315,4 @@ func formatValue(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
-}
-
-func formatPackageName(pkg string) string {
-	return tools.LowerCamelCase(pkg)
 }

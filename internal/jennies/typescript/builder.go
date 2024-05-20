@@ -37,7 +37,7 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 
 		filename := filepath.Join(
 			"src",
-			formatPackageName(builder.Package),
+			builder.Package,
 			fmt.Sprintf("%sBuilder.gen.ts", tools.LowerCamelCase(builder.Name)),
 		)
 
@@ -57,7 +57,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	}
 	jenny.typeFormatter = builderTypeFormatter(context, jenny.typeImportMapper)
 
-	buildObjectSignature := formatPackageName(builder.For.SelfRef.ReferredPkg) + "." + tools.StripNonAlphaNumeric(builder.For.Name)
+	buildObjectSignature := builder.For.SelfRef.ReferredPkg + "." + builder.For.Name
 	if builder.For.Type.ImplementsVariant() {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
@@ -91,7 +91,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 		}).
 		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
 			BuilderName:          builder.Name,
-			ObjectName:           tools.StripNonAlphaNumeric(builder.For.Name),
+			ObjectName:           builder.For.Name,
 			BuilderSignatureType: buildObjectSignature,
 			Imports:              jenny.imports,
 			ImportAlias:          jenny.importType(builder.For.SelfRef),

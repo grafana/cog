@@ -6,6 +6,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 const LanguageRef = "typescript"
@@ -65,4 +66,22 @@ func (language *Language) NullableKinds() languages.NullableConfig {
 		ProtectArrayAppend: true,
 		AnyIsNullable:      true,
 	}
+}
+
+func (language *Language) IdentifiersFormatter() *languages.IdentifierFormatter {
+	return languages.NewIdentifierFormatter(
+		languages.PackageFormatter(formatPackageName),
+		languages.ObjectFormatter(tools.StripNonAlphaNumeric),
+		languages.ObjectPrivateFieldFormatter(tools.LowerCamelCase),
+		languages.EnumMemberFormatter(func(s string) string {
+			return tools.UpperCamelCase(escapeEnumMemberName(s))
+		}),
+		languages.BuilderFormatter(tools.UpperCamelCase),
+		languages.OptionFormatter(func(s string) string {
+			return tools.LowerCamelCase(escapeIdentifier(s))
+		}),
+		languages.VariableFormatter(func(s string) string {
+			return tools.LowerCamelCase(escapeIdentifier(s))
+		}),
+	)
 }
