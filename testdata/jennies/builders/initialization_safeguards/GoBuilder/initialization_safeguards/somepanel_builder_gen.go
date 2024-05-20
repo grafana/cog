@@ -44,8 +44,8 @@ func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
 }
 
 func (builder *SomePanelBuilder) ShowLegend(show boolean) *SomePanelBuilder {
-    if builder.internal.Options == nil {
-	builder.internal.Options = &Options{}
+if builder.internal.Options == nil {
+    builder.internal.Options = &Options{}
 }
     builder.internal.Options.Legend.Show = show
 

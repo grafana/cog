@@ -154,11 +154,12 @@ func (jenny *Builder) generateAssignment(assign ast.Assignment) template.Assignm
 	}
 
 	return template.Assignment{
-		Path:           assign.Path,
-		InitSafeguards: initSafeGuards,
-		Constraints:    assign.Constraints,
-		Method:         assign.Method,
-		Value:          assign.Value,
+		Path: assign.Path,
+		// TODO(kgz)
+		// InitSafeguards: initSafeGuards,
+		Constraints: assign.Constraints,
+		Method:      assign.Method,
+		Value:       assign.Value,
 	}
 }
 

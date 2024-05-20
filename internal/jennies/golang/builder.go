@@ -78,6 +78,20 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
 			},
+			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
+				emptyValue := jenny.emptyValueForType(guard.EmptyValueType)
+
+				// This should be alright since there shouldn't be any scalar in the middle of a path
+				if emptyValue[0] == '*' {
+					emptyValue = "&" + emptyValue[1:]
+				}
+
+				if guard.Path.Last().Type.IsAny() && emptyValue[0] != '&' {
+					emptyValue = "&" + emptyValue
+				}
+
+				return emptyValue
+			},
 		}).
 		ExecuteTemplate(&buffer, "builders/builder.tmpl", template.Builder{
 			Package:              builder.Package,
@@ -86,10 +100,10 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			BuilderName:          tools.UpperCamelCase(builder.Name),
 			ObjectName:           fullObjectName,
 			Comments:             builder.For.Comments,
-			Constructor:          jenny.generateConstructor(builder),
+			Constructor:          builder.Constructor,
 			Properties:           builder.Properties,
 			Defaults:             jenny.genDefaultOptionsCalls(context, builder),
-			Options:              tools.Map(builder.Options, jenny.generateOption),
+			Options:              builder.Options,
 		})
 	if err != nil {
 		return nil, err
@@ -163,13 +177,6 @@ func (jenny *Builder) formatDefaultTypedArgs(context common.Context, opt ast.Opt
 	return args
 }
 
-func (jenny *Builder) generateConstructor(builder ast.Builder) template.Constructor {
-	return template.Constructor{
-		Args:        builder.Constructor.Args,
-		Assignments: tools.Map(builder.Constructor.Assignments, jenny.generateAssignment),
-	}
-}
-
 func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	parts := make([]string, len(fieldPath))
 
@@ -190,42 +197,6 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	}
 
 	return strings.Join(parts, ".")
-}
-
-func (jenny *Builder) generateOption(def ast.Option) template.Option {
-	return template.Option{
-		Name:        tools.UpperCamelCase(def.Name),
-		Comments:    def.Comments,
-		Args:        def.Args,
-		Assignments: tools.Map(def.Assignments, jenny.generateAssignment),
-	}
-}
-
-func (jenny *Builder) generatePathInitializationSafeGuard(guard ast.AssignmentNilCheck) string {
-	emptyValue := jenny.emptyValueForType(guard.EmptyValueType)
-
-	// This should be alright since there shouldn't be any scalar in the middle of a path
-	if emptyValue[0] == '*' {
-		emptyValue = "&" + emptyValue[1:]
-	}
-
-	if guard.Path.Last().Type.IsAny() && emptyValue[0] != '&' {
-		emptyValue = "&" + emptyValue
-	}
-
-	return fmt.Sprintf(`if builder.internal.%[1]s == nil {
-	builder.internal.%[1]s = %[2]s
-}`, jenny.formatFieldPath(guard.Path), emptyValue)
-}
-
-func (jenny *Builder) generateAssignment(assignment ast.Assignment) template.Assignment {
-	return template.Assignment{
-		Path:           assignment.Path,
-		InitSafeguards: tools.Map(assignment.NilChecks, jenny.generatePathInitializationSafeGuard),
-		Constraints:    assignment.Constraints,
-		Method:         assignment.Method,
-		Value:          assignment.Value,
-	}
 }
 
 func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {

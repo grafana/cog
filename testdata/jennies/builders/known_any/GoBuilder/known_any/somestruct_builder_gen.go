@@ -38,8 +38,8 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 }
 
 func (builder *SomeStructBuilder) Title(title string) *SomeStructBuilder {
-    if builder.internal.Config == nil {
-	builder.internal.Config = &Config{}
+if builder.internal.Config == nil {
+    builder.internal.Config = &Config{}
 }
     builder.internal.Config.(*Config).Title = title
 
