@@ -1,4 +1,4 @@
-package builder_delegation
+package builderdelegation
 
 import (
 	cog "github.com/grafana/cog/generated/cog"

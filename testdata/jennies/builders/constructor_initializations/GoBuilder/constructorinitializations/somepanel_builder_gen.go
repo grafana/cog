@@ -1,4 +1,4 @@
-package constructor_initializations
+package constructorinitializations
 
 import (
 	cog "github.com/grafana/cog/generated/cog"

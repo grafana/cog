@@ -1,4 +1,4 @@
-package initialization_safeguards
+package initializationsafeguards
 
 import (
 	cog "github.com/grafana/cog/generated/cog"

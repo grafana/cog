@@ -104,9 +104,14 @@ func doGenerate(opts options) error {
 			return err
 		}
 
+		jenniesInput := common.Context{
+			Schemas:  processedSchemas,
+			Builders: builders,
+		}
+
 		// if the target defined an identifier formatter, let's apply it to the schemas and builders.
 		if formatterProvider, ok := target.(languages.IdentifiersFormatterProvider); ok {
-			processedSchemas, builders, err = languages.FormatIdentifiers(formatterProvider, processedSchemas, builders)
+			jenniesInput, err = languages.FormatIdentifiers(formatterProvider, jenniesInput)
 			if err != nil {
 				return err
 			}
@@ -115,11 +120,6 @@ func doGenerate(opts options) error {
 		// prepare the jennies
 		languageJennies := target.Jennies(config.JenniesConfig())
 		languageJennies.AddPostprocessors(common.PathPrefixer(languageOutputDir))
-
-		jenniesInput := common.Context{
-			Schemas:  processedSchemas,
-			Builders: builders,
-		}
 
 		// then delegate the codegen to the jennies
 		if err := runJenny(languageJennies, jenniesInput, rootCodeJenFS); err != nil {

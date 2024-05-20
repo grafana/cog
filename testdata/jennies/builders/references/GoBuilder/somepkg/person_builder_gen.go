@@ -1,8 +1,8 @@
-package some_pkg
+package somepkg
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
-	other_pkg "github.com/grafana/cog/generated/other_pkg"
+	otherpkg "github.com/grafana/cog/generated/other_pkg"
 )
 
 var _ cog.Builder[Person] = (*PersonBuilder)(nil)
@@ -38,7 +38,7 @@ func (builder *PersonBuilder) Build() (Person, error) {
 	return *builder.internal, nil
 }
 
-func (builder *PersonBuilder) Name(name other_pkg.Name) *PersonBuilder {
+func (builder *PersonBuilder) Name(name otherpkg.Name) *PersonBuilder {
     builder.internal.Name = name
 
     return builder

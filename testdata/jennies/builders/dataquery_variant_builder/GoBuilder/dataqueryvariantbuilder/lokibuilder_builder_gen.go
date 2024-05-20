@@ -1,4 +1,4 @@
-package dataquery_variant_builder
+package dataqueryvariantbuilder
 
 import (
 	cog "github.com/grafana/cog/generated/cog"

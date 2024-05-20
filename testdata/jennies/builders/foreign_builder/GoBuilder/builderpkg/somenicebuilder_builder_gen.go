@@ -1,19 +1,19 @@
-package builder_pkg
+package builderpkg
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
-	some_pkg "github.com/grafana/cog/generated/some_pkg"
+	somepkg "github.com/grafana/cog/generated/somepkg"
 )
 
-var _ cog.Builder[some_pkg.SomeStruct] = (*SomeNiceBuilderBuilder)(nil)
+var _ cog.Builder[somepkg.SomeStruct] = (*SomeNiceBuilderBuilder)(nil)
 
 type SomeNiceBuilderBuilder struct {
-    internal *some_pkg.SomeStruct
+    internal *somepkg.SomeStruct
     errors map[string]cog.BuildErrors
 }
 
 func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
-	resource := &some_pkg.SomeStruct{}
+	resource := &somepkg.SomeStruct{}
 	builder := &SomeNiceBuilderBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
@@ -24,7 +24,7 @@ func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
 	return builder
 }
 
-func (builder *SomeNiceBuilderBuilder) Build() (some_pkg.SomeStruct, error) {
+func (builder *SomeNiceBuilderBuilder) Build() (somepkg.SomeStruct, error) {
 	var errs cog.BuildErrors
 
 	for _, err := range builder.errors {
@@ -32,7 +32,7 @@ func (builder *SomeNiceBuilderBuilder) Build() (some_pkg.SomeStruct, error) {
 	}
 
 	if len(errs) != 0 {
-		return some_pkg.SomeStruct{}, errs
+		return somepkg.SomeStruct{}, errs
 	}
 
 	return *builder.internal, nil

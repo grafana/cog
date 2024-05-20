@@ -40,15 +40,15 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 func (builder *SomeStructBuilder) Time(from string,to string) *SomeStructBuilder {
     if builder.internal.Time == nil {
 	builder.internal.Time = &struct {
-	From string `json:"from"`
-	To string `json:"to"`
+	From string `json:""`
+	To string `json:""`
 }{}
 }
     builder.internal.Time.From = from
     if builder.internal.Time == nil {
 	builder.internal.Time = &struct {
-	From string `json:"from"`
-	To string `json:"to"`
+	From string `json:""`
+	To string `json:""`
 }{}
 }
     builder.internal.Time.To = to

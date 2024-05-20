@@ -1,4 +1,4 @@
-package known_any
+package anonymousstruct
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
@@ -37,11 +37,11 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	return *builder.internal, nil
 }
 
-func (builder *SomeStructBuilder) Title(title string) *SomeStructBuilder {
-    if builder.internal.Config == nil {
-	builder.internal.Config = &Config{}
-}
-    builder.internal.Config.(*Config).Title = title
+func (builder *SomeStructBuilder) Time(time struct {
+	From string `json:"from"`
+	To string `json:"to"`
+}) *SomeStructBuilder {
+    builder.internal.Time = &time
 
     return builder
 }
