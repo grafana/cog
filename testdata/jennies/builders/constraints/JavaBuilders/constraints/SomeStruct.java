@@ -13,10 +13,10 @@ public class SomeStruct {
         }
     public Builder setId(Long id) {
         if (!(id >= 5)) {
-            throw new RuntimeException("id must be >= 5");
+            throw new IllegalArgumentException("id must be >= 5");
         }
         if (!(id < 10)) {
-            throw new RuntimeException("id must be < 10");
+            throw new IllegalArgumentException("id must be < 10");
         }
     this.internal.id = id;
         return this;
@@ -24,7 +24,7 @@ public class SomeStruct {
     
     public Builder setTitle(String title) {
         if (!(title.length() >= 1)) {
-            throw new RuntimeException("title.length() must be >= 1");
+            throw new IllegalArgumentException("title.length() must be >= 1");
         }
     this.internal.title = title;
         return this;
