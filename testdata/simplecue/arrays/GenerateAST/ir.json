@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "things",
               "Name": "things",
               "Type": {
                 "Kind": "scalar",
@@ -36,6 +37,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "things",
               "Name": "things",
               "Type": {
                 "Kind": "scalar",
@@ -62,6 +64,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "ints",
               "Name": "ints",
               "Type": {
                 "Kind": "array",
@@ -79,6 +82,7 @@
               "Required": true
             },
             {
+              "OriginalName": "strings",
               "Name": "strings",
               "Type": {
                 "Kind": "array",
@@ -96,6 +100,7 @@
               "Required": true
             },
             {
+              "OriginalName": "refs",
               "Name": "refs",
               "Type": {
                 "Kind": "array",
@@ -114,6 +119,7 @@
               "Required": true
             },
             {
+              "OriginalName": "structs",
               "Name": "structs",
               "Type": {
                 "Kind": "array",
