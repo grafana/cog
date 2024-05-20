@@ -43,7 +43,7 @@ func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
     return builder
 }
 
-func (builder *SomePanelBuilder) ShowLegend(show boolean) *SomePanelBuilder {
+func (builder *SomePanelBuilder) ShowLegend(show bool) *SomePanelBuilder {
 if builder.internal.Options == nil {
     builder.internal.Options = &Options{}
 }

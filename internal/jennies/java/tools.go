@@ -15,11 +15,11 @@ func formatPackageName(pkg string) string {
 	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
 }
 
-func formatFieldPath(fieldPath ast.Path) []string {
+func formatFieldPath(fieldPath ast.Path) string {
 	parts := tools.Map(fieldPath, func(fieldPath ast.PathItem) string {
 		return tools.LowerCamelCase(fieldPath.Identifier)
 	})
-	return parts
+	return strings.Join(parts, ".")
 }
 
 type CastPath struct {

@@ -35,6 +35,7 @@ func functions() template.FuncMap {
 		"formatCastValue":      formatCastValue,
 		"formatScalar":         formatScalar,
 		"formatAssignmentPath": formatAssignmentPath,
+		"formatPath":           formatFieldPath,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
@@ -46,6 +47,9 @@ func functions() template.FuncMap {
 		},
 		"typeHasBuilder": func(_ ast.Type) bool {
 			panic("typeHasBuilder() needs to be overridden by a jenny")
+		},
+		"emptyValueForType": func(_ ast.Type) string {
+			panic("emptyValueForType() needs to be overridden by a jenny")
 		},
 	}
 }
