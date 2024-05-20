@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/cog/cmd/cli/loaders"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/spf13/cobra"
 )
 
@@ -67,12 +68,20 @@ func doInspect(opts options) error {
 }
 
 func inspectBuilderIR(schemas []*ast.Schema) error {
+	var err error
 	generator := &ast.BuilderGenerator{}
 
-	return prettyPrintJSON(common.Context{
+	codegenCtx := common.Context{
 		Schemas:  schemas,
 		Builders: generator.FromAST(schemas),
-	})
+	}
+
+	codegenCtx, err = languages.GenerateBuilderNilChecks(nil, codegenCtx)
+	if err != nil {
+		return err
+	}
+
+	return prettyPrintJSON(codegenCtx)
 }
 
 func prettyPrintJSON(input any) error {
