@@ -15,6 +15,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "expr",
                   "Name": "expr",
                   "Type": {
                     "Kind": "scalar",
@@ -49,6 +50,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "expr",
                 "Name": "expr",
                 "Type": {
                   "Kind": "scalar",

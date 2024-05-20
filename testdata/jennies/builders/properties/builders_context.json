@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "id",
                   "Name": "id",
                   "Type": {
                     "Kind": "scalar",
@@ -43,6 +44,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "id",
                 "Name": "id",
                 "Type": {
                   "Kind": "scalar",
@@ -65,6 +67,7 @@
       "Name": "SomeStruct",
       "Properties": [
         {
+          "OriginalName": "someBuilderProperty",
           "Name": "someBuilderProperty",
           "Type": {
             "Kind": "scalar",

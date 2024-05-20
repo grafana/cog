@@ -1,4 +1,4 @@
-package struct_optional_fields
+package structoptionalfields
 
 type SomeStruct struct {
 	FieldRef *SomeOtherStruct `json:"FieldRef,omitempty"`

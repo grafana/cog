@@ -12,6 +12,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "FieldRef",
               "Name": "FieldRef",
               "Required": false,
               "Type": {
@@ -23,6 +24,7 @@
               }
             },
             {
+              "OriginalName": "FieldString",
               "Name": "FieldString",
               "Required": false,
               "Type": {
@@ -33,6 +35,7 @@
               }
             },
             {
+              "OriginalName": "Operator",
               "Name": "Operator",
               "Required": false,
               "Type": {
@@ -64,6 +67,7 @@
               }
             },
             {
+              "OriginalName": "FieldArrayOfStrings",
               "Name": "FieldArrayOfStrings",
               "Required": false,
               "Type": {
@@ -79,6 +83,7 @@
               }
             },
             {
+              "OriginalName": "FieldAnonymousStruct",
               "Name": "FieldAnonymousStruct",
               "Required": false,
               "Type": {
@@ -86,6 +91,7 @@
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "FieldAny",
                       "Name": "FieldAny",
                       "Required": true,
                       "Type": {
@@ -114,6 +120,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "FieldAny",
               "Name": "FieldAny",
               "Required": true,
               "Type": {

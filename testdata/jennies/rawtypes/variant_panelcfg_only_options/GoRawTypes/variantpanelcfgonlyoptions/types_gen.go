@@ -1,4 +1,4 @@
-package variant_panelcfg_only_options
+package variantpanelcfgonlyoptions
 
 import (
 	cogvariants "github.com/grafana/cog/generated/cog/variants"

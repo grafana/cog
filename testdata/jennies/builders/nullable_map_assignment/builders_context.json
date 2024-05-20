@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "config",
                   "Name": "config",
                   "Type": {
                     "Kind": "map",
@@ -56,6 +57,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "config",
                 "Name": "config",
                 "Type": {
                   "Kind": "map",

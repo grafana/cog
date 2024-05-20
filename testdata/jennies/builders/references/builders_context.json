@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "name",
                   "Name": "name",
                   "Type": {
                     "Kind": "ref",
@@ -45,6 +46,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "first_name",
                   "Name": "first_name",
                   "Type": {
                     "Kind": "scalar",
@@ -56,6 +58,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "last_name",
                   "Name": "last_name",
                   "Type": {
                     "Kind": "scalar",
@@ -87,6 +90,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "name",
                 "Name": "name",
                 "Type": {
                   "Kind": "ref",

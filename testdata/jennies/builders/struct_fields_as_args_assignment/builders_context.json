@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "time",
                   "Name": "time",
                   "Type": {
                     "Kind": "struct",
@@ -19,6 +20,7 @@
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "from",
                           "Name": "from",
                           "Type": {
                             "Kind": "scalar",
@@ -31,6 +33,7 @@
                           "Required": true
                         },
                         {
+                          "OriginalName": "to",
                           "Name": "to",
                           "Type": {
                             "Kind": "scalar",
@@ -68,6 +71,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "time",
                 "Name": "time",
                 "Type": {
                   "Kind": "struct",
@@ -75,6 +79,7 @@
                   "Struct": {
                     "Fields": [
                       {
+                        "OriginalName": "from",
                         "Name": "from",
                         "Type": {
                           "Kind": "scalar",
@@ -87,6 +92,7 @@
                         "Required": true
                       },
                       {
+                        "OriginalName": "to",
                         "Name": "to",
                         "Type": {
                           "Kind": "scalar",
@@ -151,6 +157,7 @@
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "from",
                           "Name": "from",
                           "Type": {
                             "Kind": "scalar",
@@ -163,6 +170,7 @@
                           "Required": true
                         },
                         {
+                          "OriginalName": "to",
                           "Name": "to",
                           "Type": {
                             "Kind": "scalar",
@@ -214,6 +222,7 @@
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "from",
                           "Name": "from",
                           "Type": {
                             "Kind": "scalar",
@@ -226,6 +235,7 @@
                           "Required": true
                         },
                         {
+                          "OriginalName": "to",
                           "Name": "to",
                           "Type": {
                             "Kind": "scalar",

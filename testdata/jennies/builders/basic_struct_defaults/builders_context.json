@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "id",
                   "Name": "id",
                   "Type": {
                     "Kind": "scalar",
@@ -24,6 +25,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "uid",
                   "Name": "uid",
                   "Type": {
                     "Kind": "scalar",
@@ -36,6 +38,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "tags",
                   "Name": "tags",
                   "Type": {
                     "Kind": "array",
@@ -57,6 +60,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "liveNow",
                   "Name": "liveNow",
                   "Type": {
                     "Kind": "scalar",
@@ -89,6 +93,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "id",
                 "Name": "id",
                 "Type": {
                   "Kind": "scalar",
@@ -101,6 +106,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "uid",
                 "Name": "uid",
                 "Type": {
                   "Kind": "scalar",
@@ -113,6 +119,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "tags",
                 "Name": "tags",
                 "Type": {
                   "Kind": "array",
@@ -134,6 +141,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "liveNow",
                 "Name": "liveNow",
                 "Type": {
                   "Kind": "scalar",
@@ -155,6 +163,7 @@
       },
       "Package": "basic_struct_defaults",
       "Name": "SomeStruct",
+      "Constructor": {},
       "Options": [
         {
           "Name": "id",
@@ -206,8 +215,7 @@
             "ArgsValues": [
               42
             ]
-          },
-          "IsConstructorArg": false
+          }
         },
         {
           "Name": "uid",
@@ -259,8 +267,7 @@
             "ArgsValues": [
               "default-uid"
             ]
-          },
-          "IsConstructorArg": false
+          }
         },
         {
           "Name": "tags",
@@ -342,8 +349,7 @@
                 "cog"
               ]
             ]
-          },
-          "IsConstructorArg": false
+          }
         },
         {
           "Name": "liveNow",
@@ -395,8 +401,7 @@
             "ArgsValues": [
               true
             ]
-          },
-          "IsConstructorArg": false
+          }
         }
       ]
     }

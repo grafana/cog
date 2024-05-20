@@ -13,6 +13,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "content",
               "Name": "content",
               "Required": true,
               "Type": {

@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "editable",
                   "Name": "editable",
                   "Type": {
                     "Kind": "scalar",
@@ -23,6 +24,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "autoRefresh",
                   "Name": "autoRefresh",
                   "Type": {
                     "Kind": "scalar",
@@ -54,6 +56,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "editable",
                 "Name": "editable",
                 "Type": {
                   "Kind": "scalar",
@@ -65,6 +68,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "autoRefresh",
                 "Name": "autoRefresh",
                 "Type": {
                   "Kind": "scalar",

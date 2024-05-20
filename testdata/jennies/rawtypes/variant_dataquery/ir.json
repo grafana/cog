@@ -16,6 +16,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "expr",
               "Name": "expr",
               "Required": true,
               "Type": {
@@ -26,6 +27,7 @@
               }
             },
             {
+              "OriginalName": "instant",
               "Name": "instant",
               "Type": {
                 "Kind": "scalar",

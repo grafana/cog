@@ -1,4 +1,4 @@
-package variant_dataquery
+package variantdataquery
 
 import (
 	cogvariants "github.com/grafana/cog/generated/cog/variants"

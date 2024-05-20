@@ -55,6 +55,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "Type",
               "Name": "Type",
               "Required": true,
               "Type": {
@@ -66,6 +67,7 @@
               }
             },
             {
+              "OriginalName": "FieldAny",
               "Name": "FieldAny",
               "Required": true,
               "Type": {
@@ -109,6 +111,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "Type",
               "Name": "Type",
               "Required": true,
               "Type": {
@@ -120,6 +123,7 @@
               }
             },
             {
+              "OriginalName": "Foo",
               "Name": "Foo",
               "Required": true,
               "Type": {
@@ -140,6 +144,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "Type",
               "Name": "Type",
               "Required": true,
               "Type": {
@@ -151,6 +156,7 @@
               }
             },
             {
+              "OriginalName": "Bar",
               "Name": "Bar",
               "Required": true,
               "Type": {

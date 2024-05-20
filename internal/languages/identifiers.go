@@ -186,10 +186,10 @@ func (pass *IdentifierFormatterPass) processSchema(visitor *compiler.Visitor, sc
 func (pass *IdentifierFormatterPass) processObject(visitor *compiler.Visitor, schema *ast.Schema, object ast.Object) (ast.Object, error) {
 	if object.Type.IsEnum() {
 		object.Name = pass.formatter.EnumMember(object.Name)
-	} else if object.Type.IsStruct() {
-		object.Name = pass.formatter.Object(object.Name)
 	} else if object.Type.IsConcreteScalar() {
 		object.Name = pass.formatter.Constant(object.Name)
+	} else {
+		object.Name = pass.formatter.Object(object.Name)
 	}
 
 	object.SelfRef.ReferredPkg = pass.formatter.Package(object.SelfRef.ReferredPkg)

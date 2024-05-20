@@ -1,4 +1,4 @@
-package struct_complex_fields
+package structcomplexfields
 
 // This struct does things.
 type SomeStruct struct {
@@ -12,7 +12,7 @@ type SomeStruct struct {
 	FieldAnonymousStruct struct {
 	FieldAny any `json:"FieldAny"`
 } `json:"FieldAnonymousStruct"`
-	FieldRefToConstant string `json:"fieldRefToConstant"`
+	FieldRefToConstant ConnectionPath `json:"fieldRefToConstant"`
 }
 
 const ConnectionPath = "straight"
