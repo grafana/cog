@@ -13,7 +13,7 @@ public class Dashboard {
             this.internal = new Dashboard();
         }
     public Builder setWithVariable(String name,String value) {
-    	if (this.variables == null) {
+		if (this.variables == null) {
 			this.variables = new LinkedList<>();
 		}
     Variable variable = new Variable();

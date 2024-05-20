@@ -19,7 +19,8 @@ func GenerateBuilderNilChecks(language Language, context common.Context) (common
 	nilChecksVisitor := ast.BuilderVisitor{
 		OnAssignment: func(_ *ast.BuilderVisitor, _ ast.Schemas, _ ast.Builder, assignment ast.Assignment) (ast.Assignment, error) {
 			for i, chunk := range assignment.Path {
-				if i == len(assignment.Path)-1 && (nullableKinds.ProtectArrayAppend && assignment.Method != ast.AppendAssignment) {
+				protectArrayAppend := nullableKinds.ProtectArrayAppend && assignment.Method == ast.AppendAssignment
+				if i == len(assignment.Path)-1 && !protectArrayAppend {
 					continue
 				}
 
