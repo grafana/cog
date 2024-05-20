@@ -14,27 +14,27 @@ type Builder struct {
 	Imports              fmt.Stringer
 	ImportAlias          string // alias to the pkg in which the object being built lives.
 	Comments             []string
-	Constructor          Constructor
+	Constructor          ast.Constructor
 	Properties           []ast.StructField
-	Options              []Option
+	Options              []ast.Option
 	Defaults             []OptionCall
 }
 
 type Constructor struct {
 	Args        []ast.Argument
-	Assignments []Assignment
+	Assignments []ast.Assignment
 }
 
 type Option struct {
 	Name        string
 	Comments    []string
 	Args        []ast.Argument
-	Assignments []Assignment
+	Assignments []ast.Assignment
 }
 
 type Assignment struct {
 	Path           ast.Path
-	InitSafeguards []string
+	InitSafeguards []ast.AssignmentNilCheck
 	Constraints    []ast.AssignmentConstraint
 	Method         ast.AssignmentMethod
 	Value          ast.AssignmentValue

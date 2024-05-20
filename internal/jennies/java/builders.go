@@ -92,11 +92,12 @@ func (b Builders) genArgs(arguments []ast.Argument) []ast.Argument {
 
 func (b Builders) genAssignment(assignment ast.Assignment) template.Assignment {
 	return template.Assignment{
-		Path:           assignment.Path,
-		Method:         assignment.Method,
-		Constraints:    assignment.Constraints,
-		Value:          assignment.Value,
-		InitSafeguards: b.getSafeGuards(assignment),
+		Path:        assignment.Path,
+		Method:      assignment.Method,
+		Constraints: assignment.Constraints,
+		Value:       assignment.Value,
+		// TODO(kgz)
+		// InitSafeguards: b.getSafeGuards(assignment),
 	}
 }
 
