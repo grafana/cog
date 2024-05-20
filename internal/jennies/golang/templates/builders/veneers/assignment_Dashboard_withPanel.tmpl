@@ -1,11 +1,11 @@
-{{- define "pre_assignment_Dashboard_WithPanel" }}
+{{- define "pre_assignment_Dashboard_withPanel" }}
 
 	// Position the panel on the grid
 	panelResource.GridPos.X = builder.currentX
 	panelResource.GridPos.Y = builder.currentY
 {{- end }}
 
-{{- define "post_assignment_Dashboard_WithPanel" }}
+{{- define "post_assignment_Dashboard_withPanel" }}
 
 	// Prepare the coordinates for the next panel
 	builder.currentX += panelResource.GridPos.W
