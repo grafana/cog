@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "array",
               "Name": "array",
               "Type": {
                 "Kind": "array",

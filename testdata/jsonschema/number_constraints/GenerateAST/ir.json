@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "minute",
               "Name": "minute",
               "Type": {
                 "Kind": "scalar",
@@ -36,6 +37,7 @@
               "Required": false
             },
             {
+              "OriginalName": "seconds",
               "Name": "seconds",
               "Type": {
                 "Kind": "scalar",

@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "array",
               "Name": "array",
               "Type": {
                 "Kind": "array",
@@ -33,6 +34,7 @@
               "Required": false
             },
             {
+              "OriginalName": "boolean",
               "Name": "boolean",
               "Type": {
                 "Kind": "scalar",
@@ -45,6 +47,7 @@
               "Required": false
             },
             {
+              "OriginalName": "integer",
               "Name": "integer",
               "Type": {
                 "Kind": "scalar",
@@ -57,6 +60,7 @@
               "Required": false
             },
             {
+              "OriginalName": "number",
               "Name": "number",
               "Type": {
                 "Kind": "scalar",
@@ -69,6 +73,7 @@
               "Required": false
             },
             {
+              "OriginalName": "object",
               "Name": "object",
               "Type": {
                 "Kind": "struct",
@@ -76,6 +81,7 @@
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "foo",
                       "Name": "foo",
                       "Type": {
                         "Kind": "scalar",
@@ -93,6 +99,7 @@
               "Required": false
             },
             {
+              "OriginalName": "string",
               "Name": "string",
               "Type": {
                 "Kind": "scalar",

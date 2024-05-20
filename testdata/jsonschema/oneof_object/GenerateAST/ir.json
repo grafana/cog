@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "oneOf",
               "Name": "oneOf",
               "Type": {
                 "Kind": "ref",
@@ -23,6 +24,7 @@
               "Required": false
             },
             {
+              "OriginalName": "oneOfObj",
               "Name": "oneOfObj",
               "Type": {
                 "Kind": "ref",
@@ -84,6 +86,7 @@
               "Struct": {
                 "Fields": [
                   {
+                    "OriginalName": "bar",
                     "Name": "bar",
                     "Type": {
                       "Kind": "scalar",
@@ -103,6 +106,7 @@
               "Struct": {
                 "Fields": [
                   {
+                    "OriginalName": "foo",
                     "Name": "foo",
                     "Type": {
                       "Kind": "scalar",
