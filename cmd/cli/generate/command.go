@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/cog/cmd/cli/loaders"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/spf13/cobra"
 )
@@ -104,19 +105,11 @@ func doGenerate(opts options) error {
 		}
 
 		// if the target defined an identifier formatter, let's apply it to the schemas and builders.
-		if formatterProvider, ok := target.(interface {
-			IdentifiersFormatter() *ast.IdentifierFormatter
-		}); ok {
-			formatter := formatterProvider.IdentifiersFormatter()
-
-			formatterPass := ast.NewIdentifierFormatterPass(formatter)
-			processedSchemas, err = formatterPass.Process(processedSchemas)
+		if formatterProvider, ok := target.(languages.IdentifiersFormatterProvider); ok {
+			processedSchemas, builders, err = languages.FormatIdentifiers(formatterProvider, processedSchemas, builders)
 			if err != nil {
 				return err
 			}
-
-			buildersRewriter := ast.NewIdentifierFormatterBuilderRewriter(formatter)
-			builders = buildersRewriter.Rewrite(processedSchemas, builders)
 		}
 
 		// prepare the jennies

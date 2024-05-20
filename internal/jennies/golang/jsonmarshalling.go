@@ -10,11 +10,12 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type JSONMarshalling struct {
 	Config               Config
-	IdentifiersFormatter *ast.IdentifierFormatter
+	IdentifiersFormatter *languages.IdentifierFormatter
 
 	packageMapper func(string) string
 	typeFormatter *typeFormatter

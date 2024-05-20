@@ -9,6 +9,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 //nolint:gochecknoglobals
@@ -24,7 +25,7 @@ func init() {
 	base.
 		Option("missingkey=error").
 		Funcs(sprig.FuncMap()).
-		Funcs(cogtemplate.FormatterHelpers(ast.NewIdentifierFormatter())).
+		Funcs(cogtemplate.FormatterHelpers(languages.NewIdentifierFormatter())).
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(template.FuncMap{

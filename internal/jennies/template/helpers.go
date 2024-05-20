@@ -8,12 +8,13 @@ import (
 	gotemplate "text/template"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 const recursionMaxNums = 1000
 
-func FormatterHelpers(formatter *ast.IdentifierFormatter) gotemplate.FuncMap {
+func FormatterHelpers(formatter *languages.IdentifierFormatter) gotemplate.FuncMap {
 	return gotemplate.FuncMap{
 		"formatPackageName":    formatter.Package,
 		"formatObjectName":     formatter.Object,
