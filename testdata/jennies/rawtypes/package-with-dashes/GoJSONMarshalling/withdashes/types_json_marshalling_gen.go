@@ -19,22 +19,22 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	var errList []error
 
 	// String
-	var String string
-	if err := json.Unmarshal(raw, &String); err != nil {
+	var stringArg string
+	if err := json.Unmarshal(raw, &stringArg); err != nil {
 		errList = append(errList, err)
 		resource.String = nil
 	} else {
-		resource.String = &String
+		resource.String = &stringArg
 		return nil
 	}
 
 	// Bool
-	var Bool bool
-	if err := json.Unmarshal(raw, &Bool); err != nil {
+	var boolArg bool
+	if err := json.Unmarshal(raw, &boolArg); err != nil {
 		errList = append(errList, err)
 		resource.Bool = nil
 	} else {
-		resource.Bool = &Bool
+		resource.Bool = &boolArg
 		return nil
 	}
 

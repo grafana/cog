@@ -1,4 +1,4 @@
-package variant_panelcfg_only_options
+package variantpanelcfgonlyoptions
 
 type Options struct {
 	Content string `json:"content"`

@@ -1,4 +1,4 @@
-package variant_dataquery
+package variantdataquery
 
 type Query struct {
 	Expr string `json:"expr"`

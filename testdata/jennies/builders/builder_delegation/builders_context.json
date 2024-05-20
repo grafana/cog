@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "title",
                   "Name": "title",
                   "Type": {
                     "Kind": "scalar",
@@ -23,6 +24,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "url",
                   "Name": "url",
                   "Type": {
                     "Kind": "scalar",
@@ -49,6 +51,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "id",
                   "Name": "id",
                   "Type": {
                     "Kind": "scalar",
@@ -60,6 +63,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "title",
                   "Name": "title",
                   "Type": {
                     "Kind": "scalar",
@@ -71,6 +75,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "links",
                   "Name": "links",
                   "Comments": [
                     "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
@@ -92,6 +97,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "linksOfLinks",
                   "Name": "linksOfLinks",
                   "Comments": [
                     "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
@@ -119,6 +125,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "singleLink",
                   "Name": "singleLink",
                   "Comments": [
                     "will be expanded to cog.Builder\u003cDashboardLink\u003e"
@@ -154,6 +161,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "title",
                 "Name": "title",
                 "Type": {
                   "Kind": "scalar",
@@ -165,6 +173,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "url",
                 "Name": "url",
                 "Type": {
                   "Kind": "scalar",
@@ -185,6 +194,7 @@
       },
       "Package": "builder_delegation",
       "Name": "DashboardLink",
+      "Constructor": {},
       "Options": [
         {
           "Name": "title",
@@ -228,8 +238,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "url",
@@ -273,8 +282,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         }
       ]
     },
@@ -287,6 +295,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "id",
                 "Name": "id",
                 "Type": {
                   "Kind": "scalar",
@@ -298,6 +307,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "title",
                 "Name": "title",
                 "Type": {
                   "Kind": "scalar",
@@ -309,6 +319,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "links",
                 "Name": "links",
                 "Comments": [
                   "will be expanded to []cog.Builder\u003cDashboardLink\u003e"
@@ -330,6 +341,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "linksOfLinks",
                 "Name": "linksOfLinks",
                 "Comments": [
                   "will be expanded to [][]cog.Builder\u003cDashboardLink\u003e"
@@ -357,6 +369,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "singleLink",
                 "Name": "singleLink",
                 "Comments": [
                   "will be expanded to cog.Builder\u003cDashboardLink\u003e"
@@ -381,6 +394,7 @@
       },
       "Package": "builder_delegation",
       "Name": "Dashboard",
+      "Constructor": {},
       "Options": [
         {
           "Name": "id",
@@ -424,8 +438,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "title",
@@ -469,8 +482,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "links",
@@ -538,8 +550,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "linksOfLinks",
@@ -625,8 +636,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "singleLink",
@@ -676,8 +686,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         }
       ]
     }

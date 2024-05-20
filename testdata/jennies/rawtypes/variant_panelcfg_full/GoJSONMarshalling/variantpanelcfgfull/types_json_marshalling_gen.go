@@ -1,11 +1,11 @@
-package variant_panelcfg_only_options
+package variantpanelcfgfull
 import (
 	cogvariants "github.com/grafana/cog/generated/cog/variants"
 )
 
 func VariantConfig() cogvariants.PanelcfgConfig {
 	return cogvariants.PanelcfgConfig{
-		Identifier: "text",
+		Identifier: "timeseries",
 		OptionsUnmarshaler: func (raw []byte) (any, error) {
 			options := Options{}
 
@@ -14,6 +14,15 @@ func VariantConfig() cogvariants.PanelcfgConfig {
 			}
 
 			return options, nil
+		},
+		FieldConfigUnmarshaler: func (raw []byte) (any, error) {
+			fieldConfig := FieldConfig{}
+
+			if err := json.Unmarshal(raw, &fieldConfig); err != nil {
+				return nil, err
+			}
+
+			return fieldConfig, nil
 		},
 	}
 }

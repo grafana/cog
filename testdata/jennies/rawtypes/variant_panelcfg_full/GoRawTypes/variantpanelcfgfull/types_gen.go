@@ -1,4 +1,4 @@
-package variant_panelcfg_full
+package variantpanelcfgfull
 
 type Options struct {
 	TimeseriesOption string `json:"timeseries_option"`

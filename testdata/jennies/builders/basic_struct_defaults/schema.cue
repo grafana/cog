@@ -1,4 +1,4 @@
-package sandbox
+package basic_struct_defaults
 
 SomeStruct: {
 	id: int64 | *42

@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "target",
                   "Name": "target",
                   "Type": {
                     "Kind": "composable_slot",
@@ -23,6 +24,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "targets",
                   "Name": "targets",
                   "Type": {
                     "Kind": "array",
@@ -60,6 +62,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "target",
                 "Name": "target",
                 "Type": {
                   "Kind": "composable_slot",
@@ -71,6 +74,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "targets",
                 "Name": "targets",
                 "Type": {
                   "Kind": "array",

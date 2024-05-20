@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "id",
                   "Name": "id",
                   "Type": {
                     "Kind": "scalar",
@@ -37,6 +38,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "title",
                   "Name": "title",
                   "Type": {
                     "Kind": "scalar",
@@ -76,6 +78,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "id",
                 "Name": "id",
                 "Type": {
                   "Kind": "scalar",
@@ -101,6 +104,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "title",
                 "Name": "title",
                 "Type": {
                   "Kind": "scalar",
