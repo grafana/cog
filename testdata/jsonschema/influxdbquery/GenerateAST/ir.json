@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "condition",
               "Name": "condition",
               "Type": {
                 "Kind": "scalar",
@@ -22,6 +23,7 @@
               "Required": false
             },
             {
+              "OriginalName": "key",
               "Name": "key",
               "Type": {
                 "Kind": "scalar",
@@ -33,6 +35,7 @@
               "Required": false
             },
             {
+              "OriginalName": "operator",
               "Name": "operator",
               "Type": {
                 "Kind": "scalar",
@@ -44,6 +47,7 @@
               "Required": false
             },
             {
+              "OriginalName": "value",
               "Name": "value",
               "Type": {
                 "Kind": "scalar",
@@ -70,6 +74,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "type",
               "Name": "type",
               "Comments": [
                 "The plugin type-id"
@@ -84,6 +89,7 @@
               "Required": false
             },
             {
+              "OriginalName": "uid",
               "Name": "uid",
               "Comments": [
                 "Specific datasource instance"
@@ -113,6 +119,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "adhocFilters",
               "Name": "adhocFilters",
               "Type": {
                 "Kind": "array",
@@ -131,6 +138,7 @@
               "Required": false
             },
             {
+              "OriginalName": "alias",
               "Name": "alias",
               "Type": {
                 "Kind": "scalar",
@@ -142,6 +150,7 @@
               "Required": false
             },
             {
+              "OriginalName": "datasource",
               "Name": "datasource",
               "Comments": [
                 "For mixed data sources the selected datasource is on the query level.",
@@ -175,6 +184,7 @@
               "Required": false
             },
             {
+              "OriginalName": "fill",
               "Name": "fill",
               "Type": {
                 "Kind": "scalar",
@@ -186,6 +196,7 @@
               "Required": false
             },
             {
+              "OriginalName": "fromAnnotations",
               "Name": "fromAnnotations",
               "Type": {
                 "Kind": "scalar",
@@ -197,6 +208,7 @@
               "Required": false
             },
             {
+              "OriginalName": "groupBy",
               "Name": "groupBy",
               "Type": {
                 "Kind": "array",
@@ -215,6 +227,7 @@
               "Required": false
             },
             {
+              "OriginalName": "hide",
               "Name": "hide",
               "Comments": [
                 "true if query is disabled (ie should not be returned to the dashboard)",
@@ -231,6 +244,7 @@
               "Required": false
             },
             {
+              "OriginalName": "key",
               "Name": "key",
               "Comments": [
                 "Unique, guid like, string (used only in explore mode)"
@@ -245,6 +259,7 @@
               "Required": false
             },
             {
+              "OriginalName": "limit",
               "Name": "limit",
               "Type": {
                 "Kind": "disjunction",
@@ -271,6 +286,7 @@
               "Required": false
             },
             {
+              "OriginalName": "matchAny",
               "Name": "matchAny",
               "Type": {
                 "Kind": "scalar",
@@ -282,6 +298,7 @@
               "Required": false
             },
             {
+              "OriginalName": "measurement",
               "Name": "measurement",
               "Type": {
                 "Kind": "scalar",
@@ -293,6 +310,7 @@
               "Required": false
             },
             {
+              "OriginalName": "name",
               "Name": "name",
               "Type": {
                 "Kind": "scalar",
@@ -304,6 +322,7 @@
               "Required": false
             },
             {
+              "OriginalName": "orderByTime",
               "Name": "orderByTime",
               "Type": {
                 "Kind": "scalar",
@@ -315,6 +334,7 @@
               "Required": false
             },
             {
+              "OriginalName": "policy",
               "Name": "policy",
               "Type": {
                 "Kind": "scalar",
@@ -326,6 +346,7 @@
               "Required": false
             },
             {
+              "OriginalName": "query",
               "Name": "query",
               "Type": {
                 "Kind": "scalar",
@@ -337,6 +358,7 @@
               "Required": false
             },
             {
+              "OriginalName": "queryType",
               "Name": "queryType",
               "Comments": [
                 "Specify the query flavor",
@@ -352,6 +374,7 @@
               "Required": false
             },
             {
+              "OriginalName": "rawQuery",
               "Name": "rawQuery",
               "Type": {
                 "Kind": "scalar",
@@ -363,6 +386,7 @@
               "Required": false
             },
             {
+              "OriginalName": "refId",
               "Name": "refId",
               "Comments": [
                 "A unique identifier for the query within the list of targets.",
@@ -379,6 +403,7 @@
               "Required": false
             },
             {
+              "OriginalName": "resultFormat",
               "Name": "resultFormat",
               "Type": {
                 "Kind": "enum",
@@ -424,6 +449,7 @@
               "Required": false
             },
             {
+              "OriginalName": "select",
               "Name": "select",
               "Type": {
                 "Kind": "array",
@@ -448,6 +474,7 @@
               "Required": false
             },
             {
+              "OriginalName": "slimit",
               "Name": "slimit",
               "Type": {
                 "Kind": "disjunction",
@@ -474,6 +501,7 @@
               "Required": false
             },
             {
+              "OriginalName": "tags",
               "Name": "tags",
               "Type": {
                 "Kind": "array",
@@ -492,6 +520,7 @@
               "Required": false
             },
             {
+              "OriginalName": "tagsColumn",
               "Name": "tagsColumn",
               "Type": {
                 "Kind": "scalar",
@@ -503,6 +532,7 @@
               "Required": false
             },
             {
+              "OriginalName": "textColumn",
               "Name": "textColumn",
               "Type": {
                 "Kind": "scalar",
@@ -514,6 +544,7 @@
               "Required": false
             },
             {
+              "OriginalName": "textEditor",
               "Name": "textEditor",
               "Type": {
                 "Kind": "scalar",
@@ -525,6 +556,7 @@
               "Required": false
             },
             {
+              "OriginalName": "timeEndColumn",
               "Name": "timeEndColumn",
               "Type": {
                 "Kind": "scalar",
@@ -536,6 +568,7 @@
               "Required": false
             },
             {
+              "OriginalName": "titleColumn",
               "Name": "titleColumn",
               "Type": {
                 "Kind": "scalar",
@@ -547,6 +580,7 @@
               "Required": false
             },
             {
+              "OriginalName": "type",
               "Name": "type",
               "Type": {
                 "Kind": "scalar",
@@ -558,6 +592,7 @@
               "Required": false
             },
             {
+              "OriginalName": "tz",
               "Name": "tz",
               "Type": {
                 "Kind": "scalar",
@@ -584,6 +619,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "interval",
               "Name": "interval",
               "Type": {
                 "Kind": "scalar",
@@ -595,6 +631,7 @@
               "Required": false
             },
             {
+              "OriginalName": "params",
               "Name": "params",
               "Type": {
                 "Kind": "array",
@@ -627,6 +664,7 @@
               "Required": false
             },
             {
+              "OriginalName": "type",
               "Name": "type",
               "Type": {
                 "Kind": "scalar",
@@ -653,6 +691,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "condition",
               "Name": "condition",
               "Type": {
                 "Kind": "scalar",
@@ -664,6 +703,7 @@
               "Required": false
             },
             {
+              "OriginalName": "key",
               "Name": "key",
               "Type": {
                 "Kind": "scalar",
@@ -675,6 +715,7 @@
               "Required": false
             },
             {
+              "OriginalName": "operator",
               "Name": "operator",
               "Type": {
                 "Kind": "scalar",
@@ -686,6 +727,7 @@
               "Required": false
             },
             {
+              "OriginalName": "value",
               "Name": "value",
               "Type": {
                 "Kind": "scalar",

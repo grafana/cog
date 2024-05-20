@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "edges",
               "Name": "edges",
               "Type": {
                 "Kind": "array",
@@ -29,6 +30,7 @@
               "Required": false
             },
             {
+              "OriginalName": "value",
               "Name": "value",
               "Type": {
                 "Kind": "scalar",
