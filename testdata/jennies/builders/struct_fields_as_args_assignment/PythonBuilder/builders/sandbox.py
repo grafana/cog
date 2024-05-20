@@ -15,15 +15,11 @@ class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
     def time(self, from_val: str, to: str) -> typing.Self:        
         if self._internal.time is None:
             self._internal.time = "unknown"
-        
         assert isinstance(self._internal.time, unknown)
-        
         self._internal.time.from_val = from_val    
         if self._internal.time is None:
             self._internal.time = "unknown"
-        
         assert isinstance(self._internal.time, unknown)
-        
         self._internal.time.to = to
     
         return self

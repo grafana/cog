@@ -2,8 +2,10 @@ package python
 
 import (
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 const LanguageRef = "python"
@@ -54,5 +56,13 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.AnonymousStructsToNamed{},
 		&compiler.RenameNumericEnumValues{},
+	}
+}
+
+func (language *Language) NullableKinds() languages.NullableConfig {
+	return languages.NullableConfig{
+		Kinds:              []ast.Kind{ast.KindMap, ast.KindArray, ast.KindRef, ast.KindStruct},
+		ProtectArrayAppend: true,
+		AnyIsNullable:      true,
 	}
 }
