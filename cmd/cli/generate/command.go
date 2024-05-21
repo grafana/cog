@@ -98,7 +98,7 @@ func doGenerate(opts options) error {
 		builders := builderGenerator.FromAST(processedSchemas)
 
 		// apply the builder veneers
-		builders, err = veneers.ApplyTo(builders, language)
+		builders, err = veneers.ApplyTo(processedSchemas, builders, language)
 		if err != nil {
 			return err
 		}

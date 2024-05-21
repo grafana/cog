@@ -15,24 +15,16 @@ type RetypeObject struct {
 }
 
 func (pass *RetypeObject) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	for i, schema := range schemas {
-		schemas[i] = pass.processSchema(schema)
+	visitor := &Visitor{
+		OnObject: pass.processObject,
 	}
 
-	return schemas, nil
+	return visitor.VisitSchemas(schemas)
 }
 
-func (pass *RetypeObject) processSchema(schema *ast.Schema) *ast.Schema {
-	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		return pass.processObject(object)
-	})
-
-	return schema
-}
-
-func (pass *RetypeObject) processObject(object ast.Object) ast.Object {
+func (pass *RetypeObject) processObject(_ *Visitor, _ *ast.Schema, object ast.Object) (ast.Object, error) {
 	if !pass.Object.Matches(object) {
-		return object
+		return object, nil
 	}
 
 	trailMessage := fmt.Sprintf("RetypeObject[%s → %s]", ast.TypeName(object.Type), ast.TypeName(pass.As))
@@ -44,5 +36,5 @@ func (pass *RetypeObject) processObject(object ast.Object) ast.Object {
 		object.Comments = pass.Comments
 	}
 
-	return object
+	return object, nil
 }

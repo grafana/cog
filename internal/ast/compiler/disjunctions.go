@@ -1,12 +1,10 @@
 package compiler
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/orderedmap"
 )
 
 var _ Pass = (*DisjunctionToType)(nil)
@@ -56,131 +54,17 @@ var _ Pass = (*DisjunctionToType)(nil)
 //		}
 //		```
 type DisjunctionToType struct {
-	newObjects *orderedmap.Map[string, ast.Object]
 }
 
 func (pass *DisjunctionToType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
-		newSchema, err := pass.processSchema(schema)
-		if err != nil {
-			return nil, fmt.Errorf("[%s] %w", schema.Package, err)
-		}
-
-		newSchemas = append(newSchemas, newSchema)
+	visitor := &Visitor{
+		OnDisjunction: pass.processDisjunction,
 	}
 
-	return newSchemas, nil
+	return visitor.VisitSchemas(schemas)
 }
 
-func (pass *DisjunctionToType) processSchema(schema *ast.Schema) (*ast.Schema, error) {
-	var err error
-	pass.newObjects = orderedmap.New[string, ast.Object]()
-
-	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		processedObject, innerErr := pass.processObject(schema, object)
-		if innerErr != nil {
-			err = innerErr
-			return object
-		}
-
-		return processedObject
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	pass.newObjects.Iterate(func(_ string, object ast.Object) {
-		schema.AddObject(object)
-	})
-
-	return schema, nil
-}
-
-func (pass *DisjunctionToType) processObject(schema *ast.Schema, object ast.Object) (ast.Object, error) {
-	processedType, err := pass.processType(schema, object.Type)
-	if err != nil {
-		return object, errors.Join(
-			fmt.Errorf("could not process object '%s'", object.Name),
-			err,
-		)
-	}
-
-	newObject := object
-	newObject.Type = processedType
-
-	return newObject, nil
-}
-
-func (pass *DisjunctionToType) processType(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	if def.IsArray() {
-		return pass.processArray(schema, def)
-	}
-
-	if def.IsMap() {
-		return pass.processMap(schema, def)
-	}
-
-	if def.IsStruct() {
-		return pass.processStruct(schema, def)
-	}
-
-	if def.IsDisjunction() {
-		return pass.processDisjunction(schema, def)
-	}
-
-	return def, nil
-}
-
-func (pass *DisjunctionToType) processArray(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	processedType, err := pass.processType(schema, def.AsArray().ValueType)
-	if err != nil {
-		return ast.Type{}, err
-	}
-
-	newArray := def
-	newArray.Array.ValueType = processedType
-
-	return newArray, nil
-}
-
-func (pass *DisjunctionToType) processMap(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	processedValueType, err := pass.processType(schema, def.AsMap().ValueType)
-	if err != nil {
-		return ast.Type{}, err
-	}
-
-	newMap := def
-	newMap.Map.ValueType = processedValueType
-
-	return newMap, nil
-}
-
-func (pass *DisjunctionToType) processStruct(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	processedFields := make([]ast.StructField, 0, len(def.AsStruct().Fields))
-	for _, field := range def.AsStruct().Fields {
-		processedType, err := pass.processType(schema, field.Type)
-		if err != nil {
-			return ast.Type{}, errors.Join(
-				fmt.Errorf("could not process struct field '%s'", field.Name),
-				err,
-			)
-		}
-
-		newField := field
-		newField.Type = processedType
-
-		processedFields = append(processedFields, newField)
-	}
-
-	newStruct := def
-	newStruct.Struct.Fields = processedFields
-
-	return newStruct, nil
-}
-
-func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Type) (ast.Type, error) {
+func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	disjunction := def.AsDisjunction()
 
 	// Ex: "some concrete value" | "some other value" | string
@@ -198,7 +82,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 
 	// if we already generated a new object for this disjunction, let's return
 	// a reference to it.
-	if pass.newObjects.Has(newTypeName) {
+	if visitor.HasNewObject(ast.RefType{ReferredPkg: schema.Package, ReferredType: newTypeName}) {
 		ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
 		ref.AddToPassesTrail("DisjunctionToType[disjunction → ref]")
 		if def.Nullable || disjunction.Branches.HasNullType() {
@@ -250,7 +134,7 @@ func (pass *DisjunctionToType) processDisjunction(schema *ast.Schema, def ast.Ty
 	newObject := ast.NewObject(schema.Package, newTypeName, structType)
 	newObject.AddToPassesTrail("DisjunctionToType[created]")
 
-	pass.newObjects.Set(newTypeName, newObject)
+	visitor.RegisterNewObject(newObject)
 
 	ref := ast.NewRef(schema.Package, newTypeName, ast.Hints(def.Hints))
 	ref.AddToPassesTrail("DisjunctionToType[disjunction → ref]")

@@ -18,111 +18,14 @@ type DisjunctionInferMapping struct {
 }
 
 func (pass *DisjunctionInferMapping) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0, len(schemas))
-
-	for _, schema := range schemas {
-		newSchema, err := pass.processSchema(schema)
-		if err != nil {
-			return nil, fmt.Errorf("[%s] %w", schema.Package, err)
-		}
-
-		newSchemas = append(newSchemas, newSchema)
+	visitor := &Visitor{
+		OnDisjunction: pass.processDisjunction,
 	}
 
-	return newSchemas, nil
+	return visitor.VisitSchemas(schemas)
 }
 
-func (pass *DisjunctionInferMapping) processSchema(schema *ast.Schema) (*ast.Schema, error) {
-	var err error
-	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		processedObject, innerErr := pass.processObject(schema, object)
-		if innerErr != nil {
-			err = innerErr
-			return object
-		}
-
-		return processedObject
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return schema, nil
-}
-
-func (pass *DisjunctionInferMapping) processObject(schema *ast.Schema, object ast.Object) (ast.Object, error) {
-	var err error
-
-	object.Type, err = pass.processType(schema, object.Type)
-	if err != nil {
-		return object, errors.Join(
-			fmt.Errorf("could not process object '%s'", object.Name),
-			err,
-		)
-	}
-
-	return object, nil
-}
-
-func (pass *DisjunctionInferMapping) processType(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	if def.IsArray() {
-		return pass.processArray(schema, def)
-	}
-
-	if def.IsMap() {
-		return pass.processMap(schema, def)
-	}
-
-	if def.IsStruct() {
-		return pass.processStruct(schema, def)
-	}
-
-	if def.IsDisjunction() {
-		return pass.processDisjunction(schema, def)
-	}
-
-	return def, nil
-}
-
-func (pass *DisjunctionInferMapping) processArray(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	var err error
-
-	def.Array.ValueType, err = pass.processType(schema, def.AsArray().ValueType)
-	if err != nil {
-		return ast.Type{}, err
-	}
-
-	return def, nil
-}
-
-func (pass *DisjunctionInferMapping) processMap(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	var err error
-
-	def.Map.ValueType, err = pass.processType(schema, def.AsMap().ValueType)
-	if err != nil {
-		return ast.Type{}, err
-	}
-
-	return def, nil
-}
-
-func (pass *DisjunctionInferMapping) processStruct(schema *ast.Schema, def ast.Type) (ast.Type, error) {
-	var err error
-
-	for i, field := range def.Struct.Fields {
-		def.Struct.Fields[i].Type, err = pass.processType(schema, field.Type)
-		if err != nil {
-			return ast.Type{}, errors.Join(
-				fmt.Errorf("could not process struct field '%s'", field.Name),
-				err,
-			)
-		}
-	}
-
-	return def, nil
-}
-
-func (pass *DisjunctionInferMapping) processDisjunction(schema *ast.Schema, def ast.Type) (ast.Type, error) {
+func (pass *DisjunctionInferMapping) processDisjunction(_ *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	var err error
 
 	if !def.Disjunction.Branches.HasOnlyRefs() {

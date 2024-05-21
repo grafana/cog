@@ -15,12 +15,14 @@ func TestDuplicate(t *testing.T) {
 		ast.NewStructField("name", ast.String()),
 	))
 	argument := ast.Argument{Name: "title", Type: ast.String()}
+	schemas := ast.Schemas{
+		&ast.Schema{
+			Package: "pkg",
+			Objects: testutils.ObjectsMap(originalObject),
+		},
+	}
 	originalBuilders := ast.Builders{
 		{
-			Schema: &ast.Schema{
-				Package: "pkg",
-				Objects: testutils.ObjectsMap(originalObject),
-			},
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
@@ -37,7 +39,7 @@ func TestDuplicate(t *testing.T) {
 	}
 
 	rule := Duplicate(ByName("pkg", "Dashboard"), "NewDashboard", nil)
-	updatedBuilders, err := rule(originalBuilders)
+	updatedBuilders, err := rule(schemas, originalBuilders)
 	req.NoError(err)
 
 	req.Len(updatedBuilders, 2)
@@ -54,12 +56,14 @@ func TestInitialize(t *testing.T) {
 		ast.NewStructField("name", ast.String()),
 	))
 	argument := ast.Argument{Name: "name", Type: ast.String()}
+	schemas := ast.Schemas{
+		&ast.Schema{
+			Package: "pkg",
+			Objects: testutils.ObjectsMap(originalObject),
+		},
+	}
 	originalBuilders := ast.Builders{
 		{
-			Schema: &ast.Schema{
-				Package: "pkg",
-				Objects: testutils.ObjectsMap(originalObject),
-			},
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
@@ -81,7 +85,7 @@ func TestInitialize(t *testing.T) {
 			{PropertyPath: "name", Value: "great name, isn't it?"},
 		},
 	)
-	updatedBuilders, err := rule(originalBuilders)
+	updatedBuilders, err := rule(schemas, originalBuilders)
 	req.NoError(err)
 
 	expectedAssignments := []ast.Assignment{
@@ -105,12 +109,14 @@ func TestPromoteOptionsToConstructor(t *testing.T) {
 	))
 	argument := ast.Argument{Name: "name", Type: ast.String()}
 	assignment := ast.ArgumentAssignment(ast.PathFromStructField(originalObject.Type.Struct.Fields[0]), argument)
+	schemas := ast.Schemas{
+		&ast.Schema{
+			Package: "pkg",
+			Objects: testutils.ObjectsMap(originalObject),
+		},
+	}
 	originalBuilders := ast.Builders{
 		{
-			Schema: &ast.Schema{
-				Package: "pkg",
-				Objects: testutils.ObjectsMap(originalObject),
-			},
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
@@ -128,7 +134,7 @@ func TestPromoteOptionsToConstructor(t *testing.T) {
 		ByName("pkg", "Dashboard"),
 		[]string{"name"},
 	)
-	updatedBuilders, err := rule(originalBuilders)
+	updatedBuilders, err := rule(schemas, originalBuilders)
 	req.NoError(err)
 
 	expectedArgs := []ast.Argument{argument}

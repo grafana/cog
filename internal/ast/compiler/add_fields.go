@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -14,28 +16,20 @@ type AddFields struct {
 }
 
 func (pass *AddFields) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	for i, schema := range schemas {
-		schemas[i] = pass.processSchema(schema)
+	visitor := &Visitor{
+		OnObject: pass.processObject,
 	}
 
-	return schemas, nil
+	return visitor.VisitSchemas(schemas)
 }
 
-func (pass *AddFields) processSchema(schema *ast.Schema) *ast.Schema {
-	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		if !pass.Object.Matches(object) {
-			return object
-		}
+func (pass *AddFields) processObject(_ *Visitor, _ *ast.Schema, object ast.Object) (ast.Object, error) {
+	if !pass.Object.Matches(object) {
+		return object, nil
+	}
 
-		return pass.processObject(object)
-	})
-
-	return schema
-}
-
-func (pass *AddFields) processObject(object ast.Object) ast.Object {
 	if !object.Type.IsStruct() {
-		return object
+		return object, fmt.Errorf("cannot add fields to a non-struct object: %s", pass.Object.String())
 	}
 
 	for _, field := range pass.Fields {
@@ -49,5 +43,5 @@ func (pass *AddFields) processObject(object ast.Object) ast.Object {
 		object.Type.Struct.Fields = append(object.Type.Struct.Fields, field)
 	}
 
-	return object
+	return object, nil
 }

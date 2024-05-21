@@ -103,62 +103,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "constructor_initializations",
-        "Metadata": {},
-        "Objects": {
-          "SomePanel": {
-            "Name": "SomePanel",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "type",
-                    "Type": {
-                      "Kind": "scalar",
-                      "Nullable": false,
-                      "Scalar": {
-                        "ScalarKind": "string",
-                        "Value": "panel_type"
-                      }
-                    },
-                    "Required": true
-                  },
-                  {
-                    "Name": "title",
-                    "Type": {
-                      "Kind": "scalar",
-                      "Nullable": false,
-                      "Scalar": {
-                        "ScalarKind": "string"
-                      }
-                    },
-                    "Required": true
-                  },
-                  {
-                    "Name": "cursor",
-                    "Type": {
-                      "Kind": "ref",
-                      "Nullable": false,
-                      "Ref": {
-                        "ReferredPkg": "constructor_initializations",
-                        "ReferredType": "CursorMode"
-                      }
-                    },
-                    "Required": true
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "constructor_initializations",
-              "ReferredType": "SomePanel"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "SomePanel",
         "Type": {

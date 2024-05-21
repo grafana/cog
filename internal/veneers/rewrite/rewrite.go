@@ -44,7 +44,7 @@ func NewRewrite(languageRules []LanguageRules, config Config) *Rewriter {
 	}
 }
 
-func (engine *Rewriter) ApplyTo(builders []ast.Builder, language string) ([]ast.Builder, error) {
+func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, language string) ([]ast.Builder, error) {
 	var err error
 	// TODO: should we deepCopy the builders instead?
 	newBuilders := make([]ast.Builder, 0, len(builders))
@@ -53,32 +53,32 @@ func (engine *Rewriter) ApplyTo(builders []ast.Builder, language string) ([]ast.
 	// start by applying veneers common to all languages, then
 	// apply language-specific ones.
 	for _, l := range []string{AllLanguages, language} {
-		newBuilders, err = engine.applyBuilderRules(newBuilders, engine.builderRules[l])
+		newBuilders, err = engine.applyBuilderRules(schemas, newBuilders, engine.builderRules[l])
 		if err != nil {
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules(newBuilders, engine.optionRules[l])
+		newBuilders = engine.applyOptionRules(schemas, newBuilders, engine.optionRules[l])
 	}
 
 	// and optionally, apply "debug" veneers
 	if engine.config.Debug {
-		newBuilders, err = engine.applyBuilderRules(newBuilders, engine.debugBuilderRules())
+		newBuilders, err = engine.applyBuilderRules(schemas, newBuilders, engine.debugBuilderRules())
 		if err != nil {
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules(newBuilders, engine.debugOptionRules())
+		newBuilders = engine.applyOptionRules(schemas, newBuilders, engine.debugOptionRules())
 	}
 
 	return newBuilders, nil
 }
 
-func (engine *Rewriter) applyBuilderRules(builders []ast.Builder, rules []builder.RewriteRule) ([]ast.Builder, error) {
+func (engine *Rewriter) applyBuilderRules(schemas ast.Schemas, builders []ast.Builder, rules []builder.RewriteRule) ([]ast.Builder, error) {
 	var err error
 
 	for _, rule := range rules {
-		builders, err = rule(builders)
+		builders, err = rule(schemas, builders)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +87,7 @@ func (engine *Rewriter) applyBuilderRules(builders []ast.Builder, rules []builde
 	return builders, nil
 }
 
-func (engine *Rewriter) applyOptionRules(builders []ast.Builder, rules []option.RewriteRule) []ast.Builder {
+func (engine *Rewriter) applyOptionRules(schemas ast.Schemas, builders []ast.Builder, rules []option.RewriteRule) []ast.Builder {
 	for _, rule := range rules {
 		for i, b := range builders {
 			processedOptions := make([]ast.Option, 0, len(b.Options))
@@ -98,7 +98,7 @@ func (engine *Rewriter) applyOptionRules(builders []ast.Builder, rules []option.
 					continue
 				}
 
-				processedOptions = append(processedOptions, rule.Action(b, opt)...)
+				processedOptions = append(processedOptions, rule.Action(schemas, b, opt)...)
 			}
 
 			builders[i].Options = processedOptions
