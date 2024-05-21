@@ -33,6 +33,9 @@ func init() {
 			"formatRawType": func(_ ast.Type) string {
 				panic("formatRawType() needs to be overridden by a jenny")
 			},
+			"formatRawTypeNotNullable": func(_ ast.Type) string {
+				panic("formatRawTypeNotNullable() needs to be overridden by a jenny")
+			},
 			"formatValue": func(_ ast.Type, _ any) string {
 				panic("formatValue() needs to be overridden by a jenny")
 			},

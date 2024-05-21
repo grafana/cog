@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/cog/cmd/cli/loaders"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/spf13/cobra"
 )
@@ -110,6 +111,12 @@ func doGenerate(opts options) error {
 		jenniesInput := common.Context{
 			Schemas:  processedSchemas,
 			Builders: builders,
+		}
+
+		// with the veneers applied, generate "nil-checks" for assignments
+		jenniesInput, err = languages.GenerateBuilderNilChecks(target, jenniesInput)
+		if err != nil {
+			return err
 		}
 
 		// then delegate the codegen to the jennies

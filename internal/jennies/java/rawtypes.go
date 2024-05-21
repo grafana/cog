@@ -204,6 +204,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		"formatType":               jenny.typeFormatter.formatFieldType,
 		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
 		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
+		"emptyValueForType":        jenny.typeFormatter.defaultValueFor,
 	}).ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:    pkg,
 		Imports:    jenny.imports,

@@ -1,7 +1,7 @@
 {{- define "assignment" }}
     {{- template "constraints" .Assignment.Constraints }}
-    {{- range .Assignment.InitSafeguards }}
-    {{ . }}
+    {{- range .Assignment.NilChecks }}
+        {{- template "nil_check" . }}
     {{- end }}
 
     {{- template "assignment_setup" (dict "Assignment" .Assignment "Value" .Assignment.Value) }}

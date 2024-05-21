@@ -1,0 +1,5 @@
+{{- define "nil_check" }}
+		if (this.{{ .Path|formatPath }} == null) {
+			this.{{ .Path|formatPath }} = {{ .EmptyValueType|emptyValueForType }};
+		}
+{{- end }}
