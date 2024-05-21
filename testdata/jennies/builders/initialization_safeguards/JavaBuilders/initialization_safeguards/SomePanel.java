@@ -17,11 +17,11 @@ public class SomePanel {
     }
     
     public Builder setShowLegend(Boolean show) {
-		if (this.options == null) {
-			this.options = new initialization_safeguards.Options();
+		if (this.internal.options == null) {
+			this.internal.options = new initialization_safeguards.Options();
 		}
-		if (this.options.legend == null) {
-			this.options.legend = new initialization_safeguards.LegendOptions();
+		if (this.internal.options.legend == null) {
+			this.internal.options.legend = new initialization_safeguards.LegendOptions();
 		}
     this.internal.options.legend.show = show;
         return this;

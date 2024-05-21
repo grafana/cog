@@ -1,6 +1,6 @@
 {{- define "pre_assignment_Dashboard_withPanel" }}
 
-    if (panelResource.gridPos == null) {
+    if (panelOrRowPanel.panel.gridPos == null) {
         panelOrRowPanel.panel.gridPos = new GridPos();
     }
 	// Position the panel on the grid
