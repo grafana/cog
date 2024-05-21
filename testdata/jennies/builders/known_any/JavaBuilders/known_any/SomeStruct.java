@@ -11,10 +11,12 @@ public class SomeStruct {
             this.internal = new SomeStruct();
         }
     public Builder setTitle(String title) {
-    	if (this.config == null) {
-			this.config = new known_any.Config();
+		if (this.internal.config == null) {
+			this.internal.config = new known_any.Config();
 		}
-    this.internal.config = title;
+        known_any.Config configResource = (known_any.Config) this.internal.config;
+        configResource.title = title;
+    this.internal.config = configResource;
         return this;
     }
     public SomeStruct build() {

@@ -10,7 +10,6 @@ import (
 	"github.com/expr-lang/expr"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/jennies"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
@@ -18,6 +17,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/typescript"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/semver"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/rewrite"
@@ -185,8 +185,8 @@ func (config Config) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	return allSchemas.Consolidate()
 }
 
-func (config Config) OutputLanguages() (jennies.LanguageJennies, error) {
-	outputs := make(jennies.LanguageJennies)
+func (config Config) OutputLanguages() (languages.Languages, error) {
+	outputs := make(languages.Languages)
 
 	for _, output := range config.Output.Languages {
 		switch {

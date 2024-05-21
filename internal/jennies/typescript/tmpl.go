@@ -38,6 +38,12 @@ func init() {
 			"formatValue": func(destinationType ast.Type, value any) string {
 				panic("formatValue() needs to be overridden by a jenny")
 			},
+			"formatPath": func(_ ast.Path) string {
+				panic("formatPath() needs to be overridden by a jenny")
+			},
+			"emptyValueForGuard": func(_ ast.Type) string {
+				panic("emptyValueForGuard() needs to be overridden by a jenny")
+			},
 		})
 	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
 }

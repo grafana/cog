@@ -312,6 +312,19 @@ const (
 	AppendAssignment AssignmentMethod = "append" // `foo = append(foo, bar)`
 )
 
+type AssignmentNilCheck struct {
+	Path Path
+
+	EmptyValueType Type
+}
+
+func (check *AssignmentNilCheck) DeepCopy() AssignmentNilCheck {
+	return AssignmentNilCheck{
+		Path:           check.Path.DeepCopy(),
+		EmptyValueType: check.EmptyValueType.DeepCopy(),
+	}
+}
+
 type Assignment struct {
 	// Where
 	Path Path
@@ -323,21 +336,22 @@ type Assignment struct {
 	Method AssignmentMethod
 
 	Constraints []AssignmentConstraint `json:",omitempty"`
+
+	NilChecks []AssignmentNilCheck `json:",omitempty"`
 }
 
 func (assignment *Assignment) DeepCopy() Assignment {
-	clone := Assignment{
-		Path:        assignment.Path.DeepCopy(),
-		Value:       assignment.Value.DeepCopy(),
-		Method:      assignment.Method,
-		Constraints: make([]AssignmentConstraint, 0, len(assignment.Constraints)),
+	return Assignment{
+		Path:   assignment.Path.DeepCopy(),
+		Value:  assignment.Value.DeepCopy(),
+		Method: assignment.Method,
+		Constraints: tools.Map(assignment.Constraints, func(constraint AssignmentConstraint) AssignmentConstraint {
+			return constraint.DeepCopy()
+		}),
+		NilChecks: tools.Map(assignment.NilChecks, func(check AssignmentNilCheck) AssignmentNilCheck {
+			return check.DeepCopy()
+		}),
 	}
-
-	for _, constraint := range assignment.Constraints {
-		clone.Constraints = append(clone.Constraints, constraint.DeepCopy())
-	}
-
-	return clone
 }
 
 type AssignmentConstraint struct {

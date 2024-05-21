@@ -15,11 +15,11 @@ func formatPackageName(pkg string) string {
 	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
 }
 
-func formatFieldPath(fieldPath ast.Path) []string {
+func formatFieldPath(fieldPath ast.Path) string {
 	parts := tools.Map(fieldPath, func(fieldPath ast.PathItem) string {
 		return tools.LowerCamelCase(fieldPath.Identifier)
 	})
-	return parts
+	return strings.Join(parts, ".")
 }
 
 type CastPath struct {
@@ -28,6 +28,8 @@ type CastPath struct {
 	Path  string
 }
 
+// formatCastValue identifies if the object to set is a generic one, so it needs
+// to do a cast to the desired object to be able to set their values.
 func formatCastValue(fieldPath ast.Path) CastPath {
 	refPkg := ""
 	refType := ""
@@ -62,6 +64,8 @@ func formatScalar(val any) any {
 	return newVal
 }
 
+// formatAssignmentPath generates the pad to assign the value. When the value is a generic one (Object) like Custom or FieldConfig
+// we should return until this pad to set the object to it.
 func formatAssignmentPath(fieldPath ast.Path) string {
 	path := escapeVarName(tools.LowerCamelCase(fieldPath[0].Identifier))
 
@@ -69,13 +73,12 @@ func formatAssignmentPath(fieldPath ast.Path) string {
 		return path
 	}
 
-	for i, p := range fieldPath[1:] {
-		identifier := escapeVarName(tools.LowerCamelCase(p.Identifier))
-		if i == 0 && p.TypeHint != nil && p.TypeHint.Kind == ast.KindRef {
-			return tools.LowerCamelCase(identifier)
-		}
+	for _, p := range fieldPath[1:] {
+		path = fmt.Sprintf("%s.%s", path, tools.LowerCamelCase(p.Identifier))
 
-		path = fmt.Sprintf("%s.%s", path, identifier)
+		if p.TypeHint != nil {
+			return path
+		}
 	}
 
 	return path

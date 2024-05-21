@@ -2,6 +2,7 @@ package java
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -109,11 +110,11 @@ func formatScalarType(def ast.ScalarType) string {
 	switch def.ScalarKind {
 	case ast.KindString:
 		scalarType = "String"
-	case ast.KindBytes, ast.KindInt8, ast.KindUint8:
+	case ast.KindBytes:
 		scalarType = "Byte"
 	case ast.KindInt16, ast.KindUint16:
 		scalarType = "Short"
-	case ast.KindInt32, ast.KindUint32:
+	case ast.KindInt8, ast.KindUint8, ast.KindInt32, ast.KindUint32:
 		scalarType = "Integer"
 	case ast.KindInt64, ast.KindUint64:
 		scalarType = "Long"
@@ -149,4 +150,19 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	default:
 		return "unknown"
 	}
+}
+
+func (tf *typeFormatter) formatScalar(v any) string {
+	if list, ok := v.([]any); ok {
+		items := make([]string, 0, len(list))
+
+		for _, item := range list {
+			items = append(items, tf.formatScalar(item))
+		}
+
+		// FIXME: this is wrong, we can't just assume a list of strings.
+		return strings.Join(items, ", ")
+	}
+
+	return fmt.Sprintf("%#v", v)
 }

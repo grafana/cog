@@ -1,0 +1,33 @@
+package {{ .Package }};
+
+{{- $panelBuilder := include "panelBuilder" . }}
+
+{{ .Imports }}
+
+{{- $panelBuilder }}
+
+{{- define "panelBuilder" }}
+public class PanelBuilder {
+    private dashboard.Panel internal;
+
+    public PanelBuilder({{- template "args" .Constructor.Args }}) {
+        this.internal = new dashboard.Panel();
+        {{- range .Constructor.Assignments }}
+            {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
+        {{- end }}
+    }
+    
+    {{- range .Options }}
+    public PanelBuilder set{{ .Name | camelcase }}({{- template "args" .Args }}) {
+        {{- range .Assignments }}
+            {{- template "assignment" (dict "Assignment" . "BuilderName" "PanelBuilder" "OptionName" "Panel") }}
+        {{- end }}
+        return this;
+    }
+    {{- end }}
+    
+    public dashboard.Panel build() {
+        return this.internal;
+    }
+}
+{{- end }}

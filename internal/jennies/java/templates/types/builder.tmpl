@@ -11,6 +11,10 @@
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
+        
+        {{- range .Defaults }}
+        this.set{{ .OptionName }}({{ .Args|join ", " }});
+        {{- end }}
         }
         
     {{- range $opt := .Options }}
@@ -26,12 +30,4 @@
             return this.internal;
         }
     }
-{{- end }}
-
-
-{{- define "args" }}
-    {{- range $i, $arg := . }}
-         {{- if gt $i 0 }}, {{- end }}
-         {{- $arg.Type | formatBuilderFieldType }} {{ $arg.Name | escapeVar }}
-    {{- end }}
 {{- end }}

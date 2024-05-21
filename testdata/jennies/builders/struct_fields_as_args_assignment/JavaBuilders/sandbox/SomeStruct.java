@@ -11,12 +11,12 @@ public class SomeStruct {
             this.internal = new SomeStruct();
         }
     public Builder setTime(String from,String to) {
-    	if (this.time == null) {
-			this.time = new Object();
+		if (this.internal.time == null) {
+			this.internal.time = new Object();
 		}
     this.internal.time.from = from;
-    	if (this.time == null) {
-			this.time = new Object();
+		if (this.internal.time == null) {
+			this.internal.time = new Object();
 		}
     this.internal.time.to = to;
         return this;
