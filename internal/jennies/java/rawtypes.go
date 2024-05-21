@@ -41,6 +41,16 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
+func (jenny RawTypes) getTemplate() *template.Template {
+	return templates.Funcs(map[string]any{
+		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
+		"formatType":               jenny.typeFormatter.formatFieldType,
+		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
+		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
+		"emptyValueForType":        jenny.typeFormatter.defaultValueFor,
+	})
+}
+
 func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, error) {
 	var err error
 	files := make(codejen.Files, 0)
@@ -143,9 +153,7 @@ func (jenny RawTypes) generatePanelBuilder(pkg string) ([]byte, error) {
 	builder.Imports = jenny.imports
 
 	var buffer strings.Builder
-	if err := templates.Funcs(map[string]any{
-		"formatBuilderFieldType": jenny.typeFormatter.formatBuilderFieldType,
-	}).ExecuteTemplate(&buffer, "types/panel_builder.tmpl", builder); err != nil {
+	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/panel_builder.tmpl", builder); err != nil {
 		return nil, err
 	}
 
@@ -172,7 +180,7 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 		enumType = "String"
 	}
 
-	err := templates.ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
+	err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
 		Package:  pkg,
 		Name:     object.Name,
 		Values:   values,
@@ -201,13 +209,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 
 	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name)
 
-	if err := templates.Funcs(template.FuncMap{
-		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
-		"formatType":               jenny.typeFormatter.formatFieldType,
-		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
-		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
-		"emptyValueForType":        jenny.typeFormatter.defaultValueFor,
-	}).ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:    pkg,
 		Imports:    jenny.imports,
 		Name:       tools.UpperCamelCase(object.Name),
@@ -235,7 +237,7 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 		})
 	}
 
-	if err := templates.ExecuteTemplate(&buffer, "types/constants.tmpl", ConstantTemplate{
+	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/constants.tmpl", ConstantTemplate{
 		Package:   pkg,
 		Name:      "Constants",
 		Constants: constants,
@@ -250,12 +252,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	var buffer strings.Builder
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
-	if err := templates.Funcs(template.FuncMap{
-		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
-		"formatType":               jenny.typeFormatter.formatFieldType,
-		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
-		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
-	}).ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  pkg,
 		Imports:  jenny.imports,
 		Name:     tools.UpperCamelCase(object.Name),
@@ -285,12 +282,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 		}
 	}
 
-	if err := templates.Funcs(template.FuncMap{
-		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
-		"formatType":               jenny.typeFormatter.formatFieldType,
-		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
-		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
-	}).ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  pkg,
 		Imports:  jenny.imports,
 		Name:     object.Name,
