@@ -10,6 +10,8 @@ const LanguageRef = "openapi"
 
 type Config struct {
 	debug bool
+
+	Compact bool `yaml:"compact"`
 }
 
 func (config Config) MergeWithGlobal(global common.Config) Config {
@@ -23,9 +25,9 @@ type Language struct {
 	config Config
 }
 
-func New() *Language {
+func New(config Config) *Language {
 	return &Language{
-		config: Config{},
+		config: config,
 	}
 }
 
