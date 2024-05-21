@@ -126,9 +126,6 @@ if [ ! -d "${FOUNDATION_SDK_PATH}" ]; then
   clone_foundation_sdk "${FOUNDATION_SDK_PATH}"
 fi
 
-info "Consolidating kind-registry"
-GRAFANA_VERSION=${GRAFANA_VERSION} KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH} "${__dir}/consolidate-schema-registry.sh"
-
 info "Running cog"
 grafana_version_or_main=${GRAFANA_VERSION}
 if [ "${grafana_version_or_main}" == "next" ]; then
