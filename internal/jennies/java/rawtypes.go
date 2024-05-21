@@ -143,7 +143,9 @@ func (jenny RawTypes) generatePanelBuilder(pkg string) ([]byte, error) {
 	builder.Imports = jenny.imports
 
 	var buffer strings.Builder
-	if err := templates.ExecuteTemplate(&buffer, "types/panel_builder.tmpl", builder); err != nil {
+	if err := templates.Funcs(map[string]any{
+		"formatBuilderFieldType": jenny.typeFormatter.formatBuilderFieldType,
+	}).ExecuteTemplate(&buffer, "types/panel_builder.tmpl", builder); err != nil {
 		return nil, err
 	}
 
