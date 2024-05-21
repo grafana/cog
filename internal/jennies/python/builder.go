@@ -1,7 +1,6 @@
 package python
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -77,8 +76,14 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 
 	err := templates.
 		Funcs(map[string]any{
-			"formatType":     jenny.typeFormatter.formatType,
-			"formatRawType":  jenny.rawTypeFormatter.formatType,
+			"formatType":    jenny.typeFormatter.formatType,
+			"formatRawType": jenny.rawTypeFormatter.formatType,
+			"formatRawTypeNotNullable": func(def ast.Type) string {
+				typeDef := def.DeepCopy()
+				typeDef.Nullable = false
+
+				return jenny.rawTypeFormatter.formatType(typeDef)
+			},
 			"typeHasBuilder": context.ResolveToBuilder,
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
@@ -104,11 +109,9 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			BuilderName:          tools.UpperCamelCase(builder.Name),
 			ObjectName:           fullObjectName,
 			Comments:             builder.For.Comments,
-			Constructor:          jenny.generateConstructor(context, builder),
+			Constructor:          builder.Constructor,
 			Properties:           builder.Properties,
-			Options: tools.Map(builder.Options, func(option ast.Option) template.Option {
-				return jenny.generateOption(context, option)
-			}),
+			Options:              tools.Map(builder.Options, jenny.generateOption),
 		})
 	if err != nil {
 		return nil, err
@@ -117,83 +120,13 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	return []byte(buffer.String()), nil
 }
 
-func (jenny *Builder) generateConstructor(context common.Context, builder ast.Builder) template.Constructor {
-	return template.Constructor{
-		Args: builder.Constructor.Args,
-		Assignments: tools.Map(builder.Constructor.Assignments, func(assignment ast.Assignment) template.Assignment {
-			return jenny.generateAssignment(context, assignment)
-		}),
-	}
-}
+func (jenny *Builder) generateOption(option ast.Option) ast.Option {
+	option.Args = tools.Map(option.Args, func(arg ast.Argument) ast.Argument {
+		newArg := arg.DeepCopy()
+		newArg.Type.Nullable = false
 
-func (jenny *Builder) generateOption(context common.Context, def ast.Option) template.Option {
-	return template.Option{
-		Name:     def.Name,
-		Comments: def.Comments,
-		Args: tools.Map(def.Args, func(arg ast.Argument) ast.Argument {
-			newArg := arg.DeepCopy()
-			newArg.Type.Nullable = false
+		return newArg
+	})
 
-			return newArg
-		}),
-		Assignments: tools.Map(def.Assignments, func(assignment ast.Assignment) template.Assignment {
-			return jenny.generateAssignment(context, assignment)
-		}),
-	}
-}
-
-func (jenny *Builder) generatePathInitializationSafeGuard(context common.Context, path ast.Path) string {
-	fieldPath := formatFieldPath(path)
-	valueType := path.Last().Type
-	if path.Last().TypeHint != nil {
-		valueType = *path.Last().TypeHint
-	}
-
-	emptyValue := formatValue(defaultValueForType(context.Schemas, valueType, jenny.importModule, nil))
-
-	nonOptionalType := valueType.DeepCopy()
-	nonOptionalType.Nullable = false
-
-	guard := fmt.Sprintf(`if self._internal.%[1]s is None:
-    self._internal.%[1]s = %[2]s
-`, fieldPath, emptyValue)
-
-	if !nonOptionalType.IsArray() {
-		guard += fmt.Sprintf("\nassert isinstance(self._internal.%s, %s)\n", fieldPath, jenny.rawTypeFormatter.formatType(nonOptionalType))
-	}
-
-	return guard
-}
-
-func (jenny *Builder) generateAssignment(context common.Context, assignment ast.Assignment) template.Assignment {
-	var initSafeGuards []string
-	for i, chunk := range assignment.Path {
-		if i == len(assignment.Path)-1 && assignment.Method != ast.AppendAssignment {
-			continue
-		}
-
-		chunkType := chunk.Type
-		if chunk.TypeHint != nil {
-			chunkType = *chunk.TypeHint
-		}
-
-		maybeUndefined := chunkType.Nullable ||
-			chunkType.IsAnyOf(ast.KindMap, ast.KindArray, ast.KindRef, ast.KindStruct) ||
-			chunk.Type.IsAny()
-
-		if !maybeUndefined {
-			continue
-		}
-
-		subPath := assignment.Path[:i+1]
-		initSafeGuards = append(initSafeGuards, jenny.generatePathInitializationSafeGuard(context, subPath))
-	}
-
-	return template.Assignment{
-		Path:           assignment.Path,
-		InitSafeguards: initSafeGuards,
-		Constraints:    assignment.Constraints,
-		Method:         assignment.Method,
-		Value:          assignment.Value,
-	}
+	return option
 }

@@ -5,8 +5,10 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/spf13/cobra"
 )
 
@@ -87,5 +89,13 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.DisjunctionOfAnonymousStructsToExplicit{},
 		&compiler.DisjunctionInferMapping{},
 		&compiler.DisjunctionToType{},
+	}
+}
+
+func (language *Language) NullableKinds() languages.NullableConfig {
+	return languages.NullableConfig{
+		Kinds:              []ast.Kind{ast.KindMap, ast.KindArray},
+		ProtectArrayAppend: false,
+		AnyIsNullable:      true,
 	}
 }

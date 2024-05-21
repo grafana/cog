@@ -2,7 +2,6 @@ package java
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -42,8 +41,8 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 	return template.Builder{
 		ObjectName:  tools.UpperCamelCase(object.Name),
 		BuilderName: builder.Name,
-		Constructor: b.genConstructor(builder),
-		Options:     b.genOptions(builder.Options),
+		Constructor: builder.Constructor,
+		Options:     builder.Options,
 		Properties:  builder.Properties,
 		Defaults:    b.genDefaults(builder.Options),
 	}, true
@@ -57,89 +56,6 @@ func (b Builders) getBuilder(pkg string, name string) (ast.Builder, bool) {
 
 	builder, ok := builderMap[name]
 	return builder, ok
-}
-
-func (b Builders) genConstructor(builder ast.Builder) template.Constructor {
-	return template.Constructor{
-		Args:        builder.Constructor.Args,
-		Assignments: tools.Map(builder.Constructor.Assignments, b.genAssignment),
-	}
-}
-
-func (b Builders) genOptions(opts []ast.Option) []template.Option {
-	options := make([]template.Option, len(opts))
-	for i, option := range opts {
-		options[i] = template.Option{
-			Name:        tools.LowerCamelCase(option.Name),
-			Args:        b.genArgs(option.Args),
-			Assignments: tools.Map(option.Assignments, b.genAssignment),
-		}
-	}
-
-	return options
-}
-
-func (b Builders) genArgs(arguments []ast.Argument) []ast.Argument {
-	args := make([]ast.Argument, len(arguments))
-	for i, arg := range arguments {
-		args[i] = ast.Argument{
-			Name: tools.LowerCamelCase(arg.Name),
-			Type: arg.Type,
-		}
-	}
-
-	return args
-}
-
-func (b Builders) genAssignment(assignment ast.Assignment) template.Assignment {
-	return template.Assignment{
-		Path:           assignment.Path,
-		Method:         assignment.Method,
-		Constraints:    assignment.Constraints,
-		Value:          assignment.Value,
-		InitSafeguards: b.getSafeGuards(assignment),
-	}
-}
-
-func (b Builders) getSafeGuards(assignment ast.Assignment) []string {
-	var initSafeGuards []string
-	for i, chunk := range assignment.Path {
-		if i == len(assignment.Path)-1 && assignment.Method != ast.AppendAssignment {
-			continue
-		}
-
-		canNullPointer := chunk.Type.IsAnyOf(ast.KindMap, ast.KindArray, ast.KindRef, ast.KindStruct) || chunk.Type.IsAny()
-
-		if !canNullPointer {
-			continue
-		}
-
-		subPath := assignment.Path[:i+1]
-		initSafeGuards = append(initSafeGuards, b.initSafeGuard(subPath))
-	}
-
-	return initSafeGuards
-}
-
-func (b Builders) initSafeGuard(path ast.Path) string {
-	parts := formatFieldPath(path)
-	valueType := path.Last().Type
-	if path.Last().TypeHint != nil {
-		valueType = *path.Last().TypeHint
-	}
-
-	emptyValue := b.typeFormatter.defaultValueFor(valueType)
-	if len(parts) == 1 {
-		return fmt.Sprintf(
-			`	if (this.internal.%[1]s == null) {
-			this.internal.%[1]s = %[2]s;
-		}`, tools.LowerCamelCase(parts[0]), emptyValue)
-	}
-
-	return fmt.Sprintf(
-		`	if (this.internal.%[1]s == null) {
-			this.internal.%[1]s = %[2]s;
-		}`, strings.Join(parts, "."), emptyValue)
 }
 
 func (b Builders) genDefaults(options []ast.Option) []template.OptionCall {

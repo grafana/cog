@@ -2,8 +2,10 @@ package typescript
 
 import (
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 const LanguageRef = "typescript"
@@ -35,5 +37,13 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
 		&compiler.RenameNumericEnumValues{},
+	}
+}
+
+func (language *Language) NullableKinds() languages.NullableConfig {
+	return languages.NullableConfig{
+		Kinds:              []ast.Kind{ast.KindMap, ast.KindArray, ast.KindRef, ast.KindStruct},
+		ProtectArrayAppend: true,
+		AnyIsNullable:      true,
 	}
 }

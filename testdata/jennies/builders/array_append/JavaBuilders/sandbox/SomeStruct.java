@@ -13,7 +13,7 @@ public class SomeStruct {
             this.internal = new SomeStruct();
         }
     public Builder setTags(String tags) {
-    	if (this.internal.tags == null) {
+		if (this.internal.tags == null) {
 			this.internal.tags = new LinkedList<>();
 		}
     this.internal.tags.add(tags);

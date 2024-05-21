@@ -43,9 +43,9 @@ func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
     return builder
 }
 
-func (builder *SomePanelBuilder) ShowLegend(show boolean) *SomePanelBuilder {
-    if builder.internal.Options == nil {
-	builder.internal.Options = &Options{}
+func (builder *SomePanelBuilder) ShowLegend(show bool) *SomePanelBuilder {
+if builder.internal.Options == nil {
+    builder.internal.Options = &Options{}
 }
     builder.internal.Options.Legend.Show = show
 
