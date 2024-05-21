@@ -1,7 +1,12 @@
 package {{ .Package }};
 
+{{- $panelBuilder := include "panelBuilder" . }}
+
 {{ .Imports }}
 
+{{- $panelBuilder }}
+
+{{- define "panelBuilder" }}
 public class PanelBuilder {
     private dashboard.Panel internal;
 
@@ -25,3 +30,4 @@ public class PanelBuilder {
         return this.internal;
     }
 }
+{{- end }}
