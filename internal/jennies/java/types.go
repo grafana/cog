@@ -11,11 +11,12 @@ import (
 
 type typeFormatter struct {
 	packageMapper func(pkg string, class string) string
+	config        Config
 	context       common.Context
 }
 
-func createFormatter(ctx common.Context) *typeFormatter {
-	return &typeFormatter{context: ctx}
+func createFormatter(ctx common.Context, config Config) *typeFormatter {
+	return &typeFormatter{context: ctx, config: config}
 }
 
 func (tf *typeFormatter) withPackageMapper(packageMapper func(pkg string, class string) string) *typeFormatter {
@@ -55,7 +56,7 @@ func (tf *typeFormatter) resolvesToComposableSlot(typeDef ast.Type) bool {
 func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 	value := tf.formatFieldType(def)
 	if tf.resolvesToComposableSlot(def) || tf.typeHasBuilder(def) {
-		value = fmt.Sprintf("cog.Builder<%s>", value)
+		value = fmt.Sprintf("%s.Builder<%s>", tf.packagePrefix("cog"), value)
 	}
 
 	return value
@@ -165,4 +166,12 @@ func (tf *typeFormatter) formatScalar(v any) string {
 	}
 
 	return fmt.Sprintf("%#v", v)
+}
+
+func (tf *typeFormatter) packagePrefix(pkg string) string {
+	if tf.config.PackagePrefix != "" {
+		return fmt.Sprintf("%s.%s", tf.config.PackagePrefix, pkg)
+	}
+
+	return pkg
 }

@@ -50,12 +50,6 @@ func (jenny Pom) generatePom() string {
 		</developer>
 	</developers>
 
-	<scm>
-		<connection>scm:git:git@github.com:grafana/grafana-foundation-sdk.git</connection>
-		<developerConnection>scm:git:ssh://github.com:grafana/grafana-foundation-sdk.git</developerConnection>
-		<url>https://github.com/grafana/grafana-foundation-sdk/tree/master</url>
-	</scm>
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>11</maven.compiler.source>
@@ -69,18 +63,6 @@ func (jenny Pom) generatePom() string {
 			<version>2.17.1</version>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugin>
-			<artifactId>maven-clean-plugin</artifactId>
-			<version>3.1.0</version>
-		</plugin>
-		<plugin>
-			<artifactId>maven-deploy-plugin</artifactId>
-			<version>2.8.2</version>
-		</plugin>
-	</build>
-
 </project>
 `, jenny.config.MavenVersion)
 }

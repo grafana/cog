@@ -11,15 +11,17 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	GeneratePOM  bool   `yaml:"gen_pom"`
-	MavenVersion string `yaml:"maven_version"`
-	ProjectPath  string
+	GeneratePOM   bool   `yaml:"gen_pom"`
+	MavenVersion  string `yaml:"maven_version"`
+	ProjectPath   string
+	PackagePrefix string
 }
 
 func (config Config) mergeWithGlobal(global common.Config) Config {
 	newConfig := config
 	if config.GeneratePOM {
 		newConfig.ProjectPath = "src/main/java/com/grafana/foundation"
+		newConfig.PackagePrefix = "com.grafana.foundation"
 	}
 
 	return newConfig
