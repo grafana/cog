@@ -96,7 +96,13 @@ func (b Builders) formatDefaultValues(args []ast.Argument) []string {
 		case ast.KindScalar:
 			scalar := arg.Type.AsScalar()
 			if scalar.ScalarKind == ast.KindFloat32 || scalar.ScalarKind == ast.KindFloat64 {
-				argumentList = append(argumentList, fmt.Sprintf("%.1f", float64(arg.Type.Default.(int64))))
+				val := arg.Type.Default
+				if v, ok := val.(int64); ok {
+					val = v
+				} else {
+					val = val.(float64)
+				}
+				argumentList = append(argumentList, fmt.Sprintf("%.1f", val))
 			} else {
 				argumentList = append(argumentList, fmt.Sprintf("%#v", arg.Type.Default))
 			}
