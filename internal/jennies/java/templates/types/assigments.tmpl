@@ -19,6 +19,13 @@
 {{- end }}
 
 {{- define "assignment_setup" }}
+    {{- with .Value.Argument }}
+        {{- $castPath := formatCastValue $.Assignment.Path }}
+        {{- if not (eq $castPath.Value "") }}
+        {{ $castPath.Class }} {{ $castPath.Value | lowerCamelCase }}Resource = ({{- $castPath.Class }}) this.internal.{{ $castPath.Path }};
+        {{ $castPath.Value | lowerCamelCase }}Resource.{{ .Name | lowerCamelCase }} = {{ .Name | lowerCamelCase }}{{ if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}.build(){{ end }};
+        {{- end }}
+    {{- end }}
     {{- with .Value.Envelope }}
         {{- range .Values }}
         {{- template "assignment_setup" (dict "Assignment" $.Assignment "Value" .Value) }}
@@ -33,7 +40,10 @@
         {{- formatScalar .Value.Constant }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- $castPath := formatCastValue $.Assignment.Path }}
+        {{- if not (eq $castPath.Value "") }}
+            {{- $castPath.Value | lowerCamelCase }}Resource
+        {{- else if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
             {{- .Name | escapeVar | lowerCamelCase }}.build()
         {{- else }}
             {{- .Name | escapeVar | lowerCamelCase }}

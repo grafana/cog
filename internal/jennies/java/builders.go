@@ -13,21 +13,25 @@ type Builders struct {
 	context       common.Context
 	typeFormatter *typeFormatter
 	builders      map[string]map[string]ast.Builder
+	isPanel       map[string]bool
 }
 
 func parseBuilders(context common.Context, formatter *typeFormatter) Builders {
 	b := make(map[string]map[string]ast.Builder)
+	panels := make(map[string]bool)
 	for _, builder := range context.Builders {
 		if _, ok := b[builder.Package]; !ok {
 			b[builder.Package] = map[string]ast.Builder{}
 		}
 		b[builder.Package][builder.Name] = builder
+		panels[builder.Package] = builder.Name == "Panel" && builder.Package != "dashboard" // TODO: Ugh! Maybe a compiler pass??
 	}
 
 	return Builders{
 		context:       context,
 		builders:      b,
 		typeFormatter: formatter,
+		isPanel:       panels,
 	}
 }
 
@@ -39,6 +43,7 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 
 	object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 	return template.Builder{
+		Package:     builder.Package,
 		ObjectName:  tools.UpperCamelCase(object.Name),
 		BuilderName: builder.Name,
 		Constructor: builder.Constructor,
@@ -46,6 +51,14 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 		Properties:  builder.Properties,
 		Defaults:    b.genDefaults(builder.Options),
 	}, true
+}
+
+func (b Builders) genPanelBuilder(pkg string) (template.Builder, bool) {
+	if !b.isPanel[pkg] {
+		return template.Builder{}, false
+	}
+
+	return b.genBuilder(pkg, "Panel")
 }
 
 func (b Builders) getBuilder(pkg string, name string) (ast.Builder, bool) {
@@ -83,7 +96,13 @@ func (b Builders) formatDefaultValues(args []ast.Argument) []string {
 		case ast.KindScalar:
 			scalar := arg.Type.AsScalar()
 			if scalar.ScalarKind == ast.KindFloat32 || scalar.ScalarKind == ast.KindFloat64 {
-				argumentList = append(argumentList, fmt.Sprintf("%.1f", float64(arg.Type.Default.(int64))))
+				val := arg.Type.Default
+				if v, ok := val.(int64); ok {
+					val = v
+				} else {
+					val = val.(float64)
+				}
+				argumentList = append(argumentList, fmt.Sprintf("%.1f", val))
 			} else {
 				argumentList = append(argumentList, fmt.Sprintf("%#v", arg.Type.Default))
 			}
