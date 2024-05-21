@@ -128,7 +128,7 @@ func (jenny *Builder) genDefaultOptionsCalls(context common.Context, builder ast
 
 func hasTypedDefaults(opt ast.Option) bool {
 	for _, defArg := range opt.Default.ArgsValues {
-		if _, ok := defArg.(map[string]interface{}); ok {
+		if _, ok := defArg.(map[string]any); ok {
 			return true
 		}
 	}

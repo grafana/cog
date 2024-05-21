@@ -46,49 +46,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "sandbox",
-        "Metadata": {},
-        "Objects": {
-          "SomeStruct": {
-            "Name": "SomeStruct",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "editable",
-                    "Type": {
-                      "Kind": "scalar",
-                      "Nullable": false,
-                      "Scalar": {
-                        "ScalarKind": "boolean"
-                      }
-                    },
-                    "Required": true
-                  },
-                  {
-                    "Name": "autoRefresh",
-                    "Type": {
-                      "Kind": "scalar",
-                      "Nullable": true,
-                      "Scalar": {
-                        "ScalarKind": "boolean"
-                      }
-                    },
-                    "Required": false
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "sandbox",
-              "ReferredType": "SomeStruct"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "SomeStruct",
         "Type": {

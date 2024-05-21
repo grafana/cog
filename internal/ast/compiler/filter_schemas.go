@@ -47,44 +47,17 @@ func (pass *FilterSchemas) buildAllowList(schemas ast.Schemas, entrypoints []Obj
 		rootObjects.Set(obj.SelfRef.String(), obj)
 	}
 
-	var exploreType func(typeDef ast.Type)
-	exploreType = func(typeDef ast.Type) {
-		if typeDef.IsRef() {
-			ref := typeDef.Ref
-			referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	visitor := &Visitor{
+		OnRef: func(_ *Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
+			referredObj, found := schemas.LocateObject(def.Ref.ReferredPkg, def.Ref.ReferredType)
 			if !found {
-				return
+				return def, nil
 			}
 
-			rootObjects.Set(ref.String(), referredObj)
-		}
+			rootObjects.Set(def.Ref.String(), referredObj)
 
-		if typeDef.IsStruct() {
-			for _, field := range typeDef.Struct.Fields {
-				exploreType(field.Type)
-			}
-		}
-
-		if typeDef.IsDisjunction() {
-			for _, branch := range typeDef.Disjunction.Branches {
-				exploreType(branch)
-			}
-		}
-
-		if typeDef.IsIntersection() {
-			for _, branch := range typeDef.Intersection.Branches {
-				exploreType(branch)
-			}
-		}
-
-		if typeDef.IsArray() {
-			exploreType(typeDef.Array.ValueType)
-		}
-
-		if typeDef.IsMap() {
-			exploreType(typeDef.Map.IndexType)
-			exploreType(typeDef.Map.ValueType)
-		}
+			return def, nil
+		},
 	}
 
 	for {
@@ -102,7 +75,12 @@ func (pass *FilterSchemas) buildAllowList(schemas ast.Schemas, entrypoints []Obj
 
 			allowList.Set(key, struct{}{})
 
-			exploreType(object.Type)
+			schema, found := schemas.Locate(object.SelfRef.ReferredPkg)
+			if !found {
+				return
+			}
+
+			_, _ = visitor.VisitType(schema, object.Type)
 		})
 	}
 

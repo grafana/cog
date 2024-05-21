@@ -6,11 +6,11 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-type Selector func(builder ast.Builder) bool
+type Selector func(schemas ast.Schemas, builder ast.Builder) bool
 
 // EveryBuilder accepts any given builder.
 func EveryBuilder() Selector {
-	return func(_ ast.Builder) bool {
+	return func(_ ast.Schemas, _ ast.Builder) bool {
 		return true
 	}
 }
@@ -19,8 +19,8 @@ func EveryBuilder() Selector {
 // package and name).
 // Note: the comparison on object name is case-insensitive.
 func ByObjectName(pkg string, objectName string) Selector {
-	return func(builder ast.Builder) bool {
-		return builder.For.SelfRef.ReferredPkg == pkg &&
+	return func(_ ast.Schemas, builder ast.Builder) bool {
+		return strings.EqualFold(builder.For.SelfRef.ReferredPkg, pkg) &&
 			strings.EqualFold(builder.For.SelfRef.ReferredType, objectName)
 	}
 }
@@ -28,8 +28,8 @@ func ByObjectName(pkg string, objectName string) Selector {
 // ByName matches builders for the given name.
 // Note: the comparison on builder name is case-insensitive.
 func ByName(pkg string, builderName string) Selector {
-	return func(builder ast.Builder) bool {
-		return builder.For.SelfRef.ReferredPkg == pkg &&
+	return func(_ ast.Schemas, builder ast.Builder) bool {
+		return strings.EqualFold(builder.For.SelfRef.ReferredPkg, pkg) &&
 			strings.EqualFold(builder.Name, builderName)
 	}
 }
@@ -37,8 +37,13 @@ func ByName(pkg string, builderName string) Selector {
 // StructGeneratedFromDisjunction matches builders for structs that were
 // generated from a disjunction (see the Disjunction compiler pass).
 func StructGeneratedFromDisjunction() Selector {
-	return func(builder ast.Builder) bool {
-		resolved, found := builder.Schema.Resolve(builder.For.Type)
+	return func(schemas ast.Schemas, builder ast.Builder) bool {
+		schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
+		if !found {
+			return false
+		}
+
+		resolved, found := schema.Resolve(builder.For.Type)
 		if !found {
 			return false
 		}
@@ -49,9 +54,14 @@ func StructGeneratedFromDisjunction() Selector {
 
 // ComposableDashboardPanel matches builders for Panel variants.
 func ComposableDashboardPanel() Selector {
-	return func(builder ast.Builder) bool {
-		return builder.Schema.Metadata.Kind == ast.SchemaKindComposable &&
-			builder.Schema.Metadata.Variant == ast.SchemaVariantPanel &&
-			builder.Schema.Metadata.Identifier != ""
+	return func(schemas ast.Schemas, builder ast.Builder) bool {
+		schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
+		if !found {
+			return false
+		}
+
+		return schema.Metadata.Kind == ast.SchemaKindComposable &&
+			schema.Metadata.Variant == ast.SchemaVariantPanel &&
+			schema.Metadata.Identifier != ""
 	}
 }

@@ -35,38 +35,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "properties",
-        "Metadata": {},
-        "Objects": {
-          "SomeStruct": {
-            "Name": "SomeStruct",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "id",
-                    "Type": {
-                      "Kind": "scalar",
-                      "Nullable": false,
-                      "Scalar": {
-                        "ScalarKind": "int64"
-                      }
-                    },
-                    "Required": true
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "properties",
-              "ReferredType": "SomeStruct"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "SomeStruct",
         "Type": {

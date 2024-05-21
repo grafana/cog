@@ -48,51 +48,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "nullable_map_assignment",
-        "Metadata": {},
-        "Objects": {
-          "SomeStruct": {
-            "Name": "SomeStruct",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "config",
-                    "Type": {
-                      "Kind": "map",
-                      "Nullable": true,
-                      "Map": {
-                        "IndexType": {
-                          "Kind": "scalar",
-                          "Nullable": false,
-                          "Scalar": {
-                            "ScalarKind": "string"
-                          }
-                        },
-                        "ValueType": {
-                          "Kind": "scalar",
-                          "Nullable": false,
-                          "Scalar": {
-                            "ScalarKind": "string"
-                          }
-                        }
-                      }
-                    },
-                    "Required": false
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "nullable_map_assignment",
-              "ReferredType": "SomeStruct"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "SomeStruct",
         "Type": {

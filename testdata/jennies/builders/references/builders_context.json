@@ -79,39 +79,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "some_pkg",
-        "Metadata": {},
-        "Objects": {
-          "Person": {
-            "Name": "Person",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "name",
-                    "Type": {
-                      "Kind": "ref",
-                      "Nullable": false,
-                      "Ref": {
-                        "ReferredPkg": "other_pkg",
-                        "ReferredType": "Name"
-                      }
-                    },
-                    "Required": true
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "some_pkg",
-              "ReferredType": "Person"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "Person",
         "Type": {
