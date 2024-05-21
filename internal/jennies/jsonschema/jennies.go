@@ -13,7 +13,9 @@ import (
 const LanguageRef = "jsonschema"
 
 type Config struct {
-	Debug bool
+	Debug bool `yaml:"-"`
+
+	Compact bool `yaml:"compact"`
 }
 
 func (config Config) MergeWithGlobal(global common.Config) Config {
@@ -27,9 +29,9 @@ type Language struct {
 	config Config
 }
 
-func New() *Language {
+func New(config Config) *Language {
 	return &Language{
-		config: Config{},
+		config: config,
 	}
 }
 
