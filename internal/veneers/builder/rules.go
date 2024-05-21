@@ -8,12 +8,12 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type RewriteRule func(builders ast.Builders) (ast.Builders, error)
+type RewriteRule func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error)
 
 func mapToSelected(selector Selector, mapFunc func(builders ast.Builders, builder ast.Builder) (ast.Builder, error)) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, b := range builders {
-			if !selector(b) {
+			if !selector(schemas, b) {
 				continue
 			}
 
@@ -62,11 +62,11 @@ func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath as
 }
 
 func Omit(selector Selector) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		filteredBuilders := make([]ast.Builder, 0, len(builders))
 
 		for _, builder := range builders {
-			if selector(builder) {
+			if selector(schemas, builder) {
 				continue
 			}
 
@@ -104,10 +104,11 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 
 func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders, panelOptionsToExclude []string) (ast.Builder, error) {
 	newBuilder := ast.Builder{
-		Schema:  panelBuilder.Schema,
-		Package: composableBuilders[0].Package,
-		For:     panelBuilder.For,
-		Name:    panelBuilder.For.Name,
+		Package:     composableBuilders[0].Package,
+		For:         panelBuilder.For,
+		Name:        panelBuilder.For.Name,
+		Constructor: panelBuilder.Constructor,
+		Properties:  panelBuilder.Properties,
 	}
 
 	typeField, ok := panelBuilder.For.Type.AsStruct().FieldByName("type")
@@ -171,7 +172,7 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 }
 
 func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOptionsToExclude []string) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		panelBuilderPkg, panelBuilderNameWithoutPkg, found := strings.Cut(panelBuilderName, ".")
 		if !found {
 			return nil, fmt.Errorf("panelBuilderName '%s' is incorrect: no package found", panelBuilderPkg)
@@ -193,8 +194,13 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 
 		for _, builder := range builders {
 			// the builder is for a composable type
-			if selector(builder) {
-				panelType := builder.Schema.Metadata.Identifier
+			if selector(schemas, builder) {
+				schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
+				if !found {
+					continue
+				}
+
+				panelType := schema.Metadata.Identifier
 				composableBuilders[panelType] = append(composableBuilders[panelType], builder)
 				continue
 			}
@@ -218,9 +224,9 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 }
 
 func Rename(selector Selector, newName string) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, builder := range builders {
-			if !selector(builder) {
+			if !selector(schemas, builder) {
 				continue
 			}
 
@@ -233,9 +239,9 @@ func Rename(selector Selector, newName string) RewriteRule {
 }
 
 func VeneerTrailAsComments(selector Selector) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, builder := range builders {
-			if !selector(builder) {
+			if !selector(schemas, builder) {
 				continue
 			}
 
@@ -251,9 +257,9 @@ func VeneerTrailAsComments(selector Selector) RewriteRule {
 }
 
 func Properties(selector Selector, properties []ast.StructField) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, builder := range builders {
-			if !selector(builder) {
+			if !selector(schemas, builder) {
 				continue
 			}
 
@@ -266,11 +272,11 @@ func Properties(selector Selector, properties []ast.StructField) RewriteRule {
 }
 
 func Duplicate(selector Selector, duplicateName string, excludeOptions []string) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		var newBuilders ast.Builders
 
 		for _, builder := range builders {
-			if !selector(builder) {
+			if !selector(schemas, builder) {
 				continue
 			}
 
@@ -297,9 +303,9 @@ type Initialization struct {
 }
 
 func Initialize(selector Selector, statements []Initialization) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, builder := range builders {
-			if !selector(builder) {
+			if !selector(schemas, builder) {
 				continue
 			}
 
@@ -324,9 +330,9 @@ func Initialize(selector Selector, statements []Initialization) RewriteRule {
 // parameters. Both arguments and assignments described by the options
 // will be exposed in the builder's constructor.
 func PromoteOptionsToConstructor(selector Selector, optionNames []string) RewriteRule {
-	return func(builders ast.Builders) (ast.Builders, error) {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, builder := range builders {
-			if !selector(builder) {
+			if !selector(schemas, builder) {
 				continue
 			}
 

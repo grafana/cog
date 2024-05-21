@@ -60,63 +60,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "anonymous_struct",
-        "Metadata": {},
-        "Objects": {
-          "SomeStruct": {
-            "Name": "SomeStruct",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "time",
-                    "Type": {
-                      "Kind": "struct",
-                      "Nullable": true,
-                      "Struct": {
-                        "Fields": [
-                          {
-                            "Name": "from",
-                            "Type": {
-                              "Kind": "scalar",
-                              "Nullable": false,
-                              "Default": "now-6h",
-                              "Scalar": {
-                                "ScalarKind": "string"
-                              }
-                            },
-                            "Required": true
-                          },
-                          {
-                            "Name": "to",
-                            "Type": {
-                              "Kind": "scalar",
-                              "Nullable": false,
-                              "Default": "now",
-                              "Scalar": {
-                                "ScalarKind": "string"
-                              }
-                            },
-                            "Required": true
-                          }
-                        ]
-                      }
-                    },
-                    "Required": false
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "anonymous_struct",
-              "ReferredType": "SomeStruct"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "SomeStruct",
         "Type": {

@@ -7,11 +7,11 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type RewriteAction func(builder ast.Builder, option ast.Option) []ast.Option
+type RewriteAction func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option
 
 // RenameAction renames an option.
 func RenameAction(newName string) RewriteAction {
-	return func(_ ast.Builder, option ast.Option) []ast.Option {
+	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		oldName := option.Name
 		option.Name = newName
 		option.AddToVeneerTrail(fmt.Sprintf("Rename[%s → %s]", oldName, newName))
@@ -44,7 +44,7 @@ func RenameAction(newName string) RewriteAction {
 //
 // FIXME: considers the first arg only.
 func ArrayToAppendAction() RewriteAction {
-	return func(_ ast.Builder, option ast.Option) []ast.Option {
+	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 || !option.Args[0].Type.IsArray() {
 			return []ast.Option{option}
 		}
@@ -83,14 +83,14 @@ func ArrayToAppendAction() RewriteAction {
 
 // OmitAction removes an option.
 func OmitAction() RewriteAction {
-	return func(_ ast.Builder, _ ast.Option) []ast.Option {
+	return func(_ ast.Schemas, _ ast.Builder, _ ast.Option) []ast.Option {
 		return nil
 	}
 }
 
 // VeneerTrailAsCommentsAction removes an option.
 func VeneerTrailAsCommentsAction() RewriteAction {
-	return func(_ ast.Builder, opt ast.Option) []ast.Option {
+	return func(_ ast.Schemas, _ ast.Builder, opt ast.Option) []ast.Option {
 		veneerTrail := tools.Map(opt.VeneerTrail, func(veneer string) string {
 			return fmt.Sprintf("Modified by veneer '%s'", veneer)
 		})
@@ -129,14 +129,14 @@ func VeneerTrailAsCommentsAction() RewriteAction {
 //
 // FIXME: considers the first argument only.
 func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
-	return func(builder ast.Builder, option ast.Option) []ast.Option {
+	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
 			return []ast.Option{option}
 		}
 
 		firstArgType := option.Args[0].Type
 		if firstArgType.IsRef() {
-			referredObject, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			referredObject, found := schemas.LocateObject(firstArgType.AsRef().ReferredPkg, firstArgType.AsRef().ReferredType)
 			if found {
 				firstArgType = referredObject.Type
 			}
@@ -154,12 +154,20 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 		newOpt := option
 		newOpt.Args = nil
 		newOpt.Assignments = nil
+		newOpt.Default = nil
 		newOpt.AddToVeneerTrail("StructFieldsAsArguments")
 
 		assignIntoList := assignmentPathPrefix.Last().Type.IsArray()
 
 		newAssignments := make([]ast.Assignment, 0, len(structType.Fields))
 		valuesForEnvelope := make([]ast.EnvelopeFieldValue, 0, len(structType.Fields))
+		defaults := make(map[string]any)
+		if option.Default != nil && len(option.Default.ArgsValues) == 1 {
+			if defs, ok := option.Default.ArgsValues[0].(map[string]any); ok {
+				defaults = defs
+			}
+		}
+
 		for _, field := range structType.Fields {
 			if explicitFields != nil && !tools.ItemInList(field.Name, explicitFields) {
 				continue
@@ -209,6 +217,14 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 					Path:  ast.PathFromStructField(field),
 					Value: assignmentValue,
 				})
+			}
+
+			if defaults[field.Name] != nil {
+				if newOpt.Default == nil {
+					newOpt.Default = &ast.OptionDefault{}
+				}
+
+				newOpt.Default.ArgsValues = append(newOpt.Default.ArgsValues, defaults[field.Name])
 			}
 		}
 
@@ -269,14 +285,14 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 //
 // FIXME: considers the first argument only.
 func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
-	return func(builder ast.Builder, option ast.Option) []ast.Option {
+	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
 			return []ast.Option{option}
 		}
 
 		firstArgType := option.Args[0].Type
 		if firstArgType.IsRef() {
-			referredObject, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			referredObject, found := schemas.LocateObject(firstArgType.AsRef().ReferredPkg, firstArgType.AsRef().ReferredType)
 			if found {
 				firstArgType = referredObject.Type
 			}
@@ -353,7 +369,7 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 //
 // FIXME: considers the first argument only.
 func DisjunctionAsOptionsAction() RewriteAction {
-	return func(builder ast.Builder, option ast.Option) []ast.Option {
+	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
 			return []ast.Option{option}
 		}
@@ -368,7 +384,7 @@ func DisjunctionAsOptionsAction() RewriteAction {
 		// or maybe a reference to a struct that was created to simulate a disjunction?
 		if firstArgType.IsRef() {
 			// FIXME: we only try to resolve the reference within the same package
-			referredObj, found := builder.Schema.LocateObject(firstArgType.AsRef().ReferredType)
+			referredObj, found := schemas.LocateObject(firstArgType.AsRef().ReferredPkg, firstArgType.AsRef().ReferredType)
 			if !found {
 				return []ast.Option{option}
 			}
@@ -487,7 +503,7 @@ type BooleanUnfold struct {
 //	}
 //	```
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
-	return func(_ ast.Builder, option ast.Option) []ast.Option {
+	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		intoType := option.Assignments[0].Path.Last().Type
 
 		if !intoType.IsScalar() || intoType.Scalar.ScalarKind != ast.KindBool {
@@ -530,7 +546,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 }
 
 func DuplicateAction(duplicateName string) RewriteAction {
-	return func(builder ast.Builder, option ast.Option) []ast.Option {
+	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		duplicateOpt := option.DeepCopy()
 		duplicateOpt.Name = duplicateName
 		duplicateOpt.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s]", option.Name))

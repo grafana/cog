@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAddFields(t *testing.T) {
@@ -107,5 +108,6 @@ func TestAddFields_withNonStructObjectRef(t *testing.T) {
 	}
 
 	// Run the compiler pass
-	runPassOnSchema(t, pass, schema, schema)
+	_, err := pass.Process(ast.Schemas{schema})
+	require.Error(t, err)
 }

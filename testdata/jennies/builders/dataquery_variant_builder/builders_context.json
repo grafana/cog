@@ -38,41 +38,6 @@
   ],
   "Builders": [
     {
-      "Schema": {
-        "Package": "dataquery_variant_builder",
-        "Metadata": {},
-        "Objects": {
-          "Loki": {
-            "Name": "Loki",
-            "Type": {
-              "Kind": "struct",
-              "Nullable": false,
-              "Hints": {
-                "implements_variant": "dataquery"
-              },
-              "Struct": {
-                "Fields": [
-                  {
-                    "Name": "expr",
-                    "Type": {
-                      "Kind": "scalar",
-                      "Nullable": false,
-                      "Scalar": {
-                        "ScalarKind": "string"
-                      }
-                    },
-                    "Required": true
-                  }
-                ]
-              }
-            },
-            "SelfRef": {
-              "ReferredPkg": "dataquery_variant_builder",
-              "ReferredType": "Loki"
-            }
-          }
-        }
-      },
       "For": {
         "Name": "Loki",
         "Type": {

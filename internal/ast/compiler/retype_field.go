@@ -15,24 +15,16 @@ type RetypeField struct {
 }
 
 func (pass *RetypeField) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	for i, schema := range schemas {
-		schemas[i] = pass.processSchema(schema)
+	visitor := &Visitor{
+		OnObject: pass.processObject,
 	}
 
-	return schemas, nil
+	return visitor.VisitSchemas(schemas)
 }
 
-func (pass *RetypeField) processSchema(schema *ast.Schema) *ast.Schema {
-	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		return pass.processObject(object)
-	})
-
-	return schema
-}
-
-func (pass *RetypeField) processObject(object ast.Object) ast.Object {
+func (pass *RetypeField) processObject(_ *Visitor, _ *ast.Schema, object ast.Object) (ast.Object, error) {
 	if !object.Type.IsStruct() {
-		return object
+		return object, nil
 	}
 
 	for i, field := range object.Type.Struct.Fields {
@@ -50,5 +42,5 @@ func (pass *RetypeField) processObject(object ast.Object) ast.Object {
 		break
 	}
 
-	return object
+	return object, nil
 }

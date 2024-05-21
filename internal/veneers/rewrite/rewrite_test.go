@@ -235,7 +235,7 @@ func TestRewriter_ApplyTo(t *testing.T) {
 			expectedBuildersJSON := mustMarshalJSON(t, tc.outputBuilders)
 
 			// apply the rewrite rules
-			rewrittenBuilders, err := rewriter.ApplyTo(tc.inputBuilders, "go")
+			rewrittenBuilders, err := rewriter.ApplyTo(ast.Schemas{}, tc.inputBuilders, "go")
 			req.NoError(err)
 
 			// save the output states

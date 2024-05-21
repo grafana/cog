@@ -12,22 +12,16 @@ type FieldsSetNotRequired struct {
 }
 
 func (pass *FieldsSetNotRequired) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	for i, schema := range schemas {
-		schemas[i] = pass.processSchema(schema)
+	visitor := &Visitor{
+		OnObject: pass.processObject,
 	}
 
-	return schemas, nil
+	return visitor.VisitSchemas(schemas)
 }
 
-func (pass *FieldsSetNotRequired) processSchema(schema *ast.Schema) *ast.Schema {
-	schema.Objects = schema.Objects.Map(pass.processObject)
-
-	return schema
-}
-
-func (pass *FieldsSetNotRequired) processObject(_ string, object ast.Object) ast.Object {
+func (pass *FieldsSetNotRequired) processObject(_ *Visitor, _ *ast.Schema, object ast.Object) (ast.Object, error) {
 	if !object.Type.IsStruct() {
-		return object
+		return object, nil
 	}
 
 	for i, field := range object.Type.AsStruct().Fields {
@@ -44,5 +38,5 @@ func (pass *FieldsSetNotRequired) processObject(_ string, object ast.Object) ast
 		}
 	}
 
-	return object
+	return object, nil
 }

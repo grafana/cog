@@ -14,6 +14,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	github.com/yalue/merged_fs v1.3.0
+	golang.org/x/mod v0.17.0
 	golang.org/x/text v0.15.0
 	golang.org/x/tools v0.21.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -50,7 +51,6 @@ require (
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
-	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
