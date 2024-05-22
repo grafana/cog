@@ -33,7 +33,7 @@ func NewImportMap(pkgPrefix string) *common.DirectImportMap {
 }
 
 func setPathPrefix(prefix string, importPath string) string {
-	if _, ok := ignorePaths[importPath]; ok {
+	if _, ok := ignorePaths[importPath]; ok || prefix == "" {
 		return importPath
 	}
 
