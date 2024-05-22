@@ -49,6 +49,7 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
 		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
 		"emptyValueForType":        jenny.typeFormatter.defaultValueFor,
+		"formatCastValue":          jenny.typeFormatter.formatCastValue,
 	})
 }
 
@@ -216,7 +217,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		Name:       tools.UpperCamelCase(object.Name),
 		Fields:     fields,
 		Comments:   object.Comments,
-		Variant:    tools.UpperCamelCase(object.Type.ImplementedVariant()),
+		Variant:    jenny.getVariant(object.Type),
 		Builder:    builder,
 		HasBuilder: hasBuilder,
 	}); err != nil {
@@ -259,7 +260,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 		Name:     tools.UpperCamelCase(object.Name),
 		Extends:  []string{reference},
 		Comments: object.Comments,
-		Variant:  tools.UpperCamelCase(object.Type.ImplementedVariant()),
+		Variant:  jenny.getVariant(object.Type),
 	}); err != nil {
 		return nil, err
 	}
@@ -290,7 +291,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 		Extends:  extensions,
 		Comments: object.Comments,
 		Fields:   fields,
-		Variant:  tools.UpperCamelCase(object.Type.ImplementedVariant()),
+		Variant:  jenny.getVariant(object.Type),
 	}); err != nil {
 		return nil, err
 	}
@@ -309,6 +310,15 @@ func (jenny RawTypes) formatFields(def ast.StructType) []Field {
 	}
 
 	return fields
+}
+
+func (jenny RawTypes) getVariant(t ast.Type) string {
+	variant := ""
+	if t.ImplementsVariant() {
+		variant = fmt.Sprintf("cog.variants.%s", tools.UpperCamelCase(t.ImplementedVariant()))
+		variant = jenny.typeFormatter.packagePrefix(variant)
+	}
+	return variant
 }
 
 // TODO: Need to say to the serializer the correct name.

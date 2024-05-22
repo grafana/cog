@@ -141,11 +141,11 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		tf.packageMapper("java.util", "HashMap")
 		return "new Hashmap<>()"
 	case ast.KindRef:
-		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		tf.packageMapper(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if tf.typeHasBuilder(def) {
-			return fmt.Sprintf("new %s.Builder().build()", refDef)
+			return fmt.Sprintf("new %s.Builder().build()", def.AsRef().ReferredType)
 		}
-		return fmt.Sprintf("new %s()", refDef)
+		return fmt.Sprintf("new %s()", def.AsRef().ReferredType)
 	case ast.KindStruct:
 		return "new Object()"
 	default:
@@ -174,4 +174,34 @@ func (tf *typeFormatter) packagePrefix(pkg string) string {
 	}
 
 	return pkg
+}
+
+// formatCastValue identifies if the object to set is a generic one, so it needs
+// to do a cast to the desired object to be able to set their values.
+func (tf *typeFormatter) formatCastValue(fieldPath ast.Path) CastPath {
+	refPkg := ""
+	refType := ""
+	for _, path := range fieldPath {
+		if path.TypeHint != nil && path.TypeHint.Kind == ast.KindRef {
+			refPkg = path.TypeHint.AsRef().ReferredPkg
+			refType = path.TypeHint.AsRef().ReferredType
+		}
+	}
+
+	if refType == "" {
+		return CastPath{}
+	}
+
+	castedPath := fieldPath[0].Identifier
+	for _, p := range fieldPath[1 : len(fieldPath)-1] {
+		castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+	}
+
+	class := fmt.Sprintf("%s.%s", refPkg, refType)
+
+	return CastPath{
+		Class: tf.packagePrefix(class),
+		Value: refType,
+		Path:  castedPath,
+	}
 }

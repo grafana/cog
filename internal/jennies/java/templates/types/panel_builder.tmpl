@@ -8,10 +8,10 @@ package {{ .Package }};
 
 {{- define "panelBuilder" }}
 public class PanelBuilder {
-    private dashboard.Panel internal;
+    private Panel internal;
 
     public PanelBuilder({{- template "args" .Constructor.Args }}) {
-        this.internal = new dashboard.Panel();
+        this.internal = new Panel();
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
@@ -26,7 +26,7 @@ public class PanelBuilder {
     }
     {{- end }}
     
-    public dashboard.Panel build() {
+    public Panel build() {
         return this.internal;
     }
 }

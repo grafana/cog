@@ -28,34 +28,6 @@ type CastPath struct {
 	Path  string
 }
 
-// formatCastValue identifies if the object to set is a generic one, so it needs
-// to do a cast to the desired object to be able to set their values.
-func formatCastValue(fieldPath ast.Path) CastPath {
-	refPkg := ""
-	refType := ""
-	for _, path := range fieldPath {
-		if path.TypeHint != nil && path.TypeHint.Kind == ast.KindRef {
-			refPkg = path.TypeHint.AsRef().ReferredPkg
-			refType = path.TypeHint.AsRef().ReferredType
-		}
-	}
-
-	if refType == "" {
-		return CastPath{}
-	}
-
-	castedPath := fieldPath[0].Identifier
-	for _, p := range fieldPath[1 : len(fieldPath)-1] {
-		castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
-	}
-
-	return CastPath{
-		Class: fmt.Sprintf("%s.%s", refPkg, refType),
-		Value: refType,
-		Path:  castedPath,
-	}
-}
-
 func formatScalar(val any) any {
 	newVal := fmt.Sprintf("%#v", val)
 	if len(strings.Split(newVal, ".")) > 1 {
