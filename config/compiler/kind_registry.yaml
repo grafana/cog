@@ -129,6 +129,23 @@ passes:
         ref: { referred_pkg: heatmap, referred_type: HeatmapTooltip }
 
   ###########################
+  # common.GraphFieldConfig #
+  ###########################
+
+  # The `insertNulls` field is missing.
+  # Added upstream here: https://github.com/grafana/grafana/pull/85861
+  - add_fields:
+      to: common.GraphFieldConfig
+      fields:
+        - name: insertNulls
+          type:
+            kind: disjunction
+            disjunction:
+              branches:
+                - { kind: scalar, scalar: { scalar_kind: bool } }
+                - { kind: scalar, scalar: { scalar_kind: uint32 } }
+
+  ###########################
   # common.VizLegendOptions #
   ###########################
 
