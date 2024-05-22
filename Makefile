@@ -18,3 +18,7 @@ tests:
 .PHONY: deps
 deps:
 	go mod vendor
+
+.PHONY: docs
+docs:
+	go run cmd/compiler-passes-docs/*
