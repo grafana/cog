@@ -1,5 +1,6 @@
 package nullable_map_assignment;
 
+import java.util.Map;
 
 public class SomeStruct {
     public Map<String, String> config;

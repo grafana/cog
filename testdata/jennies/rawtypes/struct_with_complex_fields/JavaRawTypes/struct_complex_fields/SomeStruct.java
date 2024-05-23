@@ -1,6 +1,7 @@
 package struct_complex_fields;
 
 import java.util.List;
+import java.util.Map;
 
 // This struct does things.
 public class SomeStruct {
