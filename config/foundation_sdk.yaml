@@ -39,6 +39,9 @@ inputs:
     jsonschema:
       url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/pkg/tsdb/grafana-testdata-datasource/kinds/query.panel.schema.json'
       package: testdata
+      metadata:
+        kind: composable
+        variant: dataquery
       transformations:
         - '%__config_dir%/compiler/testdata_passes.yaml'
 
