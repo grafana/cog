@@ -19,9 +19,12 @@
 
 	// Position the row's panels on the grid
 	for _, panel := range rowPanelResource.Panels {
-		// Position the panel on the grid
-		panel.GridPos.X = builder.currentX
-		panel.GridPos.Y = builder.currentY
+		// The panel either has no position set, or it is the first panel of the dashboard.
+		// In that case, we position it on the grid
+		if panel.GridPos.X == 0 && panel.GridPos.Y == 0 {
+			panel.GridPos.X = builder.currentX
+			panel.GridPos.Y = builder.currentY
+		}
 
 		// Prepare the coordinates for the next panel
 		builder.currentX += panel.GridPos.W

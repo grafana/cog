@@ -1,11 +1,13 @@
 {{- define "pre_assignment_Dashboard_withPanel" }}
 
-# Position the panel on the grid
 if panel_resource.grid_pos is None:
     panel_resource.grid_pos = dashboard.GridPos()
 
-panel_resource.grid_pos.x = self.__current_x
-panel_resource.grid_pos.y = self.__current_y
+# The panel either has no position set, or it is the first panel of the dashboard.
+# In that case, we position it on the grid
+if panel_resource.grid_pos.x == 0 and panel_resource.grid_pos.y == 0:
+    panel_resource.grid_pos.x = self.__current_x
+    panel_resource.grid_pos.y = self.__current_y
 {{- end }}
 
 {{- define "post_assignment_Dashboard_withPanel" }}
