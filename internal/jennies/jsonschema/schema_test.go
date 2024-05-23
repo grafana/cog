@@ -15,12 +15,9 @@ func TestSchema_Generate(t *testing.T) {
 		Name:         "JSONSchema",
 	}
 
-	jenny := Schema{
-		Config: Config{
-			Debug: true,
-		},
-	}
-	compilerPasses := New().CompilerPasses()
+	config := Config{Debug: true}
+	jenny := Schema{Config: config}
+	compilerPasses := New(config).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)

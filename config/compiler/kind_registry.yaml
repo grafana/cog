@@ -128,6 +128,43 @@ passes:
         kind: ref
         ref: { referred_pkg: heatmap, referred_type: HeatmapTooltip }
 
+  ###########################
+  # common.GraphFieldConfig #
+  ###########################
+
+  # The `insertNulls` field is missing.
+  # Added upstream here: https://github.com/grafana/grafana/pull/85861
+  - add_fields:
+      to: common.GraphFieldConfig
+      fields:
+        - name: insertNulls
+          type:
+            kind: disjunction
+            disjunction:
+              branches:
+                - { kind: scalar, scalar: { scalar_kind: bool } }
+                - { kind: scalar, scalar: { scalar_kind: uint32 } }
+
+  ###########################
+  # common.VizLegendOptions #
+  ###########################
+
+  # Without these values, some panels might misbehave when displayed in a dashboard
+  - fields_set_default:
+      defaults:
+        common.VizLegendOptions.displayMode: "list"
+        common.VizLegendOptions.placement: "bottom"
+        common.VizLegendOptions.calcs: []
+
+  ####################
+  # timeseries panel #
+  ####################
+
+  # Without these values, timeseries might not display any data or crash when editing in the UI
+  - fields_set_default:
+      defaults:
+        timeseries.Options.legend: { placement: "bottom", displayMode: "list", calcs: [] }
+
   ##########
   # Others #
   ##########

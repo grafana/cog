@@ -47,7 +47,7 @@ func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 }
 
 func (jenny Schema) toJSON(input any) ([]byte, error) {
-	if jenny.Config.Debug {
+	if !jenny.Config.Compact {
 		return json.MarshalIndent(input, "", "  ")
 	}
 

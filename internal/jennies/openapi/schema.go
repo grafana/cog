@@ -37,7 +37,8 @@ func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 func (jenny Schema) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
 	jsonschemaJenny := jsonschema.Schema{
 		Config: jsonschema.Config{
-			Debug: jenny.Config.debug,
+			Debug:   jenny.Config.debug,
+			Compact: jenny.Config.Compact,
 		},
 		ReferenceFormatter: func(ref ast.RefType) string {
 			return fmt.Sprintf("#/components/schemas/%s", ref.ReferredType)
@@ -67,7 +68,7 @@ func (jenny Schema) generateSchema(context common.Context, schema *ast.Schema) (
 }
 
 func (jenny Schema) toJSON(input any) ([]byte, error) {
-	if jenny.Config.debug {
+	if !jenny.Config.Compact {
 		return json.MarshalIndent(input, "", "  ")
 	}
 

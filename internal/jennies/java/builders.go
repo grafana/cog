@@ -101,7 +101,7 @@ func (b Builders) formatDefaultValues(args []ast.Argument) []string {
 			if scalar.ScalarKind == ast.KindFloat32 || scalar.ScalarKind == ast.KindFloat64 {
 				val := arg.Type.Default
 				if v, ok := val.(int64); ok {
-					val = v
+					val = float64(v)
 				} else {
 					val = val.(float64)
 				}

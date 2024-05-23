@@ -34,13 +34,22 @@ inputs:
       transformations:
         - '%__config_dir%/compiler/alerting.yaml'
 
-  # The schema for testdata queries was included in the kind-registry until v11.0.x
+  # The schema for testdata queries is gone from the kind-registry since v11.0.x
   - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v11.0.x"))'
     jsonschema:
       url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/pkg/tsdb/grafana-testdata-datasource/kinds/query.panel.schema.json'
       package: testdata
       transformations:
         - '%__config_dir%/compiler/testdata_passes.yaml'
+
+  # The schema for prometheus queries is gone from the kind-registry since v11.0.x
+  - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v11.0.x"))'
+    kindsys_composable:
+      entrypoint: '%__config_dir%/../schemas/composable/prometheus'
+      cue_imports:
+        - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
+      transformations:
+        - '%__config_dir%/compiler/prometheus.yaml'
 
 transformations:
   schemas:

@@ -119,21 +119,21 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 type EntrypointIdentification struct {
 }
 
-func (pass EntrypointIdentification) AsCompilerPass() compiler.Pass {
+func (pass EntrypointIdentification) AsCompilerPass() *compiler.InferEntrypoint {
 	return &compiler.InferEntrypoint{}
 }
 
 type DataqueryIdentification struct {
 }
 
-func (pass DataqueryIdentification) AsCompilerPass() compiler.Pass {
+func (pass DataqueryIdentification) AsCompilerPass() *compiler.DataqueryIdentification {
 	return &compiler.DataqueryIdentification{}
 }
 
 type Unspec struct {
 }
 
-func (pass Unspec) AsCompilerPass() compiler.Pass {
+func (pass Unspec) AsCompilerPass() *compiler.Unspec {
 	return &compiler.Unspec{}
 }
 
@@ -141,7 +141,7 @@ type FieldsSetDefault struct {
 	Defaults map[string]any // Expected format: [package].[object].[field] → value
 }
 
-func (pass FieldsSetDefault) AsCompilerPass() (compiler.Pass, error) {
+func (pass FieldsSetDefault) AsCompilerPass() (*compiler.FieldsSetDefault, error) {
 	defaults := make(map[compiler.FieldReference]any, len(pass.Defaults))
 
 	for ref, value := range pass.Defaults {
@@ -160,7 +160,7 @@ type FieldsSetRequired struct {
 	Fields []string // Expected format: [package].[object].[field]
 }
 
-func (pass FieldsSetRequired) AsCompilerPass() (compiler.Pass, error) {
+func (pass FieldsSetRequired) AsCompilerPass() (*compiler.FieldsSetRequired, error) {
 	fieldRefs := make([]compiler.FieldReference, 0, len(pass.Fields))
 
 	for _, ref := range pass.Fields {
@@ -179,7 +179,7 @@ type FieldsSetNotRequired struct {
 	Fields []string // Expected format: [package].[object].[field]
 }
 
-func (pass FieldsSetNotRequired) AsCompilerPass() (compiler.Pass, error) {
+func (pass FieldsSetNotRequired) AsCompilerPass() (*compiler.FieldsSetNotRequired, error) {
 	fieldRefs := make([]compiler.FieldReference, 0, len(pass.Fields))
 
 	for _, ref := range pass.Fields {
@@ -198,7 +198,7 @@ type Omit struct {
 	Objects []string // Expected format: [package].[object]
 }
 
-func (pass Omit) AsCompilerPass() (compiler.Pass, error) {
+func (pass Omit) AsCompilerPass() (*compiler.Omit, error) {
 	objectRefs := make([]compiler.ObjectReference, 0, len(pass.Objects))
 
 	for _, ref := range pass.Objects {
@@ -214,11 +214,12 @@ func (pass Omit) AsCompilerPass() (compiler.Pass, error) {
 }
 
 type AddFields struct {
-	To     string // Expected format: [package].[object]
+	// Expected format: [package].[object]
+	To     string
 	Fields []ast.StructField
 }
 
-func (pass AddFields) AsCompilerPass() (compiler.Pass, error) {
+func (pass AddFields) AsCompilerPass() (*compiler.AddFields, error) {
 	objectRef, err := compiler.ObjectReferenceFromString(pass.To)
 	if err != nil {
 		return nil, err
@@ -235,7 +236,7 @@ type NameAnonymousStruct struct {
 	As    string
 }
 
-func (pass NameAnonymousStruct) AsCompilerPass() (compiler.Pass, error) {
+func (pass NameAnonymousStruct) AsCompilerPass() (*compiler.NameAnonymousStruct, error) {
 	fieldRef, err := compiler.FieldReferenceFromString(pass.Field)
 	if err != nil {
 		return nil, err
@@ -253,7 +254,7 @@ type RetypeObject struct {
 	Comments []string
 }
 
-func (pass RetypeObject) AsCompilerPass() (compiler.Pass, error) {
+func (pass RetypeObject) AsCompilerPass() (*compiler.RetypeObject, error) {
 	objectRef, err := compiler.ObjectReferenceFromString(pass.Object)
 	if err != nil {
 		return nil, err
@@ -271,7 +272,7 @@ type HintObject struct {
 	Hints  ast.JenniesHints
 }
 
-func (pass HintObject) AsCompilerPass() (compiler.Pass, error) {
+func (pass HintObject) AsCompilerPass() (*compiler.HintObject, error) {
 	objectRef, err := compiler.ObjectReferenceFromString(pass.Object)
 	if err != nil {
 		return nil, err
@@ -288,7 +289,7 @@ type RenameObject struct {
 	To   string
 }
 
-func (pass RenameObject) AsCompilerPass() (compiler.Pass, error) {
+func (pass RenameObject) AsCompilerPass() (*compiler.RenameObject, error) {
 	objectRef, err := compiler.ObjectReferenceFromString(pass.From)
 	if err != nil {
 		return nil, err
@@ -306,7 +307,7 @@ type RetypeField struct {
 	Comments []string
 }
 
-func (pass RetypeField) AsCompilerPass() (compiler.Pass, error) {
+func (pass RetypeField) AsCompilerPass() (*compiler.RetypeField, error) {
 	fieldRef, err := compiler.FieldReferenceFromString(pass.Field)
 	if err != nil {
 		return nil, err
@@ -324,7 +325,7 @@ type SchemaSetIdentifier struct {
 	Identifier string
 }
 
-func (pass SchemaSetIdentifier) AsCompilerPass() (compiler.Pass, error) {
+func (pass SchemaSetIdentifier) AsCompilerPass() (*compiler.SchemaSetIdentifier, error) {
 	return &compiler.SchemaSetIdentifier{
 		Package:    pass.Package,
 		Identifier: pass.Identifier,
@@ -334,62 +335,62 @@ func (pass SchemaSetIdentifier) AsCompilerPass() (compiler.Pass, error) {
 type AnonymousStructsToNamed struct {
 }
 
-func (pass AnonymousStructsToNamed) AsCompilerPass() (compiler.Pass, error) {
+func (pass AnonymousStructsToNamed) AsCompilerPass() (*compiler.AnonymousStructsToNamed, error) {
 	return &compiler.AnonymousStructsToNamed{}, nil
 }
 
 type DisjunctionToType struct {
 }
 
-func (pass DisjunctionToType) AsCompilerPass() (compiler.Pass, error) {
+func (pass DisjunctionToType) AsCompilerPass() (*compiler.DisjunctionToType, error) {
 	return &compiler.DisjunctionToType{}, nil
 }
 
 type DisjunctionOfAnonymousStructsToExplicit struct {
 }
 
-func (pass DisjunctionOfAnonymousStructsToExplicit) AsCompilerPass() (compiler.Pass, error) {
+func (pass DisjunctionOfAnonymousStructsToExplicit) AsCompilerPass() (*compiler.DisjunctionOfAnonymousStructsToExplicit, error) {
 	return &compiler.DisjunctionOfAnonymousStructsToExplicit{}, nil
 }
 
 type DisjunctionInferMapping struct {
 }
 
-func (pass DisjunctionInferMapping) AsCompilerPass() (compiler.Pass, error) {
+func (pass DisjunctionInferMapping) AsCompilerPass() (*compiler.DisjunctionInferMapping, error) {
 	return &compiler.DisjunctionInferMapping{}, nil
 }
 
 type DisjunctionWithConstantToDefault struct {
 }
 
-func (pass DisjunctionWithConstantToDefault) AsCompilerPass() (compiler.Pass, error) {
+func (pass DisjunctionWithConstantToDefault) AsCompilerPass() (*compiler.DisjunctionWithConstantToDefault, error) {
 	return &compiler.DisjunctionWithConstantToDefault{}, nil
 }
 
 type DashboardPanels struct {
 }
 
-func (pass DashboardPanels) AsCompilerPass() compiler.Pass {
+func (pass DashboardPanels) AsCompilerPass() *compiler.DashboardPanelsRewrite {
 	return &compiler.DashboardPanelsRewrite{}
 }
 
 type Cloudwatch struct {
 }
 
-func (pass Cloudwatch) AsCompilerPass() compiler.Pass {
+func (pass Cloudwatch) AsCompilerPass() *compiler.Cloudwatch {
 	return &compiler.Cloudwatch{}
 }
 
 type GoogleCloudMonitoring struct {
 }
 
-func (pass GoogleCloudMonitoring) AsCompilerPass() compiler.Pass {
+func (pass GoogleCloudMonitoring) AsCompilerPass() *compiler.GoogleCloudMonitoring {
 	return &compiler.GoogleCloudMonitoring{}
 }
 
 type LibraryPanels struct {
 }
 
-func (pass LibraryPanels) AsCompilerPass() compiler.Pass {
+func (pass LibraryPanels) AsCompilerPass() *compiler.LibraryPanels {
 	return &compiler.LibraryPanels{}
 }

@@ -195,9 +195,9 @@ func (config Config) OutputLanguages() (languages.Languages, error) {
 		case output.Java != nil:
 			outputs[java.LanguageRef] = java.New(*output.Java)
 		case output.JSONSchema != nil:
-			outputs[jsonschema.LanguageRef] = jsonschema.New()
+			outputs[jsonschema.LanguageRef] = jsonschema.New(*output.JSONSchema)
 		case output.OpenAPI != nil:
-			outputs[openapi.LanguageRef] = openapi.New()
+			outputs[openapi.LanguageRef] = openapi.New(*output.OpenAPI)
 		case output.Python != nil:
 			outputs[python.LanguageRef] = python.New(*output.Python)
 		case output.Typescript != nil:
@@ -435,12 +435,12 @@ func (output *Output) InterpolateParameters(interpolator ParametersInterpolator)
 }
 
 type OutputLanguage struct {
-	Go         *golang.Config `yaml:"go"`
-	Java       *java.Config   `yaml:"java"`
-	JSONSchema *NoConfig      `yaml:"jsonschema"`
-	OpenAPI    *NoConfig      `yaml:"openapi"`
-	Python     *python.Config `yaml:"python"`
-	Typescript *NoConfig      `yaml:"typescript"`
+	Go         *golang.Config     `yaml:"go"`
+	Java       *java.Config       `yaml:"java"`
+	JSONSchema *jsonschema.Config `yaml:"jsonschema"`
+	OpenAPI    *openapi.Config    `yaml:"openapi"`
+	Python     *python.Config     `yaml:"python"`
+	Typescript *NoConfig          `yaml:"typescript"`
 }
 
 func (outputLanguage *OutputLanguage) InterpolateParameters(interpolator ParametersInterpolator) {
