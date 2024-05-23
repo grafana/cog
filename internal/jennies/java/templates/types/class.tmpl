@@ -1,6 +1,10 @@
 package {{ .Package }};
 {{- $class := include "class" . }}
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 {{ .Imports }}
 
 {{- $class }}
@@ -12,11 +16,15 @@ package {{ .Package }};
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
     {{- template "types" dict "Fields" .Fields }}
 
-    {{- if .HasBuilder }}
-    {{- if not .Extends }}
+    public String ToJSON() throws JsonProcessingException {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        return ow.writeValueAsString(this);
+    }
+
+    {{- if and .HasBuilder (not .Extends) }}
     {{ template "builder" .Builder }}
     {{- end }}
-    {{- end }}
+    
 }
 {{- end }}
 
@@ -25,6 +33,8 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
+    @JsonProperty("{{ .Name }}")
     public {{ .Type }} {{ .Name | escapeVar }};
+
     {{- end }}
 {{- end }}
