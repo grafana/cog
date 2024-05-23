@@ -9,7 +9,7 @@ type SomeStruct struct {
 // Really, anything.
 FieldAny any `json:"FieldAny"`
 	FieldBool bool `json:"FieldBool"`
-	FieldBytes bytes `json:"FieldBytes"`
+	FieldBytes []byte `json:"FieldBytes"`
 	FieldString string `json:"FieldString"`
 	FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
 	FieldFloat32 float32 `json:"FieldFloat32"`

@@ -70,6 +70,9 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			if def.Nullable {
 				typeName = "*" + typeName
 			}
+			if def.AsScalar().ScalarKind == ast.KindBytes {
+				typeName = "[]byte"
+			}
 
 			return string(typeName)
 		}
