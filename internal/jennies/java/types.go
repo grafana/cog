@@ -55,7 +55,7 @@ func (tf *typeFormatter) resolvesToComposableSlot(typeDef ast.Type) bool {
 func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 	value := tf.formatFieldType(def)
 	if tf.resolvesToComposableSlot(def) || tf.typeHasBuilder(def) {
-		value = fmt.Sprintf("cog.Builder<%s>", value)
+		value = fmt.Sprintf("%s.cog.Builder<%s>", packagePath, value)
 	}
 
 	return value

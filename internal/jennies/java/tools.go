@@ -83,3 +83,11 @@ func formatAssignmentPath(fieldPath ast.Path) string {
 
 	return path
 }
+
+func prefixVariant(variant string) string {
+	if variant != "" {
+		return fmt.Sprintf("%s.cog.variants.%s", packagePath, tools.UpperCamelCase(variant))
+	}
+
+	return ""
+}

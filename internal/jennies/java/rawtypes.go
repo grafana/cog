@@ -215,7 +215,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		Name:       tools.UpperCamelCase(object.Name),
 		Fields:     fields,
 		Comments:   object.Comments,
-		Variant:    tools.UpperCamelCase(object.Type.ImplementedVariant()),
+		Variant:    prefixVariant(object.Type.ImplementedVariant()),
 		Builder:    builder,
 		HasBuilder: hasBuilder,
 	}); err != nil {
@@ -258,7 +258,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 		Name:     tools.UpperCamelCase(object.Name),
 		Extends:  []string{reference},
 		Comments: object.Comments,
-		Variant:  tools.UpperCamelCase(object.Type.ImplementedVariant()),
+		Variant:  prefixVariant(object.Type.ImplementedVariant()),
 	}); err != nil {
 		return nil, err
 	}
@@ -289,7 +289,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 		Extends:  extensions,
 		Comments: object.Comments,
 		Fields:   fields,
-		Variant:  tools.UpperCamelCase(object.Type.ImplementedVariant()),
+		Variant:  prefixVariant(object.Type.ImplementedVariant()),
 	}); err != nil {
 		return nil, err
 	}

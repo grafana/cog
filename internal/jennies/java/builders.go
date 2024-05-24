@@ -58,6 +58,7 @@ func (b Builders) genPanelBuilder(pkg string) (template.Builder, bool) {
 		return template.Builder{}, false
 	}
 
+	b.typeFormatter.packageMapper("dashboard", "Panel")
 	return b.genBuilder(pkg, "Panel")
 }
 
