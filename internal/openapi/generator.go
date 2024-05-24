@@ -176,8 +176,10 @@ func (g *generator) walkArray(schema *openapi3.Schema) (ast.Type, error) {
 func (g *generator) walkString(schema *openapi3.Schema) (ast.Type, error) {
 	var t ast.Type
 	switch schema.Format {
-	case FormatDate, FormatDateTime, FormatPassword:
-		t = ast.String()
+	case FormatDateTime:
+		t = ast.String(ast.Hints(ast.JenniesHints{
+			ast.HintStringFormatDateTime: true,
+		}))
 	case FormatByte:
 		t = ast.Bytes()
 	default:
