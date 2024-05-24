@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "objTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "objWithTimeField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registeredAt"
+      ],
+      "properties": {
+        "registeredAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "time_hint",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "objTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "objWithTimeField": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "registeredAt"
+        ],
+        "properties": {
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
