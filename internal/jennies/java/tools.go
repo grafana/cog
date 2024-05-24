@@ -50,7 +50,7 @@ func formatCastValue(fieldPath ast.Path) CastPath {
 	}
 
 	return CastPath{
-		Class: fmt.Sprintf("%s.%s", refPkg, refType),
+		Class: fmt.Sprintf("%s.%s.%s", packagePath, refPkg, refType),
 		Value: refType,
 		Path:  castedPath,
 	}
