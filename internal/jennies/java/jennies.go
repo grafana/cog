@@ -21,6 +21,10 @@ func New() *Language {
 	return &Language{config: Config{}}
 }
 
+func (language *Language) Name() string {
+	return LanguageRef
+}
+
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef

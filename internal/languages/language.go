@@ -8,6 +8,7 @@ import (
 )
 
 type Language interface {
+	Name() string
 	Jennies(config common.Config) *codejen.JennyList[common.Context]
 	CompilerPasses() compiler.Passes
 }

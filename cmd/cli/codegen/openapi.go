@@ -1,4 +1,4 @@
-package loaders
+package codegen
 
 import (
 	"context"
@@ -51,8 +51,8 @@ func (input *OpenAPIInput) packageName() string {
 	return guessPackageFromFilename(input.Path)
 }
 
-func (input *OpenAPIInput) InterpolateParameters(interpolator ParametersInterpolator) {
-	input.InputBase.InterpolateParameters(interpolator)
+func (input *OpenAPIInput) interpolateParameters(interpolator ParametersInterpolator) {
+	input.InputBase.interpolateParameters(interpolator)
 
 	input.Path = interpolator(input.Path)
 	input.URL = interpolator(input.URL)

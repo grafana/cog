@@ -1,4 +1,4 @@
-package loaders
+package codegen
 
 import (
 	"context"
@@ -16,8 +16,8 @@ type KindRegistryInput struct {
 	Version string `yaml:"version"`
 }
 
-func (input *KindRegistryInput) InterpolateParameters(interpolator ParametersInterpolator) {
-	input.InputBase.InterpolateParameters(interpolator)
+func (input *KindRegistryInput) interpolateParameters(interpolator ParametersInterpolator) {
+	input.InputBase.interpolateParameters(interpolator)
 
 	input.Path = interpolator(input.Path)
 	input.Version = interpolator(input.Version)

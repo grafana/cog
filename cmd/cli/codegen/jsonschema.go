@@ -1,4 +1,4 @@
-package loaders
+package codegen
 
 import (
 	"context"
@@ -26,8 +26,8 @@ type JSONSchemaInput struct {
 	Metadata ast.SchemaMeta `yaml:"metadata"`
 }
 
-func (input *JSONSchemaInput) InterpolateParameters(interpolator ParametersInterpolator) {
-	input.InputBase.InterpolateParameters(interpolator)
+func (input *JSONSchemaInput) interpolateParameters(interpolator ParametersInterpolator) {
+	input.InputBase.interpolateParameters(interpolator)
 
 	input.Path = interpolator(input.Path)
 	input.URL = interpolator(input.URL)

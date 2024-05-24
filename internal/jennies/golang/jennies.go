@@ -9,7 +9,6 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/spf13/cobra"
 )
 
 const LanguageRef = "go"
@@ -57,9 +56,8 @@ func New(config Config) *Language {
 	}
 }
 
-func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&language.config.PackageRoot, "go-package-root", "github.com/grafana/cog/generated", "Go package root.")
-	cmd.Flags().BoolVar(&language.config.GenerateGoMod, "go-mod", false, "Generate a go.mod file. If enabled, 'go-package-root' is used as module path.")
+func (language *Language) Name() string {
+	return LanguageRef
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
