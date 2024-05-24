@@ -413,11 +413,15 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			return ast.Type{}, err
 		}
 
-		return ast.NewRef(
-			refPkg,
-			selectorLabel(selectors[len(selectors)-1]),
-			ast.Default(defValue),
-		), nil
+		refType := selectorLabel(selectors[len(selectors)-1])
+
+		if refPkg == "time" && refType == "Time" {
+			return ast.String(ast.Default(defValue), ast.Hints(ast.JenniesHints{
+				ast.HintStringFormatDateTime: true,
+			})), nil
+		}
+
+		return ast.NewRef(refPkg, refType, ast.Default(defValue)), nil
 	}
 
 	return ast.Type{}, nil
@@ -521,6 +525,15 @@ func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHint
 	}
 
 	typeDef.Scalar.Constraints = constraints
+
+	conjuncts := appendSplit(nil, cue.AndOp, v)
+	for _, conjunct := range conjuncts {
+		_, path := conjunct.ReferencePath()
+		// the string was declared as string & time.Time
+		if path.String() == "Time" {
+			typeDef.Hints[ast.HintStringFormatDateTime] = true
+		}
+	}
 
 	return typeDef, nil
 }
