@@ -11,9 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/tools"
+	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
 type PackageTemplate struct {
@@ -46,12 +45,12 @@ func (jenny PackageTemplate) Generate(context Context) (codejen.Files, error) {
 			return err
 		}
 
-		tmpl, err := template.New(jenny.JennyName()).
+		base := template.New(jenny.JennyName())
+		tmpl, err := base.
 			Option("missingkey=error").
-			Funcs(sprig.FuncMap()).
+			Funcs(cogtemplate.Helpers(base)).
 			Funcs(template.FuncMap{
 				"registryToSemver": jenny.registryToSemver,
-				"lowerCamelCase":   tools.LowerCamelCase,
 			}).
 			Parse(string(templateContent))
 		if err != nil {
