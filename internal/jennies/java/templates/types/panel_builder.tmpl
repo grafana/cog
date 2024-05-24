@@ -18,7 +18,7 @@ public class PanelBuilder {
     }
     
     {{- range .Options }}
-    public PanelBuilder set{{ .Name | camelcase }}({{- template "args" .Args }}) {
+    public PanelBuilder set{{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" "PanelBuilder" "OptionName" "Panel") }}
         {{- end }}
