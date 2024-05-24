@@ -13,6 +13,7 @@ import (
 )
 
 const projectPath = "src/main/java/com/grafana/foundation"
+const packagePath = "com.grafana.foundation"
 
 type RawTypes struct {
 	imports *common.DirectImportMap
@@ -209,7 +210,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name)
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:    pkg,
+		Package:    fmt.Sprintf("%s.%s", packagePath, pkg),
 		Imports:    jenny.imports,
 		Name:       tools.UpperCamelCase(object.Name),
 		Fields:     fields,
@@ -237,7 +238,7 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 	}
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/constants.tmpl", ConstantTemplate{
-		Package:   pkg,
+		Package:   fmt.Sprintf("%s.%s", packagePath, pkg),
 		Name:      "Constants",
 		Constants: constants,
 	}); err != nil {
@@ -252,7 +253,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:  pkg,
+		Package:  fmt.Sprintf("%s.%s", packagePath, pkg),
 		Imports:  jenny.imports,
 		Name:     tools.UpperCamelCase(object.Name),
 		Extends:  []string{reference},
@@ -282,7 +283,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 	}
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:  pkg,
+		Package:  fmt.Sprintf("%s.%s", packagePath, pkg),
 		Imports:  jenny.imports,
 		Name:     object.Name,
 		Extends:  extensions,
