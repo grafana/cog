@@ -35,6 +35,10 @@ func New(config Config) *Language {
 	}
 }
 
+func (language *Language) Name() string {
+	return LanguageRef
+}
+
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
