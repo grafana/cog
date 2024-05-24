@@ -12,6 +12,8 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
+const projectPath = "src/main/java/com/grafana/foundation"
+
 type RawTypes struct {
 	imports *common.DirectImportMap
 
@@ -86,10 +88,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			return
 		}
 
-		filename := filepath.Join(
-			pkg,
-			fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)),
-		)
+		filename := filepath.Join(projectPath, pkg, fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)))
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 
@@ -104,7 +103,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 			if panelOutput != nil {
 				alreadyValidatedPanel[schema.Package] = true
-				filename := filepath.Join(strings.ToLower(schema.Package), "PanelBuilder.java")
+				filename := filepath.Join(projectPath, strings.ToLower(schema.Package), "PanelBuilder.java")
 				files = append(files, *codejen.NewFile(filename, panelOutput, jenny))
 			}
 		}
@@ -120,7 +119,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			return nil, err
 		}
 
-		filename := filepath.Join(strings.ToLower(schema.Package), "Constants.java")
+		filename := filepath.Join(projectPath, strings.ToLower(schema.Package), "Constants.java")
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 

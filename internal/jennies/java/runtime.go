@@ -3,6 +3,7 @@ package java
 import (
 	"bytes"
 	"fmt"
+	"path/filepath"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -27,8 +28,8 @@ func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
 	}
 
 	return codejen.Files{
-		*codejen.NewFile("cog/variants/Dataquery.java", variants, jenny),
-		*codejen.NewFile("cog/Builder.java", builder, jenny),
+		*codejen.NewFile(filepath.Join(projectPath, "cog/variants/Dataquery.java"), variants, jenny),
+		*codejen.NewFile(filepath.Join(projectPath, "cog/Builder.java"), builder, jenny),
 	}, nil
 }
 
