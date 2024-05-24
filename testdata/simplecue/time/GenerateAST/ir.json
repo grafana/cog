@@ -1,0 +1,49 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "Objects": {
+    "User": {
+      "Name": "User",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "registeredAt",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                },
+                "Hints": {
+                  "string_format_datetime": true
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "subscribedAt",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                },
+                "Hints": {
+                  "string_format_datetime": true
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "User"
+      }
+    }
+  }
+}
