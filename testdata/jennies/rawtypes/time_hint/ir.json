@@ -1,0 +1,42 @@
+{
+  "Package": "time_hint",
+  "Objects": {
+    "objTime": {
+      "Name": "objTime",
+      "Type": {
+        "Kind": "scalar",
+        "Scalar": {
+          "ScalarKind": "string"
+        },
+        "Hints": {
+          "string_format_datetime": true
+        }
+      }
+    },
+    "objWithTimeField": {
+      "Name": "objWithTimeField",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "registeredAt",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                },
+                "Hints": {
+                  "string_format_datetime": true
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      }
+    }
+  }
+}
