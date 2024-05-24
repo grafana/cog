@@ -139,9 +139,15 @@ func (jenny Schema) formatScalar(typeDef ast.Type) Definition {
 	case ast.KindAny:
 		definition.Set("type", "object")
 		definition.Set("additionalProperties", map[string]any{})
-	case ast.KindBytes, ast.KindString:
+	case ast.KindBytes:
 		definition.Set("type", "string")
 		jenny.addStringConstraints(definition, typeDef)
+	case ast.KindString:
+		definition.Set("type", "string")
+		jenny.addStringConstraints(definition, typeDef)
+		if typeDef.HasHint(ast.HintStringFormatDateTime) {
+			definition.Set("format", "date-time")
+		}
 	case ast.KindBool:
 		definition.Set("type", "boolean")
 	case ast.KindFloat32, ast.KindFloat64:
