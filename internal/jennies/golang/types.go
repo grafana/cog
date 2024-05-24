@@ -73,6 +73,9 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			if def.AsScalar().ScalarKind == ast.KindBytes {
 				typeName = "[]byte"
 			}
+			if def.HasHint(ast.HintStringFormatDateTime) {
+				typeName = "time.Time"
+			}
 
 			return string(typeName)
 		}
