@@ -144,9 +144,9 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if tf.typeHasBuilder(def) {
-			return fmt.Sprintf("new %s.Builder().build()", refDef)
+			return fmt.Sprintf("new %s.%s.Builder().build()", packagePath, refDef)
 		}
-		return fmt.Sprintf("new %s()", refDef)
+		return fmt.Sprintf("new %s.%s()", packagePath, refDef)
 	case ast.KindStruct:
 		return "new Object()"
 	default:
