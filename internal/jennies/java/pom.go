@@ -23,16 +23,18 @@ func (jenny Pom) Generate(_ common.Context) (codejen.Files, error) {
 
 func (jenny Pom) generatePom() string {
 	return fmt.Sprintf(`
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.grafana.foundation</groupId>
-	<artifactId>foundation</artifactId>
+	<artifactId>sdk</artifactId>
 	<version>%s</version>
+	<packaging>pom</packaging>
 
-	<name>${project.groupId}:${project.artifactId}</name>
+	<name>Grafana foundation SDK</name>
 	<description>Grafana Java library</description>
-	<packaging>jar</packaging>
+
 	<url>https://github.com/grafana/grafana-foundation-sdk</url>
 	<licenses>
 		<license>
