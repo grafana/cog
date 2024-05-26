@@ -3,114 +3,61 @@ package golang
 import (
 	"bytes"
 	"fmt"
-	"path/filepath"
 	"strings"
 
-	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type JSONMarshalling struct {
-	Config Config
-
 	packageMapper func(string) string
 	typeFormatter *typeFormatter
 }
 
-func (jenny JSONMarshalling) JennyName() string {
-	return "GoJSONMarshalling"
-}
-
-func (jenny JSONMarshalling) Generate(context common.Context) (codejen.Files, error) {
-	files := make(codejen.Files, 0, len(context.Schemas))
-
-	for _, schema := range context.Schemas {
-		output, err := jenny.generateSchema(context, schema)
-		if err != nil {
-			return nil, err
-		}
-		if output == nil {
-			continue
-		}
-
-		filename := filepath.Join(
-			formatPackageName(schema.Package),
-			"types_json_marshalling_gen.go",
-		)
-
-		files = append(files, *codejen.NewFile(filename, output, jenny))
+func (jenny JSONMarshalling) generateForSchema(buffer *strings.Builder, schema *ast.Schema) error {
+	if schema.Metadata.Kind != ast.SchemaKindComposable || schema.Metadata.Variant != ast.SchemaVariantPanel {
+		return nil
 	}
 
-	return files, nil
-}
-
-func (jenny JSONMarshalling) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
-	var buffer strings.Builder
-	var err error
-
-	imports := NewImportMap()
-	jenny.packageMapper = func(pkg string) string {
-		if pkg == schema.Package {
-			return ""
-		}
-
-		return imports.Add(pkg, jenny.Config.importPath(pkg))
-	}
-	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, jenny.packageMapper)
-
-	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		if jenny.objectNeedsCustomMarshal(object) {
-			jsonMarshal, innerErr := jenny.renderCustomMarshal(object)
-			if innerErr != nil {
-				err = innerErr
-				return
-			}
-			buffer.WriteString(jsonMarshal)
-		}
-
-		if jenny.objectNeedsCustomUnmarshal(context, object) {
-			jsonUnmarshal, innerErr := jenny.renderCustomUnmarshal(context, object)
-			if innerErr != nil {
-				err = innerErr
-				return
-			}
-			buffer.WriteString(jsonUnmarshal)
-		}
-
-		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
-			variantUnmarshal, innerErr := jenny.renderDataqueryVariantUnmarshal(schema, object)
-			if innerErr != nil {
-				err = innerErr
-				return
-			}
-			buffer.WriteString(variantUnmarshal)
-		}
-	})
+	variantUnmarshal, err := jenny.renderPanelcfgVariantUnmarshal(schema)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	buffer.WriteString(variantUnmarshal)
+
+	return nil
+}
+
+func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context common.Context, schema *ast.Schema, object ast.Object) error {
+	if jenny.objectNeedsCustomMarshal(object) {
+		jsonMarshal, err := jenny.renderCustomMarshal(object)
+		if err != nil {
+			return err
+		}
+		buffer.WriteString(jsonMarshal)
+		buffer.WriteString("\n")
 	}
 
-	if schema.Metadata.Kind == ast.SchemaKindComposable && schema.Metadata.Variant == ast.SchemaVariantPanel {
-		variantUnmarshal, err := jenny.renderPanelcfgVariantUnmarshal(schema)
+	if jenny.objectNeedsCustomUnmarshal(context, object) {
+		jsonUnmarshal, err := jenny.renderCustomUnmarshal(context, object)
 		if err != nil {
-			return nil, err
+			return err
+		}
+		buffer.WriteString(jsonUnmarshal)
+		buffer.WriteString("\n")
+	}
+
+	if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
+		variantUnmarshal, err := jenny.renderDataqueryVariantUnmarshal(schema, object)
+		if err != nil {
+			return err
 		}
 		buffer.WriteString(variantUnmarshal)
+		buffer.WriteString("\n")
 	}
 
-	if buffer.Len() == 0 {
-		return nil, nil
-	}
-
-	importStatements := imports.String()
-	if importStatements != "" {
-		importStatements += "\n\n"
-	}
-
-	return []byte(fmt.Sprintf(`package %[1]s
-%[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
+	return nil
 }
 
 func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
