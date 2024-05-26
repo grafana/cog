@@ -68,7 +68,6 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		common.If[common.Context](config.GenerateGoMod, GoMod{Config: config}),
 
 		common.If[common.Context](globalConfig.Types, RawTypes{Config: config}),
-		common.If[common.Context](globalConfig.Types, JSONMarshalling{Config: config}),
 
 		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
 	)
