@@ -6,6 +6,14 @@ stringStringMap: {
 }
 #foo: {
     bar: string
+		stringToAny: {
+				[string]: _
+    }
 }
 stringRefMap: [string]: #foo
 stringToMapOfMap: [string]: {[string]: bool}
+
+incompleteObjectIsNotAMap: {
+	foo: string
+	...
+}

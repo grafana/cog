@@ -73,6 +73,30 @@
                 }
               },
               "Required": true
+            },
+            {
+              "Name": "stringToAny",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "any"
+                    }
+                  }
+                }
+              },
+              "Required": true
             }
           ]
         }
@@ -148,6 +172,32 @@
       "SelfRef": {
         "ReferredPkg": "grafanatest",
         "ReferredType": "stringToMapOfMap"
+      }
+    },
+    "incompleteObjectIsNotAMap": {
+      "Name": "incompleteObjectIsNotAMap",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "foo",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "incompleteObjectIsNotAMap"
       }
     }
   }

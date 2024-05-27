@@ -59,7 +59,7 @@ func TestTypes_HasOnlyScalarOrArray(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			req := require.New(t)
 
-			req.Equal(tc.expected, tc.types.HasOnlyScalarOrArray())
+			req.Equal(tc.expected, tc.types.HasOnlyScalarOrArrayOrMap())
 		})
 	}
 }

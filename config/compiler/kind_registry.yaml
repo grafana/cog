@@ -47,6 +47,18 @@ passes:
       as: TimePicker
 
   - retype_field:
+      field: dashboard.Panel.options
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+
+  - retype_field:
+      field: dashboard.FieldConfig.custom
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+
+  - retype_field:
       field: dashboard.Panel.Targets
       as:
         kind: array

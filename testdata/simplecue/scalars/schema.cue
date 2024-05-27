@@ -1,7 +1,7 @@
 container: {
     str: string
     trueOrFalse: bool
-    anything: {...}
+    anything: _
     data: bytes
 
     num_unit8: uint8
