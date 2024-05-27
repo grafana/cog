@@ -4,7 +4,6 @@ import (
 	"embed"
 	"text/template"
 
-	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
@@ -21,7 +20,6 @@ func init() {
 	base := template.New("ts")
 	base.
 		Option("missingkey=error").
-		Funcs(sprig.FuncMap()).
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(template.FuncMap{
@@ -43,6 +41,12 @@ func init() {
 			},
 			"emptyValueForGuard": func(_ ast.Type) string {
 				panic("emptyValueForGuard() needs to be overridden by a jenny")
+			},
+			"typeHasBuilder": func(_ ast.Type) bool {
+				panic("typeHasBuilder() needs to be overridden by a jenny")
+			},
+			"resolvesToComposableSlot": func(_ ast.Type) bool {
+				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
 		})
 	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))

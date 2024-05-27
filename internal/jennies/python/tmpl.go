@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
@@ -23,7 +22,6 @@ func init() {
 	base := template.New("python")
 	base.
 		Option("missingkey=error").
-		Funcs(sprig.FuncMap()).
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(template.FuncMap{
@@ -41,6 +39,12 @@ func init() {
 			},
 			"defaultForType": func(_ ast.Type) string {
 				panic("defaultForType() needs to be overridden by a jenny")
+			},
+			"typeHasBuilder": func(_ ast.Type) bool {
+				panic("typeHasBuilder() needs to be overridden by a jenny")
+			},
+			"resolvesToComposableSlot": func(_ ast.Type) bool {
+				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
 		}).
 		Funcs(template.FuncMap{

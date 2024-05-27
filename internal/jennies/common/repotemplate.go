@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/codejen"
+	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
 type RepositoryTemplate struct {
@@ -43,9 +43,10 @@ func (jenny RepositoryTemplate) Generate(buildOpts BuildOptions) (codejen.Files,
 				return err
 			}
 
-			tmpl, err := template.New(jenny.JennyName()).
+			base := template.New(jenny.JennyName())
+			tmpl, err := base.
 				Option("missingkey=error").
-				Funcs(sprig.FuncMap()).
+				Funcs(cogtemplate.Helpers(base)).
 				Parse(string(templateContent))
 			if err != nil {
 				return err

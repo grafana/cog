@@ -67,6 +67,9 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 
 		if def.IsScalar() {
 			typeName := def.AsScalar().ScalarKind
+			if def.HasHint(ast.HintStringFormatDateTime) {
+				typeName = "time.Time"
+			}
 			if def.Nullable {
 				typeName = "*" + typeName
 			}
