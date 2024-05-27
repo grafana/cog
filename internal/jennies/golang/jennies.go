@@ -15,11 +15,15 @@ import (
 const LanguageRef = "go"
 
 type Config struct {
-	debug bool
+	debug            bool
+	generateBuilders bool
 
 	// GenerateGoMod indicates whether a go.mod file should be generated.
 	// If enabled, PackageRoot is used as module path.
 	GenerateGoMod bool `yaml:"go_mod"`
+
+	// SkipRuntime disables runtime-related code generation when enabled.
+	SkipRuntime bool `yaml:"skip_runtime"`
 
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
@@ -33,6 +37,7 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug
+	newConfig.generateBuilders = global.Builders
 
 	return newConfig
 }
@@ -64,8 +69,8 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		Runtime{Config: config},
-		VariantsPlugins{Config: config},
+		common.If[common.Context](!config.SkipRuntime, Runtime{Config: config}),
+		common.If[common.Context](!config.SkipRuntime, VariantsPlugins{Config: config}),
 
 		common.If[common.Context](config.GenerateGoMod, GoMod{Config: config}),
 
