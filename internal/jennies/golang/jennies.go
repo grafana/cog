@@ -22,6 +22,8 @@ type Config struct {
 	GenerateGoMod bool `yaml:"go_mod"`
 
 	// SkipRuntime disables runtime-related code generation when enabled.
+	// Note: builders can NOT be generated with this flag turned on, as they
+	// rely on the runtime to function.
 	SkipRuntime bool `yaml:"skip_runtime"`
 
 	// Root path for imports.
@@ -74,7 +76,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 
 		common.If[common.Context](globalConfig.Types, RawTypes{Config: config}),
 
-		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
+		common.If[common.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config}),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 

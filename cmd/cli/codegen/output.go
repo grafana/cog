@@ -6,6 +6,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/python"
+	"github.com/grafana/cog/internal/jennies/typescript"
 )
 
 type Output struct {
@@ -77,7 +78,7 @@ type OutputLanguage struct {
 	JSONSchema *jsonschema.Config `yaml:"jsonschema"`
 	OpenAPI    *openapi.Config    `yaml:"openapi"`
 	Python     *python.Config     `yaml:"python"`
-	Typescript *NoConfig          `yaml:"typescript"`
+	Typescript *typescript.Config `yaml:"typescript"`
 }
 
 func (outputLanguage *OutputLanguage) interpolateParameters(interpolator ParametersInterpolator) {
@@ -87,7 +88,4 @@ func (outputLanguage *OutputLanguage) interpolateParameters(interpolator Paramet
 	if outputLanguage.Python != nil {
 		outputLanguage.Python.InterpolateParameters(interpolator)
 	}
-}
-
-type NoConfig struct {
 }

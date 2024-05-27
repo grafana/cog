@@ -14,7 +14,7 @@ func TestBuilder_Generate(t *testing.T) {
 		Name:         "TypescriptBuilder",
 	}
 
-	language := New()
+	language := New(Config{})
 	jenny := Builder{}
 
 	test.Run(t, func(tc *testutils.Test) {
