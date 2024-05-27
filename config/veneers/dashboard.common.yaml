@@ -207,9 +207,14 @@ options:
   - array_to_append:
       by_name: Panel.withTransformation
 
+  # We want to offer both the ability to set gridPos entirely manually,
+  # or to use span/height-based automatic layout
+  - duplicate:
+      by_name: Panel.gridPos
+      as: tmpGridPos
   # W(), H() instead of explicit GridPos() definition
   - struct_fields_as_options:
-      by_name: Panel.gridPos
+      by_name: Panel.tmpGridPos
       fields: [w, h]
   # W() → Span()
   - rename:

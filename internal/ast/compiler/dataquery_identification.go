@@ -25,31 +25,47 @@ func (pass *DataqueryIdentification) Process(schemas []*ast.Schema) ([]*ast.Sche
 }
 
 func (pass *DataqueryIdentification) processSchema(schema *ast.Schema, commonDataquery ast.Object) *ast.Schema {
+	variantFound := false
 	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
-		return pass.processObject(object, commonDataquery)
+		if object.SelfRef.String() == commonDataquery.SelfRef.String() {
+			return object
+		}
+
+		obj, implementsVariant := pass.processObject(object, commonDataquery)
+
+		variantFound = variantFound || implementsVariant
+
+		return obj
 	})
+
+	if variantFound {
+		schema.Metadata.Kind = ast.SchemaKindComposable
+		schema.Metadata.Variant = ast.SchemaVariantDataQuery
+	}
 
 	return schema
 }
 
-func (pass *DataqueryIdentification) processObject(object ast.Object, commonDataquery ast.Object) ast.Object {
+func (pass *DataqueryIdentification) processObject(object ast.Object, commonDataquery ast.Object) (ast.Object, bool) {
 	if !object.Type.IsStruct() {
-		return object
+		return object, false
 	}
 
 	typeDef := object.Type
 
 	// this object is already identified as a variant: nothing to do.
 	if typeDef.ImplementsVariant() {
-		return object
+		return object, true
 	}
 
-	if pass.structsIntersect(typeDef, commonDataquery.Type) {
-		object.Type.Hints[ast.HintImplementsVariant] = string(ast.SchemaVariantDataQuery)
-		object.AddToPassesTrail("DataqueryIdentification[hint.ImplementsVariant=VariantDataQuery]")
+	if !pass.structsIntersect(typeDef, commonDataquery.Type) {
+		return object, false
 	}
 
-	return object
+	object.Type.Hints[ast.HintImplementsVariant] = string(ast.SchemaVariantDataQuery)
+	object.AddToPassesTrail("DataqueryIdentification[hint.ImplementsVariant=VariantDataQuery]")
+
+	return object, true
 }
 
 func (pass *DataqueryIdentification) structsIntersect(def ast.Type, base ast.Type) bool {

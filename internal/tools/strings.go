@@ -52,3 +52,8 @@ func LowerCamelCase(s string) string {
 func CleanupNames(s string) string {
 	return nonAlphaNumRegex.ReplaceAllString(s, "")
 }
+
+func Indent(input string, spaces int) string {
+	pad := strings.Repeat(" ", spaces)
+	return pad + strings.ReplaceAll(input, "\n", "\n"+pad)
+}

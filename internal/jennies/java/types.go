@@ -69,6 +69,8 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 		return formatScalarType(object.Type.AsScalar())
 	case ast.KindMap:
 		return tf.formatMap(object.Type.AsMap())
+	case ast.KindArray:
+		return tf.formatArray(object.Type.AsArray())
 	default:
 		tf.packageMapper(def.ReferredPkg, def.ReferredType)
 		return def.ReferredType
@@ -81,12 +83,12 @@ func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
 }
 
 func (tf *typeFormatter) formatMap(def ast.MapType) string {
+	tf.packageMapper("java.util", "Map")
 	mapType := "unknown"
 	switch def.ValueType.Kind {
 	case ast.KindRef:
 		ref := def.ValueType.AsRef()
 		tf.packageMapper(ref.ReferredPkg, ref.ReferredType)
-		tf.packageMapper("java.util", "Map")
 		mapType = ref.ReferredType
 	case ast.KindScalar:
 		mapType = formatScalarType(def.ValueType.AsScalar())

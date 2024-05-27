@@ -14,7 +14,7 @@ type BoolOrRef = BoolOrSomeStruct
 
 type SomeOtherStruct struct {
 	Type string `json:"Type"`
-	Foo bytes `json:"Foo"`
+	Foo []byte `json:"Foo"`
 }
 
 type YetAnotherStruct struct {

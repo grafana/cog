@@ -7,7 +7,6 @@ import (
 	"strings"
 	gotemplate "text/template"
 
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -15,7 +14,6 @@ const recursionMaxNums = 1000
 
 func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 	includedNames := make(map[string]int)
-
 	include := func(name string, data interface{}) (string, error) {
 		var buf strings.Builder
 		if v, ok := includedNames[name]; ok {
@@ -32,17 +30,49 @@ func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 	}
 
 	return gotemplate.FuncMap{
-		// placeholder functions, will be overridden by jennies
-		"typeHasBuilder": func(_ ast.Type) bool {
-			panic("typeHasBuilder() needs to be overridden by a jenny")
+		"add1": func(i int) int { return i + 1 },
+		// https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/dict.go#L76
+		"dict": func(v ...any) map[string]any {
+			dict := map[string]any{}
+			lenv := len(v)
+			for i := 0; i < lenv; i += 2 {
+				key := v[i].(string)
+				if i+1 >= lenv {
+					dict[key] = ""
+					continue
+				}
+				dict[key] = v[i+1]
+			}
+			return dict
 		},
-		"resolvesToComposableSlot": func(_ ast.Type) bool {
-			panic("resolvesToComposableSlot() needs to be overridden by a jenny")
+		"ternary": func(valTrue any, valFalse any, condition bool) any {
+			if condition {
+				return valTrue
+			}
+
+			return valFalse
 		},
 
-		"upperCamelCase": tools.UpperCamelCase,
+		// ------- \\
+		// Strings \\
+		// ------- \\
+		"indent": func(spaces int, input string) string {
+			return tools.Indent(input, spaces)
+		},
+		// Parameter order is reversed to stay compatible with sprig: https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/strings.go#L199
+		"join": func(separator string, input []string) string {
+			return strings.Join(input, separator)
+		},
+		"lower":          strings.ToLower,
 		"lowerCamelCase": tools.LowerCamelCase,
-		"include":        include,
+		// Parameter order is reversed to stay compatible with sprig: https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/functions.go#L135
+		"trimPrefix":     func(a, b string) string { return strings.TrimPrefix(b, a) },
+		"upperCamelCase": tools.UpperCamelCase,
+
+		// --------- \\
+		// Templates \\
+		// --------- \\
+		"include": include,
 		"includeIfExists": func(name string, data interface{}) (string, error) {
 			if tmpl := baseTemplate.Lookup(name); tmpl == nil {
 				return "", nil

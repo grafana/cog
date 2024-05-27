@@ -24,6 +24,8 @@ const (
 	typeString  = "string"
 	typeNumber  = "number"
 	typeInteger = "integer"
+
+	formatDateTime = "date-time"
 )
 
 type Config struct {
@@ -305,6 +307,10 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 	// ```
 	if schema.Pattern != nil && tools.RegexMatchesConstantString(schema.Pattern.String()) {
 		def.Scalar.Value = tools.ConstantStringFromRegex(schema.Pattern.String())
+	}
+
+	if schema.Format == formatDateTime {
+		def.Hints[ast.HintStringFormatDateTime] = true
 	}
 
 	if schema.MinLength != -1 {

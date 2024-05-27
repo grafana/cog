@@ -22,8 +22,11 @@ for panel in row_panel_resource.panels:
     if panel.grid_pos is None:
         panel.grid_pos = dashboard.GridPos()
 
-    panel.grid_pos.x = self.__current_x
-    panel.grid_pos.y = self.__current_y
+    # The panel either has no position set, or it is the first panel of the dashboard.
+    # In that case, we position it on the grid
+    if panel.grid_pos.x == 0 and panel.grid_pos.y == 0:
+        panel.grid_pos.x = self.__current_x
+        panel.grid_pos.y = self.__current_y
 
     # Prepare the coordinates for the next panel
     self.__current_x += panel.grid_pos.w

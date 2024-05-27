@@ -95,7 +95,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 
-		// Because we need to check the package only, it could have multiple files and we want to generate
+		// Because we need to check the package only, it could have multiple files, and we want to generate
 		// the builder once.
 		if !alreadyValidatedPanel[schema.Package] {
 			panelOutput, innerErr := jenny.generatePanelBuilder(schema.Package)

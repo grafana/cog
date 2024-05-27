@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/Masterminds/sprig/v3"
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
@@ -22,7 +21,6 @@ func init() {
 	base := template.New("golang")
 	base.
 		Option("missingkey=error").
-		Funcs(sprig.FuncMap()).
 		Funcs(cogtemplate.Helpers(base)).
 		Funcs(functions())
 
@@ -52,6 +50,9 @@ func functions() template.FuncMap {
 		},
 		"emptyValueForType": func(_ ast.Type) string {
 			panic("emptyValueForType() needs to be overridden by a jenny")
+		},
+		"resolvesToComposableSlot": func(_ ast.Type) bool {
+			panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 		},
 	}
 }
