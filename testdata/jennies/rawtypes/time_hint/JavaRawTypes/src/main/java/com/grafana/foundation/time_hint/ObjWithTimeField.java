@@ -1,4 +1,4 @@
-package time_hint;
+package com.grafana.foundation.time_hint;
 
 
 public class ObjWithTimeField {
