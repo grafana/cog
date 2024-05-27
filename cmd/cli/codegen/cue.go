@@ -1,4 +1,4 @@
-package loaders
+package codegen
 
 import (
 	"context"
@@ -38,8 +38,8 @@ type CueInput struct {
 	CueImports []string `yaml:"cue_imports"`
 }
 
-func (input *CueInput) InterpolateParameters(interpolator ParametersInterpolator) {
-	input.InputBase.InterpolateParameters(interpolator)
+func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator) {
+	input.InputBase.interpolateParameters(interpolator)
 
 	input.Entrypoint = interpolator(input.Entrypoint)
 	input.CueImports = tools.Map(input.CueImports, interpolator)

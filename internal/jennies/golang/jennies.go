@@ -9,17 +9,20 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/spf13/cobra"
 )
 
 const LanguageRef = "go"
 
 type Config struct {
-	debug bool
+	debug            bool
+	generateBuilders bool
 
 	// GenerateGoMod indicates whether a go.mod file should be generated.
 	// If enabled, PackageRoot is used as module path.
 	GenerateGoMod bool `yaml:"go_mod"`
+
+	// SkipRuntime disables runtime-related code generation when enabled.
+	SkipRuntime bool `yaml:"skip_runtime"`
 
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
@@ -33,6 +36,7 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 func (config Config) MergeWithGlobal(global common.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug
+	newConfig.generateBuilders = global.Builders
 
 	return newConfig
 }
@@ -52,9 +56,8 @@ func New(config Config) *Language {
 	}
 }
 
-func (language *Language) RegisterCliFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&language.config.PackageRoot, "go-package-root", "github.com/grafana/cog/generated", "Go package root.")
-	cmd.Flags().BoolVar(&language.config.GenerateGoMod, "go-mod", false, "Generate a go.mod file. If enabled, 'go-package-root' is used as module path.")
+func (language *Language) Name() string {
+	return LanguageRef
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
@@ -64,13 +67,12 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		Runtime{Config: config},
-		VariantsPlugins{Config: config},
+		common.If[common.Context](!config.SkipRuntime, Runtime{Config: config}),
+		common.If[common.Context](!config.SkipRuntime, VariantsPlugins{Config: config}),
 
 		common.If[common.Context](config.GenerateGoMod, GoMod{Config: config}),
 
 		common.If[common.Context](globalConfig.Types, RawTypes{Config: config}),
-		common.If[common.Context](globalConfig.Types, JSONMarshalling{Config: config}),
 
 		common.If[common.Context](globalConfig.Builders, &Builder{Config: config}),
 	)

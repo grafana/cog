@@ -46,13 +46,18 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 	var err error
 
 	imports := NewImportMap()
-	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, func(pkg string) string {
+	packageMapper := func(pkg string) string {
 		if imports.IsIdentical(pkg, schema.Package) {
 			return ""
 		}
 
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
-	})
+	}
+	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, packageMapper)
+	unmarshallerGenerator := JSONMarshalling{
+		packageMapper: packageMapper,
+		typeFormatter: jenny.typeFormatter,
+	}
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		objectOutput, innerErr := jenny.formatObject(object)
@@ -63,8 +68,18 @@ func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema)
 
 		buffer.Write(objectOutput)
 		buffer.WriteString("\n")
+
+		innerErr = unmarshallerGenerator.generateForObject(&buffer, context, schema, object)
+		if innerErr != nil {
+			err = innerErr
+			return
+		}
 	})
 	if err != nil {
+		return nil, err
+	}
+
+	if err := unmarshallerGenerator.generateForSchema(&buffer, schema); err != nil {
 		return nil, err
 	}
 

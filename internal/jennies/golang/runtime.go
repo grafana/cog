@@ -19,12 +19,19 @@ func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
 		return nil, err
 	}
 
-	return codejen.Files{
-		*codejen.NewFile("cog/builder.go", []byte(jenny.generateBuilderInterface()), jenny),
-		*codejen.NewFile("cog/errors.go", []byte(jenny.generateErrorTools()), jenny),
+	files := []codejen.File{
 		*codejen.NewFile("cog/runtime.go", []byte(runtime), jenny),
-		*codejen.NewFile("cog/tools.go", []byte(jenny.generateToPtrFunc()), jenny),
-	}, nil
+	}
+
+	if jenny.Config.generateBuilders {
+		files = append(files,
+			*codejen.NewFile("cog/builder.go", []byte(jenny.generateBuilderInterface()), jenny),
+			*codejen.NewFile("cog/errors.go", []byte(jenny.generateErrorTools()), jenny),
+			*codejen.NewFile("cog/tools.go", []byte(jenny.generateToPtrFunc()), jenny),
+		)
+	}
+
+	return files, nil
 }
 
 func (jenny Runtime) generateBuilderInterface() string {
