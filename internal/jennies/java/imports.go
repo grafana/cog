@@ -7,10 +7,6 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 )
 
-var ignorePaths = map[string]bool{
-	"java.util": true,
-}
-
 func NewImportMap() *common.DirectImportMap {
 	return common.NewDirectImportMap(
 		common.WithAliasSanitizer[common.DirectImportMap](func(alias string) string {
@@ -32,6 +28,9 @@ func NewImportMap() *common.DirectImportMap {
 }
 
 func setPackagePath(importPath string) string {
+	ignorePaths := map[string]bool{
+		"java.util": true,
+	}
 	if _, ok := ignorePaths[importPath]; ok {
 		return importPath
 	}
