@@ -130,6 +130,23 @@
                 }
               },
               "Required": true
+            },
+            {
+              "Name": "arrayOfAnything",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "any"
+                    }
+                  }
+                }
+              },
+              "Required": true
             }
           ]
         }

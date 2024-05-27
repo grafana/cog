@@ -336,9 +336,9 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.StructKind:
 		// in cue: {...}, {[string]: type}, or inline struct
 		if op, _ := v.Expr(); op == cue.NoOp {
-			t := v.LookupPath(cue.MakePath(cue.AnyString))
-			if t.Exists() && t.IncompleteKind() != cue.TopKind {
-				typeDef, err := g.declareNode(t)
+			anyString := v.LookupPath(cue.MakePath(cue.AnyString))
+			if anyString.Exists() && !hasStructFields(v) {
+				typeDef, err := g.declareNode(anyString)
 				if err != nil {
 					return ast.Type{}, err
 				}

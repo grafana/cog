@@ -38,7 +38,7 @@ func dashboardBuilder() []byte {
 			Label("Instance").
 			Hide(dashboard.VariableHideDontHide).
 			Refresh(dashboard.VariableRefreshOnTimeRangeChanged).
-			Query(dashboard.StringOrAny{
+			Query(dashboard.StringOrMap{
 				String: toPtr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
 			}).
 			Datasource(dashboard.DataSourceRef{

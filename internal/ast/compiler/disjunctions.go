@@ -95,7 +95,7 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 	/*
 		TODO: return an error here. Some jennies won't be able to handle
 		this type of disjunction.
-		if !disjunction.Branches.HasOnlyScalarOrArray() || !disjunction.Branches.HasOnlyRefs() {
+		if !disjunction.Branches.HasOnlyScalarOrArrayOrMap() || !disjunction.Branches.HasOnlyRefs() {
 		}
 	*/
 
@@ -118,7 +118,7 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 	}
 
 	structType := ast.NewStruct(fields...)
-	if disjunction.Branches.HasOnlyScalarOrArray() {
+	if disjunction.Branches.HasOnlyScalarOrArrayOrMap() {
 		structType.Hints[ast.HintDisjunctionOfScalars] = disjunction
 	}
 	if disjunction.Branches.HasOnlyRefs() {
