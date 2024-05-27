@@ -72,4 +72,5 @@ output:
     - python:
         path_prefix: grafana_foundation_sdk
     - typescript: {}
-    - java: {}
+    - java:
+        package_path: '%java_package_path%'

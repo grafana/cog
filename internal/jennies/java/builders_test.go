@@ -17,7 +17,7 @@ func TestBuidlers_Generate(t *testing.T) {
 		},
 	}
 
-	language := New()
+	language := New(Config{})
 	jenny := RawTypes{}
 
 	test.Run(t, func(tc *testutils.Test) {

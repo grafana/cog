@@ -10,12 +10,13 @@ import (
 )
 
 type typeFormatter struct {
+	config        Config
 	packageMapper func(pkg string, class string) string
 	context       common.Context
 }
 
-func createFormatter(ctx common.Context) *typeFormatter {
-	return &typeFormatter{context: ctx}
+func createFormatter(ctx common.Context, config Config) *typeFormatter {
+	return &typeFormatter{context: ctx, config: config}
 }
 
 func (tf *typeFormatter) withPackageMapper(packageMapper func(pkg string, class string) string) *typeFormatter {
@@ -55,7 +56,7 @@ func (tf *typeFormatter) resolvesToComposableSlot(typeDef ast.Type) bool {
 func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 	value := tf.formatFieldType(def)
 	if tf.resolvesToComposableSlot(def) || tf.typeHasBuilder(def) {
-		value = fmt.Sprintf("%s.cog.Builder<%s>", packagePath, value)
+		value = fmt.Sprintf("%s.Builder<%s>", tf.formatPackage("cog"), value)
 	}
 
 	return value
@@ -144,9 +145,9 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if tf.typeHasBuilder(def) {
-			return fmt.Sprintf("new %s.%s.Builder().build()", packagePath, refDef)
+			return fmt.Sprintf("new %s.Builder().build()", tf.formatPackage(refDef))
 		}
-		return fmt.Sprintf("new %s.%s()", packagePath, refDef)
+		return fmt.Sprintf("new %s()", tf.formatPackage(refDef))
 	case ast.KindStruct:
 		return "new Object()"
 	default:
@@ -167,4 +168,74 @@ func (tf *typeFormatter) formatScalar(v any) string {
 	}
 
 	return fmt.Sprintf("%#v", v)
+}
+
+type CastPath struct {
+	Class string
+	Value string
+	Path  string
+}
+
+// formatCastValue identifies if the object to set is a generic one, so it needs
+// to do a cast to the desired object to be able to set their values.
+func (tf *typeFormatter) formatCastValue(fieldPath ast.Path) CastPath {
+	refPkg := ""
+	refType := ""
+	for _, path := range fieldPath {
+		if path.TypeHint != nil && path.TypeHint.Kind == ast.KindRef {
+			refPkg = path.TypeHint.AsRef().ReferredPkg
+			refType = path.TypeHint.AsRef().ReferredType
+		}
+	}
+
+	if refType == "" {
+		return CastPath{}
+	}
+
+	castedPath := fieldPath[0].Identifier
+	for _, p := range fieldPath[1 : len(fieldPath)-1] {
+		castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+	}
+
+	return CastPath{
+		Class: fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), refType),
+		Value: refType,
+		Path:  castedPath,
+	}
+}
+
+// formatAssignmentPath generates the pad to assign the value. When the value is a generic one (Object) like Custom or FieldConfig
+// we should return until this pad to set the object to it.
+func (tf *typeFormatter) formatAssignmentPath(fieldPath ast.Path) string {
+	path := escapeVarName(tools.LowerCamelCase(fieldPath[0].Identifier))
+
+	if len(fieldPath[1:]) == 1 && fieldPath[0].TypeHint != nil && fieldPath[0].TypeHint.Kind == ast.KindRef {
+		return path
+	}
+
+	for _, p := range fieldPath[1:] {
+		path = fmt.Sprintf("%s.%s", path, tools.LowerCamelCase(p.Identifier))
+
+		if p.TypeHint != nil {
+			return path
+		}
+	}
+
+	return path
+}
+
+func (tf *typeFormatter) prefixVariant(variant string) string {
+	if variant != "" {
+		return fmt.Sprintf("%s.%s", tf.formatPackage("cog.variants"), tools.UpperCamelCase(variant))
+	}
+
+	return ""
+}
+
+func (tf *typeFormatter) formatPackage(pkg string) string {
+	if tf.config.PackagePath != "" {
+		return fmt.Sprintf("%s.%s", tf.config.PackagePath, pkg)
+	}
+
+	return pkg
 }

@@ -193,7 +193,7 @@ func (config Config) OutputLanguages() (languages.Languages, error) {
 		case output.Go != nil:
 			outputs[golang.LanguageRef] = golang.New(*output.Go)
 		case output.Java != nil:
-			outputs[java.LanguageRef] = java.New()
+			outputs[java.LanguageRef] = java.New(*output.Java)
 		case output.JSONSchema != nil:
 			outputs[jsonschema.LanguageRef] = jsonschema.New(*output.JSONSchema)
 		case output.OpenAPI != nil:
@@ -449,6 +449,9 @@ func (outputLanguage *OutputLanguage) InterpolateParameters(interpolator Paramet
 	}
 	if outputLanguage.Python != nil {
 		outputLanguage.Python.InterpolateParameters(interpolator)
+	}
+	if outputLanguage.Java != nil {
+		outputLanguage.Java.InterpolateParameters(interpolator)
 	}
 }
 
