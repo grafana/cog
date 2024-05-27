@@ -226,3 +226,12 @@ options:
       as: height
 
 
+  ##############
+  #  Snapshot  #
+  ##############
+
+  # These values are set by Grafana on snapshot creation/update
+  - omit: { by_name: Snapshot.userId }
+  - omit: { by_name: Snapshot.created }
+  - omit: { by_name: Snapshot.updated }
+
