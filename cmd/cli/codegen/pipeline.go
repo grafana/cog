@@ -187,7 +187,7 @@ func (pipeline *Pipeline) outputLanguages() (languages.Languages, error) {
 		case output.Python != nil:
 			outputs[python.LanguageRef] = python.New(*output.Python)
 		case output.Typescript != nil:
-			outputs[typescript.LanguageRef] = typescript.New()
+			outputs[typescript.LanguageRef] = typescript.New(*output.Typescript)
 		default:
 			return nil, fmt.Errorf("empty language configuration")
 		}

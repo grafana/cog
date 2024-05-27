@@ -12,6 +12,11 @@ const LanguageRef = "python"
 
 type Config struct {
 	PathPrefix string `yaml:"path_prefix"`
+
+	// SkipRuntime disables runtime-related code generation when enabled.
+	// Note: builders can NOT be generated with this flag turned on, as they
+	// rely on the runtime to function.
+	SkipRuntime bool `yaml:"skip_runtime"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
@@ -38,10 +43,10 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 	})
 	jenny.AppendOneToMany(
 		ModuleInit{},
-		Runtime{},
+		common.If[common.Context](!language.config.SkipRuntime, Runtime{}),
 
 		common.If[common.Context](globalConfig.Types, RawTypes{}),
-		common.If[common.Context](globalConfig.Builders, &Builder{}),
+		common.If[common.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
