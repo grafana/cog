@@ -87,6 +87,9 @@ func (outputLanguage *OutputLanguage) interpolateParameters(interpolator Paramet
 	if outputLanguage.Python != nil {
 		outputLanguage.Python.InterpolateParameters(interpolator)
 	}
+	if outputLanguage.Java != nil {
+		outputLanguage.Java.InterpolateParameters(interpolator)
+	}
 }
 
 type NoConfig struct {
