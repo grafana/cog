@@ -92,6 +92,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.DisjunctionWithNullToOptional{},
 		&compiler.DisjunctionOfAnonymousStructsToExplicit{},
 		&compiler.DisjunctionInferMapping{},
+		&compiler.UndiscriminatedDisjunctionToAny{},
 		&compiler.DisjunctionToType{},
 	}
 }
