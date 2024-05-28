@@ -14,7 +14,7 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	ProjectPath string
+	ProjectPath string `yaml:"-"`
 	PackagePath string `yaml:"package_path"`
 }
 
