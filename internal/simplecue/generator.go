@@ -46,8 +46,10 @@ type Config struct {
 	// Package name used to generate code into.
 	Package string
 
-	// For dataqueries, the schema doesn't define any top-level object
-	ForceVariantEnvelope bool
+	// ForceNamedEnvelope decorates the parsed cue Value with an envelope whose
+	// name is given. This is useful for dataqueries for example, where the
+	// schema doesn't define any suitable top-level object.
+	ForceNamedEnvelope string
 
 	SchemaMetadata ast.SchemaMeta
 
@@ -67,8 +69,8 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 		}),
 	}
 
-	if c.ForceVariantEnvelope {
-		if err := g.walkCueSchemaWithVariantEnvelope(val); err != nil {
+	if c.ForceNamedEnvelope != "" {
+		if err := g.walkCueSchemaWithEnvelope(c.ForceNamedEnvelope, val); err != nil {
 			return nil, fmt.Errorf("[%s] %w", c.Package, err)
 		}
 	} else {
@@ -80,7 +82,7 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 	return g.schema, nil
 }
 
-func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
+func (g *generator) walkCueSchemaWithEnvelope(envelopeName string, v cue.Value) error {
 	i, err := v.Fields(cue.Definitions(true), cue.Optional(true))
 	if err != nil {
 		return err
@@ -117,15 +119,17 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 	}
 
 	structType := ast.NewStruct(rootObjectFields...)
-	structType.Hints[ast.HintImplementsVariant] = string(g.schema.Metadata.Variant)
+	if g.schema.Metadata.Variant != "" {
+		structType.Hints[ast.HintImplementsVariant] = string(g.schema.Metadata.Variant)
+	}
 
 	g.schema.AddObject(ast.Object{
-		Name:     string(g.schema.Metadata.Variant),
+		Name:     envelopeName,
 		Comments: commentsFromCueValue(v),
 		Type:     structType,
 		SelfRef: ast.RefType{
 			ReferredPkg:  g.schema.Package,
-			ReferredType: string(g.schema.Metadata.Variant),
+			ReferredType: envelopeName,
 		},
 	})
 
@@ -337,10 +341,13 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.ListKind:
 		return g.declareList(v, defVal, hints)
 	case cue.StructKind:
+		// to make sure that we look at the actual OP
+		evaluated := v.Eval()
+
 		// in cue: {...}, {[string]: type}, or inline struct
-		if op, _ := v.Expr(); op == cue.NoOp {
-			anyString := v.LookupPath(cue.MakePath(cue.AnyString))
-			if anyString.Exists() && !hasStructFields(v) {
+		if op, _ := evaluated.Expr(); op == cue.NoOp {
+			anyString := evaluated.LookupPath(cue.MakePath(cue.AnyString))
+			if anyString.Exists() && !hasStructFields(evaluated) {
 				typeDef, err := g.declareNode(anyString)
 				if err != nil {
 					return ast.Type{}, err

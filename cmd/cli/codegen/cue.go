@@ -33,9 +33,52 @@ type CueInput struct {
 	// Entrypoint refers to a directory containing CUE files.
 	Entrypoint string `yaml:"entrypoint"`
 
+	// Value represents the CUE value to use as an input. If specified, it
+	// supersedes the Entrypoint option.
+	Value *cue.Value `yaml:"-"`
+
+	// ForcedEnvelope decorates the parsed cue Value with an envelope whose
+	// name is given. This is useful for dataqueries for example, where the
+	// schema doesn't define any suitable top-level object.
+	ForcedEnvelope string `yaml:"forced_envelope"`
+
+	// Package name to use for the input schema. If empty, it will be guessed
+	// from the entrypoint.
+	Package string `yaml:"package"`
+
 	// CueImports allows importing additional libraries.
 	// Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common
 	CueImports []string `yaml:"cue_imports"`
+}
+
+func (input *CueInput) packageName() string {
+	if input.Package != "" {
+		return input.Package
+	}
+
+	return filepath.Base(input.Entrypoint)
+}
+
+func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecue.LibraryInclude, error) {
+	if input.Value != nil {
+		return *input.Value, nil, nil
+	}
+
+	libraries, err := simplecue.ParseImports(input.CueImports)
+	if err != nil {
+		return cue.Value{}, nil, err
+	}
+
+	if cuePkgName == "" {
+		cuePkgName = filepath.Base(input.Entrypoint)
+	}
+
+	value, err := parseCueEntrypoint(input.Entrypoint, libraries, cuePkgName)
+	if err != nil {
+		return cue.Value{}, nil, err
+	}
+
+	return value, libraries, nil
 }
 
 func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator) {
@@ -46,22 +89,16 @@ func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator
 }
 
 func cueLoader(input CueInput) (ast.Schemas, error) {
-	libraries, err := simplecue.ParseImports(input.CueImports)
-	if err != nil {
-		return nil, err
-	}
-
-	pkg := filepath.Base(input.Entrypoint)
-
-	schemaRootValue, err := parseCueEntrypoint(input.Entrypoint, libraries, pkg)
+	schemaRootValue, libraries, err := input.schemaRootValue("")
 	if err != nil {
 		return nil, err
 	}
 
 	schema, err := simplecue.GenerateAST(schemaRootValue, simplecue.Config{
-		Package:        pkg,              // TODO: extract from input schema/?
-		SchemaMetadata: ast.SchemaMeta{}, // TODO: extract these from somewhere
-		Libraries:      libraries,
+		Package:            input.packageName(),
+		ForceNamedEnvelope: input.ForcedEnvelope,
+		SchemaMetadata:     ast.SchemaMeta{}, // TODO: extract these from somewhere
+		Libraries:          libraries,
 	})
 	if err != nil {
 		return nil, err
