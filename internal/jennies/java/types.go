@@ -224,14 +224,6 @@ func (tf *typeFormatter) formatAssignmentPath(fieldPath ast.Path) string {
 	return path
 }
 
-func (tf *typeFormatter) prefixVariant(variant string) string {
-	if variant != "" {
-		return fmt.Sprintf("%s.%s", tf.formatPackage("cog.variants"), tools.UpperCamelCase(variant))
-	}
-
-	return ""
-}
-
 func (tf *typeFormatter) formatPackage(pkg string) string {
 	if tf.config.PackagePath != "" {
 		return fmt.Sprintf("%s.%s", tf.config.PackagePath, pkg)
