@@ -29,13 +29,17 @@ func init() {
 
 func functions() template.FuncMap {
 	return template.FuncMap{
-		"escapeVar":            escapeVarName,
-		"formatCastValue":      formatCastValue,
-		"formatScalar":         formatScalar,
-		"formatAssignmentPath": formatAssignmentPath,
-		"formatPath":           formatFieldPath,
+		"escapeVar":    escapeVarName,
+		"formatScalar": formatScalar,
+		"formatPath":   formatFieldPath,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
+		},
+		"formatCastValue": func(_ ast.Type) string {
+			panic("formatCastValue() needs to be overridden by a jenny")
+		},
+		"formatAssignmentPath": func(_ ast.Type) string {
+			panic("formatAssignmentPath() needs to be overridden by a jenny")
 		},
 		"formatBuilderFieldType": func(_ ast.Type) string {
 			panic("formatBuilderFieldType() needs to be overridden by a jenny")

@@ -7,7 +7,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 )
 
-func NewImportMap() *common.DirectImportMap {
+func NewImportMap(packagePath string) *common.DirectImportMap {
 	return common.NewDirectImportMap(
 		common.WithAliasSanitizer[common.DirectImportMap](func(alias string) string {
 			return strings.ReplaceAll(alias, "/", "")
@@ -19,10 +19,21 @@ func NewImportMap() *common.DirectImportMap {
 
 			statements := make([]string, 0, importMap.Imports.Len())
 			importMap.Imports.Iterate(func(class string, importPath string) {
-				statements = append(statements, fmt.Sprintf("import %s.%s;", importPath, class))
+				statements = append(statements, fmt.Sprintf("import %s.%s;", setPackagePath(packagePath, importPath), class))
 			})
 
 			return strings.Join(statements, "\n") + "\n"
 		}),
 	)
+}
+
+func setPackagePath(packagePath string, importPath string) string {
+	ignorePaths := map[string]bool{
+		"java.util": true,
+	}
+	if _, ok := ignorePaths[importPath]; ok || packagePath == "" {
+		return importPath
+	}
+
+	return fmt.Sprintf("%s.%s", packagePath, importPath)
 }

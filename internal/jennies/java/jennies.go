@@ -1,6 +1,9 @@
 package java
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
@@ -11,14 +14,21 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
+	ProjectPath string `yaml:"-"`
+	PackagePath string `yaml:"package_path"`
+}
+
+func (config *Config) InterpolateParameters(interpolator func(input string) string) {
+	config.PackagePath = interpolator(config.PackagePath)
+	config.ProjectPath = fmt.Sprintf("src/main/java/%s", strings.ReplaceAll(config.PackagePath, ".", "/"))
 }
 
 type Language struct {
 	config Config
 }
 
-func New() *Language {
-	return &Language{config: Config{}}
+func New(config Config) *Language {
+	return &Language{config}
 }
 
 func (language *Language) Name() string {
@@ -31,8 +41,8 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 	})
 
 	jenny.AppendOneToMany(
-		Runtime{},
-		RawTypes{},
+		Runtime{config: language.config},
+		RawTypes{config: language.config},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

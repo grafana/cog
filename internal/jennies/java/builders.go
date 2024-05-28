@@ -43,7 +43,7 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 
 	object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 	return template.Builder{
-		Package:     builder.Package,
+		Package:     b.typeFormatter.formatPackage(pkg),
 		ObjectName:  tools.UpperCamelCase(object.Name),
 		BuilderName: builder.Name,
 		Constructor: builder.Constructor,
@@ -58,6 +58,7 @@ func (b Builders) genPanelBuilder(pkg string) (template.Builder, bool) {
 		return template.Builder{}, false
 	}
 
+	b.typeFormatter.packageMapper("dashboard", "Panel")
 	return b.genBuilder(pkg, "Panel")
 }
 
