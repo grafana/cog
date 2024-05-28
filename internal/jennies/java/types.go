@@ -143,11 +143,11 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		tf.packageMapper("java.util", "HashMap")
 		return "new Hashmap<>()"
 	case ast.KindRef:
-		tf.packageMapper(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if tf.typeHasBuilder(def) {
-			return fmt.Sprintf("new %s.Builder().build()", tf.formatPackage(def.AsRef().ReferredType))
+			return fmt.Sprintf("new %s.Builder().build()", tf.formatPackage(refDef))
 		}
-		return fmt.Sprintf("new %s()", tf.formatPackage(def.AsRef().ReferredType))
+		return fmt.Sprintf("new %s()", tf.formatPackage(refDef))
 	case ast.KindStruct:
 		return "new Object()"
 	default:
