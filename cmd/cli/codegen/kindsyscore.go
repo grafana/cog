@@ -1,20 +1,13 @@
 package codegen
 
 import (
-	"path/filepath"
-
 	"cuelang.org/go/cue"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
 )
 
 func kindsysCoreLoader(input CueInput) (ast.Schemas, error) {
-	libraries, err := simplecue.ParseImports(input.CueImports)
-	if err != nil {
-		return nil, err
-	}
-
-	schemaRootValue, err := parseCueEntrypoint(input.Entrypoint, libraries, "kind")
+	schemaRootValue, libraries, err := input.schemaRootValue("kind")
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +18,7 @@ func kindsysCoreLoader(input CueInput) (ast.Schemas, error) {
 	}
 
 	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
-		Package: filepath.Base(input.Entrypoint), // TODO: extract from somewhere else?
+		Package: input.packageName(),
 		SchemaMetadata: ast.SchemaMeta{
 			Kind:       ast.SchemaKindCore,
 			Identifier: kindIdentifier,

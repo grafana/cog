@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"cuelang.org/go/cue"
@@ -11,12 +10,7 @@ import (
 )
 
 func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
-	libraries, err := simplecue.ParseImports(input.CueImports)
-	if err != nil {
-		return nil, err
-	}
-
-	schemaRootValue, err := parseCueEntrypoint(input.Entrypoint, libraries, "grafanaplugin")
+	schemaRootValue, libraries, err := input.schemaRootValue("grafanaplugin")
 	if err != nil {
 		return nil, err
 	}
@@ -31,9 +25,14 @@ func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
 		return nil, err
 	}
 
+	var forceNamedEnvelope string
+	if variant == ast.SchemaVariantDataQuery {
+		forceNamedEnvelope = string(variant)
+	}
+
 	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
-		Package:              filepath.Base(input.Entrypoint), // TODO: extract from somewhere else?
-		ForceVariantEnvelope: variant == ast.SchemaVariantDataQuery,
+		Package:            input.packageName(),
+		ForceNamedEnvelope: forceNamedEnvelope,
 		SchemaMetadata: ast.SchemaMeta{
 			Kind:       ast.SchemaKindComposable,
 			Variant:    variant,
