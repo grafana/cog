@@ -83,7 +83,8 @@ type ClassTemplate struct {
 	Builder    cogtemplate.Builder
 	HasBuilder bool
 
-	Variant string
+	Variant              string
+	ShouldAddMarshalling bool
 }
 
 type Field struct {
