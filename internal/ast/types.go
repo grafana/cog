@@ -288,8 +288,8 @@ func Discriminator(discriminator string, mapping map[string]string) TypeOption {
 	}
 }
 
-func Any() Type {
-	return NewScalar(KindAny)
+func Any(opts ...TypeOption) Type {
+	return NewScalar(KindAny, opts...)
 }
 
 func Null() Type {
