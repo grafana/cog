@@ -17,6 +17,9 @@ type Config struct {
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.
 	SkipRuntime bool `yaml:"skip_runtime"`
+
+	// SkipIndex disables the generation of `index.ts` files.
+	SkipIndex bool `yaml:"skip_index"`
 }
 
 type Language struct {
@@ -43,7 +46,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		common.If[common.Context](globalConfig.Types, RawTypes{}),
 		common.If[common.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
 
-		Index{Targets: globalConfig},
+		common.If[common.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
