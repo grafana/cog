@@ -7,12 +7,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 )
 
-var ignorePaths = map[string]bool{
-	"java.util":             true,
-	"com.fasterxml.jackson": true,
-}
-
-func NewImportMap(pkgPrefix string) *common.DirectImportMap {
+func NewImportMap(packagePath string) *common.DirectImportMap {
 	return common.NewDirectImportMap(
 		common.WithAliasSanitizer[common.DirectImportMap](func(alias string) string {
 			return strings.ReplaceAll(alias, "/", "")
@@ -24,7 +19,7 @@ func NewImportMap(pkgPrefix string) *common.DirectImportMap {
 
 			statements := make([]string, 0, importMap.Imports.Len())
 			importMap.Imports.Iterate(func(class string, importPath string) {
-				statements = append(statements, fmt.Sprintf("import %s.%s;", setPathPrefix(pkgPrefix, importPath), class))
+				statements = append(statements, fmt.Sprintf("import %s.%s;", setPackagePath(packagePath, importPath), class))
 			})
 
 			return strings.Join(statements, "\n") + "\n"
@@ -32,10 +27,13 @@ func NewImportMap(pkgPrefix string) *common.DirectImportMap {
 	)
 }
 
-func setPathPrefix(prefix string, importPath string) string {
-	if _, ok := ignorePaths[importPath]; ok || prefix == "" {
+func setPackagePath(packagePath string, importPath string) string {
+	ignorePaths := map[string]bool{
+		"java.util": true,
+	}
+	if _, ok := ignorePaths[importPath]; ok || packagePath == "" {
 		return importPath
 	}
 
-	return fmt.Sprintf("%s.%s", prefix, importPath)
+	return fmt.Sprintf("%s.%s", packagePath, importPath)
 }

@@ -11,4 +11,5 @@ container: {
     strings: [...string]
     refs: [...#refStruct]
     structs: [...struct]
+    arrayOfAnything: [...]
 }

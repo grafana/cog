@@ -4,8 +4,3 @@ container: {
     StringEnum: "foo" | "bar" | "baz"
     TheIntEnum: #IntEnum
 }
-
-anything: { ... }
-foo: {
-    arrayOfAnything: [...]
-}

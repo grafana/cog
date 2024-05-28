@@ -260,3 +260,15 @@ func isImplicitEnum(v cue.Value) (bool, error) {
 
 	return true, nil
 }
+
+func hasStructFields(v cue.Value) bool {
+	if v.IncompleteKind() != cue.StructKind {
+		return false
+	}
+
+	for i, _ := v.Fields(cue.Optional(true), cue.Definitions(true)); i.Next(); {
+		return true
+	}
+
+	return false
+}

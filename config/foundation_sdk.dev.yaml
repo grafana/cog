@@ -6,6 +6,7 @@ parameters:
   kind_registry_version: 'v10.4.x'
   grafana_version: 'v10.4.x'
   go_package_root: 'github.com/grafana/cog/generated'
+  java_package_path: 'com.grafana.foundation'
 
 inputs:
   - kind_registry:
@@ -72,4 +73,5 @@ output:
     - python:
         path_prefix: grafana_foundation_sdk
     - typescript: {}
-    - java: {}
+    - java:
+        package_path: '%java_package_path%'

@@ -529,9 +529,9 @@ func (object Object) DeepCopy() Object {
 
 type Types []Type
 
-func (types Types) HasOnlyScalarOrArray() bool {
+func (types Types) HasOnlyScalarOrArrayOrMap() bool {
 	for _, t := range types {
-		if t.Kind == KindArray {
+		if t.Kind == KindArray || t.Kind == KindMap {
 			continue
 		}
 

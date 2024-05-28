@@ -37,7 +37,7 @@ func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
 func (jenny Runtime) renderDataQueryVariant(variant string) ([]byte, error) {
 	buf := bytes.Buffer{}
 	if err := templates.ExecuteTemplate(&buf, "runtime/variants.tmpl", map[string]any{
-		"Package": jenny.setPackagePrefix("cog.variants"),
+		"Package": jenny.formatPackage("cog.variants"),
 		"Variant": variant,
 	}); err != nil {
 		return nil, fmt.Errorf("failed executing template: %w", err)
@@ -49,7 +49,7 @@ func (jenny Runtime) renderDataQueryVariant(variant string) ([]byte, error) {
 func (jenny Runtime) renderBuilderInterface() ([]byte, error) {
 	buf := bytes.Buffer{}
 	if err := templates.ExecuteTemplate(&buf, "runtime/builder.tmpl", map[string]any{
-		"Package": jenny.setPackagePrefix("cog"),
+		"Package": jenny.formatPackage("cog"),
 	}); err != nil {
 		return nil, fmt.Errorf("failed executing template: %w", err)
 	}
@@ -57,9 +57,9 @@ func (jenny Runtime) renderBuilderInterface() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (jenny Runtime) setPackagePrefix(pkg string) string {
-	if jenny.config.PackagePrefix != "" {
-		return fmt.Sprintf("%s.%s", jenny.config.PackagePrefix, pkg)
+func (jenny Runtime) formatPackage(pkg string) string {
+	if jenny.config.PackagePath != "" {
+		return fmt.Sprintf("%s.%s", jenny.config.PackagePath, pkg)
 	}
 
 	return pkg

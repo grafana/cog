@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/grafana/cog/cmd/cli/loaders"
+	"github.com/grafana/cog/cmd/cli/codegen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
@@ -22,9 +22,7 @@ func Command() *cobra.Command {
 	opts := options{}
 
 	// TODO:
-	// 	- support inspecting our different IRs: types, builders
-	//  - support inspecting "transformed" IRs: language-specific compiler passes applied
-	// 	  on types IR, veneers applied on the builders IR
+	//  - support inspecting "transformed" IRs: common & language-specific compiler passes, veneers, ...
 	cmd := &cobra.Command{
 		Use:   "inspect",
 		Short: "Inspects the intermediate representation.", // TODO: better descriptions
@@ -37,7 +35,7 @@ func Command() *cobra.Command {
 	cmd.Flags().BoolVar(&opts.BuilderIR, "builder-ir", false, "Inspect the \"builder IR\" instead of the \"types\" one.") // TODO: better usage text
 	cmd.Flags().StringToStringVar(&opts.ExtraParameters, "parameters", nil, "Sets or overrides parameters used in the config file.")
 
-	cmd.Flags().StringVar(&opts.ConfigPath, "config", "", "Configuration file.")
+	cmd.Flags().StringVar(&opts.ConfigPath, "config", "", "Codegen pipeline configuration file.")
 	_ = cmd.MarkFlagFilename("config")
 	_ = cmd.MarkFlagRequired("config")
 
@@ -47,15 +45,12 @@ func Command() *cobra.Command {
 func doInspect(opts options) error {
 	ctx := context.Background()
 
-	config, err := loaders.ConfigFromFile(opts.ConfigPath)
+	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, codegen.Parameters(opts.ExtraParameters))
 	if err != nil {
 		return err
 	}
 
-	config = config.WithParameters(opts.ExtraParameters)
-	config = config.InterpolateParameters()
-
-	schemas, err := config.LoadSchemas(ctx)
+	schemas, err := pipeline.LoadSchemas(ctx)
 	if err != nil {
 		return err
 	}

@@ -26,7 +26,7 @@ func (jenny RawTypes) JennyName() string {
 
 func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0)
-	jenny.imports = NewImportMap(jenny.config.PackagePrefix)
+	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
 	jenny.builders = parseBuilders(jenny.config, context, jenny.typeFormatter)
 
@@ -50,6 +50,7 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
 		"emptyValueForType":        jenny.typeFormatter.defaultValueFor,
 		"formatCastValue":          jenny.typeFormatter.formatCastValue,
+		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,
 	})
 }
 
@@ -70,7 +71,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	alreadyValidatedPanel := make(map[string]bool)
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		jenny.imports = NewImportMap(jenny.config.PackagePrefix)
+		jenny.imports = NewImportMap(jenny.config.PackagePath)
 		if object.Type.IsMap() || object.Type.IsArray() {
 			return
 		}
@@ -88,10 +89,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			return
 		}
 
-		filename := filepath.Join(jenny.config.ProjectPath,
-			pkg,
-			fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)),
-		)
+		filename := filepath.Join(jenny.config.ProjectPath, pkg, fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)))
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 
@@ -183,7 +181,7 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	}
 
 	err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
-		Package:  jenny.typeFormatter.packagePrefix(pkg),
+		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Name:     object.Name,
 		Values:   values,
 		Type:     enumType,
@@ -212,12 +210,12 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name)
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:    jenny.typeFormatter.packagePrefix(pkg),
+		Package:    jenny.typeFormatter.formatPackage(pkg),
 		Imports:    jenny.imports,
 		Name:       tools.UpperCamelCase(object.Name),
 		Fields:     fields,
 		Comments:   object.Comments,
-		Variant:    jenny.getVariant(object.Type),
+		Variant:    jenny.typeFormatter.prefixVariant(object.Type.ImplementedVariant()),
 		Builder:    builder,
 		HasBuilder: hasBuilder,
 	}); err != nil {
@@ -240,7 +238,7 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 	}
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/constants.tmpl", ConstantTemplate{
-		Package:   jenny.typeFormatter.packagePrefix(pkg),
+		Package:   jenny.typeFormatter.formatPackage(pkg),
 		Name:      "Constants",
 		Constants: constants,
 	}); err != nil {
@@ -255,12 +253,12 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:  jenny.typeFormatter.packagePrefix(pkg),
+		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Imports:  jenny.imports,
 		Name:     tools.UpperCamelCase(object.Name),
 		Extends:  []string{reference},
 		Comments: object.Comments,
-		Variant:  jenny.getVariant(object.Type),
+		Variant:  jenny.typeFormatter.prefixVariant(object.Type.ImplementedVariant()),
 	}); err != nil {
 		return nil, err
 	}
@@ -285,13 +283,13 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 	}
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:  jenny.typeFormatter.packagePrefix(pkg),
+		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Imports:  jenny.imports,
 		Name:     object.Name,
 		Extends:  extensions,
 		Comments: object.Comments,
 		Fields:   fields,
-		Variant:  jenny.getVariant(object.Type),
+		Variant:  jenny.typeFormatter.prefixVariant(object.Type.ImplementedVariant()),
 	}); err != nil {
 		return nil, err
 	}
@@ -316,7 +314,7 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 	variant := ""
 	if t.ImplementsVariant() {
 		variant = fmt.Sprintf("cog.variants.%s", tools.UpperCamelCase(t.ImplementedVariant()))
-		variant = jenny.typeFormatter.packagePrefix(variant)
+		variant = jenny.typeFormatter.formatPackage(variant)
 	}
 	return variant
 }

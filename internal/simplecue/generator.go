@@ -81,7 +81,7 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 }
 
 func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
-	i, err := v.Fields(cue.Definitions(true), cue.All())
+	i, err := v.Fields(cue.Definitions(true), cue.Optional(true))
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,10 @@ func (g *generator) walkCueSchemaWithVariantEnvelope(v cue.Value) error {
 			return err
 		}
 
-		rootObjectFields = append(rootObjectFields, ast.NewStructField(name, nodeType, ast.Comments(commentsFromCueValue(i.Value()))))
+		structField := ast.NewStructField(name, nodeType, ast.Comments(commentsFromCueValue(i.Value())))
+		structField.Required = !i.IsOptional()
+
+		rootObjectFields = append(rootObjectFields, structField)
 	}
 
 	if len(rootObjectFields) == 0 {
@@ -336,9 +339,9 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	case cue.StructKind:
 		// in cue: {...}, {[string]: type}, or inline struct
 		if op, _ := v.Expr(); op == cue.NoOp {
-			t := v.LookupPath(cue.MakePath(cue.AnyString))
-			if t.Exists() && t.IncompleteKind() != cue.TopKind {
-				typeDef, err := g.declareNode(t)
+			anyString := v.LookupPath(cue.MakePath(cue.AnyString))
+			if anyString.Exists() && !hasStructFields(v) {
+				typeDef, err := g.declareNode(anyString)
 				if err != nil {
 					return ast.Type{}, err
 				}

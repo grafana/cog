@@ -45,7 +45,7 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 
 	object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 	return template.Builder{
-		Package:     b.typeFormatter.packagePrefix(pkg),
+		Package:     b.typeFormatter.formatPackage(pkg),
 		ObjectName:  tools.UpperCamelCase(object.Name),
 		BuilderName: builder.Name,
 		Constructor: builder.Constructor,

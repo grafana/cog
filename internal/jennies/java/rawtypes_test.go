@@ -15,8 +15,10 @@ func TestRawTypes_Generate(t *testing.T) {
 		Name:         "JavaRawTypes",
 	}
 
-	jenny := RawTypes{}
-	compilerPasses := New(Config{}).CompilerPasses()
+	cfg := Config{}
+
+	jenny := RawTypes{config: cfg}
+	compilerPasses := New(cfg).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)

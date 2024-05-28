@@ -11,7 +11,7 @@ func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error 
 		errList = append(errList, err)
 		resource.{{ .Name|upperCamelCase }} = nil
 	} else {
-		resource.{{ .Name|upperCamelCase }} = {{ if ne .Type.Kind "array" }}&{{ end }}{{ .Name }}
+		resource.{{ .Name|upperCamelCase }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
 		return nil
 	}
 {{ end }}

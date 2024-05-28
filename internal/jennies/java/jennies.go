@@ -1,6 +1,9 @@
 package java
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
@@ -11,20 +14,15 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	GeneratePOM   bool   `yaml:"gen_pom"`
-	MavenVersion  string `yaml:"maven_version"`
-	ProjectPath   string
-	PackagePrefix string
+	GeneratePOM  bool   `yaml:"gen_pom"`
+	MavenVersion string `yaml:"maven_version"`
+	ProjectPath  string `yaml:"-"`
+	PackagePath  string `yaml:"package_path"`
 }
 
-func (config Config) mergeWithGlobal(global common.Config) Config {
-	newConfig := config
-	if config.GeneratePOM {
-		newConfig.ProjectPath = "src/main/java/com/grafana/foundation"
-		newConfig.PackagePrefix = "com.grafana.foundation"
-	}
-
-	return newConfig
+func (config *Config) InterpolateParameters(interpolator func(input string) string) {
+	config.PackagePath = interpolator(config.PackagePath)
+	config.ProjectPath = fmt.Sprintf("src/main/java/%s", strings.ReplaceAll(config.PackagePath, ".", "/"))
 }
 
 type Language struct {
@@ -32,21 +30,22 @@ type Language struct {
 }
 
 func New(config Config) *Language {
-	return &Language{
-		config: config,
-	}
+	return &Language{config}
+}
+
+func (language *Language) Name() string {
+	return LanguageRef
 }
 
 func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
-	config := language.config.mergeWithGlobal(globalConfig)
 
 	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		Runtime{config},
-		RawTypes{config: config},
-		common.If[common.Context](config.GeneratePOM, Pom{config}),
+		Runtime{config: language.config},
+		RawTypes{config: language.config},
+		common.If[common.Context](language.config.GeneratePOM, Pom{language.config}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

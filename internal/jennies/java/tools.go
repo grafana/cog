@@ -22,36 +22,10 @@ func formatFieldPath(fieldPath ast.Path) string {
 	return strings.Join(parts, ".")
 }
 
-type CastPath struct {
-	Class string
-	Value string
-	Path  string
-}
-
 func formatScalar(val any) any {
 	newVal := fmt.Sprintf("%#v", val)
 	if len(strings.Split(newVal, ".")) > 1 {
 		return val
 	}
 	return newVal
-}
-
-// formatAssignmentPath generates the pad to assign the value. When the value is a generic one (Object) like Custom or FieldConfig
-// we should return until this pad to set the object to it.
-func formatAssignmentPath(fieldPath ast.Path) string {
-	path := escapeVarName(tools.LowerCamelCase(fieldPath[0].Identifier))
-
-	if len(fieldPath[1:]) == 1 && fieldPath[0].TypeHint != nil && fieldPath[0].TypeHint.Kind == ast.KindRef {
-		return path
-	}
-
-	for _, p := range fieldPath[1:] {
-		path = fmt.Sprintf("%s.%s", path, tools.LowerCamelCase(p.Identifier))
-
-		if p.TypeHint != nil {
-			return path
-		}
-	}
-
-	return path
 }
