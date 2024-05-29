@@ -3,7 +3,7 @@ package generate
 import (
 	"context"
 
-	"github.com/grafana/cog/cmd/cli/codegen"
+	"github.com/grafana/cog/internal/codegen"
 	"github.com/spf13/cobra"
 )
 
