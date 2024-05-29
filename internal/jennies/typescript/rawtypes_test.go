@@ -16,7 +16,7 @@ func TestRawTypes_Generate(t *testing.T) {
 	}
 
 	jenny := RawTypes{}
-	compilerPasses := New().CompilerPasses()
+	compilerPasses := New(Config{}).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test) {
 		req := require.New(tc)

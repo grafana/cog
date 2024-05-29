@@ -10,11 +10,26 @@ import (
 
 const LanguageRef = "typescript"
 
-type Language struct {
+type Config struct {
+	PathPrefix string `yaml:"path_prefix"`
+
+	// SkipRuntime disables runtime-related code generation when enabled.
+	// Note: builders can NOT be generated with this flag turned on, as they
+	// rely on the runtime to function.
+	SkipRuntime bool `yaml:"skip_runtime"`
+
+	// SkipIndex disables the generation of `index.ts` files.
+	SkipIndex bool `yaml:"skip_index"`
 }
 
-func New() *Language {
-	return &Language{}
+type Language struct {
+	config Config
+}
+
+func New(config Config) *Language {
+	return &Language{
+		config: config,
+	}
 }
 
 func (language *Language) Name() string {
@@ -26,12 +41,12 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		Runtime{},
+		common.If[common.Context](!language.config.SkipRuntime, Runtime{}),
 
 		common.If[common.Context](globalConfig.Types, RawTypes{}),
-		common.If[common.Context](globalConfig.Builders, &Builder{}),
+		common.If[common.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
 
-		Index{Targets: globalConfig},
+		common.If[common.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

@@ -1,15 +1,12 @@
 package compiler
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
 )
 
 var _ Pass = (*DisjunctionInferMapping)(nil)
-
-var ErrCanNotInferDiscriminator = errors.New("can not infer discriminator mapping")
 
 // DisjunctionInferMapping infers the discriminator field and mapping used to
 // describe a disjunction of references.
@@ -34,13 +31,15 @@ func (pass *DisjunctionInferMapping) processDisjunction(_ *Visitor, schema *ast.
 
 	def.Disjunction, err = pass.ensureDiscriminator(schema, def)
 	if err != nil {
-		return ast.Type{}, err
+		def.AddToPassesTrail(fmt.Sprintf("DisjunctionInferMapping[no_mapping_found:%s]", err.Error()))
+		return def, nil
 	}
 
 	return def, nil
 }
 
 func (pass *DisjunctionInferMapping) ensureDiscriminator(schema *ast.Schema, def ast.Type) (*ast.DisjunctionType, error) {
+	var ok bool
 	disjunction := def.Disjunction
 
 	// discriminator-related data was set during parsing: nothing to do.
@@ -49,8 +48,10 @@ func (pass *DisjunctionInferMapping) ensureDiscriminator(schema *ast.Schema, def
 	}
 
 	if disjunction.Discriminator == "" {
-		disjunction.Discriminator = pass.inferDiscriminatorField(schema, disjunction)
-		def.AddToPassesTrail("DisjunctionInferMapping[discriminator inferred]")
+		disjunction.Discriminator, ok = pass.inferDiscriminatorField(schema, disjunction)
+		if ok {
+			def.AddToPassesTrail("DisjunctionInferMapping[discriminator inferred]")
+		}
 	}
 
 	if len(disjunction.DiscriminatorMapping) == 0 {
@@ -73,7 +74,7 @@ func (pass *DisjunctionInferMapping) ensureDiscriminator(schema *ast.Schema, def
 //   - have a concrete, scalar value
 //
 // Note: this function assumes a disjunction of references to structs.
-func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema, def *ast.DisjunctionType) string {
+func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema, def *ast.DisjunctionType) (string, bool) {
 	fieldName := ""
 	// map[typeName][fieldName]value
 	candidates := make(map[string]map[string]any)
@@ -132,17 +133,16 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 		}
 	}
 
-	return fieldName
+	return fieldName, fieldName != ""
 }
 
 func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schema, def *ast.DisjunctionType) (map[string]string, error) {
 	mapping := make(map[string]string, len(def.Branches))
 	if def.Discriminator == "" {
-		return nil, fmt.Errorf("discriminator field is empty: %w", ErrCanNotInferDiscriminator)
+		return nil, fmt.Errorf("could not identify discriminator field")
 	}
 
 	for _, branch := range def.Branches {
-		typeName := branch.AsRef().ReferredType
 		referredType, found := schema.Resolve(branch)
 		if !found {
 			return nil, fmt.Errorf("could not resolve reference '%s'", branch.AsRef().String())
@@ -152,13 +152,15 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 
 		field, found := structType.FieldByName(def.Discriminator)
 		if !found {
-			return nil, fmt.Errorf("discriminator field '%s' not found in Object '%s': %w", def.Discriminator, typeName, ErrCanNotInferDiscriminator)
+			return nil, fmt.Errorf("discriminator field '%s' not found", def.Discriminator)
 		}
 
 		// trust, but verify: we need the field to be an actual scalar with a concrete value?
 		if !field.Type.IsScalar() {
-			return nil, fmt.Errorf("discriminator field is not a scalar: %w", ErrCanNotInferDiscriminator)
+			return nil, fmt.Errorf("discriminator field '%s' is not a scalar", field.Name)
 		}
+
+		typeName := branch.AsRef().ReferredType
 
 		switch {
 		case field.Type.AsScalar().IsConcrete():
@@ -166,7 +168,7 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 		case field.Type.Default != nil:
 			mapping[field.Type.Default.(string)] = typeName
 		default:
-			return nil, fmt.Errorf("discriminator field is not concrete: %w", ErrCanNotInferDiscriminator)
+			return nil, fmt.Errorf("discriminator field '%s' is not concrete", field.Name)
 		}
 	}
 

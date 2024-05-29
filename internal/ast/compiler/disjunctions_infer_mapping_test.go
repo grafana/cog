@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/testutils"
-	"github.com/stretchr/testify/require"
 )
 
 func TestDisjunctionInferMapping_WithNonDisjunctionObjects_HasNoImpact(t *testing.T) {
@@ -58,10 +56,8 @@ func TestDisjunctionInferMapping_WithDisjunctionOfScalars_AsAnObject_hasNoImpact
 }
 
 func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata_NoDiscriminatorFieldCandidate(t *testing.T) {
-	req := require.New(t)
-
 	// Prepare test input
-	objects := testutils.ObjectsMap(
+	objects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfRefs", ast.NewDisjunction([]ast.Type{
 			ast.NewRef("test", "SomeStruct"),
 			ast.NewRef("test", "OtherStruct"),
@@ -75,20 +71,20 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
-	)
+	}
 
-	compilerPass := &DisjunctionInferMapping{}
-	_, err := compilerPass.Process([]*ast.Schema{
-		{Package: "test", Objects: objects},
-	})
-	req.Error(err)
-	req.ErrorIs(err, ErrCanNotInferDiscriminator)
-	req.ErrorContains(err, "discriminator field is empty")
+	disjunctionOfRef := objects[0].DeepCopy()
+	disjunctionOfRef.Type.PassesTrail = []string{"DisjunctionInferMapping[no_mapping_found:could not identify discriminator field]"}
+	expected := []ast.Object{
+		disjunctionOfRef,
+		objects[1],
+		objects[2],
+	}
+
+	runPassOnObjects(t, &DisjunctionInferMapping{}, objects, expected)
 }
 
 func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata_NonScalarDiscriminator(t *testing.T) {
-	req := require.New(t)
-
 	// Prepare test input
 	disjunctionType := ast.NewDisjunction([]ast.Type{
 		ast.NewRef("test", "SomeStruct"),
@@ -96,7 +92,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	})
 	disjunctionType.Disjunction.Discriminator = "MapOfString"
 
-	objects := testutils.ObjectsMap(
+	objects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("test", "SomeStruct", ast.NewStruct(
@@ -107,20 +103,20 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 			ast.NewStructField("FieldBar", ast.Bool()),
 			ast.NewStructField("MapOfString", ast.NewMap(ast.String(), ast.String())),
 		)),
-	)
+	}
 
-	compilerPass := &DisjunctionInferMapping{}
-	_, err := compilerPass.Process([]*ast.Schema{
-		{Package: "test", Objects: objects},
-	})
-	req.Error(err)
-	req.ErrorIs(err, ErrCanNotInferDiscriminator)
-	req.ErrorContains(err, "field is not a scalar")
+	disjunctionOfRef := objects[0].DeepCopy()
+	disjunctionOfRef.Type.PassesTrail = []string{"DisjunctionInferMapping[no_mapping_found:discriminator field 'MapOfString' is not a scalar]"}
+	expected := []ast.Object{
+		disjunctionOfRef,
+		objects[1],
+		objects[2],
+	}
+
+	runPassOnObjects(t, &DisjunctionInferMapping{}, objects, expected)
 }
 
 func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata_NonConcreteDiscriminator(t *testing.T) {
-	req := require.New(t)
-
 	// Prepare test input
 	disjunctionType := ast.NewDisjunction([]ast.Type{
 		ast.NewRef("test", "SomeStruct"),
@@ -128,7 +124,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	})
 	disjunctionType.Disjunction.Discriminator = "Type"
 
-	objects := testutils.ObjectsMap(
+	objects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("test", "SomeStruct", ast.NewStruct(
@@ -139,20 +135,20 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
-	)
+	}
 
-	compilerPass := &DisjunctionInferMapping{}
-	_, err := compilerPass.Process([]*ast.Schema{
-		{Package: "test", Objects: objects},
-	})
-	req.Error(err)
-	req.ErrorIs(err, ErrCanNotInferDiscriminator)
-	req.ErrorContains(err, "field is not concrete")
+	disjunctionOfRef := objects[0].DeepCopy()
+	disjunctionOfRef.Type.PassesTrail = []string{"DisjunctionInferMapping[no_mapping_found:discriminator field 'Type' is not concrete]"}
+	expected := []ast.Object{
+		disjunctionOfRef,
+		objects[1],
+		objects[2],
+	}
+
+	runPassOnObjects(t, &DisjunctionInferMapping{}, objects, expected)
 }
 
 func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata_UnknownDiscriminatorField(t *testing.T) {
-	req := require.New(t)
-
 	// Prepare test input
 	disjunctionType := ast.NewDisjunction([]ast.Type{
 		ast.NewRef("test", "SomeStruct"),
@@ -160,7 +156,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	})
 	disjunctionType.Disjunction.Discriminator = "DoesNotExist"
 
-	objects := testutils.ObjectsMap(
+	objects := []ast.Object{
 		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
 
 		ast.NewObject("test", "SomeStruct", ast.NewStruct(
@@ -171,15 +167,17 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 			ast.NewStructField("Type", ast.String(ast.Value("other-struct"))),
 			ast.NewStructField("FieldBar", ast.Bool()),
 		)),
-	)
+	}
 
-	compilerPass := &DisjunctionInferMapping{}
-	_, err := compilerPass.Process([]*ast.Schema{
-		{Package: "test", Objects: objects},
-	})
-	req.Error(err)
-	req.ErrorIs(err, ErrCanNotInferDiscriminator)
-	req.ErrorContains(err, "discriminator field 'DoesNotExist' not found")
+	disjunctionOfRef := objects[0].DeepCopy()
+	disjunctionOfRef.Type.PassesTrail = []string{"DisjunctionInferMapping[no_mapping_found:discriminator field 'DoesNotExist' not found]"}
+	expected := []ast.Object{
+		disjunctionOfRef,
+		objects[1],
+		objects[2],
+	}
+
+	runPassOnObjects(t, &DisjunctionInferMapping{}, objects, expected)
 }
 
 func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminatorMetadata(t *testing.T) {

@@ -18,6 +18,11 @@ type Config struct {
 	MavenVersion string `yaml:"maven_version"`
 	ProjectPath  string `yaml:"-"`
 	PackagePath  string `yaml:"package_path"`
+
+	// SkipRuntime disables runtime-related code generation when enabled.
+	// Note: builders can NOT be generated with this flag turned on, as they
+	// rely on the runtime to function.
+	SkipRuntime bool `yaml:"skip_runtime"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
@@ -42,7 +47,7 @@ func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		Runtime{config: language.config},
+		common.If[common.Context](!language.config.SkipRuntime, Runtime{config: language.config}),
 		RawTypes{config: language.config},
 		common.If[common.Context](language.config.GeneratePOM, Pom{language.config}),
 	)
