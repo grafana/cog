@@ -10,13 +10,14 @@ import (
 )
 
 type Builders struct {
+	config        Config
 	context       common.Context
 	typeFormatter *typeFormatter
 	builders      map[string]map[string]ast.Builder
 	isPanel       map[string]bool
 }
 
-func parseBuilders(context common.Context, formatter *typeFormatter) Builders {
+func parseBuilders(config Config, context common.Context, formatter *typeFormatter) Builders {
 	b := make(map[string]map[string]ast.Builder)
 	panels := make(map[string]bool)
 	for _, builder := range context.Builders {
@@ -28,6 +29,7 @@ func parseBuilders(context common.Context, formatter *typeFormatter) Builders {
 	}
 
 	return Builders{
+		config:        config,
 		context:       context,
 		builders:      b,
 		typeFormatter: formatter,

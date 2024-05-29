@@ -10,12 +10,17 @@ package {{ .Package }};
 // {{ . }}
 {{- end }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
-    {{- template "types" dict "Fields" .Fields }}
+    {{- template "types" dict "Fields" .Fields "ShouldAddAnnotation" .ShouldAddMarshalling }}
 
-    {{- if .HasBuilder }}
-    {{- if not .Extends }}
-    {{ template "builder" .Builder }}
+    {{- if and .ShouldAddMarshalling (not .Extends) }}
+    public String toJSON() throws JsonProcessingException {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        return ow.writeValueAsString(this);
+    }
     {{- end }}
+
+    {{- if and .HasBuilder (not .Extends) }}
+    {{ template "builder" .Builder }}
     {{- end }}
 }
 {{- end }}
@@ -25,6 +30,10 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
+    {{- if $.ShouldAddAnnotation }}
+    @JsonProperty("{{ .Name }}")
+    {{- end }}
     public {{ .Type }} {{ .Name | escapeVar }};
+
     {{- end }}
 {{- end }}

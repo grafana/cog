@@ -28,7 +28,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0)
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
-	jenny.builders = parseBuilders(context, jenny.typeFormatter)
+	jenny.builders = parseBuilders(jenny.config, context, jenny.typeFormatter)
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.genFilesForSchema(schema)
@@ -208,16 +208,18 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	}
 
 	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name)
+	jenny.addJSONImportsIfNeeded(hasBuilder)
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:    jenny.typeFormatter.formatPackage(pkg),
-		Imports:    jenny.imports,
-		Name:       tools.UpperCamelCase(object.Name),
-		Fields:     fields,
-		Comments:   object.Comments,
-		Variant:    jenny.typeFormatter.prefixVariant(object.Type.ImplementedVariant()),
-		Builder:    builder,
-		HasBuilder: hasBuilder,
+		Package:              jenny.typeFormatter.formatPackage(pkg),
+		Imports:              jenny.imports,
+		Name:                 tools.UpperCamelCase(object.Name),
+		Fields:               fields,
+		Comments:             object.Comments,
+		Variant:              jenny.getVariant(object.Type),
+		Builder:              builder,
+		HasBuilder:           hasBuilder,
+		ShouldAddMarshalling: jenny.config.GeneratePOM,
 	}); err != nil {
 		return nil, err
 	}
@@ -258,7 +260,7 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 		Name:     tools.UpperCamelCase(object.Name),
 		Extends:  []string{reference},
 		Comments: object.Comments,
-		Variant:  jenny.typeFormatter.prefixVariant(object.Type.ImplementedVariant()),
+		Variant:  jenny.getVariant(object.Type),
 	}); err != nil {
 		return nil, err
 	}
@@ -289,7 +291,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 		Extends:  extensions,
 		Comments: object.Comments,
 		Fields:   fields,
-		Variant:  jenny.typeFormatter.prefixVariant(object.Type.ImplementedVariant()),
+		Variant:  jenny.getVariant(object.Type),
 	}); err != nil {
 		return nil, err
 	}
@@ -310,23 +312,20 @@ func (jenny RawTypes) formatFields(def ast.StructType) []Field {
 	return fields
 }
 
-// TODO: Need to say to the serializer the correct name.
-func escapeVarName(varName string) string {
-	if isReservedJavaKeyword(varName) {
-		return varName + "Arg"
+func (jenny RawTypes) getVariant(t ast.Type) string {
+	variant := ""
+	if t.ImplementsVariant() {
+		variant = fmt.Sprintf("cog.variants.%s", tools.UpperCamelCase(t.ImplementedVariant()))
+		variant = jenny.typeFormatter.formatPackage(variant)
 	}
-
-	return varName
+	return variant
 }
 
-// nolint: gocyclo
-func isReservedJavaKeyword(input string) bool {
-	// see https://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html
-	switch input {
-	case "static", "abstract", "enum", "class", "if", "else", "switch", "final", "public", "private", "protected", "package", "continue", "new", "for", "assert",
-		"do", "default", "goto", "synchronized", "boolean", "double", "int", "short", "char", "float", "long", "byte", "break", "throw", "throws", "this",
-		"implements", "transient", "return", "catch", "extends", "case", "try", "void", "volatile", "super", "native", "finally", "instanceof", "import", "while":
-		return true
+func (jenny RawTypes) addJSONImportsIfNeeded(hasBuilder bool) {
+	if hasBuilder && jenny.config.GeneratePOM {
+		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "annotation.JsonProperty")
+		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "core.JsonProcessingException")
+		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectMapper")
+		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectWriter")
 	}
-	return false
 }
