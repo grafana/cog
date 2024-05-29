@@ -28,43 +28,43 @@ type ProgressReporter func(msg string)
 
 type PipelineOption func(pipeline *Pipeline)
 
-func PipelineFromFile(file string, opts ...PipelineOption) (Pipeline, error) {
+func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 	var err error
 	if !filepath.IsAbs(file) {
 		file, err = filepath.Abs(file)
 		if err != nil {
-			return Pipeline{}, err
+			return nil, err
 		}
 	}
 
 	currentDir, err := os.Getwd()
 	if err != nil {
-		return Pipeline{}, err
+		return nil, err
 	}
 
 	fileHandle, err := os.Open(file)
 	if err != nil {
-		return Pipeline{}, err
+		return nil, err
 	}
 	defer func() { _ = fileHandle.Close() }()
 
 	decoder := yaml.NewDecoder(fileHandle)
 	decoder.KnownFields(true)
 
-	pipeline := Pipeline{
-		reporter:         func(msg string) {},
-		currentDirectory: currentDir,
-		Parameters: map[string]string{
-			"__config_dir":  filepath.Dir(file),
-			"__current_dir": currentDir,
-		},
+	pipeline, err := NewPipeline()
+	if err != nil {
+		return nil, err
+	}
+	pipeline.Parameters = map[string]string{
+		"__config_dir":  filepath.Dir(file),
+		"__current_dir": currentDir,
 	}
 	if err := decoder.Decode(&pipeline); err != nil {
-		return Pipeline{}, err
+		return nil, err
 	}
 
 	for _, opt := range opts {
-		opt(&pipeline)
+		opt(pipeline)
 	}
 
 	return pipeline, nil
@@ -81,6 +81,22 @@ type Pipeline struct {
 
 	currentDirectory string
 	reporter         ProgressReporter
+}
+
+func NewPipeline() (*Pipeline, error) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Pipeline{
+		reporter:         func(msg string) {},
+		currentDirectory: currentDir,
+		Parameters: map[string]string{
+			"__config_dir":  currentDir,
+			"__current_dir": currentDir,
+		},
+	}, nil
 }
 
 func (pipeline *Pipeline) interpolateParameters() {
