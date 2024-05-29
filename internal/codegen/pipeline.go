@@ -129,8 +129,16 @@ func (pipeline *Pipeline) jenniesConfig() languages.Config {
 	}
 }
 
-func (pipeline *Pipeline) compilerPasses() (compiler.Passes, error) {
-	return cogyaml.NewCompilerLoader().PassesFrom(pipeline.Transforms.CompilerPassesFiles)
+func (pipeline *Pipeline) commonPasses() (compiler.Passes, error) {
+	if pipeline.Transforms.CommonPasses != nil {
+		return pipeline.Transforms.CommonPasses, nil
+	}
+
+	return cogyaml.NewCompilerLoader().PassesFrom(pipeline.Transforms.CommonPassesFiles)
+}
+
+func (pipeline *Pipeline) finalPasses() compiler.Passes {
+	return pipeline.Transforms.FinalPasses
 }
 
 func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
