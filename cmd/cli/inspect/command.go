@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/grafana/cog/cmd/cli/codegen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/spf13/cobra"
