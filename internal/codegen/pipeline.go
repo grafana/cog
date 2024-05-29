@@ -59,7 +59,7 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 		"__config_dir":  filepath.Dir(file),
 		"__current_dir": currentDir,
 	}
-	if err := decoder.Decode(&pipeline); err != nil {
+	if err := decoder.Decode(pipeline); err != nil {
 		return nil, err
 	}
 
