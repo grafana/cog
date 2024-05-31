@@ -39,7 +39,7 @@ func main() {
 					prometheus.NewDataqueryBuilder().
 						// RefId("A"). // needed?
 						Expr("go_memstats_alloc_bytes_total").
-						Instant(true).
+						Instant().
 						LegendFormat("__auto"),
 				)).
 			WithQuery(alerting.NewQueryBuilder("B").
