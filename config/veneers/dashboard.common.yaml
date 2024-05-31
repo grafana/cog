@@ -225,9 +225,4 @@ options:
       by_name: Panel.h
       as: height
 
-  ##############
-  #    Rows    #
-  ##############
-
-  - omit: { by_name: RowPanel.gridPos }
 

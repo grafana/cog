@@ -1,12 +1,13 @@
 {{- define "pre_assignment_Dashboard_withRow" }}
 
 # Position the row on the grid
-row_panel_resource.grid_pos = dashboard.GridPos(
-    x=0,
-    y=self.__current_y + self.__last_panel_height,
-    h=1,
-    w=24,
-)
+if row_panel_resource.grid_pos is None or (row_panel_resource.grid_pos.x == 0 and row_panel_resource.grid_pos.y == 0):
+    row_panel_resource.grid_pos = dashboard.GridPos(
+        x=0,
+        y=self.__current_y + self.__last_panel_height,
+        h=1,
+        w=24,
+    )
 {{- end }}
 
 {{- define "post_assignment_Dashboard_withRow" }}
