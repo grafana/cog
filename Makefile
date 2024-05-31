@@ -22,3 +22,4 @@ deps:
 .PHONY: docs
 docs:
 	go run cmd/compiler-passes-docs/*
+	go run cmd/cog-config-schemas/*
