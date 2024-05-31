@@ -1,0 +1,538 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json",
+  "$ref": "#/$defs/Compiler",
+  "$defs": {
+    "AddFields": {
+      "properties": {
+        "to": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/StructField"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AnonymousStructsToNamed": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ArrayType": {
+      "properties": {
+        "value_type": {
+          "$ref": "#/$defs/Type"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Cloudwatch": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Compiler": {
+      "properties": {
+        "passes": {
+          "items": {
+            "$ref": "#/$defs/CompilerPass"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CompilerPass": {
+      "properties": {
+        "entrypoint_identification": {
+          "$ref": "#/$defs/EntrypointIdentification"
+        },
+        "dataquery_identification": {
+          "$ref": "#/$defs/DataqueryIdentification"
+        },
+        "unspec": {
+          "$ref": "#/$defs/Unspec"
+        },
+        "fields_set_default": {
+          "$ref": "#/$defs/FieldsSetDefault"
+        },
+        "fields_set_required": {
+          "$ref": "#/$defs/FieldsSetRequired"
+        },
+        "fields_set_not_required": {
+          "$ref": "#/$defs/FieldsSetNotRequired"
+        },
+        "omit": {
+          "$ref": "#/$defs/Omit"
+        },
+        "add_fields": {
+          "$ref": "#/$defs/AddFields"
+        },
+        "name_anonymous_struct": {
+          "$ref": "#/$defs/NameAnonymousStruct"
+        },
+        "rename_object": {
+          "$ref": "#/$defs/RenameObject"
+        },
+        "retype_object": {
+          "$ref": "#/$defs/RetypeObject"
+        },
+        "hint_object": {
+          "$ref": "#/$defs/HintObject"
+        },
+        "retype_field": {
+          "$ref": "#/$defs/RetypeField"
+        },
+        "schema_set_identifier": {
+          "$ref": "#/$defs/SchemaSetIdentifier"
+        },
+        "anonymous_structs_to_named": {
+          "$ref": "#/$defs/AnonymousStructsToNamed"
+        },
+        "disjunction_to_type": {
+          "$ref": "#/$defs/DisjunctionToType"
+        },
+        "disjunction_of_anonymous_structs_to_explicit": {
+          "$ref": "#/$defs/DisjunctionOfAnonymousStructsToExplicit"
+        },
+        "disjunction_infer_mapping": {
+          "$ref": "#/$defs/DisjunctionInferMapping"
+        },
+        "disjunction_with_constant_to_default": {
+          "$ref": "#/$defs/DisjunctionWithConstantToDefault"
+        },
+        "dashboard_panels": {
+          "$ref": "#/$defs/DashboardPanels"
+        },
+        "cloudwatch": {
+          "$ref": "#/$defs/Cloudwatch"
+        },
+        "google_cloud_monitoring": {
+          "$ref": "#/$defs/GoogleCloudMonitoring"
+        },
+        "library_panels": {
+          "$ref": "#/$defs/LibraryPanels"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ComposableSlotType": {
+      "properties": {
+        "variant": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DashboardPanels": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DataqueryIdentification": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DisjunctionInferMapping": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DisjunctionOfAnonymousStructsToExplicit": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DisjunctionToType": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DisjunctionType": {
+      "properties": {
+        "branches": {
+          "$ref": "#/$defs/Types"
+        },
+        "discriminator": {
+          "type": "string",
+          "description": "If the branches are references to structs, some languages will need\nextra context to be able to distinguish between them. Golang, for\nexample, doesn't support sum types (disjunctions of fixed types).\nTo emulate sum types for these languages, we need a way to\ndiscriminate against every possible type.\n\nTo do that, we need two things:\n\t- a discriminator: the name of a field that is present in all types.\n\t  The value of which identifies the type being used.\n - a mapping: associating a \"discriminator value\" to a type."
+        },
+        "discriminatormapping": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "DisjunctionWithConstantToDefault": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EntrypointIdentification": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EnumType": {
+      "properties": {
+        "values": {
+          "items": {
+            "$ref": "#/$defs/EnumValue"
+          },
+          "type": "array",
+          "description": "possible values. Value types might be different"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EnumValue": {
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/Type"
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": true
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "FieldsSetDefault": {
+      "properties": {
+        "defaults": {
+          "type": "object",
+          "description": "Expected format: [package].[object].[field] → value"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "FieldsSetNotRequired": {
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object].[field]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "FieldsSetRequired": {
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object].[field]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "GoogleCloudMonitoring": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "HintObject": {
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "hints": {
+          "$ref": "#/$defs/JenniesHints"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "IntersectionType": {
+      "properties": {
+        "branches": {
+          "items": {
+            "$ref": "#/$defs/Type"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "JenniesHints": {
+      "type": "object",
+      "description": "meant to be used by jennies, to gain a finer control on the codegen from schemas"
+    },
+    "LibraryPanels": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "MapType": {
+      "properties": {
+        "indextype": {
+          "$ref": "#/$defs/Type"
+        },
+        "valuetype": {
+          "$ref": "#/$defs/Type"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NameAnonymousStruct": {
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Expected format: [package].[object].[field]"
+        },
+        "as": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Omit": {
+      "properties": {
+        "objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RefType": {
+      "properties": {
+        "referred_pkg": {
+          "type": "string"
+        },
+        "referred_type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RenameObject": {
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RetypeField": {
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Expected format: [package].[object].[field]"
+        },
+        "as": {
+          "$ref": "#/$defs/Type"
+        },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RetypeObject": {
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "as": {
+          "$ref": "#/$defs/Type"
+        },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ScalarType": {
+      "properties": {
+        "scalar_kind": {
+          "type": "string",
+          "description": "bool, bytes, string, int, float, ..."
+        },
+        "value": {
+          "description": "if value isn't nil, we're representing a constant scalar"
+        },
+        "constraints": {
+          "items": {
+            "$ref": "#/$defs/TypeConstraint"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SchemaSetIdentifier": {
+      "properties": {
+        "package": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "StructField": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "$ref": "#/$defs/Type"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "passestrail": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "StructType": {
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/StructField"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Type": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "nullable": {
+          "type": "boolean"
+        },
+        "default": true,
+        "disjunction": {
+          "$ref": "#/$defs/DisjunctionType"
+        },
+        "array": {
+          "$ref": "#/$defs/ArrayType"
+        },
+        "enum": {
+          "$ref": "#/$defs/EnumType"
+        },
+        "map": {
+          "$ref": "#/$defs/MapType"
+        },
+        "struct": {
+          "$ref": "#/$defs/StructType"
+        },
+        "ref": {
+          "$ref": "#/$defs/RefType"
+        },
+        "scalar": {
+          "$ref": "#/$defs/ScalarType"
+        },
+        "intersection": {
+          "$ref": "#/$defs/IntersectionType"
+        },
+        "composable_slot": {
+          "$ref": "#/$defs/ComposableSlotType"
+        },
+        "hints": {
+          "$ref": "#/$defs/JenniesHints"
+        },
+        "passestrail": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Struct representing every type defined by the IR."
+    },
+    "TypeConstraint": {
+      "properties": {
+        "op": {
+          "type": "string"
+        },
+        "args": {
+          "items": true,
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Types": {
+      "items": {
+        "$ref": "#/$defs/Type"
+      },
+      "type": "array"
+    },
+    "Unspec": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json",
+  "$ref": "#/$defs/Pipeline",
+  "$defs": {
+    "Config": {
+      "properties": {
+        "go_mod": {
+          "type": "boolean",
+          "description": "GenerateGoMod indicates whether a go.mod file should be generated.\nIf enabled, PackageRoot is used as module path."
+        },
+        "skip_runtime": {
+          "type": "boolean",
+          "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        },
+        "package_root": {
+          "type": "string",
+          "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CueInput": {
+      "properties": {
+        "allowed_objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowedObjects is a list of object names that will be allowed when\nparsing the input schema.\nNote: if AllowedObjects is empty, no filter is applied."
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "entrypoint": {
+          "type": "string",
+          "description": "Entrypoint refers to a directory containing CUE files."
+        },
+        "forced_envelope": {
+          "type": "string",
+          "description": "ForcedEnvelope decorates the parsed cue Value with an envelope whose\nname is given. This is useful for dataqueries for example, where the\nschema doesn't define any suitable top-level object."
+        },
+        "package": {
+          "type": "string",
+          "description": "Package name to use for the input schema. If empty, it will be guessed\nfrom the entrypoint."
+        },
+        "cue_imports": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "CueImports allows importing additional libraries.\nFormat: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Input": {
+      "properties": {
+        "if": {
+          "type": "string"
+        },
+        "jsonschema": {
+          "$ref": "#/$defs/JSONSchemaInput"
+        },
+        "openapi": {
+          "$ref": "#/$defs/OpenAPIInput"
+        },
+        "kind_registry": {
+          "$ref": "#/$defs/KindRegistryInput"
+        },
+        "kindsys_core": {
+          "$ref": "#/$defs/CueInput"
+        },
+        "kindsys_composable": {
+          "$ref": "#/$defs/CueInput"
+        },
+        "cue": {
+          "$ref": "#/$defs/CueInput"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "JSONSchemaInput": {
+      "properties": {
+        "allowed_objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowedObjects is a list of object names that will be allowed when\nparsing the input schema.\nNote: if AllowedObjects is empty, no filter is applied."
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to a JSONSchema file."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to a JSONSchema file."
+        },
+        "package": {
+          "type": "string",
+          "description": "Package name to use for the input schema. If empty, it will be guessed\nfrom the input file name."
+        },
+        "metadata": {
+          "$ref": "#/$defs/SchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "KindRegistryInput": {
+      "properties": {
+        "allowed_objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowedObjects is a list of object names that will be allowed when\nparsing the input schema.\nNote: if AllowedObjects is empty, no filter is applied."
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "path": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "OpenAPIInput": {
+      "properties": {
+        "allowed_objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowedObjects is a list of object names that will be allowed when\nparsing the input schema.\nNote: if AllowedObjects is empty, no filter is applied."
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to an OpenAPI file."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to an OpenAPI file."
+        },
+        "package": {
+          "type": "string",
+          "description": "Package name to use for the input schema. If empty, it will be guessed\nfrom the input file name."
+        },
+        "no_validate": {
+          "type": "boolean",
+          "description": "NoValidate disables validation of the OpenAPI spec."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Output": {
+      "properties": {
+        "directory": {
+          "type": "string"
+        },
+        "types": {
+          "type": "boolean"
+        },
+        "builders": {
+          "type": "boolean"
+        },
+        "languages": {
+          "items": {
+            "$ref": "#/$defs/OutputLanguage"
+          },
+          "type": "array"
+        },
+        "package_templates": {
+          "type": "string",
+          "description": "PackageTemplates is the path to a directory containing \"package templates\".\nThese templates are used to add arbitrary files to the generated code, with\nthe goal of turning it into a fully-fledged package.\nTemplates in that directory are expected to be organized by language:\n```\npackage_templates\n├── go\n│   ├── LICENSE.md\n│   └── README.md\n└── typescript\n    ├── babel.config.json\n    ├── package.json\n    ├── README.md\n    └── tsconfig.json\n```"
+        },
+        "repository_templates": {
+          "type": "string",
+          "description": "RepositoryTemplates is the path to a directory containing\n\"repository-level templates\".\nThese templates are used to add arbitrary files to the repository, such as CI pipelines.\n\nTemplates in that directory are expected to be organized by language:\n```\nrepository_templates\n├── go\n│   └── .github\n│   \t   └── workflows\n│   \t       └── go-ci.yaml\n└── typescript\n    └── .github\n    \t   └── workflows\n    \t       └── typescript-ci.yaml\n```"
+        },
+        "templates_data": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "TemplatesData holds data that will be injected into package and\nrepository templates when rendering them."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "OutputLanguage": {
+      "properties": {
+        "go": {
+          "$ref": "#/$defs/Config"
+        },
+        "java": {
+          "$ref": "#/$defs/Config"
+        },
+        "jsonschema": {
+          "$ref": "#/$defs/Config"
+        },
+        "openapi": {
+          "$ref": "#/$defs/Config"
+        },
+        "python": {
+          "$ref": "#/$defs/Config"
+        },
+        "typescript": {
+          "$ref": "#/$defs/Config"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Pipeline": {
+      "properties": {
+        "debug": {
+          "type": "boolean"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/Input"
+          },
+          "type": "array"
+        },
+        "transformations": {
+          "$ref": "#/$defs/Transforms"
+        },
+        "output": {
+          "$ref": "#/$defs/Output"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SchemaMeta": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Transforms": {
+      "properties": {
+        "schemas": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "CompilerPassesFiles holds a list of paths to files containing compiler\npasses to apply to all the schemas."
+        },
+        "builders": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "VeneersDirectories holds a list of paths to directories containing\nveneers to apply to all the builders."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}
