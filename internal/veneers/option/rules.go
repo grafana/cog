@@ -1,5 +1,9 @@
 package option
 
+import (
+	"github.com/grafana/cog/internal/veneers"
+)
+
 type RewriteRule struct {
 	Selector Selector
 	Action   RewriteAction
@@ -65,5 +69,12 @@ func Duplicate(selector Selector, duplicateName string) RewriteRule {
 	return RewriteRule{
 		Selector: selector,
 		Action:   DuplicateAction(duplicateName),
+	}
+}
+
+func AddAssignment(selector Selector, assignment veneers.Assignment) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   AddAssignmentAction(assignment),
 	}
 }
