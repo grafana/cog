@@ -28,7 +28,7 @@ func basicLokiQuery(query string) *loki.DataqueryBuilder {
 func tablePrometheusQuery(query string, ref string) *prometheus.DataqueryBuilder {
 	return prometheus.NewDataqueryBuilder().
 		Expr(query).
-		Instant(true).
+		Instant().
 		Format(prometheus.PromQueryFormatTable).
 		RefId(ref)
 }

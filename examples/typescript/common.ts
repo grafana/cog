@@ -29,7 +29,7 @@ export const basicLokiQuery = (query: string): loki.DataqueryBuilder => {
 export const tablePrometheusQuery = (query: string, ref: string): prometheus.DataqueryBuilder => {
     return new prometheus.DataqueryBuilder()
         .expr(query)
-        .instant(true)
+        .instant()
         .format(PromQueryFormat.Table)
         .refId(ref);
 };
