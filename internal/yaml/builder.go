@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/internal/veneers"
 	"github.com/grafana/cog/internal/veneers/builder"
 )
 
@@ -21,6 +22,7 @@ type BuilderRule struct {
 	Duplicate                *Duplicate                `yaml:"duplicate"`
 	Initialize               *Initialize               `yaml:"initialize"`
 	PromoteOptsToConstructor *PromoteOptsToConstructor `yaml:"promote_options_to_constructor"`
+	AddOption                *AddOption                `yaml:"add_option"`
 }
 
 func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -59,6 +61,10 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 	if rule.PromoteOptsToConstructor != nil {
 		return rule.PromoteOptsToConstructor.AsRewriteRule(pkg)
+	}
+
+	if rule.AddOption != nil {
+		return rule.AddOption.AsRewriteRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -182,6 +188,20 @@ func (rule PromoteOptsToConstructor) AsRewriteRule(pkg string) (builder.RewriteR
 	}
 
 	return builder.PromoteOptionsToConstructor(selector, rule.Options), nil
+}
+
+type AddOption struct {
+	BuilderSelector `yaml:",inline"`
+	Option          veneers.Option `yaml:"option"`
+}
+
+func (rule AddOption) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.AddOption(selector, rule.Option), nil
 }
 
 /******************************************************************************
