@@ -1,12 +1,14 @@
 {{- define "pre_assignment_Dashboard_withRow" }}
 
     // Position the row on the grid
-    rowPanelResource.GridPos = &GridPos{
-        X: 0, // beginning of the line
-        Y: builder.currentY + builder.lastPanelHeight,
+    if rowPanelResource.GridPos == nil || (rowPanelResource.GridPos.X == 0 && rowPanelResource.GridPos.Y == 0) {
+        rowPanelResource.GridPos = &GridPos{
+            X: 0, // beginning of the line
+            Y: builder.currentY + builder.lastPanelHeight,
 
-        H: 1,
-        W: 24, // full width
+            H: 1,
+            W: 24, // full width
+        }
     }
 {{- end }}
 
