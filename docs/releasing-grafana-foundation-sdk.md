@@ -1,22 +1,24 @@
 # Releasing `grafana-foundation-sdk`
 
-Releases to [`grafana-foundation-sdk`](https://github.com/grafana/grafana-foundation-sdk/) are handled by the `./scripts/release-version.sh` script.
+Releases to [`grafana-foundation-sdk`](https://github.com/grafana/grafana-foundation-sdk/)
+are handled by the `./scripts/release-all.sh` and `./scripts/release-version.sh`
+scripts.
 
 ## Requirements
 
 * [`go`](https://go.dev/doc/install)
 * [`gh`](https://cli.github.com/) (GitHub CLI), with authentication configured using `gh auth login`
 
-## Usage
-
-Before releasing, ensure that the `main` branch is checked out and up-to-date:
+Before releasing, ensure that cog's `main` branch is checked out and up-to-date:
 
 ```console
 git checkout main
 git pull --ff-only origin main
 ```
 
-Then, start a dry-run release for the desired version of the schemas:
+## Releasing a specific Grafana version
+
+Start a dry-run release for the desired version of the schemas:
 
 ```console
 ./scripts/release-version.sh v10.2.x
@@ -33,6 +35,17 @@ DRY_RUN=no ./scripts/release-version.sh v10.2.x
 
 Disabling dry-run will allow the script to push changes to a *release preview branch* and open a pull-request onto the
 actual *release branch*. To finalise the release, review this PR and merge it.
+
+## Releasing all supported Grafana versions
+
+The `release-all.sh` script is a thin wrapper that calls `release-version.sh`
+in a loop, for a pre-configured list of supported versions.
+
+As such, it's options and behavior are identical to what was described previously.
+
+```console
+DRY_RUN=no ./scripts/release-all.sh
+```
 
 ## Options
 
