@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -11,9 +12,7 @@ import (
 	"testing"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/envvars"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +32,7 @@ func TrimSpacesDiffComparator(t *testing.T, expectedContent []byte, gotContent [
 // A GoldenFilesTestSuite represents a test run that processes inputs from a
 // given directory and compares results against "golden files". See the [Test]
 // documentation for more details.
-type GoldenFilesTestSuite struct {
+type GoldenFilesTestSuite[GoldenFileType any] struct {
 	// Run the test suite on this directory.
 	TestDataRoot string
 
@@ -60,7 +59,7 @@ type GoldenFilesTestSuite struct {
 // If the output differs and $COG_UPDATE_GOLDEN is non-empty, the txtar file will be
 // updated and written to disk with the actual output data replacing the
 // out files.
-type Test struct {
+type Test[GoldenFileType any] struct {
 	// Allow Test to be used as a T.
 	*testing.T
 
@@ -76,54 +75,67 @@ type Test struct {
 }
 
 // WriteFile writes a [codejen.File] to the main output.
-func (t *Test) WriteFile(f *codejen.File) {
+func (t *Test[GoldenFileType]) WriteFile(f *codejen.File) {
 	t.outFiles[f.RelativePath] = f.Data
 }
 
+// WriteJSON marshals and writes the given input to `filename`.
+func (t *Test[GoldenFileType]) WriteJSON(filename string, input any) {
+	t.Helper()
+
+	marshaledIR, err := json.MarshalIndent(input, "", "  ")
+	require.NoError(t, err)
+
+	t.WriteFile(&codejen.File{
+		RelativePath: filename,
+		Data:         marshaledIR,
+	})
+}
+
 // WriteFiles writes a list of [codejen.File] to the main output.
-func (t *Test) WriteFiles(files codejen.Files) {
+func (t *Test[GoldenFileType]) WriteFiles(files codejen.Files) {
 	for i := range files {
 		t.WriteFile(&files[i])
 	}
 }
 
-// TypesIR locates and returns the raw types intermediate representation described
-// within the txtar archive.
-func (t *Test) TypesIR() *ast.Schema {
+// UnmarshalJSONInput reads and unmarshals the specified input file.
+func (t *Test[GoldenFileType]) UnmarshalJSONInput(filename string) GoldenFileType {
 	t.Helper()
 
-	content, err := os.ReadFile(filepath.Join(t.RootDir, "ir.json"))
-	if err != nil {
-		t.Fatalf("could not open types IR file: %s", err)
+	var parsed GoldenFileType
+	if err := json.Unmarshal(t.ReadInput(filename), &parsed); err != nil {
+		t.Fatalf("could not unmarshal input: %s", err)
 	}
 
-	parsedIR := &ast.Schema{}
-	if err := json.Unmarshal(content, parsedIR); err != nil {
-		t.Fatalf("could not load types IR: %s", err)
-	}
-
-	return parsedIR
+	return parsed
 }
 
-// BuildersContext locates and returns the builders intermediate representation described
-// within the txtar archive.
-func (t *Test) BuildersContext() common.Context {
+// OpenInput opens the specified input file and returns an [io.Reader] to it.
+func (t *Test[GoldenFileType]) OpenInput(inputFile string) io.Reader {
 	t.Helper()
 
-	content, err := os.ReadFile(filepath.Join(t.RootDir, "builders_context.json"))
+	reader, err := os.Open(filepath.Join(t.RootDir, inputFile))
 	if err != nil {
-		t.Fatalf("could not open builders context file: %s", err)
+		t.Fatalf("could not open input file '%s': %s", inputFile, err)
 	}
 
-	buildersContext := common.Context{}
-	if err := json.Unmarshal(content, &buildersContext); err != nil {
-		t.Fatal("could not unmarshal test input into context.Context{}", err)
-	}
-
-	return buildersContext
+	return reader
 }
 
-func (t *Test) writeGoldenFiles() error {
+// ReadInput reads the specified input file and its contents.
+func (t *Test[GoldenFileType]) ReadInput(inputFile string) []byte {
+	t.Helper()
+
+	content, err := io.ReadAll(t.OpenInput(inputFile))
+	if err != nil {
+		t.Fatalf("could not read input file '%s': %s", inputFile, err)
+	}
+
+	return content
+}
+
+func (t *Test[GoldenFileType]) writeGoldenFiles() error {
 	for filename, content := range t.outFiles {
 		fullpath := filepath.Join(t.OutputDir, filename)
 
@@ -140,7 +152,7 @@ func (t *Test) writeGoldenFiles() error {
 }
 
 // Run runs tests defined in `x.TestDataRoot`.
-func (x *GoldenFilesTestSuite) Run(t *testing.T, f func(tc *Test)) {
+func (x *GoldenFilesTestSuite[GoldenFileType]) Run(t *testing.T, f func(tc *Test[GoldenFileType])) {
 	t.Helper()
 
 	entries, err := os.ReadDir(x.TestDataRoot)
@@ -158,7 +170,7 @@ func (x *GoldenFilesTestSuite) Run(t *testing.T, f func(tc *Test)) {
 		testName := filepath.Join(x.Name, entry.Name())
 
 		t.Run(testName, func(t *testing.T) {
-			tc := &Test{
+			tc := &Test[GoldenFileType]{
 				T:              t,
 				RootDir:        testRootDir,
 				OutputDir:      outputDir,
@@ -233,16 +245,4 @@ func (x *GoldenFilesTestSuite) Run(t *testing.T, f func(tc *Test)) {
 			}
 		})
 	}
-}
-
-func WriteIR(irFile *ast.Schema, tc *Test) {
-	tc.Helper()
-
-	marshaledIR, err := json.MarshalIndent(irFile, "", "  ")
-	require.NoError(tc, err)
-
-	tc.WriteFile(&codejen.File{
-		RelativePath: "ir.json",
-		Data:         marshaledIR,
-	})
 }

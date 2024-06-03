@@ -11,12 +11,12 @@ import (
 )
 
 func TestGenerateAST(t *testing.T) {
-	test := testutils.GoldenFilesTestSuite{
+	test := testutils.GoldenFilesTestSuite[string]{
 		TestDataRoot: "../../testdata/openapi",
 		Name:         "GenerateAST",
 	}
 
-	test.Run(t, func(tc *testutils.Test) {
+	test.Run(t, func(tc *testutils.Test[string]) {
 		req := require.New(tc)
 		ctx := context.TODO()
 
@@ -24,11 +24,11 @@ func TestGenerateAST(t *testing.T) {
 		req.NoError(err)
 		require.NotNil(t, schemaAst)
 
-		testutils.WriteIR(schemaAst, tc)
+		tc.WriteJSON(testutils.GeneratorOutputFile, schemaAst)
 	})
 }
 
-func getSchemaAsReader(tc *testutils.Test) *openapi3.T {
+func getSchemaAsReader(tc *testutils.Test[string]) *openapi3.T {
 	tc.Helper()
 
 	loader := openapi3.NewLoader()
