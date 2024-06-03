@@ -65,6 +65,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.DisjunctionWithNullToOptional{},
 		&compiler.DisjunctionInferMapping{},
 		&compiler.DisjunctionToType{},
+		&compiler.RemoveIntersections{},
 	}
 }
 
