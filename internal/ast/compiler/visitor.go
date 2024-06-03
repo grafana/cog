@@ -51,10 +51,13 @@ func (visitor *Visitor) VisitSchemas(schemas ast.Schemas) (ast.Schemas, error) {
 }
 
 func (visitor *Visitor) VisitSchema(schema *ast.Schema) (*ast.Schema, error) {
+	newSchema := schema.DeepCopy()
+	newSchema.Objects = orderedmap.New[string, ast.Object]()
+
 	visitor.newObjects = orderedmap.New[string, ast.Object]()
 	defer func() {
 		visitor.newObjects.Iterate(func(_ string, object ast.Object) {
-			schema.AddObject(object)
+			newSchema.AddObject(object)
 		})
 	}()
 
@@ -65,9 +68,9 @@ func (visitor *Visitor) VisitSchema(schema *ast.Schema) (*ast.Schema, error) {
 	var err error
 	var obj ast.Object
 
-	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
+	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		if err != nil {
-			return object
+			return
 		}
 
 		obj, err = visitor.VisitObject(schema, object)
@@ -78,10 +81,10 @@ func (visitor *Visitor) VisitSchema(schema *ast.Schema) (*ast.Schema, error) {
 			)
 		}
 
-		return obj
+		newSchema.AddObject(obj)
 	})
 
-	return schema, err
+	return &newSchema, err
 }
 
 func (visitor *Visitor) VisitObject(schema *ast.Schema, object ast.Object) (ast.Object, error) {
