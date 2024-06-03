@@ -18,7 +18,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 		return nil, err
 	}
 
-	commonCompilerPasses, err := pipeline.compilerPasses()
+	commonPasses, err := pipeline.compilerPasses()
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 			return nil, err
 		}
 
-		jenniesInput, err := jenniesInputForLanguage(target, schemas, commonCompilerPasses, veneers)
+		jenniesInput, err := pipeline.jenniesInputForLanguage(target, schemas, commonPasses, veneers)
 		if err != nil {
 			return nil, err
 		}
@@ -87,27 +87,31 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 	return generatedFS, nil
 }
 
-func jenniesInputForLanguage(language languages.Language, schemas ast.Schemas, commonCompilerPasses compiler.Passes, veneers *rewrite.Rewriter) (common.Context, error) {
+func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, schemas ast.Schemas, commonCompilerPasses compiler.Passes, veneers *rewrite.Rewriter) (common.Context, error) {
+	var err error
+	jenniesInput := common.Context{
+		Schemas: schemas,
+	}
+
 	// apply common and language-specific compiler passes
 	compilerPasses := commonCompilerPasses.Concat(language.CompilerPasses())
-	processedSchemas, err := compilerPasses.Process(schemas)
+	jenniesInput.Schemas, err = compilerPasses.Process(jenniesInput.Schemas)
 	if err != nil {
 		return common.Context{}, err
 	}
 
-	// from these types, create builders
+	if !pipeline.Output.Builders {
+		return jenniesInput, nil
+	}
+
+	// from schemas, derive builders
 	builderGenerator := &ast.BuilderGenerator{}
-	builders := builderGenerator.FromAST(processedSchemas)
+	jenniesInput.Builders = builderGenerator.FromAST(jenniesInput.Schemas)
 
-	// apply the builder veneers
-	builders, err = veneers.ApplyTo(processedSchemas, builders, language.Name())
+	// apply veneers to builders
+	jenniesInput.Builders, err = veneers.ApplyTo(jenniesInput.Schemas, jenniesInput.Builders, language.Name())
 	if err != nil {
 		return common.Context{}, err
-	}
-
-	jenniesInput := common.Context{
-		Schemas:  processedSchemas,
-		Builders: builders,
 	}
 
 	// with the veneers applied, generate "nil-checks" for assignments
