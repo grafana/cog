@@ -1,38 +1,34 @@
 package simplecue
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"testing"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
-	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 	"github.com/yalue/merged_fs"
 )
 
 func TestGenerateAST(t *testing.T) {
-	test := testutils.GoldenFilesTestSuite{
+	test := testutils.GoldenFilesTestSuite[string]{
 		TestDataRoot: "../../testdata/simplecue",
 		Name:         "GenerateAST",
 	}
 
-	test.Run(t, func(tc *testutils.Test) {
+	test.Run(t, func(tc *testutils.Test[string]) {
 		req := require.New(tc)
 
 		schemaAst, err := GenerateAST(txtarTestToCueInstance(tc), Config{Package: "grafanatest"})
 		req.NoError(err)
 		require.NotNil(t, schemaAst)
 
-		writeIR(schemaAst, tc)
+		tc.WriteJSON(testutils.GeneratorOutputFile, schemaAst)
 	})
 }
 
@@ -74,27 +70,10 @@ func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 	return nil
 }
 
-func writeIR(irFile *ast.Schema, tc *testutils.Test) {
+func txtarTestToCueInstance(tc *testutils.Test[string]) cue.Value {
 	tc.Helper()
 
-	marshaledIR, err := json.MarshalIndent(irFile, "", "  ")
-	require.NoError(tc, err)
-
-	tc.WriteFile(&codejen.File{
-		RelativePath: "ir.json",
-		Data:         marshaledIR,
-	})
-}
-
-func txtarTestToCueInstance(tc *testutils.Test) cue.Value {
-	tc.Helper()
-
-	content, err := os.ReadFile(filepath.Join(tc.RootDir, "schema.cue"))
-	if err != nil {
-		tc.Fatalf("could not open schema: %s", err)
-	}
-
-	return bytesToCueValue(tc.T, content)
+	return bytesToCueValue(tc.T, tc.ReadInput("schema.cue"))
 }
 
 func bytesToCueValue(t *testing.T, input []byte) cue.Value {
