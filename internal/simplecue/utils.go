@@ -272,3 +272,31 @@ func hasStructFields(v cue.Value) bool {
 
 	return false
 }
+
+func areCuePathsFromSameRoot(a cue.Path, b cue.Path) bool {
+	selectorsA := a.Selectors()
+	selectorsB := b.Selectors()
+
+	if len(selectorsA) == 0 || len(selectorsB) == 0 {
+		return false
+	}
+
+	return selectorsA[0].String() == selectorsB[0].String()
+}
+
+func cuePathIsChildOf(root cue.Path, maybeChild cue.Path) bool {
+	selectorsRoot := root.Selectors()
+	selectorsChild := maybeChild.Selectors()
+
+	if len(selectorsRoot) > len(selectorsChild) {
+		return false
+	}
+
+	for i, rootSelector := range selectorsRoot {
+		if rootSelector.String() != selectorsChild[i].String() {
+			return false
+		}
+	}
+
+	return true
+}

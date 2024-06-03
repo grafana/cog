@@ -59,6 +59,7 @@ type Config struct {
 type generator struct {
 	schema      *ast.Schema
 	refResolver *referenceResolver
+	rootPath    cue.Path
 }
 
 func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
@@ -67,6 +68,7 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 		refResolver: newReferenceResolver(val, referenceResolverConfig{
 			Libraries: c.Libraries,
 		}),
+		rootPath: val.Path(),
 	}
 
 	if c.ForceNamedEnvelope != "" {
@@ -409,7 +411,37 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 }
 
 func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, error) {
-	_, path := v.ReferencePath()
+	referenceRootValue, path := v.ReferencePath()
+
+	// The reference might point to a value defined "outside" of the original root cue value, but still in the same
+	// schema/cue file.
+	// Ex:
+	// ```cue
+	// #Origin: { creator: string }
+	// spec: { // ← in this hypothetical scenario, the generator receives a cue value pointing here
+	//   title: string
+	//   origin: #Origin // `#Origin` refers to a value outside our original root
+	// }
+	// ```
+	if areCuePathsFromSameRoot(g.rootPath, path) && !cuePathIsChildOf(g.rootPath, path) {
+		selectors := path.Selectors()
+		refType := selectorLabel(selectors[len(selectors)-1])
+		if !g.schema.Objects.Has(refType) {
+			obj, err := g.declareObject(refType, referenceRootValue.LookupPath(path))
+			if err != nil {
+				return ast.Type{}, err
+			}
+
+			g.schema.AddObject(obj)
+		}
+
+		defValue, err := g.extractDefault(defV)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewRef(g.schema.Package, refType, ast.Default(defValue)), nil
+	}
 
 	if path.String() != "" {
 		selectors := path.Selectors()
