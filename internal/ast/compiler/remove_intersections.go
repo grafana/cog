@@ -47,7 +47,7 @@ func (r RemoveIntersections) processSchema(v *Visitor, schema *ast.Schema) (*ast
 		return nil, foundErr
 	}
 
-	for toRemove, _ := range r.listToRemove {
+	for toRemove := range r.listToRemove {
 		schema.Objects.Remove(toRemove)
 	}
 
