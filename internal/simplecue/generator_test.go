@@ -10,6 +10,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 	"github.com/yalue/merged_fs"
@@ -30,6 +31,38 @@ func TestGenerateAST(t *testing.T) {
 
 		tc.WriteJSON(testutils.GeneratorOutputFile, schemaAst)
 	})
+}
+
+func TestGenerateAST_withOutOfRootReference(t *testing.T) {
+	req := require.New(t)
+	schema := `
+schema: {
+  #Origin: { creator: string }
+  spec: {
+    title: string
+    origin: #Origin
+  }
+}
+`
+
+	cueVal := cuecontext.New().CompileString(schema)
+	specCueVal := cueVal.LookupPath(cue.ParsePath("schema.spec"))
+
+	schemaAst, err := GenerateAST(specCueVal, Config{Package: "grafanatest", ForceNamedEnvelope: "spec"})
+	req.NoError(err)
+	require.NotNil(t, schemaAst)
+
+	objects := []ast.Object{
+		ast.NewObject("grafanatest", "Origin", ast.NewStruct(
+			ast.NewStructField("creator", ast.String(), ast.Required()),
+		)),
+		ast.NewObject("grafanatest", "spec", ast.NewStruct(
+			ast.NewStructField("title", ast.String(), ast.Required()),
+			ast.NewStructField("origin", ast.NewRef("grafanatest", "Origin"), ast.Required()),
+		)),
+	}
+
+	req.Equal(testutils.ObjectsMap(objects...), schemaAst.Objects)
 }
 
 // ToOverlay converts a fs.FS into a CUE loader overlay.

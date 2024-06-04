@@ -216,6 +216,10 @@ func commentsFromCueValue(v cue.Value) []string {
 		}
 	}
 
+	if len(docs) == 0 {
+		return nil
+	}
+
 	ret := make([]string, 0, len(docs))
 	for _, cg := range docs {
 		ret = append(ret, strings.Split(strings.Trim(cg.Text(), "\n "), "\n")...)
