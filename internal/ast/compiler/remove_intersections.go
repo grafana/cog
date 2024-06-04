@@ -61,14 +61,17 @@ func (r RemoveIntersections) processObject(_ *Visitor, schema *ast.Schema, objec
 		return object, nil
 	}
 
-	newObject := object
-	newObject.Type = ast.NewStruct(locatedObject.Type.AsStruct().Fields...)
-	if object.Type.ImplementsVariant() {
-		newObject.Type.Hints[ast.HintImplementsVariant] = object.Type.ImplementedVariant()
-	}
+	if locatedObject.Type.IsStruct() {
+		newObject := object
+		newObject.Type = ast.NewStruct(locatedObject.Type.AsStruct().Fields...)
+		if object.Type.ImplementsVariant() {
+			newObject.Type.Hints[ast.HintImplementsVariant] = object.Type.ImplementedVariant()
+		}
 
-	r.listToRemove[locatedObject.Name] = object
-	return newObject, nil
+		r.listToRemove[locatedObject.Name] = object
+		return newObject, nil
+	}
+	return object, nil
 }
 
 func (r RemoveIntersections) processStruct(_ *Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
