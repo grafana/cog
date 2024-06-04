@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/internal/veneers"
 )
 
 type RewriteAction func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option
@@ -552,5 +553,22 @@ func DuplicateAction(duplicateName string) RewriteAction {
 		duplicateOpt.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s]", option.Name))
 
 		return []ast.Option{option, duplicateOpt}
+	}
+}
+
+// AddAssignmentAction adds an assignment to an existing option.
+func AddAssignmentAction(assignment veneers.Assignment) RewriteAction {
+	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+		irAssignment, err := assignment.AsIR(ast.Builders{builder}, builder)
+		if err != nil {
+			// TODO: let veneers return errors
+			option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[err=%s]", err.Error()))
+			return []ast.Option{option}
+		}
+
+		option.Assignments = append(option.Assignments, irAssignment)
+		option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[%s]", irAssignment.Path.String()))
+
+		return []ast.Option{option}
 	}
 }

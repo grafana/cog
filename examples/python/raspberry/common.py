@@ -61,7 +61,7 @@ def table_prometheus_query(query: str, ref_id: str) -> PrometheusQueryBuilder:
     return (
         PrometheusQueryBuilder()
         .expr(query)
-        .instant(True)
+        .instant()
         .format_val(PromQueryFormat.TABLE)
         .ref_id(ref_id)
     )

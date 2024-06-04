@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/internal/veneers"
 )
 
 type RewriteRule func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error)
@@ -348,6 +349,27 @@ func PromoteOptionsToConstructor(selector Selector, optionNames []string) Rewrit
 
 				builders[i].AddToVeneerTrail(fmt.Sprintf("PromoteOptionsToConstructor[%s]", optName))
 			}
+		}
+
+		return builders, nil
+	}
+}
+
+// AddOption adds a completely new option to the selected builders.
+func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
+		for i, builder := range builders {
+			if !selector(schemas, builder) {
+				continue
+			}
+
+			newOpt, err := newOption.AsIR(builders, builder)
+			if err != nil {
+				return nil, err
+			}
+
+			builders[i].Options = append(builders[i].Options, newOpt)
+			builders[i].AddToVeneerTrail("AddOption")
 		}
 
 		return builders, nil

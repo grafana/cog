@@ -177,6 +177,18 @@ passes:
       defaults:
         timeseries.Options.legend: { placement: "bottom", displayMode: "list", calcs: [] }
 
+  ############
+  # snapshot #
+  ############
+
+  - add_fields:
+      to: dashboard.Snapshot
+      fields:
+        - name: dashboard
+          type:
+            kind: ref
+            ref: { referred_pkg: dashboard, referred_type: Dashboard }
+
   ##########
   # Others #
   ##########

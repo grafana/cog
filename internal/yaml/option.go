@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/grafana/cog/internal/veneers"
 	"github.com/grafana/cog/internal/veneers/option"
 )
 
@@ -20,6 +21,7 @@ type OptionRule struct {
 	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append"`
 	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
 	Duplicate               *DuplicateOption         `yaml:"duplicate"`
+	AddAssignment           *AddAssignment           `yaml:"add_assignment"`
 }
 
 func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -58,6 +60,10 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 
 	if rule.Duplicate != nil {
 		return rule.Duplicate.AsRewriteRule(pkg)
+	}
+
+	if rule.AddAssignment != nil {
+		return rule.AddAssignment.AsRewriteRule(pkg)
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
@@ -163,6 +169,20 @@ func (rule DuplicateOption) AsRewriteRule(pkg string) (option.RewriteRule, error
 	}
 
 	return option.Duplicate(selector, rule.As), nil
+}
+
+type AddAssignment struct {
+	OptionSelector `yaml:",inline"`
+	Assignment     veneers.Assignment `yaml:"assignment"`
+}
+
+func (rule AddAssignment) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.AddAssignment(selector, rule.Assignment), nil
 }
 
 /******************************************************************************
