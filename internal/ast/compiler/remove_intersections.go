@@ -5,47 +5,60 @@ import (
 )
 
 type RemoveIntersections struct {
+	listToRemove map[string]ast.Object
 }
 
 func (r RemoveIntersections) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	newSchemas := make([]*ast.Schema, 0)
-	for _, schema := range schemas {
-		if sch, ok := r.processSchema(schema); ok {
-			newSchemas = append(newSchemas, sch)
-		}
+	r.listToRemove = make(map[string]ast.Object)
+	visitor := Visitor{
+		OnSchema: r.processSchema,
+		OnObject: r.processObject,
+		OnStruct: r.processStruct,
 	}
 
-	return newSchemas, nil
+	return visitor.VisitSchemas(schemas)
 }
 
-func (r RemoveIntersections) processSchema(schema *ast.Schema) (*ast.Schema, bool) {
-	listToRemove := make(map[string]ast.Object)
+func (r RemoveIntersections) processSchema(v *Visitor, schema *ast.Schema) (*ast.Schema, error) {
+	var foundErr error
 	schema.Objects.Iterate(func(key string, value ast.Object) {
 		if value.Type.IsRef() {
-			obj, toRemove := r.processObject(schema, value)
+			obj, err := v.VisitObject(schema, value)
+			if err != nil {
+				foundErr = err
+			}
 			schema.Objects.Set(key, obj)
-			listToRemove[toRemove] = obj
 		}
 	})
+
+	if foundErr != nil {
+		return nil, foundErr
+	}
 
 	schema.Objects.Iterate(func(key string, value ast.Object) {
 		if value.Type.IsStruct() {
-			schema.Objects.Set(key, r.processStruct(value, listToRemove))
+			if _, err := v.VisitStruct(schema, value.Type); err != nil {
+				foundErr = err
+			}
 		}
 	})
 
-	for toRemove, _ := range listToRemove {
+	if foundErr != nil {
+		return nil, foundErr
+	}
+
+	for toRemove, _ := range r.listToRemove {
 		schema.Objects.Remove(toRemove)
 	}
 
-	return schema, true
+	return schema, nil
 }
 
-func (r RemoveIntersections) processObject(schema *ast.Schema, object ast.Object) (ast.Object, string) {
+func (r RemoveIntersections) processObject(_ *Visitor, schema *ast.Schema, object ast.Object) (ast.Object, error) {
 	ref := object.Type.AsRef()
 	locatedObject, ok := schema.LocateObject(ref.ReferredType)
 	if !ok {
-		return object, ""
+		return object, nil
 	}
 
 	newObject := object
@@ -54,19 +67,20 @@ func (r RemoveIntersections) processObject(schema *ast.Schema, object ast.Object
 		newObject.Type.Hints[ast.HintImplementsVariant] = object.Type.ImplementedVariant()
 	}
 
-	return newObject, locatedObject.Name
+	r.listToRemove[locatedObject.Name] = object
+	return newObject, nil
 }
 
-func (r RemoveIntersections) processStruct(object ast.Object, listToRemove map[string]ast.Object) ast.Object {
-	str := object.Type.AsStruct()
+func (r RemoveIntersections) processStruct(_ *Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
+	str := def.AsStruct()
 	for i, field := range str.Fields {
 		// TODO: Add Map/List checks if necessary
 		if field.Type.IsRef() {
-			if obj, ok := listToRemove[field.Type.AsRef().ReferredType]; ok {
-				object.Type.AsStruct().Fields[i] = ast.NewStructField(obj.Name, ast.NewRef(obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType), ast.Comments(obj.Comments))
+			if obj, ok := r.listToRemove[field.Type.AsRef().ReferredType]; ok {
+				def.AsStruct().Fields[i] = ast.NewStructField(obj.Name, ast.NewRef(obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType), ast.Comments(obj.Comments))
 			}
 		}
 	}
 
-	return object
+	return def, nil
 }
