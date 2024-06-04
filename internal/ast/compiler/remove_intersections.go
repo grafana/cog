@@ -21,7 +21,7 @@ func (r RemoveIntersections) Process(schemas []*ast.Schema) ([]*ast.Schema, erro
 func (r RemoveIntersections) processSchema(schema *ast.Schema) (*ast.Schema, bool) {
 	listToRemove := make(map[string]ast.Object)
 	schema.Objects.Iterate(func(key string, value ast.Object) {
-		if value.Type.Kind == ast.KindRef {
+		if value.Type.IsRef() {
 			obj, toRemove := r.processObject(schema, value)
 			schema.Objects.Set(key, obj)
 			listToRemove[toRemove] = obj
@@ -29,12 +29,11 @@ func (r RemoveIntersections) processSchema(schema *ast.Schema) (*ast.Schema, boo
 	})
 
 	schema.Objects.Iterate(func(key string, value ast.Object) {
-		if value.Type.Kind == ast.KindStruct {
+		if value.Type.IsStruct() {
 			schema.Objects.Set(key, r.processStruct(value, listToRemove))
 		}
 	})
 
-	// fmt.Println(listToRemove)
 	for toRemove, _ := range listToRemove {
 		schema.Objects.Remove(toRemove)
 	}
@@ -51,7 +50,9 @@ func (r RemoveIntersections) processObject(schema *ast.Schema, object ast.Object
 
 	newObject := object
 	newObject.Type = ast.NewStruct(locatedObject.Type.AsStruct().Fields...)
-	newObject.Type.Hints[ast.HintImplementsVariant] = object.Type.ImplementedVariant()
+	if object.Type.ImplementsVariant() {
+		newObject.Type.Hints[ast.HintImplementsVariant] = object.Type.ImplementedVariant()
+	}
 
 	return newObject, locatedObject.Name
 }
@@ -59,10 +60,11 @@ func (r RemoveIntersections) processObject(schema *ast.Schema, object ast.Object
 func (r RemoveIntersections) processStruct(object ast.Object, listToRemove map[string]ast.Object) ast.Object {
 	str := object.Type.AsStruct()
 	for i, field := range str.Fields {
-		// fmt.Println(field.Name)
-		if obj, ok := listToRemove[field.Name]; ok {
-			object.Type.AsStruct().Fields[i].Name = obj.Name
-			object.Type.AsStruct().Fields[i].Type = obj.Type
+		// TODO: Add Map/List checks if necessary
+		if field.Type.IsRef() {
+			if obj, ok := listToRemove[field.Type.AsRef().ReferredType]; ok {
+				object.Type.AsStruct().Fields[i] = ast.NewStructField(obj.Name, ast.NewRef(obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType), ast.Comments(obj.Comments))
+			}
 		}
 	}
 
