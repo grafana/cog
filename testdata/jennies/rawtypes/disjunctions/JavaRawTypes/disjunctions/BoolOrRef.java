@@ -1,5 +1,7 @@
 package disjunctions;
 
 
-public class BoolOrRef extends BoolOrSomeStruct {
+public class BoolOrRef {
+    public Boolean bool;
+    public SomeStruct someStruct;
 }
