@@ -69,8 +69,8 @@ passes:
         kind: enum
         enum:
           values:
-            - { type: { kind: scalar, scalar: { scalar_kind: string } }, value: '=' }
-            - { type: { kind: scalar, scalar: { scalar_kind: string } }, value: '!=' }
-            - { type: { kind: scalar, scalar: { scalar_kind: string } }, value: '=~' }
-            - { type: { kind: scalar, scalar: { scalar_kind: string } }, value: '!~' }
+            - { type: { kind: scalar, scalar: { scalar_kind: string } }, name: 'equal', value: '=' }
+            - { type: { kind: scalar, scalar: { scalar_kind: string } }, name: 'not-equal', value: '!=' }
+            - { type: { kind: scalar, scalar: { scalar_kind: string } }, name: 'equal-regex', value: '=~' }
+            - { type: { kind: scalar, scalar: { scalar_kind: string } }, name: 'not-equal-regex', value: '!~' }
 
