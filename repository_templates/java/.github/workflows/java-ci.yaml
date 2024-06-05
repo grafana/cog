@@ -26,4 +26,5 @@ jobs:
         env:
           CHECK_GENERATED_FILES: true
         with:
-          arguments: test jar
+          gradle-version: current
+        run: gradle build --dry-run 

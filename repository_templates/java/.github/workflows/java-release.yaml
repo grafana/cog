@@ -37,6 +37,7 @@ jobs:
       - name: Publish package 📦
         uses: gradle/actions/setup-gradle@v3
         with:
+          gradle-version: current
           arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
