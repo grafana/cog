@@ -1,4 +1,4 @@
-# Grafana Foundation SDK – Python
+# Grafana Foundation SDK – Java
 
 A set of tools, types and *builder libraries* for building and manipulating Grafana objects in Java.
 
