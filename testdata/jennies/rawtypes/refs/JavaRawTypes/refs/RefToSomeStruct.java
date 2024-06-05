@@ -1,5 +1,6 @@
 package refs;
 
 
-public class RefToSomeStruct extends SomeStruct {
+public class RefToSomeStruct {
+    public Object fieldAny;
 }
