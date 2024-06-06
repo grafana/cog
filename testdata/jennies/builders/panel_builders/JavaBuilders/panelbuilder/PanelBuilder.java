@@ -8,6 +8,15 @@ public class PanelBuilder {
 
     public PanelBuilder() {
         this.internal = new Panel();
+        this.setOnlyFromThisDashboard(false);
+        this.setOnlyInTimeRange(false);
+        this.setLimit(10);
+        this.setShowUser(true);
+        this.setShowTime(true);
+        this.setShowTags(true);
+        this.setNavigateToPanel(true);
+        this.setNavigateBefore("10m");
+        this.setNavigateAfter("10m");
     }
     public PanelBuilder setOnlyFromThisDashboard(Boolean onlyFromThisDashboard) {
     this.internal.onlyFromThisDashboard = onlyFromThisDashboard;

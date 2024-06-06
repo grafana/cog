@@ -15,6 +15,10 @@ public class PanelBuilder {
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
+        
+        {{- range .Defaults }}
+        this.set{{ .OptionName }}({{ .Args|join ", " }});
+        {{- end }}
     }
     
     {{- range .Options }}
