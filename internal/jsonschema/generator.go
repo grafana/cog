@@ -450,12 +450,10 @@ func (g *generator) walkObject(schema *schemaparser.Schema) (ast.Type, error) {
 			return ast.Type{}, fmt.Errorf("%s: %w", name, err)
 		}
 
-		fields = append(fields, ast.StructField{
-			Name:     name,
-			Comments: schemaComments(property),
-			Required: tools.ItemInList(name, schema.Required),
-			Type:     fieldDef,
-		})
+		field := ast.NewStructField(name, fieldDef, ast.Comments(schemaComments(property)))
+		field.Required = tools.ItemInList(name, schema.Required)
+
+		fields = append(fields, field)
 	}
 
 	// To ensure consistent outputs
