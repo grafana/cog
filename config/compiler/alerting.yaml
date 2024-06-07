@@ -76,3 +76,6 @@ passes:
             - { type: { kind: scalar, scalar: { scalar_kind: string } }, name: 'equal-regex', value: '=~' }
             - { type: { kind: scalar, scalar: { scalar_kind: string } }, name: 'not-equal-regex', value: '!~' }
 
+  - rename_object:
+      from: alerting.Record
+      to: RecordRule
