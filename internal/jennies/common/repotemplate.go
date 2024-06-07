@@ -13,6 +13,10 @@ import (
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
+type BuildOptions struct {
+	Languages []string
+}
+
 type RepositoryTemplate struct {
 	TemplateDir string
 	ExtraData   map[string]string

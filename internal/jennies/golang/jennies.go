@@ -35,7 +35,7 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 	config.PackageRoot = interpolator(config.PackageRoot)
 }
 
-func (config Config) MergeWithGlobal(global common.Config) Config {
+func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug
 	newConfig.generateBuilders = global.Builders
@@ -62,21 +62,21 @@ func (language *Language) Name() string {
 	return LanguageRef
 }
 
-func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
+func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
-	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
+	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[common.Context](!config.SkipRuntime, Runtime{Config: config}),
-		common.If[common.Context](!config.SkipRuntime, VariantsPlugins{Config: config}),
+		common.If[languages.Context](!config.SkipRuntime, Runtime{Config: config}),
+		common.If[languages.Context](!config.SkipRuntime, VariantsPlugins{Config: config}),
 
-		common.If[common.Context](config.GenerateGoMod, GoMod{Config: config}),
+		common.If[languages.Context](config.GenerateGoMod, GoMod{Config: config}),
 
-		common.If[common.Context](globalConfig.Types, RawTypes{Config: config}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config}),
 
-		common.If[common.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config}),
+		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config}),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 

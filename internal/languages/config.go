@@ -1,4 +1,4 @@
-package common
+package languages
 
 // Config represents global configuration options, to be used by all jennies.
 type Config struct {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -78,13 +79,13 @@ func repositoryTemplatesJenny(pipeline *Pipeline) (*codejen.JennyList[common.Bui
 	return repoTemplatesJenny, nil
 }
 
-func packageTemplatesJenny(pipeline *Pipeline, language string) (*codejen.JennyList[common.Context], error) {
+func packageTemplatesJenny(pipeline *Pipeline, language string) (*codejen.JennyList[languages.Context], error) {
 	outputDir, err := pipeline.languageOutputDir(pipeline.currentDirectory, language)
 	if err != nil {
 		return nil, err
 	}
 
-	pkgTemplatesJenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
+	pkgTemplatesJenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return "PackageTemplates" + tools.UpperCamelCase(language)
 	})
 	pkgTemplatesJenny.AppendOneToMany(&common.PackageTemplate{

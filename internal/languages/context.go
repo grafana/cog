@@ -1,4 +1,4 @@
-package common
+package languages
 
 import (
 	"github.com/grafana/cog/internal/ast"
@@ -89,8 +89,4 @@ func (context *Context) ResolveToStruct(def ast.Type) bool {
 	}
 
 	return context.ResolveToStruct(referredObj.Type)
-}
-
-type BuildOptions struct {
-	Languages []string
 }

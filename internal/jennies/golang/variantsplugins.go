@@ -5,7 +5,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type VariantsPlugins struct {
@@ -16,7 +16,7 @@ func (jenny VariantsPlugins) JennyName() string {
 	return "GoVariantsPlugins"
 }
 
-func (jenny VariantsPlugins) Generate(context common.Context) (codejen.Files, error) {
+func (jenny VariantsPlugins) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	registries, err := jenny.variantPlugins(context)
@@ -39,7 +39,7 @@ func (jenny VariantsPlugins) variantModels() (string, error) {
 	return renderTemplate("runtime/variant_models.tmpl", map[string]any{})
 }
 
-func (jenny VariantsPlugins) variantPlugins(context common.Context) (string, error) {
+func (jenny VariantsPlugins) variantPlugins(context languages.Context) (string, error) {
 	imports := NewImportMap()
 	var panelSchemas []*ast.Schema
 	var dataquerySchemas []*ast.Schema
