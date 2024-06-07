@@ -7,7 +7,6 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/codegen"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/spf13/cobra"
 )
@@ -66,7 +65,7 @@ func inspectBuilderIR(schemas []*ast.Schema) error {
 	var err error
 	generator := &ast.BuilderGenerator{}
 
-	codegenCtx := common.Context{
+	codegenCtx := languages.Context{
 		Schemas:  schemas,
 		Builders: generator.FromAST(schemas),
 	}

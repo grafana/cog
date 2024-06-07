@@ -37,17 +37,17 @@ func (language *Language) Name() string {
 	return LanguageRef
 }
 
-func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
-	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
+func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
+	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[common.Context](!language.config.SkipRuntime, Runtime{}),
+		common.If[languages.Context](!language.config.SkipRuntime, Runtime{}),
 
-		common.If[common.Context](globalConfig.Types, RawTypes{}),
-		common.If[common.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{}),
+		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
 
-		common.If[common.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
+		common.If[languages.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

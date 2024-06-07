@@ -9,7 +9,6 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
@@ -121,8 +120,8 @@ func (pipeline *Pipeline) interpolate(input string) string {
 	return interpolated
 }
 
-func (pipeline *Pipeline) jenniesConfig() common.Config {
-	return common.Config{
+func (pipeline *Pipeline) jenniesConfig() languages.Config {
+	return languages.Config{
 		Debug:    pipeline.Debug,
 		Types:    pipeline.Output.Types,
 		Builders: pipeline.Output.Builders,

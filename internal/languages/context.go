@@ -1,4 +1,4 @@
-package common
+package languages
 
 import (
 	"github.com/grafana/cog/internal/ast"

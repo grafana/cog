@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
@@ -31,7 +30,7 @@ func (jenny JSONMarshalling) generateForSchema(buffer *strings.Builder, schema *
 	return nil
 }
 
-func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context common.Context, schema *ast.Schema, object ast.Object) error {
+func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object) error {
 	if jenny.objectNeedsCustomMarshal(object) {
 		jsonMarshal, err := jenny.renderCustomMarshal(object)
 		if err != nil {
@@ -89,7 +88,7 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	return "", fmt.Errorf("could not determine how to render custom marshal")
 }
 
-func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context common.Context, obj ast.Object) bool {
+func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Context, obj ast.Object) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
 	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot
@@ -113,7 +112,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context common.Context, 
 	return false
 }
 
-func (jenny JSONMarshalling) renderCustomUnmarshal(context common.Context, obj ast.Object) (string, error) {
+func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
 		return jenny.renderTemplate("types/disjunction_of_scalars.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
@@ -130,7 +129,7 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context common.Context, obj a
 	return jenny.renderCustomComposableSlotUnmarshal(context, obj)
 }
 
-func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context common.Context, obj ast.Object) (string, error) {
+func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languages.Context, obj ast.Object) (string, error) {
 	var buffer strings.Builder
 	fields := obj.Type.AsStruct().Fields
 

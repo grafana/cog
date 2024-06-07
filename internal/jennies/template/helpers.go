@@ -7,7 +7,6 @@ import (
 	"strings"
 	gotemplate "text/template"
 
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )

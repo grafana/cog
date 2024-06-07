@@ -3,11 +3,10 @@ package languages
 import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/tools"
 )
 
-func FormatIdentifiers(formatterProvider IdentifiersFormatterProvider, context common.Context) (common.Context, error) {
+func FormatIdentifiers(formatterProvider IdentifiersFormatterProvider, context Context) (Context, error) {
 	var err error
 
 	formatter := formatterProvider.IdentifiersFormatter()
@@ -348,8 +347,28 @@ func (rewriter *IdentifierFormatterBuilderRewriter) rewriteAssignment(visitor *a
 
 		return constraint
 	})
+	if err != nil {
+		return assignment, err
+	}
 
-	return assignment, err
+	assignment.NilChecks = tools.Map(assignment.NilChecks, func(check ast.AssignmentNilCheck) ast.AssignmentNilCheck {
+		if err != nil {
+			return check
+		}
+
+		path, err = rewriter.rewritePath(check.Path)
+		if err != nil {
+			return check
+		}
+		check.Path = path
+
+		return check
+	})
+	if err != nil {
+		return assignment, err
+	}
+
+	return assignment, nil
 }
 
 func (rewriter *IdentifierFormatterBuilderRewriter) rewriteAssignmentValue(visitor *ast.BuilderVisitor, builder ast.Builder, schemas ast.Schemas, value ast.AssignmentValue) (ast.AssignmentValue, error) {

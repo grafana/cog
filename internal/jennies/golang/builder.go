@@ -7,8 +7,8 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -24,7 +24,7 @@ func (jenny *Builder) JennyName() string {
 	return "GoBuilder"
 }
 
-func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
+func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error) {
 	files := codejen.Files{}
 
 	for _, builder := range context.Builders {
@@ -44,7 +44,7 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
 	imports := NewImportMap()
@@ -112,7 +112,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	return []byte(buffer.String()), nil
 }
 
-func (jenny *Builder) genDefaultOptionsCalls(context common.Context, builder ast.Builder) []template.OptionCall {
+func (jenny *Builder) genDefaultOptionsCalls(context languages.Context, builder ast.Builder) []template.OptionCall {
 	calls := make([]template.OptionCall, 0)
 	for _, opt := range builder.Options {
 		if opt.Default == nil {
@@ -150,7 +150,7 @@ func hasTypedDefaults(opt ast.Option) bool {
 	return false
 }
 
-func (jenny *Builder) formatDefaultTypedArgs(context common.Context, opt ast.Option) []string {
+func (jenny *Builder) formatDefaultTypedArgs(context languages.Context, opt ast.Option) []string {
 	args := make([]string, 0)
 	for i, arg := range opt.Default.ArgsValues {
 		val, _ := arg.(map[string]interface{})

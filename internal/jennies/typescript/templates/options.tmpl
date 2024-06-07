@@ -5,7 +5,7 @@
     {{- range .Comments}}
     // {{ . }}
     {{- end }}
-    {{ .Name|formatIdentifier }}({{ template "args" .Args }}): this {
+    {{ .Name }}({{ template "args" .Args }}): this {
 {{- range .Assignments }}
 {{- template "assignment" (dict "Assignment" . "Builder" $builder "Option" $option) }}
 {{- end }}

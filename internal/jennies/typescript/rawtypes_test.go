@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
@@ -30,7 +29,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		req.NoError(err)
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
 
-		context := common.Context{Schemas: processedAsts}
+		context := languages.Context{Schemas: processedAsts}
 		context, err = languages.FormatIdentifiers(language, context)
 		req.NoError(err)
 

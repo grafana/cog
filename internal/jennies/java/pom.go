@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type Pom struct {
@@ -15,7 +15,7 @@ func (jenny Pom) JennyName() string {
 	return "Pom"
 }
 
-func (jenny Pom) Generate(_ common.Context) (codejen.Files, error) {
+func (jenny Pom) Generate(_ languages.Context) (codejen.Files, error) {
 	return codejen.Files{
 		*codejen.NewFile("pom.xml", []byte(jenny.generatePom()), jenny),
 	}, nil

@@ -11,6 +11,7 @@ import (
 
 	"github.com/grafana/codejen"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type RepositoryTemplate struct {
@@ -22,7 +23,7 @@ func (jenny RepositoryTemplate) JennyName() string {
 	return "RepositoryTemplate"
 }
 
-func (jenny RepositoryTemplate) Generate(buildOpts BuildOptions) (codejen.Files, error) {
+func (jenny RepositoryTemplate) Generate(buildOpts languages.BuildOptions) (codejen.Files, error) {
 	var files codejen.Files
 
 	for _, language := range buildOpts.Languages {
