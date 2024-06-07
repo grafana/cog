@@ -3,7 +3,7 @@ package golang
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,7 +14,7 @@ func TestGoMod_Generate(t *testing.T) {
 		Config: Config{PackageRoot: "github.com/grafana/heey"},
 	}
 
-	files, err := jenny.Generate(common.Context{})
+	files, err := jenny.Generate(languages.Context{})
 	req.NoError(err)
 
 	req.Len(files, 1)

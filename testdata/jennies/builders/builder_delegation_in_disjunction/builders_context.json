@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "title",
                   "Name": "title",
                   "Type": {
                     "Kind": "scalar",
@@ -23,6 +24,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "url",
                   "Name": "url",
                   "Type": {
                     "Kind": "scalar",
@@ -49,6 +51,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "url",
                   "Name": "url",
                   "Type": {
                     "Kind": "scalar",
@@ -75,6 +78,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "singleLinkOrString",
                   "Name": "singleLinkOrString",
                   "Comments": [
                     "will be expanded to cog.Builder\u003cDashboardLink\u003e | string"
@@ -105,6 +109,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "linksOrStrings",
                   "Name": "linksOrStrings",
                   "Comments": [
                     "will be expanded to [](cog.Builder\u003cDashboardLink\u003e | string)"
@@ -141,6 +146,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "disjunctionOfBuilders",
                   "Name": "disjunctionOfBuilders",
                   "Type": {
                     "Kind": "disjunction",
@@ -189,6 +195,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "title",
                 "Name": "title",
                 "Type": {
                   "Kind": "scalar",
@@ -200,6 +207,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "url",
                 "Name": "url",
                 "Type": {
                   "Kind": "scalar",
@@ -220,6 +228,7 @@
       },
       "Package": "builder_delegation_in_disjunction",
       "Name": "DashboardLink",
+      "Constructor": {},
       "Options": [
         {
           "Name": "title",
@@ -263,8 +272,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "url",
@@ -308,8 +316,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         }
       ]
     },
@@ -322,6 +329,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "url",
                 "Name": "url",
                 "Type": {
                   "Kind": "scalar",
@@ -342,6 +350,7 @@
       },
       "Package": "builder_delegation_in_disjunction",
       "Name": "ExternalLink",
+      "Constructor": {},
       "Options": [
         {
           "Name": "url",
@@ -385,8 +394,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         }
       ]
     },
@@ -399,6 +407,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "singleLinkOrString",
                 "Name": "singleLinkOrString",
                 "Comments": [
                   "will be expanded to cog.Builder\u003cDashboardLink\u003e | string"
@@ -429,6 +438,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "linksOrStrings",
                 "Name": "linksOrStrings",
                 "Comments": [
                   "will be expanded to [](cog.Builder\u003cDashboardLink\u003e | string)"
@@ -465,6 +475,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "disjunctionOfBuilders",
                 "Name": "disjunctionOfBuilders",
                 "Type": {
                   "Kind": "disjunction",
@@ -502,6 +513,7 @@
       },
       "Package": "builder_delegation_in_disjunction",
       "Name": "Dashboard",
+      "Constructor": {},
       "Options": [
         {
           "Name": "singleLinkOrString",
@@ -596,8 +608,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "linksOrStrings",
@@ -710,8 +721,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "disjunctionOfBuilders",
@@ -806,8 +816,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         }
       ]
     }

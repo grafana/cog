@@ -7,7 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -27,7 +27,7 @@ func (jenny Schema) JennyName() string {
 	return "JSONSchema"
 }
 
-func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
+func (jenny Schema) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	if jenny.ReferenceFormatter == nil {
@@ -54,7 +54,7 @@ func (jenny Schema) toJSON(input any) ([]byte, error) {
 	return json.Marshal(input)
 }
 
-func (jenny Schema) GenerateSchema(context common.Context, schema *ast.Schema) Definition {
+func (jenny Schema) GenerateSchema(context languages.Context, schema *ast.Schema) Definition {
 	jenny.foreignObjects = orderedmap.New[string, ast.Object]()
 
 	jenny.isForeignReference = func(ref ast.RefType) bool {

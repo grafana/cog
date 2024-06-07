@@ -1,20 +1,13 @@
 package golang
 
 import (
-	"regexp"
 	"strings"
 
 	"github.com/grafana/cog/internal/tools"
 )
 
 func formatPackageName(pkg string) string {
-	rgx := regexp.MustCompile("[^a-zA-Z0-9_]+")
-
-	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
-}
-
-func formatArgName(name string) string {
-	return escapeVarName(tools.LowerCamelCase(name))
+	return strings.ToLower(tools.StripNonAlphaNumeric(pkg))
 }
 
 func escapeVarName(varName string) string {

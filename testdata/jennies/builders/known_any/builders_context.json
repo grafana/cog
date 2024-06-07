@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "config",
                   "Name": "config",
                   "Type": {
                     "Kind": "scalar",
@@ -38,6 +39,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "title",
                   "Name": "title",
                   "Type": {
                     "Kind": "scalar",
@@ -69,6 +71,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "config",
                 "Name": "config",
                 "Type": {
                   "Kind": "scalar",

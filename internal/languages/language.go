@@ -4,12 +4,11 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/jennies/common"
 )
 
 type Language interface {
 	Name() string
-	Jennies(config common.Config) *codejen.JennyList[common.Context]
+	Jennies(config Config) *codejen.JennyList[Context]
 	CompilerPasses() compiler.Passes
 }
 
@@ -21,6 +20,10 @@ type NullableConfig struct {
 
 type NullableKindsProvider interface {
 	NullableKinds() NullableConfig
+}
+
+type IdentifiersFormatterProvider interface {
+	IdentifiersFormatter() *IdentifierFormatter
 }
 
 type Languages map[string]Language

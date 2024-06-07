@@ -2,7 +2,7 @@ package golang
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type Runtime struct {
@@ -13,7 +13,7 @@ func (jenny Runtime) JennyName() string {
 	return "GoRuntime"
 }
 
-func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
+func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 	runtime, err := jenny.Runtime()
 	if err != nil {
 		return nil, err

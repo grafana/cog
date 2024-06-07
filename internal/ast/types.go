@@ -691,7 +691,7 @@ func (structType StructType) DeepCopy() StructType {
 func (structType StructType) FieldByName(name string) (StructField, bool) {
 	// FIXME: we don't have a way to directly get a struct field by name :(
 	for _, field := range structType.Fields {
-		if field.Name != name {
+		if field.Name != name && field.OriginalName != name {
 			continue
 		}
 
@@ -702,11 +702,12 @@ func (structType StructType) FieldByName(name string) (StructField, bool) {
 }
 
 type StructField struct {
-	Name        string
-	Comments    []string `json:",omitempty"`
-	Type        Type
-	Required    bool
-	PassesTrail []string `json:",omitempty"`
+	OriginalName string   // as given in the schema
+	Name         string   // might be formatted to follow language-specific conventions
+	Comments     []string `json:",omitempty"`
+	Type         Type
+	Required     bool
+	PassesTrail  []string `json:",omitempty"`
 }
 
 func (structField *StructField) AddToPassesTrail(trail string) {
@@ -715,9 +716,10 @@ func (structField *StructField) AddToPassesTrail(trail string) {
 
 func (structField StructField) DeepCopy() StructField {
 	newT := StructField{
-		Name:     structField.Name,
-		Type:     structField.Type.DeepCopy(),
-		Required: structField.Required,
+		OriginalName: structField.OriginalName,
+		Name:         structField.Name,
+		Type:         structField.Type.DeepCopy(),
+		Required:     structField.Required,
 	}
 
 	newT.Comments = append(newT.Comments, structField.Comments...)
@@ -748,8 +750,9 @@ func PassesTrail(trail string) StructFieldOption {
 
 func NewStructField(name string, fieldType Type, opts ...StructFieldOption) StructField {
 	field := StructField{
-		Name: name,
-		Type: fieldType,
+		Name:         name,
+		OriginalName: name,
+		Type:         fieldType,
 	}
 
 	for _, opt := range opts {
@@ -766,6 +769,10 @@ type RefType struct {
 
 func (t RefType) String() string {
 	return fmt.Sprintf("%s.%s", t.ReferredPkg, t.ReferredType)
+}
+
+func (t RefType) AsType() Type {
+	return NewRef(t.ReferredPkg, t.ReferredType)
 }
 
 func (t RefType) DeepCopy() RefType {

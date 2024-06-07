@@ -13,6 +13,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "timeseries_option",
               "Name": "timeseries_option",
               "Required": true,
               "Type": {
@@ -37,6 +38,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "timeseries_field_config_option",
               "Name": "timeseries_field_config_option",
               "Required": true,
               "Type": {

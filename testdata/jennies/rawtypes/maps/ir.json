@@ -51,6 +51,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "FieldAny",
               "Name": "FieldAny",
               "Required": true,
               "Type": {

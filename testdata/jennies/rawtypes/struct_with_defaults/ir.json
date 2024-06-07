@@ -8,6 +8,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "fieldBool",
               "Name": "fieldBool",
               "Required": true,
               "Type": {
@@ -19,6 +20,7 @@
               }
             },
             {
+              "OriginalName": "fieldString",
               "Name": "fieldString",
               "Required": true,
               "Type": {
@@ -30,6 +32,7 @@
               }
             },
             {
+              "OriginalName": "FieldStringWithConstantValue",
               "Name": "FieldStringWithConstantValue",
               "Required": true,
               "Type": {
@@ -41,6 +44,7 @@
               }
             },
             {
+              "OriginalName": "FieldFloat32",
               "Name": "FieldFloat32",
               "Required": true,
               "Type": {
@@ -52,6 +56,7 @@
               }
             },
             {
+              "OriginalName": "FieldInt32",
               "Name": "FieldInt32",
               "Required": true,
               "Type": {

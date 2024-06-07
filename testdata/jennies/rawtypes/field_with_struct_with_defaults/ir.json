@@ -13,6 +13,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "stringVal",
               "Name": "stringVal",
               "Type": {
                 "Kind": "scalar",
@@ -24,6 +25,7 @@
               "Required": true
             },
             {
+              "OriginalName": "intVal",
               "Name": "intVal",
               "Type": {
                 "Kind": "scalar",
@@ -50,6 +52,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "allFields",
               "Name": "allFields",
               "Type": {
                 "Kind": "ref",
@@ -65,6 +68,7 @@
               "Required": true
             },
             {
+              "OriginalName": "partialFields",
               "Name": "partialFields",
               "Type": {
                 "Kind": "ref",
@@ -79,6 +83,7 @@
               "Required": true
             },
             {
+              "OriginalName": "emptyFields",
               "Name": "emptyFields",
               "Type": {
                 "Kind": "ref",
@@ -90,6 +95,7 @@
               "Required": true
             },
             {
+              "OriginalName": "complexField",
               "Name": "complexField",
               "Type": {
                 "Kind": "struct",
@@ -106,6 +112,7 @@
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "uid",
                       "Name": "uid",
                       "Type": {
                         "Kind": "scalar",
@@ -117,6 +124,7 @@
                       "Required": true
                     },
                     {
+                      "OriginalName": "nested",
                       "Name": "nested",
                       "Type": {
                         "Kind": "struct",
@@ -124,6 +132,7 @@
                         "Struct": {
                           "Fields": [
                             {
+                              "OriginalName": "nestedVal",
                               "Name": "nestedVal",
                               "Type": {
                                 "Kind": "scalar",
@@ -140,6 +149,7 @@
                       "Required": true
                     },
                     {
+                      "OriginalName": "array",
                       "Name": "array",
                       "Type": {
                         "Kind": "array",
@@ -162,6 +172,7 @@
               "Required": true
             },
             {
+              "OriginalName": "partialComplexField",
               "Name": "partialComplexField",
               "Type": {
                 "Kind": "struct",
@@ -172,6 +183,7 @@
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "uid",
                       "Name": "uid",
                       "Type": {
                         "Kind": "scalar",
@@ -183,6 +195,7 @@
                       "Required": true
                     },
                     {
+                      "OriginalName": "intVal",
                       "Name": "intVal",
                       "Type": {
                         "Kind": "scalar",

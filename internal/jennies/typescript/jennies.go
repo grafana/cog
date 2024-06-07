@@ -6,6 +6,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 const LanguageRef = "typescript"
@@ -36,17 +37,17 @@ func (language *Language) Name() string {
 	return LanguageRef
 }
 
-func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
-	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
+func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
+	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[common.Context](!language.config.SkipRuntime, Runtime{}),
+		common.If[languages.Context](!language.config.SkipRuntime, Runtime{}),
 
-		common.If[common.Context](globalConfig.Types, RawTypes{}),
-		common.If[common.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{}),
+		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
 
-		common.If[common.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
+		common.If[languages.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
@@ -65,4 +66,22 @@ func (language *Language) NullableKinds() languages.NullableConfig {
 		ProtectArrayAppend: true,
 		AnyIsNullable:      true,
 	}
+}
+
+func (language *Language) IdentifiersFormatter() *languages.IdentifierFormatter {
+	return languages.NewIdentifierFormatter(
+		languages.PackageFormatter(formatPackageName),
+		languages.ObjectFormatter(tools.StripNonAlphaNumeric),
+		languages.ObjectPrivateFieldFormatter(tools.LowerCamelCase),
+		languages.EnumMemberFormatter(func(s string) string {
+			return tools.UpperCamelCase(escapeEnumMemberName(s))
+		}),
+		languages.BuilderFormatter(tools.UpperCamelCase),
+		languages.OptionFormatter(func(s string) string {
+			return tools.LowerCamelCase(escapeIdentifier(s))
+		}),
+		languages.VariableFormatter(func(s string) string {
+			return tools.LowerCamelCase(escapeIdentifier(s))
+		}),
+	)
 }

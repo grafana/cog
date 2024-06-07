@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "constantInt",
               "Name": "constantInt",
               "Type": {
                 "Kind": "scalar",
@@ -22,6 +23,7 @@
               "Required": true
             },
             {
+              "OriginalName": "constantFloat",
               "Name": "constantFloat",
               "Type": {
                 "Kind": "scalar",
@@ -34,6 +36,7 @@
               "Required": true
             },
             {
+              "OriginalName": "rowHeight",
               "Name": "rowHeight",
               "Type": {
                 "Kind": "scalar",
@@ -59,6 +62,7 @@
               "Required": true
             },
             {
+              "OriginalName": "colWidth",
               "Name": "colWidth",
               "Type": {
                 "Kind": "scalar",
@@ -78,6 +82,7 @@
               "Required": true
             },
             {
+              "OriginalName": "fiscalYearStartMonth",
               "Name": "fiscalYearStartMonth",
               "Type": {
                 "Kind": "scalar",

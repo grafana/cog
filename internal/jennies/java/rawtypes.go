@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -24,7 +25,7 @@ func (jenny RawTypes) JennyName() string {
 	return "JavaRawTypes"
 }
 
-func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
+func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0)
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)

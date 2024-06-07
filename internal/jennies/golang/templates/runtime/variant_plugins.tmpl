@@ -7,11 +7,11 @@ func RegisterDefaultPlugins() {
 
     // Panelcfg variants
 {{- range $schema := .panel_schemas }}
-	runtime.RegisterPanelcfgVariant({{ $schema.Package | formatPackageName }}.VariantConfig())
+	runtime.RegisterPanelcfgVariant({{ $schema.Package }}.VariantConfig())
 {{- end }}
 
     // Dataquery variants
 {{- range $schema := .dataquery_schemas }}
-	runtime.RegisterDataqueryVariant({{ $schema.Package | formatPackageName }}.VariantConfig())
+	runtime.RegisterDataqueryVariant({{ $schema.Package }}.VariantConfig())
 {{- end }}
 }

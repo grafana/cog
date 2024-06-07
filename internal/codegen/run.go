@@ -75,7 +75,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 		if err != nil {
 			return nil, err
 		}
-		jennyInput := common.BuildOptions{
+		jennyInput := languages.BuildOptions{
 			Languages: targetsByLanguage.AsLanguageRefs(),
 		}
 
@@ -87,9 +87,9 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 	return generatedFS, nil
 }
 
-func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, schemas ast.Schemas, commonCompilerPasses compiler.Passes, veneers *rewrite.Rewriter) (common.Context, error) {
+func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, schemas ast.Schemas, commonCompilerPasses compiler.Passes, veneers *rewrite.Rewriter) (languages.Context, error) {
 	var err error
-	jenniesInput := common.Context{
+	jenniesInput := languages.Context{
 		Schemas: schemas,
 	}
 
@@ -97,27 +97,68 @@ func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, s
 	compilerPasses := commonCompilerPasses.Concat(language.CompilerPasses())
 	jenniesInput.Schemas, err = compilerPasses.Process(jenniesInput.Schemas)
 	if err != nil {
-		return common.Context{}, err
+		return languages.Context{}, err
 	}
 
 	if !pipeline.Output.Builders {
-		return jenniesInput, nil
+		return pipeline.formatIdentifiers(language, jenniesInput)
 	}
 
-	// from schemas, derive builders
+	// from these types, create builders
 	builderGenerator := &ast.BuilderGenerator{}
-	jenniesInput.Builders = builderGenerator.FromAST(jenniesInput.Schemas)
+	builders := builderGenerator.FromAST(jenniesInput.Schemas)
 
-	// apply veneers to builders
-	jenniesInput.Builders, err = veneers.ApplyTo(jenniesInput.Schemas, jenniesInput.Builders, language.Name())
+	// apply the builder veneers
+	builders, err = veneers.ApplyTo(jenniesInput.Schemas, builders, language.Name())
 	if err != nil {
-		return common.Context{}, err
+		return languages.Context{}, err
+	}
+
+	// ensure identifiers are properly formatted
+	jenniesInput, err = pipeline.formatIdentifiers(language, jenniesInput)
+	if err != nil {
+		return languages.Context{}, err
+	}
+
+	// if the language defines an identifier formatter, let's apply it.
+	if formatterProvider, ok := language.(languages.IdentifiersFormatterProvider); ok {
+		jenniesInput, err = languages.FormatIdentifiers(formatterProvider, jenniesInput)
+		if err != nil {
+			return languages.Context{}, err
+		}
 	}
 
 	// with the veneers applied, generate "nil-checks" for assignments
 	jenniesInput, err = languages.GenerateBuilderNilChecks(language, jenniesInput)
 	if err != nil {
-		return common.Context{}, err
+		return languages.Context{}, err
+	}
+
+	return jenniesInput, nil
+}
+
+func (pipeline *Pipeline) formatIdentifiers(language languages.Language, jenniesInput languages.Context) (languages.Context, error) {
+	var err error
+
+	// if the language defines an identifier formatter, let's apply it.
+	formatterProvider, ok := language.(languages.IdentifiersFormatterProvider)
+
+	if !ok {
+		return jenniesInput, nil
+	}
+
+	formatter := formatterProvider.IdentifiersFormatter()
+
+	formatterPass := languages.NewIdentifierFormatterPass(jenniesInput.Schemas, formatter)
+	jenniesInput.Schemas, err = formatterPass.Process(jenniesInput.Schemas)
+	if err != nil {
+		return jenniesInput, err
+	}
+
+	buildersRewriter := languages.NewIdentifierFormatterBuilderRewriter(jenniesInput.Schemas, formatter)
+	jenniesInput.Builders, err = buildersRewriter.Rewrite(jenniesInput.Schemas, jenniesInput.Builders)
+	if err != nil {
+		return jenniesInput, err
 	}
 
 	return jenniesInput, nil

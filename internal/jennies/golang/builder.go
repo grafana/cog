@@ -7,8 +7,8 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -24,7 +24,7 @@ func (jenny *Builder) JennyName() string {
 	return "GoBuilder"
 }
 
-func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
+func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error) {
 	files := codejen.Files{}
 
 	for _, builder := range context.Builders {
@@ -34,7 +34,7 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 		}
 
 		filename := filepath.Join(
-			formatPackageName(builder.Package),
+			builder.Package,
 			fmt.Sprintf("%s_builder_gen.go", strings.ToLower(builder.Name)),
 		)
 
@@ -44,7 +44,7 @@ func (jenny *Builder) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builder) ([]byte, error) {
+func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
 	imports := NewImportMap()
@@ -60,7 +60,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	// every builder has a dependency on cog's runtime, so let's make sure it's declared.
 	jenny.typeImportMapper("cog")
 
-	fullObjectName := jenny.importType(builder.For.SelfRef)
+	fullObjectName := jenny.typeFormatter.formatRef(builder.For.SelfRef.AsType(), false)
 	buildObjectSignature := fullObjectName
 	if builder.For.Type.ImplementsVariant() {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
@@ -97,7 +97,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 			Package:              builder.Package,
 			BuilderSignatureType: buildObjectSignature,
 			Imports:              imports,
-			BuilderName:          tools.UpperCamelCase(builder.Name),
+			BuilderName:          builder.Name,
 			ObjectName:           fullObjectName,
 			Comments:             builder.For.Comments,
 			Constructor:          builder.Constructor,
@@ -112,7 +112,7 @@ func (jenny *Builder) generateBuilder(context common.Context, builder ast.Builde
 	return []byte(buffer.String()), nil
 }
 
-func (jenny *Builder) genDefaultOptionsCalls(context common.Context, builder ast.Builder) []template.OptionCall {
+func (jenny *Builder) genDefaultOptionsCalls(context languages.Context, builder ast.Builder) []template.OptionCall {
 	calls := make([]template.OptionCall, 0)
 	for _, opt := range builder.Options {
 		if opt.Default == nil {
@@ -150,7 +150,7 @@ func hasTypedDefaults(opt ast.Option) bool {
 	return false
 }
 
-func (jenny *Builder) formatDefaultTypedArgs(context common.Context, opt ast.Option) []string {
+func (jenny *Builder) formatDefaultTypedArgs(context languages.Context, opt ast.Option) []string {
 	args := make([]string, 0)
 	for i, arg := range opt.Default.ArgsValues {
 		val, _ := arg.(map[string]interface{})
@@ -181,7 +181,7 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 	parts := make([]string, len(fieldPath))
 
 	for i := range fieldPath {
-		output := tools.UpperCamelCase(fieldPath[i].Identifier)
+		output := fieldPath[i].Identifier
 
 		// don't generate type hints if:
 		// * there isn't one defined
@@ -211,16 +211,4 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	default:
 		return "unknown"
 	}
-}
-
-// importType declares an import statement for the type definition of
-// the given object and returns a fully qualified type name for it.
-func (jenny *Builder) importType(typeRef ast.RefType) string {
-	pkg := jenny.typeImportMapper(typeRef.ReferredPkg)
-	typeName := tools.UpperCamelCase(typeRef.ReferredType)
-	if pkg == "" {
-		return typeName
-	}
-
-	return fmt.Sprintf("%s.%s", pkg, typeName)
 }

@@ -14,6 +14,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "FieldAny",
               "Name": "FieldAny",
               "Required": true,
               "Comments": [
@@ -28,6 +29,7 @@
               }
             },
             {
+              "OriginalName": "FieldBool",
               "Name": "FieldBool",
               "Required": true,
               "Type": {
@@ -38,6 +40,7 @@
               }
             },
             {
+              "OriginalName": "FieldBytes",
               "Name": "FieldBytes",
               "Required": true,
               "Type": {
@@ -48,6 +51,7 @@
               }
             },
             {
+              "OriginalName": "FieldString",
               "Name": "FieldString",
               "Required": true,
               "Type": {
@@ -58,6 +62,7 @@
               }
             },
             {
+              "OriginalName": "FieldStringWithConstantValue",
               "Name": "FieldStringWithConstantValue",
               "Required": true,
               "Type": {
@@ -69,6 +74,7 @@
               }
             },
             {
+              "OriginalName": "FieldFloat32",
               "Name": "FieldFloat32",
               "Required": true,
               "Type": {
@@ -79,6 +85,7 @@
               }
             },
             {
+              "OriginalName": "FieldFloat64",
               "Name": "FieldFloat64",
               "Required": true,
               "Type": {
@@ -89,6 +96,7 @@
               }
             },
             {
+              "OriginalName": "FieldUint8",
               "Name": "FieldUint8",
               "Required": true,
               "Type": {
@@ -99,6 +107,7 @@
               }
             },
             {
+              "OriginalName": "FieldUint16",
               "Name": "FieldUint16",
               "Required": true,
               "Type": {
@@ -109,6 +118,7 @@
               }
             },
             {
+              "OriginalName": "FieldUint32",
               "Name": "FieldUint32",
               "Required": true,
               "Type": {
@@ -119,6 +129,7 @@
               }
             },
             {
+              "OriginalName": "FieldUint64",
               "Name": "FieldUint64",
               "Required": true,
               "Type": {
@@ -129,6 +140,7 @@
               }
             },
             {
+              "OriginalName": "FieldInt8",
               "Name": "FieldInt8",
               "Required": true,
               "Type": {
@@ -139,6 +151,7 @@
               }
             },
             {
+              "OriginalName": "FieldInt16",
               "Name": "FieldInt16",
               "Required": true,
               "Type": {
@@ -149,6 +162,7 @@
               }
             },
             {
+              "OriginalName": "FieldInt32",
               "Name": "FieldInt32",
               "Required": true,
               "Type": {
@@ -159,6 +173,7 @@
               }
             },
             {
+              "OriginalName": "FieldInt64",
               "Name": "FieldInt64",
               "Required": true,
               "Type": {

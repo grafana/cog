@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type Runtime struct {
@@ -17,7 +17,7 @@ func (jenny Runtime) JennyName() string {
 	return "JavaRuntime"
 }
 
-func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
+func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 	variants, err := jenny.renderDataQueryVariant("Dataquery")
 	if err != nil {
 		return nil, err

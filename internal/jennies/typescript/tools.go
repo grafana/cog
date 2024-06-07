@@ -4,10 +4,6 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-func formatIdentifier(name string) string {
-	return tools.LowerCamelCase(escapeIdentifier(name))
-}
-
 func escapeIdentifier(name string) string {
 	if isReservedTypescriptKeyword(name) {
 		return name + "Val"
@@ -29,3 +25,5 @@ func isReservedTypescriptKeyword(input string) bool {
 		return false
 	}
 }
+
+var formatPackageName = tools.LowerCamelCase

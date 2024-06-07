@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -15,10 +15,10 @@ type typeFormatter struct {
 	config        Config
 
 	forBuilder bool
-	context    common.Context
+	context    languages.Context
 }
 
-func defaultTypeFormatter(config Config, context common.Context, packageMapper func(pkg string) string) *typeFormatter {
+func defaultTypeFormatter(config Config, context languages.Context, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
 		config:        config,
@@ -26,7 +26,7 @@ func defaultTypeFormatter(config Config, context common.Context, packageMapper f
 	}
 }
 
-func builderTypeFormatter(config Config, context common.Context, packageMapper func(pkg string) string) *typeFormatter {
+func builderTypeFormatter(config Config, context languages.Context, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
 		config:        config,
@@ -164,9 +164,9 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 
 	buffer.WriteString(fmt.Sprintf(
 		"%s %s `json:\"%s%s\"`\n",
-		tools.UpperCamelCase(def.Name),
-		formatter.doFormatType(fieldType, false),
 		def.Name,
+		formatter.doFormatType(fieldType, false),
+		def.OriginalName,
 		jsonOmitEmpty,
 	))
 
@@ -215,9 +215,7 @@ func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilde
 	count := 0
 	structMap.Iterate(func(key string, value interface{}) {
 		field, _ := def.FieldByName(key)
-		if name != "" {
-			key = tools.UpperCamelCase(key)
-		}
+		key = tools.UpperCamelCase(key)
 
 		switch x := value.(type) {
 		case map[string]interface{}:
@@ -251,23 +249,21 @@ func defineAnonymousFields(def ast.StructType) string {
 	var structDefinition strings.Builder
 
 	for _, f := range def.Fields {
-		key := tools.UpperCamelCase(f.Name)
-
 		switch f.Type.Kind {
 		case ast.KindScalar:
-			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", key, f.Type.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
+			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", f.Name, f.Type.AsScalar().ScalarKind, f.OriginalName))
 		case ast.KindStruct:
 			structFields := defineAnonymousFields(f.Type.AsStruct())
-			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, tools.LowerCamelCase(key)))
+			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", f.Name, structFields, f.OriginalName))
 		case ast.KindArray:
 			array := f.Type.AsArray()
 			if array.ValueType.IsScalar() {
-				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
+				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", f.Name, array.ValueType.AsScalar().ScalarKind, f.OriginalName))
 			}
 		// TODO: Map rest of array cases
 		default:
 			// TODO: Map rest of the cases when necessary. By default it sets any
-			structDefinition.WriteString(fmt.Sprintf("%s any `json:\"%s\"`\n", key, strings.ToLower(key)))
+			structDefinition.WriteString(fmt.Sprintf("%s any `json:\"%s\"`\n", f.Name, f.OriginalName))
 		}
 	}
 
@@ -294,7 +290,7 @@ func defineAnonymousDefaults(def ast.StructType, structMap *orderedmap.Map[strin
 
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
-	typeName := tools.UpperCamelCase(def.AsRef().ReferredType)
+	typeName := def.AsRef().ReferredType
 
 	if referredPkg != "" {
 		typeName = referredPkg + "." + typeName

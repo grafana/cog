@@ -110,6 +110,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "from",
               "Name": "from",
               "Type": {
                 "Kind": "scalar",
@@ -122,6 +123,7 @@
               "Required": true
             },
             {
+              "OriginalName": "editable",
               "Name": "editable",
               "Type": {
                 "Kind": "scalar",
@@ -134,6 +136,7 @@
               "Required": true
             },
             {
+              "OriginalName": "IntEnum",
               "Name": "IntEnum",
               "Type": {
                 "Kind": "enum",
@@ -184,6 +187,7 @@
               "Required": true
             },
             {
+              "OriginalName": "Number",
               "Name": "Number",
               "Type": {
                 "Kind": "scalar",
@@ -196,6 +200,7 @@
               "Required": true
             },
             {
+              "OriginalName": "repeatDirection",
               "Name": "repeatDirection",
               "Type": {
                 "Kind": "enum",
@@ -231,6 +236,7 @@
               "Required": true
             },
             {
+              "OriginalName": "tags",
               "Name": "tags",
               "Type": {
                 "Kind": "array",
@@ -252,6 +258,7 @@
               "Required": true
             },
             {
+              "OriginalName": "stringEnum",
               "Name": "stringEnum",
               "Type": {
                 "Kind": "ref",
@@ -265,6 +272,7 @@
               "Required": true
             },
             {
+              "OriginalName": "intEnum",
               "Name": "intEnum",
               "Type": {
                 "Kind": "ref",

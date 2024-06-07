@@ -22,6 +22,7 @@
               "Struct": {
                 "Fields": [
                   {
+                    "OriginalName": "inline",
                     "Name": "inline",
                     "Type": {
                       "Kind": "scalar",
@@ -51,6 +52,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "settings",
               "Name": "settings",
               "Type": {
                 "Kind": "struct",
@@ -58,6 +60,7 @@
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "script",
                       "Name": "script",
                       "Type": {
                         "Kind": "ref",
@@ -90,6 +93,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "type",
               "Name": "type",
               "Type": {
                 "Kind": "scalar",
@@ -102,6 +106,7 @@
               "Required": true
             },
             {
+              "OriginalName": "settings",
               "Name": "settings",
               "Type": {
                 "Kind": "struct",
@@ -109,6 +114,7 @@
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "script",
                       "Name": "script",
                       "Type": {
                         "Kind": "ref",
@@ -121,6 +127,7 @@
                       "Required": false
                     },
                     {
+                      "OriginalName": "missing",
                       "Name": "missing",
                       "Type": {
                         "Kind": "scalar",

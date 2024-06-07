@@ -6,8 +6,8 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 )
 
@@ -19,7 +19,7 @@ func (jenny Schema) JennyName() string {
 	return "OpenAPI"
 }
 
-func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
+func (jenny Schema) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
@@ -34,7 +34,7 @@ func (jenny Schema) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny Schema) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny Schema) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
 	jsonschemaJenny := jsonschema.Schema{
 		Config: jsonschema.Config{
 			Debug:   jenny.Config.debug,

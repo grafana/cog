@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "stringVal",
                   "Name": "stringVal",
                   "Type": {
                     "Kind": "scalar",
@@ -23,6 +24,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "intVal",
                   "Name": "intVal",
                   "Type": {
                     "Kind": "scalar",
@@ -49,6 +51,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "allFields",
                   "Name": "allFields",
                   "Type": {
                     "Kind": "ref",
@@ -65,6 +68,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "partialFields",
                   "Name": "partialFields",
                   "Type": {
                     "Kind": "ref",
@@ -80,6 +84,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "emptyFields",
                   "Name": "emptyFields",
                   "Type": {
                     "Kind": "ref",
@@ -92,6 +97,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "complexField",
                   "Name": "complexField",
                   "Type": {
                     "Kind": "struct",
@@ -108,17 +114,20 @@
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "uid",
                           "Name": "uid",
                           "Type": {
                             "Kind": "scalar",
                             "Nullable": false,
                             "Scalar": {
-                              "ScalarKind": "string"
+                              "ScalarKind": "string",
+                              "Value": "myUID"
                             }
                           },
                           "Required": true
                         },
                         {
+                          "OriginalName": "nested",
                           "Name": "nested",
                           "Type": {
                             "Kind": "struct",
@@ -126,12 +135,14 @@
                             "Struct": {
                               "Fields": [
                                 {
+                                  "OriginalName": "nestedVal",
                                   "Name": "nestedVal",
                                   "Type": {
                                     "Kind": "scalar",
                                     "Nullable": false,
                                     "Scalar": {
-                                      "ScalarKind": "string"
+                                      "ScalarKind": "string",
+                                      "Value": "nested"
                                     }
                                   },
                                   "Required": true
@@ -142,16 +153,21 @@
                           "Required": true
                         },
                         {
+                          "OriginalName": "array",
                           "Name": "array",
                           "Type": {
                             "Kind": "array",
                             "Nullable": false,
+                            "Default": [
+                              "hello"
+                            ],
                             "Array": {
                               "ValueType": {
                                 "Kind": "scalar",
                                 "Nullable": false,
                                 "Scalar": {
-                                  "ScalarKind": "string"
+                                  "ScalarKind": "string",
+                                  "Value": "hello"
                                 }
                               }
                             }
@@ -164,16 +180,15 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "partialComplexField",
                   "Name": "partialComplexField",
                   "Type": {
                     "Kind": "struct",
                     "Nullable": false,
-                    "Default": {
-                      "xxxx": "myUID"
-                    },
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "uid",
                           "Name": "uid",
                           "Type": {
                             "Kind": "scalar",
@@ -185,7 +200,8 @@
                           "Required": true
                         },
                         {
-                          "Name": "intVal",
+                          "OriginalName": "aVal",
+                          "Name": "aVal",
                           "Type": {
                             "Kind": "scalar",
                             "Nullable": false,
@@ -221,6 +237,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "stringVal",
                 "Name": "stringVal",
                 "Type": {
                   "Kind": "scalar",
@@ -232,6 +249,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "intVal",
                 "Name": "intVal",
                 "Type": {
                   "Kind": "scalar",
@@ -252,6 +270,7 @@
       },
       "Package": "struct_with_defaults",
       "Name": "NestedStruct",
+      "Constructor": {},
       "Options": [
         {
           "Name": "stringVal",
@@ -295,8 +314,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "intVal",
@@ -340,8 +358,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         }
       ]
     },
@@ -354,6 +371,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "allFields",
                 "Name": "allFields",
                 "Type": {
                   "Kind": "ref",
@@ -370,6 +388,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "partialFields",
                 "Name": "partialFields",
                 "Type": {
                   "Kind": "ref",
@@ -385,6 +404,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "emptyFields",
                 "Name": "emptyFields",
                 "Type": {
                   "Kind": "ref",
@@ -397,6 +417,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "complexField",
                 "Name": "complexField",
                 "Type": {
                   "Kind": "struct",
@@ -413,17 +434,20 @@
                   "Struct": {
                     "Fields": [
                       {
+                        "OriginalName": "uid",
                         "Name": "uid",
                         "Type": {
                           "Kind": "scalar",
                           "Nullable": false,
                           "Scalar": {
-                            "ScalarKind": "string"
+                            "ScalarKind": "string",
+                            "Value": "myUID"
                           }
                         },
                         "Required": true
                       },
                       {
+                        "OriginalName": "nested",
                         "Name": "nested",
                         "Type": {
                           "Kind": "struct",
@@ -431,12 +455,14 @@
                           "Struct": {
                             "Fields": [
                               {
+                                "OriginalName": "nestedVal",
                                 "Name": "nestedVal",
                                 "Type": {
                                   "Kind": "scalar",
                                   "Nullable": false,
                                   "Scalar": {
-                                    "ScalarKind": "string"
+                                    "ScalarKind": "string",
+                                    "Value": "nested"
                                   }
                                 },
                                 "Required": true
@@ -447,16 +473,21 @@
                         "Required": true
                       },
                       {
+                        "OriginalName": "array",
                         "Name": "array",
                         "Type": {
                           "Kind": "array",
                           "Nullable": false,
+                          "Default": [
+                            "hello"
+                          ],
                           "Array": {
                             "ValueType": {
                               "Kind": "scalar",
                               "Nullable": false,
                               "Scalar": {
-                                "ScalarKind": "string"
+                                "ScalarKind": "string",
+                                "Value": "hello"
                               }
                             }
                           }
@@ -469,16 +500,15 @@
                 "Required": true
               },
               {
+                "OriginalName": "partialComplexField",
                 "Name": "partialComplexField",
                 "Type": {
                   "Kind": "struct",
                   "Nullable": false,
-                  "Default": {
-                    "xxxx": "myUID"
-                  },
                   "Struct": {
                     "Fields": [
                       {
+                        "OriginalName": "uid",
                         "Name": "uid",
                         "Type": {
                           "Kind": "scalar",
@@ -490,7 +520,8 @@
                         "Required": true
                       },
                       {
-                        "Name": "intVal",
+                        "OriginalName": "aVal",
+                        "Name": "aVal",
                         "Type": {
                           "Kind": "scalar",
                           "Nullable": false,
@@ -515,6 +546,7 @@
       },
       "Package": "struct_with_defaults",
       "Name": "Struct",
+      "Constructor": {},
       "Options": [
         {
           "Name": "allFields",
@@ -581,8 +613,7 @@
                 "stringVal": "hello"
               }
             ]
-          },
-          "IsConstructorArg": false
+          }
         },
         {
           "Name": "partialFields",
@@ -645,8 +676,7 @@
                 "intVal": 4
               }
             ]
-          },
-          "IsConstructorArg": false
+          }
         },
         {
           "Name": "emptyFields",
@@ -693,8 +723,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "complexField",
@@ -716,17 +745,20 @@
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "uid",
                       "Name": "uid",
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
                         "Scalar": {
-                          "ScalarKind": "string"
+                          "ScalarKind": "string",
+                          "Value": "myUID"
                         }
                       },
                       "Required": true
                     },
                     {
+                      "OriginalName": "nested",
                       "Name": "nested",
                       "Type": {
                         "Kind": "struct",
@@ -734,12 +766,14 @@
                         "Struct": {
                           "Fields": [
                             {
+                              "OriginalName": "nestedVal",
                               "Name": "nestedVal",
                               "Type": {
                                 "Kind": "scalar",
                                 "Nullable": false,
                                 "Scalar": {
-                                  "ScalarKind": "string"
+                                  "ScalarKind": "string",
+                                  "Value": "nested"
                                 }
                               },
                               "Required": true
@@ -750,16 +784,21 @@
                       "Required": true
                     },
                     {
+                      "OriginalName": "array",
                       "Name": "array",
                       "Type": {
                         "Kind": "array",
                         "Nullable": false,
+                        "Default": [
+                          "hello"
+                        ],
                         "Array": {
                           "ValueType": {
                             "Kind": "scalar",
                             "Nullable": false,
                             "Scalar": {
-                              "ScalarKind": "string"
+                              "ScalarKind": "string",
+                              "Value": "hello"
                             }
                           }
                         }
@@ -791,17 +830,20 @@
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "uid",
                           "Name": "uid",
                           "Type": {
                             "Kind": "scalar",
                             "Nullable": false,
                             "Scalar": {
-                              "ScalarKind": "string"
+                              "ScalarKind": "string",
+                              "Value": "myUID"
                             }
                           },
                           "Required": true
                         },
                         {
+                          "OriginalName": "nested",
                           "Name": "nested",
                           "Type": {
                             "Kind": "struct",
@@ -809,12 +851,14 @@
                             "Struct": {
                               "Fields": [
                                 {
+                                  "OriginalName": "nestedVal",
                                   "Name": "nestedVal",
                                   "Type": {
                                     "Kind": "scalar",
                                     "Nullable": false,
                                     "Scalar": {
-                                      "ScalarKind": "string"
+                                      "ScalarKind": "string",
+                                      "Value": "nested"
                                     }
                                   },
                                   "Required": true
@@ -825,16 +869,21 @@
                           "Required": true
                         },
                         {
+                          "OriginalName": "array",
                           "Name": "array",
                           "Type": {
                             "Kind": "array",
                             "Nullable": false,
+                            "Default": [
+                              "hello"
+                            ],
                             "Array": {
                               "ValueType": {
                                 "Kind": "scalar",
                                 "Nullable": false,
                                 "Scalar": {
-                                  "ScalarKind": "string"
+                                  "ScalarKind": "string",
+                                  "Value": "hello"
                                 }
                               }
                             }
@@ -864,17 +913,20 @@
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "uid",
                           "Name": "uid",
                           "Type": {
                             "Kind": "scalar",
                             "Nullable": false,
                             "Scalar": {
-                              "ScalarKind": "string"
+                              "ScalarKind": "string",
+                              "Value": "myUID"
                             }
                           },
                           "Required": true
                         },
                         {
+                          "OriginalName": "nested",
                           "Name": "nested",
                           "Type": {
                             "Kind": "struct",
@@ -882,12 +934,14 @@
                             "Struct": {
                               "Fields": [
                                 {
+                                  "OriginalName": "nestedVal",
                                   "Name": "nestedVal",
                                   "Type": {
                                     "Kind": "scalar",
                                     "Nullable": false,
                                     "Scalar": {
-                                      "ScalarKind": "string"
+                                      "ScalarKind": "string",
+                                      "Value": "nested"
                                     }
                                   },
                                   "Required": true
@@ -898,16 +952,21 @@
                           "Required": true
                         },
                         {
+                          "OriginalName": "array",
                           "Name": "array",
                           "Type": {
                             "Kind": "array",
                             "Nullable": false,
+                            "Default": [
+                              "hello"
+                            ],
                             "Array": {
                               "ValueType": {
                                 "Kind": "scalar",
                                 "Nullable": false,
                                 "Scalar": {
-                                  "ScalarKind": "string"
+                                  "ScalarKind": "string",
+                                  "Value": "hello"
                                 }
                               }
                             }
@@ -934,8 +993,7 @@
                 "uid": "myUID"
               }
             ]
-          },
-          "IsConstructorArg": false
+          }
         },
         {
           "Name": "partialComplexField",
@@ -945,12 +1003,10 @@
               "Type": {
                 "Kind": "struct",
                 "Nullable": false,
-                "Default": {
-                  "xxxx": "myUID"
-                },
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "uid",
                       "Name": "uid",
                       "Type": {
                         "Kind": "scalar",
@@ -962,7 +1018,8 @@
                       "Required": true
                     },
                     {
-                      "Name": "intVal",
+                      "OriginalName": "aVal",
+                      "Name": "aVal",
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
@@ -985,12 +1042,10 @@
                   "Type": {
                     "Kind": "struct",
                     "Nullable": false,
-                    "Default": {
-                      "xxxx": "myUID"
-                    },
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "uid",
                           "Name": "uid",
                           "Type": {
                             "Kind": "scalar",
@@ -1002,7 +1057,8 @@
                           "Required": true
                         },
                         {
-                          "Name": "intVal",
+                          "OriginalName": "aVal",
+                          "Name": "aVal",
                           "Type": {
                             "Kind": "scalar",
                             "Nullable": false,
@@ -1023,12 +1079,10 @@
                   "Type": {
                     "Kind": "struct",
                     "Nullable": false,
-                    "Default": {
-                      "xxxx": "myUID"
-                    },
                     "Struct": {
                       "Fields": [
                         {
+                          "OriginalName": "uid",
                           "Name": "uid",
                           "Type": {
                             "Kind": "scalar",
@@ -1040,7 +1094,8 @@
                           "Required": true
                         },
                         {
-                          "Name": "intVal",
+                          "OriginalName": "aVal",
+                          "Name": "aVal",
                           "Type": {
                             "Kind": "scalar",
                             "Nullable": false,
@@ -1057,15 +1112,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "Default": {
-            "ArgsValues": [
-              {
-                "xxxx": "myUID"
-              }
-            ]
-          },
-          "IsConstructorArg": false
+          ]
         }
       ]
     }

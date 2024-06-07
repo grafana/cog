@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "variables",
                   "Name": "variables",
                   "Type": {
                     "Kind": "array",
@@ -45,6 +46,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "name",
                   "Name": "name",
                   "Type": {
                     "Kind": "scalar",
@@ -56,6 +58,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "value",
                   "Name": "value",
                   "Type": {
                     "Kind": "scalar",
@@ -87,6 +90,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "variables",
                 "Name": "variables",
                 "Type": {
                   "Kind": "array",

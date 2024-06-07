@@ -2,10 +2,9 @@ package languages
 
 import (
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
 )
 
-func GenerateBuilderNilChecks(language Language, context common.Context) (common.Context, error) {
+func GenerateBuilderNilChecks(language Language, context Context) (Context, error) {
 	var err error
 	nullableKinds := NullableConfig{
 		Kinds:              nil,

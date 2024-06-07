@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -17,10 +17,10 @@ type typeFormatter struct {
 	importModule moduleImporter
 
 	forBuilder bool
-	context    common.Context
+	context    languages.Context
 }
 
-func defaultTypeFormatter(context common.Context, importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
+func defaultTypeFormatter(context languages.Context, importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
 	return &typeFormatter{
 		context:      context,
 		importPkg:    importPkg,
@@ -28,7 +28,7 @@ func defaultTypeFormatter(context common.Context, importPkg pkgImporter, importM
 	}
 }
 
-func builderTypeFormatter(context common.Context, importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
+func builderTypeFormatter(context languages.Context, importPkg pkgImporter, importModule moduleImporter) *typeFormatter {
 	return &typeFormatter{
 		importPkg:    importPkg,
 		importModule: importModule,

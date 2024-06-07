@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "title",
               "Name": "title",
               "Required": true,
               "Type": {
@@ -21,6 +22,7 @@
               }
             },
             {
+              "OriginalName": "panels",
               "Name": "panels",
               "Type": {
                 "Kind": "array",
@@ -50,6 +52,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "type",
               "Name": "type",
               "Type": {
                 "Kind": "scalar",
@@ -59,6 +62,7 @@
               }
             },
             {
+              "OriginalName": "uid",
               "Name": "uid",
               "Type": {
                 "Kind": "scalar",
@@ -82,6 +86,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "defaults",
               "Name": "defaults",
               "Type": {
                 "Kind": "ref",
@@ -106,6 +111,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "unit",
               "Name": "unit",
               "Type": {
                 "Kind": "scalar",
@@ -115,6 +121,7 @@
               }
             },
             {
+              "OriginalName": "custom",
               "Name": "custom",
               "Type": {
                 "Kind": "scalar",
@@ -138,6 +145,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "title",
               "Name": "title",
               "Required": true,
               "Type": {
@@ -148,6 +156,7 @@
               }
             },
             {
+              "OriginalName": "type",
               "Name": "type",
               "Required": true,
               "Type": {
@@ -158,6 +167,7 @@
               }
             },
             {
+              "OriginalName": "datasource",
               "Name": "datasource",
               "Type": {
                 "Kind": "ref",
@@ -168,6 +178,7 @@
               }
             },
             {
+              "OriginalName": "options",
               "Name": "options",
               "Type": {
                 "Kind": "scalar",
@@ -177,6 +188,7 @@
               }
             },
             {
+              "OriginalName": "targets",
               "Name": "targets",
               "Type": {
                 "Kind": "array",
@@ -191,6 +203,7 @@
               }
             },
             {
+              "OriginalName": "fieldConfig",
               "Name": "fieldConfig",
               "Type": {
                 "Kind": "ref",

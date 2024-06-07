@@ -49,6 +49,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "tags",
                 "Name": "tags",
                 "Type": {
                   "Kind": "array",
@@ -77,6 +78,7 @@
       "Name": "SomeStruct",
       "Options": [
         {
+          "OriginalName": "tags",
           "Name": "tags",
           "Args": [
             {

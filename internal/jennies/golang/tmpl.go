@@ -8,6 +8,7 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 //nolint:gochecknoglobals
@@ -22,6 +23,7 @@ func init() {
 	base := template.New("golang")
 	base.
 		Option("missingkey=error").
+		Funcs(cogtemplate.FormatterHelpers(languages.NewIdentifierFormatter())).
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(template.FuncMap{
@@ -45,9 +47,7 @@ func init() {
 			},
 		}).
 		Funcs(map[string]any{
-			"formatPackageName": formatPackageName,
-			"formatScalar":      formatScalar,
-			"formatArgName":     formatArgName,
+			"formatScalar": formatScalar,
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
 				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot()) {
 					return "&" + variableName

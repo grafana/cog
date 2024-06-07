@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "show",
                   "Name": "show",
                   "Type": {
                     "Kind": "scalar",
@@ -38,6 +39,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "legend",
                   "Name": "legend",
                   "Type": {
                     "Kind": "ref",
@@ -68,6 +70,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "title",
                   "Name": "title",
                   "Type": {
                     "Kind": "scalar",
@@ -79,6 +82,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "options",
                   "Name": "options",
                   "Type": {
                     "Kind": "ref",
@@ -111,6 +115,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "title",
                 "Name": "title",
                 "Type": {
                   "Kind": "scalar",
@@ -122,6 +127,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "options",
                 "Name": "options",
                 "Type": {
                   "Kind": "ref",

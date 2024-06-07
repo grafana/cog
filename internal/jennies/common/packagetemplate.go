@@ -13,6 +13,7 @@ import (
 
 	"github.com/grafana/codejen"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type PackageTemplate struct {
@@ -25,7 +26,7 @@ func (jenny PackageTemplate) JennyName() string {
 	return fmt.Sprintf("PackageTemplate[%s]", jenny.Language)
 }
 
-func (jenny PackageTemplate) Generate(context Context) (codejen.Files, error) {
+func (jenny PackageTemplate) Generate(context languages.Context) (codejen.Files, error) {
 	var files codejen.Files
 
 	templateRoot := filepath.Join(jenny.TemplateDir, jenny.Language)
@@ -75,7 +76,7 @@ func (jenny PackageTemplate) Generate(context Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny PackageTemplate) templateData(context Context) map[string]any {
+func (jenny PackageTemplate) templateData(context languages.Context) map[string]any {
 	packages := make([]string, 0, len(context.Schemas))
 	for _, schema := range context.Schemas {
 		packages = append(packages, schema.Package)

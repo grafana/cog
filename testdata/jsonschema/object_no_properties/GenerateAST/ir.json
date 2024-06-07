@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "ObjectAdditionalPropertiesWithSchema",
               "Name": "ObjectAdditionalPropertiesWithSchema",
               "Type": {
                 "Kind": "ref",
@@ -23,6 +24,7 @@
               "Required": false
             },
             {
+              "OriginalName": "ObjectNoAdditionalProperties",
               "Name": "ObjectNoAdditionalProperties",
               "Type": {
                 "Kind": "ref",
@@ -35,6 +37,7 @@
               "Required": false
             },
             {
+              "OriginalName": "ObjectNoProperties",
               "Name": "ObjectNoProperties",
               "Type": {
                 "Kind": "ref",

@@ -5,7 +5,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type Runtime struct {
@@ -15,7 +15,7 @@ func (jenny Runtime) JennyName() string {
 	return "PythonRuntime"
 }
 
-func (jenny Runtime) Generate(context common.Context) (codejen.Files, error) {
+func (jenny Runtime) Generate(context languages.Context) (codejen.Files, error) {
 	builder, err := renderTemplate("runtime/builder.tmpl", map[string]any{})
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (jenny Runtime) Generate(context common.Context) (codejen.Files, error) {
 	}, nil
 }
 
-func (jenny Runtime) variantPlugins(context common.Context) (string, error) {
+func (jenny Runtime) variantPlugins(context languages.Context) (string, error) {
 	imports := NewImportMap()
 	var panelSchemas []string
 	var dataquerySchemas []string

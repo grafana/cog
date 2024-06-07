@@ -11,6 +11,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "boolean",
               "Name": "boolean",
               "Type": {
                 "Kind": "scalar",
@@ -23,6 +24,7 @@
               "Required": false
             },
             {
+              "OriginalName": "boolean_with_type",
               "Name": "boolean_with_type",
               "Type": {
                 "Kind": "scalar",
@@ -35,6 +37,7 @@
               "Required": false
             },
             {
+              "OriginalName": "const_disguised_as_regex",
               "Name": "const_disguised_as_regex",
               "Type": {
                 "Kind": "scalar",
@@ -47,6 +50,7 @@
               "Required": false
             },
             {
+              "OriginalName": "integer",
               "Name": "integer",
               "Type": {
                 "Kind": "scalar",
@@ -59,6 +63,7 @@
               "Required": false
             },
             {
+              "OriginalName": "number",
               "Name": "number",
               "Type": {
                 "Kind": "scalar",
@@ -71,6 +76,7 @@
               "Required": false
             },
             {
+              "OriginalName": "number_with_type",
               "Name": "number_with_type",
               "Type": {
                 "Kind": "scalar",
@@ -83,6 +89,7 @@
               "Required": false
             },
             {
+              "OriginalName": "string",
               "Name": "string",
               "Type": {
                 "Kind": "scalar",
@@ -95,6 +102,7 @@
               "Required": false
             },
             {
+              "OriginalName": "string_with_type",
               "Name": "string_with_type",
               "Type": {
                 "Kind": "scalar",

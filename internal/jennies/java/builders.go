@@ -4,20 +4,20 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Builders struct {
 	config        Config
-	context       common.Context
+	context       languages.Context
 	typeFormatter *typeFormatter
 	builders      map[string]map[string]ast.Builder
 	isPanel       map[string]bool
 }
 
-func parseBuilders(config Config, context common.Context, formatter *typeFormatter) Builders {
+func parseBuilders(config Config, context languages.Context, formatter *typeFormatter) Builders {
 	b := make(map[string]map[string]ast.Builder)
 	panels := make(map[string]bool)
 	for _, builder := range context.Builders {

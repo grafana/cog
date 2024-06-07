@@ -31,6 +31,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "id",
               "Name": "id",
               "Type": {
                 "Kind": "scalar",

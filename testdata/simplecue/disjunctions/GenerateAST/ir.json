@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "text",
               "Name": "text",
               "Type": {
                 "Kind": "disjunction",
@@ -42,6 +43,7 @@
               "Required": true
             },
             {
+              "OriginalName": "listWithDifferentTypes",
               "Name": "listWithDifferentTypes",
               "Type": {
                 "Kind": "disjunction",
@@ -80,6 +82,7 @@
               "Required": true
             },
             {
+              "OriginalName": "stringOrBool",
               "Name": "stringOrBool",
               "Type": {
                 "Kind": "disjunction",
@@ -107,6 +110,7 @@
               "Required": true
             },
             {
+              "OriginalName": "stringOrNull",
               "Name": "stringOrNull",
               "Type": {
                 "Kind": "disjunction",

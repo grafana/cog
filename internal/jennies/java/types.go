@@ -5,17 +5,17 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type typeFormatter struct {
 	config        Config
 	packageMapper func(pkg string, class string) string
-	context       common.Context
+	context       languages.Context
 }
 
-func createFormatter(ctx common.Context, config Config) *typeFormatter {
+func createFormatter(ctx languages.Context, config Config) *typeFormatter {
 	return &typeFormatter{context: ctx, config: config}
 }
 

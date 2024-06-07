@@ -10,6 +10,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "const_disguised_as_regex",
               "Name": "const_disguised_as_regex",
               "Type": {
                 "Kind": "scalar",

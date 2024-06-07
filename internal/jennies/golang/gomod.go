@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type GoMod struct {
@@ -15,7 +15,7 @@ func (jenny GoMod) JennyName() string {
 	return "GoMod"
 }
 
-func (jenny GoMod) Generate(_ common.Context) (codejen.Files, error) {
+func (jenny GoMod) Generate(_ languages.Context) (codejen.Files, error) {
 	return codejen.Files{
 		*codejen.NewFile("go.mod", []byte(jenny.generateGoMod()), jenny),
 	}, nil

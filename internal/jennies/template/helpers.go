@@ -7,10 +7,24 @@ import (
 	"strings"
 	gotemplate "text/template"
 
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 const recursionMaxNums = 1000
+
+func FormatterHelpers(formatter *languages.IdentifierFormatter) gotemplate.FuncMap {
+	return gotemplate.FuncMap{
+		"formatPackageName":    formatter.Package,
+		"formatObjectName":     formatter.Object,
+		"formatFieldName":      formatter.ObjectPublicField,
+		"formatEnumName":       formatter.Enum,
+		"formatEnumMemberName": formatter.EnumMember,
+		"formatConstantName":   formatter.Constant,
+		"formatVariableName":   formatter.Variable,
+		"formatOptionName":     formatter.Option,
+	}
+}
 
 func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 	includedNames := make(map[string]int)

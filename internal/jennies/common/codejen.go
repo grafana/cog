@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type noopOneToManyJenny[Input any] struct {
@@ -31,7 +32,7 @@ func If[Input any](condition bool, innerJenny codejen.OneToMany[Input]) codejen.
 // GeneratedCommentHeader produces a FileMapper that injects a comment header onto
 // a [codejen.File] indicating  the jenny or jennies that constructed the
 // file.
-func GeneratedCommentHeader(config Config) codejen.FileMapper {
+func GeneratedCommentHeader(config languages.Config) codejen.FileMapper {
 	genHeader := `{{ .Leader }} Code generated - EDITING IS FUTILE. DO NOT EDIT.
 {{- with .Using }}
 {{ $.Leader }}

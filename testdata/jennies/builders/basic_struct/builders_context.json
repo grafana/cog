@@ -15,6 +15,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "id",
                   "Name": "id",
                   "Comments": [
                     "id identifies something. Weird, right?"
@@ -29,6 +30,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "uid",
                   "Name": "uid",
                   "Type": {
                     "Kind": "scalar",
@@ -40,6 +42,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "tags",
                   "Name": "tags",
                   "Type": {
                     "Kind": "array",
@@ -57,6 +60,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "liveNow",
                   "Name": "liveNow",
                   "Comments": [
                     "This thing could be live.",
@@ -95,6 +99,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "id",
                 "Name": "id",
                 "Comments": [
                   "id identifies something. Weird, right?"
@@ -109,6 +114,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "uid",
                 "Name": "uid",
                 "Type": {
                   "Kind": "scalar",
@@ -120,6 +126,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "tags",
                 "Name": "tags",
                 "Type": {
                   "Kind": "array",
@@ -137,6 +144,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "liveNow",
                 "Name": "liveNow",
                 "Comments": [
                   "This thing could be live.",
@@ -161,6 +169,7 @@
       },
       "Package": "basic_struct",
       "Name": "SomeStruct",
+      "Constructor": {},
       "Options": [
         {
           "Name": "id",
@@ -207,8 +216,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "uid",
@@ -252,8 +260,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "tags",
@@ -315,8 +322,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         },
         {
           "Name": "liveNow",
@@ -364,8 +370,7 @@
               },
               "Method": "direct"
             }
-          ],
-          "IsConstructorArg": false
+          ]
         }
       ]
     }

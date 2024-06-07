@@ -15,6 +15,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "FieldRef",
               "Name": "FieldRef",
               "Required": true,
               "Type": {
@@ -26,6 +27,7 @@
               }
             },
             {
+              "OriginalName": "FieldDisjunctionOfScalars",
               "Name": "FieldDisjunctionOfScalars",
               "Required": true,
               "Type": {
@@ -49,6 +51,7 @@
               }
             },
             {
+              "OriginalName": "FieldMixedDisjunction",
               "Name": "FieldMixedDisjunction",
               "Required": true,
               "Type": {
@@ -73,6 +76,7 @@
               }
             },
             {
+              "OriginalName": "FieldDisjunctionWithNull",
               "Name": "FieldDisjunctionWithNull",
               "Required": true,
               "Type": {
@@ -96,6 +100,7 @@
               }
             },
             {
+              "OriginalName": "Operator",
               "Name": "Operator",
               "Required": true,
               "Type": {
@@ -127,6 +132,7 @@
               }
             },
             {
+              "OriginalName": "FieldArrayOfStrings",
               "Name": "FieldArrayOfStrings",
               "Required": true,
               "Type": {
@@ -142,6 +148,7 @@
               }
             },
             {
+              "OriginalName": "FieldMapOfStringToString",
               "Name": "FieldMapOfStringToString",
               "Required": true,
               "Type": {
@@ -163,6 +170,7 @@
               }
             },
             {
+              "OriginalName": "FieldAnonymousStruct",
               "Name": "FieldAnonymousStruct",
               "Required": true,
               "Type": {
@@ -170,6 +178,7 @@
                 "Struct": {
                   "Fields": [
                     {
+                      "OriginalName": "FieldAny",
                       "Name": "FieldAny",
                       "Required": true,
                       "Type": {
@@ -184,6 +193,7 @@
               }
             },
             {
+              "OriginalName": "fieldRefToConstant",
               "Name": "fieldRefToConstant",
               "Type": {
                 "Kind": "ref",
@@ -225,6 +235,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "FieldAny",
               "Name": "FieldAny",
               "Required": true,
               "Type": {

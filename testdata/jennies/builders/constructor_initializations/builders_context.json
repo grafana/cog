@@ -12,6 +12,7 @@
             "Struct": {
               "Fields": [
                 {
+                  "OriginalName": "type",
                   "Name": "type",
                   "Type": {
                     "Kind": "scalar",
@@ -24,6 +25,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "title",
                   "Name": "title",
                   "Type": {
                     "Kind": "scalar",
@@ -35,6 +37,7 @@
                   "Required": true
                 },
                 {
+                  "OriginalName": "cursor",
                   "Name": "cursor",
                   "Type": {
                     "Kind": "ref",
@@ -111,6 +114,7 @@
           "Struct": {
             "Fields": [
               {
+                "OriginalName": "type",
                 "Name": "type",
                 "Type": {
                   "Kind": "scalar",
@@ -123,6 +127,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "title",
                 "Name": "title",
                 "Type": {
                   "Kind": "scalar",
@@ -134,6 +139,7 @@
                 "Required": true
               },
               {
+                "OriginalName": "cursor",
                 "Name": "cursor",
                 "Type": {
                   "Kind": "ref",

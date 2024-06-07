@@ -3,14 +3,13 @@ package java
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBuidlers_Generate(t *testing.T) {
-	test := testutils.GoldenFilesTestSuite[common.Context]{
+	test := testutils.GoldenFilesTestSuite[languages.Context]{
 		TestDataRoot: "../../../testdata/jennies/builders",
 		Name:         "JavaBuilders",
 		Skip:         map[string]string{
@@ -21,7 +20,7 @@ func TestBuidlers_Generate(t *testing.T) {
 	language := New(Config{})
 	jenny := RawTypes{}
 
-	test.Run(t, func(tc *testutils.Test[common.Context]) {
+	test.Run(t, func(tc *testutils.Test[languages.Context]) {
 		var err error
 		req := require.New(tc)
 

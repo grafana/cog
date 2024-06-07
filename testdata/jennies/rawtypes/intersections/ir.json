@@ -26,6 +26,7 @@
               "Struct": {
                 "Fields": [
                   {
+                    "OriginalName": "fieldString",
                     "Name": "fieldString",
                     "Required": true,
                     "Type": {
@@ -44,6 +45,7 @@
               "Struct": {
                 "Fields": [
                   {
+                    "OriginalName": "fieldInteger",
                     "Name": "fieldInteger",
                     "Required": true,
                     "Type": {
@@ -68,6 +70,7 @@
         "Struct": {
           "Fields": [
             {
+              "OriginalName": "fieldBool",
               "Name": "fieldBool",
               "Required": true,
               "Type": {

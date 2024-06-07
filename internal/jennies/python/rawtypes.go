@@ -7,7 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -22,7 +22,7 @@ func (jenny RawTypes) JennyName() string {
 	return "PythonRawTypes"
 }
 
-func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
+func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
@@ -39,7 +39,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 	var err error
 
@@ -190,7 +190,7 @@ func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 	return buffer.String()
 }
 
-func (jenny RawTypes) generateFromJSONMethod(context common.Context, object ast.Object) string {
+func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object ast.Object) string {
 	var buffer strings.Builder
 
 	typingPkg := jenny.importPkg("typing", "typing")
@@ -375,7 +375,7 @@ func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, input
 	return decodingMap, decodingCall
 }
 
-func (jenny RawTypes) composableSlotFromJSON(context common.Context, parentStruct ast.StructType, field ast.StructField) string {
+func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentStruct ast.StructType, field ast.StructField) string {
 	slot, _ := context.ResolveToComposableSlot(field.Type)
 	if slot.AsComposableSlot().Variant != ast.SchemaVariantDataQuery {
 		return "unknown composable slot variant"

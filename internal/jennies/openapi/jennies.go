@@ -3,7 +3,7 @@ package openapi
 import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 const LanguageRef = "openapi"
@@ -14,7 +14,7 @@ type Config struct {
 	Compact bool `yaml:"compact"`
 }
 
-func (config Config) MergeWithGlobal(global common.Config) Config {
+func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug
 
@@ -35,9 +35,9 @@ func (language *Language) Name() string {
 	return LanguageRef
 }
 
-func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
+func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
-	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
+	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 
