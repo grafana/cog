@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"text/template"
-	
+
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
@@ -23,7 +23,7 @@ func init() {
 		Option("missingkey=error").
 		Funcs(cogtemplate.Helpers(base)).
 		Funcs(functions())
-	
+
 	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
 }
 
@@ -84,11 +84,11 @@ type ClassTemplate struct {
 	Name     string
 	Extends  []string
 	Comments []string
-	
+
 	Fields     []Field
 	Builder    cogtemplate.Builder
 	HasBuilder bool
-	
+
 	Variant              string
 	ShouldAddMarshalling bool
 }
