@@ -6,20 +6,12 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/tools"
 )
 
 func formatPackageName(pkg string) string {
 	rgx := regexp.MustCompile("[^a-zA-Z0-9_]+")
 
 	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
-}
-
-func formatFieldPath(fieldPath ast.Path) string {
-	parts := tools.Map(fieldPath, func(fieldPath ast.PathItem) string {
-		return tools.LowerCamelCase(fieldPath.Identifier)
-	})
-	return strings.Join(parts, ".")
 }
 
 func formatScalar(val any) any {
@@ -37,6 +29,20 @@ func escapeVarName(varName string) string {
 	}
 
 	return varName
+}
+
+func lastPathIdentifier(fieldPath ast.Path) string {
+	lastPath := make([]string, 0)
+	shouldAddPath := false
+	for _, path := range fieldPath {
+		if shouldAddPath {
+			lastPath = append(lastPath, path.Identifier)
+		}
+		if path.Type.IsAny() {
+			shouldAddPath = true
+		}
+	}
+	return strings.Join(lastPath, ".")
 }
 
 // nolint: gocyclo
