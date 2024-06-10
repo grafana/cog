@@ -256,7 +256,6 @@ func (tf *typeFormatter) shouldCastNilCheck(fieldPath ast.Path) CastPath {
 		Path:         castedPath,
 		IsNilChecked: isNilChecked,
 	}
-
 }
 
 func (tf *typeFormatter) formatFieldPath(fieldPath ast.Path) string {
