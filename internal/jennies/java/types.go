@@ -195,14 +195,18 @@ func (tf *typeFormatter) formatCastValue(fieldPath ast.Path) CastPath {
 	
 	castedPath := fieldPath[0].Identifier
 	isNilChecked := false
+	genericFound := false
 	
-	if len(fieldPath) > 1 {
-		castedPath := fieldPath[1].Identifier
-		for i, p := range fieldPath {
-			if i > 0 && fieldPath[i-1].Type.IsAny() {
-				isNilChecked = true
+	for i, p := range fieldPath {
+		if i > 0 && fieldPath[i-1].Type.IsAny() && i != len(fieldPath)-1 {
+			isNilChecked = true
+		}
+		
+		if !genericFound {
+			if i > 0 {
+				castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
 			}
-			castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+			genericFound = p.Type.IsAny()
 		}
 	}
 	
@@ -212,6 +216,47 @@ func (tf *typeFormatter) formatCastValue(fieldPath ast.Path) CastPath {
 		Path:         castedPath,
 		IsNilChecked: isNilChecked,
 	}
+}
+
+func (tf *typeFormatter) shouldCastNilCheck(fieldPath ast.Path) CastPath {
+	refPkg := ""
+	refType := ""
+	for _, path := range fieldPath {
+		if path.TypeHint == nil && path.Type.Kind == ast.KindRef {
+			refPkg = path.Type.AsRef().ReferredPkg
+			refType = path.Type.AsRef().ReferredType
+		}
+	}
+	
+	if refType == "" {
+		return CastPath{}
+	}
+	
+	castedPath := fieldPath[0].Identifier
+	isNilChecked := false
+	genericFound := false
+	
+	for i, p := range fieldPath {
+		if i > 0 && p.Type.IsRef() && !fieldPath[i-1].Type.IsRef() {
+			refType = fieldPath[i-1].Identifier
+			isNilChecked = true
+		}
+		
+		if !genericFound {
+			if i > 0 {
+				castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+			}
+			genericFound = p.Type.IsAny()
+		}
+	}
+	
+	return CastPath{
+		Class:        fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), refType),
+		Value:        refType,
+		Path:         castedPath,
+		IsNilChecked: isNilChecked,
+	}
+	
 }
 
 func (tf *typeFormatter) formatFieldPath(fieldPath ast.Path) string {

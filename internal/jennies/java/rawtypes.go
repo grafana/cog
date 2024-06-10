@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
-
+	
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -16,7 +16,7 @@ import (
 type RawTypes struct {
 	config  Config
 	imports *common.DirectImportMap
-
+	
 	typeFormatter *typeFormatter
 	builders      Builders
 }
@@ -30,16 +30,16 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
 	jenny.builders = parseBuilders(jenny.config, context, jenny.typeFormatter)
-
+	
 	for _, schema := range context.Schemas {
 		output, err := jenny.genFilesForSchema(schema)
 		if err != nil {
 			return nil, err
 		}
-
+		
 		files = append(files, output...)
 	}
-
+	
 	return files, nil
 }
 
@@ -53,6 +53,7 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"formatCastValue":          jenny.typeFormatter.formatCastValue,
 		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,
 		"formatPath":               jenny.typeFormatter.formatFieldPath,
+		"shouldCastNilCheck":       jenny.typeFormatter.shouldCastNilCheck,
 	})
 }
 
@@ -60,17 +61,17 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 	var err error
 	files := make(codejen.Files, 0)
 	scalars := make(map[string]ast.ScalarType)
-
+	
 	packageMapper := func(pkg string, class string) string {
 		if jenny.imports.IsIdentical(pkg, schema.Package) {
 			return ""
 		}
-
+		
 		return jenny.imports.Add(class, pkg)
 	}
-
+	
 	jenny.typeFormatter = jenny.typeFormatter.withPackageMapper(packageMapper)
-
+	
 	alreadyValidatedPanel := make(map[string]bool)
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		jenny.imports = NewImportMap(jenny.config.PackagePath)
@@ -83,18 +84,18 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			}
 			return
 		}
-
+		
 		pkg := formatPackageName(schema.Package)
 		output, innerErr := jenny.generateSchema(pkg, object)
 		if innerErr != nil {
 			err = innerErr
 			return
 		}
-
+		
 		filename := filepath.Join(jenny.config.ProjectPath, pkg, fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)))
-
+		
 		files = append(files, *codejen.NewFile(filename, output, jenny))
-
+		
 		// Because we need to check the package only, it could have multiple files, and we want to generate
 		// the builder once.
 		if !alreadyValidatedPanel[schema.Package] {
@@ -103,7 +104,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 				err = innerErr
 				return
 			}
-
+			
 			if panelOutput != nil {
 				alreadyValidatedPanel[schema.Package] = true
 				filename := filepath.Join(jenny.config.ProjectPath, strings.ToLower(schema.Package), "PanelBuilder.java")
@@ -111,21 +112,21 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 			}
 		}
 	})
-
+	
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(scalars) > 0 {
 		output, err := jenny.formatScalars(schema.Package, scalars)
 		if err != nil {
 			return nil, err
 		}
-
+		
 		filename := filepath.Join(jenny.config.ProjectPath, strings.ToLower(schema.Package), "Constants.java")
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
-
+	
 	return files, nil
 }
 
@@ -140,7 +141,7 @@ func (jenny RawTypes) generateSchema(pkg string, object ast.Object) ([]byte, err
 	case ast.KindIntersection:
 		return jenny.formatIntersection(pkg, object)
 	}
-
+	
 	return nil, nil
 }
 
@@ -151,20 +152,20 @@ func (jenny RawTypes) generatePanelBuilder(pkg string) ([]byte, error) {
 	if !hasBuilder {
 		return nil, nil
 	}
-
+	
 	builder.Imports = jenny.imports
-
+	
 	var buffer strings.Builder
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/panel_builder.tmpl", builder); err != nil {
 		return nil, err
 	}
-
+	
 	return []byte(buffer.String()), nil
 }
 
 func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
-
+	
 	enum := object.Type.AsEnum()
 	values := make([]EnumValue, len(enum.Values))
 	for i, value := range enum.Values {
@@ -176,12 +177,12 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 			Value: value.Value,
 		}
 	}
-
+	
 	enumType := "Integer"
 	if enum.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
 		enumType = "String"
 	}
-
+	
 	err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
 		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Name:     object.Name,
@@ -189,17 +190,17 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 		Type:     enumType,
 		Comments: object.Comments,
 	})
-
+	
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return []byte(buffer.String()), nil
 }
 
 func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
-
+	
 	fields := make([]Field, 0)
 	for _, field := range object.Type.AsStruct().Fields {
 		fields = append(fields, Field{
@@ -208,10 +209,10 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 			Comments: field.Comments,
 		})
 	}
-
+	
 	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name)
 	jenny.addJSONImportsIfNeeded()
-
+	
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:              jenny.typeFormatter.formatPackage(pkg),
 		Imports:              jenny.imports,
@@ -225,13 +226,13 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	}); err != nil {
 		return nil, err
 	}
-
+	
 	return []byte(buffer.String()), nil
 }
 
 func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarType) ([]byte, error) {
 	var buffer strings.Builder
-
+	
 	constants := make([]Constant, 0)
 	for name, scalar := range scalars {
 		constants = append(constants, Constant{
@@ -240,7 +241,7 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 			Value: scalar.Value,
 		})
 	}
-
+	
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/constants.tmpl", ConstantTemplate{
 		Package:   jenny.typeFormatter.formatPackage(pkg),
 		Name:      "Constants",
@@ -248,14 +249,14 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 	}); err != nil {
 		return nil, err
 	}
-
+	
 	return []byte(buffer.String()), nil
 }
 
 func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
-
+	
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Imports:  jenny.imports,
@@ -266,17 +267,17 @@ func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, er
 	}); err != nil {
 		return nil, err
 	}
-
+	
 	return []byte(buffer.String()), nil
 }
 
 func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
-
+	
 	intersection := object.Type.AsIntersection()
 	extensions := make([]string, 0)
 	fields := make([]Field, 0)
-
+	
 	for _, branch := range intersection.Branches {
 		switch branch.Kind {
 		case ast.KindRef:
@@ -285,7 +286,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 			fields = append(fields, jenny.formatFields(branch.AsStruct())...)
 		}
 	}
-
+	
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
 		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Imports:  jenny.imports,
@@ -297,7 +298,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 	}); err != nil {
 		return nil, err
 	}
-
+	
 	return []byte(buffer.String()), nil
 }
 
@@ -310,7 +311,7 @@ func (jenny RawTypes) formatFields(def ast.StructType) []Field {
 			Comments: field.Comments,
 		}
 	}
-
+	
 	return fields
 }
 

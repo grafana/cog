@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"text/template"
-
+	
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
@@ -23,7 +23,7 @@ func init() {
 		Option("missingkey=error").
 		Funcs(cogtemplate.Helpers(base)).
 		Funcs(functions())
-
+	
 	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
 }
 
@@ -37,6 +37,9 @@ func functions() template.FuncMap {
 		},
 		"formatCastValue": func(_ ast.Type) string {
 			panic("formatCastValue() needs to be overridden by a jenny")
+		},
+		"shouldCastNilCheck": func(_ ast.Type) string {
+			panic("shouldCastNilCheck() needs to be overridden by a jenny")
 		},
 		"formatPath": func(_ ast.Type) string {
 			panic("formatPath() needs to be overridden by a jenny")
@@ -81,11 +84,11 @@ type ClassTemplate struct {
 	Name     string
 	Extends  []string
 	Comments []string
-
+	
 	Fields     []Field
 	Builder    cogtemplate.Builder
 	HasBuilder bool
-
+	
 	Variant              string
 	ShouldAddMarshalling bool
 }

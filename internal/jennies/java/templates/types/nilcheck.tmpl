@@ -1,5 +1,5 @@
 {{- define "nil_check" }}
-        {{- $castPath := formatCastValue .Path }}
+        {{- $castPath := shouldCastNilCheck .Path }}
         {{- if $castPath.IsNilChecked }}
         {{ $castPath.Class }} {{ $castPath.Value | lowerCamelCase }}Resource = ({{ $castPath.Class }}) this.internal.{{ $castPath.Path }};
         if ({{ $castPath.Value | lowerCamelCase }}Resource.{{ .Path|formatPath }} == null) {
