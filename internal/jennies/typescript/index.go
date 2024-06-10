@@ -6,19 +6,19 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Index struct {
-	Targets common.Config
+	Targets languages.Config
 }
 
 func (jenny Index) JennyName() string {
 	return "TypescriptIndex"
 }
 
-func (jenny Index) Generate(context common.Context) (codejen.Files, error) {
+func (jenny Index) Generate(context languages.Context) (codejen.Files, error) {
 	packages := make(map[string][]string, len(context.Schemas))
 	files := codejen.Files{}
 

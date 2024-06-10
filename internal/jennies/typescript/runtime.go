@@ -2,7 +2,7 @@ package typescript
 
 import (
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type Runtime struct {
@@ -12,7 +12,7 @@ func (jenny Runtime) JennyName() string {
 	return "TypescriptRuntime"
 }
 
-func (jenny Runtime) Generate(_ common.Context) (codejen.Files, error) {
+func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 	return codejen.Files{
 		*codejen.NewFile("src/cog/variants_gen.ts", []byte(jenny.generateVariantsFile()), jenny),
 		*codejen.NewFile("src/cog/builder_gen.ts", []byte(jenny.generateOptionsBuilderFile()), jenny),

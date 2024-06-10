@@ -149,12 +149,11 @@ func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
 		if err != nil {
 			return ast.Type{}, err
 		}
-		fields = append(fields, ast.StructField{
-			Name:     name,
-			Comments: schemaComments(schema),
-			Type:     def,
-			Required: tools.ItemInList(name, schema.Required),
-		})
+
+		field := ast.NewStructField(name, def, ast.Comments(schemaComments(schema)))
+		field.Required = tools.ItemInList(name, schema.Required)
+
+		fields = append(fields, field)
 	}
 
 	sort.Slice(fields, func(i, j int) bool {

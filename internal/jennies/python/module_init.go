@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type ModuleInit struct {
@@ -14,7 +14,7 @@ func (jenny ModuleInit) JennyName() string {
 	return "PythonModuleInit"
 }
 
-func (jenny ModuleInit) Generate(context common.Context) (codejen.Files, error) {
+func (jenny ModuleInit) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas)+2)
 
 	files = append(files, *codejen.NewFile("__init__.py", jenny.module("root"), jenny))
