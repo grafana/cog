@@ -4,7 +4,7 @@ package sandbox;
 public class SomeStruct {
     public String title;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         
         public Builder(String title) {

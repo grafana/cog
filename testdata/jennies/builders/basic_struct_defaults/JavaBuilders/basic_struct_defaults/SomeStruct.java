@@ -8,7 +8,7 @@ public class SomeStruct {
     public List<String> tags;
     public Boolean liveNow;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         
         public Builder() {

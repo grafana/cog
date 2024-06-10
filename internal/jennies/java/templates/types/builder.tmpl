@@ -1,5 +1,5 @@
 {{- define "builder" }}
-    public static class Builder {
+    public static class Builder implements {{ .ImportAlias }}<{{ .ObjectName }}> {
         private {{ .ObjectName }} internal;
         
         {{- range .Properties }}

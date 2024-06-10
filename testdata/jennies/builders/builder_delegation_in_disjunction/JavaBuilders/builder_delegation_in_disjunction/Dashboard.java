@@ -9,7 +9,7 @@ public class Dashboard {
     public List<unknown> linksOrStrings;
     public unknown disjunctionOfBuilders;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<Dashboard> {
         private Dashboard internal;
         
         public Builder() {

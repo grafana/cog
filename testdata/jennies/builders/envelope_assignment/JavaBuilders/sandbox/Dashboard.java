@@ -6,7 +6,7 @@ import java.util.LinkedList;
 public class Dashboard {
     public List<Variable> variables;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<Dashboard> {
         private Dashboard internal;
         
         public Builder() {

@@ -4,7 +4,7 @@ package builder_delegation_in_disjunction;
 public class ExternalLink {
     public String url;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<ExternalLink> {
         private ExternalLink internal;
         
         public Builder() {

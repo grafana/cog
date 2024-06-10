@@ -5,7 +5,7 @@ import other_pkg.Name;
 public class Person {
     public Name name;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<Person> {
         private Person internal;
         
         public Builder() {

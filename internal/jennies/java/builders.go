@@ -52,6 +52,7 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 		Options:     builder.Options,
 		Properties:  builder.Properties,
 		Defaults:    b.genDefaults(builder.Options),
+		ImportAlias: b.typeFormatter.formatPackage("cog.Builder"),
 	}, true
 }
 
