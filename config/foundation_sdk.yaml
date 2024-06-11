@@ -40,7 +40,7 @@ inputs:
   - openapi:
       url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/public/openapi3.json'
       no_validate: true
-      package: dasd
+      package: dashboardmeta
       allowed_objects:
         - DashboardMeta
 
