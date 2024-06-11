@@ -17,8 +17,10 @@ func TestBuidlers_Generate(t *testing.T) {
 		},
 	}
 
-	language := New(Config{})
-	jenny := RawTypes{}
+	language := New(Config{
+		generateBuilders: true,
+	})
+	jenny := RawTypes{config: language.config}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {
 		var err error
