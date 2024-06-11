@@ -35,6 +35,17 @@ type InputBase struct {
 	// Transforms holds a list of paths to files containing compiler passes
 	// to apply to the input.
 	Transforms []string `yaml:"transformations"`
+
+	// Metadata to add to the schema, this can be used to set Kind and Variant
+	Metadata *ast.SchemaMeta `yaml:"metadata"`
+}
+
+func (input *InputBase) schemaMetadata() ast.SchemaMeta {
+	if input.Metadata != nil {
+		return *input.Metadata
+	}
+
+	return ast.SchemaMeta{}
 }
 
 func (input *InputBase) compilerPasses() (compiler.Passes, error) {

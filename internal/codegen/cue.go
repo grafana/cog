@@ -97,7 +97,7 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 	schema, err := simplecue.GenerateAST(schemaRootValue, simplecue.Config{
 		Package:            input.packageName(),
 		ForceNamedEnvelope: input.ForcedEnvelope,
-		SchemaMetadata:     ast.SchemaMeta{}, // TODO: extract these from somewhere
+		SchemaMetadata:     input.schemaMetadata(),
 		Libraries:          libraries,
 	})
 	if err != nil {
