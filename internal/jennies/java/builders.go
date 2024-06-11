@@ -24,7 +24,9 @@ func parseBuilders(config Config, context languages.Context, formatter *typeForm
 		if _, ok := b[builder.Package]; !ok {
 			b[builder.Package] = map[string]ast.Builder{}
 		}
-		b[builder.Package][builder.Name] = builder
+
+		obj, _ := context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
+		b[builder.Package][obj.Name] = builder
 		panels[builder.Package] = builder.Name == "Panel" && builder.Package != "dashboard" // TODO: Ugh! Maybe a compiler pass??
 	}
 
