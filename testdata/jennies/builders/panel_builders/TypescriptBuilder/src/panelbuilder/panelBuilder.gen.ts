@@ -1,14 +1,14 @@
 import * as cog from '../cog';
 import * as panelbuilder from '../panelbuilder';
 
-export class PanelBuilder implements cog.Builder<panelbuilder.Options> {
-    protected readonly internal: panelbuilder.Options;
+export class PanelBuilder implements cog.Builder<panelbuilder.Panel> {
+    protected readonly internal: panelbuilder.Panel;
 
     constructor() {
-        this.internal = panelbuilder.defaultOptions();
+        this.internal = panelbuilder.defaultPanel();
     }
 
-    build(): panelbuilder.Options {
+    build(): panelbuilder.Panel {
         return this.internal;
     }
 
