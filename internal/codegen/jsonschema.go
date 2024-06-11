@@ -21,9 +21,6 @@ type JSONSchemaInput struct {
 	// Package name to use for the input schema. If empty, it will be guessed
 	// from the input file name.
 	Package string `yaml:"package"`
-
-	// Metadata to add to the schema, this can be used to set Kind and Variant
-	Metadata ast.SchemaMeta `yaml:"metadata"`
 }
 
 func (input *JSONSchemaInput) interpolateParameters(interpolator ParametersInterpolator) {
@@ -59,7 +56,7 @@ func (input *JSONSchemaInput) LoadSchemas(ctx context.Context) (ast.Schemas, err
 
 	schema, err := jsonschema.GenerateAST(schemaReader, jsonschema.Config{
 		Package:        input.packageName(),
-		SchemaMetadata: input.Metadata,
+		SchemaMetadata: input.schemaMetadata(),
 	})
 	if err != nil {
 		return nil, err
