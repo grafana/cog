@@ -3,13 +3,13 @@ from ..cog import builder as cogbuilder
 from ..models import panelbuilder
 
 
-class Panel(cogbuilder.Builder[panelbuilder.Options]):    
-    _internal: panelbuilder.Options
+class Panel(cogbuilder.Builder[panelbuilder.Panel]):    
+    _internal: panelbuilder.Panel
 
     def __init__(self):
-        self._internal = panelbuilder.Options()
+        self._internal = panelbuilder.Panel()
 
-    def build(self) -> panelbuilder.Options:
+    def build(self) -> panelbuilder.Panel:
         return self._internal    
     
     def only_from_this_dashboard(self, only_from_this_dashboard: bool) -> typing.Self:        
