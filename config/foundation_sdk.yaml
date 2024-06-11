@@ -37,6 +37,13 @@ inputs:
       transformations:
         - '%__config_dir%/compiler/alerting.yaml'
 
+  - openapi:
+      url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/public/openapi3.json'
+      no_validate: true
+      package: dasd
+      allowed_objects:
+        - DashboardMeta
+
   # The schema for testdata queries is gone from the kind-registry since v11.0.x
   - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v11.0.x"))'
     jsonschema:
