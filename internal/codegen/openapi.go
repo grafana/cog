@@ -67,7 +67,7 @@ func (input *OpenAPIInput) LoadSchemas(ctx context.Context) (ast.Schemas, error)
 
 	schema, err := openapi.GenerateAST(ctx, oapiSchema, openapi.Config{
 		Package:        input.packageName(),
-		SchemaMetadata: ast.SchemaMeta{}, // TODO: extract these from somewhere
+		SchemaMetadata: input.schemaMetadata(),
 		Validate:       !input.NoValidate,
 	})
 	if err != nil {

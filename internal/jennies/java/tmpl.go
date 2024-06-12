@@ -29,14 +29,20 @@ func init() {
 
 func functions() template.FuncMap {
 	return template.FuncMap{
-		"escapeVar":    escapeVarName,
-		"formatScalar": formatScalar,
-		"formatPath":   formatFieldPath,
+		"escapeVar":          escapeVarName,
+		"formatScalar":       formatScalar,
+		"lastPathIdentifier": lastPathIdentifier,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
 		"formatCastValue": func(_ ast.Type) string {
 			panic("formatCastValue() needs to be overridden by a jenny")
+		},
+		"shouldCastNilCheck": func(_ ast.Type) string {
+			panic("shouldCastNilCheck() needs to be overridden by a jenny")
+		},
+		"formatPath": func(_ ast.Type) string {
+			panic("formatPath() needs to be overridden by a jenny")
 		},
 		"formatAssignmentPath": func(_ ast.Type) string {
 			panic("formatAssignmentPath() needs to be overridden by a jenny")

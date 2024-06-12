@@ -37,6 +37,9 @@
           "type": "array",
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
+        "schema_metadata": {
+          "$ref": "#/$defs/SchemaMeta"
+        },
         "entrypoint": {
           "type": "string",
           "description": "Entrypoint refers to a directory containing CUE files."
@@ -103,6 +106,9 @@
           "type": "array",
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
+        "schema_metadata": {
+          "$ref": "#/$defs/SchemaMeta"
+        },
         "path": {
           "type": "string",
           "description": "Path to a JSONSchema file."
@@ -139,6 +145,9 @@
           "type": "array",
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
+        "schema_metadata": {
+          "$ref": "#/$defs/SchemaMeta"
+        },
         "path": {
           "type": "string"
         },
@@ -164,6 +173,9 @@
           },
           "type": "array",
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "schema_metadata": {
+          "$ref": "#/$defs/SchemaMeta"
         },
         "path": {
           "type": "string",

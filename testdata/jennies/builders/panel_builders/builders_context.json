@@ -8,7 +8,7 @@
         "Identifier": "annolist"
       },
       "Objects": {
-        "Options": {
+        "Panel": {
           "Name": "Options",
           "Type": {
             "Kind": "struct",
@@ -144,8 +144,8 @@
             }
           },
           "SelfRef": {
-            "ReferredPkg": "annotationslist",
-            "ReferredType": "Options"
+            "ReferredPkg": "panelbuilder",
+            "ReferredType": "Panel"
           }
         }
       }
@@ -154,7 +154,7 @@
   "Builders": [
     {
       "For": {
-        "Name": "Options",
+        "Name": "Panel",
         "Type": {
           "Kind": "struct",
           "Nullable": false,
@@ -290,7 +290,7 @@
         },
         "SelfRef": {
           "ReferredPkg": "panelbuilder",
-          "ReferredType": "Options"
+          "ReferredType": "Panel"
         }
       },
       "Package": "panelbuilder",

@@ -171,9 +171,10 @@ func (tf *typeFormatter) formatScalar(v any) string {
 }
 
 type CastPath struct {
-	Class string
-	Value string
-	Path  string
+	Class        string
+	Value        string
+	Path         string
+	IsNilChecked bool
 }
 
 // formatCastValue identifies if the object to set is a generic one, so it needs
@@ -193,15 +194,83 @@ func (tf *typeFormatter) formatCastValue(fieldPath ast.Path) CastPath {
 	}
 
 	castedPath := fieldPath[0].Identifier
-	for _, p := range fieldPath[1 : len(fieldPath)-1] {
-		castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+	isNilChecked := false
+	genericFound := false
+
+	for i, p := range fieldPath {
+		if i > 0 && fieldPath[i-1].Type.IsAny() && i != len(fieldPath)-1 {
+			isNilChecked = true
+		}
+
+		if !genericFound {
+			if i > 0 {
+				castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+			}
+			genericFound = p.Type.IsAny()
+		}
 	}
 
 	return CastPath{
-		Class: fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), refType),
-		Value: refType,
-		Path:  castedPath,
+		Class:        fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), refType),
+		Value:        refType,
+		Path:         castedPath,
+		IsNilChecked: isNilChecked,
 	}
+}
+
+func (tf *typeFormatter) shouldCastNilCheck(fieldPath ast.Path) CastPath {
+	refPkg := ""
+	refType := ""
+	for _, path := range fieldPath {
+		if path.TypeHint == nil && path.Type.Kind == ast.KindRef {
+			refPkg = path.Type.AsRef().ReferredPkg
+			refType = path.Type.AsRef().ReferredType
+		}
+	}
+
+	if refType == "" {
+		return CastPath{}
+	}
+
+	castedPath := fieldPath[0].Identifier
+	isNilChecked := false
+	genericFound := false
+
+	for i, p := range fieldPath {
+		if i > 0 && p.Type.IsRef() && !fieldPath[i-1].Type.IsRef() {
+			refType = fieldPath[i-1].Identifier
+			isNilChecked = true
+		}
+
+		if !genericFound {
+			if i > 0 {
+				castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+			}
+			genericFound = p.Type.IsAny()
+		}
+	}
+
+	return CastPath{
+		Class:        fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), tools.UpperCamelCase(refType)),
+		Value:        refType,
+		Path:         castedPath,
+		IsNilChecked: isNilChecked,
+	}
+}
+
+func (tf *typeFormatter) formatFieldPath(fieldPath ast.Path) string {
+	parts := make([]string, 0)
+	for i, part := range fieldPath {
+		output := tools.LowerCamelCase(part.Identifier)
+
+		if i > 0 && fieldPath[i-1].Type.IsAny() {
+			return output
+		}
+
+		parts = append(parts, output)
+	}
+
+	return strings.Join(parts, ".")
 }
 
 // formatAssignmentPath generates the pad to assign the value. When the value is a generic one (Object) like Custom or FieldConfig
@@ -213,9 +282,12 @@ func (tf *typeFormatter) formatAssignmentPath(fieldPath ast.Path) string {
 		return path
 	}
 
-	for _, p := range fieldPath[1:] {
-		path = fmt.Sprintf("%s.%s", path, tools.LowerCamelCase(p.Identifier))
+	for i, p := range fieldPath[1:] {
+		if fieldPath[i].Type.IsAny() && i != len(fieldPath)-1 {
+			return path
+		}
 
+		path = fmt.Sprintf("%s.%s", path, tools.LowerCamelCase(p.Identifier))
 		if p.TypeHint != nil {
 			return path
 		}

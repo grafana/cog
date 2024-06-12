@@ -4,15 +4,15 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-var _ cog.Builder[Options] = (*PanelBuilder)(nil)
+var _ cog.Builder[Panel] = (*PanelBuilder)(nil)
 
 type PanelBuilder struct {
-    internal *Options
+    internal *Panel
     errors map[string]cog.BuildErrors
 }
 
 func NewPanelBuilder() *PanelBuilder {
-	resource := &Options{}
+	resource := &Panel{}
 	builder := &PanelBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
@@ -23,7 +23,7 @@ func NewPanelBuilder() *PanelBuilder {
 	return builder
 }
 
-func (builder *PanelBuilder) Build() (Options, error) {
+func (builder *PanelBuilder) Build() (Panel, error) {
 	var errs cog.BuildErrors
 
 	for _, err := range builder.errors {
@@ -31,7 +31,7 @@ func (builder *PanelBuilder) Build() (Options, error) {
 	}
 
 	if len(errs) != 0 {
-		return Options{}, errs
+		return Panel{}, errs
 	}
 
 	return *builder.internal, nil
