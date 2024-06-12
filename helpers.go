@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/typescript"
+	"github.com/grafana/cog/internal/simplecue"
 )
 
 // singleSchemaPipeline represents a simplified codegen.Pipeline, meant to
@@ -40,6 +41,12 @@ type CUEOption func(*codegen.CueInput)
 func ForceEnvelope(envelopeName string) CUEOption {
 	return func(input *codegen.CueInput) {
 		input.ForcedEnvelope = envelopeName
+	}
+}
+
+func NameFunc(nameFunc simplecue.NameFunc) CUEOption {
+	return func(input *codegen.CueInput) {
+		input.NameFunc = nameFunc
 	}
 }
 
