@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/fs"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"cuelang.org/go/cue"
@@ -59,6 +60,51 @@ schema: {
 		ast.NewObject("grafanatest", "spec", ast.NewStruct(
 			ast.NewStructField("title", ast.String(), ast.Required()),
 			ast.NewStructField("origin", ast.NewRef("grafanatest", "Origin"), ast.Required()),
+		)),
+	}
+
+	req.Equal(testutils.ObjectsMap(objects...), schemaAst.Objects)
+}
+
+func TestGenerateAST_withCustomNameFunc(t *testing.T) {
+	req := require.New(t)
+	schema := `
+schema: {
+  #Origin: { creator: string }
+  spec: {
+    title: string
+    origin: #Origin
+    details: #Details
+    #Details: {
+      [string]: _
+    }
+  }
+}
+`
+
+	nameFunc := func(_ cue.Value, path cue.Path) string {
+		return strings.Trim(path.String(), "?#")
+	}
+
+	cueVal := cuecontext.New().CompileString(schema)
+	specCueVal := cueVal.LookupPath(cue.ParsePath("schema.spec"))
+
+	schemaAst, err := GenerateAST(specCueVal, Config{Package: "grafanatest", ForceNamedEnvelope: "spec", NameFunc: nameFunc})
+	req.NoError(err)
+	require.NotNil(t, schemaAst)
+
+	objects := []ast.Object{
+		ast.NewObject("grafanatest", "schema.#Origin", ast.NewStruct(
+			ast.NewStructField("creator", ast.String(), ast.Required()),
+		)),
+		ast.NewObject("grafanatest", "schema.spec.#Details", ast.NewMap(
+			ast.String(),
+			ast.Any(),
+		)),
+		ast.NewObject("grafanatest", "spec", ast.NewStruct(
+			ast.NewStructField("title", ast.String(), ast.Required()),
+			ast.NewStructField("origin", ast.NewRef("grafanatest", "schema.#Origin"), ast.Required()),
+			ast.NewStructField("details", ast.NewRef("grafanatest", "schema.spec.#Details"), ast.Required()),
 		)),
 	}
 

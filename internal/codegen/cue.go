@@ -49,6 +49,8 @@ type CueInput struct {
 	// CueImports allows importing additional libraries.
 	// Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common
 	CueImports []string `yaml:"cue_imports"`
+
+	NameFunc simplecue.NameFunc `yaml:"-"`
 }
 
 func (input *CueInput) packageName() string {
@@ -99,6 +101,7 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 		ForceNamedEnvelope: input.ForcedEnvelope,
 		SchemaMetadata:     input.schemaMetadata(),
 		Libraries:          libraries,
+		NameFunc:           input.NameFunc,
 	})
 	if err != nil {
 		return nil, err
