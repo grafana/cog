@@ -27,6 +27,12 @@ func AppendCommentToObjects(comment string) compiler.Pass {
 	}
 }
 
+func PrefixObjectsNames(prefix string) compiler.Pass {
+	return &compiler.PrefixObjectNames{
+		Prefix: prefix,
+	}
+}
+
 type SingleSchemaOption func(*singleSchemaPipeline)
 
 type CUEOption func(*codegen.CueInput)
