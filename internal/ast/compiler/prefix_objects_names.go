@@ -8,7 +8,7 @@ import (
 
 var _ Pass = (*PrefixObjectNames)(nil)
 
-// PrefixObjectNames appends the given comment to every object definition.
+// PrefixObjectNames adds the given prefix to every object's name.
 type PrefixObjectNames struct {
 	Prefix string
 }

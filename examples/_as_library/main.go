@@ -47,16 +47,15 @@ func main() {
 		panic(v.Err())
 	}
 
-	types, err := cog.TypesFromSchema(
-		context.Background(),
-		cog.CUEValue("sandbox", v),
-		cog.GoTypes(),
-		cog.SchemaTransformations(
+	types, err := cog.TypesFromSchema().
+		CUEValue("sandbox", v).
+		Golang().
+		//Typescript().
+		SchemaTransformations(
 			cog.AppendCommentToObjects("+k8s:openapi-gen=true"),
 			cog.PrefixObjectsNames("Foo"),
-		),
-		//cog.TypescriptTypes(),
-	)
+		).
+		Run(context.Background())
 	if err != nil {
 		panic(err)
 	}
