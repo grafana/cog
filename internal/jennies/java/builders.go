@@ -18,6 +18,12 @@ type Builders struct {
 }
 
 func parseBuilders(config Config, context languages.Context, formatter *typeFormatter) Builders {
+	if !config.generateBuilders || config.SkipRuntime {
+		return Builders{
+			builders: make(map[string]map[string]ast.Builder),
+			isPanel:  make(map[string]bool),
+		}
+	}
 	b := make(map[string]map[string]ast.Builder)
 	panels := make(map[string]bool)
 	for _, builder := range context.Builders {
