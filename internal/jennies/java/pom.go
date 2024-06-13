@@ -30,7 +30,7 @@ func (jenny Pom) generatePom() string {
 	<groupId>com.grafana.foundation</groupId>
 	<artifactId>sdk</artifactId>
 	<version>%s</version>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 
 	<name>Grafana foundation SDK</name>
 	<description>Grafana Java library</description>

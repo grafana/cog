@@ -179,6 +179,12 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 				constraints = field.Type.AsScalar().Constraints
 			}
 
+			// It sets the default to the args to simplify the process to extract the values in each language
+			// since defaults don't have enough information to detect a reference.
+			if def, ok := defaults[field.Name]; ok {
+				field.Type.Default = def
+			}
+
 			newArg := ast.Argument{
 				Name: field.Name,
 				Type: field.Type,

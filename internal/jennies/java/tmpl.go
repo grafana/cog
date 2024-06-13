@@ -86,7 +86,7 @@ type ClassTemplate struct {
 	Comments []string
 
 	Fields     []Field
-	Builder    cogtemplate.Builder
+	Builder    Builder
 	HasBuilder bool
 
 	Variant              string
@@ -109,4 +109,24 @@ type Constant struct {
 	Name  string
 	Type  string
 	Value any
+}
+
+type Builder struct {
+	Package              string
+	BuilderSignatureType string
+	BuilderName          string
+	ObjectName           string
+	Imports              fmt.Stringer
+	ImportAlias          string // alias to the pkg in which the object being built lives.
+	Comments             []string
+	Constructor          ast.Constructor
+	Properties           []ast.StructField
+	Options              []ast.Option
+	Defaults             []OptionCall
+}
+
+type OptionCall struct {
+	Initializers []string
+	OptionName   string
+	Args         []string
 }
