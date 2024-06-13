@@ -91,6 +91,9 @@ func (b Builders) genDefaults(options []ast.Option) []OptionCall {
 	return calls
 }
 
+// formatInitializers initialises objects with their defaults before set the value in the corresponding setter.
+// TODO: It could have conflicts if we have different fields with the same kind of argument.
+// TODO: It means that we need to initialize the objects with different names in that case.
 func (b Builders) formatInitializers(args []ast.Argument) []string {
 	initializers := make([]string, 0)
 	for _, arg := range args {
