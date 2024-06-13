@@ -7,7 +7,7 @@ public class Dashboard {
     public Dataquery target;
     public List<Dataquery> targets;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<Dashboard> {
         private Dashboard internal;
         
         public Builder() {

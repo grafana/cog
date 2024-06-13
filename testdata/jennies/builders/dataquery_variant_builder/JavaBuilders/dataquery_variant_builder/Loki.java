@@ -4,7 +4,7 @@ package dataquery_variant_builder;
 public class Loki implements cog.variants.Dataquery {
     public String expr;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<Loki> {
         private Loki internal;
         
         public Builder() {
