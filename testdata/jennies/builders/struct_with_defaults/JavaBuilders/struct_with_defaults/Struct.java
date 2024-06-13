@@ -13,8 +13,13 @@ public class Struct {
         
         public Builder() {
             this.internal = new Struct();
-        this.setAllFields(new NestedStruct.Builder().setStringVal("hello").setIntVal(3).build());
-        this.setPartialFields(new NestedStruct.Builder().setIntVal(4).build());
+        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
+        nestedStructResource.setStringVal("hello");
+        nestedStructResource.setIntVal(3L);
+        this.setAllFields(nestedStructResource);
+        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
+        nestedStructResource.setIntVal(4L);
+        this.setPartialFields(nestedStructResource);
         this.setComplexField(new Object());
         this.setPartialComplexField(new Object());
         }
