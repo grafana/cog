@@ -26,20 +26,18 @@ func formatType(t ast.ScalarKind, val any) string {
 	// When the default is 0, is detected as integer even if it's a float.
 	parseFloatVal := func(val any) any {
 		if v, ok := val.(int64); ok {
-			val = float64(v)
-		} else {
-			val = val.(float64)
+			return float64(v)
 		}
-		return val
+		return val.(float64)
 	}
 
 	// Integers could be floats in JSON
 	parseIntVal := func(val any) any {
 		if v, ok := val.(float64); ok {
 			return int64(v)
-		} else {
-			return val.(int64)
 		}
+
+		return val.(int64)
 	}
 
 	switch t {
