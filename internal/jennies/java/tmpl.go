@@ -86,7 +86,7 @@ type ClassTemplate struct {
 	Comments []string
 
 	Fields     []Field
-	Builder    cogtemplate.Builder
+	Builders   []cogtemplate.Builder
 	HasBuilder bool
 
 	Variant              string

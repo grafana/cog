@@ -20,7 +20,9 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- end }}
 
     {{- if and .HasBuilder (not .Extends) }}
-    {{ template "builder" .Builder }}
+        {{- range .Builders }}
+        {{ template "builder" . }}
+        {{- end }}
     {{- end }}
 }
 {{- end }}

@@ -1,5 +1,5 @@
 {{- define "builder" }}
-    public static class Builder {
+    public static class {{.BuilderName }}Builder {
         private {{ .ObjectName }} internal;
         
         {{- range .Properties }}

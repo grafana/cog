@@ -4,7 +4,7 @@ import other_pkg.Name;
 
 public class Person {
     public Name name;
-    
+        
     public static class Builder {
         private Person internal;
         
