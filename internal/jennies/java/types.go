@@ -303,3 +303,26 @@ func (tf *typeFormatter) formatPackage(pkg string) string {
 
 	return pkg
 }
+
+func (tf *typeFormatter) formatValue(destinationType ast.Type, value any) string {
+	if destinationType.IsRef() {
+		referredObj, found := tf.context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
+		if found && referredObj.Type.IsEnum() {
+			return tf.formatEnumValue(referredObj, value)
+		}
+	}
+
+	return fmt.Sprintf("%#v", value)
+
+}
+
+func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
+	enum := obj.Type.AsEnum()
+	for _, v := range enum.Values {
+		if v.Value == val {
+			return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(v.Name)))
+		}
+	}
+
+	return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(enum.Values[0].Name)))
+}
