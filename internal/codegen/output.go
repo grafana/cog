@@ -5,6 +5,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/jennies/openapi"
+	"github.com/grafana/cog/internal/jennies/php"
 	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/typescript"
 )
@@ -77,6 +78,7 @@ type OutputLanguage struct {
 	Java       *java.Config       `yaml:"java"`
 	JSONSchema *jsonschema.Config `yaml:"jsonschema"`
 	OpenAPI    *openapi.Config    `yaml:"openapi"`
+	PHP        *php.Config        `yaml:"php"`
 	Python     *python.Config     `yaml:"python"`
 	Typescript *typescript.Config `yaml:"typescript"`
 }

@@ -7,12 +7,11 @@ import (
 	"github.com/grafana/cog/internal/orderedmap"
 )
 
-var _ Pass = (*InlineScalarAliases)(nil)
+var _ Pass = (*InlineObjectsWithTypes)(nil)
 
-// InlineScalarAliases inlines objects defined as an alias to a scalar type.
-// Inlined types are: ast.KindScalar, ast.KindArray and ast.KindMap.
+// InlineObjectsWithTypes inlines objects of the given types.
 // This compiler pass is meant to be used to generate code in languages that
-// don't support type aliases on scalars.
+// don't support type aliases on scalars, top-level disjunctions, ...
 //
 // Note: constants are not impacted.
 //
@@ -39,16 +38,17 @@ var _ Pass = (*InlineScalarAliases)(nil)
 //	  TargetsField []string
 //	}
 //	```
-type InlineScalarAliases struct {
+type InlineObjectsWithTypes struct {
+	InlineTypes     []ast.Kind
 	objectsToInline *orderedmap.Map[string, ast.Type]
 }
 
-func (pass *InlineScalarAliases) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+func (pass *InlineObjectsWithTypes) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 	pass.objectsToInline = orderedmap.New[string, ast.Type]()
 
 	for _, schema := range schemas {
 		schema.Objects.Iterate(func(_ string, object ast.Object) {
-			if !object.Type.IsAnyOf(ast.KindScalar, ast.KindArray, ast.KindMap) {
+			if !object.Type.IsAnyOf(pass.InlineTypes...) {
 				return
 			}
 
@@ -79,13 +79,13 @@ func (pass *InlineScalarAliases) Process(schemas []*ast.Schema) ([]*ast.Schema, 
 	return newSchemas, nil
 }
 
-func (pass *InlineScalarAliases) processRef(_ *Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
+func (pass *InlineObjectsWithTypes) processRef(_ *Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
 	if !pass.objectsToInline.Has(def.Ref.String()) {
 		return def, nil
 	}
 
 	typeDef := pass.objectsToInline.Get(def.Ref.String()).DeepCopy()
-	typeDef.AddToPassesTrail(fmt.Sprintf("InlineScalarAliases[original=%s]", def.Ref.String()))
+	typeDef.AddToPassesTrail(fmt.Sprintf("InlineObjectsWithTypes[original=%s]", def.Ref.String()))
 
 	return typeDef, nil
 }

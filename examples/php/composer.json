@@ -1,0 +1,11 @@
+{
+    "name": "grafana/cog-example",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Runtime\\": "../../generated/Runtime",
+            "Types\\": "../../generated/Types"
+        }
+    },
+    "require": {}
+}

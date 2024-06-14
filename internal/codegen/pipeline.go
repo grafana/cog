@@ -13,6 +13,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/jennies/openapi"
+	"github.com/grafana/cog/internal/jennies/php"
 	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/languages"
@@ -199,6 +200,8 @@ func (pipeline *Pipeline) outputLanguages() (languages.Languages, error) {
 			outputs[jsonschema.LanguageRef] = jsonschema.New(*output.JSONSchema)
 		case output.OpenAPI != nil:
 			outputs[openapi.LanguageRef] = openapi.New(*output.OpenAPI)
+		case output.PHP != nil:
+			outputs[php.LanguageRef] = php.New(*output.PHP)
 		case output.Python != nil:
 			outputs[python.LanguageRef] = python.New(*output.Python)
 		case output.Typescript != nil:
