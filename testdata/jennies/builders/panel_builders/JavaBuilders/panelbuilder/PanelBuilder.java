@@ -1,13 +1,12 @@
 package panelbuilder;
 
 import java.util.List;
-import dashboard.Panel;
 
 public class PanelBuilder {
-    private Panel internal;
+    private Options internal;
 
     public PanelBuilder() {
-        this.internal = new Panel();
+        this.internal = new Options();
         this.setOnlyFromThisDashboard(false);
         this.setOnlyInTimeRange(false);
         this.setLimit(10);
@@ -59,7 +58,7 @@ public class PanelBuilder {
         return this;
     }
     
-    public Panel build() {
+    public Options build() {
         return this.internal;
     }
 }
