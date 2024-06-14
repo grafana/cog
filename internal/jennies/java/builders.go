@@ -31,7 +31,7 @@ func parseBuilders(config Config, context languages.Context, formatter *typeForm
 			b[builder.Package] = map[string]ast.Builder{}
 		}
 
-		// This is a big u
+		// This should be better 🤮
 		if builder.For.SelfRef.ReferredType == "VariableModel" || (builder.Name == "Panel" && builder.Package != "dashboard") {
 			if _, ok := externalBuilders[builder.Package]; !ok {
 				externalBuilders[builder.Package] = map[string]bool{}
