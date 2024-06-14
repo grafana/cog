@@ -7,11 +7,11 @@ package {{ .Package }};
 {{- $panelBuilder }}
 
 {{- define "panelBuilder" }}
-public class PanelBuilder {
-    private Panel internal;
+public class {{ .BuilderName }}Builder {
+    private {{ .ObjectName }} internal;
 
-    public PanelBuilder({{- template "args" .Constructor.Args }}) {
-        this.internal = new Panel();
+    public {{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) {
+        this.internal = new {{ .ObjectName }}();
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
@@ -22,7 +22,7 @@ public class PanelBuilder {
     }
     
     {{- range .Options }}
-    public PanelBuilder set{{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
+    public {{ $.BuilderName }}Builder set{{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" "PanelBuilder" "OptionName" "Panel") }}
         {{- end }}
@@ -30,7 +30,7 @@ public class PanelBuilder {
     }
     {{- end }}
     
-    public Panel build() {
+    public {{ .ObjectName }} build() {
         return this.internal;
     }
 }

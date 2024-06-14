@@ -72,7 +72,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	jenny.typeFormatter = jenny.typeFormatter.withPackageMapper(packageMapper)
 
-	alreadyValidatedPanel := make(map[string]bool)
+	alreadyValidatedBuilder := make(map[string]bool)
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		jenny.imports = NewImportMap(jenny.config.PackagePath)
 		if object.Type.IsMap() || object.Type.IsArray() {
@@ -93,24 +93,19 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 		}
 
 		filename := filepath.Join(jenny.config.ProjectPath, pkg, fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)))
-
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 
-		// Because we need to check the package only, it could have multiple files, and we want to generate
-		// the builder once.
-		if !alreadyValidatedPanel[schema.Package] {
-			panelOutput, innerErr := jenny.generatePanelBuilder(schema.Package)
+		if !alreadyValidatedBuilder[schema.Package] {
+			buildersOutput, innerErr := jenny.generateOutsideBuilder(schema.Package)
 			if innerErr != nil {
 				err = innerErr
 				return
 			}
 
-			if panelOutput != nil {
-				alreadyValidatedPanel[schema.Package] = true
-				filename := filepath.Join(jenny.config.ProjectPath, strings.ToLower(schema.Package), "PanelBuilder.java")
-				files = append(files, *codejen.NewFile(filename, panelOutput, jenny))
-			}
+			files = append(files, buildersOutput...)
+			alreadyValidatedBuilder[schema.Package] = true
 		}
+
 	})
 
 	if err != nil {
@@ -147,20 +142,25 @@ func (jenny RawTypes) generateSchema(pkg string, object ast.Object) ([]byte, err
 
 // generatePanelBuilder generates the builder for the panels. Panel's builders uses generic "Panel" name, and they don't match
 // with any Schema name. These builders accept values from the different models of the panels, being easier to make it them independent.
-func (jenny RawTypes) generatePanelBuilder(pkg string) ([]byte, error) {
-	builder, hasBuilder := jenny.builders.genPanelBuilder(pkg)
+func (jenny RawTypes) generateOutsideBuilder(pkg string) (codejen.Files, error) {
+	builders, hasBuilder := jenny.builders.genExternalBuilders(pkg)
 	if !hasBuilder {
 		return nil, nil
 	}
 
-	builder.Imports = jenny.imports
+	files := make([]codejen.File, 0)
+	for name, builder := range builders {
+		builder.Imports = jenny.imports
+		var buffer strings.Builder
+		if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/external_builder.tmpl", builder); err != nil {
+			return nil, err
+		}
 
-	var buffer strings.Builder
-	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/panel_builder.tmpl", builder); err != nil {
-		return nil, err
+		filename := filepath.Join(jenny.config.ProjectPath, strings.ToLower(pkg), fmt.Sprintf("%sBuilder.java", name))
+		files = append(files, *codejen.NewFile(filename, []byte(buffer.String()), jenny))
 	}
 
-	return []byte(buffer.String()), nil
+	return files, nil
 }
 
 func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) {

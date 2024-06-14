@@ -10,37 +10,46 @@ import (
 )
 
 type Builders struct {
-	config        Config
-	context       languages.Context
-	typeFormatter *typeFormatter
-	builders      map[string]map[string]ast.Builder
-	isPanel       map[string]bool
+	config           Config
+	context          languages.Context
+	typeFormatter    *typeFormatter
+	builders         map[string]map[string]ast.Builder
+	externalBuilders map[string]map[string]bool
 }
 
 func parseBuilders(config Config, context languages.Context, formatter *typeFormatter) Builders {
 	if !config.generateBuilders || config.SkipRuntime {
 		return Builders{
-			builders: make(map[string]map[string]ast.Builder),
-			isPanel:  make(map[string]bool),
+			builders:         make(map[string]map[string]ast.Builder),
+			externalBuilders: make(map[string]map[string]bool),
 		}
 	}
 	b := make(map[string]map[string]ast.Builder)
-	panels := make(map[string]bool)
+	externalBuilders := make(map[string]map[string]bool)
 	for _, builder := range context.Builders {
 		if _, ok := b[builder.Package]; !ok {
 			b[builder.Package] = map[string]ast.Builder{}
 		}
 
+		// This is a big u
+		if builder.For.SelfRef.ReferredType == "VariableModel" || (builder.Name == "Panel" && builder.Package != "dashboard") {
+			if _, ok := externalBuilders[builder.Package]; !ok {
+				externalBuilders[builder.Package] = map[string]bool{}
+			}
+			b[builder.Package][builder.Name] = builder
+			externalBuilders[builder.Package][builder.Name] = true
+			continue
+		}
+
 		b[builder.Package][builder.For.SelfRef.ReferredType] = builder
-		panels[builder.Package] = builder.Name == "Panel" && builder.Package != "dashboard" // TODO: Ugh! Maybe a compiler pass??
 	}
 
 	return Builders{
-		config:        config,
-		context:       context,
-		builders:      b,
-		typeFormatter: formatter,
-		isPanel:       panels,
+		config:           config,
+		context:          context,
+		builders:         b,
+		typeFormatter:    formatter,
+		externalBuilders: externalBuilders,
 	}
 }
 
@@ -48,6 +57,10 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 	builder, ok := b.getBuilder(pkg, name)
 	if !ok {
 		return template.Builder{}, false
+	}
+
+	if builder.For.SelfRef.ReferredPkg != pkg {
+		b.typeFormatter.packageMapper(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 	}
 
 	object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
@@ -62,13 +75,22 @@ func (b Builders) genBuilder(pkg string, name string) (template.Builder, bool) {
 	}, true
 }
 
-func (b Builders) genPanelBuilder(pkg string) (template.Builder, bool) {
-	if !b.isPanel[pkg] {
-		return template.Builder{}, false
+func (b Builders) genExternalBuilders(pkg string) (map[string]template.Builder, bool) {
+	builders := b.externalBuilders[pkg]
+	if len(builders) == 0 {
+		return nil, false
 	}
 
-	b.typeFormatter.packageMapper("dashboard", "Panel")
-	return b.genBuilder(pkg, "Panel")
+	tmpl := make(map[string]template.Builder, len(builders))
+	for name := range builders {
+		generatedTmpl, ok := b.genBuilder(pkg, name)
+		if !ok {
+			return nil, false
+		}
+		tmpl[name] = generatedTmpl
+	}
+
+	return tmpl, true
 }
 
 func (b Builders) getBuilder(pkg string, name string) (ast.Builder, bool) {
