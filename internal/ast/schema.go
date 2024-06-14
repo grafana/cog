@@ -47,6 +47,10 @@ func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	return Object{}, false
 }
 
+func (schemas Schemas) LocateObjectByRef(ref RefType) (Object, bool) {
+	return schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
+}
+
 func (schemas Schemas) Consolidate() (Schemas, error) {
 	byPackage := make(map[string]Schemas, len(schemas))
 

@@ -1,0 +1,8 @@
+parameters:
+  level: 9 # https://phpstan.org/user-guide/rule-levels
+  paths:
+    - ../../../generated/Types
+    - ../../../generated/Runtime
+
+#  ignoreErrors:
+#    - identifier: enum.duplicateValue # most likely a schema problem

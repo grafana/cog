@@ -195,6 +195,15 @@ passes:
   # Others #
   ##########
 
+  - retype_object:
+      object: common.TimeZone
+      as:
+        kind: scalar
+        scalar: { scalar_kind: string }
+        default: browser
+      comments:
+        - 'A specific timezone from https://en.wikipedia.org/wiki/Tz_database'
+
   - cloudwatch: {}
   - google_cloud_monitoring: {}
   - library_panels: {}

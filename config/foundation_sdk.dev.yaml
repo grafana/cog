@@ -83,6 +83,7 @@ output:
         package_root: '%go_package_root%'
     - jsonschema: {}
     - openapi: {}
+    - php: {}
     - python:
         path_prefix: grafana_foundation_sdk
     - typescript: {}

@@ -1,0 +1,35 @@
+final class {{ .Object.Name|formatObjectName }} implements \JsonSerializable, \Stringable {
+    /**
+     * @var string|int
+     */
+    private $value;
+
+    /**
+     * @var array<string, {{ .Object.Name|formatObjectName }}>
+     */
+    private static $instances = [];
+
+    private function __construct(string|int $value)
+    {
+        $this->value = $value;
+    }
+{{ range .Object.Type.Enum.Values }}
+    public function {{ .Name|formatEnumMemberName }}(): self
+    {
+        if (!isset(self::$instances["{{ .Name }}"])) {
+            self::$instances["{{ .Name }}"] = new self({{ .Value|formatScalar }});
+        }
+
+        return self::$instances["{{ .Name }}"];
+    }
+{{ end }}
+    public function jsonSerialize(): string|int
+    {
+        return $this->value;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->value;
+    }
+}
