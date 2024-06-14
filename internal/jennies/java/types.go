@@ -313,7 +313,6 @@ func (tf *typeFormatter) formatValue(destinationType ast.Type, value any) string
 	}
 
 	return fmt.Sprintf("%#v", value)
-
 }
 
 func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
