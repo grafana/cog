@@ -4,7 +4,7 @@ package builder_delegation_in_disjunction;
 public class DashboardLink {
     public String title;
     public String url;
-    
+        
     public static class Builder {
         private DashboardLink internal;
         

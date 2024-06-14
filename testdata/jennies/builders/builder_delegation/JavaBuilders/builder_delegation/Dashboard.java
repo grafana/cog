@@ -11,7 +11,7 @@ public class Dashboard {
     public List<List<DashboardLink>> linksOfLinks;
     // will be expanded to cog.Builder<DashboardLink>
     public DashboardLink singleLink;
-    
+        
     public static class Builder {
         private Dashboard internal;
         

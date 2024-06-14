@@ -3,7 +3,7 @@ package sandbox;
 
 public class SomeStruct {
     public String title;
-    
+        
     public static class Builder {
         private SomeStruct internal;
         

@@ -5,7 +5,7 @@ import java.util.LinkedList;
 
 public class Dashboard {
     public List<Variable> variables;
-    
+        
     public static class Builder {
         private Dashboard internal;
         
