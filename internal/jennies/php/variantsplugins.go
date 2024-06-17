@@ -6,6 +6,7 @@ import (
 )
 
 type VariantsPlugins struct {
+	config Config
 }
 
 func (jenny VariantsPlugins) JennyName() string {
@@ -30,19 +31,23 @@ func (jenny VariantsPlugins) Generate(_ languages.Context) (codejen.Files, error
 }
 
 func (jenny VariantsPlugins) dataqueryVariant() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/dataquery_variant.tmpl", map[string]any{})
+	rendered, err := renderTemplate("runtime/dataquery_variant.tmpl", map[string]any{
+		"NamespaceRoot": jenny.config.NamespaceRoot,
+	})
 	if err != nil {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("Runtime/Variants/Dataquery.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Runtime/Variants/Dataquery.php", []byte(rendered), jenny), nil
 }
 
 func (jenny VariantsPlugins) panelcfgInterface() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/panelcfg_variant.tmpl", map[string]any{})
+	rendered, err := renderTemplate("runtime/panelcfg_variant.tmpl", map[string]any{
+		"NamespaceRoot": jenny.config.NamespaceRoot,
+	})
 	if err != nil {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("Runtime/Variants/Panelcfg.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Runtime/Variants/Panelcfg.php", []byte(rendered), jenny), nil
 }

@@ -85,7 +85,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 }
 
 func (formatter *typeFormatter) variantInterface(variant string) string {
-	return "\\Runtime\\Variants\\" + formatObjectName(variant)
+	return formatter.config.fullNamespaceRef("Runtime\\Variants\\" + formatObjectName(variant))
 }
 
 func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
@@ -198,12 +198,14 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 	typeName := formatObjectName(def.AsRef().ReferredType)
 
 	if referredPkg != "" {
-		typeName = "\\Types\\" + referredPkg + "\\" + typeName
+		typeName = "Types\\" + referredPkg + "\\" + typeName
 	}
 
 	if resolveBuilders {
-		typeName = "\\Builders\\" + referredPkg + "\\" + typeName
+		typeName = "Builders\\" + referredPkg + "\\" + typeName
 	}
+
+	typeName = formatter.config.fullNamespaceRef(typeName)
 
 	if resolveBuilders && formatter.context.ResolveToBuilder(def) {
 		cogAlias := "cog"

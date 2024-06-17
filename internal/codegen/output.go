@@ -89,6 +89,9 @@ func (outputLanguage *OutputLanguage) interpolateParameters(interpolator Paramet
 	if outputLanguage.Go != nil {
 		outputLanguage.Go.InterpolateParameters(interpolator)
 	}
+	if outputLanguage.PHP != nil {
+		outputLanguage.PHP.InterpolateParameters(interpolator)
+	}
 	if outputLanguage.Python != nil {
 		outputLanguage.Python.InterpolateParameters(interpolator)
 	}
