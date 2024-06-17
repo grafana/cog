@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -86,14 +87,14 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 
 		//nolint: gocritic
 		if scalarType.IsConcrete() {
-			buffer.WriteString(fmt.Sprintf("const %s = %s;", formatConstantName(def.Name), formatScalar(scalarType.Value)))
+			buffer.WriteString(fmt.Sprintf("const %s = %s;", formatConstantName(def.Name), formatValue(scalarType.Value)))
 		} else {
 			return codejen.File{}, fmt.Errorf("type aliases on scalar types is not supported")
 		}
 	case ast.KindRef:
 		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type)))
 	case ast.KindStruct:
-		buffer.WriteString(jenny.formatStructDef(def))
+		buffer.WriteString(jenny.formatStructDef(context, def))
 	default:
 		return codejen.File{}, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -113,7 +114,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	return *codejen.NewFile(filename, []byte(output), jenny), nil
 }
 
-func (jenny RawTypes) formatStructDef(def ast.Object) string {
+func (jenny RawTypes) formatStructDef(context languages.Context, def ast.Object) string {
 	var buffer strings.Builder
 
 	variant := ""
@@ -128,7 +129,70 @@ func (jenny RawTypes) formatStructDef(def ast.Object) string {
 		buffer.WriteString("\n\n")
 	}
 
+	buffer.WriteString(tools.Indent(jenny.generateConstructor(context, def), 4))
+	buffer.WriteString("\n\n")
+
 	buffer.WriteString(tools.Indent(jenny.generateJSONSerialize(def), 4))
+	buffer.WriteString("\n}")
+
+	return buffer.String()
+}
+
+func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Object) string {
+	var buffer strings.Builder
+	hinter := typehints{
+		config: jenny.config,
+	}
+
+	var typeAnnotations []string
+	var args []string
+	var assignments []string
+
+	for _, field := range def.Type.AsStruct().Fields {
+		fieldName := formatFieldName(field.Name)
+		defaultValue := (any)(nil)
+
+		// set for default values for fields that need one or have one
+		if !field.Type.Nullable || field.Type.Default != nil {
+			var defaultsOverrides map[string]any
+			if overrides, ok := field.Type.Default.(map[string]interface{}); ok {
+				defaultsOverrides = overrides
+			}
+
+			defaultValue = defaultValueForType(jenny.config, context.Schemas, field.Type, orderedmap.FromMap(defaultsOverrides))
+		}
+
+		// initialize constant fields
+		if field.Type.IsConcreteScalar() {
+			assignments = append(assignments, fmt.Sprintf("    $this->%s = %s;\n", fieldName, formatValue(field.Type.AsScalar().Value)))
+			continue
+		}
+
+		argType := field.Type.DeepCopy()
+		argType.Nullable = true
+
+		args = append(args, fmt.Sprintf("%s $%s = null", jenny.typeFormatter.formatType(argType), fieldName))
+		typeAnnotation := hinter.paramAnnotationForType(fieldName, argType)
+		if typeAnnotation != "" {
+			typeAnnotations = append(typeAnnotations, typeAnnotation)
+		}
+
+		if field.Type.Nullable {
+			assignments = append(assignments, fmt.Sprintf("    $this->%[1]s = $%[1]s;", fieldName))
+		} else {
+			assignments = append(assignments, fmt.Sprintf("    $this->%[1]s = $%[1]s ?: %[2]s;", fieldName, formatValue(defaultValue)))
+		}
+	}
+
+	if len(typeAnnotations) != 0 {
+		buffer.WriteString(formatCommentsBlock(typeAnnotations))
+	}
+
+	buffer.WriteString(fmt.Sprintf("public function __construct(%s)\n", strings.Join(args, ", ")))
+	buffer.WriteString("{\n")
+
+	buffer.WriteString(strings.Join(assignments, "\n"))
+
 	buffer.WriteString("\n}")
 
 	return buffer.String()
