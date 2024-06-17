@@ -6,6 +6,14 @@ class FieldConfig implements \JsonSerializable {
     public string $timeseriesFieldConfigOption;
 
     /**
+     * @param string|null $timeseriesFieldConfigOption
+     */
+    public function __construct(?string $timeseriesFieldConfigOption = null)
+    {
+        $this->timeseriesFieldConfigOption = $timeseriesFieldConfigOption ?: "";
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function jsonSerialize(): array

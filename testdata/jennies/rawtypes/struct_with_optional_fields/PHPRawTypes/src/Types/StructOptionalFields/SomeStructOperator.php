@@ -18,7 +18,7 @@ final class SomeStructOperator implements \JsonSerializable, \Stringable {
         $this->value = $value;
     }
 
-    public function greaterThan(): self
+    public static function greaterThan(): self
     {
         if (!isset(self::$instances["GreaterThan"])) {
             self::$instances["GreaterThan"] = new self(">");
@@ -27,7 +27,7 @@ final class SomeStructOperator implements \JsonSerializable, \Stringable {
         return self::$instances["GreaterThan"];
     }
 
-    public function lessThan(): self
+    public static function lessThan(): self
     {
         if (!isset(self::$instances["LessThan"])) {
             self::$instances["LessThan"] = new self("<");

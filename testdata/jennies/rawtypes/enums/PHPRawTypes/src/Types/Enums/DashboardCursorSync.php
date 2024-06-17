@@ -23,7 +23,7 @@ final class DashboardCursorSync implements \JsonSerializable, \Stringable {
         $this->value = $value;
     }
 
-    public function off(): self
+    public static function off(): self
     {
         if (!isset(self::$instances["Off"])) {
             self::$instances["Off"] = new self(0);
@@ -32,7 +32,7 @@ final class DashboardCursorSync implements \JsonSerializable, \Stringable {
         return self::$instances["Off"];
     }
 
-    public function crosshair(): self
+    public static function crosshair(): self
     {
         if (!isset(self::$instances["Crosshair"])) {
             self::$instances["Crosshair"] = new self(1);
@@ -41,7 +41,7 @@ final class DashboardCursorSync implements \JsonSerializable, \Stringable {
         return self::$instances["Crosshair"];
     }
 
-    public function tooltip(): self
+    public static function tooltip(): self
     {
         if (!isset(self::$instances["Tooltip"])) {
             self::$instances["Tooltip"] = new self(2);
