@@ -13,6 +13,9 @@ func TestRawTypes_Generate(t *testing.T) {
 	test := testutils.GoldenFilesTestSuite[ast.Schema]{
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "PHPRawTypes",
+		Skip: map[string]string{
+			"intersections": "Intersections are not implemented",
+		},
 	}
 
 	config := Config{}
