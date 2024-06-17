@@ -93,12 +93,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	case ast.KindRef:
 		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type)))
 	case ast.KindStruct:
-		variant := ""
-		if def.Type.ImplementsVariant() {
-			variant = " implements " + jenny.config.fullNamespaceRef("Runtime\\Variants\\"+formatObjectName(def.Type.ImplementedVariant()))
-		}
-
-		buffer.WriteString(fmt.Sprintf("class %s%s\n%s", defName, variant, jenny.typeFormatter.formatType(def.Type)))
+		buffer.WriteString(jenny.formatStructDef(def))
 	default:
 		return codejen.File{}, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -116,6 +111,67 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	output += buffer.String()
 
 	return *codejen.NewFile(filename, []byte(output), jenny), nil
+}
+
+func (jenny RawTypes) formatStructDef(def ast.Object) string {
+	var buffer strings.Builder
+
+	variant := ""
+	if def.Type.ImplementsVariant() {
+		variant = ", " + jenny.config.fullNamespaceRef("Runtime\\Variants\\"+formatObjectName(def.Type.ImplementedVariant()))
+	}
+
+	buffer.WriteString(fmt.Sprintf("class %s implements \\JsonSerializable%s {\n", formatObjectName(def.Name), variant))
+
+	for _, fieldDef := range def.Type.Struct.Fields {
+		buffer.WriteString(tools.Indent(jenny.typeFormatter.formatField(fieldDef), 4))
+		buffer.WriteString("\n\n")
+	}
+
+	buffer.WriteString(tools.Indent(jenny.generateJSONSerialize(def), 4))
+	buffer.WriteString("\n}")
+
+	return buffer.String()
+}
+
+func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
+	var buffer strings.Builder
+
+	buffer.WriteString("/**\n")
+	buffer.WriteString(" * @return array<string, mixed>\n")
+	buffer.WriteString(" */\n")
+	buffer.WriteString("public function jsonSerialize(): array\n")
+	buffer.WriteString("{\n")
+
+	buffer.WriteString("    $data = [\n")
+
+	for _, field := range def.Type.AsStruct().Fields {
+		if !field.Required {
+			continue
+		}
+
+		buffer.WriteString(fmt.Sprintf(`        "%s" => $this->%s,`+"\n", field.Name, formatFieldName(field.Name)))
+	}
+
+	buffer.WriteString("    ];\n")
+
+	for _, field := range def.Type.AsStruct().Fields {
+		if field.Required {
+			continue
+		}
+
+		fieldName := formatFieldName(field.Name)
+
+		buffer.WriteString(fmt.Sprintf("    if (isset($this->%s)) {\n", fieldName))
+		buffer.WriteString(fmt.Sprintf(`        $data["%s"] = $this->%s;`+"\n", field.Name, fieldName))
+		buffer.WriteString("    }\n")
+	}
+
+	buffer.WriteString("    return $data;\n")
+
+	buffer.WriteString("}")
+
+	return buffer.String()
 }
 
 func (jenny RawTypes) formatEnumDef(def ast.Object) (string, error) {

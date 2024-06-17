@@ -3,8 +3,7 @@
     "type": "project",
     "autoload": {
         "psr-4": {
-            "Runtime\\": "../../generated/Runtime",
-            "Types\\": "../../generated/Types"
+            "Grafana\\Foundation\\": "../../generated/src"
         }
     },
     "require": {}
