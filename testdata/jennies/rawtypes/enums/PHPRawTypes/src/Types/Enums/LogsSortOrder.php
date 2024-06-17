@@ -18,7 +18,7 @@ final class LogsSortOrder implements \JsonSerializable, \Stringable {
         $this->value = $value;
     }
 
-    public function asc(): self
+    public static function asc(): self
     {
         if (!isset(self::$instances["Asc"])) {
             self::$instances["Asc"] = new self("time_asc");
@@ -27,7 +27,7 @@ final class LogsSortOrder implements \JsonSerializable, \Stringable {
         return self::$instances["Asc"];
     }
 
-    public function desc(): self
+    public static function desc(): self
     {
         if (!isset(self::$instances["Desc"])) {
             self::$instances["Desc"] = new self("time_desc");
