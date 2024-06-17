@@ -5,7 +5,7 @@ public class SomePanel {
     public String type;
     public String title;
     public CursorMode cursor;
-        
+    
     public static class Builder implements cog.Builder<SomePanel> {
         private SomePanel internal;
         

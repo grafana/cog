@@ -11,7 +11,7 @@ public class SomeStruct {
     // This thing could be live.
     // Or maybe not.
     public Boolean liveNow;
-        
+    
     public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         

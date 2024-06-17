@@ -6,7 +6,7 @@ import java.util.List;
 public class Dashboard {
     public Dataquery target;
     public List<Dataquery> targets;
-        
+    
     public static class Builder implements cog.Builder<Dashboard> {
         private Dashboard internal;
         
