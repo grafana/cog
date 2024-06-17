@@ -8,8 +8,7 @@ namespace Grafana\Foundation\Types\Basic;
  * a
  * comment
  */
-class SomeStruct
-{
+class SomeStruct implements \JsonSerializable {
     /**
      * Anything can go in there.
      * Really, anything.
@@ -44,4 +43,29 @@ class SomeStruct
     public int $fieldInt32;
 
     public int $fieldInt64;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $data = [
+            "FieldAny" => $this->fieldAny,
+            "FieldBool" => $this->fieldBool,
+            "FieldBytes" => $this->fieldBytes,
+            "FieldString" => $this->fieldString,
+            "FieldStringWithConstantValue" => $this->fieldStringWithConstantValue,
+            "FieldFloat32" => $this->fieldFloat32,
+            "FieldFloat64" => $this->fieldFloat64,
+            "FieldUint8" => $this->fieldUint8,
+            "FieldUint16" => $this->fieldUint16,
+            "FieldUint32" => $this->fieldUint32,
+            "FieldUint64" => $this->fieldUint64,
+            "FieldInt8" => $this->fieldInt8,
+            "FieldInt16" => $this->fieldInt16,
+            "FieldInt32" => $this->fieldInt32,
+            "FieldInt64" => $this->fieldInt64,
+        ];
+        return $data;
+    }
 }

@@ -2,8 +2,7 @@
 
 namespace Grafana\Foundation\Types\Dashboard;
 
-class Panel
-{
+class Panel implements \JsonSerializable {
     public string $title;
 
     public string $type;
@@ -21,4 +20,28 @@ class Panel
     public ?array $targets;
 
     public ?\Grafana\Foundation\Types\Dashboard\FieldConfigSource $fieldConfig;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $data = [
+            "title" => $this->title,
+            "type" => $this->type,
+        ];
+        if (isset($this->datasource)) {
+            $data["datasource"] = $this->datasource;
+        }
+        if (isset($this->options)) {
+            $data["options"] = $this->options;
+        }
+        if (isset($this->targets)) {
+            $data["targets"] = $this->targets;
+        }
+        if (isset($this->fieldConfig)) {
+            $data["fieldConfig"] = $this->fieldConfig;
+        }
+        return $data;
+    }
 }
