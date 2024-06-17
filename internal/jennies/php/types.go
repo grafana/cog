@@ -155,20 +155,6 @@ func (formatter *typeFormatter) formatScalar(def ast.Type) string {
 	}
 }
 
-func formatScalar(val any) string {
-	if list, ok := val.([]any); ok {
-		items := make([]string, 0, len(list))
-
-		for _, item := range list {
-			items = append(items, formatScalar(item))
-		}
-
-		return fmt.Sprintf("[%s]", strings.Join(items, ", "))
-	}
-
-	return fmt.Sprintf("%#v", val)
-}
-
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)

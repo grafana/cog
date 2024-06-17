@@ -14,10 +14,10 @@ final class {{ .Object.Name|formatObjectName }} implements \JsonSerializable, \S
         $this->value = $value;
     }
 {{ range .Object.Type.Enum.Values }}
-    public function {{ .Name|formatEnumMemberName }}(): self
+    public static function {{ .Name|formatEnumMemberName }}(): self
     {
         if (!isset(self::$instances["{{ .Name }}"])) {
-            self::$instances["{{ .Name }}"] = new self({{ .Value|formatScalar }});
+            self::$instances["{{ .Name }}"] = new self({{ .Value|formatValue }});
         }
 
         return self::$instances["{{ .Name }}"];

@@ -26,7 +26,7 @@ func init() {
 			"formatPackageName":    formatPackageName,
 			"formatObjectName":     formatObjectName,
 			"formatEnumMemberName": formatEnumMemberName,
-			"formatScalar":         formatScalar,
+			"formatValue":          formatValue,
 		})
 
 	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
