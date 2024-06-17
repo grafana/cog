@@ -35,6 +35,9 @@ func functions() template.FuncMap {
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
+		"formatValue": func(_ ast.Type) string {
+			panic("formatValue() needs to be overridden by a jenny")
+		},
 		"formatCastValue": func(_ ast.Type) string {
 			panic("formatCastValue() needs to be overridden by a jenny")
 		},
@@ -86,7 +89,7 @@ type ClassTemplate struct {
 	Comments []string
 
 	Fields     []Field
-	Builder    Builder
+	Builders   []Builder
 	HasBuilder bool
 
 	Variant              string

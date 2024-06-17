@@ -7,7 +7,7 @@ public class Struct {
     public NestedStruct emptyFields;
     public Object complexField;
     public Object partialComplexField;
-    
+        
     public static class Builder {
         private Struct internal;
         

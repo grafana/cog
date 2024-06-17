@@ -5,7 +5,7 @@ import java.util.LinkedList;
 
 public class SomeStruct {
     public List<String> tags;
-    
+        
     public static class Builder {
         private SomeStruct internal;
         
