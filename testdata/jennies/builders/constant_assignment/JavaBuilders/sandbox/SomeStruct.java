@@ -4,8 +4,8 @@ package sandbox;
 public class SomeStruct {
     public unknown editable;
     public unknown autoRefresh;
-        
-    public static class Builder {
+    
+    public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         
         public Builder() {

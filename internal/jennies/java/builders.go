@@ -60,6 +60,7 @@ func (b Builders) genBuilders(pkg string, name string) ([]template.Builder, bool
 			Options:     builder.Options,
 			Properties:  builder.Properties,
 			Defaults:    b.genDefaults(builder.Options),
+			ImportAlias: b.config.PackagePath,
 		}
 	}), true
 }

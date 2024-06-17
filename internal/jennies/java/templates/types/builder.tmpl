@@ -1,5 +1,5 @@
 {{- define "builder" }}
-    public static class {{ .BuilderName }}Builder {
+    public static class {{ .BuilderName }}Builder implements {{ if not (eq .Builder.ImportAlias "") }}{{ .Builder.ImportAlias }}.{{ end }}cog.Builder<{{ .Builder.ObjectName }}> {
         private {{ .Builder.ObjectName }} internal;
         
         {{- range .Builder.Properties }}

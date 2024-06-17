@@ -4,8 +4,8 @@ package struct_with_defaults;
 public class NestedStruct {
     public String stringVal;
     public Long intVal;
-        
-    public static class Builder {
+    
+    public static class Builder implements cog.Builder<NestedStruct> {
         private NestedStruct internal;
         
         public Builder() {
