@@ -51,15 +51,11 @@ func (b Builders) genBuilders(pkg string, name string) ([]template.Builder, bool
 	}
 
 	return tools.Map(builders, func(builder ast.Builder) template.Builder {
-		builderName := ""
-		if len(builders) > 1 {
-			builderName = builder.Name
-		}
 		object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 		return template.Builder{
 			Package:     b.typeFormatter.formatPackage(pkg),
 			ObjectName:  tools.UpperCamelCase(object.Name),
-			BuilderName: builderName,
+			BuilderName: builder.Name,
 			Constructor: builder.Constructor,
 			Options:     builder.Options,
 			Properties:  builder.Properties,
