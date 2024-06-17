@@ -11,8 +11,11 @@
         {{- range .Builder.Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
-        
+
         {{- range .Builder.Defaults }}
+        {{- range .Initializers }}
+        {{ . }}
+        {{- end }}
         this.set{{ .OptionName }}({{ .Args|join ", " }});
         {{- end }}
         }

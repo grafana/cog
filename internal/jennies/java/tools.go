@@ -22,6 +22,40 @@ func formatScalar(val any) any {
 	return newVal
 }
 
+func formatType(t ast.ScalarKind, val any) string {
+	// When the default is 0, is detected as integer even if it's a float.
+	parseFloatVal := func(val any) any {
+		if v, ok := val.(int64); ok {
+			return float64(v)
+		}
+		return val.(float64)
+	}
+
+	// Integers could be floats in JSON
+	parseIntVal := func(val any) any {
+		if v, ok := val.(float64); ok {
+			return int64(v)
+		}
+
+		return val.(int64)
+	}
+
+	switch t {
+	case ast.KindInt64:
+		return fmt.Sprintf("%dL", parseIntVal(val))
+	case ast.KindUint64:
+		return fmt.Sprintf("%dL", parseIntVal(val))
+	case ast.KindInt32:
+		return fmt.Sprintf("%d", parseIntVal(val))
+	case ast.KindFloat32:
+		return fmt.Sprintf("%.1ff", parseFloatVal(val))
+	case ast.KindFloat64:
+		return fmt.Sprintf("%.1f", parseFloatVal(val))
+	}
+
+	return fmt.Sprintf("%#v", val)
+}
+
 // TODO: Need to say to the serializer the correct name.
 func escapeVarName(varName string) string {
 	if isReservedJavaKeyword(varName) {
