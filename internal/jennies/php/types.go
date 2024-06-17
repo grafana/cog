@@ -23,6 +23,14 @@ func defaultTypeFormatter(config Config, context languages.Context) *typeFormatt
 	}
 }
 
+func builderTypeFormatter(config Config, context languages.Context) *typeFormatter {
+	return &typeFormatter{
+		config:     config,
+		context:    context,
+		forBuilder: true,
+	}
+}
+
 func (formatter *typeFormatter) formatType(def ast.Type) string {
 	return formatter.doFormatType(def, formatter.forBuilder)
 }
@@ -40,10 +48,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 				return formatted
 			}
 
-			// TODO
-			cogAlias := "cog"
-
-			return fmt.Sprintf("%s.Builder[%s]", cogAlias, formatted)
+			return formatter.config.fullNamespaceRef("Runtime\\Builder")
 		}
 
 		if def.IsArray() || def.IsMap() {
@@ -122,6 +127,20 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	return buffer.String()
 }
 
+func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
+	referredPkg := enumObj.SelfRef.ReferredPkg
+	enumName := formatObjectName(enumObj.Type.AsEnum().Values[0].Name)
+
+	for _, enumValue := range enumObj.Type.AsEnum().Values {
+		if enumValue.Value == val {
+			enumName = formatEnumMemberName(enumValue.Name)
+			break
+		}
+	}
+
+	return fmt.Sprintf(formatter.config.fullNamespaceRef(fmt.Sprintf("Types\\%s\\%s", referredPkg, enumObj.Name))+"::%s()", enumName)
+}
+
 func (formatter *typeFormatter) formatScalar(def ast.Type) string {
 	scalarKind := def.AsScalar().ScalarKind
 	/*
@@ -157,22 +176,16 @@ func (formatter *typeFormatter) formatScalar(def ast.Type) string {
 
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
-	typeName := formatObjectName(def.AsRef().ReferredType)
-
-	if referredPkg != "" {
-		typeName = "Types\\" + referredPkg + "\\" + typeName
-	}
+	typeName := "Types\\" + referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType)
 
 	if resolveBuilders {
-		typeName = "Builders\\" + referredPkg + "\\" + typeName
+		typeName = "Builders\\" + referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType)
 	}
 
 	typeName = formatter.config.fullNamespaceRef(typeName)
 
 	if resolveBuilders && formatter.context.ResolveToBuilder(def) {
-		cogAlias := "cog"
-
-		return fmt.Sprintf("%s.Builder[%s]", cogAlias, typeName)
+		return formatter.config.fullNamespaceRef("Runtime\\Builder")
 	}
 
 	return typeName

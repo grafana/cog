@@ -1,0 +1,5 @@
+{{- define "nil_check" }}
+if ($this->internal->{{ .Path|formatPath }} === null) {
+    $this->internal->{{ .Path|formatPath }} = {{ .EmptyValueType|defaultForType }};
+}
+{{- end }}
