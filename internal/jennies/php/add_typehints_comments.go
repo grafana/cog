@@ -8,11 +8,14 @@ import (
 var _ compiler.Pass = (*AddTypehintsComments)(nil)
 
 type AddTypehintsComments struct {
+	config Config
 	hinter *typehints
 }
 
 func (pass *AddTypehintsComments) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	pass.hinter = &typehints{}
+	pass.hinter = &typehints{
+		config: pass.config,
+	}
 
 	visitor := &compiler.Visitor{
 		OnStructField: pass.processStructField,

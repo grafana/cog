@@ -9,6 +9,7 @@ import (
 )
 
 type typehints struct {
+	config Config
 }
 
 func (generator *typehints) requiresHint(def ast.Type) bool {
@@ -101,11 +102,11 @@ func (generator *typehints) refHint(def ast.Type) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)
 
-	return "\\Types\\" + referredPkg + "\\" + typeName
+	return generator.config.fullNamespaceRef("Types\\" + referredPkg + "\\" + typeName)
 }
 
 func (generator *typehints) composableSlotHint(def ast.Type) string {
-	return "\\Runtime\\Variants\\" + formatObjectName(string(def.ComposableSlot.Variant))
+	return generator.config.fullNamespaceRef("Runtime\\Variants\\" + formatObjectName(string(def.ComposableSlot.Variant)))
 }
 
 func (generator *typehints) disjunctionHint(def ast.Type) string {

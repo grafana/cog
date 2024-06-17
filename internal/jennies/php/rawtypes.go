@@ -12,7 +12,7 @@ import (
 )
 
 type RawTypes struct {
-	Config Config
+	config Config
 
 	typeFormatter *typeFormatter
 }
@@ -59,12 +59,12 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema, def ast.Object) (codejen.File, error) {
 	var buffer strings.Builder
 
-	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context)
+	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context)
 
 	defName := formatObjectName(def.Name)
 
 	comments := def.Comments
-	if jenny.Config.debug {
+	if jenny.config.debug {
 		passesTrail := tools.Map(def.PassesTrail, func(trail string) string {
 			return fmt.Sprintf("Modified by compiler pass '%s'", trail)
 		})
@@ -95,7 +95,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	case ast.KindStruct:
 		variant := ""
 		if def.Type.ImplementsVariant() {
-			variant = " implements \\Runtime\\Variants\\" + formatObjectName(def.Type.ImplementedVariant())
+			variant = " implements " + jenny.config.fullNamespaceRef("Runtime\\Variants\\"+formatObjectName(def.Type.ImplementedVariant()))
 		}
 
 		buffer.WriteString(fmt.Sprintf("class %s%s\n%s", defName, variant, jenny.typeFormatter.formatType(def.Type)))
@@ -106,12 +106,13 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	buffer.WriteString("\n")
 
 	filename := filepath.Join(
+		"src",
 		"Types",
 		formatPackageName(schema.Package),
 		fmt.Sprintf("%s.php", defName),
 	)
 
-	output := fmt.Sprintf("<?php\n\nnamespace Types\\%s;\n\n", formatPackageName(schema.Package))
+	output := fmt.Sprintf("<?php\n\nnamespace %s\\%s;\n\n", jenny.config.fullNamespace("Types"), formatPackageName(schema.Package))
 	output += buffer.String()
 
 	return *codejen.NewFile(filename, []byte(output), jenny), nil
