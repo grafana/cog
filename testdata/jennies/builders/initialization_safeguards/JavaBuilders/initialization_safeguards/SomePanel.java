@@ -4,7 +4,7 @@ package initialization_safeguards;
 public class SomePanel {
     public String title;
     public Options options;
-    
+        
     public static class Builder implements cog.Builder<SomePanel> {
         private SomePanel internal;
         

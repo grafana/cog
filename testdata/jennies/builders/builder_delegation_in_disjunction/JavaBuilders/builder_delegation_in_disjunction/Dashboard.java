@@ -8,7 +8,7 @@ public class Dashboard {
     // will be expanded to [](cog.Builder<DashboardLink> | string)
     public List<unknown> linksOrStrings;
     public unknown disjunctionOfBuilders;
-    
+        
     public static class Builder implements cog.Builder<Dashboard> {
         private Dashboard internal;
         

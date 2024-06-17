@@ -37,8 +37,9 @@
           "type": "array",
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
-        "schema_metadata": {
-          "$ref": "#/$defs/SchemaMeta"
+        "metadata": {
+          "$ref": "#/$defs/SchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "entrypoint": {
           "type": "string",
@@ -106,8 +107,9 @@
           "type": "array",
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
-        "schema_metadata": {
-          "$ref": "#/$defs/SchemaMeta"
+        "metadata": {
+          "$ref": "#/$defs/SchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
           "type": "string",
@@ -120,10 +122,6 @@
         "package": {
           "type": "string",
           "description": "Package name to use for the input schema. If empty, it will be guessed\nfrom the input file name."
-        },
-        "metadata": {
-          "$ref": "#/$defs/SchemaMeta",
-          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         }
       },
       "additionalProperties": false,
@@ -145,8 +143,9 @@
           "type": "array",
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
-        "schema_metadata": {
-          "$ref": "#/$defs/SchemaMeta"
+        "metadata": {
+          "$ref": "#/$defs/SchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
           "type": "string"
@@ -174,8 +173,9 @@
           "type": "array",
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
-        "schema_metadata": {
-          "$ref": "#/$defs/SchemaMeta"
+        "metadata": {
+          "$ref": "#/$defs/SchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
           "type": "string",

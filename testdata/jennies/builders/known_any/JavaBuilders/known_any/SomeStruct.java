@@ -3,7 +3,7 @@ package known_any;
 
 public class SomeStruct {
     public Object config;
-    
+        
     public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         

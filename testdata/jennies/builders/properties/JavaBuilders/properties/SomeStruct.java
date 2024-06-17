@@ -3,7 +3,7 @@ package properties;
 
 public class SomeStruct {
     public Long id;
-    
+        
     public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         private String someBuilderProperty;

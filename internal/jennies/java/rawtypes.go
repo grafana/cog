@@ -54,6 +54,7 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,
 		"formatPath":               jenny.typeFormatter.formatFieldPath,
 		"shouldCastNilCheck":       jenny.typeFormatter.shouldCastNilCheck,
+		"formatValue":              jenny.typeFormatter.formatValue,
 	})
 }
 
@@ -210,7 +211,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		})
 	}
 
-	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name)
+	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
 	jenny.addJSONImportsIfNeeded()
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
@@ -220,7 +221,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		Fields:               fields,
 		Comments:             object.Comments,
 		Variant:              jenny.getVariant(object.Type),
-		Builder:              builder,
+		Builders:             builders,
 		HasBuilder:           hasBuilder,
 		ShouldAddMarshalling: jenny.config.GeneratePOM,
 	}); err != nil {

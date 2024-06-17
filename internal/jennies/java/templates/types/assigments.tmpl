@@ -44,7 +44,7 @@
         {{- if not (eq $castPath.Value "") }}
         {{- $castPath.Value | lowerCamelCase }}Resource
         {{- else }}
-        {{- formatScalar .Value.Constant }}
+        {{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
         {{- end }}
     {{- end }}
     {{- with .Value.Argument }}

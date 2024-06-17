@@ -7,7 +7,7 @@ public class SomeStruct {
     public String uid;
     public List<String> tags;
     public Boolean liveNow;
-    
+        
     public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         

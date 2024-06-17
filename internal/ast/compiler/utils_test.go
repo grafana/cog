@@ -1,9 +1,9 @@
 package compiler
 
 import (
+	"encoding/json"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/stretchr/testify/require"
 )
@@ -35,6 +35,11 @@ func runPassOnSchemas(t *testing.T, pass Pass, input ast.Schemas, expectedOutput
 	req.NoError(err)
 	req.Len(processedSchemas, len(input))
 	for i := range input {
-		req.Empty(cmp.Diff(expectedOutput[i], processedSchemas[i]))
+		expectedJSON, err := json.MarshalIndent(expectedOutput[i], "", "  ")
+		req.NoError(err)
+		gotJSON, err := json.MarshalIndent(processedSchemas[i], "", "  ")
+		req.NoError(err)
+
+		req.JSONEq(string(expectedJSON), string(gotJSON))
 	}
 }
