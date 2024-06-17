@@ -20,7 +20,16 @@ func (generator *typehints) requiresHint(def ast.Type) bool {
 	return !def.IsAnyOf(ast.KindScalar, ast.KindStruct, ast.KindRef, ast.KindEnum)
 }
 
-func (generator *typehints) annotationForType(def ast.Type) string {
+func (generator *typehints) paramAnnotationForType(paramName string, def ast.Type) string {
+	hintText := generator.forType(def)
+	if hintText == "" {
+		return ""
+	}
+
+	return fmt.Sprintf("@param %s $%s", hintText, paramName)
+}
+
+func (generator *typehints) varAnnotationForType(def ast.Type) string {
 	hintText := generator.forType(def)
 	if hintText == "" {
 		return ""
@@ -30,26 +39,32 @@ func (generator *typehints) annotationForType(def ast.Type) string {
 }
 
 func (generator *typehints) forType(def ast.Type) string {
-	if def.IsArray() {
-		return generator.arrayHint(def)
-	}
-	if def.IsMap() {
-		return generator.mapHint(def)
-	}
-	if def.IsScalar() {
-		return generator.scalarHint(def)
-	}
-	if def.IsRef() {
-		return generator.refHint(def)
-	}
-	if def.IsComposableSlot() {
-		return generator.composableSlotHint(def)
-	}
-	if def.IsDisjunction() {
-		return generator.disjunctionHint(def)
+	hint := ""
+
+	switch {
+	case def.IsArray():
+		hint = generator.arrayHint(def)
+	case def.IsMap():
+		hint = generator.mapHint(def)
+	case def.IsScalar():
+		hint = generator.scalarHint(def)
+	case def.IsRef():
+		hint = generator.refHint(def)
+	case def.IsComposableSlot():
+		hint = generator.composableSlotHint(def)
+	case def.IsDisjunction():
+		hint = generator.disjunctionHint(def)
 	}
 
-	return ""
+	if hint == "" {
+		return ""
+	}
+
+	if def.Nullable {
+		hint += "|null"
+	}
+
+	return hint
 }
 
 func (generator *typehints) arrayHint(def ast.Type) string {
