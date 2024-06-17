@@ -54,6 +54,7 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,
 		"formatPath":               jenny.typeFormatter.formatFieldPath,
 		"shouldCastNilCheck":       jenny.typeFormatter.shouldCastNilCheck,
+		"formatValue":              jenny.typeFormatter.formatValue,
 	})
 }
 
