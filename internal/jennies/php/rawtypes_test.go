@@ -18,9 +18,11 @@ func TestRawTypes_Generate(t *testing.T) {
 		},
 	}
 
-	config := Config{}
+	config := Config{
+		NamespaceRoot: "Grafana\\Foundation",
+	}
 	jenny := RawTypes{
-		Config: config,
+		config: config,
 	}
 	compilerPasses := New(config).CompilerPasses()
 

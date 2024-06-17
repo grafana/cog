@@ -12,6 +12,20 @@ const LanguageRef = "php"
 
 type Config struct {
 	debug bool
+
+	NamespaceRoot string `yaml:"namespace_root"`
+}
+
+func (config *Config) InterpolateParameters(interpolator func(input string) string) {
+	config.NamespaceRoot = interpolator(config.NamespaceRoot)
+}
+
+func (config Config) fullNamespace(typeName string) string {
+	return config.NamespaceRoot + "\\" + typeName
+}
+
+func (config Config) fullNamespaceRef(typeName string) string {
+	return "\\" + config.fullNamespace(typeName)
 }
 
 func (config Config) MergeWithGlobal(global languages.Config) Config {
@@ -42,8 +56,8 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		VariantsPlugins{},
-		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config}),
+		VariantsPlugins{config: config},
+		common.If[languages.Context](globalConfig.Types, RawTypes{config: config}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
@@ -63,7 +77,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.AnonymousStructsToNamed{},
 		&compiler.DisjunctionInferMapping{},
 		&compiler.UndiscriminatedDisjunctionToAny{},
-		&AddTypehintsComments{},
+		&AddTypehintsComments{config: language.config},
 	}
 }
 
