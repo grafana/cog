@@ -1,27 +1,24 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json",
-  "$ref": "#/$defs/Pipeline",
+  "$ref": "#/$defs/CodegenPipeline",
   "$defs": {
-    "Config": {
+    "AstSchemaMeta": {
       "properties": {
-        "go_mod": {
-          "type": "boolean",
-          "description": "GenerateGoMod indicates whether a go.mod file should be generated.\nIf enabled, PackageRoot is used as module path."
+        "kind": {
+          "type": "string"
         },
-        "skip_runtime": {
-          "type": "boolean",
-          "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        "variant": {
+          "type": "string"
         },
-        "package_root": {
-          "type": "string",
-          "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"
+        "identifier": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "CueInput": {
+    "CodegenCueInput": {
       "properties": {
         "allowed_objects": {
           "items": {
@@ -38,7 +35,7 @@
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
         "metadata": {
-          "$ref": "#/$defs/SchemaMeta",
+          "$ref": "#/$defs/AstSchemaMeta",
           "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "entrypoint": {
@@ -64,34 +61,34 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "Input": {
+    "CodegenInput": {
       "properties": {
         "if": {
           "type": "string"
         },
         "jsonschema": {
-          "$ref": "#/$defs/JSONSchemaInput"
+          "$ref": "#/$defs/CodegenJSONSchemaInput"
         },
         "openapi": {
-          "$ref": "#/$defs/OpenAPIInput"
+          "$ref": "#/$defs/CodegenOpenAPIInput"
         },
         "kind_registry": {
-          "$ref": "#/$defs/KindRegistryInput"
+          "$ref": "#/$defs/CodegenKindRegistryInput"
         },
         "kindsys_core": {
-          "$ref": "#/$defs/CueInput"
+          "$ref": "#/$defs/CodegenCueInput"
         },
         "kindsys_composable": {
-          "$ref": "#/$defs/CueInput"
+          "$ref": "#/$defs/CodegenCueInput"
         },
         "cue": {
-          "$ref": "#/$defs/CueInput"
+          "$ref": "#/$defs/CodegenCueInput"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "JSONSchemaInput": {
+    "CodegenJSONSchemaInput": {
       "properties": {
         "allowed_objects": {
           "items": {
@@ -108,7 +105,7 @@
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
         "metadata": {
-          "$ref": "#/$defs/SchemaMeta",
+          "$ref": "#/$defs/AstSchemaMeta",
           "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
@@ -127,7 +124,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "KindRegistryInput": {
+    "CodegenKindRegistryInput": {
       "properties": {
         "allowed_objects": {
           "items": {
@@ -144,7 +141,7 @@
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
         "metadata": {
-          "$ref": "#/$defs/SchemaMeta",
+          "$ref": "#/$defs/AstSchemaMeta",
           "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
@@ -157,7 +154,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "OpenAPIInput": {
+    "CodegenOpenAPIInput": {
       "properties": {
         "allowed_objects": {
           "items": {
@@ -174,7 +171,7 @@
           "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
         },
         "metadata": {
-          "$ref": "#/$defs/SchemaMeta",
+          "$ref": "#/$defs/AstSchemaMeta",
           "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
         },
         "path": {
@@ -197,7 +194,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "Output": {
+    "CodegenOutput": {
       "properties": {
         "directory": {
           "type": "string"
@@ -210,7 +207,7 @@
         },
         "languages": {
           "items": {
-            "$ref": "#/$defs/OutputLanguage"
+            "$ref": "#/$defs/CodegenOutputLanguage"
           },
           "type": "array"
         },
@@ -233,46 +230,46 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "OutputLanguage": {
+    "CodegenOutputLanguage": {
       "properties": {
         "go": {
-          "$ref": "#/$defs/Config"
+          "$ref": "#/$defs/GolangConfig"
         },
         "java": {
-          "$ref": "#/$defs/Config"
+          "$ref": "#/$defs/JavaConfig"
         },
         "jsonschema": {
-          "$ref": "#/$defs/Config"
+          "$ref": "#/$defs/JsonschemaConfig"
         },
         "openapi": {
-          "$ref": "#/$defs/Config"
+          "$ref": "#/$defs/OpenapiConfig"
         },
         "python": {
-          "$ref": "#/$defs/Config"
+          "$ref": "#/$defs/PythonConfig"
         },
         "typescript": {
-          "$ref": "#/$defs/Config"
+          "$ref": "#/$defs/TypescriptConfig"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "Pipeline": {
+    "CodegenPipeline": {
       "properties": {
         "debug": {
           "type": "boolean"
         },
         "inputs": {
           "items": {
-            "$ref": "#/$defs/Input"
+            "$ref": "#/$defs/CodegenInput"
           },
           "type": "array"
         },
         "transformations": {
-          "$ref": "#/$defs/Transforms"
+          "$ref": "#/$defs/CodegenTransforms"
         },
         "output": {
-          "$ref": "#/$defs/Output"
+          "$ref": "#/$defs/CodegenOutput"
         },
         "parameters": {
           "additionalProperties": {
@@ -284,22 +281,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "SchemaMeta": {
-      "properties": {
-        "kind": {
-          "type": "string"
-        },
-        "variant": {
-          "type": "string"
-        },
-        "identifier": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Transforms": {
+    "CodegenTransforms": {
       "properties": {
         "schemas": {
           "items": {
@@ -314,6 +296,91 @@
           },
           "type": "array",
           "description": "VeneersDirectories holds a list of paths to directories containing\nveneers to apply to all the builders."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "GolangConfig": {
+      "properties": {
+        "go_mod": {
+          "type": "boolean",
+          "description": "GenerateGoMod indicates whether a go.mod file should be generated.\nIf enabled, PackageRoot is used as module path."
+        },
+        "skip_runtime": {
+          "type": "boolean",
+          "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        },
+        "package_root": {
+          "type": "string",
+          "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "JavaConfig": {
+      "properties": {
+        "gen_pom": {
+          "type": "boolean"
+        },
+        "maven_version": {
+          "type": "string"
+        },
+        "package_path": {
+          "type": "string"
+        },
+        "skip_runtime": {
+          "type": "boolean",
+          "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "JsonschemaConfig": {
+      "properties": {
+        "compact": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "OpenapiConfig": {
+      "properties": {
+        "compact": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "PythonConfig": {
+      "properties": {
+        "path_prefix": {
+          "type": "string"
+        },
+        "skip_runtime": {
+          "type": "boolean",
+          "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "TypescriptConfig": {
+      "properties": {
+        "path_prefix": {
+          "type": "string"
+        },
+        "skip_runtime": {
+          "type": "boolean",
+          "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        },
+        "skip_index": {
+          "type": "boolean",
+          "description": "SkipIndex disables the generation of `index.ts` files."
         }
       },
       "additionalProperties": false,
