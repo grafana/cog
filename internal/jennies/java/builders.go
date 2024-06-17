@@ -50,19 +50,16 @@ func (b Builders) genBuilders(pkg string, name string) ([]Builder, bool) {
 	}
 
 	return tools.Map(builders, func(builder ast.Builder) Builder {
-		builderName := ""
-		if len(builders) > 1 {
-			builderName = builder.Name
-		}
 		object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 		return Builder{
 			Package:     b.typeFormatter.formatPackage(pkg),
 			ObjectName:  tools.UpperCamelCase(object.Name),
-			BuilderName: builderName,
+			BuilderName: builder.Name,
 			Constructor: builder.Constructor,
 			Options:     builder.Options,
 			Properties:  builder.Properties,
 			Defaults:    b.genDefaults(builder.Options),
+			ImportAlias: b.config.PackagePath,
 		}
 	}), true
 }

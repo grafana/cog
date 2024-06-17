@@ -3,7 +3,7 @@ package panelbuilder;
 import java.util.List;
 import dashboard.Panel;
 
-public class PanelBuilder {
+public class PanelBuilder implements cog.Builder<Panel> {
     private Panel internal;
 
     public PanelBuilder() {

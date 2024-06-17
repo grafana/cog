@@ -3,8 +3,8 @@ package anonymous_struct;
 
 public class SomeStruct {
     public Object time;
-        
-    public static class Builder {
+    
+    public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         
         public Builder() {
