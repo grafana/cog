@@ -58,11 +58,6 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			return formatter.formatRef(def, resolveBuilders)
 		}
 
-		// struct body
-		if def.IsStruct() {
-			return formatter.formatStructBody(def.AsStruct())
-		}
-
 		if def.IsDisjunction() {
 			return ""
 		}
@@ -86,25 +81,6 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 
 func (formatter *typeFormatter) variantInterface(variant string) string {
 	return formatter.config.fullNamespaceRef("Runtime\\Variants\\" + formatObjectName(variant))
-}
-
-func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
-	var buffer strings.Builder
-
-	buffer.WriteString("{\n")
-
-	for i, fieldDef := range def.Fields {
-		buffer.WriteString(tools.Indent(formatter.formatField(fieldDef), 4))
-		buffer.WriteString("\n")
-
-		if i != len(def.Fields)-1 {
-			buffer.WriteString("\n")
-		}
-	}
-
-	buffer.WriteString("}")
-
-	return buffer.String()
 }
 
 func (formatter *typeFormatter) formatField(def ast.StructField) string {
