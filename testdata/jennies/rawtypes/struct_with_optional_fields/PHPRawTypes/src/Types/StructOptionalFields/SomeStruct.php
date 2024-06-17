@@ -10,11 +10,27 @@ class SomeStruct implements \JsonSerializable {
     public ?\Grafana\Foundation\Types\StructOptionalFields\SomeStructOperator $operator;
 
     /**
-     * @var array<string>
+     * @var array<string>|null
      */
     public ?array $fieldArrayOfStrings;
 
     public ?\Grafana\Foundation\Types\StructOptionalFields\StructOptionalFieldsSomeStructFieldAnonymousStruct $fieldAnonymousStruct;
+
+    /**
+     * @param \Grafana\Foundation\Types\StructOptionalFields\SomeOtherStruct|null $fieldRef
+     * @param string|null $fieldString
+     * @param \Grafana\Foundation\Types\StructOptionalFields\SomeStructOperator|null $operator
+     * @param array<string>|null $fieldArrayOfStrings
+     * @param \Grafana\Foundation\Types\StructOptionalFields\StructOptionalFieldsSomeStructFieldAnonymousStruct|null $fieldAnonymousStruct
+     */
+    public function __construct(?\Grafana\Foundation\Types\StructOptionalFields\SomeOtherStruct $fieldRef = null, ?string $fieldString = null, ?\Grafana\Foundation\Types\StructOptionalFields\SomeStructOperator $operator = null, ?array $fieldArrayOfStrings = null, ?\Grafana\Foundation\Types\StructOptionalFields\StructOptionalFieldsSomeStructFieldAnonymousStruct $fieldAnonymousStruct = null)
+    {
+        $this->fieldRef = $fieldRef;
+        $this->fieldString = $fieldString;
+        $this->operator = $operator;
+        $this->fieldArrayOfStrings = $fieldArrayOfStrings;
+        $this->fieldAnonymousStruct = $fieldAnonymousStruct;
+    }
 
     /**
      * @return array<string, mixed>

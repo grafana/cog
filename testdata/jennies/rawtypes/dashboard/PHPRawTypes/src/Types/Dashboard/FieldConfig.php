@@ -6,9 +6,19 @@ class FieldConfig implements \JsonSerializable {
     public ?string $unit;
 
     /**
-     * @var mixed
+     * @var mixed|null
      */
     public $custom;
+
+    /**
+     * @param string|null $unit
+     * @param mixed|null $custom
+     */
+    public function __construct(?string $unit = null,  $custom = null)
+    {
+        $this->unit = $unit;
+        $this->custom = $custom;
+    }
 
     /**
      * @return array<string, mixed>
