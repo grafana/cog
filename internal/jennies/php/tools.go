@@ -22,11 +22,19 @@ func formatObjectName(name string) string {
 	return tools.UpperCamelCase(name)
 }
 
+func formatOptionName(name string) string {
+	return tools.LowerCamelCase(name)
+}
+
 func formatConstantName(name string) string {
 	return tools.UpperSnakeCase(name)
 }
 
 func formatFieldName(name string) string {
+	return tools.LowerCamelCase(name)
+}
+
+func formatArgName(name string) string {
 	return tools.LowerCamelCase(name)
 }
 

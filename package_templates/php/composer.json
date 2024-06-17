@@ -14,8 +14,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Grafana\\Foundation\\Runtime\\": "src/Runtime",
-            "Grafana\\Foundation\\Types\\": "src/Types"
+            "Grafana\\Foundation\\": "src/"
         }
     },
     "require": {}
