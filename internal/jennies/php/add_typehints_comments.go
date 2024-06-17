@@ -29,7 +29,7 @@ func (pass *AddTypehintsComments) processStructField(_ *compiler.Visitor, _ *ast
 		return field, nil
 	}
 
-	hint := pass.hinter.annotationForType(field.Type)
+	hint := pass.hinter.varAnnotationForType(field.Type)
 	if hint != "" {
 		field.Comments = append(field.Comments, hint)
 	}
