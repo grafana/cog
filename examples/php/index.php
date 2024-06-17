@@ -9,3 +9,10 @@ $dashboard->title = "Some dashboard";
 $dashboard->tags = ["foo", "bar"];
 
 var_dump(json_encode($dashboard));
+
+
+$dashBuilder = new \Grafana\Foundation\Builders\Dashboard\DashboardBuilder(title: "Awesome dashboard");
+$dashBuilder->refresh("5m");
+$dash = $dashBuilder->build();
+
+var_dump(json_encode($dash));
