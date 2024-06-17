@@ -344,7 +344,10 @@ func PromoteOptionsToConstructor(selector Selector, optionNames []string) Rewrit
 				}
 
 				// TODO: do it for every argument/assignment?
-				builders[i].Constructor.Args = append(builders[i].Constructor.Args, opt.Args[0])
+				arg := opt.Args[0].DeepCopy()
+				arg.Type.Nullable = false
+
+				builders[i].Constructor.Args = append(builders[i].Constructor.Args, arg)
 				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, opt.Assignments[0])
 
 				builders[i].AddToVeneerTrail(fmt.Sprintf("PromoteOptionsToConstructor[%s]", optName))

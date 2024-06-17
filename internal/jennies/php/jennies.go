@@ -58,6 +58,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AppendOneToMany(
 		VariantsPlugins{config: config},
 		common.If[languages.Context](globalConfig.Types, RawTypes{config: config}),
+		common.If[languages.Context](globalConfig.Builders, &Builder{config: config}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
