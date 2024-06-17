@@ -1,32 +1,32 @@
 {{- define "builder" }}
-    public static class {{ .BuilderName }}Builder implements {{ if not (eq .ImportAlias "") }}{{ .ImportAlias }}.{{ end }}cog.Builder<{{ .ObjectName }}> {
-        private {{ .ObjectName }} internal;
+    public static class {{ .BuilderName }}Builder implements {{ if not (eq .Builder.ImportAlias "") }}{{ .Builder.ImportAlias }}.{{ end }}cog.Builder<{{ .Builder.ObjectName }}> {
+        private {{ .Builder.ObjectName }} internal;
         
-        {{- range .Properties }}
+        {{- range .Builder.Properties }}
         private {{ .Type | formatBuilderFieldType }} {{ .Name | escapeVar }};
         {{- end }}
         
-        public {{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) {
-            this.internal = new {{ .ObjectName }}();
-        {{- range .Constructor.Assignments }}
+        public {{ .BuilderName }}Builder({{- template "args" .Builder.Constructor.Args }}) {
+            this.internal = new {{ .Builder.ObjectName }}();
+        {{- range .Builder.Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
         
-        {{- range .Defaults }}
+        {{- range .Builder.Defaults }}
         this.set{{ .OptionName }}({{ .Args|join ", " }});
         {{- end }}
         }
         
-    {{- range $opt := .Options }}
+    {{- range $opt := .Builder.Options }}
     public {{ $.BuilderName }}Builder set{{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
         {{- range .Assignments }}
-            {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" $opt.Name) }}
+            {{- template "assignment" (dict "Assignment" . "BuilderName" $.Builder.BuilderName "OptionName" $opt.Name) }}
         {{- end }}
         return this;
     }
     {{ end -}}
         
-        public {{ .ObjectName }} build() {
+        public {{ .Builder.ObjectName }} build() {
             return this.internal;
         }
     }
