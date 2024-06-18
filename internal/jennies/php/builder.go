@@ -118,7 +118,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				clone := def.DeepCopy()
 				clone.Nullable = false
 
-				return hinter.forType(clone)
+				return hinter.forType(clone, false)
 			},
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
