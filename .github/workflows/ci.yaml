@@ -8,6 +8,7 @@ env:
   GO_VERSION: '1.21'
   NODE_VERSION: '18'
   PYTHON_VERSION: '3.12'
+  PHP_VERSION: '8.3'
   DOCKER_TOOLS: false
 
 jobs:
@@ -73,6 +74,12 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: phpstan
+
       - name: Install mypy
         run: python3 -m pip install mypy
 
@@ -104,6 +111,9 @@ jobs:
 
       - name: Lint generated Python code
         run: mypy generated/python/
+
+      - name: Lint generated PHP code
+        run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
 
   examples:
     name: Run examples
