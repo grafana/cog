@@ -54,7 +54,7 @@ func (generator *typehints) forType(def ast.Type, resolveBuilders bool) string {
 	case def.IsMap():
 		hint = generator.mapHint(def)
 	case def.IsScalar():
-		hint = generator.scalarHint(def)
+		hint = scalarHint(def)
 	case def.IsRef():
 		hint = generator.refHint(def, resolveBuilders)
 	case def.IsComposableSlot():
@@ -87,7 +87,7 @@ func (generator *typehints) mapHint(def ast.Type) string {
 	return fmt.Sprintf("array<%s, %s>", indexType, valueType)
 }
 
-func (generator *typehints) scalarHint(def ast.Type) string {
+func scalarHint(def ast.Type) string {
 	scalarKind := def.AsScalar().ScalarKind
 	/*
 		if def.HasHint(ast.HintStringFormatDateTime) {
@@ -130,16 +130,16 @@ func (generator *typehints) refHint(def ast.Type, resolveBuilders bool) string {
 		return fqcn
 	}
 
-	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Runtime\\Builder"), fqcn)
+	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Cog\\Builder"), fqcn)
 }
 
 func (generator *typehints) composableSlotHint(def ast.Type, resolveBuilders bool) string {
-	fqcn := generator.config.fullNamespaceRef("Runtime\\" + formatObjectName(string(def.ComposableSlot.Variant)))
+	fqcn := generator.config.fullNamespaceRef("Cog\\" + formatObjectName(string(def.ComposableSlot.Variant)))
 	if !resolveBuilders {
 		return fqcn
 	}
 
-	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Runtime\\Builder"), fqcn)
+	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Cog\\Builder"), fqcn)
 }
 
 func (generator *typehints) disjunctionHint(def ast.Type, resolveBuilders bool) string {

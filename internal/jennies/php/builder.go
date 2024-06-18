@@ -84,7 +84,7 @@ func (jenny *Builder) builderInterface() (codejen.File, error) {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Runtime/Builder.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Cog/Builder.php", []byte(rendered), jenny), nil
 }
 
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
@@ -92,7 +92,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 	builder.For.Comments = append(
 		builder.For.Comments,
-		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Runtime\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),
+		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Cog\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),
 	)
 
 	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: false}
