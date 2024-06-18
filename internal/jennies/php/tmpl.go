@@ -13,7 +13,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/builders/*.tmpl templates/runtime/*.tmpl templates/types/*.tmpl
+//go:embed templates/builders/*.tmpl templates/builders/veneers/*.tmpl templates/runtime/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
