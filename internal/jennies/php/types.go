@@ -48,7 +48,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 				return formatted
 			}
 
-			return formatter.config.fullNamespaceRef("Runtime\\Builder")
+			return formatter.config.fullNamespaceRef("Cog\\Builder")
 		}
 
 		if def.IsArray() || def.IsMap() {
@@ -85,7 +85,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 }
 
 func (formatter *typeFormatter) variantInterface(variant string) string {
-	return formatter.config.fullNamespaceRef("Runtime\\" + formatObjectName(variant))
+	return formatter.config.fullNamespaceRef("Cog\\" + formatObjectName(variant))
 }
 
 func (formatter *typeFormatter) formatField(def ast.StructField) string {
@@ -179,7 +179,7 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 	typeName := formatter.config.fullNamespaceRef(referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType))
 
 	if resolveBuilders && formatter.context.ResolveToBuilder(def) {
-		return formatter.config.fullNamespaceRef("Runtime\\Builder")
+		return formatter.config.fullNamespaceRef("Cog\\Builder")
 	}
 
 	return typeName
