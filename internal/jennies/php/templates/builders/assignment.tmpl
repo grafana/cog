@@ -36,11 +36,6 @@
 {{- end }}
 
 {{- define "assignment_setup" }}
-    {{- if not (eq .Value.Constant nil) }}
-        {{- if .Assignment.Path.Last.Type.Nullable }}
-            $val{{ .Assignment.Path.Last.Identifier | upperCamelCase }} = {{ formatScalar .Value.Constant }};
-        {{- end }}
-    {{- end }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- $builtResultName := (print (formatArgName .Name) "Resource") }}
