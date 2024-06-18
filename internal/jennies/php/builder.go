@@ -35,7 +35,6 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: true}
 	visitor := ast.BuilderVisitor{
 		OnOption: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, option ast.Option) (ast.Option, error) {
-
 			option.Args = tools.Map(option.Args, func(arg ast.Argument) ast.Argument {
 				newArg := arg.DeepCopy()
 				newArg.Type.Nullable = false
