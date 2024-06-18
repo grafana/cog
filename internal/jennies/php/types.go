@@ -178,9 +178,12 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
 	typeName := "Types\\" + referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType)
 
-	if resolveBuilders {
-		typeName = "Builders\\" + referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType)
-	}
+	/*
+		TODO: remove?
+		if resolveBuilders && formatter.context.ResolveToBuilder(def) {
+			typeName = "Builders\\" + referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType)
+		}
+	*/
 
 	typeName = formatter.config.fullNamespaceRef(typeName)
 

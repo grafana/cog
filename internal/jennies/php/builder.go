@@ -21,6 +21,7 @@ func (jenny *Builder) JennyName() string {
 }
 
 func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error) {
+	var err error
 	jenny.typeFormatter = builderTypeFormatter(jenny.config, context)
 
 	builderInterface, err := jenny.builderInterface()
@@ -29,6 +30,35 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 	}
 
 	files := codejen.Files{builderInterface}
+
+	// Add argument typehints and ensure arguments are not nullable
+	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: true}
+	visitor := ast.BuilderVisitor{
+		OnOption: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, option ast.Option) (ast.Option, error) {
+
+			option.Args = tools.Map(option.Args, func(arg ast.Argument) ast.Argument {
+				newArg := arg.DeepCopy()
+				newArg.Type.Nullable = false
+
+				if !hinter.requiresHint(newArg.Type) {
+					return newArg
+				}
+
+				typehint := hinter.paramAnnotationForType(newArg.Name, newArg.Type)
+				if typehint != "" {
+					option.Comments = append(option.Comments, typehint)
+				}
+
+				return newArg
+			})
+
+			return option, nil
+		},
+	}
+	context.Builders, err = visitor.Visit(context.Schemas, context.Builders)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, builder := range context.Builders {
 		output, err := jenny.generateBuilder(context, builder)
@@ -62,17 +92,6 @@ func (jenny *Builder) builderInterface() (codejen.File, error) {
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
 	var buffer strings.Builder
 
-	builder.Options = tools.Map(builder.Options, func(option ast.Option) ast.Option {
-		option.Args = tools.Map(option.Args, func(arg ast.Argument) ast.Argument {
-			newArg := arg.DeepCopy()
-			newArg.Type.Nullable = false
-
-			return newArg
-		})
-
-		return option
-	})
-
 	builder.For.Comments = append(
 		builder.For.Comments,
 		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Runtime\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),
@@ -84,6 +103,12 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"formatType": jenny.typeFormatter.formatType,
 			"formatRawType": func(def ast.Type) string {
 				return jenny.typeFormatter.doFormatType(def, false)
+			},
+			"formatRawTypeNotNullable": func(def ast.Type) string {
+				typeDef := def.DeepCopy()
+				typeDef.Nullable = false
+
+				return jenny.typeFormatter.doFormatType(typeDef, false)
 			},
 			"typeHasBuilder": context.ResolveToBuilder,
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
