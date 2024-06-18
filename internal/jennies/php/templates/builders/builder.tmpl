@@ -3,7 +3,7 @@
 namespace {{ .NamespaceRoot }}\{{ .Builder.Package | formatPackageName }};
 
 {{ .Builder.For.Comments|formatDocsBlock -}}
-class {{ .Builder.Name }}Builder implements \{{ .NamespaceRoot }}\Runtime\Builder
+class {{ .Builder.Name }}Builder implements \{{ .NamespaceRoot }}\Cog\Builder
 {
     protected {{ .Builder.For.SelfRef.AsType|formatRawType }} $internal;
     {{- range .Builder.Properties }}
@@ -15,6 +15,9 @@ class {{ .Builder.Name }}Builder implements \{{ .NamespaceRoot }}\Runtime\Builde
     	$this->internal = new {{ .Builder.For.SelfRef.AsType|formatRawType }}();
         {{- range .Builder.Constructor.Assignments }}
         {{- template "assignment" (dict "Assignment" . "Builder" $.Builder "Option" (dict "Name" "")) }}
+        {{- end }}
+        {{- range .Builder.Properties }}
+        $this->{{ .Name }} = {{ .Type | defaultForType }};
         {{- end }}
     }
 
