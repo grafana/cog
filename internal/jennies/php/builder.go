@@ -68,7 +68,6 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 
 		filename := filepath.Join(
 			"src",
-			"Builders",
 			formatPackageName(builder.Package),
 			fmt.Sprintf("%sBuilder.php", formatObjectName(builder.Name)),
 		)

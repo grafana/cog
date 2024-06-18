@@ -38,7 +38,7 @@ func (jenny VariantsPlugins) dataqueryVariant() (codejen.File, error) {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Runtime/Variants/Dataquery.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Runtime/Dataquery.php", []byte(rendered), jenny), nil
 }
 
 func (jenny VariantsPlugins) panelcfgInterface() (codejen.File, error) {
@@ -49,5 +49,5 @@ func (jenny VariantsPlugins) panelcfgInterface() (codejen.File, error) {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Runtime/Variants/Panelcfg.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Runtime/Panelcfg.php", []byte(rendered), jenny), nil
 }
