@@ -78,14 +78,12 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.AnonymousStructsToNamed{},
 		&compiler.DisjunctionInferMapping{},
 		&compiler.UndiscriminatedDisjunctionToAny{},
-		&AddTypehintsComments{config: language.config},
 	}
 }
 
 func (language *Language) NullableKinds() languages.NullableConfig {
 	return languages.NullableConfig{
-		Kinds:              []ast.Kind{ast.KindMap, ast.KindArray},
-		ProtectArrayAppend: false,
+		ProtectArrayAppend: true,
 		AnyIsNullable:      true,
 	}
 }

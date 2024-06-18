@@ -5,15 +5,22 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type typehints struct {
-	config Config
+	config          Config
+	context         languages.Context
+	resolveBuilders bool
 }
 
 func (generator *typehints) requiresHint(def ast.Type) bool {
 	if def.IsAny() {
+		return true
+	}
+
+	if generator.resolveBuilders && def.IsRef() && generator.context.ResolveToBuilder(def) {
 		return true
 	}
 
@@ -26,7 +33,7 @@ func (generator *typehints) paramAnnotationForType(paramName string, def ast.Typ
 		return ""
 	}
 
-	return fmt.Sprintf("@param %s $%s", hintText, paramName)
+	return fmt.Sprintf("@param %s $%s", hintText, formatArgName(paramName))
 }
 
 func (generator *typehints) varAnnotationForType(def ast.Type) string {
@@ -117,11 +124,22 @@ func (generator *typehints) refHint(def ast.Type) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)
 
-	return generator.config.fullNamespaceRef("Types\\" + referredPkg + "\\" + typeName)
+	fqcn := generator.config.fullNamespaceRef("Types\\" + referredPkg + "\\" + typeName)
+
+	if !generator.resolveBuilders || !generator.context.ResolveToBuilder(def) {
+		return fqcn
+	}
+
+	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Runtime\\Builder"), fqcn)
 }
 
 func (generator *typehints) composableSlotHint(def ast.Type) string {
-	return generator.config.fullNamespaceRef("Runtime\\Variants\\" + formatObjectName(string(def.ComposableSlot.Variant)))
+	fqcn := generator.config.fullNamespaceRef("Runtime\\Variants\\" + formatObjectName(string(def.ComposableSlot.Variant)))
+	if !generator.resolveBuilders {
+		return fqcn
+	}
+
+	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Runtime\\Builder"), fqcn)
 }
 
 func (generator *typehints) disjunctionHint(def ast.Type) string {
