@@ -128,7 +128,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 }
 
 func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
-	referredPkg := enumObj.SelfRef.ReferredPkg
+	referredPkg := formatPackageName(enumObj.SelfRef.ReferredPkg)
 	enumName := formatObjectName(enumObj.Type.AsEnum().Values[0].Name)
 
 	for _, enumValue := range enumObj.Type.AsEnum().Values {
