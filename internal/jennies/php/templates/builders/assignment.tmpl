@@ -40,8 +40,8 @@
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- $builtResultName := (print (formatArgName .Name) "Resource") }}
         {{- if .Type.IsArray }}
-        ${{ formatArgName .Name}}Resources = [];
         {{- $builtResultName = (print (formatArgName .Name) "Resources") }}
+        ${{ $builtResultName }} = [];
         {{- end }}
 
         {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" (formatArgName .Name) "InputVar" (formatArgName .Name) "AssignmentPath" $.Assignment.Path "ResultVar" $builtResultName) }}
