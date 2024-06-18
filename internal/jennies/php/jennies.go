@@ -57,6 +57,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	})
 	jenny.AppendOneToMany(
 		VariantsPlugins{config: config},
+		Runtime{config: config},
 		common.If[languages.Context](globalConfig.Types, RawTypes{config: config}),
 		common.If[languages.Context](globalConfig.Builders, &Builder{config: config}),
 	)
@@ -67,9 +68,6 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
-		&compiler.InlineObjectsWithTypes{
-			InlineTypes: []ast.Kind{ast.KindScalar, ast.KindArray, ast.KindMap, ast.KindDisjunction},
-		},
 		&compiler.AnonymousEnumToExplicitType{},
 		&compiler.SanitizeEnumMemberNames{},
 		&compiler.NotRequiredFieldAsNullableType{},
@@ -78,6 +76,9 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.AnonymousStructsToNamed{},
 		&compiler.DisjunctionInferMapping{},
 		&compiler.UndiscriminatedDisjunctionToAny{},
+		&compiler.InlineObjectsWithTypes{
+			InlineTypes: []ast.Kind{ast.KindScalar, ast.KindArray, ast.KindMap, ast.KindDisjunction},
+		},
 	}
 }
 
