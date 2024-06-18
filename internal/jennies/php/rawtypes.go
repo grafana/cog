@@ -110,12 +110,11 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 
 	filename := filepath.Join(
 		"src",
-		"Types",
 		formatPackageName(schema.Package),
 		fmt.Sprintf("%s.php", defName),
 	)
 
-	output := fmt.Sprintf("<?php\n\nnamespace %s\\%s;\n\n", jenny.config.fullNamespace("Types"), formatPackageName(schema.Package))
+	output := fmt.Sprintf("<?php\n\nnamespace %s;\n\n", jenny.config.fullNamespace(formatPackageName(schema.Package)))
 	output += buffer.String()
 
 	return *codejen.NewFile(filename, []byte(output), jenny), nil
@@ -126,7 +125,7 @@ func (jenny RawTypes) formatStructDef(context languages.Context, def ast.Object)
 
 	variant := ""
 	if def.Type.ImplementsVariant() {
-		variant = ", " + jenny.config.fullNamespaceRef("Runtime\\Variants\\"+formatObjectName(def.Type.ImplementedVariant()))
+		variant = ", " + jenny.config.fullNamespaceRef("Runtime\\"+formatObjectName(def.Type.ImplementedVariant()))
 	}
 
 	buffer.WriteString(fmt.Sprintf("class %s implements \\JsonSerializable%s {\n", formatObjectName(def.Name), variant))
