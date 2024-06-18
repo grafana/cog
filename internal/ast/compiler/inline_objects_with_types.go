@@ -48,7 +48,10 @@ func (pass *InlineObjectsWithTypes) Process(schemas []*ast.Schema) ([]*ast.Schem
 
 	for _, schema := range schemas {
 		schema.Objects.Iterate(func(_ string, object ast.Object) {
-			if !object.Type.IsAnyOf(pass.InlineTypes...) {
+			// follow potential references
+			resolvedType := ast.Schemas(schemas).ResolveToType(object.Type)
+
+			if !resolvedType.IsAnyOf(pass.InlineTypes...) {
 				return
 			}
 
@@ -57,7 +60,7 @@ func (pass *InlineObjectsWithTypes) Process(schemas []*ast.Schema) ([]*ast.Schem
 				return
 			}
 
-			pass.objectsToInline.Set(object.SelfRef.String(), object.Type)
+			pass.objectsToInline.Set(object.SelfRef.String(), resolvedType)
 		})
 	}
 
