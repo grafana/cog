@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ .NamespaceRoot }}\Builders\{{ .Builder.Package | formatPackageName }};
+namespace {{ .NamespaceRoot }}\{{ .Builder.Package | formatPackageName }};
 
 {{ .Builder.For.Comments|formatDocsBlock -}}
 class {{ .Builder.Name }}Builder implements \{{ .NamespaceRoot }}\Runtime\Builder

@@ -121,7 +121,7 @@ func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, d
 				}
 			}
 
-			return raw(fmt.Sprintf(config.fullNamespaceRef(fmt.Sprintf("Types\\%s\\%s", referredPkg, referredObj.Name))+"::%s()", enumName))
+			return raw(fmt.Sprintf(config.fullNamespaceRef(referredPkg+"\\"+referredObj.Name)+"::%s()", enumName))
 		} else if found && referredObj.Type.IsDisjunction() {
 			return defaultValueForType(config, schemas, referredObj.Type, nil)
 		}
@@ -155,7 +155,7 @@ func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, d
 
 		formattedRef := ref.ReferredType
 		if referredPkg != "" {
-			formattedRef = config.fullNamespaceRef("Types\\" + referredPkg + "\\" + ref.ReferredType)
+			formattedRef = config.fullNamespaceRef(referredPkg + "\\" + ref.ReferredType)
 		}
 
 		if referredObj.Type.IsConcreteScalar() {

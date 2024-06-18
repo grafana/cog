@@ -85,7 +85,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 }
 
 func (formatter *typeFormatter) variantInterface(variant string) string {
-	return formatter.config.fullNamespaceRef("Runtime\\Variants\\" + formatObjectName(variant))
+	return formatter.config.fullNamespaceRef("Runtime\\" + formatObjectName(variant))
 }
 
 func (formatter *typeFormatter) formatField(def ast.StructField) string {
@@ -138,7 +138,7 @@ func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) str
 		}
 	}
 
-	return fmt.Sprintf(formatter.config.fullNamespaceRef(fmt.Sprintf("Types\\%s\\%s", referredPkg, enumObj.Name))+"::%s()", enumName)
+	return fmt.Sprintf(formatter.config.fullNamespaceRef(referredPkg+"\\"+enumObj.Name)+"::%s()", enumName)
 }
 
 func (formatter *typeFormatter) formatScalar(def ast.Type) string {
@@ -176,16 +176,7 @@ func (formatter *typeFormatter) formatScalar(def ast.Type) string {
 
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
-	typeName := "Types\\" + referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType)
-
-	/*
-		TODO: remove?
-		if resolveBuilders && formatter.context.ResolveToBuilder(def) {
-			typeName = "Builders\\" + referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType)
-		}
-	*/
-
-	typeName = formatter.config.fullNamespaceRef(typeName)
+	typeName := formatter.config.fullNamespaceRef(referredPkg + "\\" + formatObjectName(def.AsRef().ReferredType))
 
 	if resolveBuilders && formatter.context.ResolveToBuilder(def) {
 		return formatter.config.fullNamespaceRef("Runtime\\Builder")
