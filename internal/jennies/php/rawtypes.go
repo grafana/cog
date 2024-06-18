@@ -23,7 +23,14 @@ func (jenny RawTypes) JennyName() string {
 }
 
 func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
+	var err error
 	files := make(codejen.Files, 0, len(context.Schemas))
+
+	// generate typehints with a compiler pass
+	context.Schemas, err = (&AddTypehintsComments{config: jenny.config}).Process(context.Schemas)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, schema := range context.Schemas {
 		schemaFiles, err := jenny.generateSchema(context, schema)
@@ -140,9 +147,7 @@ func (jenny RawTypes) formatStructDef(context languages.Context, def ast.Object)
 
 func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Object) string {
 	var buffer strings.Builder
-	hinter := typehints{
-		config: jenny.config,
-	}
+	hinter := typehints{config: jenny.config, context: context}
 
 	var typeAnnotations []string
 	var args []string
