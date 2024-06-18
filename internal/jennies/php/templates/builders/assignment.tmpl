@@ -64,11 +64,20 @@
 
                 ${{ .ResultVar }}[] = ${{ .OriginalInputVar }}Depth{{ .Depth }};
             {{- else }}
+                {{- if and .InputType.Array.ValueType.IsDisjunction (not (isDisjunctionOfBuilders .InputType.Array.ValueType)) }}
+                ${{ .ResultVar }}[] = $r{{ .Depth }} instanceof {{ "Runtime\\Builder" | fullNamespaceRef }} ? $r{{ .Depth }}->build() : $r{{ .Depth }};
+                {{- else }}
                 ${{ .ResultVar }}[] = $r{{ .Depth }}->build();
+                {{- end }}
             {{- end }}
         }
     {{- else }}
+    {{- if and .InputType.IsDisjunction (not (isDisjunctionOfBuilders .InputType)) }}
+    /** @var {{ .InputType | typeHint }} ${{ .ResultVar }} */
+    ${{ .ResultVar }} = ${{ .InputVar }} instanceof {{ "Runtime\\Builder" | fullNamespaceRef }} ? ${{ .InputVar }}->build() : ${{ .InputVar }};
+    {{- else }}
     ${{ .ResultVar }} = ${{ .InputVar }}->build();
+    {{- end }}
     {{- end }}
 {{- end }}
 
