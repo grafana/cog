@@ -124,7 +124,7 @@ func (generator *typehints) refHint(def ast.Type) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)
 
-	fqcn := generator.config.fullNamespaceRef("Types\\" + referredPkg + "\\" + typeName)
+	fqcn := generator.config.fullNamespaceRef(referredPkg + "\\" + typeName)
 
 	if !generator.resolveBuilders || !generator.context.ResolveToBuilder(def) {
 		return fqcn
@@ -134,7 +134,7 @@ func (generator *typehints) refHint(def ast.Type) string {
 }
 
 func (generator *typehints) composableSlotHint(def ast.Type) string {
-	fqcn := generator.config.fullNamespaceRef("Runtime\\Variants\\" + formatObjectName(string(def.ComposableSlot.Variant)))
+	fqcn := generator.config.fullNamespaceRef("Runtime\\" + formatObjectName(string(def.ComposableSlot.Variant)))
 	if !generator.resolveBuilders {
 		return fqcn
 	}
