@@ -96,10 +96,13 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Runtime\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),
 	)
 
+	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: false}
+
 	err := templates.
 		Funcs(map[string]any{
-			"formatPath": jenny.formatFieldPath,
-			"formatType": jenny.typeFormatter.formatType,
+			"fullNamespaceRef": jenny.config.fullNamespaceRef,
+			"formatPath":       jenny.formatFieldPath,
+			"formatType":       jenny.typeFormatter.formatType,
 			"formatRawType": func(def ast.Type) string {
 				return jenny.typeFormatter.doFormatType(def, false)
 			},
@@ -109,7 +112,14 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 				return jenny.typeFormatter.doFormatType(typeDef, false)
 			},
-			"typeHasBuilder": context.ResolveToBuilder,
+			"typeHasBuilder":          context.ResolveToBuilder,
+			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
+			"typeHint": func(def ast.Type) string {
+				clone := def.DeepCopy()
+				clone.Nullable = false
+
+				return hinter.forType(clone)
+			},
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
