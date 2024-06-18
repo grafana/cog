@@ -25,6 +25,9 @@ func init() {
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(template.FuncMap{
+			"fullNamespaceRef": func(_ string) string {
+				panic("fullNamespaceRef() needs to be overridden by a jenny")
+			},
 			"formatPath": func(_ ast.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
 			},
@@ -33,6 +36,12 @@ func init() {
 			"formatRawTypeNotNullable": func(_ ast.Type) string { panic("formatRawTypeNotNullable() needs to be overridden by a jenny") },
 			"typeHasBuilder": func(_ ast.Type) bool {
 				panic("typeHasBuilder() needs to be overridden by a jenny")
+			},
+			"typeHint": func(_ ast.Type) string {
+				panic("typeHint() needs to be overridden by a jenny")
+			},
+			"isDisjunctionOfBuilders": func(_ ast.Type) bool {
+				panic("isDisjunctionOfBuilders() needs to be overridden by a jenny")
 			},
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
