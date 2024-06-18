@@ -3,6 +3,7 @@ package php
 import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/languages"
 )
 
 var _ compiler.Pass = (*AddTypehintsComments)(nil)
@@ -14,7 +15,8 @@ type AddTypehintsComments struct {
 
 func (pass *AddTypehintsComments) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 	pass.hinter = &typehints{
-		config: pass.config,
+		config:  pass.config,
+		context: languages.Context{Schemas: schemas},
 	}
 
 	visitor := &compiler.Visitor{

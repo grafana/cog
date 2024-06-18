@@ -28,8 +28,9 @@ func init() {
 			"formatPath": func(_ ast.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
 			},
-			"formatType":    func(_ ast.Type) string { panic("formatType() needs to be overridden by a jenny") },
-			"formatRawType": func(_ ast.Type) string { panic("formatRawType() needs to be overridden by a jenny") },
+			"formatType":               func(_ ast.Type) string { panic("formatType() needs to be overridden by a jenny") },
+			"formatRawType":            func(_ ast.Type) string { panic("formatRawType() needs to be overridden by a jenny") },
+			"formatRawTypeNotNullable": func(_ ast.Type) string { panic("formatRawTypeNotNullable() needs to be overridden by a jenny") },
 			"typeHasBuilder": func(_ ast.Type) bool {
 				panic("typeHasBuilder() needs to be overridden by a jenny")
 			},
