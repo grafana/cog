@@ -28,7 +28,7 @@ func (generator *typehints) requiresHint(def ast.Type) bool {
 }
 
 func (generator *typehints) paramAnnotationForType(paramName string, def ast.Type) string {
-	hintText := generator.forType(def)
+	hintText := generator.forType(def, generator.resolveBuilders)
 	if hintText == "" {
 		return ""
 	}
@@ -37,7 +37,7 @@ func (generator *typehints) paramAnnotationForType(paramName string, def ast.Typ
 }
 
 func (generator *typehints) varAnnotationForType(def ast.Type) string {
-	hintText := generator.forType(def)
+	hintText := generator.forType(def, generator.resolveBuilders)
 	if hintText == "" {
 		return ""
 	}
@@ -45,22 +45,22 @@ func (generator *typehints) varAnnotationForType(def ast.Type) string {
 	return "@var " + hintText
 }
 
-func (generator *typehints) forType(def ast.Type) string {
+func (generator *typehints) forType(def ast.Type, resolveBuilders bool) string {
 	hint := ""
 
 	switch {
 	case def.IsArray():
-		hint = generator.arrayHint(def)
+		hint = generator.arrayHint(def, resolveBuilders)
 	case def.IsMap():
 		hint = generator.mapHint(def)
 	case def.IsScalar():
 		hint = generator.scalarHint(def)
 	case def.IsRef():
-		hint = generator.refHint(def)
+		hint = generator.refHint(def, resolveBuilders)
 	case def.IsComposableSlot():
-		hint = generator.composableSlotHint(def)
+		hint = generator.composableSlotHint(def, resolveBuilders)
 	case def.IsDisjunction():
-		hint = generator.disjunctionHint(def)
+		hint = generator.disjunctionHint(def, resolveBuilders)
 	}
 
 	if hint == "" {
@@ -74,15 +74,15 @@ func (generator *typehints) forType(def ast.Type) string {
 	return hint
 }
 
-func (generator *typehints) arrayHint(def ast.Type) string {
-	valueType := generator.forType(def.Array.ValueType)
+func (generator *typehints) arrayHint(def ast.Type, resolveBuilders bool) string {
+	valueType := generator.forType(def.Array.ValueType, resolveBuilders)
 
 	return fmt.Sprintf("array<%s>", valueType)
 }
 
 func (generator *typehints) mapHint(def ast.Type) string {
-	indexType := generator.forType(def.Map.IndexType)
-	valueType := generator.forType(def.Map.ValueType)
+	indexType := generator.forType(def.Map.IndexType, false)
+	valueType := generator.forType(def.Map.ValueType, false)
 
 	return fmt.Sprintf("array<%s, %s>", indexType, valueType)
 }
@@ -120,31 +120,31 @@ func (generator *typehints) scalarHint(def ast.Type) string {
 	}
 }
 
-func (generator *typehints) refHint(def ast.Type) string {
+func (generator *typehints) refHint(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatPackageName(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)
 
 	fqcn := generator.config.fullNamespaceRef(referredPkg + "\\" + typeName)
 
-	if !generator.resolveBuilders || !generator.context.ResolveToBuilder(def) {
+	if !resolveBuilders || !generator.context.ResolveToBuilder(def) {
 		return fqcn
 	}
 
 	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Runtime\\Builder"), fqcn)
 }
 
-func (generator *typehints) composableSlotHint(def ast.Type) string {
+func (generator *typehints) composableSlotHint(def ast.Type, resolveBuilders bool) string {
 	fqcn := generator.config.fullNamespaceRef("Runtime\\" + formatObjectName(string(def.ComposableSlot.Variant)))
-	if !generator.resolveBuilders {
+	if !resolveBuilders {
 		return fqcn
 	}
 
 	return fmt.Sprintf("%s<%s>", generator.config.fullNamespaceRef("Runtime\\Builder"), fqcn)
 }
 
-func (generator *typehints) disjunctionHint(def ast.Type) string {
+func (generator *typehints) disjunctionHint(def ast.Type, resolveBuilders bool) string {
 	branches := tools.Map(def.Disjunction.Branches, func(branch ast.Type) string {
-		return generator.forType(branch)
+		return generator.forType(branch, resolveBuilders)
 	})
 
 	return strings.Join(branches, "|")
