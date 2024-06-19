@@ -1,0 +1,389 @@
+package provider
+
+import (
+	"context"
+	"encoding/json"
+	"strconv"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+)
+
+// Ensure that the imports are used to avoid compiler errors.
+var _ attr.Value
+var _ diag.Diagnostic
+
+// Ensure provider defined types fully satisfy framework interfaces.
+var (
+	_ datasource.DataSource              = &{{ .Schema.Package | formatObjectName }}DataSource{}
+	_ datasource.DataSourceWithConfigure = &{{ .Schema.Package | formatObjectName }}DataSource{}
+)
+
+func New{{ .Schema.Package | formatObjectName }}DataSource() datasource.DataSource {
+	return &{{ .Schema.Package | formatObjectName }}DataSource{}
+}
+
+// {{ .Schema.Package | formatObjectName }}DataSource defines the data source implementation.
+type {{ .Schema.Package | formatObjectName }}DataSource struct{}
+
+type {{ .Schema.Package | formatObjectName }}DataSourceModel_Time struct {
+	From types.String `tfsdk:"from"`
+	To   types.String `tfsdk:"to"`
+}
+
+func (m {{ .Schema.Package | formatObjectName }}DataSourceModel_Time) MarshalJSON() ([]byte, error) {
+	type json{{ .Schema.Package | formatObjectName }}DataSourceModel_Time struct {
+		From string `json:"from"`
+		To   string `json:"to"`
+	}
+
+	m = m.ApplyDefaults()
+	attr_from := m.From.ValueString()
+	attr_to := m.To.ValueString()
+
+	model := &json{{ .Schema.Package | formatObjectName }}DataSourceModel_Time{
+		From: attr_from,
+		To:   attr_to,
+	}
+	return json.Marshal(model)
+}
+
+func (m {{ .Schema.Package | formatObjectName }}DataSourceModel_Time) ApplyDefaults() {{ .Schema.Package | formatObjectName }}DataSourceModel_Time {
+	if m.From.IsNull() {
+		m.From = types.StringValue(`now-6h`)
+	}
+	if m.To.IsNull() {
+		m.To = types.StringValue(`now`)
+	}
+	return m
+}
+
+type {{ .Schema.Package | formatObjectName }}DataSourceModel struct {
+{{ range .Objects }}
+  {{ range .Type.Struct.Fields }}
+     {{.Name | formatFieldName }} {{.Type | formatTerraformType }} `tfsdk:"{{.Name | formatFieldNameTFSDK }}"`
+  {{ end }}
+{{ end }}
+}
+/*
+	RenderedJSON types.String `tfsdk:"rendered_json"`
+	Uid          types.String `tfsdk:"uid"`
+	Title        types.String `tfsdk:"title"`
+	Description  types.String `tfsdk:"description"`
+	Revision     types.Int64  `tfsdk:"revision"`
+	GnetId       types.String `tfsdk:"gnet_id"`
+	Tags         types.List   `tfsdk:"tags"`
+	Style        types.String `tfsdk:"style"`
+	Timezone     types.String `tfsdk:"timezone"`
+	Editable     types.Bool   `tfsdk:"editable"`
+	//GraphTooltip         types.Int64                               `tfsdk:"graph_tooltip"`
+	Time *{{ .Schema.Package | formatObjectName }}DataSourceModel_Time `tfsdk:"time"`
+	//Timepicker           *{{ .Schema.Package | formatObjectName }}DataSourceModel_Timepicker  `tfsdk:"timepicker"`
+	FiscalYearStartMonth types.Int64  `tfsdk:"fiscal_year_start_month"`
+	LiveNow              types.Bool   `tfsdk:"live_now"`
+	WeekStart            types.String `tfsdk:"week_start"`
+	Refresh              types.String `tfsdk:"refresh"`
+	SchemaVersion        types.Int64  `tfsdk:"schema_version"`
+	Version              types.Int64  `tfsdk:"version"`
+	//Panels               types.List                                `tfsdk:"panels"`
+	//Templating           *{{ .Schema.Package | formatObjectName }}DataSourceModel_Templating  `tfsdk:"templating"`
+	//Annotations          *{{ .Schema.Package | formatObjectName }}DataSourceModel_Annotations `tfsdk:"annotations"`
+	//Links                []{{ .Schema.Package | formatObjectName }}DataSourceModel_Links      `tfsdk:"links"`
+	//Snapshot             *{{ .Schema.Package | formatObjectName }}DataSourceModel_Snapshot    `tfsdk:"snapshot"`
+*/
+
+func (m {{ .Schema.Package | formatObjectName }}DataSourceModel) GetAttrRefresh() interface{} {
+	var attr interface{}
+	var err error
+
+	attr, err = strconv.ParseBool(m.Refresh.ValueString())
+	if err == nil {
+		return attr
+	}
+
+	return m.Refresh.ValueString()
+}
+
+func (m {{ .Schema.Package | formatObjectName }}DataSourceModel) MarshalJSON() ([]byte, error) {
+	type json{{ .Schema.Package | formatObjectName }}DataSourceModel struct {
+		Uid         *string  `json:"uid,omitempty"`
+		Title       *string  `json:"title,omitempty"`
+		Description *string  `json:"description,omitempty"`
+		Revision    *int64   `json:"revision,omitempty"`
+		GnetId      *string  `json:"gnetId,omitempty"`
+		Tags        []string `json:"tags,omitempty"`
+		Style       string   `json:"style"`
+		Timezone    *string  `json:"timezone,omitempty"`
+		Editable    bool     `json:"editable"`
+		//GraphTooltip         int64         `json:"graphTooltip"`
+		Time interface{} `json:"time,omitempty"`
+		//Timepicker           interface{}   `json:"timepicker,omitempty"`
+		FiscalYearStartMonth *int64      `json:"fiscalYearStartMonth,omitempty"`
+		LiveNow              *bool       `json:"liveNow,omitempty"`
+		WeekStart            *string     `json:"weekStart,omitempty"`
+		Refresh              interface{} `json:"refresh,omitempty"`
+		SchemaVersion        int64       `json:"schemaVersion"`
+		Version              *int64      `json:"version,omitempty"`
+		//Panels               []string      `json:"panels,omitempty"`
+		//Templating           interface{}   `json:"templating,omitempty"`
+		//Annotations          interface{}   `json:"annotations,omitempty"`
+		//Links                []interface{} `json:"links,omitempty"`
+		//Snapshot             interface{}   `json:"snapshot,omitempty"`
+	}
+
+	m = m.ApplyDefaults()
+	attr_uid := m.Uid.ValueStringPointer()
+	attr_title := m.Title.ValueStringPointer()
+	attr_description := m.Description.ValueStringPointer()
+	attr_revision := m.Revision.ValueInt64Pointer()
+	attr_gnetid := m.GnetId.ValueStringPointer()
+	attr_tags := []string{}
+	for _, v := range m.Tags.Elements() {
+		attr_tags = append(attr_tags, v.(types.String).ValueString())
+	}
+	attr_style := m.Style.ValueString()
+	attr_timezone := m.Timezone.ValueStringPointer()
+	attr_editable := m.Editable.ValueBool()
+	var attr_time interface{}
+	if m.Time != nil {
+		attr_time = m.Time
+	}
+	attr_fiscalyearstartmonth := m.FiscalYearStartMonth.ValueInt64Pointer()
+	attr_livenow := m.LiveNow.ValueBoolPointer()
+	attr_weekstart := m.WeekStart.ValueStringPointer()
+	attr_refresh := m.GetAttrRefresh()
+	attr_schemaversion := m.SchemaVersion.ValueInt64()
+	attr_version := m.Version.ValueInt64Pointer()
+
+	model := &json{{ .Schema.Package | formatObjectName }}DataSourceModel{
+		Uid:         attr_uid,
+		Title:       attr_title,
+		Description: attr_description,
+		Revision:    attr_revision,
+		GnetId:      attr_gnetid,
+		Tags:        attr_tags,
+		Style:       attr_style,
+		Timezone:    attr_timezone,
+		Editable:    attr_editable,
+		//GraphTooltip:         attr_graphtooltip,
+		Time: attr_time,
+		//Timepicker:           attr_timepicker,
+		FiscalYearStartMonth: attr_fiscalyearstartmonth,
+		LiveNow:              attr_livenow,
+		WeekStart:            attr_weekstart,
+		Refresh:              attr_refresh,
+		SchemaVersion:        attr_schemaversion,
+		Version:              attr_version,
+		//Panels:               attr_panels,
+		//Templating:           attr_templating,
+		//Annotations:          attr_annotations,
+		//Links:                attr_links,
+		//Snapshot:             attr_snapshot,
+	}
+	return json.Marshal(model)
+}
+
+func (m {{ .Schema.Package | formatObjectName }}DataSourceModel) ApplyDefaults() {{ .Schema.Package | formatObjectName }}DataSourceModel {
+	if len(m.Tags.Elements()) == 0 {
+		m.Tags, _ = types.ListValue(types.StringType, []attr.Value{})
+	}
+	if m.Style.IsNull() {
+		m.Style = types.StringValue(`dark`)
+	}
+	if m.Timezone.IsNull() {
+		m.Timezone = types.StringValue(`browser`)
+	}
+	if m.Editable.IsNull() {
+		m.Editable = types.BoolValue(true)
+	}
+	if m.FiscalYearStartMonth.IsNull() {
+		m.FiscalYearStartMonth = types.Int64Value(0)
+	}
+	if m.SchemaVersion.IsNull() {
+		m.SchemaVersion = types.Int64Value(36)
+	}
+	return m
+}
+
+func (d *{{ .Schema.Package | formatObjectName }}DataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_core_dashboard"
+}
+
+func (d *{{ .Schema.Package | formatObjectName }}DataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "",
+		Attributes: map[string]schema.Attribute{
+			"uid": schema.StringAttribute{
+				MarkdownDescription: `Unique dashboard identifier that can be generated by anyone. string (8-40)`,
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
+			},
+			"title": schema.StringAttribute{
+				MarkdownDescription: `Title of dashboard.`,
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
+			},
+			"description": schema.StringAttribute{
+				MarkdownDescription: `Description of dashboard.`,
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
+			},
+			"revision": schema.Int64Attribute{
+				MarkdownDescription: `This property should only be used in dashboards defined by plugins.  It is a quick check
+to see if the version has changed since the last time.`,
+				Computed: false,
+				Optional: true,
+				Required: false,
+			},
+			"gnet_id": schema.StringAttribute{
+				MarkdownDescription: `ID of a dashboard imported from the https://grafana.com/grafana/dashboards/ portal`,
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
+			},
+			"tags": schema.ListAttribute{
+				MarkdownDescription: `Tags associated with dashboard.`,
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
+				ElementType:         types.StringType,
+			},
+			"style": schema.StringAttribute{
+				MarkdownDescription: `Theme of dashboard.
+Default value: dark. Defaults to "dark".`,
+				Computed: true,
+				Optional: true,
+				Required: false,
+			},
+			"timezone": schema.StringAttribute{
+				MarkdownDescription: `Timezone of dashboard. Accepted values are IANA TZDB zone ID or "browser" or "utc". Defaults to "browser".`,
+				Computed:            true,
+				Optional:            true,
+				Required:            false,
+			},
+			"editable": schema.BoolAttribute{
+				MarkdownDescription: `Whether a dashboard is editable or not. Defaults to true.`,
+				Computed:            true,
+				Optional:            true,
+				Required:            false,
+			},
+			"time": schema.SingleNestedAttribute{
+				MarkdownDescription: `Time range for dashboard.
+Accepted values are relative time strings like {from: 'now-6h', to: 'now'} or absolute time strings like {from: '2020-07-10T08:00:00.000Z', to: '2020-07-10T14:00:00.000Z'}.`,
+				Computed: true,
+				Optional: true,
+				Required: false,
+				Attributes: map[string]schema.Attribute{
+					"from": schema.StringAttribute{
+						MarkdownDescription: ` Defaults to "now-6h".`,
+						Computed:            true,
+						Optional:            true,
+						Required:            false,
+					},
+					"to": schema.StringAttribute{
+						MarkdownDescription: ` Defaults to "now".`,
+						Computed:            true,
+						Optional:            true,
+						Required:            false,
+					},
+				},
+			},
+			"fiscal_year_start_month": schema.Int64Attribute{
+				MarkdownDescription: `The month that the fiscal year starts on.  0 = January, 11 = December. Defaults to 0.`,
+				Computed:            true,
+				Optional:            true,
+				Required:            false,
+			},
+			"live_now": schema.BoolAttribute{
+				MarkdownDescription: `When set to true, the dashboard will redraw panels at an interval matching the pixel width.
+This will keep data "moving left" regardless of the query refresh rate. This setting helps
+avoid dashboards presenting stale live data`,
+				Computed: false,
+				Optional: true,
+				Required: false,
+			},
+			"week_start": schema.StringAttribute{
+				MarkdownDescription: `Day when the week starts. Expressed by the name of the day in lowercase, e.g. "monday".`,
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
+			},
+			"refresh": schema.StringAttribute{
+				MarkdownDescription: `Refresh rate of dashboard. Represented via interval string, e.g. "5s", "1m", "1h", "1d".`,
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
+			},
+			"schema_version": schema.Int64Attribute{
+				MarkdownDescription: `Version of the JSON schema, incremented each time a Grafana update brings
+changes to said schema. Defaults to 36.`,
+				Computed: true,
+				Optional: true,
+				Required: false,
+			},
+			"version": schema.Int64Attribute{
+				MarkdownDescription: `Version of the dashboard, incremented each time the dashboard is updated.`,
+				Computed:            false,
+				Optional:            true,
+				Required:            false,
+			},
+			"rendered_json": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "This datasource rendered as JSON",
+			},
+		},
+	}
+}
+
+func (d *{{ .Schema.Package | formatObjectName }}DataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+}
+
+func (d *{{ .Schema.Package | formatObjectName }}DataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data {{ .Schema.Package | formatObjectName }}DataSourceModel
+
+	// Read Terraform configuration data into the model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	JSONConfig, err := json.Marshal(data)
+	if err != nil {
+		resp.Diagnostics.AddError("JSON marshalling error", err.Error())
+		return
+	}
+
+	// fix up the panel Attribute
+	// Read into a map[string]interface{} and then marshal it back to JSON
+	// This is a workaround for the fact that the panel attribute should be a list of maps but is a list of json strings
+	dataMap := make(map[string]interface{})
+	err = json.Unmarshal(JSONConfig, &dataMap)
+	if err != nil {
+		resp.Diagnostics.AddError("error unmarshalling config into Go map", err.Error())
+		return
+	}
+	JSONConfig, err = json.MarshalIndent(dataMap, "", "  ")
+	if err != nil {
+		resp.Diagnostics.AddError("error marshalling go map into json", err.Error())
+		return
+	}
+
+	// Not sure about that
+	data.RenderedJSON = types.StringValue(string(JSONConfig))
+
+	// Write logs using the tflog package
+	// Documentation: https://terraform.io/plugin/log
+	tflog.Trace(ctx, "read a data source")
+
+	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}

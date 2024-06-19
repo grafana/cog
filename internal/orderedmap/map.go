@@ -112,6 +112,14 @@ func (orderedMap *Map[K, V]) Filter(callback func(key K, value V) bool) *Map[K, 
 	return newMap
 }
 
+func (orderedMap *Map[K, V]) Values() []V {
+	values := make([]V, 0, orderedMap.Len())
+	for _, key := range orderedMap.order {
+		values = append(values, orderedMap.records[key])
+	}
+	return values
+}
+
 func (orderedMap *Map[K, V]) Equal(other *Map[K, V]) bool {
 	return cmp.Equal(orderedMap.order, other.order) &&
 		cmp.Equal(orderedMap.records, other.records)

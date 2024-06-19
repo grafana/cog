@@ -6,6 +6,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/python"
+	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 )
 
@@ -78,6 +79,7 @@ type OutputLanguage struct {
 	JSONSchema *jsonschema.Config `yaml:"jsonschema"`
 	OpenAPI    *openapi.Config    `yaml:"openapi"`
 	Python     *python.Config     `yaml:"python"`
+	Terraform  *terraform.Config  `yaml:"terraform"`
 	Typescript *typescript.Config `yaml:"typescript"`
 }
 
