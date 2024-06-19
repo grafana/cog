@@ -61,8 +61,6 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](config.GenerateGoMod, GoMod{Config: config}),
-
 		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config}),
 	)
 	//@TODO Re-enable this when ready
