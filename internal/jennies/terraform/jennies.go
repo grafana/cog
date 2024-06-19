@@ -15,10 +15,6 @@ const LanguageRef = "terraform"
 type Config struct {
 	debug bool
 
-	// GenerateGoMod indicates whether a go.mod file should be generated.
-	// If enabled, PackageRoot is used as module path.
-	GenerateGoMod bool `yaml:"go_mod"`
-
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string `yaml:"package_root"`
@@ -61,7 +57,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config}),
+		common.If[languages.Context](globalConfig.Types, TerraformModels{Config: config}),
 	)
 	//@TODO Re-enable this when ready
 	//jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))

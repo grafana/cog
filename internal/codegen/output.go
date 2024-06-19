@@ -93,4 +93,7 @@ func (outputLanguage *OutputLanguage) interpolateParameters(interpolator Paramet
 	if outputLanguage.Java != nil {
 		outputLanguage.Java.InterpolateParameters(interpolator)
 	}
+	if outputLanguage.Terraform != nil {
+		outputLanguage.Terraform.InterpolateParameters(interpolator)
+	}
 }

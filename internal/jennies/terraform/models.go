@@ -1,7 +1,6 @@
 package terraform
 
 import (
-	"log"
 	"path/filepath"
 	"strings"
 
@@ -10,24 +9,18 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
-type RawTypes struct {
+type TerraformModels struct {
 	Config Config
-
-	typeFormatter *typeFormatter
 }
 
-func (jenny RawTypes) JennyName() string {
-	return "TerraformRawTypes"
+func (jenny TerraformModels) JennyName() string {
+	return "TerraformModels"
 }
 
-func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
+func (jenny TerraformModels) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
-		if schema.Metadata.Identifier != "Dashboard" {
-			continue
-		}
-		log.Printf("SCHEMA: %s / %s / %s", schema.Metadata.Kind, schema.Metadata.Identifier, schema.Metadata.Variant)
 		output, err := jenny.generateSchema(context, schema)
 		if err != nil {
 			return nil, err
@@ -44,22 +37,22 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny TerraformModels) generateSchema(_ languages.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 
+	structObjects := schema.Objects.Filter(func(_ string, object ast.Object) bool {
+		return object.Type.IsStruct()
+	})
 	err := templates.
 		Funcs(map[string]any{
 			"formatTerraformType": formatTerraformType,
 		}).
-		ExecuteTemplate(&buffer, "types/provider.tmpl", map[string]any{
+		ExecuteTemplate(&buffer, "types/models.tmpl", map[string]any{
 			"Schema":  schema,
-			"Objects": schema.Objects.Values(),
+			"Objects": structObjects.Values(),
 		})
 	if err != nil {
 		return nil, err
-	}
-	for i, line := range strings.Split(buffer.String(), "\n") {
-		log.Printf("  %d: %s", i, line)
 	}
 	return []byte(buffer.String()), nil
 }
