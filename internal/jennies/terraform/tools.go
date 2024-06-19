@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/tools"
 )
 
 func formatPackageName(pkg string) string {
@@ -38,4 +39,13 @@ func formatTerraformType(t ast.Type) string {
 		return scalarType
 	}
 	return string(t.Kind)
+}
+
+func formatModelName(pkg, name string) string {
+	pkgCamel := tools.UpperCamelCase(pkg)
+	nameCamel := tools.UpperCamelCase(name)
+	if strings.HasPrefix(nameCamel, pkgCamel) {
+		return nameCamel
+	}
+	return pkgCamel + nameCamel
 }
