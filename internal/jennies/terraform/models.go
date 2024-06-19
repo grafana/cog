@@ -1,7 +1,7 @@
 package terraform
 
 import (
-	"path/filepath"
+	"fmt"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -26,10 +26,7 @@ func (jenny TerraformModels) Generate(context languages.Context) (codejen.Files,
 			return nil, err
 		}
 
-		filename := filepath.Join(
-			formatPackageName(schema.Package),
-			"terraform_provider_gen.go",
-		)
+		filename := fmt.Sprintf("%s_model_gen.go", formatPackageName(schema.Package))
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
