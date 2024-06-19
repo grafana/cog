@@ -56,31 +56,3 @@ func (jenny TerraformModels) generateSchema(_ languages.Context, schema *ast.Sch
 	}
 	return []byte(buffer.String()), nil
 }
-
-func formatTerraformType(t ast.Type) string {
-	if t.IsScalar() {
-		tt := t.AsScalar()
-		scalarType := "unknown"
-
-		switch tt.ScalarKind {
-		case ast.KindString, ast.KindBytes:
-			scalarType = "types.String"
-		case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
-			scalarType = "types.Int64"
-		case ast.KindInt32, ast.KindUint32:
-			scalarType = "types.Int64"
-		case ast.KindInt64, ast.KindUint64:
-			scalarType = "types.Int64"
-		case ast.KindFloat32:
-			scalarType = "types.Float64"
-		case ast.KindFloat64:
-			scalarType = "types.Float64"
-		case ast.KindBool:
-			scalarType = "types.Bool"
-		case ast.KindAny:
-			scalarType = "types.Object"
-		}
-		return scalarType
-	}
-	return string(t.Kind)
-}

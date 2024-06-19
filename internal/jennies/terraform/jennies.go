@@ -1,9 +1,6 @@
 package terraform
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -29,11 +26,6 @@ func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig.debug = global.Debug
 
 	return newConfig
-}
-
-func (config Config) importPath(suffix string) string {
-	root := strings.TrimSuffix(config.PackageRoot, "/")
-	return fmt.Sprintf("%s/%s", root, suffix)
 }
 
 type Language struct {

@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/internal/ast"
 )
 
 func formatPackageName(pkg string) string {
@@ -12,45 +12,30 @@ func formatPackageName(pkg string) string {
 
 	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
 }
+func formatTerraformType(t ast.Type) string {
+	if t.IsScalar() {
+		tt := t.AsScalar()
+		scalarType := "unknown"
 
-func formatArgName(name string) string {
-	return escapeVarName(tools.LowerCamelCase(name))
-}
-
-func escapeVarName(varName string) string {
-	if isReservedGoKeyword(varName) {
-		return varName + "Arg"
+		switch tt.ScalarKind {
+		case ast.KindString, ast.KindBytes:
+			scalarType = "types.String"
+		case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
+			scalarType = "types.Int64"
+		case ast.KindInt32, ast.KindUint32:
+			scalarType = "types.Int64"
+		case ast.KindInt64, ast.KindUint64:
+			scalarType = "types.Int64"
+		case ast.KindFloat32:
+			scalarType = "types.Float64"
+		case ast.KindFloat64:
+			scalarType = "types.Float64"
+		case ast.KindBool:
+			scalarType = "types.Bool"
+		case ast.KindAny:
+			scalarType = "types.Object"
+		}
+		return scalarType
 	}
-
-	return varName
-}
-
-func isReservedGoKeyword(input string) bool {
-	// see: https://go.dev/ref/spec#Keywords
-	return input == "break" ||
-		input == "case" ||
-		input == "chan" ||
-		input == "continue" ||
-		input == "const" ||
-		input == "default" ||
-		input == "defer" ||
-		input == "else" ||
-		input == "error" ||
-		input == "fallthrough" ||
-		input == "for" ||
-		input == "func" ||
-		input == "go" ||
-		input == "goto" ||
-		input == "if" ||
-		input == "import" ||
-		input == "interface" ||
-		input == "map" ||
-		input == "package" ||
-		input == "range" ||
-		input == "return" ||
-		input == "select" ||
-		input == "struct" ||
-		input == "switch" ||
-		input == "type" ||
-		input == "var"
+	return string(t.Kind)
 }
