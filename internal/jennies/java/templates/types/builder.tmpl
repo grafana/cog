@@ -16,12 +16,12 @@
         {{- range .Initializers }}
         {{ . }}
         {{- end }}
-        this.set{{ .OptionName }}({{ .Args|join ", " }});
+        this.{{ .OptionName }}({{ .Args|join ", " }});
         {{- end }}
         }
         
     {{- range $opt := .Builder.Options }}
-    public {{ $.BuilderName }}Builder set{{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
+    public {{ $.BuilderName }}Builder {{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.Builder.BuilderName "OptionName" $opt.Name) }}
         {{- end }}
