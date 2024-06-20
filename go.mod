@@ -3,7 +3,7 @@ module github.com/grafana/cog
 go 1.21
 
 require (
-	cuelang.org/go v0.8.2
+	cuelang.org/go v0.9.1
 	github.com/expr-lang/expr v1.16.9
 	github.com/getkin/kin-openapi v0.123.0
 	github.com/google/go-cmp v0.6.0
