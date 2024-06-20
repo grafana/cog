@@ -90,7 +90,7 @@ func (b Builders) getBuilders(pkg string, name string) ast.Builders {
 
 func (b Builders) getBuilderSignature(builder ast.Builder, obj ast.Object) string {
 	if builder.Name != obj.Type.ImplementedVariant() {
-		return builder.Name
+		return obj.Name
 	}
 
 	return fmt.Sprintf("%s.%s", b.typeFormatter.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Name))
