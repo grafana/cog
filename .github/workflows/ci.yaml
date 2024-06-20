@@ -8,6 +8,7 @@ env:
   GO_VERSION: '1.21'
   NODE_VERSION: '18'
   PYTHON_VERSION: '3.12'
+  JAVA_VERSION: '17'
   DOCKER_TOOLS: false
 
 jobs:
@@ -76,6 +77,12 @@ jobs:
       - name: Install mypy
         run: python3 -m pip install mypy
 
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+
       - name: Install ts-node
         run: npm install -g ts-node
 
@@ -104,6 +111,9 @@ jobs:
 
       - name: Lint generated Python code
         run: mypy generated/python/
+        
+      - name: Compile generated Java code
+        run: javac generated/src/main/**/*.java
 
   examples:
     name: Run examples
