@@ -10,7 +10,7 @@ public class SomeStruct {
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder setTime(String from,String to) {
+    public Builder Time(String from,String to) {
 		if (this.internal.time == null) {
 			this.internal.time = new Object();
 		}

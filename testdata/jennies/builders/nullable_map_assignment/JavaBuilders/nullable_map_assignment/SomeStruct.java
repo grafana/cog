@@ -11,7 +11,7 @@ public class SomeStruct {
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder setConfig(Map<String, String> config) {
+    public Builder Config(Map<String, String> config) {
     this.internal.config = config;
         return this;
     }
