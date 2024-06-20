@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/tools"
 )
 
 func formatPackageName(pkg string) string {
@@ -16,7 +15,7 @@ func formatPackageName(pkg string) string {
 func formatTerraformType(t ast.Type) string {
 	if t.IsScalar() {
 		tt := t.AsScalar()
-		scalarType := "unknown"
+		var scalarType string
 
 		switch tt.ScalarKind {
 		case ast.KindString, ast.KindBytes:
@@ -35,17 +34,10 @@ func formatTerraformType(t ast.Type) string {
 			scalarType = "types.Bool"
 		case ast.KindAny:
 			scalarType = "types.Object"
+		default:
+			scalarType = "types.Any"
 		}
 		return scalarType
 	}
-	return string(t.Kind)
-}
-
-func formatModelName(pkg, name string) string {
-	pkgCamel := tools.UpperCamelCase(pkg)
-	nameCamel := tools.UpperCamelCase(name)
-	if strings.HasPrefix(nameCamel, pkgCamel) {
-		return nameCamel
-	}
-	return pkgCamel + nameCamel
+	return "types.Any"
 }

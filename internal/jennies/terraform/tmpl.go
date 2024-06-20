@@ -23,15 +23,11 @@ func init() {
 		Option("missingkey=error").
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
-		Funcs(template.FuncMap{
-			"formatTerraformType": func(_ string) string {
-				panic("formatTerraformType() needs to be overriden by a jenny")
-			},
-		}).
 		Funcs(map[string]any{
 			"formatObjectName":     tools.UpperCamelCase,
 			"formatFieldName":      tools.UpperCamelCase,
 			"formatFieldNameTFSDK": tools.SnakeCase,
+			"formatTerraformType":  formatTerraformType,
 			"filterScalars": func(list []ast.StructField) []ast.StructField {
 				newList := []ast.StructField{}
 				for _, f := range list {
@@ -41,7 +37,6 @@ func init() {
 				}
 				return newList
 			},
-			"formatModelName": formatModelName,
 		})
 
 	templates = template.Must(cogtemplate.FindAndParseTemplates(veneersFS, base, "templates"))

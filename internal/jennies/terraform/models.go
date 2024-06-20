@@ -1,7 +1,7 @@
 package terraform
 
 import (
-	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -9,15 +9,15 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
-type TerraformModels struct {
+type Models struct {
 	Config Config
 }
 
-func (jenny TerraformModels) JennyName() string {
+func (jenny Models) JennyName() string {
 	return "TerraformModels"
 }
 
-func (jenny TerraformModels) Generate(context languages.Context) (codejen.Files, error) {
+func (jenny Models) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	for _, schema := range context.Schemas {
@@ -26,7 +26,7 @@ func (jenny TerraformModels) Generate(context languages.Context) (codejen.Files,
 			return nil, err
 		}
 
-		filename := fmt.Sprintf("%s_model_gen.go", formatPackageName(schema.Package))
+		filename := filepath.Join(formatPackageName(schema.Package), "models_gen.go")
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
@@ -34,20 +34,18 @@ func (jenny TerraformModels) Generate(context languages.Context) (codejen.Files,
 	return files, nil
 }
 
-func (jenny TerraformModels) generateSchema(_ languages.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny Models) generateSchema(_ languages.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
+
+	// schema.LocateObject(schema.EntryPoint)
 
 	structObjects := schema.Objects.Filter(func(_ string, object ast.Object) bool {
 		return object.Type.IsStruct()
 	})
-	err := templates.
-		Funcs(map[string]any{
-			"formatTerraformType": formatTerraformType,
-		}).
-		ExecuteTemplate(&buffer, "types/models.tmpl", map[string]any{
-			"Schema":  schema,
-			"Objects": structObjects.Values(),
-		})
+	err := templates.ExecuteTemplate(&buffer, "types/models.tmpl", map[string]any{
+		"Schema":  schema,
+		"Objects": structObjects.Values(),
+	})
 	if err != nil {
 		return nil, err
 	}

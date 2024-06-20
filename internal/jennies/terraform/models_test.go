@@ -18,7 +18,7 @@ func TestRawTypes_Generate(t *testing.T) {
 	config := Config{
 		PackageRoot: "github.com/grafana/cog/generated",
 	}
-	jenny := TerraformModels{
+	jenny := Models{
 		Config: config,
 	}
 	compilerPasses := New(config).CompilerPasses()

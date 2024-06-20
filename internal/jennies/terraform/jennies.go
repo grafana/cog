@@ -49,10 +49,10 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](globalConfig.Types, TerraformModels{Config: config}),
+		common.If[languages.Context](globalConfig.Types, Models{Config: config}),
 	)
-	//@TODO Re-enable this when ready
-	//jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
+	// @TODO Re-enable this when ready
+	// jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 
 	return jenny
 }
