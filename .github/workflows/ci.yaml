@@ -113,7 +113,7 @@ jobs:
         run: mypy generated/python/
         
       - name: Compile generated Java code
-        run: javac generated/java/**/*.java
+        run: javac -sourcepath generated/java generated/java/**/*.java -d generated/compiled
 
   examples:
     name: Run examples
