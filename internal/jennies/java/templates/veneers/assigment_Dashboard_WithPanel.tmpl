@@ -5,7 +5,7 @@
     }
     // The panel either has no position set, or it is the first panel of the dashboard.
     // In that case, we position it on the grid
-    if (panelOrRowPanel.panel.gridPos.x == 0 && panelOrRowPanel.panel.gridPos.y == 0) {
+    if ((panelOrRowPanel.panel.gridPos.x == null || panelOrRowPanel.panel.gridPos.x == 0) && (panelOrRowPanel.panel.gridPos.y == null || panelOrRowPanel.panel.gridPos.y == 0)) {
         panelOrRowPanel.panel.gridPos.x = this.currentX;
         panelOrRowPanel.panel.gridPos.y = this.currentY;
     }
