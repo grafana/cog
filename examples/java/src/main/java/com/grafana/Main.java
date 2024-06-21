@@ -2,12 +2,7 @@ package com.grafana;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.grafana.foundation.cog.Builder;
-import com.grafana.foundation.cog.variants.Dataquery;
 import com.grafana.foundation.dashboard.*;
-import com.grafana.foundation.googlecloudmonitoring.PromQLQuery;
-import com.grafana.foundation.heatmap.HeatmapColorMode;
-import com.grafana.foundation.heatmap.HeatmapColorOptions;
-import com.grafana.foundation.heatmap.PanelBuilder;
 
 import java.util.List;
 
