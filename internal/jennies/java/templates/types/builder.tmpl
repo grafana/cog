@@ -11,6 +11,10 @@
         {{- range .Builder.Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
+        
+        {{- range .Builder.Properties }}
+        this.{{ .Name | escapeVar }} = {{ .Type | emptyValueForType }};
+        {{- end }}
 
         {{- range .Builder.Defaults }}
         {{- range .Initializers }}
