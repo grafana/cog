@@ -163,7 +163,7 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		case ast.KindInt64, ast.KindUint64:
 			return "0L"
 		case ast.KindString:
-			return ""
+			return `""`
 		case ast.KindBytes:
 			return "(byte) 0"
 		default:
