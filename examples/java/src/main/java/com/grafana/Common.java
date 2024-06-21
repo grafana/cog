@@ -18,7 +18,7 @@ public class Common {
                 LegendFormat(legend);
     }
 
-    public static Builder<Dataquery> lokiQuery(String query) {
+    public static Builder<Dataquery> basicLokiQuery(String query) {
         return new com.grafana.foundation.prometheus.Dataquery.Builder().Expr(query);
     }
 
