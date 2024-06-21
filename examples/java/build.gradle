@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.grafana'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'com.grafana.foundation:sdk:1.0'
+}
+
+test {
+    useJUnitPlatform()
+}
