@@ -1,5 +1,3 @@
-package com.grafana;
-
 import com.grafana.foundation.logs.PanelBuilder;
 
 public class Logs {

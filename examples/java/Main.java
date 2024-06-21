@@ -1,5 +1,3 @@
-package com.grafana;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.grafana.foundation.cog.Builder;
 import com.grafana.foundation.dashboard.*;

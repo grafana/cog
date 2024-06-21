@@ -1,5 +1,3 @@
-package com.grafana;
-
 import com.grafana.foundation.common.StackingConfig;
 import com.grafana.foundation.common.StackingMode;
 import com.grafana.foundation.dashboard.Threshold;
