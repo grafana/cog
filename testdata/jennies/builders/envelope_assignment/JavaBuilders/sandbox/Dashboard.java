@@ -12,7 +12,7 @@ public class Dashboard {
         public Builder() {
             this.internal = new Dashboard();
         }
-    public Builder setWithVariable(String name,String value) {
+    public Builder WithVariable(String name,String value) {
 		if (this.internal.variables == null) {
 			this.internal.variables = new LinkedList<>();
 		}

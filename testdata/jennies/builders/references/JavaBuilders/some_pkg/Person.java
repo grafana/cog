@@ -11,7 +11,7 @@ public class Person {
         public Builder() {
             this.internal = new Person();
         }
-    public Builder setName(Name name) {
+    public Builder Name(Name name) {
     this.internal.name = name;
         return this;
     }

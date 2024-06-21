@@ -18,27 +18,27 @@ public class Dashboard {
         public Builder() {
             this.internal = new Dashboard();
         }
-    public Builder setId(Long id) {
+    public Builder Id(Long id) {
     this.internal.id = id;
         return this;
     }
     
-    public Builder setTitle(String title) {
+    public Builder Title(String title) {
     this.internal.title = title;
         return this;
     }
     
-    public Builder setLinks(cog.Builder<List<DashboardLink>> links) {
+    public Builder Links(cog.Builder<List<DashboardLink>> links) {
     this.internal.links = links.build();
         return this;
     }
     
-    public Builder setLinksOfLinks(cog.Builder<List<List<DashboardLink>>> linksOfLinks) {
+    public Builder LinksOfLinks(cog.Builder<List<List<DashboardLink>>> linksOfLinks) {
     this.internal.linksOfLinks = linksOfLinks.build();
         return this;
     }
     
-    public Builder setSingleLink(cog.Builder<DashboardLink> singleLink) {
+    public Builder SingleLink(cog.Builder<DashboardLink> singleLink) {
     this.internal.singleLink = singleLink.build();
         return this;
     }

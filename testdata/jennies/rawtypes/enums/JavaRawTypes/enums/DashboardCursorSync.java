@@ -15,7 +15,7 @@ public enum DashboardCursorSync {
         this.value = value;
     }
 
-    public Integer getValue() {
+    public Integer Value() {
         return value;
     }
 }

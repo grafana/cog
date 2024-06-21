@@ -10,7 +10,7 @@ public class ExternalLink {
         public Builder() {
             this.internal = new ExternalLink();
         }
-    public Builder setUrl(String url) {
+    public Builder Url(String url) {
     this.internal.url = url;
         return this;
     }

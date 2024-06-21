@@ -14,7 +14,7 @@ public class SomePanel {
     this.internal.type = "panel_type";
     this.internal.cursor = CursorMode.TOOLTIP;
         }
-    public Builder setTitle(String title) {
+    public Builder Title(String title) {
     this.internal.title = title;
         return this;
     }

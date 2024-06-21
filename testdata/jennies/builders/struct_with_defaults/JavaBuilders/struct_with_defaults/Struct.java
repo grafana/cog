@@ -14,36 +14,36 @@ public class Struct {
         public Builder() {
             this.internal = new Struct();
         NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
-        nestedStructResource.setStringVal("hello");
-        nestedStructResource.setIntVal(3L);
-        this.setAllFields(nestedStructResource);
+        nestedStructResource.StringVal("hello");
+        nestedStructResource.IntVal(3L);
+        this.AllFields(nestedStructResource);
         NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
-        nestedStructResource.setIntVal(4L);
-        this.setPartialFields(nestedStructResource);
-        this.setComplexField(new Object());
-        this.setPartialComplexField(new Object());
+        nestedStructResource.IntVal(4L);
+        this.PartialFields(nestedStructResource);
+        this.ComplexField(new Object());
+        this.PartialComplexField(new Object());
         }
-    public Builder setAllFields(cog.Builder<NestedStruct> allFields) {
+    public Builder AllFields(cog.Builder<NestedStruct> allFields) {
     this.internal.allFields = allFields.build();
         return this;
     }
     
-    public Builder setPartialFields(cog.Builder<NestedStruct> partialFields) {
+    public Builder PartialFields(cog.Builder<NestedStruct> partialFields) {
     this.internal.partialFields = partialFields.build();
         return this;
     }
     
-    public Builder setEmptyFields(cog.Builder<NestedStruct> emptyFields) {
+    public Builder EmptyFields(cog.Builder<NestedStruct> emptyFields) {
     this.internal.emptyFields = emptyFields.build();
         return this;
     }
     
-    public Builder setComplexField(Object complexField) {
+    public Builder ComplexField(Object complexField) {
     this.internal.complexField = complexField;
         return this;
     }
     
-    public Builder setPartialComplexField(Object partialComplexField) {
+    public Builder PartialComplexField(Object partialComplexField) {
     this.internal.partialComplexField = partialComplexField;
         return this;
     }

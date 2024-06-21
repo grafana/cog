@@ -11,7 +11,7 @@ public class SomeStruct {
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder setId(Long id) {
+    public Builder Id(Long id) {
     this.internal.id = id;
         return this;
     }

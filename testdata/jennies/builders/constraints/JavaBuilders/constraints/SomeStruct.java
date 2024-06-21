@@ -11,7 +11,7 @@ public class SomeStruct {
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder setId(Long id) {
+    public Builder Id(Long id) {
         if (!(id >= 5)) {
             throw new IllegalArgumentException("id must be >= 5");
         }
@@ -22,7 +22,7 @@ public class SomeStruct {
         return this;
     }
     
-    public Builder setTitle(String title) {
+    public Builder Title(String title) {
         if (!(title.length() >= 1)) {
             throw new IllegalArgumentException("title.length() must be >= 1");
         }
