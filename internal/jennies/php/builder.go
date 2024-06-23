@@ -24,12 +24,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 	var err error
 	jenny.typeFormatter = builderTypeFormatter(jenny.config, context)
 
-	builderInterface, err := jenny.builderInterface()
-	if err != nil {
-		return nil, err
-	}
-
-	files := codejen.Files{builderInterface}
+	files := make([]codejen.File, 0, len(context.Builders))
 
 	// Add argument typehints and ensure arguments are not nullable
 	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: true}
@@ -74,17 +69,6 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 	}
 
 	return files, nil
-}
-
-func (jenny *Builder) builderInterface() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/builder.tmpl", map[string]any{
-		"NamespaceRoot": jenny.config.NamespaceRoot,
-	})
-	if err != nil {
-		return codejen.File{}, err
-	}
-
-	return *codejen.NewFile("src/Cog/Builder.php", []byte(rendered), jenny), nil
 }
 
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
