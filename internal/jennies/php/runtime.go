@@ -27,10 +27,27 @@ func (jenny Runtime) Generate(context languages.Context) (codejen.Files, error) 
 		return nil, err
 	}
 
+	builderInterface, err := jenny.builderInterface()
+	if err != nil {
+		return nil, err
+	}
+
 	return codejen.Files{
 		runtime,
+		builderInterface,
 		unknownDataquery,
 	}, nil
+}
+
+func (jenny Runtime) builderInterface() (codejen.File, error) {
+	rendered, err := renderTemplate("runtime/builder.tmpl", map[string]any{
+		"NamespaceRoot": jenny.config.NamespaceRoot,
+	})
+	if err != nil {
+		return codejen.File{}, err
+	}
+
+	return *codejen.NewFile("src/Cog/Builder.php", []byte(rendered), jenny), nil
 }
 
 func (jenny Runtime) runtime(context languages.Context) (codejen.File, error) {
