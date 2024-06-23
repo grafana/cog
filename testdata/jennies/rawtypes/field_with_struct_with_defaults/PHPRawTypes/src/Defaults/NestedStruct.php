@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\Defaults;
 
-class NestedStruct implements \JsonSerializable {
+class NestedStruct implements \JsonSerializable
+{
     public string $stringVal;
 
     public int $intVal;
@@ -15,6 +16,19 @@ class NestedStruct implements \JsonSerializable {
     {
         $this->stringVal = $stringVal ?: "";
         $this->intVal = $intVal ?: 0;
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{stringVal?: string, intVal?: int} $inputData */
+        $data = $inputData;
+        return new self(
+            stringVal: $data["stringVal"] ?? null,
+            intVal: $data["intVal"] ?? null,
+        );
     }
 
     /**

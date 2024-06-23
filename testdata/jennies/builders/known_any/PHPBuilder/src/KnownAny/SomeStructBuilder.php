@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\KnownAny;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\KnownAny\SomeStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\KnownAny\SomeStruct>
  */
-class SomeStructBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\KnownAny\SomeStruct $internal;
 

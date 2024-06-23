@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\Dashboard;
 
-class FieldConfig implements \JsonSerializable {
+class FieldConfig implements \JsonSerializable
+{
     public ?string $unit;
 
     /**
@@ -18,6 +19,19 @@ class FieldConfig implements \JsonSerializable {
     {
         $this->unit = $unit;
         $this->custom = $custom;
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{unit?: string, custom?: mixed} $inputData */
+        $data = $inputData;
+        return new self(
+            unit: $data["unit"] ?? null,
+            custom: $data["custom"] ?? null,
+        );
     }
 
     /**

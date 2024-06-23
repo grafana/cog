@@ -8,7 +8,8 @@ namespace Grafana\Foundation\Basic;
  * a
  * comment
  */
-class SomeStruct implements \JsonSerializable {
+class SomeStruct implements \JsonSerializable
+{
     /**
      * Anything can go in there.
      * Really, anything.
@@ -78,6 +79,31 @@ class SomeStruct implements \JsonSerializable {
         $this->fieldInt16 = $fieldInt16 ?: 0;
         $this->fieldInt32 = $fieldInt32 ?: 0;
         $this->fieldInt64 = $fieldInt64 ?: 0;
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{FieldAny?: mixed, FieldBool?: bool, FieldBytes?: string, FieldString?: string, FieldStringWithConstantValue?: string, FieldFloat32?: float, FieldFloat64?: float, FieldUint8?: int, FieldUint16?: int, FieldUint32?: int, FieldUint64?: int, FieldInt8?: int, FieldInt16?: int, FieldInt32?: int, FieldInt64?: int} $inputData */
+        $data = $inputData;
+        return new self(
+            fieldAny: $data["FieldAny"] ?? null,
+            fieldBool: $data["FieldBool"] ?? null,
+            fieldBytes: $data["FieldBytes"] ?? null,
+            fieldString: $data["FieldString"] ?? null,
+            fieldFloat32: $data["FieldFloat32"] ?? null,
+            fieldFloat64: $data["FieldFloat64"] ?? null,
+            fieldUint8: $data["FieldUint8"] ?? null,
+            fieldUint16: $data["FieldUint16"] ?? null,
+            fieldUint32: $data["FieldUint32"] ?? null,
+            fieldUint64: $data["FieldUint64"] ?? null,
+            fieldInt8: $data["FieldInt8"] ?? null,
+            fieldInt16: $data["FieldInt16"] ?? null,
+            fieldInt32: $data["FieldInt32"] ?? null,
+            fieldInt64: $data["FieldInt64"] ?? null,
+        );
     }
 
     /**

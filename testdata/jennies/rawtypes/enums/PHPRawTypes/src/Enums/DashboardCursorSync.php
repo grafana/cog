@@ -9,7 +9,7 @@ namespace Grafana\Foundation\Enums;
  */
 final class DashboardCursorSync implements \JsonSerializable, \Stringable {
     /**
-     * @var string|int
+     * @var int
      */
     private $value;
 
@@ -18,7 +18,7 @@ final class DashboardCursorSync implements \JsonSerializable, \Stringable {
      */
     private static $instances = [];
 
-    private function __construct(string|int $value)
+    private function __construct(int $value)
     {
         $this->value = $value;
     }
@@ -50,7 +50,24 @@ final class DashboardCursorSync implements \JsonSerializable, \Stringable {
         return self::$instances["Tooltip"];
     }
 
-    public function jsonSerialize(): string|int
+    public static function fromValue(int $value): self
+    {
+        if ($value === 0) {
+            return self::off();
+        }
+
+        if ($value === 1) {
+            return self::crosshair();
+        }
+
+        if ($value === 2) {
+            return self::tooltip();
+        }
+
+        throw new \UnexpectedValueException("Value '$value' is not part of the enum DashboardCursorSync");
+    }
+
+    public function jsonSerialize(): int
     {
         return $this->value;
     }
