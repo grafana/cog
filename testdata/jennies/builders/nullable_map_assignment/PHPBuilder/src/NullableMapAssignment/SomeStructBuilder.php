@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\NullableMapAssignment;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\NullableMapAssignment\SomeStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\NullableMapAssignment\SomeStruct>
  */
-class SomeStructBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\NullableMapAssignment\SomeStruct $internal;
 

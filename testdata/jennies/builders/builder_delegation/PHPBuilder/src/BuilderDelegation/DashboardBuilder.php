@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\BuilderDelegation;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\BuilderDelegation\Dashboard>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegation\Dashboard>
  */
-class DashboardBuilder implements \Grafana\Foundation\Runtime\Builder
+class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\BuilderDelegation\Dashboard $internal;
 
@@ -36,7 +36,7 @@ class DashboardBuilder implements \Grafana\Foundation\Runtime\Builder
     }
     /**
      * will be expanded to []cog.Builder<DashboardLink>
-     * @param array<\Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink>> $links
+     * @param array<\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink>> $links
      */
     public function links(array $links): static
     {
@@ -50,7 +50,7 @@ class DashboardBuilder implements \Grafana\Foundation\Runtime\Builder
     }
     /**
      * will be expanded to [][]cog.Builder<DashboardLink>
-     * @param array<array<\Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink>>> $linksOfLinks
+     * @param array<array<\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink>>> $linksOfLinks
      */
     public function linksOfLinks(array $linksOfLinks): static
     {
@@ -69,9 +69,9 @@ class DashboardBuilder implements \Grafana\Foundation\Runtime\Builder
     }
     /**
      * will be expanded to cog.Builder<DashboardLink>
-     * @param \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink> $singleLink
+     * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink> $singleLink
      */
-    public function singleLink(\Grafana\Foundation\Runtime\Builder $singleLink): static
+    public function singleLink(\Grafana\Foundation\Cog\Builder $singleLink): static
     {
         $singleLinkResource = $singleLink->build();
         $this->internal->singleLink = $singleLinkResource;
