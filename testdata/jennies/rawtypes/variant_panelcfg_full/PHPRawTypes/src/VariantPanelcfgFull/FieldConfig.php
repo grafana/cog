@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\VariantPanelcfgFull;
 
-class FieldConfig implements \JsonSerializable {
+class FieldConfig implements \JsonSerializable
+{
     public string $timeseriesFieldConfigOption;
 
     /**
@@ -11,6 +12,18 @@ class FieldConfig implements \JsonSerializable {
     public function __construct(?string $timeseriesFieldConfigOption = null)
     {
         $this->timeseriesFieldConfigOption = $timeseriesFieldConfigOption ?: "";
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{timeseries_field_config_option?: string} $inputData */
+        $data = $inputData;
+        return new self(
+            timeseriesFieldConfigOption: $data["timeseries_field_config_option"] ?? null,
+        );
     }
 
     /**

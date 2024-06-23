@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\Defaults;
 
-class Struct implements \JsonSerializable {
+class Struct implements \JsonSerializable
+{
     public \Grafana\Foundation\Defaults\NestedStruct $allFields;
 
     public \Grafana\Foundation\Defaults\NestedStruct $partialFields;
@@ -27,6 +28,42 @@ class Struct implements \JsonSerializable {
         $this->emptyFields = $emptyFields ?: new \Grafana\Foundation\Defaults\NestedStruct();
         $this->complexField = $complexField ?: new \Grafana\Foundation\Defaults\DefaultsStructComplexField(array: ["hello"], nested: new \Grafana\Foundation\Defaults\DefaultsStructComplexFieldNested(nestedVal: "nested"), uid: "myUID");
         $this->partialComplexField = $partialComplexField ?: new \Grafana\Foundation\Defaults\DefaultsStructPartialComplexField();
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{allFields?: mixed, partialFields?: mixed, emptyFields?: mixed, complexField?: mixed, partialComplexField?: mixed} $inputData */
+        $data = $inputData;
+        return new self(
+            allFields: isset($data["allFields"]) ? (function($input) {
+    	/** @var array{stringVal?: string, intVal?: int} */
+    $val = $input;
+    	return \Grafana\Foundation\Defaults\NestedStruct::fromArray($val);
+    })($data["allFields"]) : null,
+            partialFields: isset($data["partialFields"]) ? (function($input) {
+    	/** @var array{stringVal?: string, intVal?: int} */
+    $val = $input;
+    	return \Grafana\Foundation\Defaults\NestedStruct::fromArray($val);
+    })($data["partialFields"]) : null,
+            emptyFields: isset($data["emptyFields"]) ? (function($input) {
+    	/** @var array{stringVal?: string, intVal?: int} */
+    $val = $input;
+    	return \Grafana\Foundation\Defaults\NestedStruct::fromArray($val);
+    })($data["emptyFields"]) : null,
+            complexField: isset($data["complexField"]) ? (function($input) {
+    	/** @var array{uid?: string, nested?: mixed, array?: array<string>} */
+    $val = $input;
+    	return \Grafana\Foundation\Defaults\DefaultsStructComplexField::fromArray($val);
+    })($data["complexField"]) : null,
+            partialComplexField: isset($data["partialComplexField"]) ? (function($input) {
+    	/** @var array{uid?: string, intVal?: int} */
+    $val = $input;
+    	return \Grafana\Foundation\Defaults\DefaultsStructPartialComplexField::fromArray($val);
+    })($data["partialComplexField"]) : null,
+        );
     }
 
     /**

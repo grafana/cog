@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\StructWithDefaults;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct>
  */
-class NestedStructBuilder implements \Grafana\Foundation\Runtime\Builder
+class NestedStructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\StructWithDefaults\NestedStruct $internal;
 

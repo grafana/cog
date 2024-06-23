@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\Sandbox;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\Sandbox\Dashboard>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Sandbox\Dashboard>
  */
-class DashboardBuilder implements \Grafana\Foundation\Runtime\Builder
+class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\Sandbox\Dashboard $internal;
 
