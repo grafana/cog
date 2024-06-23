@@ -14,8 +14,8 @@ func (context *Context) LocateObject(pkg string, name string) (ast.Object, bool)
 	return context.Schemas.LocateObject(pkg, name)
 }
 
-func (schemas *Context) LocateObjectByRef(ref ast.RefType) (ast.Object, bool) {
-	return schemas.Schemas.LocateObjectByRef(ref)
+func (context *Context) LocateObjectByRef(ref ast.RefType) (ast.Object, bool) {
+	return context.Schemas.LocateObjectByRef(ref)
 }
 
 func (context *Context) ResolveToBuilder(def ast.Type) bool {

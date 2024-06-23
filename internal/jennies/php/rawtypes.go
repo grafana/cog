@@ -260,7 +260,6 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	var constructorArgs []string
 
 	for _, field := range def.Type.AsStruct().Fields {
-
 		// No need to unmarshal constant scalar fields since they're set in
 		// the object's constructor
 		if field.Type.IsConcreteScalar() {
@@ -272,18 +271,19 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 		fieldName := formatFieldName(field.Name)
 		inputVar := fmt.Sprintf(`$data["%[1]s"]`, field.Name)
 
-		// Special cases to properly parse dashboard.Panel options
-		if def.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(def.Name, "panel") && field.Name == "options" {
+		switch {
+		// Special case to properly parse dashboard.Panel options
+		case def.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(def.Name, "panel") && field.Name == "options":
 			decodingFunc := jenny.unmarshalDashboardOptionsFunc()
 
 			value = fmt.Sprintf(`isset(%[1]s) ? %[2]s($data) : null`, inputVar, decodingFunc)
 
-			// Special cases to properly parse dashboard.Panel fieldConfig
-		} else if def.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(def.Name, "panel") && field.Name == "fieldConfig" {
+			// Special case to properly parse dashboard.Panel fieldConfig
+		case def.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(def.Name, "panel") && field.Name == "fieldConfig":
 			decodingFunc := jenny.unmarshalDashboardFieldConfigFunc(context, field)
 
 			value = fmt.Sprintf(`isset(%[1]s) ? %[2]s($data) : null`, inputVar, decodingFunc)
-		} else {
+		default:
 			value = jenny.unmarshalForType(context, def, field.Type, inputVar)
 		}
 
@@ -308,24 +308,27 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 func (jenny RawTypes) unmarshalForType(context languages.Context, object ast.Object, def ast.Type, inputVar string) string {
 	if _, ok := context.ResolveToComposableSlot(def); ok {
 		return jenny.unmarshalComposableSlot(context, object, def, inputVar)
-	} else if def.IsRef() {
+	}
+
+	switch {
+	case def.IsRef():
 		return fmt.Sprintf(`isset(%[2]s) ? %[1]s(%[2]s) : null`, jenny.unmarshalRefFunc(context, def), inputVar)
-	} else if def.IsArray() && def.Array.ValueType.IsRef() {
+	case def.IsArray() && def.Array.ValueType.IsRef():
 		return fmt.Sprintf(`array_filter(array_map(%s, %s ?? []))`, jenny.unmarshalRefFunc(context, def.Array.ValueType), inputVar)
-	} else if def.IsArray() && def.Array.ValueType.IsDisjunction() {
+	case def.IsArray() && def.Array.ValueType.IsDisjunction():
 		disjunctionType := def.Array.ValueType.AsDisjunction()
 		decodingFunc := jenny.unmarshalDisjunctionFunc(context, disjunctionType)
 
 		return fmt.Sprintf(`!empty(%[1]s) ? array_map(%[2]s, %[1]s) : null`, inputVar, decodingFunc)
-	} else if def.IsDisjunction() {
+	case def.IsDisjunction():
 		decodingFunc := jenny.unmarshalDisjunctionFunc(context, def.AsDisjunction())
 
 		return fmt.Sprintf(`isset(%[1]s) ? %[2]s(%[1]s) : null`, inputVar, decodingFunc)
-	} else if def.IsMap() {
+	case def.IsMap():
 		return jenny.unmarshalMap(context, def.AsMap(), inputVar)
+	default:
+		return fmt.Sprintf(`%[1]s ?? null`, inputVar)
 	}
-
-	return fmt.Sprintf(`%[1]s ?? null`, inputVar)
 }
 
 func (jenny RawTypes) unmarshalDashboardOptionsFunc() string {
@@ -498,20 +501,17 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 			ignoredBranches = append(ignoredBranches, branch)
 		}
 
+		//nolint:gocritic
 		if len(ignoredBranches) == 1 && ignoredBranches[0].IsRef() {
 			ref := ignoredBranches[0].AsRef()
 			referredObject, found := context.LocateObjectByRef(ref)
 			formattedRef := jenny.typeFormatter.formatRef(ignoredBranches[0], false)
 
-			var value string
+			value := "$input"
 			if found && referredObject.Type.IsStruct() {
 				value = fmt.Sprintf(`%[1]s::fromArray($input)`, formattedRef)
 			} else if found && referredObject.Type.IsEnum() {
 				value = fmt.Sprintf(`%[1]s::fromValue($input)`, formattedRef)
-			} else {
-				// TODO: should not happen?
-				// ref to a non-struct, non-enum, this should have been inlined
-				value = "$input"
 			}
 
 			decodingSwitch += fmt.Sprintf(`    default:
