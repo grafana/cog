@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\DataqueryVariantBuilder;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\DataqueryVariantBuilder\Loki>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\DataqueryVariantBuilder\Loki>
  */
-class LokiBuilderBuilder implements \Grafana\Foundation\Runtime\Builder
+class LokiBuilderBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\DataqueryVariantBuilder\Loki $internal;
 

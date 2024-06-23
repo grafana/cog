@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\StructOptionalFields;
 
-class SomeStruct implements \JsonSerializable {
+class SomeStruct implements \JsonSerializable
+{
     public ?\Grafana\Foundation\StructOptionalFields\SomeOtherStruct $fieldRef;
 
     public ?string $fieldString;
@@ -30,6 +31,30 @@ class SomeStruct implements \JsonSerializable {
         $this->operator = $operator;
         $this->fieldArrayOfStrings = $fieldArrayOfStrings;
         $this->fieldAnonymousStruct = $fieldAnonymousStruct;
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{FieldRef?: mixed, FieldString?: string, Operator?: string, FieldArrayOfStrings?: array<string>, FieldAnonymousStruct?: mixed} $inputData */
+        $data = $inputData;
+        return new self(
+            fieldRef: isset($data["FieldRef"]) ? (function($input) {
+    	/** @var array{FieldAny?: mixed} */
+    $val = $input;
+    	return \Grafana\Foundation\StructOptionalFields\SomeOtherStruct::fromArray($val);
+    })($data["FieldRef"]) : null,
+            fieldString: $data["FieldString"] ?? null,
+            operator: isset($data["Operator"]) ? (function($input) { return \Grafana\Foundation\StructOptionalFields\SomeStructOperator::fromValue($input); })($data["Operator"]) : null,
+            fieldArrayOfStrings: $data["FieldArrayOfStrings"] ?? null,
+            fieldAnonymousStruct: isset($data["FieldAnonymousStruct"]) ? (function($input) {
+    	/** @var array{FieldAny?: mixed} */
+    $val = $input;
+    	return \Grafana\Foundation\StructOptionalFields\StructOptionalFieldsSomeStructFieldAnonymousStruct::fromArray($val);
+    })($data["FieldAnonymousStruct"]) : null,
+        );
     }
 
     /**

@@ -5,7 +5,8 @@ namespace Grafana\Foundation\StructComplexFields;
 /**
  * This struct does things.
  */
-class SomeStruct implements \JsonSerializable {
+class SomeStruct implements \JsonSerializable
+{
     public \Grafana\Foundation\StructComplexFields\SomeOtherStruct $fieldRef;
 
     /**
@@ -61,6 +62,51 @@ class SomeStruct implements \JsonSerializable {
     }
 
     /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{FieldRef?: mixed, FieldDisjunctionOfScalars?: string|bool, FieldMixedDisjunction?: string|mixed, FieldDisjunctionWithNull?: string, Operator?: string, FieldArrayOfStrings?: array<string>, FieldMapOfStringToString?: array<string, string>, FieldAnonymousStruct?: mixed, fieldRefToConstant?: string} $inputData */
+        $data = $inputData;
+        return new self(
+            fieldRef: isset($data["FieldRef"]) ? (function($input) {
+    	/** @var array{FieldAny?: mixed} */
+    $val = $input;
+    	return \Grafana\Foundation\StructComplexFields\SomeOtherStruct::fromArray($val);
+    })($data["FieldRef"]) : null,
+            fieldDisjunctionOfScalars: isset($data["FieldDisjunctionOfScalars"]) ? (function($input) {
+        switch (true) {
+        case is_string($input):
+            return $input;
+        case is_bool($input):
+            return $input;
+        default:
+            throw new \ValueError('incorrect value for disjunction');
+    }
+    })($data["FieldDisjunctionOfScalars"]) : null,
+            fieldMixedDisjunction: isset($data["FieldMixedDisjunction"]) ? (function($input) {
+        switch (true) {
+        case is_string($input):
+            return $input;
+        default:
+            /** @var array{FieldAny?: mixed} $input */
+            return \Grafana\Foundation\StructComplexFields\SomeOtherStruct::fromArray($input);
+    }
+    })($data["FieldMixedDisjunction"]) : null,
+            fieldDisjunctionWithNull: $data["FieldDisjunctionWithNull"] ?? null,
+            operator: isset($data["Operator"]) ? (function($input) { return \Grafana\Foundation\StructComplexFields\SomeStructOperator::fromValue($input); })($data["Operator"]) : null,
+            fieldArrayOfStrings: $data["FieldArrayOfStrings"] ?? null,
+            fieldMapOfStringToString: $data["FieldMapOfStringToString"] ?? null,
+            fieldAnonymousStruct: isset($data["FieldAnonymousStruct"]) ? (function($input) {
+    	/** @var array{FieldAny?: mixed} */
+    $val = $input;
+    	return \Grafana\Foundation\StructComplexFields\StructComplexFieldsSomeStructFieldAnonymousStruct::fromArray($val);
+    })($data["FieldAnonymousStruct"]) : null,
+            fieldRefToConstant: isset($data["fieldRefToConstant"]) ? /* ref to a non-struct, non-enum, this should have been inlined */ (function(array $input) { return $input; })($data["fieldRefToConstant"]) : null,
+        );
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function jsonSerialize(): array
@@ -69,13 +115,15 @@ class SomeStruct implements \JsonSerializable {
             "FieldRef" => $this->fieldRef,
             "FieldDisjunctionOfScalars" => $this->fieldDisjunctionOfScalars,
             "FieldMixedDisjunction" => $this->fieldMixedDisjunction,
-            "FieldDisjunctionWithNull" => $this->fieldDisjunctionWithNull,
             "Operator" => $this->operator,
             "FieldArrayOfStrings" => $this->fieldArrayOfStrings,
             "FieldMapOfStringToString" => $this->fieldMapOfStringToString,
             "FieldAnonymousStruct" => $this->fieldAnonymousStruct,
             "fieldRefToConstant" => $this->fieldRefToConstant,
         ];
+        if (isset($this->fieldDisjunctionWithNull)) {
+            $data["FieldDisjunctionWithNull"] = $this->fieldDisjunctionWithNull;
+        }
         return $data;
     }
 }

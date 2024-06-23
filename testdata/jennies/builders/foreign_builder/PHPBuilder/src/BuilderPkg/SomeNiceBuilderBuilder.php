@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\BuilderPkg;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\SomePkg\SomeStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\SomePkg\SomeStruct>
  */
-class SomeNiceBuilderBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomeNiceBuilderBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\SomePkg\SomeStruct $internal;
 
