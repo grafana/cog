@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\BuilderDelegationInDisjunction;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\BuilderDelegationInDisjunction\ExternalLink>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegationInDisjunction\ExternalLink>
  */
-class ExternalLinkBuilder implements \Grafana\Foundation\Runtime\Builder
+class ExternalLinkBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\BuilderDelegationInDisjunction\ExternalLink $internal;
 

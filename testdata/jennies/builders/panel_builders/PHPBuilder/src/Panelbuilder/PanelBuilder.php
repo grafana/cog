@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\Panelbuilder;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\Panelbuilder\Panel>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Panelbuilder\Panel>
  */
-class PanelBuilder implements \Grafana\Foundation\Runtime\Builder
+class PanelBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\Panelbuilder\Panel $internal;
 

@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\StructWithDefaults;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\StructWithDefaults\Struct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\StructWithDefaults\Struct>
  */
-class StructBuilder implements \Grafana\Foundation\Runtime\Builder
+class StructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\StructWithDefaults\Struct $internal;
 
@@ -23,9 +23,9 @@ class StructBuilder implements \Grafana\Foundation\Runtime\Builder
     }
 
     /**
-     * @param \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct> $allFields
+     * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct> $allFields
      */
-    public function allFields(\Grafana\Foundation\Runtime\Builder $allFields): static
+    public function allFields(\Grafana\Foundation\Cog\Builder $allFields): static
     {
         $allFieldsResource = $allFields->build();
         $this->internal->allFields = $allFieldsResource;
@@ -33,9 +33,9 @@ class StructBuilder implements \Grafana\Foundation\Runtime\Builder
         return $this;
     }
     /**
-     * @param \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct> $partialFields
+     * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct> $partialFields
      */
-    public function partialFields(\Grafana\Foundation\Runtime\Builder $partialFields): static
+    public function partialFields(\Grafana\Foundation\Cog\Builder $partialFields): static
     {
         $partialFieldsResource = $partialFields->build();
         $this->internal->partialFields = $partialFieldsResource;
@@ -43,9 +43,9 @@ class StructBuilder implements \Grafana\Foundation\Runtime\Builder
         return $this;
     }
     /**
-     * @param \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct> $emptyFields
+     * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct> $emptyFields
      */
-    public function emptyFields(\Grafana\Foundation\Runtime\Builder $emptyFields): static
+    public function emptyFields(\Grafana\Foundation\Cog\Builder $emptyFields): static
     {
         $emptyFieldsResource = $emptyFields->build();
         $this->internal->emptyFields = $emptyFieldsResource;
