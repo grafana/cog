@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\InitializationSafeguards;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\InitializationSafeguards\SomePanel>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\InitializationSafeguards\SomePanel>
  */
-class SomePanelBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomePanelBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\InitializationSafeguards\SomePanel $internal;
 
