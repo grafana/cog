@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\Sandbox;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\Sandbox\SomeStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Sandbox\SomeStruct>
  */
-class SomeStructBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\Sandbox\SomeStruct $internal;
 

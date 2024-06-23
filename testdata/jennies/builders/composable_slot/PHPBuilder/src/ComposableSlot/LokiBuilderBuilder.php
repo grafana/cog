@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\ComposableSlot;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\ComposableSlot\Dashboard>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\ComposableSlot\Dashboard>
  */
-class LokiBuilderBuilder implements \Grafana\Foundation\Runtime\Builder
+class LokiBuilderBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\ComposableSlot\Dashboard $internal;
 
@@ -23,9 +23,9 @@ class LokiBuilderBuilder implements \Grafana\Foundation\Runtime\Builder
     }
 
     /**
-     * @param \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\Runtime\Dataquery> $target
+     * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Cog\Dataquery> $target
      */
-    public function target(\Grafana\Foundation\Runtime\Builder $target): static
+    public function target(\Grafana\Foundation\Cog\Builder $target): static
     {
         $targetResource = $target->build();
         $this->internal->target = $targetResource;
@@ -33,7 +33,7 @@ class LokiBuilderBuilder implements \Grafana\Foundation\Runtime\Builder
         return $this;
     }
     /**
-     * @param array<\Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\Runtime\Dataquery>> $targets
+     * @param array<\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Cog\Dataquery>> $targets
      */
     public function targets(array $targets): static
     {

@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\Constraints;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\Constraints\SomeStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Constraints\SomeStruct>
  */
-class SomeStructBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\Constraints\SomeStruct $internal;
 

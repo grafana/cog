@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\Defaults;
 
-class DefaultsStructPartialComplexField implements \JsonSerializable {
+class DefaultsStructPartialComplexField implements \JsonSerializable
+{
     public string $uid;
 
     public int $intVal;
@@ -15,6 +16,19 @@ class DefaultsStructPartialComplexField implements \JsonSerializable {
     {
         $this->uid = $uid ?: "";
         $this->intVal = $intVal ?: 0;
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{uid?: string, intVal?: int} $inputData */
+        $data = $inputData;
+        return new self(
+            uid: $data["uid"] ?? null,
+            intVal: $data["intVal"] ?? null,
+        );
     }
 
     /**
