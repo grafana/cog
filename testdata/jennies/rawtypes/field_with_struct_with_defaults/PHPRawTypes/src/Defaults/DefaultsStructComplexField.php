@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\Defaults;
 
-class DefaultsStructComplexField implements \JsonSerializable {
+class DefaultsStructComplexField implements \JsonSerializable
+{
     public string $uid;
 
     public \Grafana\Foundation\Defaults\DefaultsStructComplexFieldNested $nested;
@@ -22,6 +23,24 @@ class DefaultsStructComplexField implements \JsonSerializable {
         $this->uid = $uid ?: "";
         $this->nested = $nested ?: new \Grafana\Foundation\Defaults\DefaultsStructComplexFieldNested();
         $this->array = $array ?: [];
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{uid?: string, nested?: mixed, array?: array<string>} $inputData */
+        $data = $inputData;
+        return new self(
+            uid: $data["uid"] ?? null,
+            nested: isset($data["nested"]) ? (function($input) {
+    	/** @var array{nestedVal?: string} */
+    $val = $input;
+    	return \Grafana\Foundation\Defaults\DefaultsStructComplexFieldNested::fromArray($val);
+    })($data["nested"]) : null,
+            array: $data["array"] ?? null,
+        );
     }
 
     /**

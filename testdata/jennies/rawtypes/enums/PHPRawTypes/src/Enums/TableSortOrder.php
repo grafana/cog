@@ -4,7 +4,7 @@ namespace Grafana\Foundation\Enums;
 
 final class TableSortOrder implements \JsonSerializable, \Stringable {
     /**
-     * @var string|int
+     * @var string
      */
     private $value;
 
@@ -13,7 +13,7 @@ final class TableSortOrder implements \JsonSerializable, \Stringable {
      */
     private static $instances = [];
 
-    private function __construct(string|int $value)
+    private function __construct(string $value)
     {
         $this->value = $value;
     }
@@ -36,14 +36,27 @@ final class TableSortOrder implements \JsonSerializable, \Stringable {
         return self::$instances["Desc"];
     }
 
-    public function jsonSerialize(): string|int
+    public static function fromValue(string $value): self
+    {
+        if ($value === "asc") {
+            return self::asc();
+        }
+
+        if ($value === "desc") {
+            return self::desc();
+        }
+
+        throw new \UnexpectedValueException("Value '$value' is not part of the enum TableSortOrder");
+    }
+
+    public function jsonSerialize(): string
     {
         return $this->value;
     }
 
     public function __toString(): string
     {
-        return (string) $this->value;
+        return $this->value;
     }
 }
 

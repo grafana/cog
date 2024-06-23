@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\BuilderDelegation;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink>
  */
-class DashboardLinkBuilder implements \Grafana\Foundation\Runtime\Builder
+class DashboardLinkBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\BuilderDelegation\DashboardLink $internal;
 

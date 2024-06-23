@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\SomePkg;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\SomePkg\Person>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\SomePkg\Person>
  */
-class PersonBuilder implements \Grafana\Foundation\Runtime\Builder
+class PersonBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\SomePkg\Person $internal;
 

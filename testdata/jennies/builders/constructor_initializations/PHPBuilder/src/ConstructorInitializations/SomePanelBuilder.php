@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\ConstructorInitializations;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\ConstructorInitializations\SomePanel>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\ConstructorInitializations\SomePanel>
  */
-class SomePanelBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomePanelBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\ConstructorInitializations\SomePanel $internal;
 

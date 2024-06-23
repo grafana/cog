@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\Dashboard;
 
-class DataSourceRef implements \JsonSerializable {
+class DataSourceRef implements \JsonSerializable
+{
     public ?string $type;
 
     public ?string $uid;
@@ -15,6 +16,19 @@ class DataSourceRef implements \JsonSerializable {
     {
         $this->type = $type;
         $this->uid = $uid;
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{type?: string, uid?: string} $inputData */
+        $data = $inputData;
+        return new self(
+            type: $data["type"] ?? null,
+            uid: $data["uid"] ?? null,
+        );
     }
 
     /**
