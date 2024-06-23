@@ -2,7 +2,8 @@
 
 namespace Grafana\Foundation\StructComplexFields;
 
-class StructComplexFieldsSomeStructFieldAnonymousStruct implements \JsonSerializable {
+class StructComplexFieldsSomeStructFieldAnonymousStruct implements \JsonSerializable
+{
     /**
      * @var mixed
      */
@@ -14,6 +15,18 @@ class StructComplexFieldsSomeStructFieldAnonymousStruct implements \JsonSerializ
     public function __construct( $fieldAny = null)
     {
         $this->fieldAny = $fieldAny ?: null;
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{FieldAny?: mixed} $inputData */
+        $data = $inputData;
+        return new self(
+            fieldAny: $data["FieldAny"] ?? null,
+        );
     }
 
     /**

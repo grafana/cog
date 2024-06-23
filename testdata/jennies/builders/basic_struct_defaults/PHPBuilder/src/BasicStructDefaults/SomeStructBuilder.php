@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\BasicStructDefaults;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\BasicStructDefaults\SomeStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BasicStructDefaults\SomeStruct>
  */
-class SomeStructBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\BasicStructDefaults\SomeStruct $internal;
 

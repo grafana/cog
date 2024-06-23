@@ -4,9 +4,9 @@ namespace Grafana\Foundation\BasicStruct;
 
 /**
  * SomeStruct, to hold data.
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\BasicStruct\SomeStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BasicStruct\SomeStruct>
  */
-class SomeStructBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\BasicStruct\SomeStruct $internal;
 

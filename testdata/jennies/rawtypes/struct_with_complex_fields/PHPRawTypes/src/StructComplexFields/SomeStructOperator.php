@@ -4,7 +4,7 @@ namespace Grafana\Foundation\StructComplexFields;
 
 final class SomeStructOperator implements \JsonSerializable, \Stringable {
     /**
-     * @var string|int
+     * @var string
      */
     private $value;
 
@@ -13,7 +13,7 @@ final class SomeStructOperator implements \JsonSerializable, \Stringable {
      */
     private static $instances = [];
 
-    private function __construct(string|int $value)
+    private function __construct(string $value)
     {
         $this->value = $value;
     }
@@ -36,14 +36,27 @@ final class SomeStructOperator implements \JsonSerializable, \Stringable {
         return self::$instances["LessThan"];
     }
 
-    public function jsonSerialize(): string|int
+    public static function fromValue(string $value): self
+    {
+        if ($value === ">") {
+            return self::greaterThan();
+        }
+
+        if ($value === "<") {
+            return self::lessThan();
+        }
+
+        throw new \UnexpectedValueException("Value '$value' is not part of the enum SomeStructOperator");
+    }
+
+    public function jsonSerialize(): string
     {
         return $this->value;
     }
 
     public function __toString(): string
     {
-        return (string) $this->value;
+        return $this->value;
     }
 }
 

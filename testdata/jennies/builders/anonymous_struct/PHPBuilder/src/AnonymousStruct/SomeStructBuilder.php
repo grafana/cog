@@ -3,9 +3,9 @@
 namespace Grafana\Foundation\AnonymousStruct;
 
 /**
- * @implements \Grafana\Foundation\Runtime\Builder<\Grafana\Foundation\AnonymousStruct\SomeStruct>
+ * @implements \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\AnonymousStruct\SomeStruct>
  */
-class SomeStructBuilder implements \Grafana\Foundation\Runtime\Builder
+class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
 {
     protected \Grafana\Foundation\AnonymousStruct\SomeStruct $internal;
 
