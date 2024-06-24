@@ -243,7 +243,6 @@ final class VariantConfig
 	)
 
 	return codejen.NewFile(filename, []byte(content), jenny)
-
 }
 
 func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Object) string {
