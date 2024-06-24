@@ -79,13 +79,14 @@ func (r RemoveIntersections) processObject(_ *Visitor, schema *ast.Schema, objec
 		r.arraysToFix[object.Name] = locatedObject
 	}
 
+	// TODO: Check if a reference extends from a Map if necessary
+
 	return object, nil
 }
 
 func (r RemoveIntersections) processStruct(_ *Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
 	str := def.AsStruct()
 	for i, field := range str.Fields {
-		// TODO: Add Map/List checks if necessary
 		if field.Type.IsRef() {
 			if obj, ok := r.objectsToRemove[field.Type.AsRef().ReferredType]; ok {
 				def.AsStruct().Fields[i] = ast.NewStructField(field.Name, ast.NewRef(obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType), ast.Comments(obj.Comments))
