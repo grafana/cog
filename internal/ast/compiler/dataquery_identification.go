@@ -25,7 +25,7 @@ func (pass *DataqueryIdentification) Process(schemas []*ast.Schema) ([]*ast.Sche
 }
 
 func (pass *DataqueryIdentification) processSchema(schema *ast.Schema, commonDataquery ast.Object) *ast.Schema {
-	variantFound := false
+	var variantObjects []string
 	schema.Objects = schema.Objects.Map(func(_ string, object ast.Object) ast.Object {
 		if object.SelfRef.String() == commonDataquery.SelfRef.String() {
 			return object
@@ -33,14 +33,20 @@ func (pass *DataqueryIdentification) processSchema(schema *ast.Schema, commonDat
 
 		obj, implementsVariant := pass.processObject(object, commonDataquery)
 
-		variantFound = variantFound || implementsVariant
+		if implementsVariant {
+			variantObjects = append(variantObjects, obj.Name)
+		}
 
 		return obj
 	})
 
-	if variantFound {
+	if len(variantObjects) != 0 {
 		schema.Metadata.Kind = ast.SchemaKindComposable
 		schema.Metadata.Variant = ast.SchemaVariantDataQuery
+	}
+
+	if schema.EntryPoint == "" && len(variantObjects) == 1 {
+		schema.EntryPoint = variantObjects[0]
 	}
 
 	return schema
