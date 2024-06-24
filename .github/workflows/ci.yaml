@@ -120,11 +120,9 @@ jobs:
         run: mypy generated/python/
         
       - name: Compile generated Java code
-        run: javac -cp java generated/java/**/*.java
-      
-      - if: ${{ runner.debug == '1' }}
-        name: Debug Java
-        run: javac -cp java generated/java/**/*.java -verbose
+        run: |
+          find generated/java -name '*.java' -d > sources.txt
+          javac @sources.txt
 
       - name: Lint generated PHP code
         run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
