@@ -207,3 +207,7 @@ passes:
   - cloudwatch: {}
   - google_cloud_monitoring: {}
   - library_panels: {}
+
+  - omit:
+      objects:
+        - dashboard.HeatmapPanel
