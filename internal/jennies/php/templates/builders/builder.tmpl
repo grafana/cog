@@ -3,7 +3,7 @@
 namespace {{ .NamespaceRoot }}\{{ .Builder.Package | formatPackageName }};
 
 {{ .Builder.For.Comments|formatDocsBlock -}}
-class {{ .Builder.Name }}Builder implements \{{ .NamespaceRoot }}\Cog\Builder
+class {{ .Builder.Name|formatObjectName }}Builder implements \{{ .NamespaceRoot }}\Cog\Builder
 {
     protected {{ .Builder.For.SelfRef.AsType|formatRawType }} $internal;
     {{- range .Builder.Properties }}
