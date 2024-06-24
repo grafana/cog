@@ -344,8 +344,10 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	buffer.WriteString(" */\n")
 	buffer.WriteString("public static function fromArray(array $inputData): self\n")
 	buffer.WriteString("{\n")
-	buffer.WriteString(fmt.Sprintf("    /** @var %s $inputData */\n", jenny.shaper.typeShape(def.Type)))
-	buffer.WriteString("    $data = $inputData;\n")
+	if len(constructorArgs) != 0 {
+		buffer.WriteString(fmt.Sprintf("    /** @var %s $inputData */\n", jenny.shaper.typeShape(def.Type)))
+		buffer.WriteString("    $data = $inputData;\n")
+	}
 	buffer.WriteString("    return new self(\n")
 	buffer.WriteString(strings.Join(constructorArgs, ""))
 	buffer.WriteString("    );\n")
@@ -608,9 +610,7 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 	decodingSwitch += "}"
 
 	return fmt.Sprintf(`(function($input) {
-    if (!is_array($input)) {
-        throw new \ValueError('expected disjunction value to be an array');
-    }
+    \assert(is_array($input), 'expected disjunction value to be an array');
 
     %s
 })`, decodingSwitch)
