@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 
@@ -135,6 +136,10 @@ func (schema *Schema) Merge(other *Schema) error {
 		return fmt.Errorf("conflicting metadata: %w", ErrCannotMergeSchemas)
 	}
 
+	if schema.EntryPoint != other.EntryPoint && (schema.EntryPoint == "" || other.EntryPoint == "") {
+		schema.EntryPoint = cmp.Or(schema.EntryPoint, other.EntryPoint)
+	}
+
 	var err error
 	other.Objects.Iterate(func(objectName string, remoteObject Object) {
 		if !schema.Objects.Has(objectName) {
@@ -157,8 +162,9 @@ func (schema *Schema) Merge(other *Schema) error {
 
 func (schema *Schema) DeepCopy() Schema {
 	return Schema{
-		Package:  schema.Package,
-		Metadata: schema.Metadata,
+		Package:    schema.Package,
+		Metadata:   schema.Metadata,
+		EntryPoint: schema.EntryPoint,
 		Objects: schema.Objects.Map(func(_ string, object Object) Object {
 			return object.DeepCopy()
 		}),
