@@ -11,7 +11,7 @@ public class SomeStruct {
             this.internal = new SomeStruct();
     this.internal.title = title;
         }
-    public Builder setTitle(String title) {
+    public Builder Title(String title) {
     this.internal.title = title;
         return this;
     }

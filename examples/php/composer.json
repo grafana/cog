@@ -1,0 +1,10 @@
+{
+    "name": "grafana/cog-example",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Grafana\\Foundation\\": "../../generated/src"
+        }
+    },
+    "require": {}
+}

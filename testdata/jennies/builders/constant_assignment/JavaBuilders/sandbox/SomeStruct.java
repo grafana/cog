@@ -11,22 +11,22 @@ public class SomeStruct {
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder setEditable() {
+    public Builder Editable() {
     this.internal.editable = true;
         return this;
     }
     
-    public Builder setReadonly() {
+    public Builder Readonly() {
     this.internal.editable = false;
         return this;
     }
     
-    public Builder setAutoRefresh() {
+    public Builder AutoRefresh() {
     this.internal.autoRefresh = true;
         return this;
     }
     
-    public Builder setNoAutoRefresh() {
+    public Builder NoAutoRefresh() {
     this.internal.autoRefresh = false;
         return this;
     }

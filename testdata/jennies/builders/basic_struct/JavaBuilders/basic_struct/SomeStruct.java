@@ -18,22 +18,22 @@ public class SomeStruct {
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder setId(Long id) {
+    public Builder Id(Long id) {
     this.internal.id = id;
         return this;
     }
     
-    public Builder setUid(String uid) {
+    public Builder Uid(String uid) {
     this.internal.uid = uid;
         return this;
     }
     
-    public Builder setTags(List<String> tags) {
+    public Builder Tags(List<String> tags) {
     this.internal.tags = tags;
         return this;
     }
     
-    public Builder setLiveNow(Boolean liveNow) {
+    public Builder LiveNow(Boolean liveNow) {
     this.internal.liveNow = liveNow;
         return this;
     }

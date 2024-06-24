@@ -13,12 +13,12 @@ public class Dashboard {
         public Builder() {
             this.internal = new Dashboard();
         }
-    public Builder setTarget(cog.Builder<Dataquery> target) {
+    public Builder Target(cog.Builder<Dataquery> target) {
     this.internal.target = target.build();
         return this;
     }
     
-    public Builder setTargets(cog.Builder<List<Dataquery>> targets) {
+    public Builder Targets(cog.Builder<List<Dataquery>> targets) {
     this.internal.targets = targets.build();
         return this;
     }

@@ -35,6 +35,19 @@ func (schemas Schemas) Locate(pkg string) (*Schema, bool) {
 	return nil, false
 }
 
+func (schemas Schemas) ResolveToType(def Type) Type {
+	if !def.IsRef() {
+		return def
+	}
+
+	resolved, found := schemas.LocateObjectByRef(def.AsRef())
+	if !found {
+		return def
+	}
+
+	return schemas.ResolveToType(resolved.Type)
+}
+
 func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	for _, schema := range schemas {
 		if schema.Package != pkg {
@@ -45,6 +58,10 @@ func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	}
 
 	return Object{}, false
+}
+
+func (schemas Schemas) LocateObjectByRef(ref RefType) (Object, bool) {
+	return schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 }
 
 func (schemas Schemas) Consolidate() (Schemas, error) {

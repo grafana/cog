@@ -8,53 +8,53 @@ public class PanelBuilder implements cog.Builder<Panel> {
 
     public PanelBuilder() {
         this.internal = new Panel();
-        this.setOnlyFromThisDashboard(false);
-        this.setOnlyInTimeRange(false);
-        this.setLimit(10);
-        this.setShowUser(true);
-        this.setShowTime(true);
-        this.setShowTags(true);
-        this.setNavigateToPanel(true);
-        this.setNavigateBefore("10m");
-        this.setNavigateAfter("10m");
+        this.OnlyFromThisDashboard(false);
+        this.OnlyInTimeRange(false);
+        this.Limit(10);
+        this.ShowUser(true);
+        this.ShowTime(true);
+        this.ShowTags(true);
+        this.NavigateToPanel(true);
+        this.NavigateBefore("10m");
+        this.NavigateAfter("10m");
     }
-    public PanelBuilder setOnlyFromThisDashboard(Boolean onlyFromThisDashboard) {
+    public PanelBuilder OnlyFromThisDashboard(Boolean onlyFromThisDashboard) {
     this.internal.onlyFromThisDashboard = onlyFromThisDashboard;
         return this;
     }
-    public PanelBuilder setOnlyInTimeRange(Boolean onlyInTimeRange) {
+    public PanelBuilder OnlyInTimeRange(Boolean onlyInTimeRange) {
     this.internal.onlyInTimeRange = onlyInTimeRange;
         return this;
     }
-    public PanelBuilder setTags(List<String> tags) {
+    public PanelBuilder Tags(List<String> tags) {
     this.internal.tags = tags;
         return this;
     }
-    public PanelBuilder setLimit(Integer limit) {
+    public PanelBuilder Limit(Integer limit) {
     this.internal.limit = limit;
         return this;
     }
-    public PanelBuilder setShowUser(Boolean showUser) {
+    public PanelBuilder ShowUser(Boolean showUser) {
     this.internal.showUser = showUser;
         return this;
     }
-    public PanelBuilder setShowTime(Boolean showTime) {
+    public PanelBuilder ShowTime(Boolean showTime) {
     this.internal.showTime = showTime;
         return this;
     }
-    public PanelBuilder setShowTags(Boolean showTags) {
+    public PanelBuilder ShowTags(Boolean showTags) {
     this.internal.showTags = showTags;
         return this;
     }
-    public PanelBuilder setNavigateToPanel(Boolean navigateToPanel) {
+    public PanelBuilder NavigateToPanel(Boolean navigateToPanel) {
     this.internal.navigateToPanel = navigateToPanel;
         return this;
     }
-    public PanelBuilder setNavigateBefore(String navigateBefore) {
+    public PanelBuilder NavigateBefore(String navigateBefore) {
     this.internal.navigateBefore = navigateBefore;
         return this;
     }
-    public PanelBuilder setNavigateAfter(String navigateAfter) {
+    public PanelBuilder NavigateAfter(String navigateAfter) {
     this.internal.navigateAfter = navigateAfter;
         return this;
     }

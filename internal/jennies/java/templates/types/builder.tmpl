@@ -1,5 +1,5 @@
 {{- define "builder" }}
-    public static class {{ .BuilderName }}Builder implements {{ if not (eq .Builder.ImportAlias "") }}{{ .Builder.ImportAlias }}.{{ end }}cog.Builder<{{ .Builder.ObjectName }}> {
+    public static class {{ .BuilderName }}Builder implements {{ if not (eq .Builder.ImportAlias "") }}{{ .Builder.ImportAlias }}.{{ end }}cog.Builder<{{ .Builder.BuilderSignatureType }}> {
         private {{ .Builder.ObjectName }} internal;
         
         {{- range .Builder.Properties }}
@@ -11,17 +11,21 @@
         {{- range .Builder.Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
+        
+        {{- range .Builder.Properties }}
+        this.{{ .Name | escapeVar }} = {{ .Type | emptyValueForType }};
+        {{- end }}
 
         {{- range .Builder.Defaults }}
         {{- range .Initializers }}
         {{ . }}
         {{- end }}
-        this.set{{ .OptionName }}({{ .Args|join ", " }});
+        this.{{ .OptionName }}({{ .Args|join ", " }});
         {{- end }}
         }
         
     {{- range $opt := .Builder.Options }}
-    public {{ $.BuilderName }}Builder set{{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
+    public {{ $.BuilderName }}Builder {{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.Builder.BuilderName "OptionName" $opt.Name) }}
         {{- end }}

@@ -11,12 +11,12 @@ public class NestedStruct {
         public Builder() {
             this.internal = new NestedStruct();
         }
-    public Builder setStringVal(String stringVal) {
+    public Builder StringVal(String stringVal) {
     this.internal.stringVal = stringVal;
         return this;
     }
     
-    public Builder setIntVal(Long intVal) {
+    public Builder IntVal(Long intVal) {
     this.internal.intVal = intVal;
         return this;
     }

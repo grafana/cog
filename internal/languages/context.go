@@ -14,6 +14,10 @@ func (context *Context) LocateObject(pkg string, name string) (ast.Object, bool)
 	return context.Schemas.LocateObject(pkg, name)
 }
 
+func (context *Context) LocateObjectByRef(ref ast.RefType) (ast.Object, bool) {
+	return context.Schemas.LocateObjectByRef(ref)
+}
+
 func (context *Context) ResolveToBuilder(def ast.Type) bool {
 	if def.IsArray() {
 		return context.ResolveToBuilder(def.AsArray().ValueType)
@@ -89,4 +93,17 @@ func (context *Context) ResolveToStruct(def ast.Type) bool {
 	}
 
 	return context.ResolveToStruct(referredObj.Type)
+}
+
+func (context *Context) ResolveRefs(def ast.Type) ast.Type {
+	if !def.IsRef() {
+		return def
+	}
+
+	referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	if !found {
+		return def
+	}
+
+	return context.ResolveRefs(referredObj.Type)
 }

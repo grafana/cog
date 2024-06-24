@@ -12,7 +12,7 @@ public enum CursorMode {
         this.value = value;
     }
 
-    public String getValue() {
+    public String Value() {
         return value;
     }
 }

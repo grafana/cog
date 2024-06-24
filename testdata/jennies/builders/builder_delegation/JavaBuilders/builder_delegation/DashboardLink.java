@@ -11,12 +11,12 @@ public class DashboardLink {
         public Builder() {
             this.internal = new DashboardLink();
         }
-    public Builder setTitle(String title) {
+    public Builder Title(String title) {
     this.internal.title = title;
         return this;
     }
     
-    public Builder setUrl(String url) {
+    public Builder Url(String url) {
     this.internal.url = url;
         return this;
     }

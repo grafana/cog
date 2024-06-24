@@ -37,7 +37,6 @@ func getEnumType(t string) (ast.Type, error) {
 }
 
 func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
-	schemaType := getSchemaType(schema)
 	constraints := make([]ast.TypeConstraint, 0)
 
 	if schema.MinLength > 0 {
@@ -56,7 +55,7 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 	if schema.MultipleOf != nil {
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   ast.MultipleOfOp,
-			Args: getArgs(schema.MultipleOf, schemaType),
+			Args: getArgs(schema.MultipleOf, schema.Type),
 		})
 	}
 
@@ -67,7 +66,7 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 		}
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   op,
-			Args: getArgs(schema.Min, schemaType),
+			Args: getArgs(schema.Min, schema.Type),
 		})
 	}
 
@@ -78,7 +77,7 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 		}
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   op,
-			Args: getArgs(schema.Max, schemaType),
+			Args: getArgs(schema.Max, schema.Type),
 		})
 	}
 
@@ -95,11 +94,4 @@ func getArgs(v *float64, t string) []any {
 
 func isRef(ref string) bool {
 	return ref != "" && strings.ContainsAny(ref, "#")
-}
-
-func getSchemaType(schema *openapi3.Schema) string {
-	if schema.Type != nil && len(*schema.Type) == 1 {
-		return (*schema.Type)[0] // Handle multiple types?
-	}
-	return ""
 }

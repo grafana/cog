@@ -61,3 +61,4 @@ class Panel(cogbuilder.Builder[panelbuilder.Panel]):
         self._internal.navigate_after = navigate_after
     
         return self
+    

@@ -52,14 +52,15 @@ func (b Builders) genBuilders(pkg string, name string) ([]Builder, bool) {
 	return tools.Map(builders, func(builder ast.Builder) Builder {
 		object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 		return Builder{
-			Package:     b.typeFormatter.formatPackage(pkg),
-			ObjectName:  tools.UpperCamelCase(object.Name),
-			BuilderName: builder.Name,
-			Constructor: builder.Constructor,
-			Options:     builder.Options,
-			Properties:  builder.Properties,
-			Defaults:    b.genDefaults(builder.Options),
-			ImportAlias: b.config.PackagePath,
+			Package:              b.typeFormatter.formatPackage(pkg),
+			ObjectName:           tools.UpperCamelCase(object.Name),
+			BuilderName:          builder.Name,
+			BuilderSignatureType: b.getBuilderSignature(builder, object),
+			Constructor:          builder.Constructor,
+			Options:              builder.Options,
+			Properties:           builder.Properties,
+			Defaults:             b.genDefaults(builder.Options),
+			ImportAlias:          b.config.PackagePath,
 		}
 	}), true
 }
@@ -85,6 +86,14 @@ func (b Builders) getBuilders(pkg string, name string) ast.Builders {
 	}
 
 	return builderMap[name]
+}
+
+func (b Builders) getBuilderSignature(builder ast.Builder, obj ast.Object) string {
+	if builder.Name != obj.Type.ImplementedVariant() {
+		return obj.Name
+	}
+
+	return fmt.Sprintf("%s.%s", b.typeFormatter.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Name))
 }
 
 func (b Builders) genDefaults(options []ast.Option) []OptionCall {
@@ -130,7 +139,7 @@ func (b Builders) formatInitializers(args []ast.Argument) []string {
 		}
 		if b.typeFormatter.typeHasBuilder(arg.Type) {
 			constructorFormat = "%s.Builder %sResource = new %s.Builder();"
-			setterFormat = "%sResource.set%s(%s);"
+			setterFormat = "%sResource.%s(%s);"
 			fieldNameFunc = tools.UpperCamelCase
 		}
 
@@ -189,7 +198,7 @@ func (b Builders) formatDefaultReference(ref ast.RefType, defValue any) string {
 			defValues := defValue.(map[string]interface{})
 			for _, field := range structType.Fields {
 				if f, ok := defValues[field.Name]; ok {
-					builder = fmt.Sprintf("%s.set%s(%#v)", builder, tools.UpperCamelCase(field.Name), f)
+					builder = fmt.Sprintf("%s.%s(%#v)", builder, tools.UpperCamelCase(field.Name), f)
 				}
 			}
 			return builder + ".build()"

@@ -11,12 +11,12 @@ public class SomePanel {
         public Builder() {
             this.internal = new SomePanel();
         }
-    public Builder setTitle(String title) {
+    public Builder Title(String title) {
     this.internal.title = title;
         return this;
     }
     
-    public Builder setShowLegend(Boolean show) {
+    public Builder ShowLegend(Boolean show) {
 		if (this.internal.options == null) {
 			this.internal.options = new initialization_safeguards.Options();
 		}

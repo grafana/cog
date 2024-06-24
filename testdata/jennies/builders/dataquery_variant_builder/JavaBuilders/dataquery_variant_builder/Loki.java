@@ -10,7 +10,7 @@ public class Loki implements cog.variants.Dataquery {
         public Builder() {
             this.internal = new Loki();
         }
-    public Builder setExpr(String expr) {
+    public Builder Expr(String expr) {
     this.internal.expr = expr;
         return this;
     }
