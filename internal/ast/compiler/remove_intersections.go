@@ -5,11 +5,13 @@ import (
 )
 
 type RemoveIntersections struct {
-	listToRemove map[string]ast.Object
+	objectsToRemove map[string]ast.Object
+	arraysToFix     map[string]ast.Object
 }
 
 func (r RemoveIntersections) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
-	r.listToRemove = make(map[string]ast.Object)
+	r.objectsToRemove = make(map[string]ast.Object)
+	r.arraysToFix = make(map[string]ast.Object)
 	visitor := Visitor{
 		OnSchema: r.processSchema,
 		OnObject: r.processObject,
@@ -47,7 +49,7 @@ func (r RemoveIntersections) processSchema(v *Visitor, schema *ast.Schema) (*ast
 		return nil, foundErr
 	}
 
-	for toRemove := range r.listToRemove {
+	for toRemove := range r.objectsToRemove {
 		schema.Objects.Remove(toRemove)
 	}
 
@@ -68,9 +70,15 @@ func (r RemoveIntersections) processObject(_ *Visitor, schema *ast.Schema, objec
 			newObject.Type.Hints[ast.HintImplementsVariant] = object.Type.ImplementedVariant()
 		}
 
-		r.listToRemove[locatedObject.Name] = object
+		r.objectsToRemove[locatedObject.Name] = object
 		return newObject, nil
 	}
+
+	if locatedObject.Type.IsArray() {
+		r.objectsToRemove[object.Name] = object
+		r.arraysToFix[object.Name] = locatedObject
+	}
+
 	return object, nil
 }
 
@@ -79,8 +87,11 @@ func (r RemoveIntersections) processStruct(_ *Visitor, _ *ast.Schema, def ast.Ty
 	for i, field := range str.Fields {
 		// TODO: Add Map/List checks if necessary
 		if field.Type.IsRef() {
-			if obj, ok := r.listToRemove[field.Type.AsRef().ReferredType]; ok {
-				def.AsStruct().Fields[i] = ast.NewStructField(obj.Name, ast.NewRef(obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType), ast.Comments(obj.Comments))
+			if obj, ok := r.objectsToRemove[field.Type.AsRef().ReferredType]; ok {
+				def.AsStruct().Fields[i] = ast.NewStructField(field.Name, ast.NewRef(obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType), ast.Comments(obj.Comments))
+			}
+			if obj, ok := r.arraysToFix[field.Type.AsRef().ReferredType]; ok {
+				def.AsStruct().Fields[i] = ast.NewStructField(field.Name, ast.NewArray(obj.Type.AsArray().ValueType), ast.Comments(obj.Comments))
 			}
 		}
 	}
