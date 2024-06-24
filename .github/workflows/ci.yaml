@@ -118,7 +118,7 @@ jobs:
         run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
 
       - name: Lint generated PHP code with psalm
-        run: psalm -c .config/ci/php/psalm.xml
+        run: psalm -c .config/ci/php/psalm.xml generated/php
 
   examples:
     name: Run examples
