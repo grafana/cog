@@ -1,8 +1,8 @@
-import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/src/timeseries";
-import {PanelBuilder as GaugePanelBuilder} from "../../generated/src/gauge";
+import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/typescript/src/timeseries";
+import {PanelBuilder as GaugePanelBuilder} from "../../generated/typescript/src/gauge";
 import {basicPrometheusQuery, defaultGauge, defaultTimeseries} from "./common";
-import {StackingConfigBuilder, StackingMode} from "../../generated/src/common";
-import {ThresholdsConfigBuilder, ThresholdsMode} from "../../generated/src/dashboard";
+import {StackingConfigBuilder, StackingMode} from "../../generated/typescript/src/common";
+import {ThresholdsConfigBuilder, ThresholdsMode} from "../../generated/typescript/src/dashboard";
 
 export const memoryUsageTimeseries = (): TimeseriesPanelBuilder => {
     const 	memUsedQuery = `(

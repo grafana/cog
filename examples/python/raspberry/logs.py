@@ -1,5 +1,5 @@
-import generated.models.dashboard as dashboard
-from generated.cog import builder as cogbuilder
+import generated.python.grafana_foundation_sdk.models.dashboard as dashboard
+from generated.python.grafana_foundation_sdk.cog import builder as cogbuilder
 from .common import default_logs, basic_loki_query
 
 

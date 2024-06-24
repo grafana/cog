@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/common"
-	"github.com/grafana/cog/generated/dashboard"
-	"github.com/grafana/cog/generated/gauge"
-	"github.com/grafana/cog/generated/logs"
-	"github.com/grafana/cog/generated/loki"
-	"github.com/grafana/cog/generated/prometheus"
-	"github.com/grafana/cog/generated/timeseries"
+	"github.com/grafana/cog/generated/go/common"
+	"github.com/grafana/cog/generated/go/dashboard"
+	"github.com/grafana/cog/generated/go/gauge"
+	"github.com/grafana/cog/generated/go/logs"
+	"github.com/grafana/cog/generated/go/loki"
+	"github.com/grafana/cog/generated/go/prometheus"
+	"github.com/grafana/cog/generated/go/timeseries"
 )
 
 func toPtr[T any](input T) *T {

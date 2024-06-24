@@ -1,7 +1,7 @@
-import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/src/timeseries";
-import {PanelBuilder as TablePanelBuilder} from "../../generated/src/table";
+import {PanelBuilder as TimeseriesPanelBuilder} from "../../generated/typescript/src/timeseries";
+import {PanelBuilder as TablePanelBuilder} from "../../generated/typescript/src/table";
 import {basicPrometheusQuery, defaultTimeseries, tablePrometheusQuery} from "./common";
-import {FieldTextAlignment, TableCellHeight, TableFooterOptionsBuilder} from "../../generated/src/common";
+import {FieldTextAlignment, TableCellHeight, TableFooterOptionsBuilder} from "../../generated/typescript/src/common";
 
 export const diskIOTimeseries = (): TimeseriesPanelBuilder => {
     return defaultTimeseries()

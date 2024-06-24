@@ -3,11 +3,14 @@
 debug: true
 
 parameters:
-  output_dir: './generated'
+  output_dir: './generated/%l'
   kind_registry_path: '../kind-registry'
   kind_registry_version: 'v10.4.x'
   grafana_version: 'v10.4.x'
-  go_package_root: 'github.com/grafana/cog/generated'
+  cog_version: 'v0.0.x'
+  release_branch: 'release_branch'
+  build_timestamp: 'build_timestamp'
+  go_package_root: 'github.com/grafana/cog/generated/go'
   php_namespace_root: 'Grafana\Foundation'
   java_package_path: 'com.grafana.foundation'
 
@@ -78,6 +81,14 @@ output:
 
   types: true
   builders: true
+
+  package_templates: '%__config_dir%/../package_templates'
+  repository_templates: '%__config_dir%/../repository_templates'
+  templates_data:
+    GrafanaVersion: '%kind_registry_version%'
+    CogVersion: '%cog_version%'
+    ReleaseBranch: '%release_branch%'
+    BuildTimestamp: '%build_timestamp%'
 
   languages:
     - go:

@@ -23,10 +23,6 @@ func (jenny VariantsPlugins) Generate(_ languages.Context) (codejen.Files, error
 		return nil, err
 	}
 
-	panelcfgInterface, err := jenny.panelcfgInterface()
-	if err != nil {
-		return nil, err
-	}
 	panelcfgConfig, err := jenny.panelcfgConfig()
 	if err != nil {
 		return nil, err
@@ -35,7 +31,6 @@ func (jenny VariantsPlugins) Generate(_ languages.Context) (codejen.Files, error
 	return codejen.Files{
 		dataqueryInterface,
 		dataqueryConfig,
-		panelcfgInterface,
 		panelcfgConfig,
 	}, nil
 }
@@ -60,17 +55,6 @@ func (jenny VariantsPlugins) dataqueryConfig() (codejen.File, error) {
 	}
 
 	return *codejen.NewFile("src/Cog/DataqueryConfig.php", []byte(rendered), jenny), nil
-}
-
-func (jenny VariantsPlugins) panelcfgInterface() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/panelcfg_variant.tmpl", map[string]any{
-		"NamespaceRoot": jenny.config.NamespaceRoot,
-	})
-	if err != nil {
-		return codejen.File{}, err
-	}
-
-	return *codejen.NewFile("src/Cog/Panelcfg.php", []byte(rendered), jenny), nil
 }
 
 func (jenny VariantsPlugins) panelcfgConfig() (codejen.File, error) {

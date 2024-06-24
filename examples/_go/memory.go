@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/common"
-	"github.com/grafana/cog/generated/dashboard"
-	"github.com/grafana/cog/generated/gauge"
-	"github.com/grafana/cog/generated/timeseries"
+	"github.com/grafana/cog/generated/go/common"
+	"github.com/grafana/cog/generated/go/dashboard"
+	"github.com/grafana/cog/generated/go/gauge"
+	"github.com/grafana/cog/generated/go/timeseries"
 )
 
 func memoryUsageTimeseries() *timeseries.PanelBuilder {

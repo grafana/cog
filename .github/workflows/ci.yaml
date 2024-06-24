@@ -78,7 +78,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          tools: phpstan
+          tools: phpstan, psalm
+          extensions: none, curl, ctype, dom, mbstring, opcache, simplexml, tokenizer
+          ini-values: opcache.enable_cli=1
 
       - name: Install mypy
         run: python3 -m pip install mypy
@@ -93,7 +95,7 @@ jobs:
         run: |
           go run cmd/cli/main.go generate \
             --config ./config/foundation_sdk.dev.yaml \
-            --parameters output_dir=./generated/%l,grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
+            --parameters grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
 
       - name: Compile generated Go code
         run: |
@@ -104,6 +106,7 @@ jobs:
 
       - name: Compile generated Typescript code
         run: |
+          rm generated/typescript/tsconfig.json
           for d in generated/typescript/src/*/ ; do
             echo "Building $d"
             ts-node "./$d"
@@ -112,8 +115,14 @@ jobs:
       - name: Lint generated Python code
         run: mypy generated/python/
 
-      - name: Lint generated PHP code
+      - name: Run composer install to generate PHP autoloader
+        run: cd generated/php && composer install
+
+      - name: Lint generated PHP code with phpstan
         run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
+
+      - name: Lint generated PHP code with psalm
+        run: psalm -c .config/ci/php/psalm.xml
 
   examples:
     name: Run examples
