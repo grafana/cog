@@ -47,6 +47,7 @@ func (pass *DataqueryIdentification) processSchema(schema *ast.Schema, commonDat
 
 	if schema.EntryPoint == "" && len(variantObjects) == 1 {
 		schema.EntryPoint = variantObjects[0]
+		schema.EntryPointType = schema.Objects.Get(variantObjects[0]).SelfRef.AsType()
 	}
 
 	return schema

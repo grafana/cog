@@ -69,6 +69,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		files = append(files, jenny.generatePanelCfgVariantConfigFunc(schema))
 	}
 
+	if file := jenny.generateDataqueryVariantConfig(context, schema); file != nil {
+		files = append(files, *file)
+	}
+
 	return files, nil
 }
 
@@ -194,6 +198,52 @@ func (jenny RawTypes) formatStructDef(context languages.Context, def ast.Object)
 	buffer.WriteString("\n}")
 
 	return buffer.String()
+}
+
+func (jenny RawTypes) generateDataqueryVariantConfig(context languages.Context, schema *ast.Schema) *codejen.File {
+	if schema.Metadata.Variant != ast.SchemaVariantDataQuery || schema.EntryPoint == "" {
+		return nil
+	}
+
+	dataqueryConfigRef := jenny.config.fullNamespaceRef("Cog\\DataqueryConfig")
+	var fromArrayCallable string
+
+	_, entryPointFound := schema.LocateObject(schema.EntryPoint)
+
+	switch {
+	case !entryPointFound && schema.EntryPointType.Kind == "": // no entrypoint at all
+		return nil
+	case !entryPointFound && schema.EntryPointType.IsDisjunction(): // the entrypoint is a disjunction that was inlined (its object no longer exists)
+		fromArrayCallable = jenny.unmarshalDisjunctionFunc(context, schema.EntryPointType.AsDisjunction())
+	case entryPointFound: // the entrypoint is a valid reference to an object
+		fromArrayCallable = `[` + jenny.config.fullNamespaceRef(fmt.Sprintf("%s\\%s", formatPackageName(schema.Package), formatObjectName(schema.EntryPoint))) + `::class, 'fromArray']`
+	default: // No valid entrypoint found
+		return nil
+	}
+
+	content := fmt.Sprintf(`<?php
+
+namespace %[4]s;
+
+final class VariantConfig
+{
+    public static function get(): %[1]s
+    {
+        return new %[1]s(
+            identifier: "%[2]s",
+            fromArray: %[3]s,
+        );
+    }
+}`, dataqueryConfigRef, schema.Metadata.Identifier, fromArrayCallable, jenny.config.fullNamespace(formatPackageName(schema.Package)))
+
+	filename := filepath.Join(
+		"src",
+		formatPackageName(schema.Package),
+		"VariantConfig.php",
+	)
+
+	return codejen.NewFile(filename, []byte(content), jenny)
+
 }
 
 func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Object) string {

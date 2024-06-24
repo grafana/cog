@@ -21,6 +21,10 @@ final class Runtime
 {{- range $schema := .PanelSchemas }}
         $this->registerPanelcfgVariant(\{{ $.NamespaceRoot }}\{{ $schema.Package|formatPackageName }}\VariantConfig::get());
 {{- end }}
+
+{{- range $schema := .DataquerySchemas }}
+        $this->registerDataqueryVariant(\{{ $.NamespaceRoot }}\{{ $schema.Package|formatPackageName }}\VariantConfig::get());
+{{- end }}
     }
 
     public static function get(): self

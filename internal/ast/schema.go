@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"cmp"
 	"errors"
 	"fmt"
 
@@ -99,10 +98,11 @@ func (schemas Schemas) DeepCopy() []*Schema {
 }
 
 type Schema struct { //nolint: musttag
-	Package    string
-	Metadata   SchemaMeta `json:",omitempty"`
-	EntryPoint string     `json:",omitempty"`
-	Objects    *orderedmap.Map[string, Object]
+	Package        string
+	Metadata       SchemaMeta `json:",omitempty"`
+	EntryPoint     string     `json:",omitempty"`
+	EntryPointType Type       `json:",omitempty"`
+	Objects        *orderedmap.Map[string, Object]
 }
 
 func NewSchema(pkg string, metadata SchemaMeta) *Schema {
@@ -137,7 +137,10 @@ func (schema *Schema) Merge(other *Schema) error {
 	}
 
 	if schema.EntryPoint != other.EntryPoint && (schema.EntryPoint == "" || other.EntryPoint == "") {
-		schema.EntryPoint = cmp.Or(schema.EntryPoint, other.EntryPoint)
+		if schema.EntryPoint == "" {
+			schema.EntryPoint = other.EntryPoint
+			schema.EntryPointType = other.EntryPointType
+		}
 	}
 
 	var err error
@@ -162,9 +165,10 @@ func (schema *Schema) Merge(other *Schema) error {
 
 func (schema *Schema) DeepCopy() Schema {
 	return Schema{
-		Package:    schema.Package,
-		Metadata:   schema.Metadata,
-		EntryPoint: schema.EntryPoint,
+		Package:        schema.Package,
+		Metadata:       schema.Metadata,
+		EntryPoint:     schema.EntryPoint,
+		EntryPointType: schema.EntryPointType,
 		Objects: schema.Objects.Map(func(_ string, object Object) Object {
 			return object.DeepCopy()
 		}),

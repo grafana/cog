@@ -69,6 +69,7 @@ func (pass *Cloudwatch) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 
 	schema.AddObject(entrypoint)
 	schema.EntryPoint = entrypoint.Name
+	schema.EntryPointType = entrypoint.SelfRef.AsType()
 
 	return schema, nil
 }

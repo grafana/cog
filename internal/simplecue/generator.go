@@ -153,6 +153,7 @@ func (g *generator) walkCueSchemaWithEnvelope(envelopeName string, v cue.Value) 
 	})
 
 	g.schema.EntryPoint = envelopeName
+	g.schema.EntryPointType = g.schema.Objects.Get(envelopeName).SelfRef.AsType()
 
 	return nil
 }
