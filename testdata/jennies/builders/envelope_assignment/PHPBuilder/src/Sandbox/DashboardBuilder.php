@@ -24,10 +24,10 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
 
     public function withVariable(string $name,string $value): static
     {
-        $this->internal->variables[] = \Grafana\Foundation\Sandbox\Variable{
+        $this->internal->variables[] = new \Grafana\Foundation\Sandbox\Variable(
             name: $name,
             value: $value,
-        };
+        );
     
         return $this;
     }
