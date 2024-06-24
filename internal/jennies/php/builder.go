@@ -124,7 +124,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		ExecuteTemplate(&buffer, "builders/builder.tmpl", map[string]any{
 			"NamespaceRoot": jenny.config.NamespaceRoot,
 			"Builder":       builder,
-			"ObjectName":    jenny.typeFormatter.formatRef(builder.For.SelfRef.AsType(), false),
 		})
 	if err != nil {
 		return nil, err
