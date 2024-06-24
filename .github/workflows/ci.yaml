@@ -120,7 +120,7 @@ jobs:
         run: mypy generated/python/
         
       - name: Compile generated Java code
-        run: javac -cp java generated/java/**/*.java
+        run: java -cp java generated/java/**/*.java
 
       - name: Lint generated PHP code
         run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
