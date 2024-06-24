@@ -3,6 +3,7 @@
     "type": "project",
     "autoload": {
         "psr-4": {
+            "App\\": "./src",
             "Grafana\\Foundation\\": "../../generated/src"
         }
     },
