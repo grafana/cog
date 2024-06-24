@@ -18,6 +18,9 @@ func (pass *InferEntrypoint) Process(schemas []*ast.Schema) ([]*ast.Schema, erro
 		}
 
 		schema.EntryPoint = pass.inferEntrypoint(schema)
+		if schema.EntryPoint != "" {
+			schema.EntryPointType = schema.Objects.Get(schema.EntryPoint).SelfRef.AsType()
+		}
 	}
 
 	return schemas, nil
