@@ -2,6 +2,14 @@
   "Package": "grafanatest",
   "Metadata": {},
   "EntryPoint": "AnyOfField",
+  "EntryPointType": {
+    "Kind": "ref",
+    "Nullable": false,
+    "Ref": {
+      "ReferredPkg": "grafanatest",
+      "ReferredType": "AnyOfField"
+    }
+  },
   "Objects": {
     "AnyOfField": {
       "Name": "AnyOfField",

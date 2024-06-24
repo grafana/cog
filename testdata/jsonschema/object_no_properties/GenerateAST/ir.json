@@ -2,6 +2,14 @@
   "Package": "grafanatest",
   "Metadata": {},
   "EntryPoint": "Entrypoint",
+  "EntryPointType": {
+    "Kind": "ref",
+    "Nullable": false,
+    "Ref": {
+      "ReferredPkg": "grafanatest",
+      "ReferredType": "Entrypoint"
+    }
+  },
   "Objects": {
     "Entrypoint": {
       "Name": "Entrypoint",
