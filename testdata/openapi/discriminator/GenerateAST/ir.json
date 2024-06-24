@@ -1,6 +1,10 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
   "Objects": {
     "Discriminator": {
       "Name": "Discriminator",

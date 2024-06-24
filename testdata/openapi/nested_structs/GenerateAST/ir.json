@@ -1,6 +1,10 @@
 {
   "Package": "grafanatest",
   "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
   "Objects": {
     "Nested": {
       "Name": "Nested",
