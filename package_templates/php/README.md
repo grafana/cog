@@ -74,120 +74,149 @@ var_dump($dashboard);
 While the SDK ships with support for all core datasources and their query types,
 it can be extended for private/third-party plugins.
 
-To do so, define a type and a builder for the custom query:
+To do so, define a type for the custom query:
 
-```go
-package main
+```php
+<?php
 
-import (
-    "encoding/json"
+use Grafana\Foundation\Cog;
 
-    "github.com/grafana/grafana-foundation-sdk/go/cog"
-    cogvariants "github.com/grafana/grafana-foundation-sdk/go/cog/variants"
-)
-
-type CustomQuery struct {
+class CustomQuery implements \JsonSerializable, Cog\Dataquery
+{
     // RefId and Hide are expected on all queries
-    RefId        *string `json:"refId,omitempty"`
-    Hide         *bool   `json:"hide,omitempty"`
+    public string $refId;
+    public ?bool $hide;
 
     // Query is specific to the CustomQuery type
-    Query        string  `json:"query,omitempty"`
-}
+    public string $expr;
 
-// Let cog know that CustomQuery is a Dataquery variant
-func (resource CustomQuery) ImplementsDataqueryVariant() {}
+    /**
+     * @param string|null $expr
+     * @param string|null $refId
+     * @param bool|null $hide
+     */
+    public function __construct(?string $expr = null, ?string $refId = null, ?bool $hide = null)
+    {
+        $this->expr = $expr ?: "";
+        $this->refId = $refId ?: "";
+        $this->hide = $hide;
+    }
 
-func CustomQueryVariantConfig() cogvariants.DataqueryConfig {
-    return cogvariants.DataqueryConfig{
-        Identifier: "custom", // datasource plugin ID
-        DataqueryUnmarshaler: func(raw []byte) (cogvariants.Dataquery, error) {
-            dataquery := &CustomQuery{}
+    /**
+     * @param array{expr?: string, refId?: string, hide?: bool} $inputData
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            expr: $data["expr"] ?? null,
+            refId: $data["refId"] ?? null,
+            hide: $data["hide"] ?? null,
+        );
+    }
 
-            if err := json.Unmarshal(raw, dataquery); err != nil {
-                return nil, err
-            }
-
-            return dataquery, nil
-        },
+    public function jsonSerialize(): array
+    {
+        $data = [
+            "expr" => $this->expr,
+            "refId" => $this->refId,
+        ];
+        if (isset($this->hide)) {
+            $data["hide"] = $this->hide;
+        }
+        return $data;
     }
 }
+```
 
-// Compile-time check to ensure that CustomQueryBuilder indeed is
-// a builder for cogvariants.Dataquery
-var _ cog.Builder[cogvariants.Dataquery] = (*CustomQueryBuilder)(nil)
+Now, let's define a builder for that type:
 
-type CustomQueryBuilder struct {
-    internal *CustomQuery
-}
+```php
+<?php
 
-func NewCustomQueryBuilder(query string) *CustomQueryBuilder {
-    return &CustomQueryBuilder{
-        internal: &CustomQuery{Query: query},
+use Grafana\Foundation\Cog;
+
+/**
+ * @implements Cog\Builder<CustomQuery>
+ */
+class CustomQueryBuilder implements Cog\Builder
+{
+    protected CustomQuery $internal;
+
+    public function __construct(string $query)
+    {
+    	$this->internal = new CustomQuery(expr: $query);
     }
-}
 
-func (builder *CustomQueryBuilder) Build() (cogvariants.Dataquery, error) {
-    return *builder.internal, nil
-}
+    /**
+     * @return CustomQuery
+     */
+    public function build()
+    {
+        return $this->internal;
+    }
 
-func (builder *CustomQueryBuilder) RefId(refId string) *CustomQueryBuilder {
-    builder.internal.RefId = &refId
-    return builder
-}
+    /**
+     * The actual expression/query that will be evaluated by Prometheus
+     */
+    public function expr(string $expr): static
+    {
+        $this->internal->expr = $expr;
+        return $this;
+    }
 
-func (builder *CustomQueryBuilder) Hide(hide bool) *CustomQueryBuilder {
-    builder.internal.Hide = &hide
-    return builder
+    /**
+     * A unique identifier for the query within the list of targets.
+     * In server side expressions, the refId is used as a variable name to identify results.
+     * By default, the UI will assign A->Z; however setting meaningful names may be useful.
+     */
+    public function refId(string $refId): static
+    {
+        $this->internal->refId = $refId;
+        return $this;
+    }
+
+    /**
+     * If hide is set to true, Grafana will filter out the response(s) associated with this query before returning it to the panel.
+     */
+    public function hide(bool $hide): static
+    {
+        $this->internal->hide = $hide;
+        return $this;
+    }
 }
 ```
 
 Register the type with cog, and use it as usual to build a dashboard:
 
-```go
-package main
+```php
+<?php
 
-import (
-    "encoding/json"
-    "fmt"
+use Grafana\Foundation\Cog;
+use Grafana\Foundation\Dashboard\DashboardBuilder;
+use Grafana\Foundation\Dashboard\RowBuilder;
+use Grafana\Foundation\Timeseries;
 
-    "github.com/grafana/grafana-foundation-sdk/go/cog"
-    "github.com/grafana/grafana-foundation-sdk/go/cog/plugins"
-    "github.com/grafana/grafana-foundation-sdk/go/dashboard"
-    "github.com/grafana/grafana-foundation-sdk/go/timeseries"
-)
+require_once __DIR__.'/vendor/autoload.php';
 
-func main() {
-    // Required to correctly unmarshal panels and dataqueries
-    plugins.RegisterDefaultPlugins()
+// This lets cog know about the newly created query type and how to unmarshal it.
+Cog\Runtime::get()->registerDataqueryVariant(new Cog\DataqueryConfig(
+    identifier: 'custom', // datasource plugin ID
+    fromArray: [CustomQuery::class, 'fromArray'],
+));
 
-    // This lets cog know about the newly created query type and how to unmarshal it.
-    cog.NewRuntime().RegisterDataqueryVariant(CustomQueryVariantConfig())
+$builder = (new DashboardBuilder(title: 'Custom query type'))
+    ->uid('test-custom-query-type')
+    ->refresh('1m')
+    ->time('now-30m', 'now')
+    ->withRow(new RowBuilder('Overview'))
+    ->withPanel(
+        (new Timeseries\PanelBuilder())
+            ->title('Sample panel')
+            ->withTarget(new CustomQueryBuilder('query here'))
+    )
+;
 
-    sampleDashboard, err := dashboard.NewDashboardBuilder("Custom query type").
-        Uid("test-custom-query-type").
-        Refresh("1m").
-        Time("now-30m", "now").
-        WithRow(dashboard.NewRowBuilder("Overview")).
-        WithPanel(
-            timeseries.NewPanelBuilder().
-                Title("Sample panel").
-                WithTarget(
-                    NewCustomQueryBuilder("query here"),
-                ),
-        ).
-        Build()
-    if err != nil {
-        panic(err)
-    }
-
-    dashboardJson, err := json.MarshalIndent(sampleDashboard, "", "  ")
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println(string(dashboardJson))
-}
+echo(json_encode($builder->build(), JSON_PRETTY_PRINT).PHP_EOL);
 ```
 
 ### Defining a custom panel type
@@ -335,24 +364,12 @@ func main() {
 
 ## Maturity
 
-> [!WARNING]
-> The code in this repository should be considered experimental. Documentation is only
-available alongside the code. It comes with no support, but we are keen to receive
-feedback and suggestions on how to improve it, though we cannot commit
-to resolution of any particular issue.
+The code in this repository should be considered as "public preview" and is actively developed and maintained by Engineering teams at Grafana.
 
-Grafana Labs defines experimental features as follows:
+While this repository is stable enough to be used in production environments, occasional breaking changes can be expected.
 
-> Projects and features in the Experimental stage are supported only by the Engineering
-teams; on-call support is not available. Documentation is either limited or not provided
-outside of code comments. No SLA is provided.
->
-> Experimental projects or features are primarily intended for open source engineers who
-want to participate in ensuring systems stability, and to gain consensus and approval
-for open source governance projects.
->
-> Projects and features in the Experimental phase are not meant to be used in production
-environments, and the risks are unknown/high.
+> [!NOTE]
+> Bugs and issues are handled solely by Engineering teams. On-call support or SLAs are not available.
 
 ## License
 
