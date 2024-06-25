@@ -91,5 +91,5 @@ output:
     - typescript: {}
     - java:
         package_path: '%java_package_path%'
-        gen_pom: false
-        maven_version: "1.0-SNAPSHOT"
+        gen_pom: true
+        maven_version: "0.0"
