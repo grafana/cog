@@ -87,9 +87,7 @@ func (tf *typeFormatter) formatMap(def ast.MapType) string {
 	mapType := "unknown"
 	switch def.ValueType.Kind {
 	case ast.KindRef:
-		ref := def.ValueType.AsRef()
-		tf.packageMapper(ref.ReferredPkg, ref.ReferredType)
-		mapType = ref.ReferredType
+		mapType = tf.formatReference(def.ValueType.AsRef())
 	case ast.KindScalar:
 		mapType = formatScalarType(def.ValueType.AsScalar())
 	case ast.KindMap:
