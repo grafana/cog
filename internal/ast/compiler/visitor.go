@@ -68,6 +68,11 @@ func (visitor *Visitor) VisitSchema(schema *ast.Schema) (*ast.Schema, error) {
 	var err error
 	var obj ast.Object
 
+	newSchema.EntryPointType, err = visitor.VisitType(schema, schema.EntryPointType)
+	if err != nil {
+		return nil, fmt.Errorf("could not process entrypoint type")
+	}
+
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		if err != nil {
 			return

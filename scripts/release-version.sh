@@ -23,7 +23,7 @@ COG_VERSION="v0.0.x" # hardcoded for now
 COG_CMD=${COG_CMD:-"go run ./cmd/cli"} # Command used to run `cog`
 GH_CLI_CMD=${GH_CLI_CMD:-"gh"} # Command used to run `gh` (GitHub cli)
 
-KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH:-'../../kind-registry'} # Path to the kind-registry, relative to the ./config/foundation_sdk.yaml file
+KIND_REGISTRY_PATH=${KIND_REGISTRY_PATH:-'../kind-registry'} # Path to the kind-registry
 FOUNDATION_SDK_PATH=${FOUNDATION_SDK_PATH:-'../grafana-foundation-sdk'} # Path to the grafana-foundation-sdk
 
 KIND_REGISTRY_REPO=${KIND_REGISTRY_REPO:-'https://github.com/grafana/kind-registry.git'}
@@ -125,6 +125,10 @@ if [ ! -d "${FOUNDATION_SDK_PATH}" ]; then
   info "Cloning grafana-foundation-sdk into ${FOUNDATION_SDK_PATH}"
   clone_foundation_sdk "${FOUNDATION_SDK_PATH}"
 fi
+
+info "Pulling kind-registry@main"
+git_run "${KIND_REGISTRY_PATH}" checkout main
+git_run "${KIND_REGISTRY_PATH}" pull --ff-only origin main
 
 info "Running cog"
 grafana_version_or_main=${GRAFANA_VERSION}

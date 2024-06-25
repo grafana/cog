@@ -98,10 +98,11 @@ func (schemas Schemas) DeepCopy() []*Schema {
 }
 
 type Schema struct { //nolint: musttag
-	Package    string
-	Metadata   SchemaMeta `json:",omitempty"`
-	EntryPoint string     `json:",omitempty"`
-	Objects    *orderedmap.Map[string, Object]
+	Package        string
+	Metadata       SchemaMeta `json:",omitempty"`
+	EntryPoint     string     `json:",omitempty"`
+	EntryPointType Type       `json:",omitempty"`
+	Objects        *orderedmap.Map[string, Object]
 }
 
 func NewSchema(pkg string, metadata SchemaMeta) *Schema {
@@ -135,6 +136,13 @@ func (schema *Schema) Merge(other *Schema) error {
 		return fmt.Errorf("conflicting metadata: %w", ErrCannotMergeSchemas)
 	}
 
+	if schema.EntryPoint != other.EntryPoint && (schema.EntryPoint == "" || other.EntryPoint == "") {
+		if schema.EntryPoint == "" {
+			schema.EntryPoint = other.EntryPoint
+			schema.EntryPointType = other.EntryPointType
+		}
+	}
+
 	var err error
 	other.Objects.Iterate(func(objectName string, remoteObject Object) {
 		if !schema.Objects.Has(objectName) {
@@ -157,8 +165,10 @@ func (schema *Schema) Merge(other *Schema) error {
 
 func (schema *Schema) DeepCopy() Schema {
 	return Schema{
-		Package:  schema.Package,
-		Metadata: schema.Metadata,
+		Package:        schema.Package,
+		Metadata:       schema.Metadata,
+		EntryPoint:     schema.EntryPoint,
+		EntryPointType: schema.EntryPointType,
 		Objects: schema.Objects.Map(func(_ string, object Object) Object {
 			return object.DeepCopy()
 		}),

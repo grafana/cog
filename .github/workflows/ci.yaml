@@ -79,7 +79,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          tools: phpstan
+          tools: phpstan, psalm
+          extensions: none, curl, ctype, dom, mbstring, opcache, simplexml, tokenizer
+          ini-values: opcache.enable_cli=1
 
       - name: Install mypy
         run: python3 -m pip install mypy
@@ -124,8 +126,11 @@ jobs:
           find generated/java -name '*.java' -d > sources.txt
           javac @sources.txt
 
-      - name: Lint generated PHP code
+      - name: Lint generated PHP code with phpstan
         run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
+
+      - name: Lint generated PHP code with psalm
+        run: psalm -c .config/ci/php/psalm.xml generated/php
 
   examples:
     name: Run examples

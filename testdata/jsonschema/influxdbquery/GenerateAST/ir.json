@@ -2,6 +2,14 @@
   "Package": "grafanatest",
   "Metadata": {},
   "EntryPoint": "InfluxQuery",
+  "EntryPointType": {
+    "Kind": "ref",
+    "Nullable": false,
+    "Ref": {
+      "ReferredPkg": "grafanatest",
+      "ReferredType": "InfluxQuery"
+    }
+  },
   "Objects": {
     "AdHocVariableFilter": {
       "Name": "AdHocVariableFilter",
