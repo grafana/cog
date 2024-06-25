@@ -103,8 +103,7 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 		return g.walkEnum(schema)
 	}
 
-	schemaType := getSchemaType(schema)
-	switch schemaType {
+	switch schema.Type {
 	case openapi3.TypeString:
 		return g.walkString(schema)
 	case openapi3.TypeBoolean:
@@ -149,12 +148,11 @@ func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
 		if err != nil {
 			return ast.Type{}, err
 		}
-		fields = append(fields, ast.StructField{
-			Name:     name,
-			Comments: schemaComments(schema),
-			Type:     def,
-			Required: tools.ItemInList(name, schema.Required),
-		})
+
+		field := ast.NewStructField(name, def, ast.Comments(schemaComments(schema)))
+		field.Required = tools.ItemInList(name, schema.Required)
+
+		fields = append(fields, field)
 	}
 
 	sort.Slice(fields, func(i, j int) bool {
@@ -265,12 +263,11 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	// Nullable enums? https://swagger.io/docs/specification/data-models/enums/
 	enums := make([]ast.EnumValue, 0, len(schema.Enum))
 	format := "%#v"
-	schemaType := getSchemaType(schema)
-	if schemaType == openapi3.TypeString {
+	if schema.Type == openapi3.TypeString {
 		format = "%s"
 	}
 
-	enumType, err := getEnumType(schemaType)
+	enumType, err := getEnumType(schema.Type)
 	if err != nil {
 		return ast.Type{}, err
 	}

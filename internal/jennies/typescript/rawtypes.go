@@ -7,7 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -25,7 +25,7 @@ func (jenny RawTypes) JennyName() string {
 	return "TypescriptRawTypes"
 }
 
-func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
+func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	jenny.schemas = context.Schemas
 	files := make(codejen.Files, 0, len(context.Schemas))
 
@@ -47,7 +47,7 @@ func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(context common.Context, schema *ast.Schema) ([]byte, error) {
+func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
 	var buffer strings.Builder
 	var err error
 

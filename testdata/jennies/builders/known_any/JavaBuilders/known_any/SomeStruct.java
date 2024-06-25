@@ -4,13 +4,13 @@ package known_any;
 public class SomeStruct {
     public Object config;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder setTitle(String title) {
+    public Builder Title(String title) {
 		if (this.internal.config == null) {
 			this.internal.config = new known_any.Config();
 		}

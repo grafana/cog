@@ -1,5 +1,8 @@
 package disjunctions;
 
 
-public class SeveralRefs extends SomeStructOrSomeOtherStructOrYetAnotherStruct {
+public class SeveralRefs {
+    public SomeStruct someStruct;
+    public SomeOtherStruct someOtherStruct;
+    public YetAnotherStruct yetAnotherStruct;
 }

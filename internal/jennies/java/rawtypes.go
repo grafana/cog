@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -24,7 +25,7 @@ func (jenny RawTypes) JennyName() string {
 	return "JavaRawTypes"
 }
 
-func (jenny RawTypes) Generate(context common.Context) (codejen.Files, error) {
+func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0)
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
@@ -51,6 +52,9 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"emptyValueForType":        jenny.typeFormatter.defaultValueFor,
 		"formatCastValue":          jenny.typeFormatter.formatCastValue,
 		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,
+		"formatPath":               jenny.typeFormatter.formatFieldPath,
+		"shouldCastNilCheck":       jenny.typeFormatter.shouldCastNilCheck,
+		"formatValue":              jenny.typeFormatter.formatValue,
 	})
 }
 
@@ -207,7 +211,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		})
 	}
 
-	builder, hasBuilder := jenny.builders.genBuilder(pkg, object.Name)
+	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
 	jenny.addJSONImportsIfNeeded(hasBuilder)
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
@@ -217,7 +221,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		Fields:               fields,
 		Comments:             object.Comments,
 		Variant:              jenny.getVariant(object.Type),
-		Builder:              builder,
+		Builders:             builders,
 		HasBuilder:           hasBuilder,
 		ShouldAddMarshalling: jenny.config.AddExternalDependencies,
 	}); err != nil {

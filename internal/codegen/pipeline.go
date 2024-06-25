@@ -9,12 +9,13 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/jennies/openapi"
+	"github.com/grafana/cog/internal/jennies/php"
 	"github.com/grafana/cog/internal/jennies/python"
+	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/veneers/rewrite"
@@ -121,16 +122,24 @@ func (pipeline *Pipeline) interpolate(input string) string {
 	return interpolated
 }
 
-func (pipeline *Pipeline) jenniesConfig() common.Config {
-	return common.Config{
+func (pipeline *Pipeline) jenniesConfig() languages.Config {
+	return languages.Config{
 		Debug:    pipeline.Debug,
 		Types:    pipeline.Output.Types,
 		Builders: pipeline.Output.Builders,
 	}
 }
 
-func (pipeline *Pipeline) compilerPasses() (compiler.Passes, error) {
-	return cogyaml.NewCompilerLoader().PassesFrom(pipeline.Transforms.CompilerPassesFiles)
+func (pipeline *Pipeline) commonPasses() (compiler.Passes, error) {
+	if pipeline.Transforms.CommonPasses != nil {
+		return pipeline.Transforms.CommonPasses, nil
+	}
+
+	return cogyaml.NewCompilerLoader().PassesFrom(pipeline.Transforms.CommonPassesFiles)
+}
+
+func (pipeline *Pipeline) finalPasses() compiler.Passes {
+	return pipeline.Transforms.FinalPasses
 }
 
 func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
@@ -200,8 +209,12 @@ func (pipeline *Pipeline) outputLanguages() (languages.Languages, error) {
 			outputs[jsonschema.LanguageRef] = jsonschema.New(*output.JSONSchema)
 		case output.OpenAPI != nil:
 			outputs[openapi.LanguageRef] = openapi.New(*output.OpenAPI)
+		case output.PHP != nil:
+			outputs[php.LanguageRef] = php.New(*output.PHP)
 		case output.Python != nil:
 			outputs[python.LanguageRef] = python.New(*output.Python)
+		case output.Terraform != nil:
+			outputs[terraform.LanguageRef] = terraform.New(*output.Terraform)
 		case output.Typescript != nil:
 			outputs[typescript.LanguageRef] = typescript.New(*output.Typescript)
 		default:

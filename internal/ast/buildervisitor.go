@@ -90,6 +90,10 @@ func (visitor *BuilderVisitor) VisitConstructor(schemas Schemas, builder Builder
 		return visitor.OnConstructor(visitor, schemas, builder, constructor)
 	}
 
+	return visitor.TraverseConstructor(schemas, builder, constructor)
+}
+
+func (visitor *BuilderVisitor) TraverseConstructor(schemas Schemas, builder Builder, constructor Constructor) (Constructor, error) {
 	var arg Argument
 	var assign Assignment
 	var err error

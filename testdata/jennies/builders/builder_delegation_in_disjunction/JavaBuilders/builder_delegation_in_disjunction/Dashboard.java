@@ -9,23 +9,23 @@ public class Dashboard {
     public List<unknown> linksOrStrings;
     public unknown disjunctionOfBuilders;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<Dashboard> {
         private Dashboard internal;
         
         public Builder() {
             this.internal = new Dashboard();
         }
-    public Builder setSingleLinkOrString(cog.Builder<unknown> singleLinkOrString) {
+    public Builder SingleLinkOrString(cog.Builder<unknown> singleLinkOrString) {
     this.internal.singleLinkOrString = singleLinkOrString.build();
         return this;
     }
     
-    public Builder setLinksOrStrings(cog.Builder<List<unknown>> linksOrStrings) {
+    public Builder LinksOrStrings(cog.Builder<List<unknown>> linksOrStrings) {
     this.internal.linksOrStrings = linksOrStrings.build();
         return this;
     }
     
-    public Builder setDisjunctionOfBuilders(cog.Builder<unknown> disjunctionOfBuilders) {
+    public Builder DisjunctionOfBuilders(cog.Builder<unknown> disjunctionOfBuilders) {
     this.internal.disjunctionOfBuilders = disjunctionOfBuilders.build();
         return this;
     }

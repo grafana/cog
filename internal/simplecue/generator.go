@@ -42,6 +42,8 @@ func ParseImports(cueImports []string) ([]LibraryInclude, error) {
 	return imports, nil
 }
 
+type NameFunc func(value cue.Value, path cue.Path) string
+
 type Config struct {
 	// Package name used to generate code into.
 	Package string
@@ -54,11 +56,19 @@ type Config struct {
 	SchemaMetadata ast.SchemaMeta
 
 	Libraries []LibraryInclude
+
+	// NameFunc allows users to specify an alternative naming strategy for
+	// objects and references. It is called with the value passed to the top
+	// level method or function and the path to the entity being parsed.
+	NameFunc NameFunc
 }
 
 type generator struct {
 	schema      *ast.Schema
 	refResolver *referenceResolver
+	rootVal     cue.Value
+	rootPath    cue.Path
+	namingFunc  NameFunc
 }
 
 func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
@@ -67,6 +77,16 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 		refResolver: newReferenceResolver(val, referenceResolverConfig{
 			Libraries: c.Libraries,
 		}),
+		rootVal:    val,
+		rootPath:   val.Path(),
+		namingFunc: c.NameFunc,
+	}
+
+	if g.namingFunc == nil {
+		g.namingFunc = func(value cue.Value, path cue.Path) string {
+			selectors := path.Selectors()
+			return selectorLabel(selectors[len(selectors)-1])
+		}
 	}
 
 	if c.ForceNamedEnvelope != "" {
@@ -90,10 +110,8 @@ func (g *generator) walkCueSchemaWithEnvelope(envelopeName string, v cue.Value) 
 
 	var rootObjectFields []ast.StructField
 	for i.Next() {
-		sel := i.Selector()
-		name := selectorLabel(sel)
-
 		if i.Selector().IsDefinition() {
+			name := g.namingFunc(g.rootVal, i.Value().Path())
 			n, err := g.declareObject(name, i.Value())
 			if err != nil {
 				return err
@@ -108,6 +126,7 @@ func (g *generator) walkCueSchemaWithEnvelope(envelopeName string, v cue.Value) 
 			return err
 		}
 
+		name := selectorLabel(i.Selector())
 		structField := ast.NewStructField(name, nodeType, ast.Comments(commentsFromCueValue(i.Value())))
 		structField.Required = !i.IsOptional()
 
@@ -134,6 +153,7 @@ func (g *generator) walkCueSchemaWithEnvelope(envelopeName string, v cue.Value) 
 	})
 
 	g.schema.EntryPoint = envelopeName
+	g.schema.EntryPointType = g.schema.Objects.Get(envelopeName).SelfRef.AsType()
 
 	return nil
 }
@@ -145,9 +165,9 @@ func (g *generator) walkCueSchema(v cue.Value) error {
 	}
 
 	for i.Next() {
-		sel := i.Selector()
+		name := g.namingFunc(g.rootVal, i.Value().Path())
 
-		n, err := g.declareObject(selectorLabel(sel), i.Value())
+		n, err := g.declareObject(name, i.Value())
 		if err != nil {
 			return err
 		}
@@ -284,12 +304,10 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 			return nil, err
 		}
 
-		fields = append(fields, ast.StructField{
-			Name:     fieldLabel,
-			Comments: commentsFromCueValue(i.Value()),
-			Required: !i.IsOptional(),
-			Type:     node,
-		})
+		field := ast.NewStructField(fieldLabel, node, ast.Comments(commentsFromCueValue(i.Value())))
+		field.Required = !i.IsOptional()
+
+		fields = append(fields, field)
 	}
 
 	return fields, nil
@@ -409,10 +427,38 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 }
 
 func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, error) {
-	_, path := v.ReferencePath()
+	referenceRootValue, path := v.ReferencePath()
+
+	// The reference might point to a value defined "outside" of the original root cue value, but still in the same
+	// schema/cue file.
+	// Ex:
+	// ```cue
+	// #Origin: { creator: string }
+	// spec: { // ← in this hypothetical scenario, the generator receives a cue value pointing here
+	//   title: string
+	//   origin: #Origin // `#Origin` refers to a value outside our original root
+	// }
+	// ```
+	if areCuePathsFromSameRoot(g.rootPath, path) && !cuePathIsChildOf(g.rootPath, path) {
+		refType := g.namingFunc(g.rootVal, path)
+		if !g.schema.Objects.Has(refType) {
+			obj, err := g.declareObject(refType, referenceRootValue.LookupPath(path))
+			if err != nil {
+				return ast.Type{}, err
+			}
+
+			g.schema.AddObject(obj)
+		}
+
+		defValue, err := g.extractDefault(defV)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewRef(g.schema.Package, refType, ast.Default(defValue)), nil
+	}
 
 	if path.String() != "" {
-		selectors := path.Selectors()
 		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
 		if err != nil {
 			return ast.Type{}, errorWithCueRef(v, err.Error())
@@ -423,7 +469,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			return ast.Type{}, err
 		}
 
-		refType := selectorLabel(selectors[len(selectors)-1])
+		refType := g.namingFunc(g.rootVal, path)
 
 		if refPkg == "time" && refType == "Time" {
 			return ast.String(ast.Default(defValue), ast.Hints(ast.JenniesHints{

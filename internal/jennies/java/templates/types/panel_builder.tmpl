@@ -7,7 +7,7 @@ package {{ .Package }};
 {{- $panelBuilder }}
 
 {{- define "panelBuilder" }}
-public class PanelBuilder {
+public class PanelBuilder implements {{ if not (eq .ImportAlias "") }}{{ .ImportAlias }}.{{ end }}cog.Builder<Panel> {
     private Panel internal;
 
     public PanelBuilder({{- template "args" .Constructor.Args }}) {
@@ -15,10 +15,17 @@ public class PanelBuilder {
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
+        
+        {{- range .Defaults }}
+        {{- range .Initializers }}
+        {{ . }}
+        {{- end }}
+        this.{{ .OptionName }}({{ .Args|join ", " }});
+        {{- end }}
     }
     
     {{- range .Options }}
-    public PanelBuilder set{{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
+    public PanelBuilder {{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" "PanelBuilder" "OptionName" "Panel") }}
         {{- end }}

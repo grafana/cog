@@ -65,7 +65,11 @@ func (pass *Cloudwatch) processSchema(schema *ast.Schema) (*ast.Schema, error) {
 		return object
 	})
 
-	schema.AddObject(pass.defineQueryDisjunction(schema))
+	entrypoint := pass.defineQueryDisjunction(schema)
+
+	schema.AddObject(entrypoint)
+	schema.EntryPoint = entrypoint.Name
+	schema.EntryPointType = entrypoint.SelfRef.AsType()
 
 	return schema, nil
 }

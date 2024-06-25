@@ -5,7 +5,9 @@ import (
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/jennies/openapi"
+	"github.com/grafana/cog/internal/jennies/php"
 	"github.com/grafana/cog/internal/jennies/python"
+	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 )
 
@@ -77,7 +79,9 @@ type OutputLanguage struct {
 	Java       *java.Config       `yaml:"java"`
 	JSONSchema *jsonschema.Config `yaml:"jsonschema"`
 	OpenAPI    *openapi.Config    `yaml:"openapi"`
+	PHP        *php.Config        `yaml:"php"`
 	Python     *python.Config     `yaml:"python"`
+	Terraform  *terraform.Config  `yaml:"terraform"`
 	Typescript *typescript.Config `yaml:"typescript"`
 }
 
@@ -85,10 +89,16 @@ func (outputLanguage *OutputLanguage) interpolateParameters(interpolator Paramet
 	if outputLanguage.Go != nil {
 		outputLanguage.Go.InterpolateParameters(interpolator)
 	}
+	if outputLanguage.PHP != nil {
+		outputLanguage.PHP.InterpolateParameters(interpolator)
+	}
 	if outputLanguage.Python != nil {
 		outputLanguage.Python.InterpolateParameters(interpolator)
 	}
 	if outputLanguage.Java != nil {
 		outputLanguage.Java.InterpolateParameters(interpolator)
+	}
+	if outputLanguage.Terraform != nil {
+		outputLanguage.Terraform.InterpolateParameters(interpolator)
 	}
 }

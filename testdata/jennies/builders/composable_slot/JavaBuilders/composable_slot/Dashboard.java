@@ -6,4 +6,24 @@ import java.util.List;
 public class Dashboard {
     public Dataquery target;
     public List<Dataquery> targets;
+    
+    public static class Builder implements cog.Builder<Dashboard> {
+        private Dashboard internal;
+        
+        public Builder() {
+            this.internal = new Dashboard();
+        }
+    public Builder Target(cog.Builder<Dataquery> target) {
+    this.internal.target = target.build();
+        return this;
+    }
+    
+    public Builder Targets(cog.Builder<List<Dataquery>> targets) {
+    this.internal.targets = targets.build();
+        return this;
+    }
+    public Dashboard build() {
+            return this.internal;
+        }
+    }
 }

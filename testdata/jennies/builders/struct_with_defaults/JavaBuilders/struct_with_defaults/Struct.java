@@ -8,37 +8,42 @@ public class Struct {
     public Object complexField;
     public Object partialComplexField;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<Struct> {
         private Struct internal;
         
         public Builder() {
             this.internal = new Struct();
-        this.setAllFields(new NestedStruct.Builder().setStringVal("hello").setIntVal(3).build());
-        this.setPartialFields(new NestedStruct.Builder().setIntVal(4).build());
-        this.setComplexField(new Object());
-        this.setPartialComplexField(new Object());
+        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
+        nestedStructResource.StringVal("hello");
+        nestedStructResource.IntVal(3L);
+        this.AllFields(nestedStructResource);
+        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
+        nestedStructResource.IntVal(4L);
+        this.PartialFields(nestedStructResource);
+        this.ComplexField(new Object());
+        this.PartialComplexField(new Object());
         }
-    public Builder setAllFields(cog.Builder<NestedStruct> allFields) {
+    public Builder AllFields(cog.Builder<NestedStruct> allFields) {
     this.internal.allFields = allFields.build();
         return this;
     }
     
-    public Builder setPartialFields(cog.Builder<NestedStruct> partialFields) {
+    public Builder PartialFields(cog.Builder<NestedStruct> partialFields) {
     this.internal.partialFields = partialFields.build();
         return this;
     }
     
-    public Builder setEmptyFields(cog.Builder<NestedStruct> emptyFields) {
+    public Builder EmptyFields(cog.Builder<NestedStruct> emptyFields) {
     this.internal.emptyFields = emptyFields.build();
         return this;
     }
     
-    public Builder setComplexField(Object complexField) {
+    public Builder ComplexField(Object complexField) {
     this.internal.complexField = complexField;
         return this;
     }
     
-    public Builder setPartialComplexField(Object partialComplexField) {
+    public Builder PartialComplexField(Object partialComplexField) {
     this.internal.partialComplexField = partialComplexField;
         return this;
     }

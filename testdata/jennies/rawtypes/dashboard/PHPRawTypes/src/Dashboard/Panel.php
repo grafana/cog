@@ -1,0 +1,132 @@
+<?php
+
+namespace Grafana\Foundation\Dashboard;
+
+class Panel implements \JsonSerializable
+{
+    public string $title;
+
+    public string $type;
+
+    public ?\Grafana\Foundation\Dashboard\DataSourceRef $datasource;
+
+    /**
+     * @var mixed|null
+     */
+    public $options;
+
+    /**
+     * @var array<\Grafana\Foundation\Cog\Dataquery>|null
+     */
+    public ?array $targets;
+
+    public ?\Grafana\Foundation\Dashboard\FieldConfigSource $fieldConfig;
+
+    /**
+     * @param string|null $title
+     * @param string|null $type
+     * @param \Grafana\Foundation\Dashboard\DataSourceRef|null $datasource
+     * @param mixed|null $options
+     * @param array<\Grafana\Foundation\Cog\Dataquery>|null $targets
+     * @param \Grafana\Foundation\Dashboard\FieldConfigSource|null $fieldConfig
+     */
+    public function __construct(?string $title = null, ?string $type = null, ?\Grafana\Foundation\Dashboard\DataSourceRef $datasource = null,  $options = null, ?array $targets = null, ?\Grafana\Foundation\Dashboard\FieldConfigSource $fieldConfig = null)
+    {
+        $this->title = $title ?: "";
+        $this->type = $type ?: "";
+        $this->datasource = $datasource;
+        $this->options = $options;
+        $this->targets = $targets;
+        $this->fieldConfig = $fieldConfig;
+    }
+
+    /**
+     * @param array<string, mixed> $inputData
+     */
+    public static function fromArray(array $inputData): self
+    {
+        /** @var array{title?: string, type?: string, datasource?: mixed, options?: mixed, targets?: array<mixed>, fieldConfig?: mixed} $inputData */
+        $data = $inputData;
+        return new self(
+            title: $data["title"] ?? null,
+            type: $data["type"] ?? null,
+            datasource: isset($data["datasource"]) ? (function($input) {
+    	/** @var array{type?: string, uid?: string} */
+    $val = $input;
+    	return \Grafana\Foundation\Dashboard\DataSourceRef::fromArray($val);
+    })($data["datasource"]) : null,
+            options: isset($data["options"]) ? (function($panel) {
+        /** @var array<string, mixed> $options */
+        $options = $panel["options"];
+    
+        if (!\Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantExists($panel["type"] ?? "")) {
+            return $options;
+        }
+    
+        $config = \Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantConfig($panel["type"] ?? "");
+        if ($config->optionsFromArray === null) {
+            return $options;
+        }
+    
+    	return ($config->optionsFromArray)($options);
+    })($data) : null,
+            targets: isset($data["targets"]) ? (function ($in) {
+    	/** @var array{datasource?: array{type?: mixed}} $in */
+        $hint = (isset($in["datasource"], $in["datasource"]["type"]) && is_string($in["datasource"]["type"])) ? $in["datasource"]["type"] : "";
+        /** @var array<array<string, mixed>> $in */
+        return \Grafana\Foundation\Cog\Runtime::get()->dataqueriesFromArray($in, $hint);
+    })($data["targets"]): null,
+            fieldConfig: isset($data["fieldConfig"]) ? (function($panel) {
+        /** @var array{defaults?: mixed} */
+        $fieldConfigData = $panel["fieldConfig"];
+        $fieldConfig = FieldConfigSource::fromArray($fieldConfigData);
+    
+        if (!\Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantExists($panel["type"] ?? "")) {
+            return $fieldConfig;
+        }
+    
+        $config = \Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantConfig($panel["type"] ?? "");
+        if ($config->fieldConfigFromArray === null) {
+            return $fieldConfig;
+        }
+    
+        if (!isset($fieldConfigData["defaults"])) {
+    		return $fieldConfig;
+        }
+        /** @var array{custom?: array<string, mixed>}*/
+        $defaults = $fieldConfigData["defaults"];
+        if (!isset($defaults["custom"])) {
+    		return $fieldConfig;
+        }
+    
+    	$fieldConfig->defaults->custom = ($config->fieldConfigFromArray)($defaults["custom"]);
+    
+        return $fieldConfig;
+    })($data) : null,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $data = [
+            "title" => $this->title,
+            "type" => $this->type,
+        ];
+        if (isset($this->datasource)) {
+            $data["datasource"] = $this->datasource;
+        }
+        if (isset($this->options)) {
+            $data["options"] = $this->options;
+        }
+        if (isset($this->targets)) {
+            $data["targets"] = $this->targets;
+        }
+        if (isset($this->fieldConfig)) {
+            $data["fieldConfig"] = $this->fieldConfig;
+        }
+        return $data;
+    }
+}

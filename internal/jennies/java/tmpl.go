@@ -29,14 +29,23 @@ func init() {
 
 func functions() template.FuncMap {
 	return template.FuncMap{
-		"escapeVar":    escapeVarName,
-		"formatScalar": formatScalar,
-		"formatPath":   formatFieldPath,
+		"escapeVar":          escapeVarName,
+		"formatScalar":       formatScalar,
+		"lastPathIdentifier": lastPathIdentifier,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
+		"formatValue": func(_ ast.Type) string {
+			panic("formatValue() needs to be overridden by a jenny")
+		},
 		"formatCastValue": func(_ ast.Type) string {
 			panic("formatCastValue() needs to be overridden by a jenny")
+		},
+		"shouldCastNilCheck": func(_ ast.Type) string {
+			panic("shouldCastNilCheck() needs to be overridden by a jenny")
+		},
+		"formatPath": func(_ ast.Type) string {
+			panic("formatPath() needs to be overridden by a jenny")
 		},
 		"formatAssignmentPath": func(_ ast.Type) string {
 			panic("formatAssignmentPath() needs to be overridden by a jenny")
@@ -80,7 +89,7 @@ type ClassTemplate struct {
 	Comments []string
 
 	Fields     []Field
-	Builder    cogtemplate.Builder
+	Builders   []Builder
 	HasBuilder bool
 
 	Variant              string
@@ -103,4 +112,24 @@ type Constant struct {
 	Name  string
 	Type  string
 	Value any
+}
+
+type Builder struct {
+	Package              string
+	BuilderSignatureType string
+	BuilderName          string
+	ObjectName           string
+	Imports              fmt.Stringer
+	ImportAlias          string // alias to the pkg in which the object being built lives.
+	Comments             []string
+	Constructor          ast.Constructor
+	Properties           []ast.StructField
+	Options              []ast.Option
+	Defaults             []OptionCall
+}
+
+type OptionCall struct {
+	Initializers []string
+	OptionName   string
+	Args         []string
 }

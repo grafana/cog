@@ -5,17 +5,17 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type typeFormatter struct {
 	config        Config
 	packageMapper func(pkg string, class string) string
-	context       common.Context
+	context       languages.Context
 }
 
-func createFormatter(ctx common.Context, config Config) *typeFormatter {
+func createFormatter(ctx languages.Context, config Config) *typeFormatter {
 	return &typeFormatter{context: ctx, config: config}
 }
 
@@ -87,9 +87,7 @@ func (tf *typeFormatter) formatMap(def ast.MapType) string {
 	mapType := "unknown"
 	switch def.ValueType.Kind {
 	case ast.KindRef:
-		ref := def.ValueType.AsRef()
-		tf.packageMapper(ref.ReferredPkg, ref.ReferredType)
-		mapType = ref.ReferredType
+		mapType = tf.formatReference(def.ValueType.AsRef())
 	case ast.KindScalar:
 		mapType = formatScalarType(def.ValueType.AsScalar())
 	case ast.KindMap:
@@ -150,6 +148,25 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		return fmt.Sprintf("new %s()", tf.formatPackage(refDef))
 	case ast.KindStruct:
 		return "new Object()"
+	case ast.KindScalar:
+		switch def.AsScalar().ScalarKind {
+		case ast.KindBool:
+			return "false"
+		case ast.KindFloat32:
+			return "0.0f"
+		case ast.KindFloat64:
+			return "0.0"
+		case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32:
+			return "0"
+		case ast.KindInt64, ast.KindUint64:
+			return "0L"
+		case ast.KindString:
+			return `""`
+		case ast.KindBytes:
+			return "(byte) 0"
+		default:
+			return "unknown"
+		}
 	default:
 		return "unknown"
 	}
@@ -171,9 +188,10 @@ func (tf *typeFormatter) formatScalar(v any) string {
 }
 
 type CastPath struct {
-	Class string
-	Value string
-	Path  string
+	Class        string
+	Value        string
+	Path         string
+	IsNilChecked bool
 }
 
 // formatCastValue identifies if the object to set is a generic one, so it needs
@@ -193,15 +211,83 @@ func (tf *typeFormatter) formatCastValue(fieldPath ast.Path) CastPath {
 	}
 
 	castedPath := fieldPath[0].Identifier
-	for _, p := range fieldPath[1 : len(fieldPath)-1] {
-		castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+	isNilChecked := false
+	genericFound := false
+
+	for i, p := range fieldPath {
+		if i > 0 && fieldPath[i-1].Type.IsAny() && i != len(fieldPath)-1 {
+			isNilChecked = true
+		}
+
+		if !genericFound {
+			if i > 0 {
+				castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+			}
+			genericFound = p.Type.IsAny()
+		}
 	}
 
 	return CastPath{
-		Class: fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), refType),
-		Value: refType,
-		Path:  castedPath,
+		Class:        fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), refType),
+		Value:        refType,
+		Path:         castedPath,
+		IsNilChecked: isNilChecked,
 	}
+}
+
+func (tf *typeFormatter) shouldCastNilCheck(fieldPath ast.Path) CastPath {
+	refPkg := ""
+	refType := ""
+	for _, path := range fieldPath {
+		if path.TypeHint == nil && path.Type.Kind == ast.KindRef {
+			refPkg = path.Type.AsRef().ReferredPkg
+			refType = path.Type.AsRef().ReferredType
+		}
+	}
+
+	if refType == "" {
+		return CastPath{}
+	}
+
+	castedPath := fieldPath[0].Identifier
+	isNilChecked := false
+	genericFound := false
+
+	for i, p := range fieldPath {
+		if i > 0 && p.Type.IsRef() && !fieldPath[i-1].Type.IsRef() {
+			refType = fieldPath[i-1].Identifier
+			isNilChecked = true
+		}
+
+		if !genericFound {
+			if i > 0 {
+				castedPath = fmt.Sprintf("%s.%s", castedPath, tools.LowerCamelCase(p.Identifier))
+			}
+			genericFound = p.Type.IsAny()
+		}
+	}
+
+	return CastPath{
+		Class:        fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), tools.UpperCamelCase(refType)),
+		Value:        refType,
+		Path:         castedPath,
+		IsNilChecked: isNilChecked,
+	}
+}
+
+func (tf *typeFormatter) formatFieldPath(fieldPath ast.Path) string {
+	parts := make([]string, 0)
+	for i, part := range fieldPath {
+		output := tools.LowerCamelCase(part.Identifier)
+
+		if i > 0 && fieldPath[i-1].Type.IsAny() {
+			return output
+		}
+
+		parts = append(parts, output)
+	}
+
+	return strings.Join(parts, ".")
 }
 
 // formatAssignmentPath generates the pad to assign the value. When the value is a generic one (Object) like Custom or FieldConfig
@@ -213,9 +299,12 @@ func (tf *typeFormatter) formatAssignmentPath(fieldPath ast.Path) string {
 		return path
 	}
 
-	for _, p := range fieldPath[1:] {
-		path = fmt.Sprintf("%s.%s", path, tools.LowerCamelCase(p.Identifier))
+	for i, p := range fieldPath[1:] {
+		if fieldPath[i].Type.IsAny() && i != len(fieldPath)-1 {
+			return path
+		}
 
+		path = fmt.Sprintf("%s.%s", path, tools.LowerCamelCase(p.Identifier))
 		if p.TypeHint != nil {
 			return path
 		}
@@ -230,4 +319,26 @@ func (tf *typeFormatter) formatPackage(pkg string) string {
 	}
 
 	return pkg
+}
+
+func (tf *typeFormatter) formatValue(destinationType ast.Type, value any) string {
+	if destinationType.IsRef() {
+		referredObj, found := tf.context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
+		if found && referredObj.Type.IsEnum() {
+			return tf.formatEnumValue(referredObj, value)
+		}
+	}
+
+	return fmt.Sprintf("%#v", value)
+}
+
+func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
+	enum := obj.Type.AsEnum()
+	for _, v := range enum.Values {
+		if v.Value == val {
+			return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(v.Name)))
+		}
+	}
+
+	return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(enum.Values[0].Name)))
 }

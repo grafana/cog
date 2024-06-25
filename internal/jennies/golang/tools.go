@@ -26,8 +26,27 @@ func escapeVarName(varName string) string {
 }
 
 func isReservedGoKeyword(input string) bool {
-	// see: https://go.dev/ref/spec#Keywords
-	return input == "break" ||
+	return input == "string" ||
+		input == "uint8" ||
+		input == "uint16" ||
+		input == "uint32" ||
+		input == "uint64" ||
+		input == "int8" ||
+		input == "int16" ||
+		input == "int32" ||
+		input == "int64" ||
+		input == "float32" ||
+		input == "float64" ||
+		input == "complex64" ||
+		input == "complex128" ||
+		input == "byte" ||
+		input == "rune" ||
+		input == "uint" ||
+		input == "int" ||
+		input == "uintptr" ||
+		input == "bool" ||
+		// see: https://go.dev/ref/spec#Keywords
+		input == "break" ||
 		input == "case" ||
 		input == "chan" ||
 		input == "continue" ||

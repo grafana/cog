@@ -775,6 +775,16 @@ func (t RefType) DeepCopy() RefType {
 	}
 }
 
+func (t RefType) AsType() Type {
+	return Type{
+		Kind: KindRef,
+		Ref: &RefType{
+			ReferredPkg:  t.ReferredPkg,
+			ReferredType: t.ReferredType,
+		},
+	}
+}
+
 type ScalarType struct {
 	ScalarKind  ScalarKind       `yaml:"scalar_kind"` // bool, bytes, string, int, float, ...
 	Value       any              `json:",omitempty"`  // if value isn't nil, we're representing a constant scalar

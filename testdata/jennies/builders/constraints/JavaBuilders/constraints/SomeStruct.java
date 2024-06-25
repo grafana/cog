@@ -5,13 +5,13 @@ public class SomeStruct {
     public Long id;
     public String title;
     
-    public static class Builder {
+    public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder setId(Long id) {
+    public Builder Id(Long id) {
         if (!(id >= 5)) {
             throw new IllegalArgumentException("id must be >= 5");
         }
@@ -22,7 +22,7 @@ public class SomeStruct {
         return this;
     }
     
-    public Builder setTitle(String title) {
+    public Builder Title(String title) {
         if (!(title.length() >= 1)) {
             throw new IllegalArgumentException("title.length() must be >= 1");
         }

@@ -35,6 +35,19 @@ func (schemas Schemas) Locate(pkg string) (*Schema, bool) {
 	return nil, false
 }
 
+func (schemas Schemas) ResolveToType(def Type) Type {
+	if !def.IsRef() {
+		return def
+	}
+
+	resolved, found := schemas.LocateObjectByRef(def.AsRef())
+	if !found {
+		return def
+	}
+
+	return schemas.ResolveToType(resolved.Type)
+}
+
 func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	for _, schema := range schemas {
 		if schema.Package != pkg {
@@ -45,6 +58,10 @@ func (schemas Schemas) LocateObject(pkg string, name string) (Object, bool) {
 	}
 
 	return Object{}, false
+}
+
+func (schemas Schemas) LocateObjectByRef(ref RefType) (Object, bool) {
+	return schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 }
 
 func (schemas Schemas) Consolidate() (Schemas, error) {
@@ -81,10 +98,11 @@ func (schemas Schemas) DeepCopy() []*Schema {
 }
 
 type Schema struct { //nolint: musttag
-	Package    string
-	Metadata   SchemaMeta `json:",omitempty"`
-	EntryPoint string     `json:",omitempty"`
-	Objects    *orderedmap.Map[string, Object]
+	Package        string
+	Metadata       SchemaMeta `json:",omitempty"`
+	EntryPoint     string     `json:",omitempty"`
+	EntryPointType Type       `json:",omitempty"`
+	Objects        *orderedmap.Map[string, Object]
 }
 
 func NewSchema(pkg string, metadata SchemaMeta) *Schema {
@@ -118,6 +136,13 @@ func (schema *Schema) Merge(other *Schema) error {
 		return fmt.Errorf("conflicting metadata: %w", ErrCannotMergeSchemas)
 	}
 
+	if schema.EntryPoint != other.EntryPoint && (schema.EntryPoint == "" || other.EntryPoint == "") {
+		if schema.EntryPoint == "" {
+			schema.EntryPoint = other.EntryPoint
+			schema.EntryPointType = other.EntryPointType
+		}
+	}
+
 	var err error
 	other.Objects.Iterate(func(objectName string, remoteObject Object) {
 		if !schema.Objects.Has(objectName) {
@@ -140,8 +165,10 @@ func (schema *Schema) Merge(other *Schema) error {
 
 func (schema *Schema) DeepCopy() Schema {
 	return Schema{
-		Package:  schema.Package,
-		Metadata: schema.Metadata,
+		Package:        schema.Package,
+		Metadata:       schema.Metadata,
+		EntryPoint:     schema.EntryPoint,
+		EntryPointType: schema.EntryPointType,
 		Objects: schema.Objects.Map(func(_ string, object Object) Object {
 			return object.DeepCopy()
 		}),

@@ -1,0 +1,833 @@
+{
+  "Schemas": [
+    {
+      "Package": "panelbuilder",
+      "Metadata": {
+        "Kind": "composable",
+        "Variant": "panelcfg",
+        "Identifier": "annolist"
+      },
+      "Objects": {
+        "Panel": {
+          "Name": "Options",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "onlyFromThisDashboard",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "onlyInTimeRange",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "tags",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "limit",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": 10,
+                    "Scalar": {
+                      "ScalarKind": "uint32"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "showUser",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "showTime",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "showTags",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "navigateToPanel",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "navigateBefore",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "10m",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "navigateAfter",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "10m",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "panelbuilder",
+            "ReferredType": "Panel"
+          }
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "For": {
+        "Name": "Panel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "onlyFromThisDashboard",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": false,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "onlyInTimeRange",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": false,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "tags",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "limit",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": 10,
+                  "Scalar": {
+                    "ScalarKind": "uint32"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "showUser",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "showTime",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "showTags",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "navigateToPanel",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "navigateBefore",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": "10m",
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "navigateAfter",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": "10m",
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "panelbuilder",
+          "ReferredType": "Panel"
+        }
+      },
+      "Package": "panelbuilder",
+      "Name": "Panel",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "onlyFromThisDashboard",
+          "Args": [
+            {
+              "Name": "onlyFromThisDashboard",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "onlyFromThisDashboard",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "onlyFromThisDashboard",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              false
+            ]
+          }
+        },
+        {
+          "Name": "onlyInTimeRange",
+          "Args": [
+            {
+              "Name": "onlyInTimeRange",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "onlyInTimeRange",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "onlyInTimeRange",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              false
+            ]
+          }
+        },
+        {
+          "Name": "tags",
+          "Args": [
+            {
+              "Name": "tags",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "tags",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "tags",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        },
+        {
+          "Name": "limit",
+          "Args": [
+            {
+              "Name": "limit",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": 10,
+                "Scalar": {
+                  "ScalarKind": "uint32"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "limit",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": 10,
+                    "Scalar": {
+                      "ScalarKind": "uint32"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "limit",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": 10,
+                    "Scalar": {
+                      "ScalarKind": "uint32"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              10
+            ]
+          }
+        },
+        {
+          "Name": "showUser",
+          "Args": [
+            {
+              "Name": "showUser",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "showUser",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "showUser",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              true
+            ]
+          }
+        },
+        {
+          "Name": "showTime",
+          "Args": [
+            {
+              "Name": "showTime",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "showTime",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "showTime",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              true
+            ]
+          }
+        },
+        {
+          "Name": "showTags",
+          "Args": [
+            {
+              "Name": "showTags",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "showTags",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "showTags",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              true
+            ]
+          }
+        },
+        {
+          "Name": "navigateToPanel",
+          "Args": [
+            {
+              "Name": "navigateToPanel",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": true,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "navigateToPanel",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "navigateToPanel",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": true,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              true
+            ]
+          }
+        },
+        {
+          "Name": "navigateBefore",
+          "Args": [
+            {
+              "Name": "navigateBefore",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "10m",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "navigateBefore",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "10m",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "navigateBefore",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "10m",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              "10m"
+            ]
+          }
+        },
+        {
+          "Name": "navigateAfter",
+          "Args": [
+            {
+              "Name": "navigateAfter",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": "10m",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "navigateAfter",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "10m",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "navigateAfter",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": "10m",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              "10m"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

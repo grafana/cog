@@ -11,7 +11,7 @@ public enum SomeStructOperator {
         this.value = value;
     }
 
-    public String getValue() {
+    public String Value() {
         return value;
     }
 }

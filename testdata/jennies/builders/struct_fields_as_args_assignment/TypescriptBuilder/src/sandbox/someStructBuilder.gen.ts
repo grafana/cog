@@ -20,12 +20,6 @@ export class SomeStructBuilder implements cog.Builder<sandbox.SomeStruct> {
 };
         }
         this.internal.time.from = from;
-        if (!this.internal.time) {
-            this.internal.time = {
-	from: "now-6h",
-	to: "now",
-};
-        }
         this.internal.time.to = to;
         return this;
     }

@@ -21,12 +21,20 @@ type Config struct {
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.
-	SkipRuntime bool `yaml:"skip_runtime"`
+	SkipRuntime      bool `yaml:"skip_runtime"`
+	generateBuilders bool
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.PackagePath = interpolator(config.PackagePath)
 	config.ProjectPath = fmt.Sprintf("src/main/java/%s", strings.ReplaceAll(config.PackagePath, ".", "/"))
+}
+
+func (config Config) MergeWithGlobal(global languages.Config) Config {
+	newConfig := config
+	newConfig.generateBuilders = global.Builders
+
+	return newConfig
 }
 
 type Language struct {
@@ -41,12 +49,14 @@ func (language *Language) Name() string {
 	return LanguageRef
 }
 
-func (language *Language) Jennies(globalConfig common.Config) *codejen.JennyList[common.Context] {
-	jenny := codejen.JennyListWithNamer[common.Context](func(_ common.Context) string {
+func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
+	config := language.config.MergeWithGlobal(globalConfig)
+
+	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[common.Context](!language.config.SkipRuntime, Runtime{config: language.config}),
+		common.If[languages.Context](!config.SkipRuntime, Runtime{config: language.config}),
 		RawTypes{config: language.config},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
@@ -63,6 +73,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.DisjunctionWithNullToOptional{},
 		&compiler.DisjunctionInferMapping{},
 		&compiler.DisjunctionToType{},
+		&compiler.RemoveIntersections{},
 	}
 }
 

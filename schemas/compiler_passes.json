@@ -1,131 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json",
-  "$ref": "#/$defs/Compiler",
+  "$ref": "#/$defs/YamlCompiler",
   "$defs": {
-    "AddFields": {
-      "properties": {
-        "to": {
-          "type": "string",
-          "description": "Expected format: [package].[object]"
-        },
-        "fields": {
-          "items": {
-            "$ref": "#/$defs/StructField"
-          },
-          "type": "array"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "AnonymousStructsToNamed": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "ArrayType": {
+    "AstArrayType": {
       "properties": {
         "value_type": {
-          "$ref": "#/$defs/Type"
+          "$ref": "#/$defs/AstType"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "Cloudwatch": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Compiler": {
-      "properties": {
-        "passes": {
-          "items": {
-            "$ref": "#/$defs/CompilerPass"
-          },
-          "type": "array"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "CompilerPass": {
-      "properties": {
-        "entrypoint_identification": {
-          "$ref": "#/$defs/EntrypointIdentification"
-        },
-        "dataquery_identification": {
-          "$ref": "#/$defs/DataqueryIdentification"
-        },
-        "unspec": {
-          "$ref": "#/$defs/Unspec"
-        },
-        "fields_set_default": {
-          "$ref": "#/$defs/FieldsSetDefault"
-        },
-        "fields_set_required": {
-          "$ref": "#/$defs/FieldsSetRequired"
-        },
-        "fields_set_not_required": {
-          "$ref": "#/$defs/FieldsSetNotRequired"
-        },
-        "omit": {
-          "$ref": "#/$defs/Omit"
-        },
-        "add_fields": {
-          "$ref": "#/$defs/AddFields"
-        },
-        "name_anonymous_struct": {
-          "$ref": "#/$defs/NameAnonymousStruct"
-        },
-        "rename_object": {
-          "$ref": "#/$defs/RenameObject"
-        },
-        "retype_object": {
-          "$ref": "#/$defs/RetypeObject"
-        },
-        "hint_object": {
-          "$ref": "#/$defs/HintObject"
-        },
-        "retype_field": {
-          "$ref": "#/$defs/RetypeField"
-        },
-        "schema_set_identifier": {
-          "$ref": "#/$defs/SchemaSetIdentifier"
-        },
-        "anonymous_structs_to_named": {
-          "$ref": "#/$defs/AnonymousStructsToNamed"
-        },
-        "disjunction_to_type": {
-          "$ref": "#/$defs/DisjunctionToType"
-        },
-        "disjunction_of_anonymous_structs_to_explicit": {
-          "$ref": "#/$defs/DisjunctionOfAnonymousStructsToExplicit"
-        },
-        "disjunction_infer_mapping": {
-          "$ref": "#/$defs/DisjunctionInferMapping"
-        },
-        "disjunction_with_constant_to_default": {
-          "$ref": "#/$defs/DisjunctionWithConstantToDefault"
-        },
-        "dashboard_panels": {
-          "$ref": "#/$defs/DashboardPanels"
-        },
-        "cloudwatch": {
-          "$ref": "#/$defs/Cloudwatch"
-        },
-        "google_cloud_monitoring": {
-          "$ref": "#/$defs/GoogleCloudMonitoring"
-        },
-        "library_panels": {
-          "$ref": "#/$defs/LibraryPanels"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "ComposableSlotType": {
+    "AstComposableSlotType": {
       "properties": {
         "variant": {
           "type": "string"
@@ -134,35 +21,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "DashboardPanels": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "DataqueryIdentification": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "DisjunctionInferMapping": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "DisjunctionOfAnonymousStructsToExplicit": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "DisjunctionToType": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "DisjunctionType": {
+    "AstDisjunctionType": {
       "properties": {
         "branches": {
-          "$ref": "#/$defs/Types"
+          "$ref": "#/$defs/AstTypes"
         },
         "discriminator": {
           "type": "string",
@@ -178,21 +40,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "DisjunctionWithConstantToDefault": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "EntrypointIdentification": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "EnumType": {
+    "AstEnumType": {
       "properties": {
         "values": {
           "items": {
-            "$ref": "#/$defs/EnumValue"
+            "$ref": "#/$defs/AstEnumValue"
           },
           "type": "array",
           "description": "possible values. Value types might be different"
@@ -201,10 +53,10 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "EnumValue": {
+    "AstEnumValue": {
       "properties": {
         "type": {
-          "$ref": "#/$defs/Type"
+          "$ref": "#/$defs/AstType"
         },
         "name": {
           "type": "string"
@@ -214,65 +66,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "FieldsSetDefault": {
-      "properties": {
-        "defaults": {
-          "type": "object",
-          "description": "Expected format: [package].[object].[field] → value"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "FieldsSetNotRequired": {
-      "properties": {
-        "fields": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "description": "Expected format: [package].[object].[field]"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "FieldsSetRequired": {
-      "properties": {
-        "fields": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "description": "Expected format: [package].[object].[field]"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "GoogleCloudMonitoring": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "HintObject": {
-      "properties": {
-        "object": {
-          "type": "string",
-          "description": "Expected format: [package].[object]"
-        },
-        "hints": {
-          "$ref": "#/$defs/JenniesHints"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "IntersectionType": {
+    "AstIntersectionType": {
       "properties": {
         "branches": {
           "items": {
-            "$ref": "#/$defs/Type"
+            "$ref": "#/$defs/AstType"
           },
           "type": "array"
         }
@@ -280,54 +78,23 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "JenniesHints": {
+    "AstJenniesHints": {
       "type": "object",
       "description": "meant to be used by jennies, to gain a finer control on the codegen from schemas"
     },
-    "LibraryPanels": {
-      "properties": {},
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "MapType": {
+    "AstMapType": {
       "properties": {
         "indextype": {
-          "$ref": "#/$defs/Type"
+          "$ref": "#/$defs/AstType"
         },
         "valuetype": {
-          "$ref": "#/$defs/Type"
+          "$ref": "#/$defs/AstType"
         }
       },
       "additionalProperties": false,
       "type": "object"
     },
-    "NameAnonymousStruct": {
-      "properties": {
-        "field": {
-          "type": "string",
-          "description": "Expected format: [package].[object].[field]"
-        },
-        "as": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Omit": {
-      "properties": {
-        "objects": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array",
-          "description": "Expected format: [package].[object]"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "RefType": {
+    "AstRefType": {
       "properties": {
         "referred_pkg": {
           "type": "string"
@@ -339,58 +106,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "RenameObject": {
-      "properties": {
-        "from": {
-          "type": "string",
-          "description": "Expected format: [package].[object]"
-        },
-        "to": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "RetypeField": {
-      "properties": {
-        "field": {
-          "type": "string",
-          "description": "Expected format: [package].[object].[field]"
-        },
-        "as": {
-          "$ref": "#/$defs/Type"
-        },
-        "comments": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "RetypeObject": {
-      "properties": {
-        "object": {
-          "type": "string",
-          "description": "Expected format: [package].[object]"
-        },
-        "as": {
-          "$ref": "#/$defs/Type"
-        },
-        "comments": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "ScalarType": {
+    "AstScalarType": {
       "properties": {
         "scalar_kind": {
           "type": "string",
@@ -401,7 +117,7 @@
         },
         "constraints": {
           "items": {
-            "$ref": "#/$defs/TypeConstraint"
+            "$ref": "#/$defs/AstTypeConstraint"
           },
           "type": "array"
         }
@@ -409,19 +125,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "SchemaSetIdentifier": {
-      "properties": {
-        "package": {
-          "type": "string"
-        },
-        "identifier": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "StructField": {
+    "AstStructField": {
       "properties": {
         "name": {
           "type": "string"
@@ -433,7 +137,7 @@
           "type": "array"
         },
         "type": {
-          "$ref": "#/$defs/Type"
+          "$ref": "#/$defs/AstType"
         },
         "required": {
           "type": "boolean"
@@ -448,11 +152,11 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "StructType": {
+    "AstStructType": {
       "properties": {
         "fields": {
           "items": {
-            "$ref": "#/$defs/StructField"
+            "$ref": "#/$defs/AstStructField"
           },
           "type": "array"
         }
@@ -460,7 +164,7 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "Type": {
+    "AstType": {
       "properties": {
         "kind": {
           "type": "string"
@@ -470,34 +174,34 @@
         },
         "default": true,
         "disjunction": {
-          "$ref": "#/$defs/DisjunctionType"
+          "$ref": "#/$defs/AstDisjunctionType"
         },
         "array": {
-          "$ref": "#/$defs/ArrayType"
+          "$ref": "#/$defs/AstArrayType"
         },
         "enum": {
-          "$ref": "#/$defs/EnumType"
+          "$ref": "#/$defs/AstEnumType"
         },
         "map": {
-          "$ref": "#/$defs/MapType"
+          "$ref": "#/$defs/AstMapType"
         },
         "struct": {
-          "$ref": "#/$defs/StructType"
+          "$ref": "#/$defs/AstStructType"
         },
         "ref": {
-          "$ref": "#/$defs/RefType"
+          "$ref": "#/$defs/AstRefType"
         },
         "scalar": {
-          "$ref": "#/$defs/ScalarType"
+          "$ref": "#/$defs/AstScalarType"
         },
         "intersection": {
-          "$ref": "#/$defs/IntersectionType"
+          "$ref": "#/$defs/AstIntersectionType"
         },
         "composable_slot": {
-          "$ref": "#/$defs/ComposableSlotType"
+          "$ref": "#/$defs/AstComposableSlotType"
         },
         "hints": {
-          "$ref": "#/$defs/JenniesHints"
+          "$ref": "#/$defs/AstJenniesHints"
         },
         "passestrail": {
           "items": {
@@ -510,7 +214,7 @@
       "type": "object",
       "description": "Struct representing every type defined by the IR."
     },
-    "TypeConstraint": {
+    "AstTypeConstraint": {
       "properties": {
         "op": {
           "type": "string"
@@ -523,13 +227,309 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "Types": {
+    "AstTypes": {
       "items": {
-        "$ref": "#/$defs/Type"
+        "$ref": "#/$defs/AstType"
       },
       "type": "array"
     },
-    "Unspec": {
+    "YamlAddFields": {
+      "properties": {
+        "to": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/AstStructField"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlAnonymousStructsToNamed": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlCloudwatch": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlCompiler": {
+      "properties": {
+        "passes": {
+          "items": {
+            "$ref": "#/$defs/YamlCompilerPass"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlCompilerPass": {
+      "properties": {
+        "entrypoint_identification": {
+          "$ref": "#/$defs/YamlEntrypointIdentification"
+        },
+        "dataquery_identification": {
+          "$ref": "#/$defs/YamlDataqueryIdentification"
+        },
+        "unspec": {
+          "$ref": "#/$defs/YamlUnspec"
+        },
+        "fields_set_default": {
+          "$ref": "#/$defs/YamlFieldsSetDefault"
+        },
+        "fields_set_required": {
+          "$ref": "#/$defs/YamlFieldsSetRequired"
+        },
+        "fields_set_not_required": {
+          "$ref": "#/$defs/YamlFieldsSetNotRequired"
+        },
+        "omit": {
+          "$ref": "#/$defs/YamlOmit"
+        },
+        "add_fields": {
+          "$ref": "#/$defs/YamlAddFields"
+        },
+        "name_anonymous_struct": {
+          "$ref": "#/$defs/YamlNameAnonymousStruct"
+        },
+        "rename_object": {
+          "$ref": "#/$defs/YamlRenameObject"
+        },
+        "retype_object": {
+          "$ref": "#/$defs/YamlRetypeObject"
+        },
+        "hint_object": {
+          "$ref": "#/$defs/YamlHintObject"
+        },
+        "retype_field": {
+          "$ref": "#/$defs/YamlRetypeField"
+        },
+        "schema_set_identifier": {
+          "$ref": "#/$defs/YamlSchemaSetIdentifier"
+        },
+        "anonymous_structs_to_named": {
+          "$ref": "#/$defs/YamlAnonymousStructsToNamed"
+        },
+        "disjunction_to_type": {
+          "$ref": "#/$defs/YamlDisjunctionToType"
+        },
+        "disjunction_of_anonymous_structs_to_explicit": {
+          "$ref": "#/$defs/YamlDisjunctionOfAnonymousStructsToExplicit"
+        },
+        "disjunction_infer_mapping": {
+          "$ref": "#/$defs/YamlDisjunctionInferMapping"
+        },
+        "disjunction_with_constant_to_default": {
+          "$ref": "#/$defs/YamlDisjunctionWithConstantToDefault"
+        },
+        "dashboard_panels": {
+          "$ref": "#/$defs/YamlDashboardPanels"
+        },
+        "cloudwatch": {
+          "$ref": "#/$defs/YamlCloudwatch"
+        },
+        "google_cloud_monitoring": {
+          "$ref": "#/$defs/YamlGoogleCloudMonitoring"
+        },
+        "library_panels": {
+          "$ref": "#/$defs/YamlLibraryPanels"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDashboardPanels": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDataqueryIdentification": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDisjunctionInferMapping": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDisjunctionOfAnonymousStructsToExplicit": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDisjunctionToType": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDisjunctionWithConstantToDefault": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlEntrypointIdentification": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlFieldsSetDefault": {
+      "properties": {
+        "defaults": {
+          "type": "object",
+          "description": "Expected format: [package].[object].[field] → value"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlFieldsSetNotRequired": {
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object].[field]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlFieldsSetRequired": {
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object].[field]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlGoogleCloudMonitoring": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlHintObject": {
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "hints": {
+          "$ref": "#/$defs/AstJenniesHints"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlLibraryPanels": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlNameAnonymousStruct": {
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Expected format: [package].[object].[field]"
+        },
+        "as": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlOmit": {
+      "properties": {
+        "objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlRenameObject": {
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlRetypeField": {
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Expected format: [package].[object].[field]"
+        },
+        "as": {
+          "$ref": "#/$defs/AstType"
+        },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlRetypeObject": {
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "as": {
+          "$ref": "#/$defs/AstType"
+        },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlSchemaSetIdentifier": {
+      "properties": {
+        "package": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlUnspec": {
       "properties": {},
       "additionalProperties": false,
       "type": "object"

@@ -19,7 +19,7 @@ passes:
   # TODO: should be replaced by a ref to dashboard.DatasourceRef
   - rename_object:
       from: 'testdata.TestdataTestdataTargetsDatasource'
-      to: 'datasource'
+      to: 'Datasource'
 
   - rename_object:
       from: 'testdata.TestdataTestdataTargetsNodes'
