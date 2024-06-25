@@ -15,9 +15,6 @@ public class SomeStruct {
 			this.internal.time = new Object();
 		}
     this.internal.time.from = from;
-		if (this.internal.time == null) {
-			this.internal.time = new Object();
-		}
     this.internal.time.to = to;
         return this;
     }
