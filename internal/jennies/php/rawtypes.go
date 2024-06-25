@@ -53,6 +53,11 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 	files := make(codejen.Files, 0, schema.Objects.Len())
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
+		// Constants are handled separately
+		if object.Type.IsConcreteScalar() {
+			return
+		}
+
 		file, innerErr := jenny.formatObject(context, schema, object)
 		if innerErr != nil {
 			err = innerErr
@@ -65,6 +70,13 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return nil, err
 	}
 
+	constants := schema.Objects.Filter(func(_ string, object ast.Object) bool {
+		return object.Type.IsConcreteScalar()
+	})
+	if constants.Len() != 0 {
+		files = append(files, jenny.generateConstants(schema, constants))
+	}
+
 	if schema.Metadata.Kind == ast.SchemaKindComposable && schema.Metadata.Variant == ast.SchemaVariantPanel {
 		files = append(files, jenny.generatePanelCfgVariantConfigFunc(schema))
 	}
@@ -74,6 +86,39 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	}
 
 	return files, nil
+}
+
+func (jenny RawTypes) generateConstants(schema *ast.Schema, objects *orderedmap.Map[string, ast.Object]) codejen.File {
+	constants := make([]string, 0, objects.Len())
+
+	objects.Iterate(func(_ string, object ast.Object) {
+		name := formatConstantName(object.Name)
+		value := formatValue(object.Type.Scalar.Value)
+
+		constant := fmt.Sprintf("const %s = %s;", name, value)
+		if len(object.Comments) != 0 {
+			constant = formatCommentsBlock(object.Comments) + constant
+		}
+
+		constants = append(constants, tools.Indent(constant, 4))
+	})
+
+	content := fmt.Sprintf(`<?php
+
+namespace %[1]s;
+
+final class Constants
+{
+%[2]s
+}`, jenny.config.fullNamespace(formatPackageName(schema.Package)), strings.Join(constants, "\n"))
+
+	filename := filepath.Join(
+		"src",
+		formatPackageName(schema.Package),
+		"Constants.php",
+	)
+
+	return *codejen.NewFile(filename, []byte(content), jenny)
 }
 
 func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) codejen.File {
@@ -141,15 +186,6 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 		}
 
 		buffer.WriteString(enum)
-	case ast.KindScalar:
-		scalarType := def.Type.AsScalar()
-
-		//nolint: gocritic
-		if scalarType.IsConcrete() {
-			buffer.WriteString(fmt.Sprintf("const %s = %s;", formatConstantName(def.Name), formatValue(scalarType.Value)))
-		} else {
-			return codejen.File{}, fmt.Errorf("type aliases on scalar types is not supported")
-		}
 	case ast.KindRef:
 		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type)))
 	case ast.KindStruct:
