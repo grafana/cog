@@ -87,9 +87,7 @@ func (tf *typeFormatter) formatMap(def ast.MapType) string {
 	mapType := "unknown"
 	switch def.ValueType.Kind {
 	case ast.KindRef:
-		ref := def.ValueType.AsRef()
-		tf.packageMapper(ref.ReferredPkg, ref.ReferredType)
-		mapType = ref.ReferredType
+		mapType = tf.formatReference(def.ValueType.AsRef())
 	case ast.KindScalar:
 		mapType = formatScalarType(def.ValueType.AsScalar())
 	case ast.KindMap:
@@ -150,6 +148,25 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		return fmt.Sprintf("new %s()", tf.formatPackage(refDef))
 	case ast.KindStruct:
 		return "new Object()"
+	case ast.KindScalar:
+		switch def.AsScalar().ScalarKind {
+		case ast.KindBool:
+			return "false"
+		case ast.KindFloat32:
+			return "0.0f"
+		case ast.KindFloat64:
+			return "0.0"
+		case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32:
+			return "0"
+		case ast.KindInt64, ast.KindUint64:
+			return "0L"
+		case ast.KindString:
+			return `""`
+		case ast.KindBytes:
+			return "(byte) 0"
+		default:
+			return "unknown"
+		}
 	default:
 		return "unknown"
 	}

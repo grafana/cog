@@ -244,6 +244,9 @@
         "openapi": {
           "$ref": "#/$defs/OpenapiConfig"
         },
+        "php": {
+          "$ref": "#/$defs/Config"
+        },
         "python": {
           "$ref": "#/$defs/PythonConfig"
         },

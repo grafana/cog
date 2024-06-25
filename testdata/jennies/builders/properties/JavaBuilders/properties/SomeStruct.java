@@ -10,6 +10,7 @@ public class SomeStruct {
         
         public Builder() {
             this.internal = new SomeStruct();
+        this.someBuilderProperty = "";
         }
     public Builder Id(Long id) {
     this.internal.id = id;

@@ -2,6 +2,14 @@
   "Package": "grafanatest",
   "Metadata": {},
   "EntryPoint": "Node",
+  "EntryPointType": {
+    "Kind": "ref",
+    "Nullable": false,
+    "Ref": {
+      "ReferredPkg": "grafanatest",
+      "ReferredType": "Node"
+    }
+  },
   "Objects": {
     "Node": {
       "Name": "Node",

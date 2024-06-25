@@ -8,6 +8,8 @@ env:
   GO_VERSION: '1.21'
   NODE_VERSION: '18'
   PYTHON_VERSION: '3.12'
+  JAVA_VERSION: '17'
+  PHP_VERSION: '8.3'
   DOCKER_TOOLS: false
 
 jobs:
@@ -73,8 +75,22 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: phpstan, psalm
+          extensions: none, curl, ctype, dom, mbstring, opcache, simplexml, tokenizer
+          ini-values: opcache.enable_cli=1
+
       - name: Install mypy
         run: python3 -m pip install mypy
+
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
 
       - name: Install ts-node
         run: npm install -g ts-node
@@ -104,6 +120,17 @@ jobs:
 
       - name: Lint generated Python code
         run: mypy generated/python/
+        
+      - name: Compile generated Java code
+        run: |
+          find generated/java -name '*.java' -d > sources.txt
+          javac @sources.txt
+
+      - name: Lint generated PHP code with phpstan
+        run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
+
+      - name: Lint generated PHP code with psalm
+        run: psalm -c .config/ci/php/psalm.xml generated/php
 
   examples:
     name: Run examples
@@ -121,6 +148,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: phpstan, psalm
+          extensions: none, curl, ctype, dom, mbstring, opcache, simplexml, tokenizer
+          ini-values: opcache.enable_cli=1
 
       - name: Install ts-node
         run: npm install -g ts-node
@@ -144,3 +179,9 @@ jobs:
       - name: Run the Typescript example
         run: |
           ts-node examples/typescript
+
+      - name: Run the PHP example
+        run: |
+          cd ./examples/php
+          composer install
+          php index.php
