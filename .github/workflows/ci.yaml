@@ -8,6 +8,7 @@ env:
   GO_VERSION: '1.21'
   NODE_VERSION: '18'
   PYTHON_VERSION: '3.12'
+  JAVA_VERSION: '17'
   PHP_VERSION: '8.3'
   DOCKER_TOOLS: false
 
@@ -85,6 +86,12 @@ jobs:
       - name: Install mypy
         run: python3 -m pip install mypy
 
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+
       - name: Install ts-node
         run: npm install -g ts-node
 
@@ -113,6 +120,11 @@ jobs:
 
       - name: Lint generated Python code
         run: mypy generated/python/
+        
+      - name: Compile generated Java code
+        run: |
+          find generated/java -name '*.java' -d > sources.txt
+          javac @sources.txt
 
       - name: Lint generated PHP code with phpstan
         run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
