@@ -30,7 +30,7 @@ func (jenny Pom) generatePom() string {
 	<groupId>com.grafana.foundation</groupId>
 	<artifactId>sdk</artifactId>
 	<version>%s</version>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 
 	<name>Grafana foundation SDK</name>
 	<description>Grafana Java library</description>
@@ -65,6 +65,31 @@ func (jenny Pom) generatePom() string {
 			<version>2.17.1</version>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.6.0</version>
+				<configuration>
+					<outputDirectory>./output</outputDirectory>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
 `, jenny.config.MavenVersion)
 }

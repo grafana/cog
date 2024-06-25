@@ -156,6 +156,12 @@ jobs:
           tools: phpstan, psalm
           extensions: none, curl, ctype, dom, mbstring, opcache, simplexml, tokenizer
           ini-values: opcache.enable_cli=1
+          
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
 
       - name: Install ts-node
         run: npm install -g ts-node
@@ -170,7 +176,7 @@ jobs:
         run: |
           go run cmd/cli/main.go generate \
             --config ./config/foundation_sdk.dev.yaml \
-            --parameters kind_registry_version=next,grafana_version=main
+            --parameters kind_registry_version=next,grafana_version=main,gen_pom=true,maven_version=0.0
 
       - name: Run the Go example
         run: |
@@ -185,3 +191,9 @@ jobs:
           cd ./examples/php
           composer install
           php index.php
+          
+      - name: Run the Java example
+        run: |
+          mvn package -f .generated/java
+          cd ./examples/java
+          java -classpath ../../generated/java/output/sdk-0.0-jar-with-dependencies.jar Main.java
