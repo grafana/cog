@@ -194,6 +194,6 @@ jobs:
           
       - name: Run the Java example
         run: |
-          mvn package -f ./generated/java
+          mvn package -f generated/java
           cd ./examples/java
           java -classpath ../../generated/java/output/sdk-0.0-jar-with-dependencies.jar Main.java
