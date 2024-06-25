@@ -28,11 +28,7 @@ class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
             $this->internal->time = "unknown";
         }
         
-        $this->internal->time->from = $from;    
-        if ($this->internal->time === null) {
-            $this->internal->time = "unknown";
-        }
-        
+        $this->internal->time->from = $from;
         $this->internal->time->to = $to;
     
         return $this;
