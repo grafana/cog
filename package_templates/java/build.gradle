@@ -5,13 +5,13 @@ plugins {
     id 'signing'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-
 group = "com.grafana"
 version = project.properties['grafanaFoundationSDKVersion']
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
     withJavadocJar()
     withSourcesJar()
 }
@@ -37,13 +37,6 @@ allprojects {
 
     test {
         useJUnitPlatform()
-    }
-
-    spotless {
-      java {
-        googleJavaFormat()
-        target("src/**/*.java")
-      }
     }
 }
 

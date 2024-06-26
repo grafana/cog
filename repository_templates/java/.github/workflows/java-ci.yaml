@@ -2,6 +2,9 @@ name: Java CI
 on:
   pull_request: ~
 
+env:
+  JAVA_VERSION: '17'
+
 jobs:
   java:
     name: Java
@@ -14,10 +17,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Use Java SDK ${{ env.JAVA_VERSION }}
+      - name: Use Java SDK {{ `${{ env.JAVA_VERSION }}` }}
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: {{ `${{ env.JAVA_VERSION }}` }}
           distribution: 'adopt'
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v3
