@@ -12,6 +12,7 @@ parameters:
   build_timestamp: 'build_timestamp'
   go_package_root: 'github.com/grafana/grafana-foundation-sdk/go'
   java_package_path: 'com.grafana.foundation'
+  php_namespace_root: 'Grafana\Foundation'
 
 inputs:
   - kind_registry:
@@ -95,6 +96,8 @@ output:
         package_root: '%go_package_root%'
     - jsonschema: {}
     - openapi: {}
+    - php:
+        namespace_root: '%php_namespace_root%'
     - python:
         path_prefix: grafana_foundation_sdk
     - typescript: {}
