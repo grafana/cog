@@ -1,0 +1,33 @@
+name: Java CI
+on:
+  pull_request: ~
+
+env:
+  JAVA_VERSION: '17'
+
+jobs:
+  java:
+    name: Java
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./java
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Java SDK {{ `${{ env.JAVA_VERSION }}` }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: {{ `${{ env.JAVA_VERSION }}` }}
+          distribution: 'adopt'
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
+      - name: Test and build Jar
+        uses: gradle/actions/setup-gradle@v3
+        env:
+          CHECK_GENERATED_FILES: true
+        with:
+          gradle-version: current
+        run: gradle build --dry-run 

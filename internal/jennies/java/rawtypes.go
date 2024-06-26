@@ -223,7 +223,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		Variant:              jenny.getVariant(object.Type),
 		Builders:             builders,
 		HasBuilder:           hasBuilder,
-		ShouldAddMarshalling: jenny.config.GeneratePOM,
+		ShouldAddMarshalling: jenny.config.AddExternalDependencies,
 	}); err != nil {
 		return nil, err
 	}
@@ -326,7 +326,7 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 }
 
 func (jenny RawTypes) addJSONImportsIfNeeded() {
-	if jenny.config.GeneratePOM {
+	if jenny.config.AddExternalDependencies {
 		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "annotation.JsonProperty")
 		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "core.JsonProcessingException")
 		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectMapper")
