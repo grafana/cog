@@ -44,6 +44,10 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
 }
 
+tasks.withType(Javadoc).configureEach {
+    options.addStringOption('Xdoclint:-missing', '-quiet')
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
