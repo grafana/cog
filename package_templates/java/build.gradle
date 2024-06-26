@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
     id 'signing'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = "com.grafana"
@@ -16,7 +17,7 @@ java {
     withSourcesJar()
 }
 
-jar {
+shadowJar {
     // allows maven to read the artifact (by default, it's "plain")
     archiveClassifier.set('')
 }
@@ -47,6 +48,8 @@ dependencies {
 tasks.withType(Javadoc).configureEach {
     options.addStringOption('Xdoclint:-missing', '-quiet')
 }
+
+tasks.build.dependsOn shadowJar
 
 publishing {
     publications {
