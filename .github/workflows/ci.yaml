@@ -176,7 +176,7 @@ jobs:
         run: |
           go run cmd/cli/main.go generate \
             --config ./config/foundation_sdk.dev.yaml \
-            --parameters kind_registry_version=next,grafana_version=main,gen_pom=true,maven_version=0.0
+            --parameters kind_registry_version=next,grafana_version=main
 
       - name: Run the Go example
         run: |
@@ -191,9 +191,3 @@ jobs:
           cd ./examples/php
           composer install
           php index.php
-          
-      - name: Run the Java example
-        run: |
-          mvn package -f generated/java
-          cd ./examples/java
-          java -classpath ../../generated/java/output/sdk-0.0-jar-with-dependencies.jar Main.java
