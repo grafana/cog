@@ -19,7 +19,7 @@ type RawTypes struct {
 
 	typeFormatter  *typeFormatter
 	builders       Builders
-	jsonMarshaller JsonMarshaller
+	jsonMarshaller JSONMarshaller
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -31,7 +31,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
 	jenny.builders = parseBuilders(jenny.config, context, jenny.typeFormatter)
-	jenny.jsonMarshaller = JsonMarshaller{
+	jenny.jsonMarshaller = JSONMarshaller{
 		config:        jenny.config,
 		typeFormatter: jenny.typeFormatter,
 	}

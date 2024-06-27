@@ -6,12 +6,12 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-type JsonMarshaller struct {
+type JSONMarshaller struct {
 	config        Config
 	typeFormatter *typeFormatter
 }
 
-func (j JsonMarshaller) genToJSONFunction(t ast.Type) string {
+func (j JSONMarshaller) genToJSONFunction(t ast.Type) string {
 	if !j.config.generateBuilders || j.config.SkipRuntime || !j.config.GeneratePOM {
 		return ""
 	}
@@ -33,7 +33,7 @@ func (j JsonMarshaller) genToJSONFunction(t ast.Type) string {
 	return buffer.String()
 }
 
-func (j JsonMarshaller) annotation(t ast.Type) string {
+func (j JSONMarshaller) annotation(t ast.Type) string {
 	if !j.config.generateBuilders || j.config.SkipRuntime || !j.config.GeneratePOM {
 		return ""
 	}
