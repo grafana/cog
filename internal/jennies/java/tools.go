@@ -90,3 +90,10 @@ func isReservedJavaKeyword(input string) bool {
 	}
 	return false
 }
+
+func fillAnnotationPattern(input string, value string) string {
+	if strings.Contains(input, "%#v") {
+		return fmt.Sprintf(input, value)
+	}
+	return input
+}
