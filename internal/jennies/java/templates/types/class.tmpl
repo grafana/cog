@@ -13,10 +13,7 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- template "types" dict "Fields" .Fields "ShouldAddAnnotation" .ShouldAddMarshalling }}
 
     {{- if and .ShouldAddMarshalling (not .Extends) }}
-    public String toJSON() throws JsonProcessingException {
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        return ow.writeValueAsString(this);
-    }
+    {{ .ToJSONFunction }}
     {{- end }}
 
     {{- if and .HasBuilder (not .Extends) }}

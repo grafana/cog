@@ -12,7 +12,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/veneers/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/veneers/*.tmpl templates/marshalling/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -94,6 +94,7 @@ type ClassTemplate struct {
 
 	Variant              string
 	ShouldAddMarshalling bool
+	ToJSONFunction       string
 }
 
 type Field struct {

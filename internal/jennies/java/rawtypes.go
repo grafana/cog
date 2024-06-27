@@ -224,6 +224,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		Builders:             builders,
 		HasBuilder:           hasBuilder,
 		ShouldAddMarshalling: jenny.config.GeneratePOM,
+		ToJSONFunction:       genToJSONFunction(object.Type),
 	}); err != nil {
 		return nil, err
 	}
