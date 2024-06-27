@@ -10,9 +10,9 @@ package {{ .Package }};
 // {{ . }}
 {{- end }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
-    {{- template "types" dict "Fields" .Fields "ShouldAddAnnotation" .ShouldAddMarshalling }}
+    {{- template "types" dict "Fields" .Fields "MarshallingConfig" .MarshallingConfig }}
 
-    {{- if and .ShouldAddMarshalling (not .Extends) }}
+    {{- if and .MarshallingConfig.ShouldAddMarshalling (not .Extends) }}
     {{ .ToJSONFunction }}
     {{- end }}
 
@@ -30,8 +30,8 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
-    {{- if $.ShouldAddAnnotation }}
-    @JsonProperty("{{ .Name }}")
+    {{- if $.MarshallingConfig.ShouldAddMarshalling }}
+    {{ fillAnnotationPattern $.MarshallingConfig.Annotation .Name }}
     {{- end }}
     public {{ .Type }} {{ .Name | escapeVar }};
 

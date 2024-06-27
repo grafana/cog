@@ -6,8 +6,20 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-func genToJSONFunction(t ast.Type) string {
+type JsonMarshaller struct {
+	config        Config
+	typeFormatter *typeFormatter
+}
+
+func (j JsonMarshaller) genToJSONFunction(t ast.Type) string {
+	if !j.config.GeneratePOM {
+		return ""
+	}
+
 	var buffer strings.Builder
+	j.typeFormatter.packageMapper("com.fasterxml.jackson", "core.JsonProcessingException")
+	j.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectMapper")
+	j.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectWriter")
 	if t.IsStructGeneratedFromDisjunction() {
 		if t.IsStruct() && (t.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) || t.HasHint(ast.HintDisjunctionOfScalars)) {
 			_ = templates.ExecuteTemplate(&buffer, "marshalling/disjunctions.json_marshall.tmpl", map[string]any{
@@ -19,4 +31,18 @@ func genToJSONFunction(t ast.Type) string {
 
 	_ = templates.ExecuteTemplate(&buffer, "marshalling/marshalling.tmpl", map[string]any{})
 	return buffer.String()
+}
+
+func (j JsonMarshaller) annotation(t ast.Type) string {
+	if !j.config.GeneratePOM {
+		return ""
+	}
+
+	if t.IsStructGeneratedFromDisjunction() && t.IsStruct() {
+		j.typeFormatter.packageMapper("com.fasterxml.jackson", "annotation.JsonUnwrapped")
+		return "@JsonUnwrapped"
+	}
+
+	j.typeFormatter.packageMapper("com.fasterxml.jackson", "annotation.JsonProperty")
+	return "@JsonProperty(%#v)"
 }

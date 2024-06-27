@@ -29,9 +29,10 @@ func init() {
 
 func functions() template.FuncMap {
 	return template.FuncMap{
-		"escapeVar":          escapeVarName,
-		"formatScalar":       formatScalar,
-		"lastPathIdentifier": lastPathIdentifier,
+		"escapeVar":             escapeVarName,
+		"formatScalar":          formatScalar,
+		"lastPathIdentifier":    lastPathIdentifier,
+		"fillAnnotationPattern": fillAnnotationPattern,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
@@ -92,9 +93,9 @@ type ClassTemplate struct {
 	Builders   []Builder
 	HasBuilder bool
 
-	Variant              string
-	ShouldAddMarshalling bool
-	ToJSONFunction       string
+	Variant           string
+	MarshallingConfig MarshallingConfig
+	ToJSONFunction    string
 }
 
 type Field struct {
@@ -133,4 +134,9 @@ type OptionCall struct {
 	Initializers []string
 	OptionName   string
 	Args         []string
+}
+
+type MarshallingConfig struct {
+	ShouldAddMarshalling bool
+	Annotation           string
 }

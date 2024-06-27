@@ -17,8 +17,9 @@ type RawTypes struct {
 	config  Config
 	imports *common.DirectImportMap
 
-	typeFormatter *typeFormatter
-	builders      Builders
+	typeFormatter  *typeFormatter
+	builders       Builders
+	jsonMarshaller JsonMarshaller
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -30,6 +31,10 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
 	jenny.builders = parseBuilders(jenny.config, context, jenny.typeFormatter)
+	jenny.jsonMarshaller = JsonMarshaller{
+		config:        jenny.config,
+		typeFormatter: jenny.typeFormatter,
+	}
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.genFilesForSchema(schema)
@@ -212,19 +217,21 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	}
 
 	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
-	jenny.addJSONImportsIfNeeded()
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:              jenny.typeFormatter.formatPackage(pkg),
-		Imports:              jenny.imports,
-		Name:                 tools.UpperCamelCase(object.Name),
-		Fields:               fields,
-		Comments:             object.Comments,
-		Variant:              jenny.getVariant(object.Type),
-		Builders:             builders,
-		HasBuilder:           hasBuilder,
-		ShouldAddMarshalling: jenny.config.GeneratePOM,
-		ToJSONFunction:       genToJSONFunction(object.Type),
+		Package:    jenny.typeFormatter.formatPackage(pkg),
+		Imports:    jenny.imports,
+		Name:       tools.UpperCamelCase(object.Name),
+		Fields:     fields,
+		Comments:   object.Comments,
+		Variant:    jenny.getVariant(object.Type),
+		Builders:   builders,
+		HasBuilder: hasBuilder,
+		MarshallingConfig: MarshallingConfig{
+			ShouldAddMarshalling: jenny.config.GeneratePOM,
+			Annotation:           jenny.jsonMarshaller.annotation(object.Type),
+		},
+		ToJSONFunction: jenny.jsonMarshaller.genToJSONFunction(object.Type),
 	}); err != nil {
 		return nil, err
 	}
@@ -324,13 +331,4 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 		variant = jenny.typeFormatter.formatPackage(variant)
 	}
 	return variant
-}
-
-func (jenny RawTypes) addJSONImportsIfNeeded() {
-	if jenny.config.GeneratePOM {
-		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "annotation.JsonProperty")
-		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "core.JsonProcessingException")
-		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectMapper")
-		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectWriter")
-	}
 }
