@@ -14,7 +14,7 @@ public class ExternalLink {
     this.internal.url = url;
         return this;
     }
-    public ExternalLink build() {
+    public ExternalLink Build() {
             return this.internal;
         }
     }

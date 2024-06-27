@@ -16,20 +16,20 @@ public class Dashboard {
             this.internal = new Dashboard();
         }
     public Builder SingleLinkOrString(cog.Builder<unknown> singleLinkOrString) {
-    this.internal.singleLinkOrString = singleLinkOrString.build();
+    this.internal.singleLinkOrString = singleLinkOrString.Build();
         return this;
     }
     
     public Builder LinksOrStrings(cog.Builder<List<unknown>> linksOrStrings) {
-    this.internal.linksOrStrings = linksOrStrings.build();
+    this.internal.linksOrStrings = linksOrStrings.Build();
         return this;
     }
     
     public Builder DisjunctionOfBuilders(cog.Builder<unknown> disjunctionOfBuilders) {
-    this.internal.disjunctionOfBuilders = disjunctionOfBuilders.build();
+    this.internal.disjunctionOfBuilders = disjunctionOfBuilders.Build();
         return this;
     }
-    public Dashboard build() {
+    public Dashboard Build() {
             return this.internal;
         }
     }

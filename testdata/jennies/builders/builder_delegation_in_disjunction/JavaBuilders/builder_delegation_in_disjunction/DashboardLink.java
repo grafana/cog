@@ -20,7 +20,7 @@ public class DashboardLink {
     this.internal.url = url;
         return this;
     }
-    public DashboardLink build() {
+    public DashboardLink Build() {
             return this.internal;
         }
     }

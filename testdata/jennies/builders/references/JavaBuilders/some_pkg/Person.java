@@ -15,7 +15,7 @@ public class Person {
     this.internal.name = name;
         return this;
     }
-    public Person build() {
+    public Person Build() {
             return this.internal;
         }
     }

@@ -18,7 +18,7 @@ public class SomeStruct {
     this.internal.time.to = to;
         return this;
     }
-    public SomeStruct build() {
+    public SomeStruct Build() {
             return this.internal;
         }
     }

@@ -16,7 +16,7 @@ public class SomeStruct {
     this.internal.id = id;
         return this;
     }
-    public SomeStruct build() {
+    public SomeStruct Build() {
             return this.internal;
         }
     }

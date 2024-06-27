@@ -23,7 +23,7 @@
     {{- with .Value.Argument }}
         {{- if not (eq $castPath.Value "") }}
         {{ if not $castPath.IsNilChecked }}{{ $castPath.Class }} {{ $castPath.Value | lowerCamelCase }}Resource = ({{- $castPath.Class }}) this.internal.{{ $castPath.Path }};{{ end }}
-        {{ $castPath.Value | lowerCamelCase }}Resource.{{ lastPathIdentifier $.Assignment.Path }} = {{ .Name | lowerCamelCase }}{{ if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}.build(){{ end }};
+        {{ $castPath.Value | lowerCamelCase }}Resource.{{ lastPathIdentifier $.Assignment.Path }} = {{ .Name | lowerCamelCase }}{{ if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}.Build(){{ end }};
         {{- end }}
     {{- end }}
     {{- with .Value.Envelope }}
@@ -51,7 +51,7 @@
         {{- if not (eq $castPath.Value "") }}
             {{- $castPath.Value | lowerCamelCase }}Resource
         {{- else if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-            {{- .Name | escapeVar | lowerCamelCase }}.build()
+            {{- .Name | escapeVar | lowerCamelCase }}.Build()
         {{- else }}
             {{- .Name | escapeVar | lowerCamelCase }}
         {{- end }}

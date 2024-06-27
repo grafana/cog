@@ -201,7 +201,7 @@ func (b Builders) formatDefaultReference(ref ast.RefType, defValue any) string {
 					builder = fmt.Sprintf("%s.%s(%#v)", builder, tools.UpperCamelCase(field.Name), f)
 				}
 			}
-			return builder + ".build()"
+			return builder + ".Build()"
 		}
 
 		return fmt.Sprintf("%sResource", tools.LowerCamelCase(object.Name))

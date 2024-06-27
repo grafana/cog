@@ -22,7 +22,7 @@ public class Dashboard {
     this.internal.variables.add(variable);
         return this;
     }
-    public Dashboard build() {
+    public Dashboard Build() {
             return this.internal;
         }
     }

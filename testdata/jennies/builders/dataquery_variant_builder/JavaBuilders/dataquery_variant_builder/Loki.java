@@ -14,7 +14,7 @@ public class Loki implements cog.variants.Dataquery {
     this.internal.expr = expr;
         return this;
     }
-    public Loki build() {
+    public Loki Build() {
             return this.internal;
         }
     }

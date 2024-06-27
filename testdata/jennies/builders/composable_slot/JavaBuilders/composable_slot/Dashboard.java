@@ -14,15 +14,15 @@ public class Dashboard {
             this.internal = new Dashboard();
         }
     public Builder Target(cog.Builder<Dataquery> target) {
-    this.internal.target = target.build();
+    this.internal.target = target.Build();
         return this;
     }
     
     public Builder Targets(cog.Builder<List<Dataquery>> targets) {
-    this.internal.targets = targets.build();
+    this.internal.targets = targets.Build();
         return this;
     }
-    public Dashboard build() {
+    public Dashboard Build() {
             return this.internal;
         }
     }

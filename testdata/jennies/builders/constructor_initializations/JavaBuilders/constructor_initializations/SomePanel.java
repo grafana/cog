@@ -18,7 +18,7 @@ public class SomePanel {
     this.internal.title = title;
         return this;
     }
-    public SomePanel build() {
+    public SomePanel Build() {
             return this.internal;
         }
     }
