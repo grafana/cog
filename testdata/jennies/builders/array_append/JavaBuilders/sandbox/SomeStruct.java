@@ -19,7 +19,7 @@ public class SomeStruct {
     this.internal.tags.add(tags);
         return this;
     }
-    public SomeStruct build() {
+    public SomeStruct Build() {
             return this.internal;
         }
     }

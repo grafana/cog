@@ -24,17 +24,17 @@ public class Struct {
         this.PartialComplexField(new Object());
         }
     public Builder AllFields(cog.Builder<NestedStruct> allFields) {
-    this.internal.allFields = allFields.build();
+    this.internal.allFields = allFields.Build();
         return this;
     }
     
     public Builder PartialFields(cog.Builder<NestedStruct> partialFields) {
-    this.internal.partialFields = partialFields.build();
+    this.internal.partialFields = partialFields.Build();
         return this;
     }
     
     public Builder EmptyFields(cog.Builder<NestedStruct> emptyFields) {
-    this.internal.emptyFields = emptyFields.build();
+    this.internal.emptyFields = emptyFields.Build();
         return this;
     }
     
@@ -47,7 +47,7 @@ public class Struct {
     this.internal.partialComplexField = partialComplexField;
         return this;
     }
-    public Struct build() {
+    public Struct Build() {
             return this.internal;
         }
     }

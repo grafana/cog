@@ -20,7 +20,7 @@ public class NestedStruct {
     this.internal.intVal = intVal;
         return this;
     }
-    public NestedStruct build() {
+    public NestedStruct Build() {
             return this.internal;
         }
     }

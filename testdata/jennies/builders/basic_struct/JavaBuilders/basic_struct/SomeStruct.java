@@ -37,7 +37,7 @@ public class SomeStruct {
     this.internal.liveNow = liveNow;
         return this;
     }
-    public SomeStruct build() {
+    public SomeStruct Build() {
             return this.internal;
         }
     }

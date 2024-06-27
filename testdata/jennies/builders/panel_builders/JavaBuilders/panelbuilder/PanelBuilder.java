@@ -59,7 +59,7 @@ public class PanelBuilder implements cog.Builder<Panel> {
         return this;
     }
     
-    public Panel build() {
+    public Panel Build() {
         return this.internal;
     }
 }

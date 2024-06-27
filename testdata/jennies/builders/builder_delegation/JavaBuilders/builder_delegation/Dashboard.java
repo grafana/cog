@@ -29,20 +29,20 @@ public class Dashboard {
     }
     
     public Builder Links(cog.Builder<List<DashboardLink>> links) {
-    this.internal.links = links.build();
+    this.internal.links = links.Build();
         return this;
     }
     
     public Builder LinksOfLinks(cog.Builder<List<List<DashboardLink>>> linksOfLinks) {
-    this.internal.linksOfLinks = linksOfLinks.build();
+    this.internal.linksOfLinks = linksOfLinks.Build();
         return this;
     }
     
     public Builder SingleLink(cog.Builder<DashboardLink> singleLink) {
-    this.internal.singleLink = singleLink.build();
+    this.internal.singleLink = singleLink.Build();
         return this;
     }
-    public Dashboard build() {
+    public Dashboard Build() {
             return this.internal;
         }
     }

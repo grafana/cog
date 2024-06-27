@@ -29,7 +29,7 @@ public class SomeStruct {
     this.internal.title = title;
         return this;
     }
-    public SomeStruct build() {
+    public SomeStruct Build() {
             return this.internal;
         }
     }

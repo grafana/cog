@@ -26,7 +26,7 @@ public class SomePanel {
     this.internal.options.legend.show = show;
         return this;
     }
-    public SomePanel build() {
+    public SomePanel Build() {
             return this.internal;
         }
     }

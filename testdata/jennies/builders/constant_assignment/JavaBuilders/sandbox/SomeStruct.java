@@ -30,7 +30,7 @@ public class SomeStruct {
     this.internal.autoRefresh = false;
         return this;
     }
-    public SomeStruct build() {
+    public SomeStruct Build() {
             return this.internal;
         }
     }
