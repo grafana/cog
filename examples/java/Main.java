@@ -42,7 +42,7 @@ public class Main {
                 WithPanel(Logs.authLogs()).
                 WithPanel(Logs.kernelLogs()).
                 WithPanel(Logs.allSystemLogs()).
-                build();
+                Build();
         try {
             System.out.println(dashboard.toJSON());
         } catch (JsonProcessingException e) {
