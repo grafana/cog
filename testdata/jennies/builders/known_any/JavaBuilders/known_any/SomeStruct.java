@@ -19,7 +19,7 @@ public class SomeStruct {
     this.internal.config = configResource;
         return this;
     }
-    public SomeStruct build() {
+    public SomeStruct Build() {
             return this.internal;
         }
     }
