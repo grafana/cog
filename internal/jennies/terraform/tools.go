@@ -129,10 +129,8 @@ func formatTypeValueNoPointers(dflt any, t ast.Type) string {
 			return fmt.Sprintf("Int64Value(%d)", dflt)
 		case ast.KindInt64, ast.KindUint64:
 			return fmt.Sprintf("Int64Value(%d)", dflt)
-		case ast.KindFloat32:
-			return fmt.Sprintf("Float64Value(%f)", dflt)
-		case ast.KindFloat64:
-			return fmt.Sprintf("Float64Value(%f)", dflt)
+		case ast.KindFloat32, ast.KindFloat64:
+			return fmt.Sprintf("Float64Value(%v)", dflt)
 		case ast.KindBool:
 			return fmt.Sprintf("BoolValue(%t)", dflt)
 		case ast.KindAny:
