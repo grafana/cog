@@ -141,7 +141,13 @@ type MarshallingConfig struct {
 	Annotation           string
 }
 
-type DataqueryPanelSchema struct {
+type DataquerySchema struct {
 	Identifier string
 	Class      string
+}
+
+type PanelSchema struct {
+	Identifier  string
+	Options     string
+	FieldConfig string
 }

@@ -22,7 +22,7 @@ func (jenny Registry) JennyName() string {
 }
 
 func (jenny Registry) Generate(context languages.Context) (codejen.Files, error) {
-	panelRegistry, err := jenny.renderPanelRegistry()
+	panelRegistry, err := jenny.renderPanelConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -33,14 +33,14 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 	}
 
 	return codejen.Files{
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/PanelRegistry.java"), panelRegistry, jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/PanelConfig.java"), panelRegistry, jenny),
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Registry.java"), registry, jenny),
 	}, nil
 }
 
-func (jenny Registry) renderPanelRegistry() ([]byte, error) {
+func (jenny Registry) renderPanelConfig() ([]byte, error) {
 	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/panel_registry.tmpl", map[string]any{
+	if err := templates.ExecuteTemplate(&buf, "runtime/panel_config.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 	}); err != nil {
 		return nil, fmt.Errorf("failed executing template: %w", err)
@@ -51,8 +51,8 @@ func (jenny Registry) renderPanelRegistry() ([]byte, error) {
 
 func (jenny Registry) renderRegistry(context languages.Context) ([]byte, error) {
 	imports := NewImportMap(jenny.config.PackagePath)
-	var panelSchemas []DataqueryPanelSchema
-	var dataquerySchemas []DataqueryPanelSchema
+	var panelSchemas []PanelSchema
+	var dataquerySchemas []DataquerySchema
 
 	for _, schema := range context.Schemas {
 		if schema.Metadata.Kind != ast.SchemaKindComposable || schema.Metadata.Identifier == "" {
@@ -60,18 +60,23 @@ func (jenny Registry) renderRegistry(context languages.Context) ([]byte, error) 
 		}
 
 		if schema.Metadata.Variant == ast.SchemaVariantDataQuery {
-			dataquerySchemas = append(dataquerySchemas, DataqueryPanelSchema{
+			dataquerySchemas = append(dataquerySchemas, DataquerySchema{
 				Identifier: strings.ToLower(schema.Metadata.Identifier),
 				Class:      jenny.formatPackage(fmt.Sprintf("%s.%s", schema.Package, jenny.findDataqueryClass(schema))),
 			})
 		} else {
-			panelSchemas = append(panelSchemas, DataqueryPanelSchema{
-				Identifier: strings.ToLower(schema.Metadata.Identifier),
-				Class:      jenny.formatPackage(fmt.Sprintf("%s.Options", schema.Package)),
+			panelSchemas = append(panelSchemas, PanelSchema{
+				Identifier:  strings.ToLower(schema.Metadata.Identifier),
+				Options:     jenny.formatPackage(fmt.Sprintf("%s.Options.class", schema.Package)),
+				FieldConfig: jenny.findFieldConfig(schema),
 			})
 		}
 
 	}
+
+	sort.SliceStable(panelSchemas, func(i, j int) bool {
+		return panelSchemas[i].Identifier < panelSchemas[j].Identifier
+	})
 
 	sort.SliceStable(dataquerySchemas, func(i, j int) bool {
 		return dataquerySchemas[i].Identifier < dataquerySchemas[j].Identifier
@@ -95,6 +100,17 @@ func (jenny Registry) findDataqueryClass(schema *ast.Schema) string {
 	schema.Objects.Iterate(func(key string, object ast.Object) {
 		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
 			name = tools.UpperCamelCase(object.Name)
+		}
+	})
+
+	return name
+}
+
+func (jenny Registry) findFieldConfig(schema *ast.Schema) string {
+	name := "null"
+	schema.Objects.Iterate(func(key string, value ast.Object) {
+		if key == "FieldConfig" {
+			name = jenny.formatPackage(fmt.Sprintf("%s.FieldConfig.class", schema.Package))
 		}
 	})
 
