@@ -1,0 +1,36 @@
+package {{ .Package }};
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Registry {
+    private static final Map<String, Class<? extends PanelRegistry>> panelRegistry = new HashMap<>();
+    private static final Map<String, Class<? extends Dataquery>> dataqueryRegistry = new HashMap<>();
+    
+    static {
+        {{- range .PanelSchemas }}
+        registerPanel({{ printf "%#v" .Identifier }}, {{ .Class }}.class);
+        {{- end }}
+
+
+        {{- range .DataquerySchemas }}
+        registerDataquery({{ printf "%#v" .Identifier }}, {{ .Class }}.class);
+        {{- end }}
+    }
+
+    public static void registerDataquery(String type, Class<? extends Dataquery> clazz) {
+        dataqueryRegistry.put(type, clazz);
+    }
+
+    public static Class<? extends Dataquery> getDataquery(String type) {
+        return dataqueryRegistry.get(type);
+    }
+    
+    public static void registerPanel(String type, Class<? extends PanelRegistry> clazz) {
+        panelRegistry.put(type, clazz);
+    }
+
+    public static Class<? extends PanelRegistry> getPanel(String type) {
+        return panelRegistry.get(type);
+    }
+}

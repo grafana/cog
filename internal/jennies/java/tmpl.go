@@ -140,3 +140,8 @@ type MarshallingConfig struct {
 	ShouldAddMarshalling bool
 	Annotation           string
 }
+
+type DataqueryPanelSchema struct {
+	Identifier string
+	Class      string
+}
