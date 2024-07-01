@@ -1,14 +1,60 @@
 package {{ .Schema.Package }}
 
 import (
+	"encoding/json"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 {{ range .Objects }}
 type {{ .Name | formatObjectName }}DataSourceModel struct {
   {{- range .Type.Struct.Fields | filterScalars }}
-     {{.Name | formatFieldName }} {{.Type | formatTerraformType }} `tfsdk:"{{.Name | formatFieldNameTFSDK }}"`
+    {{.Name | formatFieldName }} {{.Type | formatTerraformType }} `tfsdk:"{{.Name | formatFieldNameTFSDK }}"`
   {{- end }}
-  TemporaryScalarPlaceholder types.Bool // @TODO Remove this once non-scalars are implemented
+    TemporaryScalarPlaceholder types.Bool // @TODO Remove this once non-scalars are implemented
 }
+
+func (m {{ .Name | formatObjectName }}DataSourceModel) GetAttrRefresh() interface{} {
+	var attr interface{}
+	var err error
+
+	attr, err = strconv.ParseBool(m.Refresh.ValueString())
+	if err == nil {
+		return attr
+	}
+
+	return m.Refresh.ValueString()
+}
+
+func (m {{ .Name | formatObjectName }}DataSourceModel) MarshalJSON() ([]byte, error) {
+	type json{{ .Name | formatObjectName }}DataSourceModel struct {
+    {{- range .Type.Struct.Fields | filterScalars }}
+      {{.Name | formatFieldName }} {{.Type | formatGolangType }} `json:"{{. | formatJSONField }}"`
+    {{- end }}
+	}
+
+	m = m.ApplyDefaults()
+  {{- range .Type.Struct.Fields | filterScalars }}
+    attr_{{.Name | formatAttrName }} := m.{{ .Name | formatFieldName }}.{{ .Type | formatTypeValue }}
+  {{- end }}
+
+	model := &json{{ .Name | formatObjectName }}DataSourceModel{
+  {{- range .Type.Struct.Fields | filterScalars }}
+      {{ .Name | formatFieldName }}: attr_{{ .Name | formatAttrName }},
+	{{- end }}
+  }
+	return json.Marshal(model)
+}
+
+func (m {{ .Name | formatObjectName }}DataSourceModel) ApplyDefaults() {{ .Name | formatObjectName }}DataSourceModel {
+  {{- range .Type.Struct.Fields | filterDefaults }}
+	if m.{{.Name | formatFieldName }}.IsNull() {
+		m.{{.Name | formatFieldName}} = types.{{ .Type | formatTypeValueNoPointers .Type.Default }}
+	}
+  {{- end }}
+	return m
+}
+
 {{ end }}
+

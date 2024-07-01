@@ -50,6 +50,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	})
 	jenny.AppendOneToMany(
 		common.If[languages.Context](globalConfig.Types, Models{Config: config}),
+		common.If[languages.Context](globalConfig.Types, Datasources{Config: config}),
 	)
 	// @TODO Re-enable this when ready
 	// jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
