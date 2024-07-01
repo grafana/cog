@@ -156,6 +156,12 @@ jobs:
           tools: phpstan, psalm
           extensions: none, curl, ctype, dom, mbstring, opcache, simplexml, tokenizer
           ini-values: opcache.enable_cli=1
+          
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
 
       - name: Install ts-node
         run: npm install -g ts-node
