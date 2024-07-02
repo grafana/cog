@@ -22,7 +22,7 @@ func VariantConfig() cogvariants.DataqueryConfig {
             }
 
             return dataquery, nil
-       },
+        },
 	}
 }
 

@@ -20,7 +20,6 @@ func VariantConfig() cogvariants.DataqueryConfig {
                     }
                 {{- end }}
 
-
                 return ""
             {{- else -}}
                 return {{ .object.Name | upperCamelCase }}Converter(panel)

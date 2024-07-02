@@ -117,7 +117,11 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 }
 
 func (generator *ConverterGenerator) constructorArgs(converter Converter, builder ast.Builder) []DirectArgMapping {
-	return tools.Map(builder.Constructor.Assignments, func(assignment ast.Assignment) DirectArgMapping {
+	argAssignments := tools.Filter(builder.Constructor.Assignments, func(assignment ast.Assignment) bool {
+		return assignment.Value.Argument != nil
+	})
+
+	return tools.Map(argAssignments, func(assignment ast.Assignment) DirectArgMapping {
 		return DirectArgMapping{
 			ValuePath: converter.inputRootPath().Append(assignment.Path),
 			ValueType: assignment.Path.Last().Type,
@@ -308,8 +312,10 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 			continue
 		}
 
+		assignmentType := assignment.Path.Last().Type
+
 		// For arrays: ensure they're not empty
-		if assignment.Path.Last().Type.IsArray() {
+		if assignmentType.IsArray() {
 			guard := MappingGuard{
 				Path:  converter.inputRootPath().Append(assignment.Path),
 				Op:    ast.MinLengthOp,
@@ -319,7 +325,8 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 		}
 
 		// For strings: ensure they're not empty
-		if assignment.Path.Last().Type.IsScalar() && assignment.Path.Last().Type.AsScalar().ScalarKind == ast.KindString {
+		// TODO: deal with datetime strings
+		if assignmentType.IsScalar() && assignmentType.AsScalar().ScalarKind == ast.KindString && !assignmentType.HasHint(ast.HintStringFormatDateTime) {
 			guard := MappingGuard{
 				Path:  converter.inputRootPath().Append(assignment.Path),
 				Op:    ast.NotEqualOp,
