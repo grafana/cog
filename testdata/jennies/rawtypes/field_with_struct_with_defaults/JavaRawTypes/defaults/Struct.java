@@ -1,8 +1,6 @@
 package defaults;
 
 
-
-
 public class Struct {
     public NestedStruct allFields;
     public NestedStruct partialFields;

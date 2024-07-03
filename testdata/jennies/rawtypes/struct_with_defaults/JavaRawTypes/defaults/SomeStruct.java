@@ -1,8 +1,6 @@
 package defaults;
 
 
-
-
 public class SomeStruct {
     public Boolean fieldBool;
     public String fieldString;
