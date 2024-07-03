@@ -5,6 +5,8 @@ package basic;
 // is
 // a
 // comment
+
+
 public class SomeStruct {
     // Anything can go in there.
     // Really, anything.
