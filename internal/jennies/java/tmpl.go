@@ -151,3 +151,18 @@ type PanelSchema struct {
 	Options     string
 	FieldConfig string
 }
+
+type Unmarshalling struct {
+	Package                   string
+	Name                      string
+	ShouldUnmarshallingPanels bool
+	Imports                   []string
+	DataqueryUnmarshalling    DataqueryUnmarshalling
+}
+
+type DataqueryUnmarshalling struct {
+	DataqueryHint   string
+	IsArray         bool
+	DatasourceField string
+	FieldName       string
+}

@@ -1,0 +1,86 @@
+package {{ .Package }};
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+{{- range .Imports }}
+import {{ . }};
+{{- end }}
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
+    
+    @Override
+    public {{ .Name }} deserialize(JsonParser jp, DeserializationContext cxt) throws IOException, JsonProcessingException {
+        ObjectMapper mapper = (ObjectMapper) jp.getCodec();
+        JsonNode root = mapper.readTree(jp);
+        
+        // Deserialise all the fields
+        {{ .Name }} {{ .Name | lowerCamelCase }} = mapper.treeToValue(root, {{ .Name }}.class);
+        
+        {{- if .ShouldUnmarshallingPanels }}
+        // Deserialise panels
+        {{ .Name | lowerCamelCase }}.type = root.get("type").asText(); 
+        PanelConfig config = Registry.getPanel(panel.type);
+        if (config != null) {
+            panel.options = mapper.treeToValue(root.get("options"), config.getOptionsClass());
+            
+            FieldConfigSource fieldConfigSource = mapper.treeToValue(root.get("fieldConfig"), FieldConfigSource.class);
+            FieldConfig fieldConfig = fieldConfigSource.defaults;
+            
+            if (fieldConfig != null) {
+                JsonNode customNode = root.get("fieldConfig").get("defaults").get("custom");
+                if (customNode != null) {
+                    Class<?> customClass = config.getFieldConfigClass();
+                    if (customClass != null) {
+                        Object custom = mapper.treeToValue(customNode, customClass);
+                        fieldConfig.custom = custom;
+                    }
+                }
+                panel.fieldConfig = fieldConfigSource;
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown panel type: " + panel.type);
+        }
+        {{- end }}
+       
+       
+       // Dataquery stuff
+       {{- if eq .DataqueryUnmarshalling.DatasourceField "" }}
+       String datasourceType = "";
+       {{- else }}
+       {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.DatasourceField }} = mapper.treeToValue(root.get({{ printf "%#v" .DataqueryUnmarshalling.DatasourceField }}), DataSourceRef.class);
+       String datasourceType = {{ .DataqueryUnmarshalling.DataqueryHint }};
+       {{- end }}
+       
+       {{- if .DataqueryUnmarshalling.IsArray }}
+       List<Dataquery> targets = new ArrayList<>();
+       for (JsonNode node : root.get({{ printf "%#v" .DataqueryUnmarshalling.FieldName }})) {
+            Class<? extends Dataquery> clazz = Registry.getDataquery(datasourceType);
+            if (clazz != null) {
+                Dataquery dataquery = mapper.treeToValue(node, clazz);
+                targets.add(dataquery);
+            } else {
+              throw new IllegalArgumentException("Unknown datasource type: " + datasourceType);
+            }
+      }
+      {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.FieldName }} = targets;
+      {{- else }}
+      Class<? extends Dataquery> clazz = Registry.getDataquery(datasourceType);
+      if (clazz != null) {
+          {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.FieldName }} = mapper.treeToValue(root.get({{ printf "%#v" .DataqueryUnmarshalling.FieldName }}), clazz);
+      } else {
+          throw new IllegalArgumentException("Unknown datasource type: " + datasourceType);
+      }
+      {{- end }}
+        
+       return {{ .Name | lowerCamelCase }};
+    }
+}
