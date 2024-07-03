@@ -71,7 +71,6 @@ func (jenny Registry) renderRegistry(context languages.Context) ([]byte, error) 
 				FieldConfig: jenny.findFieldConfig(schema),
 			})
 		}
-
 	}
 
 	sort.SliceStable(panelSchemas, func(i, j int) bool {
