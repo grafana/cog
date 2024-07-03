@@ -93,6 +93,15 @@ func (converter Converter) inputRootPath() ast.Path {
 }
 
 type ConverterGenerator struct {
+	// generatedPaths lets us keep track of the paths in the input that we generated option mappings for.
+	// Since several options can represent with a single path, it allows us to not have "duplicates".
+	generatedPaths map[string]struct{}
+}
+
+func NewConverterGenerator() *ConverterGenerator {
+	return &ConverterGenerator{
+		generatedPaths: make(map[string]struct{}),
+	}
 }
 
 func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Builder) Converter {
@@ -110,6 +119,9 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 
 	converter.Mappings = tools.Map(builder.Options, func(option ast.Option) OptionMapping {
 		return generator.convertOption(context, converter, option)
+	})
+	converter.Mappings = tools.Filter(converter.Mappings, func(mapping OptionMapping) bool {
+		return mapping.Option.Name != ""
 	})
 
 	return converter
@@ -136,18 +148,27 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		Guards: generator.optionGuards(converter, option),
 	}
 
-	nonConstantAssignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
+	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
+		if _, ok := generator.generatedPaths[assignment.Path.String()]; ok {
+			return false
+		}
+
 		return assignment.Value.Constant == nil
 	})
+	if len(assignments) == 0 {
+		return OptionMapping{}
+	}
 
-	if len(nonConstantAssignments) == 1 && nonConstantAssignments[0].Method == ast.AppendAssignment {
-		mapping.RepeatFor = converter.inputRootPath().Append(nonConstantAssignments[0].Path)
+	if len(assignments) == 1 && assignments[0].Method == ast.AppendAssignment {
+		mapping.RepeatFor = converter.inputRootPath().Append(assignments[0].Path)
 		mapping.RepeatAs = "item"
 	}
 
 	i := 0
-	for _, assignment := range nonConstantAssignments {
+	for _, assignment := range assignments {
 		i++
+
+		generator.generatedPaths[assignment.Path.String()] = struct{}{}
 
 		argName := fmt.Sprintf("arg%d", i)
 		valueType := assignment.Path.Last().Type
