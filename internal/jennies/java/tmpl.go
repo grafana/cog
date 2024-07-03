@@ -93,9 +93,10 @@ type ClassTemplate struct {
 	Builders   []Builder
 	HasBuilder bool
 
-	Variant           string
-	MarshallingConfig MarshallingConfig
-	ToJSONFunction    string
+	Variant               string
+	MarshallingConfig     MarshallingConfig
+	ToJSONFunction        string
+	ShouldAddDeserialiser bool
 }
 
 type Field struct {

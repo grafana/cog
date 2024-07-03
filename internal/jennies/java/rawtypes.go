@@ -231,7 +231,8 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 			ShouldAddMarshalling: jenny.config.GeneratePOM,
 			Annotation:           jenny.jsonMarshaller.annotation(object.Type),
 		},
-		ToJSONFunction: jenny.jsonMarshaller.genToJSONFunction(object.Type),
+		ToJSONFunction:        jenny.jsonMarshaller.genToJSONFunction(object.Type),
+		ShouldAddDeserialiser: jenny.typeFormatter.objectNeedsCustomDeserialiser(object),
 	}); err != nil {
 		return nil, err
 	}

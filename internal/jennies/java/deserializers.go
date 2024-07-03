@@ -26,7 +26,7 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 	for _, schema := range context.Schemas {
 		var hasErr error
 		schema.Objects.Iterate(func(key string, obj ast.Object) {
-			if jenny.objectNeedsCustomDeserialiser(context, obj) {
+			if objectNeedsCustomDeserialiser(context, obj) {
 				f, err := jenny.genCustomDeserialiser(context, obj)
 				if err != nil {
 					hasErr = err
@@ -64,34 +64,6 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 
 	path := filepath.Join(jenny.config.ProjectPath, obj.SelfRef.ReferredPkg, fmt.Sprintf("%sDeserializer.java", obj.SelfRef.ReferredType))
 	return codejen.NewFile(path, buf.Bytes(), jenny), nil
-}
-
-func (jenny *Deserializers) objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object) bool {
-	// an object needs a custom unmarshal if:
-	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
-	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot
-
-	if !obj.Type.IsStruct() {
-		return false
-	}
-
-	if obj.Type.HasHint(ast.HintDisjunctionOfScalars) || obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
-		return false
-	}
-
-	// is it a struct generated from a disjunction?
-	if obj.Type.IsStructGeneratedFromDisjunction() {
-		return true
-	}
-
-	// is there a KindComposableSlot field somewhere?
-	for _, field := range obj.Type.AsStruct().Fields {
-		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
-			return true
-		}
-	}
-
-	return false
 }
 
 func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.Object) (DataqueryUnmarshalling, error) {

@@ -342,3 +342,15 @@ func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
 
 	return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(enum.Values[0].Name)))
 }
+
+func (tf *typeFormatter) objectNeedsCustomDeserialiser(obj ast.Object) bool {
+	if !tf.config.GeneratePOM || !tf.config.generateBuilders || tf.config.SkipRuntime {
+		return false
+	}
+	if objectNeedsCustomDeserialiser(tf.context, obj) {
+		tf.packageMapper("com.fasterxml.jackson", "databind.annotation.JsonDeserialize")
+		return true
+	}
+
+	return false
+}
