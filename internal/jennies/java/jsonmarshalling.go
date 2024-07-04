@@ -12,7 +12,7 @@ type JSONMarshaller struct {
 }
 
 func (j JSONMarshaller) genToJSONFunction(t ast.Type) string {
-	if !j.config.generateBuilders || j.config.SkipRuntime || !j.config.GeneratePOM {
+	if !j.config.generateBuilders || j.config.SkipRuntime {
 		return ""
 	}
 
@@ -34,7 +34,7 @@ func (j JSONMarshaller) genToJSONFunction(t ast.Type) string {
 }
 
 func (j JSONMarshaller) annotation(t ast.Type) string {
-	if !j.config.generateBuilders || j.config.SkipRuntime || !j.config.GeneratePOM {
+	if !j.config.generateBuilders || j.config.SkipRuntime {
 		return ""
 	}
 
