@@ -90,7 +90,14 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'adopt'
+          distribution: 'temurin'
+          check-latest: true
+      - name: Java setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        env:
+          CHECK_GENERATED_FILES: true
+        with:
+          gradle-version: '8.8'
 
       - name: Install ts-node
         run: npm install -g ts-node
@@ -120,12 +127,10 @@ jobs:
 
       - name: Lint generated Python code
         run: mypy generated/python/
-        
-      - name: Compile generated Java code
-        run: |
-          find generated/java -name '*.java' -d > sources.txt
-          javac @sources.txt
 
+      - name: Compile generated Java code
+        run: gradle build -p generated/java
+      
       - name: Lint generated PHP code with phpstan
         run: phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
 
