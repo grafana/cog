@@ -1,3 +1,5 @@
+package test;
+
 import com.grafana.foundation.cog.Builder;
 import com.grafana.foundation.cog.variants.Dataquery;
 import com.grafana.foundation.common.*;

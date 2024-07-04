@@ -1,3 +1,5 @@
+package test;
+
 import com.grafana.foundation.timeseries.PanelBuilder;
 
 public class Network {
