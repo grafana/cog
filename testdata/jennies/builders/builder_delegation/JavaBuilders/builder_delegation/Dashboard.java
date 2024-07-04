@@ -1,16 +1,31 @@
 package builder_delegation;
 
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class Dashboard {
-    public Long id;
+public class Dashboard { 
+    @JsonProperty("id")
+    public Long id; 
+    @JsonProperty("title")
     public String title;
-    // will be expanded to []cog.Builder<DashboardLink>
+    // will be expanded to []cog.Builder<DashboardLink> 
+    @JsonProperty("links")
     public List<DashboardLink> links;
-    // will be expanded to [][]cog.Builder<DashboardLink>
+    // will be expanded to [][]cog.Builder<DashboardLink> 
+    @JsonProperty("linksOfLinks")
     public List<List<DashboardLink>> linksOfLinks;
-    // will be expanded to cog.Builder<DashboardLink>
+    // will be expanded to cog.Builder<DashboardLink> 
+    @JsonProperty("singleLink")
     public DashboardLink singleLink;
+    
+    public String ToJSON() throws JsonProcessingException {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        return ow.writeValueAsString(this);
+    }
+
     
     public static class Builder implements cog.Builder<Dashboard> {
         private Dashboard internal;

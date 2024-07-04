@@ -12,7 +12,7 @@ package {{ .Package }};
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
     {{- template "types" dict "Fields" .Fields "Annotation" .Annotation }}
 
-    {{- if not .Extends }}
+    {{- if and (ne .ToJSONFunction "") (not .Extends) }}
     {{ .ToJSONFunction }}
     {{- end }}
 
@@ -30,8 +30,9 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
+    {{- if ne $.Annotation "" }} 
     {{ fillAnnotationPattern $.Annotation .Name }}
+    {{- end }}
     public {{ .Type }} {{ .Name | escapeVar }};
-
     {{- end }}
 {{- end }}

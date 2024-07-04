@@ -1,12 +1,26 @@
 package basic_struct_defaults;
 
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class SomeStruct {
-    public Long id;
-    public String uid;
-    public List<String> tags;
+public class SomeStruct { 
+    @JsonProperty("id")
+    public Long id; 
+    @JsonProperty("uid")
+    public String uid; 
+    @JsonProperty("tags")
+    public List<String> tags; 
+    @JsonProperty("liveNow")
     public Boolean liveNow;
+    
+    public String ToJSON() throws JsonProcessingException {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        return ow.writeValueAsString(this);
+    }
+
     
     public static class Builder implements cog.Builder<SomeStruct> {
         private SomeStruct internal;
