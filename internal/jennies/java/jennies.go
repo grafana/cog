@@ -14,10 +14,8 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	GeneratePOM  bool   `yaml:"gen_pom"`
-	MavenVersion string `yaml:"maven_version"`
-	ProjectPath  string `yaml:"-"`
-	PackagePath  string `yaml:"package_path"`
+	ProjectPath string `yaml:"-"`
+	PackagePath string `yaml:"package_path"`
 
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
@@ -59,7 +57,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AppendOneToMany(
 		common.If[languages.Context](!config.SkipRuntime, Runtime{config: language.config}),
 		RawTypes{config: config},
-		common.If[languages.Context](config.GeneratePOM, Pom{language.config}),
+		Gradle{config: config},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

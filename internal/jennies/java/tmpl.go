@@ -12,7 +12,7 @@ import (
 //nolint:gochecknoglobals
 var templates *template.Template
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/veneers/*.tmpl templates/marshalling/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/veneers/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.*
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -93,9 +93,9 @@ type ClassTemplate struct {
 	Builders   []Builder
 	HasBuilder bool
 
-	Variant           string
-	MarshallingConfig MarshallingConfig
-	ToJSONFunction    string
+	Variant        string
+	Annotation     string
+	ToJSONFunction string
 }
 
 type Field struct {
@@ -134,9 +134,4 @@ type OptionCall struct {
 	Initializers []string
 	OptionName   string
 	Args         []string
-}
-
-type MarshallingConfig struct {
-	ShouldAddMarshalling bool
-	Annotation           string
 }
