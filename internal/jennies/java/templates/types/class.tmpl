@@ -14,9 +14,9 @@ package {{ .Package }};
 @JsonDeserialize(using = {{ .Name }}Deserializer.class)
 {{- end }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
-    {{- template "types" dict "Fields" .Fields "MarshallingConfig" .MarshallingConfig }}
+    {{- template "types" dict "Fields" .Fields "Annotation" .Annotation }}
 
-    {{- if and .MarshallingConfig.ShouldAddMarshalling (not .Extends) }}
+    {{- if and (ne .ToJSONFunction "") (not .Extends) }}
     {{ .ToJSONFunction }}
     {{- end }}
 
@@ -34,10 +34,9 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
-    {{- if $.MarshallingConfig.ShouldAddMarshalling }}
-    {{ fillAnnotationPattern $.MarshallingConfig.Annotation .Name }}
+    {{- if ne $.Annotation "" }} 
+    {{ fillAnnotationPattern $.Annotation .Name }}
     {{- end }}
     public {{ .Type }} {{ .Name | escapeVar }};
-
     {{- end }}
 {{- end }}

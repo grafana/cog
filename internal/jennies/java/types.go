@@ -344,7 +344,7 @@ func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
 }
 
 func (tf *typeFormatter) objectNeedsCustomDeserialiser(obj ast.Object) bool {
-	if !tf.config.GeneratePOM || !tf.config.generateBuilders || tf.config.SkipRuntime {
+	if !tf.config.generateBuilders || tf.config.SkipRuntime {
 		return false
 	}
 	if objectNeedsCustomDeserialiser(tf.context, obj) {

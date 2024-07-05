@@ -219,18 +219,15 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:    jenny.typeFormatter.formatPackage(pkg),
-		Imports:    jenny.imports,
-		Name:       tools.UpperCamelCase(object.Name),
-		Fields:     fields,
-		Comments:   object.Comments,
-		Variant:    jenny.getVariant(object.Type),
-		Builders:   builders,
-		HasBuilder: hasBuilder,
-		MarshallingConfig: MarshallingConfig{
-			ShouldAddMarshalling: jenny.config.GeneratePOM,
-			Annotation:           jenny.jsonMarshaller.annotation(object.Type),
-		},
+		Package:               jenny.typeFormatter.formatPackage(pkg),
+		Imports:               jenny.imports,
+		Name:                  tools.UpperCamelCase(object.Name),
+		Fields:                fields,
+		Comments:              object.Comments,
+		Variant:               jenny.getVariant(object.Type),
+		Builders:              builders,
+		HasBuilder:            hasBuilder,
+		Annotation:            jenny.jsonMarshaller.annotation(object.Type),
 		ToJSONFunction:        jenny.jsonMarshaller.genToJSONFunction(object.Type),
 		ShouldAddDeserialiser: jenny.typeFormatter.objectNeedsCustomDeserialiser(object),
 	}); err != nil {

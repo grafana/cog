@@ -299,6 +299,18 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 	for i, _ := v.Fields(cue.Optional(true), cue.Definitions(true)); i.Next(); {
 		fieldLabel := selectorLabel(i.Selector())
 
+		// inline definition
+		if i.FieldType().IsDefinition() {
+			obj, err := g.declareObject(fieldLabel, i.Value())
+			if err != nil {
+				return nil, err
+			}
+
+			g.schema.AddObject(obj)
+			continue
+		}
+
+		// "normal" field
 		node, err := g.declareNode(i.Value())
 		if err != nil {
 			return nil, err

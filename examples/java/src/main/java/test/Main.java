@@ -1,3 +1,5 @@
+package test;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.grafana.foundation.cog.Builder;
 import com.grafana.foundation.dashboard.*;
@@ -44,7 +46,7 @@ public class Main {
                 WithPanel(Logs.allSystemLogs()).
                 Build();
         try {
-            System.out.println(dashboard.toJSON());
+            System.out.println(dashboard.ToJSON());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
