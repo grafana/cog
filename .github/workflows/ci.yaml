@@ -206,5 +206,5 @@ jobs:
 
       - name: Run Java example
         run: |
-          gradle publishToMavenLocal -p generated/java
+          gradle publishToMavenLocal -p generated
           gradle run -p examples/java
