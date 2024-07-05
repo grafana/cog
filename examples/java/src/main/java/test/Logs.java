@@ -1,3 +1,5 @@
+package test;
+
 import com.grafana.foundation.logs.PanelBuilder;
 
 public class Logs {
