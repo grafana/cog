@@ -205,6 +205,4 @@ jobs:
           php index.php
 
       - name: Run Java example
-        run: |
-          gradle publishToLocalMaven -p ./generated/java
-          gradle build -p examples/java
+        run: gradle run -p examples/java

@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 java {
@@ -8,6 +9,10 @@ java {
 
     withJavadocJar()
     withSourcesJar()
+}
+
+application {
+    mainClass = "test.Main"
 }
 
 allprojects {
