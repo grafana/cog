@@ -11,24 +11,24 @@ public class SomePanel {
     @JsonProperty("options")
     public Options options;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<SomePanel> {
-        private SomePanel internal;
+        private final SomePanel internal;
         
         public Builder() {
             this.internal = new SomePanel();
         }
-    public Builder Title(String title) {
+    public Builder title(String title) {
     this.internal.title = title;
         return this;
     }
     
-    public Builder ShowLegend(Boolean show) {
+    public Builder showLegend(Boolean show) {
 		if (this.internal.options == null) {
 			this.internal.options = new initialization_safeguards.Options();
 		}
@@ -38,7 +38,7 @@ public class SomePanel {
     this.internal.options.legend.show = show;
         return this;
     }
-    public SomePanel Build() {
+    public SomePanel build() {
             return this.internal;
         }
     }

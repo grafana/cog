@@ -10,23 +10,23 @@ public class SomeStruct {
     @JsonProperty("config")
     public Map<String, String> config;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<SomeStruct> {
-        private SomeStruct internal;
+        private final SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder Config(Map<String, String> config) {
+    public Builder config(Map<String, String> config) {
     this.internal.config = config;
         return this;
     }
-    public SomeStruct Build() {
+    public SomeStruct build() {
             return this.internal;
         }
     }

@@ -28,7 +28,7 @@ public class Options {
     @JsonProperty("navigateAfter")
     public String navigateAfter;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }

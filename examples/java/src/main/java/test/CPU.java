@@ -24,15 +24,15 @@ public class CPU {
         th2.value = 80.0;
 
         return Common.defaultTimeSeries().
-                Title("CPU Usage").
-                Span(18).
-                Stacking(new StackingConfig.Builder().Mode(StackingMode.NORMAL)).
-                Thresholds(new ThresholdsConfig.Builder().
-                        Mode(ThresholdsMode.ABSOLUTE).
-                        Steps(List.of(th1, th2))).
-                Max(1.0).
-                Min(0.0).
-                WithTarget(Common.basicPrometheusQuery(query, "{{ cpu }}"));
+                title("CPU Usage").
+                span(18).
+                stacking(new StackingConfig.Builder().mode(StackingMode.NORMAL)).
+                thresholds(new ThresholdsConfig.Builder().
+                        mode(ThresholdsMode.ABSOLUTE).
+                        steps(List.of(th1, th2))).
+                max(1.0).
+                min(0.0).
+                withTarget(Common.basicPrometheusQuery(query, "{{ cpu }}"));
     }
 
     public static Builder<Panel> loadAverageTimeseries() {
@@ -42,19 +42,19 @@ public class CPU {
         Threshold th2 = new Threshold();
         th2.value = 80.0;
         th2.color = "red";
-        return Common.defaultTimeSeries().Title("Load Average").
-                Span(18).
-                Thresholds(
+        return Common.defaultTimeSeries().title("Load Average").
+                span(18).
+                thresholds(
                         new ThresholdsConfig.Builder().
-                                Mode(ThresholdsMode.ABSOLUTE).
-                                Steps(List.of(th1, th2))
+                                mode(ThresholdsMode.ABSOLUTE).
+                                steps(List.of(th1, th2))
                 ).
-                Min(0.0).
-                Unit("short").
-                WithTarget(Common.basicPrometheusQuery("node_load1{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "1m load average")).
-                WithTarget(Common.basicPrometheusQuery("node_load5{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "5m load average")).
-                WithTarget(Common.basicPrometheusQuery("node_load15{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "15m load average")).
-                WithTarget(Common.basicPrometheusQuery("count(node_cpu_seconds_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", mode=\"idle\"})", "logical cores"));
+                min(0.0).
+                unit("short").
+                withTarget(Common.basicPrometheusQuery("node_load1{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "1m load average")).
+                withTarget(Common.basicPrometheusQuery("node_load5{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "5m load average")).
+                withTarget(Common.basicPrometheusQuery("node_load15{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "15m load average")).
+                withTarget(Common.basicPrometheusQuery("count(node_cpu_seconds_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", mode=\"idle\"})", "logical cores"));
     }
 
     public static Builder<Panel> cpuTemperatureGauge() {
@@ -69,14 +69,14 @@ public class CPU {
         th3.value = 85.0;
         th3.color = "rgba(245, 54, 54, 0.9)";
         return Common.defaultGauge().
-                Title("CPU Temperature").
-                Span(6).
-                Min(30.0).
-                Max(100.0).
-                Unit("celsius").
-                Thresholds(new ThresholdsConfig.Builder().
-                        Mode(ThresholdsMode.ABSOLUTE).
-                        Steps(List.of(th1, th2, th3))).
-                WithTarget(Common.basicPrometheusQuery("avg(node_hwmon_temp_celsius{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", ""));
+                title("CPU Temperature").
+                span(6).
+                min(30.0).
+                max(100.0).
+                unit("celsius").
+                thresholds(new ThresholdsConfig.Builder().
+                        mode(ThresholdsMode.ABSOLUTE).
+                        steps(List.of(th1, th2, th3))).
+                withTarget(Common.basicPrometheusQuery("avg(node_hwmon_temp_celsius{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", ""));
     }
 }

@@ -9,19 +9,19 @@ public class SomeStruct {
     @JsonProperty("config")
     public Object config;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<SomeStruct> {
-        private SomeStruct internal;
+        private final SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder Title(String title) {
+    public Builder title(String title) {
 		if (this.internal.config == null) {
 			this.internal.config = new known_any.Config();
 		}
@@ -30,7 +30,7 @@ public class SomeStruct {
     this.internal.config = configResource;
         return this;
     }
-    public SomeStruct Build() {
+    public SomeStruct build() {
             return this.internal;
         }
     }

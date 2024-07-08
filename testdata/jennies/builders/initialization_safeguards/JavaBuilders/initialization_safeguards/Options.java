@@ -9,7 +9,7 @@ public class Options {
     @JsonProperty("legend")
     public LegendOptions legend;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }

@@ -11,19 +11,19 @@ public class Dashboard {
     @JsonProperty("variables")
     public List<Variable> variables;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<Dashboard> {
-        private Dashboard internal;
+        private final Dashboard internal;
         
         public Builder() {
             this.internal = new Dashboard();
         }
-    public Builder WithVariable(String name,String value) {
+    public Builder withVariable(String name,String value) {
 		if (this.internal.variables == null) {
 			this.internal.variables = new LinkedList<>();
 		}
@@ -33,7 +33,7 @@ public class Dashboard {
     this.internal.variables.add(variable);
         return this;
     }
-    public Dashboard Build() {
+    public Dashboard build() {
             return this.internal;
         }
     }

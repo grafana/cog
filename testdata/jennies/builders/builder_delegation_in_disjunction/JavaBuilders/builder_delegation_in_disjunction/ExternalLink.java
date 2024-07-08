@@ -9,23 +9,23 @@ public class ExternalLink {
     @JsonProperty("url")
     public String url;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<ExternalLink> {
-        private ExternalLink internal;
+        private final ExternalLink internal;
         
         public Builder() {
             this.internal = new ExternalLink();
         }
-    public Builder Url(String url) {
+    public Builder url(String url) {
     this.internal.url = url;
         return this;
     }
-    public ExternalLink Build() {
+    public ExternalLink build() {
             return this.internal;
         }
     }

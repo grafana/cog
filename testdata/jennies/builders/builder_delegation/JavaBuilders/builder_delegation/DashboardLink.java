@@ -11,28 +11,28 @@ public class DashboardLink {
     @JsonProperty("url")
     public String url;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<DashboardLink> {
-        private DashboardLink internal;
+        private final DashboardLink internal;
         
         public Builder() {
             this.internal = new DashboardLink();
         }
-    public Builder Title(String title) {
+    public Builder title(String title) {
     this.internal.title = title;
         return this;
     }
     
-    public Builder Url(String url) {
+    public Builder url(String url) {
     this.internal.url = url;
         return this;
     }
-    public DashboardLink Build() {
+    public DashboardLink build() {
             return this.internal;
         }
     }

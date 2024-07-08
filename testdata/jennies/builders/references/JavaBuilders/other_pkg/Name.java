@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class Name { 
-    @JsonProperty("firstName")
+    @JsonProperty("first_name")
     public String firstName; 
-    @JsonProperty("lastName")
+    @JsonProperty("last_name")
     public String lastName;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }

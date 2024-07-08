@@ -30,24 +30,24 @@ public class Memory {
         th2.value = 80.0;
 
         return Common.defaultTimeSeries().
-                Title("Memory Usage").
-                Span(18).
-                Stacking(new StackingConfig.Builder().Mode(StackingMode.NORMAL)).
-                Thresholds(new ThresholdsConfig.Builder().
-                        Mode(ThresholdsMode.ABSOLUTE).
-                        Steps(List.of(th1, th2))
+                title("Memory Usage").
+                span(18).
+                stacking(new StackingConfig.Builder().mode(StackingMode.NORMAL)).
+                thresholds(new ThresholdsConfig.Builder().
+                        mode(ThresholdsMode.ABSOLUTE).
+                        steps(List.of(th1, th2))
                 ).
-                Min(0.0).
-                Unit("bytes").
-                Decimals(2.0).
-                WithTarget(Common.basicPrometheusQuery(memUsedQuery, "Used")).
-                WithTarget(
+                min(0.0).
+                unit("bytes").
+                decimals(2.0).
+                withTarget(Common.basicPrometheusQuery(memUsedQuery, "Used")).
+                withTarget(
                         Common.basicPrometheusQuery("node_memory_Buffers_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "Buffers")
                 ).
-                WithTarget(
+                withTarget(
                         Common.basicPrometheusQuery("node_memory_Cached_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "Cached")
                 ).
-                WithTarget(
+                withTarget(
                         Common.basicPrometheusQuery("node_memory_MemFree_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "Free")
                 );
     }
@@ -70,15 +70,15 @@ public class Memory {
         th3.color = "rgba(245, 54, 54, 0.9)";
 
         return Common.defaultGauge().
-                Title("Memory Usage").
-                Span(6).
-                Min(30.0).
-                Max(100.0).
-                Unit("percent").
-                Thresholds(new ThresholdsConfig.Builder().
-                        Mode(ThresholdsMode.ABSOLUTE).
-                        Steps(List.of(th1, th2, th3))
+                title("Memory Usage").
+                span(6).
+                min(30.0).
+                max(100.0).
+                unit("percent").
+                thresholds(new ThresholdsConfig.Builder().
+                        mode(ThresholdsMode.ABSOLUTE).
+                        steps(List.of(th1, th2, th3))
                 ).
-                WithTarget(Common.basicPrometheusQuery(query, ""));
+                withTarget(Common.basicPrometheusQuery(query, ""));
     }
 }
