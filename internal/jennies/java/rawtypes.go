@@ -210,7 +210,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	fields := make([]Field, 0)
 	for _, field := range object.Type.AsStruct().Fields {
 		fields = append(fields, Field{
-			Name:     tools.LowerCamelCase(field.Name),
+			Name:     field.Name,
 			Type:     jenny.typeFormatter.formatFieldType(field.Type),
 			Comments: field.Comments,
 		})

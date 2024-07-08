@@ -20,38 +20,38 @@ public class SomeStruct {
     @JsonProperty("liveNow")
     public Boolean liveNow;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<SomeStruct> {
-        private SomeStruct internal;
+        private final SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder Id(Long id) {
+    public Builder id(Long id) {
     this.internal.id = id;
         return this;
     }
     
-    public Builder Uid(String uid) {
+    public Builder uid(String uid) {
     this.internal.uid = uid;
         return this;
     }
     
-    public Builder Tags(List<String> tags) {
+    public Builder tags(List<String> tags) {
     this.internal.tags = tags;
         return this;
     }
     
-    public Builder LiveNow(Boolean liveNow) {
+    public Builder liveNow(Boolean liveNow) {
     this.internal.liveNow = liveNow;
         return this;
     }
-    public SomeStruct Build() {
+    public SomeStruct build() {
             return this.internal;
         }
     }

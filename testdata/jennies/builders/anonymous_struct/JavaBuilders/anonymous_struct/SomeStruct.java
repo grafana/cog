@@ -9,23 +9,23 @@ public class SomeStruct {
     @JsonProperty("time")
     public Object time;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<SomeStruct> {
-        private SomeStruct internal;
+        private final SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder Time(Object time) {
+    public Builder time(Object time) {
     this.internal.time = time;
         return this;
     }
-    public SomeStruct Build() {
+    public SomeStruct build() {
             return this.internal;
         }
     }

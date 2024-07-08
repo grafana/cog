@@ -13,25 +13,25 @@ public class SomePanel {
     @JsonProperty("cursor")
     public CursorMode cursor;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<SomePanel> {
-        private SomePanel internal;
+        private final SomePanel internal;
         
         public Builder() {
             this.internal = new SomePanel();
     this.internal.type = "panel_type";
     this.internal.cursor = CursorMode.TOOLTIP;
         }
-    public Builder Title(String title) {
+    public Builder title(String title) {
     this.internal.title = title;
         return this;
     }
-    public SomePanel Build() {
+    public SomePanel build() {
             return this.internal;
         }
     }

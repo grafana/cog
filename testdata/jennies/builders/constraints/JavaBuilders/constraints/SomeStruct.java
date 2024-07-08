@@ -11,19 +11,19 @@ public class SomeStruct {
     @JsonProperty("title")
     public String title;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<SomeStruct> {
-        private SomeStruct internal;
+        private final SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder Id(Long id) {
+    public Builder id(Long id) {
         if (!(id >= 5)) {
             throw new IllegalArgumentException("id must be >= 5");
         }
@@ -34,14 +34,14 @@ public class SomeStruct {
         return this;
     }
     
-    public Builder Title(String title) {
+    public Builder title(String title) {
         if (!(title.length() >= 1)) {
             throw new IllegalArgumentException("title.length() must be >= 1");
         }
     this.internal.title = title;
         return this;
     }
-    public SomeStruct Build() {
+    public SomeStruct build() {
             return this.internal;
         }
     }

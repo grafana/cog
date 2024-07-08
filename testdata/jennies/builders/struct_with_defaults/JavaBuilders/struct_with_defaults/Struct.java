@@ -17,52 +17,52 @@ public class Struct {
     @JsonProperty("partialComplexField")
     public Object partialComplexField;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<Struct> {
-        private Struct internal;
+        private final Struct internal;
         
         public Builder() {
             this.internal = new Struct();
         NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
-        nestedStructResource.StringVal("hello");
-        nestedStructResource.IntVal(3L);
-        this.AllFields(nestedStructResource);
+        nestedStructResource.stringVal("hello");
+        nestedStructResource.intVal(3L);
+        this.allFields(nestedStructResource);
         NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
-        nestedStructResource.IntVal(4L);
-        this.PartialFields(nestedStructResource);
-        this.ComplexField(new Object());
-        this.PartialComplexField(new Object());
+        nestedStructResource.intVal(4L);
+        this.partialFields(nestedStructResource);
+        this.complexField(new Object());
+        this.partialComplexField(new Object());
         }
-    public Builder AllFields(cog.Builder<NestedStruct> allFields) {
-    this.internal.allFields = allFields.Build();
+    public Builder allFields(cog.Builder<NestedStruct> allFields) {
+    this.internal.allFields = allFields.build();
         return this;
     }
     
-    public Builder PartialFields(cog.Builder<NestedStruct> partialFields) {
-    this.internal.partialFields = partialFields.Build();
+    public Builder partialFields(cog.Builder<NestedStruct> partialFields) {
+    this.internal.partialFields = partialFields.build();
         return this;
     }
     
-    public Builder EmptyFields(cog.Builder<NestedStruct> emptyFields) {
-    this.internal.emptyFields = emptyFields.Build();
+    public Builder emptyFields(cog.Builder<NestedStruct> emptyFields) {
+    this.internal.emptyFields = emptyFields.build();
         return this;
     }
     
-    public Builder ComplexField(Object complexField) {
+    public Builder complexField(Object complexField) {
     this.internal.complexField = complexField;
         return this;
     }
     
-    public Builder PartialComplexField(Object partialComplexField) {
+    public Builder partialComplexField(Object partialComplexField) {
     this.internal.partialComplexField = partialComplexField;
         return this;
     }
-    public Struct Build() {
+    public Struct build() {
             return this.internal;
         }
     }

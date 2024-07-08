@@ -1,5 +1,5 @@
 
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         {{- range .Fields }}
         if ({{ .Name|lowerCamelCase }} != null) {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

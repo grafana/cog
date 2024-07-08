@@ -10,23 +10,23 @@ public class Person {
     @JsonProperty("name")
     public Name name;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<Person> {
-        private Person internal;
+        private final Person internal;
         
         public Builder() {
             this.internal = new Person();
         }
-    public Builder Name(Name name) {
+    public Builder name(Name name) {
     this.internal.name = name;
         return this;
     }
-    public Person Build() {
+    public Person build() {
             return this.internal;
         }
     }

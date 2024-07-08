@@ -37,6 +37,6 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- if ne $.Annotation "" }} 
     {{ fillAnnotationPattern $.Annotation .Name }}
     {{- end }}
-    public {{ .Type }} {{ .Name | escapeVar }};
+    public {{ .Type }} {{ .Name | lowerCamelCase | escapeVar }};
     {{- end }}
 {{- end }}

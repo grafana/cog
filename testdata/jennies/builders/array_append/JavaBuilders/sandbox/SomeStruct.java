@@ -11,26 +11,26 @@ public class SomeStruct {
     @JsonProperty("tags")
     public List<String> tags;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<SomeStruct> {
-        private SomeStruct internal;
+        private final SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();
         }
-    public Builder Tags(String tags) {
+    public Builder tags(String tags) {
 		if (this.internal.tags == null) {
 			this.internal.tags = new LinkedList<>();
 		}
     this.internal.tags.add(tags);
         return this;
     }
-    public SomeStruct Build() {
+    public SomeStruct build() {
             return this.internal;
         }
     }
