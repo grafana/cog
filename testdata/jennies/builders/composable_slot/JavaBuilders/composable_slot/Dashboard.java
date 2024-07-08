@@ -13,28 +13,28 @@ public class Dashboard {
     @JsonProperty("targets")
     public List<Dataquery> targets;
     
-    public String ToJSON() throws JsonProcessingException {
+    public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(this);
     }
 
     
     public static class Builder implements cog.Builder<Dashboard> {
-        private Dashboard internal;
+        private final Dashboard internal;
         
         public Builder() {
             this.internal = new Dashboard();
         }
-    public Builder Target(cog.Builder<Dataquery> target) {
-    this.internal.target = target.Build();
+    public Builder target(cog.Builder<Dataquery> target) {
+    this.internal.target = target.build();
         return this;
     }
     
-    public Builder Targets(cog.Builder<List<Dataquery>> targets) {
-    this.internal.targets = targets.Build();
+    public Builder targets(cog.Builder<List<Dataquery>> targets) {
+    this.internal.targets = targets.build();
         return this;
     }
-    public Dashboard Build() {
+    public Dashboard build() {
             return this.internal;
         }
     }
