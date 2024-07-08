@@ -70,6 +70,7 @@ func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, 
 		Name:                      obj.Name,
 		ShouldUnmarshallingPanels: obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel",
 		Imports:                   jenny.imports,
+		Fields:                    obj.Type.AsStruct().Fields,
 		DataqueryUnmarshalling:    dataqueryCode,
 	}); err != nil {
 		return nil, fmt.Errorf("failed executing template: %w", err)

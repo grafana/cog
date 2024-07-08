@@ -2,6 +2,7 @@ package {{ .Package }};
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,11 +24,18 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
         JsonNode root = mapper.readTree(jp);
         
         // Deserialise all the fields
-        {{ .Name }} {{ .Name | lowerCamelCase }} = mapper.treeToValue(root, {{ .Name }}.class);
+        {{ .Name }} {{ .Name | lowerCamelCase }} = new {{ .Name }}();
+        
+        {{- range .Fields }}
+        {{- if or (not $.ShouldUnmarshallingPanels) (ne .Name $.DataqueryUnmarshalling.FieldName) }}
+        if (root.has("{{ .Name }}")) {
+            {{ $.Name | lowerCamelCase }}.{{ .Name | lowerCamelCase }} = mapper.convertValue(root.get("{{ .Name }}"), new TypeReference<>() {});
+        }
+        {{- end }}
+        {{- end }}
         
         {{- if .ShouldUnmarshallingPanels }}
         // Deserialise panels
-        {{ .Name | lowerCamelCase }}.type = root.get("type").asText(); 
         PanelConfig config = Registry.getPanel(panel.type);
         if (config != null) {
             panel.options = mapper.treeToValue(root.get("options"), config.getOptionsClass());
@@ -40,8 +48,7 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
                 if (customNode != null) {
                     Class<?> customClass = config.getFieldConfigClass();
                     if (customClass != null) {
-                        Object custom = mapper.treeToValue(customNode, customClass);
-                        fieldConfig.custom = custom;
+                        fieldConfig.custom = mapper.treeToValue(customNode, customClass);
                     }
                 }
                 panel.fieldConfig = fieldConfigSource;

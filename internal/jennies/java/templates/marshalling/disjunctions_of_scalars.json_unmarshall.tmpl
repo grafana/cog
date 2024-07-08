@@ -19,8 +19,8 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
         {{ .Name }} {{ .Name | lowerCamelCase }} = new {{ .Name }}();
         
         {{- range $i, $val := .Fields }}
-        {{ if gt $i 0 }}else {{ end }}if (root.has("{{ $val.Name | lowerCamelCase }}")) {
-            {{ $.Name | lowerCamelCase }}.{{ $val.Name | lowerCamelCase }} = mapper.convertValue(root.get("{{ $val.Name | lowerCamelCase }}"), new TypeReference<>() {});
+        {{ if gt $i 0 }}else {{ end }}if (root.has("{{ $val.Name }}")) {
+            {{ $.Name | lowerCamelCase }}.{{ $val.Name | lowerCamelCase }} = mapper.convertValue(root.get("{{ $val.Name }}"), new TypeReference<>() {});
         }
         {{- end }}
         
