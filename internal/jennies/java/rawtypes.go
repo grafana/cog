@@ -189,6 +189,24 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 		enumType = "String"
 	}
 
+	// Adds empty value if it doesn't exist to avoid
+	// to break in deserialization.
+	if enumType == "String" {
+		hasEmptyValue := false
+		for _, value := range values {
+			if value.Value == "" {
+				hasEmptyValue = true
+			}
+		}
+
+		if !hasEmptyValue {
+			values = append(values, EnumValue{
+				Name:  "_EMPTY",
+				Value: "",
+			})
+		}
+	}
+
 	err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
 		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Name:     object.Name,
