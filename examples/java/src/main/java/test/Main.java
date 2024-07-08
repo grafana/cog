@@ -9,44 +9,44 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         Dashboard dashboard = new Dashboard.Builder("[TEST] Node Exporter / Raspberry").
-                Uid("test-dashboard-raspberry").
-                Tags(List.of("generated", "raspberrypi-node-integration")).
-                Refresh("30s").
-                Time(new DashboardDashboardTime.Builder().From("now-30m").To("now")).
-                Timezone("browser").
-                Timepicker(new TimePickerConfig.Builder().
-                        RefreshIntervals(List.of("5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d")).
-                        TimeOptions(List.of("5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"))
+                uid("test-dashboard-raspberry").
+                tags(List.of("generated", "raspberrypi-node-integration")).
+                refresh("30s").
+                time(new DashboardDashboardTime.Builder().from("now-30m").to("now")).
+                timezone("browser").
+                timepicker(new TimePickerConfig.Builder().
+                        refreshIntervals(List.of("5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d")).
+                        timeOptions(List.of("5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"))
                 ).
-                Tooltip(DashboardCursorSync.CROSSHAIR).
-                WithVariable(datasourceVariable()).
-                WithVariable(queryVariable()).
+                tooltip(DashboardCursorSync.CROSSHAIR).
+                withVariable(datasourceVariable()).
+                withVariable(queryVariable()).
                 // CPU
-                WithRow(new RowPanel.Builder("CPU")).
-                WithPanel(CPU.cpuUsageTimeseries()).
-                WithPanel(CPU.cpuTemperatureGauge()).
-                WithPanel(CPU.loadAverageTimeseries()).
+                withRow(new RowPanel.Builder("CPU")).
+                withPanel(CPU.cpuUsageTimeseries()).
+                withPanel(CPU.cpuTemperatureGauge()).
+                withPanel(CPU.loadAverageTimeseries()).
                 // Memory
-                WithRow(new RowPanel.Builder("Memory")).
-                WithPanel(Memory.memoryUsageTimeseries()).
-                WithPanel(Memory.memoryUsageGauge()).
+                withRow(new RowPanel.Builder("Memory")).
+                withPanel(Memory.memoryUsageTimeseries()).
+                withPanel(Memory.memoryUsageGauge()).
                 // Disk
-                WithRow(new RowPanel.Builder("Disk")).
-                WithPanel(Disk.diskIOTimeseries()).
-                WithPanel(Disk.diskSpaceUsageTable()).
+                withRow(new RowPanel.Builder("Disk")).
+                withPanel(Disk.diskIOTimeseries()).
+                withPanel(Disk.diskSpaceUsageTable()).
                 // Network
-                WithRow(new RowPanel.Builder("Network")).
-                WithPanel(Network.networkReceivedTimeseries()).
-                WithPanel(Network.networkTransmittedTimeseries()).
+                withRow(new RowPanel.Builder("Network")).
+                withPanel(Network.networkReceivedTimeseries()).
+                withPanel(Network.networkTransmittedTimeseries()).
                 // Logs
-                WithRow(new RowPanel.Builder("Logs")).
-                WithPanel(Logs.errorsInSystemLogs()).
-                WithPanel(Logs.authLogs()).
-                WithPanel(Logs.kernelLogs()).
-                WithPanel(Logs.allSystemLogs()).
-                Build();
+                withRow(new RowPanel.Builder("Logs")).
+                withPanel(Logs.errorsInSystemLogs()).
+                withPanel(Logs.authLogs()).
+                withPanel(Logs.kernelLogs()).
+                withPanel(Logs.allSystemLogs()).
+                build();
         try {
-            System.out.println(dashboard.ToJSON());
+            System.out.println(dashboard.toJSON());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -63,10 +63,10 @@ public class Main {
         current.value = value;
 
         return new VariableModel.DatasourceVariableBuilder("datasource").
-                Label("Data Source").
-                Hide(VariableHide.DONT_HIDE).
-                Type("prometheus").
-                Current(current);
+                label("Data Source").
+                hide(VariableHide.DONT_HIDE).
+                type("prometheus").
+                current(current);
     }
 
     private static Builder<VariableModel> queryVariable() {
@@ -87,13 +87,13 @@ public class Main {
         datasource.type = "prometheus";
 
         return new VariableModel.QueryVariableBuilder("instance").
-                Label("Instance").
-                Hide(VariableHide.DONT_HIDE).
-                Refresh(VariableRefresh.ON_TIME_RANGE_CHANGED).
-                Query(query).
-                Datasource(datasource).
-                Current(current).
-                Sort(VariableSort.DISABLED);
+                label("Instance").
+                hide(VariableHide.DONT_HIDE).
+                refresh(VariableRefresh.ON_TIME_RANGE_CHANGED).
+                query(query).
+                datasource(datasource).
+                current(current).
+                sort(VariableSort.DISABLED);
     }
 
 }

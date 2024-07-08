@@ -24,41 +24,41 @@ public class Disk {
         dcv.value = "percentunit";
 
         return Common.defaultTimeSeries().
-                Title("Disk I/O").
-                FillOpacity(0.0).
-                Unit("Bps").
-                WithTarget(Common.basicPrometheusQuery("rate(node_disk_read_bytes_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])", "{{device}} read")).
-                WithTarget(Common.basicPrometheusQuery("rate(node_disk_written_bytes_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])", "{{device}} written")).
-                WithTarget(Common.basicPrometheusQuery("rate(node_disk_io_time_seconds_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])", "{{device}} IO time")).
-                WithOverride(new DashboardFieldConfigSourceOverrides.Builder().
-                        Matcher(matcher).
-                        Properties(List.of(dcv))
+                title("Disk I/O").
+                fillOpacity(0.0).
+                unit("Bps").
+                withTarget(Common.basicPrometheusQuery("rate(node_disk_read_bytes_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])", "{{device}} read")).
+                withTarget(Common.basicPrometheusQuery("rate(node_disk_written_bytes_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])", "{{device}} written")).
+                withTarget(Common.basicPrometheusQuery("rate(node_disk_io_time_seconds_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])", "{{device}} IO time")).
+                withOverride(new DashboardFieldConfigSourceOverrides.Builder().
+                        matcher(matcher).
+                        properties(List.of(dcv))
                 );
     }
 
     public static com.grafana.foundation.table.PanelBuilder diskSpaceUsageTable() {
         return new com.grafana.foundation.table.PanelBuilder().
-                Title("Disk Space Usage").
-                Align(FieldTextAlignment.AUTO).
-                Unit("decbytes").
-                CellHeight(TableCellHeight.SM).
-                Footer(new TableFooterOptions.Builder().
-                        CountRows(false).
-                        Reducer(List.of("sum"))
+                title("Disk Space Usage").
+                align(FieldTextAlignment.AUTO).
+                unit("decbytes").
+                cellHeight(TableCellHeight.SM).
+                footer(new TableFooterOptions.Builder().
+                        countRows(false).
+                        reducer(List.of("sum"))
                 ).
-                WithTarget(Common.tablePrometheusQuery("max by (mountpoint) (node_filesystem_size_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\", fstype!=\"\"})", "A")).
-                WithTarget(Common.tablePrometheusQuery("max by (mountpoint) (node_filesystem_avail_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\", fstype!=\"\"})", "B")).
-                WithTransformation(transformer1()).
-                WithTransformation(transformer2()).
-                WithTransformation(transformer3()).
-                WithTransformation(transformer4()).
-                WithTransformation(transformer5()).
-                WithTransformation(transformer6()).
-                WithOverride(defaultOverrides("Mounted on", 260)).
-                WithOverride(defaultOverrides("Size", 93)).
-                WithOverride(defaultOverrides("Used", 72)).
-                WithOverride(defaultOverrides("Available", 88)).
-                WithOverride(complexOverrides());
+                withTarget(Common.tablePrometheusQuery("max by (mountpoint) (node_filesystem_size_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\", fstype!=\"\"})", "A")).
+                withTarget(Common.tablePrometheusQuery("max by (mountpoint) (node_filesystem_avail_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\", fstype!=\"\"})", "B")).
+                withTransformation(transformer1()).
+                withTransformation(transformer2()).
+                withTransformation(transformer3()).
+                withTransformation(transformer4()).
+                withTransformation(transformer5()).
+                withTransformation(transformer6()).
+                withOverride(defaultOverrides("Mounted on", 260)).
+                withOverride(defaultOverrides("Size", 93)).
+                withOverride(defaultOverrides("Used", 72)).
+                withOverride(defaultOverrides("Available", 88)).
+                withOverride(complexOverrides());
     }
 
     private static DataTransformerConfig transformer1() {
@@ -159,7 +159,7 @@ public class Disk {
         DynamicConfigValue dynamicConfigValue = new DynamicConfigValue();
         dynamicConfigValue.id = "custom.width";
         dynamicConfigValue.value = value;
-        return new DashboardFieldConfigSourceOverrides.Builder().Matcher(matcherConfig).Properties(List.of(dynamicConfigValue));
+        return new DashboardFieldConfigSourceOverrides.Builder().matcher(matcherConfig).properties(List.of(dynamicConfigValue));
     }
 
     private static Builder<DashboardFieldConfigSourceOverrides> complexOverrides() {
@@ -184,7 +184,7 @@ public class Disk {
         dynamicConfigValue4.value = 1;
 
         return new DashboardFieldConfigSourceOverrides.Builder().
-                Matcher(matcherConfig).
-                Properties(List.of(dynamicConfigValue1, dynamicConfigValue2, dynamicConfigValue3, dynamicConfigValue4));
+                matcher(matcherConfig).
+                properties(List.of(dynamicConfigValue1, dynamicConfigValue2, dynamicConfigValue3, dynamicConfigValue4));
     }
 }
