@@ -44,6 +44,15 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 }
 
 func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
+
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) || obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
+		return jenny.genDisjunctionsDeserialiser(obj)
+	}
+
+	return jenny.genDataqueryDeserialiser(context, obj)
+}
+
+func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
 	buf := bytes.Buffer{}
 
 	jenny.imports = jenny.genImports(obj)
@@ -52,7 +61,7 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 		return nil, err
 	}
 
-	if err := templates.ExecuteTemplate(&buf, "marshalling/deserialiser.tmpl", Unmarshalling{
+	if err := templates.ExecuteTemplate(&buf, "marshalling/unmarshalling.tmpl", Unmarshalling{
 		Package:                   jenny.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:                      obj.Name,
 		ShouldUnmarshallingPanels: obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel",
@@ -124,6 +133,21 @@ func (jenny *Deserializers) genImports(obj ast.Object) []string {
 	}
 
 	return imports
+}
+
+func (jenny *Deserializers) genDisjunctionsDeserialiser(obj ast.Object) (*codejen.File, error) {
+	buf := bytes.Buffer{}
+
+	if err := templates.ExecuteTemplate(&buf, "marshalling/disjunctions.json_unmarshall.tmpl", Unmarshalling{
+		Package: jenny.formatPackage(obj.SelfRef.ReferredPkg),
+		Name:    obj.Name,
+		Fields:  obj.Type.AsStruct().Fields,
+	}); err != nil {
+		return nil, err
+	}
+
+	path := filepath.Join(jenny.config.ProjectPath, obj.SelfRef.ReferredPkg, fmt.Sprintf("%sDeserializer.java", obj.SelfRef.ReferredType))
+	return codejen.NewFile(path, buf.Bytes(), jenny), nil
 }
 
 func (jenny *Deserializers) formatPackage(pkg string) string {

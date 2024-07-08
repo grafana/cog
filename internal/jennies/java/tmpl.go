@@ -154,6 +154,7 @@ type Unmarshalling struct {
 	ShouldUnmarshallingPanels bool
 	Imports                   []string
 	DataqueryUnmarshalling    DataqueryUnmarshalling
+	Fields                    []ast.StructField
 }
 
 type DataqueryUnmarshalling struct {
