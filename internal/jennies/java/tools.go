@@ -108,10 +108,6 @@ func objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object) bo
 		return false
 	}
 
-	if obj.Type.HasHint(ast.HintDisjunctionOfScalars) || obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
-		return true
-	}
-
 	// is it a struct generated from a disjunction?
 	if obj.Type.IsStructGeneratedFromDisjunction() {
 		return true

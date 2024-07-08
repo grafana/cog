@@ -155,6 +155,7 @@ type Unmarshalling struct {
 	Imports                   []string
 	DataqueryUnmarshalling    DataqueryUnmarshalling
 	Fields                    []ast.StructField
+	Hint                      any
 }
 
 type DataqueryUnmarshalling struct {
