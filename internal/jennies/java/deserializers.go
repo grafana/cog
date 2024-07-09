@@ -44,7 +44,6 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 }
 
 func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
-
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
 		return jenny.genDisjunctionsDeserialiser(obj, "disjunctions_of_scalars")
 	}

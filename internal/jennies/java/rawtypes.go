@@ -173,15 +173,15 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	var buffer strings.Builder
 
 	enum := object.Type.AsEnum()
-	values := make([]EnumValue, len(enum.Values))
-	for i, value := range enum.Values {
+	values := make([]EnumValue, 0)
+	for _, value := range enum.Values {
 		if value.Name == "" {
 			value.Name = "None"
 		}
-		values[i] = EnumValue{
+		values = append(values, EnumValue{
 			Name:  tools.UpperSnakeCase(value.Name),
 			Value: value.Value,
-		}
+		})
 	}
 
 	enumType := "Integer"
