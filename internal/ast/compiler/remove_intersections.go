@@ -69,6 +69,9 @@ func (r RemoveIntersections) processObject(_ *Visitor, schema *ast.Schema, objec
 		if object.Type.ImplementsVariant() {
 			newObject.Type.Hints[ast.HintImplementsVariant] = object.Type.ImplementedVariant()
 		}
+		for hint, val := range locatedObject.Type.Hints {
+			newObject.Type.Hints[hint] = val
+		}
 
 		r.objectsToRemove[locatedObject.Name] = object
 		return newObject, nil
@@ -93,6 +96,10 @@ func (r RemoveIntersections) processStruct(_ *Visitor, _ *ast.Schema, def ast.Ty
 			}
 			if obj, ok := r.arraysToFix[field.Type.AsRef().ReferredType]; ok {
 				def.AsStruct().Fields[i] = ast.NewStructField(field.Name, ast.NewArray(obj.Type.AsArray().ValueType), ast.Comments(obj.Comments))
+			}
+
+			for hint, value := range field.Type.Hints {
+				def.AsStruct().Fields[i].Type.Hints[hint] = value
 			}
 		}
 	}

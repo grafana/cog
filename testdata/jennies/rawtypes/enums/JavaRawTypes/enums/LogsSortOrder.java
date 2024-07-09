@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum LogsSortOrder {
     ASC("time_asc"),
-    DESC("time_desc");
+    DESC("time_desc"),
+    _EMPTY("");
 
     private final String value;
 

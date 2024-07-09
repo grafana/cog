@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/languages"
 )
 
 func formatPackageName(pkg string) string {
@@ -96,4 +97,38 @@ func fillAnnotationPattern(input string, value string) string {
 		return fmt.Sprintf(input, value)
 	}
 	return input
+}
+
+func containsValue(value string, list []DataqueryUnmarshalling) bool {
+	for _, v := range list {
+		if v.FieldName == value {
+			return true
+		}
+	}
+
+	return false
+}
+
+func objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object) bool {
+	// an object needs a custom unmarshal if:
+	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
+	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot
+
+	if !obj.Type.IsStruct() {
+		return false
+	}
+
+	// is it a struct generated from a disjunction?
+	if obj.Type.IsStructGeneratedFromDisjunction() {
+		return true
+	}
+
+	// is there a KindComposableSlot field somewhere?
+	for _, field := range obj.Type.AsStruct().Fields {
+		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
+			return true
+		}
+	}
+
+	return false
 }

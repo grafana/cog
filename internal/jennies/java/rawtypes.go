@@ -173,20 +173,38 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	var buffer strings.Builder
 
 	enum := object.Type.AsEnum()
-	values := make([]EnumValue, len(enum.Values))
-	for i, value := range enum.Values {
+	values := make([]EnumValue, 0)
+	for _, value := range enum.Values {
 		if value.Name == "" {
 			value.Name = "None"
 		}
-		values[i] = EnumValue{
+		values = append(values, EnumValue{
 			Name:  tools.UpperSnakeCase(value.Name),
 			Value: value.Value,
-		}
+		})
 	}
 
 	enumType := "Integer"
 	if enum.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
 		enumType = "String"
+	}
+
+	// Adds empty value if it doesn't exist to avoid
+	// to break in deserialization.
+	if enumType == "String" {
+		hasEmptyValue := false
+		for _, value := range values {
+			if value.Value == "" {
+				hasEmptyValue = true
+			}
+		}
+
+		if !hasEmptyValue {
+			values = append(values, EnumValue{
+				Name:  "_EMPTY",
+				Value: "",
+			})
+		}
 	}
 
 	err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
@@ -219,16 +237,17 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:        jenny.typeFormatter.formatPackage(pkg),
-		Imports:        jenny.imports,
-		Name:           tools.UpperCamelCase(object.Name),
-		Fields:         fields,
-		Comments:       object.Comments,
-		Variant:        jenny.getVariant(object.Type),
-		Builders:       builders,
-		HasBuilder:     hasBuilder,
-		Annotation:     jenny.jsonMarshaller.annotation(object.Type),
-		ToJSONFunction: jenny.jsonMarshaller.genToJSONFunction(object.Type),
+		Package:               jenny.typeFormatter.formatPackage(pkg),
+		Imports:               jenny.imports,
+		Name:                  tools.UpperCamelCase(object.Name),
+		Fields:                fields,
+		Comments:              object.Comments,
+		Variant:               jenny.getVariant(object.Type),
+		Builders:              builders,
+		HasBuilder:            hasBuilder,
+		Annotation:            jenny.jsonMarshaller.annotation(object.Type),
+		ToJSONFunction:        jenny.jsonMarshaller.genToJSONFunction(object.Type),
+		ShouldAddDeserialiser: jenny.typeFormatter.objectNeedsCustomDeserialiser(object),
 	}); err != nil {
 		return nil, err
 	}

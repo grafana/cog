@@ -56,6 +56,8 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	})
 	jenny.AppendOneToMany(
 		common.If[languages.Context](!config.SkipRuntime, Runtime{config: language.config}),
+		common.If[languages.Context](!config.SkipRuntime, Registry{config: language.config}),
+		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: language.config}),
 		RawTypes{config: config},
 		Gradle{config: config},
 	)

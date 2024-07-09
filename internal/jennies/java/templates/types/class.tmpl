@@ -9,6 +9,10 @@ package {{ .Package }};
 {{- range .Comments }}
 // {{ . }}
 {{- end }}
+
+{{- if .ShouldAddDeserialiser }}
+@JsonDeserialize(using = {{ .Name }}Deserializer.class)
+{{- end }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
     {{- template "types" dict "Fields" .Fields "Annotation" .Annotation }}
 

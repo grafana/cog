@@ -33,6 +33,7 @@ func functions() template.FuncMap {
 		"formatScalar":          formatScalar,
 		"lastPathIdentifier":    lastPathIdentifier,
 		"fillAnnotationPattern": fillAnnotationPattern,
+		"containsValue":         containsValue,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
@@ -93,9 +94,10 @@ type ClassTemplate struct {
 	Builders   []Builder
 	HasBuilder bool
 
-	Variant        string
-	Annotation     string
-	ToJSONFunction string
+	Variant               string
+	Annotation            string
+	ToJSONFunction        string
+	ShouldAddDeserialiser bool
 }
 
 type Field struct {
@@ -134,4 +136,32 @@ type OptionCall struct {
 	Initializers []string
 	OptionName   string
 	Args         []string
+}
+
+type DataquerySchema struct {
+	Identifier string
+	Class      string
+}
+
+type PanelSchema struct {
+	Identifier  string
+	Options     string
+	FieldConfig string
+}
+
+type Unmarshalling struct {
+	Package                   string
+	Name                      string
+	ShouldUnmarshallingPanels bool
+	Imports                   []string
+	DataqueryUnmarshalling    []DataqueryUnmarshalling
+	Fields                    []ast.StructField
+	Hint                      any
+}
+
+type DataqueryUnmarshalling struct {
+	DataqueryHint   string
+	IsArray         bool
+	DatasourceField string
+	FieldName       string
 }
