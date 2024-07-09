@@ -70,7 +70,7 @@ func (jenny Registry) renderRegistry(context languages.Context) ([]byte, error) 
 				Identifier: strings.ToLower(schema.Metadata.Identifier),
 				Class:      jenny.formatPackage(fmt.Sprintf("%s.%s", schema.Package, jenny.findDataqueryClass(schema))),
 			})
-		} else {
+		} else if schema.Metadata.Variant == ast.SchemaVariantPanel {
 			panelSchemas = append(panelSchemas, PanelSchema{
 				Identifier:  strings.ToLower(schema.Metadata.Identifier),
 				Options:     jenny.formatPackage(fmt.Sprintf("%s.Options.class", schema.Package)),
