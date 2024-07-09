@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum SomeStructOperator {
     GREATER_THAN(">"),
-    LESS_THAN("<");
+    LESS_THAN("<"),
+    _EMPTY("");
 
     private final String value;
 

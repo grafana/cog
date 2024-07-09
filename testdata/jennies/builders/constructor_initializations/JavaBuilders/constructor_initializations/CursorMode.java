@@ -8,7 +8,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum CursorMode {
     OFF("off"),
     TOOLTIP("tooltip"),
-    CROSSHAIR("crosshair");
+    CROSSHAIR("crosshair"),
+    _EMPTY("");
 
     private final String value;
 
