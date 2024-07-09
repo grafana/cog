@@ -58,6 +58,23 @@ public class Main {
 }
 ```
 
+### Unmarshaling a dashboard
+
+```java
+public class Main {
+
+    public static void main(String[] args) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            InputStream json = Main.class.getResourceAsStream("/dashboard.json");
+            Dashboard dashboard = mapper.readValue(json, Dashboard.class);
+            System.out.println(dashboard.toJSON());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
 
 ## Maturity
 
