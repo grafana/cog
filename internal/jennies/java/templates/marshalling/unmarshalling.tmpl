@@ -31,7 +31,7 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
         {{ .Name }} {{ .Name | lowerCamelCase }} = new {{ .Name }}();
         
         {{- range .Fields }}
-        {{- if or (not $.ShouldUnmarshallingPanels) (ne .Name $.DataqueryUnmarshalling.FieldName) }}
+        {{- if or (not $.ShouldUnmarshallingPanels) (not (containsValue .Name $.DataqueryUnmarshalling)) }}
         if (root.has("{{ .Name }}")) {
             {{ $.Name | lowerCamelCase }}.{{ .Name | lowerCamelCase }} = mapper.convertValue(root.get("{{ .Name }}"), new TypeReference<>() {});
         }
@@ -66,20 +66,21 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
        
        // Dataquery stuff
        String datasourceType = "";
-       {{- if ne .DataqueryUnmarshalling.DatasourceField "" }}
-       {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.DatasourceField }} = mapper.treeToValue(root.get({{ printf "%#v" .DataqueryUnmarshalling.DatasourceField }}), DataSourceRef.class);
-       if ({{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.DatasourceField }} != null) {
-            datasourceType = {{ .DataqueryUnmarshalling.DataqueryHint }};
+       {{- range .DataqueryUnmarshalling }}
+       {{- if ne .DatasourceField "" }}
+       {{ $.Name | lowerCamelCase }}.{{ .DatasourceField }} = mapper.treeToValue(root.get({{ printf "%#v" .DatasourceField }}), DataSourceRef.class);
+       if ({{ $.Name | lowerCamelCase }}.{{ .DatasourceField }} != null) {
+            datasourceType = {{ .DataqueryHint }};
        } 
        {{- end }}
        
-       {{- if .DataqueryUnmarshalling.IsArray }}
+       {{- if .IsArray }}
        List<Dataquery> targets = new ArrayList<>();
-       for (JsonNode node : root.get({{ printf "%#v" .DataqueryUnmarshalling.FieldName }})) {
+       for (JsonNode node : root.get({{ printf "%#v" .FieldName }})) {
             Class<? extends Dataquery> clazz = Registry.getDataquery(datasourceType);
             if (clazz != null) {
                 Dataquery dataquery = mapper.treeToValue(node, clazz);
-                targets.add(dataquery);
+                {{ .FieldName | lowerCamelCase}}.add(dataquery);
             } else {
               EmptyDataquery emptyDataquery = new EmptyDataquery();
               Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.fields();
@@ -87,14 +88,14 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
                   Map.Entry<String, JsonNode> field = fieldsIterator.next();
                   emptyDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
               }
-              targets.add(emptyDataquery);
+              {{ .FieldName | lowerCamelCase}}.add(emptyDataquery);
             }
       }
-      {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.FieldName }} = targets;
+      {{ $.Name | lowerCamelCase }}.{{ .FieldName }} = targets;
       {{- else }}
       Class<? extends Dataquery> clazz = Registry.getDataquery(datasourceType);
       if (clazz != null) {
-          {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.FieldName }} = mapper.treeToValue(root.get({{ printf "%#v" .DataqueryUnmarshalling.FieldName }}), clazz);
+          {{ $.Name | lowerCamelCase }}.{{ .FieldName }} = mapper.treeToValue(root.get({{ printf "%#v" .FieldName }}), clazz);
       } else {
           EmptyDataquery emptyDataquery = new EmptyDataquery();
           Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.fields();
@@ -102,8 +103,9 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
               Map.Entry<String, JsonNode> field = fieldsIterator.next();
               emptyDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
           }
-          {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.FieldName }} = emptyDataquery;
+          {{ $.Name | lowerCamelCase }}.{{ .FieldName | lowerCamelCase }} = emptyDataquery;
       }
+      {{- end }}
       {{- end }}
         
        return {{ .Name | lowerCamelCase }};

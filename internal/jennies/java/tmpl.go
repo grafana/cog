@@ -33,6 +33,7 @@ func functions() template.FuncMap {
 		"formatScalar":          formatScalar,
 		"lastPathIdentifier":    lastPathIdentifier,
 		"fillAnnotationPattern": fillAnnotationPattern,
+		"containsValue":         containsValue,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
@@ -153,7 +154,7 @@ type Unmarshalling struct {
 	Name                      string
 	ShouldUnmarshallingPanels bool
 	Imports                   []string
-	DataqueryUnmarshalling    DataqueryUnmarshalling
+	DataqueryUnmarshalling    []DataqueryUnmarshalling
 	Fields                    []ast.StructField
 	Hint                      any
 }

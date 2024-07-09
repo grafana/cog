@@ -99,6 +99,16 @@ func fillAnnotationPattern(input string, value string) string {
 	return input
 }
 
+func containsValue(value string, list []DataqueryUnmarshalling) bool {
+	for _, v := range list {
+		if v.FieldName == value {
+			return true
+		}
+	}
+
+	return false
+}
+
 func objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.

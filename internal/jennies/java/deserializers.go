@@ -2,7 +2,6 @@ package java
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -59,10 +58,6 @@ func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, 
 	buf := bytes.Buffer{}
 
 	jenny.imports = jenny.genImports(obj)
-	dataqueryCode, err := jenny.genDataqueryCode(context, obj)
-	if err != nil {
-		return nil, err
-	}
 
 	if err := templates.ExecuteTemplate(&buf, "marshalling/unmarshalling.tmpl", Unmarshalling{
 		Package:                   jenny.formatPackage(obj.SelfRef.ReferredPkg),
@@ -70,7 +65,7 @@ func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, 
 		ShouldUnmarshallingPanels: obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel",
 		Imports:                   jenny.imports,
 		Fields:                    obj.Type.AsStruct().Fields,
-		DataqueryUnmarshalling:    dataqueryCode,
+		DataqueryUnmarshalling:    jenny.genDataqueryCode(context, obj),
 	}); err != nil {
 		return nil, fmt.Errorf("failed executing template: %w", err)
 	}
@@ -79,7 +74,8 @@ func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, 
 	return codejen.NewFile(path, buf.Bytes(), jenny), nil
 }
 
-func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.Object) (DataqueryUnmarshalling, error) {
+func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.Object) []DataqueryUnmarshalling {
+	dataqueryUnmarshalling := make([]DataqueryUnmarshalling, 0)
 	for _, field := range obj.Type.AsStruct().Fields {
 		composableSlotType, resolved := context.ResolveToComposableSlot(field.Type)
 		if !resolved {
@@ -87,11 +83,11 @@ func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.
 		}
 
 		if composableSlotType.AsComposableSlot().Variant == ast.SchemaVariantDataQuery {
-			return jenny.renderUnmarshalDataqueryField(obj, field), nil
+			dataqueryUnmarshalling = append(dataqueryUnmarshalling, jenny.renderUnmarshalDataqueryField(obj, field))
 		}
 	}
 
-	return DataqueryUnmarshalling{}, errors.New("cannot find dataquery reference")
+	return dataqueryUnmarshalling
 }
 
 func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field ast.StructField) DataqueryUnmarshalling {
