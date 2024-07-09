@@ -2,9 +2,17 @@
 
     if (panelOrRowPanel.panel.gridPos == null) {
         panelOrRowPanel.panel.gridPos = new GridPos();
+    }
+    if (panelOrRowPanel.panel.gridPos.x == null) {
         panelOrRowPanel.panel.gridPos.x = 0;
+    }
+    if (panelOrRowPanel.panel.gridPos.y == null) {
         panelOrRowPanel.panel.gridPos.y = 0;
+    }
+    if (panelOrRowPanel.panel.gridPos.w == null) {
         panelOrRowPanel.panel.gridPos.w = 0;
+    }
+    if (panelOrRowPanel.panel.gridPos.h == null) {
         panelOrRowPanel.panel.gridPos.h = 0;
     }
     // The panel either has no position set, or it is the first panel of the dashboard.
