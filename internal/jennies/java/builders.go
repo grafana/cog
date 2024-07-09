@@ -140,7 +140,7 @@ func (b Builders) formatInitializers(args []ast.Argument) []string {
 		if b.typeFormatter.typeHasBuilder(arg.Type) {
 			constructorFormat = "%s.Builder %sResource = new %s.Builder();"
 			setterFormat = "%sResource.%s(%s);"
-			fieldNameFunc = tools.UpperCamelCase
+			fieldNameFunc = tools.LowerCamelCase
 		}
 
 		initializers = append(initializers, fmt.Sprintf(constructorFormat, ref.ReferredType, tools.LowerCamelCase(ref.ReferredType), ref.ReferredType))
@@ -198,7 +198,7 @@ func (b Builders) formatDefaultReference(ref ast.RefType, defValue any) string {
 			defValues := defValue.(map[string]interface{})
 			for _, field := range structType.Fields {
 				if f, ok := defValues[field.Name]; ok {
-					builder = fmt.Sprintf("%s.%s(%#v)", builder, tools.UpperCamelCase(field.Name), f)
+					builder = fmt.Sprintf("%s.%s(%#v)", builder, tools.LowerCamelCase(field.Name), f)
 				}
 			}
 			return builder + ".build()"

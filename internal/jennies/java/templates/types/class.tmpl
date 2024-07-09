@@ -9,14 +9,15 @@ package {{ .Package }};
 {{- range .Comments }}
 // {{ . }}
 {{- end }}
-public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
-    {{- template "types" dict "Fields" .Fields "ShouldAddAnnotation" .ShouldAddMarshalling }}
 
-    {{- if and .ShouldAddMarshalling (not .Extends) }}
-    public String toJSON() throws JsonProcessingException {
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        return ow.writeValueAsString(this);
-    }
+{{- if .ShouldAddDeserialiser }}
+@JsonDeserialize(using = {{ .Name }}Deserializer.class)
+{{- end }}
+public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
+    {{- template "types" dict "Fields" .Fields "Annotation" .Annotation }}
+
+    {{- if and (ne .ToJSONFunction "") (not .Extends) }}
+    {{ .ToJSONFunction }}
     {{- end }}
 
     {{- if and .HasBuilder (not .Extends) }}
@@ -33,10 +34,9 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Comments }}
     // {{ . }}
     {{- end }}
-    {{- if $.ShouldAddAnnotation }}
-    @JsonProperty("{{ .Name }}")
+    {{- if ne $.Annotation "" }} 
+    {{ fillAnnotationPattern $.Annotation .Name }}
     {{- end }}
-    public {{ .Type }} {{ .Name | escapeVar }};
-
+    public {{ .Type }} {{ .Name | lowerCamelCase | escapeVar }};
     {{- end }}
 {{- end }}

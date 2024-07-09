@@ -17,8 +17,9 @@ type RawTypes struct {
 	config  Config
 	imports *common.DirectImportMap
 
-	typeFormatter *typeFormatter
-	builders      Builders
+	typeFormatter  *typeFormatter
+	builders       Builders
+	jsonMarshaller JSONMarshaller
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -30,6 +31,10 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
 	jenny.builders = parseBuilders(jenny.config, context, jenny.typeFormatter)
+	jenny.jsonMarshaller = JSONMarshaller{
+		config:        jenny.config,
+		typeFormatter: jenny.typeFormatter,
+	}
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.genFilesForSchema(schema)
@@ -168,20 +173,38 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	var buffer strings.Builder
 
 	enum := object.Type.AsEnum()
-	values := make([]EnumValue, len(enum.Values))
-	for i, value := range enum.Values {
+	values := make([]EnumValue, 0)
+	for _, value := range enum.Values {
 		if value.Name == "" {
 			value.Name = "None"
 		}
-		values[i] = EnumValue{
+		values = append(values, EnumValue{
 			Name:  tools.UpperSnakeCase(value.Name),
 			Value: value.Value,
-		}
+		})
 	}
 
 	enumType := "Integer"
 	if enum.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
 		enumType = "String"
+	}
+
+	// Adds empty value if it doesn't exist to avoid
+	// to break in deserialization.
+	if enumType == "String" {
+		hasEmptyValue := false
+		for _, value := range values {
+			if value.Value == "" {
+				hasEmptyValue = true
+			}
+		}
+
+		if !hasEmptyValue {
+			values = append(values, EnumValue{
+				Name:  "_EMPTY",
+				Value: "",
+			})
+		}
 	}
 
 	err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
@@ -205,25 +228,26 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 	fields := make([]Field, 0)
 	for _, field := range object.Type.AsStruct().Fields {
 		fields = append(fields, Field{
-			Name:     tools.LowerCamelCase(field.Name),
+			Name:     field.Name,
 			Type:     jenny.typeFormatter.formatFieldType(field.Type),
 			Comments: field.Comments,
 		})
 	}
 
 	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
-	jenny.addJSONImportsIfNeeded()
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:              jenny.typeFormatter.formatPackage(pkg),
-		Imports:              jenny.imports,
-		Name:                 tools.UpperCamelCase(object.Name),
-		Fields:               fields,
-		Comments:             object.Comments,
-		Variant:              jenny.getVariant(object.Type),
-		Builders:             builders,
-		HasBuilder:           hasBuilder,
-		ShouldAddMarshalling: jenny.config.AddExternalDependencies,
+		Package:               jenny.typeFormatter.formatPackage(pkg),
+		Imports:               jenny.imports,
+		Name:                  tools.UpperCamelCase(object.Name),
+		Fields:                fields,
+		Comments:              object.Comments,
+		Variant:               jenny.getVariant(object.Type),
+		Builders:              builders,
+		HasBuilder:            hasBuilder,
+		Annotation:            jenny.jsonMarshaller.annotation(object.Type),
+		ToJSONFunction:        jenny.jsonMarshaller.genToJSONFunction(object.Type),
+		ShouldAddDeserialiser: jenny.typeFormatter.objectNeedsCustomDeserialiser(object),
 	}); err != nil {
 		return nil, err
 	}
@@ -323,13 +347,4 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 		variant = jenny.typeFormatter.formatPackage(variant)
 	}
 	return variant
-}
-
-func (jenny RawTypes) addJSONImportsIfNeeded() {
-	if jenny.config.AddExternalDependencies {
-		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "annotation.JsonProperty")
-		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "core.JsonProcessingException")
-		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectMapper")
-		jenny.typeFormatter.packageMapper("com.fasterxml.jackson", "databind.ObjectWriter")
-	}
 }

@@ -1,6 +1,6 @@
 {{- define "builder" }}
     public static class {{ .BuilderName }}Builder implements {{ if not (eq .Builder.ImportAlias "") }}{{ .Builder.ImportAlias }}.{{ end }}cog.Builder<{{ .Builder.BuilderSignatureType }}> {
-        private {{ .Builder.ObjectName }} internal;
+        private final {{ .Builder.ObjectName }} internal;
         
         {{- range .Builder.Properties }}
         private {{ .Type | formatBuilderFieldType }} {{ .Name | escapeVar }};
@@ -20,12 +20,12 @@
         {{- range .Initializers }}
         {{ . }}
         {{- end }}
-        this.{{ .OptionName }}({{ .Args|join ", " }});
+        this.{{ .OptionName | lowerCamelCase | escapeVar }}({{ .Args|join ", " }});
         {{- end }}
         }
         
     {{- range $opt := .Builder.Options }}
-    public {{ $.BuilderName }}Builder {{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
+    public {{ $.BuilderName }}Builder {{ .Name | lowerCamelCase | escapeVar }}({{- template "args" .Args }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.Builder.BuilderName "OptionName" $opt.Name) }}
         {{- end }}

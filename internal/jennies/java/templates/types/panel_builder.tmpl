@@ -20,12 +20,12 @@ public class PanelBuilder implements {{ if not (eq .ImportAlias "") }}{{ .Import
         {{- range .Initializers }}
         {{ . }}
         {{- end }}
-        this.{{ .OptionName }}({{ .Args|join ", " }});
+        this.{{ .OptionName | lowerCamelCase }}({{ .Args|join ", " }});
         {{- end }}
     }
     
     {{- range .Options }}
-    public PanelBuilder {{ .Name | upperCamelCase }}({{- template "args" .Args }}) {
+    public PanelBuilder {{ .Name | lowerCamelCase }}({{- template "args" .Args }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" "PanelBuilder" "OptionName" "Panel") }}
         {{- end }}

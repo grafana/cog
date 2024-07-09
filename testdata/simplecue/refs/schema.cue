@@ -3,4 +3,10 @@
 container: {
     StringEnum: "foo" | "bar" | "baz"
     TheIntEnum: #IntEnum
+
+    #SomeInlineDefinition: {
+    	field: string
+    }
+
+    inline: #SomeInlineDefinition
 }
