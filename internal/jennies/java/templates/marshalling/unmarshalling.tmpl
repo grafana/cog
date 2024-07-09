@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.grafana.foundation.cog.variants.EmptyDataquery;
+import com.grafana.foundation.cog.variants.Registry;
 
 {{- range .Imports }}
 import {{ . }};
@@ -15,6 +17,8 @@ import {{ . }};
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
 
 public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
     
@@ -41,17 +45,18 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
             panel.options = mapper.treeToValue(root.get("options"), config.getOptionsClass());
             
             FieldConfigSource fieldConfigSource = mapper.treeToValue(root.get("fieldConfig"), FieldConfigSource.class);
-            FieldConfig fieldConfig = fieldConfigSource.defaults;
-            
-            if (fieldConfig != null) {
-                JsonNode customNode = root.get("fieldConfig").get("defaults").get("custom");
-                if (customNode != null) {
-                    Class<?> customClass = config.getFieldConfigClass();
-                    if (customClass != null) {
-                        fieldConfig.custom = mapper.treeToValue(customNode, customClass);
+            if (fieldConfigSource != null) {
+                FieldConfig fieldConfig = fieldConfigSource.defaults;
+                if (fieldConfig != null) {
+                    JsonNode customNode = root.get("fieldConfig").get("defaults").get("custom");
+                    if (customNode != null) {
+                        Class<?> customClass = config.getFieldConfigClass();
+                        if (customClass != null) {
+                            fieldConfig.custom = mapper.treeToValue(customNode, customClass);
+                        }
                     }
+                    panel.fieldConfig = fieldConfigSource;
                 }
-                panel.fieldConfig = fieldConfigSource;
             }
         } else {
             throw new IllegalArgumentException("Unknown panel type: " + panel.type);
@@ -60,11 +65,12 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
        
        
        // Dataquery stuff
-       {{- if eq .DataqueryUnmarshalling.DatasourceField "" }}
        String datasourceType = "";
-       {{- else }}
+       {{- if ne .DataqueryUnmarshalling.DatasourceField "" }}
        {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.DatasourceField }} = mapper.treeToValue(root.get({{ printf "%#v" .DataqueryUnmarshalling.DatasourceField }}), DataSourceRef.class);
-       String datasourceType = {{ .DataqueryUnmarshalling.DataqueryHint }};
+       if ({{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.DatasourceField }} != null) {
+            datasourceType = {{ .DataqueryUnmarshalling.DataqueryHint }};
+       } 
        {{- end }}
        
        {{- if .DataqueryUnmarshalling.IsArray }}
@@ -75,7 +81,13 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
                 Dataquery dataquery = mapper.treeToValue(node, clazz);
                 targets.add(dataquery);
             } else {
-              throw new IllegalArgumentException("Unknown datasource type: " + datasourceType);
+              EmptyDataquery emptyDataquery = new EmptyDataquery();
+              Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.fields();
+              while (fieldsIterator.hasNext()) {
+                  Map.Entry<String, JsonNode> field = fieldsIterator.next();
+                  emptyDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
+              }
+              targets.add(emptyDataquery);
             }
       }
       {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.FieldName }} = targets;
@@ -84,7 +96,13 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
       if (clazz != null) {
           {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.FieldName }} = mapper.treeToValue(root.get({{ printf "%#v" .DataqueryUnmarshalling.FieldName }}), clazz);
       } else {
-          throw new IllegalArgumentException("Unknown datasource type: " + datasourceType);
+          EmptyDataquery emptyDataquery = new EmptyDataquery();
+          Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.fields();
+          while (fieldsIterator.hasNext()) {
+              Map.Entry<String, JsonNode> field = fieldsIterator.next();
+              emptyDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
+          }
+          {{ .Name | lowerCamelCase }}.{{ .DataqueryUnmarshalling.FieldName }} = emptyDataquery;
       }
       {{- end }}
         

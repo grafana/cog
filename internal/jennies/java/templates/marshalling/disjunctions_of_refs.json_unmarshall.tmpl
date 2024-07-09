@@ -30,6 +30,7 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
         case "{{ $discriminatorValue }}":
         {{- end }}
             {{ $.Name | lowerCamelCase }}.{{ $typeName | lowerCamelCase }} = mapper.convertValue(root, {{ $typeName | upperCamelCase }}.class);
+            break;
         {{- end }}
         }
         

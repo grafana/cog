@@ -1,0 +1,10 @@
+package com.grafana.foundation.cog.variants;
+
+import com.grafana.foundation.elasticsearch.Dataquery;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class EmptyDataquery extends Dataquery {
+    public final Map<String, Object> genericFields = new HashMap<>();
+}
