@@ -103,4 +103,3 @@ output:
     - typescript: {}
     - java:
         package_path: '%java_package_path%'
-        add_external_dependencies: true
