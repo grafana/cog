@@ -30,14 +30,13 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: {{ `${{ env.JAVA_VERSION }}` }}
-          distribution: 'adopt'
+          distribution: 'temurin'
+          check-latest: true
 
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v3
       - name: Publish package 📦
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: current
+          gradle-version: '8.8'
           arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           OSSRH_USERNAME: {{ `${{ secrets.OSSRH_USERNAME }}` }}

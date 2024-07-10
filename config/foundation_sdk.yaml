@@ -103,3 +103,4 @@ output:
     - typescript: {}
     - java:
         package_path: '%java_package_path%'
+        skip_gradle_dev: true
