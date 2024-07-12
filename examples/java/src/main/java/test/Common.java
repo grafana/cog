@@ -19,7 +19,7 @@ public class Common {
     }
 
     public static Builder<Dataquery> basicLokiQuery(String query) {
-        return new com.grafana.foundation.prometheus.Dataquery.Builder().expr(query);
+        return new com.grafana.foundation.loki.Dataquery.Builder().expr(query);
     }
 
     // ??
