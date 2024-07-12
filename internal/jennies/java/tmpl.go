@@ -98,7 +98,8 @@ type ClassTemplate struct {
 	Variant               string
 	Annotation            string
 	ToJSONFunction        string
-	ShouldAddDeserialiser bool
+	ShouldAddSerializer   bool
+	ShouldAddDeserializer bool
 }
 
 type Field struct {
