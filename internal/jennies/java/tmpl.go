@@ -34,6 +34,7 @@ func functions() template.FuncMap {
 		"lastPathIdentifier":    lastPathIdentifier,
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
+		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
