@@ -37,10 +37,16 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 		return nil, err
 	}
 
+	emptyDataquerySerializer, err := jenny.emptyDataquerySerializer()
+	if err != nil {
+		return nil, err
+	}
+
 	return codejen.Files{
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/PanelConfig.java"), panelRegistry, jenny),
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Registry.java"), registry, jenny),
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/EmptyDataquery.java"), emptyDataquery, jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/EmptyDataquerySerializer.java"), emptyDataquerySerializer, jenny),
 	}, nil
 }
 
@@ -133,6 +139,17 @@ func (jenny Registry) formatPackage(pkg string) string {
 func (jenny Registry) emptyDataquery() ([]byte, error) {
 	buf := bytes.Buffer{}
 	if err := templates.ExecuteTemplate(&buf, "runtime/empty_dataquery.tmpl", map[string]any{
+		"Package": jenny.formatPackage("cog.variants"),
+	}); err != nil {
+		return nil, fmt.Errorf("failed executing template: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (jenny Registry) emptyDataquerySerializer() ([]byte, error) {
+	buf := bytes.Buffer{}
+	if err := templates.ExecuteTemplate(&buf, "runtime/empty_dataquery_serializer.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 	}); err != nil {
 		return nil, fmt.Errorf("failed executing template: %w", err)
