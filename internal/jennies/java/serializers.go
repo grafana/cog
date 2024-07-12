@@ -12,8 +12,7 @@ import (
 )
 
 type Serializers struct {
-	config  Config
-	imports []string
+	config Config
 }
 
 func (jenny *Serializers) JennyName() string {
