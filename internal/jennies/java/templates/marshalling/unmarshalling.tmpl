@@ -98,7 +98,7 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
           {{ $.Name | lowerCamelCase }}.{{ .FieldName }} = mapper.treeToValue(root.get({{ printf "%#v" .FieldName }}), clazz);
       } else {
           EmptyDataquery emptyDataquery = new EmptyDataquery();
-          Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.fields();
+          Iterator<Map.Entry<String, JsonNode>> fieldsIterator = node.fields();
           while (fieldsIterator.hasNext()) {
               Map.Entry<String, JsonNode> field = fieldsIterator.next();
               emptyDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
