@@ -16,10 +16,10 @@ jobs:
         working-directory: ./java
 
     steps:
-      - name: Use Java SDK ${{ env.JAVA_VERSION }}
+      - name: Use Java SDK {{ `${{ env.JAVA_VERSION }}` }}
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: {{ `${{ env.JAVA_VERSION }}` }}
           distribution: 'temurin'
           check-latest: true
 
