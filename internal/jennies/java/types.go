@@ -343,7 +343,19 @@ func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
 	return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(enum.Values[0].Name)))
 }
 
-func (tf *typeFormatter) objectNeedsCustomDeserialiser(obj ast.Object) bool {
+func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
+	if !tf.config.generateBuilders || tf.config.SkipRuntime {
+		return false
+	}
+	if obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
+		tf.packageMapper("com.fasterxml.jackson", "databind.annotation.JsonSerialize")
+		return true
+	}
+
+	return false
+}
+
+func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object) bool {
 	if !tf.config.generateBuilders || tf.config.SkipRuntime {
 		return false
 	}

@@ -34,6 +34,7 @@ func functions() template.FuncMap {
 		"lastPathIdentifier":    lastPathIdentifier,
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
+		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
@@ -97,7 +98,8 @@ type ClassTemplate struct {
 	Variant               string
 	Annotation            string
 	ToJSONFunction        string
-	ShouldAddDeserialiser bool
+	ShouldAddSerializer   bool
+	ShouldAddDeserializer bool
 }
 
 type Field struct {

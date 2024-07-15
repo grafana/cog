@@ -58,6 +58,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](!config.SkipRuntime, Runtime{config: language.config}),
 		common.If[languages.Context](!config.SkipRuntime, Registry{config: language.config}),
 		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: language.config}),
+		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: language.config}),
 		RawTypes{config: config},
 		Gradle{config: config},
 	)

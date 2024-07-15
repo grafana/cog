@@ -109,6 +109,30 @@ func containsValue(value string, list []DataqueryUnmarshalling) bool {
 	return false
 }
 
+func getJavaFieldTypeCheck(t ast.Type) string {
+	switch t.Kind {
+	case ast.KindArray:
+		return "isArray()"
+	case ast.KindMap:
+		return "isObject()"
+	case ast.KindScalar:
+		switch t.AsScalar().ScalarKind {
+		case ast.KindString:
+			return "isTextual()"
+		case ast.KindBool:
+			return "isBoolean()"
+		case ast.KindInt8, ast.KindUint8, ast.KindInt32, ast.KindUint32:
+			return "isInt()"
+		case ast.KindFloat64:
+			return "isDouble()"
+		default:
+			return "isObject()"
+		}
+	default:
+		return "isObject()"
+	}
+}
+
 func objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
