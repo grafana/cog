@@ -1,0 +1,14 @@
+package {{ .Package }};
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+
+import java.io.IOException;
+
+public class EmptyDataquerySerializer extends JsonSerializer<EmptyDataquery> {
+    @Override
+    public void serialize(EmptyDataquery emptyDataquery, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        jsonGenerator.writeObject(emptyDataquery.genericFields);
+    }
+}

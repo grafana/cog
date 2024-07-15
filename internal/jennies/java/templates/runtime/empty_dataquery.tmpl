@@ -1,10 +1,11 @@
-package com.grafana.foundation.cog.variants;
+package {{ .Package }};
 
-import com.grafana.foundation.elasticsearch.Dataquery;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class EmptyDataquery extends Dataquery {
+@JsonSerialize(using = EmptyDataquerySerializer.class)
+public class EmptyDataquery implements Dataquery {
     public final Map<String, Object> genericFields = new HashMap<>();
 }
