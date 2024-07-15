@@ -14,8 +14,9 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	ProjectPath string `yaml:"-"`
-	PackagePath string `yaml:"package_path"`
+	ProjectPath   string `yaml:"-"`
+	PackagePath   string `yaml:"package_path"`
+	SkipGradleDev bool   `yaml:"skip_gradle_dev"`
 
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
@@ -60,7 +61,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: language.config}),
 		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: language.config}),
 		RawTypes{config: config},
-		Gradle{config: config},
+		common.If[languages.Context](!config.SkipGradleDev, Gradle{config: config}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
