@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.HashMap;
 import java.util.Map;
 
-@JsonSerialize(using = EmptyDataquerySerializer.class)
-public class EmptyDataquery implements Dataquery {
+@JsonSerialize(using = UnknownDataquerySerializer.class)
+public class UnknownDataquery implements Dataquery {
     public final Map<String, Object> genericFields = new HashMap<>();
 }
