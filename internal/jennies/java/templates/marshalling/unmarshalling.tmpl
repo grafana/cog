@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.grafana.foundation.cog.variants.EmptyDataquery;
+import com.grafana.foundation.cog.variants.UnknownDataquery;
 import com.grafana.foundation.cog.variants.Registry;
 
 {{- range .Imports }}
@@ -82,13 +82,13 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
                 Dataquery dataquery = mapper.treeToValue(node, clazz);
                 {{ .FieldName | lowerCamelCase}}.add(dataquery);
             } else {
-              EmptyDataquery emptyDataquery = new EmptyDataquery();
-              Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.fields();
+              UnknownDataquery unknownDataquery = new UnknownDataquery();
+              Iterator<Map.Entry<String, JsonNode>> fieldsIterator = node.fields();
               while (fieldsIterator.hasNext()) {
                   Map.Entry<String, JsonNode> field = fieldsIterator.next();
-                  emptyDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
+                  unknownDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
               }
-              {{ .FieldName | lowerCamelCase}}.add(emptyDataquery);
+              {{ .FieldName | lowerCamelCase}}.add(unknownDataquery);
             }
       }
       {{ $.Name | lowerCamelCase }}.{{ .FieldName }} = targets;
@@ -97,13 +97,13 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
       if (clazz != null) {
           {{ $.Name | lowerCamelCase }}.{{ .FieldName }} = mapper.treeToValue(root.get({{ printf "%#v" .FieldName }}), clazz);
       } else {
-          EmptyDataquery emptyDataquery = new EmptyDataquery();
-          Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.fields();
+          UnknownDataquery unknownDataquery = new UnknownDataquery();
+          Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.get({{ printf "%#v" .FieldName }}).fields();
           while (fieldsIterator.hasNext()) {
               Map.Entry<String, JsonNode> field = fieldsIterator.next();
-              emptyDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
+              unknownDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
           }
-          {{ $.Name | lowerCamelCase }}.{{ .FieldName | lowerCamelCase }} = emptyDataquery;
+          {{ $.Name | lowerCamelCase }}.{{ .FieldName | lowerCamelCase }} = unknownDataquery;
       }
       {{- end }}
       {{- end }}

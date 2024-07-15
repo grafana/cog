@@ -32,12 +32,12 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 		return nil, err
 	}
 
-	emptyDataquery, err := jenny.emptyDataquery()
+	unknownDataquery, err := jenny.unknownDataquery()
 	if err != nil {
 		return nil, err
 	}
 
-	emptyDataquerySerializer, err := jenny.emptyDataquerySerializer()
+	unknownDataquerySerializer, err := jenny.unknownDataquerySerializer()
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +45,8 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 	return codejen.Files{
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/PanelConfig.java"), panelRegistry, jenny),
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Registry.java"), registry, jenny),
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/EmptyDataquery.java"), emptyDataquery, jenny),
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/EmptyDataquerySerializer.java"), emptyDataquerySerializer, jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/UnknownDataquery.java"), unknownDataquery, jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/UnknownDataquerySerializer.java"), unknownDataquerySerializer, jenny),
 	}, nil
 }
 
@@ -136,9 +136,9 @@ func (jenny Registry) formatPackage(pkg string) string {
 	return pkg
 }
 
-func (jenny Registry) emptyDataquery() ([]byte, error) {
+func (jenny Registry) unknownDataquery() ([]byte, error) {
 	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/empty_dataquery.tmpl", map[string]any{
+	if err := templates.ExecuteTemplate(&buf, "runtime/unknown_dataquery.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 	}); err != nil {
 		return nil, fmt.Errorf("failed executing template: %w", err)
@@ -147,9 +147,9 @@ func (jenny Registry) emptyDataquery() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (jenny Registry) emptyDataquerySerializer() ([]byte, error) {
+func (jenny Registry) unknownDataquerySerializer() ([]byte, error) {
 	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/empty_dataquery_serializer.tmpl", map[string]any{
+	if err := templates.ExecuteTemplate(&buf, "runtime/unknown_dataquery_serializer.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 	}); err != nil {
 		return nil, fmt.Errorf("failed executing template: %w", err)
