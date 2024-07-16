@@ -27,8 +27,6 @@ jobs:
 
       - name: Java setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        env:
-          CHECK_GENERATED_FILES: true
         with:
           gradle-version: '8.8'
 

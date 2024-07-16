@@ -33,14 +33,17 @@ jobs:
           distribution: 'temurin'
           check-latest: true
 
-      - name: Publish package 📦
+      - name: Java setup gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.8'
-          arguments: publishToSonatype closeAndReleaseSonatypeStagingRepository
+          
+      - name: Publish package 📦
         env:
           OSSRH_USERNAME: {{ `${{ secrets.OSSRH_USERNAME }}` }}
           OSSRH_PASSWORD: {{ `${{ secrets.OSSRH_PASSWORD }}` }}
           SIGNING_KEY: {{ `${{ secrets.SIGNING_KEY }}` }}
           SIGNING_PASSWORD: {{ `${{ secrets.SIGNING_PASSWORD }}` }}
+        run:
+          gradle publishToSonatype closeAndReleaseSonatypeStagingRepository
   
