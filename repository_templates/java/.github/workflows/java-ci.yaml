@@ -16,6 +16,8 @@ jobs:
         working-directory: ./java
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Use Java SDK {{ `${{ env.JAVA_VERSION }}` }}
         uses: actions/setup-java@v4
         with:
@@ -23,10 +25,12 @@ jobs:
           distribution: 'temurin'
           check-latest: true
 
-      - name: Test and build Jar
+      - name: Java setup Gradle
         uses: gradle/actions/setup-gradle@v3
         env:
           CHECK_GENERATED_FILES: true
         with:
           gradle-version: '8.8'
+
+      - name: Java build
         run: gradle build
