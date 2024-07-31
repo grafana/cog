@@ -243,6 +243,54 @@ func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilde
 	return fmt.Sprintf("%s%s%s", starter, buffer.String(), ending)
 }
 
+func formatTypedDefaultReferenceStructForBuilder(refPkg string, name string, isBuilder bool, def ast.StructType, defaultValues ast.StructType) string {
+	starter, format, sep, lastSep, ending := fmt.Sprintf("%s {\n", name), "%s: %v", ",\n", ",\n", "}"
+	if isBuilder {
+		starter, format, sep, lastSep, ending = fmt.Sprintf("New%sBuilder().\n", name), "%s(%v)", ".\n", ",\n", ""
+	}
+
+	if refPkg != "" {
+		starter = fmt.Sprintf("%s.%s", refPkg, starter)
+	}
+
+	var buffer strings.Builder
+
+	for i, defaultField := range defaultValues.Fields {
+		field, _ := def.FieldByName(defaultField.Name)
+		if name != "" {
+			defaultField.Name = tools.UpperCamelCase(defaultField.Name)
+		}
+
+		switch field.Type.Kind {
+		case ast.KindStruct:
+			buffer.WriteString(fmt.Sprintf(format, defaultField.Name, formatTypedDefaultReferenceStructForBuilder(refPkg, name, isBuilder, field.Type.AsStruct(), field.Type.AsStruct())))
+		case ast.KindScalar:
+			val := formatScalar(field.Type.AsScalar().Value)
+			if !isBuilder && field.Type.Nullable {
+				val = fmt.Sprintf("cog.ToPtr[%s](%v)", field.Type.AsScalar().Value, val)
+			}
+			buffer.WriteString(fmt.Sprintf(format, defaultField.Name, val))
+		case ast.KindArray:
+			array := field.Type.AsArray()
+			if array.IsArrayOfScalars() {
+				val := formatScalar(array.ValueType.AsScalar().Value)
+				if !isBuilder && field.Type.Nullable {
+					val = fmt.Sprintf("cog.ToPtr[%s](%v)", field.Type.AsScalar().Value, val)
+				}
+				buffer.WriteString(fmt.Sprintf(format, defaultField.Name, val))
+			}
+		}
+
+		if i != len(defaultValues.Fields)-1 {
+			buffer.WriteString(sep)
+		} else {
+			buffer.WriteString(lastSep)
+		}
+	}
+
+	return fmt.Sprintf("%s%s%s", starter, buffer.String(), ending)
+}
+
 func formatAnonymousDefaultStruct(def ast.StructType, structMap *orderedmap.Map[string, interface{}]) string {
 	return fmt.Sprintf("struct %s {\n %s }", defineAnonymousFields(def), defineAnonymousDefaults(def, structMap))
 }

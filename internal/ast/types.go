@@ -251,7 +251,9 @@ func Nullable() TypeOption {
 
 func Default(value any) TypeOption {
 	return func(def *Type) {
-		def.Default = value
+		if defVal, ok := value.(Type); !ok || defVal.Kind != "" {
+			def.Default = defVal
+		}
 	}
 }
 

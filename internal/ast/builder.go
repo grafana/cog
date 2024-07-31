@@ -178,6 +178,23 @@ type OptionDefault struct {
 	ArgsValues []any
 }
 
+func (opt OptionDefault) GetTypedArgsValues() ([]Type, bool) {
+	if len(opt.ArgsValues) == 0 {
+		return nil, false
+	}
+
+	if _, ok := opt.ArgsValues[0].(Type); !ok {
+		return nil, false
+	}
+
+	typedValues := make([]Type, len(opt.ArgsValues))
+	for i, v := range opt.ArgsValues {
+		typedValues[i] = v.(Type)
+	}
+
+	return typedValues, true
+}
+
 type Argument struct {
 	Name string
 	Type Type

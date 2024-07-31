@@ -495,7 +495,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 	return ast.Type{}, nil
 }
 
-func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defaultValue any) (ast.Type, error) {
+func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defaultValue ast.Type) (ast.Type, error) {
 	// Possible cases:
 	// 1. "value" | "other_value" | "concrete_value" → we want to parse that as an "enum" type
 	// 2. SomeType | SomeOtherType | string → we want to parse that as a disjunction
@@ -545,7 +545,7 @@ func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defa
 	return ast.NewDisjunction(branches, ast.Default(defaultValue), ast.Hints(hints)), nil
 }
 
-func (g *generator) declareAnonymousEnum(v cue.Value, defValue any, hints ast.JenniesHints) (ast.Type, error) {
+func (g *generator) declareAnonymousEnum(v cue.Value, defValue ast.Type, hints ast.JenniesHints) (ast.Type, error) {
 	allowed := cue.StringKind | cue.IntKind
 	ik := v.IncompleteKind()
 	if ik&allowed != ik {
@@ -560,7 +560,7 @@ func (g *generator) declareAnonymousEnum(v cue.Value, defValue any, hints ast.Je
 	return ast.NewEnum(values, ast.Default(defValue), ast.Hints(hints)), nil
 }
 
-func (g *generator) scalarTypeOptions(v cue.Value, defVal any, hints ast.JenniesHints) ([]ast.TypeOption, error) {
+func (g *generator) scalarTypeOptions(v cue.Value, defVal ast.Type, hints ast.JenniesHints) ([]ast.TypeOption, error) {
 	opts := []ast.TypeOption{
 		ast.Default(defVal),
 		ast.Hints(hints),
@@ -578,7 +578,7 @@ func (g *generator) scalarTypeOptions(v cue.Value, defVal any, hints ast.Jennies
 	return opts, nil
 }
 
-func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
+func (g *generator) declareString(v cue.Value, defVal ast.Type, hints ast.JenniesHints) (ast.Type, error) {
 	opts, err := g.scalarTypeOptions(v, defVal, hints)
 	if err != nil {
 		return ast.Type{}, err
@@ -606,19 +606,136 @@ func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHint
 	return typeDef, nil
 }
 
-func (g *generator) extractDefault(v cue.Value) (any, error) {
+func (g *generator) extractDefault(v cue.Value) (ast.Type, error) {
 	defaultVal, ok := v.Default()
 	if !ok {
-		// nolint: nilnil
-		return nil, nil
+		return ast.Type{}, nil
 	}
 
-	def, err := cueConcreteToScalar(defaultVal)
+	def, err := g.cueToConcreteToScalar(defaultVal)
 	if err != nil {
-		return nil, err
+		return ast.Type{}, err
 	}
 
 	return def, nil
+}
+
+func (g *generator) cueToConcreteToScalar(v cue.Value) (ast.Type, error) {
+	switch v.Kind() {
+	case cue.TopKind:
+		return ast.Any(), nil
+	case cue.NullKind:
+		return ast.Null(), nil
+	case cue.BoolKind:
+		b, err := v.Bool()
+		if err != nil {
+			return ast.Type{}, err
+		}
+		return ast.Bool(ast.Value(b)), nil
+	case cue.BytesKind:
+		b, err := v.Bytes()
+		if err != nil {
+			return ast.Type{}, err
+		}
+		return ast.Bytes(ast.Value(b)), nil
+	case cue.StringKind:
+		b, err := v.String()
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.String(ast.Value(b)), nil
+	case cue.IntKind:
+		b, err := v.Int64()
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewScalar(ast.KindInt64, ast.Value(b)), nil
+	case cue.FloatKind, cue.NumberKind:
+		b, err := v.Float64()
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		return ast.NewScalar(ast.KindFloat64, ast.Value(b)), nil
+	case cue.ListKind:
+		size, _ := v.Len().Int64()
+		if size == 0 {
+			return ast.Type{}, nil
+		}
+
+		b, err := v.List()
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		var value ast.Type
+		for b.Next() {
+			value, err = g.declareNode(b.Value())
+			if err != nil {
+				return ast.Type{}, err
+			}
+		}
+
+		return ast.NewArray(value), nil
+	case cue.StructKind:
+		// to make sure that we look at the actual OP
+		evaluated := v.Eval()
+
+		// in cue: {...}, {[string]: type}, or inline struct
+		if op, _ := evaluated.Expr(); op == cue.NoOp {
+			anyString := evaluated.LookupPath(cue.MakePath(cue.AnyString))
+			if anyString.Exists() && !hasStructFields(evaluated) {
+				typeDef, err := g.declareNode(anyString)
+				if err != nil {
+					return ast.Type{}, err
+				}
+
+				return ast.NewMap(ast.String(), typeDef), nil
+			}
+		}
+
+		i, err := v.Fields(cue.Optional(true), cue.Definitions(true))
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		var fields []ast.StructField
+		for i.Next() {
+			fieldLabel := selectorLabel(i.Selector())
+			field, err := g.cueToConcreteToScalar(i.Value())
+			if err != nil {
+				return ast.Type{}, err
+			}
+
+			if field.IsScalar() {
+				concrete, err := cueConcreteToScalar(i.Value())
+				if err != nil {
+					return ast.Type{}, err
+				}
+				field = ast.NewScalar(field.AsScalar().ScalarKind, ast.Value(concrete))
+			}
+
+			fields = append(fields, ast.StructField{
+				Name: fieldLabel,
+				Type: field,
+			})
+		}
+
+		if len(fields) == 0 {
+			return ast.Type{}, nil
+		}
+
+		return ast.NewStruct(fields...), nil
+	case cue.BottomKind:
+		if defVal, ok := v.Default(); ok {
+			return g.cueToConcreteToScalar(defVal)
+		}
+		return ast.Type{}, nil
+	default:
+		return ast.Type{}, errorWithCueRef(v, "unexpected node with kind '%s'", v.IncompleteKind().String())
+	}
 }
 
 func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
@@ -684,7 +801,7 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 	return constraints, nil
 }
 
-func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
+func (g *generator) declareNumber(v cue.Value, defVal ast.Type, hints ast.JenniesHints) (ast.Type, error) {
 	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
 	if err != nil {
 		return ast.Type{}, err
@@ -840,7 +957,7 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 	return constraints, nil
 }
 
-func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
+func (g *generator) declareList(v cue.Value, defVal ast.Type, hints ast.JenniesHints) (ast.Type, error) {
 	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints), ast.Default(defVal))
 
 	// works only for a closed/concrete list

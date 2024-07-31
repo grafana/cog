@@ -123,6 +123,14 @@ func (jenny *Builder) genDefaultOptionsCalls(context languages.Context, builder 
 			continue
 		}
 
+		if typedValues, ok := opt.Default.GetTypedArgsValues(); ok {
+			calls = append(calls, template.OptionCall{
+				OptionName: opt.Name,
+				Args:       jenny.formatTypedDefaults(context, typedValues, opt),
+			})
+			continue
+		}
+
 		if hasTypedDefaults(opt) {
 			calls = append(calls, template.OptionCall{
 				OptionName: opt.Name,
@@ -165,6 +173,7 @@ func (jenny *Builder) formatDefaultTypedArgs(context languages.Context, opt ast.
 			if !ok {
 				return []string{"unknown"}
 			}
+
 			args = append(args, formatDefaultReferenceStructForBuilder(refPkg, pkg, isBuilder, obj.Type.AsStruct(), orderedmap.FromMap(val)))
 		}
 
@@ -175,6 +184,39 @@ func (jenny *Builder) formatDefaultTypedArgs(context languages.Context, opt ast.
 		}
 	}
 	return args
+}
+
+func (jenny *Builder) formatTypedDefaults(context languages.Context, defaults []ast.Type, opt ast.Option) []string {
+	args := make([]string, 0)
+	for i, def := range defaults {
+		args = append(args, jenny.formatConstantDefaults(context, def, opt.Args[i]))
+	}
+	return args
+}
+
+func (jenny *Builder) formatConstantDefaults(context languages.Context, def ast.Type, arg ast.Argument) string {
+	switch def.Kind {
+	case ast.KindScalar:
+		return formatScalar(def.AsScalar().Value)
+	case ast.KindArray:
+		if def.AsArray().IsArrayOfScalars() {
+			return jenny.formatConstantDefaults(context, def.AsArray().ValueType, arg)
+		}
+		return fmt.Sprintf("[]string{%s}", jenny.formatConstantDefaults(context, def, arg))
+	case ast.KindStruct:
+		if arg.Type.IsRef() {
+			ref := arg.Type.AsRef()
+			_, isBuilder := context.Builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+			obj, ok := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+			if !ok {
+				return "unknown"
+			}
+			return formatTypedDefaultReferenceStructForBuilder(jenny.typeImportMapper(ref.ReferredPkg), ref.ReferredType, isBuilder, obj.Type.AsStruct(), def.AsStruct())
+		}
+		return ""
+	default:
+		return ""
+	}
 }
 
 func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
