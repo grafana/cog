@@ -1,5 +1,5 @@
-func VariantConfig() cogvariants.PanelcfgConfig {
-	return cogvariants.PanelcfgConfig{
+func VariantConfig() variants.PanelcfgConfig {
+	return variants.PanelcfgConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",
 		{{- if .hasOptions }}
 		OptionsUnmarshaler: func (raw []byte) (any, error) {

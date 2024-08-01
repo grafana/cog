@@ -1,7 +1,7 @@
-func VariantConfig() cogvariants.DataqueryConfig {
-	return cogvariants.DataqueryConfig{
+func VariantConfig() variants.DataqueryConfig {
+	return variants.DataqueryConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",
-	    DataqueryUnmarshaler: func (raw []byte) (cogvariants.Dataquery, error) {
+	    DataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
             dataquery := {{ .object.Name|upperCamelCase }}{}
 
             if err := json.Unmarshal(raw, &dataquery); err != nil {
