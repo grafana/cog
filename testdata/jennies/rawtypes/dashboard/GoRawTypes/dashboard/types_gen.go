@@ -1,7 +1,7 @@
 package dashboard
 
 import (
-	cogvariants "github.com/grafana/cog/generated/cog/variants"
+	variants "github.com/grafana/cog/generated/cog/variants"
 	cog "github.com/grafana/cog/generated/cog"
 )
 
@@ -29,7 +29,7 @@ type Panel struct {
 	Type string `json:"type"`
 	Datasource *DataSourceRef `json:"datasource,omitempty"`
 	Options any `json:"options,omitempty"`
-	Targets []cogvariants.Dataquery `json:"targets,omitempty"`
+	Targets []variants.Dataquery `json:"targets,omitempty"`
 	FieldConfig *FieldConfigSource `json:"fieldConfig,omitempty"`
 }
 

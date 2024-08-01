@@ -1,15 +1,15 @@
 package variant_panelcfg_only_options
 
 import (
-	cogvariants "github.com/grafana/cog/generated/cog/variants"
+	variants "github.com/grafana/cog/generated/cog/variants"
 )
 
 type Options struct {
 	Content string `json:"content"`
 }
 
-func VariantConfig() cogvariants.PanelcfgConfig {
-	return cogvariants.PanelcfgConfig{
+func VariantConfig() variants.PanelcfgConfig {
+	return variants.PanelcfgConfig{
 		Identifier: "text",
 		OptionsUnmarshaler: func (raw []byte) (any, error) {
 			options := Options{}

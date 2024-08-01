@@ -1,7 +1,7 @@
 package variant_dataquery
 
 import (
-	cogvariants "github.com/grafana/cog/generated/cog/variants"
+	variants "github.com/grafana/cog/generated/cog/variants"
 )
 
 type Query struct {
@@ -11,10 +11,10 @@ type Query struct {
 func (resource Query) ImplementsDataqueryVariant() {}
 
 
-func VariantConfig() cogvariants.DataqueryConfig {
-	return cogvariants.DataqueryConfig{
+func VariantConfig() variants.DataqueryConfig {
+	return variants.DataqueryConfig{
 		Identifier: "prometheus",
-	    DataqueryUnmarshaler: func (raw []byte) (cogvariants.Dataquery, error) {
+	    DataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
             dataquery := Query{}
 
             if err := json.Unmarshal(raw, &dataquery); err != nil {

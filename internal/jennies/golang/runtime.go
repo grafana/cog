@@ -46,7 +46,7 @@ type Builder[ResourceT any] interface {
 
 func (jenny Runtime) Runtime() (string, error) {
 	imports := NewImportMap()
-	imports.Add("cogvariants", jenny.Config.importPath("cog/variants"))
+	imports.Add("", jenny.Config.importPath("cog/variants"))
 
 	return renderTemplate("runtime/runtime.tmpl", map[string]any{
 		"imports": imports,
