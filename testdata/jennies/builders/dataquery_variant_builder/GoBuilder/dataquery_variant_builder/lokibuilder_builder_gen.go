@@ -2,10 +2,10 @@ package dataquery_variant_builder
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
-	cogvariants "github.com/grafana/cog/generated/cog/variants"
+	variants "github.com/grafana/cog/generated/cog/variants"
 )
 
-var _ cog.Builder[cogvariants.Dataquery] = (*LokiBuilderBuilder)(nil)
+var _ cog.Builder[variants.Dataquery] = (*LokiBuilderBuilder)(nil)
 
 type LokiBuilderBuilder struct {
     internal *Loki
@@ -24,7 +24,7 @@ func NewLokiBuilderBuilder() *LokiBuilderBuilder {
 	return builder
 }
 
-func (builder *LokiBuilderBuilder) Build() (cogvariants.Dataquery, error) {
+func (builder *LokiBuilderBuilder) Build() (variants.Dataquery, error) {
 	var errs cog.BuildErrors
 
 	for _, err := range builder.errors {

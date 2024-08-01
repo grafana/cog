@@ -1,7 +1,7 @@
 package variant_panelcfg_full
 
 import (
-	cogvariants "github.com/grafana/cog/generated/cog/variants"
+	variants "github.com/grafana/cog/generated/cog/variants"
 )
 
 type Options struct {
@@ -12,8 +12,8 @@ type FieldConfig struct {
 	TimeseriesFieldConfigOption string `json:"timeseries_field_config_option"`
 }
 
-func VariantConfig() cogvariants.PanelcfgConfig {
-	return cogvariants.PanelcfgConfig{
+func VariantConfig() variants.PanelcfgConfig {
+	return variants.PanelcfgConfig{
 		Identifier: "timeseries",
 		OptionsUnmarshaler: func (raw []byte) (any, error) {
 			options := Options{}

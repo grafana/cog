@@ -2,7 +2,7 @@ package composable_slot
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
-	cogvariants "github.com/grafana/cog/generated/cog/variants"
+	variants "github.com/grafana/cog/generated/cog/variants"
 )
 
 var _ cog.Builder[Dashboard] = (*LokiBuilderBuilder)(nil)
@@ -38,7 +38,7 @@ func (builder *LokiBuilderBuilder) Build() (Dashboard, error) {
 	return *builder.internal, nil
 }
 
-func (builder *LokiBuilderBuilder) Target(target cog.Builder[cogvariants.Dataquery]) *LokiBuilderBuilder {
+func (builder *LokiBuilderBuilder) Target(target cog.Builder[variants.Dataquery]) *LokiBuilderBuilder {
     targetResource, err := target.Build()
     if err != nil {
         builder.errors["target"] = err.(cog.BuildErrors)
@@ -49,8 +49,8 @@ func (builder *LokiBuilderBuilder) Target(target cog.Builder[cogvariants.Dataque
     return builder
 }
 
-func (builder *LokiBuilderBuilder) Targets(targets []cog.Builder[cogvariants.Dataquery]) *LokiBuilderBuilder {
-        targetsResources := make([]cogvariants.Dataquery, 0, len(targets))
+func (builder *LokiBuilderBuilder) Targets(targets []cog.Builder[variants.Dataquery]) *LokiBuilderBuilder {
+        targetsResources := make([]variants.Dataquery, 0, len(targets))
         for _, r1 := range targets {
                 targetsDepth1, err := r1.Build()
                 if err != nil {
