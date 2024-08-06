@@ -24,14 +24,28 @@ func init() {
 		Funcs(cogtemplate.Helpers(base)).
 		// placeholder functions, will be overridden by jennies
 		Funcs(map[string]any{
-			"formatObjectName":     tools.UpperCamelCase,
-			"formatFieldName":      tools.UpperCamelCase,
-			"formatFieldNameTFSDK": tools.SnakeCase,
-			"formatTerraformType":  formatTerraformType,
+			"formatObjectName":          tools.UpperCamelCase,
+			"formatFieldName":           tools.UpperCamelCase,
+			"formatFieldNameTFSDK":      tools.SnakeCase,
+			"formatAttrName":            tools.LowerCamelCase,
+			"formatTerraformType":       formatTerraformType,
+			"formatGolangType":          formatGolangType,
+			"formatJSONField":           formatJSONField,
+			"formatTypeValue":           formatTypeValue,
+			"formatTypeValueNoPointers": formatTypeValueNoPointers,
 			"filterScalars": func(list []ast.StructField) []ast.StructField {
 				newList := []ast.StructField{}
 				for _, f := range list {
 					if f.Type.IsScalar() {
+						newList = append(newList, f)
+					}
+				}
+				return newList
+			},
+			"filterDefaults": func(list []ast.StructField) []ast.StructField {
+				newList := []ast.StructField{}
+				for _, f := range list {
+					if f.Type.Default != nil {
 						newList = append(newList, f)
 					}
 				}
