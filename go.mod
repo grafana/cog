@@ -16,7 +16,7 @@ require (
 	github.com/yalue/merged_fs v1.3.0
 	golang.org/x/mod v0.20.0
 	golang.org/x/text v0.17.0
-	golang.org/x/tools v0.23.0
+	golang.org/x/tools v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -46,7 +46,7 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
-	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 )
