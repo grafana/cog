@@ -300,7 +300,7 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 		fieldLabel := selectorLabel(i.Selector())
 
 		// inline definition
-		if i.FieldType().IsDefinition() {
+		if i.Selector().IsDefinition() {
 			obj, err := g.declareObject(fieldLabel, i.Value())
 			if err != nil {
 				return nil, err
