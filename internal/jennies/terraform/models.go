@@ -38,7 +38,7 @@ func (jenny Models) generateSchema(_ languages.Context, schema *ast.Schema) ([]b
 	var buffer strings.Builder
 
 	// schema.LocateObject(schema.EntryPoint)
-
+	schema.Package = formatPackageName(schema.Package)
 	structObjects := schema.Objects.Filter(func(_ string, object ast.Object) bool {
 		return object.Type.IsStruct()
 	})

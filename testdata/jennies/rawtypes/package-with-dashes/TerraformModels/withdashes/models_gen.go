@@ -1,4 +1,4 @@
-package with-dashes
+package withdashes
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
