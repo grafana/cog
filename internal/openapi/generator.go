@@ -103,23 +103,21 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 		return g.walkEnum(schema)
 	}
 
-	switch schema.Type {
-	case openapi3.TypeString:
+	if schema.Type.Is(openapi3.TypeString) {
 		return g.walkString(schema)
-	case openapi3.TypeBoolean:
-		return g.walkBoolean(schema)
-	case openapi3.TypeNumber:
-		return g.walkNumber(schema)
-	case openapi3.TypeInteger:
-		return g.walkInteger(schema)
-	case openapi3.TypeObject:
+	} else if schema.Type.Is(openapi3.TypeObject) {
 		return g.walkObject(schema)
-	case openapi3.TypeArray:
+	} else if schema.Type.Is(openapi3.TypeArray) {
 		return g.walkArray(schema)
-	default:
-		// No type defined
-		return g.walkAny(schema)
+	} else if schema.Type.Is(openapi3.TypeBoolean) {
+		return g.walkBoolean(schema)
+	} else if schema.Type.Is(openapi3.TypeInteger) {
+		return g.walkInteger(schema)
+	} else if schema.Type.Is(openapi3.TypeNumber) {
+		return g.walkNumber(schema)
 	}
+
+	return g.walkAny(schema)
 }
 
 func (g *generator) walkRef(schema *openapi3.SchemaRef) (ast.Type, error) {
@@ -263,11 +261,11 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 	// Nullable enums? https://swagger.io/docs/specification/data-models/enums/
 	enums := make([]ast.EnumValue, 0, len(schema.Enum))
 	format := "%#v"
-	if schema.Type == openapi3.TypeString {
+	if schema.Type.Is(openapi3.TypeString) {
 		format = "%s"
 	}
 
-	enumType, err := getEnumType(schema.Type)
+	enumType, err := getEnumType(schema.Type.Slice()[0])
 	if err != nil {
 		return ast.Type{}, err
 	}
