@@ -245,10 +245,13 @@
           "$ref": "#/$defs/OpenapiConfig"
         },
         "php": {
-          "$ref": "#/$defs/Config"
+          "$ref": "#/$defs/PhpConfig"
         },
         "python": {
           "$ref": "#/$defs/PythonConfig"
+        },
+        "terraform": {
+          "$ref": "#/$defs/TerraformConfig"
         },
         "typescript": {
           "$ref": "#/$defs/TypescriptConfig"
@@ -291,7 +294,7 @@
             "type": "string"
           },
           "type": "array",
-          "description": "CompilerPassesFiles holds a list of paths to files containing compiler\npasses to apply to all the schemas."
+          "description": "CommonPassesFiles holds a list of paths to files containing compiler\npasses to apply to all the schemas.\nNote: these compiler passes are applied *before* language-specific passes."
         },
         "builders": {
           "items": {
@@ -324,14 +327,11 @@
     },
     "JavaConfig": {
       "properties": {
-        "gen_pom": {
-          "type": "boolean"
-        },
-        "maven_version": {
-          "type": "string"
-        },
         "package_path": {
           "type": "string"
+        },
+        "skip_gradle_dev": {
+          "type": "boolean"
         },
         "skip_runtime": {
           "type": "boolean",
@@ -359,6 +359,15 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "PhpConfig": {
+      "properties": {
+        "namespace_root": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "PythonConfig": {
       "properties": {
         "path_prefix": {
@@ -367,6 +376,16 @@
         "skip_runtime": {
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "TerraformConfig": {
+      "properties": {
+        "package_root": {
+          "type": "string",
+          "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"
         }
       },
       "additionalProperties": false,
