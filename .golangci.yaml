@@ -7,8 +7,7 @@ linters:
     - wastedassign
     - varnamelen
     - forcetypeassert
-    - goerr113
-    - exhaustivestruct
+    - err113
     - ireturn
     - funlen
     - forbidigo
@@ -18,7 +17,6 @@ linters:
     - prealloc
     - dupl
     - lll
-    - maligned
     - goconst
     - depguard
     - exhaustive
@@ -34,22 +32,25 @@ linters:
     - tagliatelle
     - nlreturn
     - gocyclo
-    # deprecated
-    - deadcode
-    - scopelint
-    - nosnakecase
-    - golint
-    - interfacer
-    - structcheck
-    - ifshort
-    - varcheck
+    # added from 1.60.3
+    - revive
+    - govet
+    - intrange
+    - mnd
+    - perfsprint
+    - musttag
+    - testifylint
 
 linters-settings:
   errcheck:
-    ignore: fmt:.*
+    exclude-functions: 
+     - fmt:.*
+
+issues:
+  exclude-dirs:
+    - generated
 
 run:
   modules-download-mode: vendor
   timeout: 3m
-  skip-dirs:
-    - generated
+  go: '1.23'
