@@ -103,17 +103,18 @@ func (g *generator) walkDefinitions(schema *openapi3.Schema) (ast.Type, error) {
 		return g.walkEnum(schema)
 	}
 
-	if schema.Type.Is(openapi3.TypeString) {
+	switch {
+	case schema.Type.Is(openapi3.TypeString):
 		return g.walkString(schema)
-	} else if schema.Type.Is(openapi3.TypeObject) {
+	case schema.Type.Is(openapi3.TypeObject):
 		return g.walkObject(schema)
-	} else if schema.Type.Is(openapi3.TypeArray) {
+	case schema.Type.Is(openapi3.TypeArray):
 		return g.walkArray(schema)
-	} else if schema.Type.Is(openapi3.TypeBoolean) {
+	case schema.Type.Is(openapi3.TypeBoolean):
 		return g.walkBoolean(schema)
-	} else if schema.Type.Is(openapi3.TypeInteger) {
+	case schema.Type.Is(openapi3.TypeInteger):
 		return g.walkInteger(schema)
-	} else if schema.Type.Is(openapi3.TypeNumber) {
+	case schema.Type.Is(openapi3.TypeNumber):
 		return g.walkNumber(schema)
 	}
 
