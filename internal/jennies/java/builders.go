@@ -2,6 +2,7 @@ package java
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/languages"
@@ -132,26 +133,34 @@ func (b Builders) formatInitializers(args []ast.Argument) []string {
 		structType := object.Type.AsStruct()
 		defValues := arg.Type.Default.(map[string]interface{})
 
-		constructorFormat := "%s %sResource = new %s();"
-		setterFormat := "%sResource.%s = %s;"
-		fieldNameFunc := func(s string) string {
-			return s
-		}
+		constructorFormat := "%s %sResource = new %s(%s);"
+		setterFormat := "%s"
+		separator := ","
+		hasBuilder := false
+
 		if b.typeFormatter.typeHasBuilder(arg.Type) {
-			constructorFormat = "%s.Builder %sResource = new %s.Builder();"
-			setterFormat = "%sResource.%s(%s);"
-			fieldNameFunc = tools.LowerCamelCase
+			constructorFormat = "%s.Builder %sResource = new %s.Builder()%s;"
+			setterFormat = ".%s(%#v)"
+			separator = ""
+			hasBuilder = true
 		}
 
-		initializers = append(initializers, fmt.Sprintf(constructorFormat, ref.ReferredType, tools.LowerCamelCase(ref.ReferredType), ref.ReferredType))
+		setters := make([]string, 0)
 		for _, field := range structType.Fields {
 			if defVal, ok := defValues[field.Name]; ok {
 				if field.Type.IsScalar() {
-					initializers = append(initializers, fmt.Sprintf(setterFormat, tools.LowerCamelCase(ref.ReferredType), fieldNameFunc(field.Name), formatType(field.Type.AsScalar().ScalarKind, defVal)))
+					if hasBuilder {
+						setters = append(setters, fmt.Sprintf(setterFormat, tools.LowerCamelCase(field.Name), formatType(field.Type.AsScalar().ScalarKind, defVal)))
+						continue
+					}
+
+					setters = append(setters, fmt.Sprintf(setterFormat, formatType(field.Type.AsScalar().ScalarKind, defVal)))
 				}
-				// TODO: Implement lists if needed
+				// TODO: Add missing types if necessary
 			}
 		}
+
+		initializers = append(initializers, fmt.Sprintf(constructorFormat, ref.ReferredType, tools.LowerCamelCase(ref.ReferredType), ref.ReferredType, strings.Join(setters, separator)))
 	}
 
 	return initializers
