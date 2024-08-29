@@ -45,4 +45,5 @@ public class SomeStruct {
             return this.internal;
         }
     }
+    
 }

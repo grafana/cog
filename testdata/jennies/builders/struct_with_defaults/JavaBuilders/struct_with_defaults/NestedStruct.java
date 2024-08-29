@@ -36,4 +36,5 @@ public class NestedStruct {
             return this.internal;
         }
     }
+    
 }

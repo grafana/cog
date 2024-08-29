@@ -29,4 +29,5 @@ public class Loki implements cog.variants.Dataquery {
             return this.internal;
         }
     }
+    
 }

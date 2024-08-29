@@ -36,4 +36,5 @@ public class DashboardLink {
             return this.internal;
         }
     }
+    
 }

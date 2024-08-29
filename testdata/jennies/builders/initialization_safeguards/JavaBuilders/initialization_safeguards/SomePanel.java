@@ -42,4 +42,5 @@ public class SomePanel {
             return this.internal;
         }
     }
+    
 }

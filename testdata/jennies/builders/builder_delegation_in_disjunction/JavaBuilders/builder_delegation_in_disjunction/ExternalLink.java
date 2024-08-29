@@ -29,4 +29,5 @@ public class ExternalLink {
             return this.internal;
         }
     }
+    
 }

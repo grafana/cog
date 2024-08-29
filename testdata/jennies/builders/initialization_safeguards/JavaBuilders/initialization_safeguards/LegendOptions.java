@@ -14,4 +14,8 @@ public class LegendOptions {
         return ow.writeValueAsString(this);
     }
 
+    public LegendOptions(Boolean show) {
+        this.show = show;
+    }
+    
 }

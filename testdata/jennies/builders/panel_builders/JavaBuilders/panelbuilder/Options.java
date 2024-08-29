@@ -33,4 +33,17 @@ public class Options {
         return ow.writeValueAsString(this);
     }
 
+    public Options(Boolean onlyFromThisDashboard,Boolean onlyInTimeRange,List<String> tags,Integer limit,Boolean showUser,Boolean showTime,Boolean showTags,Boolean navigateToPanel,String navigateBefore,String navigateAfter) {
+        this.onlyFromThisDashboard = onlyFromThisDashboard;
+        this.onlyInTimeRange = onlyInTimeRange;
+        this.tags = tags;
+        this.limit = limit;
+        this.showUser = showUser;
+        this.showTime = showTime;
+        this.showTags = showTags;
+        this.navigateToPanel = navigateToPanel;
+        this.navigateBefore = navigateBefore;
+        this.navigateAfter = navigateAfter;
+    }
+    
 }
