@@ -5,4 +5,9 @@ package withdashes;
 public class RefreshRate {
     public String string;
     public Boolean bool;
+    public RefreshRate(String string,Boolean bool) {
+        this.string = string;
+        this.bool = bool;
+    }
+    
 }
