@@ -14,6 +14,8 @@ public class SomeStruct {
         return ow.writeValueAsString(this);
     }
 
+    public SomeStruct() {}
+
     public SomeStruct(String title) {
         this.title = title;
     }

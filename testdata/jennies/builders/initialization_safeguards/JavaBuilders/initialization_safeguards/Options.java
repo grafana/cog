@@ -14,6 +14,8 @@ public class Options {
         return ow.writeValueAsString(this);
     }
 
+    public Options() {}
+
     public Options(LegendOptions legend) {
         this.legend = legend;
     }

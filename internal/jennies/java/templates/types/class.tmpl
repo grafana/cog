@@ -29,6 +29,8 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{ template "builder" (dict "Builder" . "BuilderName" $builderName) }}
     {{- end }}
     {{- else if gt (len .Fields) 0 }}
+    public {{ .Name }}() {}
+
     public {{ .Name }}({{ template "args_from_fields" .Fields }}) {
     {{- range .Fields }}
         this.{{ .Name | lowerCamelCase | escapeVar }} = {{ .Name | lowerCamelCase | escapeVar }};

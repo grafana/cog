@@ -14,6 +14,8 @@ public class Config {
         return ow.writeValueAsString(this);
     }
 
+    public Config() {}
+
     public Config(String title) {
         this.title = title;
     }

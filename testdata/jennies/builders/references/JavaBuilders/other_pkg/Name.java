@@ -16,6 +16,8 @@ public class Name {
         return ow.writeValueAsString(this);
     }
 
+    public Name() {}
+
     public Name(String firstName,String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
