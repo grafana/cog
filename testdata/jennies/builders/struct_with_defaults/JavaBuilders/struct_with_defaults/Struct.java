@@ -28,9 +28,12 @@ public class Struct {
         
         public Builder() {
             this.internal = new Struct();
-        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder().stringVal("\"hello\"").intVal("3L");
+        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
+        nestedStructResource.stringVal("hello");
+        nestedStructResource.intVal(3L);
         this.allFields(nestedStructResource);
-        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder().intVal("4L");
+        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
+        nestedStructResource.intVal(4L);
         this.partialFields(nestedStructResource);
         this.complexField(new Object());
         this.partialComplexField(new Object());
