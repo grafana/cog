@@ -17,7 +17,18 @@ package {{ .Package }};
 @JsonSerialize(using = {{ .Name }}Serializer.class)
 {{- end }}
 public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}{{ if gt $i 0 }}, {{ end }}{{ $e }}{{ end }}{{ end }}{{ if .Variant }} implements {{ .Variant }}{{ end }} {
-    {{- template "types" dict "Fields" .Fields "Annotation" .Annotation }}
+    {{- template "types" dict "Fields" .Fields "Annotation" .Annotation "HasFactoryMethods" .ShouldAddFactoryMethods }}
+    
+    {{- if .ShouldAddFactoryMethods }}
+    protected {{ .Name }}() {}
+    {{- range .Fields }}
+    public static {{ $.Name }} create{{ .Name }}({{ .Type | formatBuilderFieldType }} {{ .Name | lowerCamelCase | escapeVar }}) {
+        {{ $.Name }} {{ $.Name | lowerCamelCase }} = new {{ $.Name }}();
+        {{ $.Name | lowerCamelCase }}.{{ .Name | lowerCamelCase | escapeVar }} = {{ .Name | lowerCamelCase | escapeVar }}{{ if .Type | typeHasBuilder }}.build(){{ end }};
+        return {{ $.Name | lowerCamelCase }};
+    }
+    {{- end }}
+    {{- end }}
 
     {{- if and (ne .ToJSONFunction "") (not .Extends) }}
     {{ .ToJSONFunction }}
@@ -40,6 +51,6 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- if ne $.Annotation "" }} 
     {{ fillAnnotationPattern $.Annotation .Name }}
     {{- end }}
-    public {{ .Type }} {{ .Name | lowerCamelCase | escapeVar }};
+    {{ if $.HasFactoryMethods }}protected{{ else }}public{{ end }} {{ .Type | formatType }} {{ .Name | lowerCamelCase | escapeVar }};
     {{- end }}
 {{- end }}

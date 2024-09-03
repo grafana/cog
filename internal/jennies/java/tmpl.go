@@ -91,21 +91,16 @@ type ClassTemplate struct {
 	Extends  []string
 	Comments []string
 
-	Fields     []Field
+	Fields     []ast.StructField
 	Builders   []Builder
 	HasBuilder bool
 
-	Variant               string
-	Annotation            string
-	ToJSONFunction        string
-	ShouldAddSerializer   bool
-	ShouldAddDeserializer bool
-}
-
-type Field struct {
-	Name     string
-	Type     string
-	Comments []string
+	Variant                 string
+	Annotation              string
+	ToJSONFunction          string
+	ShouldAddSerializer     bool
+	ShouldAddDeserializer   bool
+	ShouldAddFactoryMethods bool
 }
 
 type ConstantTemplate struct {
