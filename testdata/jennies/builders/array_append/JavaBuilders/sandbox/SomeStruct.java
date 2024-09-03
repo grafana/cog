@@ -1,10 +1,10 @@
 package sandbox;
 
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import java.util.List;
 import java.util.LinkedList;
 
 public class SomeStruct { 
