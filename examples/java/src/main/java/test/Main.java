@@ -55,12 +55,8 @@ public class Main {
     private static Builder<VariableModel> datasourceVariable() {
         VariableOption current = new VariableOption();
         current.selected = true;
-        StringOrArrayOfString text = new StringOrArrayOfString();
-        text.string = "grafanacloud-potatopi-prom";
-        current.text = text;
-        StringOrArrayOfString value = new StringOrArrayOfString();
-        value.string = "grafanacloud-prom";
-        current.value = value;
+        current.text = StringOrArrayOfString.createString("grafanacloud-potatopi-prom");
+        current.value = StringOrArrayOfString.createString("grafanacloud-prom");
 
         return new VariableModel.DatasourceVariableBuilder("datasource").
                 label("Data Source").
@@ -72,15 +68,8 @@ public class Main {
     private static Builder<VariableModel> queryVariable() {
         VariableOption current = new VariableOption();
         current.selected = false;
-        StringOrArrayOfString text = new StringOrArrayOfString();
-        text.string = "potato";
-        current.text = text;
-        StringOrArrayOfString value = new StringOrArrayOfString();
-        value.string = "potato";
-        current.value = value;
-
-        StringOrMap query = new StringOrMap();
-        query.string = "label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)";
+        current.text = StringOrArrayOfString.createString("potato");
+        current.value = StringOrArrayOfString.createString("potato");
 
         DataSourceRef datasource = new DataSourceRef();
         datasource.uid = "$datasource";
@@ -90,7 +79,7 @@ public class Main {
                 label("Instance").
                 hide(VariableHide.DONT_HIDE).
                 refresh(VariableRefresh.ON_TIME_RANGE_CHANGED).
-                query(query).
+                query(StringOrMap.createString("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)")).
                 datasource(datasource).
                 current(current).
                 sort(VariableSort.DISABLED);
