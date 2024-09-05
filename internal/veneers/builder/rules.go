@@ -410,7 +410,6 @@ func DefaultToConstant(selector Selector, options []string) RewriteRule {
 
 				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, opt.Assignments...)
 			}
-
 		}
 
 		return builders, nil
