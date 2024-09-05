@@ -225,30 +225,22 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error) {
 	var buffer strings.Builder
 
-	fields := make([]Field, 0)
-	for _, field := range object.Type.AsStruct().Fields {
-		fields = append(fields, Field{
-			Name:     field.Name,
-			Type:     jenny.typeFormatter.formatFieldType(field.Type),
-			Comments: field.Comments,
-		})
-	}
-
 	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
 
 	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
-		Package:               jenny.typeFormatter.formatPackage(pkg),
-		Imports:               jenny.imports,
-		Name:                  tools.UpperCamelCase(object.Name),
-		Fields:                fields,
-		Comments:              object.Comments,
-		Variant:               jenny.getVariant(object.Type),
-		Builders:              builders,
-		HasBuilder:            hasBuilder,
-		Annotation:            jenny.jsonMarshaller.annotation(object.Type),
-		ToJSONFunction:        jenny.jsonMarshaller.genToJSONFunction(object.Type),
-		ShouldAddSerializer:   jenny.typeFormatter.objectNeedsCustomSerializer(object),
-		ShouldAddDeserializer: jenny.typeFormatter.objectNeedsCustomDeserializer(object),
+		Package:                 jenny.typeFormatter.formatPackage(pkg),
+		Imports:                 jenny.imports,
+		Name:                    tools.UpperCamelCase(object.Name),
+		Fields:                  object.Type.AsStruct().Fields,
+		Comments:                object.Comments,
+		Variant:                 jenny.getVariant(object.Type),
+		Builders:                builders,
+		HasBuilder:              hasBuilder,
+		Annotation:              jenny.jsonMarshaller.annotation(object.Type),
+		ToJSONFunction:          jenny.jsonMarshaller.genToJSONFunction(object.Type),
+		ShouldAddSerializer:     jenny.typeFormatter.objectNeedsCustomSerializer(object),
+		ShouldAddDeserializer:   jenny.typeFormatter.objectNeedsCustomDeserializer(object),
+		ShouldAddFactoryMethods: object.Type.HasHint(ast.HintDisjunctionOfScalars) || object.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs),
 	}); err != nil {
 		return nil, err
 	}
@@ -302,14 +294,14 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 
 	intersection := object.Type.AsIntersection()
 	extensions := make([]string, 0)
-	fields := make([]Field, 0)
+	fields := make([]ast.StructField, 0)
 
 	for _, branch := range intersection.Branches {
 		switch branch.Kind {
 		case ast.KindRef:
 			extensions = append(extensions, jenny.typeFormatter.formatReference(branch.AsRef()))
 		case ast.KindStruct:
-			fields = append(fields, jenny.formatFields(branch.AsStruct())...)
+			fields = append(fields, branch.AsStruct().Fields...)
 		}
 	}
 
@@ -326,19 +318,6 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 	}
 
 	return []byte(buffer.String()), nil
-}
-
-func (jenny RawTypes) formatFields(def ast.StructType) []Field {
-	fields := make([]Field, len(def.Fields))
-	for i, field := range def.Fields {
-		fields[i] = Field{
-			Name:     field.Name,
-			Type:     jenny.typeFormatter.formatFieldType(field.Type),
-			Comments: field.Comments,
-		}
-	}
-
-	return fields
 }
 
 func (jenny RawTypes) getVariant(t ast.Type) string {

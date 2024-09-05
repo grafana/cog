@@ -1,10 +1,10 @@
 package nullable_map_assignment;
 
-import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import java.util.Map;
 
 public class SomeStruct { 
     @JsonProperty("config")
