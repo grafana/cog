@@ -23,6 +23,7 @@ type BuilderRule struct {
 	Initialize               *Initialize               `yaml:"initialize"`
 	PromoteOptsToConstructor *PromoteOptsToConstructor `yaml:"promote_options_to_constructor"`
 	AddOption                *AddOption                `yaml:"add_option"`
+	DefaultToConstant        *DefaultToConstant        `yaml:"default_to_constant"`
 }
 
 func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -65,6 +66,10 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 	if rule.AddOption != nil {
 		return rule.AddOption.AsRewriteRule(pkg)
+	}
+
+	if rule.DefaultToConstant != nil {
+		return rule.DefaultToConstant.AsRewriteRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -202,6 +207,20 @@ func (rule AddOption) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	}
 
 	return builder.AddOption(selector, rule.Option), nil
+}
+
+type DefaultToConstant struct {
+	BuilderSelector `yaml:",inline"`
+	Options         []string `yaml:"options"`
+}
+
+func (rule DefaultToConstant) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.DefaultToConstant(selector, rule.Options), nil
 }
 
 /******************************************************************************
