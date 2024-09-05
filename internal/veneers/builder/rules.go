@@ -379,8 +379,10 @@ func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
 	}
 }
 
-// DefaultToConstant sets a default value into a constant. It's useful when we omit an option in the builder
-// to avoid to lose the default value
+// DefaultToConstant sets a default value into a constant.
+// When we unfold a value, omit an option, or any other action; we can lose the default value in the Builder struct.
+// If we parse the defaults using the Builder and not the Schema, we might not have all the defaults and with this rule,
+// we set these defaults as constants inside the constructor.
 func DefaultToConstant(selector Selector, options []string) RewriteRule {
 	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, builder := range builders {
