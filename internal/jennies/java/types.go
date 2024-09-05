@@ -9,7 +9,7 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-const fasterXmlPackageName = "com.fasterxml.jackson"
+const fasterXMLPackageName = "com.fasterxml.jackson"
 const javaNullableField = "@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)"
 
 type typeFormatter struct {
@@ -351,7 +351,7 @@ func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
 		return false
 	}
 	if obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
-		tf.packageMapper(fasterXmlPackageName, "databind.annotation.JsonSerialize")
+		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonSerialize")
 		return true
 	}
 
@@ -363,7 +363,7 @@ func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object) bool {
 		return false
 	}
 	if objectNeedsCustomDeserialiser(tf.context, obj) {
-		tf.packageMapper(fasterXmlPackageName, "databind.annotation.JsonDeserialize")
+		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonDeserialize")
 		return true
 	}
 
@@ -372,7 +372,7 @@ func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object) bool {
 
 func (tf *typeFormatter) fillNullableAnnotationPattern(t ast.Type) string {
 	if t.Nullable {
-		tf.packageMapper(fasterXmlPackageName, "databind.annotation.JsonSerialize")
+		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonSerialize")
 		return javaNullableField
 	}
 	return ""

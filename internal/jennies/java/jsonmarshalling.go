@@ -17,9 +17,9 @@ func (j JSONMarshaller) genToJSONFunction(t ast.Type) string {
 	}
 
 	var buffer strings.Builder
-	j.typeFormatter.packageMapper(fasterXmlPackageName, "core.JsonProcessingException")
-	j.typeFormatter.packageMapper(fasterXmlPackageName, "databind.ObjectMapper")
-	j.typeFormatter.packageMapper(fasterXmlPackageName, "databind.ObjectWriter")
+	j.typeFormatter.packageMapper(fasterXMLPackageName, "core.JsonProcessingException")
+	j.typeFormatter.packageMapper(fasterXMLPackageName, "databind.ObjectMapper")
+	j.typeFormatter.packageMapper(fasterXMLPackageName, "databind.ObjectWriter")
 	if t.IsStructGeneratedFromDisjunction() {
 		if t.IsStruct() && (t.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) || t.HasHint(ast.HintDisjunctionOfScalars)) {
 			_ = templates.ExecuteTemplate(&buffer, "marshalling/disjunctions.json_marshall.tmpl", map[string]any{
@@ -39,10 +39,10 @@ func (j JSONMarshaller) annotation(t ast.Type) string {
 	}
 
 	if t.IsStructGeneratedFromDisjunction() && t.IsStruct() {
-		j.typeFormatter.packageMapper(fasterXmlPackageName, "annotation.JsonUnwrapped")
+		j.typeFormatter.packageMapper(fasterXMLPackageName, "annotation.JsonUnwrapped")
 		return "@JsonUnwrapped"
 	}
 
-	j.typeFormatter.packageMapper(fasterXmlPackageName, "annotation.JsonProperty")
+	j.typeFormatter.packageMapper(fasterXMLPackageName, "annotation.JsonProperty")
 	return "@JsonProperty(%#v)"
 }
