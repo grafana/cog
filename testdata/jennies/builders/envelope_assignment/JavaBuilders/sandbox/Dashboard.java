@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.List;
 import java.util.LinkedList;
 
-public class Dashboard { 
+public class Dashboard {
     @JsonProperty("variables")
     public List<Variable> variables;
     

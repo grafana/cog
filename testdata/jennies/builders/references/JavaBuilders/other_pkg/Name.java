@@ -5,9 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class Name { 
+public class Name {
     @JsonProperty("first_name")
-    public String firstName; 
+    public String firstName;
     @JsonProperty("last_name")
     public String lastName;
     

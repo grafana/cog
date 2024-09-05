@@ -5,11 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class SomePanel { 
+public class SomePanel {
     @JsonProperty("type")
-    public String type; 
+    public String type;
     @JsonProperty("title")
-    public String title; 
+    public String title;
     @JsonProperty("cursor")
     public CursorMode cursor;
     

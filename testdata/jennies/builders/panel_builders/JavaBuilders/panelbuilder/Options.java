@@ -6,25 +6,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.List;
 
-public class Options { 
+public class Options {
     @JsonProperty("onlyFromThisDashboard")
-    public Boolean onlyFromThisDashboard; 
+    public Boolean onlyFromThisDashboard;
     @JsonProperty("onlyInTimeRange")
-    public Boolean onlyInTimeRange; 
+    public Boolean onlyInTimeRange;
     @JsonProperty("tags")
-    public List<String> tags; 
+    public List<String> tags;
     @JsonProperty("limit")
-    public Integer limit; 
+    public Integer limit;
     @JsonProperty("showUser")
-    public Boolean showUser; 
+    public Boolean showUser;
     @JsonProperty("showTime")
-    public Boolean showTime; 
+    public Boolean showTime;
     @JsonProperty("showTags")
-    public Boolean showTags; 
+    public Boolean showTags;
     @JsonProperty("navigateToPanel")
-    public Boolean navigateToPanel; 
+    public Boolean navigateToPanel;
     @JsonProperty("navigateBefore")
-    public String navigateBefore; 
+    public String navigateBefore;
     @JsonProperty("navigateAfter")
     public String navigateAfter;
     

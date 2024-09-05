@@ -5,9 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class DashboardLink { 
+public class DashboardLink {
     @JsonProperty("title")
-    public String title; 
+    public String title;
     @JsonProperty("url")
     public String url;
     
