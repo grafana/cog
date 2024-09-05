@@ -49,7 +49,9 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     // {{ . }}
     {{- end }}
     {{- if ne $.Annotation "" }}
+    {{- if fillNullableAnnotationPattern .Type }}
     {{ fillNullableAnnotationPattern .Type }}
+    {{- end }}
     {{ fillAnnotationPattern $.Annotation .Name }}
     {{- end }}
     {{ if $.HasFactoryMethods }}protected{{ else }}public{{ end }} {{ .Type | formatType }} {{ .Name | lowerCamelCase | escapeVar }};
