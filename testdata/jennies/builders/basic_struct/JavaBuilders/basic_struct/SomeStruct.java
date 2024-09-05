@@ -8,15 +8,15 @@ import java.util.List;
 
 // SomeStruct, to hold data.
 public class SomeStruct {
-    // id identifies something. Weird, right? 
+    // id identifies something. Weird, right?
     @JsonProperty("id")
-    public Long id; 
+    public Long id;
     @JsonProperty("uid")
-    public String uid; 
+    public String uid;
     @JsonProperty("tags")
     public List<String> tags;
     // This thing could be live.
-    // Or maybe not. 
+    // Or maybe not.
     @JsonProperty("liveNow")
     public Boolean liveNow;
     

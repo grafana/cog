@@ -5,9 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class SomeStruct { 
+public class SomeStruct {
     @JsonProperty("id")
-    public Long id; 
+    public Long id;
     @JsonProperty("title")
     public String title;
     

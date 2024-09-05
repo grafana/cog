@@ -5,15 +5,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class Struct { 
+public class Struct {
     @JsonProperty("allFields")
-    public NestedStruct allFields; 
+    public NestedStruct allFields;
     @JsonProperty("partialFields")
-    public NestedStruct partialFields; 
+    public NestedStruct partialFields;
     @JsonProperty("emptyFields")
-    public NestedStruct emptyFields; 
+    public NestedStruct emptyFields;
     @JsonProperty("complexField")
-    public Object complexField; 
+    public Object complexField;
     @JsonProperty("partialComplexField")
     public Object partialComplexField;
     

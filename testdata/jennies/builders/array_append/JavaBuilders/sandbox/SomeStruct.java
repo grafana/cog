@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.List;
 import java.util.LinkedList;
 
-public class SomeStruct { 
+public class SomeStruct {
     @JsonProperty("tags")
     public List<String> tags;
     

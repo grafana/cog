@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import other_pkg.Name;
 
-public class Person { 
+public class Person {
     @JsonProperty("name")
     public Name name;
     

@@ -6,18 +6,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.List;
 
-public class Dashboard { 
+public class Dashboard {
     @JsonProperty("id")
-    public Long id; 
+    public Long id;
     @JsonProperty("title")
     public String title;
-    // will be expanded to []cog.Builder<DashboardLink> 
+    // will be expanded to []cog.Builder<DashboardLink>
     @JsonProperty("links")
     public List<DashboardLink> links;
-    // will be expanded to [][]cog.Builder<DashboardLink> 
+    // will be expanded to [][]cog.Builder<DashboardLink>
     @JsonProperty("linksOfLinks")
     public List<List<DashboardLink>> linksOfLinks;
-    // will be expanded to cog.Builder<DashboardLink> 
+    // will be expanded to cog.Builder<DashboardLink>
     @JsonProperty("singleLink")
     public DashboardLink singleLink;
     

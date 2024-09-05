@@ -9,6 +9,9 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
+const fasterXMLPackageName = "com.fasterxml.jackson"
+const javaNullableField = "@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)"
+
 type typeFormatter struct {
 	config        Config
 	packageMapper func(pkg string, class string) string
@@ -348,7 +351,7 @@ func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
 		return false
 	}
 	if obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
-		tf.packageMapper("com.fasterxml.jackson", "databind.annotation.JsonSerialize")
+		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonSerialize")
 		return true
 	}
 
@@ -360,9 +363,17 @@ func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object) bool {
 		return false
 	}
 	if objectNeedsCustomDeserialiser(tf.context, obj) {
-		tf.packageMapper("com.fasterxml.jackson", "databind.annotation.JsonDeserialize")
+		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonDeserialize")
 		return true
 	}
 
 	return false
+}
+
+func (tf *typeFormatter) fillNullableAnnotationPattern(t ast.Type) string {
+	if t.Nullable {
+		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonSerialize")
+		return javaNullableField
+	}
+	return ""
 }

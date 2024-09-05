@@ -50,16 +50,17 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 
 func (jenny RawTypes) getTemplate() *template.Template {
 	return templates.Funcs(map[string]any{
-		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
-		"formatType":               jenny.typeFormatter.formatFieldType,
-		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
-		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
-		"emptyValueForType":        jenny.typeFormatter.defaultValueFor,
-		"formatCastValue":          jenny.typeFormatter.formatCastValue,
-		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,
-		"formatPath":               jenny.typeFormatter.formatFieldPath,
-		"shouldCastNilCheck":       jenny.typeFormatter.shouldCastNilCheck,
-		"formatValue":              jenny.typeFormatter.formatValue,
+		"formatBuilderFieldType":        jenny.typeFormatter.formatBuilderFieldType,
+		"formatType":                    jenny.typeFormatter.formatFieldType,
+		"typeHasBuilder":                jenny.typeFormatter.typeHasBuilder,
+		"resolvesToComposableSlot":      jenny.typeFormatter.resolvesToComposableSlot,
+		"emptyValueForType":             jenny.typeFormatter.defaultValueFor,
+		"formatCastValue":               jenny.typeFormatter.formatCastValue,
+		"formatAssignmentPath":          jenny.typeFormatter.formatAssignmentPath,
+		"formatPath":                    jenny.typeFormatter.formatFieldPath,
+		"shouldCastNilCheck":            jenny.typeFormatter.shouldCastNilCheck,
+		"formatValue":                   jenny.typeFormatter.formatValue,
+		"fillNullableAnnotationPattern": jenny.typeFormatter.fillNullableAnnotationPattern,
 	})
 }
 

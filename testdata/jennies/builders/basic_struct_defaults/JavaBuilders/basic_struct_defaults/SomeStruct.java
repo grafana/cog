@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.List;
 
-public class SomeStruct { 
+public class SomeStruct {
     @JsonProperty("id")
-    public Long id; 
+    public Long id;
     @JsonProperty("uid")
-    public String uid; 
+    public String uid;
     @JsonProperty("tags")
-    public List<String> tags; 
+    public List<String> tags;
     @JsonProperty("liveNow")
     public Boolean liveNow;
     

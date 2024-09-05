@@ -7,12 +7,12 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import java.util.List;
 
 public class Dashboard {
-    // will be expanded to cog.Builder<DashboardLink> | string 
+    // will be expanded to cog.Builder<DashboardLink> | string
     @JsonProperty("singleLinkOrString")
     public unknown singleLinkOrString;
-    // will be expanded to [](cog.Builder<DashboardLink> | string) 
+    // will be expanded to [](cog.Builder<DashboardLink> | string)
     @JsonProperty("linksOrStrings")
-    public List<unknown> linksOrStrings; 
+    public List<unknown> linksOrStrings;
     @JsonProperty("disjunctionOfBuilders")
     public unknown disjunctionOfBuilders;
     

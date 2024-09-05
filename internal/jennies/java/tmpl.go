@@ -35,6 +35,9 @@ func functions() template.FuncMap {
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
+		"fillNullableAnnotationPattern": func(_ ast.Type) string {
+			panic("fillNullableAnnotationPattern() needs to be overridden by a jenny")
+		},
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},

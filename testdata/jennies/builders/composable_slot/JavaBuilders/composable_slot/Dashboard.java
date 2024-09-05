@@ -9,9 +9,9 @@ import cog.variants.Dataquery;
 import java.util.List;
 
 @JsonDeserialize(using = DashboardDeserializer.class)
-public class Dashboard { 
+public class Dashboard {
     @JsonProperty("target")
-    public Dataquery target; 
+    public Dataquery target;
     @JsonProperty("targets")
     public List<Dataquery> targets;
     
