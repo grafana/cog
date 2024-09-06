@@ -6,12 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import cog.variants.Dataquery;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import java.util.List;
 
 @JsonDeserialize(using = DashboardDeserializer.class)
 public class Dashboard {
     @JsonProperty("target")
     public Dataquery target;
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @JsonProperty("targets")
     public List<Dataquery> targets;
     
