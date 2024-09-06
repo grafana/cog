@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import java.util.List;
 
 public class Dashboard {
@@ -11,6 +13,7 @@ public class Dashboard {
     @JsonProperty("singleLinkOrString")
     public unknown singleLinkOrString;
     // will be expanded to [](cog.Builder<DashboardLink> | string)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @JsonProperty("linksOrStrings")
     public List<unknown> linksOrStrings;
     @JsonProperty("disjunctionOfBuilders")

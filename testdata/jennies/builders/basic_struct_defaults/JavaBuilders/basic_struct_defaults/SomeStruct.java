@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import java.util.List;
 
 public class SomeStruct {
@@ -11,6 +13,7 @@ public class SomeStruct {
     public Long id;
     @JsonProperty("uid")
     public String uid;
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @JsonProperty("tags")
     public List<String> tags;
     @JsonProperty("liveNow")

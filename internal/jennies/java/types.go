@@ -10,7 +10,9 @@ import (
 )
 
 const fasterXMLPackageName = "com.fasterxml.jackson"
-const javaNullableField = "@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)"
+const javaNullableField = "@JsonInclude(JsonInclude.Include.NON_NULL)"
+const javaDefaultEmptyField = "@JsonSetter(nulls = Nulls.AS_EMPTY)"
+const javaEmptyField = "@JsonInclude(JsonInclude.Include.NON_EMPTY)"
 
 type typeFormatter struct {
 	config        Config
@@ -372,8 +374,20 @@ func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object) bool {
 
 func (tf *typeFormatter) fillNullableAnnotationPattern(t ast.Type) string {
 	if t.Nullable {
-		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonSerialize")
+		tf.packageMapper(fasterXMLPackageName, "annotation.JsonInclude")
 		return javaNullableField
 	}
+
+	if t.IsArray() || t.IsMap() {
+		tf.packageMapper(fasterXMLPackageName, "annotation.JsonSetter")
+		tf.packageMapper(fasterXMLPackageName, "annotation.Nulls")
+		return javaDefaultEmptyField
+	}
+
+	if t.IsAny() || t.IsStruct() || t.IsRef() {
+		tf.packageMapper(fasterXMLPackageName, "annotation.JsonInclude")
+		return javaEmptyField
+	}
+
 	return ""
 }

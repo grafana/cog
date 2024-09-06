@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 public class Dashboard {
     @JsonProperty("id")
@@ -12,12 +15,15 @@ public class Dashboard {
     @JsonProperty("title")
     public String title;
     // will be expanded to []cog.Builder<DashboardLink>
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @JsonProperty("links")
     public List<DashboardLink> links;
     // will be expanded to [][]cog.Builder<DashboardLink>
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     @JsonProperty("linksOfLinks")
     public List<List<DashboardLink>> linksOfLinks;
     // will be expanded to cog.Builder<DashboardLink>
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonProperty("singleLink")
     public DashboardLink singleLink;
     
