@@ -14,7 +14,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/yalue/merged_fs v1.3.0
-	golang.org/x/mod v0.20.0
+	golang.org/x/mod v0.21.0
 	golang.org/x/text v0.17.0
 	golang.org/x/tools v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
