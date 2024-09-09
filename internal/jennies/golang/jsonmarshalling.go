@@ -3,22 +3,23 @@ package golang
 import (
 	"fmt"
 	"strings"
-	"text/template"
+	gotemplate "text/template"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type JSONMarshalling struct {
-	tmpl          *template.Template
+	tmpl          *gotemplate.Template
 	packageMapper func(string) string
 	typeFormatter *typeFormatter
 }
 
-func NewJSONMarshalling(tmpl *template.Template, packageMapper func(string) string, typeFormatter *typeFormatter) JSONMarshalling {
+func NewJSONMarshalling(tmpl *gotemplate.Template, packageMapper func(string) string, typeFormatter *typeFormatter) JSONMarshalling {
 	return JSONMarshalling{
-		tmpl: template.Must(tmpl.Clone()).Funcs(map[string]any{
+		tmpl: gotemplate.Must(tmpl.Clone()).Funcs(map[string]any{
 			"formatType": typeFormatter.formatType,
 		}),
 		packageMapper: packageMapper,
@@ -84,13 +85,13 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
 	// 	  structs and these structs have a common "discriminator" field.
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
-		return renderTemplate(jenny.tmpl, "types/disjunction_of_scalars.json_marshal.tmpl", map[string]any{
+		return template.Render(jenny.tmpl, "types/disjunction_of_scalars.json_marshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
-		return renderTemplate(jenny.tmpl, "types/disjunction_of_refs.json_marshal.tmpl", map[string]any{
+		return template.Render(jenny.tmpl, "types/disjunction_of_refs.json_marshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
@@ -124,13 +125,13 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 
 func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
-		return renderTemplate(jenny.tmpl, "types/disjunction_of_scalars.json_unmarshal.tmpl", map[string]any{
+		return template.Render(jenny.tmpl, "types/disjunction_of_scalars.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
-		return renderTemplate(jenny.tmpl, "types/disjunction_of_refs.json_unmarshal.tmpl", map[string]any{
+		return template.Render(jenny.tmpl, "types/disjunction_of_refs.json_unmarshal.tmpl", map[string]any{
 			"def":  obj,
 			"hint": obj.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs],
 		})
@@ -301,7 +302,7 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 	_, hasOptions := schema.LocateObject("Options")
 	_, hasFieldConfig := schema.LocateObject("FieldConfig")
 
-	return renderTemplate(jenny.tmpl, "types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
+	return template.Render(jenny.tmpl, "types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
 		"schema":         schema,
 		"hasOptions":     hasOptions,
 		"hasFieldConfig": hasFieldConfig,
@@ -311,7 +312,7 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
 	jenny.packageMapper("cog/variants")
 
-	return renderTemplate(jenny.tmpl, "types/variant_dataquery.json_unmarshal.tmpl", map[string]any{
+	return template.Render(jenny.tmpl, "types/variant_dataquery.json_unmarshal.tmpl", map[string]any{
 		"schema": schema,
 		"object": obj,
 	})

@@ -1,18 +1,20 @@
 package java
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Serializers struct {
 	config Config
+	tmpl   *gotemplate.Template
 }
 
 func (jenny *Serializers) JennyName() string {
@@ -42,18 +44,17 @@ func (jenny *Serializers) Generate(context languages.Context) (codejen.Files, er
 }
 
 func (jenny *Serializers) genSerializer(obj ast.Object) (*codejen.File, error) {
-	buf := bytes.Buffer{}
-
-	if err := templates.ExecuteTemplate(&buf, "marshalling/disjunctions_of_scalars.json_marshall.tmpl", Unmarshalling{
+	rendered, err := template.Render(jenny.tmpl, "marshalling/disjunctions_of_scalars.json_marshall.tmpl", Unmarshalling{
 		Package: jenny.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:    tools.UpperCamelCase(obj.Name),
 		Fields:  obj.Type.AsStruct().Fields,
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, err
 	}
 
 	path := filepath.Join(jenny.config.ProjectPath, obj.SelfRef.ReferredPkg, fmt.Sprintf("%sSerializer.java", tools.UpperCamelCase(obj.SelfRef.ReferredType)))
-	return codejen.NewFile(path, buf.Bytes(), jenny), nil
+	return codejen.NewFile(path, []byte(rendered), jenny), nil
 }
 
 func (jenny *Serializers) formatPackage(pkg string) string {

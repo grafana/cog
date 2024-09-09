@@ -93,3 +93,5 @@ output:
     - typescript: {}
     - java:
         package_path: '%java_package_path%'
+        builder_templates:
+          - '%__config_dir%/templates/java'

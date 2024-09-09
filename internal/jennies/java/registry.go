@@ -1,20 +1,22 @@
 package java
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
 	"sort"
 	"strings"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Registry struct {
 	config Config
+	tmpl   *gotemplate.Template
 }
 
 func (jenny Registry) JennyName() string {
@@ -43,25 +45,20 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 	}
 
 	return codejen.Files{
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/PanelConfig.java"), panelRegistry, jenny),
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Registry.java"), registry, jenny),
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/UnknownDataquery.java"), unknownDataquery, jenny),
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/UnknownDataquerySerializer.java"), unknownDataquerySerializer, jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/PanelConfig.java"), []byte(panelRegistry), jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Registry.java"), []byte(registry), jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/UnknownDataquery.java"), []byte(unknownDataquery), jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/UnknownDataquerySerializer.java"), []byte(unknownDataquerySerializer), jenny),
 	}, nil
 }
 
-func (jenny Registry) renderPanelConfig() ([]byte, error) {
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/panel_config.tmpl", map[string]any{
+func (jenny Registry) renderPanelConfig() (string, error) {
+	return template.Render(jenny.tmpl, "runtime/panel_config.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
-	}); err != nil {
-		return nil, fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	})
 }
 
-func (jenny Registry) renderRegistry(context languages.Context) ([]byte, error) {
+func (jenny Registry) renderRegistry(context languages.Context) (string, error) {
 	imports := NewImportMap(jenny.config.PackagePath)
 	var panelSchemas []PanelSchema
 	var dataquerySchemas []DataquerySchema
@@ -93,17 +90,12 @@ func (jenny Registry) renderRegistry(context languages.Context) ([]byte, error) 
 		return dataquerySchemas[i].Identifier < dataquerySchemas[j].Identifier
 	})
 
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/registry.tmpl", map[string]any{
+	return template.Render(jenny.tmpl, "runtime/registry.tmpl", map[string]any{
 		"Package":          jenny.formatPackage("cog.variants"),
 		"Imports":          imports,
 		"PanelSchemas":     panelSchemas,
 		"DataquerySchemas": dataquerySchemas,
-	}); err != nil {
-		return nil, fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	})
 }
 
 func (jenny Registry) findDataqueryClass(schema *ast.Schema) string {
@@ -136,24 +128,14 @@ func (jenny Registry) formatPackage(pkg string) string {
 	return pkg
 }
 
-func (jenny Registry) unknownDataquery() ([]byte, error) {
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/unknown_dataquery.tmpl", map[string]any{
+func (jenny Registry) unknownDataquery() (string, error) {
+	return template.Render(jenny.tmpl, "runtime/unknown_dataquery.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
-	}); err != nil {
-		return nil, fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	})
 }
 
-func (jenny Registry) unknownDataquerySerializer() ([]byte, error) {
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/unknown_dataquery_serializer.tmpl", map[string]any{
+func (jenny Registry) unknownDataquerySerializer() (string, error) {
+	return template.Render(jenny.tmpl, "runtime/unknown_dataquery_serializer.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
-	}); err != nil {
-		return nil, fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	})
 }

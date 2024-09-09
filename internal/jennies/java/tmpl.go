@@ -9,22 +9,20 @@ import (
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
-//nolint:gochecknoglobals
-var templates *template.Template
-
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/veneers/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.*
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.*
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-//nolint:gochecknoinits
-func init() {
+func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	base := template.New("golang")
 	base.
 		Option("missingkey=error").
 		Funcs(cogtemplate.Helpers(base)).
 		Funcs(functions())
 
-	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
+	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
+
+	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
 }
 
 func functions() template.FuncMap {

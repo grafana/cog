@@ -2,15 +2,16 @@ package golang
 
 import (
 	"sort"
-	"text/template"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
 
 type VariantsPlugins struct {
-	Tmpl   *template.Template
+	Tmpl   *gotemplate.Template
 	Config Config
 }
 
@@ -38,7 +39,7 @@ func (jenny VariantsPlugins) Generate(context languages.Context) (codejen.Files,
 }
 
 func (jenny VariantsPlugins) variantModels() (string, error) {
-	return renderTemplate(jenny.Tmpl, "runtime/variant_models.tmpl", map[string]any{})
+	return template.Render(jenny.Tmpl, "runtime/variant_models.tmpl", map[string]any{})
 }
 
 func (jenny VariantsPlugins) variantPlugins(context languages.Context) (string, error) {
@@ -70,7 +71,7 @@ func (jenny VariantsPlugins) variantPlugins(context languages.Context) (string, 
 		return dataquerySchemas[i].Package < dataquerySchemas[j].Package
 	})
 
-	return renderTemplate(jenny.Tmpl, "runtime/variant_plugins.tmpl", map[string]any{
+	return template.Render(jenny.Tmpl, "runtime/variant_plugins.tmpl", map[string]any{
 		"panel_schemas":     panelSchemas,
 		"dataquery_schemas": dataquerySchemas,
 		"imports":           imports,

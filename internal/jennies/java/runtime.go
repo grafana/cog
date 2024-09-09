@@ -1,16 +1,18 @@
 package java
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
 
 type Runtime struct {
 	config Config
+	tmpl   *gotemplate.Template
 }
 
 func (jenny Runtime) JennyName() string {
@@ -29,32 +31,22 @@ func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 	}
 
 	return codejen.Files{
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Dataquery.java"), variants, jenny),
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/Builder.java"), builder, jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Dataquery.java"), []byte(variants), jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/Builder.java"), []byte(builder), jenny),
 	}, nil
 }
 
-func (jenny Runtime) renderDataQueryVariant(variant string) ([]byte, error) {
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/variants.tmpl", map[string]any{
+func (jenny Runtime) renderDataQueryVariant(variant string) (string, error) {
+	return template.Render(jenny.tmpl, "runtime/variants.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 		"Variant": variant,
-	}); err != nil {
-		return nil, fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	})
 }
 
-func (jenny Runtime) renderBuilderInterface() ([]byte, error) {
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, "runtime/builder.tmpl", map[string]any{
+func (jenny Runtime) renderBuilderInterface() (string, error) {
+	return template.Render(jenny.tmpl, "runtime/builder.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog"),
-	}); err != nil {
-		return nil, fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	})
 }
 
 func (jenny Runtime) formatPackage(pkg string) string {
