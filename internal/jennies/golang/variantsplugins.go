@@ -2,6 +2,7 @@ package golang
 
 import (
 	"sort"
+	"text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -9,6 +10,7 @@ import (
 )
 
 type VariantsPlugins struct {
+	Tmpl   *template.Template
 	Config Config
 }
 
@@ -36,7 +38,7 @@ func (jenny VariantsPlugins) Generate(context languages.Context) (codejen.Files,
 }
 
 func (jenny VariantsPlugins) variantModels() (string, error) {
-	return renderTemplate("runtime/variant_models.tmpl", map[string]any{})
+	return renderTemplate(jenny.Tmpl, "runtime/variant_models.tmpl", map[string]any{})
 }
 
 func (jenny VariantsPlugins) variantPlugins(context languages.Context) (string, error) {
@@ -68,7 +70,7 @@ func (jenny VariantsPlugins) variantPlugins(context languages.Context) (string, 
 		return dataquerySchemas[i].Package < dataquerySchemas[j].Package
 	})
 
-	return renderTemplate("runtime/variant_plugins.tmpl", map[string]any{
+	return renderTemplate(jenny.Tmpl, "runtime/variant_plugins.tmpl", map[string]any{
 		"panel_schemas":     panelSchemas,
 		"dataquery_schemas": dataquerySchemas,
 		"imports":           imports,

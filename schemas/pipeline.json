@@ -317,6 +317,13 @@
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
         },
+        "builder_templates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "BuilderTemplatesDirectories holds a list of directories containing templates\nto be used to override parts of builders."
+        },
         "package_root": {
           "type": "string",
           "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"

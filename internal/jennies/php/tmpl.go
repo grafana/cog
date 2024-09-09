@@ -63,7 +63,7 @@ func init() {
 			"formatDocsBlock":      formatCommentsBlock,
 		})
 
-	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
+	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
 }
 
 func renderTemplate(templateFile string, data map[string]any) (string, error) {

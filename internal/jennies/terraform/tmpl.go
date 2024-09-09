@@ -39,5 +39,5 @@ func init() {
 			},
 		})
 
-	templates = template.Must(cogtemplate.FindAndParseTemplates(veneersFS, base, "templates"))
+	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(veneersFS, base, "templates"))
 }

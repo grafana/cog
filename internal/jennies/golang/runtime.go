@@ -1,11 +1,14 @@
 package golang
 
 import (
+	"text/template"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/languages"
 )
 
 type Runtime struct {
+	Tmpl   *template.Template
 	Config Config
 }
 
@@ -48,7 +51,7 @@ func (jenny Runtime) Runtime() (string, error) {
 	imports := NewImportMap()
 	imports.Add("", jenny.Config.importPath("cog/variants"))
 
-	return renderTemplate("runtime/runtime.tmpl", map[string]any{
+	return renderTemplate(jenny.Tmpl, "runtime/runtime.tmpl", map[string]any{
 		"imports": imports,
 	})
 }

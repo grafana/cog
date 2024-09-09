@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 const LanguageRef = "go"
@@ -26,6 +27,10 @@ type Config struct {
 	// rely on the runtime to function.
 	SkipRuntime bool `yaml:"skip_runtime"`
 
+	// BuilderTemplatesDirectories holds a list of directories containing templates
+	// to be used to override parts of builders.
+	BuilderTemplatesDirectories []string `yaml:"builder_templates"`
+
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string `yaml:"package_root"`
@@ -33,6 +38,7 @@ type Config struct {
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.PackageRoot = interpolator(config.PackageRoot)
+	config.BuilderTemplatesDirectories = tools.Map(config.BuilderTemplatesDirectories, interpolator)
 }
 
 func (config Config) MergeWithGlobal(global languages.Config) Config {
@@ -65,18 +71,20 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
+	tmpl := initTemplates(language.config.BuilderTemplatesDirectories)
+
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](!config.SkipRuntime, Runtime{Config: config}),
-		common.If[languages.Context](!config.SkipRuntime, VariantsPlugins{Config: config}),
+		common.If[languages.Context](!config.SkipRuntime, Runtime{Config: config, Tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime, VariantsPlugins{Config: config, Tmpl: tmpl}),
 
 		common.If[languages.Context](config.GenerateGoMod, GoMod{Config: config}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl}),
 
-		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config}),
+		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl}),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 

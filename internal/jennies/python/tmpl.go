@@ -52,7 +52,7 @@ func init() {
 			"formatPath":       formatFieldPath,
 		})
 
-	templates = template.Must(cogtemplate.FindAndParseTemplates(veneersFS, base, "templates"))
+	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(veneersFS, base, "templates"))
 }
 
 func renderTemplate(templateFile string, data map[string]any) (string, error) {

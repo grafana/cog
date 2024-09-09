@@ -425,6 +425,9 @@
         },
         "add_option": {
           "$ref": "#/$defs/YamlAddOption"
+        },
+        "default_to_constant": {
+          "$ref": "#/$defs/YamlDefaultToConstant"
         }
       },
       "additionalProperties": false,
@@ -467,6 +470,28 @@
           "type": "string"
         },
         "exclude_panel_options": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDefaultToConstant": {
+      "properties": {
+        "by_object": {
+          "type": "string"
+        },
+        "by_name": {
+          "type": "string"
+        },
+        "generated_from_disjunction": {
+          "type": "boolean",
+          "description": "noop?"
+        },
+        "options": {
           "items": {
             "type": "string"
           },

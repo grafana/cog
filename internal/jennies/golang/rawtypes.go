@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -13,6 +14,7 @@ import (
 
 type RawTypes struct {
 	Config Config
+	Tmpl   *template.Template
 
 	typeFormatter *typeFormatter
 }
@@ -54,10 +56,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, packageMapper)
-	unmarshallerGenerator := JSONMarshalling{
-		packageMapper: packageMapper,
-		typeFormatter: jenny.typeFormatter,
-	}
+	unmarshallerGenerator := NewJSONMarshalling(jenny.Tmpl, packageMapper, jenny.typeFormatter)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		objectOutput, innerErr := jenny.formatObject(object)

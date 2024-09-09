@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -15,6 +16,7 @@ import (
 
 type Builder struct {
 	Config Config
+	Tmpl   *gotemplate.Template
 
 	typeImportMapper func(pkg string) string
 	typeFormatter    *typeFormatter
@@ -66,7 +68,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
-	err := templates.
+	err := jenny.Tmpl.
 		Funcs(map[string]any{
 			"formatPath": jenny.formatFieldPath,
 			"formatType": jenny.typeFormatter.formatType,

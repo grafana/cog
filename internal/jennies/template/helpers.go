@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
 	gotemplate "text/template"
 
@@ -83,7 +85,7 @@ func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 	}
 }
 
-func FindAndParseTemplates(vfs fs.FS, rootTmpl *gotemplate.Template, rootDir string) (*gotemplate.Template, error) {
+func FindAndParseTemplatesFromFS(vfs fs.FS, rootTmpl *gotemplate.Template, rootDir string) (*gotemplate.Template, error) {
 	err := fs.WalkDir(vfs, rootDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -111,4 +113,39 @@ func FindAndParseTemplates(vfs fs.FS, rootTmpl *gotemplate.Template, rootDir str
 	})
 
 	return rootTmpl, err
+}
+
+func FindAndParseTemplates(rootTmpl *gotemplate.Template, rootDirs ...string) (*gotemplate.Template, error) {
+	for _, rootDir := range rootDirs {
+		err := filepath.WalkDir(rootDir, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if d.IsDir() {
+				return nil
+			}
+
+			fileHandle, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+
+			contents, err := io.ReadAll(fileHandle)
+			if err != nil {
+				return err
+			}
+
+			templateName := strings.TrimPrefix(strings.TrimPrefix(path, rootDir), "/")
+			t := rootTmpl.New(templateName)
+			_, err = t.Parse(string(contents))
+
+			return err
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return rootTmpl, nil
 }
