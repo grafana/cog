@@ -24,7 +24,7 @@ func init() {
 		Funcs(cogtemplate.Helpers(base)).
 		Funcs(functions())
 
-	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
+	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
 }
 
 func functions() template.FuncMap {

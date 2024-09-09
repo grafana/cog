@@ -49,5 +49,5 @@ func init() {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
 		})
-	templates = template.Must(cogtemplate.FindAndParseTemplates(templatesFS, base, "templates"))
+	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
 }

@@ -21,7 +21,7 @@ func TestBuilder_Generate(t *testing.T) {
 		PackageRoot: "github.com/grafana/cog/generated",
 	}
 	language := New(config)
-	jenny := Builder{Config: config}
+	jenny := Builder{Config: config, Tmpl: initTemplates([]string{})}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {
 		var err error
