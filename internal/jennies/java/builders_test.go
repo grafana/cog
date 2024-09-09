@@ -20,7 +20,7 @@ func TestBuidlers_Generate(t *testing.T) {
 	language := New(Config{
 		generateBuilders: true,
 	})
-	jenny := RawTypes{config: language.config}
+	jenny := RawTypes{config: language.config, tmpl: initTemplates([]string{})}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {
 		var err error

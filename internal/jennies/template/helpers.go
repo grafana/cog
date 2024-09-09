@@ -1,6 +1,7 @@
 package template
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/fs"
@@ -83,6 +84,15 @@ func Helpers(baseTemplate *gotemplate.Template) gotemplate.FuncMap {
 			return include(name, data)
 		},
 	}
+}
+
+func Render(templates *gotemplate.Template, templateFile string, data any) (string, error) {
+	buf := bytes.Buffer{}
+	if err := templates.ExecuteTemplate(&buf, templateFile, data); err != nil {
+		return "", fmt.Errorf("failed executing template: %w", err)
+	}
+
+	return buf.String(), nil
 }
 
 func FindAndParseTemplatesFromFS(vfs fs.FS, rootTmpl *gotemplate.Template, rootDir string) (*gotemplate.Template, error) {

@@ -106,3 +106,5 @@ output:
     - java:
         package_path: '%java_package_path%'
         skip_gradle_dev: true
+        builder_templates:
+          - '%__config_dir%/templates/java'

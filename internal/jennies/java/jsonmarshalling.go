@@ -1,13 +1,15 @@
 package java
 
 import (
-	"strings"
+	gotemplate "text/template"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 )
 
 type JSONMarshaller struct {
 	config        Config
+	tmpl          *gotemplate.Template
 	typeFormatter *typeFormatter
 }
 
@@ -16,21 +18,20 @@ func (j JSONMarshaller) genToJSONFunction(t ast.Type) string {
 		return ""
 	}
 
-	var buffer strings.Builder
 	j.typeFormatter.packageMapper(fasterXMLPackageName, "core.JsonProcessingException")
 	j.typeFormatter.packageMapper(fasterXMLPackageName, "databind.ObjectMapper")
 	j.typeFormatter.packageMapper(fasterXMLPackageName, "databind.ObjectWriter")
 	if t.IsStructGeneratedFromDisjunction() {
 		if t.IsStruct() && (t.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) || t.HasHint(ast.HintDisjunctionOfScalars)) {
-			_ = templates.ExecuteTemplate(&buffer, "marshalling/disjunctions.json_marshall.tmpl", map[string]any{
+			rendered, _ := template.Render(j.tmpl, "marshalling/disjunctions.json_marshall.tmpl", map[string]any{
 				"Fields": t.AsStruct().Fields,
 			})
-			return buffer.String()
+			return rendered
 		}
 	}
 
-	_ = templates.ExecuteTemplate(&buffer, "marshalling/marshalling.tmpl", map[string]any{})
-	return buffer.String()
+	rendered, _ := template.Render(j.tmpl, "marshalling/marshalling.tmpl", map[string]any{})
+	return rendered
 }
 
 func (j JSONMarshaller) annotation(t ast.Type) string {

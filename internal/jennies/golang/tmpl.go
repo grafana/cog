@@ -1,9 +1,7 @@
 package golang
 
 import (
-	"bytes"
 	"embed"
-	"fmt"
 	"text/template"
 
 	"github.com/grafana/cog/internal/ast"
@@ -59,13 +57,4 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(veneersFS, base, "templates"))
 
 	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
-}
-
-func renderTemplate(templates *template.Template, templateFile string, data map[string]any) (string, error) {
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, templateFile, data); err != nil {
-		return "", fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.String(), nil
 }

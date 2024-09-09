@@ -1,18 +1,20 @@
 package java
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Deserializers struct {
 	config  Config
+	tmpl    *gotemplate.Template
 	imports []string
 }
 
@@ -55,23 +57,22 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 }
 
 func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
-	buf := bytes.Buffer{}
-
 	jenny.imports = jenny.genImports(obj)
 
-	if err := templates.ExecuteTemplate(&buf, "marshalling/unmarshalling.tmpl", Unmarshalling{
+	rendered, err := template.Render(jenny.tmpl, "marshalling/unmarshalling.tmpl", Unmarshalling{
 		Package:                   jenny.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:                      obj.Name,
 		ShouldUnmarshallingPanels: obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel",
 		Imports:                   jenny.imports,
 		Fields:                    obj.Type.AsStruct().Fields,
 		DataqueryUnmarshalling:    jenny.genDataqueryCode(context, obj),
-	}); err != nil {
-		return nil, fmt.Errorf("failed executing template: %w", err)
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	path := filepath.Join(jenny.config.ProjectPath, obj.SelfRef.ReferredPkg, fmt.Sprintf("%sDeserializer.java", obj.SelfRef.ReferredType))
-	return codejen.NewFile(path, buf.Bytes(), jenny), nil
+	return codejen.NewFile(path, []byte(rendered), jenny), nil
 }
 
 func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.Object) []DataqueryUnmarshalling {
@@ -136,19 +137,18 @@ func (jenny *Deserializers) genImports(obj ast.Object) []string {
 }
 
 func (jenny *Deserializers) genDisjunctionsDeserialiser(obj ast.Object, tmpl string) (*codejen.File, error) {
-	buf := bytes.Buffer{}
-
-	if err := templates.ExecuteTemplate(&buf, fmt.Sprintf("marshalling/%s.json_unmarshall.tmpl", tmpl), Unmarshalling{
+	rendered, err := template.Render(jenny.tmpl, fmt.Sprintf("marshalling/%s.json_unmarshall.tmpl", tmpl), Unmarshalling{
 		Package: jenny.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:    tools.UpperCamelCase(obj.Name),
 		Fields:  obj.Type.AsStruct().Fields,
 		Hint:    obj.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs],
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, err
 	}
 
 	path := filepath.Join(jenny.config.ProjectPath, obj.SelfRef.ReferredPkg, fmt.Sprintf("%sDeserializer.java", tools.UpperCamelCase(obj.SelfRef.ReferredType)))
-	return codejen.NewFile(path, buf.Bytes(), jenny), nil
+	return codejen.NewFile(path, []byte(rendered), jenny), nil
 }
 
 func (jenny *Deserializers) formatPackage(pkg string) string {

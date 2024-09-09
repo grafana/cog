@@ -1,15 +1,17 @@
 package java
 
 import (
-	"bytes"
 	"fmt"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
 
 type Gradle struct {
 	config Config
+	tmpl   *gotemplate.Template
 }
 
 func (jenny Gradle) JennyName() string {
@@ -36,7 +38,6 @@ func (jenny Gradle) Generate(_ languages.Context) (codejen.Files, error) {
 }
 
 func (jenny Gradle) gen(tmpl string) (*codejen.File, error) {
-	buf := new(bytes.Buffer)
-	err := templates.ExecuteTemplate(buf, fmt.Sprintf("gradle/%s", tmpl), map[string]string{})
-	return codejen.NewFile(tmpl, buf.Bytes(), jenny), err
+	rendered, err := template.Render(jenny.tmpl, fmt.Sprintf("gradle/%s", tmpl), map[string]string{})
+	return codejen.NewFile(tmpl, []byte(rendered), jenny), err
 }

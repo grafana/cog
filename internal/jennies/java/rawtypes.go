@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -15,6 +16,7 @@ import (
 
 type RawTypes struct {
 	config  Config
+	tmpl    *gotemplate.Template
 	imports *common.DirectImportMap
 
 	typeFormatter  *typeFormatter
@@ -33,6 +35,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	jenny.builders = parseBuilders(jenny.config, context, jenny.typeFormatter)
 	jenny.jsonMarshaller = JSONMarshaller{
 		config:        jenny.config,
+		tmpl:          jenny.tmpl,
 		typeFormatter: jenny.typeFormatter,
 	}
 
@@ -49,7 +52,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny RawTypes) getTemplate() *template.Template {
-	return templates.Funcs(map[string]any{
+	return jenny.tmpl.Funcs(map[string]any{
 		"formatBuilderFieldType":        jenny.typeFormatter.formatBuilderFieldType,
 		"formatType":                    jenny.typeFormatter.formatFieldType,
 		"typeHasBuilder":                jenny.typeFormatter.typeHasBuilder,
