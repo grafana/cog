@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -15,6 +16,7 @@ import (
 
 type RawTypes struct {
 	config Config
+	tmpl   *gotemplate.Template
 
 	typeFormatter *typeFormatter
 	shaper        *shape
@@ -696,7 +698,7 @@ func (jenny RawTypes) formatEnumDef(def ast.Object) (string, error) {
 	enumType := def.Type.Enum.Values[0].Type
 
 	buf := bytes.Buffer{}
-	if err := templates.
+	if err := jenny.tmpl.
 		Funcs(map[string]any{
 			"formatType": jenny.typeFormatter.formatType,
 		}).

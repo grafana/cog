@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -13,6 +14,7 @@ import (
 
 type Builder struct {
 	config        Config
+	tmpl          *gotemplate.Template
 	typeFormatter *typeFormatter
 }
 
@@ -81,7 +83,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: false}
 
-	err := templates.
+	err := jenny.tmpl.
 		Funcs(map[string]any{
 			"fullNamespaceRef": jenny.config.fullNamespaceRef,
 			"formatPath":       jenny.formatFieldPath,

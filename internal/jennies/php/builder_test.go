@@ -18,7 +18,7 @@ func TestBuilder_Generate(t *testing.T) {
 		NamespaceRoot: "Grafana\\Foundation",
 	}
 	language := New(config)
-	jenny := Builder{config: config}
+	jenny := Builder{config: config, tmpl: initTemplates([]string{})}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {
 		var err error
