@@ -6,6 +6,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 const LanguageRef = "php"
@@ -14,10 +15,15 @@ type Config struct {
 	debug bool
 
 	NamespaceRoot string `yaml:"namespace_root"`
+
+	// BuilderTemplatesDirectories holds a list of directories containing templates
+	// to be used to override parts of builders.
+	BuilderTemplatesDirectories []string `yaml:"builder_templates"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.NamespaceRoot = interpolator(config.NamespaceRoot)
+	config.BuilderTemplatesDirectories = tools.Map(config.BuilderTemplatesDirectories, interpolator)
 }
 
 func (config Config) fullNamespace(typeName string) string {
@@ -52,14 +58,16 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
+	tmpl := initTemplates(language.config.BuilderTemplatesDirectories)
+
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		VariantsPlugins{config: config},
-		Runtime{config: config},
-		common.If[languages.Context](globalConfig.Types, RawTypes{config: config}),
-		common.If[languages.Context](globalConfig.Builders, &Builder{config: config}),
+		VariantsPlugins{config: config, tmpl: tmpl},
+		Runtime{config: config, tmpl: tmpl},
+		common.If[languages.Context](globalConfig.Types, RawTypes{config: config, tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

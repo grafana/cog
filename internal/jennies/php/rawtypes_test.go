@@ -23,6 +23,7 @@ func TestRawTypes_Generate(t *testing.T) {
 	}
 	jenny := RawTypes{
 		config: config,
+		tmpl:   initTemplates([]string{}),
 	}
 	compilerPasses := New(config).CompilerPasses()
 

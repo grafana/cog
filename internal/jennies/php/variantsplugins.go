@@ -1,12 +1,16 @@
 package php
 
 import (
+	gotemplate "text/template"
+
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
 
 type VariantsPlugins struct {
 	config Config
+	tmpl   *gotemplate.Template
 }
 
 func (jenny VariantsPlugins) JennyName() string {
@@ -41,7 +45,7 @@ func (jenny VariantsPlugins) Generate(_ languages.Context) (codejen.Files, error
 }
 
 func (jenny VariantsPlugins) dataqueryVariant() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/dataquery_variant.tmpl", map[string]any{
+	rendered, err := template.Render(jenny.tmpl, "runtime/dataquery_variant.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
@@ -52,7 +56,7 @@ func (jenny VariantsPlugins) dataqueryVariant() (codejen.File, error) {
 }
 
 func (jenny VariantsPlugins) dataqueryConfig() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/dataquery_config.tmpl", map[string]any{
+	rendered, err := template.Render(jenny.tmpl, "runtime/dataquery_config.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
@@ -63,7 +67,7 @@ func (jenny VariantsPlugins) dataqueryConfig() (codejen.File, error) {
 }
 
 func (jenny VariantsPlugins) panelcfgInterface() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/panelcfg_variant.tmpl", map[string]any{
+	rendered, err := template.Render(jenny.tmpl, "runtime/panelcfg_variant.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
@@ -74,7 +78,7 @@ func (jenny VariantsPlugins) panelcfgInterface() (codejen.File, error) {
 }
 
 func (jenny VariantsPlugins) panelcfgConfig() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/panelcfg_config.tmpl", map[string]any{
+	rendered, err := template.Render(jenny.tmpl, "runtime/panelcfg_config.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {

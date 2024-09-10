@@ -1,24 +1,18 @@
 package php
 
 import (
-	"bytes"
 	"embed"
-	"fmt"
 	"text/template"
 
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
-//nolint:gochecknoglobals
-var templates *template.Template
-
-//go:embed templates/builders/*.tmpl templates/builders/veneers/*.tmpl templates/runtime/*.tmpl templates/types/*.tmpl
+//go:embed templates/builders/*.tmpl templates/runtime/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-//nolint:gochecknoinits
-func init() {
+func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	base := template.New("php")
 	base.
 		Option("missingkey=error").
@@ -63,14 +57,7 @@ func init() {
 			"formatDocsBlock":      formatCommentsBlock,
 		})
 
-	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
-}
+	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
 
-func renderTemplate(templateFile string, data map[string]any) (string, error) {
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, templateFile, data); err != nil {
-		return "", fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.String(), nil
+	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
 }

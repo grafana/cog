@@ -2,14 +2,17 @@ package php
 
 import (
 	"sort"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
 
 type Runtime struct {
 	config Config
+	tmpl   *gotemplate.Template
 }
 
 func (jenny Runtime) JennyName() string {
@@ -40,7 +43,7 @@ func (jenny Runtime) Generate(context languages.Context) (codejen.Files, error) 
 }
 
 func (jenny Runtime) builderInterface() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/builder.tmpl", map[string]any{
+	rendered, err := template.Render(jenny.tmpl, "runtime/builder.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
@@ -74,7 +77,7 @@ func (jenny Runtime) runtime(context languages.Context) (codejen.File, error) {
 		return dataquerySchemas[i].Package < dataquerySchemas[j].Package
 	})
 
-	rendered, err := renderTemplate("runtime/runtime.tmpl", map[string]any{
+	rendered, err := template.Render(jenny.tmpl, "runtime/runtime.tmpl", map[string]any{
 		"PanelSchemas":     panelSchemas,
 		"DataquerySchemas": dataquerySchemas,
 		"NamespaceRoot":    jenny.config.NamespaceRoot,
@@ -87,7 +90,7 @@ func (jenny Runtime) runtime(context languages.Context) (codejen.File, error) {
 }
 
 func (jenny Runtime) unknownDataquery() (codejen.File, error) {
-	rendered, err := renderTemplate("runtime/unknown_dataquery.tmpl", map[string]any{
+	rendered, err := template.Render(jenny.tmpl, "runtime/unknown_dataquery.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
