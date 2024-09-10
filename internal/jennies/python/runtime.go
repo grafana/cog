@@ -2,13 +2,16 @@ package python
 
 import (
 	"sort"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
 
 type Runtime struct {
+	tmpl *gotemplate.Template
 }
 
 func (jenny Runtime) JennyName() string {
@@ -16,22 +19,22 @@ func (jenny Runtime) JennyName() string {
 }
 
 func (jenny Runtime) Generate(context languages.Context) (codejen.Files, error) {
-	builder, err := renderTemplate("runtime/builder.tmpl", map[string]any{})
+	builder, err := template.Render(jenny.tmpl, "runtime/builder.tmpl", map[string]any{})
 	if err != nil {
 		return nil, err
 	}
 
-	encoder, err := renderTemplate("runtime/encoder.tmpl", map[string]any{})
+	encoder, err := template.Render(jenny.tmpl, "runtime/encoder.tmpl", map[string]any{})
 	if err != nil {
 		return nil, err
 	}
 
-	models, err := renderTemplate("runtime/variant_models.tmpl", map[string]any{})
+	models, err := template.Render(jenny.tmpl, "runtime/variant_models.tmpl", map[string]any{})
 	if err != nil {
 		return nil, err
 	}
 
-	runtime, err := renderTemplate("runtime/runtime.tmpl", map[string]any{})
+	runtime, err := template.Render(jenny.tmpl, "runtime/runtime.tmpl", map[string]any{})
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +76,7 @@ func (jenny Runtime) variantPlugins(context languages.Context) (string, error) {
 	sort.Strings(panelSchemas)
 	sort.Strings(dataquerySchemas)
 
-	rendered, err := renderTemplate("runtime/plugins.tmpl", map[string]any{
+	rendered, err := template.Render(jenny.tmpl, "runtime/plugins.tmpl", map[string]any{
 		"panel_schemas":     panelSchemas,
 		"dataquery_schemas": dataquerySchemas,
 		"imports":           imports,
