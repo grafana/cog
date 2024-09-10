@@ -8,15 +8,11 @@ import (
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
-//nolint:gochecknoglobals
-var templates *template.Template
-
-//go:embed templates/*.tmpl templates/veneers/*.tmpl
+//go:embed templates/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-//nolint:gochecknoinits
-func init() {
+func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	base := template.New("ts")
 	base.
 		Option("missingkey=error").
@@ -49,5 +45,8 @@ func init() {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
 		})
-	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
+
+	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
+
+	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
 }
