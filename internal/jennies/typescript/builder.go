@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -14,6 +15,8 @@ import (
 )
 
 type Builder struct {
+	tmpl *gotemplate.Template
+
 	imports          *common.DirectImportMap
 	typeImportMapper func(string) string
 	typeFormatter    *typeFormatter
@@ -63,7 +66,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
-	err := templates.
+	err := jenny.tmpl.
 		Funcs(map[string]any{
 			"typeHasBuilder":              context.ResolveToBuilder,
 			"typeIsDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,

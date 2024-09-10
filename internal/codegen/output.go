@@ -101,4 +101,7 @@ func (outputLanguage *OutputLanguage) interpolateParameters(interpolator Paramet
 	if outputLanguage.Terraform != nil {
 		outputLanguage.Terraform.InterpolateParameters(interpolator)
 	}
+	if outputLanguage.Typescript != nil {
+		outputLanguage.Typescript.InterpolateParameters(interpolator)
+	}
 }

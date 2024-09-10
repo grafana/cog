@@ -15,7 +15,7 @@ func TestBuilder_Generate(t *testing.T) {
 	}
 
 	language := New(Config{})
-	jenny := Builder{}
+	jenny := Builder{tmpl: initTemplates([]string{})}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {
 		var err error
