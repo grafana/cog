@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	"text/template"
 	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
@@ -51,7 +50,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny RawTypes) getTemplate() *template.Template {
+func (jenny RawTypes) getTemplate() *gotemplate.Template {
 	return jenny.tmpl.Funcs(map[string]any{
 		"formatBuilderFieldType":        jenny.typeFormatter.formatBuilderFieldType,
 		"formatType":                    jenny.typeFormatter.formatFieldType,
