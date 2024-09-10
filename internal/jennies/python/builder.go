@@ -3,6 +3,7 @@ package python
 import (
 	"path/filepath"
 	"strings"
+	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -12,6 +13,8 @@ import (
 )
 
 type Builder struct {
+	tmpl *gotemplate.Template
+
 	imports          *ModuleImportMap
 	typeFormatter    *typeFormatter
 	rawTypeFormatter *typeFormatter
@@ -74,7 +77,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	fullObjectName := jenny.typeFormatter.formatRef(builder.For.SelfRef)
 	buildObjectSignature := fullObjectName
 
-	err := templates.
+	err := jenny.tmpl.
 		Funcs(map[string]any{
 			"formatType":    jenny.typeFormatter.formatType,
 			"formatRawType": jenny.rawTypeFormatter.formatType,

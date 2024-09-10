@@ -6,6 +6,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 const LanguageRef = "python"
@@ -17,10 +18,15 @@ type Config struct {
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.
 	SkipRuntime bool `yaml:"skip_runtime"`
+
+	// BuilderTemplatesDirectories holds a list of directories containing templates
+	// to be used to override parts of builders.
+	BuilderTemplatesDirectories []string `yaml:"builder_templates"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.PathPrefix = interpolator(config.PathPrefix)
+	config.BuilderTemplatesDirectories = tools.Map(config.BuilderTemplatesDirectories, interpolator)
 }
 
 type Language struct {
@@ -38,15 +44,17 @@ func (language *Language) Name() string {
 }
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
+	tmpl := initTemplates(language.config.BuilderTemplatesDirectories)
+
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
 		ModuleInit{},
-		common.If[languages.Context](!language.config.SkipRuntime, Runtime{}),
+		common.If[languages.Context](!language.config.SkipRuntime, Runtime{tmpl: tmpl}),
 
 		common.If[languages.Context](globalConfig.Types, RawTypes{}),
-		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{}),
+		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

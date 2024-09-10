@@ -104,6 +104,8 @@ output:
           - '%__config_dir%/templates/php'
     - python:
         path_prefix: grafana_foundation_sdk
+        builder_templates:
+          - '%__config_dir%/templates/python'
     - typescript: {}
     - java:
         package_path: '%java_package_path%'

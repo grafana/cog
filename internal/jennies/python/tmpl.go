@@ -1,24 +1,18 @@
 package python
 
 import (
-	"bytes"
 	"embed"
-	"fmt"
 	"text/template"
 
 	"github.com/grafana/cog/internal/ast"
 	cogtemplate "github.com/grafana/cog/internal/jennies/template"
 )
 
+//go:embed templates/*/*.tmpl
 //nolint:gochecknoglobals
-var templates *template.Template
+var templatesFS embed.FS
 
-//go:embed templates/*/*.tmpl templates/builders/veneers/*.tmpl
-//nolint:gochecknoglobals
-var veneersFS embed.FS
-
-//nolint:gochecknoinits
-func init() {
+func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	base := template.New("python")
 	base.
 		Option("missingkey=error").
@@ -52,14 +46,7 @@ func init() {
 			"formatPath":       formatFieldPath,
 		})
 
-	templates = template.Must(cogtemplate.FindAndParseTemplatesFromFS(veneersFS, base, "templates"))
-}
+	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
 
-func renderTemplate(templateFile string, data map[string]any) (string, error) {
-	buf := bytes.Buffer{}
-	if err := templates.ExecuteTemplate(&buf, templateFile, data); err != nil {
-		return "", fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.String(), nil
+	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
 }
