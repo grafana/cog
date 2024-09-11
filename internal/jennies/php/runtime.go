@@ -2,7 +2,6 @@ package php
 
 import (
 	"sort"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -12,7 +11,7 @@ import (
 
 type Runtime struct {
 	config Config
-	tmpl   *gotemplate.Template
+	tmpl   *template.Template
 }
 
 func (jenny Runtime) JennyName() string {
@@ -43,14 +42,14 @@ func (jenny Runtime) Generate(context languages.Context) (codejen.Files, error) 
 }
 
 func (jenny Runtime) builderInterface() (codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, "runtime/builder.tmpl", map[string]any{
+	rendered, err := jenny.tmpl.RenderAsBytes("runtime/builder.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Cog/Builder.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Cog/Builder.php", rendered, jenny), nil
 }
 
 func (jenny Runtime) runtime(context languages.Context) (codejen.File, error) {
@@ -77,7 +76,7 @@ func (jenny Runtime) runtime(context languages.Context) (codejen.File, error) {
 		return dataquerySchemas[i].Package < dataquerySchemas[j].Package
 	})
 
-	rendered, err := template.Render(jenny.tmpl, "runtime/runtime.tmpl", map[string]any{
+	rendered, err := jenny.tmpl.RenderAsBytes("runtime/runtime.tmpl", map[string]any{
 		"PanelSchemas":     panelSchemas,
 		"DataquerySchemas": dataquerySchemas,
 		"NamespaceRoot":    jenny.config.NamespaceRoot,
@@ -86,16 +85,16 @@ func (jenny Runtime) runtime(context languages.Context) (codejen.File, error) {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Cog/Runtime.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Cog/Runtime.php", rendered, jenny), nil
 }
 
 func (jenny Runtime) unknownDataquery() (codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, "runtime/unknown_dataquery.tmpl", map[string]any{
+	rendered, err := jenny.tmpl.RenderAsBytes("runtime/unknown_dataquery.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Cog/UnknownDataquery.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Cog/UnknownDataquery.php", rendered, jenny), nil
 }

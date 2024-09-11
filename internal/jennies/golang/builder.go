@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -16,7 +15,7 @@ import (
 
 type Builder struct {
 	Config Config
-	Tmpl   *gotemplate.Template
+	Tmpl   *template.Template
 
 	typeImportMapper func(pkg string) string
 	typeFormatter    *typeFormatter
@@ -47,8 +46,6 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
-	var buffer strings.Builder
-
 	imports := NewImportMap()
 	jenny.typeImportMapper = func(pkg string) string {
 		if imports.IsIdentical(pkg, builder.Package) {
@@ -68,7 +65,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
-	err := jenny.Tmpl.
+	return jenny.Tmpl.
 		Funcs(map[string]any{
 			"formatPath": jenny.formatFieldPath,
 			"formatType": jenny.typeFormatter.formatType,
@@ -95,7 +92,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return emptyValue
 			},
 		}).
-		ExecuteTemplate(&buffer, "builders/builder.tmpl", template.Builder{
+		RenderAsBytes("builders/builder.tmpl", template.Builder{
 			Package:              builder.Package,
 			BuilderSignatureType: buildObjectSignature,
 			Imports:              imports,
@@ -107,11 +104,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			Defaults:             jenny.genDefaultOptionsCalls(context, builder),
 			Options:              builder.Options,
 		})
-	if err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
 }
 
 func (jenny *Builder) genDefaultOptionsCalls(context languages.Context, builder ast.Builder) []template.OptionCall {

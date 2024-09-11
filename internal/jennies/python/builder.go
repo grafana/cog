@@ -3,7 +3,6 @@ package python
 import (
 	"path/filepath"
 	"strings"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -13,7 +12,7 @@ import (
 )
 
 type Builder struct {
-	tmpl *gotemplate.Template
+	tmpl *template.Template
 
 	imports          *ModuleImportMap
 	typeFormatter    *typeFormatter
@@ -68,8 +67,6 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
-	var buffer strings.Builder
-
 	// every builder uses the following imports
 	jenny.imports.AddPackage("typing", "typing")
 	jenny.importModule("cogbuilder", "..cog", "builder")
@@ -77,7 +74,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	fullObjectName := jenny.typeFormatter.formatRef(builder.For.SelfRef)
 	buildObjectSignature := fullObjectName
 
-	err := jenny.tmpl.
+	return jenny.tmpl.
 		Funcs(map[string]any{
 			"formatType":    jenny.typeFormatter.formatType,
 			"formatRawType": jenny.rawTypeFormatter.formatType,
@@ -106,7 +103,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
 			},
 		}).
-		ExecuteTemplate(&buffer, "builders/builder.tmpl", template.Builder{
+		RenderAsBytes("builders/builder.tmpl", template.Builder{
 			Package:              builder.Package,
 			BuilderSignatureType: buildObjectSignature,
 			BuilderName:          tools.UpperCamelCase(builder.Name),
@@ -116,11 +113,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			Properties:           builder.Properties,
 			Options:              tools.Map(builder.Options, jenny.generateOption),
 		})
-	if err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
 }
 
 func (jenny *Builder) generateOption(option ast.Option) ast.Option {

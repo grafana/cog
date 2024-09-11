@@ -2,23 +2,22 @@ package golang
 
 import (
 	"embed"
-	"text/template"
+	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
-	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/template"
 )
 
 //go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
-var veneersFS embed.FS
+var templatesFS embed.FS
 
 func initTemplates(extraTemplatesDirectories []string) *template.Template {
-	base := template.New("golang")
-	base.
-		Option("missingkey=error").
-		Funcs(cogtemplate.Helpers(base)).
+	tmpl, err := template.New(
+		"golang",
+
 		// placeholder functions, will be overridden by jennies
-		Funcs(template.FuncMap{
+		template.Funcs(template.FuncMap{
 			"formatPath": func(_ ast.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
 			},
@@ -37,8 +36,8 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
-		}).
-		Funcs(map[string]any{
+		}),
+		template.Funcs(map[string]any{
 			"formatPackageName": formatPackageName,
 			"formatScalar":      formatScalar,
 			"formatArgName":     formatArgName,
@@ -52,9 +51,15 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"isNullableNonArray": func(typeDef ast.Type) bool {
 				return typeDef.Nullable && !typeDef.IsArray()
 			},
-		})
+		}),
 
-	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(veneersFS, base, "templates"))
+		// parse templates
+		template.ParseFS(templatesFS, "templates"),
+		template.ParseDirectories(extraTemplatesDirectories...),
+	)
+	if err != nil {
+		panic(fmt.Errorf("could not initialize templates: %w", err))
+	}
 
-	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
+	return tmpl
 }

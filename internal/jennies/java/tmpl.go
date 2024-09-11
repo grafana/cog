@@ -3,10 +3,9 @@ package java
 import (
 	"embed"
 	"fmt"
-	"text/template"
 
 	"github.com/grafana/cog/internal/ast"
-	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/template"
 )
 
 //go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.*
@@ -14,15 +13,17 @@ import (
 var templatesFS embed.FS
 
 func initTemplates(extraTemplatesDirectories []string) *template.Template {
-	base := template.New("golang")
-	base.
-		Option("missingkey=error").
-		Funcs(cogtemplate.Helpers(base)).
-		Funcs(functions())
+	tmpl, err := template.New(
+		"java",
+		template.Funcs(functions()),
+		template.ParseFS(templatesFS, "templates"),
+		template.ParseDirectories(extraTemplatesDirectories...),
+	)
+	if err != nil {
+		panic(fmt.Errorf("could not initialize templates: %w", err))
+	}
 
-	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
-
-	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
+	return tmpl
 }
 
 func functions() template.FuncMap {

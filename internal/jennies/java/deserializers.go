@@ -3,7 +3,6 @@ package java
 import (
 	"fmt"
 	"path/filepath"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -14,7 +13,7 @@ import (
 
 type Deserializers struct {
 	config  Config
-	tmpl    *gotemplate.Template
+	tmpl    *template.Template
 	imports []string
 }
 
@@ -59,7 +58,7 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
 	jenny.imports = jenny.genImports(obj)
 
-	rendered, err := template.Render(jenny.tmpl, "marshalling/unmarshalling.tmpl", Unmarshalling{
+	rendered, err := jenny.tmpl.Render("marshalling/unmarshalling.tmpl", Unmarshalling{
 		Package:                   jenny.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:                      obj.Name,
 		ShouldUnmarshallingPanels: obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel",
@@ -137,7 +136,7 @@ func (jenny *Deserializers) genImports(obj ast.Object) []string {
 }
 
 func (jenny *Deserializers) genDisjunctionsDeserialiser(obj ast.Object, tmpl string) (*codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, fmt.Sprintf("marshalling/%s.json_unmarshall.tmpl", tmpl), Unmarshalling{
+	rendered, err := jenny.tmpl.Render(fmt.Sprintf("marshalling/%s.json_unmarshall.tmpl", tmpl), Unmarshalling{
 		Package: jenny.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:    tools.UpperCamelCase(obj.Name),
 		Fields:  obj.Type.AsStruct().Fields,

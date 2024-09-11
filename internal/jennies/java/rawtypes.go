@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
 	config  Config
-	tmpl    *gotemplate.Template
+	tmpl    *template.Template
 	imports *common.DirectImportMap
 
 	typeFormatter  *typeFormatter
@@ -50,7 +50,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	return files, nil
 }
 
-func (jenny RawTypes) getTemplate() *gotemplate.Template {
+func (jenny RawTypes) getTemplate() *template.Template {
 	return jenny.tmpl.Funcs(map[string]any{
 		"formatBuilderFieldType":        jenny.typeFormatter.formatBuilderFieldType,
 		"formatType":                    jenny.typeFormatter.formatFieldType,
@@ -164,17 +164,10 @@ func (jenny RawTypes) generatePanelBuilder(pkg string) ([]byte, error) {
 
 	builder.Imports = jenny.imports
 
-	var buffer strings.Builder
-	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/panel_builder.tmpl", builder); err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
+	return jenny.getTemplate().RenderAsBytes("types/panel_builder.tmpl", builder)
 }
 
 func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) {
-	var buffer strings.Builder
-
 	enum := object.Type.AsEnum()
 	values := make([]EnumValue, 0)
 	for _, value := range enum.Values {
@@ -210,27 +203,19 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 		}
 	}
 
-	err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/enum.tmpl", EnumTemplate{
+	return jenny.getTemplate().RenderAsBytes("types/enum.tmpl", EnumTemplate{
 		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Name:     object.Name,
 		Values:   values,
 		Type:     enumType,
 		Comments: object.Comments,
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
 }
 
 func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error) {
-	var buffer strings.Builder
-
 	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
 
-	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:                 jenny.typeFormatter.formatPackage(pkg),
 		Imports:                 jenny.imports,
 		Name:                    tools.UpperCamelCase(object.Name),
@@ -244,16 +229,10 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		ShouldAddSerializer:     jenny.typeFormatter.objectNeedsCustomSerializer(object),
 		ShouldAddDeserializer:   jenny.typeFormatter.objectNeedsCustomDeserializer(object),
 		ShouldAddFactoryMethods: object.Type.HasHint(ast.HintDisjunctionOfScalars) || object.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs),
-	}); err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
+	})
 }
 
 func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarType) ([]byte, error) {
-	var buffer strings.Builder
-
 	constants := make([]Constant, 0)
 	for name, scalar := range scalars {
 		constants = append(constants, Constant{
@@ -263,38 +242,27 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 		})
 	}
 
-	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/constants.tmpl", ConstantTemplate{
+	return jenny.getTemplate().RenderAsBytes("types/constants.tmpl", ConstantTemplate{
 		Package:   jenny.typeFormatter.formatPackage(pkg),
 		Name:      "Constants",
 		Constants: constants,
-	}); err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
+	})
 }
 
 func (jenny RawTypes) formatReference(pkg string, object ast.Object) ([]byte, error) {
-	var buffer strings.Builder
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
-	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Imports:  jenny.imports,
 		Name:     tools.UpperCamelCase(object.Name),
 		Extends:  []string{reference},
 		Comments: object.Comments,
 		Variant:  jenny.getVariant(object.Type),
-	}); err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
+	})
 }
 
 func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte, error) {
-	var buffer strings.Builder
-
 	intersection := object.Type.AsIntersection()
 	extensions := make([]string, 0)
 	fields := make([]ast.StructField, 0)
@@ -308,7 +276,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 		}
 	}
 
-	if err := jenny.getTemplate().ExecuteTemplate(&buffer, "types/class.tmpl", ClassTemplate{
+	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:  jenny.typeFormatter.formatPackage(pkg),
 		Imports:  jenny.imports,
 		Name:     object.Name,
@@ -316,11 +284,7 @@ func (jenny RawTypes) formatIntersection(pkg string, object ast.Object) ([]byte,
 		Comments: object.Comments,
 		Fields:   fields,
 		Variant:  jenny.getVariant(object.Type),
-	}); err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
+	})
 }
 
 func (jenny RawTypes) getVariant(t ast.Type) string {

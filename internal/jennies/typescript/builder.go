@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -15,7 +14,7 @@ import (
 )
 
 type Builder struct {
-	tmpl *gotemplate.Template
+	tmpl *template.Template
 
 	imports          *common.DirectImportMap
 	typeImportMapper func(string) string
@@ -52,8 +51,6 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
-	var buffer strings.Builder
-
 	jenny.imports = NewImportMap()
 	jenny.imports.Add("cog", "../cog")
 	jenny.typeImportMapper = func(pkg string) string {
@@ -66,7 +63,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
-	err := jenny.tmpl.
+	return jenny.tmpl.
 		Funcs(map[string]any{
 			"typeHasBuilder":              context.ResolveToBuilder,
 			"typeIsDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
@@ -93,7 +90,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return formatValue(jenny.rawTypes.defaultValueForType(guard.EmptyValueType, jenny.typeImportMapper))
 			},
 		}).
-		ExecuteTemplate(&buffer, "builder.tmpl", template.Builder{
+		RenderAsBytes("builder.tmpl", template.Builder{
 			BuilderName:          builder.Name,
 			ObjectName:           tools.CleanupNames(builder.For.Name),
 			BuilderSignatureType: buildObjectSignature,
@@ -104,8 +101,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			Properties:           builder.Properties,
 			Options:              builder.Options,
 		})
-
-	return []byte(buffer.String()), err
 }
 
 // importType declares an import statement for the type definition of
