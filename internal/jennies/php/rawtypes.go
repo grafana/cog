@@ -3,6 +3,7 @@ package php
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -624,11 +625,14 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 	}
 
 	decodingSwitch := fmt.Sprintf("switch ($input[\"%s\"]) {\n", disjunction.Discriminator)
-	for discriminator, objectRef := range disjunction.DiscriminatorMapping {
+	discriminators := tools.Keys(disjunction.DiscriminatorMapping)
+	sort.Strings(discriminators) // to ensure a deterministic output
+	for _, discriminator := range discriminators {
 		if discriminator == ast.DiscriminatorCatchAll {
 			continue
 		}
 
+		objectRef := disjunction.DiscriminatorMapping[discriminator]
 		decodingSwitch += fmt.Sprintf(`    case "%[1]s":
         return %[2]s::fromArray($input);
 `, discriminator, objectRef)
