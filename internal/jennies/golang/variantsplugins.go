@@ -2,7 +2,6 @@ package golang
 
 import (
 	"sort"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -11,7 +10,7 @@ import (
 )
 
 type VariantsPlugins struct {
-	Tmpl   *gotemplate.Template
+	Tmpl   *template.Template
 	Config Config
 }
 
@@ -32,17 +31,17 @@ func (jenny VariantsPlugins) Generate(context languages.Context) (codejen.Files,
 		return nil, err
 	}
 
-	files = append(files, *codejen.NewFile("cog/plugins/variants.go", []byte(registries), jenny))
-	files = append(files, *codejen.NewFile("cog/variants/variants.go", []byte(models), jenny))
+	files = append(files, *codejen.NewFile("cog/plugins/variants.go", registries, jenny))
+	files = append(files, *codejen.NewFile("cog/variants/variants.go", models, jenny))
 
 	return files, nil
 }
 
-func (jenny VariantsPlugins) variantModels() (string, error) {
-	return template.Render(jenny.Tmpl, "runtime/variant_models.tmpl", map[string]any{})
+func (jenny VariantsPlugins) variantModels() ([]byte, error) {
+	return jenny.Tmpl.RenderAsBytes("runtime/variant_models.tmpl", map[string]any{})
 }
 
-func (jenny VariantsPlugins) variantPlugins(context languages.Context) (string, error) {
+func (jenny VariantsPlugins) variantPlugins(context languages.Context) ([]byte, error) {
 	imports := NewImportMap()
 	var panelSchemas []*ast.Schema
 	var dataquerySchemas []*ast.Schema
@@ -71,7 +70,7 @@ func (jenny VariantsPlugins) variantPlugins(context languages.Context) (string, 
 		return dataquerySchemas[i].Package < dataquerySchemas[j].Package
 	})
 
-	return template.Render(jenny.Tmpl, "runtime/variant_plugins.tmpl", map[string]any{
+	return jenny.Tmpl.RenderAsBytes("runtime/variant_plugins.tmpl", map[string]any{
 		"panel_schemas":     panelSchemas,
 		"dataquery_schemas": dataquerySchemas,
 		"imports":           imports,

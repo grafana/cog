@@ -45,11 +45,13 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
+	tmpl := initTemplates()
+
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](globalConfig.Types, Models{Config: config}),
+		common.If[languages.Context](globalConfig.Types, Models{Config: config, tmpl: tmpl}),
 	)
 	// @TODO Re-enable this when ready
 	// jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))

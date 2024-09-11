@@ -2,7 +2,6 @@ package java
 
 import (
 	"fmt"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/template"
@@ -11,7 +10,7 @@ import (
 
 type Gradle struct {
 	config Config
-	tmpl   *gotemplate.Template
+	tmpl   *template.Template
 }
 
 func (jenny Gradle) JennyName() string {
@@ -38,6 +37,6 @@ func (jenny Gradle) Generate(_ languages.Context) (codejen.Files, error) {
 }
 
 func (jenny Gradle) gen(tmpl string) (*codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, fmt.Sprintf("gradle/%s", tmpl), map[string]string{})
-	return codejen.NewFile(tmpl, []byte(rendered), jenny), err
+	rendered, err := jenny.tmpl.RenderAsBytes(fmt.Sprintf("gradle/%s", tmpl), map[string]string{})
+	return codejen.NewFile(tmpl, rendered, jenny), err
 }

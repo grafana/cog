@@ -1,16 +1,14 @@
 package common
 
 import (
-	"bytes"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 
 	"github.com/grafana/codejen"
-	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/template"
 )
 
 type BuildOptions struct {
@@ -47,22 +45,21 @@ func (jenny RepositoryTemplate) Generate(buildOpts BuildOptions) (codejen.Files,
 				return err
 			}
 
-			base := template.New(jenny.JennyName())
-			tmpl, err := base.
-				Option("missingkey=error").
-				Funcs(cogtemplate.Helpers(base)).
-				Parse(string(templateContent))
+			tmpl, err := template.New(
+				jenny.JennyName(),
+				template.Parse(string(templateContent)),
+			)
 			if err != nil {
 				return err
 			}
 
-			buf := new(bytes.Buffer)
-			if err := tmpl.Execute(buf, jenny.templateData()); err != nil {
+			rendered, err := tmpl.ExecuteAsBytes(jenny.templateData())
+			if err != nil {
 				return err
 			}
 
-			if buf.Len() != 0 {
-				files = append(files, *codejen.NewFile(strings.TrimPrefix(path, cleanedRoot), buf.Bytes(), jenny))
+			if len(rendered) != 0 {
+				files = append(files, *codejen.NewFile(strings.TrimPrefix(path, cleanedRoot), rendered, jenny))
 			}
 
 			return nil

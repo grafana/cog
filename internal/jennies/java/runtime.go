@@ -3,7 +3,6 @@ package java
 import (
 	"fmt"
 	"path/filepath"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/template"
@@ -12,7 +11,7 @@ import (
 
 type Runtime struct {
 	config Config
-	tmpl   *gotemplate.Template
+	tmpl   *template.Template
 }
 
 func (jenny Runtime) JennyName() string {
@@ -37,14 +36,14 @@ func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 }
 
 func (jenny Runtime) renderDataQueryVariant(variant string) (string, error) {
-	return template.Render(jenny.tmpl, "runtime/variants.tmpl", map[string]any{
+	return jenny.tmpl.Render("runtime/variants.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 		"Variant": variant,
 	})
 }
 
 func (jenny Runtime) renderBuilderInterface() (string, error) {
-	return template.Render(jenny.tmpl, "runtime/builder.tmpl", map[string]any{
+	return jenny.tmpl.Render("runtime/builder.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog"),
 	})
 }

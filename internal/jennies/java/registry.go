@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -16,7 +15,7 @@ import (
 
 type Registry struct {
 	config Config
-	tmpl   *gotemplate.Template
+	tmpl   *template.Template
 }
 
 func (jenny Registry) JennyName() string {
@@ -53,7 +52,7 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny Registry) renderPanelConfig() (string, error) {
-	return template.Render(jenny.tmpl, "runtime/panel_config.tmpl", map[string]any{
+	return jenny.tmpl.Render("runtime/panel_config.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 	})
 }
@@ -90,7 +89,7 @@ func (jenny Registry) renderRegistry(context languages.Context) (string, error) 
 		return dataquerySchemas[i].Identifier < dataquerySchemas[j].Identifier
 	})
 
-	return template.Render(jenny.tmpl, "runtime/registry.tmpl", map[string]any{
+	return jenny.tmpl.Render("runtime/registry.tmpl", map[string]any{
 		"Package":          jenny.formatPackage("cog.variants"),
 		"Imports":          imports,
 		"PanelSchemas":     panelSchemas,
@@ -129,13 +128,13 @@ func (jenny Registry) formatPackage(pkg string) string {
 }
 
 func (jenny Registry) unknownDataquery() (string, error) {
-	return template.Render(jenny.tmpl, "runtime/unknown_dataquery.tmpl", map[string]any{
+	return jenny.tmpl.Render("runtime/unknown_dataquery.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 	})
 }
 
 func (jenny Registry) unknownDataquerySerializer() (string, error) {
-	return template.Render(jenny.tmpl, "runtime/unknown_dataquery_serializer.tmpl", map[string]any{
+	return jenny.tmpl.Render("runtime/unknown_dataquery_serializer.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog.variants"),
 	})
 }

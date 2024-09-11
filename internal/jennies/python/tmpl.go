@@ -2,10 +2,10 @@ package python
 
 import (
 	"embed"
-	"text/template"
+	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
-	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/template"
 )
 
 //go:embed templates/*/*.tmpl
@@ -13,12 +13,11 @@ import (
 var templatesFS embed.FS
 
 func initTemplates(extraTemplatesDirectories []string) *template.Template {
-	base := template.New("python")
-	base.
-		Option("missingkey=error").
-		Funcs(cogtemplate.Helpers(base)).
+	tmpl, err := template.New(
+		"python",
+
 		// placeholder functions, will be overridden by jennies
-		Funcs(template.FuncMap{
+		template.Funcs(template.FuncMap{
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
@@ -40,13 +39,19 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
-		}).
-		Funcs(template.FuncMap{
+		}),
+		template.Funcs(map[string]any{
 			"formatIdentifier": formatIdentifier,
 			"formatPath":       formatFieldPath,
-		})
+		}),
 
-	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
+		// parse templates
+		template.ParseFS(templatesFS, "templates"),
+		template.ParseDirectories(extraTemplatesDirectories...),
+	)
+	if err != nil {
+		panic(fmt.Errorf("could not initialize templates: %w", err))
+	}
 
-	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
+	return tmpl
 }

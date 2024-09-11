@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Builder struct {
 	config        Config
-	tmpl          *gotemplate.Template
+	tmpl          *template.Template
 	typeFormatter *typeFormatter
 }
 
@@ -74,8 +74,6 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
-	var buffer strings.Builder
-
 	builder.For.Comments = append(
 		builder.For.Comments,
 		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Cog\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),
@@ -83,7 +81,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: false}
 
-	err := jenny.tmpl.
+	return jenny.tmpl.
 		Funcs(map[string]any{
 			"fullNamespaceRef": jenny.config.fullNamespaceRef,
 			"formatPath":       jenny.formatFieldPath,
@@ -123,15 +121,10 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return formatValue(defaultValueForType(jenny.config, context.Schemas, typeDef, nil))
 			},
 		}).
-		ExecuteTemplate(&buffer, "builders/builder.tmpl", map[string]any{
+		RenderAsBytes("builders/builder.tmpl", map[string]any{
 			"NamespaceRoot": jenny.config.NamespaceRoot,
 			"Builder":       builder,
 		})
-	if err != nil {
-		return nil, err
-	}
-
-	return []byte(buffer.String()), nil
 }
 
 func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
