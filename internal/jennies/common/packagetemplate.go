@@ -1,7 +1,6 @@
 package common
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -9,10 +8,9 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"text/template"
 
 	"github.com/grafana/codejen"
-	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -46,25 +44,24 @@ func (jenny PackageTemplate) Generate(context languages.Context) (codejen.Files,
 			return err
 		}
 
-		base := template.New(jenny.JennyName())
-		tmpl, err := base.
-			Option("missingkey=error").
-			Funcs(cogtemplate.Helpers(base)).
-			Funcs(template.FuncMap{
+		tmpl, err := template.New(
+			jenny.JennyName(),
+			template.Funcs(template.FuncMap{
 				"registryToSemver": jenny.registryToSemver,
-			}).
-			Parse(string(templateContent))
+			}),
+			template.Parse(string(templateContent)),
+		)
 		if err != nil {
 			return err
 		}
 
-		buf := new(bytes.Buffer)
-		if err := tmpl.Execute(buf, jenny.templateData(context)); err != nil {
+		rendered, err := tmpl.ExecuteAsBytes(jenny.templateData(context))
+		if err != nil {
 			return err
 		}
 
-		if buf.Len() != 0 {
-			files = append(files, *codejen.NewFile(strings.TrimPrefix(path, cleanedRoot), buf.Bytes(), jenny))
+		if len(rendered) != 0 {
+			files = append(files, *codejen.NewFile(strings.TrimPrefix(path, cleanedRoot), rendered, jenny))
 		}
 
 		return nil

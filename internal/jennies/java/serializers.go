@@ -3,7 +3,6 @@ package java
 import (
 	"fmt"
 	"path/filepath"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -14,7 +13,7 @@ import (
 
 type Serializers struct {
 	config Config
-	tmpl   *gotemplate.Template
+	tmpl   *template.Template
 }
 
 func (jenny *Serializers) JennyName() string {
@@ -44,7 +43,7 @@ func (jenny *Serializers) Generate(context languages.Context) (codejen.Files, er
 }
 
 func (jenny *Serializers) genSerializer(obj ast.Object) (*codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, "marshalling/disjunctions_of_scalars.json_marshall.tmpl", Unmarshalling{
+	rendered, err := jenny.tmpl.Render("marshalling/disjunctions_of_scalars.json_marshall.tmpl", Unmarshalling{
 		Package: jenny.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:    tools.UpperCamelCase(obj.Name),
 		Fields:  obj.Type.AsStruct().Fields,

@@ -2,10 +2,10 @@ package php
 
 import (
 	"embed"
-	"text/template"
+	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
-	cogtemplate "github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/jennies/template"
 )
 
 //go:embed templates/builders/*.tmpl templates/runtime/*.tmpl templates/types/*.tmpl
@@ -13,12 +13,11 @@ import (
 var templatesFS embed.FS
 
 func initTemplates(extraTemplatesDirectories []string) *template.Template {
-	base := template.New("php")
-	base.
-		Option("missingkey=error").
-		Funcs(cogtemplate.Helpers(base)).
+	tmpl, err := template.New(
+		"php",
+
 		// placeholder functions, will be overridden by jennies
-		Funcs(template.FuncMap{
+		template.Funcs(template.FuncMap{
 			"fullNamespaceRef": func(_ string) string {
 				panic("fullNamespaceRef() needs to be overridden by a jenny")
 			},
@@ -46,8 +45,8 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"formatValue": func(_ ast.Type, _ any) bool {
 				panic("formatValue() needs to be overridden by a jenny")
 			},
-		}).
-		Funcs(map[string]any{
+		}),
+		template.Funcs(map[string]any{
 			"formatPackageName":    formatPackageName,
 			"formatObjectName":     formatObjectName,
 			"formatOptionName":     formatOptionName,
@@ -55,9 +54,15 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"formatArgName":        formatArgName,
 			"formatScalar":         formatValue,
 			"formatDocsBlock":      formatCommentsBlock,
-		})
+		}),
 
-	templates := template.Must(cogtemplate.FindAndParseTemplatesFromFS(templatesFS, base, "templates"))
+		// parse templates
+		template.ParseFS(templatesFS, "templates"),
+		template.ParseDirectories(extraTemplatesDirectories...),
+	)
+	if err != nil {
+		panic(fmt.Errorf("could not initialize templates: %w", err))
+	}
 
-	return template.Must(cogtemplate.FindAndParseTemplates(templates, extraTemplatesDirectories...))
+	return tmpl
 }

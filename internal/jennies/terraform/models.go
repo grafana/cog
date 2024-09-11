@@ -2,15 +2,16 @@ package terraform
 
 import (
 	"path/filepath"
-	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
 
 type Models struct {
 	Config Config
+	tmpl   *template.Template
 }
 
 func (jenny Models) JennyName() string {
@@ -35,19 +36,14 @@ func (jenny Models) Generate(context languages.Context) (codejen.Files, error) {
 }
 
 func (jenny Models) generateSchema(_ languages.Context, schema *ast.Schema) ([]byte, error) {
-	var buffer strings.Builder
-
 	// schema.LocateObject(schema.EntryPoint)
 	schema.Package = formatPackageName(schema.Package)
 	structObjects := schema.Objects.Filter(func(_ string, object ast.Object) bool {
 		return object.Type.IsStruct()
 	})
-	err := templates.ExecuteTemplate(&buffer, "types/models.tmpl", map[string]any{
+
+	return jenny.tmpl.RenderAsBytes("types/models.tmpl", map[string]any{
 		"Schema":  schema,
 		"Objects": structObjects.Values(),
 	})
-	if err != nil {
-		return nil, err
-	}
-	return []byte(buffer.String()), nil
 }

@@ -1,14 +1,13 @@
 package php
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
 	"strings"
-	gotemplate "text/template"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
@@ -16,7 +15,7 @@ import (
 
 type RawTypes struct {
 	config Config
-	tmpl   *gotemplate.Template
+	tmpl   *template.Template
 
 	typeFormatter *typeFormatter
 	shaper        *shape
@@ -695,19 +694,12 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 }
 
 func (jenny RawTypes) formatEnumDef(def ast.Object) (string, error) {
-	enumType := def.Type.Enum.Values[0].Type
-
-	buf := bytes.Buffer{}
-	if err := jenny.tmpl.
+	return jenny.tmpl.
 		Funcs(map[string]any{
 			"formatType": jenny.typeFormatter.formatType,
 		}).
-		ExecuteTemplate(&buf, "types/enum.tmpl", map[string]any{
+		Render("types/enum.tmpl", map[string]any{
 			"Object":   def,
-			"EnumType": enumType,
-		}); err != nil {
-		return "", fmt.Errorf("failed executing template: %w", err)
-	}
-
-	return buf.String(), nil
+			"EnumType": def.Type.Enum.Values[0].Type,
+		})
 }

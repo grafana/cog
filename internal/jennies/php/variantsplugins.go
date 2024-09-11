@@ -1,8 +1,6 @@
 package php
 
 import (
-	gotemplate "text/template"
-
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -10,7 +8,7 @@ import (
 
 type VariantsPlugins struct {
 	config Config
-	tmpl   *gotemplate.Template
+	tmpl   *template.Template
 }
 
 func (jenny VariantsPlugins) JennyName() string {
@@ -45,45 +43,45 @@ func (jenny VariantsPlugins) Generate(_ languages.Context) (codejen.Files, error
 }
 
 func (jenny VariantsPlugins) dataqueryVariant() (codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, "runtime/dataquery_variant.tmpl", map[string]any{
+	rendered, err := jenny.tmpl.RenderAsBytes("runtime/dataquery_variant.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Cog/Dataquery.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Cog/Dataquery.php", rendered, jenny), nil
 }
 
 func (jenny VariantsPlugins) dataqueryConfig() (codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, "runtime/dataquery_config.tmpl", map[string]any{
+	rendered, err := jenny.tmpl.RenderAsBytes("runtime/dataquery_config.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Cog/DataqueryConfig.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Cog/DataqueryConfig.php", rendered, jenny), nil
 }
 
 func (jenny VariantsPlugins) panelcfgInterface() (codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, "runtime/panelcfg_variant.tmpl", map[string]any{
+	rendered, err := jenny.tmpl.RenderAsBytes("runtime/panelcfg_variant.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Cog/Panelcfg.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Cog/Panelcfg.php", rendered, jenny), nil
 }
 
 func (jenny VariantsPlugins) panelcfgConfig() (codejen.File, error) {
-	rendered, err := template.Render(jenny.tmpl, "runtime/panelcfg_config.tmpl", map[string]any{
+	rendered, err := jenny.tmpl.RenderAsBytes("runtime/panelcfg_config.tmpl", map[string]any{
 		"NamespaceRoot": jenny.config.NamespaceRoot,
 	})
 	if err != nil {
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile("src/Cog/PanelcfgConfig.php", []byte(rendered), jenny), nil
+	return *codejen.NewFile("src/Cog/PanelcfgConfig.php", rendered, jenny), nil
 }
