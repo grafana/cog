@@ -3,6 +3,7 @@ package python
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -350,11 +351,14 @@ func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, input
 	decodingMap := "{"
 	branchTypes := make([]string, 0, len(disjunction.Branches))
 	defaultBranch := ""
-	for discriminator, objectRef := range disjunction.DiscriminatorMapping {
+	discriminators := tools.Keys(disjunction.DiscriminatorMapping)
+	sort.Strings(discriminators) // to ensure a deterministic output
+	for _, discriminator := range discriminators {
 		if discriminator == ast.DiscriminatorCatchAll {
 			continue
 		}
 
+		objectRef := disjunction.DiscriminatorMapping[discriminator]
 		decodingMap += fmt.Sprintf(`"%s": %s, `, discriminator, objectRef)
 		branchTypes = append(branchTypes, fmt.Sprintf("%s.Type[%s]", typingPkg, objectRef))
 	}
