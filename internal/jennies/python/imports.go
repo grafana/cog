@@ -94,6 +94,10 @@ func (im ModuleImportMap) AddModule(alias string, pkg string, module string) str
 	return sanitizedAlias
 }
 
+func (im ModuleImportMap) Sort() {
+	im.Imports.Sort(orderedmap.SortStrings)
+}
+
 func (im ModuleImportMap) String() string {
 	return im.config.Formatter(im)
 }

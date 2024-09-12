@@ -72,6 +72,7 @@ func (jenny Runtime) variantPlugins(context languages.Context) ([]byte, error) {
 	}
 
 	// to guarantee a consistent output for this jenny
+	imports.Sort()
 	sort.Strings(panelSchemas)
 	sort.Strings(dataquerySchemas)
 
