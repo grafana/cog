@@ -57,10 +57,6 @@ function run_codegen() {
   local extra_parameters="${1}"
   shift
 
-  echo $COG_CMD generate \
-         --config "${__dir}/../config/foundation_sdk.yaml" \
-         --parameters "${extra_parameters}"
-
   $COG_CMD generate \
     --config "${__dir}/../config/foundation_sdk.yaml" \
     --parameters "${extra_parameters}"
