@@ -71,6 +71,16 @@ passes:
 
   - dashboard_panels: {}
 
+  # Add a few missing fields.
+  # This is meant to be removed once the schema is updated.
+  - add_fields:
+      to: dashboard.AnnotationQuery
+      fields:
+        - name: expr
+          type:
+            kind: scalar
+            scalar: { scalar_kind: string }
+
   ########################
   # Prometheus dataquery #
   ########################
