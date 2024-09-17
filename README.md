@@ -36,7 +36,36 @@ For the [`kind-registry`](https://github.com/grafana/kind-registry):
 
 ```console
 $ git clone https://github.com/grafana/kind-registry ../kind-registry
-$ go run cmd/cli/main.go generate \
-    --config ./config/foundation_sdk.dev.yaml \
-    --parameters kind_registry_version=v10.4.x
+$ devbox run gen-sdk-dev
 ```
+
+## Development setup
+
+cog relies on [devbox](https://www.jetify.com/devbox/docs/) to manage all
+the tools and programming languages it targets.
+
+A shell including all the required tools is accessible via:
+
+```console
+$ devbox shell
+```
+
+One-off commands can be executed within the devbox shell as well:
+
+```console
+$ devbox run go version
+```
+
+Various cog-specific commands also exist:
+
+```console
+$ devbox run
+```
+
+Packages can be installed using:
+
+```console
+devbox add go@1.23
+```
+
+Available packages can be found on the [NixOS package repository](https://search.nixos.org/packages).
