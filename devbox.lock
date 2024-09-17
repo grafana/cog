@@ -1,0 +1,367 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "go@1.23": {
+      "last_modified": "2024-09-12T11:58:09Z",
+      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#go_1_23",
+      "source": "devbox-search",
+      "version": "1.23.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/nvaay1c4banbccyvv6ba1gzyqpypjmfq-go-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/nvaay1c4banbccyvv6ba1gzyqpypjmfq-go-1.23.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9ylsay11jb3p6yarkmlz0fin76cdypwa-go-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/9ylsay11jb3p6yarkmlz0fin76cdypwa-go-1.23.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zkg5xhyx2rs03dq0qp14nqlx9ff1y5c5-go-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zkg5xhyx2rs03dq0qp14nqlx9ff1y5c5-go-1.23.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mi0ybwsm6pmxzv9hsm6bcbqaq1pkf8wh-go-1.23.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mi0ybwsm6pmxzv9hsm6bcbqaq1pkf8wh-go-1.23.1"
+        }
+      }
+    },
+    "golangci-lint@1.61": {
+      "last_modified": "2024-09-12T11:58:09Z",
+      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#golangci-lint",
+      "source": "devbox-search",
+      "version": "1.61.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mycyzj74j3hb0z3cn93zl27vn636nzvp-golangci-lint-1.61.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mycyzj74j3hb0z3cn93zl27vn636nzvp-golangci-lint-1.61.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/615pmvpwdk4a8zvysig394qyxryycvv5-golangci-lint-1.61.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/615pmvpwdk4a8zvysig394qyxryycvv5-golangci-lint-1.61.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/1ka14pll6a8kmvp4m3j493kaks8kf7hk-golangci-lint-1.61.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/1ka14pll6a8kmvp4m3j493kaks8kf7hk-golangci-lint-1.61.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/l9q9gr0500smf0wiqyv3q804ld8xdj21-golangci-lint-1.61.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/l9q9gr0500smf0wiqyv3q804ld8xdj21-golangci-lint-1.61.0"
+        }
+      }
+    },
+    "php83Packages.phpstan@1.11": {
+      "last_modified": "2024-09-12T11:58:09Z",
+      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#php83Packages.phpstan",
+      "source": "devbox-search",
+      "version": "1.11.8",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/pyw05w2xsnndx3k1s4yns80gax4l6jm5-phpstan-1.11.8",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/pyw05w2xsnndx3k1s4yns80gax4l6jm5-phpstan-1.11.8"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/raxgmljp14ilfyi8jzngqa28c1wl35c6-phpstan-1.11.8",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/raxgmljp14ilfyi8jzngqa28c1wl35c6-phpstan-1.11.8"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/icd857ch4plc4qw4fnnixhnmibr926dm-phpstan-1.11.8",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/icd857ch4plc4qw4fnnixhnmibr926dm-phpstan-1.11.8"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/dicy20zii0b1xpqflh4jxmz0ywsmj04k-phpstan-1.11.8",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/dicy20zii0b1xpqflh4jxmz0ywsmj04k-phpstan-1.11.8"
+        }
+      }
+    },
+    "php83Packages.psalm@5.25": {
+      "last_modified": "2024-09-12T11:58:09Z",
+      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#php83Packages.psalm",
+      "source": "devbox-search",
+      "version": "5.25.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/2ipakcda8icl7r86s0qjkd627mrcfvl3-psalm-5.25.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/2ipakcda8icl7r86s0qjkd627mrcfvl3-psalm-5.25.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/w32iqghc4gxydkfqgrds69i0bg23jjaf-psalm-5.25.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/w32iqghc4gxydkfqgrds69i0bg23jjaf-psalm-5.25.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/phmq70pf9wmqm0vf03qhf9w9zmszcjf9-psalm-5.25.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/phmq70pf9wmqm0vf03qhf9w9zmszcjf9-psalm-5.25.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/l5l5pbf9yny98982f3rd2z8dsnaas5sg-psalm-5.25.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/l5l5pbf9yny98982f3rd2z8dsnaas5sg-psalm-5.25.0"
+        }
+      }
+    },
+    "php@8.3": {
+      "last_modified": "2024-09-12T11:58:09Z",
+      "plugin_version": "0.0.3",
+      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#php83",
+      "source": "devbox-search",
+      "version": "8.3.11",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/0njs510s207yhfg3a8ans9cmfwca0fwl-php-with-extensions-8.3.11",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/0njs510s207yhfg3a8ans9cmfwca0fwl-php-with-extensions-8.3.11"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/gk2lzzh45d8cvzgs780jjfjwx3g2k9pg-php-with-extensions-8.3.11",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/gk2lzzh45d8cvzgs780jjfjwx3g2k9pg-php-with-extensions-8.3.11"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/md7k6rhnvm7pz8dkppy4f17mydx064cj-php-with-extensions-8.3.11",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/md7k6rhnvm7pz8dkppy4f17mydx064cj-php-with-extensions-8.3.11"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/0r8w4n0xh1wkvc14n4gl0mshy1y3sri1-php-with-extensions-8.3.11",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/0r8w4n0xh1wkvc14n4gl0mshy1y3sri1-php-with-extensions-8.3.11"
+        }
+      }
+    },
+    "python312Packages.mypy@1.10": {
+      "last_modified": "2024-09-12T11:58:09Z",
+      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#python312Packages.mypy",
+      "source": "devbox-search",
+      "version": "1.10.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/1y80vmnvgybi07jkqabwz7bh4z7i0hr4-python3.12-mypy-1.10.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/nnfh6hz9dg422jmm7ncmrhk7yzxisb3c-python3.12-mypy-1.10.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/1y80vmnvgybi07jkqabwz7bh4z7i0hr4-python3.12-mypy-1.10.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zfds59h3jsq2gsc9yg1gq9ms4hbb11vv-python3.12-mypy-1.10.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/nazj5x0i8hvi3rvh66asdmb69523pihr-python3.12-mypy-1.10.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/zfds59h3jsq2gsc9yg1gq9ms4hbb11vv-python3.12-mypy-1.10.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/k82wd2xx1bv05963hg1614218y45s77r-python3.12-mypy-1.10.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/aclf1fmdmyjsd4fkjnv8phm02vbwz1mf-python3.12-mypy-1.10.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/k82wd2xx1bv05963hg1614218y45s77r-python3.12-mypy-1.10.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ryp4vp6rs3d1gk0mgj6x8bncavsp4wqa-python3.12-mypy-1.10.1",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/i2kag0929as7g6mb2lp7kijw6wpjaxhs-python3.12-mypy-1.10.1-dist"
+            }
+          ],
+          "store_path": "/nix/store/ryp4vp6rs3d1gk0mgj6x8bncavsp4wqa-python3.12-mypy-1.10.1"
+        }
+      }
+    },
+    "python@3.12": {
+      "last_modified": "2024-09-12T11:58:09Z",
+      "plugin_version": "0.0.3",
+      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#python3",
+      "source": "devbox-search",
+      "version": "3.12.5",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9pj4rzx5pbynkkxq1srzwjhywmcfxws3-python3-3.12.5",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/9pj4rzx5pbynkkxq1srzwjhywmcfxws3-python3-3.12.5"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/6iq3nhgdyp8a5wzwf097zf2mn4zyqxr6-python3-3.12.5",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/xc4hygp28y7g1rvjf0vi7fj0d83a75pj-python3-3.12.5-debug"
+            }
+          ],
+          "store_path": "/nix/store/6iq3nhgdyp8a5wzwf097zf2mn4zyqxr6-python3-3.12.5"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ks8acr22s4iggnmvxydm5czl30racy32-python3-3.12.5",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/ks8acr22s4iggnmvxydm5czl30racy32-python3-3.12.5"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/h3i0acpmr8mrjx07519xxmidv8mpax4y-python3-3.12.5",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/0a39pi2s6kxqc3kjjz2y9yzibd62zhhb-python3-3.12.5-debug"
+            }
+          ],
+          "store_path": "/nix/store/h3i0acpmr8mrjx07519xxmidv8mpax4y-python3-3.12.5"
+        }
+      }
+    }
+  }
+}
