@@ -2,10 +2,6 @@ name: Foundation-sdk diff preview
 on:
   pull_request: ~
 
-env:
-  GO_VERSION: '1.21'
-  NODE_VERSION: '18'
-
 jobs:
   sdk_diff:
     name: Generate diff
@@ -14,10 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.11.0
         with:
-          go-version: ${{ env.GO_VERSION }}
+          enable-cache: 'true'
 
       - name: Dry-run release
         shell: bash
@@ -25,7 +21,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
           
-          ./scripts/release-version.sh next
+          devbox run ./scripts/release-version.sh next
         env:
           FOUNDATION_SDK_PATH: ./grafana-foundation-sdk
           FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git

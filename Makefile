@@ -21,3 +21,13 @@ gen-sdk-dev:
 	go run cmd/cli/main.go generate \
 		--config ./config/foundation_sdk.dev.yaml \
 		--parameters kind_registry_version=next,grafana_version=main
+
+.PHONY: run-go-example
+run-go-example:
+	go run ./examples/_go/*
+
+.PHONY: run-php-example
+run-php-example:
+	cd ./examples/php && \
+	composer install && \
+	php index.php
