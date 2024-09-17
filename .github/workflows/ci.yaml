@@ -5,7 +5,6 @@ on:
     branches: [main] # so that we build a Go cache that can be re-used in PRs
 
 env:
-  PYTHON_VERSION: '3.12'
   JAVA_VERSION: '17'
 
 jobs:
@@ -55,14 +54,6 @@ jobs:
         with:
           enable-cache: 'true'
 
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install mypy
-        run: python3 -m pip install mypy
-
       - name: Setup Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
@@ -98,7 +89,7 @@ jobs:
           done
 
       - name: Lint generated Python code
-        run: mypy generated/python/
+        run: devbox run mypy generated/python/
 
       - name: Compile generated Java code
         run: gradle build -p generated/java
