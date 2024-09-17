@@ -25,7 +25,7 @@ jobs:
           enable-cache: 'true'
 
       - name: Run golangci-lint
-        run: devbox run make lint
+        run: devbox run lint
 
   tests:
     name: Tests
@@ -34,16 +34,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.11.0
         with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Install vendors
-        run: make deps
+          enable-cache: 'true'
 
       - name: Tests
-        run: make tests
+        run: devbox run tests
 
   registry:
     name: Generate registry
