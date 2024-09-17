@@ -7,14 +7,19 @@
     "php83Packages.phpstan@1.11",
     "python312Packages.mypy@1.10",
     "golangci-lint@1.61",
-    "php83Packages.psalm@5.25"
+    "php83Packages.psalm@5.25",
+    "nodejs_18@18.20",
+    "nodePackages.ts-node@10.9.2"
   ],
   "shell": {
     "init_hook": [
       "echo 'Installing dependencies...' && make deps"
     ],
     "scripts": {
-      "lint": "make lint",
+      "go-example": "make run-go-example",
+      "php-example": "make run-php-example",
+      "ts-example": "make run-ts-example",
+      "lint":  "make lint",
       "tests": "make tests"
     }
   }

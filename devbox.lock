@@ -97,6 +97,119 @@
         }
       }
     },
+    "nodePackages.ts-node@10.9.2": {
+      "last_modified": "2024-09-13T05:52:00Z",
+      "resolved": "github:NixOS/nixpkgs/673d99f1406cb09b8eb6feab4743ebdf70046557#nodePackages.ts-node",
+      "source": "devbox-search",
+      "version": "10.9.2",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/kmchq7l6lyfl6q5dxh82kyvxd2r2hrgy-ts-node-10.9.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/kmchq7l6lyfl6q5dxh82kyvxd2r2hrgy-ts-node-10.9.2"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/6kgfhn3mczsgv39b15l1iv4vhjmiyfvp-ts-node-10.9.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/6kgfhn3mczsgv39b15l1iv4vhjmiyfvp-ts-node-10.9.2"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/49pyi3l8xd1cw5fw5rgd3jy9782184p7-ts-node-10.9.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/49pyi3l8xd1cw5fw5rgd3jy9782184p7-ts-node-10.9.2"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/l8phr8qy3mdj1wy0cy4afl27acc8f28b-ts-node-10.9.2",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/l8phr8qy3mdj1wy0cy4afl27acc8f28b-ts-node-10.9.2"
+        }
+      }
+    },
+    "nodejs_18@18.20": {
+      "last_modified": "2024-09-10T15:01:03Z",
+      "plugin_version": "0.0.2",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#nodejs_18",
+      "source": "devbox-search",
+      "version": "18.20.4",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mq4a000w2661rsz18bc66kspz46xg36i-nodejs-18.20.4",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/m6bjaxvy75snd24fk3kki98f80k0zazj-nodejs-18.20.4-libv8"
+            }
+          ],
+          "store_path": "/nix/store/mq4a000w2661rsz18bc66kspz46xg36i-nodejs-18.20.4"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/f92p8im867b0ih7x75fhvzq1n03a88nm-nodejs-18.20.4",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/bd2r8dn44lx8bkjikf7y0nlg9swyn90d-nodejs-18.20.4-libv8"
+            }
+          ],
+          "store_path": "/nix/store/f92p8im867b0ih7x75fhvzq1n03a88nm-nodejs-18.20.4"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/6ig5ijfhc8amfwh3y9kdh7yrfcv6wnzh-nodejs-18.20.4",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/74gg33cz9cksv940ffxrbx75z160k5cr-nodejs-18.20.4-libv8"
+            }
+          ],
+          "store_path": "/nix/store/6ig5ijfhc8amfwh3y9kdh7yrfcv6wnzh-nodejs-18.20.4"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/lgw9z5sf9n6pm2dqmd92z4gq4irslnq1-nodejs-18.20.4",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/rgrg7ccyvbzj6v9fdhbzvr3di2hl4458-nodejs-18.20.4-libv8"
+            }
+          ],
+          "store_path": "/nix/store/lgw9z5sf9n6pm2dqmd92z4gq4irslnq1-nodejs-18.20.4"
+        }
+      }
+    },
     "php83Packages.phpstan@1.11": {
       "last_modified": "2024-09-12T11:58:09Z",
       "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#php83Packages.phpstan",
