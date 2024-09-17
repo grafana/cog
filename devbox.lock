@@ -2,8 +2,8 @@
   "lockfile_version": "1",
   "packages": {
     "go@1.23": {
-      "last_modified": "2024-09-12T11:58:09Z",
-      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#go_1_23",
+      "last_modified": "2024-09-10T15:01:03Z",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#go_1_23",
       "source": "devbox-search",
       "version": "1.23.1",
       "systems": {
@@ -50,8 +50,8 @@
       }
     },
     "golangci-lint@1.61": {
-      "last_modified": "2024-09-12T11:58:09Z",
-      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#golangci-lint",
+      "last_modified": "2024-09-10T15:01:03Z",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#golangci-lint",
       "source": "devbox-search",
       "version": "1.61.0",
       "systems": {
@@ -288,8 +288,8 @@
       }
     },
     "php83Packages.phpstan@1.11": {
-      "last_modified": "2024-09-12T11:58:09Z",
-      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#php83Packages.phpstan",
+      "last_modified": "2024-09-10T15:01:03Z",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#php83Packages.phpstan",
       "source": "devbox-search",
       "version": "1.11.8",
       "systems": {
@@ -336,8 +336,8 @@
       }
     },
     "php83Packages.psalm@5.25": {
-      "last_modified": "2024-09-12T11:58:09Z",
-      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#php83Packages.psalm",
+      "last_modified": "2024-09-10T15:01:03Z",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#php83Packages.psalm",
       "source": "devbox-search",
       "version": "5.25.0",
       "systems": {
@@ -384,9 +384,9 @@
       }
     },
     "php@8.3": {
-      "last_modified": "2024-09-12T11:58:09Z",
+      "last_modified": "2024-09-10T15:01:03Z",
       "plugin_version": "0.0.3",
-      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#php83",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#php83",
       "source": "devbox-search",
       "version": "8.3.11",
       "systems": {
@@ -433,8 +433,8 @@
       }
     },
     "python312Packages.mypy@1.10": {
-      "last_modified": "2024-09-12T11:58:09Z",
-      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#python312Packages.mypy",
+      "last_modified": "2024-09-10T15:01:03Z",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#python312Packages.mypy",
       "source": "devbox-search",
       "version": "1.10.1",
       "systems": {
@@ -497,9 +497,9 @@
       }
     },
     "python@3.12": {
-      "last_modified": "2024-09-12T11:58:09Z",
+      "last_modified": "2024-09-10T15:01:03Z",
       "plugin_version": "0.0.3",
-      "resolved": "github:NixOS/nixpkgs/280db3decab4cbeb22a4599bd472229ab74d25e1#python3",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#python3",
       "source": "devbox-search",
       "version": "3.12.5",
       "systems": {
