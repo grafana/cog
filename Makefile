@@ -1,15 +1,6 @@
-GOLANGCI_LINT_VERSION?=v1.54.2
-DOCKER_TOOLS?=true
-
-GOLANGCI_LINT=docker run --rm -v $(shell pwd):/app -w /app golangci/golangci-lint:${GOLANGCI_LINT_VERSION}-alpine golangci-lint
-
-ifneq ($(DOCKER_TOOLS),true)
-  GOLANGCI_LINT=golangci-lint
-endif
-
 .PHONY: lint
 lint:
-	$(GOLANGCI_LINT) run -c .golangci.yaml
+	golangci-lint run -c .golangci.yaml
 
 .PHONY: tests
 tests:
@@ -23,3 +14,10 @@ deps:
 docs:
 	go run cmd/compiler-passes-docs/*
 	go run cmd/cog-config-schemas/*
+
+.PHONY: gen-sdk-dev
+gen-sdk-dev:
+	rm -rf generated
+	go run cmd/cli/main.go generate \
+		--config ./config/foundation_sdk.dev.yaml \
+		--parameters kind_registry_version=next,grafana_version=main

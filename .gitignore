@@ -1,5 +1,6 @@
 /generated
 /schemas/kind-registry
 /examples/php/vendor
+/.devbox
 
 .idea

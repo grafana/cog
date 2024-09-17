@@ -1,0 +1,21 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "python@3.12",
+    "go@1.23",
+    "php@8.3",
+    "php83Packages.phpstan@1.11",
+    "python312Packages.mypy@1.10",
+    "golangci-lint@1.61",
+    "php83Packages.psalm@5.25"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'Installing dependencies...' && make deps"
+    ],
+    "scripts": {
+      "lint": "make lint",
+      "tests": "make tests"
+    }
+  }
+}
