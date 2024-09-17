@@ -4,9 +4,6 @@ on:
   push:
     branches: [main] # so that we build a Go cache that can be re-used in PRs
 
-env:
-  JAVA_VERSION: '17'
-
 jobs:
   linters:
     name: Linters
@@ -54,17 +51,6 @@ jobs:
         with:
           enable-cache: 'true'
 
-      - name: Setup Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          check-latest: true
-      - name: Java setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.8'
-
       - name: Clone kind-registry
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
 
@@ -92,7 +78,7 @@ jobs:
         run: devbox run mypy generated/python/
 
       - name: Compile generated Java code
-        run: gradle build -p generated/java
+        run: devbox run gradle build -p generated/java
       
       - name: Lint generated PHP code with phpstan
         run: devbox run phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
@@ -112,25 +98,12 @@ jobs:
         with:
           enable-cache: 'true'
 
-      - name: Setup Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          check-latest: true
-      - name: Java setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.8'
-
       - name: Clone kind-registry
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
 
       - name: Run code generation
         run: |
-          devbox run go run cmd/cli/main.go generate \
-            --config ./config/foundation_sdk.dev.yaml \
-            --parameters kind_registry_version=next,grafana_version=main
+          devbox run gen-sdk-dev
 
       - name: Run the Go example
         run: |
@@ -146,5 +119,4 @@ jobs:
 
       - name: Run Java example
         run: |
-          gradle publishToMavenLocal -p generated
-          gradle run -p examples/java
+          devbox run java-example

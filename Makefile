@@ -26,6 +26,11 @@ gen-sdk-dev:
 run-go-example:
 	go run ./examples/_go/*
 
+.PHONY: run-java-example
+run-java-example:
+	gradle publishToMavenLocal -p generated
+	gradle run -p examples/java
+
 .PHONY: run-php-example
 run-php-example:
 	cd ./examples/php && \

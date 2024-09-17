@@ -97,6 +97,83 @@
         }
       }
     },
+    "gradle@8.10": {
+      "last_modified": "2024-09-12T02:28:40Z",
+      "plugin_version": "0.0.1",
+      "resolved": "github:NixOS/nixpkgs/111ed8812c10d7dc3017de46cbf509600c93f551#gradle",
+      "source": "devbox-search",
+      "version": "8.10",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/61170qk70z4crhbcd426i0psczpsiryg-gradle-8.10",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/61170qk70z4crhbcd426i0psczpsiryg-gradle-8.10"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/i2qacqh3c503d9cxzfaprc55sbr26q6m-gradle-8.10",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/i2qacqh3c503d9cxzfaprc55sbr26q6m-gradle-8.10"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/pjgyb964cp2hk3zk4claps5v4cxbn5w5-gradle-8.10",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/pjgyb964cp2hk3zk4claps5v4cxbn5w5-gradle-8.10"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/x3sypmdvnfc371qdrwqrh1haf3h8iw76-gradle-8.10",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/x3sypmdvnfc371qdrwqrh1haf3h8iw76-gradle-8.10"
+        }
+      }
+    },
+    "jre17_minimal@17": {
+      "last_modified": "2024-09-10T15:01:03Z",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#jre17_minimal",
+      "source": "devbox-search",
+      "version": "17.0.11+9",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/szdrjjzbn7af0wgfpbk2nviswqmpxjgk-openjdk-minimal-jre-17.0.11+9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/szdrjjzbn7af0wgfpbk2nviswqmpxjgk-openjdk-minimal-jre-17.0.11+9"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/fiqgppg5qc1hll09hgklc1n8h4x9w9cz-openjdk-minimal-jre-17.0.11+9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/fiqgppg5qc1hll09hgklc1n8h4x9w9cz-openjdk-minimal-jre-17.0.11+9"
+        }
+      }
+    },
     "nodePackages.ts-node@10.9.2": {
       "last_modified": "2024-09-13T05:52:00Z",
       "resolved": "github:NixOS/nixpkgs/673d99f1406cb09b8eb6feab4743ebdf70046557#nodePackages.ts-node",
