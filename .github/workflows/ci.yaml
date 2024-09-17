@@ -5,11 +5,8 @@ on:
     branches: [main] # so that we build a Go cache that can be re-used in PRs
 
 env:
-  GO_VERSION: '1.21'
-  NODE_VERSION: '18'
   PYTHON_VERSION: '3.12'
   JAVA_VERSION: '17'
-  PHP_VERSION: '8.3'
 
 jobs:
   linters:
@@ -77,9 +74,6 @@ jobs:
         with:
           gradle-version: '8.8'
 
-      - name: Install ts-node
-        run: npm install -g ts-node
-
       - name: Clone kind-registry
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
 
@@ -100,7 +94,7 @@ jobs:
         run: |
           for d in generated/typescript/src/*/ ; do
             echo "Building $d"
-            ts-node "./$d"
+            devbox run ts-node "./$d"
           done
 
       - name: Lint generated Python code
@@ -127,11 +121,6 @@ jobs:
         with:
           enable-cache: 'true'
 
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
       - name: Setup Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
@@ -142,9 +131,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.8'
-
-      - name: Install ts-node
-        run: npm install -g ts-node
 
       - name: Clone kind-registry
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
@@ -157,16 +143,15 @@ jobs:
 
       - name: Run the Go example
         run: |
-          devbox run go run ./examples/_go/*
+          devbox run go-example
 
       - name: Run the Typescript example
         run: |
-          ts-node examples/typescript
+          devbox run ts-example
 
       - name: Run the PHP example
         run: |
-          cd ./examples/php
-          devbox run make run-php-example
+          devbox run php-example
 
       - name: Run Java example
         run: |

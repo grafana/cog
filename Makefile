@@ -31,3 +31,7 @@ run-php-example:
 	cd ./examples/php && \
 	composer install && \
 	php index.php
+
+.PHONY: run-ts-example
+run-ts-example:
+	ts-node examples/typescript
