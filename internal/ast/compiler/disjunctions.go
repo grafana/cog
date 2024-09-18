@@ -114,6 +114,9 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 	}
 
 	structType := ast.NewStruct(fields...)
+	for hint, value := range def.Hints {
+		structType.Hints[hint] = value
+	}
 	if disjunction.Branches.HasOnlyScalarOrArrayOrMap() {
 		structType.Hints[ast.HintDisjunctionOfScalars] = disjunction
 	}

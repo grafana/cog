@@ -59,7 +59,7 @@ func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context 
 		buffer.WriteString("\n")
 	}
 
-	if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
+	if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) && !object.Type.IsStructGeneratedFromDisjunction() {
 		variantUnmarshal, err := jenny.renderDataqueryVariantUnmarshal(schema, object)
 		if err != nil {
 			return err

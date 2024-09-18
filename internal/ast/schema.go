@@ -114,10 +114,6 @@ func NewSchema(pkg string, metadata SchemaMeta) *Schema {
 }
 
 func (schema *Schema) AddObject(object Object) {
-	if _, exists := schema.LocateObject(object.Name); exists {
-		return
-	}
-
 	schema.Objects.Set(object.Name, object)
 }
 

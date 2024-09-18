@@ -140,7 +140,7 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 
 	buffer.WriteString("\n")
 
-	if def.Type.ImplementsVariant() {
+	if def.Type.ImplementsVariant() && !def.Type.IsRef() {
 		variant := tools.UpperCamelCase(def.Type.ImplementedVariant())
 
 		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", defName, variant))
