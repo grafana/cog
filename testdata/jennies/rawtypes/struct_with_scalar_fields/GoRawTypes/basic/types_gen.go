@@ -24,3 +24,55 @@ FieldAny any `json:"FieldAny"`
 	FieldInt64 int64 `json:"FieldInt64"`
 }
 
+func (resource SomeStruct) Equals(other SomeStruct) bool {
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
+			return false
+		}
+		if resource.FieldBool != other.FieldBool {
+			return false
+		}
+		if resource.FieldBytes != other.FieldBytes {
+			return false
+		}
+		if resource.FieldString != other.FieldString {
+			return false
+		}
+		if resource.FieldStringWithConstantValue != other.FieldStringWithConstantValue {
+			return false
+		}
+		if resource.FieldFloat32 != other.FieldFloat32 {
+			return false
+		}
+		if resource.FieldFloat64 != other.FieldFloat64 {
+			return false
+		}
+		if resource.FieldUint8 != other.FieldUint8 {
+			return false
+		}
+		if resource.FieldUint16 != other.FieldUint16 {
+			return false
+		}
+		if resource.FieldUint32 != other.FieldUint32 {
+			return false
+		}
+		if resource.FieldUint64 != other.FieldUint64 {
+			return false
+		}
+		if resource.FieldInt8 != other.FieldInt8 {
+			return false
+		}
+		if resource.FieldInt16 != other.FieldInt16 {
+			return false
+		}
+		if resource.FieldInt32 != other.FieldInt32 {
+			return false
+		}
+		if resource.FieldInt64 != other.FieldInt64 {
+			return false
+		}
+
+	return true
+}
+
+

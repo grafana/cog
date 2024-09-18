@@ -8,3 +8,24 @@ type SomeStruct struct {
 	FieldInt32 int32 `json:"FieldInt32"`
 }
 
+func (resource SomeStruct) Equals(other SomeStruct) bool {
+		if resource.FieldBool != other.FieldBool {
+			return false
+		}
+		if resource.FieldString != other.FieldString {
+			return false
+		}
+		if resource.FieldStringWithConstantValue != other.FieldStringWithConstantValue {
+			return false
+		}
+		if resource.FieldFloat32 != other.FieldFloat32 {
+			return false
+		}
+		if resource.FieldInt32 != other.FieldInt32 {
+			return false
+		}
+
+	return true
+}
+
+

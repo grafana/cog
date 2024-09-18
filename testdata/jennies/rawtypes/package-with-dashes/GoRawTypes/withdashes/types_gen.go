@@ -4,6 +4,16 @@ type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
+func (resource SomeStruct) Equals(other SomeStruct) bool {
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
+			return false
+		}
+
+	return true
+}
+
+
 // Refresh rate or disabled.
 type RefreshRate = StringOrBool
 
@@ -53,6 +63,30 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	}
 
 	return errors.Join(errList...)
+}
+
+
+func (resource StringOrBool) Equals(other StringOrBool) bool {
+		if !((resource.String == nil && other.String == nil) || (resource.String != nil && other.String != nil)) {
+			return false
+		}
+
+		if resource.String != nil {
+		if *resource.String != *other.String {
+			return false
+		}
+		}
+		if !((resource.Bool == nil && other.Bool == nil) || (resource.Bool != nil && other.Bool != nil)) {
+			return false
+		}
+
+		if resource.Bool != nil {
+		if *resource.Bool != *other.Bool {
+			return false
+		}
+		}
+
+	return true
 }
 
 

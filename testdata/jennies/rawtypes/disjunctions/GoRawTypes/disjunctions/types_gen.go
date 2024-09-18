@@ -10,6 +10,19 @@ type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
+func (resource SomeStruct) Equals(other SomeStruct) bool {
+		if resource.Type != other.Type {
+			return false
+		}
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
+			return false
+		}
+
+	return true
+}
+
+
 type BoolOrRef = BoolOrSomeStruct
 
 type SomeOtherStruct struct {
@@ -17,10 +30,34 @@ type SomeOtherStruct struct {
 	Foo []byte `json:"Foo"`
 }
 
+func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
+		if resource.Type != other.Type {
+			return false
+		}
+		if resource.Foo != other.Foo {
+			return false
+		}
+
+	return true
+}
+
+
 type YetAnotherStruct struct {
 	Type string `json:"Type"`
 	Bar uint8 `json:"Bar"`
 }
+
+func (resource YetAnotherStruct) Equals(other YetAnotherStruct) bool {
+		if resource.Type != other.Type {
+			return false
+		}
+		if resource.Bar != other.Bar {
+			return false
+		}
+
+	return true
+}
+
 
 type SeveralRefs = SomeStructOrSomeOtherStructOrYetAnotherStruct
 
@@ -73,10 +110,58 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 }
 
 
+func (resource StringOrBool) Equals(other StringOrBool) bool {
+		if !((resource.String == nil && other.String == nil) || (resource.String != nil && other.String != nil)) {
+			return false
+		}
+
+		if resource.String != nil {
+		if *resource.String != *other.String {
+			return false
+		}
+		}
+		if !((resource.Bool == nil && other.Bool == nil) || (resource.Bool != nil && other.Bool != nil)) {
+			return false
+		}
+
+		if resource.Bool != nil {
+		if *resource.Bool != *other.Bool {
+			return false
+		}
+		}
+
+	return true
+}
+
+
 type BoolOrSomeStruct struct {
 	Bool *bool `json:"Bool,omitempty"`
 	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
 }
+
+func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
+		if !((resource.Bool == nil && other.Bool == nil) || (resource.Bool != nil && other.Bool != nil)) {
+			return false
+		}
+
+		if resource.Bool != nil {
+		if *resource.Bool != *other.Bool {
+			return false
+		}
+		}
+		if !((resource.SomeStruct == nil && other.SomeStruct == nil) || (resource.SomeStruct != nil && other.SomeStruct != nil)) {
+			return false
+		}
+
+		if resource.SomeStruct != nil {
+		if !resource.SomeStruct.Equals(*other.SomeStruct) {
+			return false
+		}
+		}
+
+	return true
+}
+
 
 type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
 	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
@@ -142,6 +227,39 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 	}
 
 	return fmt.Errorf("could not unmarshal resource with `Type = %v`", discriminator)
+}
+
+
+func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Equals(other SomeStructOrSomeOtherStructOrYetAnotherStruct) bool {
+		if !((resource.SomeStruct == nil && other.SomeStruct == nil) || (resource.SomeStruct != nil && other.SomeStruct != nil)) {
+			return false
+		}
+
+		if resource.SomeStruct != nil {
+		if !resource.SomeStruct.Equals(*other.SomeStruct) {
+			return false
+		}
+		}
+		if !((resource.SomeOtherStruct == nil && other.SomeOtherStruct == nil) || (resource.SomeOtherStruct != nil && other.SomeOtherStruct != nil)) {
+			return false
+		}
+
+		if resource.SomeOtherStruct != nil {
+		if !resource.SomeOtherStruct.Equals(*other.SomeOtherStruct) {
+			return false
+		}
+		}
+		if !((resource.YetAnotherStruct == nil && other.YetAnotherStruct == nil) || (resource.YetAnotherStruct != nil && other.YetAnotherStruct != nil)) {
+			return false
+		}
+
+		if resource.YetAnotherStruct != nil {
+		if !resource.YetAnotherStruct.Equals(*other.YetAnotherStruct) {
+			return false
+		}
+		}
+
+	return true
 }
 
 
