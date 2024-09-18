@@ -18,7 +18,7 @@ jobs:
           enable-cache: 'true'
 
       - name: Run golangci-lint
-        run: devbox run lint
+        run: make lint
 
   tests:
     name: Tests
@@ -33,7 +33,7 @@ jobs:
           enable-cache: 'true'
 
       - name: Tests
-        run: devbox run tests
+        run: make tests
 
   registry:
     name: Generate registry
@@ -103,20 +103,20 @@ jobs:
 
       - name: Run code generation
         run: |
-          devbox run gen-sdk-dev
+          make gen-sdk-dev
 
       - name: Run the Go example
         run: |
-          devbox run go-example
+          make run-go-example
 
       - name: Run the Typescript example
         run: |
-          devbox run ts-example
+          make run-ts-example
 
       - name: Run the PHP example
         run: |
-          devbox run php-example
+          make run-php-example
 
       - name: Run Java example
         run: |
-          devbox run java-example
+          make run-java-example

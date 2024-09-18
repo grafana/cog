@@ -58,12 +58,6 @@ One-off commands can be executed within the devbox shell as well:
 $ devbox run go version
 ```
 
-Various cog-specific commands also exist:
-
-```console
-$ devbox run
-```
-
 Packages can be installed using:
 
 ```console
