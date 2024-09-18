@@ -8,30 +8,52 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 {{- define "type_equality_check" }}
 	{{- if .Type.IsAny }}
 		{{- $dereference := ternary "*" "" .Dereference }}
-		// TODO: is DeepEqual good enough here?
+		// is DeepEqual good enough here?
 		if !reflect.DeepEqual({{ $dereference }}{{ .SelfName }}, {{ $dereference }}{{ .OtherName }}) {
 			return false
 		}
-	{{- else if .Type.IsArray }}
-		if len({{ .SelfName }}) != len({{ .OtherName }}) {
+	{{- else if resolvesToArray .Type }}
+		{{- $needsDereference := and .Type.IsRef .Type.Nullable }}
+		{{- $dereference := ternary "*" "" $needsDereference }}
+		{{- if $needsDereference }}
+			if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
+				return false
+			}
+
+			if {{ .SelfName }} != nil {
+		{{- end }}
+
+		if len({{ $dereference }}{{ .SelfName }}) != len({{ $dereference }}{{ .OtherName }}) {
 			return false
 		}
 
-		for i := range {{ .SelfName }} {
-			{{- $selfKey := print .SelfName "[i]" }}
-			{{- $otherKey := print .OtherName "[i]" }}
-			{{- template "type_equality_check" (dict "Type" .Type.Array.ValueType "Nullable" .Type.Array.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
+		for i := range {{ $dereference }}{{ .SelfName }} {
+		{{- $selfKey := print (ternary (print "(*" .SelfName ")") .SelfName $needsDereference) "[i]" }}
+		{{- $otherKey := print (ternary (print "(*" .OtherName ")") .OtherName $needsDereference) "[i]" }}
+			{{- template "type_equality_check" (dict "Type" (resolveRefs .Type).Array.ValueType "Nullable" (resolveRefs .Type).Array.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
 		}
-	{{- else if .Type.IsMap }}
-		if len({{ .SelfName }}) != len({{ .OtherName }}) {
+		{{- if $needsDereference }}}{{ end }}
+	{{- else if resolvesToMap .Type }}
+		{{- $needsDereference := and .Type.IsRef .Type.Nullable }}
+		{{- $dereference := ternary "*" "" $needsDereference }}
+		{{- if $needsDereference }}
+			if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
+				return false
+			}
+
+		if {{ .SelfName }} != nil {
+		{{- end }}
+
+		if len({{ $dereference }}{{ .SelfName }}) != len({{ $dereference }}{{ .OtherName }}) {
 			return false
 		}
 
-		for key := range {{ .SelfName }} {
-			{{- $selfKey := print .SelfName "[key]" }}
-			{{- $otherKey := print .OtherName "[key]" }}
-			{{- template "type_equality_check" (dict "Type" .Type.Map.ValueType "Nullable" .Type.Map.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
+		for key := range {{ $dereference }}{{ .SelfName }} {
+			{{- $selfKey := print (ternary (print "(*" .SelfName ")") .SelfName $needsDereference) "[key]" }}
+			{{- $otherKey := print (ternary (print "(*" .OtherName ")") .OtherName $needsDereference) "[key]" }}
+			{{- template "type_equality_check" (dict "Type" (resolveRefs .Type).Map.ValueType "Nullable" (resolveRefs .Type).Map.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
 		}
+		{{- if $needsDereference }}}{{ end }}
 	{{- else if .Nullable }}
 		if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
 			return false
@@ -57,7 +79,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 		if !{{ .SelfName }}.Equals({{ $dereference }}{{ .OtherName }}) {
 			return false
 		}
-	{{- else if or .Type.IsScalar (refResolvesToEnum .Type) }}
+	{{- else if or (resolvesToScalar .Type) (resolvesToEnum .Type) }}
 		{{- $dereference := ternary "*" "" .Dereference }}
 		if {{ $dereference }}{{ .SelfName }} != {{ $dereference }}{{ .OtherName }} {
 			return false

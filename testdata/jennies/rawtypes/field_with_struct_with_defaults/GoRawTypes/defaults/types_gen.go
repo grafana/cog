@@ -50,6 +50,7 @@ func (resource Struct) Equals(other Struct) bool {
 		if resource.ComplexField.Nested.NestedVal != other.ComplexField.Nested.NestedVal {
 			return false
 		}
+
 		if len(resource.ComplexField.Array) != len(other.ComplexField.Array) {
 			return false
 		}

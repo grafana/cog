@@ -37,6 +37,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if resource.Operator != other.Operator {
 			return false
 		}
+
 		if len(resource.FieldArrayOfStrings) != len(other.FieldArrayOfStrings) {
 			return false
 		}
@@ -46,6 +47,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 		}
+
 		if len(resource.FieldMapOfStringToString) != len(other.FieldMapOfStringToString) {
 			return false
 		}
@@ -55,11 +57,13 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 		}
-		// TODO: is DeepEqual good enough here?
+		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.FieldAnonymousStruct.FieldAny, other.FieldAnonymousStruct.FieldAny) {
 			return false
 		}
-		// TODO: not implemented
+		if resource.FieldRefToConstant != other.FieldRefToConstant {
+			return false
+		}
 
 	return true
 }
@@ -72,7 +76,7 @@ type SomeOtherStruct struct {
 }
 
 func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
-		// TODO: is DeepEqual good enough here?
+		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
 			return false
 		}

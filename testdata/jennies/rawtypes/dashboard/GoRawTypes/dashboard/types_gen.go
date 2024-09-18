@@ -14,6 +14,7 @@ func (resource Dashboard) Equals(other Dashboard) bool {
 		if resource.Title != other.Title {
 			return false
 		}
+
 		if len(resource.Panels) != len(other.Panels) {
 			return false
 		}
@@ -91,7 +92,7 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 			return false
 		}
 		}
-		// TODO: is DeepEqual good enough here?
+		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.Custom, other.Custom) {
 			return false
 		}
@@ -210,10 +211,11 @@ func (resource Panel) Equals(other Panel) bool {
 			return false
 		}
 		}
-		// TODO: is DeepEqual good enough here?
+		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.Options, other.Options) {
 			return false
 		}
+
 		if len(resource.Targets) != len(other.Targets) {
 			return false
 		}
