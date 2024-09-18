@@ -9,6 +9,16 @@ type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
+func (resource SomeStruct) Equals(other SomeStruct) bool {
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
+			return false
+		}
+
+	return true
+}
+
+
 type MapOfStringToRef map[string]SomeStruct
 
 type MapOfStringToMapOfStringToBool map[string]map[string]bool

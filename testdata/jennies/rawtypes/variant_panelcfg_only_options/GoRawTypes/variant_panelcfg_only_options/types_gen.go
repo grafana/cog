@@ -8,6 +8,15 @@ type Options struct {
 	Content string `json:"content"`
 }
 
+func (resource Options) Equals(other Options) bool {
+		if resource.Content != other.Content {
+			return false
+		}
+
+	return true
+}
+
+
 func VariantConfig() variants.PanelcfgConfig {
 	return variants.PanelcfgConfig{
 		Identifier: "text",

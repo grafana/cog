@@ -27,3 +27,31 @@ func VariantConfig() variants.DataqueryConfig {
 }
 
 
+func (resource Query) Equals(otherCandidate variants.Dataquery) bool {
+	if otherCandidate == nil {
+		return false
+	}
+
+	other, ok := otherCandidate.(Query)
+	if !ok {
+		return false
+	}
+
+
+		if resource.Expr != other.Expr {
+			return false
+		}
+
+		if !((resource.Instant == nil && other.Instant == nil) || (resource.Instant != nil && other.Instant != nil)) {
+			return false
+		}
+
+		if resource.Instant != nil {
+		if *resource.Instant != *other.Instant {
+			return false
+		}
+		}
+
+
+	return true
+}

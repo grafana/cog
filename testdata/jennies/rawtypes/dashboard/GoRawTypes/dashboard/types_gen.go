@@ -10,19 +10,95 @@ type Dashboard struct {
 	Panels []Panel `json:"panels,omitempty"`
 }
 
+func (resource Dashboard) Equals(other Dashboard) bool {
+		if resource.Title != other.Title {
+			return false
+		}
+		if len(resource.Panels) != len(other.Panels) {
+			return false
+		}
+
+		for i := range resource.Panels {
+		if !resource.Panels[i].Equals(other.Panels[i]) {
+			return false
+		}
+		}
+
+	return true
+}
+
+
 type DataSourceRef struct {
 	Type *string `json:"type,omitempty"`
 	Uid *string `json:"uid,omitempty"`
 }
 
+func (resource DataSourceRef) Equals(other DataSourceRef) bool {
+		if !((resource.Type == nil && other.Type == nil) || (resource.Type != nil && other.Type != nil)) {
+			return false
+		}
+
+		if resource.Type != nil {
+		if *resource.Type != *other.Type {
+			return false
+		}
+		}
+		if !((resource.Uid == nil && other.Uid == nil) || (resource.Uid != nil && other.Uid != nil)) {
+			return false
+		}
+
+		if resource.Uid != nil {
+		if *resource.Uid != *other.Uid {
+			return false
+		}
+		}
+
+	return true
+}
+
+
 type FieldConfigSource struct {
 	Defaults *FieldConfig `json:"defaults,omitempty"`
 }
+
+func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
+		if !((resource.Defaults == nil && other.Defaults == nil) || (resource.Defaults != nil && other.Defaults != nil)) {
+			return false
+		}
+
+		if resource.Defaults != nil {
+		if !resource.Defaults.Equals(*other.Defaults) {
+			return false
+		}
+		}
+
+	return true
+}
+
 
 type FieldConfig struct {
 	Unit *string `json:"unit,omitempty"`
 	Custom any `json:"custom,omitempty"`
 }
+
+func (resource FieldConfig) Equals(other FieldConfig) bool {
+		if !((resource.Unit == nil && other.Unit == nil) || (resource.Unit != nil && other.Unit != nil)) {
+			return false
+		}
+
+		if resource.Unit != nil {
+		if *resource.Unit != *other.Unit {
+			return false
+		}
+		}
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual(resource.Custom, other.Custom) {
+			return false
+		}
+
+	return true
+}
+
 
 type Panel struct {
 	Title string `json:"title"`
@@ -117,4 +193,47 @@ dataqueryTypeHint = *resource.Datasource.Type
 
 	return nil
 }
+
+func (resource Panel) Equals(other Panel) bool {
+		if resource.Title != other.Title {
+			return false
+		}
+		if resource.Type != other.Type {
+			return false
+		}
+		if !((resource.Datasource == nil && other.Datasource == nil) || (resource.Datasource != nil && other.Datasource != nil)) {
+			return false
+		}
+
+		if resource.Datasource != nil {
+		if !resource.Datasource.Equals(*other.Datasource) {
+			return false
+		}
+		}
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual(resource.Options, other.Options) {
+			return false
+		}
+		if len(resource.Targets) != len(other.Targets) {
+			return false
+		}
+
+		for i := range resource.Targets {
+		if !resource.Targets[i].Equals(other.Targets[i]) {
+			return false
+		}
+		}
+		if !((resource.FieldConfig == nil && other.FieldConfig == nil) || (resource.FieldConfig != nil && other.FieldConfig != nil)) {
+			return false
+		}
+
+		if resource.FieldConfig != nil {
+		if !resource.FieldConfig.Equals(*other.FieldConfig) {
+			return false
+		}
+		}
+
+	return true
+}
+
 

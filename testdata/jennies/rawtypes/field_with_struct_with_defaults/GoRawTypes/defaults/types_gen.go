@@ -5,6 +5,18 @@ type NestedStruct struct {
 	IntVal int64 `json:"intVal"`
 }
 
+func (resource NestedStruct) Equals(other NestedStruct) bool {
+		if resource.StringVal != other.StringVal {
+			return false
+		}
+		if resource.IntVal != other.IntVal {
+			return false
+		}
+
+	return true
+}
+
+
 type Struct struct {
 	AllFields NestedStruct `json:"allFields"`
 	PartialFields NestedStruct `json:"partialFields"`
@@ -21,4 +33,40 @@ type Struct struct {
 	IntVal int64 `json:"intVal"`
 } `json:"partialComplexField"`
 }
+
+func (resource Struct) Equals(other Struct) bool {
+		if !resource.AllFields.Equals(other.AllFields) {
+			return false
+		}
+		if !resource.PartialFields.Equals(other.PartialFields) {
+			return false
+		}
+		if !resource.EmptyFields.Equals(other.EmptyFields) {
+			return false
+		}
+		if resource.ComplexField.Uid != other.ComplexField.Uid {
+			return false
+		}
+		if resource.ComplexField.Nested.NestedVal != other.ComplexField.Nested.NestedVal {
+			return false
+		}
+		if len(resource.ComplexField.Array) != len(other.ComplexField.Array) {
+			return false
+		}
+
+		for i := range resource.ComplexField.Array {
+		if resource.ComplexField.Array[i] != other.ComplexField.Array[i] {
+			return false
+		}
+		}
+		if resource.PartialComplexField.Uid != other.PartialComplexField.Uid {
+			return false
+		}
+		if resource.PartialComplexField.IntVal != other.PartialComplexField.IntVal {
+			return false
+		}
+
+	return true
+}
+
 
