@@ -13,6 +13,7 @@ type DataqueryConfig struct {
 
 type Dataquery interface {
 	ImplementsDataqueryVariant()
+	Equals(other Dataquery) bool
 }
 
 type Panelcfg interface {
@@ -23,4 +24,28 @@ type UnknownDataquery map[string]any
 
 func (unknown UnknownDataquery) ImplementsDataqueryVariant() {
 
+}
+
+func (unknown UnknownDataquery) Equals(otherCandidate Dataquery) bool {
+	if otherCandidate == nil {
+		return false
+	}
+
+	other, ok := otherCandidate.(UnknownDataquery)
+	if !ok {
+		return false
+	}
+
+	if len(unknown) != len(other) {
+		return false
+	}
+
+	for key := range unknown {
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual(unknown[key], other[key]) {
+			return false
+		}
+	}
+
+	return true
 }
