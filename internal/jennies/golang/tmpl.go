@@ -36,6 +36,12 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
+			"typeHasEqualityFunc": func(_ ast.Type) bool {
+				panic("typeHasEqualityFunc() needs to be overridden by a jenny")
+			},
+			"refResolvesToEnum": func(typeDef ast.Type) bool {
+				panic("refResolvesToEnum() needs to be overridden by a jenny")
+			},
 		}),
 		template.Funcs(map[string]any{
 			"formatPackageName": formatPackageName,

@@ -1,0 +1,18 @@
+func (resource {{ .def.Name|upperCamelCase }}) Equals(otherCandidate variants.Dataquery) bool {
+	if otherCandidate == nil {
+		return false
+	}
+
+	other, ok := otherCandidate.({{ .def.Name|upperCamelCase }})
+	if !ok {
+		return false
+	}
+
+{{ range $field := .def.Type.Struct.Fields }}
+	{{- $fieldName := $field.Name|upperCamelCase -}}
+
+	{{ template "type_equality_check" (dict "Type" $field.Type "Nullable" $field.Type.Nullable "Dereference" false "SelfName" (print "resource." $fieldName) "OtherName" (print "other." $fieldName)) }}
+{{ end }}
+
+	return true
+}

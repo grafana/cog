@@ -1,0 +1,68 @@
+func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCamelCase }}) bool {
+	{{- template "type_equality_check" (dict "Type" .def.Type "Nullable" .def.Type.Nullable "Dereference" false "SelfName" "resource" "OtherName" "other") }}
+
+	return true
+}
+
+{{/* arguments: Type, Nullable, Dereference, SelfName, OtherName */}}
+{{- define "type_equality_check" }}
+	{{- if .Type.IsAny }}
+		{{- $dereference := ternary "*" "" .Dereference }}
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual({{ $dereference }}{{ .SelfName }}, {{ $dereference }}{{ .OtherName }}) {
+			return false
+		}
+	{{- else if .Type.IsArray }}
+		if len({{ .SelfName }}) != len({{ .OtherName }}) {
+			return false
+		}
+
+		for i := range {{ .SelfName }} {
+			{{- $selfKey := print .SelfName "[i]" }}
+			{{- $otherKey := print .OtherName "[i]" }}
+			{{- template "type_equality_check" (dict "Type" .Type.Array.ValueType "Nullable" .Type.Array.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
+		}
+	{{- else if .Type.IsMap }}
+		if len({{ .SelfName }}) != len({{ .OtherName }}) {
+			return false
+		}
+
+		for key := range {{ .SelfName }} {
+			{{- $selfKey := print .SelfName "[key]" }}
+			{{- $otherKey := print .OtherName "[key]" }}
+			{{- template "type_equality_check" (dict "Type" .Type.Map.ValueType "Nullable" .Type.Map.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
+		}
+	{{- else if .Nullable }}
+		if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
+			return false
+		}
+
+		if {{ .SelfName }} != nil {
+			{{- template "type_equality_check" (dict "Type" .Type "Nullable" false "Dereference" true "SelfName" .SelfName "OtherName" .OtherName) }}
+		}
+	{{- else if .Type.IsStruct }}
+		{{- range $field := .Type.Struct.Fields }}
+			{{- $fieldName := $field.Name|upperCamelCase -}}
+			{{- $selfKey := print $.SelfName "." $fieldName }}
+			{{- $otherKey := print $.OtherName "." $fieldName }}
+
+			{{- template "type_equality_check" (dict "Type" $field.Type "Nullable" $field.Type.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
+		{{- end }}
+	{{- else if .Type.IsDataqueryComposableSlot }}
+		if !{{ .SelfName }}.Equals({{ .OtherName }}) {
+			return false
+		}
+	{{- else if typeHasEqualityFunc .Type }}
+		{{- $dereference := ternary "*" "" .Dereference }}
+		if !{{ .SelfName }}.Equals({{ $dereference }}{{ .OtherName }}) {
+			return false
+		}
+	{{- else if or .Type.IsScalar (refResolvesToEnum .Type) }}
+		{{- $dereference := ternary "*" "" .Dereference }}
+		if {{ $dereference }}{{ .SelfName }} != {{ $dereference }}{{ .OtherName }} {
+			return false
+		}
+	{{- else }}
+		// TODO: not implemented
+	{{- end }}
+{{- end }}

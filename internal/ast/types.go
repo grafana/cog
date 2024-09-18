@@ -128,6 +128,14 @@ func (t Type) ImplementedVariant() string {
 	return t.Hints[HintImplementsVariant].(string)
 }
 
+func (t Type) IsDataqueryVariant() bool {
+	if !t.ImplementsVariant() {
+		return false
+	}
+
+	return t.Hints[HintImplementsVariant].(string) == string(SchemaVariantDataQuery)
+}
+
 func (t Type) HasHint(hintName string) bool {
 	_, found := t.Hints[hintName]
 
@@ -176,6 +184,10 @@ func (t Type) IsIntersection() bool {
 
 func (t Type) IsComposableSlot() bool {
 	return t.Kind == KindComposableSlot
+}
+
+func (t Type) IsDataqueryComposableSlot() bool {
+	return t.IsComposableSlot() && t.AsComposableSlot().Variant == SchemaVariantDataQuery
 }
 
 func (t Type) IsStructGeneratedFromDisjunction() bool {

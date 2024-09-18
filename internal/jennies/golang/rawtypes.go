@@ -57,6 +57,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, packageMapper)
 	unmarshallerGenerator := NewJSONMarshalling(jenny.Tmpl, packageMapper, jenny.typeFormatter)
+	equalityMethodsGenerator := newEqualityMethods(jenny.Tmpl)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		objectOutput, innerErr := jenny.formatObject(object)
@@ -69,6 +70,12 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		buffer.WriteString("\n")
 
 		innerErr = unmarshallerGenerator.generateForObject(&buffer, context, schema, object)
+		if innerErr != nil {
+			err = innerErr
+			return
+		}
+
+		innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, schema, object)
 		if innerErr != nil {
 			err = innerErr
 			return
