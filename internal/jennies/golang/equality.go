@@ -43,9 +43,7 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 		"resolvesToEnum": func(typeDef ast.Type) bool {
 			return context.ResolveRefs(typeDef).IsEnum()
 		},
-		"resolveRefs": func(typeDef ast.Type) ast.Type {
-			return context.ResolveRefs(typeDef)
-		},
+		"resolveRefs": context.ResolveRefs,
 	})
 
 	templateFile := "types/struct_equality_method.tmpl"
