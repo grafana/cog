@@ -50,6 +50,8 @@ A shell including all the required tools is accessible via:
 $ devbox shell
 ```
 
+This shell can be exited like any other shell, with `exit` or `CTRL+D`.
+
 One-off commands can be executed within the devbox shell as well:
 
 ```console
