@@ -16,15 +16,6 @@
   "shell": {
     "init_hook": [
       "echo 'Installing dependencies...' && make deps"
-    ],
-    "scripts": {
-      "go-example":  "make run-go-example",
-      "java-example": "make run-java-example",
-      "php-example": "make run-php-example",
-      "ts-example":  "make run-ts-example",
-      "lint":        "make lint",
-      "tests":       "make tests",
-      "gen-sdk-dev": "make gen-sdk-dev"
-    }
+    ]
   }
 }
