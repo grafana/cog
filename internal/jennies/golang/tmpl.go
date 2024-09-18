@@ -39,8 +39,20 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"typeHasEqualityFunc": func(_ ast.Type) bool {
 				panic("typeHasEqualityFunc() needs to be overridden by a jenny")
 			},
-			"refResolvesToEnum": func(typeDef ast.Type) bool {
+			"resolvesToScalar": func(typeDef ast.Type) bool {
+				panic("refResolvesToScalar() needs to be overridden by a jenny")
+			},
+			"resolvesToMap": func(typeDef ast.Type) bool {
+				panic("refResolvesToMap() needs to be overridden by a jenny")
+			},
+			"resolvesToArray": func(typeDef ast.Type) bool {
+				panic("refResolvesToArray() needs to be overridden by a jenny")
+			},
+			"resolvesToEnum": func(typeDef ast.Type) bool {
 				panic("refResolvesToEnum() needs to be overridden by a jenny")
+			},
+			"resolveRefs": func(typeDef ast.Type) ast.Type {
+				panic("resolveRefs() needs to be overridden by a jenny")
 			},
 		}),
 		template.Funcs(map[string]any{

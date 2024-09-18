@@ -14,7 +14,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if resource.Type != other.Type {
 			return false
 		}
-		// TODO: is DeepEqual good enough here?
+		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
 			return false
 		}
