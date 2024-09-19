@@ -85,6 +85,6 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 			return false
 		}
 	{{- else }}
-		// TODO: not implemented
+		found an unimplemented equality case // intentionally left uncommented, to trigger a failure during codegen
 	{{- end }}
 {{- end }}
