@@ -282,6 +282,9 @@
         "unspec": {
           "$ref": "#/$defs/YamlUnspec"
         },
+        "set_datasource_to_dataquery": {
+          "$ref": "#/$defs/YamlSetDatasourceToDataquery"
+        },
         "fields_set_default": {
           "$ref": "#/$defs/YamlFieldsSetDefault"
         },
@@ -526,6 +529,11 @@
           "type": "string"
         }
       },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlSetDatasourceToDataquery": {
+      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },

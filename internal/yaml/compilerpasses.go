@@ -11,6 +11,7 @@ type CompilerPass struct {
 	EntrypointIdentification *EntrypointIdentification `yaml:"entrypoint_identification"`
 	DataqueryIdentification  *DataqueryIdentification  `yaml:"dataquery_identification"`
 	Unspec                   *Unspec                   `yaml:"unspec"`
+	SetDatasourceToDataquery *SetDatasourceToDataquery `yaml:"set_datasource_to_dataquery"`
 	FieldsSetDefault         *FieldsSetDefault         `yaml:"fields_set_default"`
 	FieldsSetRequired        *FieldsSetRequired        `yaml:"fields_set_required"`
 	FieldsSetNotRequired     *FieldsSetNotRequired     `yaml:"fields_set_not_required"`
@@ -47,7 +48,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.Unspec != nil {
 		return pass.Unspec.AsCompilerPass(), nil
 	}
-
+	if pass.SetDatasourceToDataquery != nil {
+		return pass.SetDatasourceToDataquery.AsCompilerPass(), nil
+	}
 	if pass.FieldsSetDefault != nil {
 		return pass.FieldsSetDefault.AsCompilerPass()
 	}
@@ -135,6 +138,12 @@ type Unspec struct {
 
 func (pass Unspec) AsCompilerPass() *compiler.Unspec {
 	return &compiler.Unspec{}
+}
+
+type SetDatasourceToDataquery struct{}
+
+func (pass SetDatasourceToDataquery) AsCompilerPass() *compiler.SetDatasourceToDataquery {
+	return &compiler.SetDatasourceToDataquery{}
 }
 
 type FieldsSetDefault struct {

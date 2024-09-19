@@ -7,6 +7,7 @@ const (
 
 	dashboardPackage                = "dashboard"
 	dashboardObject                 = "Dashboard"
+	dashboardDatasource             = "DataSourceRef"
 	dashboardPanelObject            = "Panel"
 	dashboardRowPanelObject         = "RowPanel"
 	dashboardPanelIDField           = "id"
@@ -14,4 +15,6 @@ const (
 	dashboardPanelLibraryPanelField = "libraryPanel"
 	dashboardPanelTypeField         = "type"
 	dashboardPanelsField            = "panels"
+
+	datasourceName = "Datasource"
 )
