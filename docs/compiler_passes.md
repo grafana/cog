@@ -370,6 +370,19 @@ schema_set_identifier:
   identifier: string
 ```
 
+## `set_datasource_to_dataquery`
+
+SetDatasourceToDataquery uses dashboard.DataSourceRef reference for the datasource field in each dataquery.
+
+Depending on the type of schema, this value can be an any or an internal Datasource struct generating an inconsistency
+between them.
+
+### Usage
+
+```yaml
+set_datasource_to_dataquery: {}
+```
+
 ## `unspec`
 
 Unspec removes the Kubernetes-style envelope added by kindsys.
