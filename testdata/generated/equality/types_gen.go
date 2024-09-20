@@ -63,7 +63,7 @@ type Optionals struct {
 }
 
 func (resource Optionals) Equals(other Optionals) bool {
-	if !((resource.StringField == nil && other.StringField == nil) || (resource.StringField != nil && other.StringField != nil)) {
+	if resource.StringField == nil && other.StringField != nil || resource.StringField != nil && other.StringField == nil {
 		return false
 	}
 
@@ -72,7 +72,7 @@ func (resource Optionals) Equals(other Optionals) bool {
 			return false
 		}
 	}
-	if !((resource.EnumField == nil && other.EnumField == nil) || (resource.EnumField != nil && other.EnumField != nil)) {
+	if resource.EnumField == nil && other.EnumField != nil || resource.EnumField != nil && other.EnumField == nil {
 		return false
 	}
 
@@ -81,7 +81,7 @@ func (resource Optionals) Equals(other Optionals) bool {
 			return false
 		}
 	}
-	if !((resource.RefField == nil && other.RefField == nil) || (resource.RefField != nil && other.RefField != nil)) {
+	if resource.RefField == nil && other.RefField != nil || resource.RefField != nil && other.RefField == nil {
 		return false
 	}
 

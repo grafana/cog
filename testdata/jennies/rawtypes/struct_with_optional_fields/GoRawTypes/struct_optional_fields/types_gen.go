@@ -11,7 +11,7 @@ type SomeStruct struct {
 }
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
-		if !((resource.FieldRef == nil && other.FieldRef == nil) || (resource.FieldRef != nil && other.FieldRef != nil)) {
+		if resource.FieldRef == nil && other.FieldRef != nil || resource.FieldRef != nil && other.FieldRef == nil {
 			return false
 		}
 
@@ -20,7 +20,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 		}
-		if !((resource.FieldString == nil && other.FieldString == nil) || (resource.FieldString != nil && other.FieldString != nil)) {
+		if resource.FieldString == nil && other.FieldString != nil || resource.FieldString != nil && other.FieldString == nil {
 			return false
 		}
 
@@ -29,7 +29,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 		}
-		if !((resource.Operator == nil && other.Operator == nil) || (resource.Operator != nil && other.Operator != nil)) {
+		if resource.Operator == nil && other.Operator != nil || resource.Operator != nil && other.Operator == nil {
 			return false
 		}
 
@@ -48,7 +48,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 		}
-		if !((resource.FieldAnonymousStruct == nil && other.FieldAnonymousStruct == nil) || (resource.FieldAnonymousStruct != nil && other.FieldAnonymousStruct != nil)) {
+		if resource.FieldAnonymousStruct == nil && other.FieldAnonymousStruct != nil || resource.FieldAnonymousStruct != nil && other.FieldAnonymousStruct == nil {
 			return false
 		}
 

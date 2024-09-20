@@ -39,7 +39,7 @@ func (resource Query) Equals(otherCandidate variants.Dataquery) bool {
 		if resource.Expr != other.Expr {
 			return false
 		}
-		if !((resource.Instant == nil && other.Instant == nil) || (resource.Instant != nil && other.Instant != nil)) {
+		if resource.Instant == nil && other.Instant != nil || resource.Instant != nil && other.Instant == nil {
 			return false
 		}
 

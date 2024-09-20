@@ -67,7 +67,7 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 
 
 func (resource StringOrBool) Equals(other StringOrBool) bool {
-		if !((resource.String == nil && other.String == nil) || (resource.String != nil && other.String != nil)) {
+		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 			return false
 		}
 
@@ -76,7 +76,7 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 			return false
 		}
 		}
-		if !((resource.Bool == nil && other.Bool == nil) || (resource.Bool != nil && other.Bool != nil)) {
+		if resource.Bool == nil && other.Bool != nil || resource.Bool != nil && other.Bool == nil {
 			return false
 		}
 

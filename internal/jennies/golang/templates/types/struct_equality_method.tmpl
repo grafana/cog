@@ -17,7 +17,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 		{{- $dereference := ternary "*" "" $needsDereference }}
 		{{- $depth := default 1 .Depth }}
 		{{- if $needsDereference }}
-			if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
+			if {{ .SelfName }} == nil && {{ .OtherName }} != nil || {{ .SelfName }} != nil && {{ .OtherName }} == nil {
 				return false
 			}
 
@@ -39,7 +39,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 		{{- $dereference := ternary "*" "" $needsDereference }}
 		{{- $depth := default 1 .Depth }}
 		{{- if $needsDereference }}
-			if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
+			if {{ .SelfName }} == nil && {{ .OtherName }} != nil || {{ .SelfName }} != nil && {{ .OtherName }} == nil {
 				return false
 			}
 
@@ -57,7 +57,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 		}
 		{{- if $needsDereference }}}{{ end }}
 	{{- else if .Nullable }}
-		if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
+		if {{ .SelfName }} == nil && {{ .OtherName }} != nil || {{ .SelfName }} != nil && {{ .OtherName }} == nil {
 			return false
 		}
 
