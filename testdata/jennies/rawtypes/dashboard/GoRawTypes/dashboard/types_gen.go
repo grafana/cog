@@ -19,8 +19,8 @@ func (resource Dashboard) Equals(other Dashboard) bool {
 			return false
 		}
 
-		for i := range resource.Panels {
-		if !resource.Panels[i].Equals(other.Panels[i]) {
+		for i1 := range resource.Panels {
+		if !resource.Panels[i1].Equals(other.Panels[i1]) {
 			return false
 		}
 		}
@@ -220,8 +220,8 @@ func (resource Panel) Equals(other Panel) bool {
 			return false
 		}
 
-		for i := range resource.Targets {
-		if !resource.Targets[i].Equals(other.Targets[i]) {
+		for i1 := range resource.Targets {
+		if !resource.Targets[i1].Equals(other.Targets[i1]) {
 			return false
 		}
 		}

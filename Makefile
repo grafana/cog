@@ -29,7 +29,7 @@ lint: dev-env-check-binaries ## Lints the code base.
 	$(RUN_DEVBOX) golangci-lint run -c .golangci.yaml
 
 .PHONY: tests
-tests: dev-env-check-binaries ## Runs the tests.
+tests: dev-env-check-binaries gen-tests ## Runs the tests.
 	$(RUN_DEVBOX) go test -v ./...
 
 .PHONY: deps
@@ -47,6 +47,12 @@ gen-sdk-dev: dev-env-check-binaries ## Generates a dev version of the Foundation
 	$(RUN_DEVBOX) go run cmd/cli/main.go generate \
 		--config ./config/foundation_sdk.dev.yaml \
 		--parameters kind_registry_version=next,grafana_version=main
+
+.PHONY: gen-tests
+gen-tests: dev-env-check-binaries ## Generates the code described by tests schemas.
+	rm -rf generated
+	$(RUN_DEVBOX) go run ./cmd/cli/ generate \
+		--config ./config/foundation_sdk.tests.yaml
 
 .PHONY: run-go-example
 run-go-example: dev-env-check-binaries ## Runs the Go example.

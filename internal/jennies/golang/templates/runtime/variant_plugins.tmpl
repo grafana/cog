@@ -3,7 +3,9 @@ package plugins
 {{ .imports }}
 
 func RegisterDefaultPlugins() {
+	{{- if or (ne (len .panel_schemas) 0) (ne (len .dataquery_schemas) 0) }}
 	runtime := cog.NewRuntime()
+	{{- end }}
 
     // Panelcfg variants
 {{- range $schema := .panel_schemas }}
