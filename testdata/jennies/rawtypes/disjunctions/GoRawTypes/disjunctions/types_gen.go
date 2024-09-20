@@ -111,7 +111,7 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 
 
 func (resource StringOrBool) Equals(other StringOrBool) bool {
-		if !((resource.String == nil && other.String == nil) || (resource.String != nil && other.String != nil)) {
+		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 			return false
 		}
 
@@ -120,7 +120,7 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 			return false
 		}
 		}
-		if !((resource.Bool == nil && other.Bool == nil) || (resource.Bool != nil && other.Bool != nil)) {
+		if resource.Bool == nil && other.Bool != nil || resource.Bool != nil && other.Bool == nil {
 			return false
 		}
 
@@ -140,7 +140,7 @@ type BoolOrSomeStruct struct {
 }
 
 func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
-		if !((resource.Bool == nil && other.Bool == nil) || (resource.Bool != nil && other.Bool != nil)) {
+		if resource.Bool == nil && other.Bool != nil || resource.Bool != nil && other.Bool == nil {
 			return false
 		}
 
@@ -149,7 +149,7 @@ func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
 			return false
 		}
 		}
-		if !((resource.SomeStruct == nil && other.SomeStruct == nil) || (resource.SomeStruct != nil && other.SomeStruct != nil)) {
+		if resource.SomeStruct == nil && other.SomeStruct != nil || resource.SomeStruct != nil && other.SomeStruct == nil {
 			return false
 		}
 
@@ -231,7 +231,7 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 
 
 func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Equals(other SomeStructOrSomeOtherStructOrYetAnotherStruct) bool {
-		if !((resource.SomeStruct == nil && other.SomeStruct == nil) || (resource.SomeStruct != nil && other.SomeStruct != nil)) {
+		if resource.SomeStruct == nil && other.SomeStruct != nil || resource.SomeStruct != nil && other.SomeStruct == nil {
 			return false
 		}
 
@@ -240,7 +240,7 @@ func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Equals(other SomeS
 			return false
 		}
 		}
-		if !((resource.SomeOtherStruct == nil && other.SomeOtherStruct == nil) || (resource.SomeOtherStruct != nil && other.SomeOtherStruct != nil)) {
+		if resource.SomeOtherStruct == nil && other.SomeOtherStruct != nil || resource.SomeOtherStruct != nil && other.SomeOtherStruct == nil {
 			return false
 		}
 
@@ -249,7 +249,7 @@ func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Equals(other SomeS
 			return false
 		}
 		}
-		if !((resource.YetAnotherStruct == nil && other.YetAnotherStruct == nil) || (resource.YetAnotherStruct != nil && other.YetAnotherStruct != nil)) {
+		if resource.YetAnotherStruct == nil && other.YetAnotherStruct != nil || resource.YetAnotherStruct != nil && other.YetAnotherStruct == nil {
 			return false
 		}
 

@@ -25,7 +25,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if !resource.FieldMixedDisjunction.Equals(other.FieldMixedDisjunction) {
 			return false
 		}
-		if !((resource.FieldDisjunctionWithNull == nil && other.FieldDisjunctionWithNull == nil) || (resource.FieldDisjunctionWithNull != nil && other.FieldDisjunctionWithNull != nil)) {
+		if resource.FieldDisjunctionWithNull == nil && other.FieldDisjunctionWithNull != nil || resource.FieldDisjunctionWithNull != nil && other.FieldDisjunctionWithNull == nil {
 			return false
 		}
 
@@ -142,7 +142,7 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 
 
 func (resource StringOrBool) Equals(other StringOrBool) bool {
-		if !((resource.String == nil && other.String == nil) || (resource.String != nil && other.String != nil)) {
+		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 			return false
 		}
 
@@ -151,7 +151,7 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 			return false
 		}
 		}
-		if !((resource.Bool == nil && other.Bool == nil) || (resource.Bool != nil && other.Bool != nil)) {
+		if resource.Bool == nil && other.Bool != nil || resource.Bool != nil && other.Bool == nil {
 			return false
 		}
 
@@ -171,7 +171,7 @@ type StringOrSomeOtherStruct struct {
 }
 
 func (resource StringOrSomeOtherStruct) Equals(other StringOrSomeOtherStruct) bool {
-		if !((resource.String == nil && other.String == nil) || (resource.String != nil && other.String != nil)) {
+		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 			return false
 		}
 
@@ -180,7 +180,7 @@ func (resource StringOrSomeOtherStruct) Equals(other StringOrSomeOtherStruct) bo
 			return false
 		}
 		}
-		if !((resource.SomeOtherStruct == nil && other.SomeOtherStruct == nil) || (resource.SomeOtherStruct != nil && other.SomeOtherStruct != nil)) {
+		if resource.SomeOtherStruct == nil && other.SomeOtherStruct != nil || resource.SomeOtherStruct != nil && other.SomeOtherStruct == nil {
 			return false
 		}
 

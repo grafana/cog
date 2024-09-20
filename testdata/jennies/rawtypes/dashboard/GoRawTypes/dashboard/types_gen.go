@@ -35,7 +35,7 @@ type DataSourceRef struct {
 }
 
 func (resource DataSourceRef) Equals(other DataSourceRef) bool {
-		if !((resource.Type == nil && other.Type == nil) || (resource.Type != nil && other.Type != nil)) {
+		if resource.Type == nil && other.Type != nil || resource.Type != nil && other.Type == nil {
 			return false
 		}
 
@@ -44,7 +44,7 @@ func (resource DataSourceRef) Equals(other DataSourceRef) bool {
 			return false
 		}
 		}
-		if !((resource.Uid == nil && other.Uid == nil) || (resource.Uid != nil && other.Uid != nil)) {
+		if resource.Uid == nil && other.Uid != nil || resource.Uid != nil && other.Uid == nil {
 			return false
 		}
 
@@ -63,7 +63,7 @@ type FieldConfigSource struct {
 }
 
 func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
-		if !((resource.Defaults == nil && other.Defaults == nil) || (resource.Defaults != nil && other.Defaults != nil)) {
+		if resource.Defaults == nil && other.Defaults != nil || resource.Defaults != nil && other.Defaults == nil {
 			return false
 		}
 
@@ -83,7 +83,7 @@ type FieldConfig struct {
 }
 
 func (resource FieldConfig) Equals(other FieldConfig) bool {
-		if !((resource.Unit == nil && other.Unit == nil) || (resource.Unit != nil && other.Unit != nil)) {
+		if resource.Unit == nil && other.Unit != nil || resource.Unit != nil && other.Unit == nil {
 			return false
 		}
 
@@ -202,7 +202,7 @@ func (resource Panel) Equals(other Panel) bool {
 		if resource.Type != other.Type {
 			return false
 		}
-		if !((resource.Datasource == nil && other.Datasource == nil) || (resource.Datasource != nil && other.Datasource != nil)) {
+		if resource.Datasource == nil && other.Datasource != nil || resource.Datasource != nil && other.Datasource == nil {
 			return false
 		}
 
@@ -225,7 +225,7 @@ func (resource Panel) Equals(other Panel) bool {
 			return false
 		}
 		}
-		if !((resource.FieldConfig == nil && other.FieldConfig == nil) || (resource.FieldConfig != nil && other.FieldConfig != nil)) {
+		if resource.FieldConfig == nil && other.FieldConfig != nil || resource.FieldConfig != nil && other.FieldConfig == nil {
 			return false
 		}
 
