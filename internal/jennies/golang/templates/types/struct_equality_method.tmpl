@@ -15,7 +15,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 	{{- else if resolvesToArray .Type }}
 		{{- $needsDereference := and .Type.IsRef .Type.Nullable }}
 		{{- $dereference := ternary "*" "" $needsDereference }}
-		{{- $depth := default 1  .Depth }}
+		{{- $depth := default 1 .Depth }}
 		{{- if $needsDereference }}
 			if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
 				return false
