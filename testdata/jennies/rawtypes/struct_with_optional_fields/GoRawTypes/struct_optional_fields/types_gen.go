@@ -43,8 +43,8 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 
-		for i := range resource.FieldArrayOfStrings {
-		if resource.FieldArrayOfStrings[i] != other.FieldArrayOfStrings[i] {
+		for i1 := range resource.FieldArrayOfStrings {
+		if resource.FieldArrayOfStrings[i1] != other.FieldArrayOfStrings[i1] {
 			return false
 		}
 		}

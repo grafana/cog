@@ -8,7 +8,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(otherCandidate variants.Da
 		return false
 	}
 
-	{{- template "type_equality_check" (dict "Type" .def.Type "Nullable" .def.Type.Nullable "Dereference" false "SelfName" "resource" "OtherName" "other") }}
+	{{- template "type_equality_check" (dict "Type" .def.Type "Nullable" .def.Type.Nullable "Dereference" false "SelfName" "resource" "OtherName" "other" "Depth" 0) }}
 
 	return true
 }

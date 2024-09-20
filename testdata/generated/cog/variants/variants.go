@@ -1,0 +1,58 @@
+// Code generated - EDITING IS FUTILE. DO NOT EDIT.
+//
+// Using jennies:
+//     GoVariantsPlugins
+
+package variants
+
+import "reflect"
+
+type PanelcfgConfig struct {
+	Identifier             string
+	OptionsUnmarshaler     func(raw []byte) (any, error)
+	FieldConfigUnmarshaler func(raw []byte) (any, error)
+}
+
+type DataqueryConfig struct {
+	Identifier           string
+	DataqueryUnmarshaler func(raw []byte) (Dataquery, error)
+}
+
+type Dataquery interface {
+	ImplementsDataqueryVariant()
+	Equals(other Dataquery) bool
+}
+
+type Panelcfg interface {
+	ImplementsPanelcfgVariant()
+}
+
+type UnknownDataquery map[string]any
+
+func (unknown UnknownDataquery) ImplementsDataqueryVariant() {
+
+}
+
+func (unknown UnknownDataquery) Equals(otherCandidate Dataquery) bool {
+	if otherCandidate == nil {
+		return false
+	}
+
+	other, ok := otherCandidate.(UnknownDataquery)
+	if !ok {
+		return false
+	}
+
+	if len(unknown) != len(other) {
+		return false
+	}
+
+	for key := range unknown {
+		// TODO: is DeepEqual good enough here?
+		if !reflect.DeepEqual(unknown[key], other[key]) {
+			return false
+		}
+	}
+
+	return true
+}

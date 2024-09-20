@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+debug: true
+
+parameters:
+  output_dir: './testdata/generated'
+  go_package_root: 'github.com/grafana/cog/testdata/generated'
+  php_namespace_root: 'Grafana\Foundation'
+  java_package_path: 'com.grafana.foundation'
+
+inputs:
+  - cue:
+      entrypoint: '%__config_dir%/../testdata/schemas/equality'
+
+output:
+  directory: '%output_dir%'
+
+  types: true
+
+  languages:
+    - go:
+        package_root: '%go_package_root%'

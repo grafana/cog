@@ -1,5 +1,5 @@
 func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCamelCase }}) bool {
-	{{- template "type_equality_check" (dict "Type" .def.Type "Nullable" .def.Type.Nullable "Dereference" false "SelfName" "resource" "OtherName" "other") }}
+	{{- template "type_equality_check" (dict "Type" .def.Type "Nullable" .def.Type.Nullable "Dereference" false "SelfName" "resource" "OtherName" "other" "Depth" 0) }}
 
 	return true
 }
@@ -15,6 +15,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 	{{- else if resolvesToArray .Type }}
 		{{- $needsDereference := and .Type.IsRef .Type.Nullable }}
 		{{- $dereference := ternary "*" "" $needsDereference }}
+		{{- $depth := default 1  .Depth }}
 		{{- if $needsDereference }}
 			if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
 				return false
@@ -27,15 +28,16 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 			return false
 		}
 
-		for i := range {{ $dereference }}{{ .SelfName }} {
-		{{- $selfKey := print (ternary (print "(*" .SelfName ")") .SelfName $needsDereference) "[i]" }}
-		{{- $otherKey := print (ternary (print "(*" .OtherName ")") .OtherName $needsDereference) "[i]" }}
-			{{- template "type_equality_check" (dict "Type" (resolveRefs .Type).Array.ValueType "Nullable" (resolveRefs .Type).Array.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
+		for i{{ $depth }} := range {{ $dereference }}{{ .SelfName }} {
+		{{- $selfKey := print (ternary (print "(*" .SelfName ")") .SelfName $needsDereference) "[i" $depth "]" }}
+		{{- $otherKey := print (ternary (print "(*" .OtherName ")") .OtherName $needsDereference) "[i" $depth "]" }}
+			{{- template "type_equality_check" (dict "Type" (resolveRefs .Type).Array.ValueType "Nullable" (resolveRefs .Type).Array.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey "Depth" (add1 $depth)) }}
 		}
 		{{- if $needsDereference }}}{{ end }}
 	{{- else if resolvesToMap .Type }}
 		{{- $needsDereference := and .Type.IsRef .Type.Nullable }}
 		{{- $dereference := ternary "*" "" $needsDereference }}
+		{{- $depth := default 1  .Depth }}
 		{{- if $needsDereference }}
 			if !(({{ .SelfName }} == nil && {{ .OtherName }} == nil) || ({{ .SelfName }} != nil && {{ .OtherName }} != nil)) {
 				return false
@@ -48,10 +50,10 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 			return false
 		}
 
-		for key := range {{ $dereference }}{{ .SelfName }} {
-			{{- $selfKey := print (ternary (print "(*" .SelfName ")") .SelfName $needsDereference) "[key]" }}
-			{{- $otherKey := print (ternary (print "(*" .OtherName ")") .OtherName $needsDereference) "[key]" }}
-			{{- template "type_equality_check" (dict "Type" (resolveRefs .Type).Map.ValueType "Nullable" (resolveRefs .Type).Map.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
+		for key{{ $depth }} := range {{ $dereference }}{{ .SelfName }} {
+			{{- $selfKey := print (ternary (print "(*" .SelfName ")") .SelfName $needsDereference) "[key" $depth "]" }}
+			{{- $otherKey := print (ternary (print "(*" .OtherName ")") .OtherName $needsDereference) "[key" $depth "]" }}
+			{{- template "type_equality_check" (dict "Type" (resolveRefs .Type).Map.ValueType "Nullable" (resolveRefs .Type).Map.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey "Depth" (add1 $depth)) }}
 		}
 		{{- if $needsDereference }}}{{ end }}
 	{{- else if .Nullable }}
@@ -60,7 +62,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 		}
 
 		if {{ .SelfName }} != nil {
-			{{- template "type_equality_check" (dict "Type" .Type "Nullable" false "Dereference" true "SelfName" .SelfName "OtherName" .OtherName) }}
+			{{- template "type_equality_check" (dict "Type" .Type "Nullable" false "Dereference" true "SelfName" .SelfName "OtherName" .OtherName "Depth" .Depth) }}
 		}
 	{{- else if .Type.IsStruct }}
 		{{- range $field := .Type.Struct.Fields }}
@@ -68,7 +70,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 			{{- $selfKey := print $.SelfName "." $fieldName }}
 			{{- $otherKey := print $.OtherName "." $fieldName }}
 
-			{{- template "type_equality_check" (dict "Type" $field.Type "Nullable" $field.Type.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey) }}
+			{{- template "type_equality_check" (dict "Type" $field.Type "Nullable" $field.Type.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey "Depth" $.Depth) }}
 		{{- end }}
 	{{- else if .Type.IsDataqueryComposableSlot }}
 		if !{{ .SelfName }}.Equals({{ .OtherName }}) {

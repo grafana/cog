@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	gotemplate "text/template"
 
@@ -200,6 +201,12 @@ func (template *Template) builtins() FuncMap {
 
 			return valFalse
 		},
+		"default": func(d any, given ...any) any {
+			if empty(given) || empty(given[0]) {
+				return d
+			}
+			return given[0]
+		},
 
 		// ------- \\
 		// Strings \\
@@ -228,5 +235,34 @@ func (template *Template) builtins() FuncMap {
 
 			return include(name, data)
 		},
+	}
+}
+
+// empty returns true if the given value has the zero value for its type.
+// see https://github.com/Masterminds/sprig/blob/e708470d529a10ac1a3f02ab6fdd339b65958372/defaults.go#L35
+func empty(given interface{}) bool {
+	g := reflect.ValueOf(given)
+	if !g.IsValid() {
+		return true
+	}
+
+	// Basically adapted from text/template.isTrue
+	switch g.Kind() {
+	default:
+		return g.IsNil()
+	case reflect.Array, reflect.Slice, reflect.Map, reflect.String:
+		return g.Len() == 0
+	case reflect.Bool:
+		return !g.Bool()
+	case reflect.Complex64, reflect.Complex128:
+		return g.Complex() == 0
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return g.Int() == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return g.Uint() == 0
+	case reflect.Float32, reflect.Float64:
+		return g.Float() == 0
+	case reflect.Struct:
+		return false
 	}
 }

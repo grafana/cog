@@ -55,8 +55,8 @@ func (resource Struct) Equals(other Struct) bool {
 			return false
 		}
 
-		for i := range resource.ComplexField.Array {
-		if resource.ComplexField.Array[i] != other.ComplexField.Array[i] {
+		for i1 := range resource.ComplexField.Array {
+		if resource.ComplexField.Array[i1] != other.ComplexField.Array[i1] {
 			return false
 		}
 		}

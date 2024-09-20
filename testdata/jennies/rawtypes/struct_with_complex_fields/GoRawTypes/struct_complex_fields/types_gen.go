@@ -42,8 +42,8 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 
-		for i := range resource.FieldArrayOfStrings {
-		if resource.FieldArrayOfStrings[i] != other.FieldArrayOfStrings[i] {
+		for i1 := range resource.FieldArrayOfStrings {
+		if resource.FieldArrayOfStrings[i1] != other.FieldArrayOfStrings[i1] {
 			return false
 		}
 		}
@@ -52,8 +52,8 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 
-		for key := range resource.FieldMapOfStringToString {
-		if resource.FieldMapOfStringToString[key] != other.FieldMapOfStringToString[key] {
+		for key1 := range resource.FieldMapOfStringToString {
+		if resource.FieldMapOfStringToString[key1] != other.FieldMapOfStringToString[key1] {
 			return false
 		}
 		}
