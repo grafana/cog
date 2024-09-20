@@ -84,9 +84,10 @@ type JenniesHints map[string]any
 // Bonus: in a way that can be (un)marshaled to/from JSON,
 // which is useful for unit tests.
 type Type struct {
-	Kind     Kind
-	Nullable bool
-	Default  any `json:",omitempty"`
+	Kind         Kind
+	Nullable     bool
+	Default      any   `json:",omitempty"`
+	TypedDefault *Type `json:",omitempty"`
 
 	Disjunction    *DisjunctionType    `json:",omitempty"`
 	Array          *ArrayType          `json:",omitempty"`
