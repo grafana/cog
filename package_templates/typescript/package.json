@@ -10,6 +10,11 @@
     "traces",
     "metrics"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public",
+    "provenance": true
+  },
   "license": "Apache-2.0",
   "author": "Grafana Labs",
   "homepage": "https://github.com/grafana/grafana-foundation-sdk",
