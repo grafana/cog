@@ -232,6 +232,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 				}
 
 				newOpt.Default.ArgsValues = append(newOpt.Default.ArgsValues, defaults[field.Name])
+				newOpt.Default.TypedArgsValues = append(newOpt.Default.TypedArgsValues, field.Type)
 			}
 		}
 
@@ -337,6 +338,9 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 			if field.Type.Default != nil {
 				newOpt.Default = &ast.OptionDefault{
 					ArgsValues: []any{field.Type.Default},
+				}
+				if field.Type.TypedDefault != nil {
+					newOpt.Default.TypedArgsValues = []ast.Type{*field.Type.TypedDefault}
 				}
 			}
 

@@ -175,7 +175,8 @@ func (opt *Option) AddToVeneerTrail(veneerName string) {
 }
 
 type OptionDefault struct {
-	ArgsValues []any
+	ArgsValues      []any
+	TypedArgsValues []Type
 }
 
 type Argument struct {
@@ -530,6 +531,13 @@ func (generator *BuilderGenerator) structFieldToOption(field StructField) Option
 	if field.Type.Default != nil {
 		opt.Default = &OptionDefault{
 			ArgsValues: []any{field.Type.Default},
+		}
+		if field.Type.TypedDefault != nil {
+			opt.Default.TypedArgsValues = []Type{*field.Type.TypedDefault}
+		}
+	} else if field.Type.TypedDefault != nil {
+		opt.Default = &OptionDefault{
+			TypedArgsValues: []Type{*field.Type.TypedDefault},
 		}
 	}
 

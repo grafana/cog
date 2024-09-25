@@ -256,6 +256,12 @@ func Default(value any) TypeOption {
 	}
 }
 
+func TypedDefault(value Type) TypeOption {
+	return func(def *Type) {
+		def.TypedDefault = &value
+	}
+}
+
 func Hints(hints JenniesHints) TypeOption {
 	return func(def *Type) {
 		def.Hints = hints
