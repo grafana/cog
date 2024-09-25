@@ -109,7 +109,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 func (jenny *Builder) genDefaultOptionsCalls(context languages.Context, builder ast.Builder) []template.OptionCall {
 	calls := make([]template.OptionCall, 0)
 	for _, opt := range builder.Options {
-		if opt.Default == nil {
+		if opt.TypedDefault == nil {
 			continue
 		}
 
@@ -117,58 +117,42 @@ func (jenny *Builder) genDefaultOptionsCalls(context languages.Context, builder 
 			continue
 		}
 
-		if hasTypedDefaults(opt) {
-			calls = append(calls, template.OptionCall{
-				OptionName: opt.Name,
-				Args:       jenny.formatDefaultTypedArgs(context, opt),
-			})
-			continue
-		}
-
 		calls = append(calls, template.OptionCall{
 			OptionName: opt.Name,
-			Args:       tools.Map(opt.Default.ArgsValues, formatScalar),
+			Args:       jenny.parseTypedDefaults(context, *opt.TypedDefault),
 		})
 	}
 
 	return calls
 }
 
-func hasTypedDefaults(opt ast.Option) bool {
-	for _, defArg := range opt.Default.ArgsValues {
-		if _, ok := defArg.(map[string]any); ok {
-			return true
+func (jenny *Builder) parseTypedDefaults(context languages.Context, typedDef ast.TypedOptionDefault) []string {
+	switch typedDef.Type.Kind {
+	case ast.KindScalar:
+		return []string{formatScalar(typedDef.Value)}
+	case ast.KindEnum:
+		return []string{formatScalar(typedDef.Value)}
+	case ast.KindArray:
+		if typedDef.Type.AsArray().IsArrayOfScalars() {
+			return []string{formatScalar(typedDef.Value)}
 		}
+	case ast.KindRef:
+		ref := typedDef.Type.AsRef()
+		obj, _ := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+		if obj.Type.IsStruct() {
+			refPkg := jenny.typeImportMapper(ref.ReferredPkg)
+			_, isBuilder := context.Builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+			defs, _ := typedDef.Value.(map[string]interface{})
+			return []string{formatDefaultReferenceStructForBuilder(refPkg, obj.Name, isBuilder, obj.Type.AsStruct(), orderedmap.FromMap(defs))}
+		}
+		return jenny.parseTypedDefaults(context, ast.TypedOptionDefault{
+			Name:  typedDef.Name,
+			Type:  obj.Type,
+			Value: typedDef.Value,
+		})
 	}
 
-	return false
-}
-
-func (jenny *Builder) formatDefaultTypedArgs(context languages.Context, opt ast.Option) []string {
-	args := make([]string, 0)
-	for i, arg := range opt.Default.ArgsValues {
-		val, _ := arg.(map[string]interface{})
-
-		pkg := ""
-		refPkg := ""
-		if opt.Args[i].Type.IsRef() {
-			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
-			pkg = opt.Args[i].Type.AsRef().ReferredType
-			_, isBuilder := context.Builders.LocateByObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
-			obj, ok := context.LocateObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
-			if !ok {
-				return []string{"unknown"}
-			}
-			args = append(args, formatDefaultReferenceStructForBuilder(refPkg, pkg, isBuilder, obj.Type.AsStruct(), orderedmap.FromMap(val)))
-		}
-
-		// Anonymous structs
-		if opt.Args[i].Type.IsStruct() {
-			def := opt.Args[i].Type.AsStruct()
-			args = append(args, formatAnonymousDefaultStruct(def, orderedmap.FromMap(val)))
-		}
-	}
-	return args
+	return []string{"unknown"}
 }
 
 func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {

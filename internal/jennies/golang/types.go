@@ -243,55 +243,6 @@ func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilde
 	return fmt.Sprintf("%s%s%s", starter, buffer.String(), ending)
 }
 
-func formatAnonymousDefaultStruct(def ast.StructType, structMap *orderedmap.Map[string, interface{}]) string {
-	return fmt.Sprintf("struct %s {\n %s }", defineAnonymousFields(def), defineAnonymousDefaults(def, structMap))
-}
-
-func defineAnonymousFields(def ast.StructType) string {
-	var structDefinition strings.Builder
-
-	for _, f := range def.Fields {
-		key := tools.UpperCamelCase(f.Name)
-
-		switch f.Type.Kind {
-		case ast.KindScalar:
-			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", key, f.Type.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
-		case ast.KindStruct:
-			structFields := defineAnonymousFields(f.Type.AsStruct())
-			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, tools.LowerCamelCase(key)))
-		case ast.KindArray:
-			array := f.Type.AsArray()
-			if array.ValueType.IsScalar() {
-				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
-			}
-		// TODO: Map rest of array cases
-		default:
-			// TODO: Map rest of the cases when necessary. By default it sets any
-			structDefinition.WriteString(fmt.Sprintf("%s any `json:\"%s\"`\n", key, strings.ToLower(key)))
-		}
-	}
-
-	return fmt.Sprintf("{\n %s }", structDefinition.String())
-}
-
-func defineAnonymousDefaults(def ast.StructType, structMap *orderedmap.Map[string, interface{}]) string {
-	var buffer strings.Builder
-	structMap.Iterate(func(key string, value interface{}) {
-		name := tools.UpperCamelCase(key)
-		switch x := value.(type) {
-		case map[string]interface{}:
-			// FIXME: Set a default not defined shouldn't happen..
-			field, _ := def.FieldByName(key)
-			def = field.Type.AsStruct()
-			buffer.WriteString(fmt.Sprintf("%s: struct %v {\n %v},\n", name, defineAnonymousFields(def), defineAnonymousDefaults(def, orderedmap.FromMap(x))))
-		case []interface{}, interface{}:
-			buffer.WriteString(fmt.Sprintf("%s: %v,\n", name, formatScalar(x)))
-		}
-	})
-
-	return buffer.String()
-}
-
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
 	typeName := tools.UpperCamelCase(def.AsRef().ReferredType)

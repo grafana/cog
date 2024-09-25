@@ -141,12 +141,13 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 }
 
 type Option struct {
-	Name        string
-	Comments    []string `json:",omitempty"`
-	VeneerTrail []string `json:",omitempty"`
-	Args        []Argument
-	Assignments []Assignment
-	Default     *OptionDefault `json:",omitempty"`
+	Name         string
+	Comments     []string `json:",omitempty"`
+	VeneerTrail  []string `json:",omitempty"`
+	Args         []Argument
+	Assignments  []Assignment
+	Default      *OptionDefault `json:",omitempty"`
+	TypedDefault *TypedOptionDefault
 }
 
 func (opt *Option) DeepCopy() Option {
@@ -175,8 +176,13 @@ func (opt *Option) AddToVeneerTrail(veneerName string) {
 }
 
 type OptionDefault struct {
-	ArgsValues      []any
-	TypedArgsValues []Type
+	ArgsValues []any
+}
+
+type TypedOptionDefault struct {
+	Name  string
+	Type  Type
+	Value any
 }
 
 type Argument struct {
@@ -529,15 +535,16 @@ func (generator *BuilderGenerator) structFieldToOption(field StructField) Option
 	}
 
 	if field.Type.Default != nil {
+		opt.TypedDefault = &TypedOptionDefault{
+			Name:  field.Name,
+			Type:  field.Type,
+			Value: field.Type.Default,
+		}
+	}
+
+	if field.Type.Default != nil {
 		opt.Default = &OptionDefault{
 			ArgsValues: []any{field.Type.Default},
-		}
-		if field.Type.TypedDefault != nil {
-			opt.Default.TypedArgsValues = []Type{*field.Type.TypedDefault}
-		}
-	} else if field.Type.TypedDefault != nil {
-		opt.Default = &OptionDefault{
-			TypedArgsValues: []Type{*field.Type.TypedDefault},
 		}
 	}
 
