@@ -77,7 +77,6 @@ export function {{ .Converter.BuilderName | upperCamelCase }}Converter(input: {{
                 {{- end }}
             {{- end }}
         }
-
     {{- else }}
         {{- $optMapping := .Options | first }}
         {{ with $optMapping.Guards }}if ({{ template "guards" . }}){{ end }}{

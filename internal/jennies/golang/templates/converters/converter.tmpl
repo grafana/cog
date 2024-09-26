@@ -56,8 +56,44 @@ package {{ .Converter.Package | formatPackageName }}
         {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath | formatPath }}{{ else }}{{ maybeUnptr ($runtimeArg.ValuePath | formatPath) $runtimeArg.ValueType }}{{ end }}, {{ end }})
     {{- end -}}
     {{- with .Arg.Direct -}}
-        {{ $.IntoVar }} := {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath ) -}}
+        {{ $.IntoVar }} := {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}}
     {{- end -}}
+{{- end }}
+
+{{- define "option_mapping" -}}
+{{- $argsCount := sub1 (len .Args) -}}
+
+{{ with .Guards -}}if ({{ template "guards" . }}) { {{- end }}
+
+{{- range $arg := .Args }}
+{{ with $arg.Guards -}}if ({{ template "guards" . }}) {{- end }}{
+    var buffer strings.Builder
+    buffer.WriteString(`{{ $.Option.Name | upperCamelCase }}(`)
+    {{- range $i, $arg := $.Args }}
+        {{- $intoVar := print "arg" $i }}
+        {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
+        buffer.WriteString({{ $intoVar }})
+        {{- if ne $i $argsCount }}
+            buffer.WriteString(", ")
+        {{- end }}
+    {{- end }}
+    buffer.WriteString(")")
+
+    calls = append(calls, buffer.String())
+    buffer.Reset()
+}
+{{- end }}
+
+{{ with .Guards -}} } {{- end }}
+
+{{- end }}
+
+{{- define "conversion_mapping" -}}
+{{ if ne .RepeatFor nil -}}for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} { {{- end }}
+    {{- range $optMapping := .Options }}
+        {{ template "option_mapping" $optMapping }}
+    {{- end }}
+{{ if ne .RepeatFor nil -}} } {{- end }}
 {{- end }}
 
 {{- define "converter" -}}
@@ -68,51 +104,7 @@ func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawR
     }
 
     {{- range .Converter.Mappings }}
-    {
-        var buffer strings.Builder
-
-        {{ if ne .RepeatFor nil -}}
-        for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} {
-            {{- range $optMapping := .Options }}
-                {{- $argsCount := sub1 (len $optMapping.Args) -}}
-                {{- range $arg := $optMapping.Args }}
-                    {{ with $arg.Guards -}}if ({{ template "guards" . }}) {{- end }}{
-                        buffer.WriteString(`{{ $optMapping.Option.Name | upperCamelCase }}(`)
-                        {{- range $i, $arg := $optMapping.Args }}
-                            {{- $intoVar := print "arg" $i }}
-                            {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
-                            buffer.WriteString({{ $intoVar }})
-                            {{- if ne $i $argsCount }}
-                                buffer.WriteString(", ")
-                            {{- end }}
-                        {{- end }}
-                        buffer.WriteString(")")
-
-                        calls = append(calls, buffer.String())
-                        buffer.Reset()
-                    }
-                {{- end }}
-            {{- end }}
-        }
-        {{- else }}
-        {{- $optMapping := .Options | first }}
-        {{ with $optMapping.Guards }}if {{ template "guards" . }} { {{- end }}
-        buffer.WriteString(`{{ $optMapping.Option.Name | upperCamelCase }}(`)
-        {{- $argsCount := sub1 (len $optMapping.Args) -}}
-        {{- range $i, $arg := $optMapping.Args }}
-            {{- $intoVar := print "arg" $i }}
-            {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
-            buffer.WriteString({{ $intoVar }})
-            {{- if ne $i $argsCount }}
-                buffer.WriteString(", ")
-            {{- end }}
-        {{- end }}
-        buffer.WriteString(")")
-
-        calls = append(calls, buffer.String())
-        {{ with $optMapping.Guards -}} } {{- end }}
-        {{- end }}
-    }
+        {{ template "conversion_mapping" . }}
     {{- end }}
 
     return strings.Join(calls, ".\t\n")
