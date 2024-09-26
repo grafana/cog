@@ -304,7 +304,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 
 		return ArgumentMapping{
 			Runtime: &RuntimeArgMapping{
-				FuncName: fmt.Sprintf("Convert%sToGo", tools.UpperCamelCase(string(typeDef.AsComposableSlot().Variant))),
+				FuncName: fmt.Sprintf("Convert%sToCode", tools.UpperCamelCase(string(typeDef.AsComposableSlot().Variant))),
 				Args: append([]*DirectArgMapping{
 					{ValuePath: valuePath, ValueType: typeDef},
 				}, slotTypeHintsArgs...),
@@ -337,7 +337,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 
 		return ArgumentMapping{
 			Runtime: &RuntimeArgMapping{
-				FuncName: "ConvertPanelToGo",
+				FuncName: "ConvertPanelToCode",
 				Args: []*DirectArgMapping{
 					{ValuePath: valuePath, ValueType: typeDef},
 					{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},

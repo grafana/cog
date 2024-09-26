@@ -60,40 +60,43 @@ export function {{ .Converter.BuilderName | upperCamelCase }}Converter(input: {{
     ];
 
     {{- range .Converter.Mappings }}
-    {{ with .Guards }}if ({{ template "guards" . }}){{ end }}{
-        {{ if ne .RepeatFor nil -}}
-        {{- $arg := index .Args 0 -}}
+    {{ if ne .RepeatFor nil -}}
         for (const {{ .RepeatAs }} of {{ .RepeatFor }}) {
+            {{- range $optMapping := .Options }}
+                {{- $argsCount := sub1 (len $optMapping.Args) -}}
+                {{- range $arg := $optMapping.Args }}
+                    {{ with $arg.Guards -}}if (!({{ template "guards" . }})){{ end }}{
+                        let buffer: string = "";
+                        buffer += `{{ $optMapping.Option.Name }}(`;
+                        {{ template "prepare_arg" (dict "IntoVar" "arg" "Arg" $arg) }}
+                        buffer += arg;
+                        buffer += ")";
+
+                        calls.push(buffer);
+                    }
+                {{- end }}
+            {{- end }}
+        }
+
+    {{- else }}
+        {{- $optMapping := .Options | first }}
+        {{ with $optMapping.Guards }}if ({{ template "guards" . }}){{ end }}{
             let buffer: string = "";
-            {{ with $arg.Guards -}}
-                if (!({{ template "guards" . }})) {
-                    continue;
-                }
-            {{ end }}
-            buffer += `{{ .Option.Name }}(`;
-            {{ template "prepare_arg" (dict "IntoVar" "arg" "Arg" $arg) }}
-            buffer += arg;
+            buffer += `{{ $optMapping.Option.Name }}(`;
+            {{- $argsCount := sub1 (len $optMapping.Args) -}}
+            {{- range $i, $arg := $optMapping.Args }}
+                {{- $intoVar := print "arg" $i }}
+                {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
+                buffer += {{ $intoVar }};
+                {{- if ne $i $argsCount }}
+                    buffer += ", ";
+                {{- end }}
+            {{- end }}
             buffer += ")";
 
             calls.push(buffer);
         }
-        {{- else }}
-        let buffer: string = "";
-        buffer += `{{ .Option.Name }}(`;
-        {{- $argsCount := sub1 (len .Args) -}}
-        {{- range $i, $arg := .Args }}
-            {{- $intoVar := print "arg" $i }}
-            {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
-            buffer += {{ $intoVar }};
-            {{- if ne $i $argsCount }}
-                buffer += ", ";
-            {{- end }}
-        {{- end }}
-        buffer += ")";
-
-        calls.push(buffer);
-        {{- end }}
-    }
+    {{- end }}
     {{- end }}
 
     return calls.join(".\t\n");

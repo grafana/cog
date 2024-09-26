@@ -34,6 +34,12 @@ func (jenny Index) Generate(context languages.Context) (codejen.Files, error) {
 		}
 	}
 
+	if jenny.Targets.Converters {
+		for _, builder := range context.Builders {
+			packages[builder.Package] = append(packages[builder.Package], fmt.Sprintf("%sConverter.gen", tools.LowerCamelCase(builder.Name)))
+		}
+	}
+
 	for pkg, refs := range packages {
 		files = append(files, *codejen.NewFile(filepath.Join("src", formatPackageName(pkg), "index.ts"), jenny.generateIndex(refs), jenny))
 	}

@@ -110,11 +110,11 @@ func (runtime *Runtime) ConvertDataqueryToGo(inputPanel any, dataqueryTypeHints 
 	return "/* could not convert dataquery to go */"
 }
 
-func ConvertPanelToGo(inputPanel any, panelType string) string {
+func ConvertPanelToCode(inputPanel any, panelType string) string {
 	return NewRuntime().ConvertPanelToGo(inputPanel, panelType)
 }
 
-func ConvertDataqueryToGo(inputPanel any, dataqueryTypeHints ...string) string {
+func ConvertDataqueryToCode(inputPanel any, dataqueryTypeHints ...string) string {
 	return NewRuntime().ConvertDataqueryToGo(inputPanel, dataqueryTypeHints...)
 }
 
