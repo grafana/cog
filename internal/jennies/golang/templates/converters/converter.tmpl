@@ -35,7 +35,7 @@ package {{ .Converter.Package | formatPackageName }}
 {{- end }}
 
 {{- define "guards" }}
-    {{- $guardsCount := (sub (len .) 1) -}}
+    {{- $guardsCount := sub1 (len .) -}}
     {{- range $i, $guard := . }}{{- template "guard" $guard }}{{ if ne $i $guardsCount }} && {{ end }}{{ end }}
 {{- end }}
 
@@ -62,7 +62,7 @@ package {{ .Converter.Package | formatPackageName }}
 
 {{- define "converter" -}}
 func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
-    {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) }}
+    {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
     calls := []string{
         `{{ .Converter.Package | formatPackageName }}.New{{ .Converter.BuilderName | upperCamelCase }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
     }
@@ -72,7 +72,7 @@ func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawR
         var buffer strings.Builder
 
         {{ if ne .RepeatFor nil -}}
-        {{- $argsCount := (sub (len .Args) 1) -}}
+        {{- $argsCount := sub1 (len .Args) -}}
         for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} {
             {{- range $arg := .Args }}
             {{ with $arg.Guards -}}
@@ -98,7 +98,7 @@ func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawR
         }
         {{- else }}
         buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
-        {{- $argsCount := (sub (len .Args) 1) -}}
+        {{- $argsCount := sub1 (len .Args) -}}
         {{- range $i, $arg := .Args }}
             {{- $intoVar := print "arg" $i }}
             {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}

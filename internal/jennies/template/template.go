@@ -180,6 +180,7 @@ func (template *Template) builtins() FuncMap {
 
 	return gotemplate.FuncMap{
 		"add1": func(i int) int { return i + 1 },
+		"sub1": func(i int) int { return i - 1 },
 		// https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/dict.go#L76
 		"dict": func(v ...any) map[string]any {
 			dict := map[string]any{}

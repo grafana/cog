@@ -78,9 +78,18 @@ func (runtime *Runtime) UnmarshalDataquery(raw []byte, dataqueryTypeHint string)
 	return dataquery, nil
 }
 
-<<<<<<< HEAD
 func UnmarshalDataqueryArray(raw []byte, dataqueryTypeHint string) ([]variants.Dataquery, error) {
-=======
+	return NewRuntime().UnmarshalDataqueryArray(raw, dataqueryTypeHint)
+}
+
+func UnmarshalDataquery(raw []byte, dataqueryTypeHint string) (variants.Dataquery, error) {
+	return NewRuntime().UnmarshalDataquery(raw, dataqueryTypeHint)
+}
+
+func ConfigForPanelcfgVariant(identifier string) (variants.PanelcfgConfig, bool) {
+	return NewRuntime().ConfigForPanelcfgVariant(identifier)
+}
+
 func (runtime *Runtime) ConvertPanelToGo(inputPanel any, panelType string) string {
 	config, found := runtime.panelcfgVariants[panelType]
 	if found && config.GoConverter != nil {
@@ -107,19 +116,6 @@ func ConvertPanelToGo(inputPanel any, panelType string) string {
 
 func ConvertDataqueryToGo(inputPanel any, dataqueryTypeHints ...string) string {
 	return NewRuntime().ConvertDataqueryToGo(inputPanel, dataqueryTypeHints...)
-}
-
-func UnmarshalDataqueryArray(raw []byte, dataqueryTypeHint string) ([]cogvariants.Dataquery, error) {
->>>>>>> b46a16e7 (WIP)
-	return NewRuntime().UnmarshalDataqueryArray(raw, dataqueryTypeHint)
-}
-
-func UnmarshalDataquery(raw []byte, dataqueryTypeHint string) (variants.Dataquery, error) {
-	return NewRuntime().UnmarshalDataquery(raw, dataqueryTypeHint)
-}
-
-func ConfigForPanelcfgVariant(identifier string) (variants.PanelcfgConfig, bool) {
-	return NewRuntime().ConfigForPanelcfgVariant(identifier)
 }
 
 func Dump(root any) string {

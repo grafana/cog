@@ -27,7 +27,7 @@
 {{- end }}
 
 {{- define "guards" }}
-    {{- $guardsCount := (sub (len .) 1) -}}
+    {{- $guardsCount := sub1 (len .) -}}
     {{- range $i, $guard := . }}{{- template "guard" $guard }}{{ if ne $i $guardsCount }} && {{ end }}{{ end }}
 {{- end }}
 
@@ -54,7 +54,7 @@
 
 {{- define "converter" -}}
 export function {{ .Converter.BuilderName | upperCamelCase }}Converter(input: {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType }}): string {
-    {{- $constructorArgsCount := (sub (len .Converter.ConstructorArgs) 1) }}
+    {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
     const calls: string[] = [
         `new {{ .Converter.Package }}.{{ .Converter.BuilderName | upperCamelCase }}Builder({{ range $i, $arg := .Converter.ConstructorArgs }}${ {{ $arg.ValuePath }} }{{- if ne $i $constructorArgsCount }}, {{ end }}{{ end }})`,
     ];
@@ -80,7 +80,7 @@ export function {{ .Converter.BuilderName | upperCamelCase }}Converter(input: {{
         {{- else }}
         let buffer: string = "";
         buffer += `{{ .Option.Name }}(`;
-        {{- $argsCount := (sub (len .Args) 1) -}}
+        {{- $argsCount := sub1 (len .Args) -}}
         {{- range $i, $arg := .Args }}
             {{- $intoVar := print "arg" $i }}
             {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}

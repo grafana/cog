@@ -1,13 +1,8 @@
 func VariantConfig() variants.DataqueryConfig {
 	return variants.DataqueryConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",
-<<<<<<< HEAD
 	    DataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
-            dataquery := {{ .object.Name|upperCamelCase }}{}
-=======
-	    DataqueryUnmarshaler: func (raw []byte) (cogvariants.Dataquery, error) {
-            dataquery := &{{ .object.Name | upperCamelCase }}{}
->>>>>>> b46a16e7 (WIP)
+            dataquery := &{{ .object.Name|upperCamelCase }}{}
 
             if err := json.Unmarshal(raw, dataquery); err != nil {
                 return nil, err

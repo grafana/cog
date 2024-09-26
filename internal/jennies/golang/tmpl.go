@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/template"
 )
 
-//go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/types/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/converters/*.tmpl templates/types/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -26,6 +26,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			},
 			"formatTypeNoBuilder": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
+			},
+			"formatRawRef": func(_ ast.Type) string {
+				panic("formatRawRef() needs to be overridden by a jenny")
 			},
 			"emptyValueForGuard": func(_ ast.Type) string {
 				panic("emptyValueForGuard() needs to be overridden by a jenny")
