@@ -68,38 +68,38 @@ func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawR
     }
 
     {{- range .Converter.Mappings }}
-    {{ with .Guards }}if {{ template "guards" . }}{{ end }}{
+    {
         var buffer strings.Builder
 
         {{ if ne .RepeatFor nil -}}
-        {{- $argsCount := sub1 (len .Args) -}}
         for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} {
-            {{- range $arg := .Args }}
-            {{ with $arg.Guards -}}
-                if !({{ template "guards" . }}) {
-                    continue
-                }
-            {{ end }}
-            {{- end }}
+            {{- range $optMapping := .Options }}
+                {{- $argsCount := sub1 (len $optMapping.Args) -}}
+                {{- range $arg := $optMapping.Args }}
+                    {{ with $arg.Guards -}}if ({{ template "guards" . }}) {{- end }}{
+                        buffer.WriteString(`{{ $optMapping.Option.Name | upperCamelCase }}(`)
+                        {{- range $i, $arg := $optMapping.Args }}
+                            {{- $intoVar := print "arg" $i }}
+                            {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
+                            buffer.WriteString({{ $intoVar }})
+                            {{- if ne $i $argsCount }}
+                                buffer.WriteString(", ")
+                            {{- end }}
+                        {{- end }}
+                        buffer.WriteString(")")
 
-            buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
-            {{- range $i, $arg := .Args }}
-                {{- $intoVar := print "arg" $i }}
-                {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
-                buffer.WriteString({{ $intoVar }})
-                {{- if ne $i $argsCount }}
-                    buffer.WriteString(", ")
+                        calls = append(calls, buffer.String())
+                        buffer.Reset()
+                    }
                 {{- end }}
             {{- end }}
-            buffer.WriteString(")")
-
-            calls = append(calls, buffer.String())
-            buffer.Reset()
         }
         {{- else }}
-        buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
-        {{- $argsCount := sub1 (len .Args) -}}
-        {{- range $i, $arg := .Args }}
+        {{- $optMapping := .Options | first }}
+        {{ with $optMapping.Guards }}if {{ template "guards" . }} { {{- end }}
+        buffer.WriteString(`{{ $optMapping.Option.Name | upperCamelCase }}(`)
+        {{- $argsCount := sub1 (len $optMapping.Args) -}}
+        {{- range $i, $arg := $optMapping.Args }}
             {{- $intoVar := print "arg" $i }}
             {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
             buffer.WriteString({{ $intoVar }})
@@ -110,6 +110,7 @@ func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawR
         buffer.WriteString(")")
 
         calls = append(calls, buffer.String())
+        {{ with $optMapping.Guards -}} } {{- end }}
         {{- end }}
     }
     {{- end }}

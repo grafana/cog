@@ -54,12 +54,16 @@ type ArgumentMapping struct {
 	Guards []MappingGuard
 }
 
-type OptionMapping struct {
-	Option ast.Option // option in the builder
-
+type ConversionMapping struct {
 	// for _, panel := range input.Panels { WithPanel(panel) }
 	RepeatFor ast.Path // `input.Panels`
 	RepeatAs  string   // `panel`
+
+	Options []OptionMapping
+}
+
+type OptionMapping struct {
+	Option ast.Option // option in the builder
 
 	Guards []MappingGuard
 	Args   []ArgumentMapping
@@ -79,7 +83,7 @@ type Converter struct {
 	// FIXME: assuming we only have direct mappings here is... *optimistic*.
 	ConstructorArgs []DirectArgMapping
 
-	Mappings []OptionMapping
+	Mappings []ConversionMapping
 }
 
 func (converter Converter) inputRootPath() ast.Path {
@@ -96,11 +100,14 @@ type ConverterGenerator struct {
 	// generatedPaths lets us keep track of the paths in the input that we generated option mappings for.
 	// Since several options can represent with a single path, it allows us to not have "duplicates".
 	generatedPaths map[string]struct{}
+
+	listOfDisjunctionOptions map[string][]ast.Option
 }
 
 func NewConverterGenerator() *ConverterGenerator {
 	return &ConverterGenerator{
-		generatedPaths: make(map[string]struct{}),
+		generatedPaths:           make(map[string]struct{}),
+		listOfDisjunctionOptions: make(map[string][]ast.Option),
 	}
 }
 
@@ -117,11 +124,16 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 
 	converter.ConstructorArgs = generator.constructorArgs(converter, builder)
 
-	converter.Mappings = tools.Map(builder.Options, func(option ast.Option) OptionMapping {
+	converter.Mappings = tools.Map(builder.Options, func(option ast.Option) ConversionMapping {
 		return generator.convertOption(context, converter, option)
 	})
-	converter.Mappings = tools.Filter(converter.Mappings, func(mapping OptionMapping) bool {
-		return mapping.Option.Name != ""
+
+	for _, opts := range generator.listOfDisjunctionOptions {
+		converter.Mappings = append(converter.Mappings, generator.convertListOfDisjunctionOptions(context, converter, opts))
+	}
+
+	converter.Mappings = tools.Filter(converter.Mappings, func(mapping ConversionMapping) bool {
+		return len(mapping.Options) != 0
 	})
 
 	return converter
@@ -142,22 +154,69 @@ func (generator *ConverterGenerator) constructorArgs(converter Converter, builde
 	})
 }
 
-func (generator *ConverterGenerator) convertOption(context Context, converter Converter, option ast.Option) OptionMapping {
-	mapping := OptionMapping{
+func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context Context, converter Converter, options []ast.Option) ConversionMapping {
+	mapping := ConversionMapping{
+		RepeatFor: converter.inputRootPath().Append(options[0].Assignments[0].Path),
+		RepeatAs:  "item",
+	}
+
+	mapping.Options = tools.Map(options, func(option ast.Option) OptionMapping {
+		return generator.mappingForOption(context, converter, mapping, option)
+	})
+	mapping.Options = tools.Filter(mapping.Options, func(optMapping OptionMapping) bool {
+		return optMapping.Option.Name != ""
+	})
+
+	return mapping
+}
+
+func (generator *ConverterGenerator) convertOption(context Context, converter Converter, option ast.Option) ConversionMapping {
+	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
+		key := generator.assignmentKey(assignment)
+		if _, ok := generator.generatedPaths[key]; ok {
+			return false
+		}
+
+		return assignment.Value.Constant == nil
+	})
+	if len(assignments) == 0 {
+		return ConversionMapping{}
+	}
+
+	mapping := ConversionMapping{}
+
+	if len(assignments) == 1 && assignments[0].Method == ast.AppendAssignment {
+		mapping.RepeatFor = converter.inputRootPath().Append(assignments[0].Path)
+		mapping.RepeatAs = "item"
+	}
+
+	// if the option appends one possible branch of a disjunction to a list,
+	// we need to treat it differently
+	if mapping.RepeatFor != nil && generator.isAssignmentFromDisjunctionStruct(context, assignments[0]) {
+		path := assignments[0].Path.String()
+		generator.listOfDisjunctionOptions[path] = append(generator.listOfDisjunctionOptions[path], option)
+		return ConversionMapping{}
+	}
+
+	optMapping := generator.mappingForOption(context, converter, mapping, option)
+	if optMapping.Option.Name == "" {
+		return ConversionMapping{}
+	}
+
+	mapping.Options = []OptionMapping{optMapping}
+
+	return mapping
+}
+
+func (generator *ConverterGenerator) mappingForOption(context Context, converter Converter, mapping ConversionMapping, option ast.Option) OptionMapping {
+	optMapping := OptionMapping{
 		Option: option,
 		Guards: generator.optionGuards(converter, option),
 	}
 
 	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
-		path := assignment.Path.String()
-
-		if assignment.Value.Envelope != nil {
-			// TODO: envelope of envelope?
-			for _, envelopeAssignment := range assignment.Value.Envelope.Values {
-				path += "," + envelopeAssignment.Path.String()
-			}
-		}
-		if _, ok := generator.generatedPaths[path]; ok {
+		key := generator.assignmentKey(assignment)
+		if _, ok := generator.generatedPaths[key]; ok {
 			return false
 		}
 
@@ -167,16 +226,11 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		return OptionMapping{}
 	}
 
-	if len(assignments) == 1 && assignments[0].Method == ast.AppendAssignment {
-		mapping.RepeatFor = converter.inputRootPath().Append(assignments[0].Path)
-		mapping.RepeatAs = "item"
-	}
-
 	i := 0
 	for _, assignment := range assignments {
 		i++
 
-		generator.generatedPaths[assignment.Path.String()] = struct{}{}
+		generator.generatedPaths[generator.assignmentKey(assignment)] = struct{}{}
 
 		argName := fmt.Sprintf("arg%d", i)
 		valueType := assignment.Path.Last().Type
@@ -189,21 +243,21 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		}
 
 		if argument, ok := generator.argumentFromDisjunctionStruct(context, converter, argName, valuePath, assignment); ok {
-			mapping.Args = append(mapping.Args, argument)
+			optMapping.Args = append(optMapping.Args, argument)
 			continue
 		}
 
 		if assignment.Value.Envelope != nil {
 			arguments := generator.argumentsForEnvelope(context, converter, argName, valuePath, assignment)
-			mapping.Args = append(mapping.Args, arguments...)
+			optMapping.Args = append(optMapping.Args, arguments...)
 			continue
 		}
 
 		argument := generator.argumentForType(context, converter, argName, valuePath, valueType)
-		mapping.Args = append(mapping.Args, argument)
+		optMapping.Args = append(optMapping.Args, argument)
 	}
 
-	return mapping
+	return optMapping
 }
 
 func (generator *ConverterGenerator) argumentsForEnvelope(context Context, converter Converter, argName string, valuePath ast.Path, assignment ast.Assignment) []ArgumentMapping {
@@ -307,9 +361,9 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	}
 }
 
-func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, converter Converter, argName string, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context Context, assignment ast.Assignment) bool {
 	if assignment.Value.Envelope == nil {
-		return ArgumentMapping{}, false
+		return false
 	}
 
 	envelopedType := assignment.Value.Envelope.Type
@@ -318,7 +372,11 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Conte
 		envelopedType = referredObject.Type
 	}
 
-	if !envelopedType.IsStructGeneratedFromDisjunction() {
+	return envelopedType.IsStructGeneratedFromDisjunction()
+}
+
+func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, converter Converter, argName string, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+	if !generator.isAssignmentFromDisjunctionStruct(context, assignment) {
 		return ArgumentMapping{}, false
 	}
 
@@ -422,4 +480,17 @@ func (generator *ConverterGenerator) pathNotNullGuards(converter Converter, path
 	}
 
 	return guards
+}
+
+func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) string {
+	path := assignment.Path.String()
+
+	if assignment.Value.Envelope != nil {
+		// TODO: envelope of envelope?
+		for _, envelopeAssignment := range assignment.Value.Envelope.Values {
+			path += "," + envelopeAssignment.Path.String()
+		}
+	}
+
+	return path
 }

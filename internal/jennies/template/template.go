@@ -209,6 +209,17 @@ func (template *Template) builtins() FuncMap {
 			return given[0]
 		},
 
+		"first": func(list any) any {
+			tp := reflect.TypeOf(list).Kind()
+			switch tp {
+			case reflect.Slice, reflect.Array:
+				l2 := reflect.ValueOf(list)
+				return l2.Index(0).Interface() // this will *willingly* panic if the list is empty
+			default:
+				panic(fmt.Sprintf("Cannot find first on type %s", tp))
+			}
+		},
+
 		// ------- \\
 		// Strings \\
 		// ------- \\
