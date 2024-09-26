@@ -12,6 +12,9 @@ func TestBuilder_Generate(t *testing.T) {
 	test := testutils.GoldenFilesTestSuite[languages.Context]{
 		TestDataRoot: "../../../testdata/jennies/builders",
 		Name:         "TypescriptBuilder",
+		Skip: map[string]string{
+			"dashboard_panel": "this test if for Java generics for dashboard.Panel",
+		},
 	}
 
 	language := New(Config{})

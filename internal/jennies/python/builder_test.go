@@ -14,6 +14,7 @@ func TestBuilder_Generate(t *testing.T) {
 		Name:         "PythonBuilder",
 		Skip: map[string]string{
 			"anonymous_struct": "Anonymous structs are not supported in Python",
+			"dashboard_panel":  "this test if for Java generics for dashboard.Panel",
 		},
 	}
 
