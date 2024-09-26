@@ -61,6 +61,7 @@ func (b Builders) genBuilders(pkg string, name string) ([]Builder, bool) {
 			Properties:           builder.Properties,
 			Defaults:             b.genDefaults(builder.Options),
 			ImportAlias:          b.config.PackagePath,
+			IsGeneric:            builder.For.SelfRef.ReferredPkg == "dashboard" && object.Name == "Panel",
 		}
 	}), true
 }
