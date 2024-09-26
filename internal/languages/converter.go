@@ -149,7 +149,15 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 	}
 
 	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
-		if _, ok := generator.generatedPaths[assignment.Path.String()]; ok {
+		path := assignment.Path.String()
+
+		if assignment.Value.Envelope != nil {
+			// TODO: envelope of envelope?
+			for _, envelopeAssignment := range assignment.Value.Envelope.Values {
+				path += "," + envelopeAssignment.Path.String()
+			}
+		}
+		if _, ok := generator.generatedPaths[path]; ok {
 			return false
 		}
 
