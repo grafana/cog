@@ -534,7 +534,7 @@ func (generator *BuilderGenerator) structFieldToOption(field StructField) Option
 		},
 	}
 
-	if field.Type.Default != nil {
+	if field.Type.TypedDefault != nil {
 		opt.TypedDefault = &TypedOptionDefault{
 			Name:  field.Name,
 			Type:  field.Type,

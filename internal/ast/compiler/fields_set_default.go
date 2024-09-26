@@ -33,6 +33,7 @@ func (pass *FieldsSetDefault) processObject(_ *Visitor, _ *ast.Schema, object as
 			}
 
 			field.Type.Default = value
+			field.Type.TypedDefault = &field.Type
 			field.AddToPassesTrail(fmt.Sprintf("FieldsSetDefault[default=%v]", value))
 
 			object.Type.Struct.Fields[i] = field

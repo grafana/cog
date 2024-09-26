@@ -11,6 +11,7 @@ type CompilerPass struct {
 	EntrypointIdentification *EntrypointIdentification `yaml:"entrypoint_identification"`
 	DataqueryIdentification  *DataqueryIdentification  `yaml:"dataquery_identification"`
 	Unspec                   *Unspec                   `yaml:"unspec"`
+	TypedDefaults            *TypedDefaults            `yaml:"typed_defaults"`
 	FieldsSetDefault         *FieldsSetDefault         `yaml:"fields_set_default"`
 	FieldsSetRequired        *FieldsSetRequired        `yaml:"fields_set_required"`
 	FieldsSetNotRequired     *FieldsSetNotRequired     `yaml:"fields_set_not_required"`
@@ -47,7 +48,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.Unspec != nil {
 		return pass.Unspec.AsCompilerPass(), nil
 	}
-
+	if pass.TypedDefaults != nil {
+		return pass.TypedDefaults.AsCompilerPass()
+	}
 	if pass.FieldsSetDefault != nil {
 		return pass.FieldsSetDefault.AsCompilerPass()
 	}
@@ -330,6 +333,13 @@ func (pass SchemaSetIdentifier) AsCompilerPass() (*compiler.SchemaSetIdentifier,
 		Package:    pass.Package,
 		Identifier: pass.Identifier,
 	}, nil
+}
+
+type TypedDefaults struct {
+}
+
+func (pass TypedDefaults) AsCompilerPass() (*compiler.TypedDefaults, error) {
+	return &compiler.TypedDefaults{}, nil
 }
 
 type AnonymousStructsToNamed struct {

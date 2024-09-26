@@ -343,6 +343,8 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 				newOpt.Default = &ast.OptionDefault{
 					ArgsValues: []any{field.Type.Default},
 				}
+			}
+			if field.Type.TypedDefault != nil {
 				newOpt.TypedDefault = &ast.TypedOptionDefault{
 					Name:  newOpt.Name,
 					Type:  newOpt.Args[0].Type,
@@ -452,6 +454,13 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Object)
 		if field.Type.Default != nil {
 			opt.Default = &ast.OptionDefault{
 				ArgsValues: []any{field.Type.Default},
+			}
+		}
+		if field.Type.TypedDefault != nil {
+			opt.TypedDefault = &ast.TypedOptionDefault{
+				Name:  opt.Name,
+				Type:  opt.Args[0].Type,
+				Value: field.Type.Default,
 			}
 		}
 

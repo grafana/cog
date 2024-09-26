@@ -370,6 +370,16 @@ schema_set_identifier:
   identifier: string
 ```
 
+## `typed_defaults`
+
+N/A
+
+### Usage
+
+```yaml
+typed_defaults: {}
+```
+
 ## `unspec`
 
 Unspec removes the Kubernetes-style envelope added by kindsys.

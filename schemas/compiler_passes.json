@@ -173,6 +173,9 @@
           "type": "boolean"
         },
         "default": true,
+        "typeddefault": {
+          "$ref": "#/$defs/AstType"
+        },
         "disjunction": {
           "$ref": "#/$defs/AstDisjunctionType"
         },
@@ -281,6 +284,9 @@
         },
         "unspec": {
           "$ref": "#/$defs/YamlUnspec"
+        },
+        "typed_defaults": {
+          "$ref": "#/$defs/YamlTypedDefaults"
         },
         "fields_set_default": {
           "$ref": "#/$defs/YamlFieldsSetDefault"
@@ -526,6 +532,11 @@
           "type": "string"
         }
       },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlTypedDefaults": {
+      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },
