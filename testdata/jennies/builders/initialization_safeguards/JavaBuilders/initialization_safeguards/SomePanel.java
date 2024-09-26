@@ -20,7 +20,7 @@ public class SomePanel {
 
     
     public static class Builder implements cog.Builder<SomePanel> {
-        private final SomePanel internal;
+        protected final SomePanel internal;
         
         public Builder() {
             this.internal = new SomePanel();

@@ -1,13 +1,13 @@
-package properties;
+package dashboard;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class SomeStruct {
-    @JsonProperty("id")
-    public Long id;
+public class Panel {
+    @JsonProperty("onlyFromThisDashboard")
+    public Boolean onlyFromThisDashboard;
     
     public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -15,19 +15,18 @@ public class SomeStruct {
     }
 
     
-    public static class Builder implements cog.Builder<SomeStruct> {
-        protected final SomeStruct internal;
-        private String someBuilderProperty;
+    public static class Builder<T extends Builder<T>> implements cog.Builder<Panel> {
+        protected final Panel internal;
         
         public Builder() {
-            this.internal = new SomeStruct();
-        this.someBuilderProperty = "";
+            this.internal = new Panel();
+        this.onlyFromThisDashboard(false);
         }
-    public Builder id(Long id) {
-    this.internal.id = id;
-        return this;
+    public T onlyFromThisDashboard(Boolean onlyFromThisDashboard) {
+    this.internal.onlyFromThisDashboard = onlyFromThisDashboard;
+        return (T) this;
     }
-    public SomeStruct build() {
+    public Panel build() {
             return this.internal;
         }
     }

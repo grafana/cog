@@ -16,7 +16,7 @@ public class Loki implements cog.variants.Dataquery {
 
     
     public static class Builder implements cog.Builder<Loki> {
-        private final Loki internal;
+        protected final Loki internal;
         
         public Builder() {
             this.internal = new Loki();
