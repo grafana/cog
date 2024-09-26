@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/template"
 )
 
-//go:embed templates/*.tmpl templates/converters/*.tmpl
+//go:embed templates/*.tmpl templates/converters/*.tmpl templates/runtime/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
