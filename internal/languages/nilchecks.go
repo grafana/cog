@@ -38,10 +38,7 @@ func GenerateBuilderNilChecks(language Language, context Context) (Context, erro
 					continue
 				}
 
-				nullable := chunk.Type.Nullable ||
-					(chunk.Type.IsAny() && nullableKinds.AnyIsNullable) ||
-					chunk.Type.IsAnyOf(nullableKinds.Kinds...)
-				if nullable {
+				if nullableKinds.TypeIsNullable(chunk.Type) {
 					subPath := assignment.Path[:i+1]
 					valueType := subPath.Last().Type
 					if subPath.Last().TypeHint != nil {

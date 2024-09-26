@@ -18,6 +18,12 @@ type NullableConfig struct {
 	AnyIsNullable      bool
 }
 
+func (nullableConfig NullableConfig) TypeIsNullable(typeDef ast.Type) bool {
+	return typeDef.Nullable ||
+		(typeDef.IsAny() && nullableConfig.AnyIsNullable) ||
+		typeDef.IsAnyOf(nullableConfig.Kinds...)
+}
+
 type NullableKindsProvider interface {
 	NullableKinds() NullableConfig
 }

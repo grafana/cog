@@ -12,7 +12,8 @@ import (
 )
 
 type Converter struct {
-	tmpl *template.Template
+	tmpl           *template.Template
+	nullableConfig languages.NullableConfig
 }
 
 func (jenny *Converter) JennyName() string {
@@ -41,7 +42,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 }
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
-	converter := languages.NewConverterGenerator().FromBuilder(context, builder)
+	converter := languages.NewConverterGenerator(jenny.nullableConfig).FromBuilder(context, builder)
 
 	imports := NewImportMap()
 	typeImportMapper := func(pkg string) string {

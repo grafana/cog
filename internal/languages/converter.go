@@ -97,6 +97,8 @@ func (converter Converter) inputRootPath() ast.Path {
 }
 
 type ConverterGenerator struct {
+	nullableTypes NullableConfig
+
 	// generatedPaths lets us keep track of the paths in the input that we generated option mappings for.
 	// Since several options can represent with a single path, it allows us to not have "duplicates".
 	generatedPaths map[string]struct{}
@@ -104,8 +106,9 @@ type ConverterGenerator struct {
 	listOfDisjunctionOptions map[string][]ast.Option
 }
 
-func NewConverterGenerator() *ConverterGenerator {
+func NewConverterGenerator(nullableTypes NullableConfig) *ConverterGenerator {
 	return &ConverterGenerator{
+		nullableTypes:            nullableTypes,
 		generatedPaths:           make(map[string]struct{}),
 		listOfDisjunctionOptions: make(map[string][]ast.Option),
 	}
@@ -466,9 +469,7 @@ func (generator *ConverterGenerator) pathNotNullGuards(converter Converter, path
 			chunkType = *chunk.TypeHint
 		}
 
-		// TODO: this is language-specific
-		maybeNull := chunkType.Nullable || chunkType.IsAnyOf(ast.KindMap, ast.KindArray)
-		if !maybeNull {
+		if !generator.nullableTypes.TypeIsNullable(chunkType) {
 			continue
 		}
 

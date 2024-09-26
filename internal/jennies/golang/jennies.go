@@ -87,7 +87,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl}),
 
 		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl}),
-		common.If[languages.Context](globalConfig.Converters, &Converter{Config: config, Tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Converters, &Converter{Config: config, Tmpl: tmpl, NullableConfig: language.NullableKinds()}),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 
