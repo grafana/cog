@@ -61,18 +61,10 @@ jobs:
             --parameters output_dir=./generated/%l,grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
 
       - name: Compile generated Go code
-        run: |
-          for d in generated/go/*/ ; do
-            echo "Building $d"
-            devbox run go build "./$d"
-          done
+        run: ./scripts/ci/build-go.sh
 
       - name: Compile generated Typescript code
-        run: |
-          for d in generated/typescript/src/*/ ; do
-            echo "Building $d"
-            devbox run ts-node "./$d"
-          done
+        run: ./scripts/ci/build-ts.sh
 
       - name: Lint generated Python code
         run: devbox run mypy generated/python/
@@ -102,21 +94,16 @@ jobs:
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
 
       - name: Run code generation
-        run: |
-          make gen-sdk-dev
+        run: make gen-sdk-dev
 
       - name: Run the Go example
-        run: |
-          make run-go-example
+        run: make run-go-example
 
       - name: Run the Typescript example
-        run: |
-          make run-ts-example
+        run: make run-ts-example
 
       - name: Run the PHP example
-        run: |
-          make run-php-example
+        run: make run-php-example
 
       - name: Run Java example
-        run: |
-          make run-java-example
+        run: make run-java-example
