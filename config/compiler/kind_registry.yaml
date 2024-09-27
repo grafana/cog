@@ -111,6 +111,13 @@ passes:
   - fields_set_not_required:
       fields: [ common.TableFieldOptions.CellOptions ]
 
+  ##################
+  # piechart panel #
+  ##################
+
+  - fields_set_not_required:
+      fields: [ piechart.Options.displayLabels ]
+
   #####################
   # candlestick panel #
   #####################
