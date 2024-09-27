@@ -29,6 +29,7 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     }
     {{- end }}
     {{- else if .Defaults }}
+
     public {{ .Name }}() {
         {{- range .Defaults }}
         {{- range .Initializers }}

@@ -129,6 +129,7 @@ type Builder struct {
 	Constructor          ast.Constructor
 	Properties           []ast.StructField
 	Options              []ast.Option
+	Defaults             []OptionCall
 }
 
 type OptionCall struct {
