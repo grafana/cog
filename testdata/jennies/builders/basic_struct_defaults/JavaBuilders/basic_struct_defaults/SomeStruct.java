@@ -18,6 +18,13 @@ public class SomeStruct {
     public List<String> tags;
     @JsonProperty("liveNow")
     public Boolean liveNow;
+
+    public SomeStruct() {
+        this.id = 42L;
+        this.uid = "default-uid";
+        this.tags = List.of("generated", "cog");
+        this.liveNow = true;
+    }
     
     public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -30,10 +37,6 @@ public class SomeStruct {
         
         public Builder() {
             this.internal = new SomeStruct();
-        this.id(42L);
-        this.uid("default-uid");
-        this.tags(List.of("generated", "cog"));
-        this.liveNow(true);
         }
     public Builder id(Long id) {
     this.internal.id = id;

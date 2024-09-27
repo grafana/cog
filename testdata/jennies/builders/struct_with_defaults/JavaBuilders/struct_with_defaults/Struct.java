@@ -22,6 +22,18 @@ public class Struct {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonProperty("partialComplexField")
     public Object partialComplexField;
+
+    public Struct() {
+        NestedStruct nestedStructResource = new NestedStruct();
+        nestedStructResource.stringVal = "hello";
+        nestedStructResource.intVal = 3L;
+        this.allFields = nestedStructResource;
+        NestedStruct nestedStructResource = new NestedStruct();
+        nestedStructResource.intVal = 4L;
+        this.partialFields = nestedStructResource;
+        this.complexField = new Object();
+        this.partialComplexField = new Object();
+    }
     
     public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -34,15 +46,6 @@ public class Struct {
         
         public Builder() {
             this.internal = new Struct();
-        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
-        nestedStructResource.stringVal("hello");
-        nestedStructResource.intVal(3L);
-        this.allFields(nestedStructResource);
-        NestedStruct.Builder nestedStructResource = new NestedStruct.Builder();
-        nestedStructResource.intVal(4L);
-        this.partialFields(nestedStructResource);
-        this.complexField(new Object());
-        this.partialComplexField(new Object());
         }
     public Builder allFields(cog.Builder<NestedStruct> allFields) {
     this.internal.allFields = allFields.build();
