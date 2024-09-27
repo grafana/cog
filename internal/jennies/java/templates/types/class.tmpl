@@ -28,7 +28,7 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
         return {{ $.Name | lowerCamelCase }};
     }
     {{- end }}
-    {{- else }}
+    {{- else if .Defaults }}
     public {{ .Name }}() {
         {{- range .Defaults }}
         {{- range .Initializers }}
