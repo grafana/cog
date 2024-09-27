@@ -9,10 +9,13 @@ import (
 
 func TestRuntime(t *testing.T) {
 	req := require.New(t)
-	jenny := Runtime{}
+	jenny := Runtime{
+		tmpl:    initTemplates(nil),
+		targets: languages.Config{Converters: true},
+	}
 
 	files, err := jenny.Generate(languages.Context{})
 	req.NoError(err)
 
-	req.Len(files, 3)
+	req.Len(files, 4)
 }
