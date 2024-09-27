@@ -69,6 +69,16 @@ type OptionMapping struct {
 	Args   []ArgumentMapping
 }
 
+func (optMapping OptionMapping) ArgumentGuards() []MappingGuard {
+	var guards []MappingGuard
+
+	for _, arg := range optMapping.Args {
+		guards = append(guards, arg.Guards...)
+	}
+
+	return guards
+}
+
 type ConverterInput struct {
 	ArgName string
 	TypeRef ast.RefType

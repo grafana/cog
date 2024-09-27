@@ -52,50 +52,46 @@
     {{- end -}}
 {{- end }}
 
+{{- define "conversion_mapping" -}}
+{{- $firstOpt := .Options | first }}
+{{- with $firstOpt.Guards -}}if ({{ template "guards" . }}) { {{- end }}
+{{ if ne .RepeatFor nil -}}for (const {{ .RepeatAs }} of {{ .RepeatFor }}) { {{- end }}
+{{- range $optMapping := .Options }}
+    {{ template "option_mapping" $optMapping }}
+{{- end }}
+{{ if ne .RepeatFor nil -}} } {{- end }}
+{{- with $firstOpt.Guards -}} } {{- end }}
+{{- end }}
+
+{{- define "option_mapping" -}}
+{{- $argsCount := sub1 (len .Args) -}}
+{{- with .ArgumentGuards -}}if ({{ template "guards" . }}) { {{- end }}
+{{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} { {{- end }}
+buffer += `{{ $.Option.Name }}(`;
+{{- range $i, $arg := $.Args }}
+    {{- $intoVar := print "arg" $i }}
+    {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
+    buffer += {{ $intoVar }};
+    {{ if ne $i $argsCount }}buffer += ", ";{{- end }}
+{{- end }}
+buffer += ")";
+
+calls.push(buffer);
+buffer = "";
+{{ with .ArgumentGuards -}} } {{- end }}
+{{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} } {{- end }}
+{{- end }}
+
 {{- define "converter" -}}
 export function {{ .Converter.BuilderName | upperCamelCase }}Converter(input: {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType }}): string {
     {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
     const calls: string[] = [
         `new {{ .Converter.Package }}.{{ .Converter.BuilderName | upperCamelCase }}Builder({{ range $i, $arg := .Converter.ConstructorArgs }}${ {{ $arg.ValuePath }} }{{- if ne $i $constructorArgsCount }}, {{ end }}{{ end }})`,
     ];
+    let buffer: string = "";
 
     {{- range .Converter.Mappings }}
-    {{ if ne .RepeatFor nil -}}
-        for (const {{ .RepeatAs }} of {{ .RepeatFor }}) {
-            {{- range $optMapping := .Options }}
-                {{- $argsCount := sub1 (len $optMapping.Args) -}}
-                {{- range $arg := $optMapping.Args }}
-                    {{ with $arg.Guards -}}if (!({{ template "guards" . }})){{ end }}{
-                        let buffer: string = "";
-                        buffer += `{{ $optMapping.Option.Name }}(`;
-                        {{ template "prepare_arg" (dict "IntoVar" "arg" "Arg" $arg) }}
-                        buffer += arg;
-                        buffer += ")";
-
-                        calls.push(buffer);
-                    }
-                {{- end }}
-            {{- end }}
-        }
-    {{- else }}
-        {{- $optMapping := .Options | first }}
-        {{ with $optMapping.Guards }}if ({{ template "guards" . }}){{ end }}{
-            let buffer: string = "";
-            buffer += `{{ $optMapping.Option.Name }}(`;
-            {{- $argsCount := sub1 (len $optMapping.Args) -}}
-            {{- range $i, $arg := $optMapping.Args }}
-                {{- $intoVar := print "arg" $i }}
-                {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
-                buffer += {{ $intoVar }};
-                {{- if ne $i $argsCount }}
-                    buffer += ", ";
-                {{- end }}
-            {{- end }}
-            buffer += ")";
-
-            calls.push(buffer);
-        }
-    {{- end }}
+    {{ template "conversion_mapping" . }}
     {{- end }}
 
     return calls.join(".\t\n");

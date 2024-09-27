@@ -62,38 +62,32 @@ package {{ .Converter.Package | formatPackageName }}
 
 {{- define "option_mapping" -}}
 {{- $argsCount := sub1 (len .Args) -}}
-
-{{ with .Guards -}}if ({{ template "guards" . }}) { {{- end }}
-
-{{- range $arg := .Args }}
-{{ with $arg.Guards -}}if ({{ template "guards" . }}) {{- end }}{
-    var buffer strings.Builder
-    buffer.WriteString(`{{ $.Option.Name | upperCamelCase }}(`)
-    {{- range $i, $arg := $.Args }}
+{{- with .ArgumentGuards -}}if {{ template "guards" . }} { {{- end }}
+{{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} { {{- end }}
+    buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
+    {{- range $i, $arg := .Args }}
         {{- $intoVar := print "arg" $i }}
         {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
         buffer.WriteString({{ $intoVar }})
-        {{- if ne $i $argsCount }}
-            buffer.WriteString(", ")
-        {{- end }}
+        {{ if ne $i $argsCount }}buffer.WriteString(", "){{- end }}
     {{- end }}
     buffer.WriteString(")")
 
     calls = append(calls, buffer.String())
     buffer.Reset()
-}
-{{- end }}
-
-{{ with .Guards -}} } {{- end }}
-
+{{ with .ArgumentGuards -}} } {{- end }}
+{{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} } {{- end }}
 {{- end }}
 
 {{- define "conversion_mapping" -}}
-{{ if ne .RepeatFor nil -}}for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} { {{- end }}
+{{- $firstOpt := .Options | first }}
+{{- with $firstOpt.Guards -}}if {{ template "guards" . }} { {{- end }}
+{{- if ne .RepeatFor nil -}}for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} { {{- end }}
     {{- range $optMapping := .Options }}
         {{ template "option_mapping" $optMapping }}
     {{- end }}
 {{ if ne .RepeatFor nil -}} } {{- end }}
+{{- with $firstOpt.Guards -}} } {{- end }}
 {{- end }}
 
 {{- define "converter" -}}
@@ -102,6 +96,7 @@ func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawR
     calls := []string{
         `{{ .Converter.Package | formatPackageName }}.New{{ .Converter.BuilderName | upperCamelCase }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
     }
+    var buffer strings.Builder
 
     {{- range .Converter.Mappings }}
         {{ template "conversion_mapping" . }}
