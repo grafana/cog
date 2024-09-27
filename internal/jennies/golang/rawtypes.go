@@ -60,7 +60,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	equalityMethodsGenerator := newEqualityMethods(jenny.Tmpl)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		objectOutput, innerErr := jenny.formatObject(object)
+		objectOutput, innerErr := jenny.formatObject(schema, object)
 		if innerErr != nil {
 			err = innerErr
 			return
@@ -99,7 +99,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 %[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
 }
 
-func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
+func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object) ([]byte, error) {
 	var buffer strings.Builder
 
 	defName := tools.UpperCamelCase(def.Name)
@@ -145,6 +145,12 @@ func (jenny RawTypes) formatObject(def ast.Object) ([]byte, error) {
 
 		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", defName, variant))
 		buffer.WriteString("\n")
+
+		if def.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
+			buffer.WriteString(fmt.Sprintf("func (resource %s) DataqueryType() string {\n", defName))
+			buffer.WriteString(fmt.Sprintf("\treturn \"%s\"\n", strings.ToLower(schema.Metadata.Identifier)))
+			buffer.WriteString("}\n")
+		}
 	}
 
 	return []byte(buffer.String()), nil

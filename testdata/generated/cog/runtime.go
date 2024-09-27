@@ -132,12 +132,10 @@ func (runtime *Runtime) ConvertPanelToGo(inputPanel any, panelType string) strin
 	return "/* could not convert panel to go */"
 }
 
-func (runtime *Runtime) ConvertDataqueryToGo(inputPanel any, dataqueryTypeHints ...string) string {
-	for _, dataqueryTypeHint := range dataqueryTypeHints {
-		config, found := runtime.dataqueryVariants[dataqueryTypeHint]
-		if found && config.GoConverter != nil {
-			return config.GoConverter(inputPanel)
-		}
+func (runtime *Runtime) ConvertDataqueryToGo(dataquery variants.Dataquery) string {
+	config, found := runtime.dataqueryVariants[dataquery.DataqueryType()]
+	if found && config.GoConverter != nil {
+		return config.GoConverter(dataquery)
 	}
 
 	return "/* could not convert dataquery to go */"
@@ -147,8 +145,8 @@ func ConvertPanelToCode(inputPanel any, panelType string) string {
 	return NewRuntime().ConvertPanelToGo(inputPanel, panelType)
 }
 
-func ConvertDataqueryToCode(inputPanel any, dataqueryTypeHints ...string) string {
-	return NewRuntime().ConvertDataqueryToGo(inputPanel, dataqueryTypeHints...)
+func ConvertDataqueryToCode(dataquery variants.Dataquery) string {
+	return NewRuntime().ConvertDataqueryToGo(dataquery)
 }
 
 func Dump(root any) string {
