@@ -28,6 +28,15 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
         return {{ $.Name | lowerCamelCase }};
     }
     {{- end }}
+    {{- else }}
+    public {{ .Name }}() {
+        {{- range .Defaults }}
+        {{- range .Initializers }}
+        {{ . }}
+        {{- end }}
+        this.{{ .OptionName | lowerCamelCase | escapeVar }} = {{ .Args|join ", " }};
+        {{- end }}
+    }
     {{- end }}
 
     {{- if and (ne .ToJSONFunction "") (not .Extends) }}

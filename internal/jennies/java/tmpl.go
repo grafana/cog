@@ -103,6 +103,7 @@ type ClassTemplate struct {
 	ShouldAddSerializer     bool
 	ShouldAddDeserializer   bool
 	ShouldAddFactoryMethods bool
+	Defaults                []OptionCall
 }
 
 type ConstantTemplate struct {
@@ -128,7 +129,6 @@ type Builder struct {
 	Constructor          ast.Constructor
 	Properties           []ast.StructField
 	Options              []ast.Option
-	Defaults             []OptionCall
 }
 
 type OptionCall struct {

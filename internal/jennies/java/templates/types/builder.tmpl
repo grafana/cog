@@ -15,13 +15,6 @@
         {{- range .Builder.Properties }}
         this.{{ .Name | escapeVar }} = {{ .Type | emptyValueForType }};
         {{- end }}
-
-        {{- range .Builder.Defaults }}
-        {{- range .Initializers }}
-        {{ . }}
-        {{- end }}
-        this.{{ .OptionName | lowerCamelCase | escapeVar }}({{ .Args|join ", " }});
-        {{- end }}
         }
         
     {{- range $opt := .Builder.Options }}

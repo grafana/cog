@@ -229,6 +229,7 @@ func (jenny RawTypes) formatStruct(pkg string, object ast.Object) ([]byte, error
 		ShouldAddSerializer:     jenny.typeFormatter.objectNeedsCustomSerializer(object),
 		ShouldAddDeserializer:   jenny.typeFormatter.objectNeedsCustomDeserializer(object),
 		ShouldAddFactoryMethods: object.Type.HasHint(ast.HintDisjunctionOfScalars) || object.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs),
+		Defaults:                jenny.formatDefaults(object),
 	})
 }
 
@@ -294,4 +295,89 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 		variant = jenny.typeFormatter.formatPackage(variant)
 	}
 	return variant
+}
+
+func (jenny RawTypes) formatDefaults(obj ast.Object) []OptionCall {
+	calls := make([]OptionCall, 0)
+	structDef := obj.Type.AsStruct()
+
+	for _, field := range structDef.Fields {
+		if field.Type.Default == nil {
+			continue
+		}
+
+		calls = append(calls, OptionCall{
+			Initializers: jenny.formatInitializers(field),
+			OptionName:   tools.UpperCamelCase(field.Name),
+			Args:         jenny.formatDefaultValues(field),
+		})
+	}
+
+	return calls
+}
+
+// formatInitializers initialises objects with their defaults before set the value in the corresponding setter.
+// TODO: It could have conflicts if we have different fields with the same kind of argument.
+// TODO: It means that we need to initialize the objects with different names in that case.
+func (jenny RawTypes) formatInitializers(field ast.StructField) []string {
+	initializers := make([]string, 0)
+	if !field.Type.IsRef() {
+		return nil
+	}
+
+	ref := field.Type.AsRef()
+	object, _ := jenny.typeFormatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	if !object.Type.IsStruct() {
+		return nil
+	}
+
+	structType := object.Type.AsStruct()
+	defValues := field.Type.Default.(map[string]interface{})
+
+	initializers = append(initializers, fmt.Sprintf("%s %sResource = new %s();", ref.ReferredType, tools.LowerCamelCase(ref.ReferredType), ref.ReferredType))
+	for _, field := range structType.Fields {
+		if defVal, ok := defValues[field.Name]; ok {
+			if field.Type.IsScalar() {
+				initializers = append(initializers, fmt.Sprintf("%sResource.%s = %s;", tools.LowerCamelCase(ref.ReferredType), field.Name, formatType(field.Type.AsScalar().ScalarKind, defVal)))
+			}
+			// TODO: Implement lists if needed
+		}
+	}
+
+	return initializers
+}
+
+func (jenny RawTypes) formatDefaultValues(field ast.StructField) []string {
+	argumentList := make([]string, 0)
+	switch field.Type.Kind {
+	case ast.KindRef:
+		argumentList = append(argumentList, jenny.formatDefaultReference(field.Type.AsRef(), field.Type.Default))
+	case ast.KindScalar:
+		scalar := field.Type.AsScalar()
+		argumentList = append(argumentList, formatType(scalar.ScalarKind, field.Type.Default))
+	case ast.KindArray:
+		array := field.Type.AsArray()
+		if array.IsArrayOfScalars() {
+			argumentList = append(argumentList, fmt.Sprintf("List.of(%s)", jenny.typeFormatter.formatScalar(field.Type.Default)))
+		}
+	case ast.KindStruct:
+		// TODO: Java is using veneers to avoid anonymous structs but it should be detailed if we need it at any moment.
+		argumentList = append(argumentList, "new Object()")
+	}
+	// TODO: Implement the rest of types if any
+
+	return argumentList
+}
+
+func (jenny RawTypes) formatDefaultReference(ref ast.RefType, defValue any) string {
+	object, _ := jenny.typeFormatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	if object.Type.Kind == ast.KindEnum {
+		for _, v := range object.Type.AsEnum().Values {
+			if defValue == v.Value {
+				return fmt.Sprintf("%s.%s", object.Name, tools.UpperSnakeCase(v.Name))
+			}
+		}
+	}
+
+	return fmt.Sprintf("%sResource", tools.LowerCamelCase(object.Name))
 }

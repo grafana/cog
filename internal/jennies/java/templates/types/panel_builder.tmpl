@@ -15,13 +15,6 @@ public class PanelBuilder implements {{ if not (eq .ImportAlias "") }}{{ .Import
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
         {{- end }}
-        
-        {{- range .Defaults }}
-        {{- range .Initializers }}
-        {{ . }}
-        {{- end }}
-        this.{{ .OptionName | lowerCamelCase }}({{ .Args|join ", " }});
-        {{- end }}
     }
     
     {{- range .Options }}
