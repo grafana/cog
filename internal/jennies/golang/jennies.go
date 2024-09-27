@@ -97,7 +97,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
 		&compiler.AnonymousEnumToExplicitType{},
-		&compiler.AnonymousStructsToNamed{}, // TODO: the converter should be able to correctly generate code for anonymous structs
+		&compiler.AnonymousStructsToNamed{},
 		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.FlattenDisjunctions{},
