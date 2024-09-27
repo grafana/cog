@@ -11,5 +11,5 @@ set -o pipefail
 
 for d in generated/typescript/src/*/ ; do
   echo "Building $d"
-  devbox run ts-node "./$d"
+  ts-node "./$d"
 done

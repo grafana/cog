@@ -61,10 +61,10 @@ jobs:
             --parameters output_dir=./generated/%l,grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
 
       - name: Compile generated Go code
-        run: ./scripts/ci/build-go.sh
+        run: devbox run ./scripts/ci/build-go.sh
 
       - name: Compile generated Typescript code
-        run: ./scripts/ci/build-ts.sh
+        run: devbox run ./scripts/ci/build-ts.sh
 
       - name: Lint generated Python code
         run: devbox run mypy generated/python/
