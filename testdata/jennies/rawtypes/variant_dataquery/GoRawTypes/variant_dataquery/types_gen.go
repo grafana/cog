@@ -10,6 +10,9 @@ type Query struct {
 }
 func (resource Query) ImplementsDataqueryVariant() {}
 
+func (resource Query) DataqueryType() string {
+	return "prometheus"
+}
 
 func VariantConfig() variants.DataqueryConfig {
 	return variants.DataqueryConfig{

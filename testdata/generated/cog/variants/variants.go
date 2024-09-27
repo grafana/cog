@@ -23,6 +23,7 @@ type DataqueryConfig struct {
 type Dataquery interface {
 	ImplementsDataqueryVariant()
 	Equals(other Dataquery) bool
+	DataqueryType() string
 }
 
 type Panelcfg interface {
@@ -30,6 +31,10 @@ type Panelcfg interface {
 }
 
 type UnknownDataquery map[string]any
+
+func (unknown UnknownDataquery) DataqueryType() string {
+	return ""
+}
 
 func (unknown UnknownDataquery) ImplementsDataqueryVariant() {
 

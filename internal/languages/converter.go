@@ -284,42 +284,13 @@ func (generator *ConverterGenerator) argumentsForEnvelope(context Context, conve
 
 func (generator *ConverterGenerator) argumentForType(context Context, converter Converter, argName string, valuePath ast.Path, typeDef ast.Type) ArgumentMapping {
 	if typeDef.IsComposableSlot() {
-		var slotTypeHintsArgs []*DirectArgMapping
-		var guards []MappingGuard
-		converterRootType := context.ResolveRefs(converter.inputRootPath().Last().Type)
-
-		if converterRootType.IsStruct() {
-			for _, field := range converterRootType.Struct.Fields {
-				if !field.Type.IsRef() || field.Type.AsRef().ReferredType != "DataSourceRef" {
-					continue
-				}
-
-				refPath := ast.PathFromStructField(field)
-				datasourceRefType := context.ResolveRefs(field.Type)
-
-				typeField, found := datasourceRefType.Struct.FieldByName("type")
-				if !found {
-					continue
-				}
-
-				typePath := refPath.AppendStructField(typeField)
-				guards = append(guards, generator.pathNotNullGuards(converter, typePath)...)
-
-				slotTypeHintsArgs = append(slotTypeHintsArgs, &DirectArgMapping{
-					ValuePath: converter.inputRootPath().Append(typePath),
-					ValueType: typeField.Type,
-				})
-			}
-		}
-
 		return ArgumentMapping{
 			Runtime: &RuntimeArgMapping{
 				FuncName: fmt.Sprintf("Convert%sToCode", tools.UpperCamelCase(string(typeDef.AsComposableSlot().Variant))),
-				Args: append([]*DirectArgMapping{
+				Args: []*DirectArgMapping{
 					{ValuePath: valuePath, ValueType: typeDef},
-				}, slotTypeHintsArgs...),
+				},
 			},
-			Guards: guards,
 		}
 	}
 
