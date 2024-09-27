@@ -205,6 +205,9 @@
         "builders": {
           "type": "boolean"
         },
+        "converters": {
+          "type": "boolean"
+        },
         "languages": {
           "items": {
             "$ref": "#/$defs/CodegenOutputLanguage"

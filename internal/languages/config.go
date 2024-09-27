@@ -10,4 +10,7 @@ type Config struct {
 
 	// Builders indicates whether builders should be generated or not.
 	Builders bool
+
+	// Converters indicates whether converters should be generated or not.
+	Converters bool
 }

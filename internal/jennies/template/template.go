@@ -180,6 +180,7 @@ func (template *Template) builtins() FuncMap {
 
 	return gotemplate.FuncMap{
 		"add1": func(i int) int { return i + 1 },
+		"sub1": func(i int) int { return i - 1 },
 		// https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/dict.go#L76
 		"dict": func(v ...any) map[string]any {
 			dict := map[string]any{}
@@ -206,6 +207,16 @@ func (template *Template) builtins() FuncMap {
 				return d
 			}
 			return given[0]
+		},
+		"first": func(list any) any {
+			tp := reflect.TypeOf(list).Kind()
+			switch tp {
+			case reflect.Slice, reflect.Array:
+				l2 := reflect.ValueOf(list)
+				return l2.Index(0).Interface() // this will *willingly* panic if the list is empty
+			default:
+				panic(fmt.Sprintf("Cannot find first on type %s", tp))
+			}
 		},
 
 		// ------- \\

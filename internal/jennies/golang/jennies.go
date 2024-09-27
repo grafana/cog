@@ -15,8 +15,9 @@ import (
 const LanguageRef = "go"
 
 type Config struct {
-	debug            bool
-	generateBuilders bool
+	debug              bool
+	generateBuilders   bool
+	generateConverters bool
 
 	// GenerateGoMod indicates whether a go.mod file should be generated.
 	// If enabled, PackageRoot is used as module path.
@@ -45,6 +46,7 @@ func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug
 	newConfig.generateBuilders = global.Builders
+	newConfig.generateConverters = global.Converters
 
 	return newConfig
 }
@@ -85,6 +87,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl}),
 
 		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{Config: config, Tmpl: tmpl, NullableConfig: language.NullableKinds()}),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 
@@ -94,6 +97,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
 		&compiler.AnonymousEnumToExplicitType{},
+		&compiler.AnonymousStructsToNamed{},
 		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.FlattenDisjunctions{},

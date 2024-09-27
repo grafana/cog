@@ -117,25 +117,6 @@ func TestEquality_Struct_WithArrays(t *testing.T) {
 	req.True(equality.Arrays{Refs: []equality.Variable{}}.Equals(equality.Arrays{Refs: []equality.Variable{}}))
 	req.True(equality.Arrays{Refs: []equality.Variable{{Name: "foo"}}}.Equals(equality.Arrays{Refs: []equality.Variable{{Name: "foo"}}}))
 
-	req.True(equality.Arrays{AnonymousStructs: []struct {
-		Inner string `json:"inner"`
-	}{}}.Equals(equality.Arrays{
-		AnonymousStructs: []struct {
-			Inner string `json:"inner"`
-		}{},
-	}))
-	req.True(equality.Arrays{AnonymousStructs: []struct {
-		Inner string `json:"inner"`
-	}{
-		{Inner: "foo"},
-	}}.Equals(equality.Arrays{
-		AnonymousStructs: []struct {
-			Inner string `json:"inner"`
-		}{
-			{Inner: "foo"},
-		},
-	}))
-
 	req.True(equality.Arrays{ArrayOfAny: []any{}}.Equals(equality.Arrays{ArrayOfAny: []any{}}))
 	req.True(equality.Arrays{ArrayOfAny: []any{"foo", 1}}.Equals(equality.Arrays{ArrayOfAny: []any{"foo", 1}}))
 
@@ -145,30 +126,6 @@ func TestEquality_Struct_WithArrays(t *testing.T) {
 	req.False(equality.Arrays{ArrayOfArray: [][]string{{"foo", "bar"}}}.Equals(equality.Arrays{ArrayOfArray: [][]string{{"foo"}}}))
 	req.False(equality.Arrays{ArrayOfArray: [][]string{{"foo"}, {"bar"}}}.Equals(equality.Arrays{ArrayOfArray: [][]string{{"foo"}}}))
 	req.False(equality.Arrays{ArrayOfArray: [][]string{{"foo"}, {"bar"}}}.Equals(equality.Arrays{ArrayOfArray: [][]string{{"foo"}, {"other"}}}))
-
-	req.False(equality.Arrays{AnonymousStructs: []struct {
-		Inner string `json:"inner"`
-	}{
-		{Inner: "foo"},
-	}}.Equals(equality.Arrays{
-		AnonymousStructs: []struct {
-			Inner string `json:"inner"`
-		}{
-			{Inner: "bar"},
-		},
-	}))
-	req.False(equality.Arrays{AnonymousStructs: []struct {
-		Inner string `json:"inner"`
-	}{
-		{Inner: "foo"},
-	}}.Equals(equality.Arrays{
-		AnonymousStructs: []struct {
-			Inner string `json:"inner"`
-		}{
-			{Inner: "foo"},
-			{Inner: "bar"},
-		},
-	}))
 
 	req.False(equality.Arrays{ArrayOfAny: []any{"foo", 1}}.Equals(equality.Arrays{ArrayOfAny: []any{"foo"}}))
 	req.False(equality.Arrays{ArrayOfAny: []any{"bar"}}.Equals(equality.Arrays{ArrayOfAny: []any{"foo"}}))
@@ -198,19 +155,6 @@ func TestEquality_Struct_WithMaps(t *testing.T) {
 	}.Equals(equality.Maps{
 		Refs: map[string]equality.Variable{
 			"foo": {Name: "foo"},
-		},
-	}))
-	req.True(equality.Maps{
-		AnonymousStructs: map[string]struct {
-			Inner string `json:"inner"`
-		}{
-			"foo": {Inner: "foo"},
-		},
-	}.Equals(equality.Maps{
-		AnonymousStructs: map[string]struct {
-			Inner string `json:"inner"`
-		}{
-			"foo": {Inner: "foo"},
 		},
 	}))
 	req.True(equality.Maps{

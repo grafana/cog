@@ -9,9 +9,7 @@ type SomeStruct struct {
 	Operator SomeStructOperator `json:"Operator"`
 	FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
 	FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
-	FieldAnonymousStruct struct {
-	FieldAny any `json:"FieldAny"`
-} `json:"FieldAnonymousStruct"`
+	FieldAnonymousStruct StructComplexFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct"`
 	FieldRefToConstant string `json:"fieldRefToConstant"`
 }
 
@@ -57,8 +55,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 		}
-		// is DeepEqual good enough here?
-		if !reflect.DeepEqual(resource.FieldAnonymousStruct.FieldAny, other.FieldAnonymousStruct.FieldAny) {
+		if !resource.FieldAnonymousStruct.Equals(other.FieldAnonymousStruct) {
 			return false
 		}
 		if resource.FieldRefToConstant != other.FieldRefToConstant {
@@ -90,6 +87,20 @@ const (
 	SomeStructOperatorGreaterThan SomeStructOperator = ">"
 	SomeStructOperatorLessThan SomeStructOperator = "<"
 )
+
+
+type StructComplexFieldsSomeStructFieldAnonymousStruct struct {
+	FieldAny any `json:"FieldAny"`
+}
+
+func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Equals(other StructComplexFieldsSomeStructFieldAnonymousStruct) bool {
+		// is DeepEqual good enough here?
+		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
+			return false
+		}
+
+	return true
+}
 
 
 type StringOrBool struct {

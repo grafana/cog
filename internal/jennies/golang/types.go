@@ -351,3 +351,30 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 
 	return buffer.String()
 }
+
+func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string {
+	return func(fieldPath ast.Path) string {
+		parts := make([]string, len(fieldPath))
+
+		for i := range fieldPath {
+			output := fieldPath[i].Identifier
+			if !fieldPath[i].Root {
+				output = tools.UpperCamelCase(output)
+			}
+
+			// don't generate type hints if:
+			// * there isn't one defined
+			// * the type isn't "any"
+			// * as a trailing element in the path
+			if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
+				parts[i] = output
+				continue
+			}
+
+			formattedTypeHint := typeFormatter.formatType(*fieldPath[i].TypeHint)
+			parts[i] = output + fmt.Sprintf(".(*%s)", formattedTypeHint)
+		}
+
+		return strings.Join(parts, ".")
+	}
+}

@@ -167,6 +167,10 @@
         "typehint": {
           "$ref": "#/$defs/AstType",
           "description": "useful mostly for composability purposes, when a field Type is \"any\"\nand we're trying to \"compose in\" something of a known type."
+        },
+        "root": {
+          "type": "boolean",
+          "description": "Is this element of the path the root? (ie: a variable, not a member of a struct)"
         }
       },
       "additionalProperties": false,
