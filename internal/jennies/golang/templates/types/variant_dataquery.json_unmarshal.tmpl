@@ -2,14 +2,30 @@ func VariantConfig() variants.DataqueryConfig {
 	return variants.DataqueryConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",
 	    DataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
-            dataquery := {{ .object.Name|upperCamelCase }}{}
+            dataquery := &{{ .object.Name|upperCamelCase }}{}
 
-            if err := json.Unmarshal(raw, &dataquery); err != nil {
+            if err := json.Unmarshal(raw, dataquery); err != nil {
                 return nil, err
             }
 
             return dataquery, nil
        },
+        {{- if .hasConverter }}
+        GoConverter: func(inputPanel any) string {
+            panel := inputPanel.(*{{ .object.Name | upperCamelCase }})
+            {{ if ne .disjunctionStruct nil -}}
+                {{- range $field := .disjunctionStruct.Fields }}
+                    if panel.{{ $field.Name | upperCamelCase }} != nil {
+                        return {{ $field.Type.Ref.ReferredType | upperCamelCase }}Converter(panel.{{ $field.Name | upperCamelCase }})
+                    }
+                {{- end }}
+
+                return ""
+            {{- else -}}
+                return {{ .object.Name | upperCamelCase }}Converter(panel)
+            {{- end }}
+        },
+        {{- end }}
 	}
 }
 

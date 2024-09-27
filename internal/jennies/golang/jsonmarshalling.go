@@ -12,12 +12,14 @@ import (
 
 type JSONMarshalling struct {
 	tmpl          *template.Template
+	config        Config
 	packageMapper func(string) string
 	typeFormatter *typeFormatter
 }
 
-func NewJSONMarshalling(tmpl *template.Template, packageMapper func(string) string, typeFormatter *typeFormatter) JSONMarshalling {
+func NewJSONMarshalling(config Config, tmpl *template.Template, packageMapper func(string) string, typeFormatter *typeFormatter) JSONMarshalling {
 	return JSONMarshalling{
+		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
 			"formatType": typeFormatter.formatType,
 		}),
@@ -301,18 +303,34 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 	_, hasOptions := schema.LocateObject("Options")
 	_, hasFieldConfig := schema.LocateObject("FieldConfig")
 
+	if jenny.config.generateConverters {
+		jenny.packageMapper("dashboard")
+	}
+
 	return jenny.tmpl.Render("types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
 		"schema":         schema,
 		"hasOptions":     hasOptions,
 		"hasFieldConfig": hasFieldConfig,
+		"hasConverter":   jenny.config.generateConverters,
 	})
 }
 
 func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
 	jenny.packageMapper("cog/variants")
 
+	var disjunctionStruct *ast.StructType
+
+	if obj.Type.IsRef() {
+		resolved, _ := schema.Resolve(obj.Type)
+		if resolved.IsStructGeneratedFromDisjunction() {
+			disjunctionStruct = resolved.Struct
+		}
+	}
+
 	return jenny.tmpl.Render("types/variant_dataquery.json_unmarshal.tmpl", map[string]any{
-		"schema": schema,
-		"object": obj,
+		"schema":            schema,
+		"object":            obj,
+		"hasConverter":      jenny.config.generateConverters,
+		"disjunctionStruct": disjunctionStruct,
 	})
 }

@@ -95,14 +95,12 @@ func (resource Optionals) Equals(other Optionals) bool {
 }
 
 type Arrays struct {
-	Ints             []int64    `json:"ints"`
-	Strings          []string   `json:"strings"`
-	ArrayOfArray     [][]string `json:"arrayOfArray"`
-	Refs             []Variable `json:"refs"`
-	AnonymousStructs []struct {
-		Inner string `json:"inner"`
-	} `json:"anonymousStructs"`
-	ArrayOfAny []any `json:"arrayOfAny"`
+	Ints             []int64                          `json:"ints"`
+	Strings          []string                         `json:"strings"`
+	ArrayOfArray     [][]string                       `json:"arrayOfArray"`
+	Refs             []Variable                       `json:"refs"`
+	AnonymousStructs []EqualityArraysAnonymousStructs `json:"anonymousStructs"`
+	ArrayOfAny       []any                            `json:"arrayOfAny"`
 }
 
 func (resource Arrays) Equals(other Arrays) bool {
@@ -159,7 +157,7 @@ func (resource Arrays) Equals(other Arrays) bool {
 	}
 
 	for i1 := range resource.AnonymousStructs {
-		if resource.AnonymousStructs[i1].Inner != other.AnonymousStructs[i1].Inner {
+		if !resource.AnonymousStructs[i1].Equals(other.AnonymousStructs[i1]) {
 			return false
 		}
 	}
@@ -179,13 +177,11 @@ func (resource Arrays) Equals(other Arrays) bool {
 }
 
 type Maps struct {
-	Ints             map[string]int64    `json:"ints"`
-	Strings          map[string]string   `json:"strings"`
-	Refs             map[string]Variable `json:"refs"`
-	AnonymousStructs map[string]struct {
-		Inner string `json:"inner"`
-	} `json:"anonymousStructs"`
-	StringToAny map[string]any `json:"stringToAny"`
+	Ints             map[string]int64                        `json:"ints"`
+	Strings          map[string]string                       `json:"strings"`
+	Refs             map[string]Variable                     `json:"refs"`
+	AnonymousStructs map[string]EqualityMapsAnonymousStructs `json:"anonymousStructs"`
+	StringToAny      map[string]any                          `json:"stringToAny"`
 }
 
 func (resource Maps) Equals(other Maps) bool {
@@ -225,7 +221,7 @@ func (resource Maps) Equals(other Maps) bool {
 	}
 
 	for key1 := range resource.AnonymousStructs {
-		if resource.AnonymousStructs[key1].Inner != other.AnonymousStructs[key1].Inner {
+		if !resource.AnonymousStructs[key1].Equals(other.AnonymousStructs[key1]) {
 			return false
 		}
 	}
@@ -239,6 +235,32 @@ func (resource Maps) Equals(other Maps) bool {
 		if !reflect.DeepEqual(resource.StringToAny[key1], other.StringToAny[key1]) {
 			return false
 		}
+	}
+
+	return true
+}
+
+// Modified by compiler pass 'AnonymousStructsToNamed'
+type EqualityArraysAnonymousStructs struct {
+	Inner string `json:"inner"`
+}
+
+func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonymousStructs) bool {
+	if resource.Inner != other.Inner {
+		return false
+	}
+
+	return true
+}
+
+// Modified by compiler pass 'AnonymousStructsToNamed'
+type EqualityMapsAnonymousStructs struct {
+	Inner string `json:"inner"`
+}
+
+func (resource EqualityMapsAnonymousStructs) Equals(other EqualityMapsAnonymousStructs) bool {
+	if resource.Inner != other.Inner {
+		return false
 	}
 
 	return true

@@ -15,9 +15,9 @@ func VariantConfig() variants.DataqueryConfig {
 	return variants.DataqueryConfig{
 		Identifier: "prometheus",
 	    DataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
-            dataquery := Query{}
+            dataquery := &Query{}
 
-            if err := json.Unmarshal(raw, &dataquery); err != nil {
+            if err := json.Unmarshal(raw, dataquery); err != nil {
                 return nil, err
             }
 

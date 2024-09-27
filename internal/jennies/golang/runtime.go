@@ -106,6 +106,14 @@ func MakeBuildErrors(rootPath string, err error) BuildErrors {
 	}}
 }
 
+func Unptr[T any](v *T) T {
+	var val T
+	if v == nil {
+		return val
+	}
+	return *v
+}
+
 `)
 }
 

@@ -22,6 +22,12 @@ type NullableKindsProvider interface {
 	NullableKinds() NullableConfig
 }
 
+func (nullableConfig NullableConfig) TypeIsNullable(typeDef ast.Type) bool {
+	return typeDef.Nullable ||
+		(typeDef.IsAny() && nullableConfig.AnyIsNullable) ||
+		typeDef.IsAnyOf(nullableConfig.Kinds...)
+}
+
 type Languages map[string]Language
 
 func (languages Languages) AsLanguageRefs() []string {

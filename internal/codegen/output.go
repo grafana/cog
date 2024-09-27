@@ -14,8 +14,9 @@ import (
 type Output struct {
 	Directory string `yaml:"directory"`
 
-	Types    bool `yaml:"types"`
-	Builders bool `yaml:"builders"`
+	Types      bool `yaml:"types"`
+	Builders   bool `yaml:"builders"`
+	Converters bool `yaml:"converters"`
 
 	Languages []*OutputLanguage `yaml:"languages"`
 
