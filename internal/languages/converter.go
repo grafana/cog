@@ -421,6 +421,16 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 			guards.Set(guard.String(), guard)
 		}
 
+		// For scalar values, add a guard against assignments equal to the default value for that path
+		if assignmentType.IsScalar() && assignmentType.Default != nil {
+			guard := MappingGuard{
+				Path:  converter.inputRootPath().Append(assignment.Path),
+				Op:    ast.NotEqualOp,
+				Value: assignmentType.Default,
+			}
+			guards.Set(guard.String(), guard)
+		}
+
 		// TODO: is that correct/needed?
 		if assignment.Method != ast.AppendAssignment && assignment.Value.Envelope != nil {
 			for _, envelopePath := range assignment.Value.Envelope.Values {
