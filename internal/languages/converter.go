@@ -185,12 +185,8 @@ func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context Con
 
 func (generator *ConverterGenerator) convertOption(context Context, converter Converter, option ast.Option) ConversionMapping {
 	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
-		key := generator.assignmentKey(assignment)
-		if _, ok := generator.generatedPaths[key]; ok {
-			return false
-		}
-
-		return assignment.Value.Constant == nil
+		_, pathAlreadyGenerated := generator.generatedPaths[generator.assignmentKey(assignment)]
+		return !pathAlreadyGenerated
 	})
 	if len(assignments) == 0 {
 		return ConversionMapping{}
@@ -228,12 +224,8 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 	}
 
 	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
-		key := generator.assignmentKey(assignment)
-		if _, ok := generator.generatedPaths[key]; ok {
-			return false
-		}
-
-		return assignment.Value.Constant == nil
+		_, pathAlreadyGenerated := generator.generatedPaths[generator.assignmentKey(assignment)]
+		return !pathAlreadyGenerated
 	})
 	if len(assignments) == 0 {
 		return OptionMapping{}
@@ -244,6 +236,11 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 		i++
 
 		generator.generatedPaths[generator.assignmentKey(assignment)] = struct{}{}
+
+		// no need for an argument if the assignment uses a constant value
+		if assignment.Value.Constant != nil {
+			continue
+		}
 
 		argName := fmt.Sprintf("arg%d", i)
 		valueType := assignment.Path.Last().Type
@@ -466,6 +463,10 @@ func (generator *ConverterGenerator) pathNotNullGuards(converter Converter, path
 
 func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) string {
 	path := assignment.Path.String()
+
+	if assignment.Value.Constant != nil {
+		path += fmt.Sprintf("=%v", assignment.Value.Constant)
+	}
 
 	if assignment.Value.Envelope != nil {
 		// TODO: envelope of envelope?
