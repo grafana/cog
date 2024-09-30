@@ -93,4 +93,32 @@ final class Runtime
         }
         return $queries;
     }
+
+    public function convertPanelToCode($panel, string $panelType): string
+    {
+        if (!$this->panelcfgVariantExists($panelType)) {
+            return '/* could not convert panel to PHP */';
+        }
+
+        $convert = $this->panelcfgVariants[$panelType]->convert;
+        if ($convert === null) {
+            return '/* could not convert panel to PHP */';
+        }
+
+        return $convert($panel);
+    }
+
+    public function convertDataqueryToCode(Dataquery $dataquery): string
+    {
+        if (!isset($this->dataqueryVariants[$dataquery->dataqueryType()])) {
+            return '/* could not convert dataquery to PHP */';
+        }
+
+        $convert = $this->dataqueryVariants[$dataquery->dataqueryType()]->convert;
+        if ($convert === null) {
+            return '/* could not convert dataquery to PHP */';
+        }
+
+        return $convert($dataquery);
+    }
 }

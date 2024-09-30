@@ -62,6 +62,12 @@ func formatCommentsBlock(comments []string) string {
 	return buffer.String()
 }
 
+func formatFieldPath(fieldPath ast.Path) string {
+	return strings.Join(tools.Map(fieldPath, func(item ast.PathItem) string {
+		return formatFieldName(item.Identifier)
+	}), "->")
+}
+
 func formatValue(val any) string {
 	if val == nil {
 		return "null"
