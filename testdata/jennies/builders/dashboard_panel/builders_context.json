@@ -1,0 +1,242 @@
+{
+  "Schemas": [
+    {
+      "Package": "dashboard",
+      "Metadata": {
+        "Kind": "composable",
+        "Variant": "panelcfg",
+        "Identifier": "annolist"
+      },
+      "Objects": {
+        "Panel": {
+          "Name": "Panel",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "onlyFromThisDashboard",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "dashboard",
+            "ReferredType": "Panel"
+          }
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "For": {
+        "Name": "Panel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "onlyFromThisDashboard",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": false,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "onlyInTimeRange",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": false,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "tags",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "limit",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": 10,
+                  "Scalar": {
+                    "ScalarKind": "uint32"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "showUser",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "showTime",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "showTags",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "navigateToPanel",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": true,
+                  "Scalar": {
+                    "ScalarKind": "bool"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "navigateBefore",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": "10m",
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "navigateAfter",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Default": "10m",
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "dashboard",
+          "ReferredType": "Panel"
+        }
+      },
+      "Package": "dashboard",
+      "Name": "Panel",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "onlyFromThisDashboard",
+          "Args": [
+            {
+              "Name": "onlyFromThisDashboard",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Default": false,
+                "Scalar": {
+                  "ScalarKind": "bool"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "onlyFromThisDashboard",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "onlyFromThisDashboard",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Default": false,
+                    "Scalar": {
+                      "ScalarKind": "bool"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ],
+          "Default": {
+            "ArgsValues": [
+              false
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

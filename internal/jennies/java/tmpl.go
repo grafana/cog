@@ -129,6 +129,7 @@ type Builder struct {
 	Properties           []ast.StructField
 	Options              []ast.Option
 	Defaults             []OptionCall
+	IsGeneric            bool
 }
 
 type OptionCall struct {

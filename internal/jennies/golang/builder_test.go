@@ -14,6 +14,7 @@ func TestBuilder_Generate(t *testing.T) {
 		Name:         "GoBuilder",
 		Skip: map[string]string{
 			"builder_delegation_in_disjunction": "disjunctions are eliminated with compiler passes",
+			"dashboard_panel":                   "this test if for Java generics for dashboard.Panel",
 		},
 	}
 

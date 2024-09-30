@@ -21,7 +21,7 @@ public class Dashboard {
 
     
     public static class Builder implements cog.Builder<Dashboard> {
-        private final Dashboard internal;
+        protected final Dashboard internal;
         
         public Builder() {
             this.internal = new Dashboard();

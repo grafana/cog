@@ -18,7 +18,7 @@ public class NestedStruct {
 
     
     public static class Builder implements cog.Builder<NestedStruct> {
-        private final NestedStruct internal;
+        protected final NestedStruct internal;
         
         public Builder() {
             this.internal = new NestedStruct();

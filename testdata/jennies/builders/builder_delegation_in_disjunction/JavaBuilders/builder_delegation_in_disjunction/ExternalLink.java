@@ -16,7 +16,7 @@ public class ExternalLink {
 
     
     public static class Builder implements cog.Builder<ExternalLink> {
-        private final ExternalLink internal;
+        protected final ExternalLink internal;
         
         public Builder() {
             this.internal = new ExternalLink();

@@ -19,7 +19,7 @@ public class Person {
 
     
     public static class Builder implements cog.Builder<Person> {
-        private final Person internal;
+        protected final Person internal;
         
         public Builder() {
             this.internal = new Person();

@@ -21,7 +21,7 @@ public class SomeStruct {
 
     
     public static class Builder implements cog.Builder<SomeStruct> {
-        private final SomeStruct internal;
+        protected final SomeStruct internal;
         
         public Builder() {
             this.internal = new SomeStruct();

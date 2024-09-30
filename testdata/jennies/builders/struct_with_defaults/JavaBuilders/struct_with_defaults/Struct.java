@@ -30,7 +30,7 @@ public class Struct {
 
     
     public static class Builder implements cog.Builder<Struct> {
-        private final Struct internal;
+        protected final Struct internal;
         
         public Builder() {
             this.internal = new Struct();
