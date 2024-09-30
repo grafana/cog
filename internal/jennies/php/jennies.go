@@ -14,6 +14,8 @@ const LanguageRef = "php"
 type Config struct {
 	debug bool
 
+	converters bool
+
 	NamespaceRoot string `yaml:"namespace_root"`
 
 	// BuilderTemplatesDirectories holds a list of directories containing templates
@@ -37,6 +39,7 @@ func (config Config) fullNamespaceRef(typeName string) string {
 func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug
+	newConfig.converters = global.Converters
 
 	return newConfig
 }
@@ -68,6 +71,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		Runtime{config: config, tmpl: tmpl},
 		common.If[languages.Context](globalConfig.Types, RawTypes{config: config, tmpl: tmpl}),
 		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

@@ -137,6 +137,10 @@ func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) code
 	}
 
 	panelcfgConfigRef := jenny.config.fullNamespaceRef("Cog\\PanelcfgConfig")
+	convert := ""
+	if jenny.config.converters {
+		convert = fmt.Sprintf("\n            convert: [\\%[1]s\\PanelConverter::class, 'convert'],\n", jenny.config.fullNamespace(formatPackageName(schema.Package)))
+	}
 
 	content := fmt.Sprintf(`<?php
 
@@ -149,10 +153,10 @@ final class VariantConfig
         return new %[1]s(
             identifier: '%[2]s',
             optionsFromArray: %[3]s,
-            fieldConfigFromArray: %[4]s
+            fieldConfigFromArray: %[4]s,%[6]s
         );
     }
-}`, panelcfgConfigRef, identifier, options, fieldConfig, jenny.config.fullNamespace(formatPackageName(schema.Package)))
+}`, panelcfgConfigRef, identifier, options, fieldConfig, jenny.config.fullNamespace(formatPackageName(schema.Package)), convert)
 
 	filename := filepath.Join(
 		"src",
@@ -191,7 +195,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	case ast.KindRef:
 		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type)))
 	case ast.KindStruct:
-		buffer.WriteString(jenny.formatStructDef(context, def))
+		buffer.WriteString(jenny.formatStructDef(context, schema, def))
 	default:
 		return codejen.File{}, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -210,7 +214,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	return *codejen.NewFile(filename, []byte(output), jenny), nil
 }
 
-func (jenny RawTypes) formatStructDef(context languages.Context, def ast.Object) string {
+func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Schema, def ast.Object) string {
 	var buffer strings.Builder
 
 	variant := ""
@@ -232,6 +236,11 @@ func (jenny RawTypes) formatStructDef(context languages.Context, def ast.Object)
 	buffer.WriteString("\n\n")
 
 	buffer.WriteString(tools.Indent(jenny.generateJSONSerialize(def), 4))
+
+	if def.Type.IsDataqueryVariant() {
+		buffer.WriteString("\n\n")
+		buffer.WriteString(tools.Indent(jenny.generateDataqueryType(schema), 4))
+	}
 
 	buffer.WriteString("\n}")
 
@@ -259,6 +268,11 @@ func (jenny RawTypes) generateDataqueryVariantConfig(context languages.Context, 
 		return nil
 	}
 
+	converterCallable := `[` + jenny.config.fullNamespaceRef(fmt.Sprintf("%s\\%s", formatPackageName(schema.Package), formatObjectName(schema.EntryPoint))) + `Converter::class, 'convert']`
+	if !entryPointFound && schema.EntryPointType.IsDisjunction() {
+		converterCallable = jenny.convertDisjunctionFunc(schema.EntryPointType.AsDisjunction())
+	}
+
 	content := fmt.Sprintf(`<?php
 
 namespace %[4]s;
@@ -270,9 +284,10 @@ final class VariantConfig
         return new %[1]s(
             identifier: "%[2]s",
             fromArray: %[3]s,
+            convert: %[5]s,
         );
     }
-}`, dataqueryConfigRef, schema.Metadata.Identifier, fromArrayCallable, jenny.config.fullNamespace(formatPackageName(schema.Package)))
+}`, dataqueryConfigRef, schema.Metadata.Identifier, fromArrayCallable, jenny.config.fullNamespace(formatPackageName(schema.Package)), converterCallable)
 
 	filename := filepath.Join(
 		"src",
@@ -281,6 +296,39 @@ final class VariantConfig
 	)
 
 	return codejen.NewFile(filename, []byte(content), jenny)
+}
+
+func (jenny RawTypes) convertDisjunctionFunc(disjunction ast.DisjunctionType) string {
+	decodingSwitch := "switch (true) {\n"
+	discriminators := tools.Keys(disjunction.DiscriminatorMapping)
+	sort.Strings(discriminators) // to ensure a deterministic output
+	for _, discriminator := range discriminators {
+		if discriminator == ast.DiscriminatorCatchAll {
+			continue
+		}
+
+		objectRef := disjunction.DiscriminatorMapping[discriminator]
+		decodingSwitch += fmt.Sprintf(`    case $input instanceof %[1]s:
+        return %[1]sConverter::convert($input);
+`, objectRef)
+	}
+
+	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ast.DiscriminatorCatchAll]; ok {
+		decodingSwitch += fmt.Sprintf(`    default:
+        return %[1]sConverter::convert($input);
+`, defaultBranchType)
+	} else {
+		decodingSwitch += `    default:
+        throw new \ValueError('can not convert unknown disjunction branch');
+`
+	}
+
+	decodingSwitch += "}"
+
+	return fmt.Sprintf(`(function($input) {
+
+    %s
+})`, decodingSwitch)
 }
 
 func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Object) string {
@@ -692,6 +740,17 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 
 	buffer.WriteString("    return $data;\n")
 
+	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+func (jenny RawTypes) generateDataqueryType(schema *ast.Schema) string {
+	var buffer strings.Builder
+
+	buffer.WriteString("public function dataqueryType(): string\n")
+	buffer.WriteString("{\n")
+	buffer.WriteString(fmt.Sprintf("    return \"%s\";\n", strings.ToLower(schema.Metadata.Identifier)))
 	buffer.WriteString("}")
 
 	return buffer.String()

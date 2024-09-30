@@ -3,7 +3,6 @@ package php
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -84,7 +83,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	return jenny.tmpl.
 		Funcs(map[string]any{
 			"fullNamespaceRef": jenny.config.fullNamespaceRef,
-			"formatPath":       jenny.formatFieldPath,
+			"formatPath":       formatFieldPath,
 			"formatType":       jenny.typeFormatter.formatType,
 			"formatRawType": func(def ast.Type) string {
 				return jenny.typeFormatter.doFormatType(def, false)
@@ -125,10 +124,4 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"NamespaceRoot": jenny.config.NamespaceRoot,
 			"Builder":       builder,
 		})
-}
-
-func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
-	return strings.Join(tools.Map(fieldPath, func(item ast.PathItem) string {
-		return formatFieldName(item.Identifier)
-	}), "->")
 }
