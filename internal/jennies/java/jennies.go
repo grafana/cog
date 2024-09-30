@@ -96,3 +96,12 @@ func (language *Language) NullableKinds() languages.NullableConfig {
 		AnyIsNullable:      true,
 	}
 }
+
+func (language *Language) DefaultKinds() languages.DefaultConfig {
+	return languages.DefaultConfig{
+		FormatScalarFunc: formatType,
+		FormatListFunc:   arrayDefaults,
+		FormatEnumFunc:   enumDefaults,
+		FormatStructFunc: structDefaults,
+	}
+}

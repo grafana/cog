@@ -118,6 +118,7 @@ func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, s
 
 	// with the veneers applied, generate "nil-checks" for assignments
 	jenniesInput, err = languages.GenerateBuilderNilChecks(language, jenniesInput)
+	jenniesInput, err = languages.GenerateDefaults(language, jenniesInput)
 	if err != nil {
 		return languages.Context{}, err
 	}

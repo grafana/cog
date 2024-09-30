@@ -23,7 +23,7 @@ func formatScalar(val any) any {
 	return newVal
 }
 
-func formatType(t ast.ScalarKind, val any) string {
+func formatType(t ast.Type, val any) string {
 	// When the default is 0, is detected as integer even if it's a float.
 	parseFloatVal := func(val any) any {
 		if v, ok := val.(int64); ok {
@@ -41,7 +41,7 @@ func formatType(t ast.ScalarKind, val any) string {
 		return val.(int64)
 	}
 
-	switch t {
+	switch t.AsScalar().ScalarKind {
 	case ast.KindInt64:
 		return fmt.Sprintf("%dL", parseIntVal(val))
 	case ast.KindUint64:

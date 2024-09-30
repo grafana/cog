@@ -18,8 +18,20 @@ type NullableConfig struct {
 	AnyIsNullable      bool
 }
 
+type DefaultConfig struct {
+	FormatScalarFunc func(t ast.Type, v any) string
+	FormatListFunc   func(t ast.Type, v any) string
+	FormatEnumFunc   func(name string, t ast.Type, v any) string
+	FormatStructFunc func(name string, t ast.Type, v any) string
+	FormatMapFunc    func(t ast.Type, v any) string
+}
+
 type NullableKindsProvider interface {
 	NullableKinds() NullableConfig
+}
+
+type DefaultKindsProvider interface {
+	DefaultKinds() DefaultConfig
 }
 
 type Languages map[string]Language

@@ -106,7 +106,9 @@ func (b Builders) genDefaults(options []ast.Option) []OptionCall {
 		calls = append(calls, OptionCall{
 			Initializers: b.formatInitializers(opt.Args),
 			OptionName:   tools.UpperCamelCase(opt.Name),
-			Args:         b.formatDefaultValues(opt.Args),
+			Args: tools.Map[any, string](opt.Default.ArgsValues, func(t any) string {
+				return t.(string)
+			}),
 		})
 	}
 
@@ -147,7 +149,7 @@ func (b Builders) formatInitializers(args []ast.Argument) []string {
 		for _, field := range structType.Fields {
 			if defVal, ok := defValues[field.Name]; ok {
 				if field.Type.IsScalar() {
-					initializers = append(initializers, fmt.Sprintf(setterFormat, tools.LowerCamelCase(ref.ReferredType), fieldNameFunc(field.Name), formatType(field.Type.AsScalar().ScalarKind, defVal)))
+					initializers = append(initializers, fmt.Sprintf(setterFormat, tools.LowerCamelCase(ref.ReferredType), fieldNameFunc(field.Name), formatType(field.Type, defVal)))
 				}
 				// TODO: Implement lists if needed
 			}
@@ -155,57 +157,4 @@ func (b Builders) formatInitializers(args []ast.Argument) []string {
 	}
 
 	return initializers
-}
-
-func (b Builders) formatDefaultValues(args []ast.Argument) []string {
-	argumentList := make([]string, 0, len(args))
-	for _, arg := range args {
-		switch arg.Type.Kind {
-		case ast.KindRef:
-			argumentList = append(argumentList, b.formatDefaultReference(arg.Type.AsRef(), arg.Type.Default))
-		case ast.KindScalar:
-			scalar := arg.Type.AsScalar()
-			argumentList = append(argumentList, formatType(scalar.ScalarKind, arg.Type.Default))
-		case ast.KindArray:
-			array := arg.Type.AsArray()
-			if array.IsArrayOfScalars() {
-				argumentList = append(argumentList, fmt.Sprintf("List.of(%s)", b.typeFormatter.formatScalar(arg.Type.Default)))
-			}
-		case ast.KindStruct:
-			// TODO: Java is using veneers to avoid anonymous structs but it should be detailed if we need it at any moment.
-			argumentList = append(argumentList, "new Object()")
-		}
-		// TODO: Implement the rest of types if any
-	}
-
-	return argumentList
-}
-
-func (b Builders) formatDefaultReference(ref ast.RefType, defValue any) string {
-	object, _ := b.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
-	switch object.Type.Kind {
-	case ast.KindEnum:
-		for _, v := range object.Type.AsEnum().Values {
-			if defValue == v.Value {
-				return fmt.Sprintf("%s.%s", object.Name, tools.UpperSnakeCase(v.Name))
-			}
-		}
-	case ast.KindStruct:
-		if b.typeFormatter.typeHasBuilder(object.Type) {
-			// TODO: Builder could have arguments 🙃
-			builder := fmt.Sprintf("new %s.Builder()", tools.UpperCamelCase(object.Name))
-			structType := object.Type.AsStruct()
-			defValues := defValue.(map[string]interface{})
-			for _, field := range structType.Fields {
-				if f, ok := defValues[field.Name]; ok {
-					builder = fmt.Sprintf("%s.%s(%#v)", builder, tools.LowerCamelCase(field.Name), f)
-				}
-			}
-			return builder + ".build()"
-		}
-
-		return fmt.Sprintf("%sResource", tools.LowerCamelCase(object.Name))
-	}
-
-	return ""
 }
