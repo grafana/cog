@@ -45,6 +45,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"formatValue": func(_ ast.Type, _ any) bool {
 				panic("formatValue() needs to be overridden by a jenny")
 			},
+			"disjunctionCaseForType": func(input string, typeDef ast.Type) string {
+				panic("disjunctionCaseForType() needs to be overridden by a jenny")
+			},
 		}),
 		template.Funcs(map[string]any{
 			"formatPath":           formatFieldPath,

@@ -52,7 +52,20 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
         ${{ $.IntoVar }} = {{ "Cog\\Runtime" | fullNamespaceRef }}::get()->{{ .FuncName|formatOptionName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}${{ $runtimeArg.ValuePath | formatPath }}{{ else }}${{ $runtimeArg.ValuePath | formatPath }}{{ end }}, {{ end }});
     {{- end -}}
     {{- with .Arg.Direct -}}
-        ${{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}};
+        ${{ $.IntoVar }} = {{- template "value_formatter" (dict "Path" .ValuePath) -}};
+    {{- end -}}
+    {{- with .Arg.Disjunction -}}
+        switch (true) {
+            {{- range $branch := .Branches }}
+            case {{ disjunctionCaseForType (print "$" (formatPath .Of.ValuePath)) $branch.Type }}:
+                {{- $subIntoVar := print "disjunction" .Of.ValuePath.Last.Identifier }}
+                {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" $branch.Arg) }}
+                ${{ $.IntoVar }} = ${{ $subIntoVar }};
+                break;
+            {{- end }}
+            default:
+                throw new \ValueError('disjunction branch not handled');
+        }
     {{- end -}}
 {{- end }}
 
@@ -93,7 +106,7 @@ final class {{ .Converter.BuilderName | upperCamelCase }}Converter
     {
         {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
         $calls = [
-            'new {{ formatRawRef .Converter.Package .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}'.{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} . ", " .{{ end }}{{ end }}.'{{ end }})',
+            '(new {{ formatRawRef .Converter.Package .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}'.{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} . ", " .{{ end }}{{ end }}.'{{ end }}))',
         ];
         $buffer = '';
 
@@ -101,7 +114,7 @@ final class {{ .Converter.BuilderName | upperCamelCase }}Converter
             {{ template "conversion_mapping" . }}
         {{- end }}
 
-        return \implode("->\t\n", $calls);
+        return \implode("\n\t->", $calls);
     }
 }
 {{- end }}
