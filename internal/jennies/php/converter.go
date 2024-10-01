@@ -47,6 +47,9 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 	return jenny.tmpl.
 		Funcs(map[string]any{
+			"resolvesToEnum": func(typeDef ast.Type) bool {
+				return context.ResolveRefs(typeDef).IsEnum()
+			},
 			"formatType": builderTypeFormatter(jenny.config, context).formatType,
 			"formatPath": formatFieldPath,
 			"formatRawRef": func(pkg string, ref string) string {

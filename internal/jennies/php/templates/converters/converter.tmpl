@@ -27,7 +27,11 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 {{- end }}
 
 {{- define "value_formatter" -}}
+    {{- if and (.Type.IsRef) (resolvesToEnum .Type) -}}
+    '{{ formatRawRef .Type.Ref.ReferredPkg .Type.Ref.ReferredType }}::fromValue("'.${{ .Path | formatPath }}.'")'
+    {{- else -}}
     \var_export(${{ .Path | formatPath }}, true)
+    {{- end -}}
 {{- end }}
 
 {{- define "guards" }}
@@ -52,7 +56,7 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
         ${{ $.IntoVar }} = {{ "Cog\\Runtime" | fullNamespaceRef }}::get()->{{ .FuncName|formatOptionName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}${{ $runtimeArg.ValuePath | formatPath }}{{ else }}${{ $runtimeArg.ValuePath | formatPath }}{{ end }}, {{ end }});
     {{- end -}}
     {{- with .Arg.Direct -}}
-        ${{ $.IntoVar }} = {{- template "value_formatter" (dict "Path" .ValuePath) -}};
+        ${{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}};
     {{- end -}}
     {{- with .Arg.Disjunction -}}
         switch (true) {
@@ -106,7 +110,7 @@ final class {{ .Converter.BuilderName | upperCamelCase }}Converter
     {
         {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
         $calls = [
-            '(new {{ formatRawRef .Converter.Package .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}'.{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} . ", " .{{ end }}{{ end }}.'{{ end }}))',
+            '(new {{ formatRawRef .Converter.Package .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}'.{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} . ", " .{{ end }}{{ end }}.'{{ end }}))',
         ];
         $buffer = '';
 
