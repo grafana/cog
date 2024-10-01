@@ -45,12 +45,24 @@ type RuntimeArgMapping struct {
 	Args     []*DirectArgMapping
 }
 
-type ArgumentMapping struct {
-	Direct  *DirectArgMapping
-	Runtime *RuntimeArgMapping
-	Builder *BuilderArgMapping
-	Array   *ArrayArgMapping
+type DisjunctionBranchArgMapping struct {
+	Type ast.Type
+	Of   *DirectArgMapping
+	Arg  *ArgumentMapping
+}
 
+type DisjunctionArgMapping struct {
+	Branches []DisjunctionBranchArgMapping
+}
+
+type ArgumentMapping struct {
+	Direct      *DirectArgMapping
+	Runtime     *RuntimeArgMapping
+	Builder     *BuilderArgMapping
+	Array       *ArrayArgMapping
+	Disjunction *DisjunctionArgMapping
+
+	// TODO: used? necessary?
 	Guards []MappingGuard
 }
 
@@ -287,6 +299,21 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 				Args: []*DirectArgMapping{
 					{ValuePath: valuePath, ValueType: typeDef},
 				},
+			},
+		}
+	}
+
+	if typeDef.IsDisjunction() {
+		return ArgumentMapping{
+			Disjunction: &DisjunctionArgMapping{
+				Branches: tools.Map(typeDef.Disjunction.Branches, func(branch ast.Type) DisjunctionBranchArgMapping {
+					arg := generator.argumentForType(context, converter, argName, valuePath, branch)
+					return DisjunctionBranchArgMapping{
+						Type: branch,
+						Of:   &DirectArgMapping{ValuePath: valuePath, ValueType: typeDef},
+						Arg:  &arg,
+					}
+				}),
 			},
 		}
 	}
