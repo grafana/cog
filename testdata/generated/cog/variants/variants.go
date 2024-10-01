@@ -33,12 +33,10 @@ type Panelcfg interface {
 type UnknownDataquery map[string]any
 
 func (unknown UnknownDataquery) DataqueryType() string {
-	return ""
+	return "unknown"
 }
 
-func (unknown UnknownDataquery) ImplementsDataqueryVariant() {
-
-}
+func (unknown UnknownDataquery) ImplementsDataqueryVariant() {}
 
 func (unknown UnknownDataquery) Equals(otherCandidate Dataquery) bool {
 	if otherCandidate == nil {
