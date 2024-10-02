@@ -94,7 +94,7 @@ final class Runtime
         return $queries;
     }
 
-    public function convertPanelToCode($panel, string $panelType): string
+    public function convertPanelToCode(\Grafana\Foundation\Dashboard\Panel $panel, string $panelType): string
     {
         if (!$this->panelcfgVariantExists($panelType)) {
             return '/* could not convert panel to PHP */';
