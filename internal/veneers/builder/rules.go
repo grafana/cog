@@ -103,7 +103,7 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 	})
 }
 
-func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders, panelOptionsToExclude []string) (ast.Builder, error) {
+func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders, panelOptionsToExclude []string) (ast.Builders, error) {
 	newBuilder := ast.Builder{
 		Package:     composableBuilders[0].Package,
 		For:         panelBuilder.For,
@@ -114,7 +114,7 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 
 	typeField, ok := panelBuilder.For.Type.AsStruct().FieldByName("type")
 	if !ok {
-		return panelBuilder, fmt.Errorf("could not find field 'type' in panel builder")
+		return nil, fmt.Errorf("could not find field 'type' in panel builder")
 	}
 
 	typeAssignment := ast.ConstantAssignment(ast.PathFromStructField(typeField), panelType)
@@ -145,18 +145,20 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 		"FieldConfig": "fieldConfig.defaults.custom",
 	}
 
+	composedBuilders := make([]ast.Builder, 0, len(composableBuilders))
 	for _, composableBuilder := range composableBuilders {
 		underPath, exists := compositionMap[composableBuilder.For.Name]
 		if !exists {
 			// schemas for composable panels can define more types than just "Options"
 			// and "FieldConfig": we need to leave these objects untouched and
 			// compose only the builders that we know of.
+			composedBuilders = append(composedBuilders, composableBuilder)
 			continue
 		}
 
 		newRoot, err := newBuilder.MakePath(builders, underPath)
 		if err != nil {
-			return newBuilder, err
+			return nil, err
 		}
 
 		ref := composableBuilder.For.SelfRef
@@ -165,11 +167,13 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 
 		newBuilder, err = mergeOptions(composableBuilder, newBuilder, newRoot, nil, nil)
 		if err != nil {
-			return newBuilder, err
+			return nil, err
 		}
 	}
 
-	return newBuilder, nil
+	composedBuilders = append(composedBuilders, newBuilder)
+
+	return composedBuilders, nil
 }
 
 func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOptionsToExclude []string) RewriteRule {
@@ -210,14 +214,16 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 		}
 
 		for panelType, buildersForType := range composableBuilders {
-			composedBuilder, err := composePanelType(builders, panelType, panelBuilder, buildersForType, panelOptionsToExclude)
+			composedBuilders, err := composePanelType(builders, panelType, panelBuilder, buildersForType, panelOptionsToExclude)
 			if err != nil {
 				return nil, err
 			}
 
-			composedBuilder.AddToVeneerTrail("ComposeDashboardPanel")
+			for _, b := range composedBuilders {
+				b.AddToVeneerTrail("ComposeDashboardPanel")
+			}
 
-			newBuilders = append(newBuilders, composedBuilder)
+			newBuilders = append(newBuilders, composedBuilders...)
 		}
 
 		return newBuilders, nil

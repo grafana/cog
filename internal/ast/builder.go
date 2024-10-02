@@ -448,20 +448,8 @@ func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
 
 	for _, schema := range schemas {
 		schema.Objects.Iterate(func(_ string, object Object) {
-			// we only want builders for structs or references to structs
-			if object.Type.IsRef() {
-				ref := object.Type.AsRef()
-				referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
-				if !found {
-					return
-				}
-
-				if !referredObj.Type.IsStruct() {
-					return
-				}
-			}
-
-			if !object.Type.IsAnyOf(KindStruct, KindRef) {
+			resolvedType := schemas.ResolveToType(object.Type)
+			if !resolvedType.IsAnyOf(KindStruct, KindRef) {
 				return
 			}
 
@@ -479,15 +467,7 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 		Name:    object.Name,
 	}
 
-	var structType StructType
-	if object.Type.IsStruct() {
-		structType = object.Type.AsStruct()
-	} else {
-		ref := object.Type.AsRef()
-		referredObj, _ := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
-		structType = referredObj.Type.AsStruct()
-	}
-
+	structType := schemas.ResolveToType(object.Type).AsStruct()
 	for _, field := range structType.Fields {
 		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
 			constantAssignment := ConstantAssignment(PathFromStructField(field), field.Type.AsScalar().Value)
@@ -496,9 +476,9 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 			continue
 		}
 		if field.Required && !field.Type.Nullable && generator.fieldIsRefToConcrete(schemas, field) {
-			referredObj, _ := schemas.LocateObject(field.Type.Ref.ReferredPkg, field.Type.Ref.ReferredType)
+			resolvedType := schemas.ResolveToType(field.Type)
 
-			constantAssignment := ConstantAssignment(PathFromStructField(field), referredObj.Type.AsScalar().Value)
+			constantAssignment := ConstantAssignment(PathFromStructField(field), resolvedType.AsScalar().Value)
 			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
 			continue
 		}
@@ -514,12 +494,7 @@ func (generator *BuilderGenerator) fieldIsRefToConcrete(schemas Schemas, field S
 		return false
 	}
 
-	referredObj, found := schemas.LocateObject(field.Type.Ref.ReferredPkg, field.Type.Ref.ReferredType)
-	if !found {
-		return false
-	}
-
-	return referredObj.Type.IsScalar() && referredObj.Type.AsScalar().IsConcrete()
+	return schemas.ResolveToType(field.Type).IsConcreteScalar()
 }
 
 func (generator *BuilderGenerator) structFieldToOption(field StructField) Option {
