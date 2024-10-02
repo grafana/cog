@@ -66,9 +66,10 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 	return jenny.Tmpl.
 		Funcs(map[string]any{
-			"formatType":   builderTypeFormatter(jenny.Config, context, dummyImportMapper).formatType,
-			"formatPath":   makePathFormatter(formatter),
-			"formatRawRef": formatRawRef,
+			"formatType":          builderTypeFormatter(jenny.Config, context, dummyImportMapper).formatType,
+			"formatTypeNoBuilder": defaultTypeFormatter(jenny.Config, context, dummyImportMapper).formatType,
+			"formatPath":          makePathFormatter(formatter),
+			"formatRawRef":        formatRawRef,
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
 			"Imports":   imports,

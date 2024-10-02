@@ -29,6 +29,18 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 {{- define "value_formatter" -}}
     {{- if and (.Type.IsRef) (resolvesToEnum .Type) -}}
     '{{ formatRawRef .Type.Ref.ReferredPkg .Type.Ref.ReferredType }}::fromValue("'.${{ .Path | formatPath }}.'")'
+    {{- else if and (.Type.IsRef) (resolvesToStruct .Type) -}}
+    {{- $structDef := (resolveRefs .Type).Struct -}}
+    '(new {{ formatRawRef .Type.Ref.ReferredPkg .Type.Ref.ReferredType }}(
+        {{- range $field := $structDef.Fields -}}
+        {{- $valuePath := $.Path.AppendStructField $field -}}
+        {{- if $field.Type.Nullable -}}
+        '.((${{ $valuePath | formatPath }} !== null) ? '{{ $field.Name }}: '.{{- template "value_formatter" (dict "Type" $field.Type "Path" $valuePath) -}}.', ' : '').'
+        {{- else -}}
+        {{ $field.Name }}: '.{{- template "value_formatter" (dict "Type" $field.Type "Path" $valuePath) -}}.',
+        {{- end -}}
+        {{- end -}}
+    ))'
     {{- else -}}
     \var_export(${{ .Path | formatPath }}, true)
     {{- end -}}
@@ -51,6 +63,15 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
         $tmp{{ $.IntoVar }}[] = ${{ $subIntoVar }};
         }
         ${{ $.IntoVar }} = "[" . implode(", \n", $tmp{{ $.IntoVar }}) . "]";
+    {{- end -}}
+    {{- with .Arg.Map -}}
+        ${{ $.IntoVar }} = "[";
+        foreach (${{ .For | formatPath }} as $key => ${{ .ValueAs | formatPath }}) {
+        {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
+            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
+            ${{ $.IntoVar }} .= "\t".var_export($key, true)." => ${{ $subIntoVar }},";
+        }
+        ${{ $.IntoVar }} .= "]";
     {{- end -}}
     {{- with .Arg.Runtime -}}
         ${{ $.IntoVar }} = {{ "Cog\\Runtime" | fullNamespaceRef }}::get()->{{ .FuncName|formatOptionName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}${{ $runtimeArg.ValuePath | formatPath }}{{ else }}${{ $runtimeArg.ValuePath | formatPath }}{{ end }}, {{ end }});

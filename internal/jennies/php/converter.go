@@ -47,6 +47,13 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 	return jenny.tmpl.
 		Funcs(map[string]any{
+			"resolveRefs": context.ResolveRefs,
+			"resolvesToStruct": func(typeDef ast.Type) bool {
+				return context.ResolveRefs(typeDef).IsStruct()
+			},
+			"resolvesToMap": func(typeDef ast.Type) bool {
+				return context.ResolveRefs(typeDef).IsMap()
+			},
 			"resolvesToEnum": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsEnum()
 			},
