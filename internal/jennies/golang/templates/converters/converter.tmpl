@@ -52,6 +52,15 @@ package {{ .Converter.Package | formatPackageName }}
         }
         {{ $.IntoVar }} := "{{ .ForType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
     {{- end -}}
+    {{- with .Arg.Map -}}
+        {{ $.IntoVar }} := "map[{{ .IndexType | formatType }}]{{ .ValueType | formatTypeNoBuilder }}{"
+        for key, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
+        {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
+            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
+            {{ $.IntoVar }} += "\t" + fmt.Sprintf("%#v", key) + ": " + {{ $subIntoVar }} +","
+        }
+        {{ $.IntoVar }} += "}"
+    {{- end -}}
     {{- with .Arg.Runtime -}}
         {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath | formatPath }}{{ else }}{{ maybeUnptr ($runtimeArg.ValuePath | formatPath) $runtimeArg.ValueType }}{{ end }}, {{ end }})
     {{- end -}}

@@ -40,6 +40,15 @@ type ArrayArgMapping struct {
 	ValueType ast.Type
 }
 
+type MapArgMapping struct {
+	For       ast.Path
+	ForType   ast.Type
+	ForArg    *ArgumentMapping
+	ValueAs   ast.Path
+	IndexType ast.Type
+	ValueType ast.Type
+}
+
 type RuntimeArgMapping struct {
 	FuncName string
 	Args     []*DirectArgMapping
@@ -60,6 +69,7 @@ type ArgumentMapping struct {
 	Runtime     *RuntimeArgMapping
 	Builder     *BuilderArgMapping
 	Array       *ArrayArgMapping
+	Map         *MapArgMapping
 	Disjunction *DisjunctionArgMapping
 
 	// TODO: used? necessary?
@@ -332,6 +342,25 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 				ForArg:    &forArg,
 				ValueAs:   valueAs,
 				ValueType: typeDef.Array.ValueType,
+			},
+		}
+	}
+
+	if typeDef.IsMap() {
+		valueAs := ast.Path{
+			{Identifier: argName, Type: typeDef.Map.ValueType, Root: true},
+		}
+
+		forArg := generator.argumentForType(context, converter, argName+"Value", valueAs, typeDef.Map.ValueType)
+
+		return ArgumentMapping{
+			Map: &MapArgMapping{
+				For:       valuePath,
+				ForType:   typeDef,
+				ForArg:    &forArg,
+				ValueAs:   valueAs,
+				IndexType: typeDef.Map.IndexType,
+				ValueType: typeDef.Map.ValueType,
 			},
 		}
 	}
