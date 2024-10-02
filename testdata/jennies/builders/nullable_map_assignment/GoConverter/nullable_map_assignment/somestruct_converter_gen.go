@@ -14,7 +14,12 @@ func SomeStructConverter(input *SomeStruct) string {
         if input.Config != nil {
         
     buffer.WriteString(`Config(`)
-        arg0 :=cog.Dump(input.Config)
+        arg0 := "map[string]string{"
+        for key, arg1 := range input.Config {
+            tmpconfigarg1 :=fmt.Sprintf("%#v", arg1)
+            arg0 += "\t" + fmt.Sprintf("%#v", key) + ": " + tmpconfigarg1 +","
+        }
+        arg0 += "}"
         buffer.WriteString(arg0)
         
     buffer.WriteString(")")

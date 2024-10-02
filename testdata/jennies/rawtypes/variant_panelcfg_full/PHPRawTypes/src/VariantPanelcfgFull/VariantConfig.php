@@ -9,7 +9,7 @@ final class VariantConfig
         return new \Grafana\Foundation\Cog\PanelcfgConfig(
             identifier: 'timeseries',
             optionsFromArray: [\Grafana\Foundation\VariantPanelcfgFull\Options::class, 'fromArray'],
-            fieldConfigFromArray: [\Grafana\Foundation\VariantPanelcfgFull\FieldConfig::class, 'fromArray']
+            fieldConfigFromArray: [\Grafana\Foundation\VariantPanelcfgFull\FieldConfig::class, 'fromArray'],
         );
     }
 }
