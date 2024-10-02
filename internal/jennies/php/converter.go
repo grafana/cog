@@ -47,7 +47,8 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 	return jenny.tmpl.
 		Funcs(map[string]any{
-			"resolveRefs": context.ResolveRefs,
+			"fullNamespaceRef": jenny.config.fullNamespaceRef,
+			"resolveRefs":      context.ResolveRefs,
 			"resolvesToStruct": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsStruct()
 			},
