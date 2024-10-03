@@ -2,6 +2,9 @@ name: Foundation-sdk diff preview
 on:
   pull_request: ~
 
+env:
+  DEVBOX_VERSION: 0.13.1
+
 jobs:
   sdk_diff:
     name: Generate diff
@@ -14,6 +17,7 @@ jobs:
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
           enable-cache: 'true'
+          devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Dry-run release
         shell: bash

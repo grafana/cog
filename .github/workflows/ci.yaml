@@ -4,6 +4,9 @@ on:
   push:
     branches: [main] # so that we build a Go cache that can be re-used in PRs
 
+env:
+  DEVBOX_VERSION: 0.13.1
+
 jobs:
   linters:
     name: Linters
@@ -16,6 +19,7 @@ jobs:
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
           enable-cache: 'true'
+          devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Run golangci-lint
         run: make lint
@@ -31,6 +35,7 @@ jobs:
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
           enable-cache: 'true'
+          devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Tests
         run: make tests
@@ -50,6 +55,7 @@ jobs:
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
           enable-cache: 'true'
+          devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Clone kind-registry
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
@@ -73,7 +79,7 @@ jobs:
         run: devbox run gradle build -p generated/java
       
       - name: Lint generated PHP code with phpstan
-        run: devbox run phpstan analyze --memory-limit 256M -c .config/ci/php/phpstan.neon
+        run: devbox run phpstan analyze --memory-limit 256M -v -c .config/ci/php/phpstan.neon
 
       - name: Lint generated PHP code with psalm
         run: devbox run psalm -c .config/ci/php/psalm.xml generated/php
@@ -89,6 +95,7 @@ jobs:
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
           enable-cache: 'true'
+          devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Clone kind-registry
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry

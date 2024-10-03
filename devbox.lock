@@ -175,8 +175,8 @@
       }
     },
     "nodePackages.ts-node@10.9.2": {
-      "last_modified": "2024-09-13T05:52:00Z",
-      "resolved": "github:NixOS/nixpkgs/673d99f1406cb09b8eb6feab4743ebdf70046557#nodePackages.ts-node",
+      "last_modified": "2024-09-23T10:58:17Z",
+      "resolved": "github:NixOS/nixpkgs/568bfef547c14ca438c56a0bece08b8bb2b71a9c#nodePackages.ts-node",
       "source": "devbox-search",
       "version": "10.9.2",
       "systems": {
@@ -184,41 +184,41 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/kmchq7l6lyfl6q5dxh82kyvxd2r2hrgy-ts-node-10.9.2",
+              "path": "/nix/store/3zm6xc7hzn1msjha4srgqphdi3l4cxr9-ts-node-10.9.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/kmchq7l6lyfl6q5dxh82kyvxd2r2hrgy-ts-node-10.9.2"
+          "store_path": "/nix/store/3zm6xc7hzn1msjha4srgqphdi3l4cxr9-ts-node-10.9.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/6kgfhn3mczsgv39b15l1iv4vhjmiyfvp-ts-node-10.9.2",
+              "path": "/nix/store/56q9lbgk20cqwqlqar1mm1l1h31c7pif-ts-node-10.9.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/6kgfhn3mczsgv39b15l1iv4vhjmiyfvp-ts-node-10.9.2"
+          "store_path": "/nix/store/56q9lbgk20cqwqlqar1mm1l1h31c7pif-ts-node-10.9.2"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/49pyi3l8xd1cw5fw5rgd3jy9782184p7-ts-node-10.9.2",
+              "path": "/nix/store/vpihhsb85fx3qyy87l6f77fpw7sm0y8d-ts-node-10.9.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/49pyi3l8xd1cw5fw5rgd3jy9782184p7-ts-node-10.9.2"
+          "store_path": "/nix/store/vpihhsb85fx3qyy87l6f77fpw7sm0y8d-ts-node-10.9.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/l8phr8qy3mdj1wy0cy4afl27acc8f28b-ts-node-10.9.2",
+              "path": "/nix/store/nvmzzqg1x44w0lys42ws7pkvbwgh6ap9-ts-node-10.9.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/l8phr8qy3mdj1wy0cy4afl27acc8f28b-ts-node-10.9.2"
+          "store_path": "/nix/store/nvmzzqg1x44w0lys42ws7pkvbwgh6ap9-ts-node-10.9.2"
         }
       }
     },
@@ -288,8 +288,8 @@
       }
     },
     "php83Packages.phpstan@1.11": {
-      "last_modified": "2024-09-10T15:01:03Z",
-      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#php83Packages.phpstan",
+      "last_modified": "2024-09-28T20:36:15Z",
+      "resolved": "github:NixOS/nixpkgs/19d2ec01a20afa6a816a10d3a57b4c49b3d1293b#php83Packages.phpstan",
       "source": "devbox-search",
       "version": "1.11.8",
       "systems": {
@@ -297,47 +297,47 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/pyw05w2xsnndx3k1s4yns80gax4l6jm5-phpstan-1.11.8",
+              "path": "/nix/store/5sidqrbm6jwgglzfp5j1c5sc4m46qxz2-phpstan-1.11.8",
               "default": true
             }
           ],
-          "store_path": "/nix/store/pyw05w2xsnndx3k1s4yns80gax4l6jm5-phpstan-1.11.8"
+          "store_path": "/nix/store/5sidqrbm6jwgglzfp5j1c5sc4m46qxz2-phpstan-1.11.8"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/raxgmljp14ilfyi8jzngqa28c1wl35c6-phpstan-1.11.8",
+              "path": "/nix/store/7msdy2byk1xzn5pmdqpxg4vzs97qhlcm-phpstan-1.11.8",
               "default": true
             }
           ],
-          "store_path": "/nix/store/raxgmljp14ilfyi8jzngqa28c1wl35c6-phpstan-1.11.8"
+          "store_path": "/nix/store/7msdy2byk1xzn5pmdqpxg4vzs97qhlcm-phpstan-1.11.8"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/icd857ch4plc4qw4fnnixhnmibr926dm-phpstan-1.11.8",
+              "path": "/nix/store/r8ph0bh12wywfnwlnraqrfj5i4947d8b-phpstan-1.11.8",
               "default": true
             }
           ],
-          "store_path": "/nix/store/icd857ch4plc4qw4fnnixhnmibr926dm-phpstan-1.11.8"
+          "store_path": "/nix/store/r8ph0bh12wywfnwlnraqrfj5i4947d8b-phpstan-1.11.8"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dicy20zii0b1xpqflh4jxmz0ywsmj04k-phpstan-1.11.8",
+              "path": "/nix/store/vvbcf62600lnrnsz6wnxi8l4lrp9advr-phpstan-1.11.8",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dicy20zii0b1xpqflh4jxmz0ywsmj04k-phpstan-1.11.8"
+          "store_path": "/nix/store/vvbcf62600lnrnsz6wnxi8l4lrp9advr-phpstan-1.11.8"
         }
       }
     },
     "php83Packages.psalm@5.25": {
-      "last_modified": "2024-09-10T15:01:03Z",
-      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#php83Packages.psalm",
+      "last_modified": "2024-09-28T20:36:15Z",
+      "resolved": "github:NixOS/nixpkgs/19d2ec01a20afa6a816a10d3a57b4c49b3d1293b#php83Packages.psalm",
       "source": "devbox-search",
       "version": "5.25.0",
       "systems": {
@@ -345,41 +345,41 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2ipakcda8icl7r86s0qjkd627mrcfvl3-psalm-5.25.0",
+              "path": "/nix/store/h1wnfcnaw7nhp357dc0wcaz9w8ikmyv8-psalm-5.25.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/2ipakcda8icl7r86s0qjkd627mrcfvl3-psalm-5.25.0"
+          "store_path": "/nix/store/h1wnfcnaw7nhp357dc0wcaz9w8ikmyv8-psalm-5.25.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/w32iqghc4gxydkfqgrds69i0bg23jjaf-psalm-5.25.0",
+              "path": "/nix/store/4w4m1r72la7mziv8ac83ar0jsn12jrmp-psalm-5.25.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/w32iqghc4gxydkfqgrds69i0bg23jjaf-psalm-5.25.0"
+          "store_path": "/nix/store/4w4m1r72la7mziv8ac83ar0jsn12jrmp-psalm-5.25.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/phmq70pf9wmqm0vf03qhf9w9zmszcjf9-psalm-5.25.0",
+              "path": "/nix/store/p38qj9ckg20ycg3avdbin9ip8h6nxpkh-psalm-5.25.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/phmq70pf9wmqm0vf03qhf9w9zmszcjf9-psalm-5.25.0"
+          "store_path": "/nix/store/p38qj9ckg20ycg3avdbin9ip8h6nxpkh-psalm-5.25.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/l5l5pbf9yny98982f3rd2z8dsnaas5sg-psalm-5.25.0",
+              "path": "/nix/store/zq02h3hv6464b666qjdyyybpnmvr8zhl-psalm-5.25.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/l5l5pbf9yny98982f3rd2z8dsnaas5sg-psalm-5.25.0"
+          "store_path": "/nix/store/zq02h3hv6464b666qjdyyybpnmvr8zhl-psalm-5.25.0"
         }
       }
     },
