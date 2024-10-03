@@ -6,6 +6,7 @@ final class SomeNiceBuilderConverter
 {
     public static function convert(\Grafana\Foundation\Withdashes\SomeStruct $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\Builderpkg\SomeNiceBuilderBuilder())',
         ];

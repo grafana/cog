@@ -6,6 +6,7 @@ final class SomePanelConverter
 {
     public static function convert(\Grafana\Foundation\ConstructorInitializations\SomePanel $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\ConstructorInitializations\SomePanelBuilder())',
         ];
