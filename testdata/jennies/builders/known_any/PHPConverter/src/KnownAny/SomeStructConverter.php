@@ -11,7 +11,7 @@ final class SomeStructConverter
             '(new \Grafana\Foundation\KnownAny\SomeStructBuilder())',
         ];
         $buffer = '';
-            if ($input->config->title !== "") {
+            if ($input->config !== null && $input->config instanceof \Grafana\Foundation\KnownAny\Config && $input->config->title !== "") {
     
         
     $buffer .= 'title(';
