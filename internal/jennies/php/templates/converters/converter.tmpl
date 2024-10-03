@@ -12,6 +12,7 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 
     {{- if and (eq $operator "!==") (eq .Value nil) -}}
         ${{ .Path | formatPath }} !== null
+        {{- if ne .Path.Last.TypeHint nil }} && ${{ .Path | formatPath }} instanceof {{ formatRawRef .Path.Last.TypeHint.Ref.ReferredPkg .Path.Last.TypeHint.Ref.ReferredType }}{{ end }}
     {{- else -}}
         {{- $leftOperand := print "$" (.Path | formatPath) -}}
         {{- if eq .Op "minLength" -}}

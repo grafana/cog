@@ -508,12 +508,7 @@ func (generator *ConverterGenerator) pathNotNullGuards(converter Converter, path
 	var guards []MappingGuard
 
 	for i, chunk := range path {
-		chunkType := chunk.Type
-		if chunk.TypeHint != nil {
-			chunkType = *chunk.TypeHint
-		}
-
-		if !generator.nullableTypes.TypeIsNullable(chunkType) {
+		if !generator.nullableTypes.TypeIsNullable(chunk.Type) {
 			continue
 		}
 

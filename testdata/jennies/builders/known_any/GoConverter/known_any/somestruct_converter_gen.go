@@ -11,7 +11,7 @@ func SomeStructConverter(input *SomeStruct) string {
     `known_any.NewSomeStructBuilder()`,
     }
     var buffer strings.Builder
-        if input.Config.(*Config).Title != "" {
+        if input.Config != nil && input.Config.(*Config).Title != "" {
         
     buffer.WriteString(`Title(`)
         arg0 :=fmt.Sprintf("%#v", input.Config.(*Config).Title)
