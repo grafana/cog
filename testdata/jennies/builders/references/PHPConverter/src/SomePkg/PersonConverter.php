@@ -6,6 +6,7 @@ final class PersonConverter
 {
     public static function convert(\Grafana\Foundation\SomePkg\Person $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\SomePkg\PersonBuilder())',
         ];

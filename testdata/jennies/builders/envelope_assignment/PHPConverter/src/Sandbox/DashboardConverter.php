@@ -6,6 +6,7 @@ final class DashboardConverter
 {
     public static function convert(\Grafana\Foundation\Sandbox\Dashboard $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\Sandbox\DashboardBuilder())',
         ];

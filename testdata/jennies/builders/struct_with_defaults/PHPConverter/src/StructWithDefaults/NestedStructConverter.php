@@ -6,6 +6,7 @@ final class NestedStructConverter
 {
     public static function convert(\Grafana\Foundation\StructWithDefaults\NestedStruct $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\StructWithDefaults\NestedStructBuilder())',
         ];

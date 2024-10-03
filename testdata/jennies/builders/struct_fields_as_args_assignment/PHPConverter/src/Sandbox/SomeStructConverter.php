@@ -6,6 +6,7 @@ final class SomeStructConverter
 {
     public static function convert(\Grafana\Foundation\Sandbox\SomeStruct $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\Sandbox\SomeStructBuilder())',
         ];

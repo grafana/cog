@@ -6,6 +6,7 @@ final class LokiBuilderConverter
 {
     public static function convert(\Grafana\Foundation\DataqueryVariantBuilder\Loki $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\DataqueryVariantBuilder\LokiBuilderBuilder())',
         ];

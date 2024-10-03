@@ -6,6 +6,7 @@ final class LokiBuilderConverter
 {
     public static function convert(\Grafana\Foundation\ComposableSlot\Dashboard $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\ComposableSlot\LokiBuilderBuilder())',
         ];

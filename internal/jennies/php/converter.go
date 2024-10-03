@@ -44,6 +44,9 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
 	converter := languages.NewConverterGenerator(jenny.nullableConfig).FromBuilder(context, builder)
 	formatter := builderTypeFormatter(jenny.config, context)
+	schema, schemaFound := context.Schemas.Locate(builder.Package)
+
+	inputIsDataquery := schemaFound && schema.Metadata.Variant == ast.SchemaVariantDataQuery && schema.EntryPoint == builder.For.Name
 
 	return jenny.tmpl.
 		Funcs(map[string]any{
@@ -102,7 +105,8 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			},
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
-			"NamespaceRoot": jenny.config.NamespaceRoot,
-			"Converter":     converter,
+			"NamespaceRoot":    jenny.config.NamespaceRoot,
+			"Converter":        converter,
+			"InputIsDataquery": inputIsDataquery,
 		})
 }

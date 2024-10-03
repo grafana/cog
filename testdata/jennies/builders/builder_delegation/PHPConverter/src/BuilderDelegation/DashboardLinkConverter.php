@@ -6,6 +6,7 @@ final class DashboardLinkConverter
 {
     public static function convert(\Grafana\Foundation\BuilderDelegation\DashboardLink $input): string
     {
+        
         $calls = [
             '(new \Grafana\Foundation\BuilderDelegation\DashboardLinkBuilder())',
         ];

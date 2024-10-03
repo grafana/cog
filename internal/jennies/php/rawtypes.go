@@ -325,10 +325,12 @@ func (jenny RawTypes) convertDisjunctionFunc(disjunction ast.DisjunctionType) st
 
 	decodingSwitch += "}"
 
-	return fmt.Sprintf(`(function($input) {
+	dataqueryRef := jenny.config.fullNamespaceRef("Cog\\Dataquery")
+
+	return fmt.Sprintf(`(function(%s $input) {
 
     %s
-})`, decodingSwitch)
+})`, dataqueryRef, decodingSwitch)
 }
 
 func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Object) string {

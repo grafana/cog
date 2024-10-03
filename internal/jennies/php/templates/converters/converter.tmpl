@@ -127,8 +127,9 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 {{- define "converter" -}}
 final class {{ .Converter.BuilderName | upperCamelCase }}Converter
 {
-    public static function convert({{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType }} $input): string
+    public static function convert({{ if .InputIsDataquery }}{{ "Cog\\Dataquery" | fullNamespaceRef }}{{ else }}{{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType }}{{ end }} $input): string
     {
+        {{ if .InputIsDataquery }}assert($input instanceof {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType }});{{ end }}
         {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
         $calls = [
             '(new {{ formatRawRef .Converter.Package .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}'.{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} . ", " .{{ end }}{{ end }}.'{{ end }}))',
