@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 //go:embed templates/builders/*.tmpl templates/converters/*.tmpl templates/runtime/*.tmpl templates/types/*.tmpl
@@ -16,51 +17,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	tmpl, err := template.New(
 		"php",
 
-		// placeholder functions, will be overridden by jennies
-		template.Funcs(template.FuncMap{
-			"fullNamespaceRef": func(_ string) string {
-				panic("fullNamespaceRef() needs to be overridden by a jenny")
-			},
-			"formatType":    func(_ ast.Type) string { panic("formatType() needs to be overridden by a jenny") },
-			"formatRawType": func(_ ast.Type) string { panic("formatRawType() needs to be overridden by a jenny") },
-			"formatRawRef": func(pkg string, ref string) string {
-				panic("formatRawRef() needs to be overridden by a jenny")
-			},
-			"formatRawTypeNotNullable": func(_ ast.Type) string { panic("formatRawTypeNotNullable() needs to be overridden by a jenny") },
-			"typeHasBuilder": func(_ ast.Type) bool {
-				panic("typeHasBuilder() needs to be overridden by a jenny")
-			},
-			"typeHint": func(_ ast.Type) string {
-				panic("typeHint() needs to be overridden by a jenny")
-			},
-			"isDisjunctionOfBuilders": func(_ ast.Type) bool {
-				panic("isDisjunctionOfBuilders() needs to be overridden by a jenny")
-			},
-			"resolvesToComposableSlot": func(_ ast.Type) bool {
-				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
-			},
-			"defaultForType": func(_ ast.Type) bool {
-				panic("defaultForType() needs to be overridden by a jenny")
-			},
-			"formatValue": func(_ ast.Type, _ any) bool {
-				panic("formatValue() needs to be overridden by a jenny")
-			},
-			"disjunctionCaseForType": func(input string, typeDef ast.Type) string {
-				panic("disjunctionCaseForType() needs to be overridden by a jenny")
-			},
-			"resolvesToEnum": func(typeDef ast.Type) bool {
-				panic("refResolvesToEnum() needs to be overridden by a jenny")
-			},
-			"resolvesToStruct": func(typeDef ast.Type) bool {
-				panic("resolvesToStruct() needs to be overridden by a jenny")
-			},
-			"resolvesToMap": func(typeDef ast.Type) bool {
-				panic("resolvesToMap() needs to be overridden by a jenny")
-			},
-			"resolveRefs": func(typeDef ast.Type) ast.Type {
-				panic("resolveRefs() needs to be overridden by a jenny")
-			},
-		}),
+		// "dummy"/unimplemented helpers, to be able to parse the templates before jennies are initialized.
+		// Jennies will override these with proper dependencies.
+		template.Funcs(templateHelpers(templateDeps{})),
 		template.Funcs(map[string]any{
 			"formatPath":           formatFieldPath,
 			"formatPackageName":    formatPackageName,
@@ -81,4 +40,72 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	}
 
 	return tmpl
+}
+
+type templateDeps struct {
+	config  Config
+	context languages.Context
+}
+
+func templateHelpers(deps templateDeps) template.FuncMap {
+	typesFormatter := builderTypeFormatter(deps.config, deps.context)
+	hinter := &typehints{config: deps.config, context: deps.context, resolveBuilders: false}
+
+	return template.FuncMap{
+		"fullNamespaceRef":        deps.config.fullNamespaceRef,
+		"typeHasBuilder":          deps.context.ResolveToBuilder,
+		"isDisjunctionOfBuilders": deps.context.IsDisjunctionOfBuilders,
+
+		"formatType": typesFormatter.formatType,
+		"formatRawType": func(def ast.Type) string {
+			return typesFormatter.doFormatType(def, false)
+		},
+		"formatRawRef": func(pkg string, ref string) string {
+			return typesFormatter.formatRef(ast.NewRef(pkg, ref), false)
+		},
+		"formatRawTypeNotNullable": func(def ast.Type) string {
+			typeDef := def.DeepCopy()
+			typeDef.Nullable = false
+
+			return typesFormatter.doFormatType(typeDef, false)
+		},
+		"formatValue": func(destinationType ast.Type, value any) string {
+			if destinationType.IsRef() {
+				referredObj, found := deps.context.LocateObjectByRef(destinationType.AsRef())
+				if found && referredObj.Type.IsEnum() {
+					return typesFormatter.formatEnumValue(referredObj, value)
+				}
+			}
+
+			return formatValue(value)
+		},
+
+		"typeHint": func(def ast.Type) string {
+			clone := def.DeepCopy()
+			clone.Nullable = false
+
+			return hinter.forType(clone, false)
+		},
+		"defaultForType": func(typeDef ast.Type) string {
+			return formatValue(defaultValueForType(deps.config, deps.context.Schemas, typeDef, nil))
+		},
+		"disjunctionCaseForType": func(input string, typeDef ast.Type) string {
+			return disjunctionCaseForType(typesFormatter, input, typeDef)
+		},
+
+		"resolveRefs": deps.context.ResolveRefs,
+		"resolvesToStruct": func(typeDef ast.Type) bool {
+			return deps.context.ResolveRefs(typeDef).IsStruct()
+		},
+		"resolvesToMap": func(typeDef ast.Type) bool {
+			return deps.context.ResolveRefs(typeDef).IsMap()
+		},
+		"resolvesToEnum": func(typeDef ast.Type) bool {
+			return deps.context.ResolveRefs(typeDef).IsEnum()
+		},
+		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
+			_, found := deps.context.ResolveToComposableSlot(typeDef)
+			return found
+		},
+	}
 }

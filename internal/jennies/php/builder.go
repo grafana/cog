@@ -78,48 +78,11 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Cog\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),
 	)
 
-	hinter := &typehints{config: jenny.config, context: context, resolveBuilders: false}
-
 	return jenny.tmpl.
-		Funcs(map[string]any{
-			"fullNamespaceRef": jenny.config.fullNamespaceRef,
-			"formatPath":       formatFieldPath,
-			"formatType":       jenny.typeFormatter.formatType,
-			"formatRawType": func(def ast.Type) string {
-				return jenny.typeFormatter.doFormatType(def, false)
-			},
-			"formatRawTypeNotNullable": func(def ast.Type) string {
-				typeDef := def.DeepCopy()
-				typeDef.Nullable = false
-
-				return jenny.typeFormatter.doFormatType(typeDef, false)
-			},
-			"typeHasBuilder":          context.ResolveToBuilder,
-			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
-			"typeHint": func(def ast.Type) string {
-				clone := def.DeepCopy()
-				clone.Nullable = false
-
-				return hinter.forType(clone, false)
-			},
-			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
-				_, found := context.ResolveToComposableSlot(typeDef)
-				return found
-			},
-			"formatValue": func(destinationType ast.Type, value any) string {
-				if destinationType.IsRef() {
-					referredObj, found := context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
-					if found && referredObj.Type.IsEnum() {
-						return jenny.typeFormatter.formatEnumValue(referredObj, value)
-					}
-				}
-
-				return formatValue(value)
-			},
-			"defaultForType": func(typeDef ast.Type) string {
-				return formatValue(defaultValueForType(jenny.config, context.Schemas, typeDef, nil))
-			},
-		}).
+		Funcs(templateHelpers(templateDeps{
+			config:  jenny.config,
+			context: context,
+		})).
 		RenderAsBytes("builders/builder.tmpl", map[string]any{
 			"NamespaceRoot": jenny.config.NamespaceRoot,
 			"Builder":       builder,
