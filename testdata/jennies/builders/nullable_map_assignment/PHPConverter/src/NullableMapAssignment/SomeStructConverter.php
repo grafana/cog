@@ -10,11 +10,10 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\NullableMapAssignment\SomeStructBuilder())',
         ];
-        $buffer = '';
             if ($input->config !== null) {
     
         
-    $buffer .= 'config(';
+    $buffer = 'config(';
         $arg0 = "[";
         foreach ($input->config as $key => $arg1) {
             $tmpconfigarg1 =\var_export($arg1, true);
@@ -26,7 +25,6 @@ final class SomeStructConverter
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

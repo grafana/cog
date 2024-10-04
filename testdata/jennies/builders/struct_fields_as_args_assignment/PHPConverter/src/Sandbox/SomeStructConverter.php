@@ -10,11 +10,10 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\Sandbox\SomeStructBuilder())',
         ];
-        $buffer = '';
             if ($input->time !== null && $input->time->from !== "" && $input->time->from !== "now-6h" && $input->time->to !== "" && $input->time->to !== "now") {
     
         
-    $buffer .= 'time(';
+    $buffer = 'time(';
         $arg0 =\var_export($input->time->from, true);
         $buffer .= $arg0;
         $buffer .= ', ';
@@ -24,7 +23,6 @@ final class SomeStructConverter
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

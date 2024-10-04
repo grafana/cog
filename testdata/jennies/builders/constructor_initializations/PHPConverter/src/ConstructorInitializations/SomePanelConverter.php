@@ -10,18 +10,16 @@ final class SomePanelConverter
         $calls = [
             '(new \Grafana\Foundation\ConstructorInitializations\SomePanelBuilder())',
         ];
-        $buffer = '';
             if ($input->title !== "") {
     
         
-    $buffer .= 'title(';
+    $buffer = 'title(';
         $arg0 =\var_export($input->title, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

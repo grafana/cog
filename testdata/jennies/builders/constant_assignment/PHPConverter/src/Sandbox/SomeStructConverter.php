@@ -10,48 +10,43 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\Sandbox\SomeStructBuilder())',
         ];
-        $buffer = '';
             if ($input->editable === true) {
     
         
-    $buffer .= 'editable(';
+    $buffer = 'editable(';
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->editable === false) {
     
         
-    $buffer .= 'readonly(';
+    $buffer = 'readonly(';
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->autoRefresh !== null && $input->autoRefresh === true) {
     
         
-    $buffer .= 'autoRefresh(';
+    $buffer = 'autoRefresh(';
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->autoRefresh !== null && $input->autoRefresh === false) {
     
         
-    $buffer .= 'noAutoRefresh(';
+    $buffer = 'noAutoRefresh(';
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

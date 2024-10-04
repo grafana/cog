@@ -10,74 +10,68 @@ final class StructConverter
         $calls = [
             '(new \Grafana\Foundation\StructWithDefaults\StructBuilder())',
         ];
-        $buffer = '';
             
     
         {
-    $buffer .= 'allFields(';
+    $buffer = 'allFields(';
         $arg0 = \Grafana\Foundation\StructWithDefaults\NestedStructConverter::convert($input->allFields);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     
             
     
         {
-    $buffer .= 'partialFields(';
+    $buffer = 'partialFields(';
         $arg0 = \Grafana\Foundation\StructWithDefaults\NestedStructConverter::convert($input->partialFields);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     
             
     
         {
-    $buffer .= 'emptyFields(';
+    $buffer = 'emptyFields(';
         $arg0 = \Grafana\Foundation\StructWithDefaults\NestedStructConverter::convert($input->emptyFields);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     
             
     
         {
-    $buffer .= 'complexField(';
+    $buffer = 'complexField(';
         $arg0 =\var_export($input->complexField, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     
             
     
         {
-    $buffer .= 'partialComplexField(';
+    $buffer = 'partialComplexField(';
         $arg0 =\var_export($input->partialComplexField, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     

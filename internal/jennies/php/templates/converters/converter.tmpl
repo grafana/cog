@@ -99,7 +99,7 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
     {{- $argsCount := sub1 (len .Args) -}}
     {{- with .ArgumentGuards -}}if ({{ template "guards" . }}) { {{- end }}
     {{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} { {{- end }}
-    $buffer .= '{{ .Option.Name | formatOptionName }}(';
+    $buffer = '{{ .Option.Name | formatOptionName }}(';
     {{- range $i, $arg := .Args }}
         {{- $intoVar := print "arg" $i }}
         {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
@@ -109,7 +109,6 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     {{ with .ArgumentGuards -}} } {{- end }}
     {{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} } {{- end }}
 {{- end }}
@@ -135,7 +134,6 @@ final class {{ .Converter.BuilderName | upperCamelCase }}Converter
         $calls = [
             '(new {{ formatRawRef .Converter.Package .Converter.BuilderName }}Builder({{ with .Converter.ConstructorArgs}}'.{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} . ", " .{{ end }}{{ end }}.'{{ end }}))',
         ];
-        $buffer = '';
 
         {{- range .Converter.Mappings }}
             {{ template "conversion_mapping" . }}

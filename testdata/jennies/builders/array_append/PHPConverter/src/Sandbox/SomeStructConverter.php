@@ -10,18 +10,16 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\Sandbox\SomeStructBuilder())',
         ];
-        $buffer = '';
             if (count($input->tags) >= 1) {
     foreach ($input->tags as $item) {
         
-    $buffer .= 'tags(';
+    $buffer = 'tags(';
         $arg0 =\var_export($item, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     }
     }

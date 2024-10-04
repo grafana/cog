@@ -10,18 +10,16 @@ final class LokiBuilderConverter
         $calls = [
             '(new \Grafana\Foundation\DataqueryVariantBuilder\LokiBuilderBuilder())',
         ];
-        $buffer = '';
             if ($input->expr !== "") {
     
         
-    $buffer .= 'expr(';
+    $buffer = 'expr(';
         $arg0 =\var_export($input->expr, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

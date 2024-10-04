@@ -10,32 +10,29 @@ final class DashboardLinkConverter
         $calls = [
             '(new \Grafana\Foundation\BuilderDelegation\DashboardLinkBuilder())',
         ];
-        $buffer = '';
             if ($input->title !== "") {
     
         
-    $buffer .= 'title(';
+    $buffer = 'title(';
         $arg0 =\var_export($input->title, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->url !== "") {
     
         
-    $buffer .= 'url(';
+    $buffer = 'url(';
         $arg0 =\var_export($input->url, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
