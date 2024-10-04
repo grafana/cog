@@ -10,39 +10,36 @@ final class PanelConverter
         $calls = [
             '(new \Grafana\Foundation\Panelbuilder\PanelBuilder())',
         ];
-        $buffer = '';
             if ($input->onlyFromThisDashboard !== false) {
     
         
-    $buffer .= 'onlyFromThisDashboard(';
+    $buffer = 'onlyFromThisDashboard(';
         $arg0 =\var_export($input->onlyFromThisDashboard, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->onlyInTimeRange !== false) {
     
         
-    $buffer .= 'onlyInTimeRange(';
+    $buffer = 'onlyInTimeRange(';
         $arg0 =\var_export($input->onlyInTimeRange, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if (count($input->tags) >= 1) {
     
         
-    $buffer .= 'tags(';
+    $buffer = 'tags(';
         $tmparg0 = [];
         foreach ($input->tags as $arg1) {
         $tmptagsarg1 =\var_export($arg1, true);
@@ -54,105 +51,97 @@ final class PanelConverter
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->limit !== 10) {
     
         
-    $buffer .= 'limit(';
+    $buffer = 'limit(';
         $arg0 =\var_export($input->limit, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->showUser !== true) {
     
         
-    $buffer .= 'showUser(';
+    $buffer = 'showUser(';
         $arg0 =\var_export($input->showUser, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->showTime !== true) {
     
         
-    $buffer .= 'showTime(';
+    $buffer = 'showTime(';
         $arg0 =\var_export($input->showTime, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->showTags !== true) {
     
         
-    $buffer .= 'showTags(';
+    $buffer = 'showTags(';
         $arg0 =\var_export($input->showTags, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->navigateToPanel !== true) {
     
         
-    $buffer .= 'navigateToPanel(';
+    $buffer = 'navigateToPanel(';
         $arg0 =\var_export($input->navigateToPanel, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->navigateBefore !== "" && $input->navigateBefore !== "10m") {
     
         
-    $buffer .= 'navigateBefore(';
+    $buffer = 'navigateBefore(';
         $arg0 =\var_export($input->navigateBefore, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->navigateAfter !== "" && $input->navigateAfter !== "10m") {
     
         
-    $buffer .= 'navigateAfter(';
+    $buffer = 'navigateAfter(';
         $arg0 =\var_export($input->navigateAfter, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

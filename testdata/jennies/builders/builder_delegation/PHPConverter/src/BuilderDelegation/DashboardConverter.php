@@ -10,39 +10,36 @@ final class DashboardConverter
         $calls = [
             '(new \Grafana\Foundation\BuilderDelegation\DashboardBuilder())',
         ];
-        $buffer = '';
             
     
         {
-    $buffer .= 'id(';
+    $buffer = 'id(';
         $arg0 =\var_export($input->id, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     
             if ($input->title !== "") {
     
         
-    $buffer .= 'title(';
+    $buffer = 'title(';
         $arg0 =\var_export($input->title, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if (count($input->links) >= 1) {
     
         
-    $buffer .= 'links(';
+    $buffer = 'links(';
         $tmparg0 = [];
         foreach ($input->links as $arg1) {
         $tmplinksarg1 = \Grafana\Foundation\BuilderDelegation\DashboardLinkConverter::convert($arg1);
@@ -54,14 +51,13 @@ final class DashboardConverter
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if (count($input->linksOfLinks) >= 1) {
     
         
-    $buffer .= 'linksOfLinks(';
+    $buffer = 'linksOfLinks(';
         $tmparg0 = [];
         foreach ($input->linksOfLinks as $arg1) {
         $tmptmplinksOfLinksarg1 = [];
@@ -78,21 +74,19 @@ final class DashboardConverter
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             
     
         {
-    $buffer .= 'singleLink(';
+    $buffer = 'singleLink(';
         $arg0 = \Grafana\Foundation\BuilderDelegation\DashboardLinkConverter::convert($input->singleLink);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     

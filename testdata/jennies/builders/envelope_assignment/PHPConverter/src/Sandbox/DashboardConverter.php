@@ -10,11 +10,10 @@ final class DashboardConverter
         $calls = [
             '(new \Grafana\Foundation\Sandbox\DashboardBuilder())',
         ];
-        $buffer = '';
             if (count($input->variables) >= 1) {
     foreach ($input->variables as $item) {
         
-    $buffer .= 'withVariable(';
+    $buffer = 'withVariable(';
         $arg0 =\var_export($item->name, true);
         $buffer .= $arg0;
         $buffer .= ', ';
@@ -24,7 +23,6 @@ final class DashboardConverter
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     }
     }

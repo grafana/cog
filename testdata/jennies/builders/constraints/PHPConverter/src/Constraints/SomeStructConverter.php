@@ -10,32 +10,29 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\Constraints\SomeStructBuilder())',
         ];
-        $buffer = '';
             
     
         {
-    $buffer .= 'id(';
+    $buffer = 'id(';
         $arg0 =\var_export($input->id, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     
             if ($input->title !== "") {
     
         
-    $buffer .= 'title(';
+    $buffer = 'title(';
         $arg0 =\var_export($input->title, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

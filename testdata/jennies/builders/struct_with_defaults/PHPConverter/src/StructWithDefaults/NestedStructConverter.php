@@ -10,32 +10,29 @@ final class NestedStructConverter
         $calls = [
             '(new \Grafana\Foundation\StructWithDefaults\NestedStructBuilder())',
         ];
-        $buffer = '';
             if ($input->stringVal !== "") {
     
         
-    $buffer .= 'stringVal(';
+    $buffer = 'stringVal(';
         $arg0 =\var_export($input->stringVal, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             
     
         {
-    $buffer .= 'intVal(';
+    $buffer = 'intVal(';
         $arg0 =\var_export($input->intVal, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     

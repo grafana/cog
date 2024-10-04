@@ -10,18 +10,16 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\Properties\SomeStructBuilder())',
         ];
-        $buffer = '';
             
     
         {
-    $buffer .= 'id(';
+    $buffer = 'id(';
         $arg0 =\var_export($input->id, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     

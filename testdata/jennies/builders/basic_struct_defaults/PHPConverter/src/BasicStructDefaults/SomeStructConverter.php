@@ -10,39 +10,36 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\BasicStructDefaults\SomeStructBuilder())',
         ];
-        $buffer = '';
             if ($input->id !== 42) {
     
         
-    $buffer .= 'id(';
+    $buffer = 'id(';
         $arg0 =\var_export($input->id, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->uid !== "" && $input->uid !== "default-uid") {
     
         
-    $buffer .= 'uid(';
+    $buffer = 'uid(';
         $arg0 =\var_export($input->uid, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if (count($input->tags) >= 1) {
     
         
-    $buffer .= 'tags(';
+    $buffer = 'tags(';
         $tmparg0 = [];
         foreach ($input->tags as $arg1) {
         $tmptagsarg1 =\var_export($arg1, true);
@@ -54,21 +51,19 @@ final class SomeStructConverter
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
             if ($input->liveNow !== true) {
     
         
-    $buffer .= 'liveNow(';
+    $buffer = 'liveNow(';
         $arg0 =\var_export($input->liveNow, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

@@ -10,18 +10,16 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\Sandbox\SomeStructBuilder('.\var_export($input->title, true).'))',
         ];
-        $buffer = '';
             if ($input->title !== "") {
     
         
-    $buffer .= 'title(';
+    $buffer = 'title(';
         $arg0 =\var_export($input->title, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

@@ -10,18 +10,16 @@ final class PersonConverter
         $calls = [
             '(new \Grafana\Foundation\SomePkg\PersonBuilder())',
         ];
-        $buffer = '';
             
     
         {
-    $buffer .= 'name(';
+    $buffer = 'name(';
         $arg0 =\var_export($input->name, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     

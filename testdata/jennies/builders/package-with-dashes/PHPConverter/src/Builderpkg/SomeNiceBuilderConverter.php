@@ -10,18 +10,16 @@ final class SomeNiceBuilderConverter
         $calls = [
             '(new \Grafana\Foundation\Builderpkg\SomeNiceBuilderBuilder())',
         ];
-        $buffer = '';
             if ($input->title !== "") {
     
         
-    $buffer .= 'title(';
+    $buffer = 'title(';
         $arg0 =\var_export($input->title, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

@@ -10,18 +10,16 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\KnownAny\SomeStructBuilder())',
         ];
-        $buffer = '';
             if ($input->config !== null && $input->config instanceof \Grafana\Foundation\KnownAny\Config && $input->config->title !== "") {
     
         
-    $buffer .= 'title(';
+    $buffer = 'title(';
         $arg0 =\var_export($input->config->title, true);
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }

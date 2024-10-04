@@ -10,25 +10,23 @@ final class LokiBuilderConverter
         $calls = [
             '(new \Grafana\Foundation\ComposableSlot\LokiBuilderBuilder())',
         ];
-        $buffer = '';
             
     
         {
-    $buffer .= 'target(';
+    $buffer = 'target(';
         $arg0 = \Grafana\Foundation\Cog\Runtime::get()->convertDataqueryToCode($input->target, );
         $buffer .= $arg0;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     }
     
     
             if (count($input->targets) >= 1) {
     
         
-    $buffer .= 'targets(';
+    $buffer = 'targets(';
         $tmparg0 = [];
         foreach ($input->targets as $arg1) {
         $tmptargetsarg1 = \Grafana\Foundation\Cog\Runtime::get()->convertDataqueryToCode($arg1, );
@@ -40,7 +38,6 @@ final class LokiBuilderConverter
     $buffer .= ')';
 
     $calls[] = $buffer;
-    $buffer = '';
     
     
     }
