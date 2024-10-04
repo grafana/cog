@@ -43,67 +43,15 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
 	converter := languages.NewConverterGenerator(jenny.nullableConfig).FromBuilder(context, builder)
-	formatter := builderTypeFormatter(jenny.config, context)
 	schema, schemaFound := context.Schemas.Locate(builder.Package)
 
 	inputIsDataquery := schemaFound && schema.Metadata.Variant == ast.SchemaVariantDataQuery && schema.EntryPoint == builder.For.Name
 
 	return jenny.tmpl.
-		Funcs(map[string]any{
-			"fullNamespaceRef": jenny.config.fullNamespaceRef,
-			"resolveRefs":      context.ResolveRefs,
-			"resolvesToStruct": func(typeDef ast.Type) bool {
-				return context.ResolveRefs(typeDef).IsStruct()
-			},
-			"resolvesToMap": func(typeDef ast.Type) bool {
-				return context.ResolveRefs(typeDef).IsMap()
-			},
-			"resolvesToEnum": func(typeDef ast.Type) bool {
-				return context.ResolveRefs(typeDef).IsEnum()
-			},
-			"formatType": builderTypeFormatter(jenny.config, context).formatType,
-			"formatPath": formatFieldPath,
-			"formatRawRef": func(pkg string, ref string) string {
-				return formatter.formatRef(ast.NewRef(pkg, ref), false)
-			},
-			"disjunctionCaseForType": func(input string, typeDef ast.Type) string {
-				// TODO: shaky at best
-				if typeDef.IsAnyOf(ast.KindArray, ast.KindMap) {
-					return fmt.Sprintf("is_array(%s)", input)
-				}
-
-				if typeDef.IsScalar() {
-					testMap := map[ast.ScalarKind]string{
-						ast.KindBytes:   "is_string",
-						ast.KindString:  "is_string",
-						ast.KindFloat32: "is_float",
-						ast.KindFloat64: "is_float",
-						ast.KindUint8:   "is_int",
-						ast.KindUint16:  "is_int",
-						ast.KindUint32:  "is_int",
-						ast.KindUint64:  "is_int",
-						ast.KindInt8:    "is_int",
-						ast.KindInt16:   "is_int",
-						ast.KindInt32:   "is_int",
-						ast.KindInt64:   "is_int",
-						ast.KindBool:    "is_bool",
-					}
-
-					testFunc := testMap[typeDef.Scalar.ScalarKind]
-					if testFunc == "" {
-						return "/* unhandled scalar type */"
-					}
-
-					return fmt.Sprintf("%s(%s)", testFunc, input)
-				}
-
-				if typeDef.IsRef() {
-					return fmt.Sprintf("%s instanceof %s", input, formatter.formatRef(typeDef.Ref.AsType(), false))
-				}
-
-				return "/* unhandled type */"
-			},
-		}).
+		Funcs(templateHelpers(templateDeps{
+			config:  jenny.config,
+			context: context,
+		})).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
 			"NamespaceRoot":    jenny.config.NamespaceRoot,
 			"Converter":        converter,

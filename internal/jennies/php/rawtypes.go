@@ -186,7 +186,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 
 	switch def.Type.Kind {
 	case ast.KindEnum:
-		enum, err := jenny.formatEnumDef(def)
+		enum, err := jenny.formatEnumDef(context, def)
 		if err != nil {
 			return codejen.File{}, err
 		}
@@ -762,11 +762,12 @@ func (jenny RawTypes) generateDataqueryType(schema *ast.Schema) string {
 	return buffer.String()
 }
 
-func (jenny RawTypes) formatEnumDef(def ast.Object) (string, error) {
+func (jenny RawTypes) formatEnumDef(context languages.Context, def ast.Object) (string, error) {
 	return jenny.tmpl.
-		Funcs(map[string]any{
-			"formatType": jenny.typeFormatter.formatType,
-		}).
+		Funcs(templateHelpers(templateDeps{
+			config:  jenny.config,
+			context: context,
+		})).
 		Render("types/enum.tmpl", map[string]any{
 			"Object":   def,
 			"EnumType": def.Type.Enum.Values[0].Type,
