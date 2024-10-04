@@ -25,7 +25,11 @@ func VariantConfig() variants.PanelcfgConfig {
 		{{- end }}
 		{{- if .hasConverter }}
 		GoConverter: func(inputPanel any) string {
-			return PanelConverter(inputPanel.(*dashboard.Panel))
+			if panel, ok := inputPanel.(*dashboard.Panel); ok {
+				return PanelConverter(*panel)
+			}
+
+			return PanelConverter(inputPanel.(dashboard.Panel))
 		},
 		{{- end }}
 	}

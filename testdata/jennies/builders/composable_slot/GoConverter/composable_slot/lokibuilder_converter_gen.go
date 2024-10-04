@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func LokiBuilderConverter(input *Dashboard) string {
+func LokiBuilderConverter(input Dashboard) string {
     calls := []string{
     `composable_slot.NewLokiBuilderBuilder()`,
     }

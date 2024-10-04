@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func SomePanelConverter(input *SomePanel) string {
+func SomePanelConverter(input SomePanel) string {
     calls := []string{
     `initialization_safeguards.NewSomePanelBuilder()`,
     }

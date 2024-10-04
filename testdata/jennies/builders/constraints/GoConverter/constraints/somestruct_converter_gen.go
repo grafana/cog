@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func SomeStructConverter(input *SomeStruct) string {
+func SomeStructConverter(input SomeStruct) string {
     calls := []string{
     `constraints.NewSomeStructBuilder()`,
     }

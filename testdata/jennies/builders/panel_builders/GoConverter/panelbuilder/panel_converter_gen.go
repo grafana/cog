@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func PanelConverter(input *Panel) string {
+func PanelConverter(input Panel) string {
     calls := []string{
     `panelbuilder.NewPanelBuilder()`,
     }

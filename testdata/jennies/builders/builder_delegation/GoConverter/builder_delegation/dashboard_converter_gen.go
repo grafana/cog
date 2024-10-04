@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func DashboardConverter(input *Dashboard) string {
+func DashboardConverter(input Dashboard) string {
     calls := []string{
     `builder_delegation.NewDashboardBuilder()`,
     }
@@ -40,7 +40,7 @@ func DashboardConverter(input *Dashboard) string {
     buffer.WriteString(`Links(`)
         tmparg0 := []string{}
         for _, arg1 := range input.Links {
-        tmplinksarg1 := DashboardLinkConverter(&arg1)
+        tmplinksarg1 := DashboardLinkConverter(arg1)
         tmparg0 = append(tmparg0, tmplinksarg1)
         }
         arg0 := "[]cog.Builder[builder_delegation.DashboardLink]{" + strings.Join(tmparg0, ",\n") + "}"
@@ -59,7 +59,7 @@ func DashboardConverter(input *Dashboard) string {
         for _, arg1 := range input.LinksOfLinks {
         tmptmplinksOfLinksarg1 := []string{}
         for _, arg1Value := range arg1 {
-        tmparg1arg1Value := DashboardLinkConverter(&arg1Value)
+        tmparg1arg1Value := DashboardLinkConverter(arg1Value)
         tmptmplinksOfLinksarg1 = append(tmptmplinksOfLinksarg1, tmparg1arg1Value)
         }
         tmplinksOfLinksarg1 := "[]cog.Builder[builder_delegation.DashboardLink]{" + strings.Join(tmptmplinksOfLinksarg1, ",\n") + "}"
@@ -77,7 +77,7 @@ func DashboardConverter(input *Dashboard) string {
         
         {
     buffer.WriteString(`SingleLink(`)
-        arg0 := DashboardLinkConverter(&input.SingleLink)
+        arg0 := DashboardLinkConverter(input.SingleLink)
         buffer.WriteString(arg0)
         
     buffer.WriteString(")")
