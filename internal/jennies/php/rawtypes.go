@@ -268,9 +268,14 @@ func (jenny RawTypes) generateDataqueryVariantConfig(context languages.Context, 
 		return nil
 	}
 
-	converterCallable := `[` + jenny.config.fullNamespaceRef(fmt.Sprintf("%s\\%s", formatPackageName(schema.Package), formatObjectName(schema.EntryPoint))) + `Converter::class, 'convert']`
-	if !entryPointFound && schema.EntryPointType.IsDisjunction() {
-		converterCallable = jenny.convertDisjunctionFunc(schema.EntryPointType.AsDisjunction())
+	converterCallable := ""
+	if jenny.config.converters {
+		converterCallable = `[` + jenny.config.fullNamespaceRef(fmt.Sprintf("%s\\%s", formatPackageName(schema.Package), formatObjectName(schema.EntryPoint))) + `Converter::class, 'convert']`
+		if !entryPointFound && schema.EntryPointType.IsDisjunction() {
+			converterCallable = jenny.convertDisjunctionFunc(schema.EntryPointType.AsDisjunction())
+		}
+
+		converterCallable = fmt.Sprintf("\n            convert: %s,", converterCallable)
 	}
 
 	content := fmt.Sprintf(`<?php
@@ -283,8 +288,7 @@ final class VariantConfig
     {
         return new %[1]s(
             identifier: "%[2]s",
-            fromArray: %[3]s,
-            convert: %[5]s,
+            fromArray: %[3]s,%[5]s
         );
     }
 }`, dataqueryConfigRef, schema.Metadata.Identifier, fromArrayCallable, jenny.config.fullNamespace(formatPackageName(schema.Package)), converterCallable)
