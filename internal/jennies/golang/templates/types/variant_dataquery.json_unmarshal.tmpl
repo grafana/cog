@@ -11,18 +11,23 @@ func VariantConfig() variants.DataqueryConfig {
             return dataquery, nil
        },
         {{- if .hasConverter }}
-        GoConverter: func(inputPanel any) string {
-            panel := inputPanel.(*{{ .object.Name | upperCamelCase }})
+        GoConverter: func(input any) string {
+            var dataquery {{ .object.Name | upperCamelCase }}
+            if cast, ok := input.(*{{ .object.Name | upperCamelCase }}); ok {
+                dataquery = *cast
+            } else {
+                dataquery = input.({{ .object.Name | upperCamelCase }})
+            }
             {{ if ne .disjunctionStruct nil -}}
                 {{- range $field := .disjunctionStruct.Fields }}
-                    if panel.{{ $field.Name | upperCamelCase }} != nil {
-                        return {{ $field.Type.Ref.ReferredType | upperCamelCase }}Converter(panel.{{ $field.Name | upperCamelCase }})
+                    if dataquery.{{ $field.Name | upperCamelCase }} != nil {
+                        return {{ $field.Type.Ref.ReferredType | upperCamelCase }}Converter(*dataquery.{{ $field.Name | upperCamelCase }})
                     }
                 {{- end }}
 
                 return ""
             {{- else -}}
-                return {{ .object.Name | upperCamelCase }}Converter(panel)
+                return {{ .object.Name | upperCamelCase }}Converter(dataquery)
             {{- end }}
         },
         {{- end }}

@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func LokiBuilderConverter(input *Loki) string {
+func LokiBuilderConverter(input Loki) string {
     calls := []string{
     `dataquery_variant_builder.NewLokiBuilderBuilder()`,
     }

@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func DashboardLinkConverter(input *DashboardLink) string {
+func DashboardLinkConverter(input DashboardLink) string {
     calls := []string{
     `builder_delegation.NewDashboardLinkBuilder()`,
     }

@@ -7,7 +7,7 @@ import (
 	some_pkg "github.com/grafana/cog/generated/some_pkg"
 )
 
-func SomeNiceBuilderConverter(input *some_pkg.SomeStruct) string {
+func SomeNiceBuilderConverter(input some_pkg.SomeStruct) string {
     calls := []string{
     `builder_pkg.NewSomeNiceBuilderBuilder()`,
     }

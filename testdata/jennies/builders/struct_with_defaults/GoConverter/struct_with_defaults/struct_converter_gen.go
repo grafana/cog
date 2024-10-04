@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func StructConverter(input *Struct) string {
+func StructConverter(input Struct) string {
     calls := []string{
     `struct_with_defaults.NewStructBuilder()`,
     }
@@ -14,7 +14,7 @@ func StructConverter(input *Struct) string {
         
         {
     buffer.WriteString(`AllFields(`)
-        arg0 := NestedStructConverter(&input.AllFields)
+        arg0 := NestedStructConverter(input.AllFields)
         buffer.WriteString(arg0)
         
     buffer.WriteString(")")
@@ -26,7 +26,7 @@ func StructConverter(input *Struct) string {
         
         {
     buffer.WriteString(`PartialFields(`)
-        arg0 := NestedStructConverter(&input.PartialFields)
+        arg0 := NestedStructConverter(input.PartialFields)
         buffer.WriteString(arg0)
         
     buffer.WriteString(")")
@@ -38,7 +38,7 @@ func StructConverter(input *Struct) string {
         
         {
     buffer.WriteString(`EmptyFields(`)
-        arg0 := NestedStructConverter(&input.EmptyFields)
+        arg0 := NestedStructConverter(input.EmptyFields)
         buffer.WriteString(arg0)
         
     buffer.WriteString(")")

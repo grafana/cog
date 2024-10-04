@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func PersonConverter(input *Person) string {
+func PersonConverter(input Person) string {
     calls := []string{
     `some_pkg.NewPersonBuilder()`,
     }

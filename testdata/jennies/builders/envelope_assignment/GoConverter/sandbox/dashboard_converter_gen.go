@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func DashboardConverter(input *Dashboard) string {
+func DashboardConverter(input Dashboard) string {
     calls := []string{
     `sandbox.NewDashboardBuilder()`,
     }

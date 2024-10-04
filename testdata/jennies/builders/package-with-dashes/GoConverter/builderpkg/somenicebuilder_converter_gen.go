@@ -7,7 +7,7 @@ import (
 	withdashes "github.com/grafana/cog/generated/with-dashes"
 )
 
-func SomeNiceBuilderConverter(input *withdashes.SomeStruct) string {
+func SomeNiceBuilderConverter(input withdashes.SomeStruct) string {
     calls := []string{
     `builderpkg.NewSomeNiceBuilderBuilder()`,
     }

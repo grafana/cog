@@ -28,7 +28,7 @@ package {{ .Converter.Package | formatPackageName }}
     {{- if .Type.IsAny -}}
         cog.Dump({{ .Path | formatPath }})
     {{- else if .Type.IsScalar -}}
-        fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
+        fmt.Sprintf("%#v", {{ maybeUnptr (.Path | formatPath) .Type }})
     {{- else -}}
         cog.Dump({{ .Type | maybeDereference }}{{ .Path | formatPath }})
     {{- end -}}
@@ -41,7 +41,7 @@ package {{ .Converter.Package | formatPackageName }}
 
 {{- define "prepare_arg" -}}
     {{- with .Arg.Builder -}}
-        {{ $.IntoVar }} := {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if not .ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }})
+        {{ $.IntoVar }} := {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if .ValueType.Nullable}}*{{ end }}{{ .ValuePath | formatPath }})
     {{- end -}}
     {{- with .Arg.Array -}}
         tmp{{ $.IntoVar }} := []string{}
@@ -100,7 +100,7 @@ package {{ .Converter.Package | formatPackageName }}
 {{- end }}
 
 {{- define "converter" -}}
-    func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
+    func {{ .Converter.BuilderName | upperCamelCase }}Converter(input {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
     {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
     calls := []string{
     `{{ .Converter.Package | formatPackageName }}.New{{ .Converter.BuilderName | upperCamelCase }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,

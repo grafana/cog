@@ -6,7 +6,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
-func NestedStructConverter(input *NestedStruct) string {
+func NestedStructConverter(input NestedStruct) string {
     calls := []string{
     `struct_with_defaults.NewNestedStructBuilder()`,
     }
