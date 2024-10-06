@@ -5,7 +5,7 @@ import (
 )
 
 type Options struct {
-	Content string `json:"content"`
+	Content string `json:"content" yaml:"content"`
 }
 
 func (resource Options) Equals(other Options) bool {

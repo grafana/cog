@@ -1,8 +1,8 @@
 package defaults
 
 type NestedStruct struct {
-	StringVal string `json:"stringVal"`
-	IntVal int64 `json:"intVal"`
+	StringVal string `json:"stringVal" yaml:"stringVal"`
+	IntVal int64 `json:"intVal" yaml:"intVal"`
 }
 
 func (resource NestedStruct) Equals(other NestedStruct) bool {
@@ -18,11 +18,11 @@ func (resource NestedStruct) Equals(other NestedStruct) bool {
 
 
 type Struct struct {
-	AllFields NestedStruct `json:"allFields"`
-	PartialFields NestedStruct `json:"partialFields"`
-	EmptyFields NestedStruct `json:"emptyFields"`
-	ComplexField DefaultsStructComplexField `json:"complexField"`
-	PartialComplexField DefaultsStructPartialComplexField `json:"partialComplexField"`
+	AllFields NestedStruct `json:"allFields" yaml:"allFields"`
+	PartialFields NestedStruct `json:"partialFields" yaml:"partialFields"`
+	EmptyFields NestedStruct `json:"emptyFields" yaml:"emptyFields"`
+	ComplexField DefaultsStructComplexField `json:"complexField" yaml:"complexField"`
+	PartialComplexField DefaultsStructPartialComplexField `json:"partialComplexField" yaml:"partialComplexField"`
 }
 
 func (resource Struct) Equals(other Struct) bool {
@@ -47,7 +47,7 @@ func (resource Struct) Equals(other Struct) bool {
 
 
 type DefaultsStructComplexFieldNested struct {
-	NestedVal string `json:"nestedVal"`
+	NestedVal string `json:"nestedVal" yaml:"nestedVal"`
 }
 
 func (resource DefaultsStructComplexFieldNested) Equals(other DefaultsStructComplexFieldNested) bool {
@@ -60,9 +60,9 @@ func (resource DefaultsStructComplexFieldNested) Equals(other DefaultsStructComp
 
 
 type DefaultsStructComplexField struct {
-	Uid string `json:"uid"`
-	Nested DefaultsStructComplexFieldNested `json:"nested"`
-	Array []string `json:"array"`
+	Uid string `json:"uid" yaml:"uid"`
+	Nested DefaultsStructComplexFieldNested `json:"nested" yaml:"nested"`
+	Array []string `json:"array" yaml:"array"`
 }
 
 func (resource DefaultsStructComplexField) Equals(other DefaultsStructComplexField) bool {
@@ -88,8 +88,8 @@ func (resource DefaultsStructComplexField) Equals(other DefaultsStructComplexFie
 
 
 type DefaultsStructPartialComplexField struct {
-	Uid string `json:"uid"`
-	IntVal int64 `json:"intVal"`
+	Uid string `json:"uid" yaml:"uid"`
+	IntVal int64 `json:"intVal" yaml:"intVal"`
 }
 
 func (resource DefaultsStructPartialComplexField) Equals(other DefaultsStructPartialComplexField) bool {

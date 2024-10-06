@@ -6,8 +6,8 @@ type RefreshRate = StringOrBool
 type StringOrNull *string
 
 type SomeStruct struct {
-	Type string `json:"Type"`
-	FieldAny any `json:"FieldAny"`
+	Type string `json:"Type" yaml:"Type"`
+	FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
@@ -26,8 +26,8 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 type BoolOrRef = BoolOrSomeStruct
 
 type SomeOtherStruct struct {
-	Type string `json:"Type"`
-	Foo []byte `json:"Foo"`
+	Type string `json:"Type" yaml:"Type"`
+	Foo []byte `json:"Foo" yaml:"Foo"`
 }
 
 func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
@@ -43,8 +43,8 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 
 
 type YetAnotherStruct struct {
-	Type string `json:"Type"`
-	Bar uint8 `json:"Bar"`
+	Type string `json:"Type" yaml:"Type"`
+	Bar uint8 `json:"Bar" yaml:"Bar"`
 }
 
 func (resource YetAnotherStruct) Equals(other YetAnotherStruct) bool {
@@ -62,8 +62,8 @@ func (resource YetAnotherStruct) Equals(other YetAnotherStruct) bool {
 type SeveralRefs = SomeStructOrSomeOtherStructOrYetAnotherStruct
 
 type StringOrBool struct {
-	String *string `json:"String,omitempty"`
-	Bool *bool `json:"Bool,omitempty"`
+	String *string `json:"String,omitempty" yaml:"String,omitempty"`
+	Bool *bool `json:"Bool,omitempty" yaml:"Bool,omitempty"`
 }
 
 func (resource StringOrBool) MarshalJSON() ([]byte, error) {
@@ -78,6 +78,17 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	return nil, fmt.Errorf("no value for disjunction of scalars")
 }
 
+func (resource StringOrBool) MarshalYAML() (any, error) {
+	if resource.String != nil {
+		return resource.String, nil
+	}
+
+	if resource.Bool != nil {
+		return resource.Bool, nil
+	}
+
+	return nil, fmt.Errorf("no value for disjunction of scalars")
+}
 
 func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
@@ -135,8 +146,8 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 
 
 type BoolOrSomeStruct struct {
-	Bool *bool `json:"Bool,omitempty"`
-	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
+	Bool *bool `json:"Bool,omitempty" yaml:"Bool,omitempty"`
+	SomeStruct *SomeStruct `json:"SomeStruct,omitempty" yaml:"SomeStruct,omitempty"`
 }
 
 func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
@@ -164,9 +175,9 @@ func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
 
 
 type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
-	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
-	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
-	YetAnotherStruct *YetAnotherStruct `json:"YetAnotherStruct,omitempty"`
+	SomeStruct *SomeStruct `json:"SomeStruct,omitempty" yaml:"SomeStruct,omitempty"`
+	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty" yaml:"SomeOtherStruct,omitempty"`
+	YetAnotherStruct *YetAnotherStruct `json:"YetAnotherStruct,omitempty" yaml:"YetAnotherStruct,omitempty"`
 }
 
 func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]byte, error) {
@@ -178,6 +189,20 @@ func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]b
 	}
 	if resource.YetAnotherStruct != nil {
 		return json.Marshal(resource.YetAnotherStruct)
+	}
+
+	return nil, fmt.Errorf("no value for disjunction of refs")
+}
+
+func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalYAML() (any, error) {
+	if resource.SomeStruct != nil {
+		return resource.SomeStruct, nil
+	}
+	if resource.SomeOtherStruct != nil {
+		return resource.SomeOtherStruct, nil
+	}
+	if resource.YetAnotherStruct != nil {
+		return resource.YetAnotherStruct, nil
 	}
 
 	return nil, fmt.Errorf("no value for disjunction of refs")

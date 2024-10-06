@@ -5,8 +5,8 @@ import (
 )
 
 type Query struct {
-	Expr string `json:"expr"`
-	Instant *bool `json:"instant,omitempty"`
+	Expr string `json:"expr" yaml:"expr"`
+	Instant *bool `json:"instant,omitempty" yaml:"instant,omitempty"`
 }
 func (resource Query) ImplementsDataqueryVariant() {}
 

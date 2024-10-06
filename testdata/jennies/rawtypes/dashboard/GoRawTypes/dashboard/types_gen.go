@@ -6,8 +6,8 @@ import (
 )
 
 type Dashboard struct {
-	Title string `json:"title"`
-	Panels []Panel `json:"panels,omitempty"`
+	Title string `json:"title" yaml:"title"`
+	Panels []Panel `json:"panels,omitempty" yaml:"panels,omitempty"`
 }
 
 func (resource Dashboard) Equals(other Dashboard) bool {
@@ -30,8 +30,8 @@ func (resource Dashboard) Equals(other Dashboard) bool {
 
 
 type DataSourceRef struct {
-	Type *string `json:"type,omitempty"`
-	Uid *string `json:"uid,omitempty"`
+	Type *string `json:"type,omitempty" yaml:"type,omitempty"`
+	Uid *string `json:"uid,omitempty" yaml:"uid,omitempty"`
 }
 
 func (resource DataSourceRef) Equals(other DataSourceRef) bool {
@@ -59,7 +59,7 @@ func (resource DataSourceRef) Equals(other DataSourceRef) bool {
 
 
 type FieldConfigSource struct {
-	Defaults *FieldConfig `json:"defaults,omitempty"`
+	Defaults *FieldConfig `json:"defaults,omitempty" yaml:"defaults,omitempty"`
 }
 
 func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
@@ -78,8 +78,8 @@ func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
 
 
 type FieldConfig struct {
-	Unit *string `json:"unit,omitempty"`
-	Custom any `json:"custom,omitempty"`
+	Unit *string `json:"unit,omitempty" yaml:"unit,omitempty"`
+	Custom any `json:"custom,omitempty" yaml:"custom,omitempty"`
 }
 
 func (resource FieldConfig) Equals(other FieldConfig) bool {
@@ -102,12 +102,12 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 
 
 type Panel struct {
-	Title string `json:"title"`
-	Type string `json:"type"`
-	Datasource *DataSourceRef `json:"datasource,omitempty"`
-	Options any `json:"options,omitempty"`
-	Targets []variants.Dataquery `json:"targets,omitempty"`
-	FieldConfig *FieldConfigSource `json:"fieldConfig,omitempty"`
+	Title string `json:"title" yaml:"title"`
+	Type string `json:"type" yaml:"type"`
+	Datasource *DataSourceRef `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Options any `json:"options,omitempty" yaml:"options,omitempty"`
+	Targets []variants.Dataquery `json:"targets,omitempty" yaml:"targets,omitempty"`
+	FieldConfig *FieldConfigSource `json:"fieldConfig,omitempty" yaml:"fieldConfig,omitempty"`
 }
 
 func (resource *Panel) UnmarshalJSON(raw []byte) error {

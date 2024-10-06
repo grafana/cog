@@ -5,7 +5,7 @@ import (
 )
 
 type Options struct {
-	TimeseriesOption string `json:"timeseries_option"`
+	TimeseriesOption string `json:"timeseries_option" yaml:"timeseries_option"`
 }
 
 func (resource Options) Equals(other Options) bool {
@@ -18,7 +18,7 @@ func (resource Options) Equals(other Options) bool {
 
 
 type FieldConfig struct {
-	TimeseriesFieldConfigOption string `json:"timeseries_field_config_option"`
+	TimeseriesFieldConfigOption string `json:"timeseries_field_config_option" yaml:"timeseries_field_config_option"`
 }
 
 func (resource FieldConfig) Equals(other FieldConfig) bool {
