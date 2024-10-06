@@ -10,15 +10,15 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type JSONMarshalling struct {
+type Marshalling struct {
 	tmpl          *template.Template
 	config        Config
 	packageMapper func(string) string
 	typeFormatter *typeFormatter
 }
 
-func NewJSONMarshalling(config Config, tmpl *template.Template, packageMapper func(string) string, typeFormatter *typeFormatter) JSONMarshalling {
-	return JSONMarshalling{
+func NewMarshalling(config Config, tmpl *template.Template, packageMapper func(string) string, typeFormatter *typeFormatter) Marshalling {
+	return Marshalling{
 		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
 			"formatType": typeFormatter.formatType,
@@ -28,7 +28,7 @@ func NewJSONMarshalling(config Config, tmpl *template.Template, packageMapper fu
 	}
 }
 
-func (jenny JSONMarshalling) generateForSchema(buffer *strings.Builder, schema *ast.Schema) error {
+func (jenny Marshalling) generateForSchema(buffer *strings.Builder, schema *ast.Schema) error {
 	if schema.Metadata.Kind != ast.SchemaKindComposable || schema.Metadata.Variant != ast.SchemaVariantPanel {
 		return nil
 	}
@@ -42,7 +42,7 @@ func (jenny JSONMarshalling) generateForSchema(buffer *strings.Builder, schema *
 	return nil
 }
 
-func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object) error {
+func (jenny Marshalling) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object) error {
 	if jenny.objectNeedsCustomMarshal(object) {
 		jsonMarshal, err := jenny.renderCustomMarshal(object)
 		if err != nil {
@@ -73,26 +73,26 @@ func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context 
 	return nil
 }
 
-func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
+func (jenny Marshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
 	// the only case for which we need a custom marshaller is for structs
 	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
 
 	return obj.Type.IsStructGeneratedFromDisjunction()
 }
 
-func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error) {
+func (jenny Marshalling) renderCustomMarshal(obj ast.Object) (string, error) {
 	// There are only two types of disjunctions we support:
 	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
 	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
 	// 	  structs and these structs have a common "discriminator" field.
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
-		return jenny.tmpl.Render("types/disjunction_of_scalars.json_marshal.tmpl", map[string]any{
+		return jenny.tmpl.Render("types/disjunction_of_scalars.marshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
-		return jenny.tmpl.Render("types/disjunction_of_refs.json_marshal.tmpl", map[string]any{
+		return jenny.tmpl.Render("types/disjunction_of_refs.marshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
@@ -100,7 +100,7 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	return "", fmt.Errorf("could not determine how to render custom marshal")
 }
 
-func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Context, obj ast.Object) bool {
+func (jenny Marshalling) objectNeedsCustomUnmarshal(context languages.Context, obj ast.Object) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
 	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot
@@ -124,7 +124,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 	return false
 }
 
-func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
+func (jenny Marshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
 		return jenny.tmpl.Render("types/disjunction_of_scalars.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
@@ -141,7 +141,7 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 	return jenny.renderCustomComposableSlotUnmarshal(context, obj)
 }
 
-func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languages.Context, obj ast.Object) (string, error) {
+func (jenny Marshalling) renderCustomComposableSlotUnmarshal(context languages.Context, obj ast.Object) (string, error) {
 	var buffer strings.Builder
 	fields := obj.Type.AsStruct().Fields
 
@@ -246,7 +246,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 `, tools.UpperCamelCase(obj.Name), buffer.String()), nil
 }
 
-func (jenny JSONMarshalling) renderUnmarshalDataqueryField(parentStruct ast.Object, field ast.StructField) string {
+func (jenny Marshalling) renderUnmarshalDataqueryField(parentStruct ast.Object, field ast.StructField) string {
 	// First: try to locate a field that would contain the type of datasource being used.
 	// We're looking for a field defined as a reference to the `DataSourceRef` type.
 	var hintField *ast.StructField
@@ -297,7 +297,7 @@ dataqueryTypeHint = *resource.%[1]s.Type
 `, tools.UpperCamelCase(field.Name), field.Name, hintValue)
 }
 
-func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
+func (jenny Marshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
 	jenny.packageMapper("cog/variants")
 
 	_, hasOptions := schema.LocateObject("Options")
@@ -315,7 +315,7 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 	})
 }
 
-func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
+func (jenny Marshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
 	jenny.packageMapper("cog/variants")
 
 	var disjunctionStruct *ast.StructType

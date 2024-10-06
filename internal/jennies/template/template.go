@@ -110,12 +110,14 @@ func ParseDirectories(rootDirs ...string) Option {
 }
 
 type Template struct {
-	tmpl *gotemplate.Template
+	tmpl          *gotemplate.Template
+	includedNames map[string]int
 }
 
 func New(name string, opts ...Option) (*Template, error) {
 	template := &Template{
-		tmpl: gotemplate.New(name).Option("missingkey=error"),
+		tmpl:          gotemplate.New(name).Option("missingkey=error"),
+		includedNames: map[string]int{},
 	}
 
 	template.Funcs(template.builtins())
@@ -152,6 +154,29 @@ func (template *Template) RenderAsBytes(file string, data any) ([]byte, error) {
 	return []byte(rendered), nil
 }
 
+func (template *Template) RenderIfExists(name string, data any) (string, error) {
+	if tmpl := template.tmpl.Lookup(name); tmpl == nil {
+		return "", nil
+	}
+
+	return template.safeRender(name, data)
+}
+
+func (template *Template) safeRender(name string, data interface{}) (string, error) {
+	var buf strings.Builder
+	if v, ok := template.includedNames[name]; ok {
+		if v > recursionMaxNums {
+			return "", fmt.Errorf("unable to execute template: rendering template has a nested reference name: %s", name)
+		}
+		template.includedNames[name]++
+	} else {
+		template.includedNames[name] = 1
+	}
+	err := template.tmpl.ExecuteTemplate(&buf, name, data)
+	template.includedNames[name]--
+	return buf.String(), err
+}
+
 func (template *Template) ExecuteAsBytes(data any) ([]byte, error) {
 	buf := bytes.Buffer{}
 	if err := template.tmpl.Execute(&buf, data); err != nil {
@@ -162,22 +187,6 @@ func (template *Template) ExecuteAsBytes(data any) ([]byte, error) {
 }
 
 func (template *Template) builtins() FuncMap {
-	includedNames := make(map[string]int)
-	include := func(name string, data interface{}) (string, error) {
-		var buf strings.Builder
-		if v, ok := includedNames[name]; ok {
-			if v > recursionMaxNums {
-				return "", fmt.Errorf("unable to execute template: rendering template has a nested reference name: %s", name)
-			}
-			includedNames[name]++
-		} else {
-			includedNames[name] = 1
-		}
-		err := template.tmpl.ExecuteTemplate(&buf, name, data)
-		includedNames[name]--
-		return buf.String(), err
-	}
-
 	return gotemplate.FuncMap{
 		"add1": func(i int) int { return i + 1 },
 		"sub1": func(i int) int { return i - 1 },
@@ -238,14 +247,8 @@ func (template *Template) builtins() FuncMap {
 		// --------- \\
 		// Templates \\
 		// --------- \\
-		"include": include,
-		"includeIfExists": func(name string, data interface{}) (string, error) {
-			if tmpl := template.tmpl.Lookup(name); tmpl == nil {
-				return "", nil
-			}
-
-			return include(name, data)
-		},
+		"include":         template.safeRender,
+		"includeIfExists": template.RenderIfExists,
 	}
 }
 

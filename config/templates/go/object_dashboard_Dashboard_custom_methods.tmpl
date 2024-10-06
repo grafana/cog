@@ -1,0 +1,16 @@
+{{- define "object_dashboard_Dashboard_custom_methods" }}
+func (resource {{ .Object.Name|upperCamelCase }}) AsGrizzlyResource() {{ formatRawRef "grizzly" "Resource" }} {
+    metadata := {{ formatRawRef "grizzly" "Metadata" }}{}
+    if resource.Uid != nil {
+        metadata["uid"] = *resource.Uid
+    }
+
+    return {{ formatRawRef "grizzly" "Resource" }}{
+        ApiVersion: {{ formatRawRef "grizzly" "ApiVersionV1alpha1" }},
+        Kind: {{ formatRawRef "grizzly" "KindDashboard" }},
+        Metadata: metadata,
+        Spec: resource,
+    }
+}
+{{- end }}
+
