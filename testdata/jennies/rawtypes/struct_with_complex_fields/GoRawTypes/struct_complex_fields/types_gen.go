@@ -1,5 +1,12 @@
 package struct_complex_fields
 
+import (
+	reflect "reflect"
+	json "encoding/json"
+	fmt "fmt"
+	errors "errors"
+)
+
 // This struct does things.
 type SomeStruct struct {
 	FieldRef SomeOtherStruct `json:"FieldRef"`

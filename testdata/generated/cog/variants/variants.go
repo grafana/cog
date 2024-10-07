@@ -5,7 +5,9 @@
 
 package variants
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type PanelcfgConfig struct {
 	Identifier             string

@@ -1,5 +1,12 @@
 package withdashes
 
+import (
+	reflect "reflect"
+	json "encoding/json"
+	fmt "fmt"
+	errors "errors"
+)
+
 type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }

@@ -3,7 +3,8 @@ package builder_delegation
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func DashboardLinkConverter(input DashboardLink) string {

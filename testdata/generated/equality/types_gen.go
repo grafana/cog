@@ -5,7 +5,9 @@
 
 package equality
 
-import "reflect"
+import (
+	reflect "reflect"
+)
 
 // Modified by compiler pass 'PrefixEnumValues'
 type Direction string

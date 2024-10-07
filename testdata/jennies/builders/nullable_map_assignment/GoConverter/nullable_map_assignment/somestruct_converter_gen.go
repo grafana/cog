@@ -3,7 +3,8 @@ package nullable_map_assignment
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func SomeStructConverter(input SomeStruct) string {

@@ -3,7 +3,8 @@ package basic_struct_defaults
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func SomeStructConverter(input SomeStruct) string {

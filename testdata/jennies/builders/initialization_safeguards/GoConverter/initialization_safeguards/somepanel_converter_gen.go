@@ -3,7 +3,8 @@ package initialization_safeguards
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func SomePanelConverter(input SomePanel) string {

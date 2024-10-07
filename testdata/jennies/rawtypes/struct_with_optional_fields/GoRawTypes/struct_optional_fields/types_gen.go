@@ -1,5 +1,9 @@
 package struct_optional_fields
 
+import (
+	reflect "reflect"
+)
+
 type SomeStruct struct {
 	FieldRef *SomeOtherStruct `json:"FieldRef,omitempty"`
 	FieldString *string `json:"FieldString,omitempty"`

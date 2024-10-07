@@ -2,6 +2,7 @@ package variant_dataquery
 
 import (
 	variants "github.com/grafana/cog/generated/cog/variants"
+	json "encoding/json"
 )
 
 type Query struct {

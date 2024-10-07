@@ -3,7 +3,8 @@ package dataquery_variant_builder
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func LokiBuilderConverter(input Loki) string {

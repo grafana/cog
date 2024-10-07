@@ -1,5 +1,9 @@
 package arrays
 
+import (
+	reflect "reflect"
+)
+
 // List of tags, maybe?
 type ArrayOfStrings []string
 

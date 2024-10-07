@@ -2,6 +2,7 @@ package variant_panelcfg_full
 
 import (
 	variants "github.com/grafana/cog/generated/cog/variants"
+	json "encoding/json"
 )
 
 type Options struct {
