@@ -32,6 +32,11 @@ type BuilderArgMapping struct {
 	BuilderName string
 }
 
+type BuilderChoiceMapping struct {
+	Guards  []MappingGuard
+	Builder BuilderArgMapping
+}
+
 type ArrayArgMapping struct {
 	For       ast.Path
 	ForType   ast.Type
@@ -65,12 +70,13 @@ type DisjunctionArgMapping struct {
 }
 
 type ArgumentMapping struct {
-	Direct      *DirectArgMapping
-	Runtime     *RuntimeArgMapping
-	Builder     *BuilderArgMapping
-	Array       *ArrayArgMapping
-	Map         *MapArgMapping
-	Disjunction *DisjunctionArgMapping
+	Direct             *DirectArgMapping
+	Runtime            *RuntimeArgMapping
+	Builder            *BuilderArgMapping
+	BuilderDisjunction []BuilderChoiceMapping
+	Array              *ArrayArgMapping
+	Map                *MapArgMapping
+	Disjunction        *DisjunctionArgMapping
 
 	// TODO: used? necessary?
 	Guards []MappingGuard
@@ -242,7 +248,7 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 func (generator *ConverterGenerator) mappingForOption(context Context, converter Converter, mapping ConversionMapping, option ast.Option) OptionMapping {
 	optMapping := OptionMapping{
 		Option: option,
-		Guards: generator.optionGuards(converter, option),
+		Guards: generator.guardForAssignments(converter.inputRootPath(), option.Assignments),
 	}
 
 	assignments := tools.Filter(option.Assignments, func(assignment ast.Assignment) bool {
@@ -365,9 +371,11 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 		}
 	}
 
-	builder, found := context.ResolveAsBuilder(typeDef)
-	if found && strings.EqualFold(builder.Package, "dashboard") && strings.EqualFold("panel", builder.For.Name) {
-		typeField, _ := builder.For.Type.Struct.FieldByName("type")
+	possibleBuilders := generator.buildersForType(context, typeDef)
+	// hack to use the runtime to convert panels
+	// TODO: find a better way to handle this case (ie: something more generic than hardcoding it :/)
+	if len(possibleBuilders) > 1 && strings.EqualFold(possibleBuilders[0].Package, "dashboard") && strings.EqualFold("panel", possibleBuilders[0].For.Name) {
+		typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName("type")
 
 		return ArgumentMapping{
 			Runtime: &RuntimeArgMapping{
@@ -379,13 +387,35 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 			},
 		}
 	}
-	if found {
+	if len(possibleBuilders) > 1 && possibleBuilders.HaveConstantConstructorAssignment() {
+		choices := make([]BuilderChoiceMapping, 0, len(possibleBuilders))
+		for _, possibleBuilder := range possibleBuilders {
+			constantAssignments := tools.Filter(possibleBuilder.Constructor.Assignments, func(assignment ast.Assignment) bool {
+				return assignment.HasConstantValue()
+			})
+
+			choices = append(choices, BuilderChoiceMapping{
+				Guards: generator.guardForAssignments(valuePath, constantAssignments),
+				Builder: BuilderArgMapping{
+					ValuePath:   valuePath,
+					ValueType:   typeDef,
+					BuilderPkg:  possibleBuilder.Package,
+					BuilderName: possibleBuilder.Name,
+				},
+			})
+		}
+
+		return ArgumentMapping{
+			BuilderDisjunction: choices,
+		}
+	}
+	if len(possibleBuilders) > 0 {
 		return ArgumentMapping{
 			Builder: &BuilderArgMapping{
 				ValuePath:   valuePath,
 				ValueType:   typeDef,
-				BuilderPkg:  builder.Package,
-				BuilderName: builder.Name,
+				BuilderPkg:  possibleBuilders[0].Package,
+				BuilderName: possibleBuilders[0].Name,
 			},
 		}
 	}
@@ -431,22 +461,22 @@ func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Conte
 	return arg, true
 }
 
-func (generator *ConverterGenerator) optionGuards(converter Converter, option ast.Option) []MappingGuard {
+func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path, assignments []ast.Assignment) []MappingGuard {
 	// conditions safeguarding the conversion of the current option
 	guards := orderedmap.New[string, MappingGuard]()
 
 	// TODO: define guards other than "not null" checks? (0, "", ...)
 	// TODO: builders + array of builders (and array of array of builders, ...)
 	// TODO: envelopes?
-	for _, assignment := range option.Assignments {
-		nullPathChunksGuards := generator.pathNotNullGuards(converter, assignment.Path)
+	for _, assignment := range assignments {
+		nullPathChunksGuards := generator.pathNotNullGuards(valuesRootPath, assignment.Path)
 		for _, guard := range nullPathChunksGuards {
 			guards.Set(guard.String(), guard)
 		}
 
 		if assignment.Value.Constant != nil {
 			guard := MappingGuard{
-				Path:  converter.inputRootPath().Append(assignment.Path),
+				Path:  valuesRootPath.Append(assignment.Path),
 				Op:    ast.EqualOp,
 				Value: assignment.Value.Constant,
 			}
@@ -459,7 +489,7 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 		// For arrays: ensure they're not empty
 		if assignmentType.IsArray() {
 			guard := MappingGuard{
-				Path:  converter.inputRootPath().Append(assignment.Path),
+				Path:  valuesRootPath.Append(assignment.Path),
 				Op:    ast.MinLengthOp,
 				Value: 1,
 			}
@@ -470,7 +500,7 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 		// TODO: deal with datetime strings
 		if assignmentType.IsScalar() && assignmentType.AsScalar().ScalarKind == ast.KindString && !assignmentType.HasHint(ast.HintStringFormatDateTime) {
 			guard := MappingGuard{
-				Path:  converter.inputRootPath().Append(assignment.Path),
+				Path:  valuesRootPath.Append(assignment.Path),
 				Op:    ast.NotEqualOp,
 				Value: "",
 			}
@@ -480,7 +510,7 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 		// For scalar values, add a guard against assignments equal to the default value for that path
 		if assignmentType.IsScalar() && assignmentType.Default != nil {
 			guard := MappingGuard{
-				Path:  converter.inputRootPath().Append(assignment.Path),
+				Path:  valuesRootPath.Append(assignment.Path),
 				Op:    ast.NotEqualOp,
 				Value: assignmentType.Default,
 			}
@@ -491,7 +521,7 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 		if assignment.Method != ast.AppendAssignment && assignment.Value.Envelope != nil {
 			for _, envelopePath := range assignment.Value.Envelope.Values {
 				guard := MappingGuard{
-					Path:  converter.inputRootPath().Append(assignment.Path.Append(envelopePath.Path)),
+					Path:  valuesRootPath.Append(assignment.Path.Append(envelopePath.Path)),
 					Op:    ast.NotEqualOp,
 					Value: nil,
 				}
@@ -504,7 +534,7 @@ func (generator *ConverterGenerator) optionGuards(converter Converter, option as
 	return guards.Values()
 }
 
-func (generator *ConverterGenerator) pathNotNullGuards(converter Converter, path ast.Path) []MappingGuard {
+func (generator *ConverterGenerator) pathNotNullGuards(rootPath ast.Path, path ast.Path) []MappingGuard {
 	var guards []MappingGuard
 
 	for i, chunk := range path {
@@ -513,7 +543,7 @@ func (generator *ConverterGenerator) pathNotNullGuards(converter Converter, path
 		}
 
 		guards = append(guards, MappingGuard{
-			Path:  converter.inputRootPath().Append(path[:i+1]),
+			Path:  rootPath.Append(path[:i+1]),
 			Op:    ast.NotEqualOp,
 			Value: nil,
 		})
@@ -537,4 +567,40 @@ func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) st
 	}
 
 	return path
+}
+
+func (generator *ConverterGenerator) buildersForType(context Context, typeDef ast.Type) ast.Builders {
+	var candidateBuilders ast.Builders
+
+	var search func(def ast.Type)
+	search = func(def ast.Type) {
+		if def.IsArray() {
+			search(def.AsArray().ValueType)
+			return
+		}
+		if def.IsMap() {
+			search(def.AsMap().ValueType)
+			return
+		}
+
+		if def.IsDisjunction() {
+			for _, branch := range def.AsDisjunction().Branches {
+				search(branch)
+			}
+
+			return
+		}
+
+		if !def.IsRef() {
+			return
+		}
+
+		ref := def.AsRef()
+		builders := context.Builders.LocateAllByObject(ref.ReferredPkg, ref.ReferredType)
+		candidateBuilders = append(candidateBuilders, builders...)
+	}
+
+	search(typeDef)
+
+	return candidateBuilders
 }

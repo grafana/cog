@@ -43,6 +43,14 @@ package {{ .Converter.Package | formatPackageName }}
     {{- with .Arg.Builder -}}
         {{ $.IntoVar }} := {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if not .ValueType.Nullable}}&{{ end }}{{ .ValuePath | formatPath }})
     {{- end -}}
+    {{- with .Arg.BuilderDisjunction -}}
+        var {{ $.IntoVar }} string
+        {{ range $builderChoice := . }}
+        if {{ template "guards" $builderChoice.Guards }} {
+            {{ $.IntoVar }} = {{ formatRawRef $builderChoice.Builder.BuilderPkg (print $builderChoice.Builder.BuilderName "Converter") }}({{- if not $builderChoice.Builder.ValueType.Nullable}}&{{ end }}{{ $builderChoice.Builder.ValuePath | formatPath }})
+        }
+        {{ end }}
+    {{- end -}}
     {{- with .Arg.Array -}}
         tmp{{ $.IntoVar }} := []string{}
         for _, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
