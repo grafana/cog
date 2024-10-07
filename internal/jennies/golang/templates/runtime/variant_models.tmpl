@@ -1,5 +1,9 @@
 package variants
 
+import (
+	"reflect"
+)
+
 type PanelcfgConfig struct {
 	Identifier             string
 	OptionsUnmarshaler     func(raw []byte) (any, error)

@@ -7,6 +7,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Equals(other {{ .def.Name|upperCa
 {{/* arguments: Type, Nullable, Dereference, SelfName, OtherName */}}
 {{- define "type_equality_check" }}
 	{{- if .Type.IsAny }}
+		{{- $reflect := importStdPkg "reflect" }}
 		{{- $dereference := ternary "*" "" .Dereference }}
 		// is DeepEqual good enough here?
 		if !reflect.DeepEqual({{ $dereference }}{{ .SelfName }}, {{ $dereference }}{{ .OtherName }}) {

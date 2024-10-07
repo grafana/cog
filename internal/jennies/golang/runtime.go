@@ -49,6 +49,10 @@ type Builder[ResourceT any] interface {
 func (jenny Runtime) Runtime() ([]byte, error) {
 	imports := NewImportMap()
 	imports.Add("", jenny.Config.importPath("cog/variants"))
+	imports.Add("json", "encoding/json")
+	imports.Add("fmt", "fmt")
+	imports.Add("reflect", "reflect")
+	imports.Add("strings", "strings")
 
 	return jenny.Tmpl.RenderAsBytes("runtime/runtime.tmpl", map[string]any{
 		"imports": imports,

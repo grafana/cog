@@ -1,5 +1,6 @@
 {{- define "constraints" }}
 {{- range . }}
+    {{- $errors := importStdPkg "errors" }}
     {{- $argName := .Argument.Name|formatArgName }}
     {{- $leftOperand := $argName }}
     {{- $operator := .Op }}
