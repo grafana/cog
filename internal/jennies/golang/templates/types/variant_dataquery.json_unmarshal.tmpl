@@ -1,3 +1,4 @@
+{{- $json := importStdPkg "encoding/json" -}}
 func VariantConfig() variants.DataqueryConfig {
 	return variants.DataqueryConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",

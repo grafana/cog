@@ -26,10 +26,13 @@ package {{ .Converter.Package | formatPackageName }}
 
 {{- define "value_formatter" -}}
     {{- if .Type.IsAny -}}
+        {{- $cog := importPkg "cog" -}}
         cog.Dump({{ .Path | formatPath }})
     {{- else if .Type.IsScalar -}}
+        {{- $reflect := importStdPkg "fmt" -}}
         fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
     {{- else -}}
+        {{- $cog := importPkg "cog" -}}
         cog.Dump({{ .Type | maybeDereference }}{{ .Path | formatPath }})
     {{- end -}}
 {{- end }}
@@ -52,6 +55,7 @@ package {{ .Converter.Package | formatPackageName }}
         {{ end }}
     {{- end -}}
     {{- with .Arg.Array -}}
+        {{- $reflect := importStdPkg "strings" -}}
         tmp{{ $.IntoVar }} := []string{}
         for _, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
         {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
@@ -61,6 +65,7 @@ package {{ .Converter.Package | formatPackageName }}
         {{ $.IntoVar }} := "{{ .ForType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
     {{- end -}}
     {{- with .Arg.Map -}}
+        {{- $reflect := importStdPkg "fmt" -}}
         {{ $.IntoVar }} := "map[{{ .IndexType | formatType }}]{{ .ValueType | formatTypeNoBuilder }}{"
         for key, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
         {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
@@ -70,6 +75,7 @@ package {{ .Converter.Package | formatPackageName }}
         {{ $.IntoVar }} += "}"
     {{- end -}}
     {{- with .Arg.Runtime -}}
+        {{- $cog := importPkg "cog" -}}
         {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath | formatPath }}{{ else }}{{ maybeUnptr ($runtimeArg.ValuePath | formatPath) $runtimeArg.ValueType }}{{ end }}, {{ end }})
     {{- end -}}
     {{- with .Arg.Direct -}}
@@ -108,6 +114,7 @@ package {{ .Converter.Package | formatPackageName }}
 {{- end }}
 
 {{- define "converter" -}}
+    {{- $reflect := importStdPkg "strings" -}}
     func {{ .Converter.BuilderName | upperCamelCase }}Converter(input *{{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
     {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
     calls := []string{

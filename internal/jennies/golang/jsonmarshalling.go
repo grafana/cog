@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -17,11 +18,14 @@ type JSONMarshalling struct {
 	typeFormatter *typeFormatter
 }
 
-func NewJSONMarshalling(config Config, tmpl *template.Template, packageMapper func(string) string, typeFormatter *typeFormatter) JSONMarshalling {
+func NewJSONMarshalling(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter) JSONMarshalling {
 	return JSONMarshalling{
 		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
 			"formatType": typeFormatter.formatType,
+			"importStdPkg": func(pkg string) string {
+				return imports.Add(pkg, pkg)
+			},
 		}),
 		packageMapper: packageMapper,
 		typeFormatter: typeFormatter,

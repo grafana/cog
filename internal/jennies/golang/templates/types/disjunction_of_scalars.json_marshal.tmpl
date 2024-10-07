@@ -1,3 +1,5 @@
+{{- $json := importStdPkg "encoding/json" -}}
+{{- $fmt := importStdPkg "fmt" -}}
 func (resource {{ .def.Name|upperCamelCase }}) MarshalJSON() ([]byte, error) {
 {{- range .def.Type.Struct.Fields }}
 	if resource.{{ .Name|upperCamelCase }} != nil {

@@ -52,8 +52,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
-	typeImportMapper("cog")
-	formatter := builderTypeFormatter(jenny.Config, context, typeImportMapper)
+	formatter := builderTypeFormatter(jenny.Config, context, imports, typeImportMapper)
 
 	dummyImports := NewImportMap()
 	dummyImportMapper := func(pkg string) string {
@@ -66,8 +65,12 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 	return jenny.Tmpl.
 		Funcs(map[string]any{
-			"formatType":          builderTypeFormatter(jenny.Config, context, dummyImportMapper).formatType,
-			"formatTypeNoBuilder": defaultTypeFormatter(jenny.Config, context, dummyImportMapper).formatType,
+			"importStdPkg": func(pkg string) string {
+				return imports.Add(pkg, pkg)
+			},
+			"importPkg":           typeImportMapper,
+			"formatType":          builderTypeFormatter(jenny.Config, context, dummyImports, dummyImportMapper).formatType,
+			"formatTypeNoBuilder": defaultTypeFormatter(jenny.Config, context, dummyImports, dummyImportMapper).formatType,
 			"formatPath":          makePathFormatter(formatter),
 			"formatRawRef":        formatRawRef,
 		}).
