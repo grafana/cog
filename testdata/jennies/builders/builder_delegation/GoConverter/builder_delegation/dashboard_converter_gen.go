@@ -3,8 +3,8 @@ package builder_delegation
 
 
 import (
-	strings "strings"
-	fmt "fmt"
+	"strings"
+	"fmt"
 )
 
 func DashboardConverter(input *Dashboard) string {

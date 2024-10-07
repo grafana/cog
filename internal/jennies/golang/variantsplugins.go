@@ -42,7 +42,7 @@ func (jenny VariantsPlugins) variantModels() ([]byte, error) {
 }
 
 func (jenny VariantsPlugins) variantPlugins(context languages.Context) ([]byte, error) {
-	imports := NewImportMap()
+	imports := NewImportMap(jenny.Config.PackageRoot)
 	var panelSchemas []*ast.Schema
 	var dataquerySchemas []*ast.Schema
 

@@ -3,8 +3,8 @@ package struct_with_defaults
 
 
 import (
-	strings "strings"
-	fmt "fmt"
+	"strings"
+	"fmt"
 )
 
 func NestedStructConverter(input *NestedStruct) string {

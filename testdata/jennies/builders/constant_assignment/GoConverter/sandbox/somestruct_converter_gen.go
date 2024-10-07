@@ -3,7 +3,7 @@ package sandbox
 
 
 import (
-	strings "strings"
+	"strings"
 )
 
 func SomeStructConverter(input *SomeStruct) string {

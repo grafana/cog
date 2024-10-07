@@ -47,7 +47,7 @@ type Builder[ResourceT any] interface {
 }
 
 func (jenny Runtime) Runtime() ([]byte, error) {
-	imports := NewImportMap()
+	imports := NewImportMap(jenny.Config.PackageRoot)
 	imports.Add("", jenny.Config.importPath("cog/variants"))
 	imports.Add("json", "encoding/json")
 	imports.Add("fmt", "fmt")

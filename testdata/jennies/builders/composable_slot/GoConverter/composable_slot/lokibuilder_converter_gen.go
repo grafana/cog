@@ -3,7 +3,7 @@ package composable_slot
 
 
 import (
-	strings "strings"
+	"strings"
 	cog "github.com/grafana/cog/generated/cog"
 )
 

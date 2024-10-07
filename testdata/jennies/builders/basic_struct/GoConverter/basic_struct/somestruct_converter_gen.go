@@ -3,8 +3,8 @@ package basic_struct
 
 
 import (
-	strings "strings"
-	fmt "fmt"
+	"strings"
+	"fmt"
 )
 
 func SomeStructConverter(input *SomeStruct) string {

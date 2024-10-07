@@ -3,8 +3,8 @@ package dataquery_variant_builder
 
 
 import (
-	strings "strings"
-	fmt "fmt"
+	"strings"
+	"fmt"
 )
 
 func LokiBuilderConverter(input *Loki) string {

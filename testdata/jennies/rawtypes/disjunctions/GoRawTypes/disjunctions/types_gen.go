@@ -1,10 +1,10 @@
 package disjunctions
 
 import (
-	reflect "reflect"
-	json "encoding/json"
-	fmt "fmt"
-	errors "errors"
+	"reflect"
+	"encoding/json"
+	"fmt"
+	"errors"
 )
 
 // Refresh rate or disabled.

@@ -1,7 +1,7 @@
 package basic
 
 import (
-	reflect "reflect"
+	"reflect"
 )
 
 // This

@@ -3,9 +3,9 @@ package builderpkg
 
 
 import (
-	strings "strings"
+	"strings"
 	withdashes "github.com/grafana/cog/generated/with-dashes"
-	fmt "fmt"
+	"fmt"
 )
 
 func SomeNiceBuilderConverter(input *withdashes.SomeStruct) string {

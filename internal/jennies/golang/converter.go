@@ -44,7 +44,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
 	converter := languages.NewConverterGenerator(jenny.NullableConfig).FromBuilder(context, builder)
 
-	imports := NewImportMap()
+	imports := NewImportMap(jenny.Config.PackageRoot)
 	typeImportMapper := func(pkg string) string {
 		if imports.IsIdentical(pkg, builder.Package) {
 			return ""
@@ -54,7 +54,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	}
 	formatter := builderTypeFormatter(jenny.Config, context, imports, typeImportMapper)
 
-	dummyImports := NewImportMap()
+	dummyImports := NewImportMap(jenny.Config.PackageRoot)
 	dummyImportMapper := func(pkg string) string {
 		return dummyImports.Add(pkg, jenny.Config.importPath(pkg))
 	}

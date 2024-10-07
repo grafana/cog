@@ -3,8 +3,8 @@ package initialization_safeguards
 
 
 import (
-	strings "strings"
-	fmt "fmt"
+	"strings"
+	"fmt"
 )
 
 func SomePanelConverter(input *SomePanel) string {

@@ -7,7 +7,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 )
 
-func NewImportMap() *common.DirectImportMap {
+func NewImportMap(packageRoot string) *common.DirectImportMap {
 	return common.NewDirectImportMap(
 		common.WithAliasSanitizer[common.DirectImportMap](formatPackageName),
 		common.WithImportPathSanitizer[common.DirectImportMap](strings.ToLower),
@@ -18,7 +18,11 @@ func NewImportMap() *common.DirectImportMap {
 
 			statements := make([]string, 0, importMap.Imports.Len())
 			importMap.Imports.Iterate(func(alias string, importPath string) {
-				statements = append(statements, fmt.Sprintf(`	%s "%s"`, alias, importPath))
+				if strings.HasPrefix(importPath, packageRoot) {
+					statements = append(statements, fmt.Sprintf(`	%s "%s"`, alias, importPath))
+				} else { // stdlib import
+					statements = append(statements, fmt.Sprintf(`	"%s"`, importPath))
+				}
 			})
 
 			return fmt.Sprintf(`import (
