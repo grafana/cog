@@ -6,6 +6,8 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 
 {{- define "guard" }}
 {{- $operator := .Op -}}
+{{- $value := formatScalar .Value -}}
+{{- if .Path.Last.Type.IsRef -}}{{ $value = print (.Path.Last.Type | formatType) "::fromValue(" (.Value | formatScalar) ")" }}{{- end -}}
 {{- if eq $operator "==" -}}{{ $operator = "===" }}{{- end -}}
 {{- if eq $operator "!=" -}}{{ $operator = "!==" }}{{- end -}}
 {{- if eq $operator "!=" -}}{{ $operator = "!==" }}{{- end -}}
@@ -23,7 +25,7 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
             {{- $leftOperand = print "count(" $leftOperand ")" -}}
             {{- $operator = "<=" -}}
         {{- end -}}
-        {{- $leftOperand }} {{ $operator}} {{ .Value | formatScalar -}}
+        {{- $leftOperand }} {{ $operator}} {{ $value -}}
     {{- end -}}
 {{- end }}
 
@@ -55,6 +57,14 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 {{- define "prepare_arg" -}}
     {{- with .Arg.Builder -}}
         ${{ $.IntoVar }} = {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}::convert(${{ .ValuePath | formatPath }});
+    {{- end -}}
+    {{- with .Arg.BuilderDisjunction -}}
+        ${{ $.IntoVar }} = '';
+        {{ range $builderChoice := . }}
+        if ({{ template "guards" $builderChoice.Guards }}) {
+            ${{ $.IntoVar }} = {{ formatRawRef $builderChoice.Builder.BuilderPkg (print $builderChoice.Builder.BuilderName "Converter") }}::convert(${{ $builderChoice.Builder.ValuePath | formatPath }});
+        }
+        {{ end }}
     {{- end -}}
     {{- with .Arg.Array -}}
         $tmp{{ $.IntoVar }} = [];

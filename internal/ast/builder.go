@@ -140,6 +140,34 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 	return Builder{}, false
 }
 
+func (builders Builders) LocateAllByObject(pkg string, name string) Builders {
+	var results Builders
+	for _, builder := range builders {
+		if builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name {
+			results = append(results, builder)
+		}
+	}
+
+	return results
+}
+
+func (builders Builders) HaveConstantConstructorAssignment() bool {
+	for _, builder := range builders {
+		constantAssignmentFound := false
+		for _, assignment := range builder.Constructor.Assignments {
+			if assignment.HasConstantValue() {
+				constantAssignmentFound = true
+			}
+		}
+
+		if !constantAssignmentFound {
+			return false
+		}
+	}
+
+	return true
+}
+
 type Option struct {
 	Name        string
 	Comments    []string `json:",omitempty"`
@@ -345,6 +373,10 @@ type Assignment struct {
 	Constraints []AssignmentConstraint `json:",omitempty"`
 
 	NilChecks []AssignmentNilCheck `json:",omitempty"`
+}
+
+func (assignment *Assignment) HasConstantValue() bool {
+	return assignment.Value.Constant != nil
 }
 
 func (assignment *Assignment) DeepCopy() Assignment {
