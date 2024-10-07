@@ -5,12 +5,14 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type typeFormatter struct {
+	imports       *common.DirectImportMap
 	packageMapper func(pkg string) string
 	config        Config
 
@@ -18,16 +20,18 @@ type typeFormatter struct {
 	context    languages.Context
 }
 
-func defaultTypeFormatter(config Config, context languages.Context, packageMapper func(pkg string) string) *typeFormatter {
+func defaultTypeFormatter(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
+		imports:       imports,
 		packageMapper: packageMapper,
 		config:        config,
 		context:       context,
 	}
 }
 
-func builderTypeFormatter(config Config, context languages.Context, packageMapper func(pkg string) string) *typeFormatter {
+func builderTypeFormatter(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
+		imports:       imports,
 		packageMapper: packageMapper,
 		config:        config,
 		forBuilder:    true,
@@ -69,6 +73,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 			typeName := def.AsScalar().ScalarKind
 			if def.HasHint(ast.HintStringFormatDateTime) {
 				typeName = "time.Time"
+				formatter.imports.Add("time", "time")
 			}
 			if def.Nullable {
 				typeName = "*" + typeName

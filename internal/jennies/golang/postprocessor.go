@@ -14,7 +14,10 @@ func PostProcessFile(file codejen.File) (codejen.File, error) {
 		return file, nil
 	}
 
-	output, err := imports.Process(filepath.Base(file.RelativePath), file.Data, nil)
+	output, err := imports.Process(filepath.Base(file.RelativePath), file.Data, &imports.Options{
+		FormatOnly: true,
+		Comments:   true,
+	})
 	if err != nil {
 		return codejen.File{}, fmt.Errorf("goimports processing of generated file failed: %w", err)
 	}

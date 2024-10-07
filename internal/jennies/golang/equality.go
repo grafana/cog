@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
@@ -18,7 +19,7 @@ func newEqualityMethods(tmpl *template.Template) equalityMethods {
 	}
 }
 
-func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object) error {
+func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object, imports *common.DirectImportMap) error {
 	if !object.Type.IsStruct() {
 		return nil
 	}
@@ -44,6 +45,9 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 			return context.ResolveRefs(typeDef).IsEnum()
 		},
 		"resolveRefs": context.ResolveRefs,
+		"importStdPkg": func(pkg string) string {
+			return imports.Add(pkg, pkg)
+		},
 	})
 
 	templateFile := "types/struct_equality_method.tmpl"

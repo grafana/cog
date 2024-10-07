@@ -1,3 +1,4 @@
+{{- $json := importStdPkg "encoding/json" -}}
 func VariantConfig() variants.PanelcfgConfig {
 	return variants.PanelcfgConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",

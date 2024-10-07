@@ -30,6 +30,12 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"formatRawRef": func(_ ast.Type) string {
 				panic("formatRawRef() needs to be overridden by a jenny")
 			},
+			"importStdPkg": func(_ string) string {
+				panic("importStdPkg() needs to be overridden by a jenny")
+			},
+			"importPkg": func(_ string) string {
+				panic("importPkg() needs to be overridden by a jenny")
+			},
 			"emptyValueForGuard": func(_ ast.Type) string {
 				panic("emptyValueForGuard() needs to be overridden by a jenny")
 			},
