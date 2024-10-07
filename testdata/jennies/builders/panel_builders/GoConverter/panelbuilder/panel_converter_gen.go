@@ -3,8 +3,8 @@ package panelbuilder
 
 
 import (
-	strings "strings"
-	fmt "fmt"
+	"strings"
+	"fmt"
 )
 
 func PanelConverter(input Panel) string {

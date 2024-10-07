@@ -3,8 +3,8 @@ package nullable_map_assignment
 
 
 import (
-	strings "strings"
-	fmt "fmt"
+	"strings"
+	"fmt"
 )
 
 func SomeStructConverter(input SomeStruct) string {

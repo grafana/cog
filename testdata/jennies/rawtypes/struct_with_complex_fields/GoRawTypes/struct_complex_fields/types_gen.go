@@ -1,10 +1,10 @@
 package struct_complex_fields
 
 import (
-	reflect "reflect"
-	json "encoding/json"
-	fmt "fmt"
-	errors "errors"
+	"reflect"
+	"encoding/json"
+	"fmt"
+	"errors"
 )
 
 // This struct does things.

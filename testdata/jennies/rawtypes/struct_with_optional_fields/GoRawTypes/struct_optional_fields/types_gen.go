@@ -1,7 +1,7 @@
 package struct_optional_fields
 
 import (
-	reflect "reflect"
+	"reflect"
 )
 
 type SomeStruct struct {

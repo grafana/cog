@@ -1,7 +1,7 @@
 package time_hint
 
 import (
-	time "time"
+	"time"
 )
 
 type ObjTime time.Time

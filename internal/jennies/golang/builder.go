@@ -47,7 +47,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
-	imports := NewImportMap()
+	imports := NewImportMap(jenny.Config.PackageRoot)
 	jenny.typeImportMapper = func(pkg string) string {
 		if imports.IsIdentical(pkg, builder.Package) {
 			return ""
