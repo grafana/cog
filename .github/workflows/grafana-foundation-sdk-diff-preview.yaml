@@ -25,7 +25,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
           
-          devbox run ./scripts/release-version.sh next
+          devbox run ./scripts/release-version.sh next next
         env:
           FOUNDATION_SDK_PATH: ./grafana-foundation-sdk
           FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git

@@ -17,7 +17,8 @@ source "${__dir}/libs/git.sh"
 
 DRY_RUN=${DRY_RUN:-"yes"} # Some kind of fail-safe to ensure that we're only pushing something when we mean it.
 
-GRAFANA_VERSION=${1:-"next"} # version of the schemas/grafana to run the codegen for.
+ALL_GRAFANA_VERSIONS=${1:-"next"} # all the versions for which we do releases (";"-separated list).
+GRAFANA_VERSION=${2:-"next"} # version of the schemas/grafana to run the codegen for.
 COG_VERSION="v0.0.x" # hardcoded for now
 
 COG_CMD=${COG_CMD:-"go run ./cmd/cli"} # Command used to run `cog`
@@ -132,7 +133,7 @@ if [ "${grafana_version_or_main}" == "next" ]; then
   grafana_version_or_main="main"
 fi
 
-run_codegen "output_dir=${codegen_output_path}/%l,kind_registry_path=${KIND_REGISTRY_PATH},kind_registry_version=${GRAFANA_VERSION},grafana_version=${grafana_version_or_main},cog_version=${COG_VERSION},release_branch=${release_branch},build_timestamp=${build_timestamp}"
+run_codegen "output_dir=${codegen_output_path}/%l,kind_registry_path=${KIND_REGISTRY_PATH},kind_registry_version=${GRAFANA_VERSION},grafana_version=${grafana_version_or_main},cog_version=${COG_VERSION},all_grafana_versions=${ALL_GRAFANA_VERSIONS},release_branch=${release_branch},build_timestamp=${build_timestamp}"
 
 release_branch_exists=$(git_has_branch "${FOUNDATION_SDK_PATH}" "${release_branch}")
 if [ "$release_branch_exists" != "0" ]; then

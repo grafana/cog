@@ -229,6 +229,10 @@ func (template *Template) builtins() FuncMap {
 		"join": func(separator string, input []string) string {
 			return strings.Join(input, separator)
 		},
+		"split": func(separator string, input string) []string {
+			return strings.Split(input, separator)
+		},
+
 		"lower":          strings.ToLower,
 		"lowerCamelCase": tools.LowerCamelCase,
 		// Parameter order is reversed to stay compatible with sprig: https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/functions.go#L135
