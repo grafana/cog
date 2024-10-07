@@ -2,7 +2,7 @@ package variant_panelcfg_only_options
 
 import (
 	variants "github.com/grafana/cog/generated/cog/variants"
-	json "encoding/json"
+	"encoding/json"
 )
 
 type Options struct {

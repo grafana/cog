@@ -47,7 +47,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	var buffer strings.Builder
 	var err error
 
-	imports := NewImportMap()
+	imports := NewImportMap(jenny.Config.PackageRoot)
 	packageMapper := func(pkg string) string {
 		if imports.IsIdentical(pkg, schema.Package) {
 			return ""

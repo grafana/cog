@@ -1,10 +1,10 @@
 package dashboard
 
 import (
-	reflect "reflect"
+	"reflect"
 	variants "github.com/grafana/cog/generated/cog/variants"
 	cog "github.com/grafana/cog/generated/cog"
-	json "encoding/json"
+	"encoding/json"
 )
 
 type Dashboard struct {

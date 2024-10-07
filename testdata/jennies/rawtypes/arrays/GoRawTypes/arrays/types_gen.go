@@ -1,7 +1,7 @@
 package arrays
 
 import (
-	reflect "reflect"
+	"reflect"
 )
 
 // List of tags, maybe?

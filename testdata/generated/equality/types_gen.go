@@ -6,7 +6,7 @@
 package equality
 
 import (
-	reflect "reflect"
+	"reflect"
 )
 
 // Modified by compiler pass 'PrefixEnumValues'

@@ -1,7 +1,7 @@
 package maps
 
 import (
-	reflect "reflect"
+	"reflect"
 )
 
 // String to... something.

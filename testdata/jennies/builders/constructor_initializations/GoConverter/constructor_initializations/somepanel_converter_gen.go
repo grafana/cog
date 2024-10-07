@@ -3,8 +3,8 @@ package constructor_initializations
 
 
 import (
-	strings "strings"
-	fmt "fmt"
+	"strings"
+	"fmt"
 )
 
 func SomePanelConverter(input SomePanel) string {
