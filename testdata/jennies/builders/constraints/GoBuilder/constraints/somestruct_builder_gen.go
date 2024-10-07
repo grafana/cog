@@ -2,6 +2,7 @@ package constraints
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
+	errors "errors"
 )
 
 var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)

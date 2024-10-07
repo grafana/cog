@@ -6,10 +6,10 @@
 package cog
 
 import (
-	"encoding/json"
-	"fmt"
-	"reflect"
-	"strings"
+	json "encoding/json"
+	fmt "fmt"
+	reflect "reflect"
+	strings "strings"
 
 	"github.com/grafana/cog/testdata/generated/cog/variants"
 )
