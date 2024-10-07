@@ -14,6 +14,7 @@ import (
 type JSONMarshalling struct {
 	tmpl          *template.Template
 	config        Config
+	imports       *common.DirectImportMap
 	packageMapper func(string) string
 	typeFormatter *typeFormatter
 }
@@ -27,6 +28,7 @@ func NewJSONMarshalling(config Config, tmpl *template.Template, imports *common.
 				return imports.Add(pkg, pkg)
 			},
 		}),
+		imports:       imports,
 		packageMapper: packageMapper,
 		typeFormatter: typeFormatter,
 	}
@@ -236,6 +238,8 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 		}
 	}
 
+	jenny.imports.Add("json", "encoding/json")
+
 	return fmt.Sprintf(`func (resource *%[1]s) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -276,7 +280,10 @@ dataqueryTypeHint = *resource.%[1]s.Type
 `, tools.UpperCamelCase(hintField.Name))
 	}
 
+	jenny.packageMapper("cog")
+
 	if field.Type.IsArray() {
+		jenny.packageMapper("cog")
 		return fmt.Sprintf(`
 	%[3]s
 	if fields["%[2]s"] != nil {
