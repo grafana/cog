@@ -7,6 +7,7 @@ parameters:
   kind_registry_path: '../kind-registry'
   kind_registry_version: 'v10.4.x'
   grafana_version: 'v10.4.x'
+  all_grafana_versions: 'v10.4.x'
   cog_version: 'v0.0.x'
   release_branch: 'release_branch'
   build_timestamp: 'build_timestamp'
@@ -86,6 +87,7 @@ output:
   repository_templates: '%__config_dir%/../repository_templates'
   templates_data:
     GrafanaVersion: '%kind_registry_version%'
+    AllGrafanaVersions: '%all_grafana_versions%'
     CogVersion: '%cog_version%'
     ReleaseBranch: '%release_branch%'
     BuildTimestamp: '%build_timestamp%'
