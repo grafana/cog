@@ -3,7 +3,8 @@ package constructor_initializations
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func SomePanelConverter(input *SomePanel) string {

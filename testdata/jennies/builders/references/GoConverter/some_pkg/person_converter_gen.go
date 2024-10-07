@@ -3,6 +3,7 @@ package some_pkg
 
 
 import (
+	strings "strings"
 	cog "github.com/grafana/cog/generated/cog"
 )
 

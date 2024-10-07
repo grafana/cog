@@ -1,5 +1,9 @@
 package time_hint
 
+import (
+	time "time"
+)
+
 type ObjTime time.Time
 
 type ObjWithTimeField struct {

@@ -3,7 +3,8 @@ package sandbox
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func DashboardConverter(input *Dashboard) string {

@@ -3,7 +3,8 @@ package panelbuilder
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func PanelConverter(input *Panel) string {

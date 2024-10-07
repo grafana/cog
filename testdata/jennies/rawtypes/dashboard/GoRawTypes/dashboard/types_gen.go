@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	reflect "reflect"
 	variants "github.com/grafana/cog/generated/cog/variants"
 	cog "github.com/grafana/cog/generated/cog"
 )

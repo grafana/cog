@@ -3,6 +3,7 @@ package struct_with_defaults
 
 
 import (
+	strings "strings"
 	cog "github.com/grafana/cog/generated/cog"
 )
 

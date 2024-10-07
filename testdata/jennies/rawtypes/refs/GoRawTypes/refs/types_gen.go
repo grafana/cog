@@ -1,6 +1,7 @@
 package refs
 
 import (
+	reflect "reflect"
 	otherpkg "github.com/grafana/cog/generated/otherpkg"
 )
 

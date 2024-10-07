@@ -3,7 +3,8 @@ package struct_with_defaults
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
+	fmt "fmt"
 )
 
 func NestedStructConverter(input *NestedStruct) string {

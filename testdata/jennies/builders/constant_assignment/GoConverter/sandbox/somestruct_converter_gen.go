@@ -3,7 +3,7 @@ package sandbox
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
 )
 
 func SomeStructConverter(input *SomeStruct) string {

@@ -1,5 +1,9 @@
 package basic
 
+import (
+	reflect "reflect"
+)
+
 // This
 // is
 // a

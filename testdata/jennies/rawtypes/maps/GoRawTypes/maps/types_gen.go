@@ -1,5 +1,9 @@
 package maps
 
+import (
+	reflect "reflect"
+)
+
 // String to... something.
 type MapOfStringToAny map[string]any
 

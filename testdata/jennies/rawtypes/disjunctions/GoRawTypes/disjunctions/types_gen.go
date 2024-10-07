@@ -1,5 +1,12 @@
 package disjunctions
 
+import (
+	reflect "reflect"
+	json "encoding/json"
+	fmt "fmt"
+	errors "errors"
+)
+
 // Refresh rate or disabled.
 type RefreshRate = StringOrBool
 

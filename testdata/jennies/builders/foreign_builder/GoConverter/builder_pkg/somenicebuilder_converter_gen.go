@@ -3,8 +3,9 @@ package builder_pkg
 
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
+	strings "strings"
 	some_pkg "github.com/grafana/cog/generated/some_pkg"
+	fmt "fmt"
 )
 
 func SomeNiceBuilderConverter(input *some_pkg.SomeStruct) string {
