@@ -9,7 +9,4 @@ set -o nounset
 # Catch the error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
 set -o pipefail
 
-for d in generated/typescript/src/*/ ; do
-  echo "Building $d"
-  ts-node "./$d"
-done
+tsc generated/typescript/src/*/*.ts
