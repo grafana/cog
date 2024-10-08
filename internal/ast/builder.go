@@ -157,6 +157,7 @@ func (builders Builders) HaveConstantConstructorAssignment() bool {
 		for _, assignment := range builder.Constructor.Assignments {
 			if assignment.HasConstantValue() {
 				constantAssignmentFound = true
+				break
 			}
 		}
 
