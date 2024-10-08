@@ -29,12 +29,8 @@ package {{ .Converter.Package | formatPackageName }}
         {{- $cog := importPkg "cog" -}}
         cog.Dump({{ .Path | formatPath }})
     {{- else if .Type.IsScalar -}}
-<<<<<<< HEAD
-        fmt.Sprintf("%#v", {{ maybeUnptr (.Path | formatPath) .Type }})
-=======
         {{- $reflect := importStdPkg "fmt" -}}
-        fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
->>>>>>> 22ca11e3 (Explicitly import standard packages when necessary as relying on post-processing is slow)
+        fmt.Sprintf("%#v", {{ maybeUnptr (.Path | formatPath) .Type }})
     {{- else -}}
         {{- $cog := importPkg "cog" -}}
         cog.Dump({{ .Type | maybeDereference }}{{ .Path | formatPath }})
@@ -54,7 +50,7 @@ package {{ .Converter.Package | formatPackageName }}
         var {{ $.IntoVar }} string
         {{ range $builderChoice := . }}
         if {{ template "guards" $builderChoice.Guards }} {
-            {{ $.IntoVar }} = {{ formatRawRef $builderChoice.Builder.BuilderPkg (print $builderChoice.Builder.BuilderName "Converter") }}({{- if not $builderChoice.Builder.ValueType.Nullable}}&{{ end }}{{ $builderChoice.Builder.ValuePath | formatPath }})
+            {{ $.IntoVar }} = {{ formatRawRef $builderChoice.Builder.BuilderPkg (print $builderChoice.Builder.BuilderName "Converter") }}({{- if $builderChoice.Builder.ValueType.Nullable}}*{{ end }}{{ $builderChoice.Builder.ValuePath | formatPath }})
         }
         {{ end }}
     {{- end -}}

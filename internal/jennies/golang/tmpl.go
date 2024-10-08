@@ -36,6 +36,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"importPkg": func(_ string) string {
 				panic("importPkg() needs to be overridden by a jenny")
 			},
+			"maybeUnptr": func(variableName string, intoType ast.Type) string {
+				panic("maybeUnptr() needs to be overridden by a jenny")
+			},
 			"emptyValueForGuard": func(_ ast.Type) string {
 				panic("emptyValueForGuard() needs to be overridden by a jenny")
 			},
@@ -74,13 +77,6 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 				}
 
 				return variableName
-			},
-			"maybeUnptr": func(variableName string, intoType ast.Type) string {
-				if !intoType.Nullable || intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot() {
-					return variableName
-				}
-
-				return "cog.Unptr(" + variableName + ")"
 			},
 			"maybeDereference": func(typeDef ast.Type) string {
 				if typeDef.Nullable && !typeDef.IsAnyOf(ast.KindArray, ast.KindMap) {
