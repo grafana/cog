@@ -1,11 +1,11 @@
 package defaults
 
 type SomeStruct struct {
-	FieldBool bool `json:"fieldBool"`
-	FieldString string `json:"fieldString"`
-	FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
-	FieldFloat32 float32 `json:"FieldFloat32"`
-	FieldInt32 int32 `json:"FieldInt32"`
+	FieldBool bool `json:"fieldBool" yaml:"fieldBool"`
+	FieldString string `json:"fieldString" yaml:"fieldString"`
+	FieldStringWithConstantValue string `json:"FieldStringWithConstantValue" yaml:"FieldStringWithConstantValue"`
+	FieldFloat32 float32 `json:"FieldFloat32" yaml:"FieldFloat32"`
+	FieldInt32 int32 `json:"FieldInt32" yaml:"FieldInt32"`
 }
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {

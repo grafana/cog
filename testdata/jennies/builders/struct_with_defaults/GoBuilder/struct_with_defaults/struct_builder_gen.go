@@ -71,11 +71,11 @@ func (builder *StructBuilder) EmptyFields(emptyFields cog.Builder[NestedStruct])
 }
 
 func (builder *StructBuilder) ComplexField(complexField struct {
-	Uid string `json:"uid"`
+	Uid string `json:"uid" yaml:"uid"`
 	Nested struct {
-	NestedVal string `json:"nestedVal"`
-} `json:"nested"`
-	Array []string `json:"array"`
+	NestedVal string `json:"nestedVal" yaml:"nestedVal"`
+} `json:"nested" yaml:"nested"`
+	Array []string `json:"array" yaml:"array"`
 }) *StructBuilder {
     builder.internal.ComplexField = complexField
 
@@ -83,8 +83,8 @@ func (builder *StructBuilder) ComplexField(complexField struct {
 }
 
 func (builder *StructBuilder) PartialComplexField(partialComplexField struct {
-	Uid string `json:"uid"`
-	IntVal int64 `json:"intVal"`
+	Uid string `json:"uid" yaml:"uid"`
+	IntVal int64 `json:"intVal" yaml:"intVal"`
 }) *StructBuilder {
     builder.internal.PartialComplexField = partialComplexField
 
@@ -100,23 +100,23 @@ StringVal("hello"),
 IntVal(4),
 )
     builder.ComplexField(struct {
- Uid string `json:"uid"`
+ Uid string `json:"uid" yaml:"uid"`
 Nested struct {
- NestedVal string `json:"nestedVal"`
- } `json:"nested"`
-Array []string `json:"array"`
+ NestedVal string `json:"nestedVal" yaml:"nestedVal"`
+ } `json:"nested" yaml:"nested"`
+Array []string `json:"array" yaml:"array"`
  } {
  Array: []string{"hello"},
 Nested: struct {
- NestedVal string `json:"nestedVal"`
+ NestedVal string `json:"nestedVal" yaml:"nestedVal"`
  } {
  NestedVal: "nested",
 },
 Uid: "myUID",
  })
     builder.PartialComplexField(struct {
- Uid string `json:"uid"`
-IntVal int64 `json:"intVal"`
+ Uid string `json:"uid" yaml:"uid"`
+IntVal int64 `json:"intVal" yaml:"intVal"`
  } {
  Xxxx: "myUID",
  })

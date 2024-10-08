@@ -1,11 +1,11 @@
 package struct_optional_fields
 
 type SomeStruct struct {
-	FieldRef *SomeOtherStruct `json:"FieldRef,omitempty"`
-	FieldString *string `json:"FieldString,omitempty"`
-	Operator *SomeStructOperator `json:"Operator,omitempty"`
-	FieldArrayOfStrings []string `json:"FieldArrayOfStrings,omitempty"`
-	FieldAnonymousStruct *StructOptionalFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct,omitempty"`
+	FieldRef *SomeOtherStruct `json:"FieldRef,omitempty" yaml:"FieldRef,omitempty"`
+	FieldString *string `json:"FieldString,omitempty" yaml:"FieldString,omitempty"`
+	Operator *SomeStructOperator `json:"Operator,omitempty" yaml:"Operator,omitempty"`
+	FieldArrayOfStrings []string `json:"FieldArrayOfStrings,omitempty" yaml:"FieldArrayOfStrings,omitempty"`
+	FieldAnonymousStruct *StructOptionalFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct,omitempty" yaml:"FieldAnonymousStruct,omitempty"`
 }
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
@@ -61,7 +61,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 
 
 type SomeOtherStruct struct {
-	FieldAny any `json:"FieldAny"`
+	FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
@@ -82,7 +82,7 @@ const (
 
 
 type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
-	FieldAny any `json:"FieldAny"`
+	FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 func (resource StructOptionalFieldsSomeStructFieldAnonymousStruct) Equals(other StructOptionalFieldsSomeStructFieldAnonymousStruct) bool {

@@ -2,15 +2,15 @@ package struct_complex_fields
 
 // This struct does things.
 type SomeStruct struct {
-	FieldRef SomeOtherStruct `json:"FieldRef"`
-	FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars"`
-	FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction"`
-	FieldDisjunctionWithNull *string `json:"FieldDisjunctionWithNull"`
-	Operator SomeStructOperator `json:"Operator"`
-	FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
-	FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
-	FieldAnonymousStruct StructComplexFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct"`
-	FieldRefToConstant string `json:"fieldRefToConstant"`
+	FieldRef SomeOtherStruct `json:"FieldRef" yaml:"FieldRef"`
+	FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars" yaml:"FieldDisjunctionOfScalars"`
+	FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction" yaml:"FieldMixedDisjunction"`
+	FieldDisjunctionWithNull *string `json:"FieldDisjunctionWithNull" yaml:"FieldDisjunctionWithNull"`
+	Operator SomeStructOperator `json:"Operator" yaml:"Operator"`
+	FieldArrayOfStrings []string `json:"FieldArrayOfStrings" yaml:"FieldArrayOfStrings"`
+	FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString" yaml:"FieldMapOfStringToString"`
+	FieldAnonymousStruct StructComplexFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct" yaml:"FieldAnonymousStruct"`
+	FieldRefToConstant string `json:"fieldRefToConstant" yaml:"fieldRefToConstant"`
 }
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
@@ -69,7 +69,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 const ConnectionPath = "straight"
 
 type SomeOtherStruct struct {
-	FieldAny any `json:"FieldAny"`
+	FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
@@ -90,7 +90,7 @@ const (
 
 
 type StructComplexFieldsSomeStructFieldAnonymousStruct struct {
-	FieldAny any `json:"FieldAny"`
+	FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Equals(other StructComplexFieldsSomeStructFieldAnonymousStruct) bool {
@@ -104,8 +104,8 @@ func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Equals(other S
 
 
 type StringOrBool struct {
-	String *string `json:"String,omitempty"`
-	Bool *bool `json:"Bool,omitempty"`
+	String *string `json:"String,omitempty" yaml:"String,omitempty"`
+	Bool *bool `json:"Bool,omitempty" yaml:"Bool,omitempty"`
 }
 
 func (resource StringOrBool) MarshalJSON() ([]byte, error) {
@@ -120,6 +120,17 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	return nil, fmt.Errorf("no value for disjunction of scalars")
 }
 
+func (resource StringOrBool) MarshalYAML() (any, error) {
+	if resource.String != nil {
+		return resource.String, nil
+	}
+
+	if resource.Bool != nil {
+		return resource.Bool, nil
+	}
+
+	return nil, fmt.Errorf("no value for disjunction of scalars")
+}
 
 func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
@@ -177,8 +188,8 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 
 
 type StringOrSomeOtherStruct struct {
-	String *string `json:"String,omitempty"`
-	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
+	String *string `json:"String,omitempty" yaml:"String,omitempty"`
+	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty" yaml:"SomeOtherStruct,omitempty"`
 }
 
 func (resource StringOrSomeOtherStruct) Equals(other StringOrSomeOtherStruct) bool {

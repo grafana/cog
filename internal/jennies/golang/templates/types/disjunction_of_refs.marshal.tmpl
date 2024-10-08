@@ -7,3 +7,13 @@ func (resource {{ .def.Name|upperCamelCase }}) MarshalJSON() ([]byte, error) {
 
 	return nil, fmt.Errorf("no value for disjunction of refs")
 }
+
+func (resource {{ .def.Name|upperCamelCase }}) MarshalYAML() (any, error) {
+{{- range .def.Type.Struct.Fields }}
+	if resource.{{ .Name|upperCamelCase }} != nil {
+		return resource.{{ .Name|upperCamelCase }}, nil
+	}
+{{- end }}
+
+	return nil, fmt.Errorf("no value for disjunction of refs")
+}

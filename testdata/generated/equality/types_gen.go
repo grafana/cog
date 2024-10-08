@@ -18,7 +18,7 @@ const (
 )
 
 type Variable struct {
-	Name string `json:"name"`
+	Name string `json:"name" yaml:"name"`
 }
 
 func (resource Variable) Equals(other Variable) bool {
@@ -30,10 +30,10 @@ func (resource Variable) Equals(other Variable) bool {
 }
 
 type Container struct {
-	StringField string    `json:"stringField"`
-	IntField    int64     `json:"intField"`
-	EnumField   Direction `json:"enumField"`
-	RefField    Variable  `json:"refField"`
+	StringField string    `json:"stringField" yaml:"stringField"`
+	IntField    int64     `json:"intField" yaml:"intField"`
+	EnumField   Direction `json:"enumField" yaml:"enumField"`
+	RefField    Variable  `json:"refField" yaml:"refField"`
 }
 
 func (resource Container) Equals(other Container) bool {
@@ -55,11 +55,11 @@ func (resource Container) Equals(other Container) bool {
 
 type Optionals struct {
 	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	StringField *string `json:"stringField,omitempty"`
+	StringField *string `json:"stringField,omitempty" yaml:"stringField,omitempty"`
 	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	EnumField *Direction `json:"enumField,omitempty"`
+	EnumField *Direction `json:"enumField,omitempty" yaml:"enumField,omitempty"`
 	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	RefField *Variable `json:"refField,omitempty"`
+	RefField *Variable `json:"refField,omitempty" yaml:"refField,omitempty"`
 }
 
 func (resource Optionals) Equals(other Optionals) bool {
@@ -95,12 +95,12 @@ func (resource Optionals) Equals(other Optionals) bool {
 }
 
 type Arrays struct {
-	Ints             []int64                          `json:"ints"`
-	Strings          []string                         `json:"strings"`
-	ArrayOfArray     [][]string                       `json:"arrayOfArray"`
-	Refs             []Variable                       `json:"refs"`
-	AnonymousStructs []EqualityArraysAnonymousStructs `json:"anonymousStructs"`
-	ArrayOfAny       []any                            `json:"arrayOfAny"`
+	Ints             []int64                          `json:"ints" yaml:"ints"`
+	Strings          []string                         `json:"strings" yaml:"strings"`
+	ArrayOfArray     [][]string                       `json:"arrayOfArray" yaml:"arrayOfArray"`
+	Refs             []Variable                       `json:"refs" yaml:"refs"`
+	AnonymousStructs []EqualityArraysAnonymousStructs `json:"anonymousStructs" yaml:"anonymousStructs"`
+	ArrayOfAny       []any                            `json:"arrayOfAny" yaml:"arrayOfAny"`
 }
 
 func (resource Arrays) Equals(other Arrays) bool {
@@ -177,11 +177,11 @@ func (resource Arrays) Equals(other Arrays) bool {
 }
 
 type Maps struct {
-	Ints             map[string]int64                        `json:"ints"`
-	Strings          map[string]string                       `json:"strings"`
-	Refs             map[string]Variable                     `json:"refs"`
-	AnonymousStructs map[string]EqualityMapsAnonymousStructs `json:"anonymousStructs"`
-	StringToAny      map[string]any                          `json:"stringToAny"`
+	Ints             map[string]int64                        `json:"ints" yaml:"ints"`
+	Strings          map[string]string                       `json:"strings" yaml:"strings"`
+	Refs             map[string]Variable                     `json:"refs" yaml:"refs"`
+	AnonymousStructs map[string]EqualityMapsAnonymousStructs `json:"anonymousStructs" yaml:"anonymousStructs"`
+	StringToAny      map[string]any                          `json:"stringToAny" yaml:"stringToAny"`
 }
 
 func (resource Maps) Equals(other Maps) bool {
@@ -242,7 +242,7 @@ func (resource Maps) Equals(other Maps) bool {
 
 // Modified by compiler pass 'AnonymousStructsToNamed'
 type EqualityArraysAnonymousStructs struct {
-	Inner string `json:"inner"`
+	Inner string `json:"inner" yaml:"inner"`
 }
 
 func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonymousStructs) bool {
@@ -255,7 +255,7 @@ func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonym
 
 // Modified by compiler pass 'AnonymousStructsToNamed'
 type EqualityMapsAnonymousStructs struct {
-	Inner string `json:"inner"`
+	Inner string `json:"inner" yaml:"inner"`
 }
 
 func (resource EqualityMapsAnonymousStructs) Equals(other EqualityMapsAnonymousStructs) bool {

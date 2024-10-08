@@ -145,9 +145,9 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	jsonOmitEmpty := ""
+	tagOmitEmpty := ""
 	if !def.Required {
-		jsonOmitEmpty = ",omitempty"
+		tagOmitEmpty = ",omitempty"
 	}
 
 	fieldType := def.Type
@@ -163,11 +163,11 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	}
 
 	buffer.WriteString(fmt.Sprintf(
-		"%s %s `json:\"%s%s\"`\n",
+		"%[1]s %[2]s `json:\"%[3]s%[4]s\" yaml:\"%[3]s%[4]s\"`\n",
 		tools.UpperCamelCase(def.Name),
 		formatter.doFormatType(fieldType, false),
 		def.Name,
-		jsonOmitEmpty,
+		tagOmitEmpty,
 	))
 
 	return buffer.String()
@@ -255,19 +255,19 @@ func defineAnonymousFields(def ast.StructType) string {
 
 		switch f.Type.Kind {
 		case ast.KindScalar:
-			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", key, f.Type.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
+			structDefinition.WriteString(fmt.Sprintf("%[1]s %[2]v `json:\"%[3]s\" yaml:\"%[3]s\"`\n", key, f.Type.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
 		case ast.KindStruct:
 			structFields := defineAnonymousFields(f.Type.AsStruct())
-			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, tools.LowerCamelCase(key)))
+			structDefinition.WriteString(fmt.Sprintf("%[1]s struct %[2]v `json:\"%[3]s\" yaml:\"%[3]s\"`\n", key, structFields, tools.LowerCamelCase(key)))
 		case ast.KindArray:
 			array := f.Type.AsArray()
 			if array.ValueType.IsScalar() {
-				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
+				structDefinition.WriteString(fmt.Sprintf("%[1]s []%[2]v `json:\"%[3]s\" yaml:\"%[3]s\"`\n", key, array.ValueType.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
 			}
 		// TODO: Map rest of array cases
 		default:
 			// TODO: Map rest of the cases when necessary. By default it sets any
-			structDefinition.WriteString(fmt.Sprintf("%s any `json:\"%s\"`\n", key, strings.ToLower(key)))
+			structDefinition.WriteString(fmt.Sprintf("%[1]s any `json:\"%[2]s\" yaml:\"%[2]s\"`\n", key, strings.ToLower(key)))
 		}
 	}
 

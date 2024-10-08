@@ -6,7 +6,7 @@ type MapOfStringToAny map[string]any
 type MapOfStringToString map[string]string
 
 type SomeStruct struct {
-	FieldAny any `json:"FieldAny"`
+	FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {

@@ -1,7 +1,7 @@
 package withdashes
 
 type SomeStruct struct {
-	FieldAny any `json:"FieldAny"`
+	FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
@@ -18,8 +18,8 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 type RefreshRate = StringOrBool
 
 type StringOrBool struct {
-	String *string `json:"String,omitempty"`
-	Bool *bool `json:"Bool,omitempty"`
+	String *string `json:"String,omitempty" yaml:"String,omitempty"`
+	Bool *bool `json:"Bool,omitempty" yaml:"Bool,omitempty"`
 }
 
 func (resource StringOrBool) MarshalJSON() ([]byte, error) {
@@ -34,6 +34,17 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	return nil, fmt.Errorf("no value for disjunction of scalars")
 }
 
+func (resource StringOrBool) MarshalYAML() (any, error) {
+	if resource.String != nil {
+		return resource.String, nil
+	}
+
+	if resource.Bool != nil {
+		return resource.Bool, nil
+	}
+
+	return nil, fmt.Errorf("no value for disjunction of scalars")
+}
 
 func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	if raw == nil {

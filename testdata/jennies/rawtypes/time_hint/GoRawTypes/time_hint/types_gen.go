@@ -3,7 +3,7 @@ package time_hint
 type ObjTime time.Time
 
 type ObjWithTimeField struct {
-	RegisteredAt time.Time `json:"registeredAt"`
+	RegisteredAt time.Time `json:"registeredAt" yaml:"registeredAt"`
 }
 
 func (resource ObjWithTimeField) Equals(other ObjWithTimeField) bool {

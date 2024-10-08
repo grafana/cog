@@ -4,7 +4,7 @@ package arrays
 type ArrayOfStrings []string
 
 type SomeStruct struct {
-	FieldAny any `json:"FieldAny"`
+	FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {

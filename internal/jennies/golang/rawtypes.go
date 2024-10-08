@@ -56,8 +56,14 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, packageMapper)
-	unmarshallerGenerator := NewJSONMarshalling(jenny.Config, jenny.Tmpl, packageMapper, jenny.typeFormatter)
+	unmarshallerGenerator := NewMarshalling(jenny.Config, jenny.Tmpl, packageMapper, jenny.typeFormatter)
 	equalityMethodsGenerator := newEqualityMethods(jenny.Tmpl)
+
+	jenny.Tmpl = jenny.Tmpl.Funcs(template.FuncMap{
+		"formatRawRef": func(pkg string, ref string) string {
+			return jenny.typeFormatter.formatRef(ast.NewRef(pkg, ref), false)
+		},
+	})
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		objectOutput, innerErr := jenny.formatObject(schema, object)
@@ -151,6 +157,19 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object) ([]byte, 
 			buffer.WriteString(fmt.Sprintf("\treturn \"%s\"\n", strings.ToLower(schema.Metadata.Identifier)))
 			buffer.WriteString("}\n")
 		}
+	}
+
+	customMethodsTmpl := fmt.Sprintf("object_%s_%s_custom_methods", def.SelfRef.ReferredPkg, def.SelfRef.ReferredType)
+	customMethods, err := jenny.Tmpl.RenderIfExists(customMethodsTmpl, map[string]any{
+		"Object": def,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if customMethods != "" {
+		buffer.WriteString(customMethods)
+		buffer.WriteString("\n")
 	}
 
 	return []byte(buffer.String()), nil
