@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/template"
 )
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.*
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.* templates/converters/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -34,6 +34,7 @@ func functions() template.FuncMap {
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
+		"formatPackageName":     formatPackageName,
 		"fillNullableAnnotationPattern": func(_ ast.Type) string {
 			panic("fillNullableAnnotationPattern() needs to be overridden by a jenny")
 		},

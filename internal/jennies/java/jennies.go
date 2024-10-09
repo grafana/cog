@@ -70,6 +70,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: language.config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
 		common.If[languages.Context](!config.SkipGradleDev, Gradle{config: config, tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

@@ -1,0 +1,122 @@
+package {{ .Converter.Package | formatPackageName }};
+
+{{ $converter := include "converter" . }}
+
+{{ .Imports }}
+
+{{ $converter }}
+
+{{- define "guard" }}
+    {{- if and (eq .Op "!=") (eq .Value nil) -}}
+        {{ .Path | formatPath }} != null
+    {{- else -}}
+        {{- $leftOperand := print .Path.Last.Type (.Path | formatPath) -}}
+        {{- $operator := .Op -}}
+        {{- if eq .Op "minLength" -}}
+            {{- $leftOperand = print "len(" $leftOperand ")" -}}
+            {{- $operator = ">=" -}}
+        {{- end -}}
+        {{- if eq .Op "maxLength" -}}
+            {{- $leftOperand = print "len(" $leftOperand ")" -}}
+            {{- $operator = "<=" -}}
+        {{- end -}}
+        {{- $leftOperand }} {{ $operator}} {{ .Value | formatScalar -}}
+    {{- end -}}
+{{- end }}
+
+{{- define "value_formatter" -}}
+    {{- if .Type.IsAny -}}
+        cog.Dump({{ .Path | formatPath }})
+    {{- else if .Type.IsScalar -}}
+        fmt.Sprintf("%#v", {{ (.Path | formatPath) .Type }})
+    {{- else -}}
+        cog.Dump({{ .Type }}{{ .Path | formatPath }})
+    {{- end -}}
+{{- end }}
+
+{{- define "guards" }}
+    {{- $guardsCount := sub1 (len .) -}}
+    {{- range $i, $guard := . }}{{- template "guard" $guard }}{{ if ne $i $guardsCount }} && {{ end }}{{ end }}
+{{- end }}
+
+{{- define "prepare_arg" -}}
+    {{- with .Arg.Builder -}}
+        {{ $.IntoVar }} := {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if .ValueType.Nullable}}*{{ end }}{{ .ValuePath | formatPath }})
+    {{- end -}}
+    {{- with .Arg.BuilderDisjunction -}}
+        var {{ $.IntoVar }} string
+        {{ range $builderChoice := . }}
+        if {{ template "guards" $builderChoice.Guards }} {
+            {{ $.IntoVar }} = {{ formatRawRef $builderChoice.Builder.BuilderPkg (print $builderChoice.Builder.BuilderName "Converter") }}({{- if $builderChoice.Builder.ValueType.Nullable}}*{{ end }}{{ $builderChoice.Builder.ValuePath | formatPath }})
+        }
+        {{ end }}
+    {{- end -}}
+    {{- with .Arg.Array -}}
+        tmp{{ $.IntoVar }} := []string{}
+        for _, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
+        {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
+        {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
+        tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{ $subIntoVar }})
+        }
+        {{ $.IntoVar }} := "{{ .ForType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
+    {{- end -}}
+    {{- with .Arg.Map -}}
+        {{ $.IntoVar }} := "map[{{ .IndexType | formatType }}]{{ .ValueType | formatTypeNoBuilder }}{"
+        for key, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
+        {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
+            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
+            {{ $.IntoVar }} += "\t" + fmt.Sprintf("%#v", key) + ": " + {{ $subIntoVar }} +","
+        }
+        {{ $.IntoVar }} += "}"
+    {{- end -}}
+    {{- with .Arg.Runtime -}}
+        {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath | formatPath }}{{ else }}{{ ($runtimeArg.ValuePath | formatPath) $runtimeArg.ValueType }}{{ end }}, {{ end }})
+    {{- end -}}
+    {{- with .Arg.Direct -}}
+        {{ $.IntoVar }} := {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}}
+    {{- end -}}
+{{- end }}
+
+{{- define "option_mapping" -}}
+    {{- $argsCount := sub1 (len .Args) -}}
+    {{- with .ArgumentGuards -}}if ({{ template "guards" . }}) { {{- end }}
+    {{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} { {{- end }}
+    calls.add(`{{ .Option.Name | upperCamelCase }}(`);
+    {{- range $i, $arg := .Args }}
+        {{- $intoVar := print "arg" $i }}
+        {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
+        calls.add({{ $intoVar }});
+        {{ if ne $i $argsCount }}calls.add(", ");{{- end }}
+    {{- end }}
+    calls.add(")");
+
+    calls = append(calls, buffer.String())
+    {{ with .ArgumentGuards -}} } {{- end }}
+    {{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} } {{- end }}
+{{- end }}
+
+{{- define "conversion_mapping" -}}
+    {{- $firstOpt := .Options | first }}
+    {{- with $firstOpt.Guards -}}if ({{ template "guards" . }}) { {{- end }}
+    {{- if ne .RepeatFor nil -}}for (int i = 0; i < {{ .RepeatFor | formatPath }}.size(); i++) { {{- end }}
+    {{- range $optMapping := .Options }}
+        {{ template "option_mapping" $optMapping }}
+    {{- end }}
+    {{ if ne .RepeatFor nil -}} } {{- end }}
+    {{- with $firstOpt.Guards -}} } {{- end }}
+{{- end }}
+
+{{- define "converter" -}}
+public class {{ .Converter.BuilderName | upperCamelCase }}Converter {
+    public static String convert({{ .InputDataquery | ternary "Dataquery" (formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType) }} input) {
+        List<String> calls = new LinkedList<>();
+        calls.add("{{ .Converter.BuilderName | upperCamelCase }}.Builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder(/*TODO*/)")
+    }
+    
+     {{- range .Converter.Mappings }}
+        {{ template "conversion_mapping" . }}
+     {{- end }}
+     
+     return String.join(".", calls);   
+}
+{{- end }}
