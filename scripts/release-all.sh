@@ -14,10 +14,9 @@ normal=$(tput sgr0)
 
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${__dir}/libs/logs.sh"
+source "${__dir}/versions.sh"
 
-versions="next;v11.2.x;v11.1.x;v11.0.x;v10.4.x;v10.3.x;v10.2.x;v10.1.x"
-
-for version in ${versions//;/ } ; do
+for version in ${ALL_GRAFANA_VERSIONS//;/ } ; do
   info "🪧 Releasing ${bold}${version}${normal}"
-  $__dir/release-version.sh "${versions}" "${version}"
+  $__dir/release-version.sh "${version}"
 done

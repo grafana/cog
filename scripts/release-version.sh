@@ -12,13 +12,13 @@ set -o pipefail
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${__dir}/libs/logs.sh"
 source "${__dir}/libs/git.sh"
+source "${__dir}/versions.sh"
 
 # These environment variables can be used to alter the behavior of the release script.
 
 DRY_RUN=${DRY_RUN:-"yes"} # Some kind of fail-safe to ensure that we're only pushing something when we mean it.
 
-ALL_GRAFANA_VERSIONS=${1:-"next"} # all the versions for which we do releases (";"-separated list).
-GRAFANA_VERSION=${2:-"next"} # version of the schemas/grafana to run the codegen for.
+GRAFANA_VERSION=${1:-"next"} # version of the schemas/grafana to run the codegen for.
 COG_VERSION="v0.0.x" # hardcoded for now
 
 COG_CMD=${COG_CMD:-"go run ./cmd/cli"} # Command used to run `cog`
