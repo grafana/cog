@@ -134,6 +134,10 @@ func (template *Template) Funcs(funcs FuncMap) *Template {
 	return template
 }
 
+func (template *Template) Exists(name string) bool {
+	return template.tmpl.Lookup(name) != nil
+}
+
 func (template *Template) Render(file string, data any) (string, error) {
 	buf := bytes.Buffer{}
 	if err := template.tmpl.ExecuteTemplate(&buf, file, data); err != nil {
