@@ -29,6 +29,11 @@ func (jenny Runtime) Generate(context languages.Context) (codejen.Files, error) 
 		return nil, err
 	}
 
+	unknownDataqueryBuilder, err := jenny.unknownDataqueryBuilder()
+	if err != nil {
+		return nil, err
+	}
+
 	builderInterface, err := jenny.builderInterface()
 	if err != nil {
 		return nil, err
@@ -38,6 +43,7 @@ func (jenny Runtime) Generate(context languages.Context) (codejen.Files, error) 
 		runtime,
 		builderInterface,
 		unknownDataquery,
+		unknownDataqueryBuilder,
 	}, nil
 }
 
@@ -97,4 +103,15 @@ func (jenny Runtime) unknownDataquery() (codejen.File, error) {
 	}
 
 	return *codejen.NewFile("src/Cog/UnknownDataquery.php", rendered, jenny), nil
+}
+
+func (jenny Runtime) unknownDataqueryBuilder() (codejen.File, error) {
+	rendered, err := jenny.tmpl.RenderAsBytes("runtime/unknown_dataquery_builder.tmpl", map[string]any{
+		"NamespaceRoot": jenny.config.NamespaceRoot,
+	})
+	if err != nil {
+		return codejen.File{}, err
+	}
+
+	return *codejen.NewFile("src/Cog/UnknownDataqueryBuilder.php", rendered, jenny), nil
 }
