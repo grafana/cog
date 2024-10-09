@@ -110,6 +110,10 @@ final class Runtime
 
     public function convertDataqueryToCode(Dataquery $dataquery): string
     {
+        if ($dataquery instanceof UnknownDataquery) {
+            return '(new \{{ .NamespaceRoot }}\Cog\UnknownDataqueryBuilder(new \{{ .NamespaceRoot }}\Cog\UnknownDataquery('.var_export($dataquery->toArray(), true).')))';
+        }
+
         if (!isset($this->dataqueryVariants[$dataquery->dataqueryType()])) {
             return '/* could not convert dataquery to PHP */';
         }
