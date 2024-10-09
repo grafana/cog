@@ -138,7 +138,7 @@ func (runtime *Runtime) ConvertDataqueryToGo(dataquery variants.Dataquery) strin
 		return config.GoConverter(dataquery)
 	}
 
-	return "/* could not convert dataquery to go */"
+	return fmt.Sprintf("variants.NewUnknownDataqueryBuilderFromObject(%s)", Dump(dataquery))
 }
 
 func ConvertPanelToCode(inputPanel any, panelType string) string {
@@ -154,6 +154,10 @@ func Dump(root any) string {
 }
 
 func dumpValue(value reflect.Value) string {
+	if reflectValueIsNil(value) {
+		return "nil"
+	}
+
 	if !value.IsValid() {
 		return "<invalid>"
 	}
@@ -215,6 +219,10 @@ func dumpMap(value reflect.Value) string {
 	parts := make([]string, 0, value.Len())
 	iter := value.MapRange()
 	for iter.Next() {
+		if reflectValueIsNil(iter.Value()) {
+			continue
+		}
+
 		line := fmt.Sprintf("%s: %s", dumpValue(iter.Key()), dumpValue(iter.Value()))
 		parts = append(parts, line)
 	}
@@ -233,8 +241,7 @@ func dumpStruct(value reflect.Value) string {
 		}
 
 		fieldValue := value.Field(i)
-		fieldValueKind := fieldValue.Kind()
-		if (fieldValueKind == reflect.Pointer || fieldValueKind == reflect.Interface || fieldValueKind == reflect.Array || fieldValueKind == reflect.Slice || fieldValueKind == reflect.Map) && fieldValue.IsNil() {
+		if reflectValueIsNil(fieldValue) {
 			continue
 		}
 
@@ -243,4 +250,9 @@ func dumpStruct(value reflect.Value) string {
 	}
 
 	return fmt.Sprintf("%s{%s}", value.Type().String(), strings.Join(parts, ", "))
+}
+
+func reflectValueIsNil(value reflect.Value) bool {
+	valueKind := value.Kind()
+	return (valueKind == reflect.Pointer || valueKind == reflect.Interface || valueKind == reflect.Array || valueKind == reflect.Slice || valueKind == reflect.Map) && value.IsNil()
 }

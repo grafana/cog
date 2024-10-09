@@ -63,3 +63,17 @@ func (unknown UnknownDataquery) Equals(otherCandidate Dataquery) bool {
 
 	return true
 }
+
+type UnknownDataqueryBuilder struct {
+	internal *UnknownDataquery
+}
+
+func NewUnknownDataqueryBuilderFromObject(dataquery UnknownDataquery) *UnknownDataqueryBuilder {
+	return &UnknownDataqueryBuilder{
+		internal: &dataquery,
+	}
+}
+
+func (builder *UnknownDataqueryBuilder) Build() (Dataquery, error) {
+	return *builder.internal, nil
+}
