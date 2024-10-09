@@ -4,6 +4,7 @@ import (
 	"reflect"
 	variants "github.com/grafana/cog/generated/cog/variants"
 	cog "github.com/grafana/cog/generated/cog"
+	"fmt"
 	"encoding/json"
 )
 
@@ -123,19 +124,19 @@ func (resource *Panel) UnmarshalJSON(raw []byte) error {
 	
 	if fields["title"] != nil {
 		if err := json.Unmarshal(fields["title"], &resource.Title); err != nil {
-			return err
+			return fmt.Errorf("error decoding field 'title': %w", err)
 		}
 	}
 
 	if fields["type"] != nil {
 		if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
-			return err
+			return fmt.Errorf("error decoding field 'type': %w", err)
 		}
 	}
 
 	if fields["datasource"] != nil {
 		if err := json.Unmarshal(fields["datasource"], &resource.Datasource); err != nil {
-			return err
+			return fmt.Errorf("error decoding field 'datasource': %w", err)
 		}
 	}
 
