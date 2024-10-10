@@ -55,7 +55,6 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	}
 
 	inputIsDataquery := schemaFound && schema.Metadata.Variant == ast.SchemaVariantDataQuery && schema.EntryPoint == builder.For.Name
-
 	typeFormatter := createFormatter(context, jenny.config).withPackageMapper(packageMapper)
 
 	return jenny.tmpl.

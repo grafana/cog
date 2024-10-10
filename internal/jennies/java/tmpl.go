@@ -35,6 +35,9 @@ func functions() template.FuncMap {
 		"containsValue":         containsValue,
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
 		"formatPackageName":     formatPackageName,
+		"formatRawRef": func(_ ast.Type) string {
+			panic("formatRawRef() needs to be overridden by a jenny")
+		},
 		"fillNullableAnnotationPattern": func(_ ast.Type) string {
 			panic("fillNullableAnnotationPattern() needs to be overridden by a jenny")
 		},
