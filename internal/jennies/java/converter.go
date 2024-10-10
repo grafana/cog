@@ -57,12 +57,16 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	inputIsDataquery := schemaFound && schema.Metadata.Variant == ast.SchemaVariantDataQuery && schema.EntryPoint == builder.For.Name
 	typeFormatter := createFormatter(context, jenny.config).withPackageMapper(packageMapper)
 
+	packageMapper("java.util", "List")
+	packageMapper("java.util", "LinkedList")
+
 	return jenny.tmpl.
 		Funcs(map[string]any{
 			"formatRawRef": func(pkg string, ref string) string {
 				return typeFormatter.formatReference(ast.NewRef(pkg, ref).AsRef())
 			},
 			"formatPath": typeFormatter.formatFieldPath,
+			"formatType": typeFormatter.formatFieldType,
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
 			"Imports":          imports,

@@ -10,16 +10,18 @@ package {{ .Converter.Package | formatPackageName }};
     {{- $leftOperand := print (.Path | formatPath) -}}
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
         {{ .Path }} != null
-    {{- else if not .Value -}}
+    {{- else if isScalarType .Path "bool" -}}
+        !{{- $leftOperand }}
+    {{- else if isScalarType .Path "string" -}}
         !{{- $leftOperand }}.isEmpty()
     {{- else -}}
         {{- $operator := .Op -}}
         {{- if eq .Op "minLength" -}}
-            {{- $leftOperand = print "len(" $leftOperand ")" -}}
+            {{- $leftOperand = print $leftOperand ".size()" -}}
             {{- $operator = ">=" -}}
         {{- end }}
         {{- if eq .Op "maxLength" -}}
-            {{- $leftOperand = print "len(" $leftOperand ")" -}}
+            {{- $leftOperand = print $leftOperand ".size()" -}}
             {{- $operator = "<=" -}}
         {{- end }}
         
@@ -44,40 +46,33 @@ package {{ .Converter.Package | formatPackageName }};
 
 {{- define "prepare_arg" -}}
     {{- with .Arg.Builder -}}
-        {{ $.IntoVar }} := {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{- if .ValueType.Nullable}}*{{ end }}{{ .ValuePath }})
+        {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }} {{ $.IntoVar }} = new {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{ .ValuePath }});
     {{- end -}}
     {{- with .Arg.BuilderDisjunction -}}
         var {{ $.IntoVar }} string
         {{ range $builderChoice := . }}
         if {{ template "guards" $builderChoice.Guards }} {
-            {{ $.IntoVar }} = {{ formatRawRef $builderChoice.Builder.BuilderPkg (print $builderChoice.Builder.BuilderName "Converter") }}({{- if $builderChoice.Builder.ValueType.Nullable}}*{{ end }}{{ $builderChoice.Builder.ValuePath }})
+            {{ $.IntoVar }} = {{ formatRawRef $builderChoice.Builder.BuilderPkg (print $builderChoice.Builder.BuilderName "Converter") }}({{- if $builderChoice.Builder.ValueType.Nullable}}*{{ end }}{{ $builderChoice.Builder.ValuePath }});
         }
         {{ end }}
     {{- end -}}
     {{- with .Arg.Array -}}
-        
-        List<String> tmp{{ $.IntoVar }} = new LinkedList<>();
-        for (int i=0; i< {{ .For }}.size(); i++) {
-            {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs) }}
-            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
-            tmp{{ $.IntoVar }}.add({{ $subIntoVar }});
-        }
-        {{ $.IntoVar }} := "{{ .ForType | formatType }}{" + strings.Join(tmp{{ $.IntoVar }}, ",\n") + "}"
+        List<String> tmp{{ $.IntoVar }} = new LinkedList<>({{ .For }});
+        String {{ $.IntoVar }} = "{{ .ForType | formatType }}(" + String.join(",\n", tmp{{ $.IntoVar }}) + ")";
     {{- end -}}
     {{- with .Arg.Map -}}
-        {{ $.IntoVar }} := "map[{{ .IndexType | formatType }}]{{ .ValueType | formatType }}{"
+        HashMap<{{ .IndexType | formatType }}, {{ .ValueType | formatType }}> {{ $.IntoVar }} := "new LinkedHashmap<>();"
         for key, {{ .ValueAs }} := range {{ .For }} {
         {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs) }}
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
-            {{ $.IntoVar }} += "\t" + fmt.Sprintf("%#v", key) + ": " + {{ $subIntoVar }} +","
+            {{ $.IntoVar }}.put(key, {{ $subIntoVar }});
         }
-        {{ $.IntoVar }} += "}"
     {{- end -}}
     {{- with .Arg.Runtime -}}
-        {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath }}{{ else }}{{ ($runtimeArg.ValuePath) }}{{ $runtimeArg.ValueType }}{{ end }}, {{ end }})
+        {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath }}{{ else }}{{ ($runtimeArg.ValuePath) }}{{ $runtimeArg.ValueType }}{{ end }}, {{ end }});
     {{- end -}}
     {{- with .Arg.Direct -}}
-        {{ $.IntoVar }} := {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}}
+        {{ .ValueType | formatType }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}};
     {{- end -}}
 {{- end }}
 
@@ -85,7 +80,7 @@ package {{ .Converter.Package | formatPackageName }};
     {{- $argsCount := sub1 (len .Args) -}}
     {{- with .ArgumentGuards -}}if ({{ template "guards" . }}) { {{- end }}
     {{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} { {{- end }}
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("new {{ .Option.Name | upperCamelCase }}(");
     {{- range $i, $arg := .Args }}
         {{- $intoVar := print "arg" $i }}
