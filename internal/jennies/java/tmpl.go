@@ -34,13 +34,19 @@ func functions() template.FuncMap {
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
-		"formatPackageName":     formatPackageName,
 		"isScalarType": func(p ast.Path, scalar string) bool {
 			if !p.Last().Type.IsScalar() {
 				return false
 			}
 
 			return p.Last().Type.AsScalar().ScalarKind == ast.ScalarKind(scalar)
+		},
+		"is": is,
+		"importStdPkg": func(_ ast.Type) string {
+			panic("formatRawRef() needs to be overridden by a jenny")
+		},
+		"formatPackageName": func(_ ast.Type) string {
+			panic("formatRawRef() needs to be overridden by a jenny")
 		},
 		"formatRawRef": func(_ ast.Type) string {
 			panic("formatRawRef() needs to be overridden by a jenny")

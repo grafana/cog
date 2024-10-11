@@ -66,8 +66,10 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			"formatRawRef": func(pkg string, ref string) string {
 				return typeFormatter.formatReference(ast.NewRef(pkg, ref).AsRef())
 			},
-			"formatPath": typeFormatter.formatFieldPath,
-			"formatType": typeFormatter.formatFieldType,
+			"formatPath":        typeFormatter.formatFieldPath,
+			"formatType":        typeFormatter.formatFieldType,
+			"formatPackageName": typeFormatter.formatPackage,
+			"importStdPkg":      packageMapper,
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
 			"Imports":          imports,

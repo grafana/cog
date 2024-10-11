@@ -9,7 +9,7 @@ package {{ .Converter.Package | formatPackageName }};
 {{- define "guard" }}
     {{- $leftOperand := print (.Path | formatPath) -}}
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
-        {{ .Path }} != null
+        {{ $leftOperand }} != null
     {{- else if isScalarType .Path "bool" -}}
         !{{- $leftOperand }}
     {{- else if isScalarType .Path "string" -}}
@@ -46,7 +46,7 @@ package {{ .Converter.Package | formatPackageName }};
 
 {{- define "prepare_arg" -}}
     {{- with .Arg.Builder -}}
-        {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }} {{ $.IntoVar }} = new {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}({{ .ValuePath }});
+        String {{ $.IntoVar }} = {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}.convert({{ .ValuePath }}{{ if $.IsMapEntry }}.getValue(){{ end }});
     {{- end -}}
     {{- with .Arg.BuilderDisjunction -}}
         var {{ $.IntoVar }} string
@@ -57,22 +57,33 @@ package {{ .Converter.Package | formatPackageName }};
         {{ end }}
     {{- end -}}
     {{- with .Arg.Array -}}
-        List<String> tmp{{ $.IntoVar }} = new LinkedList<>({{ .For }});
-        String {{ $.IntoVar }} = "{{ .ForType | formatType }}(" + String.join(",\n", tmp{{ $.IntoVar }}) + ")";
+        List<String> tmp{{ $.IntoVar }} = new LinkedList<>();
+        for ({{ .ValueType | formatType }} {{ .ValueAs | formatPath }} : {{ .For | formatPath }}) {
+            {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
+            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" false) }}
+            {{- if and (is .ValueType "scalar") (not (isScalarType .For "string")) }}
+            tmp{{ $.IntoVar }}.add({{ $subIntoVar }}.toString());
+            {{- else }}
+            tmp{{ $.IntoVar }}.add({{ $subIntoVar }});
+            {{- end }}
+        }
+        String {{ $.IntoVar }} = "List.of("+ String.join(",\n", tmp{{ $.IntoVar }}) +")";
     {{- end -}}
     {{- with .Arg.Map -}}
-        HashMap<{{ .IndexType | formatType }}, {{ .ValueType | formatType }}> {{ $.IntoVar }} := "new LinkedHashmap<>();"
-        for key, {{ .ValueAs }} := range {{ .For }} {
-        {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs) }}
-            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
-            {{ $.IntoVar }}.put(key, {{ $subIntoVar }});
+        {{- $reflect := importStdPkg "java.util" "Map" -}}
+        {{- $reflect := importStdPkg "java.util" "HashMap" -}}
+        Map<{{ .IndexType | formatType }}, String> {{ $.IntoVar }} = new HashMap<>();
+        for (Map.Entry<{{ .IndexType | formatType }}, {{ .ValueType | formatType }}> {{ .ValueAs | formatPath }} : {{ .For }}.entrySet()) {
+            {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs) }}
+            {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" true) }}
+            {{ $.IntoVar }}.put({{ .ValueAs | formatPath }}.getKey(), {{ $subIntoVar }});
         }
     {{- end -}}
     {{- with .Arg.Runtime -}}
         {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath }}{{ else }}{{ ($runtimeArg.ValuePath) }}{{ $runtimeArg.ValueType }}{{ end }}, {{ end }});
     {{- end -}}
     {{- with .Arg.Direct -}}
-        {{ .ValueType | formatType }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}};
+        {{ .ValueType | formatType }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}}{{ if $.IsMapEntry }}.getValue(){{ end }};
     {{- end -}}
 {{- end }}
 
@@ -84,7 +95,7 @@ package {{ .Converter.Package | formatPackageName }};
         buffer.append("new {{ .Option.Name | upperCamelCase }}(");
     {{- range $i, $arg := .Args }}
         {{- $intoVar := print "arg" $i }}
-        {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
+        {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg "IsMapEntry" false) }}
         buffer.append({{ $intoVar }});
         {{ if ne $i $argsCount }}calls.add(", ");{{- end }}
     {{- end }}
@@ -117,6 +128,7 @@ public class {{ .Converter.BuilderName | upperCamelCase }}Converter {
         {{ template "conversion_mapping" . }}
      {{- end }}
      
-     return String.join(".", calls);   
+     return String.join(".", calls);
+     }
 }
 {{- end }}
