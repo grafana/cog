@@ -95,7 +95,6 @@ output:
 
   languages:
     - go:
-        go_mod: true
         package_root: '%go_package_root%'
         builder_templates:
           - '%__config_dir%/templates/go'
