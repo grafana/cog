@@ -30,6 +30,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 		}
 
 		filename := filepath.Join(
+			jenny.config.ProjectPath,
 			formatPackageName(builder.Package),
 			fmt.Sprintf("%sConverter.java", builder.Name),
 		)
