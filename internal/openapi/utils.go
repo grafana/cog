@@ -48,7 +48,7 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 	if schema.MaxLength != nil {
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   ast.MaxLengthOp,
-			Args: []any{schema.MaxLength},
+			Args: []any{*schema.MaxLength},
 		})
 	}
 
