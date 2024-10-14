@@ -1,5 +1,4 @@
 {{- define "assignment" }}
-    {{- template "constraints" .Assignment.Constraints }}
     {{- range .Assignment.NilChecks }}
         {{- template "nil_check" . }}
     {{- end }}
