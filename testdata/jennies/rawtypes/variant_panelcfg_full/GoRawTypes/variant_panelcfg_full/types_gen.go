@@ -1,7 +1,6 @@
 package variant_panelcfg_full
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
 	variants "github.com/grafana/cog/generated/cog/variants"
 	"encoding/json"
 )
@@ -20,13 +19,7 @@ func (resource Options) Equals(other Options) bool {
 
 
 func (resource Options) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -44,13 +37,7 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 
 
 func (resource FieldConfig) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 

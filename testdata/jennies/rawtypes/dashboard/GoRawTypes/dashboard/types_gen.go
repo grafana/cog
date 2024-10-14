@@ -80,13 +80,7 @@ func (resource DataSourceRef) Equals(other DataSourceRef) bool {
 
 
 func (resource DataSourceRef) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -150,13 +144,7 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 
 
 func (resource FieldConfig) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 

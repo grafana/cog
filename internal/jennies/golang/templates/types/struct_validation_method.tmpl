@@ -1,4 +1,6 @@
 func (resource {{ .def.Name|upperCamelCase }}) Validate() error {
+	{{- if resolvesToConstraints .def.Type }}
+	{{- $cog := importPkg "cog" }}
 	var errs cog.BuildErrors
 	{{- template "type_validate_check" (dict "ConstraintPath" "" "Type" .def.Type "Nullable" .def.Type.Nullable "Dereference" false "SelfName" "resource" "Depth" 0) }}
 
@@ -7,6 +9,9 @@ func (resource {{ .def.Name|upperCamelCase }}) Validate() error {
 	}
 
 	return errs
+	{{- else }}
+	return nil
+	{{- end }}
 }
 
 {{/* arguments: ConstraintPath, Type, Nullable, Dereference, SelfName */}}

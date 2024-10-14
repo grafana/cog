@@ -35,13 +35,7 @@ func (resource Variable) Equals(other Variable) bool {
 }
 
 func (resource Variable) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 type Container struct {
@@ -341,13 +335,7 @@ func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonym
 }
 
 func (resource EqualityArraysAnonymousStructs) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 // Modified by compiler pass 'AnonymousStructsToNamed'
@@ -364,11 +352,5 @@ func (resource EqualityMapsAnonymousStructs) Equals(other EqualityMapsAnonymousS
 }
 
 func (resource EqualityMapsAnonymousStructs) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }

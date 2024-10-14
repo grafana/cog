@@ -2,7 +2,6 @@ package withdashes
 
 import (
 	"reflect"
-	cog "github.com/grafana/cog/generated/cog"
 	"encoding/json"
 	"fmt"
 	"errors"
@@ -23,13 +22,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 
 
 func (resource SomeStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -110,13 +103,7 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 
 
 func (resource StringOrBool) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
