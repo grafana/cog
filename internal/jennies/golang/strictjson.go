@@ -12,15 +12,13 @@ import (
 
 type strictJSONUnmarshal struct {
 	tmpl          *template.Template
-	config        Config
 	imports       *common.DirectImportMap
 	packageMapper func(string) string
 	typeFormatter *typeFormatter
 }
 
-func newStrictJSONUnmarshal(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter) strictJSONUnmarshal {
+func newStrictJSONUnmarshal(tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter) strictJSONUnmarshal {
 	return strictJSONUnmarshal{
-		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
 			"formatType": typeFormatter.formatType,
 			"importStdPkg": func(pkg string) string {
@@ -67,6 +65,12 @@ func (jenny strictJSONUnmarshal) renderStructUnmarshal(context languages.Context
 		Funcs(template.FuncMap{
 			"resolvesToScalar": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsScalar()
+			},
+			"resolvesToStruct": func(typeDef ast.Type) bool {
+				return context.ResolveRefs(typeDef).IsStruct()
+			},
+			"formatRawRef": func(pkg string, ref string) string {
+				return jenny.typeFormatter.formatRef(ast.NewRef(pkg, ref), false)
 			},
 		}).
 		Render("types/struct.strict.json_unmarshal.tmpl", map[string]any{
