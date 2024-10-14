@@ -2,6 +2,7 @@ package {{ .Package }};
 
 import java.util.HashMap;
 import java.util.Map;
+{{ .Imports }}
 
 public class Registry {
     private static final Map<String, PanelConfig> panelRegistry = new HashMap<>();
@@ -9,12 +10,12 @@ public class Registry {
     
     static {
         {{- range .PanelSchemas }}
-        registerPanel({{ printf "%#v" .Identifier }}, {{ .Options }}, {{ .FieldConfig }});
+        registerPanel({{ printf "%#v" .Identifier }}, {{ .Options }}, {{ .FieldConfig }}{{ if $.ShouldAddConverters }}, {{ .Converter }}{{ end }});
         {{- end }}
 
 
         {{- range .DataquerySchemas }}
-        registerDataquery({{ printf "%#v" .Identifier }}, {{ .Class }}.class);
+        registerDataquery({{ printf "%#v" .Identifier }}, {{ .Class }}{{ if $.ShouldAddConverters }}, {{ .Converter }}{{ end }});
         {{- end }}
     }
 
@@ -26,11 +27,25 @@ public class Registry {
         return dataqueryRegistry.get(type);
     }
     
-    public static void registerPanel(String type, Class<?> options, Class<?> fieldConfig) {
-        panelRegistry.put(type, new PanelConfig(options, fieldConfig));
+    public static void registerPanel(String type, Class<?> options, Class<?> fieldConfig{{ if .ShouldAddConverters }}, Class<?> converters{{ end }}) {
+        panelRegistry.put(type, new PanelConfig(options, fieldConfig{{ if .ShouldAddConverters }}, converters{{ end }}));
     }
 
-    public static PanelConfig getPanel(String type) {
-        return panelRegistry.get(type);
+    {{- if .ShouldAddConverters }}
+    public static String convertPanelToCode(Panel panel, String type) {
+        PanelConfig pc = panelRegistry.get(type);
+        if (pc != null) {
+            try {
+                Object panelResult = pc.getConverter().getMethod("convert").invoke(panel);
+                return (String) panelResult;
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        // TODO: Return unknown panel.
+        return "";
     }
+    {{- end }}
+    
 }

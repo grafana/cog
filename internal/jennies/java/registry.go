@@ -53,7 +53,8 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 
 func (jenny Registry) renderPanelConfig() (string, error) {
 	return jenny.tmpl.Render("runtime/panel_config.tmpl", map[string]any{
-		"Package": jenny.formatPackage("cog.variants"),
+		"Package":             jenny.formatPackage("cog.variants"),
+		"ShouldAddConverters": jenny.config.generateConverters,
 	})
 }
 
@@ -70,13 +71,15 @@ func (jenny Registry) renderRegistry(context languages.Context) (string, error) 
 		if schema.Metadata.Variant == ast.SchemaVariantDataQuery {
 			dataquerySchemas = append(dataquerySchemas, DataquerySchema{
 				Identifier: strings.ToLower(schema.Metadata.Identifier),
-				Class:      jenny.formatPackage(fmt.Sprintf("%s.%s", schema.Package, jenny.findDataqueryClass(schema))),
+				Class:      jenny.formatPackage(fmt.Sprintf("%s.%s.class", schema.Package, jenny.findDataqueryClass(schema))),
+				Converter:  jenny.formatPackage(fmt.Sprintf("%s.Converter.class", schema.Package)),
 			})
 		} else if schema.Metadata.Variant == ast.SchemaVariantPanel {
 			panelSchemas = append(panelSchemas, PanelSchema{
 				Identifier:  strings.ToLower(schema.Metadata.Identifier),
 				Options:     jenny.formatPackage(fmt.Sprintf("%s.Options.class", schema.Package)),
 				FieldConfig: jenny.findFieldConfig(schema),
+				Converter:   jenny.formatPackage(fmt.Sprintf("%s.PanelConverter.class", schema.Package)),
 			})
 		}
 	}
@@ -85,15 +88,21 @@ func (jenny Registry) renderRegistry(context languages.Context) (string, error) 
 		return panelSchemas[i].Identifier < panelSchemas[j].Identifier
 	})
 
+	if jenny.config.generateConverters {
+		imports.Add("Panel", "dashboard")
+		imports.Add("reflect.InvocationTargetException", "java.lang")
+	}
+
 	sort.SliceStable(dataquerySchemas, func(i, j int) bool {
 		return dataquerySchemas[i].Identifier < dataquerySchemas[j].Identifier
 	})
 
 	return jenny.tmpl.Render("runtime/registry.tmpl", map[string]any{
-		"Package":          jenny.formatPackage("cog.variants"),
-		"Imports":          imports,
-		"PanelSchemas":     panelSchemas,
-		"DataquerySchemas": dataquerySchemas,
+		"Package":             jenny.formatPackage("cog.variants"),
+		"Imports":             imports.String(),
+		"PanelSchemas":        panelSchemas,
+		"DataquerySchemas":    dataquerySchemas,
+		"ShouldAddConverters": jenny.config.generateConverters,
 	})
 }
 

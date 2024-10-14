@@ -29,8 +29,9 @@ func NewImportMap(packagePath string) *common.DirectImportMap {
 
 func setPackagePath(packagePath string, importPath string) string {
 	ignorePaths := map[string]bool{
-		"java.util":             true,
 		"com.fasterxml.jackson": true,
+		"java.lang":             true,
+		"java.util":             true,
 	}
 	if _, ok := ignorePaths[importPath]; ok || packagePath == "" {
 		return importPath

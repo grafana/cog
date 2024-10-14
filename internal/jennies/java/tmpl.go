@@ -161,12 +161,14 @@ type OptionCall struct {
 type DataquerySchema struct {
 	Identifier string
 	Class      string
+	Converter  string
 }
 
 type PanelSchema struct {
 	Identifier  string
 	Options     string
 	FieldConfig string
+	Converter   string
 }
 
 type Unmarshalling struct {
