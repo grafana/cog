@@ -22,13 +22,7 @@ func (resource NestedStruct) Equals(other NestedStruct) bool {
 
 
 func (resource NestedStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -101,13 +95,7 @@ func (resource DefaultsStructComplexFieldNested) Equals(other DefaultsStructComp
 
 
 func (resource DefaultsStructComplexFieldNested) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -171,13 +159,7 @@ func (resource DefaultsStructPartialComplexField) Equals(other DefaultsStructPar
 
 
 func (resource DefaultsStructPartialComplexField) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 

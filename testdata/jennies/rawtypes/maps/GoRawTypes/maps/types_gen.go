@@ -2,7 +2,6 @@ package maps
 
 import (
 	"reflect"
-	cog "github.com/grafana/cog/generated/cog"
 )
 
 // String to... something.
@@ -25,13 +24,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 
 
 func (resource SomeStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 

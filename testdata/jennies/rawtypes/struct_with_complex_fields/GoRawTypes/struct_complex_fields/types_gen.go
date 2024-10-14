@@ -114,13 +114,7 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 
 
 func (resource SomeOtherStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -146,13 +140,7 @@ func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Equals(other S
 
 
 func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -230,13 +218,7 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 
 
 func (resource StringOrBool) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 

@@ -101,13 +101,7 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 
 
 func (resource SomeOtherStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -133,13 +127,7 @@ func (resource StructOptionalFieldsSomeStructFieldAnonymousStruct) Equals(other 
 
 
 func (resource StructOptionalFieldsSomeStructFieldAnonymousStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 

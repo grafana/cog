@@ -1,9 +1,5 @@
 package defaults
 
-import (
-	cog "github.com/grafana/cog/generated/cog"
-)
-
 type SomeStruct struct {
 	FieldBool bool `json:"fieldBool"`
 	FieldString string `json:"fieldString"`
@@ -34,13 +30,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 
 
 func (resource SomeStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 

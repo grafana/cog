@@ -76,32 +76,15 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 			return resolvesToConstraints(typeDef.AsArray().ValueType)
 		}
 
-		// TODO: descend other types
-
 		return false
 	}
 
-	jenny.packageMapper("cog")
-
 	tmpl := jenny.tmpl.Funcs(template.FuncMap{
-		"typeHasEqualityFunc": func(typeDef ast.Type) bool {
-			if !typeDef.IsRef() {
-				return false
-			}
-
-			return context.ResolveToStruct(typeDef)
-		},
-		"resolvesToScalar": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsScalar()
-		},
 		"resolvesToMap": func(typeDef ast.Type) bool {
 			return context.ResolveRefs(typeDef).IsMap()
 		},
 		"resolvesToArray": func(typeDef ast.Type) bool {
 			return context.ResolveRefs(typeDef).IsArray()
-		},
-		"resolvesToEnum": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsEnum()
 		},
 		"resolvesToStruct": func(typeDef ast.Type) bool {
 			return context.ResolveRefs(typeDef).IsStruct()
@@ -110,6 +93,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		"importStdPkg": func(pkg string) string {
 			return imports.Add(pkg, pkg)
 		},
+		"importPkg": jenny.packageMapper,
 
 		"resolvesToConstraints": resolvesToConstraints,
 	})

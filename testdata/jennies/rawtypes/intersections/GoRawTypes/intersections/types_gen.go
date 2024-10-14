@@ -2,7 +2,6 @@ package intersections
 
 import (
 	externalpkg "github.com/grafana/cog/generated/externalpkg"
-	cog "github.com/grafana/cog/generated/cog"
 )
 
 type Intersections struct {
@@ -27,13 +26,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 
 
 func (resource SomeStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 

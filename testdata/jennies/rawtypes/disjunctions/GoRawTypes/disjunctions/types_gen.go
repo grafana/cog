@@ -2,10 +2,10 @@ package disjunctions
 
 import (
 	"reflect"
-	cog "github.com/grafana/cog/generated/cog"
 	"encoding/json"
 	"fmt"
 	"errors"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 // Refresh rate or disabled.
@@ -32,13 +32,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 
 
 func (resource SomeStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -62,13 +56,7 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 
 
 func (resource SomeOtherStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -90,13 +78,7 @@ func (resource YetAnotherStruct) Equals(other YetAnotherStruct) bool {
 
 
 func (resource YetAnotherStruct) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
@@ -176,13 +158,7 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 
 
 func (resource StringOrBool) Validate() error {
-	var errs cog.BuildErrors
-
-	if len(errs) == 0 {
-		return nil
-	}
-
-	return errs
+	return nil
 }
 
 
