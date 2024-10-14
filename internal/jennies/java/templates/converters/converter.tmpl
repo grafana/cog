@@ -109,7 +109,10 @@ package {{ .Converter.Package | formatPackageName }};
 {{- define "conversion_mapping" -}}
     {{- $firstOpt := .Options | first }}
     {{- with $firstOpt.Guards -}}if ({{ template "guards" . }}) { {{- end }}
-    {{- if ne .RepeatFor nil -}}for (int i = 0; i < {{ .RepeatFor }}.size(); i++) { {{- end }}
+    {{- if ne .RepeatFor nil -}}
+        {{ $repeatFor := .RepeatFor.Last.Type.AsArray.ValueType | formatType }}
+        for ({{ $repeatFor }} item : {{ .RepeatFor }}) { 
+    {{ end }}
     {{- range $optMapping := .Options }}
         {{ template "option_mapping" $optMapping }}
     {{- end }}
