@@ -326,7 +326,7 @@ func (tf *typeFormatter) formatPackage(pkg string) string {
 	return pkg
 }
 
-func (tf *typeFormatter) formatValue(destinationType ast.Type, value any) string {
+func (tf *typeFormatter) formatRefType(destinationType ast.Type, value any) string {
 	if destinationType.IsRef() {
 		referredObj, found := tf.context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
 		if found && referredObj.Type.IsEnum() {

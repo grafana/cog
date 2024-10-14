@@ -87,6 +87,9 @@ func functions() template.FuncMap {
 		"resolvesToComposableSlot": func(_ ast.Type) bool {
 			panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 		},
+		"formatRefType": func(_ ast.Type, value any) string {
+			panic("formatRefType() needs to be overridden by a jenny")
+		},
 	}
 }
 

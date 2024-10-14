@@ -68,6 +68,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			},
 			"formatPath":        typeFormatter.formatFieldPath,
 			"formatType":        typeFormatter.formatFieldType,
+			"formatRefType":     typeFormatter.formatRefType,
 			"formatPackageName": typeFormatter.formatPackage,
 			"importStdPkg":      packageMapper,
 		}).
