@@ -1,4 +1,4 @@
-{{- $json := importStdPkg "encoding/json" }}
+{{- $json := importStdPkg "encoding/json" -}}
 func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -15,10 +15,16 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 
 	// Field "{{ $field.Name }}"
 	if fields[{{ $field.Name|formatScalar }}] != nil {
-		{{ template "strict_unmarshal_field_type" (dict "Field" $field) }}
+		if string(fields[{{ $field.Name|formatScalar }}]) != "null" {
+			{{ template "strict_unmarshal_field_type" (dict "Field" $field) }}
+		{{ if $field.Required -}} } else {
+			{{- $errors := importStdPkg "errors" -}}
+			errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is null"))...)
+		{{ end }}
+		}
 		delete(fields, {{ $field.Name|formatScalar }})
 	{{ if $field.Required -}} } else {
-		{{- $errors := importStdPkg "errors" }}
+		{{- $errors := importStdPkg "errors" -}}
 		errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is missing from input"))...)
 	{{- end }}
 	}
@@ -34,10 +40,16 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 {{/* arguments: Field */}}
 {{- define "strict_unmarshal_field_type" -}}
 	{{- if or (resolvesToScalar .Field.Type) -}}
-		if err := json.Unmarshal(fields[{{ .Field.Name|formatScalar }}], &resource.{{ .Field.Name|upperCamelCase }}); err != nil {
-			errs = append(errs, cog.MakeBuildErrors({{ .Field.Name|formatScalar }}, err)...)
-		}
+			if err := json.Unmarshal(fields[{{ .Field.Name|formatScalar }}], &resource.{{ .Field.Name|upperCamelCase }}); err != nil {
+				errs = append(errs, cog.MakeBuildErrors({{ .Field.Name|formatScalar }}, err)...)
+			}
+	{{- else if and .Field.Type.IsRef (resolvesToStruct .Field.Type) }}
+			resource.{{ .Field.Name|upperCamelCase }} = {{ if .Field.Type.Nullable}}&{{ end }}{{ formatRawRef .Field.Type.Ref.ReferredPkg .Field.Type.Ref.ReferredType }}{}
+			if err := resource.{{ .Field.Name|upperCamelCase }}.StrictUnmarshalJSON(fields[{{ .Field.Name|formatScalar }}]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors({{ .Field.Name|formatScalar }}, err)...)
+			}
 	{{- else -}}
-		{{/* TODO: uncomment later → found an unimplemented unmarshal case  intentionally left uncommented, to trigger a failure during codegen */}}
+			{{/* TODO: uncomment later → found an unimplemented unmarshal case  intentionally left uncommented, to trigger a failure during codegen */}}
+			// TODO: implement me :( → {{ .Field.Type.Kind }}
 	{{- end -}}
 {{- end -}}
