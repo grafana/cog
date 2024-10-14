@@ -63,8 +63,14 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"resolvesToEnum": func(typeDef ast.Type) bool {
 				panic("refResolvesToEnum() needs to be overridden by a jenny")
 			},
+			"resolvesToStruct": func(typeDef ast.Type) bool {
+				panic("resolvesToStruct() needs to be overridden by a jenny")
+			},
 			"resolveRefs": func(typeDef ast.Type) ast.Type {
 				panic("resolveRefs() needs to be overridden by a jenny")
+			},
+			"resolvesToConstraints": func(_ ast.Type) string {
+				panic("resolvesToConstraints() needs to be overridden by a jenny")
 			},
 		}),
 		template.Funcs(map[string]any{
