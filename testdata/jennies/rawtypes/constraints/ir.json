@@ -1,0 +1,178 @@
+{
+  "Package": "constraints",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "SomeStruct": {
+      "Name": "SomeStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "id",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        5
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        10
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "maybeId",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        5
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        10
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "minLength",
+                      "Args": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "refStruct",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "constraints",
+                  "ReferredType": "refStruct"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constraints",
+        "ReferredType": "SomeStruct"
+      }
+    },
+    "refStruct": {
+      "Name": "refStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "labels",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "tags",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constraints",
+        "ReferredType": "refStruct"
+      }
+    }
+  }
+}

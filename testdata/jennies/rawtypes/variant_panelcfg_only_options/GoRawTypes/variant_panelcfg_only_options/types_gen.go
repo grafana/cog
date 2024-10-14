@@ -18,6 +18,8 @@ func (resource Options) Equals(other Options) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Options) Validate() error {
 	return nil
 }

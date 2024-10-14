@@ -31,6 +31,8 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource SomeStruct) Validate() error {
 	return nil
 }
@@ -55,6 +57,8 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource SomeOtherStruct) Validate() error {
 	return nil
 }
@@ -77,6 +81,8 @@ func (resource YetAnotherStruct) Equals(other YetAnotherStruct) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource YetAnotherStruct) Validate() error {
 	return nil
 }
@@ -157,6 +163,8 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource StringOrBool) Validate() error {
 	return nil
 }
@@ -191,6 +199,8 @@ func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource BoolOrSomeStruct) Validate() error {
 	var errs cog.BuildErrors
 		if resource.SomeStruct != nil {
@@ -307,6 +317,8 @@ func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Equals(other SomeS
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Validate() error {
 	var errs cog.BuildErrors
 		if resource.SomeStruct != nil {

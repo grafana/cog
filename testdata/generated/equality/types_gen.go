@@ -34,6 +34,8 @@ func (resource Variable) Equals(other Variable) bool {
 	return true
 }
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Variable) Validate() error {
 	return nil
 }
@@ -62,6 +64,8 @@ func (resource Container) Equals(other Container) bool {
 	return true
 }
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Container) Validate() error {
 	var errs cog.BuildErrors
 	if err := resource.RefField.Validate(); err != nil {
@@ -116,6 +120,8 @@ func (resource Optionals) Equals(other Optionals) bool {
 	return true
 }
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Optionals) Validate() error {
 	var errs cog.BuildErrors
 	if resource.RefField != nil {
@@ -213,6 +219,8 @@ func (resource Arrays) Equals(other Arrays) bool {
 	return true
 }
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Arrays) Validate() error {
 	var errs cog.BuildErrors
 
@@ -299,6 +307,8 @@ func (resource Maps) Equals(other Maps) bool {
 	return true
 }
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Maps) Validate() error {
 	var errs cog.BuildErrors
 
@@ -334,6 +344,8 @@ func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonym
 	return true
 }
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource EqualityArraysAnonymousStructs) Validate() error {
 	return nil
 }
@@ -351,6 +363,8 @@ func (resource EqualityMapsAnonymousStructs) Equals(other EqualityMapsAnonymousS
 	return true
 }
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource EqualityMapsAnonymousStructs) Validate() error {
 	return nil
 }

@@ -21,6 +21,8 @@ func (resource NestedStruct) Equals(other NestedStruct) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource NestedStruct) Validate() error {
 	return nil
 }
@@ -55,6 +57,8 @@ func (resource Struct) Equals(other Struct) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Struct) Validate() error {
 	var errs cog.BuildErrors
 		if err := resource.AllFields.Validate(); err != nil {
@@ -94,6 +98,8 @@ func (resource DefaultsStructComplexFieldNested) Equals(other DefaultsStructComp
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource DefaultsStructComplexFieldNested) Validate() error {
 	return nil
 }
@@ -127,6 +133,8 @@ func (resource DefaultsStructComplexField) Equals(other DefaultsStructComplexFie
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource DefaultsStructComplexField) Validate() error {
 	var errs cog.BuildErrors
 		if err := resource.Nested.Validate(); err != nil {
@@ -158,6 +166,8 @@ func (resource DefaultsStructPartialComplexField) Equals(other DefaultsStructPar
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource DefaultsStructPartialComplexField) Validate() error {
 	return nil
 }
