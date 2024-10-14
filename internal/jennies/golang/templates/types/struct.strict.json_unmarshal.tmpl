@@ -1,0 +1,43 @@
+{{- $json := importStdPkg "encoding/json" }}
+func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+
+	{{- $cog := importPkg "cog" }}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	{{- range $field := .def.Type.Struct.Fields }}
+
+	// Field "{{ $field.Name }}"
+	if fields[{{ $field.Name|formatScalar }}] != nil {
+		{{ template "strict_unmarshal_field_type" (dict "Field" $field) }}
+		delete(fields, {{ $field.Name|formatScalar }})
+	{{ if $field.Required -}} } else {
+		{{- $errors := importStdPkg "errors" }}
+		errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is missing from input"))...)
+	{{- end }}
+	}
+	{{- end }}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+{{/* arguments: Field */}}
+{{- define "strict_unmarshal_field_type" -}}
+	{{- if or (resolvesToScalar .Field.Type) -}}
+		if err := json.Unmarshal(fields[{{ .Field.Name|formatScalar }}], &resource.{{ .Field.Name|upperCamelCase }}); err != nil {
+			errs = append(errs, cog.MakeBuildErrors({{ .Field.Name|formatScalar }}, err)...)
+		}
+	{{- else -}}
+		{{/* TODO: uncomment later → found an unimplemented unmarshal case  intentionally left uncommented, to trigger a failure during codegen */}}
+	{{- end -}}
+{{- end -}}
