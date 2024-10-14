@@ -1,9 +1,10 @@
 package dashboard
 
 import (
+	cog "github.com/grafana/cog/generated/cog"
+	"strconv"
 	"reflect"
 	variants "github.com/grafana/cog/generated/cog/variants"
-	cog "github.com/grafana/cog/generated/cog"
 	"fmt"
 	"encoding/json"
 )
@@ -29,6 +30,23 @@ func (resource Dashboard) Equals(other Dashboard) bool {
 		}
 
 	return true
+}
+
+
+func (resource Dashboard) Validate() error {
+	var errs cog.BuildErrors
+
+		for i1 := range resource.Panels {
+		if err := resource.Panels[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("panels["+strconv.Itoa(i1)+"]", err)...)
+		}
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -61,6 +79,17 @@ func (resource DataSourceRef) Equals(other DataSourceRef) bool {
 }
 
 
+func (resource DataSourceRef) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 type FieldConfigSource struct {
 	Defaults *FieldConfig `json:"defaults,omitempty"`
 }
@@ -77,6 +106,22 @@ func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
 		}
 
 	return true
+}
+
+
+func (resource FieldConfigSource) Validate() error {
+	var errs cog.BuildErrors
+		if resource.Defaults != nil {
+		if err := resource.Defaults.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("defaults", err)...)
+		}
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -101,6 +146,17 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 		}
 
 	return true
+}
+
+
+func (resource FieldConfig) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -239,6 +295,33 @@ func (resource Panel) Equals(other Panel) bool {
 		}
 
 	return true
+}
+
+
+func (resource Panel) Validate() error {
+	var errs cog.BuildErrors
+		if resource.Datasource != nil {
+		if err := resource.Datasource.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
+		}
+		}
+
+		for i1 := range resource.Targets {
+		if err := resource.Targets[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("targets["+strconv.Itoa(i1)+"]", err)...)
+		}
+		}
+		if resource.FieldConfig != nil {
+		if err := resource.FieldConfig.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("fieldConfig", err)...)
+		}
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 

@@ -2,6 +2,7 @@ package time_hint
 
 import (
 	"time"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 type ObjTime time.Time
@@ -16,6 +17,17 @@ func (resource ObjWithTimeField) Equals(other ObjWithTimeField) bool {
 		}
 
 	return true
+}
+
+
+func (resource ObjWithTimeField) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 

@@ -24,14 +24,8 @@ func NewDashboardBuilder() *DashboardBuilder {
 }
 
 func (builder *DashboardBuilder) Build() (Dashboard, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("Dashboard", err)...)
-	}
-
-	if len(errs) != 0 {
-		return Dashboard{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return Dashboard{}, err
 	}
 
 	return *builder.internal, nil

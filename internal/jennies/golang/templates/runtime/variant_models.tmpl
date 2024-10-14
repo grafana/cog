@@ -26,7 +26,6 @@ type Dataquery interface {
 
 type Panelcfg interface {
 	ImplementsPanelcfgVariant()
-	Validate() error
 }
 
 type UnknownDataquery map[string]any

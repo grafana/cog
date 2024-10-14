@@ -1,5 +1,9 @@
 package defaults
 
+import (
+	cog "github.com/grafana/cog/generated/cog"
+)
+
 type NestedStruct struct {
 	StringVal string `json:"stringVal"`
 	IntVal int64 `json:"intVal"`
@@ -14,6 +18,17 @@ func (resource NestedStruct) Equals(other NestedStruct) bool {
 		}
 
 	return true
+}
+
+
+func (resource NestedStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -46,6 +61,32 @@ func (resource Struct) Equals(other Struct) bool {
 }
 
 
+func (resource Struct) Validate() error {
+	var errs cog.BuildErrors
+		if err := resource.AllFields.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("allFields", err)...)
+		}
+		if err := resource.PartialFields.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("partialFields", err)...)
+		}
+		if err := resource.EmptyFields.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("emptyFields", err)...)
+		}
+		if err := resource.ComplexField.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("complexField", err)...)
+		}
+		if err := resource.PartialComplexField.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("partialComplexField", err)...)
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 type DefaultsStructComplexFieldNested struct {
 	NestedVal string `json:"nestedVal"`
 }
@@ -56,6 +97,17 @@ func (resource DefaultsStructComplexFieldNested) Equals(other DefaultsStructComp
 		}
 
 	return true
+}
+
+
+func (resource DefaultsStructComplexFieldNested) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -87,6 +139,20 @@ func (resource DefaultsStructComplexField) Equals(other DefaultsStructComplexFie
 }
 
 
+func (resource DefaultsStructComplexField) Validate() error {
+	var errs cog.BuildErrors
+		if err := resource.Nested.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("nested", err)...)
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 type DefaultsStructPartialComplexField struct {
 	Uid string `json:"uid"`
 	IntVal int64 `json:"intVal"`
@@ -101,6 +167,17 @@ func (resource DefaultsStructPartialComplexField) Equals(other DefaultsStructPar
 		}
 
 	return true
+}
+
+
+func (resource DefaultsStructPartialComplexField) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 

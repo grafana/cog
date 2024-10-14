@@ -3,6 +3,7 @@ package variant_dataquery
 import (
 	variants "github.com/grafana/cog/generated/cog/variants"
 	"encoding/json"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 type Query struct {
@@ -55,3 +56,14 @@ func (resource Query) Equals(otherCandidate variants.Dataquery) bool {
 
 	return true
 }
+func (resource Query) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+

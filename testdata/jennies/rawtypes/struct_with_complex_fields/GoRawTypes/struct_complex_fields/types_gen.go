@@ -1,6 +1,7 @@
 package struct_complex_fields
 
 import (
+	cog "github.com/grafana/cog/generated/cog"
 	"reflect"
 	"encoding/json"
 	"fmt"
@@ -73,6 +74,29 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
+func (resource SomeStruct) Validate() error {
+	var errs cog.BuildErrors
+		if err := resource.FieldRef.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("FieldRef", err)...)
+		}
+		if err := resource.FieldDisjunctionOfScalars.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("FieldDisjunctionOfScalars", err)...)
+		}
+		if err := resource.FieldMixedDisjunction.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("FieldMixedDisjunction", err)...)
+		}
+		if err := resource.FieldAnonymousStruct.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("FieldAnonymousStruct", err)...)
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 const ConnectionPath = "straight"
 
 type SomeOtherStruct struct {
@@ -86,6 +110,17 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 		}
 
 	return true
+}
+
+
+func (resource SomeOtherStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -107,6 +142,17 @@ func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Equals(other S
 		}
 
 	return true
+}
+
+
+func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -183,6 +229,17 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 }
 
 
+func (resource StringOrBool) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 type StringOrSomeOtherStruct struct {
 	String *string `json:"String,omitempty"`
 	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
@@ -209,6 +266,22 @@ func (resource StringOrSomeOtherStruct) Equals(other StringOrSomeOtherStruct) bo
 		}
 
 	return true
+}
+
+
+func (resource StringOrSomeOtherStruct) Validate() error {
+	var errs cog.BuildErrors
+		if resource.SomeOtherStruct != nil {
+		if err := resource.SomeOtherStruct.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("SomeOtherStruct", err)...)
+		}
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 

@@ -2,6 +2,7 @@ package basic
 
 import (
 	"reflect"
+	cog "github.com/grafana/cog/generated/cog"
 )
 
 // This
@@ -77,6 +78,17 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 		}
 
 	return true
+}
+
+
+func (resource SomeStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 

@@ -114,14 +114,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		"resolvesToConstraints": resolvesToConstraints,
 	})
 
-	templateFile := "types/struct_validation_method.tmpl"
-	/*
-		if object.Type.IsDataqueryVariant() {
-			templateFile = "types/dataquery_validation_method.tmpl"
-		}
-	*/
-
-	rendered, err := tmpl.Render(templateFile, map[string]any{
+	rendered, err := tmpl.Render("types/struct_validation_method.tmpl", map[string]any{
 		"def": object,
 	})
 	if err != nil {

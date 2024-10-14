@@ -25,14 +25,8 @@ func NewPersonBuilder() *PersonBuilder {
 }
 
 func (builder *PersonBuilder) Build() (Person, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("Person", err)...)
-	}
-
-	if len(errs) != 0 {
-		return Person{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return Person{}, err
 	}
 
 	return *builder.internal, nil
