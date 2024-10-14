@@ -2,6 +2,10 @@ func (resource {{ .def.Name|upperCamelCase }}) Validate() error {
 	var errs cog.BuildErrors
 	{{- template "type_validate_check" (dict "ConstraintPath" "" "Type" .def.Type "Nullable" .def.Type.Nullable "Dereference" false "SelfName" "resource" "Depth" 0) }}
 
+	if len(errs) == 0 {
+		return nil
+	}
+
 	return errs
 }
 
