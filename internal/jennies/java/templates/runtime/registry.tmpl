@@ -30,6 +30,10 @@ public class Registry {
     public static void registerPanel(String type, Class<?> options, Class<?> fieldConfig{{ if .ShouldAddConverters }}, Class<?> converters{{ end }}) {
         panelRegistry.put(type, new PanelConfig(options, fieldConfig{{ if .ShouldAddConverters }}, converters{{ end }}));
     }
+    
+    public static PanelConfig getPanel(String type) {
+        return panelRegistry.get(type);
+    }    
 
     {{- if .ShouldAddConverters }}
     public static String convertPanelToCode(Panel panel, String type) {
