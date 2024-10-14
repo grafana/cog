@@ -2,6 +2,7 @@ package disjunctions
 
 import (
 	"reflect"
+	cog "github.com/grafana/cog/generated/cog"
 	"encoding/json"
 	"fmt"
 	"errors"
@@ -30,6 +31,17 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
+func (resource SomeStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 type BoolOrRef = BoolOrSomeStruct
 
 type SomeOtherStruct struct {
@@ -49,6 +61,17 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 }
 
 
+func (resource SomeOtherStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 type YetAnotherStruct struct {
 	Type string `json:"Type"`
 	Bar uint8 `json:"Bar"`
@@ -63,6 +86,17 @@ func (resource YetAnotherStruct) Equals(other YetAnotherStruct) bool {
 		}
 
 	return true
+}
+
+
+func (resource YetAnotherStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -141,6 +175,17 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 }
 
 
+func (resource StringOrBool) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 type BoolOrSomeStruct struct {
 	Bool *bool `json:"Bool,omitempty"`
 	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
@@ -167,6 +212,22 @@ func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
 		}
 
 	return true
+}
+
+
+func (resource BoolOrSomeStruct) Validate() error {
+	var errs cog.BuildErrors
+		if resource.SomeStruct != nil {
+		if err := resource.SomeStruct.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
+		}
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -267,6 +328,32 @@ func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Equals(other SomeS
 		}
 
 	return true
+}
+
+
+func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Validate() error {
+	var errs cog.BuildErrors
+		if resource.SomeStruct != nil {
+		if err := resource.SomeStruct.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
+		}
+		}
+		if resource.SomeOtherStruct != nil {
+		if err := resource.SomeOtherStruct.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("SomeOtherStruct", err)...)
+		}
+		}
+		if resource.YetAnotherStruct != nil {
+		if err := resource.YetAnotherStruct.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("YetAnotherStruct", err)...)
+		}
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 

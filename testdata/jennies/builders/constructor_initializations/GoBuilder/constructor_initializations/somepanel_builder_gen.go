@@ -26,14 +26,8 @@ func NewSomePanelBuilder() *SomePanelBuilder {
 }
 
 func (builder *SomePanelBuilder) Build() (SomePanel, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("SomePanel", err)...)
-	}
-
-	if len(errs) != 0 {
-		return SomePanel{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return SomePanel{}, err
 	}
 
 	return *builder.internal, nil

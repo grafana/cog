@@ -24,14 +24,8 @@ func NewSomeStructBuilder() *SomeStructBuilder {
 }
 
 func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
-	}
-
-	if len(errs) != 0 {
-		return SomeStruct{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return SomeStruct{}, err
 	}
 
 	return *builder.internal, nil

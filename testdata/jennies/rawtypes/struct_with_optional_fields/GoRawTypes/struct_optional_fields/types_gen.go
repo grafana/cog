@@ -1,6 +1,7 @@
 package struct_optional_fields
 
 import (
+	cog "github.com/grafana/cog/generated/cog"
 	"reflect"
 )
 
@@ -64,6 +65,27 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
+func (resource SomeStruct) Validate() error {
+	var errs cog.BuildErrors
+		if resource.FieldRef != nil {
+		if err := resource.FieldRef.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("FieldRef", err)...)
+		}
+		}
+		if resource.FieldAnonymousStruct != nil {
+		if err := resource.FieldAnonymousStruct.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("FieldAnonymousStruct", err)...)
+		}
+		}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 type SomeOtherStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
@@ -75,6 +97,17 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 		}
 
 	return true
+}
+
+
+func (resource SomeOtherStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 
@@ -96,6 +129,17 @@ func (resource StructOptionalFieldsSomeStructFieldAnonymousStruct) Equals(other 
 		}
 
 	return true
+}
+
+
+func (resource StructOptionalFieldsSomeStructFieldAnonymousStruct) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 

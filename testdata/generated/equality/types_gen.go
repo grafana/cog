@@ -7,6 +7,9 @@ package equality
 
 import (
 	"reflect"
+	"strconv"
+
+	cog "github.com/grafana/cog/testdata/generated/cog"
 )
 
 // Modified by compiler pass 'PrefixEnumValues'
@@ -31,6 +34,16 @@ func (resource Variable) Equals(other Variable) bool {
 	return true
 }
 
+func (resource Variable) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type Container struct {
 	StringField string    `json:"stringField"`
 	IntField    int64     `json:"intField"`
@@ -53,6 +66,19 @@ func (resource Container) Equals(other Container) bool {
 	}
 
 	return true
+}
+
+func (resource Container) Validate() error {
+	var errs cog.BuildErrors
+	if err := resource.RefField.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("refField", err)...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 type Optionals struct {
@@ -94,6 +120,21 @@ func (resource Optionals) Equals(other Optionals) bool {
 	}
 
 	return true
+}
+
+func (resource Optionals) Validate() error {
+	var errs cog.BuildErrors
+	if resource.RefField != nil {
+		if err := resource.RefField.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("refField", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 type Arrays struct {
@@ -178,6 +219,28 @@ func (resource Arrays) Equals(other Arrays) bool {
 	return true
 }
 
+func (resource Arrays) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.Refs {
+		if err := resource.Refs[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("refs["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	for i1 := range resource.AnonymousStructs {
+		if err := resource.AnonymousStructs[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("anonymousStructs["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type Maps struct {
 	Ints             map[string]int64                        `json:"ints"`
 	Strings          map[string]string                       `json:"strings"`
@@ -242,6 +305,28 @@ func (resource Maps) Equals(other Maps) bool {
 	return true
 }
 
+func (resource Maps) Validate() error {
+	var errs cog.BuildErrors
+
+	for key1 := range resource.Refs {
+		if err := resource.Refs[key1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("refs["+key1+"]", err)...)
+		}
+	}
+
+	for key1 := range resource.AnonymousStructs {
+		if err := resource.AnonymousStructs[key1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("anonymousStructs["+key1+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 // Modified by compiler pass 'AnonymousStructsToNamed'
 type EqualityArraysAnonymousStructs struct {
 	Inner string `json:"inner"`
@@ -255,6 +340,16 @@ func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonym
 	return true
 }
 
+func (resource EqualityArraysAnonymousStructs) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 // Modified by compiler pass 'AnonymousStructsToNamed'
 type EqualityMapsAnonymousStructs struct {
 	Inner string `json:"inner"`
@@ -266,4 +361,14 @@ func (resource EqualityMapsAnonymousStructs) Equals(other EqualityMapsAnonymousS
 	}
 
 	return true
+}
+
+func (resource EqualityMapsAnonymousStructs) Validate() error {
+	var errs cog.BuildErrors
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
