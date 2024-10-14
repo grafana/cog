@@ -55,6 +55,8 @@ func (resource Query) Equals(otherCandidate variants.Dataquery) bool {
 
 	return true
 }
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Query) Validate() error {
 	return nil
 }

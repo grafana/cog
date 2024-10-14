@@ -33,6 +33,8 @@ func (resource Dashboard) Equals(other Dashboard) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Dashboard) Validate() error {
 	var errs cog.BuildErrors
 
@@ -79,6 +81,8 @@ func (resource DataSourceRef) Equals(other DataSourceRef) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource DataSourceRef) Validate() error {
 	return nil
 }
@@ -103,6 +107,8 @@ func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource FieldConfigSource) Validate() error {
 	var errs cog.BuildErrors
 		if resource.Defaults != nil {
@@ -143,6 +149,8 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource FieldConfig) Validate() error {
 	return nil
 }
@@ -286,6 +294,8 @@ func (resource Panel) Equals(other Panel) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource Panel) Validate() error {
 	var errs cog.BuildErrors
 		if resource.Datasource != nil {

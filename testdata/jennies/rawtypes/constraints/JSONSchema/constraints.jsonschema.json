@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 5,
+          "exclusiveMaximum": 10
+        },
+        "maybeId": {
+          "type": "integer",
+          "minimum": 5,
+          "exclusiveMaximum": 10
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "refStruct": {
+          "$ref": "#/definitions/refStruct"
+        }
+      }
+    },
+    "refStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "labels",
+        "tags"
+      ],
+      "properties": {
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

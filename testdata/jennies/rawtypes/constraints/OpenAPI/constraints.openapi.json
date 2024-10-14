@@ -1,0 +1,65 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "constraints",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "SomeStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 5,
+            "exclusiveMaximum": 10
+          },
+          "maybeId": {
+            "type": "integer",
+            "minimum": 5,
+            "exclusiveMaximum": 10
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "refStruct": {
+            "$ref": "#/components/schemas/refStruct"
+          }
+        }
+      },
+      "refStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "labels",
+          "tags"
+        ],
+        "properties": {
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

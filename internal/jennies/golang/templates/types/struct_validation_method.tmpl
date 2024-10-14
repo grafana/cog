@@ -1,3 +1,5 @@
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource {{ .def.Name|upperCamelCase }}) Validate() error {
 	{{- if resolvesToConstraints .def.Type }}
 	{{- $cog := importPkg "cog" }}

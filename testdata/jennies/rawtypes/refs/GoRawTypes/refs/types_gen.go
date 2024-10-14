@@ -19,6 +19,8 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
+// Validate checks any constraint that may be defined for this type
+// and returns all violations.
 func (resource SomeStruct) Validate() error {
 	return nil
 }
