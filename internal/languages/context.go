@@ -61,6 +61,20 @@ func (context *Context) IsDisjunctionOfBuilders(def ast.Type) bool {
 	return true
 }
 
+func (context *Context) IsArrayOfKinds(def ast.Type, kinds ...ast.Kind) bool {
+	def = context.ResolveRefs(def)
+	if !def.IsArray() {
+		return false
+	}
+
+	valueType := context.ResolveRefs(def.AsArray().ValueType)
+	if valueType.IsArray() {
+		return context.IsArrayOfKinds(valueType, kinds...)
+	}
+
+	return valueType.IsAnyOf(kinds...)
+}
+
 func (context *Context) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {
 	if def.IsComposableSlot() {
 		return def, true

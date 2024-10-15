@@ -55,12 +55,12 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
 			}
 	{{- else if resolvesToArray .InputType }}
-			{{- $arrayType := (resolveRefs .InputType).Array }}
-			{{- if $arrayType.IsArrayOfScalars }}
+			{{- if resolvesToArrayOfScalars .InputType }}
 			if err := json.Unmarshal({{ .RawInputRef }}, &{{ .UnmarshalInto }}); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
 			}
 			{{- else }}
+			{{- $arrayType := (resolveRefs .InputType).Array }}
 			partialArray := []json.RawMessage{}
 			if err := json.Unmarshal({{ .RawInputRef }}, &partialArray); err != nil {
 				return err
@@ -76,6 +76,13 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 				{{ .UnmarshalInto }} = append({{ .UnmarshalInto }}, {{ $result }})
 			}
 			{{- end}}
+	{{- else if .InputType.IsDataqueryComposableSlot }}
+			dataquery, err := cog.StrictUnmarshalDataquery({{ .RawInputRef }}, "")
+			if err != nil {
+				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
+			} else {
+				{{ .UnmarshalInto }} = dataquery
+			}
 	{{- else -}}
 			{{/* TODO: uncomment later → found an unimplemented unmarshal case  intentionally left uncommented, to trigger a failure during codegen */}}
 			// TODO: implement me :( → {{ .InputType.Kind }}
