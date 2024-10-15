@@ -18,7 +18,7 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 	if fields[{{ $field.Name|formatScalar }}] != nil {
 		if string(fields[{{ $field.Name|formatScalar }}]) != "null" {
 			{{ template "strict_unmarshal_field_type" (dict "RawInputRef" $inputRef "InputType" $field.Type "UnmarshalInto" $unmarshalInto "ErrorBreadcrumb" $field.Name "Depth" 1) }}
-		{{ if $field.Required -}} } else {
+		{{ if and $field.Required (not $field.Type.Nullable) -}} } else {
 			{{- $errors := importStdPkg "errors" -}}
 			errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is null"))...)
 		{{ end }}
@@ -33,7 +33,7 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 
 	{{ $fmt := importStdPkg "fmt" -}}
 	for field := range fields {
-		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|upperCamelCase }}", fmt.Errorf("unexpected field %s", field))...)
+		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|upperCamelCase }}", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
 	if len(errs) == 0 {
@@ -45,13 +45,8 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 
 {{/* arguments: RawInputRef, InputType, UnmarshalInto, ErrorBreadcrumb, Depth */}}
 {{- define "strict_unmarshal_field_type" -}}
-	{{- if or (resolvesToScalar .InputType) -}}
+	{{- if or (resolvesToScalar .InputType) (resolvesToEnum .InputType) -}}
 			if err := json.Unmarshal({{ .RawInputRef }}, &{{ .UnmarshalInto }}); err != nil {
-				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
-			}
-	{{- else if and .InputType.IsRef (resolvesToStruct .InputType) }}
-			{{ .UnmarshalInto }} = {{ if .InputType.Nullable}}&{{ end }}{{ formatRawRef .InputType.Ref.ReferredPkg .InputType.Ref.ReferredType }}{}
-			if err := {{ .UnmarshalInto }}.StrictUnmarshalJSON({{ .RawInputRef }}); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
 			}
 	{{- else if resolvesToArray .InputType }}
@@ -82,6 +77,11 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
 			} else {
 				{{ .UnmarshalInto }} = dataquery
+			}
+	{{- else if and .InputType.IsRef (resolvesToStruct .InputType) }}
+			{{ .UnmarshalInto }} = {{ if .InputType.Nullable}}&{{ end }}{{ formatRawRef .InputType.Ref.ReferredPkg .InputType.Ref.ReferredType }}{}
+			if err := {{ .UnmarshalInto }}.StrictUnmarshalJSON({{ .RawInputRef }}); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
 			}
 	{{- else -}}
 			{{/* TODO: uncomment later → found an unimplemented unmarshal case  intentionally left uncommented, to trigger a failure during codegen */}}

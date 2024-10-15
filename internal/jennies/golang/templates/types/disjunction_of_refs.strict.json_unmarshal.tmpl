@@ -1,0 +1,38 @@
+{{- $json := importStdPkg "encoding/json" -}}
+{{- $fmt := importStdPkg "fmt" -}}
+func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+
+	{{- $hint := index .def.Type.Hints "disjunction_of_refs" }}
+	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
+	parsedAsMap := make(map[string]any)
+	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
+		return err
+	}
+
+	discriminator, found := parsedAsMap["{{ $hint.Discriminator }}"]
+	if !found {
+		return fmt.Errorf("discriminator field '{{ $hint.Discriminator }}' not found in payload")
+	}
+
+	switch discriminator {
+	{{- range $discriminatorValue, $typeName := $hint.DiscriminatorMapping }}
+		{{- if eq $discriminatorValue "cog_discriminator_catch_all" }}
+		default:
+		{{- else }}
+		case "{{ $discriminatorValue }}":
+		{{- end }}
+		{{ $typeName|lowerCamelCase }} := &{{ $typeName|upperCamelCase }}{}
+		if err := {{ $typeName|lowerCamelCase }}.StrictUnmarshalJSON(raw); err != nil {
+			return err
+		}
+
+		resource.{{ $typeName|upperCamelCase }} = {{ $typeName|lowerCamelCase }}
+		return nil
+	{{- end }}
+	}
+
+	return fmt.Errorf("could not unmarshal resource with `{{ $hint.Discriminator }} = %v`", discriminator)
+}
