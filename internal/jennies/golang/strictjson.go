@@ -66,9 +66,13 @@ func (jenny strictJSONUnmarshal) renderStructUnmarshal(context languages.Context
 			"resolvesToScalar": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsScalar()
 			},
+			"resolvesToArray": func(typeDef ast.Type) bool {
+				return context.ResolveRefs(typeDef).IsArray()
+			},
 			"resolvesToStruct": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsStruct()
 			},
+			"resolveRefs": context.ResolveRefs,
 			"formatRawRef": func(pkg string, ref string) string {
 				return jenny.typeFormatter.formatRef(ast.NewRef(pkg, ref), false)
 			},
