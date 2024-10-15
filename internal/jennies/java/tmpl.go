@@ -98,6 +98,7 @@ type ClassTemplate struct {
 	HasBuilder bool
 
 	Variant                 string
+	Identifier              string
 	Annotation              string
 	ToJSONFunction          string
 	ShouldAddSerializer     bool

@@ -29,6 +29,12 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     }
     {{- end }}
     {{- end }}
+    
+    {{- if .Variant }}
+    public String dataqueryName() {
+        return "{{ .Identifier | lower }}";
+    }
+    {{- end }}
 
     {{- if and (ne .ToJSONFunction "") (not .Extends) }}
     {{ .ToJSONFunction }}

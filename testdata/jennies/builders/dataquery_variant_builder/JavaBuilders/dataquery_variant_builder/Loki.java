@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 public class Loki implements cog.variants.Dataquery {
     @JsonProperty("expr")
     public String expr;
+    public String dataqueryName() {
+        return "loki";
+    }
     
     public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
