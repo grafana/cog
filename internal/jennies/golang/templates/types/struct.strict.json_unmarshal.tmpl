@@ -30,6 +30,11 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 	}
 	{{- end }}
 
+	{{ $fmt := importStdPkg "fmt" -}}
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|upperCamelCase }}", fmt.Errorf("unexpected field %s", field))...)
+	}
+
 	if len(errs) == 0 {
 		return nil
 	}
