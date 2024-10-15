@@ -11,6 +11,15 @@ func VariantConfig() variants.DataqueryConfig {
 
             return dataquery, nil
        },
+	    StrictDataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
+            dataquery := &{{ .object.Name|upperCamelCase }}{}
+
+            if err := dataquery.StrictUnmarshalJSON(raw); err != nil {
+                return nil, err
+            }
+
+            return dataquery, nil
+       },
         {{- if .hasConverter }}
         GoConverter: func(input any) string {
             var dataquery {{ .object.Name | upperCamelCase }}
