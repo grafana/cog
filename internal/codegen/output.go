@@ -27,7 +27,7 @@ type Output struct {
 	// ```
 	// package_templates
 	// ├── go
-	// │   ├── LICENSE.md
+	// │   ├── LICENSE
 	// │   └── README.md
 	// └── typescript
 	//     ├── babel.config.json

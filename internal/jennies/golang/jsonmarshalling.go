@@ -115,6 +115,11 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 		return false
 	}
 
+	// is there a custom unmarshal template block?
+	if jenny.tmpl.Exists(jenny.customObjectUnmarshalBlock(obj)) {
+		return true
+	}
+
 	// is it a struct generated from a disjunction?
 	if obj.Type.IsStructGeneratedFromDisjunction() {
 		return true
@@ -131,6 +136,13 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 }
 
 func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
+	customUnmarshalTmpl := jenny.customObjectUnmarshalBlock(obj)
+	if jenny.tmpl.Exists(customUnmarshalTmpl) {
+		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
+			"Object": obj,
+		})
+	}
+
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
 		return jenny.tmpl.Render("types/disjunction_of_scalars.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
@@ -211,10 +223,11 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 			continue
 		}
 
+		jenny.imports.Add("fmt", "fmt")
 		buffer.WriteString(fmt.Sprintf(`
 	if fields["%[1]s"] != nil {
 		if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
-			return err
+			return fmt.Errorf("error decoding field '%[1]s': %%w", err)
 		}
 	}
 `, field.Name, tools.UpperCamelCase(field.Name)))
@@ -344,4 +357,8 @@ func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema,
 		"hasConverter":      jenny.config.generateConverters,
 		"disjunctionStruct": disjunctionStruct,
 	})
+}
+
+func (jenny JSONMarshalling) customObjectUnmarshalBlock(obj ast.Object) string {
+	return fmt.Sprintf("object_%s_%s_custom_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }

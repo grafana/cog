@@ -23,7 +23,12 @@ func (jenny Registry) JennyName() string {
 }
 
 func (jenny Registry) Generate(context languages.Context) (codejen.Files, error) {
-	panelRegistry, err := jenny.renderPanelConfig()
+	panelConfig, err := jenny.renderPanelConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	dataqueryConfig, err := jenny.renderDataqueryConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +49,8 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 	}
 
 	return codejen.Files{
-		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/PanelConfig.java"), []byte(panelRegistry), jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/PanelConfig.java"), []byte(panelConfig), jenny),
+		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/DataqueryConfig.java"), []byte(dataqueryConfig), jenny),
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Registry.java"), []byte(registry), jenny),
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/UnknownDataquery.java"), []byte(unknownDataquery), jenny),
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/UnknownDataquerySerializer.java"), []byte(unknownDataquerySerializer), jenny),
@@ -55,6 +61,12 @@ func (jenny Registry) renderPanelConfig() (string, error) {
 	return jenny.tmpl.Render("runtime/panel_config.tmpl", map[string]any{
 		"Package":             jenny.formatPackage("cog.variants"),
 		"ShouldAddConverters": jenny.config.generateConverters,
+	})
+}
+
+func (jenny Registry) renderDataqueryConfig() (string, error) {
+	return jenny.tmpl.Render("runtime/dataquery_config.tmpl", map[string]any{
+		"Package": jenny.formatPackage("cog.variants"),
 	})
 }
 

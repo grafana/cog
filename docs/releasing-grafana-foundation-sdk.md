@@ -27,20 +27,19 @@ As such, it's options and behavior are identical to what was described previousl
 DRY_RUN=no ./scripts/release-all.sh
 ```
 
+> [!NOTE]
+> A list of all supported Grafana versions can be found in `./scripts/versions.sh`.
+
 ## Releasing a specific Grafana version
 
 Start a dry-run release for the desired version of the schemas:
 
 ```console
-./scripts/release-version.sh "next;v11.2.x;v11.1.x;v11.0.x;v10.4.x;v10.3.x;v10.2.x;v10.1.x" v10.2.x
+./scripts/release-version.sh v10.2.x
 ```
 
 This will perform the release process without pushing any change to give a safe opportunity to review the release.
 Details on where to find the generated code and inspect it will be written to the standard output.
-
-> [!NOTE]
-> To generate accurate READMEs, a list of all supported Grafana versions needs to be given to the script.
-> An accurate list can be found in the `./scripts/release-all.sh` file.
 
 If everything looks good, proceed for real:
 

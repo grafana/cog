@@ -2,7 +2,9 @@
   "Schemas": [
     {
       "Package": "dataquery_variant_builder",
-      "Metadata": {},
+      "Metadata": {
+        "Identifier": "loki"
+      },
       "Objects": {
         "Loki": {
           "Name": "Loki",

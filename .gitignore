@@ -3,5 +3,10 @@
 /examples/php/vendor
 /.devbox
 /gradle.properties
+/vendor
+
+# Java building folders
+.gradle/
+build/
 
 .idea
