@@ -50,24 +50,16 @@ func (jenny strictJSONUnmarshal) objectNeedsUnmarshal(obj ast.Object) bool {
 }
 
 func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj ast.Object) (string, error) {
-	customUnmarshalTmpl := jenny.customObjectUnmarshalBlock(obj)
-	if jenny.tmpl.Exists(customUnmarshalTmpl) {
-		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
-			"Object": obj,
-		})
-	}
-
-	return jenny.renderStructUnmarshal(context, obj)
-}
-
-func (jenny strictJSONUnmarshal) renderStructUnmarshal(context languages.Context, obj ast.Object) (string, error) {
-	return jenny.tmpl.
+	tmpl := jenny.tmpl.
 		Funcs(template.FuncMap{
 			"resolvesToScalar": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsScalar()
 			},
 			"resolvesToArray": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsArray()
+			},
+			"resolvesToEnum": func(typeDef ast.Type) bool {
+				return context.ResolveRefs(typeDef).IsEnum()
 			},
 			"resolvesToArrayOfScalars": func(typeDef ast.Type) bool {
 				return context.IsArrayOfKinds(typeDef, ast.KindScalar, ast.KindEnum)
@@ -79,10 +71,31 @@ func (jenny strictJSONUnmarshal) renderStructUnmarshal(context languages.Context
 			"formatRawRef": func(pkg string, ref string) string {
 				return jenny.typeFormatter.formatRef(ast.NewRef(pkg, ref), false)
 			},
-		}).
-		Render("types/struct.strict.json_unmarshal.tmpl", map[string]any{
+		})
+
+	customUnmarshalTmpl := jenny.customObjectUnmarshalBlock(obj)
+	if tmpl.Exists(customUnmarshalTmpl) {
+		return tmpl.Render(customUnmarshalTmpl, map[string]any{
+			"Object": obj,
+		})
+	}
+
+	if obj.Type.IsDisjunctionOfScalars() {
+		return jenny.tmpl.Render("types/disjunction_of_scalars.strict.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
 		})
+	}
+
+	if obj.Type.IsDisjunctionOfRefs() {
+		return jenny.tmpl.Render("types/disjunction_of_refs.strict.json_unmarshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
+	// struct
+	return jenny.tmpl.Render("types/struct.strict.json_unmarshal.tmpl", map[string]any{
+		"def": obj,
+	})
 }
 
 func (jenny strictJSONUnmarshal) customObjectUnmarshalBlock(obj ast.Object) string {
