@@ -129,7 +129,7 @@ public class {{ .Converter.BuilderName | upperCamelCase }}Converter {
     public static String convert({{ .InputIsDataquery | ternary "Dataquery" (formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType) }} input) {
         List<String> calls = new LinkedList<>();
         {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
-        calls.add("{{ .Converter.BuilderName | upperCamelCase }}.Builder builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder({{ with .Converter.ConstructorArgs }}{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} + ", " {{ end }}{{ end }}{{ end }})");
+        calls.add("{{ .Converter.BuilderName | upperCamelCase }}.Builder builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder({{ with .Converter.ConstructorArgs }}{{ range $i, $arg := . }}"+{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}+"{{- if ne $i $constructorArgsCount }}, {{ end }}{{ end }}{{ end }})");
     
      {{- range .Converter.Mappings }}
         {{ template "conversion_mapping" . }}
