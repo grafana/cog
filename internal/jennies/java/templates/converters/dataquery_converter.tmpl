@@ -1,0 +1,23 @@
+package {{ .Package | formatPackageName }};
+
+{{ .Imports }}
+
+public class {{ .Name | upperCamelCase }}MapperConverter implements Converter<{{ .Input }}> {
+    
+    @Override
+    public String convert({{ .Input }} input) {
+        assert input instanceof {{ .Name | upperCamelCase }};
+        
+        {{ .Name | upperCamelCase }} dataquery = ({{ .Name | upperCamelCase }}) input;
+
+        {{- if ne .Disjunction nil }}
+            {{- range .Disjunction.Fields }}
+                if (dataquery.{{ .Name | lower }} != null) {
+                    return {{ .Type.Ref.ReferredType | upperCamelCase }}Converter(dataquery);
+                }
+            {{- end }}
+        {{- else }}
+            return {{ .Name | upperCamelCase }}Converter.convert(dataquery);
+        {{- end }}
+    }
+}

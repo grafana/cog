@@ -10,25 +10,25 @@ public class Registry {
     
     static {
         {{- range .PanelSchemas }}
-        registerPanel({{ printf "%#v" .Identifier }}, {{ .Options }}, {{ .FieldConfig }}{{ if $.ShouldAddConverters }}, {{ .Converter }}{{ end }});
+        registerPanel({{ printf "%#v" .Identifier }}, {{ .Options }}, {{ .FieldConfig }}{{ if $.ShouldAddConverters }}, new {{ .Converter }}{{ end }});
         {{- end }}
 
 
         {{- range .DataquerySchemas }}
-        registerDataquery({{ printf "%#v" .Identifier }}, {{ .Class }}{{ if $.ShouldAddConverters }}, {{ .Converter }}{{ end }});
+        registerDataquery({{ printf "%#v" .Identifier }}, {{ .Class }}{{ if $.ShouldAddConverters }}, new {{ .Converter }}{{ end }});
         {{- end }}
     }
 
-    public static void registerDataquery(String type, Class<? extends Dataquery> clazz) {
-        dataqueryRegistry.put(type, new DataqueryConfig(clazz));
+    public static void registerDataquery(String type, Class<? extends Dataquery> clazz{{ if .ShouldAddConverters }}, Converter<Dataquery> converter{{ end }}) {
+        dataqueryRegistry.put(type, new DataqueryConfig(clazz{{ if .ShouldAddConverters }}, converter{{ end }}));
     }
 
     public static Class<? extends Dataquery> getDataquery(String type) {
         return dataqueryRegistry.get(type).getDataquery();
     }
     
-    public static void registerPanel(String type, Class<?> options, Class<?> fieldConfig{{ if .ShouldAddConverters }}, Class<?> converters{{ end }}) {
-        panelRegistry.put(type, new PanelConfig(options, fieldConfig{{ if .ShouldAddConverters }}, converters{{ end }}));
+    public static void registerPanel(String type, Class<?> options, Class<?> fieldConfig{{ if .ShouldAddConverters }}, Converter<Panel> converter{{ end }}) {
+        panelRegistry.put(type, new PanelConfig(options, fieldConfig{{ if .ShouldAddConverters }}, converter{{ end }}));
     }
     
     public static PanelConfig getPanel(String type) {
@@ -37,18 +37,11 @@ public class Registry {
 
     {{- if .ShouldAddConverters }}
     public static String convertPanelToCode(Panel panel, String type) {
-        PanelConfig pc = panelRegistry.get(type);
-        if (pc != null) {
-            try {
-                Object panelResult = pc.getConverter().getMethod("convert").invoke(panel);
-                return (String) panelResult;
-            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        
-        // TODO: Return unknown panel.
-        return "";
+        return panelRegistry.get(type).getConverter().convert(panel);
+    }
+    
+    public static String convertDataqueryToCode(Dataquery dataquery) {
+        return dataqueryRegistry.get(dataquery.dataqueryName()).getConverter().convert(dataquery);
     }
     {{- end }}
     

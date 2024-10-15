@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type Converter struct {
@@ -32,7 +33,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 		filename := filepath.Join(
 			jenny.config.ProjectPath,
 			formatPackageName(builder.Package),
-			fmt.Sprintf("%sConverter.java", builder.Name),
+			fmt.Sprintf("%sConverter.java", tools.UpperCamelCase(builder.Name)),
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
@@ -54,8 +55,6 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 
 		return imports.Add(class, pkg)
 	}
-
-	inputIsDataquery := schemaFound && schema.Metadata.Variant == ast.SchemaVariantDataQuery && schema.EntryPoint == builder.For.Name
 	typeFormatter := createFormatter(context, jenny.config).withPackageMapper(packageMapper)
 
 	packageMapper("java.util", "List")
@@ -73,8 +72,8 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			"importStdPkg":      packageMapper,
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
-			"Imports":          imports,
-			"Converter":        converter,
-			"InputIsDataquery": inputIsDataquery,
+			"Imports":   imports,
+			"Converter": converter,
+			"IsPanel":   schemaFound && schema.Metadata.Variant == ast.SchemaVariantPanel,
 		})
 }

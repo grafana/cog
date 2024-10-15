@@ -4,10 +4,10 @@ public class PanelConfig {
     private final Class<?> optionsClass;
     private final Class<?> fieldConfigClass;
     {{- if .ShouldAddConverters }}
-    private final Class<?> converter;
+    private final Converter<Panel> converter;
     {{- end }}
 
-    public PanelConfig(Class<?> optionsClass, Class<?> fieldConfigClass, Class<?> converter) {
+    public PanelConfig(Class<?> optionsClass, Class<?> fieldConfigClass, Converter<Panel> converter) {
         this.optionsClass = optionsClass;
         this.fieldConfigClass = fieldConfigClass;
         {{- if .ShouldAddConverters }}
@@ -24,7 +24,7 @@ public class PanelConfig {
     }
     
     {{- if .ShouldAddConverters }}
-    public Class<?> getConverter() {
+    public Converter<Panel> getConverter() {
         return converter;
     }
     {{- end }}
