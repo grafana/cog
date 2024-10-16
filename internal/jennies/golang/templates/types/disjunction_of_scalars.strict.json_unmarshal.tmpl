@@ -7,12 +7,6 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 
 	{{- $cog := importPkg "cog" }}
 	var errs cog.BuildErrors
-
-	fields := make(map[string]json.RawMessage)
-	if err := json.Unmarshal(raw, &fields); err != nil {
-		return err
-	}
-
 	var errList []error
 {{ range .def.Type.Struct.Fields }}
 	// {{ .Name|upperCamelCase }}
