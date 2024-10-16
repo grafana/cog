@@ -1,13 +1,51 @@
 package variant_panelcfg_only_options
 
 import (
-	variants "github.com/grafana/cog/generated/cog/variants"
 	"encoding/json"
+	cog "github.com/grafana/cog/generated/cog"
+	"errors"
+	"fmt"
+	variants "github.com/grafana/cog/generated/cog/variants"
 )
 
 type Options struct {
 	Content string `json:"content"`
 }
+
+func (resource *Options) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "content"
+	if fields["content"] != nil {
+		if string(fields["content"]) != "null" {
+			if err := json.Unmarshal(fields["content"], &resource.Content); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("content", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("content", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "content")
+	} else {errs = append(errs, cog.MakeBuildErrors("content", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Options", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource Options) Equals(other Options) bool {
 		if resource.Content != other.Content {
@@ -34,6 +72,15 @@ func VariantConfig() variants.PanelcfgConfig {
 			if err := json.Unmarshal(raw, options); err != nil {
 				return nil, err
 			}
+
+			return options, nil
+		},
+		StrictOptionsUnmarshaler: func (raw []byte) (any, error) {
+			options := &Options{}
+
+			if err := options.StrictUnmarshalJSON(raw); err != nil {
+                return nil, err
+            }
 
 			return options, nil
 		},

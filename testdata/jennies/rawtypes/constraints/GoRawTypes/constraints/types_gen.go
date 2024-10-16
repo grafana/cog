@@ -1,8 +1,10 @@
 package constraints
 
 import (
+	"encoding/json"
 	cog "github.com/grafana/cog/generated/cog"
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -12,6 +14,77 @@ type SomeStruct struct {
 	Title string `json:"title"`
 	RefStruct *RefStruct `json:"refStruct,omitempty"`
 }
+
+func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "id"
+	if fields["id"] != nil {
+		if string(fields["id"]) != "null" {
+			if err := json.Unmarshal(fields["id"], &resource.Id); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("id", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("id", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "id")
+	} else {errs = append(errs, cog.MakeBuildErrors("id", errors.New("required field is missing from input"))...)
+	}
+	// Field "maybeId"
+	if fields["maybeId"] != nil {
+		if string(fields["maybeId"]) != "null" {
+			if err := json.Unmarshal(fields["maybeId"], &resource.MaybeId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("maybeId", err)...)
+			}
+		
+		}
+		delete(fields, "maybeId")
+	
+	}
+	// Field "title"
+	if fields["title"] != nil {
+		if string(fields["title"]) != "null" {
+			if err := json.Unmarshal(fields["title"], &resource.Title); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("title", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "title")
+	} else {errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is missing from input"))...)
+	}
+	// Field "refStruct"
+	if fields["refStruct"] != nil {
+		if string(fields["refStruct"]) != "null" {
+			
+			resource.RefStruct = &RefStruct{}
+			if err := resource.RefStruct.StrictUnmarshalJSON(fields["refStruct"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("refStruct", err)...)
+			}
+		
+		}
+		delete(fields, "refStruct")
+	
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("SomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if resource.Id != other.Id {
@@ -97,6 +170,55 @@ type RefStruct struct {
 	Labels map[string]string `json:"labels"`
 	Tags []string `json:"tags"`
 }
+
+func (resource *RefStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "labels"
+	if fields["labels"] != nil {
+		if string(fields["labels"]) != "null" {
+			
+			if err := json.Unmarshal(fields["labels"], &resource.Labels); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("labels", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("labels", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "labels")
+	} else {errs = append(errs, cog.MakeBuildErrors("labels", errors.New("required field is missing from input"))...)
+	}
+	// Field "tags"
+	if fields["tags"] != nil {
+		if string(fields["tags"]) != "null" {
+			
+			if err := json.Unmarshal(fields["tags"], &resource.Tags); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("tags", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("tags", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "tags")
+	} else {errs = append(errs, cog.MakeBuildErrors("tags", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("RefStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource RefStruct) Equals(other RefStruct) bool {
 

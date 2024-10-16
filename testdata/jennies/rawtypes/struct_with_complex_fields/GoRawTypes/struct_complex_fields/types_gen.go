@@ -1,11 +1,11 @@
 package struct_complex_fields
 
 import (
-	cog "github.com/grafana/cog/generated/cog"
-	"reflect"
 	"encoding/json"
-	"fmt"
+	cog "github.com/grafana/cog/generated/cog"
 	"errors"
+	"fmt"
+	"reflect"
 )
 
 // This struct does things.
@@ -20,6 +20,146 @@ type SomeStruct struct {
 	FieldAnonymousStruct StructComplexFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct"`
 	FieldRefToConstant string `json:"fieldRefToConstant"`
 }
+
+func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "FieldRef"
+	if fields["FieldRef"] != nil {
+		if string(fields["FieldRef"]) != "null" {
+			
+			resource.FieldRef = SomeOtherStruct{}
+			if err := resource.FieldRef.StrictUnmarshalJSON(fields["FieldRef"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldRef", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldRef", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldRef")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldRef", errors.New("required field is missing from input"))...)
+	}
+	// Field "FieldDisjunctionOfScalars"
+	if fields["FieldDisjunctionOfScalars"] != nil {
+		if string(fields["FieldDisjunctionOfScalars"]) != "null" {
+			
+			resource.FieldDisjunctionOfScalars = StringOrBool{}
+			if err := resource.FieldDisjunctionOfScalars.StrictUnmarshalJSON(fields["FieldDisjunctionOfScalars"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldDisjunctionOfScalars", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldDisjunctionOfScalars", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldDisjunctionOfScalars")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldDisjunctionOfScalars", errors.New("required field is missing from input"))...)
+	}
+	// Field "FieldMixedDisjunction"
+	if fields["FieldMixedDisjunction"] != nil {
+		if string(fields["FieldMixedDisjunction"]) != "null" {
+			
+			resource.FieldMixedDisjunction = StringOrSomeOtherStruct{}
+			if err := resource.FieldMixedDisjunction.StrictUnmarshalJSON(fields["FieldMixedDisjunction"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldMixedDisjunction", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldMixedDisjunction", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldMixedDisjunction")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldMixedDisjunction", errors.New("required field is missing from input"))...)
+	}
+	// Field "FieldDisjunctionWithNull"
+	if fields["FieldDisjunctionWithNull"] != nil {
+		if string(fields["FieldDisjunctionWithNull"]) != "null" {
+			if err := json.Unmarshal(fields["FieldDisjunctionWithNull"], &resource.FieldDisjunctionWithNull); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldDisjunctionWithNull", err)...)
+			}
+		
+		}
+		delete(fields, "FieldDisjunctionWithNull")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldDisjunctionWithNull", errors.New("required field is missing from input"))...)
+	}
+	// Field "Operator"
+	if fields["Operator"] != nil {
+		if string(fields["Operator"]) != "null" {
+			if err := json.Unmarshal(fields["Operator"], &resource.Operator); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Operator", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("Operator", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "Operator")
+	} else {errs = append(errs, cog.MakeBuildErrors("Operator", errors.New("required field is missing from input"))...)
+	}
+	// Field "FieldArrayOfStrings"
+	if fields["FieldArrayOfStrings"] != nil {
+		if string(fields["FieldArrayOfStrings"]) != "null" {
+			
+			if err := json.Unmarshal(fields["FieldArrayOfStrings"], &resource.FieldArrayOfStrings); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldArrayOfStrings", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldArrayOfStrings", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldArrayOfStrings")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldArrayOfStrings", errors.New("required field is missing from input"))...)
+	}
+	// Field "FieldMapOfStringToString"
+	if fields["FieldMapOfStringToString"] != nil {
+		if string(fields["FieldMapOfStringToString"]) != "null" {
+			
+			if err := json.Unmarshal(fields["FieldMapOfStringToString"], &resource.FieldMapOfStringToString); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldMapOfStringToString", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldMapOfStringToString", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldMapOfStringToString")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldMapOfStringToString", errors.New("required field is missing from input"))...)
+	}
+	// Field "FieldAnonymousStruct"
+	if fields["FieldAnonymousStruct"] != nil {
+		if string(fields["FieldAnonymousStruct"]) != "null" {
+			
+			resource.FieldAnonymousStruct = StructComplexFieldsSomeStructFieldAnonymousStruct{}
+			if err := resource.FieldAnonymousStruct.StrictUnmarshalJSON(fields["FieldAnonymousStruct"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldAnonymousStruct", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldAnonymousStruct", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldAnonymousStruct")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldAnonymousStruct", errors.New("required field is missing from input"))...)
+	}
+	// Field "fieldRefToConstant"
+	if fields["fieldRefToConstant"] != nil {
+		if string(fields["fieldRefToConstant"]) != "null" {
+			if err := json.Unmarshal(fields["fieldRefToConstant"], &resource.FieldRefToConstant); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("fieldRefToConstant", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("fieldRefToConstant", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "fieldRefToConstant")
+	} else {errs = append(errs, cog.MakeBuildErrors("fieldRefToConstant", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("SomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if !resource.FieldRef.Equals(other.FieldRef) {
@@ -105,6 +245,41 @@ type SomeOtherStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
+func (resource *SomeOtherStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "FieldAny"
+	if fields["FieldAny"] != nil {
+		if string(fields["FieldAny"]) != "null" {
+			if err := json.Unmarshal(fields["FieldAny"], &resource.FieldAny); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldAny", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldAny", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldAny")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldAny", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("SomeOtherStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
@@ -132,6 +307,41 @@ const (
 type StructComplexFieldsSomeStructFieldAnonymousStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
+
+func (resource *StructComplexFieldsSomeStructFieldAnonymousStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "FieldAny"
+	if fields["FieldAny"] != nil {
+		if string(fields["FieldAny"]) != "null" {
+			if err := json.Unmarshal(fields["FieldAny"], &resource.FieldAny); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldAny", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldAny", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldAny")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldAny", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("StructComplexFieldsSomeStructFieldAnonymousStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Equals(other StructComplexFieldsSomeStructFieldAnonymousStruct) bool {
 		// is DeepEqual good enough here?
@@ -199,6 +409,45 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 }
 
 
+func (resource *StringOrBool) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+	var errList []error
+
+	// String
+	var String string
+
+	if err := json.Unmarshal(raw, &String); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.String = &String
+		return nil
+	}
+
+	// Bool
+	var Bool bool
+
+	if err := json.Unmarshal(raw, &Bool); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.Bool = &Bool
+		return nil
+	}
+
+
+	if len(errList) != 0 {
+		errs = append(errs, cog.MakeBuildErrors("StringOrBool", errors.Join(errList...))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 func (resource StringOrBool) Equals(other StringOrBool) bool {
 		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 			return false
@@ -234,6 +483,53 @@ type StringOrSomeOtherStruct struct {
 	String *string `json:"String,omitempty"`
 	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
 }
+
+func (resource *StringOrSomeOtherStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "String"
+	if fields["String"] != nil {
+		if string(fields["String"]) != "null" {
+			if err := json.Unmarshal(fields["String"], &resource.String); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("String", err)...)
+			}
+		
+		}
+		delete(fields, "String")
+	
+	}
+	// Field "SomeOtherStruct"
+	if fields["SomeOtherStruct"] != nil {
+		if string(fields["SomeOtherStruct"]) != "null" {
+			
+			resource.SomeOtherStruct = &SomeOtherStruct{}
+			if err := resource.SomeOtherStruct.StrictUnmarshalJSON(fields["SomeOtherStruct"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("SomeOtherStruct", err)...)
+			}
+		
+		}
+		delete(fields, "SomeOtherStruct")
+	
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("StringOrSomeOtherStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource StringOrSomeOtherStruct) Equals(other StringOrSomeOtherStruct) bool {
 		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
