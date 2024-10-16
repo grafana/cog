@@ -1,6 +1,10 @@
 package refs
 
 import (
+	"encoding/json"
+	cog "github.com/grafana/cog/generated/cog"
+	"errors"
+	"fmt"
 	"reflect"
 	otherpkg "github.com/grafana/cog/generated/otherpkg"
 )
@@ -8,6 +12,41 @@ import (
 type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
+
+func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "FieldAny"
+	if fields["FieldAny"] != nil {
+		if string(fields["FieldAny"]) != "null" {
+			if err := json.Unmarshal(fields["FieldAny"], &resource.FieldAny); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldAny", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldAny", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldAny")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldAny", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("SomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
 		// is DeepEqual good enough here?

@@ -10,16 +10,19 @@ import (
 )
 
 type PanelcfgConfig struct {
-	Identifier             string
-	OptionsUnmarshaler     func(raw []byte) (any, error)
-	FieldConfigUnmarshaler func(raw []byte) (any, error)
-	GoConverter            func(inputPanel any) string
+	Identifier                   string
+	OptionsUnmarshaler           func(raw []byte) (any, error)
+	FieldConfigUnmarshaler       func(raw []byte) (any, error)
+	StrictOptionsUnmarshaler     func(raw []byte) (any, error)
+	StrictFieldConfigUnmarshaler func(raw []byte) (any, error)
+	GoConverter                  func(inputPanel any) string
 }
 
 type DataqueryConfig struct {
-	Identifier           string
-	DataqueryUnmarshaler func(raw []byte) (Dataquery, error)
-	GoConverter          func(inputPanel any) string
+	Identifier                 string
+	DataqueryUnmarshaler       func(raw []byte) (Dataquery, error)
+	StrictDataqueryUnmarshaler func(raw []byte) (Dataquery, error)
+	GoConverter                func(inputPanel any) string
 }
 
 type Dataquery interface {

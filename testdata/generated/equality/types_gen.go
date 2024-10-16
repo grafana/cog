@@ -6,6 +6,9 @@
 package equality
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 
@@ -24,6 +27,42 @@ const (
 
 type Variable struct {
 	Name string `json:"name"`
+}
+
+func (resource *Variable) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("name", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "name")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("name", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Variable", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 func (resource Variable) Equals(other Variable) bool {
@@ -45,6 +84,86 @@ type Container struct {
 	IntField    int64     `json:"intField"`
 	EnumField   Direction `json:"enumField"`
 	RefField    Variable  `json:"refField"`
+}
+
+func (resource *Container) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "stringField"
+	if fields["stringField"] != nil {
+		if string(fields["stringField"]) != "null" {
+			if err := json.Unmarshal(fields["stringField"], &resource.StringField); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("stringField", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("stringField", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "stringField")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("stringField", errors.New("required field is missing from input"))...)
+	}
+	// Field "intField"
+	if fields["intField"] != nil {
+		if string(fields["intField"]) != "null" {
+			if err := json.Unmarshal(fields["intField"], &resource.IntField); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("intField", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("intField", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "intField")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("intField", errors.New("required field is missing from input"))...)
+	}
+	// Field "enumField"
+	if fields["enumField"] != nil {
+		if string(fields["enumField"]) != "null" {
+			if err := json.Unmarshal(fields["enumField"], &resource.EnumField); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("enumField", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("enumField", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "enumField")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("enumField", errors.New("required field is missing from input"))...)
+	}
+	// Field "refField"
+	if fields["refField"] != nil {
+		if string(fields["refField"]) != "null" {
+
+			resource.RefField = Variable{}
+			if err := resource.RefField.StrictUnmarshalJSON(fields["refField"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("refField", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("refField", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "refField")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("refField", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Container", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 func (resource Container) Equals(other Container) bool {
@@ -86,6 +205,63 @@ type Optionals struct {
 	EnumField *Direction `json:"enumField,omitempty"`
 	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
 	RefField *Variable `json:"refField,omitempty"`
+}
+
+func (resource *Optionals) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "stringField"
+	if fields["stringField"] != nil {
+		if string(fields["stringField"]) != "null" {
+			if err := json.Unmarshal(fields["stringField"], &resource.StringField); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("stringField", err)...)
+			}
+
+		}
+		delete(fields, "stringField")
+
+	}
+	// Field "enumField"
+	if fields["enumField"] != nil {
+		if string(fields["enumField"]) != "null" {
+			if err := json.Unmarshal(fields["enumField"], &resource.EnumField); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("enumField", err)...)
+			}
+
+		}
+		delete(fields, "enumField")
+
+	}
+	// Field "refField"
+	if fields["refField"] != nil {
+		if string(fields["refField"]) != "null" {
+
+			resource.RefField = &Variable{}
+			if err := resource.RefField.StrictUnmarshalJSON(fields["refField"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("refField", err)...)
+			}
+
+		}
+		delete(fields, "refField")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Optionals", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 func (resource Optionals) Equals(other Optionals) bool {
@@ -144,6 +320,140 @@ type Arrays struct {
 	Refs             []Variable                       `json:"refs"`
 	AnonymousStructs []EqualityArraysAnonymousStructs `json:"anonymousStructs"`
 	ArrayOfAny       []any                            `json:"arrayOfAny"`
+}
+
+func (resource *Arrays) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "ints"
+	if fields["ints"] != nil {
+		if string(fields["ints"]) != "null" {
+
+			if err := json.Unmarshal(fields["ints"], &resource.Ints); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("ints", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("ints", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "ints")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("ints", errors.New("required field is missing from input"))...)
+	}
+	// Field "strings"
+	if fields["strings"] != nil {
+		if string(fields["strings"]) != "null" {
+
+			if err := json.Unmarshal(fields["strings"], &resource.Strings); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("strings", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("strings", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "strings")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("strings", errors.New("required field is missing from input"))...)
+	}
+	// Field "arrayOfArray"
+	if fields["arrayOfArray"] != nil {
+		if string(fields["arrayOfArray"]) != "null" {
+
+			if err := json.Unmarshal(fields["arrayOfArray"], &resource.ArrayOfArray); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("arrayOfArray", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("arrayOfArray", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "arrayOfArray")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("arrayOfArray", errors.New("required field is missing from input"))...)
+	}
+	// Field "refs"
+	if fields["refs"] != nil {
+		if string(fields["refs"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["refs"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 Variable
+
+				result1 = Variable{}
+				if err := result1.StrictUnmarshalJSON(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("refs["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Refs = append(resource.Refs, result1)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("refs", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "refs")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("refs", errors.New("required field is missing from input"))...)
+	}
+	// Field "anonymousStructs"
+	if fields["anonymousStructs"] != nil {
+		if string(fields["anonymousStructs"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["anonymousStructs"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 EqualityArraysAnonymousStructs
+
+				result1 = EqualityArraysAnonymousStructs{}
+				if err := result1.StrictUnmarshalJSON(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("anonymousStructs["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.AnonymousStructs = append(resource.AnonymousStructs, result1)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("anonymousStructs", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "anonymousStructs")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("anonymousStructs", errors.New("required field is missing from input"))...)
+	}
+	// Field "arrayOfAny"
+	if fields["arrayOfAny"] != nil {
+		if string(fields["arrayOfAny"]) != "null" {
+
+			if err := json.Unmarshal(fields["arrayOfAny"], &resource.ArrayOfAny); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("arrayOfAny", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("arrayOfAny", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "arrayOfAny")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("arrayOfAny", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Arrays", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 func (resource Arrays) Equals(other Arrays) bool {
@@ -251,6 +561,127 @@ type Maps struct {
 	StringToAny      map[string]any                          `json:"stringToAny"`
 }
 
+func (resource *Maps) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "ints"
+	if fields["ints"] != nil {
+		if string(fields["ints"]) != "null" {
+
+			if err := json.Unmarshal(fields["ints"], &resource.Ints); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("ints", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("ints", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "ints")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("ints", errors.New("required field is missing from input"))...)
+	}
+	// Field "strings"
+	if fields["strings"] != nil {
+		if string(fields["strings"]) != "null" {
+
+			if err := json.Unmarshal(fields["strings"], &resource.Strings); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("strings", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("strings", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "strings")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("strings", errors.New("required field is missing from input"))...)
+	}
+	// Field "refs"
+	if fields["refs"] != nil {
+		if string(fields["refs"]) != "null" {
+
+			partialMap := make(map[string]json.RawMessage)
+			if err := json.Unmarshal(fields["refs"], &partialMap); err != nil {
+				return err
+			}
+			parsedMap1 := make(map[string]Variable, len(partialMap))
+			for key1 := range partialMap {
+				var result1 Variable
+
+				result1 = Variable{}
+				if err := result1.StrictUnmarshalJSON(partialMap[key1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("refs["+key1+"]", err)...)
+				}
+				parsedMap1[key1] = result1
+			}
+			resource.Refs = parsedMap1
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("refs", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "refs")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("refs", errors.New("required field is missing from input"))...)
+	}
+	// Field "anonymousStructs"
+	if fields["anonymousStructs"] != nil {
+		if string(fields["anonymousStructs"]) != "null" {
+
+			partialMap := make(map[string]json.RawMessage)
+			if err := json.Unmarshal(fields["anonymousStructs"], &partialMap); err != nil {
+				return err
+			}
+			parsedMap1 := make(map[string]EqualityMapsAnonymousStructs, len(partialMap))
+			for key1 := range partialMap {
+				var result1 EqualityMapsAnonymousStructs
+
+				result1 = EqualityMapsAnonymousStructs{}
+				if err := result1.StrictUnmarshalJSON(partialMap[key1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("anonymousStructs["+key1+"]", err)...)
+				}
+				parsedMap1[key1] = result1
+			}
+			resource.AnonymousStructs = parsedMap1
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("anonymousStructs", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "anonymousStructs")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("anonymousStructs", errors.New("required field is missing from input"))...)
+	}
+	// Field "stringToAny"
+	if fields["stringToAny"] != nil {
+		if string(fields["stringToAny"]) != "null" {
+
+			if err := json.Unmarshal(fields["stringToAny"], &resource.StringToAny); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("stringToAny", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("stringToAny", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "stringToAny")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("stringToAny", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Maps", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 func (resource Maps) Equals(other Maps) bool {
 
 	if len(resource.Ints) != len(other.Ints) {
@@ -336,6 +767,42 @@ type EqualityArraysAnonymousStructs struct {
 	Inner string `json:"inner"`
 }
 
+func (resource *EqualityArraysAnonymousStructs) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "inner"
+	if fields["inner"] != nil {
+		if string(fields["inner"]) != "null" {
+			if err := json.Unmarshal(fields["inner"], &resource.Inner); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("inner", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("inner", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "inner")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("inner", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("EqualityArraysAnonymousStructs", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonymousStructs) bool {
 	if resource.Inner != other.Inner {
 		return false
@@ -353,6 +820,42 @@ func (resource EqualityArraysAnonymousStructs) Validate() error {
 // Modified by compiler pass 'AnonymousStructsToNamed'
 type EqualityMapsAnonymousStructs struct {
 	Inner string `json:"inner"`
+}
+
+func (resource *EqualityMapsAnonymousStructs) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "inner"
+	if fields["inner"] != nil {
+		if string(fields["inner"]) != "null" {
+			if err := json.Unmarshal(fields["inner"], &resource.Inner); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("inner", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("inner", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "inner")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("inner", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("EqualityMapsAnonymousStructs", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 func (resource EqualityMapsAnonymousStructs) Equals(other EqualityMapsAnonymousStructs) bool {

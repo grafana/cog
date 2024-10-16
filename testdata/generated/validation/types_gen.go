@@ -6,7 +6,9 @@
 package validation
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 
 	cog "github.com/grafana/cog/testdata/generated/cog"
@@ -21,6 +23,120 @@ type Dashboard struct {
 	Tags   []string          `json:"tags"`
 	Labels map[string]string `json:"labels"`
 	Panels []Panel           `json:"panels"`
+}
+
+func (resource *Dashboard) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "uid"
+	if fields["uid"] != nil {
+		if string(fields["uid"]) != "null" {
+			if err := json.Unmarshal(fields["uid"], &resource.Uid); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("uid", err)...)
+			}
+
+		}
+		delete(fields, "uid")
+
+	}
+	// Field "id"
+	if fields["id"] != nil {
+		if string(fields["id"]) != "null" {
+			if err := json.Unmarshal(fields["id"], &resource.Id); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("id", err)...)
+			}
+
+		}
+		delete(fields, "id")
+
+	}
+	// Field "title"
+	if fields["title"] != nil {
+		if string(fields["title"]) != "null" {
+			if err := json.Unmarshal(fields["title"], &resource.Title); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("title", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "title")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is missing from input"))...)
+	}
+	// Field "tags"
+	if fields["tags"] != nil {
+		if string(fields["tags"]) != "null" {
+
+			if err := json.Unmarshal(fields["tags"], &resource.Tags); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("tags", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("tags", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "tags")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("tags", errors.New("required field is missing from input"))...)
+	}
+	// Field "labels"
+	if fields["labels"] != nil {
+		if string(fields["labels"]) != "null" {
+
+			if err := json.Unmarshal(fields["labels"], &resource.Labels); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("labels", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("labels", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "labels")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("labels", errors.New("required field is missing from input"))...)
+	}
+	// Field "panels"
+	if fields["panels"] != nil {
+		if string(fields["panels"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["panels"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 Panel
+
+				result1 = Panel{}
+				if err := result1.StrictUnmarshalJSON(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("panels["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Panels = append(resource.Panels, result1)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("panels", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "panels")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("panels", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Dashboard", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 func (resource Dashboard) Equals(other Dashboard) bool {
@@ -139,6 +255,42 @@ func (resource Dashboard) Validate() error {
 
 type Panel struct {
 	Title string `json:"title"`
+}
+
+func (resource *Panel) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "title"
+	if fields["title"] != nil {
+		if string(fields["title"]) != "null" {
+			if err := json.Unmarshal(fields["title"], &resource.Title); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("title", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "title")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Panel", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 func (resource Panel) Equals(other Panel) bool {

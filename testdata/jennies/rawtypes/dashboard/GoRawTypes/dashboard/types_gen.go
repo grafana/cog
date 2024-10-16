@@ -1,18 +1,77 @@
 package dashboard
 
 import (
+	"encoding/json"
 	cog "github.com/grafana/cog/generated/cog"
+	"errors"
 	"strconv"
+	"fmt"
 	"reflect"
 	variants "github.com/grafana/cog/generated/cog/variants"
-	"fmt"
-	"encoding/json"
 )
 
 type Dashboard struct {
 	Title string `json:"title"`
 	Panels []Panel `json:"panels,omitempty"`
 }
+
+func (resource *Dashboard) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "title"
+	if fields["title"] != nil {
+		if string(fields["title"]) != "null" {
+			if err := json.Unmarshal(fields["title"], &resource.Title); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("title", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "title")
+	} else {errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is missing from input"))...)
+	}
+	// Field "panels"
+	if fields["panels"] != nil {
+		if string(fields["panels"]) != "null" {
+			
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["panels"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 Panel
+				
+			result1 = Panel{}
+			if err := result1.StrictUnmarshalJSON(partialArray[i1]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("panels["+strconv.Itoa(i1)+"]", err)...)
+			}
+				resource.Panels = append(resource.Panels, result1)
+			}
+		
+		}
+		delete(fields, "panels")
+	
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Dashboard", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource Dashboard) Equals(other Dashboard) bool {
 		if resource.Title != other.Title {
@@ -57,6 +116,51 @@ type DataSourceRef struct {
 	Uid *string `json:"uid,omitempty"`
 }
 
+func (resource *DataSourceRef) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		
+		}
+		delete(fields, "type")
+	
+	}
+	// Field "uid"
+	if fields["uid"] != nil {
+		if string(fields["uid"]) != "null" {
+			if err := json.Unmarshal(fields["uid"], &resource.Uid); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("uid", err)...)
+			}
+		
+		}
+		delete(fields, "uid")
+	
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("DataSourceRef", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 func (resource DataSourceRef) Equals(other DataSourceRef) bool {
 		if resource.Type == nil && other.Type != nil || resource.Type != nil && other.Type == nil {
 			return false
@@ -91,6 +195,42 @@ func (resource DataSourceRef) Validate() error {
 type FieldConfigSource struct {
 	Defaults *FieldConfig `json:"defaults,omitempty"`
 }
+
+func (resource *FieldConfigSource) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "defaults"
+	if fields["defaults"] != nil {
+		if string(fields["defaults"]) != "null" {
+			
+			resource.Defaults = &FieldConfig{}
+			if err := resource.Defaults.StrictUnmarshalJSON(fields["defaults"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("defaults", err)...)
+			}
+		
+		}
+		delete(fields, "defaults")
+	
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("FieldConfigSource", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
 		if resource.Defaults == nil && other.Defaults != nil || resource.Defaults != nil && other.Defaults == nil {
@@ -129,6 +269,51 @@ type FieldConfig struct {
 	Unit *string `json:"unit,omitempty"`
 	Custom any `json:"custom,omitempty"`
 }
+
+func (resource *FieldConfig) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "unit"
+	if fields["unit"] != nil {
+		if string(fields["unit"]) != "null" {
+			if err := json.Unmarshal(fields["unit"], &resource.Unit); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("unit", err)...)
+			}
+		
+		}
+		delete(fields, "unit")
+	
+	}
+	// Field "custom"
+	if fields["custom"] != nil {
+		if string(fields["custom"]) != "null" {
+			if err := json.Unmarshal(fields["custom"], &resource.Custom); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("custom", err)...)
+			}
+		
+		}
+		delete(fields, "custom")
+	
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("FieldConfig", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource FieldConfig) Equals(other FieldConfig) bool {
 		if resource.Unit == nil && other.Unit != nil || resource.Unit != nil && other.Unit == nil {
@@ -249,6 +434,115 @@ dataqueryTypeHint = *resource.Datasource.Type
 
 	return nil
 }
+
+func (resource *Panel) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "title"
+	if fields["title"] != nil {
+		if string(fields["title"]) != "null" {
+			if err := json.Unmarshal(fields["title"], &resource.Title); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("title", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "title")
+	} else {errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is missing from input"))...)
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "type")
+	} else {errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "datasource"
+	if fields["datasource"] != nil {
+		if string(fields["datasource"]) != "null" {
+			
+			resource.Datasource = &DataSourceRef{}
+			if err := resource.Datasource.StrictUnmarshalJSON(fields["datasource"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
+			}
+		
+		}
+		delete(fields, "datasource")
+	
+	}
+	// Field "options"
+	if fields["options"] != nil {
+		if string(fields["options"]) != "null" {
+			if err := json.Unmarshal(fields["options"], &resource.Options); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("options", err)...)
+			}
+		
+		}
+		delete(fields, "options")
+	
+	}
+	// Field "targets"
+	if fields["targets"] != nil {
+		if string(fields["targets"]) != "null" {
+			
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["targets"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 variants.Dataquery
+				
+			dataquery, err := cog.StrictUnmarshalDataquery(partialArray[i1], "")
+			if err != nil {
+				errs = append(errs, cog.MakeBuildErrors("targets["+strconv.Itoa(i1)+"]", err)...)
+			} else {
+				result1 = dataquery
+			}
+				resource.Targets = append(resource.Targets, result1)
+			}
+		
+		}
+		delete(fields, "targets")
+	
+	}
+	// Field "fieldConfig"
+	if fields["fieldConfig"] != nil {
+		if string(fields["fieldConfig"]) != "null" {
+			
+			resource.FieldConfig = &FieldConfigSource{}
+			if err := resource.FieldConfig.StrictUnmarshalJSON(fields["fieldConfig"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("fieldConfig", err)...)
+			}
+		
+		}
+		delete(fields, "fieldConfig")
+	
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Panel", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource Panel) Equals(other Panel) bool {
 		if resource.Title != other.Title {
