@@ -63,6 +63,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"resolvesToArrayOfScalars": func(typeDef ast.Type) bool {
 				panic("resolvesToArrayOfScalars() needs to be overridden by a jenny")
 			},
+			"resolvesToMapOfScalars": func(typeDef ast.Type) bool {
+				panic("resolvesToMapOfScalars() needs to be overridden by a jenny")
+			},
 			"resolvesToEnum": func(typeDef ast.Type) bool {
 				panic("refResolvesToEnum() needs to be overridden by a jenny")
 			},

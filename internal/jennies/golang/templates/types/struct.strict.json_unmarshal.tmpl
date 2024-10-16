@@ -71,6 +71,39 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 				{{ .UnmarshalInto }} = append({{ .UnmarshalInto }}, {{ $result }})
 			}
 			{{- end}}
+	{{- else if resolvesToMap .InputType }}
+			{{- if resolvesToMapOfScalars .InputType }}
+			if err := json.Unmarshal({{ .RawInputRef }}, &{{ .UnmarshalInto }}); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
+			}
+			{{- else }}
+			{{- $mapType := (resolveRefs .InputType).Map }}
+			partialMap := make(map[string]json.RawMessage)
+			if err := json.Unmarshal({{ .RawInputRef }}, &partialMap); err != nil {
+				return err
+			}
+
+			{{- if .InputType.IsRef }}
+			{{- $resolvedType := resolveRefs .InputType }}
+			parsedMap{{ .Depth }} := make({{ $resolvedType|formatType }}, len(partialMap))
+			{{- else }}
+			parsedMap{{ .Depth }} := make({{ .InputType|formatType }}, len(partialMap))
+			{{- end }}
+			for key{{ .Depth }} := range partialMap {
+				{{- $strconv := importStdPkg "strconv" }}
+				{{- $breadcrumb := print .ErrorBreadcrumb "[\"+key" .Depth "+\"]" }}
+				{{- $rawInputRef := print "partialMap[key" .Depth "]" }}
+				{{- $result := print "result" .Depth }}
+				var {{ $result }} {{ $mapType.ValueType|formatType }}
+				{{ template "strict_unmarshal_field_type" (dict "RawInputRef" $rawInputRef "InputType" $mapType.ValueType "UnmarshalInto" $result "ErrorBreadcrumb" $breadcrumb "Depth" (add1 .Depth)) }}
+				parsedMap{{ .Depth }}[key{{ .Depth }}] = {{ $result }}
+			}
+			{{- if .InputType.IsRef }}
+			{{ .UnmarshalInto }} = {{ if .InputType.Nullable }}cog.ToPtr({{ end }}{{ formatRawRef .InputType.Ref.ReferredPkg .InputType.Ref.ReferredType }}(parsedMap{{ .Depth }}){{ if .InputType.Nullable }}){{ end }}
+			{{- else }}
+			{{ .UnmarshalInto }} = parsedMap{{ .Depth }}
+			{{- end }}
+			{{- end }}
 	{{- else if .InputType.IsDataqueryComposableSlot }}
 			dataquery, err := cog.StrictUnmarshalDataquery({{ .RawInputRef }}, "")
 			if err != nil {
@@ -84,7 +117,6 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
 			}
 	{{- else -}}
-			{{/* TODO: uncomment later → found an unimplemented unmarshal case  intentionally left uncommented, to trigger a failure during codegen */}}
-			// TODO: implement me :( → {{ .InputType.Kind }}
+			found an unimplemented unmarshal case → {{ .InputType.Kind }} // intentionally left uncommented, to trigger a failure during codegen
 	{{- end -}}
 {{- end -}}
