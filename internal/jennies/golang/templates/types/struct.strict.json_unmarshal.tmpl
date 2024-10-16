@@ -12,12 +12,17 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 		return err
 	}
 	{{- range $field := .def.Type.Struct.Fields }}
-	{{- $inputRef := print "fields[" ($field.Name|formatScalar) "]" }}
-	{{- $unmarshalInto := print "resource." ($field.Name|upperCamelCase) }}
+	{{- $customFieldBlockName := print "object_" $.def.SelfRef.ReferredPkg "_" $.def.Name "_field_" $field.Name "_custom_strict_unmarshal" }}
 	// Field "{{ $field.Name }}"
 	if fields[{{ $field.Name|formatScalar }}] != nil {
 		if string(fields[{{ $field.Name|formatScalar }}]) != "null" {
+	{{- if blockExists $customFieldBlockName }}
+		{{ include $customFieldBlockName (dict "Object" $.def "Field" $field) }}
+	{{- else }}
+	{{- $inputRef := print "fields[" ($field.Name|formatScalar) "]" }}
+	{{- $unmarshalInto := print "resource." ($field.Name|upperCamelCase) }}
 			{{ template "strict_unmarshal_field_type" (dict "RawInputRef" $inputRef "InputType" $field.Type "UnmarshalInto" $unmarshalInto "ErrorBreadcrumb" $field.Name "Depth" 1) }}
+	{{- end }}
 		{{ if and $field.Required (not $field.Type.Nullable) -}} } else {
 			{{- $errors := importStdPkg "errors" -}}
 			errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is null"))...)
