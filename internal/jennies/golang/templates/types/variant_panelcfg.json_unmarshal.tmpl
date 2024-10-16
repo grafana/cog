@@ -12,6 +12,15 @@ func VariantConfig() variants.PanelcfgConfig {
 
 			return options, nil
 		},
+		StrictOptionsUnmarshaler: func (raw []byte) (any, error) {
+			options := &Options{}
+
+			if err := options.StrictUnmarshalJSON(raw); err != nil {
+                return nil, err
+            }
+
+			return options, nil
+		},
 		{{- end }}
 		{{- if .hasFieldConfig }}
 		FieldConfigUnmarshaler: func (raw []byte) (any, error) {
@@ -20,6 +29,15 @@ func VariantConfig() variants.PanelcfgConfig {
 			if err := json.Unmarshal(raw, fieldConfig); err != nil {
 				return nil, err
 			}
+
+			return fieldConfig, nil
+		},
+		StrictFieldConfigUnmarshaler: func (raw []byte) (any, error) {
+			fieldConfig := &FieldConfig{}
+
+			if err := fieldConfig.StrictUnmarshalJSON(raw); err != nil {
+                return nil, err
+            }
 
 			return fieldConfig, nil
 		},

@@ -8,6 +8,8 @@ type PanelcfgConfig struct {
 	Identifier             string
 	OptionsUnmarshaler     func(raw []byte) (any, error)
 	FieldConfigUnmarshaler func(raw []byte) (any, error)
+	StrictOptionsUnmarshaler     func(raw []byte) (any, error)
+	StrictFieldConfigUnmarshaler func(raw []byte) (any, error)
 	GoConverter func(inputPanel any) string
 }
 
