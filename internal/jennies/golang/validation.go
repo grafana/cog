@@ -79,24 +79,15 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		return false
 	}
 
-	tmpl := jenny.tmpl.Funcs(template.FuncMap{
-		"resolvesToMap": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsMap()
-		},
-		"resolvesToArray": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsArray()
-		},
-		"resolvesToStruct": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsStruct()
-		},
-		"resolveRefs": context.ResolveRefs,
-		"importStdPkg": func(pkg string) string {
-			return imports.Add(pkg, pkg)
-		},
-		"importPkg": jenny.packageMapper,
-
-		"resolvesToConstraints": resolvesToConstraints,
-	})
+	tmpl := jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.FuncMap{
+			"resolvesToConstraints": resolvesToConstraints,
+			"importPkg":             jenny.packageMapper,
+			"importStdPkg": func(pkg string) string {
+				return imports.Add(pkg, pkg)
+			},
+		})
 
 	rendered, err := tmpl.Render("types/struct_validation_method.tmpl", map[string]any{
 		"def": object,
