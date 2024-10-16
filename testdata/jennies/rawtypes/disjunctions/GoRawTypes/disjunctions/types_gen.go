@@ -1,11 +1,11 @@
 package disjunctions
 
 import (
-	"reflect"
 	"encoding/json"
-	"fmt"
-	"errors"
 	cog "github.com/grafana/cog/generated/cog"
+	"errors"
+	"fmt"
+	"reflect"
 )
 
 // Refresh rate or disabled.
@@ -17,6 +17,53 @@ type SomeStruct struct {
 	Type string `json:"Type"`
 	FieldAny any `json:"FieldAny"`
 }
+
+func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "Type"
+	if fields["Type"] != nil {
+		if string(fields["Type"]) != "null" {
+			if err := json.Unmarshal(fields["Type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Type", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("Type", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "Type")
+	} else {errs = append(errs, cog.MakeBuildErrors("Type", errors.New("required field is missing from input"))...)
+	}
+	// Field "FieldAny"
+	if fields["FieldAny"] != nil {
+		if string(fields["FieldAny"]) != "null" {
+			if err := json.Unmarshal(fields["FieldAny"], &resource.FieldAny); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("FieldAny", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("FieldAny", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "FieldAny")
+	} else {errs = append(errs, cog.MakeBuildErrors("FieldAny", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("SomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if resource.Type != other.Type {
@@ -45,6 +92,53 @@ type SomeOtherStruct struct {
 	Foo []byte `json:"Foo"`
 }
 
+func (resource *SomeOtherStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "Type"
+	if fields["Type"] != nil {
+		if string(fields["Type"]) != "null" {
+			if err := json.Unmarshal(fields["Type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Type", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("Type", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "Type")
+	} else {errs = append(errs, cog.MakeBuildErrors("Type", errors.New("required field is missing from input"))...)
+	}
+	// Field "Foo"
+	if fields["Foo"] != nil {
+		if string(fields["Foo"]) != "null" {
+			if err := json.Unmarshal(fields["Foo"], &resource.Foo); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Foo", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("Foo", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "Foo")
+	} else {errs = append(errs, cog.MakeBuildErrors("Foo", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("SomeOtherStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+
 func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 		if resource.Type != other.Type {
 			return false
@@ -68,6 +162,53 @@ type YetAnotherStruct struct {
 	Type string `json:"Type"`
 	Bar uint8 `json:"Bar"`
 }
+
+func (resource *YetAnotherStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "Type"
+	if fields["Type"] != nil {
+		if string(fields["Type"]) != "null" {
+			if err := json.Unmarshal(fields["Type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Type", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("Type", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "Type")
+	} else {errs = append(errs, cog.MakeBuildErrors("Type", errors.New("required field is missing from input"))...)
+	}
+	// Field "Bar"
+	if fields["Bar"] != nil {
+		if string(fields["Bar"]) != "null" {
+			if err := json.Unmarshal(fields["Bar"], &resource.Bar); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Bar", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("Bar", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "Bar")
+	} else {errs = append(errs, cog.MakeBuildErrors("Bar", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("YetAnotherStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource YetAnotherStruct) Equals(other YetAnotherStruct) bool {
 		if resource.Type != other.Type {
@@ -139,6 +280,45 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 }
 
 
+func (resource *StringOrBool) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+	var errList []error
+
+	// String
+	var String string
+
+	if err := json.Unmarshal(raw, &String); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.String = &String
+		return nil
+	}
+
+	// Bool
+	var Bool bool
+
+	if err := json.Unmarshal(raw, &Bool); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.Bool = &Bool
+		return nil
+	}
+
+
+	if len(errList) != 0 {
+		errs = append(errs, cog.MakeBuildErrors("StringOrBool", errors.Join(errList...))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 func (resource StringOrBool) Equals(other StringOrBool) bool {
 		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 			return false
@@ -174,6 +354,53 @@ type BoolOrSomeStruct struct {
 	Bool *bool `json:"Bool,omitempty"`
 	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
 }
+
+func (resource *BoolOrSomeStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "Bool"
+	if fields["Bool"] != nil {
+		if string(fields["Bool"]) != "null" {
+			if err := json.Unmarshal(fields["Bool"], &resource.Bool); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Bool", err)...)
+			}
+		
+		}
+		delete(fields, "Bool")
+	
+	}
+	// Field "SomeStruct"
+	if fields["SomeStruct"] != nil {
+		if string(fields["SomeStruct"]) != "null" {
+			
+			resource.SomeStruct = &SomeStruct{}
+			if err := resource.SomeStruct.StrictUnmarshalJSON(fields["SomeStruct"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
+			}
+		
+		}
+		delete(fields, "SomeStruct")
+	
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("BoolOrSomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 
 func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
 		if resource.Bool == nil && other.Bool != nil || resource.Bool != nil && other.Bool == nil {
@@ -283,6 +510,51 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 	return fmt.Errorf("could not unmarshal resource with `Type = %v`", discriminator)
 }
 
+
+func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) StrictUnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
+	parsedAsMap := make(map[string]any)
+	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
+		return err
+	}
+
+	discriminator, found := parsedAsMap["Type"]
+	if !found {
+		return fmt.Errorf("discriminator field 'Type' not found in payload")
+	}
+
+	switch discriminator {
+		case "some-other-struct":
+		someOtherStruct := &SomeOtherStruct{}
+		if err := someOtherStruct.StrictUnmarshalJSON(raw); err != nil {
+			return err
+		}
+
+		resource.SomeOtherStruct = someOtherStruct
+		return nil
+		case "some-struct":
+		someStruct := &SomeStruct{}
+		if err := someStruct.StrictUnmarshalJSON(raw); err != nil {
+			return err
+		}
+
+		resource.SomeStruct = someStruct
+		return nil
+		case "yet-another-struct":
+		yetAnotherStruct := &YetAnotherStruct{}
+		if err := yetAnotherStruct.StrictUnmarshalJSON(raw); err != nil {
+			return err
+		}
+
+		resource.YetAnotherStruct = yetAnotherStruct
+		return nil
+	}
+
+	return fmt.Errorf("could not unmarshal resource with `Type = %v`", discriminator)
+}
 
 func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) Equals(other SomeStructOrSomeOtherStructOrYetAnotherStruct) bool {
 		if resource.SomeStruct == nil && other.SomeStruct != nil || resource.SomeStruct != nil && other.SomeStruct == nil {
