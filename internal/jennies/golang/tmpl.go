@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 //go:embed templates/runtime/*.tmpl templates/builders/*.tmpl templates/converters/*.tmpl templates/types/*.tmpl
@@ -17,6 +19,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 		"golang",
 
 		// placeholder functions, will be overridden by jennies
+		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(template.FuncMap{
 			"formatPath": func(_ ast.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
@@ -45,35 +48,14 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"typeHasBuilder": func(_ ast.Type) bool {
 				panic("typeHasBuilder() needs to be overridden by a jenny")
 			},
-			"resolvesToComposableSlot": func(_ ast.Type) bool {
-				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
-			},
 			"typeHasEqualityFunc": func(_ ast.Type) bool {
 				panic("typeHasEqualityFunc() needs to be overridden by a jenny")
-			},
-			"resolvesToScalar": func(typeDef ast.Type) bool {
-				panic("refResolvesToScalar() needs to be overridden by a jenny")
-			},
-			"resolvesToMap": func(typeDef ast.Type) bool {
-				panic("refResolvesToMap() needs to be overridden by a jenny")
-			},
-			"resolvesToArray": func(typeDef ast.Type) bool {
-				panic("refResolvesToArray() needs to be overridden by a jenny")
 			},
 			"resolvesToArrayOfScalars": func(typeDef ast.Type) bool {
 				panic("resolvesToArrayOfScalars() needs to be overridden by a jenny")
 			},
 			"resolvesToMapOfScalars": func(typeDef ast.Type) bool {
 				panic("resolvesToMapOfScalars() needs to be overridden by a jenny")
-			},
-			"resolvesToEnum": func(typeDef ast.Type) bool {
-				panic("refResolvesToEnum() needs to be overridden by a jenny")
-			},
-			"resolvesToStruct": func(typeDef ast.Type) bool {
-				panic("resolvesToStruct() needs to be overridden by a jenny")
-			},
-			"resolveRefs": func(typeDef ast.Type) ast.Type {
-				panic("resolveRefs() needs to be overridden by a jenny")
 			},
 			"resolvesToConstraints": func(_ ast.Type) string {
 				panic("resolvesToConstraints() needs to be overridden by a jenny")

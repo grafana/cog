@@ -24,31 +24,21 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 		return nil
 	}
 
-	tmpl := jenny.tmpl.Funcs(template.FuncMap{
-		"typeHasEqualityFunc": func(typeDef ast.Type) bool {
-			if !typeDef.IsRef() {
-				return false
-			}
+	tmpl := jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.FuncMap{
+			"typeHasEqualityFunc": func(typeDef ast.Type) bool {
+				if !typeDef.IsRef() {
+					return false
+				}
 
-			return context.ResolveToStruct(typeDef)
-		},
-		"resolvesToScalar": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsScalar()
-		},
-		"resolvesToMap": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsMap()
-		},
-		"resolvesToArray": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsArray()
-		},
-		"resolvesToEnum": func(typeDef ast.Type) bool {
-			return context.ResolveRefs(typeDef).IsEnum()
-		},
-		"resolveRefs": context.ResolveRefs,
-		"importStdPkg": func(pkg string) string {
-			return imports.Add(pkg, pkg)
-		},
-	})
+				return context.ResolveToStruct(typeDef)
+			},
+			"resolveRefs": context.ResolveRefs,
+			"importStdPkg": func(pkg string) string {
+				return imports.Add(pkg, pkg)
+			},
+		})
 
 	templateFile := "types/struct_equality_method.tmpl"
 	if object.Type.IsDataqueryVariant() {
