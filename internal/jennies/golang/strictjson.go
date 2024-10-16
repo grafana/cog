@@ -58,11 +58,17 @@ func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj 
 			"resolvesToArray": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsArray()
 			},
+			"resolvesToMap": func(typeDef ast.Type) bool {
+				return context.ResolveRefs(typeDef).IsMap()
+			},
 			"resolvesToEnum": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsEnum()
 			},
 			"resolvesToArrayOfScalars": func(typeDef ast.Type) bool {
 				return context.IsArrayOfKinds(typeDef, ast.KindScalar, ast.KindEnum)
+			},
+			"resolvesToMapOfScalars": func(typeDef ast.Type) bool {
+				return context.IsMapOfKinds(typeDef, ast.KindScalar, ast.KindEnum)
 			},
 			"resolvesToStruct": func(typeDef ast.Type) bool {
 				return context.ResolveRefs(typeDef).IsStruct()

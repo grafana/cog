@@ -75,6 +75,20 @@ func (context *Context) IsArrayOfKinds(def ast.Type, kinds ...ast.Kind) bool {
 	return valueType.IsAnyOf(kinds...)
 }
 
+func (context *Context) IsMapOfKinds(def ast.Type, kinds ...ast.Kind) bool {
+	def = context.ResolveRefs(def)
+	if !def.IsMap() {
+		return false
+	}
+
+	valueType := context.ResolveRefs(def.AsMap().ValueType)
+	if valueType.IsMap() {
+		return context.IsMapOfKinds(valueType, kinds...)
+	}
+
+	return valueType.IsAnyOf(kinds...)
+}
+
 func (context *Context) ResolveToComposableSlot(def ast.Type) (ast.Type, bool) {
 	if def.IsComposableSlot() {
 		return def, true
