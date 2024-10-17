@@ -28,6 +28,7 @@ func Command() *cli.Command {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "kind",
+				Usage:    fmt.Sprintf("Supported kinds: %s", strings.Join(tools.KnownKinds(), ", ")),
 				Aliases:  []string{"k"},
 				Required: true,
 			},

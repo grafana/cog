@@ -1,7 +1,6 @@
 package validate
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -12,12 +11,18 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type unmarshaller func(decoder *json.Decoder, input []byte, hint string) (any, error)
+type unmarshaller func(input []byte, hint string) (any, error)
 
 var unmarshallers = map[string]unmarshaller{
 	tools.KindDashboard: unmarshalDashboard,
 	tools.KindPanel:     unmarshalPanel,
 	tools.KindQuery:     unmarshalQuery,
+}
+
+var strictUnmarshallers = map[string]unmarshaller{
+	tools.KindDashboard: unmarshalDashboardStrict,
+	tools.KindPanel:     unmarshalPanelStrict,
+	tools.KindQuery:     unmarshalQueryStrict,
 }
 
 func Command() *cli.Command {
@@ -29,6 +34,7 @@ func Command() *cli.Command {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "kind",
+				Usage:    fmt.Sprintf("Supported kinds: %s", strings.Join(tools.KnownKinds(), ", ")),
 				Aliases:  []string{"k"},
 				Required: true,
 			},
@@ -46,48 +52,74 @@ func Command() *cli.Command {
 				return err
 			}
 
-			decoder := json.NewDecoder(bytes.NewBuffer(input))
-
+			unmarshallersMap := unmarshallers
 			if cCtx.Bool("strict") {
-				decoder.DisallowUnknownFields()
+				unmarshallersMap = strictUnmarshallers
 			}
 
-			_, err = unmarshalKind(decoder, input, cCtx.String("kind"), cCtx.String("hint"))
+			_, err = unmarshalKind(unmarshallersMap, input, cCtx.String("kind"), cCtx.String("hint"))
 
 			return err
 		},
 	}
 }
 
-func unmarshalKind(decoder *json.Decoder, input []byte, kind string, hint string) (any, error) {
-	unmarshallerFunc, found := unmarshallers[kind]
+func unmarshalKind(unmarshallersMap map[string]unmarshaller, input []byte, kind string, hint string) (any, error) {
+	unmarshallerFunc, found := unmarshallersMap[kind]
 	if !found {
 		return nil, fmt.Errorf("unknown kind '%s'. Valid kinds are: %s", kind, strings.Join(tools.KnownKinds(), ", "))
 	}
 
-	return unmarshallerFunc(decoder, input, hint)
+	return unmarshallerFunc(input, hint)
 }
 
-func unmarshalDashboard(decoder *json.Decoder, input []byte, _ string) (any, error) {
+func unmarshalDashboard(input []byte, _ string) (any, error) {
 	dash := dashboard.Dashboard{}
-	if err := decoder.Decode(&dash); err != nil {
-		return dash, err
+	if err := json.Unmarshal(input, &dash); err != nil {
+		return nil, err
 	}
 
 	return dash, nil
 }
 
-func unmarshalPanel(decoder *json.Decoder, input []byte, _ string) (any, error) {
+func unmarshalPanel(input []byte, _ string) (any, error) {
 	panel := dashboard.Panel{}
-	if err := decoder.Decode(&panel); err != nil {
-		return panel, err
+	if err := json.Unmarshal(input, &panel); err != nil {
+		return nil, err
 	}
 
 	return panel, nil
 }
 
-func unmarshalQuery(decoder *json.Decoder, input []byte, hint string) (any, error) {
+func unmarshalQuery(input []byte, hint string) (any, error) {
 	query, err := cog.UnmarshalDataquery(input, hint)
+	if err != nil {
+		return nil, err
+	}
+
+	return query, nil
+}
+
+func unmarshalDashboardStrict(input []byte, _ string) (any, error) {
+	dash := dashboard.Dashboard{}
+	if err := dash.UnmarshalJSONStrict(input); err != nil {
+		return nil, err
+	}
+
+	return dash, nil
+}
+
+func unmarshalPanelStrict(input []byte, _ string) (any, error) {
+	panel := dashboard.Panel{}
+	if err := panel.UnmarshalJSONStrict(input); err != nil {
+		return nil, err
+	}
+
+	return panel, nil
+}
+
+func unmarshalQueryStrict(input []byte, hint string) (any, error) {
+	query, err := cog.StrictUnmarshalDataquery(input, hint)
 	if err != nil {
 		return nil, err
 	}
