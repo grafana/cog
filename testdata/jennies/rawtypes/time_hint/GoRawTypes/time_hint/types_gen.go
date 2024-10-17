@@ -14,7 +14,7 @@ type ObjWithTimeField struct {
 	RegisteredAt time.Time `json:"registeredAt"`
 }
 
-func (resource *ObjWithTimeField) StrictUnmarshalJSON(raw []byte) error {
+func (resource *ObjWithTimeField) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

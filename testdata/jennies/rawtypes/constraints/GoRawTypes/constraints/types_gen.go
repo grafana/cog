@@ -15,7 +15,7 @@ type SomeStruct struct {
 	RefStruct *RefStruct `json:"refStruct,omitempty"`
 }
 
-func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -65,7 +65,7 @@ func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["refStruct"]) != "null" {
 			
 			resource.RefStruct = &RefStruct{}
-			if err := resource.RefStruct.StrictUnmarshalJSON(fields["refStruct"]); err != nil {
+			if err := resource.RefStruct.UnmarshalJSONStrict(fields["refStruct"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("refStruct", err)...)
 			}
 		
@@ -171,7 +171,7 @@ type RefStruct struct {
 	Tags []string `json:"tags"`
 }
 
-func (resource *RefStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *RefStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

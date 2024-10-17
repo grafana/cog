@@ -21,7 +21,7 @@ type SomeStruct struct {
 	FieldRefToConstant string `json:"fieldRefToConstant"`
 }
 
-func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -36,7 +36,7 @@ func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["FieldRef"]) != "null" {
 			
 			resource.FieldRef = SomeOtherStruct{}
-			if err := resource.FieldRef.StrictUnmarshalJSON(fields["FieldRef"]); err != nil {
+			if err := resource.FieldRef.UnmarshalJSONStrict(fields["FieldRef"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("FieldRef", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("FieldRef", errors.New("required field is null"))...)
@@ -50,7 +50,7 @@ func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["FieldDisjunctionOfScalars"]) != "null" {
 			
 			resource.FieldDisjunctionOfScalars = StringOrBool{}
-			if err := resource.FieldDisjunctionOfScalars.StrictUnmarshalJSON(fields["FieldDisjunctionOfScalars"]); err != nil {
+			if err := resource.FieldDisjunctionOfScalars.UnmarshalJSONStrict(fields["FieldDisjunctionOfScalars"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("FieldDisjunctionOfScalars", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("FieldDisjunctionOfScalars", errors.New("required field is null"))...)
@@ -64,7 +64,7 @@ func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["FieldMixedDisjunction"]) != "null" {
 			
 			resource.FieldMixedDisjunction = StringOrSomeOtherStruct{}
-			if err := resource.FieldMixedDisjunction.StrictUnmarshalJSON(fields["FieldMixedDisjunction"]); err != nil {
+			if err := resource.FieldMixedDisjunction.UnmarshalJSONStrict(fields["FieldMixedDisjunction"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("FieldMixedDisjunction", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("FieldMixedDisjunction", errors.New("required field is null"))...)
@@ -127,7 +127,7 @@ func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["FieldAnonymousStruct"]) != "null" {
 			
 			resource.FieldAnonymousStruct = StructComplexFieldsSomeStructFieldAnonymousStruct{}
-			if err := resource.FieldAnonymousStruct.StrictUnmarshalJSON(fields["FieldAnonymousStruct"]); err != nil {
+			if err := resource.FieldAnonymousStruct.UnmarshalJSONStrict(fields["FieldAnonymousStruct"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("FieldAnonymousStruct", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("FieldAnonymousStruct", errors.New("required field is null"))...)
@@ -245,7 +245,7 @@ type SomeOtherStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-func (resource *SomeOtherStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -308,7 +308,7 @@ type StructComplexFieldsSomeStructFieldAnonymousStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-func (resource *StructComplexFieldsSomeStructFieldAnonymousStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *StructComplexFieldsSomeStructFieldAnonymousStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -409,7 +409,7 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 }
 
 
-func (resource *StringOrBool) StrictUnmarshalJSON(raw []byte) error {
+func (resource *StringOrBool) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -484,7 +484,7 @@ type StringOrSomeOtherStruct struct {
 	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
 }
 
-func (resource *StringOrSomeOtherStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *StringOrSomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -510,7 +510,7 @@ func (resource *StringOrSomeOtherStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["SomeOtherStruct"]) != "null" {
 			
 			resource.SomeOtherStruct = &SomeOtherStruct{}
-			if err := resource.SomeOtherStruct.StrictUnmarshalJSON(fields["SomeOtherStruct"]); err != nil {
+			if err := resource.SomeOtherStruct.UnmarshalJSONStrict(fields["SomeOtherStruct"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("SomeOtherStruct", err)...)
 			}
 		
