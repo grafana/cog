@@ -11,7 +11,11 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type unmarshaller func(input []byte, hint string) (any, error)
+type unmarshaller func(input []byte, hint string) (validableResource, error)
+
+type validableResource interface {
+	Validate() error
+}
 
 var unmarshallers = map[string]unmarshaller{
 	tools.KindDashboard: unmarshalDashboard,
@@ -47,24 +51,32 @@ func Command() *cli.Command {
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
+			strict := cCtx.Bool("strict")
 			input, err := tools.ReadFileOrStdin(cCtx.Args().First())
 			if err != nil {
 				return err
 			}
 
 			unmarshallersMap := unmarshallers
-			if cCtx.Bool("strict") {
+			if strict {
 				unmarshallersMap = strictUnmarshallers
 			}
 
-			_, err = unmarshalKind(unmarshallersMap, input, cCtx.String("kind"), cCtx.String("hint"))
+			resource, err := unmarshalKind(unmarshallersMap, input, cCtx.String("kind"), cCtx.String("hint"))
+			if err != nil {
+				return err
+			}
 
-			return err
+			if strict {
+				return resource.Validate()
+			}
+
+			return nil
 		},
 	}
 }
 
-func unmarshalKind(unmarshallersMap map[string]unmarshaller, input []byte, kind string, hint string) (any, error) {
+func unmarshalKind(unmarshallersMap map[string]unmarshaller, input []byte, kind string, hint string) (validableResource, error) {
 	unmarshallerFunc, found := unmarshallersMap[kind]
 	if !found {
 		return nil, fmt.Errorf("unknown kind '%s'. Valid kinds are: %s", kind, strings.Join(tools.KnownKinds(), ", "))
@@ -73,7 +85,7 @@ func unmarshalKind(unmarshallersMap map[string]unmarshaller, input []byte, kind 
 	return unmarshallerFunc(input, hint)
 }
 
-func unmarshalDashboard(input []byte, _ string) (any, error) {
+func unmarshalDashboard(input []byte, _ string) (validableResource, error) {
 	dash := dashboard.Dashboard{}
 	if err := json.Unmarshal(input, &dash); err != nil {
 		return nil, err
@@ -82,7 +94,7 @@ func unmarshalDashboard(input []byte, _ string) (any, error) {
 	return dash, nil
 }
 
-func unmarshalPanel(input []byte, _ string) (any, error) {
+func unmarshalPanel(input []byte, _ string) (validableResource, error) {
 	panel := dashboard.Panel{}
 	if err := json.Unmarshal(input, &panel); err != nil {
 		return nil, err
@@ -91,7 +103,7 @@ func unmarshalPanel(input []byte, _ string) (any, error) {
 	return panel, nil
 }
 
-func unmarshalQuery(input []byte, hint string) (any, error) {
+func unmarshalQuery(input []byte, hint string) (validableResource, error) {
 	query, err := cog.UnmarshalDataquery(input, hint)
 	if err != nil {
 		return nil, err
@@ -100,7 +112,7 @@ func unmarshalQuery(input []byte, hint string) (any, error) {
 	return query, nil
 }
 
-func unmarshalDashboardStrict(input []byte, _ string) (any, error) {
+func unmarshalDashboardStrict(input []byte, _ string) (validableResource, error) {
 	dash := dashboard.Dashboard{}
 	if err := dash.UnmarshalJSONStrict(input); err != nil {
 		return nil, err
@@ -109,7 +121,7 @@ func unmarshalDashboardStrict(input []byte, _ string) (any, error) {
 	return dash, nil
 }
 
-func unmarshalPanelStrict(input []byte, _ string) (any, error) {
+func unmarshalPanelStrict(input []byte, _ string) (validableResource, error) {
 	panel := dashboard.Panel{}
 	if err := panel.UnmarshalJSONStrict(input); err != nil {
 		return nil, err
@@ -118,7 +130,7 @@ func unmarshalPanelStrict(input []byte, _ string) (any, error) {
 	return panel, nil
 }
 
-func unmarshalQueryStrict(input []byte, hint string) (any, error) {
+func unmarshalQueryStrict(input []byte, hint string) (validableResource, error) {
 	query, err := cog.StrictUnmarshalDataquery(input, hint)
 	if err != nil {
 		return nil, err
