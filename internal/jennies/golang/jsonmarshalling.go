@@ -171,58 +171,6 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 			continue
 		}
 
-		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.Name == "options" {
-			buffer.WriteString(fmt.Sprintf(`
-	if fields["%[1]s"] != nil {
-		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Type)
-		if found && variantCfg.OptionsUnmarshaler != nil {
-			options, err := variantCfg.OptionsUnmarshaler(fields["%[1]s"])
-			if err != nil {
-				return err
-			}
-			resource.%[2]s = options
-		} else {
-			if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
-				return err
-			}
-		}
-	}
-`, field.Name, tools.UpperCamelCase(field.Name)))
-			continue
-		}
-
-		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.Name == "fieldConfig" {
-			buffer.WriteString(fmt.Sprintf(`
-	if fields["%[1]s"] != nil {
-		if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
-			return err
-		}
-
-		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Type)
-		if found && variantCfg.FieldConfigUnmarshaler != nil {
-			fakeFieldConfigSource := struct{
-				Defaults struct {
-					Custom json.RawMessage `+"`json:\"custom\"`"+` 
-				} `+"`json:\"defaults\"`"+`
-			}{}
-			if err := json.Unmarshal(fields["%[1]s"], &fakeFieldConfigSource); err != nil {
-				return err
-			}
-
-			if fakeFieldConfigSource.Defaults.Custom != nil {
-				customFieldConfig, err := variantCfg.FieldConfigUnmarshaler(fakeFieldConfigSource.Defaults.Custom)
-				if err != nil {
-					return err
-				}
-
-				resource.%[2]s.Defaults.Custom = customFieldConfig
-			}
-		}
-	}
-`, field.Name, tools.UpperCamelCase(field.Name)))
-			continue
-		}
-
 		jenny.imports.Add("fmt", "fmt")
 		buffer.WriteString(fmt.Sprintf(`
 	if fields["%[1]s"] != nil {
