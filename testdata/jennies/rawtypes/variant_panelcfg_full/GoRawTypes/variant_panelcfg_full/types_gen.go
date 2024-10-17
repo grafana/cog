@@ -12,7 +12,7 @@ type Options struct {
 	TimeseriesOption string `json:"timeseries_option"`
 }
 
-func (resource *Options) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Options) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -67,7 +67,7 @@ type FieldConfig struct {
 	TimeseriesFieldConfigOption string `json:"timeseries_field_config_option"`
 }
 
-func (resource *FieldConfig) StrictUnmarshalJSON(raw []byte) error {
+func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -133,7 +133,7 @@ func VariantConfig() variants.PanelcfgConfig {
 		StrictOptionsUnmarshaler: func (raw []byte) (any, error) {
 			options := &Options{}
 
-			if err := options.StrictUnmarshalJSON(raw); err != nil {
+			if err := options.UnmarshalJSONStrict(raw); err != nil {
                 return nil, err
             }
 
@@ -151,7 +151,7 @@ func VariantConfig() variants.PanelcfgConfig {
 		StrictFieldConfigUnmarshaler: func (raw []byte) (any, error) {
 			fieldConfig := &FieldConfig{}
 
-			if err := fieldConfig.StrictUnmarshalJSON(raw); err != nil {
+			if err := fieldConfig.UnmarshalJSONStrict(raw); err != nil {
                 return nil, err
             }
 

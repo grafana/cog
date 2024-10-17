@@ -12,7 +12,7 @@ type Options struct {
 	Content string `json:"content"`
 }
 
-func (resource *Options) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Options) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -78,7 +78,7 @@ func VariantConfig() variants.PanelcfgConfig {
 		StrictOptionsUnmarshaler: func (raw []byte) (any, error) {
 			options := &Options{}
 
-			if err := options.StrictUnmarshalJSON(raw); err != nil {
+			if err := options.UnmarshalJSONStrict(raw); err != nil {
                 return nil, err
             }
 

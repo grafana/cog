@@ -1,6 +1,6 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $errors := importStdPkg "errors" -}}
-func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) error {
+func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

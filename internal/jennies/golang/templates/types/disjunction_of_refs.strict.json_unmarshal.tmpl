@@ -1,6 +1,6 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $fmt := importStdPkg "fmt" -}}
-func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) error {
+func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -25,7 +25,7 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 		case "{{ $discriminatorValue }}":
 		{{- end }}
 		{{ $typeName|lowerCamelCase }} := &{{ $typeName|upperCamelCase }}{}
-		if err := {{ $typeName|lowerCamelCase }}.StrictUnmarshalJSON(raw); err != nil {
+		if err := {{ $typeName|lowerCamelCase }}.UnmarshalJSONStrict(raw); err != nil {
 			return err
 		}
 

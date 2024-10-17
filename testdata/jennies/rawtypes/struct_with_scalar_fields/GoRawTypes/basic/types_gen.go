@@ -32,7 +32,7 @@ FieldAny any `json:"FieldAny"`
 	FieldInt64 int64 `json:"FieldInt64"`
 }
 
-func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

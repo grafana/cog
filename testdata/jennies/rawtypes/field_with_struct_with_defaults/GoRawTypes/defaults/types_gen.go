@@ -12,7 +12,7 @@ type NestedStruct struct {
 	IntVal int64 `json:"intVal"`
 }
 
-func (resource *NestedStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *NestedStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -86,7 +86,7 @@ type Struct struct {
 	PartialComplexField DefaultsStructPartialComplexField `json:"partialComplexField"`
 }
 
-func (resource *Struct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Struct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -101,7 +101,7 @@ func (resource *Struct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["allFields"]) != "null" {
 			
 			resource.AllFields = NestedStruct{}
-			if err := resource.AllFields.StrictUnmarshalJSON(fields["allFields"]); err != nil {
+			if err := resource.AllFields.UnmarshalJSONStrict(fields["allFields"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("allFields", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("allFields", errors.New("required field is null"))...)
@@ -115,7 +115,7 @@ func (resource *Struct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["partialFields"]) != "null" {
 			
 			resource.PartialFields = NestedStruct{}
-			if err := resource.PartialFields.StrictUnmarshalJSON(fields["partialFields"]); err != nil {
+			if err := resource.PartialFields.UnmarshalJSONStrict(fields["partialFields"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("partialFields", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("partialFields", errors.New("required field is null"))...)
@@ -129,7 +129,7 @@ func (resource *Struct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["emptyFields"]) != "null" {
 			
 			resource.EmptyFields = NestedStruct{}
-			if err := resource.EmptyFields.StrictUnmarshalJSON(fields["emptyFields"]); err != nil {
+			if err := resource.EmptyFields.UnmarshalJSONStrict(fields["emptyFields"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("emptyFields", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("emptyFields", errors.New("required field is null"))...)
@@ -143,7 +143,7 @@ func (resource *Struct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["complexField"]) != "null" {
 			
 			resource.ComplexField = DefaultsStructComplexField{}
-			if err := resource.ComplexField.StrictUnmarshalJSON(fields["complexField"]); err != nil {
+			if err := resource.ComplexField.UnmarshalJSONStrict(fields["complexField"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("complexField", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("complexField", errors.New("required field is null"))...)
@@ -157,7 +157,7 @@ func (resource *Struct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["partialComplexField"]) != "null" {
 			
 			resource.PartialComplexField = DefaultsStructPartialComplexField{}
-			if err := resource.PartialComplexField.StrictUnmarshalJSON(fields["partialComplexField"]); err != nil {
+			if err := resource.PartialComplexField.UnmarshalJSONStrict(fields["partialComplexField"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("partialComplexField", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("partialComplexField", errors.New("required field is null"))...)
@@ -232,7 +232,7 @@ type DefaultsStructComplexFieldNested struct {
 	NestedVal string `json:"nestedVal"`
 }
 
-func (resource *DefaultsStructComplexFieldNested) StrictUnmarshalJSON(raw []byte) error {
+func (resource *DefaultsStructComplexFieldNested) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -289,7 +289,7 @@ type DefaultsStructComplexField struct {
 	Array []string `json:"array"`
 }
 
-func (resource *DefaultsStructComplexField) StrictUnmarshalJSON(raw []byte) error {
+func (resource *DefaultsStructComplexField) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -316,7 +316,7 @@ func (resource *DefaultsStructComplexField) StrictUnmarshalJSON(raw []byte) erro
 		if string(fields["nested"]) != "null" {
 			
 			resource.Nested = DefaultsStructComplexFieldNested{}
-			if err := resource.Nested.StrictUnmarshalJSON(fields["nested"]); err != nil {
+			if err := resource.Nested.UnmarshalJSONStrict(fields["nested"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("nested", err)...)
 			}
 		} else {errs = append(errs, cog.MakeBuildErrors("nested", errors.New("required field is null"))...)
@@ -394,7 +394,7 @@ type DefaultsStructPartialComplexField struct {
 	IntVal int64 `json:"intVal"`
 }
 
-func (resource *DefaultsStructPartialComplexField) StrictUnmarshalJSON(raw []byte) error {
+func (resource *DefaultsStructPartialComplexField) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

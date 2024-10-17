@@ -33,7 +33,7 @@ func VariantConfig() variants.DataqueryConfig {
 	    StrictDataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
             dataquery := &Query{}
 
-            if err := dataquery.StrictUnmarshalJSON(raw); err != nil {
+            if err := dataquery.UnmarshalJSONStrict(raw); err != nil {
                 return nil, err
             }
 
@@ -43,7 +43,7 @@ func VariantConfig() variants.DataqueryConfig {
 }
 
 
-func (resource *Query) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Query) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

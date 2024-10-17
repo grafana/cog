@@ -29,7 +29,7 @@ type Variable struct {
 	Name string `json:"name"`
 }
 
-func (resource *Variable) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Variable) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -86,7 +86,7 @@ type Container struct {
 	RefField    Variable  `json:"refField"`
 }
 
-func (resource *Container) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Container) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -143,7 +143,7 @@ func (resource *Container) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["refField"]) != "null" {
 
 			resource.RefField = Variable{}
-			if err := resource.RefField.StrictUnmarshalJSON(fields["refField"]); err != nil {
+			if err := resource.RefField.UnmarshalJSONStrict(fields["refField"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("refField", err)...)
 			}
 		} else {
@@ -207,7 +207,7 @@ type Optionals struct {
 	RefField *Variable `json:"refField,omitempty"`
 }
 
-func (resource *Optionals) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Optionals) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -244,7 +244,7 @@ func (resource *Optionals) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["refField"]) != "null" {
 
 			resource.RefField = &Variable{}
-			if err := resource.RefField.StrictUnmarshalJSON(fields["refField"]); err != nil {
+			if err := resource.RefField.UnmarshalJSONStrict(fields["refField"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("refField", err)...)
 			}
 
@@ -322,7 +322,7 @@ type Arrays struct {
 	ArrayOfAny       []any                            `json:"arrayOfAny"`
 }
 
-func (resource *Arrays) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Arrays) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -390,7 +390,7 @@ func (resource *Arrays) StrictUnmarshalJSON(raw []byte) error {
 				var result1 Variable
 
 				result1 = Variable{}
-				if err := result1.StrictUnmarshalJSON(partialArray[i1]); err != nil {
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
 					errs = append(errs, cog.MakeBuildErrors("refs["+strconv.Itoa(i1)+"]", err)...)
 				}
 				resource.Refs = append(resource.Refs, result1)
@@ -416,7 +416,7 @@ func (resource *Arrays) StrictUnmarshalJSON(raw []byte) error {
 				var result1 EqualityArraysAnonymousStructs
 
 				result1 = EqualityArraysAnonymousStructs{}
-				if err := result1.StrictUnmarshalJSON(partialArray[i1]); err != nil {
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
 					errs = append(errs, cog.MakeBuildErrors("anonymousStructs["+strconv.Itoa(i1)+"]", err)...)
 				}
 				resource.AnonymousStructs = append(resource.AnonymousStructs, result1)
@@ -561,7 +561,7 @@ type Maps struct {
 	StringToAny      map[string]any                          `json:"stringToAny"`
 }
 
-func (resource *Maps) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Maps) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -614,7 +614,7 @@ func (resource *Maps) StrictUnmarshalJSON(raw []byte) error {
 				var result1 Variable
 
 				result1 = Variable{}
-				if err := result1.StrictUnmarshalJSON(partialMap[key1]); err != nil {
+				if err := result1.UnmarshalJSONStrict(partialMap[key1]); err != nil {
 					errs = append(errs, cog.MakeBuildErrors("refs["+key1+"]", err)...)
 				}
 				parsedMap1[key1] = result1
@@ -641,7 +641,7 @@ func (resource *Maps) StrictUnmarshalJSON(raw []byte) error {
 				var result1 EqualityMapsAnonymousStructs
 
 				result1 = EqualityMapsAnonymousStructs{}
-				if err := result1.StrictUnmarshalJSON(partialMap[key1]); err != nil {
+				if err := result1.UnmarshalJSONStrict(partialMap[key1]); err != nil {
 					errs = append(errs, cog.MakeBuildErrors("anonymousStructs["+key1+"]", err)...)
 				}
 				parsedMap1[key1] = result1
@@ -767,7 +767,7 @@ type EqualityArraysAnonymousStructs struct {
 	Inner string `json:"inner"`
 }
 
-func (resource *EqualityArraysAnonymousStructs) StrictUnmarshalJSON(raw []byte) error {
+func (resource *EqualityArraysAnonymousStructs) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -822,7 +822,7 @@ type EqualityMapsAnonymousStructs struct {
 	Inner string `json:"inner"`
 }
 
-func (resource *EqualityMapsAnonymousStructs) StrictUnmarshalJSON(raw []byte) error {
+func (resource *EqualityMapsAnonymousStructs) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

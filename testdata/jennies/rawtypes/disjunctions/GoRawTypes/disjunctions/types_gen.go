@@ -18,7 +18,7 @@ type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -92,7 +92,7 @@ type SomeOtherStruct struct {
 	Foo []byte `json:"Foo"`
 }
 
-func (resource *SomeOtherStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -163,7 +163,7 @@ type YetAnotherStruct struct {
 	Bar uint8 `json:"Bar"`
 }
 
-func (resource *YetAnotherStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *YetAnotherStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -280,7 +280,7 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 }
 
 
-func (resource *StringOrBool) StrictUnmarshalJSON(raw []byte) error {
+func (resource *StringOrBool) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -355,7 +355,7 @@ type BoolOrSomeStruct struct {
 	SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
 }
 
-func (resource *BoolOrSomeStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *BoolOrSomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -381,7 +381,7 @@ func (resource *BoolOrSomeStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["SomeStruct"]) != "null" {
 			
 			resource.SomeStruct = &SomeStruct{}
-			if err := resource.SomeStruct.StrictUnmarshalJSON(fields["SomeStruct"]); err != nil {
+			if err := resource.SomeStruct.UnmarshalJSONStrict(fields["SomeStruct"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
 			}
 		
@@ -511,7 +511,7 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 }
 
 
-func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -529,7 +529,7 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) StrictUnmarshalJS
 	switch discriminator {
 		case "some-other-struct":
 		someOtherStruct := &SomeOtherStruct{}
-		if err := someOtherStruct.StrictUnmarshalJSON(raw); err != nil {
+		if err := someOtherStruct.UnmarshalJSONStrict(raw); err != nil {
 			return err
 		}
 
@@ -537,7 +537,7 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) StrictUnmarshalJS
 		return nil
 		case "some-struct":
 		someStruct := &SomeStruct{}
-		if err := someStruct.StrictUnmarshalJSON(raw); err != nil {
+		if err := someStruct.UnmarshalJSONStrict(raw); err != nil {
 			return err
 		}
 
@@ -545,7 +545,7 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) StrictUnmarshalJS
 		return nil
 		case "yet-another-struct":
 		yetAnotherStruct := &YetAnotherStruct{}
-		if err := yetAnotherStruct.StrictUnmarshalJSON(raw); err != nil {
+		if err := yetAnotherStruct.UnmarshalJSONStrict(raw); err != nil {
 			return err
 		}
 

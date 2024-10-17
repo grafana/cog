@@ -33,14 +33,17 @@ func newStrictJSONUnmarshal(tmpl *template.Template, imports *common.DirectImpor
 }
 
 func (jenny strictJSONUnmarshal) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object) error {
-	if jenny.objectNeedsUnmarshal(object) {
-		jsonUnmarshal, err := jenny.renderUnmarshal(context, object)
-		if err != nil {
-			return err
-		}
-		buffer.WriteString(jsonUnmarshal)
-		buffer.WriteString("\n")
+	if !jenny.objectNeedsUnmarshal(object) {
+		return nil
 	}
+
+	jsonUnmarshal, err := jenny.renderUnmarshal(context, object)
+	if err != nil {
+		return err
+	}
+
+	buffer.WriteString(jsonUnmarshal)
+	buffer.WriteString("\n")
 
 	return nil
 }

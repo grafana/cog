@@ -15,7 +15,7 @@ type SomeStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

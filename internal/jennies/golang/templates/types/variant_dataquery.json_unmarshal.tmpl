@@ -14,7 +14,7 @@ func VariantConfig() variants.DataqueryConfig {
 	    StrictDataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
             dataquery := &{{ .object.Name|upperCamelCase }}{}
 
-            if err := dataquery.StrictUnmarshalJSON(raw); err != nil {
+            if err := dataquery.UnmarshalJSONStrict(raw); err != nil {
                 return nil, err
             }
 
