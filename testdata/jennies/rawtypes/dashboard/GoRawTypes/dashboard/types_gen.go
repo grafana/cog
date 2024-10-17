@@ -378,44 +378,14 @@ func (resource *Panel) UnmarshalJSON(raw []byte) error {
 	}
 
 	if fields["options"] != nil {
-		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Type)
-		if found && variantCfg.OptionsUnmarshaler != nil {
-			options, err := variantCfg.OptionsUnmarshaler(fields["options"])
-			if err != nil {
-				return err
-			}
-			resource.Options = options
-		} else {
-			if err := json.Unmarshal(fields["options"], &resource.Options); err != nil {
-				return err
-			}
+		if err := json.Unmarshal(fields["options"], &resource.Options); err != nil {
+			return fmt.Errorf("error decoding field 'options': %w", err)
 		}
 	}
 
 	if fields["fieldConfig"] != nil {
 		if err := json.Unmarshal(fields["fieldConfig"], &resource.FieldConfig); err != nil {
-			return err
-		}
-
-		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Type)
-		if found && variantCfg.FieldConfigUnmarshaler != nil {
-			fakeFieldConfigSource := struct{
-				Defaults struct {
-					Custom json.RawMessage `json:"custom"` 
-				} `json:"defaults"`
-			}{}
-			if err := json.Unmarshal(fields["fieldConfig"], &fakeFieldConfigSource); err != nil {
-				return err
-			}
-
-			if fakeFieldConfigSource.Defaults.Custom != nil {
-				customFieldConfig, err := variantCfg.FieldConfigUnmarshaler(fakeFieldConfigSource.Defaults.Custom)
-				if err != nil {
-					return err
-				}
-
-				resource.FieldConfig.Defaults.Custom = customFieldConfig
-			}
+			return fmt.Errorf("error decoding field 'fieldConfig': %w", err)
 		}
 	}
 
