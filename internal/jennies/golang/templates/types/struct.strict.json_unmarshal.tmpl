@@ -1,5 +1,5 @@
 {{- $json := importStdPkg "encoding/json" -}}
-func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) error {
+func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -118,7 +118,7 @@ func (resource *{{ .def.Name|upperCamelCase }}) StrictUnmarshalJSON(raw []byte) 
 			}
 	{{- else if and .InputType.IsRef (resolvesToStruct .InputType) }}
 			{{ .UnmarshalInto }} = {{ if .InputType.Nullable}}&{{ end }}{{ formatRawRef .InputType.Ref.ReferredPkg .InputType.Ref.ReferredType }}{}
-			if err := {{ .UnmarshalInto }}.StrictUnmarshalJSON({{ .RawInputRef }}); err != nil {
+			if err := {{ .UnmarshalInto }}.UnmarshalJSONStrict({{ .RawInputRef }}); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
 			}
 	{{- else -}}

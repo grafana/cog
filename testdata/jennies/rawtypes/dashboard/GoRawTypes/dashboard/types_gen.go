@@ -15,7 +15,7 @@ type Dashboard struct {
 	Panels []Panel `json:"panels,omitempty"`
 }
 
-func (resource *Dashboard) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Dashboard) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -50,7 +50,7 @@ func (resource *Dashboard) StrictUnmarshalJSON(raw []byte) error {
 				var result1 Panel
 				
 			result1 = Panel{}
-			if err := result1.StrictUnmarshalJSON(partialArray[i1]); err != nil {
+			if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("panels["+strconv.Itoa(i1)+"]", err)...)
 			}
 				resource.Panels = append(resource.Panels, result1)
@@ -116,7 +116,7 @@ type DataSourceRef struct {
 	Uid *string `json:"uid,omitempty"`
 }
 
-func (resource *DataSourceRef) StrictUnmarshalJSON(raw []byte) error {
+func (resource *DataSourceRef) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -196,7 +196,7 @@ type FieldConfigSource struct {
 	Defaults *FieldConfig `json:"defaults,omitempty"`
 }
 
-func (resource *FieldConfigSource) StrictUnmarshalJSON(raw []byte) error {
+func (resource *FieldConfigSource) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -211,7 +211,7 @@ func (resource *FieldConfigSource) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["defaults"]) != "null" {
 			
 			resource.Defaults = &FieldConfig{}
-			if err := resource.Defaults.StrictUnmarshalJSON(fields["defaults"]); err != nil {
+			if err := resource.Defaults.UnmarshalJSONStrict(fields["defaults"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("defaults", err)...)
 			}
 		
@@ -270,7 +270,7 @@ type FieldConfig struct {
 	Custom any `json:"custom,omitempty"`
 }
 
-func (resource *FieldConfig) StrictUnmarshalJSON(raw []byte) error {
+func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -435,7 +435,7 @@ dataqueryTypeHint = *resource.Datasource.Type
 	return nil
 }
 
-func (resource *Panel) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Panel) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -474,7 +474,7 @@ func (resource *Panel) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["datasource"]) != "null" {
 			
 			resource.Datasource = &DataSourceRef{}
-			if err := resource.Datasource.StrictUnmarshalJSON(fields["datasource"]); err != nil {
+			if err := resource.Datasource.UnmarshalJSONStrict(fields["datasource"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
 			}
 		
@@ -523,7 +523,7 @@ func (resource *Panel) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["fieldConfig"]) != "null" {
 			
 			resource.FieldConfig = &FieldConfigSource{}
-			if err := resource.FieldConfig.StrictUnmarshalJSON(fields["fieldConfig"]); err != nil {
+			if err := resource.FieldConfig.UnmarshalJSONStrict(fields["fieldConfig"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("fieldConfig", err)...)
 			}
 		

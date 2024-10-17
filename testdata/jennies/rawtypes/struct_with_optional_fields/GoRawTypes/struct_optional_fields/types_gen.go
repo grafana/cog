@@ -16,7 +16,7 @@ type SomeStruct struct {
 	FieldAnonymousStruct *StructOptionalFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct,omitempty"`
 }
 
-func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -31,7 +31,7 @@ func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["FieldRef"]) != "null" {
 			
 			resource.FieldRef = &SomeOtherStruct{}
-			if err := resource.FieldRef.StrictUnmarshalJSON(fields["FieldRef"]); err != nil {
+			if err := resource.FieldRef.UnmarshalJSONStrict(fields["FieldRef"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("FieldRef", err)...)
 			}
 		
@@ -78,7 +78,7 @@ func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
 		if string(fields["FieldAnonymousStruct"]) != "null" {
 			
 			resource.FieldAnonymousStruct = &StructOptionalFieldsSomeStructFieldAnonymousStruct{}
-			if err := resource.FieldAnonymousStruct.StrictUnmarshalJSON(fields["FieldAnonymousStruct"]); err != nil {
+			if err := resource.FieldAnonymousStruct.UnmarshalJSONStrict(fields["FieldAnonymousStruct"]); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("FieldAnonymousStruct", err)...)
 			}
 		
@@ -178,7 +178,7 @@ type SomeOtherStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-func (resource *SomeOtherStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -241,7 +241,7 @@ type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
 	FieldAny any `json:"FieldAny"`
 }
 
-func (resource *StructOptionalFieldsSomeStructFieldAnonymousStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *StructOptionalFieldsSomeStructFieldAnonymousStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

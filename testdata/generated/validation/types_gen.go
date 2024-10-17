@@ -25,7 +25,7 @@ type Dashboard struct {
 	Panels []Panel           `json:"panels"`
 }
 
-func (resource *Dashboard) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Dashboard) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -114,7 +114,7 @@ func (resource *Dashboard) StrictUnmarshalJSON(raw []byte) error {
 				var result1 Panel
 
 				result1 = Panel{}
-				if err := result1.StrictUnmarshalJSON(partialArray[i1]); err != nil {
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
 					errs = append(errs, cog.MakeBuildErrors("panels["+strconv.Itoa(i1)+"]", err)...)
 				}
 				resource.Panels = append(resource.Panels, result1)
@@ -257,7 +257,7 @@ type Panel struct {
 	Title string `json:"title"`
 }
 
-func (resource *Panel) StrictUnmarshalJSON(raw []byte) error {
+func (resource *Panel) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}

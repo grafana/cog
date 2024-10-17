@@ -15,7 +15,7 @@ type SomeStruct struct {
 	FieldInt32 int32 `json:"FieldInt32"`
 }
 
-func (resource *SomeStruct) StrictUnmarshalJSON(raw []byte) error {
+func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
