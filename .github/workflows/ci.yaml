@@ -108,6 +108,18 @@ jobs:
       - name: Compile generated Java code
         run: devbox run gradle build -p generated/java
 
+      # See https://phpstan.org/user-guide/result-cache
+      # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
+      - name: Restore PHP linters cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/phpstan
+            ~/.cache/psalm
+          key: php-linters-result-cache-${{ matrix.kind_version }}
+          restore-keys: |
+            php-linters-result-cache-
+
       - name: Lint generated PHP code with phpstan
         run: devbox run phpstan analyze --memory-limit 512M -c .config/ci/php/phpstan.neon
 
