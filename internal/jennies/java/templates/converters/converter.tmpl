@@ -7,7 +7,7 @@ package {{ .Converter.Package | formatPackageName }};
 {{ $converter }}
 
 {{- define "guard" }}
-    {{- $leftOperand := print (.Path | formatPath) -}}
+    {{- $leftOperand := print (.Path | formatGuardPath) -}}
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
         {{ $leftOperand }} != null
     {{- else if isScalarType .Path "bool" -}}
@@ -17,7 +17,7 @@ package {{ .Converter.Package | formatPackageName }};
     {{- else if is .Path.Last.Type "ref" }}
         {{- formatRefType .Path.Last.Type .Value }}
     {{- else -}}
-        {{- $operator := .Op -}}
+        {{- $operator := .Op -}} 
         {{- if eq .Op "minLength" -}}
             {{- $leftOperand = print $leftOperand ".size()" -}}
             {{- $operator = ">=" -}}
@@ -33,11 +33,11 @@ package {{ .Converter.Package | formatPackageName }};
 
 {{- define "value_formatter" -}}
     {{- if .Type.IsAny -}}
-        {{ .Path | formatPath }}
+        {{ .Path | formatGuardPath }}
     {{- else if .Type.IsScalar -}}
-        {{ .Path | formatPath }}
+        {{ .Path | formatGuardPath }}
     {{- else -}}
-        {{ .Path | formatPath }}
+        {{ .Path | formatGuardPath }}
     {{- end -}}
 {{- end }}
 
@@ -48,7 +48,7 @@ package {{ .Converter.Package | formatPackageName }};
 
 {{- define "prepare_arg" -}}
     {{- with .Arg.Builder -}}
-        String {{ $.IntoVar }} = {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}.convert({{ .ValuePath | formatPath }}{{ if $.IsMapEntry }}.getValue(){{ end }});
+        String {{ $.IntoVar }} = {{ formatRawRef .BuilderPkg (print .BuilderName "Converter") }}.convert({{ .ValuePath | formatGuardPath }}{{ if $.IsMapEntry }}.getValue(){{ end }});
     {{- end -}}
     {{- with .Arg.BuilderDisjunction -}}
             String {{ $.IntoVar }} = "";        

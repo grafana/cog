@@ -90,6 +90,9 @@ func functions() template.FuncMap {
 		"formatRefType": func(_ ast.Type, value any) string {
 			panic("formatRefType() needs to be overridden by a jenny")
 		},
+		"formatGuardPath": func(_ ast.Path) string {
+			panic("formatGuardPath() needs to be overridden by a jenny")
+		},
 	}
 }
 

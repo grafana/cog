@@ -58,8 +58,15 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny Registry) renderPanelConfig() (string, error) {
+	imports := NewImportMap(jenny.config.PackagePath)
+	if jenny.config.generateConverters {
+		imports.Add("Converter", "cog")
+		imports.Add("Panel", "dashboard")
+	}
+
 	return jenny.tmpl.Render("runtime/panel_config.tmpl", map[string]any{
 		"Package":             jenny.formatPackage("cog.variants"),
+		"Imports":             imports.String(),
 		"ShouldAddConverters": jenny.config.generateConverters,
 	})
 }

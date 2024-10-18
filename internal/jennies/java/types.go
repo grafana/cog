@@ -391,3 +391,29 @@ func (tf *typeFormatter) fillNullableAnnotationPattern(t ast.Type) string {
 
 	return ""
 }
+
+func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
+	parts := make([]string, 0)
+	var castedPath string
+
+	for i := range fieldPath {
+		output := fieldPath[i].Identifier
+		if !fieldPath[i].Root {
+			output = tools.LowerCamelCase(output)
+		}
+
+		// don't generate type hints if:
+		// * there isn't one defined
+		// * the type isn't "any"
+		// * as a trailing element in the path
+		if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
+			parts = append(parts, output)
+			continue
+		}
+
+		castedPath = fmt.Sprintf("((%s) %s.%s).", tf.formatFieldType(*fieldPath[i].TypeHint), strings.Join(parts, "."), output)
+		parts = nil
+	}
+
+	return castedPath + strings.Join(parts, ".")
+}
