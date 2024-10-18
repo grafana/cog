@@ -95,6 +95,8 @@ jobs:
           devbox run go run cmd/cli/main.go generate \
             --config ./config/foundation_sdk.dev.yaml \
             --parameters output_dir=./generated/%l,grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
+        env:
+          GOGC: 'off'
 
       - name: Compile generated Go code
         run: devbox run ./scripts/ci/build-go.sh
@@ -154,6 +156,8 @@ jobs:
 
       - name: Run code generation
         run: make gen-sdk-dev
+        env:
+          GOGC: 'off'
 
       - name: Run the Go example
         run: make run-go-example
