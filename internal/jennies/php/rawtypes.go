@@ -195,7 +195,12 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	case ast.KindRef:
 		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type)))
 	case ast.KindStruct:
-		buffer.WriteString(jenny.formatStructDef(context, schema, def))
+		structDef, err := jenny.formatStructDef(context, schema, def)
+		if err != nil {
+			return codejen.File{}, err
+		}
+
+		buffer.WriteString(structDef)
 	default:
 		return codejen.File{}, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -214,7 +219,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	return *codejen.NewFile(filename, []byte(output), jenny), nil
 }
 
-func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Schema, def ast.Object) string {
+func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Schema, def ast.Object) (string, error) {
 	var buffer strings.Builder
 
 	variant := ""
@@ -232,7 +237,11 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 	buffer.WriteString(tools.Indent(jenny.generateConstructor(context, def), 4))
 	buffer.WriteString("\n\n")
 
-	buffer.WriteString(tools.Indent(jenny.generateFromJSON(context, def), 4))
+	fromJSON, err := jenny.generateFromJSON(context, def)
+	if err != nil {
+		return "", err
+	}
+	buffer.WriteString(tools.Indent(fromJSON, 4))
 	buffer.WriteString("\n\n")
 
 	buffer.WriteString(tools.Indent(jenny.generateJSONSerialize(def), 4))
@@ -244,7 +253,7 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 
 	buffer.WriteString("\n}")
 
-	return buffer.String()
+	return buffer.String(), nil
 }
 
 func (jenny RawTypes) generateDataqueryVariantConfig(context languages.Context, schema *ast.Schema) *codejen.File {
@@ -395,9 +404,21 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 	return buffer.String()
 }
 
-func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object) string {
-	var buffer strings.Builder
+func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object) (string, error) {
+	jenny.tmpl = jenny.tmpl.Funcs(template.FuncMap{
+		"unmarshalForType": func(typeDef ast.Type, inputVar string) string {
+			return jenny.unmarshalForType(context, def, typeDef, inputVar)
+		},
+	})
 
+	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(def)
+	if jenny.tmpl.Exists(customUnmarshalTmpl) {
+		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
+			"Object": def,
+		})
+	}
+
+	var buffer strings.Builder
 	var constructorArgs []string
 
 	for _, field := range def.Type.AsStruct().Fields {
@@ -407,28 +428,10 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 			continue
 		}
 
-		var value string
-
-		fieldName := formatFieldName(field.Name)
 		inputVar := fmt.Sprintf(`$data["%[1]s"]`, field.Name)
+		value := jenny.unmarshalForType(context, def, field.Type, inputVar)
 
-		switch {
-		// Special case to properly parse dashboard.Panel options
-		case def.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(def.Name, "panel") && field.Name == "options":
-			decodingFunc := jenny.unmarshalDashboardOptionsFunc()
-
-			value = fmt.Sprintf(`isset(%[1]s) ? %[2]s($data) : null`, inputVar, decodingFunc)
-
-			// Special case to properly parse dashboard.Panel fieldConfig
-		case def.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(def.Name, "panel") && field.Name == "fieldConfig":
-			decodingFunc := jenny.unmarshalDashboardFieldConfigFunc(context, field)
-
-			value = fmt.Sprintf(`isset(%[1]s) ? %[2]s($data) : null`, inputVar, decodingFunc)
-		default:
-			value = jenny.unmarshalForType(context, def, field.Type, inputVar)
-		}
-
-		constructorArgs = append(constructorArgs, fmt.Sprintf("        %s: %s,\n", fieldName, value))
+		constructorArgs = append(constructorArgs, fmt.Sprintf("        %s: %s,\n", formatFieldName(field.Name), value))
 	}
 
 	buffer.WriteString("/**\n")
@@ -445,7 +448,7 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	buffer.WriteString("    );\n")
 	buffer.WriteString("}")
 
-	return buffer.String()
+	return buffer.String(), nil
 }
 
 func (jenny RawTypes) unmarshalForType(context languages.Context, object ast.Object, def ast.Type, inputVar string) string {
