@@ -15,6 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+          key: go-deps-${{ runner.os }}-primes-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
@@ -30,6 +39,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+          key: go-deps-${{ runner.os }}-primes-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
@@ -50,6 +68,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+          key: go-deps-${{ runner.os }}-primes-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
@@ -90,6 +117,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+          key: go-deps-${{ runner.os }}-primes-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
