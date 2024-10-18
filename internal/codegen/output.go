@@ -7,7 +7,6 @@ import (
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/php"
 	"github.com/grafana/cog/internal/jennies/python"
-	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 )
 
@@ -82,7 +81,6 @@ type OutputLanguage struct {
 	OpenAPI    *openapi.Config    `yaml:"openapi"`
 	PHP        *php.Config        `yaml:"php"`
 	Python     *python.Config     `yaml:"python"`
-	Terraform  *terraform.Config  `yaml:"terraform"`
 	Typescript *typescript.Config `yaml:"typescript"`
 }
 
@@ -98,9 +96,6 @@ func (outputLanguage *OutputLanguage) interpolateParameters(interpolator Paramet
 	}
 	if outputLanguage.Java != nil {
 		outputLanguage.Java.InterpolateParameters(interpolator)
-	}
-	if outputLanguage.Terraform != nil {
-		outputLanguage.Terraform.InterpolateParameters(interpolator)
 	}
 	if outputLanguage.Typescript != nil {
 		outputLanguage.Typescript.InterpolateParameters(interpolator)

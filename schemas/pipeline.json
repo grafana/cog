@@ -216,7 +216,7 @@
         },
         "package_templates": {
           "type": "string",
-          "description": "PackageTemplates is the path to a directory containing \"package templates\".\nThese templates are used to add arbitrary files to the generated code, with\nthe goal of turning it into a fully-fledged package.\nTemplates in that directory are expected to be organized by language:\n```\npackage_templates\n├── go\n│   ├── LICENSE.md\n│   └── README.md\n└── typescript\n    ├── babel.config.json\n    ├── package.json\n    ├── README.md\n    └── tsconfig.json\n```"
+          "description": "PackageTemplates is the path to a directory containing \"package templates\".\nThese templates are used to add arbitrary files to the generated code, with\nthe goal of turning it into a fully-fledged package.\nTemplates in that directory are expected to be organized by language:\n```\npackage_templates\n├── go\n│   ├── LICENSE\n│   └── README.md\n└── typescript\n    ├── babel.config.json\n    ├── package.json\n    ├── README.md\n    └── tsconfig.json\n```"
         },
         "repository_templates": {
           "type": "string",
@@ -252,9 +252,6 @@
         },
         "python": {
           "$ref": "#/$defs/PythonConfig"
-        },
-        "terraform": {
-          "$ref": "#/$defs/TerraformConfig"
         },
         "typescript": {
           "$ref": "#/$defs/TypescriptConfig"
@@ -407,16 +404,6 @@
           },
           "type": "array",
           "description": "BuilderTemplatesDirectories holds a list of directories containing templates\nto be used to override parts of builders."
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "TerraformConfig": {
-      "properties": {
-        "package_root": {
-          "type": "string",
-          "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"
         }
       },
       "additionalProperties": false,
