@@ -478,60 +478,6 @@ func (jenny RawTypes) unmarshalForType(context languages.Context, object ast.Obj
 	}
 }
 
-func (jenny RawTypes) unmarshalDashboardOptionsFunc() string {
-	cog := jenny.config.fullNamespaceRef("Cog")
-
-	return fmt.Sprintf(`(function($panel) {
-    /** @var array<string, mixed> $options */
-    $options = $panel["options"];
-
-    if (!%[1]s\Runtime::get()->panelcfgVariantExists($panel["type"] ?? "")) {
-        return $options;
-    }
-
-    $config = %[1]s\Runtime::get()->panelcfgVariantConfig($panel["type"] ?? "");
-    if ($config->optionsFromArray === null) {
-        return $options;
-    }
-
-	return ($config->optionsFromArray)($options);
-})`, cog)
-}
-
-func (jenny RawTypes) unmarshalDashboardFieldConfigFunc(context languages.Context, field ast.StructField) string {
-	cog := jenny.config.fullNamespaceRef("Cog")
-
-	fieldConfigShape := jenny.shaper.typeShape(context.ResolveRefs(field.Type))
-
-	return fmt.Sprintf(`(function($panel) {
-    /** @var %[2]s */
-    $fieldConfigData = $panel["fieldConfig"];
-    $fieldConfig = FieldConfigSource::fromArray($fieldConfigData);
-
-    if (!%[1]s\Runtime::get()->panelcfgVariantExists($panel["type"] ?? "")) {
-        return $fieldConfig;
-    }
-
-    $config = %[1]s\Runtime::get()->panelcfgVariantConfig($panel["type"] ?? "");
-    if ($config->fieldConfigFromArray === null) {
-        return $fieldConfig;
-    }
-
-    if (!isset($fieldConfigData["defaults"])) {
-		return $fieldConfig;
-    }
-    /** @var array{custom?: array<string, mixed>}*/
-    $defaults = $fieldConfigData["defaults"];
-    if (!isset($defaults["custom"])) {
-		return $fieldConfig;
-    }
-
-	$fieldConfig->defaults->custom = ($config->fieldConfigFromArray)($defaults["custom"]);
-
-    return $fieldConfig;
-})`, cog, fieldConfigShape)
-}
-
 func (jenny RawTypes) unmarshalMap(context languages.Context, mapDef ast.MapType, inputVar string) string {
 	if !mapDef.ValueType.IsRef() {
 		return fmt.Sprintf("%s ?? null", inputVar)
