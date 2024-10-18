@@ -208,7 +208,7 @@ func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 }
 
 func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object ast.Object) (string, error) {
-	customUnmarshalTmpl := jenny.customObjectUnmarshalBlock(object)
+	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(object)
 	if jenny.tmpl.Exists(customUnmarshalTmpl) {
 		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
 			"Object": object,
@@ -404,8 +404,4 @@ func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentSt
 	}
 
 	return fmt.Sprintf(`%[3]s.dataquery_from_json(data["%[1]s"], %[2]s)`, field.Name, hintValue, cogruntime)
-}
-
-func (jenny RawTypes) customObjectUnmarshalBlock(obj ast.Object) string {
-	return fmt.Sprintf("object_%s_%s_custom_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }

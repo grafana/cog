@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
@@ -48,6 +49,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	inputIsDataquery := schemaFound && schema.Metadata.Variant == ast.SchemaVariantDataQuery && schema.EntryPoint == builder.For.Name
 
 	return jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(templateHelpers(templateDeps{
 			config:  jenny.config,
 			context: context,
