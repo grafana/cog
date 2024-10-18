@@ -8,12 +8,14 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
+	tmpl          *template.Template
 	typeFormatter *typeFormatter
 	importModule  moduleImporter
 	importPkg     pkgImporter
@@ -61,6 +63,15 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	}
 	jenny.typeFormatter = defaultTypeFormatter(context, jenny.importPkg, jenny.importModule)
 
+	jenny.tmpl = jenny.tmpl.
+		Funcs(template.FuncMap{
+			"formatFullyQualifiedRef": func(typeDef ast.RefType) string {
+				return jenny.typeFormatter.formatFullyQualifiedRef(typeDef, false)
+			},
+			"importModule": jenny.importModule,
+			"importPkg":    jenny.importPkg,
+		})
+
 	i := 0
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		objectOutput, innerErr := jenny.typeFormatter.formatObject(object)
@@ -78,7 +89,12 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			buffer.WriteString(jenny.generateToJSONMethod(object))
 
 			buffer.WriteString("\n\n")
-			buffer.WriteString(jenny.generateFromJSONMethod(context, object))
+			fromJSON, innerErr := jenny.generateFromJSONMethod(context, object)
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+			buffer.WriteString(fromJSON)
 		}
 
 		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
@@ -191,7 +207,14 @@ func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 	return buffer.String()
 }
 
-func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object ast.Object) string {
+func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object ast.Object) (string, error) {
+	customUnmarshalTmpl := jenny.customObjectUnmarshalBlock(object)
+	if jenny.tmpl.Exists(customUnmarshalTmpl) {
+		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
+			"Object": object,
+		})
+	}
+
 	var buffer strings.Builder
 
 	typingPkg := jenny.importPkg("typing", "typing")
@@ -204,37 +227,6 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	for _, field := range object.Type.AsStruct().Fields {
 		fieldName := formatIdentifier(field.Name)
 		value := fmt.Sprintf(`data["%s"]`, field.Name)
-
-		// Special cases to properly parse dashboard.Panel options
-		if object.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(object.Name, "panel") && field.Name == "options" {
-			cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
-			assignment := fmt.Sprintf(`        if "options" in data:
-            config = %[1]s.panelcfg_config(data.get("type", ""))
-            if config is not None and config.options_from_json_hook is not None:
-                args["%[2]s"] = config.options_from_json_hook(data["options"])
-            else:
-                args["%[2]s"] = data["options"]`, cogruntime, fieldName)
-
-			assignments = append(assignments, assignment)
-			continue
-		}
-
-		// Special cases to properly parse dashboard.Panel fieldConfig
-		if object.SelfRef.ReferredPkg == "dashboard" && strings.EqualFold(object.Name, "panel") && field.Name == "fieldConfig" {
-			cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
-			assignment := fmt.Sprintf(`        if "fieldConfig" in data:
-            config = %[1]s.panelcfg_config(data.get("type", ""))
-            field_config = FieldConfigSource.from_json(data["fieldConfig"])
-
-            if config is not None and config.field_config_from_json_hook is not None:
-                custom_field_config = data["fieldConfig"].get("defaults", {}).get("custom", {})
-                field_config.defaults.custom = config.field_config_from_json_hook(custom_field_config)
-
-            args["%[2]s"] = field_config`, cogruntime, fieldName)
-
-			assignments = append(assignments, assignment)
-			continue
-		}
 
 		// No need to unmarshal constant scalar fields since they're set in
 		// the object's constructor
@@ -291,7 +283,7 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 
 	buffer.WriteString("        return cls(**args)")
 
-	return buffer.String()
+	return buffer.String(), nil
 }
 
 func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) string {
@@ -412,4 +404,8 @@ func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentSt
 	}
 
 	return fmt.Sprintf(`%[3]s.dataquery_from_json(data["%[1]s"], %[2]s)`, field.Name, hintValue, cogruntime)
+}
+
+func (jenny RawTypes) customObjectUnmarshalBlock(obj ast.Object) string {
+	return fmt.Sprintf("object_%s_%s_custom_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }
