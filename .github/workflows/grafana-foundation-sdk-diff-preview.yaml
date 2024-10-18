@@ -13,6 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-next-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
@@ -30,6 +40,7 @@ jobs:
           FOUNDATION_SDK_PATH: ./grafana-foundation-sdk
           FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
           LOG_LEVEL: '7' # debug
+          GOGC: 'off'
 
       - name: Preview diff
         run: |
