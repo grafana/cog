@@ -8,6 +8,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -767,6 +768,7 @@ func (jenny RawTypes) generateDataqueryType(schema *ast.Schema) string {
 
 func (jenny RawTypes) formatEnumDef(context languages.Context, def ast.Object) (string, error) {
 	return jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(templateHelpers(templateDeps{
 			config:  jenny.config,
 			context: context,

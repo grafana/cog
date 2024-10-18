@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
@@ -19,6 +20,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 
 		// "dummy"/unimplemented helpers, to be able to parse the templates before jennies are initialized.
 		// Jennies will override these with proper dependencies.
+		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(templateHelpers(templateDeps{})),
 		template.Funcs(map[string]any{
 			"formatPath":           formatFieldPath,
@@ -97,20 +99,5 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 		},
 
 		"unmarshalForType": deps.unmarshalForType,
-
-		"resolveRefs": deps.context.ResolveRefs,
-		"resolvesToStruct": func(typeDef ast.Type) bool {
-			return deps.context.ResolveRefs(typeDef).IsStruct()
-		},
-		"resolvesToMap": func(typeDef ast.Type) bool {
-			return deps.context.ResolveRefs(typeDef).IsMap()
-		},
-		"resolvesToEnum": func(typeDef ast.Type) bool {
-			return deps.context.ResolveRefs(typeDef).IsEnum()
-		},
-		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
-			_, found := deps.context.ResolveToComposableSlot(typeDef)
-			return found
-		},
 	}
 }
