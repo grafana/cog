@@ -43,13 +43,15 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 }
 
 type templateDeps struct {
-	config  Config
-	context languages.Context
+	config           Config
+	context          languages.Context
+	unmarshalForType func(typeDef ast.Type, inputVar string) string
 }
 
 func templateHelpers(deps templateDeps) template.FuncMap {
 	typesFormatter := builderTypeFormatter(deps.config, deps.context)
 	hinter := &typehints{config: deps.config, context: deps.context, resolveBuilders: false}
+	shaper := &shape{context: deps.context}
 
 	return template.FuncMap{
 		"fullNamespaceRef":        deps.config.fullNamespaceRef,
@@ -86,12 +88,15 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 
 			return hinter.forType(clone, false)
 		},
+		"typeShape": shaper.typeShape,
 		"defaultForType": func(typeDef ast.Type) string {
 			return formatValue(defaultValueForType(deps.config, deps.context.Schemas, typeDef, nil))
 		},
 		"disjunctionCaseForType": func(input string, typeDef ast.Type) string {
 			return disjunctionCaseForType(typesFormatter, input, typeDef)
 		},
+
+		"unmarshalForType": deps.unmarshalForType,
 
 		"resolveRefs": deps.context.ResolveRefs,
 		"resolvesToStruct": func(typeDef ast.Type) bool {

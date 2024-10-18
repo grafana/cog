@@ -116,7 +116,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 	}
 
 	// is there a custom unmarshal template block?
-	if jenny.tmpl.Exists(jenny.customObjectUnmarshalBlock(obj)) {
+	if jenny.tmpl.Exists(template.CustomObjectUnmarshalBlock(obj)) {
 		return true
 	}
 
@@ -136,7 +136,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 }
 
 func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
-	customUnmarshalTmpl := jenny.customObjectUnmarshalBlock(obj)
+	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(obj)
 	if jenny.tmpl.Exists(customUnmarshalTmpl) {
 		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
 			"Object": obj,
@@ -305,8 +305,4 @@ func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema,
 		"hasConverter":      jenny.config.generateConverters,
 		"disjunctionStruct": disjunctionStruct,
 	})
-}
-
-func (jenny JSONMarshalling) customObjectUnmarshalBlock(obj ast.Object) string {
-	return fmt.Sprintf("object_%s_%s_custom_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }
