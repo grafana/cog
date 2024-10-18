@@ -17,8 +17,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            vendor
-          key: go-deps-${{ runner.os }}-primes-${{ hashFiles('go.sum') }}
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-${{ hashFiles('go.sum') }}
           restore-keys: |
             go-deps-${{ runner.os }}
 
