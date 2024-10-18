@@ -77,7 +77,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: go-deps-${{ runner.os }}-${{ hashFiles('go.sum') }}
+          key: go-deps-${{ runner.os }}-${{ matrix.kind_version }}-${{ hashFiles('go.sum') }}
           restore-keys: |
             go-deps-${{ runner.os }}
 
@@ -107,8 +107,18 @@ jobs:
       - name: Lint generated Python code
         run: devbox run mypy generated/python/
 
+      # See https://docs.gradle.org/current/userguide/build_cache.html
+      - name: Restore Gradle build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-build-cache-${{ runner.os }}-${{ matrix.kind_version }}
+          restore-keys: |
+            gradle-build-cache-${{ runner.os }}-
+
       - name: Compile generated Java code
-        run: devbox run gradle build -p generated/java
+        run: devbox run gradle build --build-cache -p generated/java
 
       # See https://phpstan.org/user-guide/result-cache
       # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
@@ -141,7 +151,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: go-deps-${{ runner.os }}-${{ hashFiles('go.sum') }}
+          key: go-deps-${{ runner.os }}-next-${{ hashFiles('go.sum') }}
           restore-keys: |
             go-deps-${{ runner.os }}
 
@@ -167,6 +177,16 @@ jobs:
 
       - name: Run the PHP example
         run: make run-php-example
+
+      # See https://docs.gradle.org/current/userguide/build_cache.html
+      - name: Restore Gradle build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-build-cache-${{ runner.os }}-${{ matrix.kind_version }}
+          restore-keys: |
+            gradle-build-cache-${{ runner.os }}-
 
       - name: Run Java example
         run: make run-java-example
