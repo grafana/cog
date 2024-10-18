@@ -40,6 +40,7 @@ jobs:
           FOUNDATION_SDK_PATH: ./grafana-foundation-sdk
           FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
           LOG_LEVEL: '7' # debug
+          GOGC: 'off'
 
       - name: Preview diff
         run: |
