@@ -1,6 +1,9 @@
 package typescript
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
@@ -59,7 +62,31 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 		common.If[languages.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
 
-		common.If[languages.Context](globalConfig.APIReference, common.APIReference{}),
+		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+			Language: "typescript",
+			Formatter: common.APIReferenceFormatter{
+				ObjectName: func(object ast.Object) string {
+					return tools.CleanupNames(object.Name)
+				},
+				BuilderName: func(builder ast.Builder) string {
+					return tools.UpperCamelCase(builder.Name) + "Builder"
+				},
+				OptionName: func(option ast.Option) string {
+					return formatIdentifier(option.Name)
+				},
+				OptionSignature: func(context languages.Context, option ast.Option) string {
+					typesFormatter := builderTypeFormatter(context, func(pkg string) string {
+						return pkg
+					})
+
+					args := tools.Map(option.Args, func(arg ast.Argument) string {
+						return formatIdentifier(arg.Name) + ": " + typesFormatter.formatType(arg.Type)
+					})
+
+					return fmt.Sprintf("%[1]s(%[2]s)", formatIdentifier(option.Name), strings.Join(args, ", "))
+				},
+			},
+		}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
