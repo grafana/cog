@@ -10,10 +10,18 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
-	"github.com/grafana/cog/internal/tools"
 )
 
+type APIReferenceFormatter struct {
+	ObjectName      func(object ast.Object) string
+	BuilderName     func(builder ast.Builder) string
+	OptionName      func(option ast.Option) string
+	OptionSignature func(context languages.Context, option ast.Option) string
+}
+
 type APIReference struct {
+	Language  string
+	Formatter APIReferenceFormatter
 }
 
 func (jenny APIReference) JennyName() string {
@@ -28,7 +36,7 @@ func (jenny APIReference) Generate(context languages.Context) (codejen.Files, er
 		files = append(files, *jenny.referenceForSchema(context, schema))
 	}
 	for _, builder := range context.Builders {
-		files = append(files, *jenny.referenceForBuilder(builder))
+		files = append(files, *jenny.referenceForBuilder(context, builder))
 	}
 
 	files = append(files, *jenny.index(context))
@@ -61,7 +69,7 @@ func (jenny APIReference) referenceForSchema(context languages.Context, schema *
 
 	schema.Objects.Sort(orderedmap.SortStrings)
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		buffer.WriteString(fmt.Sprintf(" * %s\n", object.Name))
+		buffer.WriteString(fmt.Sprintf(" * %s\n", jenny.Formatter.ObjectName(object)))
 	})
 
 	buffer.WriteString("## Builders\n\n")
@@ -72,17 +80,18 @@ func (jenny APIReference) referenceForSchema(context languages.Context, schema *
 	})
 
 	for _, builder := range builders {
-		// TODO: builder name is language-dependent
-		buffer.WriteString(fmt.Sprintf(" * [%[1]s](./%[1]s.md)\n", builder.Name, schema.Package))
+		buffer.WriteString(fmt.Sprintf(" * [%[1]s](./%[1]s.md)\n", jenny.Formatter.BuilderName(builder)))
 	}
 
 	return codejen.NewFile(fmt.Sprintf("docs/%s/index.md", schema.Package), buffer.Bytes(), jenny)
 }
 
-func (jenny APIReference) referenceForBuilder(builder ast.Builder) *codejen.File {
+func (jenny APIReference) referenceForBuilder(context languages.Context, builder ast.Builder) *codejen.File {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(fmt.Sprintf("# %s\n\n", builder.Name))
+	builderName := jenny.Formatter.BuilderName(builder)
+
+	buffer.WriteString(fmt.Sprintf("# %s\n\n", builderName))
 
 	buffer.WriteString("## Methods\n\n")
 
@@ -91,24 +100,18 @@ func (jenny APIReference) referenceForBuilder(builder ast.Builder) *codejen.File
 	})
 
 	for _, option := range builder.Options {
-		buffer.WriteString(fmt.Sprintf("### %s\n\n", option.Name))
-
-		args := tools.Map(option.Args, func(arg ast.Argument) string {
-			return arg.Name
-		})
+		buffer.WriteString(fmt.Sprintf("### %s\n\n", jenny.Formatter.OptionName(option)))
 
 		if len(option.Comments) != 0 {
 			buffer.WriteString(strings.Join(option.Comments, "\n\n") + "\n\n")
 		}
 
-		// TODO: configurable language tag
-		buffer.WriteString("```typescript\n")
-		// TODO: language-dependent function definition formatting
-		buffer.WriteString(fmt.Sprintf("%[1]s(%[2]s)\n", option.Name, strings.Join(args, ", ")))
-		buffer.WriteString("```\n")
+		buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+		buffer.WriteString(jenny.Formatter.OptionSignature(context, option))
+		buffer.WriteString("\n```\n")
 
 		buffer.WriteString("\n")
 	}
 
-	return codejen.NewFile(fmt.Sprintf("docs/%s/%s.md", builder.Package, builder.Name), buffer.Bytes(), jenny)
+	return codejen.NewFile(fmt.Sprintf("docs/%s/%s.md", builder.Package, builderName), buffer.Bytes(), jenny)
 }
