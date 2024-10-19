@@ -1,6 +1,9 @@
 package php
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
@@ -72,6 +75,34 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](globalConfig.Types, RawTypes{config: config, tmpl: tmpl}),
 		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl}),
 		common.If[languages.Context](globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
+
+		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+			Language: "php",
+			Formatter: common.APIReferenceFormatter{
+				ObjectName: func(object ast.Object) string {
+					return formatObjectName(object.Name)
+				},
+				BuilderName: func(builder ast.Builder) string {
+					return formatObjectName(builder.Name) + "Builder"
+				},
+				OptionName: func(option ast.Option) string {
+					return formatOptionName(option.Name)
+				},
+				OptionSignature: func(context languages.Context, option ast.Option) string {
+					typesFormatter := builderTypeFormatter(config, context)
+					args := tools.Map(option.Args, func(arg ast.Argument) string {
+						argType := typesFormatter.formatType(arg.Type)
+						if argType != "" {
+							argType += " "
+						}
+
+						return argType + "$" + formatArgName(arg.Name)
+					})
+
+					return fmt.Sprintf("%[1]s(%[2]s)", formatOptionName(option.Name), strings.Join(args, ", "))
+				},
+			},
+		}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
