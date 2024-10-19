@@ -71,6 +71,17 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 				BuilderName: func(builder ast.Builder) string {
 					return tools.UpperCamelCase(builder.Name) + "Builder"
 				},
+				ConstructorSignature: func(context languages.Context, builder ast.Builder) string {
+					typesFormatter := builderTypeFormatter(context, func(pkg string) string {
+						return pkg
+					})
+					args := tools.Map(builder.Constructor.Args, func(arg ast.Argument) string {
+						return formatIdentifier(arg.Name) + ": " + typesFormatter.formatType(arg.Type)
+					})
+
+					return fmt.Sprintf("new %[1]s(%[2]s)", tools.UpperCamelCase(builder.Name)+"Builder", strings.Join(args, ", "))
+
+				},
 				OptionName: func(option ast.Option) string {
 					return formatIdentifier(option.Name)
 				},
