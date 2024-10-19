@@ -1,0 +1,40 @@
+site_name: Grafana Foundation SDK
+
+repo_name: "grafana/grafana-foundation-sdk"
+repo_url: "https://github.com/grafana/grafana-foundation-sdk"
+
+markdown_extensions:
+  - admonition
+  - pymdownx.magiclink
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - toc:
+      permalink: 🔗
+
+theme:
+  name: "material"
+  features:
+    - navigation.tabs
+    - navigation.indexes
+
+  logo: "assets/logo.svg"
+
+  palette:
+    - accent: "deep orange"
+      media: "(prefers-color-scheme: light)"
+      primary: "black"
+      scheme: "default"
+      toggle:
+        icon: "material/toggle-switch-off-outline"
+        name: "Switch to dark mode"
+    - accent: "deep-orange"
+      media: "(prefers-color-scheme: dark)"
+      primary: "black"
+      scheme: "slate"
+      toggle:
+        icon: "material/toggle-switch"
+        name: "Switch to light mode"
+
+extra_css: 
+  - "assets/custom.css"
