@@ -58,6 +58,8 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl}),
 
 		common.If[languages.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
+
+		common.If[languages.Context](globalConfig.APIReference, common.APIReference{}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
