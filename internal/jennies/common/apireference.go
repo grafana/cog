@@ -13,10 +13,11 @@ import (
 )
 
 type APIReferenceFormatter struct {
-	ObjectName      func(object ast.Object) string
-	BuilderName     func(builder ast.Builder) string
-	OptionName      func(option ast.Option) string
-	OptionSignature func(context languages.Context, option ast.Option) string
+	ObjectName           func(object ast.Object) string
+	BuilderName          func(builder ast.Builder) string
+	ConstructorSignature func(context languages.Context, builder ast.Builder) string
+	OptionName           func(option ast.Option) string
+	OptionSignature      func(context languages.Context, option ast.Option) string
 }
 
 type APIReference struct {
@@ -92,6 +93,12 @@ func (jenny APIReference) referenceForBuilder(context languages.Context, builder
 	builderName := jenny.Formatter.BuilderName(builder)
 
 	buffer.WriteString(fmt.Sprintf("# %s\n\n", builderName))
+
+	buffer.WriteString("## Constructor\n\n")
+
+	buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+	buffer.WriteString(jenny.Formatter.ConstructorSignature(context, builder))
+	buffer.WriteString("\n```\n")
 
 	buffer.WriteString("## Methods\n\n")
 
