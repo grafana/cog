@@ -1,3 +1,86 @@
+.badge {
+  border-radius: .1rem;
+  font-size: .85em;
+  padding: 0 .3em;
+  font-weight: bold;
+  display: inline-block;
+
+  color: #ffa657;
+  background-color: #ffa6571a;
+}
+
+.badge.object-type-struct {
+  color: #79c0ff;
+  background-color: #79c0ff1a;
+}
+.badge.object-type-struct::after {
+  content: 'class';
+}
+
+.badge.object-type-enum {
+  color: #d2a8ff;
+  background-color: #d2a8ff1a;
+}
+.badge.object-type-enum::after {
+  content: 'enum';
+}
+
+.badge.object-type-disjunction {
+  color: #baff79;
+  background-color: #baff791a;
+}
+.badge.object-type-disjunction::after {
+  content: 'union';
+}
+
+.badge.object-type-alias {
+  color: #dfbe50;
+  background-color: #dfbe501a;
+}
+.badge.object-type-ref::after {
+  content: 'alias';
+}
+
+.badge.object-type-map {
+  color: #ffa8cc;
+  background-color: #ffa8cc1a;
+}
+.badge.object-type-map::after {
+  content: 'map';
+}
+
+.badge.object-type-array {
+  color: #5e8bde;
+  background-color: #272a35;
+}
+.badge.object-type-array::after {
+  content: 'array';
+}
+
+.badge.object-type-scalar {
+  color: #c973d9;
+  background-color: #ffa8cc1a;
+}
+.badge.object-type-scalar::after {
+  content: 'scalar';
+}
+
+.badge.builder {
+  color: #ffa657;
+  background-color: #ffa6571a;
+}
+.badge.builder::after {
+  content: 'builder';
+}
+
+.badge.object-method {
+  color: #d2a8ff;
+  background-color: #d2a8ff1a;
+}
+.badge.object-method::after {
+  content: 'method';
+}
+
 /* Menu */
 /* Decapitalize menu items, Mkdocs capilizes by default and can't be configured */
 nav nav .md-nav__link .md-ellipsis::first-letter { text-transform: lowercase }

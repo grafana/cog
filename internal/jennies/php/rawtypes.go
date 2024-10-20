@@ -8,7 +8,6 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -187,7 +186,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 
 	switch def.Type.Kind {
 	case ast.KindEnum:
-		enum, err := jenny.formatEnumDef(context, def)
+		enum, err := jenny.typeFormatter.formatEnumDeclaration(jenny.tmpl, context, def)
 		if err != nil {
 			return codejen.File{}, err
 		}
@@ -710,17 +709,4 @@ func (jenny RawTypes) generateDataqueryType(schema *ast.Schema) string {
 	buffer.WriteString("}")
 
 	return buffer.String()
-}
-
-func (jenny RawTypes) formatEnumDef(context languages.Context, def ast.Object) (string, error) {
-	return jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
-		Funcs(templateHelpers(templateDeps{
-			config:  jenny.config,
-			context: context,
-		})).
-		Render("types/enum.tmpl", map[string]any{
-			"Object":   def,
-			"EnumType": def.Type.Enum.Values[0].Type,
-		})
 }
