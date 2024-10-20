@@ -23,6 +23,8 @@ theme:
     - navigation.tabs
     - navigation.indexes
 
+  custom_dir: overrides
+
   logo: "assets/logo.svg"
 
   palette:
