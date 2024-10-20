@@ -11,7 +11,7 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIReferenceFormatter {
+func apiReferenceFormatter(apiRefCollector *common.APIReferenceCollector, tmpl *template.Template, config Config) common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
 		ObjectName: func(object ast.Object) string {
 			return formatObjectName(object.Name)
@@ -20,6 +20,23 @@ func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIRef
 			typesFormatter := defaultTypeFormatter(config, context)
 			return typesFormatter.formatTypeDeclaration(tmpl, context, object)
 		},
+
+		MethodName: func(method common.MethodReference) string {
+			return formatOptionName(method.Name)
+		},
+		MethodSignature: func(context languages.Context, method common.MethodReference) string {
+			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
+				return fmt.Sprintf("%s $%s", arg.Type, arg.Name)
+			})
+
+			signature := fmt.Sprintf("%[1]s(%[2]s)", formatOptionName(method.Name), strings.Join(args, ", "))
+			if method.Static {
+				signature = "static " + signature
+			}
+
+			return signature
+		},
+
 		BuilderName: func(builder ast.Builder) string {
 			return formatObjectName(builder.Name) + "Builder"
 		},
@@ -35,7 +52,6 @@ func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIRef
 			})
 
 			return fmt.Sprintf("new %[1]s(%[2]s)", formatObjectName(builder.Name)+"Builder", strings.Join(args, ", "))
-
 		},
 		OptionName: func(option ast.Option) string {
 			return formatOptionName(option.Name)

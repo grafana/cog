@@ -45,12 +45,14 @@ func (config Config) MergeWithGlobal(global languages.Config) Config {
 }
 
 type Language struct {
-	config Config
+	config          Config
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func New(config Config) *Language {
 	return &Language{
-		config: config,
+		config:          config,
+		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 }
 
@@ -69,13 +71,14 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AppendOneToMany(
 		VariantsPlugins{config: config, tmpl: tmpl},
 		Runtime{config: config, tmpl: tmpl},
-		common.If[languages.Context](globalConfig.Types, RawTypes{config: config, tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl}),
 		common.If[languages.Context](globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
 
 		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
-			Language:  "php",
-			Formatter: apiReferenceFormatter(tmpl, config),
+			Collector: language.apiRefCollector,
+			Language:  LanguageRef,
+			Formatter: apiReferenceFormatter(language.apiRefCollector, tmpl, config),
 		}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
