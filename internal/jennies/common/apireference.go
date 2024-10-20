@@ -12,9 +12,46 @@ import (
 	"github.com/grafana/cog/internal/orderedmap"
 )
 
+type ArgumentReference struct {
+	Name     string
+	Type     string
+	Comments []string
+}
+
+type MethodReference struct {
+	Name      string
+	Comments  []string
+	Arguments []ArgumentReference
+	Return    string
+	Static    bool
+}
+
+type APIReferenceCollector struct {
+	objectMethods map[string][]MethodReference
+}
+
+func NewAPIReferenceCollector() *APIReferenceCollector {
+	return &APIReferenceCollector{
+		objectMethods: make(map[string][]MethodReference),
+	}
+}
+
+func (collector *APIReferenceCollector) RegisterMethodForObject(object ast.Object, methodReference MethodReference) {
+	objectRef := object.SelfRef.String()
+	collector.objectMethods[objectRef] = append(collector.objectMethods[objectRef], methodReference)
+}
+
+func (collector *APIReferenceCollector) MethodsForObject(object ast.Object) []MethodReference {
+	return collector.objectMethods[object.SelfRef.String()]
+}
+
 type APIReferenceFormatter struct {
-	ObjectName           func(object ast.Object) string
-	ObjectDefinition     func(context languages.Context, object ast.Object) string
+	ObjectName       func(object ast.Object) string
+	ObjectDefinition func(context languages.Context, object ast.Object) string
+
+	MethodName      func(method MethodReference) string
+	MethodSignature func(context languages.Context, method MethodReference) string
+
 	BuilderName          func(builder ast.Builder) string
 	ConstructorSignature func(context languages.Context, builder ast.Builder) string
 	OptionName           func(option ast.Option) string
@@ -22,6 +59,7 @@ type APIReferenceFormatter struct {
 }
 
 type APIReference struct {
+	Collector *APIReferenceCollector
 	Language  string
 	Formatter APIReferenceFormatter
 }
@@ -143,8 +181,25 @@ title: %[2]s %[1]s
 func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context languages.Context, object ast.Object) {
 	buffer.WriteString("## Methods\n\n")
 
-	// TODO
-	buffer.WriteString("TODO\n")
+	methods := jenny.Collector.MethodsForObject(object)
+
+	for _, method := range methods {
+		buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", jenny.Formatter.MethodName(method), jenny.methodBadge()))
+
+		if len(method.Comments) != 0 {
+			buffer.WriteString(strings.Join(method.Comments, "\n\n") + "\n\n")
+		}
+
+		buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+		buffer.WriteString(jenny.Formatter.MethodSignature(context, method))
+		buffer.WriteString("\n```\n")
+
+		buffer.WriteString("\n")
+	}
+
+	if len(methods) == 0 {
+		buffer.WriteString("No methods.\n")
+	}
 }
 
 func (jenny APIReference) referenceForType(buffer *bytes.Buffer, context languages.Context, object ast.Object) {

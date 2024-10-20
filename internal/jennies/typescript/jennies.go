@@ -60,7 +60,8 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
 
 		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
-			Language:  "typescript",
+			Collector: common.NewAPIReferenceCollector(),
+			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(),
 		}),
 	)
