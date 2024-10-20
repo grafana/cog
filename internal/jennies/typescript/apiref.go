@@ -16,16 +16,24 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			return tools.CleanupNames(object.Name)
 		},
 		ObjectDefinition: func(context languages.Context, object ast.Object) string {
-			// TODO: assumes object is a struct
-			var buffer strings.Builder
 			typesFormatter := defaultTypeFormatter(context, func(pkg string) string {
 				return pkg
 			})
 
-			buffer.WriteString(typesFormatter.formatTypeDeclaration(object))
-
-			return buffer.String()
+			return typesFormatter.formatTypeDeclaration(object)
 		},
+
+		MethodName: func(method common.MethodReference) string {
+			return formatIdentifier(method.Name)
+		},
+		MethodSignature: func(context languages.Context, method common.MethodReference) string {
+			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
+				return fmt.Sprintf("%s: %s", arg.Name, arg.Type)
+			})
+
+			return fmt.Sprintf("%[1]s(%[2]s)", formatIdentifier(method.Name), strings.Join(args, ", "))
+		},
+
 		BuilderName: func(builder ast.Builder) string {
 			return tools.UpperCamelCase(builder.Name) + "Builder"
 		},

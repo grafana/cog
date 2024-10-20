@@ -8,6 +8,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -15,8 +16,9 @@ import (
 )
 
 type RawTypes struct {
-	config Config
-	tmpl   *template.Template
+	config          Config
+	tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 
 	typeFormatter *typeFormatter
 	shaper        *shape
@@ -248,7 +250,7 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 
 	if def.Type.IsDataqueryVariant() {
 		buffer.WriteString("\n\n")
-		buffer.WriteString(tools.Indent(jenny.generateDataqueryType(schema), 4))
+		buffer.WriteString(tools.Indent(jenny.generateDataqueryType(schema, def), 4))
 	}
 
 	buffer.WriteString("\n}")
@@ -447,6 +449,20 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	buffer.WriteString(strings.Join(constructorArgs, ""))
 	buffer.WriteString("    );\n")
 	buffer.WriteString("}")
+
+	jenny.apiRefCollector.RegisterMethodForObject(def, common.MethodReference{
+		Name: "fromArray",
+		Comments: []string{
+			"Builds this object from an array.",
+			"This function is meant to be used with the return value of `json_decode($json, true)`.",
+		},
+		Arguments: []common.ArgumentReference{{
+			Name: "inputData",
+			Type: "array",
+		}},
+		Return: "self",
+		Static: true,
+	})
 
 	return buffer.String(), nil
 }
@@ -697,16 +713,32 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 
 	buffer.WriteString("}")
 
+	jenny.apiRefCollector.RegisterMethodForObject(def, common.MethodReference{
+		Name: "jsonSerialize",
+		Comments: []string{
+			"Returns the data representing this object, preparing it for JSON serialization with `json_encode()`.",
+		},
+		Return: "array",
+	})
+
 	return buffer.String()
 }
 
-func (jenny RawTypes) generateDataqueryType(schema *ast.Schema) string {
+func (jenny RawTypes) generateDataqueryType(schema *ast.Schema, object ast.Object) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("public function dataqueryType(): string\n")
 	buffer.WriteString("{\n")
 	buffer.WriteString(fmt.Sprintf("    return \"%s\";\n", strings.ToLower(schema.Metadata.Identifier)))
 	buffer.WriteString("}")
+
+	jenny.apiRefCollector.RegisterMethodForObject(object, common.MethodReference{
+		Name: "dataqueryType",
+		Comments: []string{
+			"Returns the type of this dataquery object.",
+		},
+		Return: "string",
+	})
 
 	return buffer.String()
 }
