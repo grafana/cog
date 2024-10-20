@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -29,6 +30,53 @@ func builderTypeFormatter(config Config, context languages.Context) *typeFormatt
 		context:    context,
 		forBuilder: true,
 	}
+}
+func (formatter *typeFormatter) formatTypeDeclaration(tmpl *template.Template, context languages.Context, def ast.Object) string {
+	var buffer strings.Builder
+
+	defName := formatObjectName(def.Name)
+
+	switch def.Type.Kind {
+	case ast.KindEnum:
+		enum, err := formatter.formatEnumDeclaration(tmpl, context, def)
+		if err != nil {
+			panic(err)
+		}
+
+		buffer.WriteString(enum)
+	case ast.KindRef:
+		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, formatter.formatType(def.Type)))
+	case ast.KindStruct:
+		variant := ""
+		if def.Type.ImplementsVariant() {
+			variant = ", " + formatter.config.fullNamespaceRef("Cog\\"+formatObjectName(def.Type.ImplementedVariant()))
+		}
+
+		buffer.WriteString(fmt.Sprintf("class %s implements \\JsonSerializable%s\n{\n", formatObjectName(def.Name), variant))
+
+		for _, fieldDef := range def.Type.Struct.Fields {
+			buffer.WriteString(tools.Indent(formatter.formatField(fieldDef), 4))
+			buffer.WriteString("\n\n")
+		}
+
+		buffer.WriteString("}")
+	default:
+		return fmt.Sprintf("unhandled type def kind: %s", def.Type.Kind)
+	}
+
+	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatEnumDeclaration(tmpl *template.Template, context languages.Context, def ast.Object) (string, error) {
+	return tmpl.
+		Funcs(templateHelpers(templateDeps{
+			config:  formatter.config,
+			context: context,
+		})).
+		Render("types/enum.tmpl", map[string]any{
+			"Object":   def,
+			"EnumType": def.Type.Enum.Values[0].Type,
+		})
 }
 
 func (formatter *typeFormatter) formatType(def ast.Type) string {
