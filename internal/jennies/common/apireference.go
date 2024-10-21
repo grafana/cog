@@ -8,6 +8,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 )
@@ -62,6 +63,7 @@ type APIReference struct {
 	Collector *APIReferenceCollector
 	Language  string
 	Formatter APIReferenceFormatter
+	Tmpl      *template.Template
 }
 
 func (jenny APIReference) JennyName() string {
@@ -72,19 +74,38 @@ func (jenny APIReference) Generate(context languages.Context) (codejen.Files, er
 	files := make([]codejen.File, 0, len(context.Schemas)+len(context.Builders)+1)
 
 	for _, schema := range context.Schemas {
-		files = append(files, jenny.referenceForSchema(context, schema)...)
+		schemaFiles, err := jenny.referenceForSchema(context, schema)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, schemaFiles...)
 	}
 	for _, builder := range context.Builders {
-		files = append(files, jenny.referenceForBuilder(context, builder))
+		builderFile, err := jenny.referenceForBuilder(context, builder)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, builderFile)
 	}
 
-	files = append(files, jenny.index(context))
+	indexFile, err := jenny.index(context)
+	if err != nil {
+		return nil, err
+	}
+	files = append(files, indexFile)
 
 	return files, nil
 }
 
-func (jenny APIReference) index(context languages.Context) codejen.File {
+func (jenny APIReference) index(context languages.Context) (codejen.File, error) {
 	var buffer bytes.Buffer
+
+	err := jenny.renderIfExists(&buffer, template.ExtraIndexDocsBlock(), map[string]any{})
+	if err != nil {
+		return codejen.File{}, err
+	}
 
 	buffer.WriteString("# Packages\n\n")
 
@@ -96,22 +117,38 @@ func (jenny APIReference) index(context languages.Context) codejen.File {
 		buffer.WriteString(fmt.Sprintf(" * [%[1]s](./%[1]s/index.md)\n", schema.Package))
 	}
 
-	return *codejen.NewFile("docs/index.md", buffer.Bytes(), jenny)
+	return *codejen.NewFile("docs/index.md", buffer.Bytes(), jenny), nil
 }
 
-func (jenny APIReference) referenceForSchema(context languages.Context, schema *ast.Schema) codejen.Files {
+func (jenny APIReference) referenceForSchema(context languages.Context, schema *ast.Schema) (codejen.Files, error) {
 	files := make([]codejen.File, 0, schema.Objects.Len()+1)
 
-	files = append(files, jenny.schemaIndex(context, schema))
+	schemaIndexFile, err := jenny.schemaIndex(context, schema)
+	if err != nil {
+		return nil, err
+	}
+	files = append(files, schemaIndexFile)
 
+	var inner error
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		files = append(files, jenny.referenceForObject(context, object))
-	})
+		if inner != nil {
+			return
+		}
 
-	return files
+		objFile, err := jenny.referenceForObject(context, object)
+		if err != nil {
+			inner = err
+		}
+		files = append(files, objFile)
+	})
+	if inner != nil {
+		return nil, inner
+	}
+
+	return files, nil
 }
 
-func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Schema) codejen.File {
+func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Schema) (codejen.File, error) {
 	var buffer bytes.Buffer
 
 	buffer.WriteString(fmt.Sprintf("# %s\n\n", schema.Package))
@@ -134,10 +171,17 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/%s/index.md", schema.Package), buffer.Bytes(), jenny)
+	err := jenny.renderIfExists(&buffer, template.ExtraPackageDocsBlock(schema), map[string]any{
+		"Schema": schema,
+	})
+	if err != nil {
+		return codejen.File{}, err
+	}
+
+	return *codejen.NewFile(fmt.Sprintf("docs/%s/index.md", schema.Package), buffer.Bytes(), jenny), nil
 }
 
-func (jenny APIReference) referenceForObject(context languages.Context, object ast.Object) codejen.File {
+func (jenny APIReference) referenceForObject(context languages.Context, object ast.Object) (codejen.File, error) {
 	var buffer bytes.Buffer
 
 	objectName := jenny.Formatter.ObjectName(object)
@@ -159,6 +203,13 @@ title: %[2]s %[1]s
 		jenny.referenceStructMethods(&buffer, context, object)
 	}
 
+	err := jenny.renderIfExists(&buffer, template.ExtraObjectDocsBlock(object), map[string]any{
+		"Object": object,
+	})
+	if err != nil {
+		return codejen.File{}, err
+	}
+
 	buildersForObjet := context.Builders.LocateAllByObject(object.SelfRef.ReferredPkg, object.SelfRef.ReferredType)
 	if len(buildersForObjet) != 0 {
 		buffer.WriteString("## See also\n\n")
@@ -175,7 +226,7 @@ title: %[2]s %[1]s
 		}
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/%s/%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes(), jenny)
+	return *codejen.NewFile(fmt.Sprintf("docs/%s/%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes(), jenny), nil
 }
 
 func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context languages.Context, object ast.Object) {
@@ -210,7 +261,7 @@ func (jenny APIReference) referenceForType(buffer *bytes.Buffer, context languag
 	buffer.WriteString("\n```\n")
 }
 
-func (jenny APIReference) referenceForBuilder(context languages.Context, builder ast.Builder) codejen.File {
+func (jenny APIReference) referenceForBuilder(context languages.Context, builder ast.Builder) (codejen.File, error) {
 	var buffer bytes.Buffer
 
 	builderName := jenny.Formatter.BuilderName(builder)
@@ -248,10 +299,12 @@ title: %[2]s %[1]s
 		buffer.WriteString("\n")
 	}
 
-	buffer.WriteString("## Examples\n\n")
-
-	// TODO
-	buffer.WriteString("TODO\n")
+	err := jenny.renderIfExists(&buffer, template.ExtraBuilderDocsBlock(builder), map[string]any{
+		"Builder": builder,
+	})
+	if err != nil {
+		return codejen.File{}, err
+	}
 
 	buffer.WriteString("## See also\n\n")
 
@@ -261,7 +314,7 @@ title: %[2]s %[1]s
 		buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/%[2]s.md)\n", builder.For.SelfRef.ReferredPkg, jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/%s/%s.md", builder.Package, builderName), buffer.Bytes(), jenny)
+	return *codejen.NewFile(fmt.Sprintf("docs/%s/%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil
 }
 
 func (jenny APIReference) kindBadge(kind ast.Kind) string {
@@ -274,4 +327,19 @@ func (jenny APIReference) methodBadge() string {
 
 func (jenny APIReference) builderBadge() string {
 	return "<span class=\"badge builder\"></span>"
+}
+
+func (jenny APIReference) renderIfExists(buffer *bytes.Buffer, blockName string, data any) error {
+	if !jenny.Tmpl.Exists(blockName) {
+		return nil
+	}
+
+	rendered, err := jenny.Tmpl.Render(blockName, data)
+	if err != nil {
+		return err
+	}
+
+	buffer.WriteString(rendered)
+
+	return nil
 }

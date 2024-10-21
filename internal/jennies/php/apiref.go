@@ -11,7 +11,7 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-func apiReferenceFormatter(apiRefCollector *common.APIReferenceCollector, tmpl *template.Template, config Config) common.APIReferenceFormatter {
+func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
 		ObjectName: func(object ast.Object) string {
 			return formatObjectName(object.Name)
