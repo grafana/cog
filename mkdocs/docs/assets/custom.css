@@ -81,10 +81,6 @@
   content: 'method';
 }
 
-/* Menu */
-/* Decapitalize menu items, Mkdocs capilizes by default and can't be configured */
-nav nav .md-nav__link .md-ellipsis::first-letter { text-transform: lowercase }
-
 /* TOC */
 /* Don't wrap TOC links with spaces */
 .md-sidebar--secondary .md-nav__item { white-space: nowrap }

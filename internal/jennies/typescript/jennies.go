@@ -63,6 +63,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			Collector: common.NewAPIReferenceCollector(),
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(),
+			Tmpl:      tmpl,
 		}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
