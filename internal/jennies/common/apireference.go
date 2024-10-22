@@ -253,14 +253,6 @@ func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context l
 	}
 }
 
-func (jenny APIReference) referenceForType(buffer *bytes.Buffer, context languages.Context, object ast.Object) {
-	buffer.WriteString("## Definition\n\n")
-
-	buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
-	buffer.WriteString(jenny.Formatter.ObjectDefinition(context, object))
-	buffer.WriteString("\n```\n")
-}
-
 func (jenny APIReference) referenceForBuilder(context languages.Context, builder ast.Builder) (codejen.File, error) {
 	var buffer bytes.Buffer
 
