@@ -27,17 +27,26 @@ type MethodReference struct {
 	Static    bool
 }
 
+type FunctionReference struct {
+	Name      string
+	Comments  []string
+	Arguments []ArgumentReference
+	Return    string
+}
+
 type APIReferenceCollector struct {
-	objectMethods map[string][]MethodReference
+	objectMethods    map[string][]MethodReference
+	packageFunctions map[string][]FunctionReference
 }
 
 func NewAPIReferenceCollector() *APIReferenceCollector {
 	return &APIReferenceCollector{
-		objectMethods: make(map[string][]MethodReference),
+		objectMethods:    make(map[string][]MethodReference),
+		packageFunctions: make(map[string][]FunctionReference),
 	}
 }
 
-func (collector *APIReferenceCollector) RegisterMethodForObject(object ast.Object, methodReference MethodReference) {
+func (collector *APIReferenceCollector) RegisterMethod(object ast.Object, methodReference MethodReference) {
 	objectRef := object.SelfRef.String()
 	collector.objectMethods[objectRef] = append(collector.objectMethods[objectRef], methodReference)
 }
@@ -46,17 +55,25 @@ func (collector *APIReferenceCollector) MethodsForObject(object ast.Object) []Me
 	return collector.objectMethods[object.SelfRef.String()]
 }
 
+func (collector *APIReferenceCollector) RegisterFunction(pkg string, functionReference FunctionReference) {
+	collector.packageFunctions[pkg] = append(collector.packageFunctions[pkg], functionReference)
+}
+
+func (collector *APIReferenceCollector) FunctionsForPackage(pkg string) []FunctionReference {
+	return collector.packageFunctions[pkg]
+}
+
 type APIReferenceFormatter struct {
 	ObjectName       func(object ast.Object) string
 	ObjectDefinition func(context languages.Context, object ast.Object) string
 
 	MethodName      func(method MethodReference) string
-	MethodSignature func(context languages.Context, method MethodReference) string
+	MethodSignature func(context languages.Context, object ast.Object, method MethodReference) string
 
 	BuilderName          func(builder ast.Builder) string
 	ConstructorSignature func(context languages.Context, builder ast.Builder) string
 	OptionName           func(option ast.Option) string
-	OptionSignature      func(context languages.Context, option ast.Option) string
+	OptionSignature      func(context languages.Context, builder ast.Builder, option ast.Option) string
 }
 
 type APIReference struct {
@@ -246,7 +263,7 @@ func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context l
 		}
 
 		buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
-		buffer.WriteString(jenny.Formatter.MethodSignature(context, method))
+		buffer.WriteString(jenny.Formatter.MethodSignature(context, object, method))
 		buffer.WriteString("\n```\n")
 
 		buffer.WriteString("\n")
