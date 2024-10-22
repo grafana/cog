@@ -38,6 +38,54 @@ func (formatter *typeFormatter) variantInterface(variant string) string {
 	return fmt.Sprintf("%s.%s", referredPkg, tools.UpperCamelCase(variant))
 }
 
+func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
+	var buffer strings.Builder
+
+	buffer.WriteString("export ")
+
+	objectName := tools.CleanupNames(def.Name)
+
+	switch def.Type.Kind {
+	case ast.KindStruct:
+		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
+		buffer.WriteString(formatter.formatStructFields(def.Type))
+		buffer.WriteString("\n")
+	case ast.KindEnum:
+		buffer.WriteString(fmt.Sprintf("enum %s {\n", objectName))
+		for _, val := range def.Type.AsEnum().Values {
+			name := tools.CleanupNames(tools.UpperCamelCase(escapeEnumMemberName(val.Name)))
+
+			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatValue(val.Value)))
+		}
+		buffer.WriteString("}\n")
+	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
+		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, formatter.formatType(def.Type)))
+	case ast.KindScalar:
+		scalarType := def.Type.AsScalar()
+		typeValue := formatValue(scalarType.Value)
+
+		if !scalarType.IsConcrete() || def.Type.Hints["kind"] == "type" {
+			if !scalarType.IsConcrete() {
+				typeValue = formatter.formatScalarKind(scalarType.ScalarKind)
+			}
+
+			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, typeValue))
+		} else {
+			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", objectName, typeValue))
+		}
+	case ast.KindIntersection:
+		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
+		buffer.WriteString(formatter.formatType(def.Type))
+		buffer.WriteString("\n")
+	case ast.KindComposableSlot:
+		buffer.WriteString(fmt.Sprintf("interface %s %s\n", objectName, formatter.variantInterface(string(def.Type.AsComposableSlot().Variant))))
+	default:
+		return fmt.Sprintf("unhandled object of type: %s", def.Type.Kind)
+	}
+
+	return buffer.String()
+}
+
 func (formatter *typeFormatter) formatType(def ast.Type) string {
 	return formatter.doFormatType(def, formatter.forBuilder)
 }

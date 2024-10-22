@@ -13,4 +13,7 @@ type Config struct {
 
 	// Converters indicates whether converters should be generated or not.
 	Converters bool
+
+	// APIReference indicates whether an API reference should be generated or not.
+	APIReference bool
 }

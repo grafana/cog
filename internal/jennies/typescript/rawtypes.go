@@ -91,47 +91,10 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]b
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	buffer.WriteString("export ")
+	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(def))
 
 	objectName := tools.CleanupNames(def.Name)
 
-	switch def.Type.Kind {
-	case ast.KindStruct:
-		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
-		buffer.WriteString(jenny.typeFormatter.formatStructFields(def.Type))
-		buffer.WriteString("\n")
-	case ast.KindEnum:
-		buffer.WriteString(fmt.Sprintf("enum %s {\n", objectName))
-		for _, val := range def.Type.AsEnum().Values {
-			name := tools.CleanupNames(tools.UpperCamelCase(escapeEnumMemberName(val.Name)))
-
-			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatValue(val.Value)))
-		}
-		buffer.WriteString("}\n")
-	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, jenny.typeFormatter.formatType(def.Type)))
-	case ast.KindScalar:
-		scalarType := def.Type.AsScalar()
-		typeValue := formatValue(scalarType.Value)
-
-		if !scalarType.IsConcrete() || def.Type.Hints["kind"] == "type" {
-			if !scalarType.IsConcrete() {
-				typeValue = jenny.typeFormatter.formatScalarKind(scalarType.ScalarKind)
-			}
-
-			buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, typeValue))
-		} else {
-			buffer.WriteString(fmt.Sprintf("const %s = %s;\n", objectName, typeValue))
-		}
-	case ast.KindIntersection:
-		buffer.WriteString(fmt.Sprintf("interface %s ", objectName))
-		buffer.WriteString(jenny.typeFormatter.formatType(def.Type))
-		buffer.WriteString("\n")
-	case ast.KindComposableSlot:
-		buffer.WriteString(fmt.Sprintf("interface %s %s\n", objectName, jenny.typeFormatter.variantInterface(string(def.Type.AsComposableSlot().Variant))))
-	default:
-		return nil, fmt.Errorf("unhandled object of type: %s", def.Type.Kind)
-	}
 	// generate a "default value factory" for every object, except for constants or composability slots
 	if (!def.Type.IsScalar() && !def.Type.IsComposableSlot()) || (def.Type.IsScalar() && !def.Type.AsScalar().IsConcrete()) {
 		buffer.WriteString("\n")

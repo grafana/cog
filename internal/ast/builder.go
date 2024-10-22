@@ -140,6 +140,12 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 	return Builder{}, false
 }
 
+func (builders Builders) ByPackage(pkg string) Builders {
+	return tools.Filter(builders, func(builder Builder) bool {
+		return builder.Package == pkg
+	})
+}
+
 func (builders Builders) LocateAllByObject(pkg string, name string) Builders {
 	var results Builders
 	for _, builder := range builders {
