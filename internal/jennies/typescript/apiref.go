@@ -50,7 +50,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 		OptionName: func(option ast.Option) string {
 			return formatIdentifier(option.Name)
 		},
-		OptionSignature: func(context languages.Context, option ast.Option) string {
+		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
 			typesFormatter := builderTypeFormatter(context, func(pkg string) string {
 				return pkg
 			})

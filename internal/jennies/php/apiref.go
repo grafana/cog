@@ -56,7 +56,7 @@ func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIRef
 		OptionName: func(option ast.Option) string {
 			return formatOptionName(option.Name)
 		},
-		OptionSignature: func(context languages.Context, option ast.Option) string {
+		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
 			typesFormatter := builderTypeFormatter(config, context)
 			args := tools.Map(option.Args, func(arg ast.Argument) string {
 				argType := typesFormatter.formatType(arg.Type)

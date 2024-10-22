@@ -193,6 +193,10 @@ title: %[2]s %[1]s
 
 	buffer.WriteString(fmt.Sprintf("# %[2]s %[1]s\n\n", objectName, jenny.kindBadge(object.Type.Kind)))
 
+	if len(object.Comments) != 0 {
+		buffer.WriteString(strings.Join(object.Comments, "\n\n") + "\n\n")
+	}
+
 	buffer.WriteString("## Definition\n\n")
 
 	buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
@@ -285,7 +289,7 @@ title: %[2]s %[1]s
 		}
 
 		buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
-		buffer.WriteString(jenny.Formatter.OptionSignature(context, option))
+		buffer.WriteString(jenny.Formatter.OptionSignature(context, builder, option))
 		buffer.WriteString("\n```\n")
 
 		buffer.WriteString("\n")
