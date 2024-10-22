@@ -399,7 +399,7 @@ func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
 	for i := range fieldPath {
 		output := fieldPath[i].Identifier
 		if !fieldPath[i].Root {
-			output = tools.LowerCamelCase(output)
+			output = escapeVarName(tools.LowerCamelCase(output))
 		}
 
 		// don't generate type hints if:

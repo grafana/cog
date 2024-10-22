@@ -1,9 +1,7 @@
 package {{ .Converter.Package | formatPackageName }};
 
 {{ $converter := include "converter" . }}
-
-{{ .Imports }}
-
+{{- .Imports }}
 {{ $converter }}
 
 {{- define "guard" }}
@@ -19,26 +17,25 @@ package {{ .Converter.Package | formatPackageName }};
     {{- else -}}
         {{- $operator := .Op -}} 
         {{- if eq .Op "minLength" -}}
-            {{- $leftOperand = print $leftOperand ".size()" -}}
-            {{- $operator = ">=" -}}
+            !{{- $leftOperand }}.isEmpty()
+        {{- else }}
+            {{- if eq .Op "maxLength" -}}
+                {{- $leftOperand = print $leftOperand ".size()" -}}
+                {{- $operator = "<=" -}}
+            {{- end }}
+    
+            {{- $leftOperand }} {{ $operator }} {{ .Value | formatScalar -}}
         {{- end }}
-        {{- if eq .Op "maxLength" -}}
-            {{- $leftOperand = print $leftOperand ".size()" -}}
-            {{- $operator = "<=" -}}
-        {{- end }}
-
-        {{- $leftOperand }} {{ $operator }} {{ .Value | formatScalar -}}
     {{- end -}}
 {{- end }}
 
 {{- define "value_formatter" -}}
-    {{- if .Type.IsAny -}}
-        {{ .Path | formatGuardPath }}
-    {{- else if .Type.IsScalar -}}
-        {{ .Path | formatGuardPath }}
-    {{- else -}}
-        {{ .Path | formatGuardPath }}
-    {{- end -}}
+    {{- if .Type.IsScalar }}
+        {{- .Path | formatGuardPath }}
+    {{- else }}
+        {{- $reflect := importStdPkg "cog" "Runtime" -}}
+        Runtime.dump({{ .Path | formatGuardPath }})
+    {{- end }}
 {{- end }}
 
 {{- define "guards" }}
@@ -60,34 +57,37 @@ package {{ .Converter.Package | formatPackageName }};
             }
     {{- end -}}
     {{- with .Arg.Array -}}
-        List<String> tmp{{ $.IntoVar }} = new LinkedList<>();
+        {{- $reflect := importStdPkg "java.util" "StringJoiner" -}}
+        StringJoiner tmp{{ $.IntoVar | upperCamelCase }} = new StringJoiner(", ");
         for ({{ .ValueType | formatType }} {{ .ValueAs | formatPath }} : {{ .For | formatPath }}) {
             {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" false) }}
             {{- if and (is .ValueType "scalar") (not (isScalarType .For "string")) }}
-            tmp{{ $.IntoVar }}.add({{ $subIntoVar }}.toString());
+            tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }}.toString());
             {{- else }}
-            tmp{{ $.IntoVar }}.add({{ $subIntoVar }});
+            tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }});
             {{- end }}
         }
-        String {{ $.IntoVar }} = "List.of("+ String.join(",\n", tmp{{ $.IntoVar }}) +")";
+        String {{ $.IntoVar }} = "List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +")";
     {{- end -}}
     {{- with .Arg.Map -}}
+        {{- $reflect := importStdPkg "java.util" "StringJoiner" -}}
         {{- $reflect := importStdPkg "java.util" "Map" -}}
-        {{- $reflect := importStdPkg "java.util" "HashMap" -}}
-        Map<{{ .IndexType | formatType }}, String> {{ $.IntoVar }} = new HashMap<>();
+        StringJoiner tmp{{ $.IntoVar | upperCamelCase }} = new StringJoiner(", ");
         for (Map.Entry<{{ .IndexType | formatType }}, {{ .ValueType | formatType }}> {{ .ValueAs | formatPath }} : {{ .For }}.entrySet()) {
             {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs) }}
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" true) }}
-            {{ $.IntoVar }}.put({{ .ValueAs | formatPath }}.getKey(), {{ $subIntoVar }});
+            tmp{{ $.IntoVar | upperCamelCase }}.add({{ .ValueAs | formatPath }}.getKey() + "=" + {{ $subIntoVar }});
         }
+        
+        String {{ $.IntoVar }} = "Map.ofEntries(" + tmp{{ $.IntoVar | upperCamelCase }} +")";
     {{- end -}}
     {{- with .Arg.Runtime -}}
         {{- $reflect := importStdPkg "cog.variants" "Registry" -}}
         String {{ $.IntoVar }} = Registry.{{ .FuncName | lowerCamelCase }}({{ range $i, $runtimeArg := .Args }}{{ if gt $i 0 }}, {{ end }}{{ $runtimeArg.ValuePath | formatPath }}{{ end }});
     {{- end -}}
     {{- with .Arg.Direct -}}
-        {{ .ValueType | formatType }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}}{{ if $.IsMapEntry }}.getValue(){{ end }};
+        {{ if .ValueType.IsScalar }}{{ .ValueType | formatType }}{{ else }}String{{ end }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}}{{ if $.IsMapEntry }}.getValue(){{ end }};
     {{- end -}}
 {{- end }}
 
@@ -95,17 +95,14 @@ package {{ .Converter.Package | formatPackageName }};
     {{- $argsCount := sub1 (len .Args) -}}
     {{- with .ArgumentGuards -}}if ({{ template "guards" . }}) { {{- end }}
     {{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} { {{- end }}
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("new {{ .Option.Name | upperCamelCase }}(");
+        sb.append(".{{ .Option.Name | escapeVar | lowerCamelCase }}(");
     {{- range $i, $arg := .Args }}
         {{- $intoVar := print "arg" $i }}
         {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg "IsMapEntry" false) }}
-        buffer.append({{ $intoVar }});
-        {{ if ne $i $argsCount }}calls.add(", ");{{- end }}
+        sb.append({{ $intoVar }});
+        {{ if ne $i $argsCount }}sb.append(", ");{{- end }}
     {{- end }}
-        buffer.append(")");
-
-        calls.add(buffer.toString());
+        sb.append(")");
     {{ with .ArgumentGuards -}} } {{- end }}
     {{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} } {{- end }}
 {{- end }}
@@ -128,15 +125,15 @@ package {{ .Converter.Package | formatPackageName }};
 {{- $reflect := ternary (importStdPkg "cog" "Converter") "" .IsPanel -}}
 public class {{ .Converter.BuilderName | upperCamelCase }}Converter {{ if .IsPanel }}implements Converter<Panel> {{ end }}{
     public{{ if not .IsPanel }} static{{ end }} String convert({{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType | upperCamelCase }} input) {
-        List<String> calls = new LinkedList<>();
+        StringBuilder sb = new StringBuilder();
         {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
-        calls.add("{{ .Converter.BuilderName | upperCamelCase }}.Builder builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder({{ with .Converter.ConstructorArgs }}{{ range $i, $arg := . }}"+{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}+"{{- if ne $i $constructorArgsCount }}, {{ end }}{{ end }}{{ end }})");
+        sb.append("{{ .Converter.BuilderName | upperCamelCase }}.Builder builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder({{ with .Converter.ConstructorArgs }}{{ range $i, $arg := . }}"+{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}+"{{- if ne $i $constructorArgsCount }}, {{ end }}{{ end }}{{ end }})");
     
      {{- range .Converter.Mappings }}
         {{ template "conversion_mapping" . }}
      {{- end }}
      
-     return String.join(".", calls);
+     return sb.toString();
      }
 }
 {{- end }}

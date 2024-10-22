@@ -40,7 +40,13 @@ func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 			return nil, err
 		}
 
+		runtime, err := jenny.renderRuntime()
+		if err != nil {
+			return nil, err
+		}
+
 		files = append(files, *codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/Converter.java"), []byte(converter), jenny))
+		files = append(files, *codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/Runtime.java"), []byte(runtime), jenny))
 	}
 
 	return files, nil
@@ -66,6 +72,12 @@ func (jenny Runtime) renderConverterInterface() (string, error) {
 	return jenny.tmpl.Render("runtime/converter_interface.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog"),
 		"Imports": imports.String(),
+	})
+}
+
+func (jenny Runtime) renderRuntime() (string, error) {
+	return jenny.tmpl.Render("converters/converter_runtime.tmpl", map[string]any{
+		"Package": jenny.formatPackage("cog"),
 	})
 }
 

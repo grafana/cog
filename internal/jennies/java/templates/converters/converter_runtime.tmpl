@@ -1,0 +1,41 @@
+package {{ .Package }};
+
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+
+public class Runtime {
+    public static String dump(Object object) {
+        if (object instanceof String) {
+            return (String) object;
+        } else if (object instanceof Integer || object instanceof Float || object instanceof Double ||
+                object instanceof Boolean || object instanceof Long || object instanceof Character ||
+                object instanceof Short || object instanceof Byte) {
+            return object.toString();
+        } else if (object instanceof List) {
+            return "List.of(" + formatList((List<?>) object) + ")";
+        } else if (object instanceof Map) {
+            return "Map.ofEntries(" + formatMap((Map<?, ?>) object) + ")";
+        } else if (object == null) {
+            return "null";
+        }
+
+        return "Unsupported type: " + object.getClass().getSimpleName();
+    }
+
+    private static String formatList(List<?> list) {
+        StringJoiner joiner = new StringJoiner(", ");
+        for (Object item : list) {
+            joiner.add(dump(item));
+        }
+        return joiner.toString();
+    }
+
+    private static String formatMap(Map<?, ?> map) {
+        StringJoiner joiner = new StringJoiner(", ");
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            joiner.add(dump(entry.getKey()) + "=" + dump(entry.getValue()));
+        }
+        return joiner.toString();
+    }
+}
