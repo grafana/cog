@@ -46,7 +46,6 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			})
 
 			return fmt.Sprintf("new %[1]s(%[2]s)", tools.UpperCamelCase(builder.Name)+"Builder", strings.Join(args, ", "))
-
 		},
 		OptionName: func(option ast.Option) string {
 			return formatIdentifier(option.Name)
