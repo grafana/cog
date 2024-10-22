@@ -13,6 +13,14 @@ import (
 
 func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
+		FunctionSignature: func(context languages.Context, function common.FunctionReference) string {
+			args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
+				return fmt.Sprintf("%s $%s", arg.Type, arg.Name)
+			})
+
+			return fmt.Sprintf("%[1]s(%[2]s)", formatOptionName(function.Name), strings.Join(args, ", "))
+		},
+
 		ObjectName: func(object ast.Object) string {
 			return formatObjectName(object.Name)
 		},

@@ -12,6 +12,19 @@ import (
 
 func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
+		FunctionSignature: func(context languages.Context, function common.FunctionReference) string {
+			args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
+				return fmt.Sprintf("%s %s", arg.Name, arg.Type)
+			})
+
+			returnType := ""
+			if function.Return != "" {
+				returnType = " " + function.Return
+			}
+
+			return fmt.Sprintf("func %[1]s(%[2]s)%[3]s", tools.UpperCamelCase(function.Name), strings.Join(args, ", "), returnType)
+		},
+
 		ObjectName: func(object ast.Object) string {
 			return tools.UpperCamelCase(object.Name)
 		},
