@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -68,6 +69,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	}
 
 	return jenny.Tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(map[string]any{
 			"importStdPkg": func(pkg string) string {
 				return imports.Add(pkg, pkg)
@@ -78,10 +80,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return jenny.typeFormatter.doFormatType(typeDef, false)
 			},
 			"typeHasBuilder": context.ResolveToBuilder,
-			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
-				_, found := context.ResolveToComposableSlot(typeDef)
-				return found
-			},
 			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
 				emptyValue := jenny.emptyValueForType(guard.EmptyValueType)
 

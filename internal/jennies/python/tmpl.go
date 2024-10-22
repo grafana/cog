@@ -21,6 +21,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
+			"formatFullyQualifiedRef": func(_ ast.Type) string {
+				panic("formatFullyQualifiedRef() needs to be overridden by a jenny")
+			},
 			"formatRawType": func(_ ast.Type) string {
 				panic("formatRawType() needs to be overridden by a jenny")
 			},
@@ -38,6 +41,12 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			},
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
+			},
+			"importModule": func(alias string, pkg string, module string) string {
+				panic("importModule() needs to be overridden by a jenny")
+			},
+			"importPkg": func(alias string, pkg string) string {
+				panic("importPkg() needs to be overridden by a jenny")
 			},
 		}),
 		template.Funcs(map[string]any{

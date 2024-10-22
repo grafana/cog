@@ -55,54 +55,18 @@ class Panel implements \JsonSerializable
     $val = $input;
     	return \Grafana\Foundation\Dashboard\DataSourceRef::fromArray($val);
     })($data["datasource"]) : null,
-            options: isset($data["options"]) ? (function($panel) {
-        /** @var array<string, mixed> $options */
-        $options = $panel["options"];
-    
-        if (!\Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantExists($panel["type"] ?? "")) {
-            return $options;
-        }
-    
-        $config = \Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantConfig($panel["type"] ?? "");
-        if ($config->optionsFromArray === null) {
-            return $options;
-        }
-    
-    	return ($config->optionsFromArray)($options);
-    })($data) : null,
+            options: $data["options"] ?? null,
             targets: isset($data["targets"]) ? (function ($in) {
     	/** @var array{datasource?: array{type?: mixed}} $in */
         $hint = (isset($in["datasource"], $in["datasource"]["type"]) && is_string($in["datasource"]["type"])) ? $in["datasource"]["type"] : "";
         /** @var array<array<string, mixed>> $in */
         return \Grafana\Foundation\Cog\Runtime::get()->dataqueriesFromArray($in, $hint);
     })($data["targets"]): null,
-            fieldConfig: isset($data["fieldConfig"]) ? (function($panel) {
-        /** @var array{defaults?: mixed} */
-        $fieldConfigData = $panel["fieldConfig"];
-        $fieldConfig = FieldConfigSource::fromArray($fieldConfigData);
-    
-        if (!\Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantExists($panel["type"] ?? "")) {
-            return $fieldConfig;
-        }
-    
-        $config = \Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantConfig($panel["type"] ?? "");
-        if ($config->fieldConfigFromArray === null) {
-            return $fieldConfig;
-        }
-    
-        if (!isset($fieldConfigData["defaults"])) {
-    		return $fieldConfig;
-        }
-        /** @var array{custom?: array<string, mixed>}*/
-        $defaults = $fieldConfigData["defaults"];
-        if (!isset($defaults["custom"])) {
-    		return $fieldConfig;
-        }
-    
-    	$fieldConfig->defaults->custom = ($config->fieldConfigFromArray)($defaults["custom"]);
-    
-        return $fieldConfig;
-    })($data) : null,
+            fieldConfig: isset($data["fieldConfig"]) ? (function($input) {
+    	/** @var array{defaults?: mixed} */
+    $val = $input;
+    	return \Grafana\Foundation\Dashboard\FieldConfigSource::fromArray($val);
+    })($data["fieldConfig"]) : null,
         );
     }
 

@@ -50,7 +50,6 @@ gen-sdk-dev: dev-env-check-binaries ## Generates a dev version of the Foundation
 
 .PHONY: gen-tests
 gen-tests: dev-env-check-binaries ## Generates the code described by tests schemas.
-	rm -rf generated
 	$(RUN_DEVBOX) go run ./cmd/cli/ generate \
 		--config ./config/foundation_sdk.tests.yaml
 

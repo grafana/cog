@@ -24,14 +24,8 @@ func NewNestedStructBuilder() *NestedStructBuilder {
 }
 
 func (builder *NestedStructBuilder) Build() (NestedStruct, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("NestedStruct", err)...)
-	}
-
-	if len(errs) != 0 {
-		return NestedStruct{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return NestedStruct{}, err
 	}
 
 	return *builder.internal, nil

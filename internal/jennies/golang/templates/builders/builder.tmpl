@@ -32,14 +32,8 @@ func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ 
 }
 
 func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("{{ .BuilderName }}", err)...)
-	}
-
-	if len(errs) != 0 {
-		return {{ .ObjectName }}{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return {{ .ObjectName }}{}, err
 	}
 
 	return *builder.internal, nil

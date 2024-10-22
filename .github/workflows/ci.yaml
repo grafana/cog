@@ -15,6 +15,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
@@ -30,6 +40,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
@@ -51,6 +71,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-${{ matrix.kind_version }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
@@ -65,6 +95,8 @@ jobs:
           devbox run go run cmd/cli/main.go generate \
             --config ./config/foundation_sdk.dev.yaml \
             --parameters output_dir=./generated/%l,grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
+        env:
+          GOGC: 'off'
 
       - name: Compile generated Go code
         run: devbox run ./scripts/ci/build-go.sh
@@ -75,8 +107,30 @@ jobs:
       - name: Lint generated Python code
         run: devbox run mypy generated/python/
 
+      # See https://docs.gradle.org/current/userguide/build_cache.html
+      - name: Restore Gradle build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-build-cache-${{ runner.os }}-${{ matrix.kind_version }}
+          restore-keys: |
+            gradle-build-cache-${{ runner.os }}-
+
       - name: Compile generated Java code
-        run: devbox run gradle build -p generated/java
+        run: devbox run gradle build --build-cache -p generated/java
+
+      # See https://phpstan.org/user-guide/result-cache
+      # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
+      - name: Restore PHP linters cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/phpstan
+            ~/.cache/psalm
+          key: php-linters-result-cache-${{ matrix.kind_version }}
+          restore-keys: |
+            php-linters-result-cache-
 
       - name: Lint generated PHP code with phpstan
         run: devbox run phpstan analyze --memory-limit 512M -c .config/ci/php/phpstan.neon
@@ -91,6 +145,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restore go vendors
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-next-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.11.0
         with:
@@ -102,6 +166,8 @@ jobs:
 
       - name: Run code generation
         run: make gen-sdk-dev
+        env:
+          GOGC: 'off'
 
       - name: Run the Go example
         run: make run-go-example
@@ -111,6 +177,16 @@ jobs:
 
       - name: Run the PHP example
         run: make run-php-example
+
+      # See https://docs.gradle.org/current/userguide/build_cache.html
+      - name: Restore Gradle build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-build-cache-${{ runner.os }}-${{ matrix.kind_version }}
+          restore-keys: |
+            gradle-build-cache-${{ runner.os }}-
 
       - name: Run Java example
         run: make run-java-example

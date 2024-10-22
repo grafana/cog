@@ -9,6 +9,7 @@ a particular naming convention, and renders them.
 For types, the following blocks are supported:
 
 * `object_{{ Package }}_{{ ObjectName }}_custom_unmarshal`: allows the definition of a custom unmarshal function for the object.
+* `object_{{ Package }}_{{ ObjectName }}_field_{{ FieldName}}_custom_strict_unmarshal`: allows the definition of a custom — strict — unmarshal logic for a field.
 
 
 For builders, the following blocks are supported:

@@ -116,7 +116,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 	}
 
 	// is there a custom unmarshal template block?
-	if jenny.tmpl.Exists(jenny.customObjectUnmarshalBlock(obj)) {
+	if jenny.tmpl.Exists(template.CustomObjectUnmarshalBlock(obj)) {
 		return true
 	}
 
@@ -136,7 +136,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 }
 
 func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
-	customUnmarshalTmpl := jenny.customObjectUnmarshalBlock(obj)
+	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(obj)
 	if jenny.tmpl.Exists(customUnmarshalTmpl) {
 		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
 			"Object": obj,
@@ -168,58 +168,6 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 	// unmarshal "normal" fields (ie: with no composable slot)
 	for _, field := range fields {
 		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
-			continue
-		}
-
-		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.Name == "options" {
-			buffer.WriteString(fmt.Sprintf(`
-	if fields["%[1]s"] != nil {
-		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Type)
-		if found && variantCfg.OptionsUnmarshaler != nil {
-			options, err := variantCfg.OptionsUnmarshaler(fields["%[1]s"])
-			if err != nil {
-				return err
-			}
-			resource.%[2]s = options
-		} else {
-			if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
-				return err
-			}
-		}
-	}
-`, field.Name, tools.UpperCamelCase(field.Name)))
-			continue
-		}
-
-		if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" && field.Name == "fieldConfig" {
-			buffer.WriteString(fmt.Sprintf(`
-	if fields["%[1]s"] != nil {
-		if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
-			return err
-		}
-
-		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Type)
-		if found && variantCfg.FieldConfigUnmarshaler != nil {
-			fakeFieldConfigSource := struct{
-				Defaults struct {
-					Custom json.RawMessage `+"`json:\"custom\"`"+` 
-				} `+"`json:\"defaults\"`"+`
-			}{}
-			if err := json.Unmarshal(fields["%[1]s"], &fakeFieldConfigSource); err != nil {
-				return err
-			}
-
-			if fakeFieldConfigSource.Defaults.Custom != nil {
-				customFieldConfig, err := variantCfg.FieldConfigUnmarshaler(fakeFieldConfigSource.Defaults.Custom)
-				if err != nil {
-					return err
-				}
-
-				resource.%[2]s.Defaults.Custom = customFieldConfig
-			}
-		}
-	}
-`, field.Name, tools.UpperCamelCase(field.Name)))
 			continue
 		}
 
@@ -357,8 +305,4 @@ func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema,
 		"hasConverter":      jenny.config.generateConverters,
 		"disjunctionStruct": disjunctionStruct,
 	})
-}
-
-func (jenny JSONMarshalling) customObjectUnmarshalBlock(obj ast.Object) string {
-	return fmt.Sprintf("object_%s_%s_custom_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }

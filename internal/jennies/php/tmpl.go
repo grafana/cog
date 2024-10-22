@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 )
@@ -19,6 +20,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 
 		// "dummy"/unimplemented helpers, to be able to parse the templates before jennies are initialized.
 		// Jennies will override these with proper dependencies.
+		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(templateHelpers(templateDeps{})),
 		template.Funcs(map[string]any{
 			"formatPath":           formatFieldPath,
@@ -43,13 +45,15 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 }
 
 type templateDeps struct {
-	config  Config
-	context languages.Context
+	config           Config
+	context          languages.Context
+	unmarshalForType func(typeDef ast.Type, inputVar string) string
 }
 
 func templateHelpers(deps templateDeps) template.FuncMap {
 	typesFormatter := builderTypeFormatter(deps.config, deps.context)
 	hinter := &typehints{config: deps.config, context: deps.context, resolveBuilders: false}
+	shaper := &shape{context: deps.context}
 
 	return template.FuncMap{
 		"fullNamespaceRef":        deps.config.fullNamespaceRef,
@@ -86,6 +90,7 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 
 			return hinter.forType(clone, false)
 		},
+		"typeShape": shaper.typeShape,
 		"defaultForType": func(typeDef ast.Type) string {
 			return formatValue(defaultValueForType(deps.config, deps.context.Schemas, typeDef, nil))
 		},
@@ -93,19 +98,6 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 			return disjunctionCaseForType(typesFormatter, input, typeDef)
 		},
 
-		"resolveRefs": deps.context.ResolveRefs,
-		"resolvesToStruct": func(typeDef ast.Type) bool {
-			return deps.context.ResolveRefs(typeDef).IsStruct()
-		},
-		"resolvesToMap": func(typeDef ast.Type) bool {
-			return deps.context.ResolveRefs(typeDef).IsMap()
-		},
-		"resolvesToEnum": func(typeDef ast.Type) bool {
-			return deps.context.ResolveRefs(typeDef).IsEnum()
-		},
-		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
-			_, found := deps.context.ResolveToComposableSlot(typeDef)
-			return found
-		},
+		"unmarshalForType": deps.unmarshalForType,
 	}
 }

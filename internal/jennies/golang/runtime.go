@@ -23,12 +23,12 @@ func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 
 	files := []codejen.File{
 		*codejen.NewFile("cog/runtime.go", runtime, jenny),
+		*codejen.NewFile("cog/errors.go", jenny.generateErrorTools(), jenny),
 	}
 
 	if jenny.Config.generateBuilders {
 		files = append(files,
 			*codejen.NewFile("cog/builder.go", jenny.generateBuilderInterface(), jenny),
-			*codejen.NewFile("cog/errors.go", jenny.generateErrorTools(), jenny),
 			*codejen.NewFile("cog/tools.go", jenny.generateToPtrFunc(), jenny),
 		)
 	}

@@ -263,7 +263,10 @@ func (template *Template) builtins() FuncMap {
 		// Templates \\
 		// --------- \\
 		"include": include,
-		"includeIfExists": func(name string, data interface{}) (string, error) {
+		"blockExists": func(name string) bool {
+			return template.tmpl.Lookup(name) != nil
+		},
+		"includeIfExists": func(name string, data any) (string, error) {
 			if tmpl := template.tmpl.Lookup(name); tmpl == nil {
 				return "", nil
 			}
