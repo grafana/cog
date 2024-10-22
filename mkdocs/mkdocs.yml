@@ -43,5 +43,8 @@ theme:
         icon: "material/toggle-switch"
         name: "Switch to light mode"
 
-extra_css: 
+extra_css:
   - "assets/custom.css"
+
+extra_javascript:
+  - "assets/versions.js"
