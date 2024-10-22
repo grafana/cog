@@ -64,6 +64,8 @@ func (collector *APIReferenceCollector) FunctionsForPackage(pkg string) []Functi
 }
 
 type APIReferenceFormatter struct {
+	FunctionSignature func(context languages.Context, function FunctionReference) string
+
 	ObjectName       func(object ast.Object) string
 	ObjectDefinition func(context languages.Context, object ast.Object) string
 
@@ -186,6 +188,26 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 
 	for _, builder := range builders {
 		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+	}
+
+	functions := jenny.Collector.FunctionsForPackage(schema.Package)
+
+	if len(functions) > 0 {
+		buffer.WriteString("## Functions\n\n")
+
+		for _, functionReference := range functions {
+			buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", functionReference.Name, jenny.functionBadge()))
+
+			if len(functionReference.Comments) != 0 {
+				buffer.WriteString(strings.Join(functionReference.Comments, "\n\n") + "\n\n")
+			}
+
+			buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+			buffer.WriteString(jenny.Formatter.FunctionSignature(context, functionReference))
+			buffer.WriteString("\n```\n")
+
+			buffer.WriteString("\n")
+		}
 	}
 
 	err := jenny.renderIfExists(&buffer, template.ExtraPackageDocsBlock(schema), map[string]any{
@@ -336,6 +358,10 @@ func (jenny APIReference) kindBadge(kind ast.Kind) string {
 
 func (jenny APIReference) methodBadge() string {
 	return "<span class=\"badge object-method\"></span>"
+}
+
+func (jenny APIReference) functionBadge() string {
+	return "<span class=\"badge function\"></span>"
 }
 
 func (jenny APIReference) builderBadge() string {

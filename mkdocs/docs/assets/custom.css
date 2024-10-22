@@ -81,6 +81,14 @@
   content: 'method';
 }
 
+.badge.function {
+  color: #d2a8ff;
+  background-color: #d2a8ff1a;
+}
+.badge.function::after {
+  content: 'function';
+}
+
 /* TOC */
 /* Don't wrap TOC links with spaces */
 .md-sidebar--secondary .md-nav__item { white-space: nowrap }
