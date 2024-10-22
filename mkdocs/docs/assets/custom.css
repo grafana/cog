@@ -91,23 +91,6 @@
 /* Make codeblocks stand out */
 .md-typeset pre>code { border-left: 0.2rem solid var(--md-accent-fg-color) }
 
-/* Headings */
-/* Hide headings for functions but don't remove them, they function as deeplink targets */
-h2[id^="fn-"],
-h3[id^="fn-"],
-h4[id^="fn-"],
-h5[id^="fn-"],
-h6[id^="fn-"],
-h7[id^="fn-"],
-h8[id^="fn-"],
-h9[id^="fn-"] {
-  visibility: hidden;
-  width: 0;
-  height: 0;
-  padding: 0;
-  margin: 0;
-}
-
 /* Parameters */
 /* Format 'PARAMETERS' after highlight (div.highlight) */
 /* Match first paragraph (p) but only if it is followed by an unsorted list (ul) */
