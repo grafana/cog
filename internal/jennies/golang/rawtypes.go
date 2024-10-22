@@ -130,28 +130,7 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object) ([]byte, 
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	switch def.Type.Kind {
-	case ast.KindEnum:
-		buffer.WriteString(jenny.formatEnumDef(def))
-	case ast.KindScalar:
-		scalarType := def.Type.AsScalar()
-
-		//nolint: gocritic
-		if scalarType.Value != nil {
-			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
-		} else if scalarType.ScalarKind == ast.KindBytes {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
-		} else {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, jenny.typeFormatter.formatType(def.Type)))
-		}
-	case ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s = %s", defName, jenny.typeFormatter.formatType(def.Type)))
-	case ast.KindMap, ast.KindArray, ast.KindStruct, ast.KindIntersection:
-		buffer.WriteString(fmt.Sprintf("type %s %s", defName, jenny.typeFormatter.formatType(def.Type)))
-	default:
-		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
-	}
-
+	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(def))
 	buffer.WriteString("\n")
 
 	if def.Type.ImplementsVariant() && !def.Type.IsRef() {
@@ -168,22 +147,4 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object) ([]byte, 
 	}
 
 	return []byte(buffer.String()), nil
-}
-
-func (jenny RawTypes) formatEnumDef(def ast.Object) string {
-	var buffer strings.Builder
-
-	enumName := tools.UpperCamelCase(def.Name)
-	enumType := def.Type.AsEnum()
-
-	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, jenny.typeFormatter.formatType(enumType.Values[0].Type)))
-
-	buffer.WriteString("const (\n")
-	for _, val := range enumType.Values {
-		name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
-		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", name, enumName, val.Value))
-	}
-	buffer.WriteString(")\n")
-
-	return buffer.String()
 }

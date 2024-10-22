@@ -43,6 +43,54 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 	return formatter.doFormatType(def, formatter.forBuilder)
 }
 
+func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
+	var buffer strings.Builder
+
+	defName := tools.UpperCamelCase(def.Name)
+
+	switch def.Type.Kind {
+	case ast.KindEnum:
+		buffer.WriteString(formatter.formatEnumDef(def))
+	case ast.KindScalar:
+		scalarType := def.Type.AsScalar()
+
+		//nolint: gocritic
+		if scalarType.Value != nil {
+			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
+		} else if scalarType.ScalarKind == ast.KindBytes {
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
+		} else {
+			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatter.formatType(def.Type)))
+		}
+	case ast.KindRef:
+		buffer.WriteString(fmt.Sprintf("type %s = %s", defName, formatter.formatType(def.Type)))
+	case ast.KindMap, ast.KindArray, ast.KindStruct, ast.KindIntersection:
+		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatter.formatType(def.Type)))
+	default:
+		return fmt.Sprintf("unhandled type def kind: %s", def.Type.Kind)
+	}
+
+	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatEnumDef(def ast.Object) string {
+	var buffer strings.Builder
+
+	enumName := tools.UpperCamelCase(def.Name)
+	enumType := def.Type.AsEnum()
+
+	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatter.formatType(enumType.Values[0].Type)))
+
+	buffer.WriteString("const (\n")
+	for _, val := range enumType.Values {
+		name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
+		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", name, enumName, val.Value))
+	}
+	buffer.WriteString(")\n")
+
+	return buffer.String()
+}
+
 func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool) string {
 	actualFormatter := func() string {
 		if def.IsAny() {
