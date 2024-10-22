@@ -11,7 +11,11 @@ package {{ .Converter.Package | formatPackageName }};
     {{- else if isScalarType .Path "bool" -}}
         !{{- $leftOperand }}
     {{- else if isScalarType .Path "string" -}}
-        !{{- $leftOperand }}.isEmpty()
+        {{- if .Value }}
+            !{{- $leftOperand }}.equals("{{ cleanString .Value }}")
+        {{- else }}
+            !{{- $leftOperand }}.isEmpty()
+        {{- end }}
     {{- else if is .Path.Last.Type "ref" }}
         {{- formatRefType .Path.Last.Type .Value }}
     {{- else -}}
@@ -59,7 +63,7 @@ package {{ .Converter.Package | formatPackageName }};
     {{- with .Arg.Array -}}
         {{- $reflect := importStdPkg "java.util" "StringJoiner" -}}
         StringJoiner tmp{{ $.IntoVar | upperCamelCase }} = new StringJoiner(", ");
-        for ({{ .ValueType | formatType }} {{ .ValueAs | formatPath }} : {{ .For | formatPath }}) {
+        for ({{ .ValueType | formatType }} {{ .ValueAs | formatPath }} : {{ .For | formatGuardPath }}) {
             {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" false) }}
             {{- if and (is .ValueType "scalar") (not (isScalarType .For "string")) }}

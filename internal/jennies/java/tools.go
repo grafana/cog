@@ -23,6 +23,14 @@ func formatScalar(val any) any {
 	return newVal
 }
 
+func cleanString(s string) string {
+	if strings.Contains(s, "\n") {
+		return strings.Replace(s, "\n", `\n`, -1)
+	}
+
+	return s
+}
+
 func formatType(t ast.ScalarKind, val any) string {
 	// When the default is 0, is detected as integer even if it's a float.
 	parseFloatVal := func(val any) any {

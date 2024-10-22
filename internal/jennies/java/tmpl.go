@@ -30,6 +30,7 @@ func functions() template.FuncMap {
 	return template.FuncMap{
 		"escapeVar":             escapeVarName,
 		"formatScalar":          formatScalar,
+		"cleanString":           cleanString,
 		"lastPathIdentifier":    lastPathIdentifier,
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
