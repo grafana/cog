@@ -10,18 +10,20 @@ import (
 )
 
 type validationMethods struct {
-	tmpl          *template.Template
-	packageMapper func(string) string
+	tmpl            *template.Template
+	packageMapper   func(string) string
+	apiRefCollector *common.APIReferenceCollector
 }
 
-func newValidationMethods(tmpl *template.Template, packageMapper func(string) string) validationMethods {
+func newValidationMethods(tmpl *template.Template, packageMapper func(string) string, apiRefCollector *common.APIReferenceCollector) validationMethods {
 	return validationMethods{
-		tmpl:          tmpl,
-		packageMapper: packageMapper,
+		tmpl:            tmpl,
+		packageMapper:   packageMapper,
+		apiRefCollector: apiRefCollector,
 	}
 }
 
-func (jenny validationMethods) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object, imports *common.DirectImportMap) error {
+func (jenny validationMethods) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object, imports *common.DirectImportMap) error {
 	if !object.Type.IsStruct() {
 		return nil
 	}
@@ -78,6 +80,11 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 
 		return false
 	}
+
+	jenny.apiRefCollector.RegisterMethod(object, common.MethodReference{
+		Name:   "Validate",
+		Return: "error",
+	})
 
 	tmpl := jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).

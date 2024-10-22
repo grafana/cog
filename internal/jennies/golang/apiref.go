@@ -26,12 +26,21 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 		MethodName: func(method common.MethodReference) string {
 			return tools.UpperCamelCase(method.Name)
 		},
-		MethodSignature: func(context languages.Context, method common.MethodReference) string {
+		MethodSignature: func(context languages.Context, object ast.Object, method common.MethodReference) string {
 			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
 				return fmt.Sprintf("%s %s", arg.Name, arg.Type)
 			})
 
-			return fmt.Sprintf("%[1]s(%[2]s)", tools.UpperCamelCase(method.Name), strings.Join(args, ", "))
+			returnType := ""
+			if method.Return != "" {
+				returnType = " " + method.Return
+			}
+
+			receiverName := tools.LowerCamelCase(object.Name)
+			objectName := tools.UpperCamelCase(object.Name)
+			methodName := tools.UpperCamelCase(method.Name)
+
+			return fmt.Sprintf("func (%[1]s *%[2]s) %[3]s(%[4]s)%[5]s", receiverName, objectName, methodName, strings.Join(args, ", "), returnType)
 		},
 
 		BuilderName: func(builder ast.Builder) string {

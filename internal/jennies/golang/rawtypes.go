@@ -7,14 +7,16 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
-	Config Config
-	Tmpl   *template.Template
+	Config          Config
+	Tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 
 	typeFormatter *typeFormatter
 }
@@ -56,10 +58,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, imports, packageMapper)
-	unmarshallerGenerator := NewJSONMarshalling(jenny.Config, jenny.Tmpl, imports, packageMapper, jenny.typeFormatter)
-	strictUnmarshallerGenerator := newStrictJSONUnmarshal(jenny.Tmpl, imports, packageMapper, jenny.typeFormatter)
-	equalityMethodsGenerator := newEqualityMethods(jenny.Tmpl)
-	validationMethodsGenerator := newValidationMethods(jenny.Tmpl, packageMapper)
+	unmarshallerGenerator := NewJSONMarshalling(jenny.Config, jenny.Tmpl, imports, packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
+	strictUnmarshallerGenerator := newStrictJSONUnmarshal(jenny.Tmpl, imports, packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
+	equalityMethodsGenerator := newEqualityMethods(jenny.Tmpl, jenny.apiRefCollector)
+	validationMethodsGenerator := newValidationMethods(jenny.Tmpl, packageMapper, jenny.apiRefCollector)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		objectOutput, innerErr := jenny.formatObject(schema, object)
@@ -83,13 +85,13 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			return
 		}
 
-		innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, schema, object, imports)
+		innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, object, imports)
 		if innerErr != nil {
 			err = innerErr
 			return
 		}
 
-		innerErr = validationMethodsGenerator.generateForObject(&buffer, context, schema, object, imports)
+		innerErr = validationMethodsGenerator.generateForObject(&buffer, context, object, imports)
 		if innerErr != nil {
 			err = innerErr
 			return
