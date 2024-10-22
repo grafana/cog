@@ -11,13 +11,14 @@ import (
 )
 
 type strictJSONUnmarshal struct {
-	tmpl          *template.Template
-	imports       *common.DirectImportMap
-	packageMapper func(string) string
-	typeFormatter *typeFormatter
+	tmpl            *template.Template
+	imports         *common.DirectImportMap
+	packageMapper   func(string) string
+	typeFormatter   *typeFormatter
+	apiRefCollector *common.APIReferenceCollector
 }
 
-func newStrictJSONUnmarshal(tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter) strictJSONUnmarshal {
+func newStrictJSONUnmarshal(tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *common.APIReferenceCollector) strictJSONUnmarshal {
 	return strictJSONUnmarshal{
 		tmpl: tmpl.Funcs(template.FuncMap{
 			"formatType": typeFormatter.formatType,
@@ -26,9 +27,10 @@ func newStrictJSONUnmarshal(tmpl *template.Template, imports *common.DirectImpor
 			},
 			"importPkg": packageMapper,
 		}),
-		imports:       imports,
-		packageMapper: packageMapper,
-		typeFormatter: typeFormatter,
+		imports:         imports,
+		packageMapper:   packageMapper,
+		typeFormatter:   typeFormatter,
+		apiRefCollector: apiRefCollector,
 	}
 }
 
@@ -53,6 +55,14 @@ func (jenny strictJSONUnmarshal) objectNeedsUnmarshal(obj ast.Object) bool {
 }
 
 func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj ast.Object) (string, error) {
+	jenny.apiRefCollector.RegisterMethod(obj, common.MethodReference{
+		Name: "UnmarshalJSONStrict",
+		Arguments: []common.ArgumentReference{
+			{Name: "raw", Type: "[]byte"},
+		},
+		Return: "error",
+	})
+
 	tmpl := jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(template.FuncMap{

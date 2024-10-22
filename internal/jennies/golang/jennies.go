@@ -86,7 +86,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 		common.If[languages.Context](config.GenerateGoMod, GoMod{Config: config}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 
 		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl}),
 		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{Config: config, Tmpl: tmpl, NullableConfig: language.NullableKinds()}),

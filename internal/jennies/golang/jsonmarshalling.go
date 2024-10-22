@@ -12,14 +12,15 @@ import (
 )
 
 type JSONMarshalling struct {
-	tmpl          *template.Template
-	config        Config
-	imports       *common.DirectImportMap
-	packageMapper func(string) string
-	typeFormatter *typeFormatter
+	tmpl            *template.Template
+	config          Config
+	imports         *common.DirectImportMap
+	packageMapper   func(string) string
+	typeFormatter   *typeFormatter
+	apiRefCollector *common.APIReferenceCollector
 }
 
-func NewJSONMarshalling(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter) JSONMarshalling {
+func NewJSONMarshalling(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *common.APIReferenceCollector) JSONMarshalling {
 	return JSONMarshalling{
 		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
@@ -28,9 +29,10 @@ func NewJSONMarshalling(config Config, tmpl *template.Template, imports *common.
 				return imports.Add(pkg, pkg)
 			},
 		}),
-		imports:       imports,
-		packageMapper: packageMapper,
-		typeFormatter: typeFormatter,
+		imports:         imports,
+		packageMapper:   packageMapper,
+		typeFormatter:   typeFormatter,
+		apiRefCollector: apiRefCollector,
 	}
 }
 
@@ -87,6 +89,12 @@ func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
 }
 
 func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error) {
+	jenny.apiRefCollector.RegisterMethod(obj, common.MethodReference{
+		Name:     "MarshalJSON",
+		Comments: []string{},
+		Return:   "([]byte, error)",
+	})
+
 	// There are only two types of disjunctions we support:
 	//  * undiscriminated: string | bool | ..., where all the disjunction branches are scalars (or an array)
 	//  * discriminated: SomeStruct | SomeOtherStruct, where all the disjunction branches are references to
@@ -136,6 +144,14 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 }
 
 func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
+	jenny.apiRefCollector.RegisterMethod(obj, common.MethodReference{
+		Name: "UnmarshalJSON",
+		Arguments: []common.ArgumentReference{
+			{Name: "raw", Type: "[]byte"},
+		},
+		Return: "error",
+	})
+
 	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(obj)
 	if jenny.tmpl.Exists(customUnmarshalTmpl) {
 		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
@@ -289,6 +305,11 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 
 func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
 	jenny.packageMapper("cog/variants")
+
+	jenny.apiRefCollector.RegisterFunction(schema.Package, common.FunctionReference{
+		Name:   "VariantConfig",
+		Return: "variants.DataqueryConfig",
+	})
 
 	var disjunctionStruct *ast.StructType
 
