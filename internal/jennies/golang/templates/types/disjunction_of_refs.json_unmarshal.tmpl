@@ -1,6 +1,7 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $errors := importStdPkg "errors" -}}
 {{- $fmt := importStdPkg "fmt" -}}
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name|upperCamelCase }}` from JSON.
 func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
