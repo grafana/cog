@@ -7,6 +7,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
+// LokiBuilderConverter accepts a `LokiBuilder` object and generates the Go code to build this object using builders.
 func LokiBuilderConverter(input Dashboard) string {
     calls := []string{
     `composable_slot.NewLokiBuilderBuilder()`,
@@ -43,4 +44,4 @@ func LokiBuilderConverter(input Dashboard) string {
     }
 
     return strings.Join(calls, ".\t\n")
-    }
+}

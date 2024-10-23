@@ -7,6 +7,7 @@ import (
 	"fmt"
 )
 
+// DashboardLinkConverter accepts a `DashboardLink` object and generates the Go code to build this object using builders.
 func DashboardLinkConverter(input DashboardLink) string {
     calls := []string{
     `builder_delegation.NewDashboardLinkBuilder()`,
@@ -38,4 +39,4 @@ func DashboardLinkConverter(input DashboardLink) string {
     }
 
     return strings.Join(calls, ".\t\n")
-    }
+}

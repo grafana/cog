@@ -3,11 +3,12 @@ package builderpkg
 
 
 import (
-	"strings"
 	withdashes "github.com/grafana/cog/generated/with-dashes"
+	"strings"
 	"fmt"
 )
 
+// SomeNiceBuilderConverter accepts a `SomeNiceBuilder` object and generates the Go code to build this object using builders.
 func SomeNiceBuilderConverter(input withdashes.SomeStruct) string {
     calls := []string{
     `builderpkg.NewSomeNiceBuilderBuilder()`,
@@ -27,4 +28,4 @@ func SomeNiceBuilderConverter(input withdashes.SomeStruct) string {
     }
 
     return strings.Join(calls, ".\t\n")
-    }
+}

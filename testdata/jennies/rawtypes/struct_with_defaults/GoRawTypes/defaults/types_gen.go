@@ -8,13 +8,15 @@ import (
 )
 
 type SomeStruct struct {
-	FieldBool bool `json:"fieldBool"`
-	FieldString string `json:"fieldString"`
-	FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
-	FieldFloat32 float32 `json:"FieldFloat32"`
-	FieldInt32 int32 `json:"FieldInt32"`
+    FieldBool bool `json:"fieldBool"`
+    FieldString string `json:"fieldString"`
+    FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
+    FieldFloat32 float32 `json:"FieldFloat32"`
+    FieldInt32 int32 `json:"FieldInt32"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -98,6 +100,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `SomeStruct` objects.
 func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if resource.FieldBool != other.FieldBool {
 			return false
@@ -119,8 +122,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `SomeStruct` fields for violations and returns them.
 func (resource SomeStruct) Validate() error {
 	return nil
 }

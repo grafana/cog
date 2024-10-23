@@ -7,6 +7,7 @@ import (
 	"fmt"
 )
 
+// LokiBuilderConverter accepts a `LokiBuilder` object and generates the Go code to build this object using builders.
 func LokiBuilderConverter(input Loki) string {
     calls := []string{
     `dataquery_variant_builder.NewLokiBuilderBuilder()`,
@@ -26,4 +27,4 @@ func LokiBuilderConverter(input Loki) string {
     }
 
     return strings.Join(calls, ".\t\n")
-    }
+}
