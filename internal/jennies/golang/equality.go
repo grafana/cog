@@ -1,6 +1,7 @@
 package golang
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -31,6 +32,9 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 		Name: "Equals",
 		Arguments: []common.ArgumentReference{
 			{Name: "other", Type: tools.UpperCamelCase(object.Name)},
+		},
+		Comments: []string{
+			fmt.Sprintf("Equals tests the equality of two `%s` objects.", tools.UpperCamelCase(object.Name)),
 		},
 		Return: "bool",
 	})

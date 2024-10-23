@@ -90,9 +90,11 @@ func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
 
 func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error) {
 	jenny.apiRefCollector.RegisterMethod(obj, common.MethodReference{
-		Name:     "MarshalJSON",
-		Comments: []string{},
-		Return:   "([]byte, error)",
+		Name: "MarshalJSON",
+		Comments: []string{
+			fmt.Sprintf("MarshalJSON implements a custom JSON marshalling logic to encode `%s` as JSON.", tools.UpperCamelCase(obj.Name)),
+		},
+		Return: "([]byte, error)",
 	})
 
 	// There are only two types of disjunctions we support:
@@ -148,6 +150,9 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 		Name: "UnmarshalJSON",
 		Arguments: []common.ArgumentReference{
 			{Name: "raw", Type: "[]byte"},
+		},
+		Comments: []string{
+			fmt.Sprintf("UnmarshalJSON implements a custom JSON unmarshalling logic to decode `%s` from JSON.", tools.UpperCamelCase(obj.Name)),
 		},
 		Return: "error",
 	})
@@ -217,7 +222,8 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 
 	jenny.imports.Add("json", "encoding/json")
 
-	return fmt.Sprintf(`func (resource *%[1]s) UnmarshalJSON(raw []byte) error {
+	return fmt.Sprintf(`// UnmarshalJSON implements a custom JSON unmarshalling logic to decode %[1]s from JSON.
+func (resource *%[1]s) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -295,6 +301,15 @@ func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) 
 		jenny.packageMapper("dashboard")
 	}
 
+	jenny.apiRefCollector.RegisterFunction(schema.Package, common.FunctionReference{
+		Name: "VariantConfig",
+		Comments: []string{
+			fmt.Sprintf("VariantConfig returns the configuration related to %s panels.", strings.ToLower(schema.Metadata.Identifier)),
+			"This configuration describes how to unmarshal it, convert it to code, …",
+		},
+		Return: "variants.PanelcfgConfig",
+	})
+
 	return jenny.tmpl.Render("types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
 		"schema":         schema,
 		"hasOptions":     hasOptions,
@@ -307,7 +322,11 @@ func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema,
 	jenny.packageMapper("cog/variants")
 
 	jenny.apiRefCollector.RegisterFunction(schema.Package, common.FunctionReference{
-		Name:   "VariantConfig",
+		Name: "VariantConfig",
+		Comments: []string{
+			fmt.Sprintf("VariantConfig returns the configuration related to %s dataqueries.", strings.ToLower(schema.Metadata.Identifier)),
+			"This configuration describes how to unmarshal it, convert it to code, …",
+		},
 		Return: "variants.DataqueryConfig",
 	})
 
