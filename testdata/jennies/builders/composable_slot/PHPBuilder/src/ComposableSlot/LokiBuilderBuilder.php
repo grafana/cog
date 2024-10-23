@@ -15,6 +15,7 @@ class LokiBuilderBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\ComposableSlot\Dashboard
      */
     public function build()

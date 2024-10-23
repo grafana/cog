@@ -11,6 +11,9 @@ class LokiBuilder(cogbuilder.Builder[composable_slot.Dashboard]):
         self._internal = composable_slot.Dashboard()
 
     def build(self) -> composable_slot.Dashboard:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def target(self, target: cogbuilder.Builder[cogvariants.Dataquery]) -> typing.Self:        

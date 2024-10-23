@@ -10,6 +10,9 @@ class SomeStruct(cogbuilder.Builder[constraints.SomeStruct]):
         self._internal = constraints.SomeStruct()
 
     def build(self) -> constraints.SomeStruct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def id_val(self, id_val: int) -> typing.Self:        

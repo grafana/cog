@@ -10,6 +10,9 @@ class DashboardLink(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboa
         self._internal = builder_delegation_in_disjunction.DashboardLink()
 
     def build(self) -> builder_delegation_in_disjunction.DashboardLink:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def title(self, title: str) -> typing.Self:        
@@ -30,6 +33,9 @@ class ExternalLink(cogbuilder.Builder[builder_delegation_in_disjunction.External
         self._internal = builder_delegation_in_disjunction.ExternalLink()
 
     def build(self) -> builder_delegation_in_disjunction.ExternalLink:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def url(self, url: str) -> typing.Self:        
@@ -45,6 +51,9 @@ class Dashboard(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboard])
         self._internal = builder_delegation_in_disjunction.Dashboard()
 
     def build(self) -> builder_delegation_in_disjunction.Dashboard:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def single_link_or_string(self, single_link_or_string: typing.Union[cogbuilder.Builder[builder_delegation_in_disjunction.DashboardLink], str]) -> typing.Self:    

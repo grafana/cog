@@ -3,6 +3,7 @@ package golang
 import (
 	"testing"
 
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
@@ -22,7 +23,11 @@ func TestBuilder_Generate(t *testing.T) {
 		PackageRoot: "github.com/grafana/cog/generated",
 	}
 	language := New(config)
-	jenny := Builder{Config: config, Tmpl: initTemplates([]string{})}
+	jenny := Builder{
+		Config:          config,
+		Tmpl:            initTemplates([]string{}),
+		apiRefCollector: common.NewAPIReferenceCollector(),
+	}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {
 		var err error

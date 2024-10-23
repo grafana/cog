@@ -8,6 +8,9 @@ export class SomeStructBuilder implements cog.Builder<constraints.SomeStruct> {
         this.internal = constraints.defaultSomeStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): constraints.SomeStruct {
         return this.internal;
     }

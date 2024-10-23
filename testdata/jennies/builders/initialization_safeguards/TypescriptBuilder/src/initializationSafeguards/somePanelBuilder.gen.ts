@@ -8,6 +8,9 @@ export class SomePanelBuilder implements cog.Builder<initializationSafeguards.So
         this.internal = initializationSafeguards.defaultSomePanel();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): initializationSafeguards.SomePanel {
         return this.internal;
     }

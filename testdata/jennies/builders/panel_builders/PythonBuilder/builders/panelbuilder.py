@@ -10,6 +10,9 @@ class Panel(cogbuilder.Builder[panelbuilder.Panel]):
         self._internal = panelbuilder.Panel()
 
     def build(self) -> panelbuilder.Panel:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def only_from_this_dashboard(self, only_from_this_dashboard: bool) -> typing.Self:        
