@@ -15,6 +15,7 @@ class ExternalLinkBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\BuilderDelegationInDisjunction\ExternalLink
      */
     public function build()

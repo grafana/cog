@@ -10,6 +10,9 @@ class LokiBuilder(cogbuilder.Builder[dataquery_variant_builder.Loki]):
         self._internal = dataquery_variant_builder.Loki()
 
     def build(self) -> dataquery_variant_builder.Loki:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def expr(self, expr: str) -> typing.Self:        

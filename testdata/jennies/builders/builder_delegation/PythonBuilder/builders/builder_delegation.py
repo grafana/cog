@@ -10,6 +10,9 @@ class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):
         self._internal = builder_delegation.DashboardLink()
 
     def build(self) -> builder_delegation.DashboardLink:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def title(self, title: str) -> typing.Self:        
@@ -30,6 +33,9 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
         self._internal = builder_delegation.Dashboard()
 
     def build(self) -> builder_delegation.Dashboard:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def id_val(self, id_val: int) -> typing.Self:        

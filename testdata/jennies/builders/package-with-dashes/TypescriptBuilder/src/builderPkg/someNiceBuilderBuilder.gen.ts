@@ -8,6 +8,9 @@ export class SomeNiceBuilderBuilder implements cog.Builder<withDashes.SomeStruct
         this.internal = withDashes.defaultSomeStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): withDashes.SomeStruct {
         return this.internal;
     }

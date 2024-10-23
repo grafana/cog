@@ -8,6 +8,9 @@ export class LokiBuilderBuilder implements cog.Builder<composableSlot.Dashboard>
         this.internal = composableSlot.defaultDashboard();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): composableSlot.Dashboard {
         return this.internal;
     }

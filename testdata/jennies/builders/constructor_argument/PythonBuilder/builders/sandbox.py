@@ -11,6 +11,9 @@ class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
         self._internal.title = title
 
     def build(self) -> sandbox.SomeStruct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def title(self, title: str) -> typing.Self:        
