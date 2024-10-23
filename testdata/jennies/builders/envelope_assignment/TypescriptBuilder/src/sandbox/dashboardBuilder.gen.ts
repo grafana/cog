@@ -8,6 +8,9 @@ export class DashboardBuilder implements cog.Builder<sandbox.Dashboard> {
         this.internal = sandbox.defaultDashboard();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): sandbox.Dashboard {
         return this.internal;
     }

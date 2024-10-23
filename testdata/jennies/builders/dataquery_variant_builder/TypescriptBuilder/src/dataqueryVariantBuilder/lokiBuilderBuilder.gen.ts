@@ -8,6 +8,9 @@ export class LokiBuilderBuilder implements cog.Builder<cog.Dataquery> {
         this.internal = dataqueryVariantBuilder.defaultLoki();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): dataqueryVariantBuilder.Loki {
         return this.internal;
     }

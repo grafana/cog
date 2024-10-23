@@ -14,6 +14,9 @@ class SomeStruct(cogbuilder.Builder[basic_struct.SomeStruct]):
         self._internal = basic_struct.SomeStruct()
 
     def build(self) -> basic_struct.SomeStruct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def id_val(self, id_val: int) -> typing.Self:    

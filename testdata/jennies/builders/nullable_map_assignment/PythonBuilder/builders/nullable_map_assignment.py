@@ -10,6 +10,9 @@ class SomeStruct(cogbuilder.Builder[nullable_map_assignment.SomeStruct]):
         self._internal = nullable_map_assignment.SomeStruct()
 
     def build(self) -> nullable_map_assignment.SomeStruct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def config(self, config: dict[str, str]) -> typing.Self:        

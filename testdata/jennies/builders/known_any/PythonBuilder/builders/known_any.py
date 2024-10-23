@@ -10,6 +10,9 @@ class SomeStruct(cogbuilder.Builder[known_any.SomeStruct]):
         self._internal = known_any.SomeStruct()
 
     def build(self) -> known_any.SomeStruct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def title(self, title: str) -> typing.Self:        
