@@ -64,7 +64,7 @@ func (collector *APIReferenceCollector) MethodsForObject(object ast.Object) []Me
 func (collector *APIReferenceCollector) BuilderMethod(builder ast.Builder, methodReference MethodReference) {
 	ref := fmt.Sprintf("%s_%s", builder.Package, builder.Name)
 	methodReference.ReceiverBuilder = &builder
-	collector.builderMethods[ref] = append(collector.objectMethods[ref], methodReference)
+	collector.builderMethods[ref] = append(collector.builderMethods[ref], methodReference)
 }
 
 func (collector *APIReferenceCollector) MethodsForBuilder(builder ast.Builder) []MethodReference {
