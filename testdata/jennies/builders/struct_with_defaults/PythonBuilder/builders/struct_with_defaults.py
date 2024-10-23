@@ -10,6 +10,9 @@ class NestedStruct(cogbuilder.Builder[struct_with_defaults.NestedStruct]):
         self._internal = struct_with_defaults.NestedStruct()
 
     def build(self) -> struct_with_defaults.NestedStruct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def string_val(self, string_val: str) -> typing.Self:        
@@ -30,6 +33,9 @@ class Struct(cogbuilder.Builder[struct_with_defaults.Struct]):
         self._internal = struct_with_defaults.Struct()
 
     def build(self) -> struct_with_defaults.Struct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def all_fields(self, all_fields: cogbuilder.Builder[struct_with_defaults.NestedStruct]) -> typing.Self:        

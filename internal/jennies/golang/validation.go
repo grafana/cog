@@ -83,7 +83,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		return false
 	}
 
-	jenny.apiRefCollector.RegisterMethod(object, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
 		Name: "Validate",
 		Comments: []string{
 			fmt.Sprintf("Validate checks all the validation constraints that may be defined on `%s` fields for violations and returns them.", tools.UpperCamelCase(object.Name)),

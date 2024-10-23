@@ -8,6 +8,9 @@ export class ExternalLinkBuilder implements cog.Builder<builderDelegationInDisju
         this.internal = builderDelegationInDisjunction.defaultExternalLink();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): builderDelegationInDisjunction.ExternalLink {
         return this.internal;
     }

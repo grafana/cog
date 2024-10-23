@@ -13,9 +13,10 @@ import (
 )
 
 type Builder struct {
-	config        Config
-	tmpl          *template.Template
-	typeFormatter *typeFormatter
+	config          Config
+	tmpl            *template.Template
+	typeFormatter   *typeFormatter
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func (jenny *Builder) JennyName() string {
@@ -78,6 +79,14 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		builder.For.Comments,
 		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Cog\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),
 	)
+
+	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
+		Name: "build",
+		Comments: []string{
+			"Builds the object.",
+		},
+		Return: jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false),
+	})
 
 	return jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).

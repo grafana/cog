@@ -20,6 +20,9 @@ type ArgumentReference struct {
 }
 
 type MethodReference struct {
+	ReceiverObject  *ast.Object
+	ReceiverBuilder *ast.Builder
+
 	Name      string
 	Comments  []string
 	Arguments []ArgumentReference
@@ -36,23 +39,37 @@ type FunctionReference struct {
 
 type APIReferenceCollector struct {
 	objectMethods    map[string][]MethodReference
+	builderMethods   map[string][]MethodReference
 	packageFunctions map[string][]FunctionReference
 }
 
 func NewAPIReferenceCollector() *APIReferenceCollector {
 	return &APIReferenceCollector{
 		objectMethods:    make(map[string][]MethodReference),
+		builderMethods:   make(map[string][]MethodReference),
 		packageFunctions: make(map[string][]FunctionReference),
 	}
 }
 
-func (collector *APIReferenceCollector) RegisterMethod(object ast.Object, methodReference MethodReference) {
+func (collector *APIReferenceCollector) ObjectMethod(object ast.Object, methodReference MethodReference) {
 	objectRef := object.SelfRef.String()
+	methodReference.ReceiverObject = &object
 	collector.objectMethods[objectRef] = append(collector.objectMethods[objectRef], methodReference)
 }
 
 func (collector *APIReferenceCollector) MethodsForObject(object ast.Object) []MethodReference {
 	return collector.objectMethods[object.SelfRef.String()]
+}
+
+func (collector *APIReferenceCollector) BuilderMethod(builder ast.Builder, methodReference MethodReference) {
+	ref := fmt.Sprintf("%s_%s", builder.Package, builder.Name)
+	methodReference.ReceiverBuilder = &builder
+	collector.builderMethods[ref] = append(collector.builderMethods[ref], methodReference)
+}
+
+func (collector *APIReferenceCollector) MethodsForBuilder(builder ast.Builder) []MethodReference {
+	ref := fmt.Sprintf("%s_%s", builder.Package, builder.Name)
+	return collector.builderMethods[ref]
 }
 
 func (collector *APIReferenceCollector) RegisterFunction(pkg string, functionReference FunctionReference) {
@@ -72,7 +89,7 @@ type APIReferenceFormatter struct {
 	ObjectDefinition func(context languages.Context, object ast.Object) string
 
 	MethodName      func(method MethodReference) string
-	MethodSignature func(context languages.Context, object ast.Object, method MethodReference) string
+	MethodSignature func(context languages.Context, method MethodReference) string
 
 	BuilderName          func(builder ast.Builder) string
 	ConstructorSignature func(context languages.Context, builder ast.Builder) string
@@ -88,7 +105,7 @@ type APIReference struct {
 }
 
 func (jenny APIReference) JennyName() string {
-	return "APIReference"
+	return fmt.Sprintf("APIReference[%s]", jenny.Language)
 }
 
 func (jenny APIReference) Generate(context languages.Context) (codejen.Files, error) {
@@ -178,7 +195,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 
 	schema.Objects.Sort(orderedmap.SortStrings)
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./%[1]s.md)\n", jenny.Formatter.ObjectName(object), jenny.kindBadge(object.Type.Kind)))
+		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./objects/%[1]s.md)\n", jenny.Formatter.ObjectName(object), jenny.kindBadge(object.Type.Kind)))
 	})
 
 	buffer.WriteString("## Builders\n\n")
@@ -189,7 +206,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 	})
 
 	for _, builder := range builders {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builders/%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
 	}
 
 	functions := jenny.Collector.FunctionsForPackage(schema.Package)
@@ -264,14 +281,14 @@ title: %[2]s %[1]s
 		})
 		for _, builder := range buildersForObjet {
 			if builder.Package == object.SelfRef.ReferredPkg {
-				buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+				buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](../builders/%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
 			} else {
-				buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/%[2]s.md)\n", builder.Package, jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+				buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../../%[1]s/builders/%[2]s.md)\n", builder.Package, jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
 			}
 		}
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/%s/%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes(), jenny), nil
+	return *codejen.NewFile(fmt.Sprintf("docs/%s/objects/%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes(), jenny), nil
 }
 
 func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context languages.Context, object ast.Object) {
@@ -280,22 +297,25 @@ func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context l
 	methods := jenny.Collector.MethodsForObject(object)
 
 	for _, method := range methods {
-		buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", jenny.Formatter.MethodName(method), jenny.methodBadge()))
-
-		if len(method.Comments) != 0 {
-			buffer.WriteString(strings.Join(method.Comments, "\n\n") + "\n\n")
-		}
-
-		buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
-		buffer.WriteString(jenny.Formatter.MethodSignature(context, object, method))
-		buffer.WriteString("\n```\n")
-
+		jenny.formatMethodReference(buffer, context, method)
 		buffer.WriteString("\n")
 	}
 
 	if len(methods) == 0 {
 		buffer.WriteString("No methods.\n")
 	}
+}
+
+func (jenny APIReference) formatMethodReference(buffer *bytes.Buffer, context languages.Context, method MethodReference) {
+	buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", jenny.Formatter.MethodName(method), jenny.methodBadge()))
+
+	if len(method.Comments) != 0 {
+		buffer.WriteString(strings.Join(method.Comments, "\n\n") + "\n\n")
+	}
+
+	buffer.WriteString(fmt.Sprintf("```%s\n", jenny.Language))
+	buffer.WriteString(jenny.Formatter.MethodSignature(context, method))
+	buffer.WriteString("\n```\n")
 }
 
 func (jenny APIReference) referenceForBuilder(context languages.Context, builder ast.Builder) (codejen.File, error) {
@@ -317,6 +337,17 @@ title: %[2]s %[1]s
 	buffer.WriteString("\n```\n")
 
 	buffer.WriteString("## Methods\n\n")
+
+	builderMethods := jenny.Collector.MethodsForBuilder(builder)
+	slices.SortFunc(builderMethods, func(methodA, methodB MethodReference) int {
+		return strings.Compare(methodA.Name, methodB.Name)
+	})
+
+	for _, method := range builderMethods {
+		jenny.formatMethodReference(&buffer, context, method)
+
+		buffer.WriteString("\n")
+	}
 
 	slices.SortFunc(builder.Options, func(optionA, optionB ast.Option) int {
 		return strings.Compare(optionA.Name, optionB.Name)
@@ -346,12 +377,12 @@ title: %[2]s %[1]s
 	buffer.WriteString("## See also\n\n")
 
 	if builder.Package == builder.For.SelfRef.ReferredPkg {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./%[1]s.md)\n", jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
+		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](../objects/%[1]s.md)\n", jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
 	} else {
-		buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/%[2]s.md)\n", builder.For.SelfRef.ReferredPkg, jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
+		buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../../%[1]s/objects/%[2]s.md)\n", builder.For.SelfRef.ReferredPkg, jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/%s/%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil
+	return *codejen.NewFile(fmt.Sprintf("docs/%s/builders/%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil
 }
 
 func (jenny APIReference) kindBadge(kind ast.Kind) string {

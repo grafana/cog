@@ -15,6 +15,7 @@ class PersonBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\SomePkg\Person
      */
     public function build()

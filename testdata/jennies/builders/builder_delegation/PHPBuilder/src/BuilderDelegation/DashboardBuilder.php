@@ -15,6 +15,7 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\BuilderDelegation\Dashboard
      */
     public function build()

@@ -89,7 +89,7 @@ func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
 }
 
 func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error) {
-	jenny.apiRefCollector.RegisterMethod(obj, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
 		Name: "MarshalJSON",
 		Comments: []string{
 			fmt.Sprintf("MarshalJSON implements a custom JSON marshalling logic to encode `%s` as JSON.", tools.UpperCamelCase(obj.Name)),
@@ -146,7 +146,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 }
 
 func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, obj ast.Object) (string, error) {
-	jenny.apiRefCollector.RegisterMethod(obj, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
 		Name: "UnmarshalJSON",
 		Arguments: []common.ArgumentReference{
 			{Name: "raw", Type: "[]byte"},

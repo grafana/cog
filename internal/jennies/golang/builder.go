@@ -15,8 +15,9 @@ import (
 )
 
 type Builder struct {
-	Config Config
-	Tmpl   *template.Template
+	Config          Config
+	Tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 
 	typeImportMapper func(pkg string) string
 	pathFormatter    func(path ast.Path) string
@@ -67,6 +68,14 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	if builder.For.Type.ImplementsVariant() {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
+
+	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
+		Name: "Build",
+		Comments: []string{
+			"Builds the object.",
+		},
+		Return: fmt.Sprintf("(%s, error)", buildObjectSignature),
+	})
 
 	return jenny.Tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).

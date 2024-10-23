@@ -8,6 +8,9 @@ export class NestedStructBuilder implements cog.Builder<structWithDefaults.Neste
         this.internal = structWithDefaults.defaultNestedStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): structWithDefaults.NestedStruct {
         return this.internal;
     }

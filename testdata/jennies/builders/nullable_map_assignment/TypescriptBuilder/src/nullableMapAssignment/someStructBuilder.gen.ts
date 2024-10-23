@@ -8,6 +8,9 @@ export class SomeStructBuilder implements cog.Builder<nullableMapAssignment.Some
         this.internal = nullableMapAssignment.defaultSomeStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): nullableMapAssignment.SomeStruct {
         return this.internal;
     }

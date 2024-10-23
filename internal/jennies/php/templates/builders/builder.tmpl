@@ -22,6 +22,7 @@ class {{ .Builder.Name|formatObjectName }}Builder implements \{{ .NamespaceRoot 
     }
 
     /**
+     * Builds the object.
      * @return {{ .Builder.For.SelfRef.AsType|formatRawType }}
      */
     public function build()

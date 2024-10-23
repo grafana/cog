@@ -10,6 +10,9 @@ class Dashboard(cogbuilder.Builder[sandbox.Dashboard]):
         self._internal = sandbox.Dashboard()
 
     def build(self) -> sandbox.Dashboard:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def with_variable(self, name: str, value: str) -> typing.Self:        

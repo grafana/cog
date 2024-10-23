@@ -8,6 +8,9 @@ export class SomeStructBuilder implements cog.Builder<sandbox.SomeStruct> {
         this.internal = sandbox.defaultSomeStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): sandbox.SomeStruct {
         return this.internal;
     }

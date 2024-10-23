@@ -15,6 +15,7 @@ class NestedStructBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\StructWithDefaults\NestedStruct
      */
     public function build()

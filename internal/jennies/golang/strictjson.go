@@ -56,7 +56,7 @@ func (jenny strictJSONUnmarshal) objectNeedsUnmarshal(obj ast.Object) bool {
 }
 
 func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj ast.Object) (string, error) {
-	jenny.apiRefCollector.RegisterMethod(obj, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
 		Name: "UnmarshalJSONStrict",
 		Arguments: []common.ArgumentReference{
 			{Name: "raw", Type: "[]byte"},

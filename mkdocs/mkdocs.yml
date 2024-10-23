@@ -13,6 +13,18 @@ markdown_extensions:
           lang: php
           options:
             startinline: true
+        - name: go
+          lang: go
+          options:
+            startinline: true
+        - name: typescript
+          lang: typescript
+          options:
+            startinline: true
+        - name: python
+          lang: python
+          options:
+            startinline: true
   - pymdownx.superfences
   - toc:
       permalink: 🔗
@@ -22,6 +34,7 @@ theme:
   features:
     - navigation.tabs
     - navigation.indexes
+    - navigation.top
 
   custom_dir: overrides
 

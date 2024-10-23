@@ -8,6 +8,9 @@ export class DashboardBuilder implements cog.Builder<builderDelegationInDisjunct
         this.internal = builderDelegationInDisjunction.defaultDashboard();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): builderDelegationInDisjunction.Dashboard {
         return this.internal;
     }

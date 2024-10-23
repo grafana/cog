@@ -10,6 +10,9 @@ class SomePanel(cogbuilder.Builder[initialization_safeguards.SomePanel]):
         self._internal = initialization_safeguards.SomePanel()
 
     def build(self) -> initialization_safeguards.SomePanel:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def title(self, title: str) -> typing.Self:        

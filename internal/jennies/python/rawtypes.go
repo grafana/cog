@@ -8,6 +8,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
@@ -15,10 +16,11 @@ import (
 )
 
 type RawTypes struct {
-	tmpl          *template.Template
-	typeFormatter *typeFormatter
-	importModule  moduleImporter
-	importPkg     pkgImporter
+	tmpl            *template.Template
+	typeFormatter   *typeFormatter
+	importModule    moduleImporter
+	importPkg       pkgImporter
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -178,6 +180,14 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 	var buffer strings.Builder
 
+	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
+		Name: "to_json",
+		Comments: []string{
+			"Converts this object into a representation that can easily be encoded to JSON.",
+		},
+		Return: "dict[str, object]",
+	})
+
 	buffer.WriteString("    def to_json(self) -> dict[str, object]:\n")
 	buffer.WriteString("        payload: dict[str, object] = {\n")
 
@@ -208,6 +218,18 @@ func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 }
 
 func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object ast.Object) (string, error) {
+	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
+		Name: "from_json",
+		Comments: []string{
+			"Builds this object from a JSON-decoded dict.",
+		},
+		Arguments: []common.ArgumentReference{
+			{Name: "data", Type: "dict[str, typing.Any]"},
+		},
+		Return: "typing.Self",
+		Static: true,
+	})
+
 	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(object)
 	if jenny.tmpl.Exists(customUnmarshalTmpl) {
 		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{

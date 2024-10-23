@@ -8,6 +8,9 @@ export class SomeStructBuilder implements cog.Builder<anonymousStruct.SomeStruct
         this.internal = anonymousStruct.defaultSomeStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): anonymousStruct.SomeStruct {
         return this.internal;
     }

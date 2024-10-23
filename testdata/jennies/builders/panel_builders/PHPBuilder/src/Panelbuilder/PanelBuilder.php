@@ -15,6 +15,7 @@ class PanelBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\Panelbuilder\Panel
      */
     public function build()

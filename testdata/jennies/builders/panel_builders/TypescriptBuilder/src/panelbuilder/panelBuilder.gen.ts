@@ -8,6 +8,9 @@ export class PanelBuilder implements cog.Builder<panelbuilder.Panel> {
         this.internal = panelbuilder.defaultPanel();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): panelbuilder.Panel {
         return this.internal;
     }

@@ -10,6 +10,9 @@ export class SomePanelBuilder implements cog.Builder<constructorInitializations.
         this.internal.cursor = constructorInitializations.CursorMode.Tooltip;
     }
 
+    /**
+     * Builds the object.
+     */
     build(): constructorInitializations.SomePanel {
         return this.internal;
     }

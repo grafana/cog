@@ -10,6 +10,9 @@ class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
         self._internal = sandbox.SomeStruct()
 
     def build(self) -> sandbox.SomeStruct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def editable(self) -> typing.Self:        

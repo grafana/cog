@@ -8,6 +8,9 @@ export class StructBuilder implements cog.Builder<structWithDefaults.Struct> {
         this.internal = structWithDefaults.defaultStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): structWithDefaults.Struct {
         return this.internal;
     }

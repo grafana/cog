@@ -450,7 +450,7 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	buffer.WriteString("    );\n")
 	buffer.WriteString("}")
 
-	jenny.apiRefCollector.RegisterMethod(def, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(def, common.MethodReference{
 		Name: "fromArray",
 		Comments: []string{
 			"Builds this object from an array.",
@@ -713,7 +713,7 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 
 	buffer.WriteString("}")
 
-	jenny.apiRefCollector.RegisterMethod(def, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(def, common.MethodReference{
 		Name: "jsonSerialize",
 		Comments: []string{
 			"Returns the data representing this object, preparing it for JSON serialization with `json_encode()`.",
@@ -732,7 +732,7 @@ func (jenny RawTypes) generateDataqueryType(schema *ast.Schema, object ast.Objec
 	buffer.WriteString(fmt.Sprintf("    return \"%s\";\n", strings.ToLower(schema.Metadata.Identifier)))
 	buffer.WriteString("}")
 
-	jenny.apiRefCollector.RegisterMethod(object, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
 		Name: "dataqueryType",
 		Comments: []string{
 			"Returns the type of this dataquery object.",

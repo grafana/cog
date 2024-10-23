@@ -40,7 +40,7 @@ func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIRef
 		MethodName: func(method common.MethodReference) string {
 			return formatOptionName(method.Name)
 		},
-		MethodSignature: func(context languages.Context, object ast.Object, method common.MethodReference) string {
+		MethodSignature: func(context languages.Context, method common.MethodReference) string {
 			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
 				return fmt.Sprintf("%s $%s", arg.Type, arg.Name)
 			})

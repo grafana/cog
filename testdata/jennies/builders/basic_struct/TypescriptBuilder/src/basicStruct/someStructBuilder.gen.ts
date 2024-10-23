@@ -9,6 +9,9 @@ export class SomeStructBuilder implements cog.Builder<basicStruct.SomeStruct> {
         this.internal = basicStruct.defaultSomeStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): basicStruct.SomeStruct {
         return this.internal;
     }

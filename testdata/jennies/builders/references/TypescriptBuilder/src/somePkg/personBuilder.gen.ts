@@ -9,6 +9,9 @@ export class PersonBuilder implements cog.Builder<somePkg.Person> {
         this.internal = somePkg.defaultPerson();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): somePkg.Person {
         return this.internal;
     }

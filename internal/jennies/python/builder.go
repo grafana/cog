@@ -6,13 +6,15 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Builder struct {
-	tmpl *template.Template
+	tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 
 	imports          *ModuleImportMap
 	typeFormatter    *typeFormatter
@@ -73,6 +75,14 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 	fullObjectName := jenny.typeFormatter.formatRef(builder.For.SelfRef)
 	buildObjectSignature := fullObjectName
+
+	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
+		Name: "build",
+		Comments: []string{
+			"Builds the object.",
+		},
+		Return: fullObjectName,
+	})
 
 	return jenny.tmpl.
 		Funcs(map[string]any{

@@ -8,6 +8,9 @@ export class SomeNiceBuilderBuilder implements cog.Builder<somePkg.SomeStruct> {
         this.internal = somePkg.defaultSomeStruct();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): somePkg.SomeStruct {
         return this.internal;
     }

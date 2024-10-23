@@ -18,6 +18,9 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
         {{- end }}
     }
 
+    /**
+     * Builds the object.
+     */
     build(): {{ .ImportAlias }}.{{ .ObjectName }} {
         return this.internal;
     }

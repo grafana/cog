@@ -12,6 +12,9 @@ class SomePanel(cogbuilder.Builder[constructor_initializations.SomePanel]):
         self._internal.cursor = constructor_initializations.CursorMode.TOOLTIP
 
     def build(self) -> constructor_initializations.SomePanel:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def title(self, title: str) -> typing.Self:        

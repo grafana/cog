@@ -9,6 +9,9 @@ export class SomeStructBuilder implements cog.Builder<sandbox.SomeStruct> {
         this.internal.title = title;
     }
 
+    /**
+     * Builds the object.
+     */
     build(): sandbox.SomeStruct {
         return this.internal;
     }
