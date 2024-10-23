@@ -11,6 +11,9 @@ class Person(cogbuilder.Builder[some_pkg.Person]):
         self._internal = some_pkg.Person()
 
     def build(self) -> some_pkg.Person:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def name(self, name: other_pkg.Name) -> typing.Self:        
