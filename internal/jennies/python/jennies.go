@@ -30,12 +30,14 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 }
 
 type Language struct {
-	config Config
+	config          Config
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func New(config Config) *Language {
 	return &Language{
-		config: config,
+		config:          config,
+		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 }
 
@@ -55,6 +57,13 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 		common.If[languages.Context](globalConfig.Types, RawTypes{tmpl: tmpl}),
 		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl}),
+
+		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+			Collector: language.apiRefCollector,
+			Language:  LanguageRef,
+			Formatter: apiReferenceFormatter(),
+			Tmpl:      tmpl,
+		}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
