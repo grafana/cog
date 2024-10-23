@@ -174,11 +174,14 @@ func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
 
 	buffer.WriteString("struct {\n")
 
-	for _, fieldDef := range def.Fields {
-		buffer.WriteString("\t" + formatter.formatField(fieldDef))
+	for i, fieldDef := range def.Fields {
+		buffer.WriteString(tools.Indent(formatter.formatField(fieldDef), 4))
+		if i != len(def.Fields)-1 {
+			buffer.WriteString("\n")
+		}
 	}
 
-	buffer.WriteString("}")
+	buffer.WriteString("\n}")
 
 	return buffer.String()
 }
@@ -216,7 +219,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	}
 
 	buffer.WriteString(fmt.Sprintf(
-		"%s %s `json:\"%s%s\"`\n",
+		"%s %s `json:\"%s%s\"`",
 		tools.UpperCamelCase(def.Name),
 		formatter.doFormatType(fieldType, false),
 		def.Name,

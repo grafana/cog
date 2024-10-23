@@ -32,8 +32,8 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 }
 
 func (builder *SomeStructBuilder) Time(time struct {
-	From string `json:"from"`
-	To string `json:"to"`
+    From string `json:"from"`
+    To string `json:"to"`
 }) *SomeStructBuilder {
     builder.internal.Time = &time
 

@@ -65,11 +65,11 @@ func (builder *StructBuilder) EmptyFields(emptyFields cog.Builder[NestedStruct])
 }
 
 func (builder *StructBuilder) ComplexField(complexField struct {
-	Uid string `json:"uid"`
-	Nested struct {
-	NestedVal string `json:"nestedVal"`
-} `json:"nested"`
-	Array []string `json:"array"`
+    Uid string `json:"uid"`
+    Nested struct {
+        NestedVal string `json:"nestedVal"`
+    } `json:"nested"`
+    Array []string `json:"array"`
 }) *StructBuilder {
     builder.internal.ComplexField = complexField
 
@@ -77,8 +77,8 @@ func (builder *StructBuilder) ComplexField(complexField struct {
 }
 
 func (builder *StructBuilder) PartialComplexField(partialComplexField struct {
-	Uid string `json:"uid"`
-	IntVal int64 `json:"intVal"`
+    Uid string `json:"uid"`
+    IntVal int64 `json:"intVal"`
 }) *StructBuilder {
     builder.internal.PartialComplexField = partialComplexField
 
