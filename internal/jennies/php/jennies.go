@@ -72,7 +72,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		VariantsPlugins{config: config, tmpl: tmpl},
 		Runtime{config: config, tmpl: tmpl},
 		common.If[languages.Context](globalConfig.Types, RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 		common.If[languages.Context](globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
 
 		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
