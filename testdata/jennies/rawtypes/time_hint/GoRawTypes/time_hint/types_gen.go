@@ -11,9 +11,11 @@ import (
 type ObjTime time.Time
 
 type ObjWithTimeField struct {
-	RegisteredAt time.Time `json:"registeredAt"`
+    RegisteredAt time.Time `json:"registeredAt"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `ObjWithTimeField` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *ObjWithTimeField) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -49,6 +51,7 @@ func (resource *ObjWithTimeField) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `ObjWithTimeField` objects.
 func (resource ObjWithTimeField) Equals(other ObjWithTimeField) bool {
 		if resource.RegisteredAt != other.RegisteredAt {
 			return false
@@ -58,8 +61,7 @@ func (resource ObjWithTimeField) Equals(other ObjWithTimeField) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `ObjWithTimeField` fields for violations and returns them.
 func (resource ObjWithTimeField) Validate() error {
 	return nil
 }

@@ -10,17 +10,19 @@ import (
 
 // This struct does things.
 type SomeStruct struct {
-	FieldRef SomeOtherStruct `json:"FieldRef"`
-	FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars"`
-	FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction"`
-	FieldDisjunctionWithNull *string `json:"FieldDisjunctionWithNull"`
-	Operator SomeStructOperator `json:"Operator"`
-	FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
-	FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
-	FieldAnonymousStruct StructComplexFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct"`
-	FieldRefToConstant string `json:"fieldRefToConstant"`
+    FieldRef SomeOtherStruct `json:"FieldRef"`
+    FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars"`
+    FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction"`
+    FieldDisjunctionWithNull *string `json:"FieldDisjunctionWithNull"`
+    Operator SomeStructOperator `json:"Operator"`
+    FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
+    FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
+    FieldAnonymousStruct StructComplexFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct"`
+    FieldRefToConstant string `json:"fieldRefToConstant"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -161,6 +163,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `SomeStruct` objects.
 func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if !resource.FieldRef.Equals(other.FieldRef) {
 			return false
@@ -214,8 +217,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `SomeStruct` fields for violations and returns them.
 func (resource SomeStruct) Validate() error {
 	var errs cog.BuildErrors
 		if err := resource.FieldRef.Validate(); err != nil {
@@ -242,9 +244,11 @@ func (resource SomeStruct) Validate() error {
 const ConnectionPath = "straight"
 
 type SomeOtherStruct struct {
-	FieldAny any `json:"FieldAny"`
+    FieldAny any `json:"FieldAny"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeOtherStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -280,6 +284,7 @@ func (resource *SomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `SomeOtherStruct` objects.
 func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
@@ -290,8 +295,7 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `SomeOtherStruct` fields for violations and returns them.
 func (resource SomeOtherStruct) Validate() error {
 	return nil
 }
@@ -305,9 +309,11 @@ const (
 
 
 type StructComplexFieldsSomeStructFieldAnonymousStruct struct {
-	FieldAny any `json:"FieldAny"`
+    FieldAny any `json:"FieldAny"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StructComplexFieldsSomeStructFieldAnonymousStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *StructComplexFieldsSomeStructFieldAnonymousStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -343,6 +349,7 @@ func (resource *StructComplexFieldsSomeStructFieldAnonymousStruct) UnmarshalJSON
 }
 
 
+// Equals tests the equality of two `StructComplexFieldsSomeStructFieldAnonymousStruct` objects.
 func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Equals(other StructComplexFieldsSomeStructFieldAnonymousStruct) bool {
 		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
@@ -353,18 +360,18 @@ func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Equals(other S
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `StructComplexFieldsSomeStructFieldAnonymousStruct` fields for violations and returns them.
 func (resource StructComplexFieldsSomeStructFieldAnonymousStruct) Validate() error {
 	return nil
 }
 
 
 type StringOrBool struct {
-	String *string `json:"String,omitempty"`
-	Bool *bool `json:"Bool,omitempty"`
+    String *string `json:"String,omitempty"`
+    Bool *bool `json:"Bool,omitempty"`
 }
 
+// MarshalJSON implements a custom JSON marshalling logic to encode `StringOrBool` as JSON.
 func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {
 		return json.Marshal(resource.String)
@@ -378,6 +385,7 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 }
 
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `StringOrBool` from JSON.
 func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -409,6 +417,8 @@ func (resource *StringOrBool) UnmarshalJSON(raw []byte) error {
 }
 
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StringOrBool` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *StringOrBool) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -448,6 +458,7 @@ func (resource *StringOrBool) UnmarshalJSONStrict(raw []byte) error {
 	return errs
 }
 
+// Equals tests the equality of two `StringOrBool` objects.
 func (resource StringOrBool) Equals(other StringOrBool) bool {
 		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 			return false
@@ -472,18 +483,19 @@ func (resource StringOrBool) Equals(other StringOrBool) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `StringOrBool` fields for violations and returns them.
 func (resource StringOrBool) Validate() error {
 	return nil
 }
 
 
 type StringOrSomeOtherStruct struct {
-	String *string `json:"String,omitempty"`
-	SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
+    String *string `json:"String,omitempty"`
+    SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StringOrSomeOtherStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *StringOrSomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -531,6 +543,7 @@ func (resource *StringOrSomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `StringOrSomeOtherStruct` objects.
 func (resource StringOrSomeOtherStruct) Equals(other StringOrSomeOtherStruct) bool {
 		if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 			return false
@@ -555,8 +568,7 @@ func (resource StringOrSomeOtherStruct) Equals(other StringOrSomeOtherStruct) bo
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `StringOrSomeOtherStruct` fields for violations and returns them.
 func (resource StringOrSomeOtherStruct) Validate() error {
 	var errs cog.BuildErrors
 		if resource.SomeOtherStruct != nil {
