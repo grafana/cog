@@ -14,7 +14,8 @@ import (
 )
 
 type Builder struct {
-	tmpl *template.Template
+	tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 
 	imports          *common.DirectImportMap
 	typeImportMapper func(string) string
@@ -62,6 +63,14 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	if builder.For.Type.ImplementsVariant() {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
+
+	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
+		Name: "build",
+		Comments: []string{
+			"Builds the object.",
+		},
+		Return: fmt.Sprintf("%s.%s", jenny.importType(builder.For.SelfRef), tools.CleanupNames(builder.For.Name)),
+	})
 
 	return jenny.tmpl.
 		Funcs(map[string]any{

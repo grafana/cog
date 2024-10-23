@@ -28,7 +28,7 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 		return nil
 	}
 
-	jenny.apiRefCollector.RegisterMethod(object, common.MethodReference{
+	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
 		Name: "Equals",
 		Arguments: []common.ArgumentReference{
 			{Name: "other", Type: tools.UpperCamelCase(object.Name)},
