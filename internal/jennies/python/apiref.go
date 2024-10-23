@@ -53,7 +53,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 		MethodName: func(method common.MethodReference) string {
 			return formatIdentifier(method.Name)
 		},
-		MethodSignature: func(context languages.Context, object ast.Object, method common.MethodReference) string {
+		MethodSignature: func(context languages.Context, method common.MethodReference) string {
 			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
 				return fmt.Sprintf("%s: %s", arg.Name, arg.Type)
 			})
@@ -64,8 +64,12 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			}
 
 			methodName := formatIdentifier(method.Name)
+			classmethod := ""
+			if method.Static {
+				classmethod = "@classmethod\n"
+			}
 
-			return fmt.Sprintf("def %[1]s(%[2]s)%[3]s", methodName, strings.Join(args, ", "), returnType)
+			return fmt.Sprintf("%[1]sdef %[2]s(%[3]s)%[4]s", classmethod, methodName, strings.Join(args, ", "), returnType)
 		},
 
 		BuilderName: func(builder ast.Builder) string {

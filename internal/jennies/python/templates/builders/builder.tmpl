@@ -12,6 +12,9 @@ class {{ .BuilderName }}(cogbuilder.Builder[{{ .BuilderSignatureType }}]):
 {{- end }}
 
     def build(self) -> {{ .ObjectName }}:
+        """
+        Builds the object.
+        """
         return self._internal
 
 {{- include "options" . | indent 4 -}}

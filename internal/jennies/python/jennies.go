@@ -55,8 +55,8 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		ModuleInit{},
 		common.If[languages.Context](!language.config.SkipRuntime, Runtime{tmpl: tmpl}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{tmpl: tmpl}),
-		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 
 		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
 			Collector: language.apiRefCollector,
