@@ -9,11 +9,19 @@
   background-color: #ffa6571a;
 }
 
-.badge.object-type-struct {
+.badge.object-type-struct,
+.badge.object-type-interface,
+.badge.object-type-class {
   color: #79c0ff;
   background-color: #79c0ff1a;
 }
 .badge.object-type-struct::after {
+  content: 'struct';
+}
+.badge.object-type-interface::after {
+  content: 'interface';
+}
+.badge.object-type-class::after {
   content: 'class';
 }
 

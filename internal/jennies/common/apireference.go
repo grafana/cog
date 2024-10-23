@@ -64,6 +64,8 @@ func (collector *APIReferenceCollector) FunctionsForPackage(pkg string) []Functi
 }
 
 type APIReferenceFormatter struct {
+	KindName func(kind ast.Kind) string
+
 	FunctionSignature func(context languages.Context, function FunctionReference) string
 
 	ObjectName       func(object ast.Object) string
@@ -353,7 +355,7 @@ title: %[2]s %[1]s
 }
 
 func (jenny APIReference) kindBadge(kind ast.Kind) string {
-	return fmt.Sprintf("<span class=\"badge object-type-%s\"></span>", kind)
+	return fmt.Sprintf("<span class=\"badge object-type-%s\"></span>", jenny.Formatter.KindName(kind))
 }
 
 func (jenny APIReference) methodBadge() string {

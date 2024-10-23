@@ -12,6 +12,13 @@ import (
 
 func apiReferenceFormatter() common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
+		KindName: func(kind ast.Kind) string {
+			if kind == ast.KindStruct {
+				return "interface"
+			}
+
+			return string(kind)
+		},
 		FunctionSignature: func(context languages.Context, function common.FunctionReference) string {
 			args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
 				return fmt.Sprintf("%s: %s", arg.Name, arg.Type)
