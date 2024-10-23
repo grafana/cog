@@ -25,6 +25,8 @@ type Dashboard struct {
 	Panels []Panel           `json:"panels"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Dashboard` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Dashboard) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -139,6 +141,7 @@ func (resource *Dashboard) UnmarshalJSONStrict(raw []byte) error {
 	return errs
 }
 
+// Equals tests the equality of two `Dashboard` objects.
 func (resource Dashboard) Equals(other Dashboard) bool {
 	if resource.Uid == nil && other.Uid != nil || resource.Uid != nil && other.Uid == nil {
 		return false
@@ -195,8 +198,7 @@ func (resource Dashboard) Equals(other Dashboard) bool {
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Dashboard` fields for violations and returns them.
 func (resource Dashboard) Validate() error {
 	var errs cog.BuildErrors
 	if resource.Uid != nil {
@@ -257,6 +259,8 @@ type Panel struct {
 	Title string `json:"title"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Panel` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Panel) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -293,6 +297,7 @@ func (resource *Panel) UnmarshalJSONStrict(raw []byte) error {
 	return errs
 }
 
+// Equals tests the equality of two `Panel` objects.
 func (resource Panel) Equals(other Panel) bool {
 	if resource.Title != other.Title {
 		return false
@@ -301,8 +306,7 @@ func (resource Panel) Equals(other Panel) bool {
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Panel` fields for violations and returns them.
 func (resource Panel) Validate() error {
 	var errs cog.BuildErrors
 	if !(len([]rune(resource.Title)) >= 1) {

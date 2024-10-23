@@ -74,6 +74,9 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 				Type: formatRawRef(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType),
 			},
 		},
+		Comments: []string{
+			fmt.Sprintf("%[1]sConverter accepts a `%[1]s` object and generates the Go code to build this object using builders.", tools.UpperCamelCase(converter.BuilderName)),
+		},
 		Return: "string",
 	})
 
