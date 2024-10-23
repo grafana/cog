@@ -13,25 +13,27 @@ import (
 // a
 // comment
 type SomeStruct struct {
-	// Anything can go in there.
-// Really, anything.
-FieldAny any `json:"FieldAny"`
-	FieldBool bool `json:"FieldBool"`
-	FieldBytes []byte `json:"FieldBytes"`
-	FieldString string `json:"FieldString"`
-	FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
-	FieldFloat32 float32 `json:"FieldFloat32"`
-	FieldFloat64 float64 `json:"FieldFloat64"`
-	FieldUint8 uint8 `json:"FieldUint8"`
-	FieldUint16 uint16 `json:"FieldUint16"`
-	FieldUint32 uint32 `json:"FieldUint32"`
-	FieldUint64 uint64 `json:"FieldUint64"`
-	FieldInt8 int8 `json:"FieldInt8"`
-	FieldInt16 int16 `json:"FieldInt16"`
-	FieldInt32 int32 `json:"FieldInt32"`
-	FieldInt64 int64 `json:"FieldInt64"`
+    // Anything can go in there.
+    // Really, anything.
+    FieldAny any `json:"FieldAny"`
+    FieldBool bool `json:"FieldBool"`
+    FieldBytes []byte `json:"FieldBytes"`
+    FieldString string `json:"FieldString"`
+    FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
+    FieldFloat32 float32 `json:"FieldFloat32"`
+    FieldFloat64 float64 `json:"FieldFloat64"`
+    FieldUint8 uint8 `json:"FieldUint8"`
+    FieldUint16 uint16 `json:"FieldUint16"`
+    FieldUint32 uint32 `json:"FieldUint32"`
+    FieldUint64 uint64 `json:"FieldUint64"`
+    FieldInt8 int8 `json:"FieldInt8"`
+    FieldInt16 int16 `json:"FieldInt16"`
+    FieldInt32 int32 `json:"FieldInt32"`
+    FieldInt64 int64 `json:"FieldInt64"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -235,6 +237,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `SomeStruct` objects.
 func (resource SomeStruct) Equals(other SomeStruct) bool {
 		// is DeepEqual good enough here?
 		if !reflect.DeepEqual(resource.FieldAny, other.FieldAny) {
@@ -287,8 +290,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `SomeStruct` fields for violations and returns them.
 func (resource SomeStruct) Validate() error {
 	return nil
 }

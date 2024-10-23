@@ -7,6 +7,7 @@ import (
 	"fmt"
 )
 
+// DashboardConverter accepts a `Dashboard` object and generates the Go code to build this object using builders.
 func DashboardConverter(input Dashboard) string {
     calls := []string{
     `sandbox.NewDashboardBuilder()`,
@@ -29,4 +30,4 @@ func DashboardConverter(input Dashboard) string {
     }}
 
     return strings.Join(calls, ".\t\n")
-    }
+}

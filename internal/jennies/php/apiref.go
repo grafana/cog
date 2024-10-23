@@ -13,6 +13,22 @@ import (
 
 func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
+		KindName: func(kind ast.Kind) string {
+			if kind == ast.KindStruct {
+				return "class"
+			}
+
+			return string(kind)
+		},
+
+		FunctionSignature: func(context languages.Context, function common.FunctionReference) string {
+			args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
+				return fmt.Sprintf("%s $%s", arg.Type, arg.Name)
+			})
+
+			return fmt.Sprintf("%[1]s(%[2]s)", formatOptionName(function.Name), strings.Join(args, ", "))
+		},
+
 		ObjectName: func(object ast.Object) string {
 			return formatObjectName(object.Name)
 		},
@@ -24,7 +40,7 @@ func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIRef
 		MethodName: func(method common.MethodReference) string {
 			return formatOptionName(method.Name)
 		},
-		MethodSignature: func(context languages.Context, method common.MethodReference) string {
+		MethodSignature: func(context languages.Context, object ast.Object, method common.MethodReference) string {
 			args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
 				return fmt.Sprintf("%s $%s", arg.Type, arg.Name)
 			})
@@ -56,7 +72,7 @@ func apiReferenceFormatter(tmpl *template.Template, config Config) common.APIRef
 		OptionName: func(option ast.Option) string {
 			return formatOptionName(option.Name)
 		},
-		OptionSignature: func(context languages.Context, option ast.Option) string {
+		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
 			typesFormatter := builderTypeFormatter(config, context)
 			args := tools.Map(option.Args, func(arg ast.Argument) string {
 				argType := typesFormatter.formatType(arg.Type)

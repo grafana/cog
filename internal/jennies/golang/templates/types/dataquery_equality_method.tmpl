@@ -1,3 +1,4 @@
+// Equals tests the equality of two dataqueries.
 func (resource {{ .def.Name|upperCamelCase }}) Equals(otherCandidate variants.Dataquery) bool {
 	if otherCandidate == nil {
 		return false

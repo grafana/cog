@@ -7,6 +7,7 @@ import (
 	"fmt"
 )
 
+// SomePanelConverter accepts a `SomePanel` object and generates the Go code to build this object using builders.
 func SomePanelConverter(input SomePanel) string {
     calls := []string{
     `constructor_initializations.NewSomePanelBuilder()`,
@@ -26,4 +27,4 @@ func SomePanelConverter(input SomePanel) string {
     }
 
     return strings.Join(calls, ".\t\n")
-    }
+}

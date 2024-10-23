@@ -114,8 +114,9 @@ package {{ .Converter.Package | formatPackageName }}
 {{- end }}
 
 {{- define "converter" -}}
-    {{- $reflect := importStdPkg "strings" -}}
-    func {{ .Converter.BuilderName | upperCamelCase }}Converter(input {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
+{{- $reflect := importStdPkg "strings" -}}
+// {{ .Converter.BuilderName | upperCamelCase }}Converter accepts a `{{ .Converter.BuilderName | upperCamelCase }}` object and generates the Go code to build this object using builders.
+func {{ .Converter.BuilderName | upperCamelCase }}Converter(input {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
     {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
     calls := []string{
     `{{ .Converter.Package | formatPackageName }}.New{{ .Converter.BuilderName | upperCamelCase }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
@@ -127,5 +128,5 @@ package {{ .Converter.Package | formatPackageName }}
     {{- end }}
 
     return strings.Join(calls, ".\t\n")
-    }
+}
 {{- end }}

@@ -8,10 +8,12 @@ import (
 )
 
 type NestedStruct struct {
-	StringVal string `json:"stringVal"`
-	IntVal int64 `json:"intVal"`
+    StringVal string `json:"stringVal"`
+    IntVal int64 `json:"intVal"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `NestedStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *NestedStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -59,6 +61,7 @@ func (resource *NestedStruct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `NestedStruct` objects.
 func (resource NestedStruct) Equals(other NestedStruct) bool {
 		if resource.StringVal != other.StringVal {
 			return false
@@ -71,21 +74,22 @@ func (resource NestedStruct) Equals(other NestedStruct) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `NestedStruct` fields for violations and returns them.
 func (resource NestedStruct) Validate() error {
 	return nil
 }
 
 
 type Struct struct {
-	AllFields NestedStruct `json:"allFields"`
-	PartialFields NestedStruct `json:"partialFields"`
-	EmptyFields NestedStruct `json:"emptyFields"`
-	ComplexField DefaultsStructComplexField `json:"complexField"`
-	PartialComplexField DefaultsStructPartialComplexField `json:"partialComplexField"`
+    AllFields NestedStruct `json:"allFields"`
+    PartialFields NestedStruct `json:"partialFields"`
+    EmptyFields NestedStruct `json:"emptyFields"`
+    ComplexField DefaultsStructComplexField `json:"complexField"`
+    PartialComplexField DefaultsStructPartialComplexField `json:"partialComplexField"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Struct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Struct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -179,6 +183,7 @@ func (resource *Struct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `Struct` objects.
 func (resource Struct) Equals(other Struct) bool {
 		if !resource.AllFields.Equals(other.AllFields) {
 			return false
@@ -200,8 +205,7 @@ func (resource Struct) Equals(other Struct) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Struct` fields for violations and returns them.
 func (resource Struct) Validate() error {
 	var errs cog.BuildErrors
 		if err := resource.AllFields.Validate(); err != nil {
@@ -229,9 +233,11 @@ func (resource Struct) Validate() error {
 
 
 type DefaultsStructComplexFieldNested struct {
-	NestedVal string `json:"nestedVal"`
+    NestedVal string `json:"nestedVal"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DefaultsStructComplexFieldNested` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *DefaultsStructComplexFieldNested) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -267,6 +273,7 @@ func (resource *DefaultsStructComplexFieldNested) UnmarshalJSONStrict(raw []byte
 }
 
 
+// Equals tests the equality of two `DefaultsStructComplexFieldNested` objects.
 func (resource DefaultsStructComplexFieldNested) Equals(other DefaultsStructComplexFieldNested) bool {
 		if resource.NestedVal != other.NestedVal {
 			return false
@@ -276,19 +283,20 @@ func (resource DefaultsStructComplexFieldNested) Equals(other DefaultsStructComp
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `DefaultsStructComplexFieldNested` fields for violations and returns them.
 func (resource DefaultsStructComplexFieldNested) Validate() error {
 	return nil
 }
 
 
 type DefaultsStructComplexField struct {
-	Uid string `json:"uid"`
-	Nested DefaultsStructComplexFieldNested `json:"nested"`
-	Array []string `json:"array"`
+    Uid string `json:"uid"`
+    Nested DefaultsStructComplexFieldNested `json:"nested"`
+    Array []string `json:"array"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DefaultsStructComplexField` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *DefaultsStructComplexField) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -351,6 +359,7 @@ func (resource *DefaultsStructComplexField) UnmarshalJSONStrict(raw []byte) erro
 }
 
 
+// Equals tests the equality of two `DefaultsStructComplexField` objects.
 func (resource DefaultsStructComplexField) Equals(other DefaultsStructComplexField) bool {
 		if resource.Uid != other.Uid {
 			return false
@@ -373,8 +382,7 @@ func (resource DefaultsStructComplexField) Equals(other DefaultsStructComplexFie
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `DefaultsStructComplexField` fields for violations and returns them.
 func (resource DefaultsStructComplexField) Validate() error {
 	var errs cog.BuildErrors
 		if err := resource.Nested.Validate(); err != nil {
@@ -390,10 +398,12 @@ func (resource DefaultsStructComplexField) Validate() error {
 
 
 type DefaultsStructPartialComplexField struct {
-	Uid string `json:"uid"`
-	IntVal int64 `json:"intVal"`
+    Uid string `json:"uid"`
+    IntVal int64 `json:"intVal"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DefaultsStructPartialComplexField` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *DefaultsStructPartialComplexField) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -441,6 +451,7 @@ func (resource *DefaultsStructPartialComplexField) UnmarshalJSONStrict(raw []byt
 }
 
 
+// Equals tests the equality of two `DefaultsStructPartialComplexField` objects.
 func (resource DefaultsStructPartialComplexField) Equals(other DefaultsStructPartialComplexField) bool {
 		if resource.Uid != other.Uid {
 			return false
@@ -453,8 +464,7 @@ func (resource DefaultsStructPartialComplexField) Equals(other DefaultsStructPar
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `DefaultsStructPartialComplexField` fields for violations and returns them.
 func (resource DefaultsStructPartialComplexField) Validate() error {
 	return nil
 }

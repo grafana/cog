@@ -3,6 +3,7 @@ package golang
 import (
 	"testing"
 
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
@@ -24,9 +25,10 @@ func TestConverter_Generate(t *testing.T) {
 	}
 	language := New(config)
 	jenny := Converter{
-		Config:         config,
-		NullableConfig: language.NullableKinds(),
-		Tmpl:           initTemplates([]string{}),
+		Config:          config,
+		NullableConfig:  language.NullableKinds(),
+		Tmpl:            initTemplates([]string{}),
+		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {

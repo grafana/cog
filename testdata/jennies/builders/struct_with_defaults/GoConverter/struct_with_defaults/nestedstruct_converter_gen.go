@@ -7,6 +7,7 @@ import (
 	"fmt"
 )
 
+// NestedStructConverter accepts a `NestedStruct` object and generates the Go code to build this object using builders.
 func NestedStructConverter(input NestedStruct) string {
     calls := []string{
     `struct_with_defaults.NewNestedStructBuilder()`,
@@ -38,4 +39,4 @@ func NestedStructConverter(input NestedStruct) string {
     
 
     return strings.Join(calls, ".\t\n")
-    }
+}

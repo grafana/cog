@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// SomeStructConverter accepts a `SomeStruct` object and generates the Go code to build this object using builders.
 func SomeStructConverter(input SomeStruct) string {
     calls := []string{
     `sandbox.NewSomeStructBuilder()`,
@@ -49,4 +50,4 @@ func SomeStructConverter(input SomeStruct) string {
     }
 
     return strings.Join(calls, ".\t\n")
-    }
+}

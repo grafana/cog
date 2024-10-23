@@ -7,6 +7,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
+// PersonConverter accepts a `Person` object and generates the Go code to build this object using builders.
 func PersonConverter(input Person) string {
     calls := []string{
     `some_pkg.NewPersonBuilder()`,
@@ -26,4 +27,4 @@ func PersonConverter(input Person) string {
     
 
     return strings.Join(calls, ".\t\n")
-    }
+}

@@ -29,6 +29,8 @@ type Variable struct {
 	Name string `json:"name"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Variable` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Variable) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -65,6 +67,7 @@ func (resource *Variable) UnmarshalJSONStrict(raw []byte) error {
 	return errs
 }
 
+// Equals tests the equality of two `Variable` objects.
 func (resource Variable) Equals(other Variable) bool {
 	if resource.Name != other.Name {
 		return false
@@ -73,8 +76,7 @@ func (resource Variable) Equals(other Variable) bool {
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Variable` fields for violations and returns them.
 func (resource Variable) Validate() error {
 	return nil
 }
@@ -86,6 +88,8 @@ type Container struct {
 	RefField    Variable  `json:"refField"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Container` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Container) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -166,6 +170,7 @@ func (resource *Container) UnmarshalJSONStrict(raw []byte) error {
 	return errs
 }
 
+// Equals tests the equality of two `Container` objects.
 func (resource Container) Equals(other Container) bool {
 	if resource.StringField != other.StringField {
 		return false
@@ -183,8 +188,7 @@ func (resource Container) Equals(other Container) bool {
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Container` fields for violations and returns them.
 func (resource Container) Validate() error {
 	var errs cog.BuildErrors
 	if err := resource.RefField.Validate(); err != nil {
@@ -207,6 +211,8 @@ type Optionals struct {
 	RefField *Variable `json:"refField,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Optionals` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Optionals) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -264,6 +270,7 @@ func (resource *Optionals) UnmarshalJSONStrict(raw []byte) error {
 	return errs
 }
 
+// Equals tests the equality of two `Optionals` objects.
 func (resource Optionals) Equals(other Optionals) bool {
 	if resource.StringField == nil && other.StringField != nil || resource.StringField != nil && other.StringField == nil {
 		return false
@@ -296,8 +303,7 @@ func (resource Optionals) Equals(other Optionals) bool {
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Optionals` fields for violations and returns them.
 func (resource Optionals) Validate() error {
 	var errs cog.BuildErrors
 	if resource.RefField != nil {
@@ -322,6 +328,8 @@ type Arrays struct {
 	ArrayOfAny       []any                            `json:"arrayOfAny"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Arrays` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Arrays) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -456,6 +464,7 @@ func (resource *Arrays) UnmarshalJSONStrict(raw []byte) error {
 	return errs
 }
 
+// Equals tests the equality of two `Arrays` objects.
 func (resource Arrays) Equals(other Arrays) bool {
 
 	if len(resource.Ints) != len(other.Ints) {
@@ -529,8 +538,7 @@ func (resource Arrays) Equals(other Arrays) bool {
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Arrays` fields for violations and returns them.
 func (resource Arrays) Validate() error {
 	var errs cog.BuildErrors
 
@@ -561,6 +569,8 @@ type Maps struct {
 	StringToAny      map[string]any                          `json:"stringToAny"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Maps` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Maps) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -682,6 +692,7 @@ func (resource *Maps) UnmarshalJSONStrict(raw []byte) error {
 	return errs
 }
 
+// Equals tests the equality of two `Maps` objects.
 func (resource Maps) Equals(other Maps) bool {
 
 	if len(resource.Ints) != len(other.Ints) {
@@ -738,8 +749,7 @@ func (resource Maps) Equals(other Maps) bool {
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Maps` fields for violations and returns them.
 func (resource Maps) Validate() error {
 	var errs cog.BuildErrors
 
@@ -767,6 +777,8 @@ type EqualityArraysAnonymousStructs struct {
 	Inner string `json:"inner"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `EqualityArraysAnonymousStructs` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *EqualityArraysAnonymousStructs) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -803,6 +815,7 @@ func (resource *EqualityArraysAnonymousStructs) UnmarshalJSONStrict(raw []byte) 
 	return errs
 }
 
+// Equals tests the equality of two `EqualityArraysAnonymousStructs` objects.
 func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonymousStructs) bool {
 	if resource.Inner != other.Inner {
 		return false
@@ -811,8 +824,7 @@ func (resource EqualityArraysAnonymousStructs) Equals(other EqualityArraysAnonym
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `EqualityArraysAnonymousStructs` fields for violations and returns them.
 func (resource EqualityArraysAnonymousStructs) Validate() error {
 	return nil
 }
@@ -822,6 +834,8 @@ type EqualityMapsAnonymousStructs struct {
 	Inner string `json:"inner"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `EqualityMapsAnonymousStructs` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *EqualityMapsAnonymousStructs) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -858,6 +872,7 @@ func (resource *EqualityMapsAnonymousStructs) UnmarshalJSONStrict(raw []byte) er
 	return errs
 }
 
+// Equals tests the equality of two `EqualityMapsAnonymousStructs` objects.
 func (resource EqualityMapsAnonymousStructs) Equals(other EqualityMapsAnonymousStructs) bool {
 	if resource.Inner != other.Inner {
 		return false
@@ -866,8 +881,7 @@ func (resource EqualityMapsAnonymousStructs) Equals(other EqualityMapsAnonymousS
 	return true
 }
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `EqualityMapsAnonymousStructs` fields for violations and returns them.
 func (resource EqualityMapsAnonymousStructs) Validate() error {
 	return nil
 }

@@ -7,14 +7,17 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type Converter struct {
-	Config         Config
-	NullableConfig languages.NullableConfig
-	Tmpl           *template.Template
+	Config          Config
+	NullableConfig  languages.NullableConfig
+	Tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func (jenny *Converter) JennyName() string {
@@ -62,6 +65,20 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	formatRawRef := func(pkg string, ref string) string {
 		return formatter.formatRef(ast.NewRef(pkg, ref), false)
 	}
+
+	jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
+		Name: fmt.Sprintf("%sConverter", tools.UpperCamelCase(converter.BuilderName)),
+		Arguments: []common.ArgumentReference{
+			{
+				Name: "input",
+				Type: formatRawRef(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType),
+			},
+		},
+		Comments: []string{
+			fmt.Sprintf("%[1]sConverter accepts a `%[1]s` object and generates the Go code to build this object using builders.", tools.UpperCamelCase(converter.BuilderName)),
+		},
+		Return: "string",
+	})
 
 	return jenny.Tmpl.
 		Funcs(map[string]any{
