@@ -11,13 +11,14 @@ public class {{ .Name | upperCamelCase }}MapperConverter implements Converter<{{
         {{ .Name | upperCamelCase }} dataquery = ({{ .Name | upperCamelCase }}) input;
 
         {{- if ne .Disjunction nil }}
-            {{- range .Disjunction.Fields }}
-                if (dataquery.{{ .Name | lower }} != null) {
-                    return {{ .Type.Ref.ReferredType | upperCamelCase }}Converter(dataquery);
-                }
-            {{- end }}
+        {{- range .Disjunction.Fields }}
+        if (dataquery.{{ .Name | escapeVar | lowerCamelCase }} != null) {
+            return {{ .Type.Ref.ReferredType | upperCamelCase }}Converter.convert(dataquery.{{ .Name | escapeVar | lowerCamelCase }});
+        }
+        {{- end }}
+        return "<invalid>";
         {{- else }}
-            return {{ .Name | upperCamelCase }}Converter.convert(dataquery);
+        return {{ .Name | upperCamelCase }}Converter.convert(dataquery);
         {{- end }}
     }
 }

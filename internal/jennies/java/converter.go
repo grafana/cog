@@ -39,7 +39,33 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
-	return files, nil
+	var err error
+	for _, schema := range context.Schemas {
+		schema.Objects = schema.Objects.Filter(func(key string, obj ast.Object) bool {
+			if obj.Type.ImplementedVariant() != string(ast.SchemaVariantDataQuery) {
+				return false
+			}
+
+			return !obj.Type.HasHint(ast.HintSkipVariantPluginRegistration)
+		})
+
+		schema.Objects.Iterate(func(key string, obj ast.Object) {
+			output, genErr := jenny.generateDataqueryConverter(context, schema, obj)
+			if genErr != nil {
+				err = genErr
+			} else {
+				filename := filepath.Join(
+					jenny.config.ProjectPath,
+					formatPackageName(schema.Package),
+					fmt.Sprintf("%sMapperConverter.java", tools.UpperCamelCase(obj.Name)),
+				)
+
+				files = append(files, *codejen.NewFile(filename, output, jenny))
+			}
+		})
+	}
+
+	return files, err
 }
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
@@ -74,4 +100,44 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			"Converter": converter,
 			"IsPanel":   schemaFound && schema.Metadata.Variant == ast.SchemaVariantPanel && builder.Name == "Panel",
 		})
+}
+
+func (jenny *Converter) generateDataqueryConverter(context languages.Context, schema *ast.Schema, obj ast.Object) ([]byte, error) {
+	var disjunctionStruct *ast.StructType
+
+	if obj.Type.IsDisjunctionOfRefs() {
+		disjunctionStruct = obj.Type.Struct
+	}
+
+	imports := NewImportMap(jenny.config.PackagePath)
+	packageMapper := func(pkg string, class string) string {
+		if imports.IsIdentical(pkg, schema.Package) {
+			return ""
+		}
+
+		return imports.Add(class, pkg)
+	}
+
+	typeFormatter := createFormatter(context, jenny.config).withPackageMapper(packageMapper)
+
+	imports.Add("Converter", "cog")
+
+	return jenny.tmpl.Funcs(map[string]any{
+		"formatPackageName": typeFormatter.formatPackage,
+	}).
+		RenderAsBytes("converters/dataquery_converter.tmpl", map[string]any{
+			"Package":     obj.SelfRef.ReferredPkg,
+			"Imports":     imports.String(),
+			"Name":        obj.Name,
+			"Input":       jenny.formatPackage("cog.variants.Dataquery"),
+			"Disjunction": disjunctionStruct,
+		})
+}
+
+func (jenny *Converter) formatPackage(pkg string) string {
+	if jenny.config.PackagePath != "" {
+		return fmt.Sprintf("%s.%s", jenny.config.PackagePath, pkg)
+	}
+
+	return pkg
 }
