@@ -9,12 +9,14 @@ import (
 )
 
 type SomeStruct struct {
-	Id uint64 `json:"id"`
-	MaybeId *uint64 `json:"maybeId,omitempty"`
-	Title string `json:"title"`
-	RefStruct *RefStruct `json:"refStruct,omitempty"`
+    Id uint64 `json:"id"`
+    MaybeId *uint64 `json:"maybeId,omitempty"`
+    Title string `json:"title"`
+    RefStruct *RefStruct `json:"refStruct,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -86,6 +88,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `SomeStruct` objects.
 func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if resource.Id != other.Id {
 			return false
@@ -116,8 +119,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `SomeStruct` fields for violations and returns them.
 func (resource SomeStruct) Validate() error {
 	var errs cog.BuildErrors
 		if !(resource.Id >= 5) {
@@ -167,10 +169,12 @@ func (resource SomeStruct) Validate() error {
 
 
 type RefStruct struct {
-	Labels map[string]string `json:"labels"`
-	Tags []string `json:"tags"`
+    Labels map[string]string `json:"labels"`
+    Tags []string `json:"tags"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `RefStruct` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *RefStruct) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -220,6 +224,7 @@ func (resource *RefStruct) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `RefStruct` objects.
 func (resource RefStruct) Equals(other RefStruct) bool {
 
 		if len(resource.Labels) != len(other.Labels) {
@@ -246,8 +251,7 @@ func (resource RefStruct) Equals(other RefStruct) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `RefStruct` fields for violations and returns them.
 func (resource RefStruct) Validate() error {
 	var errs cog.BuildErrors
 

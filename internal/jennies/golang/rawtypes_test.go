@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
@@ -19,8 +20,9 @@ func TestRawTypes_Generate(t *testing.T) {
 		PackageRoot: "github.com/grafana/cog/generated",
 	}
 	jenny := RawTypes{
-		Config: config,
-		Tmpl:   initTemplates([]string{}),
+		Config:          config,
+		Tmpl:            initTemplates([]string{}),
+		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 	compilerPasses := New(config).CompilerPasses()
 

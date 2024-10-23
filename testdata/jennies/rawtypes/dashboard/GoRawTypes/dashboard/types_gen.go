@@ -11,10 +11,12 @@ import (
 )
 
 type Dashboard struct {
-	Title string `json:"title"`
-	Panels []Panel `json:"panels,omitempty"`
+    Title string `json:"title"`
+    Panels []Panel `json:"panels,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Dashboard` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Dashboard) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -73,6 +75,7 @@ func (resource *Dashboard) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `Dashboard` objects.
 func (resource Dashboard) Equals(other Dashboard) bool {
 		if resource.Title != other.Title {
 			return false
@@ -92,8 +95,7 @@ func (resource Dashboard) Equals(other Dashboard) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Dashboard` fields for violations and returns them.
 func (resource Dashboard) Validate() error {
 	var errs cog.BuildErrors
 
@@ -112,10 +114,12 @@ func (resource Dashboard) Validate() error {
 
 
 type DataSourceRef struct {
-	Type *string `json:"type,omitempty"`
-	Uid *string `json:"uid,omitempty"`
+    Type *string `json:"type,omitempty"`
+    Uid *string `json:"uid,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DataSourceRef` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *DataSourceRef) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -161,6 +165,7 @@ func (resource *DataSourceRef) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `DataSourceRef` objects.
 func (resource DataSourceRef) Equals(other DataSourceRef) bool {
 		if resource.Type == nil && other.Type != nil || resource.Type != nil && other.Type == nil {
 			return false
@@ -185,17 +190,18 @@ func (resource DataSourceRef) Equals(other DataSourceRef) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `DataSourceRef` fields for violations and returns them.
 func (resource DataSourceRef) Validate() error {
 	return nil
 }
 
 
 type FieldConfigSource struct {
-	Defaults *FieldConfig `json:"defaults,omitempty"`
+    Defaults *FieldConfig `json:"defaults,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `FieldConfigSource` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *FieldConfigSource) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -232,6 +238,7 @@ func (resource *FieldConfigSource) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `FieldConfigSource` objects.
 func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
 		if resource.Defaults == nil && other.Defaults != nil || resource.Defaults != nil && other.Defaults == nil {
 			return false
@@ -247,8 +254,7 @@ func (resource FieldConfigSource) Equals(other FieldConfigSource) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `FieldConfigSource` fields for violations and returns them.
 func (resource FieldConfigSource) Validate() error {
 	var errs cog.BuildErrors
 		if resource.Defaults != nil {
@@ -266,10 +272,12 @@ func (resource FieldConfigSource) Validate() error {
 
 
 type FieldConfig struct {
-	Unit *string `json:"unit,omitempty"`
-	Custom any `json:"custom,omitempty"`
+    Unit *string `json:"unit,omitempty"`
+    Custom any `json:"custom,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `FieldConfig` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -315,6 +323,7 @@ func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `FieldConfig` objects.
 func (resource FieldConfig) Equals(other FieldConfig) bool {
 		if resource.Unit == nil && other.Unit != nil || resource.Unit != nil && other.Unit == nil {
 			return false
@@ -334,22 +343,22 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `FieldConfig` fields for violations and returns them.
 func (resource FieldConfig) Validate() error {
 	return nil
 }
 
 
 type Panel struct {
-	Title string `json:"title"`
-	Type string `json:"type"`
-	Datasource *DataSourceRef `json:"datasource,omitempty"`
-	Options any `json:"options,omitempty"`
-	Targets []variants.Dataquery `json:"targets,omitempty"`
-	FieldConfig *FieldConfigSource `json:"fieldConfig,omitempty"`
+    Title string `json:"title"`
+    Type string `json:"type"`
+    Datasource *DataSourceRef `json:"datasource,omitempty"`
+    Options any `json:"options,omitempty"`
+    Targets []variants.Dataquery `json:"targets,omitempty"`
+    FieldConfig *FieldConfigSource `json:"fieldConfig,omitempty"`
 }
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode Panel from JSON.
 func (resource *Panel) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -405,6 +414,8 @@ dataqueryTypeHint = *resource.Datasource.Type
 	return nil
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Panel` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Panel) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -514,6 +525,7 @@ func (resource *Panel) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `Panel` objects.
 func (resource Panel) Equals(other Panel) bool {
 		if resource.Title != other.Title {
 			return false
@@ -558,8 +570,7 @@ func (resource Panel) Equals(other Panel) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Panel` fields for violations and returns them.
 func (resource Panel) Validate() error {
 	var errs cog.BuildErrors
 		if resource.Datasource != nil {
