@@ -22,6 +22,7 @@ theme:
   features:
     - navigation.tabs
     - navigation.indexes
+    - navigation.top
 
   custom_dir: overrides
 
