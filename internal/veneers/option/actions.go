@@ -55,6 +55,7 @@ func ArrayToAppendAction() RewriteAction {
 
 		newFirstArg := option.Args[0]
 		newFirstArg.Type = option.Args[0].Type.AsArray().ValueType
+		newFirstArg.Name = tools.Singularize(newFirstArg.Name)
 
 		// Update the assignment to do an append instead of a list assignment
 		oldAssignments := option.Assignments
@@ -63,6 +64,7 @@ func ArrayToAppendAction() RewriteAction {
 		newFirstAssignment.Method = ast.AppendAssignment
 		// TODO: what if there is an envelope in the value assignment?
 		if newFirstAssignment.Value.Argument != nil {
+			newFirstAssignment.Value.Argument.Name = newFirstArg.Name
 			newFirstAssignment.Value.Argument.Type = newFirstArg.Type
 		}
 
