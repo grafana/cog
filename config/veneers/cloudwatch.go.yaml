@@ -10,3 +10,6 @@ options:
   - struct_fields_as_arguments:
       by_name: QueryEditorOperator.value
       fields: [ ArrayOfQueryEditorOperatorType ]
+  - rename_arguments:
+      by_name: QueryEditorOperator.value
+      as: [operatorTypes]

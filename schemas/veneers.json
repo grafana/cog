@@ -634,6 +634,9 @@
         "rename": {
           "$ref": "#/$defs/YamlRenameOption"
         },
+        "rename_arguments": {
+          "$ref": "#/$defs/YamlRenameArguments"
+        },
         "unfold_boolean": {
           "$ref": "#/$defs/YamlUnfoldBoolean"
         },
@@ -713,6 +716,29 @@
         "set": {
           "items": {
             "$ref": "#/$defs/AstStructField"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlRenameArguments": {
+      "properties": {
+        "by_name": {
+          "type": "string",
+          "description": "objectName.optionName"
+        },
+        "by_builder": {
+          "type": "string",
+          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
+        },
+        "by_names": {
+          "$ref": "#/$defs/YamlByNamesSelector"
+        },
+        "as": {
+          "items": {
+            "type": "string"
           },
           "type": "array"
         }
