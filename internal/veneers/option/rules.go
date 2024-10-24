@@ -23,6 +23,13 @@ func ArrayToAppend(selector Selector) RewriteRule {
 	}
 }
 
+func RenameArguments(selector Selector, newNames []string) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   RenameArgumentsAction(newNames),
+	}
+}
+
 func Omit(selector Selector) RewriteRule {
 	return RewriteRule{
 		Selector: selector,

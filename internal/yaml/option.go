@@ -15,6 +15,7 @@ import (
 type OptionRule struct {
 	Omit                    *OptionSelector          `yaml:"omit"`
 	Rename                  *RenameOption            `yaml:"rename"`
+	RenameArguments         *RenameArguments         `yaml:"rename_arguments"`
 	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean"`
 	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
 	StructFieldsAsOptions   *StructFieldsAsOptions   `yaml:"struct_fields_as_options"`
@@ -36,6 +37,10 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 
 	if rule.Rename != nil {
 		return rule.Rename.AsRewriteRule(pkg)
+	}
+
+	if rule.RenameArguments != nil {
+		return rule.RenameArguments.AsRewriteRule(pkg)
 	}
 
 	if rule.UnfoldBoolean != nil {
@@ -82,6 +87,21 @@ func (rule RenameOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 	}
 
 	return option.Rename(selector, rule.As), nil
+}
+
+type RenameArguments struct {
+	OptionSelector `yaml:",inline"`
+
+	As []string `yaml:"as"`
+}
+
+func (rule RenameArguments) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.RenameArguments(selector, rule.As), nil
 }
 
 type UnfoldBoolean struct {

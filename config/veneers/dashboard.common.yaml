@@ -135,9 +135,14 @@ options:
   - array_to_append:
       by_name: Dashboard.link
 
-  # Dashboard.annotations([]AnnotationQuery) instead of Dashboard.annotations(AnnotationContainer)
+  # annotations([]AnnotationQuery) instead of annotations(AnnotationContainer)
   - struct_fields_as_arguments:
       by_name: Dashboard.annotations
+  # annotations(annotations) instead of annotations(list)
+  - rename_arguments:
+      by_name: Dashboard.annotations
+      as: [annotations]
+
   # Append a single `annotation` value instead of a list of everything
   - duplicate:
       by_name: Dashboard.annotations
@@ -172,6 +177,10 @@ options:
   - struct_fields_as_arguments:
       by_name: Dashboard.templating
       fields: [list]
+  # Templating(variables) instead of Templating(list)
+  - rename_arguments:
+      by_name: Dashboard.templating
+      as: [variables]
   # Append a single variable instead forcing to define every variable at once
   - duplicate:
       by_name: Dashboard.templating

@@ -260,14 +260,14 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 	// expected output
 	expectedOption := ast.Option{
 		Args: []ast.Argument{
-			{Name: "tags", Type: ast.String()},
+			{Name: "tag", Type: ast.String()},
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(
 				ast.Path{
 					{Identifier: "tags", Type: ast.NewArray(ast.String())},
 				},
-				ast.Argument{Name: "tags", Type: ast.String()},
+				ast.Argument{Name: "tag", Type: ast.String()},
 				ast.Method(ast.AppendAssignment),
 			),
 		},
