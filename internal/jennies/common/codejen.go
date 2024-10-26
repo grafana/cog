@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/grafana/codejen"
@@ -85,10 +86,35 @@ func GeneratedCommentHeader(config languages.Config) codejen.FileMapper {
 	}
 }
 
+type pathPrefixerCfg struct {
+	except []string
+	only   []string
+}
+
+type PathPrefixerOption func(*pathPrefixerCfg)
+
+func PrefixExcept(pathPrefix ...string) PathPrefixerOption {
+	return func(cfg *pathPrefixerCfg) {
+		cfg.except = append(cfg.except, pathPrefix...)
+	}
+}
+
 // PathPrefixer returns a FileMapper that injects the provided path prefix to files
 // passed through it.
-func PathPrefixer(prefix string) codejen.FileMapper {
+func PathPrefixer(prefix string, opts ...PathPrefixerOption) codejen.FileMapper {
+	cfg := &pathPrefixerCfg{}
+
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
 	return func(f codejen.File) (codejen.File, error) {
+		for _, ignoredPrefix := range cfg.except {
+			if strings.HasPrefix(f.RelativePath, ignoredPrefix) {
+				return f, nil
+			}
+		}
+
 		f.RelativePath = filepath.Join(prefix, f.RelativePath)
 		return f, nil
 	}
