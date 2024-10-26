@@ -155,7 +155,7 @@ func (jenny APIReference) index(context languages.Context) (codejen.File, error)
 		buffer.WriteString(fmt.Sprintf(" * [%[1]s](./%[1]s/index.md)\n", schema.Package))
 	}
 
-	return *codejen.NewFile("docs/index.md", buffer.Bytes(), jenny), nil
+	return *codejen.NewFile("docs/Reference/index.md", buffer.Bytes(), jenny), nil
 }
 
 func (jenny APIReference) referenceForSchema(context languages.Context, schema *ast.Schema) (codejen.Files, error) {
@@ -195,7 +195,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 
 	schema.Objects.Sort(orderedmap.SortStrings)
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./objects/%[1]s.md)\n", jenny.Formatter.ObjectName(object), jenny.kindBadge(object.Type.Kind)))
+		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./object-%[1]s.md)\n", jenny.Formatter.ObjectName(object), jenny.kindBadge(object.Type.Kind)))
 	})
 
 	buffer.WriteString("## Builders\n\n")
@@ -206,7 +206,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 	})
 
 	for _, builder := range builders {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builders/%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
 	}
 
 	functions := jenny.Collector.FunctionsForPackage(schema.Package)
@@ -236,7 +236,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 		return codejen.File{}, err
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/%s/index.md", schema.Package), buffer.Bytes(), jenny), nil
+	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/index.md", schema.Package), buffer.Bytes(), jenny), nil
 }
 
 func (jenny APIReference) referenceForObject(context languages.Context, object ast.Object) (codejen.File, error) {
@@ -281,14 +281,14 @@ title: %[2]s %[1]s
 		})
 		for _, builder := range buildersForObjet {
 			if builder.Package == object.SelfRef.ReferredPkg {
-				buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](../builders/%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+				buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
 			} else {
-				buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../../%[1]s/builders/%[2]s.md)\n", builder.Package, jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+				buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/builder-%[2]s.md)\n", builder.Package, jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
 			}
 		}
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/%s/objects/%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes(), jenny), nil
+	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/object-%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes(), jenny), nil
 }
 
 func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context languages.Context, object ast.Object) {
@@ -377,12 +377,12 @@ title: %[2]s %[1]s
 	buffer.WriteString("## See also\n\n")
 
 	if builder.Package == builder.For.SelfRef.ReferredPkg {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](../objects/%[1]s.md)\n", jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
+		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./object-%[1]s.md)\n", jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
 	} else {
-		buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../../%[1]s/objects/%[2]s.md)\n", builder.For.SelfRef.ReferredPkg, jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
+		buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/object-%[2]s.md)\n", builder.For.SelfRef.ReferredPkg, jenny.Formatter.ObjectName(builder.For), jenny.kindBadge(builder.For.Type.Kind)))
 	}
 
-	return *codejen.NewFile(fmt.Sprintf("docs/%s/builders/%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil
+	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/builder-%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil
 }
 
 func (jenny APIReference) kindBadge(kind ast.Kind) string {
