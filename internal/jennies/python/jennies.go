@@ -68,7 +68,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
 	if language.config.PathPrefix != "" {
-		jenny.AddPostprocessors(common.PathPrefixer(language.config.PathPrefix))
+		jenny.AddPostprocessors(common.PathPrefixer(language.config.PathPrefix, common.PrefixExcept("docs/")))
 	}
 
 	return jenny
