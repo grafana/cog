@@ -21,7 +21,3 @@ func ExtraObjectDocsBlock(obj ast.Object) string {
 func ExtraBuilderDocsBlock(builder ast.Builder) string {
 	return fmt.Sprintf("api_reference_builder_%s_%s_extra", builder.Package, builder.Name)
 }
-
-func ExtraIndexDocsBlock() string {
-	return "api_reference_index_extra"
-}
