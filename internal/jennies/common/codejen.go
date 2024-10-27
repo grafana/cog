@@ -88,7 +88,6 @@ func GeneratedCommentHeader(config languages.Config) codejen.FileMapper {
 
 type pathPrefixerCfg struct {
 	except []string
-	only   []string
 }
 
 type PathPrefixerOption func(*pathPrefixerCfg)
