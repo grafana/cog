@@ -140,11 +140,6 @@ func (jenny APIReference) Generate(context languages.Context) (codejen.Files, er
 func (jenny APIReference) index(context languages.Context) (codejen.File, error) {
 	var buffer bytes.Buffer
 
-	err := jenny.renderIfExists(&buffer, template.ExtraIndexDocsBlock(), map[string]any{})
-	if err != nil {
-		return codejen.File{}, err
-	}
-
 	buffer.WriteString("# Packages\n\n")
 
 	slices.SortFunc(context.Schemas, func(schemaA, schemaB *ast.Schema) int {
