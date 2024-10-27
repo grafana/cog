@@ -99,7 +99,6 @@ export class CustomQueryBuilder implements Builder<Dataquery> {
         return this;
     }
 }
-
 ```
 
 The custom query type can now be used as usual to build a dashboard:
