@@ -83,6 +83,7 @@ output:
   types: true
   builders: true
   converters: true
+  api_reference: true
 
   package_templates: '%__config_dir%/../package_templates'
   repository_templates: '%__config_dir%/../repository_templates'
