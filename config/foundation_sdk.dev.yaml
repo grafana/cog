@@ -90,6 +90,7 @@ output:
   types: true
   builders: true
   converters: true
+  api_reference: true
 
   languages:
     - go:
