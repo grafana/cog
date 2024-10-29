@@ -13,6 +13,7 @@
           "string",
           "bytes"
         ],
+        "description": "An object with many fields.",
         "properties": {
           "string": {
             "description": "Comment for string",

@@ -148,7 +148,7 @@ func (g *generator) walkObject(schema *openapi3.Schema) (ast.Type, error) {
 			return ast.Type{}, err
 		}
 
-		field := ast.NewStructField(name, def, ast.Comments(schemaComments(schema)))
+		field := ast.NewStructField(name, def, ast.Comments(schemaComments(schemaRef.Value)))
 		field.Required = tools.ItemInList(name, schema.Required)
 
 		fields = append(fields, field)
