@@ -8,6 +8,9 @@
   "Objects": {
     "DataTypes": {
       "Name": "DataTypes",
+      "Comments": [
+        "An object with many fields."
+      ],
       "Type": {
         "Kind": "struct",
         "Nullable": false,
@@ -15,6 +18,9 @@
           "Fields": [
             {
               "Name": "boolean",
+              "Comments": [
+                "Comment for boolean"
+              ],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -26,6 +32,9 @@
             },
             {
               "Name": "bytes",
+              "Comments": [
+                "Comment for byte"
+              ],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -37,6 +46,9 @@
             },
             {
               "Name": "float32",
+              "Comments": [
+                "Comment for float64"
+              ],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -49,6 +61,9 @@
             },
             {
               "Name": "float64",
+              "Comments": [
+                "Comment for float64"
+              ],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -60,6 +75,9 @@
             },
             {
               "Name": "int32",
+              "Comments": [
+                "Comment for integer32"
+              ],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -72,6 +90,9 @@
             },
             {
               "Name": "int64",
+              "Comments": [
+                "Comment for integer32"
+              ],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -83,6 +104,9 @@
             },
             {
               "Name": "string",
+              "Comments": [
+                "Comment for string"
+              ],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": true,
