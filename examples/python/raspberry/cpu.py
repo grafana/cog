@@ -1,9 +1,9 @@
-import generated.models.dashboard as dashboard
-from generated.builders.dashboard import ThresholdsConfig as ThresholdsConfigBuilder
-from generated.cog import builder as cogbuilder
+import grafana_foundation_sdk.models.dashboard as dashboard
+from grafana_foundation_sdk.builders.dashboard import ThresholdsConfig as ThresholdsConfigBuilder
+from grafana_foundation_sdk.cog import builder as cogbuilder
 from .common import default_timeseries, basic_prometheus_query, default_gauge
-from generated.builders.common import StackingConfig as StackingConfigBuilder
-from generated.models.common import StackingMode
+from grafana_foundation_sdk.builders.common import StackingConfig as StackingConfigBuilder
+from grafana_foundation_sdk.models.common import StackingMode
 
 
 def cpu_usage_timeseries() -> cogbuilder.Builder[dashboard.Panel]:

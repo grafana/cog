@@ -8,7 +8,7 @@ import {
     VariableHide,
     VariableRefresh,
     VariableSort,
-} from "../../generated/src/dashboard";
+} from "../../generated/typescript/src/dashboard";
 import {cpuTemperatureGauge, cpuUsageTimeseries, loadAverageTimeseries} from "./cpu";
 import {memoryUsageGauge, memoryUsageTimeseries} from "./memory";
 import {diskIOTimeseries, diskSpaceUsageTable} from "./disk";

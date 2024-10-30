@@ -1,5 +1,5 @@
-import generated.models.dashboard as dashboard
-from generated.cog import builder as cogbuilder
+import grafana_foundation_sdk.models.dashboard as dashboard
+from grafana_foundation_sdk.cog import builder as cogbuilder
 from .common import default_timeseries, basic_prometheus_query
 
 

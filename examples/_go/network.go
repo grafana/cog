@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/timeseries"
+	"github.com/grafana/cog/generated/go/timeseries"
 )
 
 func networkReceivedTimeseries() *timeseries.PanelBuilder {

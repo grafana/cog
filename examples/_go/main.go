@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/grafana/cog/generated/cog/plugins"
-	"github.com/grafana/cog/generated/common"
-	"github.com/grafana/cog/generated/dashboard"
+	"github.com/grafana/cog/generated/go/cog/plugins"
+	"github.com/grafana/cog/generated/go/common"
+	"github.com/grafana/cog/generated/go/dashboard"
 )
 
 func dashboardBuilder() []byte {
