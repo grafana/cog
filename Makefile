@@ -45,8 +45,7 @@ docs: dev-env-check-binaries ## Generates the documentation.
 gen-sdk-dev: dev-env-check-binaries ## Generates a dev version of the Foundation SDK.
 	rm -rf generated
 	$(RUN_DEVBOX) go run cmd/cli/main.go generate \
-		--config ./config/foundation_sdk.dev.yaml \
-		--parameters kind_registry_version=next,grafana_version=main
+		--config ./config/foundation_sdk.dev.yaml
 
 .PHONY: gen-tests
 gen-tests: dev-env-check-binaries ## Generates the code described by tests schemas.
@@ -59,7 +58,7 @@ run-go-example: dev-env-check-binaries ## Runs the Go example.
 
 .PHONY: run-java-example
 run-java-example: dev-env-check-binaries ## Runs the Java example.
-	$(RUN_DEVBOX) gradle publishToMavenLocal -p generated
+	$(RUN_DEVBOX) gradle publishToMavenLocal -p generated/java
 	$(RUN_DEVBOX) gradle run -p examples/java
 
 .PHONY: run-php-example
@@ -70,6 +69,10 @@ run-php-example: dev-env-check-binaries ## Runs the PHP example.
 .PHONY: run-ts-example
 run-ts-example: dev-env-check-binaries ## Runs the Typescript example.
 	$(RUN_DEVBOX) ts-node examples/typescript
+
+.PHONY: run-python-example
+run-python-example: dev-env-check-binaries ## Runs the Python example.
+	$(RUN_DEVBOX) python examples/python/main.py
 
 .PHONY: dev-env-check-binaires
 dev-env-check-binaries: ## Check that the required binary are present.

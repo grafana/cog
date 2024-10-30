@@ -14,10 +14,10 @@
             {{ continue}}
         {{- else if $field.Type.IsRef }}
         if "{{ $field.Name }}" in data:
-            args["{{ $field.Name }}"] = {{ $field.Type.AsRef|formatFullyQualifiedRef }}.from_json(data["{{ $field.Name }}"])
+            args["{{ $field.Name|formatIdentifier }}"] = {{ $field.Type.AsRef|formatFullyQualifiedRef }}.from_json(data["{{ $field.Name }}"])
         {{- else }}
         if "{{ $field.Name }}" in data:
-            args["{{ $field.Name }}"] = data["{{ $field.Name }}"]
+            args["{{ $field.Name|formatIdentifier }}"] = data["{{ $field.Name }}"]
         {{- end }}
         {{- end }}
 

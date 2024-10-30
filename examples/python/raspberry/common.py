@@ -1,12 +1,12 @@
-from generated.builders.timeseries import Panel as TimeseriesBuilder
-from generated.builders.gauge import Panel as GaugeBuilder
-from generated.builders.logs import Panel as LogsBuilder
-from generated.builders.prometheus import Dataquery as PrometheusQueryBuilder
-from generated.builders.loki import Dataquery as LokiQueryBuilder
-from generated.models.dashboard import DataSourceRef
-from generated.models.prometheus import PromQueryFormat
-from generated.models.common import GraphDrawStyle, VisibilityMode, LegendPlacement, LegendDisplayMode, VizOrientation, LogsSortOrder
-from generated.builders.common import VizLegendOptions as VizLegendOptionsBuilder, ReduceDataOptions as ReduceDataOptionsBuilder
+from grafana_foundation_sdk.builders.timeseries import Panel as TimeseriesBuilder
+from grafana_foundation_sdk.builders.gauge import Panel as GaugeBuilder
+from grafana_foundation_sdk.builders.logs import Panel as LogsBuilder
+from grafana_foundation_sdk.builders.prometheus import Dataquery as PrometheusQueryBuilder
+from grafana_foundation_sdk.builders.loki import Dataquery as LokiQueryBuilder
+from grafana_foundation_sdk.models.dashboard import DataSourceRef
+from grafana_foundation_sdk.models.prometheus import PromQueryFormat
+from grafana_foundation_sdk.models.common import GraphDrawStyle, VisibilityMode, LegendPlacement, LegendDisplayMode, VizOrientation, LogsSortOrder
+from grafana_foundation_sdk.builders.common import VizLegendOptions as VizLegendOptionsBuilder, ReduceDataOptions as ReduceDataOptionsBuilder
 
 
 def default_timeseries() -> TimeseriesBuilder:

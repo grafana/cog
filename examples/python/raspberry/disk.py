@@ -1,8 +1,8 @@
-import generated.models.dashboard as dashboard
-from generated.cog import builder as cogbuilder
-from generated.builders.table import Panel as TableBuilder
-from generated.models.common import FieldTextAlignment, TableAutoCellOptions, TableCellHeight
-from generated.builders.common import TableFooterOptions
+import grafana_foundation_sdk.models.dashboard as dashboard
+from grafana_foundation_sdk.cog import builder as cogbuilder
+from grafana_foundation_sdk.builders.table import Panel as TableBuilder
+from grafana_foundation_sdk.models.common import FieldTextAlignment, TableAutoCellOptions, TableCellHeight
+from grafana_foundation_sdk.builders.common import TableFooterOptions
 from .common import default_timeseries, basic_prometheus_query, table_prometheus_query
 
 

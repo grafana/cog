@@ -3,7 +3,7 @@
 debug: false
 
 parameters:
-  output_dir: './generated'
+  output_dir: './generated/%l'
   kind_registry_path: '../kind-registry'
   kind_registry_version: 'v10.4.x'
   grafana_version: 'v10.4.x'

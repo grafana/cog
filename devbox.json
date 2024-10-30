@@ -15,7 +15,8 @@
   ],
   "shell": {
     "init_hook": [
-      "echo 'Installing dependencies...' && make deps"
+      "echo 'Installing dependencies...' && make deps",
+      "export PYTHONPATH=$PYTHONPATH:$(pwd)/generated/python"
     ]
   }
 }
