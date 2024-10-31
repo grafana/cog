@@ -11,9 +11,7 @@
     "nodejs-slim_18@18.20",
     "nodePackages.ts-node@10.9.2",
     "jre17_minimal@17",
-    "gradle@8.10",
-    "mkdocs@1.6",
-    "python312Packages.mkdocs-material@9.5"
+    "gradle@8.10"
   ],
   "shell": {
     "init_hook": [
