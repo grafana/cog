@@ -50,7 +50,13 @@ DRY_RUN=no ./scripts/release-version.sh "next;v11.2.x;v11.1.x;v11.0.x;v10.4.x;v1
 Disabling dry-run will allow the script to push changes to a *release preview branch* and open a pull-request onto the
 actual *release branch*. To finalise the release, review this PR and merge it.
 
-## Options
+## Releasing the documentation
+
+Building and releasing the Foundation SDK documentation is done by triggering the ["Publish documentation" workflow](https://github.com/grafana/grafana-foundation-sdk/actions/workflows/docs.yaml).
+
+This is **NOT** done automatically by the `./scripts/release-*.sh` scripts.
+
+## Release script options
 
 The following environment variables can be used to alter the behavior of the release script:
 
