@@ -38,4 +38,4 @@ jobs:
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Run GoReleaser
-        run: goreleaser release --clean
+        run: devbox run goreleaser release --clean
