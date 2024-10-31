@@ -39,3 +39,5 @@ jobs:
 
       - name: Run GoReleaser
         run: devbox run goreleaser release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
