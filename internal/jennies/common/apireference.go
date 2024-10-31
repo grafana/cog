@@ -272,7 +272,7 @@ title: %[2]s %[1]s
 		buffer.WriteString("## See also\n\n")
 
 		slices.SortFunc(buildersForObjet, func(builderA, builderB ast.Builder) int {
-			return strings.Compare(builderA.Name, builderB.Name)
+			return strings.Compare(jenny.Formatter.BuilderName(builderA), jenny.Formatter.BuilderName(builderB))
 		})
 		for _, builder := range buildersForObjet {
 			if builder.Package == object.SelfRef.ReferredPkg {
