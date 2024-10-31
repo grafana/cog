@@ -12,7 +12,7 @@
     "nodePackages.ts-node@10.9.2",
     "jre17_minimal@17",
     "gradle@8.10",
-    "goreleaser@1.26"
+    "goreleaser@2.2"
   ],
   "shell": {
     "init_hook": [
