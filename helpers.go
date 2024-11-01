@@ -56,6 +56,14 @@ func NameFunc(nameFunc simplecue.NameFunc) CUEOption {
 	}
 }
 
+func CUEImports(importsMap map[string]string) CUEOption {
+	return func(input *codegen.CueInput) {
+		for importPkg, pkgPath := range importsMap {
+			input.CueImports = append(input.CueImports, fmt.Sprintf("%s:%s", pkgPath, importPkg))
+		}
+	}
+}
+
 // TypesFromSchema generates types from a single input schema and a single
 // output language.
 func TypesFromSchema() *SchemaToTypesPipeline {
