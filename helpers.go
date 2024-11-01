@@ -129,6 +129,21 @@ func (pipeline *SchemaToTypesPipeline) CUEValue(pkgName string, value cue.Value,
 	return pipeline
 }
 
+// CUEModule sets the pipeline's input to the given cue module.
+func (pipeline *SchemaToTypesPipeline) CUEModule(modulePath string, opts ...CUEOption) *SchemaToTypesPipeline {
+	cueInput := &codegen.CueInput{
+		Entrypoint: modulePath,
+	}
+
+	for _, opt := range opts {
+		opt(cueInput)
+	}
+
+	pipeline.input = &codegen.Input{Cue: cueInput}
+
+	return pipeline
+}
+
 /*******************
  * Transformations *
  *******************/
