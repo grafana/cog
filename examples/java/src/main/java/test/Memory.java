@@ -22,20 +22,16 @@ public class Memory {
                 "  node_memory_Cached_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}" +
                 ")";
 
-        Threshold th1 = new Threshold();
-        th1.color = "green";
-
-        Threshold th2 = new Threshold();
-        th2.color = "red";
-        th2.value = 80.0;
-
         return Common.defaultTimeSeries().
                 title("Memory Usage").
                 span(18).
                 stacking(new StackingConfig.Builder().mode(StackingMode.NORMAL)).
                 thresholds(new ThresholdsConfig.Builder().
                         mode(ThresholdsMode.ABSOLUTE).
-                        steps(List.of(th1, th2))
+                        steps(List.of(
+                                new Threshold(0.0, "green"),
+                                new Threshold(80.0, "red")
+                        ))
                 ).
                 min(0.0).
                 unit("bytes").
@@ -58,17 +54,6 @@ public class Memory {
                 "  avg(node_memory_MemTotal_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\"})" +
                 "* 100)";
 
-        Threshold th1 = new Threshold();
-        th1.color = "rgba(50, 172, 45, 0.97)";
-
-        Threshold th2 = new Threshold();
-        th2.value = 80.0;
-        th2.color = "rgba(237, 129, 40, 0.89)";
-
-        Threshold th3 = new Threshold();
-        th3.value = 90.0;
-        th3.color = "rgba(245, 54, 54, 0.9)";
-
         return Common.defaultGauge().
                 title("Memory Usage").
                 span(6).
@@ -77,7 +62,11 @@ public class Memory {
                 unit("percent").
                 thresholds(new ThresholdsConfig.Builder().
                         mode(ThresholdsMode.ABSOLUTE).
-                        steps(List.of(th1, th2, th3))
+                        steps(List.of(
+                                new Threshold(0.0, "rgba(50, 172, 45, 0.97)"),
+                                new Threshold(80.0, "rgba(237, 129, 40, 0.89)"),
+                                new Threshold(90.0, "rgba(245, 54, 54, 0.9)")
+                        ))
                 ).
                 withTarget(Common.basicPrometheusQuery(query, ""));
     }

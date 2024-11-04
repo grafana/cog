@@ -45,12 +45,9 @@ public class Common {
     }
 
     public static com.grafana.foundation.logs.PanelBuilder defaultLogs() {
-        DataSourceRef ref = new DataSourceRef();
-        ref.type = "loki";
-        ref.uid = "grafana-cloud-logs";
         return new com.grafana.foundation.logs.PanelBuilder().
                 span(24).
-                datasource(ref).
+                datasource(new DataSourceRef("loki", "grafana-cloud-logs")).
                 showTime(true).
                 enableLogDetails(true).
                 sortOrder(LogsSortOrder.DESCENDING).
