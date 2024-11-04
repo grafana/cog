@@ -6,7 +6,7 @@
         private {{ .Type | formatBuilderFieldType }} {{ .Name | escapeVar }};
         {{- end }}
         
-        public {{ .BuilderName }}Builder({{- template "args" .Builder.Constructor.Args }}) {
+        public {{ .BuilderName }}Builder({{- template "args" (dict "Arguments" .Builder.Constructor.Args "IsBuilder" true) }}) {
             this.internal = new {{ .Builder.ObjectName }}();
         {{- range .Builder.Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
@@ -25,7 +25,7 @@
         }
         
     {{- range $opt := .Builder.Options }}
-    public {{ if $.Builder.IsGeneric }}T {{ else }}{{ $.BuilderName }}Builder {{ end }}{{ .Name | lowerCamelCase | escapeVar }}({{- template "args" .Args }}) {
+    public {{ if $.Builder.IsGeneric }}T {{ else }}{{ $.BuilderName }}Builder {{ end }}{{ .Name | lowerCamelCase | escapeVar }}({{- template "args" (dict "Arguments" .Args "IsBuilder" true) }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.Builder.BuilderName "OptionName" $opt.Name) }}
         {{- end }}

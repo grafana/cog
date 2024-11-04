@@ -31,7 +31,7 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- else if .DefaultConstructorArgs }}
     public {{ $.Name }}() {}
     
-    public {{ $.Name }}({{- template "args" .DefaultConstructorArgs }}) {
+    public {{ $.Name }}({{- template "args" dict "Arguments" .DefaultConstructorArgs "IsBuilder" false }}) {
         {{- range .DefaultConstructorArgs }}
         this.{{ .Name | escapeVar | lowerCamelCase }} = {{ .Name | escapeVar | lowerCamelCase }};
         {{- end }}

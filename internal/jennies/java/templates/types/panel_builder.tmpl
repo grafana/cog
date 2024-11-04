@@ -10,7 +10,7 @@ package {{ .Package }};
 public class PanelBuilder implements {{ if not (eq .ImportAlias "") }}{{ .ImportAlias }}.{{ end }}cog.Builder<Panel> {
     private Panel internal;
 
-    public PanelBuilder({{- template "args" .Constructor.Args }}) {
+    public PanelBuilder({{- template "args" (dict "Arguments" .Constructor.Args "IsBuilder" true) }}) {
         this.internal = new Panel();
         {{- range .Constructor.Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" "") }}
@@ -25,7 +25,7 @@ public class PanelBuilder implements {{ if not (eq .ImportAlias "") }}{{ .Import
     }
     
     {{- range .Options }}
-    public PanelBuilder {{ .Name | lowerCamelCase }}({{- template "args" .Args }}) {
+    public PanelBuilder {{ .Name | lowerCamelCase }}({{- template "args" (dict "Arguments" .Args "IsBuilder" true) }}) {
         {{- range .Assignments }}
             {{- template "assignment" (dict "Assignment" . "BuilderName" "PanelBuilder" "OptionName" "Panel") }}
         {{- end }}
