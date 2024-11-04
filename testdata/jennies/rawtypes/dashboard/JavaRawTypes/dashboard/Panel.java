@@ -12,7 +12,7 @@ public class Panel {
     public FieldConfigSource fieldConfig;
     public Panel() {}
     
-    public Panel(String title,String type,DataSourceRef datasource,Object options,cog.Builder<List<Dataquery>> targets,FieldConfigSource fieldConfig) {
+    public Panel(String title,String type,DataSourceRef datasource,Object options,List<Dataquery> targets,FieldConfigSource fieldConfig) {
         this.title = title;
         this.type = type;
         this.datasource = datasource;
