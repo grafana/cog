@@ -13,12 +13,6 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-// Skip schemas without builder that aren't set directly in the builders.
-var defaultConstructorsExceptions = map[string]bool{
-	"FieldConfig":       true,
-	"FieldConfigSource": true,
-}
-
 type RawTypes struct {
 	config  Config
 	tmpl    *template.Template
@@ -315,7 +309,8 @@ func (jenny RawTypes) defaultConstructor(object ast.Object) []ast.Argument {
 		return nil
 	}
 
-	if defaultConstructorsExceptions[object.Name] {
+	// Skip schemas without builder that aren't set directly into the builders.
+	if object.Name == "FieldConfig" || object.Name == "FieldConfigSource" {
 		return nil
 	}
 
