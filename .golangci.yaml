@@ -41,6 +41,8 @@ linters:
     - musttag
     - testifylint
 
+    - testableexamples
+
 linters-settings:
   errcheck:
     exclude-functions: 
