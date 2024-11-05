@@ -37,7 +37,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "fieldBool")
-	} else {errs = append(errs, cog.MakeBuildErrors("fieldBool", errors.New("required field is missing from input"))...)
+	
 	}
 	// Field "fieldString"
 	if fields["fieldString"] != nil {
@@ -49,7 +49,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "fieldString")
-	} else {errs = append(errs, cog.MakeBuildErrors("fieldString", errors.New("required field is missing from input"))...)
+	
 	}
 	// Field "FieldStringWithConstantValue"
 	if fields["FieldStringWithConstantValue"] != nil {
@@ -73,7 +73,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "FieldFloat32")
-	} else {errs = append(errs, cog.MakeBuildErrors("FieldFloat32", errors.New("required field is missing from input"))...)
+	
 	}
 	// Field "FieldInt32"
 	if fields["FieldInt32"] != nil {
@@ -85,7 +85,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "FieldInt32")
-	} else {errs = append(errs, cog.MakeBuildErrors("FieldInt32", errors.New("required field is missing from input"))...)
+	
 	}
 
 	for field := range fields {
