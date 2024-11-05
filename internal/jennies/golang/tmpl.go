@@ -63,6 +63,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 		}),
 		template.Funcs(map[string]any{
 			"formatPackageName": formatPackageName,
+			"formatObjectName":  formatObjectName,
 			"formatScalar":      formatScalar,
 			"formatArgName":     formatArgName,
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {

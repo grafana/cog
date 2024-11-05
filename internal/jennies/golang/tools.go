@@ -21,6 +21,14 @@ func formatArgName(name string) string {
 	return escapeVarName(tools.LowerCamelCase(name))
 }
 
+func formatObjectName(name string) string {
+	return tools.UpperCamelCase(name)
+}
+
+func formatFieldName(name string) string {
+	return tools.UpperCamelCase(name)
+}
+
 func escapeVarName(varName string) string {
 	if isReservedGoKeyword(varName) {
 		return varName + "Arg"

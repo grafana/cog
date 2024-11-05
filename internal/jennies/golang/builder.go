@@ -10,7 +10,6 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -69,6 +68,12 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
+	constructorName := fmt.Sprintf("New%s", formatObjectName(builder.For.SelfRef.ReferredType))
+	constructorPkg := jenny.typeImportMapper(builder.For.SelfRef.ReferredPkg)
+	if constructorPkg != "" {
+		constructorName = constructorPkg + "." + constructorName
+	}
+
 	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
 		Name: "Build",
 		Comments: []string{
@@ -90,105 +95,49 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 			"typeHasBuilder": context.ResolveToBuilder,
 			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
-				emptyValue := jenny.emptyValueForType(guard.EmptyValueType)
-
-				// This should be alright since there shouldn't be any scalar in the middle of a path
-				if emptyValue[0] == '*' {
-					emptyValue = "&" + emptyValue[1:]
-				}
-
-				if guard.Path.Last().Type.IsAny() && emptyValue[0] != '&' {
-					emptyValue = "&" + emptyValue
-				}
-
-				return emptyValue
+				return jenny.emptyValueForGuard(context, guard.EmptyValueType)
 			},
 		}).
-		RenderAsBytes("builders/builder.tmpl", template.Builder{
-			Package:              builder.Package,
-			BuilderSignatureType: buildObjectSignature,
-			Imports:              imports,
-			BuilderName:          tools.UpperCamelCase(builder.Name),
-			ObjectName:           fullObjectName,
-			Comments:             builder.For.Comments,
-			Constructor:          builder.Constructor,
-			Properties:           builder.Properties,
-			Defaults:             jenny.genDefaultOptionsCalls(context, builder),
-			Options:              builder.Options,
+		RenderAsBytes("builders/builder.tmpl", map[string]any{
+			"Package":              builder.Package,
+			"BuilderSignatureType": buildObjectSignature,
+			"Imports":              imports,
+			"BuilderName":          tools.UpperCamelCase(builder.Name),
+			"ObjectName":           fullObjectName,
+			"Comments":             builder.For.Comments,
+			"ConstructorName":      constructorName,
+			"Constructor":          builder.Constructor,
+			"Properties":           builder.Properties,
+			"Options":              builder.Options,
 		})
 }
 
-func (jenny *Builder) genDefaultOptionsCalls(context languages.Context, builder ast.Builder) []template.OptionCall {
-	calls := make([]template.OptionCall, 0)
-	for _, opt := range builder.Options {
-		if opt.Default == nil {
-			continue
-		}
+func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ast.Type) string {
+	typeDef = typeDef.DeepCopy()
+	typeDef.Nullable = false
 
-		if len(opt.Args) == 0 {
-			continue
-		}
-
-		if hasTypedDefaults(opt) {
-			calls = append(calls, template.OptionCall{
-				OptionName: opt.Name,
-				Args:       jenny.formatDefaultTypedArgs(context, opt),
-			})
-			continue
-		}
-
-		calls = append(calls, template.OptionCall{
-			OptionName: opt.Name,
-			Args:       tools.Map(opt.Default.ArgsValues, formatScalar),
-		})
-	}
-
-	return calls
-}
-
-func hasTypedDefaults(opt ast.Option) bool {
-	for _, defArg := range opt.Default.ArgsValues {
-		if _, ok := defArg.(map[string]any); ok {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (jenny *Builder) formatDefaultTypedArgs(context languages.Context, opt ast.Option) []string {
-	args := make([]string, 0)
-	for i, arg := range opt.Default.ArgsValues {
-		val, _ := arg.(map[string]interface{})
-
-		pkg := ""
-		refPkg := ""
-		if opt.Args[i].Type.IsRef() {
-			refPkg = jenny.typeImportMapper(opt.Args[i].Type.AsRef().ReferredPkg)
-			pkg = opt.Args[i].Type.AsRef().ReferredType
-			_, isBuilder := context.Builders.LocateByObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
-			obj, ok := context.LocateObject(opt.Args[i].Type.AsRef().ReferredPkg, pkg)
-			if !ok {
-				return []string{"unknown"}
-			}
-			args = append(args, formatDefaultReferenceStructForBuilder(refPkg, pkg, isBuilder, obj.Type.AsStruct(), orderedmap.FromMap(val)))
-		}
-
-		// Anonymous structs
-		if opt.Args[i].Type.IsStruct() {
-			def := opt.Args[i].Type.AsStruct()
-			args = append(args, formatAnonymousDefaultStruct(def, orderedmap.FromMap(val)))
-		}
-	}
-	return args
-}
-
-func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 	switch typeDef.Kind {
-	case ast.KindRef, ast.KindStruct, ast.KindArray, ast.KindMap:
-		return jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
+	case ast.KindRef:
+		resolvedType := context.ResolveRefs(typeDef)
+		if resolvedType.IsStruct() {
+			constructor := fmt.Sprintf("New%s()", typeDef.Ref.ReferredType)
+
+			referredPkg := jenny.typeImportMapper(typeDef.Ref.ReferredPkg)
+			if referredPkg != "" {
+				constructor = fmt.Sprintf("%s.%s", referredPkg, constructor)
+			}
+
+			return constructor
+		}
+
+		return jenny.emptyValueForGuard(context, resolvedType)
+	case ast.KindStruct, ast.KindArray, ast.KindMap:
+		return "&" + jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
 	case ast.KindEnum:
-		return formatScalar(typeDef.AsEnum().Values[0].Value)
+		jenny.typeImportMapper("cog")
+		typeHint := jenny.typeFormatter.formatType(typeDef)
+
+		return fmt.Sprintf("cog.ToPtr[%s](%s)", typeHint, formatScalar(typeDef.AsEnum().Values[0].Value))
 	case ast.KindScalar:
 		return "" // no need to do anything here
 
@@ -201,7 +150,7 @@ func (jenny *Builder) emptyValueForType(typeDef ast.Type) string {
 // the given object and returns a fully qualified type name for it.
 func (jenny *Builder) importType(typeRef ast.RefType) string {
 	pkg := jenny.typeImportMapper(typeRef.ReferredPkg)
-	typeName := tools.UpperCamelCase(typeRef.ReferredType)
+	typeName := formatObjectName(typeRef.ReferredType)
 	if pkg == "" {
 		return typeName
 	}
