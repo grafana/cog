@@ -3,6 +3,10 @@
   "Objects": {
     "someStruct": {
       "Name": "someStruct",
+      "SelfRef": {
+        "ReferredPkg": "with-dashes",
+        "ReferredType": "someStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {
@@ -26,6 +30,10 @@
       "Comments": [
         "Refresh rate or disabled."
       ],
+      "SelfRef": {
+        "ReferredPkg": "with-dashes",
+        "ReferredType": "RefreshRate"
+      },
       "Type": {
         "Kind": "disjunction",
         "Disjunction": {

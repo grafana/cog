@@ -3,6 +3,10 @@
   "Objects": {
     "Intersections": {
       "Name": "Intersections",
+      "SelfRef": {
+        "ReferredPkg": "intersections",
+        "ReferredType": "Intersections"
+      },
       "Type": {
         "Kind": "intersection",
         "Intersection": {
@@ -63,6 +67,10 @@
     },
     "SomeStruct": {
       "Name": "SomeStruct",
+      "SelfRef": {
+        "ReferredPkg": "intersections",
+        "ReferredType": "SomeStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {

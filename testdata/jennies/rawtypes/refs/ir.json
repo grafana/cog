@@ -3,6 +3,10 @@
   "Objects": {
     "SomeStruct": {
       "Name": "SomeStruct",
+      "SelfRef": {
+        "ReferredPkg": "refs",
+        "ReferredType": "SomeStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {
@@ -23,6 +27,10 @@
     },
     "RefToSomeStruct": {
       "Name": "RefToSomeStruct",
+      "SelfRef": {
+        "ReferredPkg": "refs",
+        "ReferredType": "RefToSomeStruct"
+      },
       "Type": {
         "Kind": "ref",
         "Ref": {
@@ -33,6 +41,10 @@
     },
     "RefToSomeStructFromOtherPackage": {
       "Name": "RefToSomeStructFromOtherPackage",
+      "SelfRef": {
+        "ReferredPkg": "refs",
+        "ReferredType": "RefToSomeStructFromOtherPackage"
+      },
       "Type": {
         "Kind": "ref",
         "Ref": {

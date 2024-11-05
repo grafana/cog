@@ -2,7 +2,6 @@ package time_hint
 
 import (
 	"time"
-	 "github.com/grafana/cog/generated/"
 	"encoding/json"
 	cog "github.com/grafana/cog/generated/cog"
 	"errors"
@@ -17,7 +16,7 @@ type ObjWithTimeField struct {
 
 // NewObjWithTimeField creates a new ObjWithTimeField object.
 func NewObjWithTimeField() *ObjWithTimeField {
-	return &{
+	return &ObjWithTimeField{
 }
 }
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `ObjWithTimeField` from JSON.

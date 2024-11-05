@@ -1,7 +1,6 @@
 package basic
 
 import (
-	 "github.com/grafana/cog/generated/"
 	"encoding/json"
 	cog "github.com/grafana/cog/generated/cog"
 	"errors"
@@ -35,7 +34,7 @@ type SomeStruct struct {
 
 // NewSomeStruct creates a new SomeStruct object.
 func NewSomeStruct() *SomeStruct {
-	return &{
+	return &SomeStruct{
 		FieldStringWithConstantValue: "auto",
 }
 }
