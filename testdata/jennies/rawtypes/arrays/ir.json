@@ -6,6 +6,10 @@
       "Comments": [
         "List of tags, maybe?"
       ],
+      "SelfRef": {
+        "ReferredPkg": "arrays",
+        "ReferredType": "ArrayOfStrings"
+      },
       "Type": {
         "Kind": "array",
         "Array": {
@@ -20,6 +24,10 @@
     },
     "someStruct": {
       "Name": "someStruct",
+      "SelfRef": {
+        "ReferredPkg": "arrays",
+        "ReferredType": "someStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {
@@ -40,6 +48,10 @@
     },
     "ArrayOfRefs": {
       "Name": "ArrayOfRefs",
+      "SelfRef": {
+        "ReferredPkg": "arrays",
+        "ReferredType": "ArrayOfRefs"
+      },
       "Type": {
         "Kind": "array",
         "Array": {
@@ -55,6 +67,10 @@
     },
     "ArrayOfArrayOfNumbers": {
       "Name": "ArrayOfArrayOfNumbers",
+      "SelfRef": {
+        "ReferredPkg": "arrays",
+        "ReferredType": "ArrayOfArrayOfNumbers"
+      },
       "Type": {
         "Kind": "array",
         "Array": {

@@ -3,6 +3,10 @@
   "Objects": {
     "objTime": {
       "Name": "objTime",
+      "SelfRef": {
+        "ReferredPkg": "time_hint",
+        "ReferredType": "objTime"
+      },
       "Type": {
         "Kind": "scalar",
         "Scalar": {
@@ -15,6 +19,10 @@
     },
     "objWithTimeField": {
       "Name": "objWithTimeField",
+      "SelfRef": {
+        "ReferredPkg": "time_hint",
+        "ReferredType": "objWithTimeField"
+      },
       "Type": {
         "Kind": "struct",
         "Nullable": false,
