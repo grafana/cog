@@ -1,6 +1,7 @@
 package defaults
 
 import (
+	 "github.com/grafana/cog/generated/"
 	"encoding/json"
 	cog "github.com/grafana/cog/generated/cog"
 	"errors"
@@ -15,6 +16,16 @@ type SomeStruct struct {
     FieldInt32 int32 `json:"FieldInt32"`
 }
 
+// NewSomeStruct creates a new SomeStruct object.
+func NewSomeStruct() *SomeStruct {
+	return &{
+		FieldBool: true,
+		FieldString: "foo",
+		FieldStringWithConstantValue: "auto",
+		FieldFloat32: 42.42,
+		FieldInt32: 42,
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {

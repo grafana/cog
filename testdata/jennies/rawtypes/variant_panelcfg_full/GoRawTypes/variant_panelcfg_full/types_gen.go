@@ -12,6 +12,11 @@ type Options struct {
     TimeseriesOption string `json:"timeseries_option"`
 }
 
+// NewOptions creates a new Options object.
+func NewOptions() *Options {
+	return &Options{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Options` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Options) UnmarshalJSONStrict(raw []byte) error {
@@ -69,6 +74,11 @@ type FieldConfig struct {
     TimeseriesFieldConfigOption string `json:"timeseries_field_config_option"`
 }
 
+// NewFieldConfig creates a new FieldConfig object.
+func NewFieldConfig() *FieldConfig {
+	return &FieldConfig{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `FieldConfig` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {

@@ -29,6 +29,11 @@ type Variable struct {
 	Name string `json:"name"`
 }
 
+// NewVariable creates a new Variable object.
+func NewVariable() *Variable {
+	return &Variable{}
+}
+
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Variable` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Variable) UnmarshalJSONStrict(raw []byte) error {
@@ -86,6 +91,13 @@ type Container struct {
 	IntField    int64     `json:"intField"`
 	EnumField   Direction `json:"enumField"`
 	RefField    Variable  `json:"refField"`
+}
+
+// NewContainer creates a new Container object.
+func NewContainer() *Container {
+	return &Container{
+		RefField: *NewVariable(),
+	}
 }
 
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Container` from JSON.
@@ -211,6 +223,11 @@ type Optionals struct {
 	RefField *Variable `json:"refField,omitempty"`
 }
 
+// NewOptionals creates a new Optionals object.
+func NewOptionals() *Optionals {
+	return &Optionals{}
+}
+
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Optionals` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Optionals) UnmarshalJSONStrict(raw []byte) error {
@@ -326,6 +343,11 @@ type Arrays struct {
 	Refs             []Variable                       `json:"refs"`
 	AnonymousStructs []EqualityArraysAnonymousStructs `json:"anonymousStructs"`
 	ArrayOfAny       []any                            `json:"arrayOfAny"`
+}
+
+// NewArrays creates a new Arrays object.
+func NewArrays() *Arrays {
+	return &Arrays{}
 }
 
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Arrays` from JSON.
@@ -569,6 +591,11 @@ type Maps struct {
 	StringToAny      map[string]any                          `json:"stringToAny"`
 }
 
+// NewMaps creates a new Maps object.
+func NewMaps() *Maps {
+	return &Maps{}
+}
+
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Maps` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Maps) UnmarshalJSONStrict(raw []byte) error {
@@ -777,6 +804,11 @@ type EqualityArraysAnonymousStructs struct {
 	Inner string `json:"inner"`
 }
 
+// NewEqualityArraysAnonymousStructs creates a new EqualityArraysAnonymousStructs object.
+func NewEqualityArraysAnonymousStructs() *EqualityArraysAnonymousStructs {
+	return &EqualityArraysAnonymousStructs{}
+}
+
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `EqualityArraysAnonymousStructs` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *EqualityArraysAnonymousStructs) UnmarshalJSONStrict(raw []byte) error {
@@ -832,6 +864,11 @@ func (resource EqualityArraysAnonymousStructs) Validate() error {
 // Modified by compiler pass 'AnonymousStructsToNamed'
 type EqualityMapsAnonymousStructs struct {
 	Inner string `json:"inner"`
+}
+
+// NewEqualityMapsAnonymousStructs creates a new EqualityMapsAnonymousStructs object.
+func NewEqualityMapsAnonymousStructs() *EqualityMapsAnonymousStructs {
+	return &EqualityMapsAnonymousStructs{}
 }
 
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `EqualityMapsAnonymousStructs` from JSON.

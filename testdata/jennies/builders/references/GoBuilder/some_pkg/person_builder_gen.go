@@ -13,13 +13,10 @@ type PersonBuilder struct {
 }
 
 func NewPersonBuilder() *PersonBuilder {
-	resource := &Person{}
 	builder := &PersonBuilder{
-		internal: resource,
+		internal: NewPerson(),
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -38,5 +35,3 @@ func (builder *PersonBuilder) Name(name other_pkg.Name) *PersonBuilder {
     return builder
 }
 
-func (builder *PersonBuilder) applyDefaults() {
-}

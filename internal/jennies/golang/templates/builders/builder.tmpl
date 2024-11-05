@@ -16,9 +16,8 @@ type {{ .BuilderName }}Builder struct {
 }
 
 func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ .BuilderName }}Builder {
-	resource := {{ .ConstructorName }}()
 	builder := &{{ .BuilderName }}Builder{
-		internal: resource,
+		internal: {{ .ConstructorName }}(),
 		errors: make(map[string]cog.BuildErrors),
 	}
 

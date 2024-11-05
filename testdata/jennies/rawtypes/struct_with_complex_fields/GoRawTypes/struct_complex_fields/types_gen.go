@@ -21,6 +21,15 @@ type SomeStruct struct {
     FieldRefToConstant string `json:"fieldRefToConstant"`
 }
 
+// NewSomeStruct creates a new SomeStruct object.
+func NewSomeStruct() *SomeStruct {
+	return &SomeStruct{
+		FieldRef: *NewSomeOtherStruct(),
+		FieldDisjunctionOfScalars: *NewStringOrBool(),
+		FieldMixedDisjunction: *NewStringOrSomeOtherStruct(),
+		FieldAnonymousStruct: *NewStructComplexFieldsSomeStructFieldAnonymousStruct(),
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -247,6 +256,11 @@ type SomeOtherStruct struct {
     FieldAny any `json:"FieldAny"`
 }
 
+// NewSomeOtherStruct creates a new SomeOtherStruct object.
+func NewSomeOtherStruct() *SomeOtherStruct {
+	return &SomeOtherStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeOtherStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -312,6 +326,11 @@ type StructComplexFieldsSomeStructFieldAnonymousStruct struct {
     FieldAny any `json:"FieldAny"`
 }
 
+// NewStructComplexFieldsSomeStructFieldAnonymousStruct creates a new StructComplexFieldsSomeStructFieldAnonymousStruct object.
+func NewStructComplexFieldsSomeStructFieldAnonymousStruct() *StructComplexFieldsSomeStructFieldAnonymousStruct {
+	return &StructComplexFieldsSomeStructFieldAnonymousStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StructComplexFieldsSomeStructFieldAnonymousStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *StructComplexFieldsSomeStructFieldAnonymousStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -371,6 +390,11 @@ type StringOrBool struct {
     Bool *bool `json:"Bool,omitempty"`
 }
 
+// NewStringOrBool creates a new StringOrBool object.
+func NewStringOrBool() *StringOrBool {
+	return &StringOrBool{
+}
+}
 // MarshalJSON implements a custom JSON marshalling logic to encode `StringOrBool` as JSON.
 func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {
@@ -494,6 +518,11 @@ type StringOrSomeOtherStruct struct {
     SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
 }
 
+// NewStringOrSomeOtherStruct creates a new StringOrSomeOtherStruct object.
+func NewStringOrSomeOtherStruct() *StringOrSomeOtherStruct {
+	return &StringOrSomeOtherStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StringOrSomeOtherStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *StringOrSomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {

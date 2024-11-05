@@ -2,6 +2,7 @@ package intersections
 
 import (
 	externalpkg "github.com/grafana/cog/generated/externalpkg"
+	 "github.com/grafana/cog/generated/"
 	"encoding/json"
 	cog "github.com/grafana/cog/generated/cog"
 	"errors"
@@ -18,6 +19,12 @@ type SomeStruct struct {
     FieldBool bool `json:"fieldBool"`
 }
 
+// NewSomeStruct creates a new SomeStruct object.
+func NewSomeStruct() *SomeStruct {
+	return &{
+		FieldBool: true,
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {

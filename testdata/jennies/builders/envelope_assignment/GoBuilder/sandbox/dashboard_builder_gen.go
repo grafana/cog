@@ -12,13 +12,10 @@ type DashboardBuilder struct {
 }
 
 func NewDashboardBuilder() *DashboardBuilder {
-	resource := &Dashboard{}
 	builder := &DashboardBuilder{
-		internal: resource,
+		internal: NewDashboard(),
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -40,5 +37,3 @@ func (builder *DashboardBuilder) WithVariable(name string,value string) *Dashboa
     return builder
 }
 
-func (builder *DashboardBuilder) applyDefaults() {
-}

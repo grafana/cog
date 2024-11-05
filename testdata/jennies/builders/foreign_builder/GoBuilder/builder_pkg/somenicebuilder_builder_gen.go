@@ -13,13 +13,10 @@ type SomeNiceBuilderBuilder struct {
 }
 
 func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
-	resource := &some_pkg.SomeStruct{}
 	builder := &SomeNiceBuilderBuilder{
-		internal: resource,
+		internal: some_pkg.NewSomeStruct(),
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -38,5 +35,3 @@ func (builder *SomeNiceBuilderBuilder) Title(title string) *SomeNiceBuilderBuild
     return builder
 }
 
-func (builder *SomeNiceBuilderBuilder) applyDefaults() {
-}

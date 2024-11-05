@@ -12,13 +12,10 @@ type SomePanelBuilder struct {
 }
 
 func NewSomePanelBuilder() *SomePanelBuilder {
-	resource := &SomePanel{}
 	builder := &SomePanelBuilder{
-		internal: resource,
+		internal: NewSomePanel(),
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
     builder.internal.Type = "panel_type"
     builder.internal.Cursor = "tooltip"
 
@@ -39,5 +36,3 @@ func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
     return builder
 }
 
-func (builder *SomePanelBuilder) applyDefaults() {
-}

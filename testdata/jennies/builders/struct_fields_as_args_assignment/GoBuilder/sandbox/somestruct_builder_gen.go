@@ -12,13 +12,10 @@ type SomeStructBuilder struct {
 }
 
 func NewSomeStructBuilder() *SomeStructBuilder {
-	resource := &SomeStruct{}
 	builder := &SomeStructBuilder{
-		internal: resource,
+		internal: NewSomeStruct(),
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -44,5 +41,3 @@ if builder.internal.Time == nil {
     return builder
 }
 
-func (builder *SomeStructBuilder) applyDefaults() {
-}

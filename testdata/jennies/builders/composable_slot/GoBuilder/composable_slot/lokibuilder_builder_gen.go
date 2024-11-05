@@ -13,13 +13,10 @@ type LokiBuilderBuilder struct {
 }
 
 func NewLokiBuilderBuilder() *LokiBuilderBuilder {
-	resource := &Dashboard{}
 	builder := &LokiBuilderBuilder{
-		internal: resource,
+		internal: NewDashboard(),
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -58,5 +55,3 @@ func (builder *LokiBuilderBuilder) Targets(targets []cog.Builder[variants.Dataqu
     return builder
 }
 
-func (builder *LokiBuilderBuilder) applyDefaults() {
-}

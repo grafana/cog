@@ -12,13 +12,10 @@ type DashboardLinkBuilder struct {
 }
 
 func NewDashboardLinkBuilder() *DashboardLinkBuilder {
-	resource := &DashboardLink{}
 	builder := &DashboardLinkBuilder{
-		internal: resource,
+		internal: NewDashboardLink(),
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -43,5 +40,3 @@ func (builder *DashboardLinkBuilder) Url(url string) *DashboardLinkBuilder {
     return builder
 }
 
-func (builder *DashboardLinkBuilder) applyDefaults() {
-}
