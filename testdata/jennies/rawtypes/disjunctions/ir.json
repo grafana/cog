@@ -6,6 +6,10 @@
       "Comments": [
         "Refresh rate or disabled."
       ],
+      "SelfRef": {
+        "ReferredPkg": "disjunctions",
+        "ReferredType": "RefreshRate"
+      },
       "Type": {
         "Kind": "disjunction",
         "Disjunction": {
@@ -28,6 +32,10 @@
     },
     "StringOrNull": {
       "Name": "StringOrNull",
+      "SelfRef": {
+        "ReferredPkg": "disjunctions",
+        "ReferredType": "StringOrNull"
+      },
       "Type": {
         "Kind": "disjunction",
         "Disjunction": {
@@ -50,6 +58,10 @@
     },
     "SomeStruct": {
       "Name": "SomeStruct",
+      "SelfRef": {
+        "ReferredPkg": "disjunctions",
+        "ReferredType": "SomeStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {
@@ -81,6 +93,10 @@
     },
     "BoolOrRef": {
       "Name": "BoolOrRef",
+      "SelfRef": {
+        "ReferredPkg": "disjunctions",
+        "ReferredType": "BoolOrRef"
+      },
       "Type": {
         "Kind": "disjunction",
         "Disjunction": {
@@ -104,6 +120,10 @@
     },
     "SomeOtherStruct": {
       "Name": "SomeOtherStruct",
+      "SelfRef": {
+        "ReferredPkg": "disjunctions",
+        "ReferredType": "SomeOtherStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {
@@ -135,6 +155,10 @@
     },
     "YetAnotherStruct": {
       "Name": "YetAnotherStruct",
+      "SelfRef": {
+        "ReferredPkg": "disjunctions",
+        "ReferredType": "YetAnotherStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {
@@ -166,6 +190,10 @@
     },
     "SeveralRefs": {
       "Name": "SeveralRefs",
+      "SelfRef": {
+        "ReferredPkg": "disjunctions",
+        "ReferredType": "SeveralRefs"
+      },
       "Type": {
         "Kind": "disjunction",
         "Disjunction": {

@@ -9,6 +9,10 @@
         "a",
         "comment"
       ],
+      "SelfRef": {
+        "ReferredPkg": "basic",
+        "ReferredType": "SomeStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {
