@@ -275,7 +275,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 				defaultValue = fmt.Sprintf("cog.ToPtr(%s)", defaultValue)
 			}
 		} else {
-			defaultValue = "\"wait, wat?\""
+			defaultValue = "\"unsupported default value case: this is likely a bug in cog\""
 		}
 
 		buffer.WriteString(fmt.Sprintf("\t\t%s: %s,\n", fieldName, defaultValue))
