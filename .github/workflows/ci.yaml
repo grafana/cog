@@ -66,7 +66,7 @@ jobs:
 
     strategy:
       matrix:
-        kind_version: [next, v11.2.x, v11.1.x, v11.0.x, v10.4.x, v10.3.x, v10.2.x, v10.1.x]
+        kind_version: [next, v11.3.x, v11.2.x, v11.1.x, v11.0.x, v10.4.x, v10.3.x, v10.2.x, v10.1.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
         run: |
           devbox run go run cmd/cli/main.go generate \
             --config ./config/foundation_sdk.dev.yaml \
-            --parameters output_dir=./generated/%l,grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }},go_package_root=github.com/grafana/cog/generated/go
+            --parameters grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }}
         env:
           GOGC: 'off'
 
@@ -190,3 +190,6 @@ jobs:
 
       - name: Run Java example
         run: make run-java-example
+
+      - name: Run Python example
+        run: make run-python-example

@@ -36,6 +36,9 @@
           "Fields": [
             {
               "Name": "id",
+              "Comments": [
+                "An identifier"
+              ],
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

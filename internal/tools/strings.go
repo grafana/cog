@@ -57,3 +57,24 @@ func Indent(input string, spaces int) string {
 	pad := strings.Repeat(" ", spaces)
 	return pad + strings.ReplaceAll(input, "\n", "\n"+pad)
 }
+
+func Singularize(input string) string {
+	var rules = []struct {
+		regex       string
+		replacement string
+	}{
+		{`(?i)s$`, ``},    // tags → tag
+		{`(?i)ies$`, `y`}, // strategies → strategy
+	}
+
+	for _, rule := range rules {
+		re := regexp.MustCompile(rule.regex)
+		result := re.ReplaceAllString(input, rule.replacement)
+
+		if result != input {
+			return result
+		}
+	}
+
+	return input
+}

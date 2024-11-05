@@ -57,12 +57,14 @@ func (config Config) importPath(suffix string) string {
 }
 
 type Language struct {
-	config Config
+	config          Config
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func New(config Config) *Language {
 	return &Language{
-		config: config,
+		config:          config,
+		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 }
 
@@ -84,10 +86,22 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 		common.If[languages.Context](config.GenerateGoMod, GoMod{Config: config}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 
-		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{Config: config, Tmpl: tmpl, NullableConfig: language.NullableKinds()}),
+		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{
+			Config:          config,
+			Tmpl:            tmpl,
+			NullableConfig:  language.NullableKinds(),
+			apiRefCollector: language.apiRefCollector,
+		}),
+
+		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+			Collector: language.apiRefCollector,
+			Language:  LanguageRef,
+			Formatter: apiReferenceFormatter(config),
+			Tmpl:      tmpl,
+		}),
 	)
 	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
 

@@ -8,6 +8,9 @@ export class DashboardLinkBuilder implements cog.Builder<builderDelegationInDisj
         this.internal = builderDelegationInDisjunction.defaultDashboardLink();
     }
 
+    /**
+     * Builds the object.
+     */
     build(): builderDelegationInDisjunction.DashboardLink {
         return this.internal;
     }

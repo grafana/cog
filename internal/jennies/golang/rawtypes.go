@@ -7,14 +7,16 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
-	Config Config
-	Tmpl   *template.Template
+	Config          Config
+	Tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 
 	typeFormatter *typeFormatter
 }
@@ -56,10 +58,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return imports.Add(pkg, jenny.Config.importPath(pkg))
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, imports, packageMapper)
-	unmarshallerGenerator := NewJSONMarshalling(jenny.Config, jenny.Tmpl, imports, packageMapper, jenny.typeFormatter)
-	strictUnmarshallerGenerator := newStrictJSONUnmarshal(jenny.Tmpl, imports, packageMapper, jenny.typeFormatter)
-	equalityMethodsGenerator := newEqualityMethods(jenny.Tmpl)
-	validationMethodsGenerator := newValidationMethods(jenny.Tmpl, packageMapper)
+	unmarshallerGenerator := NewJSONMarshalling(jenny.Config, jenny.Tmpl, imports, packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
+	strictUnmarshallerGenerator := newStrictJSONUnmarshal(jenny.Tmpl, imports, packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
+	equalityMethodsGenerator := newEqualityMethods(jenny.Tmpl, jenny.apiRefCollector)
+	validationMethodsGenerator := newValidationMethods(jenny.Tmpl, packageMapper, jenny.apiRefCollector)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		objectOutput, innerErr := jenny.formatObject(schema, object)
@@ -83,13 +85,13 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			return
 		}
 
-		innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, schema, object, imports)
+		innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, object, imports)
 		if innerErr != nil {
 			err = innerErr
 			return
 		}
 
-		innerErr = validationMethodsGenerator.generateForObject(&buffer, context, schema, object, imports)
+		innerErr = validationMethodsGenerator.generateForObject(&buffer, context, object, imports)
 		if innerErr != nil {
 			err = innerErr
 			return
@@ -130,28 +132,7 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object) ([]byte, 
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	switch def.Type.Kind {
-	case ast.KindEnum:
-		buffer.WriteString(jenny.formatEnumDef(def))
-	case ast.KindScalar:
-		scalarType := def.Type.AsScalar()
-
-		//nolint: gocritic
-		if scalarType.Value != nil {
-			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
-		} else if scalarType.ScalarKind == ast.KindBytes {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
-		} else {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, jenny.typeFormatter.formatType(def.Type)))
-		}
-	case ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s = %s", defName, jenny.typeFormatter.formatType(def.Type)))
-	case ast.KindMap, ast.KindArray, ast.KindStruct, ast.KindIntersection:
-		buffer.WriteString(fmt.Sprintf("type %s %s", defName, jenny.typeFormatter.formatType(def.Type)))
-	default:
-		return nil, fmt.Errorf("unhandled type def kind: %s", def.Type.Kind)
-	}
-
+	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(def))
 	buffer.WriteString("\n")
 
 	if def.Type.ImplementsVariant() && !def.Type.IsRef() {
@@ -168,22 +149,4 @@ func (jenny RawTypes) formatObject(schema *ast.Schema, def ast.Object) ([]byte, 
 	}
 
 	return []byte(buffer.String()), nil
-}
-
-func (jenny RawTypes) formatEnumDef(def ast.Object) string {
-	var buffer strings.Builder
-
-	enumName := tools.UpperCamelCase(def.Name)
-	enumType := def.Type.AsEnum()
-
-	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, jenny.typeFormatter.formatType(enumType.Values[0].Type)))
-
-	buffer.WriteString("const (\n")
-	for _, val := range enumType.Values {
-		name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
-		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", name, enumName, val.Value))
-	}
-	buffer.WriteString(")\n")
-
-	return buffer.String()
 }

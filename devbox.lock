@@ -97,6 +97,54 @@
         }
       }
     },
+    "goreleaser@2.2": {
+      "last_modified": "2024-10-13T23:44:06Z",
+      "resolved": "github:NixOS/nixpkgs/d4f247e89f6e10120f911e2e2d2254a050d0f732#goreleaser",
+      "source": "devbox-search",
+      "version": "2.2.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mfwm9y5vhs3dzfbhmpqmgr2mx0p4kbnl-goreleaser-2.2.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mfwm9y5vhs3dzfbhmpqmgr2mx0p4kbnl-goreleaser-2.2.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/gqpm92gd4lnbk2467cgypjxl8af4zv6p-goreleaser-2.2.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/gqpm92gd4lnbk2467cgypjxl8af4zv6p-goreleaser-2.2.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/bk3fkkjqa4cxl23a1qz8s0w3dj5pi4zn-goreleaser-2.2.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/bk3fkkjqa4cxl23a1qz8s0w3dj5pi4zn-goreleaser-2.2.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/pjh8k3pnrfaj7riis0s5addqx3v4jbrn-goreleaser-2.2.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/pjh8k3pnrfaj7riis0s5addqx3v4jbrn-goreleaser-2.2.0"
+        }
+      }
+    },
     "gradle@8.10": {
       "last_modified": "2024-09-12T02:28:40Z",
       "plugin_version": "0.0.1",

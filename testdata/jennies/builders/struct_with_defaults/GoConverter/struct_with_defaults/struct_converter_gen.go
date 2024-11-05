@@ -7,6 +7,7 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 )
 
+// StructConverter accepts a `Struct` object and generates the Go code to build this object using builders.
 func StructConverter(input Struct) string {
     calls := []string{
     `struct_with_defaults.NewStructBuilder()`,
@@ -74,4 +75,4 @@ func StructConverter(input Struct) string {
     
 
     return strings.Join(calls, ".\t\n")
-    }
+}

@@ -9,9 +9,11 @@ import (
 )
 
 type Options struct {
-	TimeseriesOption string `json:"timeseries_option"`
+    TimeseriesOption string `json:"timeseries_option"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Options` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Options) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -47,6 +49,7 @@ func (resource *Options) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `Options` objects.
 func (resource Options) Equals(other Options) bool {
 		if resource.TimeseriesOption != other.TimeseriesOption {
 			return false
@@ -56,17 +59,18 @@ func (resource Options) Equals(other Options) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `Options` fields for violations and returns them.
 func (resource Options) Validate() error {
 	return nil
 }
 
 
 type FieldConfig struct {
-	TimeseriesFieldConfigOption string `json:"timeseries_field_config_option"`
+    TimeseriesFieldConfigOption string `json:"timeseries_field_config_option"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `FieldConfig` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -102,6 +106,7 @@ func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
+// Equals tests the equality of two `FieldConfig` objects.
 func (resource FieldConfig) Equals(other FieldConfig) bool {
 		if resource.TimeseriesFieldConfigOption != other.TimeseriesFieldConfigOption {
 			return false
@@ -111,13 +116,14 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 }
 
 
-// Validate checks any constraint that may be defined for this type
-// and returns all violations.
+// Validate checks all the validation constraints that may be defined on `FieldConfig` fields for violations and returns them.
 func (resource FieldConfig) Validate() error {
 	return nil
 }
 
 
+// VariantConfig returns the configuration related to timeseries panels.
+// This configuration describes how to unmarshal it, convert it to code, …
 func VariantConfig() variants.PanelcfgConfig {
 	return variants.PanelcfgConfig{
 		Identifier: "timeseries",

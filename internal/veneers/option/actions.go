@@ -21,6 +21,30 @@ func RenameAction(newName string) RewriteAction {
 	}
 }
 
+// RenameArgumentsAction renames the arguments of an options.
+func RenameArgumentsAction(newNames []string) RewriteAction {
+	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+		if len(newNames) != len(option.Args) {
+			return []ast.Option{option}
+		}
+
+		for i, arg := range option.Args {
+			previousName := arg.Name
+			option.Args[i].Name = newNames[i]
+
+			for j, assignment := range option.Assignments {
+				if assignment.Value.Argument != nil && assignment.Value.Argument.Name == previousName {
+					option.Assignments[j].Value.Argument.Name = newNames[i]
+				}
+			}
+		}
+
+		option.AddToVeneerTrail("RenameArguments")
+
+		return []ast.Option{option}
+	}
+}
+
 // ArrayToAppendAction updates the option to perform an "append" assignment.
 //
 // Example:
@@ -55,6 +79,7 @@ func ArrayToAppendAction() RewriteAction {
 
 		newFirstArg := option.Args[0]
 		newFirstArg.Type = option.Args[0].Type.AsArray().ValueType
+		newFirstArg.Name = tools.Singularize(newFirstArg.Name)
 
 		// Update the assignment to do an append instead of a list assignment
 		oldAssignments := option.Assignments
@@ -63,6 +88,7 @@ func ArrayToAppendAction() RewriteAction {
 		newFirstAssignment.Method = ast.AppendAssignment
 		// TODO: what if there is an envelope in the value assignment?
 		if newFirstAssignment.Value.Argument != nil {
+			newFirstAssignment.Value.Argument.Name = newFirstArg.Name
 			newFirstAssignment.Value.Argument.Type = newFirstArg.Type
 		}
 

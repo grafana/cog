@@ -16,8 +16,9 @@ import (
 )
 
 type RawTypes struct {
-	config Config
-	tmpl   *template.Template
+	config          Config
+	tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 
 	typeFormatter *typeFormatter
 	shaper        *shape
@@ -187,7 +188,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 
 	switch def.Type.Kind {
 	case ast.KindEnum:
-		enum, err := jenny.formatEnumDef(context, def)
+		enum, err := jenny.typeFormatter.formatEnumDeclaration(jenny.tmpl, context, def)
 		if err != nil {
 			return codejen.File{}, err
 		}
@@ -249,7 +250,7 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 
 	if def.Type.IsDataqueryVariant() {
 		buffer.WriteString("\n\n")
-		buffer.WriteString(tools.Indent(jenny.generateDataqueryType(schema), 4))
+		buffer.WriteString(tools.Indent(jenny.generateDataqueryType(schema, def), 4))
 	}
 
 	buffer.WriteString("\n}")
@@ -448,6 +449,20 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	buffer.WriteString(strings.Join(constructorArgs, ""))
 	buffer.WriteString("    );\n")
 	buffer.WriteString("}")
+
+	jenny.apiRefCollector.ObjectMethod(def, common.MethodReference{
+		Name: "fromArray",
+		Comments: []string{
+			"Builds this object from an array.",
+			"This function is meant to be used with the return value of `json_decode($json, true)`.",
+		},
+		Arguments: []common.ArgumentReference{{
+			Name: "inputData",
+			Type: "array",
+		}},
+		Return: "self",
+		Static: true,
+	})
 
 	return buffer.String(), nil
 }
@@ -698,10 +713,18 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 
 	buffer.WriteString("}")
 
+	jenny.apiRefCollector.ObjectMethod(def, common.MethodReference{
+		Name: "jsonSerialize",
+		Comments: []string{
+			"Returns the data representing this object, preparing it for JSON serialization with `json_encode()`.",
+		},
+		Return: "array",
+	})
+
 	return buffer.String()
 }
 
-func (jenny RawTypes) generateDataqueryType(schema *ast.Schema) string {
+func (jenny RawTypes) generateDataqueryType(schema *ast.Schema, object ast.Object) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("public function dataqueryType(): string\n")
@@ -709,18 +732,13 @@ func (jenny RawTypes) generateDataqueryType(schema *ast.Schema) string {
 	buffer.WriteString(fmt.Sprintf("    return \"%s\";\n", strings.ToLower(schema.Metadata.Identifier)))
 	buffer.WriteString("}")
 
-	return buffer.String()
-}
+	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
+		Name: "dataqueryType",
+		Comments: []string{
+			"Returns the type of this dataquery object.",
+		},
+		Return: "string",
+	})
 
-func (jenny RawTypes) formatEnumDef(context languages.Context, def ast.Object) (string, error) {
-	return jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
-		Funcs(templateHelpers(templateDeps{
-			config:  jenny.config,
-			context: context,
-		})).
-		Render("types/enum.tmpl", map[string]any{
-			"Object":   def,
-			"EnumType": def.Type.Enum.Values[0].Type,
-		})
+	return buffer.String()
 }

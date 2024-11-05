@@ -10,3 +10,6 @@ options:
   - struct_fields_as_arguments:
       by_name: TraceqlFilter.value
       fields: [ ArrayOfString ]
+  - rename_arguments:
+      by_name: TraceqlFilter.value
+      as: [values]

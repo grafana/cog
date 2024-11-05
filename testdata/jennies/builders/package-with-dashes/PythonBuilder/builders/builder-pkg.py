@@ -10,6 +10,9 @@ class SomeNiceBuilder(cogbuilder.Builder[with-dashes.SomeStruct]):
         self._internal = with-dashes.SomeStruct()
 
     def build(self) -> with-dashes.SomeStruct:
+        """
+        Builds the object.
+        """
         return self._internal    
     
     def title(self, title: str) -> typing.Self:        

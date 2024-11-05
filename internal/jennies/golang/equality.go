@@ -1,28 +1,43 @@
 package golang
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type equalityMethods struct {
-	tmpl *template.Template
+	tmpl            *template.Template
+	apiRefCollector *common.APIReferenceCollector
 }
 
-func newEqualityMethods(tmpl *template.Template) equalityMethods {
+func newEqualityMethods(tmpl *template.Template, apiRefCollector *common.APIReferenceCollector) equalityMethods {
 	return equalityMethods{
-		tmpl: tmpl,
+		tmpl:            tmpl,
+		apiRefCollector: apiRefCollector,
 	}
 }
 
-func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object, imports *common.DirectImportMap) error {
+func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object, imports *common.DirectImportMap) error {
 	if !object.Type.IsStruct() {
 		return nil
 	}
+
+	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
+		Name: "Equals",
+		Arguments: []common.ArgumentReference{
+			{Name: "other", Type: tools.UpperCamelCase(object.Name)},
+		},
+		Comments: []string{
+			fmt.Sprintf("Equals tests the equality of two `%s` objects.", tools.UpperCamelCase(object.Name)),
+		},
+		Return: "bool",
+	})
 
 	tmpl := jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).

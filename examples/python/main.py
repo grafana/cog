@@ -1,12 +1,12 @@
 import json
-from generated.builders.dashboard import (
+from grafana_foundation_sdk.builders.dashboard import (
     Dashboard,
     TimePicker,
     Row,
     DatasourceVariable,
     QueryVariable,
 )
-from generated.models.dashboard import (
+from grafana_foundation_sdk.models.dashboard import (
     Dashboard as DashboardModel,
     DashboardCursorSync,
     VariableHide,
@@ -15,16 +15,16 @@ from generated.models.dashboard import (
     DataSourceRef,
     VariableSort,
 )
-from generated.models.common import (
+from grafana_foundation_sdk.models.common import (
     TimeZoneBrowser,
 )
-from generated.cog.encoder import JSONEncoder
-from generated.cog.plugins import register_default_plugins
-from examples.python.raspberry.cpu import cpu_usage_timeseries, cpu_load_average_timeseries, cpu_temperature_gauge
-from examples.python.raspberry.disk import disk_io_timeseries, disk_space_usage_table
-from examples.python.raspberry.logs import errors_in_system_logs, all_system_logs, auth_logs, kernel_logs
-from examples.python.raspberry.memory import memory_usage_timeseries, memory_usage_gauge
-from examples.python.raspberry.network import network_received_timeseries, network_transmitted_timeseries
+from grafana_foundation_sdk.cog.encoder import JSONEncoder
+from grafana_foundation_sdk.cog.plugins import register_default_plugins
+from raspberry.cpu import cpu_usage_timeseries, cpu_load_average_timeseries, cpu_temperature_gauge
+from raspberry.disk import disk_io_timeseries, disk_space_usage_table
+from raspberry.logs import errors_in_system_logs, all_system_logs, auth_logs, kernel_logs
+from raspberry.memory import memory_usage_timeseries, memory_usage_gauge
+from raspberry.network import network_received_timeseries, network_transmitted_timeseries
 
 
 def build_dashboard() -> Dashboard:

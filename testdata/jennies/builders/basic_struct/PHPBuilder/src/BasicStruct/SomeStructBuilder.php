@@ -16,6 +16,7 @@ class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\BasicStruct\SomeStruct
      */
     public function build()

@@ -10,6 +10,5 @@ set -o nounset
 set -o pipefail
 
 for d in generated/go/*/ ; do
-  echo "Building $d"
-  go build "./$d"
+  [[ "$d" != "generated/go/docs/" ]] && (echo "Building $d"; go build "./$d")
 done

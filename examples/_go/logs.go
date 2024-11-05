@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/logs"
+	"github.com/grafana/cog/generated/go/logs"
 )
 
 func errorsInSystemLogs() *logs.PanelBuilder {
