@@ -220,6 +220,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 		fieldName := formatFieldName(field.Name)
 		defaultValue := ""
 
+		// nolint:gocritic
 		if extraDefault, ok := extraDefaults[field.Name]; ok {
 			defaultValue = formatScalar(extraDefault)
 
@@ -233,12 +234,6 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 
 			defaultValue = jenny.maybeScalarValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
 		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.Default != nil {
-			referredType := field.Type.Ref.ReferredType
-			referredPkg = jenny.packageMapper(field.Type.Ref.ReferredPkg)
-			if referredPkg != "" {
-				referredType = fmt.Sprintf("%s.%s", referredPkg, referredType)
-			}
-
 			defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.Default)
 			if field.Type.Nullable {
 				defaultValue = "&" + defaultValue
