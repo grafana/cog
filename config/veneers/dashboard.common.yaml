@@ -102,10 +102,6 @@ builders:
   - promote_options_to_constructor:
       by_object: DashboardLink
       options: [title]
-      
-  - default_to_constant:
-      by_object: Dashboard
-      options: [schemaVersion, editable]
 
 options:
   ##############

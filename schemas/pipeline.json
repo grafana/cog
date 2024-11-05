@@ -208,6 +208,9 @@
         "converters": {
           "type": "boolean"
         },
+        "api_reference": {
+          "type": "boolean"
+        },
         "languages": {
           "items": {
             "$ref": "#/$defs/CodegenOutputLanguage"

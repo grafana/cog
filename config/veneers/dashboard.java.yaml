@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json
+
+language: java
+
+package: dashboard
+
+builders:
+  ##############
+  # Dashboards #
+  ##############
+
+  - default_to_constant:
+      by_object: Dashboard
+      options: [schemaVersion, editable]
+
+options: ~
