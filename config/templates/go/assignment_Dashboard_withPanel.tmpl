@@ -1,7 +1,7 @@
 {{- define "pre_assignment_Dashboard_withPanel" }}
 
 	if panelResource.GridPos == nil {
-		panelResource.GridPos = &GridPos{}
+		panelResource.GridPos = NewGridPos()
 	}
 	// The panel either has no position set, or it is the first panel of the dashboard.
 	// In that case, we position it on the grid

@@ -7,7 +7,6 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -220,7 +219,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 
 	buffer.WriteString(fmt.Sprintf(
 		"%s %s `json:\"%s%s\"`",
-		tools.UpperCamelCase(def.Name),
+		formatFieldName(def.Name),
 		formatter.doFormatType(fieldType, false),
 		def.Name,
 		jsonOmitEmpty,
@@ -255,97 +254,6 @@ func formatScalar(val any) string {
 	}
 
 	return fmt.Sprintf("%#v", val)
-}
-
-func formatDefaultReferenceStructForBuilder(refPkg string, name string, isBuilder bool, def ast.StructType, structMap *orderedmap.Map[string, interface{}]) string {
-	starter, format, sep, lastSep, ending := fmt.Sprintf("%s {\n", name), "%s: %v", ",\n", ",\n", "}"
-	if isBuilder {
-		starter, format, sep, lastSep, ending = fmt.Sprintf("New%sBuilder().\n", name), "%s(%v)", ".\n", ",\n", ""
-	}
-
-	if refPkg != "" {
-		starter = fmt.Sprintf("%s.%s", refPkg, starter)
-	}
-
-	var buffer strings.Builder
-	count := 0
-	structMap.Iterate(func(key string, value interface{}) {
-		field, _ := def.FieldByName(key)
-		if name != "" {
-			key = tools.UpperCamelCase(key)
-		}
-
-		switch x := value.(type) {
-		case map[string]interface{}:
-			buffer.WriteString(fmt.Sprintf(format, key, formatDefaultReferenceStructForBuilder(refPkg, name, isBuilder, field.Type.AsStruct(), orderedmap.FromMap(x))))
-		case nil:
-			buffer.WriteString(fmt.Sprintf(format, key, formatScalar([]any{})))
-		default:
-			val := formatScalar(x)
-			if !isBuilder && field.Type.IsScalar() && field.Type.Nullable {
-				val = fmt.Sprintf("cog.ToPtr[%s](%v)", field.Type.AsScalar().ScalarKind, value)
-			}
-			buffer.WriteString(fmt.Sprintf(format, key, val))
-		}
-
-		if count != structMap.Len()-1 {
-			buffer.WriteString(sep)
-		} else {
-			buffer.WriteString(lastSep)
-		}
-		count++
-	})
-
-	return fmt.Sprintf("%s%s%s", starter, buffer.String(), ending)
-}
-
-func formatAnonymousDefaultStruct(def ast.StructType, structMap *orderedmap.Map[string, interface{}]) string {
-	return fmt.Sprintf("struct %s {\n %s }", defineAnonymousFields(def), defineAnonymousDefaults(def, structMap))
-}
-
-func defineAnonymousFields(def ast.StructType) string {
-	var structDefinition strings.Builder
-
-	for _, f := range def.Fields {
-		key := tools.UpperCamelCase(f.Name)
-
-		switch f.Type.Kind {
-		case ast.KindScalar:
-			structDefinition.WriteString(fmt.Sprintf("%s %v `json:\"%s\"`\n", key, f.Type.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
-		case ast.KindStruct:
-			structFields := defineAnonymousFields(f.Type.AsStruct())
-			structDefinition.WriteString(fmt.Sprintf("%s struct %v `json:\"%s\"`\n", key, structFields, tools.LowerCamelCase(key)))
-		case ast.KindArray:
-			array := f.Type.AsArray()
-			if array.ValueType.IsScalar() {
-				structDefinition.WriteString(fmt.Sprintf("%s []%v `json:\"%s\"`\n", key, array.ValueType.AsScalar().ScalarKind, tools.LowerCamelCase(key)))
-			}
-		// TODO: Map rest of array cases
-		default:
-			// TODO: Map rest of the cases when necessary. By default it sets any
-			structDefinition.WriteString(fmt.Sprintf("%s any `json:\"%s\"`\n", key, strings.ToLower(key)))
-		}
-	}
-
-	return fmt.Sprintf("{\n %s }", structDefinition.String())
-}
-
-func defineAnonymousDefaults(def ast.StructType, structMap *orderedmap.Map[string, interface{}]) string {
-	var buffer strings.Builder
-	structMap.Iterate(func(key string, value interface{}) {
-		name := tools.UpperCamelCase(key)
-		switch x := value.(type) {
-		case map[string]interface{}:
-			// FIXME: Set a default not defined shouldn't happen..
-			field, _ := def.FieldByName(key)
-			def = field.Type.AsStruct()
-			buffer.WriteString(fmt.Sprintf("%s: struct %v {\n %v},\n", name, defineAnonymousFields(def), defineAnonymousDefaults(def, orderedmap.FromMap(x))))
-		case []interface{}, interface{}:
-			buffer.WriteString(fmt.Sprintf("%s: %v,\n", name, formatScalar(x)))
-		}
-	})
-
-	return buffer.String()
 }
 
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
