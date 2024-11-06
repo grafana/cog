@@ -103,6 +103,12 @@ builders:
       by_object: DashboardLink
       options: [title]
 
+  # TODO: remove
+  # Only useful for java (or any language that doesn't set defaults in raw type constructors)
+  - default_to_constant:
+      by_object: Dashboard
+      options: [schemaVersion, editable]
+
 options:
   ##############
   # Dashboards #

@@ -410,6 +410,11 @@ func DefaultToConstant(selector Selector, options []string) RewriteRule {
 				}
 
 				for v := range opt.Assignments {
+					// already a constant
+					if opt.Assignments[v].Value.Constant != nil {
+						continue
+					}
+
 					opt.Assignments[v].Value.Argument = nil
 					opt.Assignments[v].Value.Constant = values[v]
 				}
