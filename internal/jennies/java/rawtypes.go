@@ -230,6 +230,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		ShouldAddSerializer:     jenny.typeFormatter.objectNeedsCustomSerializer(object),
 		ShouldAddDeserializer:   jenny.typeFormatter.objectNeedsCustomDeserializer(object),
 		ShouldAddFactoryMethods: object.Type.HasHint(ast.HintDisjunctionOfScalars) || object.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs),
+		DefaultConstructorArgs:  jenny.defaultConstructor(object),
 	})
 }
 
@@ -297,4 +298,31 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 		variant = jenny.typeFormatter.formatPackage(variant)
 	}
 	return variant
+}
+
+func (jenny RawTypes) defaultConstructor(object ast.Object) []ast.Argument {
+	if jenny.builders.getBuilders(object.SelfRef.ReferredPkg, object.Name) != nil {
+		return nil
+	}
+
+	if jenny.builders.isPanel[object.SelfRef.ReferredPkg] {
+		return nil
+	}
+
+	// Skip schemas without builder that aren't set directly into the builders.
+	if object.Name == "FieldConfig" || object.Name == "FieldConfigSource" {
+		return nil
+	}
+
+	fields := object.Type.AsStruct().Fields
+
+	args := make([]ast.Argument, len(fields))
+	for i, field := range object.Type.AsStruct().Fields {
+		args[i] = ast.Argument{
+			Name: field.Name,
+			Type: field.Type,
+		}
+	}
+
+	return args
 }

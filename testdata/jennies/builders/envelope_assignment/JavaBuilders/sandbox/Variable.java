@@ -10,6 +10,12 @@ public class Variable {
     public String name;
     @JsonProperty("value")
     public String value;
+    public Variable() {}
+    
+    public Variable(String name,String value) {
+        this.name = name;
+        this.value = value;
+    }
     
     public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

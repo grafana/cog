@@ -16,38 +16,32 @@ public class CPU {
                 "/ ignoring(cpu) group_left " +
                 "count without (cpu, mode) (node_cpu_seconds_total{job=\"integrations/raspberrypi-node\", mode=\"idle\", instance=\"$instance\"}))";
 
-        Threshold th1 = new Threshold();
-        th1.color = "green";
-
-        Threshold th2 = new Threshold();
-        th2.color = "red";
-        th2.value = 80.0;
-
         return Common.defaultTimeSeries().
                 title("CPU Usage").
                 span(18).
                 stacking(new StackingConfig.Builder().mode(StackingMode.NORMAL)).
                 thresholds(new ThresholdsConfig.Builder().
                         mode(ThresholdsMode.ABSOLUTE).
-                        steps(List.of(th1, th2))).
+                        steps(List.of(
+                                new Threshold(0.0, "green"),
+                                new Threshold(80.0, "red")
+                        ))
+                ).
                 max(1.0).
                 min(0.0).
                 withTarget(Common.basicPrometheusQuery(query, "{{ cpu }}"));
     }
 
     public static Builder<Panel> loadAverageTimeseries() {
-        Threshold th1 = new Threshold();
-        th1.color = "green";
-
-        Threshold th2 = new Threshold();
-        th2.value = 80.0;
-        th2.color = "red";
         return Common.defaultTimeSeries().title("Load Average").
                 span(18).
                 thresholds(
                         new ThresholdsConfig.Builder().
                                 mode(ThresholdsMode.ABSOLUTE).
-                                steps(List.of(th1, th2))
+                                steps(List.of(
+                                        new Threshold(0.0, "green"),
+                                        new Threshold(80.0, "red")
+                                ))
                 ).
                 min(0.0).
                 unit("short").
@@ -58,16 +52,6 @@ public class CPU {
     }
 
     public static Builder<Panel> cpuTemperatureGauge() {
-        Threshold th1 = new Threshold();
-        th1.color = "rgba(50, 172, 45, 0.97)";
-
-        Threshold th2 = new Threshold();
-        th2.value = 65.0;
-        th2.color = "rgba(237, 129, 40, 0.89)";
-
-        Threshold th3 = new Threshold();
-        th3.value = 85.0;
-        th3.color = "rgba(245, 54, 54, 0.9)";
         return Common.defaultGauge().
                 title("CPU Temperature").
                 span(6).
@@ -76,7 +60,12 @@ public class CPU {
                 unit("celsius").
                 thresholds(new ThresholdsConfig.Builder().
                         mode(ThresholdsMode.ABSOLUTE).
-                        steps(List.of(th1, th2, th3))).
+                        steps(List.of(
+                                new Threshold(0.0, "rgba(50, 172, 45, 0.97)"),
+                                new Threshold(65.0, "rgba(237, 129, 40, 0.89)"),
+                                new Threshold(85.0, "rgba(245, 54, 54, 0.9)")
+                        ))
+                ).
                 withTarget(Common.basicPrometheusQuery("avg(node_hwmon_temp_celsius{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", ""));
     }
 }

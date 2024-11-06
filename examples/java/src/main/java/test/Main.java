@@ -53,35 +53,21 @@ public class Main {
     }
 
     private static Builder<VariableModel> datasourceVariable() {
-        VariableOption current = new VariableOption();
-        current.selected = true;
-        current.text = StringOrArrayOfString.createString("grafanacloud-potatopi-prom");
-        current.value = StringOrArrayOfString.createString("grafanacloud-prom");
-
         return new VariableModel.DatasourceVariableBuilder("datasource").
                 label("Data Source").
                 hide(VariableHide.DONT_HIDE).
                 type("prometheus").
-                current(current);
+                current(new VariableOption(true, StringOrArrayOfString.createString("grafanacloud-potatopi-prom"), StringOrArrayOfString.createString("grafanacloud-prom")));
     }
 
     private static Builder<VariableModel> queryVariable() {
-        VariableOption current = new VariableOption();
-        current.selected = false;
-        current.text = StringOrArrayOfString.createString("potato");
-        current.value = StringOrArrayOfString.createString("potato");
-
-        DataSourceRef datasource = new DataSourceRef();
-        datasource.uid = "$datasource";
-        datasource.type = "prometheus";
-
         return new VariableModel.QueryVariableBuilder("instance").
                 label("Instance").
                 hide(VariableHide.DONT_HIDE).
                 refresh(VariableRefresh.ON_TIME_RANGE_CHANGED).
                 query(StringOrMap.createString("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)")).
-                datasource(datasource).
-                current(current).
+                datasource(new DataSourceRef("$datasource", "prometheus")).
+                current(new VariableOption(false, StringOrArrayOfString.createString("potato"), StringOrArrayOfString.createString("potato"))).
                 sort(VariableSort.DISABLED);
     }
 

@@ -15,14 +15,6 @@ import java.util.Map;
 
 public class Disk {
     public static PanelBuilder diskIOTimeseries() {
-        MatcherConfig matcher = new MatcherConfig();
-        matcher.id = "byRegexp";
-        matcher.options = "/ io time/";
-
-        DynamicConfigValue dcv = new DynamicConfigValue();
-        dcv.id = "unit";
-        dcv.value = "percentunit";
-
         return Common.defaultTimeSeries().
                 title("Disk I/O").
                 fillOpacity(0.0).
@@ -31,8 +23,8 @@ public class Disk {
                 withTarget(Common.basicPrometheusQuery("rate(node_disk_written_bytes_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])", "{{device}} written")).
                 withTarget(Common.basicPrometheusQuery("rate(node_disk_io_time_seconds_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])", "{{device}} IO time")).
                 withOverride(new DashboardFieldConfigSourceOverrides.Builder().
-                        matcher(matcher).
-                        properties(List.of(dcv))
+                        matcher(new MatcherConfig("byRegexp", "/ io time/")).
+                        properties(List.of(new DynamicConfigValue("unit", "percentunit")))
                 );
     }
 
@@ -48,23 +40,33 @@ public class Disk {
                 ).
                 withTarget(Common.tablePrometheusQuery("max by (mountpoint) (node_filesystem_size_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\", fstype!=\"\"})", "A")).
                 withTarget(Common.tablePrometheusQuery("max by (mountpoint) (node_filesystem_avail_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\", fstype!=\"\"})", "B")).
-                withTransformation(transformer1()).
-                withTransformation(transformer2()).
-                withTransformation(transformer3()).
-                withTransformation(transformer4()).
-                withTransformation(transformer5()).
-                withTransformation(transformer6()).
+                withTransformation(transformation("groupBy", transformer1Options())).
+                withTransformation(transformation("merge",null)).
+                withTransformation(transformation("calculateField", transformer3Options())).
+                withTransformation(transformation("calculateField", transformer4Options())).
+                withTransformation(transformation("organize", transformer5Options())).
+                withTransformation(transformation("sortBy", transformer6Options())).
                 withOverride(defaultOverrides("Mounted on", 260)).
                 withOverride(defaultOverrides("Size", 93)).
                 withOverride(defaultOverrides("Used", 72)).
                 withOverride(defaultOverrides("Available", 88)).
-                withOverride(complexOverrides());
+                withOverride(new DashboardFieldConfigSourceOverrides.Builder().
+                        matcher(new MatcherConfig("byName", "Used, %")).
+                        properties(List.of(
+                                new DynamicConfigValue("unit", "percentunit"),
+                                new DynamicConfigValue("custom.cellOptions", Map.of("mode", "gradient", "type", "gauge")),
+                                new DynamicConfigValue("min", 0),
+                                new DynamicConfigValue("max", 1)
+                        ))
+                );
     }
 
-    private static DataTransformerConfig transformer1() {
-        DataTransformerConfig dataTransformerConfig = new DataTransformerConfig();
-        dataTransformerConfig.id = "groupBy";
-        dataTransformerConfig.options = Map.of(
+    private static DataTransformerConfig transformation(String id, Object options) {
+        return new DataTransformerConfig(id, false, null, null, options);
+    }
+
+    private static Map<String, Object> transformer1Options() {
+        return Map.of(
                 "fields", Map.of(
                         "Value #A", Map.of(
                                 "aggregations", List.of("lastNotNull"),
@@ -80,21 +82,10 @@ public class Disk {
                         )
                 )
         );
-
-        return dataTransformerConfig;
     }
 
-    private static DataTransformerConfig transformer2() {
-        DataTransformerConfig dataTransformerConfig = new DataTransformerConfig();
-        dataTransformerConfig.id = "merge";
-
-        return dataTransformerConfig;
-    }
-
-    private static DataTransformerConfig transformer3() {
-        DataTransformerConfig dataTransformerConfig = new DataTransformerConfig();
-        dataTransformerConfig.id = "calculateField";
-        dataTransformerConfig.options = Map.of(
+    private static Map<String, Object> transformer3Options() {
+        return Map.of(
                 "alias", "Used",
                 "binary", Map.of(
                         "left", "Value #A (lastNotNull)",
@@ -103,14 +94,10 @@ public class Disk {
                         "right", "Value #B (lastNotNull)"
                 ), "mode", "binary",
                 "reduce", Map.of("reducer", "sum"));
-
-        return dataTransformerConfig;
     }
 
-    private static DataTransformerConfig transformer4() {
-        DataTransformerConfig dataTransformerConfig = new DataTransformerConfig();
-        dataTransformerConfig.id = "calculateField";
-        dataTransformerConfig.options = Map.of(
+    private static Map<String, Object> transformer4Options() {
+        return Map.of(
                 "alias", "Used, %",
                 "binary", Map.of(
                         "left", "Used",
@@ -120,14 +107,10 @@ public class Disk {
                 ),
                 "mode", "binary",
                 "reduce", Map.of("reducer", "sum"));
-
-        return dataTransformerConfig;
     }
 
-    private static DataTransformerConfig transformer5() {
-        DataTransformerConfig dataTransformerConfig = new DataTransformerConfig();
-        dataTransformerConfig.id = "organize";
-        dataTransformerConfig.options = Map.of(
+    private static Map<String, Object> transformer5Options() {
+        return Map.of(
                 "excludeByName", List.of(),
                 "indexByName", List.of(),
                 "renameByName", Map.of(
@@ -136,55 +119,18 @@ public class Disk {
                         "mountpoint", "Mounted on"
                 )
         );
-
-        return dataTransformerConfig;
     }
 
-    private static DataTransformerConfig transformer6() {
-        DataTransformerConfig dataTransformerConfig = new DataTransformerConfig();
-        dataTransformerConfig.id = "sortBy";
-        dataTransformerConfig.options = Map.of(
+    private static Map<String, Object> transformer6Options() {
+        return Map.of(
                 "fields", List.of(),
                 "sort", Map.of("field", "Mounted on")
         );
-
-        return dataTransformerConfig;
     }
 
     private static Builder<DashboardFieldConfigSourceOverrides> defaultOverrides(String options, Integer value) {
-        MatcherConfig matcherConfig = new MatcherConfig();
-        matcherConfig.id = "byName";
-        matcherConfig.options = options;
-
-        DynamicConfigValue dynamicConfigValue = new DynamicConfigValue();
-        dynamicConfigValue.id = "custom.width";
-        dynamicConfigValue.value = value;
-        return new DashboardFieldConfigSourceOverrides.Builder().matcher(matcherConfig).properties(List.of(dynamicConfigValue));
-    }
-
-    private static Builder<DashboardFieldConfigSourceOverrides> complexOverrides() {
-        MatcherConfig matcherConfig = new MatcherConfig();
-        matcherConfig.id = "byName";
-        matcherConfig.options = "Used, %";
-
-        DynamicConfigValue dynamicConfigValue1 = new DynamicConfigValue();
-        dynamicConfigValue1.id = "unit";
-        dynamicConfigValue1.value = "percentunit";
-
-        DynamicConfigValue dynamicConfigValue2 = new DynamicConfigValue();
-        dynamicConfigValue2.id = "custom.cellOptions";
-        dynamicConfigValue2.value = Map.of("mode", "gradient", "type", "gauge");
-
-        DynamicConfigValue dynamicConfigValue3 = new DynamicConfigValue();
-        dynamicConfigValue3.id = "min";
-        dynamicConfigValue3.value = 0;
-
-        DynamicConfigValue dynamicConfigValue4 = new DynamicConfigValue();
-        dynamicConfigValue4.id = "max";
-        dynamicConfigValue4.value = 1;
-
         return new DashboardFieldConfigSourceOverrides.Builder().
-                matcher(matcherConfig).
-                properties(List.of(dynamicConfigValue1, dynamicConfigValue2, dynamicConfigValue3, dynamicConfigValue4));
+                matcher(new MatcherConfig("byName", options)).
+                properties(List.of(new DynamicConfigValue("custom.width", value)));
     }
 }
