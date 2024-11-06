@@ -285,7 +285,7 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	refs := make([]ast.Type, 0)
 	rest := make([]ast.Type, 0)
 	for _, b := range def.Branches {
-		if b.Ref != nil {
+		if b.IsRef() {
 			refs = append(refs, b)
 			continue
 		}
@@ -302,12 +302,14 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	}
 
 	for _, r := range rest {
-		if r.Struct != nil {
-			for _, fieldDef := range r.AsStruct().Fields {
+		if r.IsStruct() {
+			for _, fieldDef := range r.Struct.Fields {
 				buffer.WriteString("\t" + formatter.formatField(fieldDef))
+				buffer.WriteString("\n")
 			}
 			continue
 		}
+
 		buffer.WriteString("\t" + formatter.doFormatType(r, false) + "\n")
 	}
 
