@@ -69,6 +69,16 @@ passes:
             kind: composable_slot
             composable_slot: { variant: dataquery }
 
+  # typed as `links?: [...]` in the original schema
+  - retype_field:
+      field: dashboard.FieldConfig.links
+      as:
+        kind: array
+        array:
+          value_type:
+            kind: ref
+            ref: { referred_pkg: dashboard, referred_type: DashboardLink }
+
   - dashboard_panels: {}
 
   # Add a few missing fields.

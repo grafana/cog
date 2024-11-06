@@ -53,13 +53,14 @@ builders:
       under_path: fieldConfig.defaults
       exclude_options: [
         # don't copy these over as they clash with a similarly named options from Panel
-        "description", "links",
+        "description",
 
         # TODO: check if these are actually relevant
         "displayNameFromDS", "filterable", "path", "writeable"
       ]
       rename_options:
         color: colorScheme
+        links: dataLinks
   - merge_into:
       source: FieldConfigSource
       destination: Panel
