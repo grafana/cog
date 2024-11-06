@@ -68,7 +68,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
-	constructorName := fmt.Sprintf("New%s", formatObjectName(builder.For.SelfRef.ReferredType))
+	constructorName := "New" + formatObjectName(builder.For.SelfRef.ReferredType)
 	constructorPkg := jenny.typeImportMapper(builder.For.SelfRef.ReferredPkg)
 	if constructorPkg != "" {
 		constructorName = constructorPkg + "." + constructorName
