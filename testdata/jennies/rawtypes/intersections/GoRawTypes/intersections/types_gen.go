@@ -12,7 +12,9 @@ type Intersections struct {
 	SomeStruct
 	externalpkg.AnotherStruct
 
-	FieldString string `json:"fieldString"`	FieldInteger int32 `json:"fieldInteger"`}
+	FieldString string `json:"fieldString"`
+	FieldInteger int32 `json:"fieldInteger"`
+}
 
 type SomeStruct struct {
     FieldBool bool `json:"fieldBool"`
