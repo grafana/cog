@@ -120,7 +120,7 @@ func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ast.
 	case ast.KindRef:
 		resolvedType := context.ResolveRefs(typeDef)
 		if resolvedType.IsStruct() {
-			constructor := fmt.Sprintf("New%s()", typeDef.Ref.ReferredType)
+			constructor := "New" + typeDef.Ref.ReferredType + "()"
 
 			referredPkg := jenny.typeImportMapper(typeDef.Ref.ReferredPkg)
 			if referredPkg != "" {
