@@ -124,7 +124,7 @@ func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ast.
 
 			referredPkg := jenny.typeImportMapper(typeDef.Ref.ReferredPkg)
 			if referredPkg != "" {
-				constructor = fmt.Sprintf("%s.%s", referredPkg, constructor)
+				constructor = referredPkg + "." + constructor
 			}
 
 			return constructor
