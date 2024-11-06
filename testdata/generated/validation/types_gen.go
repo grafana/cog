@@ -25,6 +25,11 @@ type Dashboard struct {
 	Panels []Panel           `json:"panels"`
 }
 
+// NewDashboard creates a new Dashboard object.
+func NewDashboard() *Dashboard {
+	return &Dashboard{}
+}
+
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Dashboard` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Dashboard) UnmarshalJSONStrict(raw []byte) error {
@@ -257,6 +262,11 @@ func (resource Dashboard) Validate() error {
 
 type Panel struct {
 	Title string `json:"title"`
+}
+
+// NewPanel creates a new Panel object.
+func NewPanel() *Panel {
+	return &Panel{}
 }
 
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Panel` from JSON.

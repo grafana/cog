@@ -15,6 +15,11 @@ type SomeStruct struct {
     RefStruct *RefStruct `json:"refStruct,omitempty"`
 }
 
+// NewSomeStruct creates a new SomeStruct object.
+func NewSomeStruct() *SomeStruct {
+	return &SomeStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -173,6 +178,11 @@ type RefStruct struct {
     Tags []string `json:"tags"`
 }
 
+// NewRefStruct creates a new RefStruct object.
+func NewRefStruct() *RefStruct {
+	return &RefStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `RefStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *RefStruct) UnmarshalJSONStrict(raw []byte) error {

@@ -18,6 +18,11 @@ func (resource Query) DataqueryType() string {
 	return "prometheus"
 }
 
+// NewQuery creates a new Query object.
+func NewQuery() *Query {
+	return &Query{
+}
+}
 // VariantConfig returns the configuration related to prometheus dataqueries.
 // This configuration describes how to unmarshal it, convert it to code, …
 func VariantConfig() variants.DataqueryConfig {

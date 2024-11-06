@@ -12,13 +12,11 @@ type PanelBuilder struct {
 }
 
 func NewPanelBuilder() *PanelBuilder {
-	resource := &Panel{}
+	resource := NewPanel()
 	builder := &PanelBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -91,14 +89,3 @@ func (builder *PanelBuilder) NavigateAfter(navigateAfter string) *PanelBuilder {
     return builder
 }
 
-func (builder *PanelBuilder) applyDefaults() {
-    builder.OnlyFromThisDashboard(false)
-    builder.OnlyInTimeRange(false)
-    builder.Limit(10)
-    builder.ShowUser(true)
-    builder.ShowTime(true)
-    builder.ShowTags(true)
-    builder.NavigateToPanel(true)
-    builder.NavigateBefore("10m")
-    builder.NavigateAfter("10m")
-}

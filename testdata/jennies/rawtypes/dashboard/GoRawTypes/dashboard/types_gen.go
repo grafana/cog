@@ -15,6 +15,11 @@ type Dashboard struct {
     Panels []Panel `json:"panels,omitempty"`
 }
 
+// NewDashboard creates a new Dashboard object.
+func NewDashboard() *Dashboard {
+	return &Dashboard{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Dashboard` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Dashboard) UnmarshalJSONStrict(raw []byte) error {
@@ -118,6 +123,11 @@ type DataSourceRef struct {
     Uid *string `json:"uid,omitempty"`
 }
 
+// NewDataSourceRef creates a new DataSourceRef object.
+func NewDataSourceRef() *DataSourceRef {
+	return &DataSourceRef{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DataSourceRef` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *DataSourceRef) UnmarshalJSONStrict(raw []byte) error {
@@ -200,6 +210,11 @@ type FieldConfigSource struct {
     Defaults *FieldConfig `json:"defaults,omitempty"`
 }
 
+// NewFieldConfigSource creates a new FieldConfigSource object.
+func NewFieldConfigSource() *FieldConfigSource {
+	return &FieldConfigSource{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `FieldConfigSource` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *FieldConfigSource) UnmarshalJSONStrict(raw []byte) error {
@@ -276,6 +291,11 @@ type FieldConfig struct {
     Custom any `json:"custom,omitempty"`
 }
 
+// NewFieldConfig creates a new FieldConfig object.
+func NewFieldConfig() *FieldConfig {
+	return &FieldConfig{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `FieldConfig` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {
@@ -358,6 +378,11 @@ type Panel struct {
     FieldConfig *FieldConfigSource `json:"fieldConfig,omitempty"`
 }
 
+// NewPanel creates a new Panel object.
+func NewPanel() *Panel {
+	return &Panel{
+}
+}
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode Panel from JSON.
 func (resource *Panel) UnmarshalJSON(raw []byte) error {
 	if raw == nil {

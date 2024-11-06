@@ -13,6 +13,11 @@ type SomeStruct struct {
     FieldAny any `json:"FieldAny"`
 }
 
+// NewSomeStruct creates a new SomeStruct object.
+func NewSomeStruct() *SomeStruct {
+	return &SomeStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -69,5 +74,9 @@ func (resource SomeStruct) Validate() error {
 
 type RefToSomeStruct = SomeStruct
 
+// NewRefToSomeStruct creates a new RefToSomeStruct object.
+func NewRefToSomeStruct() *RefToSomeStruct {
+	return NewSomeStruct()
+}
 type RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct
 

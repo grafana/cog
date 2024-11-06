@@ -14,6 +14,11 @@ type ObjWithTimeField struct {
     RegisteredAt time.Time `json:"registeredAt"`
 }
 
+// NewObjWithTimeField creates a new ObjWithTimeField object.
+func NewObjWithTimeField() *ObjWithTimeField {
+	return &ObjWithTimeField{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `ObjWithTimeField` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *ObjWithTimeField) UnmarshalJSONStrict(raw []byte) error {
