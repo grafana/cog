@@ -13,13 +13,11 @@ type SomeNiceBuilderBuilder struct {
 }
 
 func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
-	resource := &withdashes.SomeStruct{}
+	resource := withdashes.NewSomeStruct()
 	builder := &SomeNiceBuilderBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -38,5 +36,3 @@ func (builder *SomeNiceBuilderBuilder) Title(title string) *SomeNiceBuilderBuild
     return builder
 }
 
-func (builder *SomeNiceBuilderBuilder) applyDefaults() {
-}

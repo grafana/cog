@@ -12,6 +12,11 @@ type NestedStruct struct {
     IntVal int64 `json:"intVal"`
 }
 
+// NewNestedStruct creates a new NestedStruct object.
+func NewNestedStruct() *NestedStruct {
+	return &NestedStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `NestedStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *NestedStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -88,6 +93,26 @@ type Struct struct {
     PartialComplexField DefaultsStructPartialComplexField `json:"partialComplexField"`
 }
 
+// NewStruct creates a new Struct object.
+func NewStruct() *Struct {
+	return &Struct{
+		AllFields: NestedStruct{
+		StringVal: "hello",
+		IntVal: 3,
+},
+		PartialFields: NestedStruct{
+		IntVal: 3,
+},
+		EmptyFields: *NewNestedStruct(),
+		ComplexField: DefaultsStructComplexField{
+		Uid: "myUID",
+		Nested: map[string]interface {}{"nestedVal":"nested"},
+		Array: []string{"hello"},
+},
+		PartialComplexField: DefaultsStructPartialComplexField{
+},
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Struct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Struct) UnmarshalJSONStrict(raw []byte) error {
@@ -236,6 +261,11 @@ type DefaultsStructComplexFieldNested struct {
     NestedVal string `json:"nestedVal"`
 }
 
+// NewDefaultsStructComplexFieldNested creates a new DefaultsStructComplexFieldNested object.
+func NewDefaultsStructComplexFieldNested() *DefaultsStructComplexFieldNested {
+	return &DefaultsStructComplexFieldNested{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DefaultsStructComplexFieldNested` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *DefaultsStructComplexFieldNested) UnmarshalJSONStrict(raw []byte) error {
@@ -295,6 +325,12 @@ type DefaultsStructComplexField struct {
     Array []string `json:"array"`
 }
 
+// NewDefaultsStructComplexField creates a new DefaultsStructComplexField object.
+func NewDefaultsStructComplexField() *DefaultsStructComplexField {
+	return &DefaultsStructComplexField{
+		Nested: *NewDefaultsStructComplexFieldNested(),
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DefaultsStructComplexField` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *DefaultsStructComplexField) UnmarshalJSONStrict(raw []byte) error {
@@ -402,6 +438,11 @@ type DefaultsStructPartialComplexField struct {
     IntVal int64 `json:"intVal"`
 }
 
+// NewDefaultsStructPartialComplexField creates a new DefaultsStructPartialComplexField object.
+func NewDefaultsStructPartialComplexField() *DefaultsStructPartialComplexField {
+	return &DefaultsStructPartialComplexField{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DefaultsStructPartialComplexField` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *DefaultsStructPartialComplexField) UnmarshalJSONStrict(raw []byte) error {

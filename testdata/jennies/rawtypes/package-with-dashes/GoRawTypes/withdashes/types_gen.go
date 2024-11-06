@@ -12,6 +12,11 @@ type SomeStruct struct {
     FieldAny any `json:"FieldAny"`
 }
 
+// NewSomeStruct creates a new SomeStruct object.
+func NewSomeStruct() *SomeStruct {
+	return &SomeStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -69,11 +74,20 @@ func (resource SomeStruct) Validate() error {
 // Refresh rate or disabled.
 type RefreshRate = StringOrBool
 
+// NewRefreshRate creates a new RefreshRate object.
+func NewRefreshRate() *RefreshRate {
+	return NewStringOrBool()
+}
 type StringOrBool struct {
     String *string `json:"String,omitempty"`
     Bool *bool `json:"Bool,omitempty"`
 }
 
+// NewStringOrBool creates a new StringOrBool object.
+func NewStringOrBool() *StringOrBool {
+	return &StringOrBool{
+}
+}
 // MarshalJSON implements a custom JSON marshalling logic to encode `StringOrBool` as JSON.
 func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {

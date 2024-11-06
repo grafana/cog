@@ -16,6 +16,11 @@ type SomeStruct struct {
     FieldAnonymousStruct *StructOptionalFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct,omitempty"`
 }
 
+// NewSomeStruct creates a new SomeStruct object.
+func NewSomeStruct() *SomeStruct {
+	return &SomeStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -180,6 +185,11 @@ type SomeOtherStruct struct {
     FieldAny any `json:"FieldAny"`
 }
 
+// NewSomeOtherStruct creates a new SomeOtherStruct object.
+func NewSomeOtherStruct() *SomeOtherStruct {
+	return &SomeOtherStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeOtherStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -245,6 +255,11 @@ type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
     FieldAny any `json:"FieldAny"`
 }
 
+// NewStructOptionalFieldsSomeStructFieldAnonymousStruct creates a new StructOptionalFieldsSomeStructFieldAnonymousStruct object.
+func NewStructOptionalFieldsSomeStructFieldAnonymousStruct() *StructOptionalFieldsSomeStructFieldAnonymousStruct {
+	return &StructOptionalFieldsSomeStructFieldAnonymousStruct{
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StructOptionalFieldsSomeStructFieldAnonymousStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *StructOptionalFieldsSomeStructFieldAnonymousStruct) UnmarshalJSONStrict(raw []byte) error {
