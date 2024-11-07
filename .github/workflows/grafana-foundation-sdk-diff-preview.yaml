@@ -29,32 +29,48 @@ jobs:
           enable-cache: 'true'
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
-      - name: Dry-run release
+      - name: Dry-run release with current branch
         shell: bash
         run: |
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
-          
-          devbox run ./scripts/release-version.sh next next
+
+          devbox run ./scripts/release-version.sh next
         env:
-          FOUNDATION_SDK_PATH: ./grafana-foundation-sdk
+          FOUNDATION_SDK_PATH: ../grafana-foundation-sdk-current
+          FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
+          LOG_LEVEL: '7' # debug
+          GOGC: 'off'
+
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Dry-run release with main branch
+        shell: bash
+        run: |
+          git config --global user.email "cog-ci@grafana.com"
+          git config --global user.name "cog - CI"
+
+          devbox run ./scripts/release-version.sh next
+        env:
+          FOUNDATION_SDK_PATH: ../grafana-foundation-sdk-main
           FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
           LOG_LEVEL: '7' # debug
           GOGC: 'off'
 
       - name: Preview diff
         run: |
-          cd ./grafana-foundation-sdk
-          
           echo -e '<!-- grafana-foundation-sdk-diff-preview-marker -->\n\n' >> preview.md          
-          echo -e '**Note:** in addition to the changes introduced by this PR, the diff includes unreleased changes living in `main`. \n\n' >> preview.md
+          echo -e '**Note:** the diff includes only changes introduced by this PR. Changes on `main` are excluded. \n\n' >> preview.md
           echo -e "<details>\n" >> preview.md
           echo -e "<summary>\n" >> preview.md
           echo -e '### 🔎 Changes to `grafana-foundation-sdk@next+cog-v0.0.x`\n' >> preview.md
           echo -e "</summary>\n" >> preview.md
           echo '```patch' >> preview.md
           
-          git diff next+cog-v0.0.x..HEAD ':(exclude,glob)*/README.md' ':(exclude)java/gradle.properties' ':(exclude)python/pyproject.toml' ':(exclude)typescript/package.json' | tee -a preview.md
+          diff --new-file --unidirectional-new-file --color=never --unified --recursive --exclude='README.md' --exclude='.git' --exclude='gradle.properties' --exclude='pyproject.toml' --exclude='package.json' --exclude='Installing.md' ../grafana-foundation-sdk-main/ ../grafana-foundation-sdk-current/ | tee -a preview.md
           
           echo '```' >> preview.md
           echo -e "\n" >> preview.md
@@ -76,4 +92,4 @@ jobs:
           comment-id: ${{ steps.preview-comment-find.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           edit-mode: replace
-          body-path: './grafana-foundation-sdk/preview.md'
+          body-path: './preview.md'
