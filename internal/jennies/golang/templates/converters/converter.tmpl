@@ -87,7 +87,7 @@ package {{ .Converter.Package | formatPackageName }}
     {{- $argsCount := sub1 (len .Args) -}}
     {{- with .ArgumentGuards -}}if {{ template "guards" . }} { {{- end }}
     {{- if and (eq (len .Guards) 0) (eq (len .ArgumentGuards) 0) -}} { {{- end }}
-    buffer.WriteString(`{{ .Option.Name | upperCamelCase }}(`)
+    buffer.WriteString(`{{ .Option.Name | formatFunctionName }}(`)
     {{- range $i, $arg := .Args }}
         {{- $intoVar := print "arg" $i }}
         {{ template "prepare_arg" (dict "IntoVar" $intoVar "Arg" $arg) }}
@@ -115,11 +115,11 @@ package {{ .Converter.Package | formatPackageName }}
 
 {{- define "converter" -}}
 {{- $reflect := importStdPkg "strings" -}}
-// {{ .Converter.BuilderName | upperCamelCase }}Converter accepts a `{{ .Converter.BuilderName | upperCamelCase }}` object and generates the Go code to build this object using builders.
-func {{ .Converter.BuilderName | upperCamelCase }}Converter(input {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
+// {{ .Converter.BuilderName | formatFunctionName }}Converter accepts a `{{ .Converter.BuilderName | formatObjectName }}` object and generates the Go code to build this object using builders.
+func {{ .Converter.BuilderName | formatFunctionName }}Converter(input {{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType  }}) string {
     {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
     calls := []string{
-    `{{ .Converter.Package | formatPackageName }}.New{{ .Converter.BuilderName | upperCamelCase }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
+    `{{ .Converter.Package | formatPackageName }}.New{{ .Converter.BuilderName | formatFunctionName }}Builder({{ with .Converter.ConstructorArgs}}`+{{ range $i, $arg := . }}{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}{{- if ne $i $constructorArgsCount }} + ", " +{{ end }}{{ end }}+`{{ end }})`,
     }
     var buffer strings.Builder
 
