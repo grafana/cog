@@ -103,7 +103,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			Tmpl:      tmpl,
 		}),
 	)
-	jenny.AddPostprocessors(PostProcessFile, common.GeneratedCommentHeader(globalConfig))
+	jenny.AddPostprocessors(formatGoFiles, common.GeneratedCommentHeader(globalConfig))
 
 	return jenny
 }

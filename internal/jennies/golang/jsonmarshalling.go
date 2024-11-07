@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type JSONMarshalling struct {
@@ -92,7 +91,7 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
 		Name: "MarshalJSON",
 		Comments: []string{
-			fmt.Sprintf("MarshalJSON implements a custom JSON marshalling logic to encode `%s` as JSON.", tools.UpperCamelCase(obj.Name)),
+			fmt.Sprintf("MarshalJSON implements a custom JSON marshalling logic to encode `%s` as JSON.", formatObjectName(obj.Name)),
 		},
 		Return: "([]byte, error)",
 	})
@@ -152,7 +151,7 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 			{Name: "raw", Type: "[]byte"},
 		},
 		Comments: []string{
-			fmt.Sprintf("UnmarshalJSON implements a custom JSON unmarshalling logic to decode `%s` from JSON.", tools.UpperCamelCase(obj.Name)),
+			fmt.Sprintf("UnmarshalJSON implements a custom JSON unmarshalling logic to decode `%s` from JSON.", formatObjectName(obj.Name)),
 		},
 		Return: "error",
 	})
@@ -199,7 +198,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 			return fmt.Errorf("error decoding field '%[1]s': %%w", err)
 		}
 	}
-`, field.Name, tools.UpperCamelCase(field.Name)))
+`, field.Name, formatFieldName(field.Name)))
 	}
 
 	// unmarshal "composable slot" fields
@@ -234,7 +233,7 @@ func (resource *%[1]s) UnmarshalJSON(raw []byte) error {
 	%[2]s
 	return nil
 }
-`, tools.UpperCamelCase(obj.Name), buffer.String()), nil
+`, formatObjectName(obj.Name), buffer.String()), nil
 }
 
 func (jenny JSONMarshalling) renderUnmarshalDataqueryField(parentStruct ast.Object, field ast.StructField) string {
@@ -260,7 +259,7 @@ func (jenny JSONMarshalling) renderUnmarshalDataqueryField(parentStruct ast.Obje
 		hintValue += fmt.Sprintf(`if resource.%[1]s != nil && resource.%[1]s.Type != nil {
 dataqueryTypeHint = *resource.%[1]s.Type
 }
-`, tools.UpperCamelCase(hintField.Name))
+`, formatFieldName(hintField.Name))
 	}
 
 	jenny.packageMapper("cog")
@@ -276,7 +275,7 @@ dataqueryTypeHint = *resource.%[1]s.Type
 		}
 		resource.%[1]s = %[2]s
 	}
-`, tools.UpperCamelCase(field.Name), field.Name, hintValue)
+`, formatFieldName(field.Name), field.Name, hintValue)
 	}
 
 	return fmt.Sprintf(`
@@ -288,7 +287,7 @@ dataqueryTypeHint = *resource.%[1]s.Type
 		}
 		resource.%[1]s = %[2]s
 	}
-`, tools.UpperCamelCase(field.Name), field.Name, hintValue)
+`, formatFieldName(field.Name), field.Name, hintValue)
 }
 
 func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {

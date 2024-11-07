@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type validationMethods struct {
@@ -86,7 +85,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
 		Name: "Validate",
 		Comments: []string{
-			fmt.Sprintf("Validate checks all the validation constraints that may be defined on `%s` fields for violations and returns them.", tools.UpperCamelCase(object.Name)),
+			fmt.Sprintf("Validate checks all the validation constraints that may be defined on `%s` fields for violations and returns them.", formatObjectName(object.Name)),
 		},
 		Return: "error",
 	})
