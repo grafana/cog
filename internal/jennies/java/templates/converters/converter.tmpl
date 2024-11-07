@@ -75,10 +75,10 @@ package {{ .Converter.Package | formatPackageName }};
             {{- if and .ValueType.IsScalar (not (isScalarType .For "string")) }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }}.toString());
             {{- else }}
-            tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }});
+            tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }} + ".build()");
             {{- end }}
         }
-        String {{ $.IntoVar }} = "() -> List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +".build())";
+        String {{ $.IntoVar }} = "() -> List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +")";
     {{- end -}}
     {{- with .Arg.Map -}}
         {{- $reflect := importStdPkg "java.util" "StringJoiner" -}}
