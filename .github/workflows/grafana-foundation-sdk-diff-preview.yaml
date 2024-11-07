@@ -62,19 +62,24 @@ jobs:
 
       - name: Preview diff
         run: |
-          echo -e '<!-- grafana-foundation-sdk-diff-preview-marker -->\n\n' >> preview.md          
-          echo -e '**Note:** the diff includes only changes introduced by this PR. Changes on `main` are excluded. \n\n' >> preview.md
-          echo -e "<details>\n" >> preview.md
-          echo -e "<summary>\n" >> preview.md
-          echo -e '### 🔎 Changes to `grafana-foundation-sdk@next+cog-v0.0.x`\n' >> preview.md
-          echo -e "</summary>\n" >> preview.md
-          echo '```patch' >> preview.md
+          cat <<'EOF' > preview.md
+          <!-- grafana-foundation-sdk-diff-preview-marker -->
+          **Note:** the diff includes only changes introduced by this PR. Changes on `main` are excluded.
           
-          diff --new-file --unidirectional-new-file --color=never --unified --recursive --exclude='README.md' --exclude='.git' --exclude='gradle.properties' --exclude='pyproject.toml' --exclude='package.json' --exclude='Installing.md' ../grafana-foundation-sdk-main/ ../grafana-foundation-sdk-current/ | tee -a preview.md
+          <details>
+          <summary>
+          ### 🔎 Changes to `grafana-foundation-sdk@next+cog-v0.0.x`
+          </summary>
           
-          echo '```' >> preview.md
-          echo -e "\n" >> preview.md
-          echo -e "</details>\n\n" >> preview.md
+          ```patch
+          EOF
+          
+          diff --new-file --unidirectional-new-file --color=never --unified --recursive --exclude='README.md' --exclude='.git' --exclude='gradle.properties' --exclude='pyproject.toml' --exclude='package.json' --exclude='Installing.md' ../grafana-foundation-sdk-main/ ../grafana-foundation-sdk-current/ >> preview.md
+          
+          cat <<'EOF' >> preview.md
+          ```
+          </details>
+          EOF
 
       - name: Find preview comment
         uses: peter-evans/find-comment@v3
