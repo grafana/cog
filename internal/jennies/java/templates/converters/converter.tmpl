@@ -35,7 +35,11 @@ package {{ .Converter.Package | formatPackageName }};
 
 {{- define "value_formatter" -}}
     {{- if .Type.IsScalar }}
+        {{- if and (eq .Type.AsScalar.ScalarKind "string") (not .IsMapEntry) -}}
+        "\""+{{- .Path | formatGuardPath }}+"\""
+        {{- else }}
         {{- .Path | formatGuardPath }}
+        {{- end }}
     {{- else }}
         {{- $reflect := importStdPkg "cog" "Runtime" -}}
         Runtime.dump({{ .Path | formatGuardPath }})
@@ -91,7 +95,7 @@ package {{ .Converter.Package | formatPackageName }};
         String {{ $.IntoVar }} = Registry.{{ .FuncName | lowerCamelCase }}({{ range $i, $runtimeArg := .Args }}{{ if gt $i 0 }}, {{ end }}{{ $runtimeArg.ValuePath | formatPath }}{{ end }});
     {{- end -}}
     {{- with .Arg.Direct -}}
-        {{ if .ValueType.IsScalar }}{{ .ValueType | formatType }}{{ else }}String{{ end }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}}{{ if $.IsMapEntry }}.getValue(){{ end }};
+        {{ if .ValueType.IsScalar }}{{ .ValueType | formatType }}{{ else }}String{{ end }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath "IsMapEntry" $.IsMapEntry) -}}{{ if $.IsMapEntry }}.getValue(){{ end }};
     {{- end -}}
 {{- end }}
 
@@ -134,9 +138,7 @@ public class {{ .Converter.BuilderName | upperCamelCase }}Converter {{ if .IsPan
         sb.append("{{ .Converter.BuilderName | upperCamelCase }}.Builder builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder(");
         {{- with .Converter.ConstructorArgs }}
         {{- range $i, $arg := . }}
-        {{- template "escape_string" (dict "Type" $arg.ValueType) }}
-        sb.append({{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}});
-        {{- template "escape_string" (dict "Type" $arg.ValueType) }}
+        sb.append({{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath "IsMapEntry" false) -}});
         {{- if ne $i $constructorArgsCount }}
         sb.append(","); 
         {{- end }}
@@ -151,10 +153,4 @@ public class {{ .Converter.BuilderName | upperCamelCase }}Converter {{ if .IsPan
      return sb.toString();
      }
 }
-{{- end }}
-
-{{- define "escape_string" -}}
-    {{- if and .Type.IsScalar (eq .Type.AsScalar.ScalarKind "string") }}
-        sb.append("\"");
-    {{- end }}
 {{- end }}
