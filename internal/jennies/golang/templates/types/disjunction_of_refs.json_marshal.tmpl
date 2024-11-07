@@ -1,4 +1,4 @@
-// MarshalJSON implements a custom JSON marshalling logic to encode `{{ .def.Name|upperCamelCase }}` as JSON.
+// MarshalJSON implements a custom JSON marshalling logic to encode `{{ .def.Name|formatObjectName }}` as JSON.
 func (resource {{ .def.Name|formatObjectName }}) MarshalJSON() ([]byte, error) {
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $fmt := importStdPkg "fmt" -}}
