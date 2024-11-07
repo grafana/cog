@@ -33,7 +33,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 
 		filename := filepath.Join(
 			formatPackageName(builder.Package),
-			fmt.Sprintf("%s_converter_gen.go", formatFileName(builder.Name)),
+			formatFileName(builder.Name)+"_converter_gen.go",
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
