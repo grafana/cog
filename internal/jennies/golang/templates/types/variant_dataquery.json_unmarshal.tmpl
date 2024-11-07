@@ -5,7 +5,7 @@ func VariantConfig() variants.DataqueryConfig {
 	return variants.DataqueryConfig{
 		Identifier: "{{ .schema.Metadata.Identifier|lower }}",
 	    DataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
-            dataquery := &{{ .object.Name|upperCamelCase }}{}
+            dataquery := &{{ .object.Name|formatObjectName }}{}
 
             if err := json.Unmarshal(raw, dataquery); err != nil {
                 return nil, err
@@ -14,7 +14,7 @@ func VariantConfig() variants.DataqueryConfig {
             return dataquery, nil
        },
 	    StrictDataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
-            dataquery := &{{ .object.Name|upperCamelCase }}{}
+            dataquery := &{{ .object.Name|formatObjectName }}{}
 
             if err := dataquery.UnmarshalJSONStrict(raw); err != nil {
                 return nil, err
@@ -24,22 +24,22 @@ func VariantConfig() variants.DataqueryConfig {
        },
         {{- if .hasConverter }}
         GoConverter: func(input any) string {
-            var dataquery {{ .object.Name | upperCamelCase }}
-            if cast, ok := input.(*{{ .object.Name | upperCamelCase }}); ok {
+            var dataquery {{ .object.Name|formatObjectName }}
+            if cast, ok := input.(*{{ .object.Name|formatObjectName }}); ok {
                 dataquery = *cast
             } else {
-                dataquery = input.({{ .object.Name | upperCamelCase }})
+                dataquery = input.({{ .object.Name|formatObjectName }})
             }
             {{ if ne .disjunctionStruct nil -}}
                 {{- range $field := .disjunctionStruct.Fields }}
-                    if dataquery.{{ $field.Name | upperCamelCase }} != nil {
-                        return {{ $field.Type.Ref.ReferredType | upperCamelCase }}Converter(*dataquery.{{ $field.Name | upperCamelCase }})
+                    if dataquery.{{ $field.Name|formatFieldName }} != nil {
+                        return {{ $field.Type.Ref.ReferredType|formatObjectName }}Converter(*dataquery.{{ $field.Name|formatFieldName }})
                     }
                 {{- end }}
 
                 return ""
             {{- else -}}
-                return {{ .object.Name | upperCamelCase }}Converter(dataquery)
+                return {{ .object.Name|formatObjectName }}Converter(dataquery)
             {{- end }}
         },
         {{- end }}

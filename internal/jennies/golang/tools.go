@@ -25,6 +25,10 @@ func formatArgName(name string) string {
 	return escapeVarName(tools.LowerCamelCase(name))
 }
 
+func formatVarName(name string) string {
+	return escapeVarName(tools.LowerCamelCase(name))
+}
+
 func formatObjectName(name string) string {
 	return tools.UpperCamelCase(name)
 }
