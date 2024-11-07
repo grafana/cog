@@ -64,8 +64,10 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 		template.Funcs(map[string]any{
 			"formatPackageName": formatPackageName,
 			"formatObjectName":  formatObjectName,
-			"formatScalar":      formatScalar,
+			"formatFieldName":   formatFieldName,
 			"formatArgName":     formatArgName,
+			"formatVarName":     formatVarName,
+			"formatScalar":      formatScalar,
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
 				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot()) {
 					return "&" + variableName

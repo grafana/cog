@@ -1,8 +1,8 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $errors := importStdPkg "errors" -}}
-// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name|upperCamelCase }}` from JSON.
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
-func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) error {
+func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -17,13 +17,13 @@ func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) 
 	if err := json.Unmarshal(raw, &{{ .Name }}); err != nil {
 		errList = append(errList, err)
 	} else {
-		resource.{{ .Name|upperCamelCase }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
+		resource.{{ .Name|formatFieldName }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
 		return nil
 	}
 {{ end }}
 
 	if len(errList) != 0 {
-		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|upperCamelCase }}", errors.Join(errList...))...)
+		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name }}", errors.Join(errList...))...)
 	}
 
 	if len(errs) == 0 {

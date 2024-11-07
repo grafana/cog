@@ -1,5 +1,5 @@
-// Validate checks all the validation constraints that may be defined on `{{ .def.Name|upperCamelCase }}` fields for violations and returns them.
-func (resource {{ .def.Name|upperCamelCase }}) Validate() error {
+// Validate checks all the validation constraints that may be defined on `{{ .def.Name|formatObjectName }}` fields for violations and returns them.
+func (resource {{ .def.Name|formatObjectName }}) Validate() error {
 	{{- if resolvesToConstraints .def.Type }}
 	{{- $cog := importPkg "cog" }}
 	var errs cog.BuildErrors
@@ -60,7 +60,7 @@ func (resource {{ .def.Name|upperCamelCase }}) Validate() error {
 	{{- else if .Type.IsStruct }}
 		{{- range $field := .Type.Struct.Fields }}
 			{{- if resolvesToConstraints $field.Type -}}
-				{{- $fieldName := $field.Name|upperCamelCase -}}
+				{{- $fieldName := $field.Name|formatFieldName -}}
 				{{- $selfKey := print $.SelfName "." $fieldName }}
 				{{- $constraintPath := $field.Name }}
 				{{- if ne $.ConstraintPath "" -}}

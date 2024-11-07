@@ -1,8 +1,8 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $errors := importStdPkg "errors" -}}
 {{- $fmt := importStdPkg "fmt" -}}
-// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name|upperCamelCase }}` from JSON.
-func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error {
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
+func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -25,12 +25,12 @@ func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error 
     {{- else }}
 	case "{{ $discriminatorValue }}":
 	{{- end }}
-		var {{ $typeName|lowerCamelCase }} {{ $typeName|upperCamelCase }}
-		if err := json.Unmarshal(raw, &{{ $typeName|lowerCamelCase }}); err != nil {
+		var {{ $typeName|formatVarName }} {{ $typeName|formatObjectName }}
+		if err := json.Unmarshal(raw, &{{ $typeName|formatVarName }}); err != nil {
 			return err
 		}
 
-		resource.{{ $typeName|upperCamelCase }} = &{{ $typeName|lowerCamelCase }}
+		resource.{{ $typeName|formatFieldName }} = &{{ $typeName|formatVarName }}
 		return nil
 {{- end }}
 	}
