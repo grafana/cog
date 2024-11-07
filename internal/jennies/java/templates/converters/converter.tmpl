@@ -66,7 +66,7 @@ package {{ .Converter.Package | formatPackageName }};
         for ({{ .ValueType | formatType }} {{ .ValueAs | formatPath }} : {{ .For | formatGuardPath }}) {
             {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" false) }}
-            {{- if and (is .ValueType "scalar") (not (isScalarType .For "string")) }}
+            {{- if and .ValueType.IsScalar (not (isScalarType .For "string")) }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }}.toString());
             {{- else }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }});
@@ -131,7 +131,18 @@ public class {{ .Converter.BuilderName | upperCamelCase }}Converter {{ if .IsPan
     public{{ if not .IsPanel }} static{{ end }} String convert({{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType | upperCamelCase }} input) {
         StringBuilder sb = new StringBuilder();
         {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
-        sb.append("{{ .Converter.BuilderName | upperCamelCase }}.Builder builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder({{ with .Converter.ConstructorArgs }}{{ range $i, $arg := . }}"+{{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}}+"{{- if ne $i $constructorArgsCount }}, {{ end }}{{ end }}{{ end }})");
+        sb.append("{{ .Converter.BuilderName | upperCamelCase }}.Builder builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder(");
+        {{- with .Converter.ConstructorArgs }}
+        {{- range $i, $arg := . }}
+        {{- template "escape_string" (dict "Type" $arg.ValueType) }}
+        sb.append({{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath ) -}});
+        {{- template "escape_string" (dict "Type" $arg.ValueType) }}
+        {{- if ne $i $constructorArgsCount }}
+        sb.append(","); 
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        sb.append(")");
     
      {{- range .Converter.Mappings }}
         {{ template "conversion_mapping" . }}
@@ -140,4 +151,10 @@ public class {{ .Converter.BuilderName | upperCamelCase }}Converter {{ if .IsPan
      return sb.toString();
      }
 }
+{{- end }}
+
+{{- define "escape_string" -}}
+    {{- if and .Type.IsScalar (eq .Type.AsScalar.ScalarKind "string") }}
+        sb.append("\"");
+    {{- end }}
 {{- end }}
