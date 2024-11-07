@@ -112,12 +112,12 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 %[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
 }
 
-func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, def ast.Object) {
-	defName := formatObjectName(def.Name)
+func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, object ast.Object) {
+	objectName := formatObjectName(object.Name)
 
-	comments := def.Comments
+	comments := object.Comments
 	if jenny.Config.debug {
-		passesTrail := tools.Map(def.PassesTrail, func(trail string) string {
+		passesTrail := tools.Map(object.PassesTrail, func(trail string) string {
 			return fmt.Sprintf("Modified by compiler pass '%s'", trail)
 		})
 		comments = append(comments, passesTrail...)
@@ -127,17 +127,17 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
 
-	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(def))
+	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(object))
 	buffer.WriteString("\n")
 
-	if def.Type.ImplementsVariant() && !def.Type.IsRef() {
-		variant := tools.UpperCamelCase(def.Type.ImplementedVariant())
+	if object.Type.ImplementsVariant() && !object.Type.IsRef() {
+		variant := tools.UpperCamelCase(object.Type.ImplementedVariant())
 
-		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", defName, variant))
+		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", objectName, variant))
 		buffer.WriteString("\n")
 
-		if def.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
-			buffer.WriteString(fmt.Sprintf("func (resource %s) DataqueryType() string {\n", defName))
+		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
+			buffer.WriteString(fmt.Sprintf("func (resource %s) DataqueryType() string {\n", objectName))
 			buffer.WriteString(fmt.Sprintf("\treturn \"%s\"\n", strings.ToLower(schema.Metadata.Identifier)))
 			buffer.WriteString("}\n")
 		}
@@ -145,16 +145,16 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 }
 
 func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context languages.Context, object ast.Object) {
-	defName := formatObjectName(object.Name)
-	constructorName := "New" + defName
+	objectName := formatObjectName(object.Name)
+	constructorName := "New" + objectName
 
 	declareConstructor := func() {
 		jenny.apiRefCollector.RegisterFunction(object.SelfRef.ReferredPkg, common.FunctionReference{
 			Name: constructorName,
 			Comments: []string{
-				fmt.Sprintf("%[1]s creates a new %[2]s object.", constructorName, defName),
+				fmt.Sprintf("%[1]s creates a new %[2]s object.", constructorName, objectName),
 			},
-			Return: "*" + defName,
+			Return: "*" + objectName,
 		})
 	}
 
@@ -165,8 +165,8 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 		}
 
 		declareConstructor()
-		buffer.WriteString(fmt.Sprintf("// %[1]s creates a new %[2]s object.\n", constructorName, defName))
-		buffer.WriteString(fmt.Sprintf("func %[1]s() *%[2]s {\n", constructorName, defName))
+		buffer.WriteString(fmt.Sprintf("// %[1]s creates a new %[2]s object.\n", constructorName, objectName))
+		buffer.WriteString(fmt.Sprintf("func %[1]s() *%[2]s {\n", constructorName, objectName))
 
 		delegatedConstructorName := fmt.Sprintf("New%s", formatObjectName(referredObj.Name))
 		referredPkg := jenny.packageMapper(referredObj.SelfRef.ReferredPkg)
@@ -184,8 +184,8 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 	}
 
 	declareConstructor()
-	buffer.WriteString(fmt.Sprintf("// %[1]s creates a new %[2]s object.\n", constructorName, defName))
-	buffer.WriteString(fmt.Sprintf("func %[1]s() *%[2]s {\n", constructorName, defName))
+	buffer.WriteString(fmt.Sprintf("// %[1]s creates a new %[2]s object.\n", constructorName, objectName))
+	buffer.WriteString(fmt.Sprintf("func %[1]s() *%[2]s {\n", constructorName, objectName))
 	buffer.WriteString(fmt.Sprintf("\treturn &%s", jenny.defaultsForStruct(context, object.SelfRef, object.Type, nil)))
 	buffer.WriteString("\n}\n")
 }
@@ -193,13 +193,13 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast.RefType, objectType ast.Type, maybeExtraDefaults any) string {
 	var buffer strings.Builder
 
-	defName := formatObjectName(objectRef.ReferredType)
+	objectName := formatObjectName(objectRef.ReferredType)
 	referredPkg := jenny.packageMapper(objectRef.ReferredPkg)
 	if referredPkg != "" {
-		defName = fmt.Sprintf("%s.%s", referredPkg, defName)
+		objectName = fmt.Sprintf("%s.%s", referredPkg, objectName)
 	}
 
-	buffer.WriteString(fmt.Sprintf("%s{\n", defName))
+	buffer.WriteString(fmt.Sprintf("%s{\n", objectName))
 
 	extraDefaults := map[string]any{}
 	if val, ok := maybeExtraDefaults.(map[string]any); ok {
