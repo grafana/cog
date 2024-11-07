@@ -45,7 +45,7 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 	var buffer strings.Builder
 
-	defName := tools.UpperCamelCase(def.Name)
+	defName := formatObjectName(def.Name)
 
 	switch def.Type.Kind {
 	case ast.KindEnum:
@@ -75,14 +75,14 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 func (formatter *typeFormatter) formatEnumDef(def ast.Object) string {
 	var buffer strings.Builder
 
-	enumName := tools.UpperCamelCase(def.Name)
+	enumName := formatObjectName(def.Name)
 	enumType := def.Type.AsEnum()
 
 	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatter.formatType(enumType.Values[0].Type)))
 
 	buffer.WriteString("const (\n")
 	for _, val := range enumType.Values {
-		name := tools.CleanupNames(tools.UpperCamelCase(val.Name))
+		name := tools.CleanupNames(formatObjectName(val.Name))
 		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", name, enumName, val.Value))
 	}
 	buffer.WriteString(")\n")
@@ -165,7 +165,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 func (formatter *typeFormatter) variantInterface(variant string) string {
 	referredPkg := formatter.packageMapper("cog/variants")
 
-	return fmt.Sprintf("%s.%s", referredPkg, tools.UpperCamelCase(variant))
+	return referredPkg + "." + formatObjectName(variant)
 }
 
 func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
@@ -197,7 +197,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	}
 
 	for _, commentLine := range comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
+		buffer.WriteString("// " + commentLine + "\n")
 	}
 
 	jsonOmitEmpty := ""
@@ -231,7 +231,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 func (formatter *typeFormatter) formatArray(def ast.ArrayType, resolveBuilders bool) string {
 	subTypeString := formatter.doFormatType(def.ValueType, resolveBuilders)
 
-	return fmt.Sprintf("[]%s", subTypeString)
+	return "[]" + subTypeString
 }
 
 func (formatter *typeFormatter) formatMap(def ast.MapType) string {
@@ -258,7 +258,7 @@ func formatScalar(val any) string {
 
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
-	typeName := tools.UpperCamelCase(def.AsRef().ReferredType)
+	typeName := formatObjectName(def.AsRef().ReferredType)
 
 	if referredPkg != "" {
 		typeName = referredPkg + "." + typeName
@@ -325,7 +325,7 @@ func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string 
 		for i := range fieldPath {
 			output := fieldPath[i].Identifier
 			if !fieldPath[i].Root {
-				output = tools.UpperCamelCase(output)
+				output = formatFieldName(output)
 			}
 
 			// don't generate type hints if:

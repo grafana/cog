@@ -3,14 +3,12 @@ package golang
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type Builder struct {
@@ -38,7 +36,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 
 		filename := filepath.Join(
 			formatPackageName(builder.Package),
-			fmt.Sprintf("%s_builder_gen.go", strings.ToLower(builder.Name)),
+			fmt.Sprintf("%s_builder_gen.go", formatFileName(builder.Name)),
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
@@ -102,7 +100,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"Package":              builder.Package,
 			"BuilderSignatureType": buildObjectSignature,
 			"Imports":              imports,
-			"BuilderName":          tools.UpperCamelCase(builder.Name),
+			"BuilderName":          formatObjectName(builder.Name),
 			"ObjectName":           fullObjectName,
 			"Comments":             builder.For.Comments,
 			"ConstructorName":      constructorName,

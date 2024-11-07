@@ -196,10 +196,10 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 	objectName := formatObjectName(objectRef.ReferredType)
 	referredPkg := jenny.packageMapper(objectRef.ReferredPkg)
 	if referredPkg != "" {
-		objectName = fmt.Sprintf("%s.%s", referredPkg, objectName)
+		objectName = referredPkg + "." + objectName
 	}
 
-	buffer.WriteString(fmt.Sprintf("%s{\n", objectName))
+	buffer.WriteString(objectName + "{\n")
 
 	extraDefaults := map[string]any{}
 	if val, ok := maybeExtraDefaults.(map[string]any); ok {
@@ -239,11 +239,11 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 				defaultValue = "&" + defaultValue
 			}
 		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() {
-			defaultValue = fmt.Sprintf("New%s()", formatObjectName(field.Type.Ref.ReferredType))
+			defaultValue = "New" + formatObjectName(field.Type.Ref.ReferredType) + "()"
 
 			referredPkg = jenny.packageMapper(field.Type.Ref.ReferredPkg)
 			if referredPkg != "" {
-				defaultValue = fmt.Sprintf("%s.%s", referredPkg, defaultValue)
+				defaultValue = referredPkg + "." + defaultValue
 			}
 
 			if !field.Type.Nullable {
@@ -262,12 +262,12 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 
 			referredPkg = jenny.packageMapper(field.Type.Ref.ReferredPkg)
 			if referredPkg != "" {
-				defaultValue = fmt.Sprintf("%s.%s", referredPkg, defaultValue)
+				defaultValue = referredPkg + "." + defaultValue
 			}
 
 			if field.Type.Nullable {
 				jenny.packageMapper("cog")
-				defaultValue = fmt.Sprintf("cog.ToPtr(%s)", defaultValue)
+				defaultValue = "cog.ToPtr(" + defaultValue + ")"
 			}
 		} else {
 			defaultValue = "\"unsupported default value case: this is likely a bug in cog\""

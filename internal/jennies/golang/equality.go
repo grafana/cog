@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type equalityMethods struct {
@@ -31,10 +30,10 @@ func (jenny equalityMethods) generateForObject(buffer *strings.Builder, context 
 	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
 		Name: "Equals",
 		Arguments: []common.ArgumentReference{
-			{Name: "other", Type: tools.UpperCamelCase(object.Name)},
+			{Name: "other", Type: formatObjectName(object.Name)},
 		},
 		Comments: []string{
-			fmt.Sprintf("Equals tests the equality of two `%s` objects.", tools.UpperCamelCase(object.Name)),
+			fmt.Sprintf("Equals tests the equality of two `%s` objects.", formatObjectName(object.Name)),
 		},
 		Return: "bool",
 	})
