@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 //go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.* templates/converters/*.tmpl
@@ -15,6 +17,7 @@ var templatesFS embed.FS
 func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	tmpl, err := template.New(
 		"java",
+		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(functions()),
 		template.ParseFS(templatesFS, "templates"),
 		template.ParseDirectories(extraTemplatesDirectories...),

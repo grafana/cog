@@ -40,6 +40,8 @@ package {{ .Converter.Package | formatPackageName }};
         {{- else }}
         {{- .Path | formatGuardPath }}
         {{- end }}
+    {{- else if resolvesToEnum .Type -}}
+        "{{ .Type.AsRef.ReferredType }}." + {{- .Path | formatGuardPath }}.name()
     {{- else }}
         {{- $reflect := importStdPkg "cog" "Runtime" -}}
         Runtime.dump({{ .Path | formatGuardPath }})
