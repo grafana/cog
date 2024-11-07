@@ -78,7 +78,7 @@ package {{ .Converter.Package | formatPackageName }};
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }});
             {{- end }}
         }
-        String {{ $.IntoVar }} = "List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +")";
+        String {{ $.IntoVar }} = "() -> List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +".build())";
     {{- end -}}
     {{- with .Arg.Map -}}
         {{- $reflect := importStdPkg "java.util" "StringJoiner" -}}
@@ -137,7 +137,11 @@ public class {{ .Converter.BuilderName | upperCamelCase }}Converter {{ if .IsPan
     public{{ if not .IsPanel }} static{{ end }} String convert({{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType | upperCamelCase }} input) {
         StringBuilder sb = new StringBuilder();
         {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
-        sb.append("{{ .Converter.BuilderName | upperCamelCase }}.Builder builder = new {{ .Converter.BuilderName | upperCamelCase }}.Builder(");
+        {{- if eq .Converter.BuilderName .Converter.Input.TypeRef.ReferredType }}
+        sb.append("new {{ .Converter.BuilderName | upperCamelCase }}.Builder(");
+        {{- else }}
+        sb.append("new {{ .Converter.Input.TypeRef.ReferredType | upperCamelCase }}.{{ .Converter.BuilderName | upperCamelCase }}Builder(");
+        {{- end }}
         {{- with .Converter.ConstructorArgs }}
         {{- range $i, $arg := . }}
         sb.append({{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath "IsMapEntry" false) -}});
