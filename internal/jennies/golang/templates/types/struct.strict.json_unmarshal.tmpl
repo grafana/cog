@@ -1,7 +1,7 @@
 {{- $json := importStdPkg "encoding/json" -}}
-// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name|upperCamelCase }}` from JSON.
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
-func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) error {
+func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -22,7 +22,7 @@ func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) 
 		{{ include $customFieldBlockName (dict "Object" $.def "Field" $field) }}
 	{{- else }}
 	{{- $inputRef := print "fields[" ($field.Name|formatScalar) "]" }}
-	{{- $unmarshalInto := print "resource." ($field.Name|upperCamelCase) }}
+	{{- $unmarshalInto := print "resource." ($field.Name|formatFieldName) }}
 			{{ template "strict_unmarshal_field_type" (dict "RawInputRef" $inputRef "InputType" $field.Type "UnmarshalInto" $unmarshalInto "ErrorBreadcrumb" $field.Name "Depth" 1) }}
 	{{- end }}
 		{{ if and $field.Required (not $field.Type.Nullable) -}} } else {
@@ -31,7 +31,7 @@ func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) 
 		{{ end }}
 		}
 		delete(fields, {{ $field.Name|formatScalar }})
-	{{ if $field.Required -}} } else {
+	{{ if and $field.Required (eq $field.Type.Default nil) -}} } else {
 		{{- $errors := importStdPkg "errors" -}}
 		errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is missing from input"))...)
 	{{- end }}
@@ -40,7 +40,7 @@ func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSONStrict(raw []byte) 
 
 	{{ $fmt := importStdPkg "fmt" -}}
 	for field := range fields {
-		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|upperCamelCase }}", fmt.Errorf("unexpected field '%s'", field))...)
+		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|formatObjectName }}", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
 	if len(errs) == 0 {

@@ -12,13 +12,11 @@ type DashboardBuilder struct {
 }
 
 func NewDashboardBuilder() *DashboardBuilder {
-	resource := &Dashboard{}
+	resource := NewDashboard()
 	builder := &DashboardBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -92,5 +90,3 @@ func (builder *DashboardBuilder) SingleLink(singleLink cog.Builder[DashboardLink
     return builder
 }
 
-func (builder *DashboardBuilder) applyDefaults() {
-}

@@ -12,13 +12,11 @@ type StructBuilder struct {
 }
 
 func NewStructBuilder() *StructBuilder {
-	resource := &Struct{}
+	resource := NewStruct()
 	builder := &StructBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -85,33 +83,3 @@ func (builder *StructBuilder) PartialComplexField(partialComplexField struct {
     return builder
 }
 
-func (builder *StructBuilder) applyDefaults() {
-    builder.AllFields(NewNestedStructBuilder().
-IntVal(3).
-StringVal("hello"),
-)
-    builder.PartialFields(NewNestedStructBuilder().
-IntVal(4),
-)
-    builder.ComplexField(struct {
- Uid string `json:"uid"`
-Nested struct {
- NestedVal string `json:"nestedVal"`
- } `json:"nested"`
-Array []string `json:"array"`
- } {
- Array: []string{"hello"},
-Nested: struct {
- NestedVal string `json:"nestedVal"`
- } {
- NestedVal: "nested",
-},
-Uid: "myUID",
- })
-    builder.PartialComplexField(struct {
- Uid string `json:"uid"`
-IntVal int64 `json:"intVal"`
- } {
- Xxxx: "myUID",
- })
-}

@@ -15,6 +15,16 @@ type SomeStruct struct {
     FieldInt32 int32 `json:"FieldInt32"`
 }
 
+// NewSomeStruct creates a new SomeStruct object.
+func NewSomeStruct() *SomeStruct {
+	return &SomeStruct{
+		FieldBool: true,
+		FieldString: "foo",
+		FieldStringWithConstantValue: "auto",
+		FieldFloat32: 42.42,
+		FieldInt32: 42,
+}
+}
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
@@ -37,7 +47,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "fieldBool")
-	} else {errs = append(errs, cog.MakeBuildErrors("fieldBool", errors.New("required field is missing from input"))...)
+	
 	}
 	// Field "fieldString"
 	if fields["fieldString"] != nil {
@@ -49,7 +59,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "fieldString")
-	} else {errs = append(errs, cog.MakeBuildErrors("fieldString", errors.New("required field is missing from input"))...)
+	
 	}
 	// Field "FieldStringWithConstantValue"
 	if fields["FieldStringWithConstantValue"] != nil {
@@ -73,7 +83,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "FieldFloat32")
-	} else {errs = append(errs, cog.MakeBuildErrors("FieldFloat32", errors.New("required field is missing from input"))...)
+	
 	}
 	// Field "FieldInt32"
 	if fields["FieldInt32"] != nil {
@@ -85,7 +95,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "FieldInt32")
-	} else {errs = append(errs, cog.MakeBuildErrors("FieldInt32", errors.New("required field is missing from input"))...)
+	
 	}
 
 	for field := range fields {

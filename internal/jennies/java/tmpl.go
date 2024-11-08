@@ -131,6 +131,7 @@ type ClassTemplate struct {
 	ShouldAddSerializer     bool
 	ShouldAddDeserializer   bool
 	ShouldAddFactoryMethods bool
+	DefaultConstructorArgs  []ast.Argument
 }
 
 type ConstantTemplate struct {

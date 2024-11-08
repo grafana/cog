@@ -12,13 +12,11 @@ type SomeStructBuilder struct {
 }
 
 func NewSomeStructBuilder() *SomeStructBuilder {
-	resource := &SomeStruct{}
+	resource := NewSomeStruct()
 	builder := &SomeStructBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -37,5 +35,3 @@ func (builder *SomeStructBuilder) Tags(tags string) *SomeStructBuilder {
     return builder
 }
 
-func (builder *SomeStructBuilder) applyDefaults() {
-}

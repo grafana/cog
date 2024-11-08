@@ -12,13 +12,11 @@ type NestedStructBuilder struct {
 }
 
 func NewNestedStructBuilder() *NestedStructBuilder {
-	resource := &NestedStruct{}
+	resource := NewNestedStruct()
 	builder := &NestedStructBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -43,5 +41,3 @@ func (builder *NestedStructBuilder) IntVal(intVal int64) *NestedStructBuilder {
     return builder
 }
 
-func (builder *NestedStructBuilder) applyDefaults() {
-}

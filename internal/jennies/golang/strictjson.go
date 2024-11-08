@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type strictJSONUnmarshal struct {
@@ -62,7 +61,7 @@ func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj 
 			{Name: "raw", Type: "[]byte"},
 		},
 		Comments: []string{
-			fmt.Sprintf("UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `%s` from JSON.", tools.UpperCamelCase(obj.Name)),
+			fmt.Sprintf("UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `%s` from JSON.", formatObjectName(obj.Name)),
 			"Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …",
 		},
 		Return: "error",
@@ -82,7 +81,7 @@ func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj 
 			},
 		})
 
-	customUnmarshalTmpl := jenny.customObjectUnmarshalBlock(obj)
+	customUnmarshalTmpl := template.CustomObjectStrictUnmarshalBlock(obj)
 	if tmpl.Exists(customUnmarshalTmpl) {
 		return tmpl.Render(customUnmarshalTmpl, map[string]any{
 			"Object": obj,
@@ -105,8 +104,4 @@ func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj 
 	return jenny.tmpl.Render("types/struct.strict.json_unmarshal.tmpl", map[string]any{
 		"def": obj,
 	})
-}
-
-func (jenny strictJSONUnmarshal) customObjectUnmarshalBlock(obj ast.Object) string {
-	return fmt.Sprintf("object_%s_%s_custom_strict_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }

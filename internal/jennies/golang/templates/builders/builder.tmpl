@@ -16,13 +16,11 @@ type {{ .BuilderName }}Builder struct {
 }
 
 func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ .BuilderName }}Builder {
-	resource := &{{ .ObjectName }}{}
+	resource := {{ .ConstructorName }}()
 	builder := &{{ .BuilderName }}Builder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
     {{- range .Constructor.Assignments }}
         {{- template "assignment" (dict "Assignment" . "Builder" $ "Option" (dict "Name" "")) }}
@@ -39,8 +37,3 @@ func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, 
 	return *builder.internal, nil
 }
 {{- $options }}
-func (builder *{{ .BuilderName }}Builder) applyDefaults() {
-    {{- range .Defaults }}
-    builder.{{ .OptionName|upperCamelCase }}({{ .Args|join ", " }})
-    {{- end }}
-}

@@ -3,6 +3,10 @@
   "Objects": {
     "SomeStruct": {
       "Name": "SomeStruct",
+      "SelfRef": {
+        "ReferredPkg": "defaults",
+        "ReferredType": "SomeStruct"
+      },
       "Type": {
         "Kind": "struct",
         "Struct": {

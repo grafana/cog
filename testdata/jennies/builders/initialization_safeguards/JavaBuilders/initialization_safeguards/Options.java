@@ -10,6 +10,11 @@ public class Options {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonProperty("legend")
     public LegendOptions legend;
+    public Options() {}
+    
+    public Options(LegendOptions legend) {
+        this.legend = legend;
+    }
     
     public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

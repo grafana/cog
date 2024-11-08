@@ -10,4 +10,14 @@ public class Panel {
     public Object options;
     public List<Dataquery> targets;
     public FieldConfigSource fieldConfig;
+    public Panel() {}
+    
+    public Panel(String title,String type,DataSourceRef datasource,Object options,List<Dataquery> targets,FieldConfigSource fieldConfig) {
+        this.title = title;
+        this.type = type;
+        this.datasource = datasource;
+        this.options = options;
+        this.targets = targets;
+        this.fieldConfig = fieldConfig;
+    }
 }

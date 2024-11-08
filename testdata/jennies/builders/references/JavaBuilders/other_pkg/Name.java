@@ -10,6 +10,12 @@ public class Name {
     public String firstName;
     @JsonProperty("last_name")
     public String lastName;
+    public Name() {}
+    
+    public Name(String firstName,String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
     
     public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

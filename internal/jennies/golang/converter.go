@@ -3,14 +3,12 @@ package golang
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type Converter struct {
@@ -35,7 +33,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 
 		filename := filepath.Join(
 			formatPackageName(builder.Package),
-			fmt.Sprintf("%s_converter_gen.go", strings.ToLower(builder.Name)),
+			formatFileName(builder.Name)+"_converter_gen.go",
 		)
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
@@ -67,7 +65,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	}
 
 	jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
-		Name: fmt.Sprintf("%sConverter", tools.UpperCamelCase(converter.BuilderName)),
+		Name: formatFunctionName(converter.BuilderName + "Converter"),
 		Arguments: []common.ArgumentReference{
 			{
 				Name: "input",
@@ -75,7 +73,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			},
 		},
 		Comments: []string{
-			fmt.Sprintf("%[1]sConverter accepts a `%[1]s` object and generates the Go code to build this object using builders.", tools.UpperCamelCase(converter.BuilderName)),
+			fmt.Sprintf("%[1]sConverter accepts a `%[1]s` object and generates the Go code to build this object using builders.", formatObjectName(converter.BuilderName)),
 		},
 		Return: "string",
 	})

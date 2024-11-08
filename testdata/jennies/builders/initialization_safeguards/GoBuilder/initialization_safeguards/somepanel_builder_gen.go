@@ -12,13 +12,11 @@ type SomePanelBuilder struct {
 }
 
 func NewSomePanelBuilder() *SomePanelBuilder {
-	resource := &SomePanel{}
+	resource := NewSomePanel()
 	builder := &SomePanelBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -39,12 +37,10 @@ func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
 
 func (builder *SomePanelBuilder) ShowLegend(show bool) *SomePanelBuilder {
 if builder.internal.Options == nil {
-    builder.internal.Options = &Options{}
+    builder.internal.Options = NewOptions()
 }
     builder.internal.Options.Legend.Show = show
 
     return builder
 }
 
-func (builder *SomePanelBuilder) applyDefaults() {
-}

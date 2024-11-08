@@ -1,10 +1,10 @@
-// MarshalJSON implements a custom JSON marshalling logic to encode `{{ .def.Name|upperCamelCase }}` as JSON.
-func (resource {{ .def.Name|upperCamelCase }}) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements a custom JSON marshalling logic to encode `{{ .def.Name|formatObjectName }}` as JSON.
+func (resource {{ .def.Name|formatObjectName }}) MarshalJSON() ([]byte, error) {
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $fmt := importStdPkg "fmt" -}}
 {{- range .def.Type.Struct.Fields }}
-	if resource.{{ .Name|upperCamelCase }} != nil {
-		return json.Marshal(resource.{{ .Name|upperCamelCase }})
+	if resource.{{ .Name|formatFieldName }} != nil {
+		return json.Marshal(resource.{{ .Name|formatFieldName }})
 	}
 {{- end }}
 

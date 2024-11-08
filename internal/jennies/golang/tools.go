@@ -17,8 +17,28 @@ func formatPackageName(pkg string) string {
 	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))
 }
 
+func formatFileName(name string) string {
+	return strings.ToLower(name)
+}
+
 func formatArgName(name string) string {
 	return escapeVarName(tools.LowerCamelCase(name))
+}
+
+func formatVarName(name string) string {
+	return escapeVarName(tools.LowerCamelCase(name))
+}
+
+func formatObjectName(name string) string {
+	return tools.UpperCamelCase(name)
+}
+
+func formatFunctionName(name string) string {
+	return tools.UpperCamelCase(name)
+}
+
+func formatFieldName(name string) string {
+	return tools.UpperCamelCase(name)
 }
 
 func escapeVarName(varName string) string {

@@ -1,7 +1,7 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $errors := importStdPkg "errors" -}}
-// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name|upperCamelCase }}` from JSON.
-func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error {
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
+func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -12,9 +12,9 @@ func (resource *{{ .def.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error 
 	var {{ .Name }} {{ trimPrefix "*" (.Type | formatType) }}
 	if err := json.Unmarshal(raw, &{{ .Name }}); err != nil {
 		errList = append(errList, err)
-		resource.{{ .Name|upperCamelCase }} = nil
+		resource.{{ .Name|formatFieldName }} = nil
 	} else {
-		resource.{{ .Name|upperCamelCase }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
+		resource.{{ .Name|formatFieldName }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
 		return nil
 	}
 {{ end }}

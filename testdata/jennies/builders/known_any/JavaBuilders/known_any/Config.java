@@ -8,6 +8,11 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 public class Config {
     @JsonProperty("title")
     public String title;
+    public Config() {}
+    
+    public Config(String title) {
+        this.title = title;
+    }
     
     public String toJSON() throws JsonProcessingException {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

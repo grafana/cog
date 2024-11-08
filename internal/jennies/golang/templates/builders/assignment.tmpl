@@ -95,7 +95,7 @@
         {{- range .Envelope.Values }}
         {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
         {{- $value = maybeAsPointer (.Path.Last.Type) $value }}
-        {{ (index .Path 0).Identifier | upperCamelCase }}: {{ $value }},
+        {{ (index .Path 0).Identifier | formatFieldName }}: {{ $value }},
         {{- end }}
     }
 {{- end }}

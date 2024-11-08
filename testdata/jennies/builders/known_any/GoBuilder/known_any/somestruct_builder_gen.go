@@ -12,13 +12,11 @@ type SomeStructBuilder struct {
 }
 
 func NewSomeStructBuilder() *SomeStructBuilder {
-	resource := &SomeStruct{}
+	resource := NewSomeStruct()
 	builder := &SomeStructBuilder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
-
-	builder.applyDefaults()
 
 	return builder
 }
@@ -33,12 +31,10 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 
 func (builder *SomeStructBuilder) Title(title string) *SomeStructBuilder {
 if builder.internal.Config == nil {
-    builder.internal.Config = &Config{}
+    builder.internal.Config = NewConfig()
 }
     builder.internal.Config.(*Config).Title = title
 
     return builder
 }
 
-func (builder *SomeStructBuilder) applyDefaults() {
-}

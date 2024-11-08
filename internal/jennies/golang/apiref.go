@@ -26,13 +26,13 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 
 		var receiverName, objectName string
 		if method.ReceiverObject != nil {
-			receiverName = tools.LowerCamelCase(method.ReceiverObject.Name)
-			objectName = tools.UpperCamelCase(method.ReceiverObject.Name)
+			receiverName = formatArgName(method.ReceiverObject.Name)
+			objectName = formatObjectName(method.ReceiverObject.Name)
 		} else {
 			receiverName = "builder"
 			objectName = builderName(*method.ReceiverBuilder)
 		}
-		methodName := tools.UpperCamelCase(method.Name)
+		methodName := formatFunctionName(method.Name)
 
 		return fmt.Sprintf("func (%[1]s *%[2]s) %[3]s(%[4]s)%[5]s", receiverName, objectName, methodName, strings.Join(args, ", "), returnType)
 	}
@@ -47,7 +47,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			returnType = " " + function.Return
 		}
 
-		return fmt.Sprintf("func %[1]s(%[2]s)%[3]s", tools.UpperCamelCase(function.Name), strings.Join(args, ", "), returnType)
+		return fmt.Sprintf("func %[1]s(%[2]s)%[3]s", formatFunctionName(function.Name), strings.Join(args, ", "), returnType)
 	}
 
 	return common.APIReferenceFormatter{
@@ -58,7 +58,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 		FunctionSignature: functionSignature,
 
 		ObjectName: func(object ast.Object) string {
-			return tools.UpperCamelCase(object.Name)
+			return formatObjectName(object.Name)
 		},
 		ObjectDefinition: func(context languages.Context, object ast.Object) string {
 			dummyImports := NewImportMap("")
@@ -69,7 +69,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 		},
 
 		MethodName: func(method common.MethodReference) string {
-			return tools.UpperCamelCase(method.Name)
+			return formatFunctionName(method.Name)
 		},
 		MethodSignature: methodSignature,
 
