@@ -55,7 +55,7 @@ func (b Builders) genBuilders(pkg string, name string) ([]Builder, bool) {
 			Package:              b.typeFormatter.formatPackage(pkg),
 			ObjectName:           tools.UpperCamelCase(object.Name),
 			BuilderName:          builder.Name,
-			BuilderSignatureType: b.getBuilderSignature(builder, object),
+			BuilderSignatureType: b.getBuilderSignature(object),
 			Constructor:          builder.Constructor,
 			Options:              builder.Options,
 			Properties:           builder.Properties,
@@ -89,12 +89,12 @@ func (b Builders) getBuilders(pkg string, name string) ast.Builders {
 	return builderMap[name]
 }
 
-func (b Builders) getBuilderSignature(builder ast.Builder, obj ast.Object) string {
-	if builder.Name != obj.Type.ImplementedVariant() {
+func (b Builders) getBuilderSignature(obj ast.Object) string {
+	if !obj.Type.IsDataqueryVariant() {
 		return obj.Name
 	}
 
-	return fmt.Sprintf("%s.%s", b.typeFormatter.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Name))
+	return fmt.Sprintf("%s.%s", b.typeFormatter.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Type.ImplementedVariant()))
 }
 
 func (b Builders) genDefaults(options []ast.Option) []OptionCall {
