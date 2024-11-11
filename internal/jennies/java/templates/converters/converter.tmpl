@@ -91,13 +91,13 @@ package {{ .Converter.Package | formatPackageName }};
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" false) }}
             {{- if and .ValueType.IsScalar (not (eq .ValueType.AsScalar.ScalarKind "string")) }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }}.toString());
-            {{- else if resolvesToBuilder .ValueType}}
+            {{- else if or (resolvesToBuilder .ValueType) (resolvesToComposableSlot .ValueType) }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }} + ".build()");
             {{- else }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }});
             {{- end }}
         }
-        {{- if resolvesToBuilder .ValueType }}
+        {{- if or (resolvesToBuilder .ValueType) (resolvesToComposableSlot .ValueType) }}
         String {{ $.IntoVar }} = "() -> List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +")";
         {{- else }}
         String {{ $.IntoVar }} = "List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +")";
@@ -110,7 +110,7 @@ package {{ .Converter.Package | formatPackageName }};
         for (Map.Entry<{{ .IndexType | formatType }}, {{ .ValueType | formatType }}> {{ .ValueAs | formatPath }} : {{ .For }}.entrySet()) {
             {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs) }}
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" true) }}
-            tmp{{ $.IntoVar | upperCamelCase }}.add({{ .ValueAs | formatPath }}.getKey() + "=" + {{ $subIntoVar }});
+            tmp{{ $.IntoVar | upperCamelCase }}.add("Map.entry(" + {{ .ValueAs | formatPath }}.getKey() + ", " + {{ $subIntoVar }} + ")");
         }
         
         String {{ $.IntoVar }} = "Map.ofEntries(" + tmp{{ $.IntoVar | upperCamelCase }} +")";
@@ -160,11 +160,7 @@ public class {{ .Converter.BuilderName | upperCamelCase }}Converter {{ if .IsPan
     public{{ if not .IsPanel }} static{{ end }} String convert({{ formatRawRef .Converter.Input.TypeRef.ReferredPkg .Converter.Input.TypeRef.ReferredType | upperCamelCase }} input) {
         StringBuilder sb = new StringBuilder();
         {{- $constructorArgsCount := sub1 (len .Converter.ConstructorArgs) }}
-        {{- if eq .Converter.BuilderName .Converter.Input.TypeRef.ReferredType }}
-        sb.append("new {{ .Converter.BuilderName | upperCamelCase }}.Builder(");
-        {{- else }}
-        sb.append("new {{ .Converter.Input.TypeRef.ReferredType | upperCamelCase }}.{{ .Converter.BuilderName | upperCamelCase }}Builder(");
-        {{- end }}
+        sb.append("new {{ .BuilderNameFormat }}(");
         {{- with .Converter.ConstructorArgs }}
         {{- range $i, $arg := . }}
         sb.append({{- template "value_formatter" (dict "Type" $arg.ValueType "Path" $arg.ValuePath "IsMapEntry" false) -}});

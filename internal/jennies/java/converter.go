@@ -3,6 +3,7 @@ package java
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -73,6 +74,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	converter := languages.NewConverterGenerator(jenny.nullableConfig).FromBuilder(context, builder)
 
 	schema, schemaFound := context.Schemas.Locate(builder.Package)
+	isPanel := schemaFound && schema.Metadata.Variant == ast.SchemaVariantPanel && builder.Name == "Panel"
 
 	imports := NewImportMap(jenny.config.PackagePath)
 	packageMapper := func(pkg string, class string) string {
@@ -83,6 +85,25 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 		return imports.Add(class, pkg)
 	}
 	typeFormatter := createFormatter(context, jenny.config).withPackageMapper(packageMapper)
+
+	builderNameFormat := fmt.Sprintf("%s.Builder", tools.UpperCamelCase(converter.BuilderName))
+	if isPanel {
+		builderNameFormat = fmt.Sprintf("%s.PanelBuilder", typeFormatter.formatPackage(converter.Package))
+	} else if converter.BuilderName != converter.Input.TypeRef.ReferredType {
+		isRenamed := false
+		for _, v := range builder.VeneerTrail {
+			if strings.Contains(v, "Rename") {
+				isRenamed = true
+				break
+			}
+		}
+
+		if !isRenamed {
+			builderNameFormat = fmt.Sprintf("%s.%sBuilder", tools.UpperCamelCase(converter.Input.TypeRef.ReferredType), tools.UpperCamelCase(converter.BuilderName))
+		} else {
+			builderNameFormat = fmt.Sprintf("%s.Builder", tools.UpperCamelCase(converter.Input.TypeRef.ReferredType))
+		}
+	}
 
 	return jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
@@ -98,9 +119,10 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			"importStdPkg":      packageMapper,
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
-			"Imports":   imports,
-			"Converter": converter,
-			"IsPanel":   schemaFound && schema.Metadata.Variant == ast.SchemaVariantPanel && builder.Name == "Panel",
+			"Imports":           imports,
+			"Converter":         converter,
+			"BuilderNameFormat": builderNameFormat,
+			"IsPanel":           isPanel,
 		})
 }
 

@@ -42,7 +42,7 @@ func functions() template.FuncMap {
 			switch t.AsScalar().ScalarKind {
 			case ast.KindInt64, ast.KindUint64:
 				return "L"
-			case ast.KindFloat32, ast.KindFloat64:
+			case ast.KindFloat32:
 				return "f"
 			}
 			return ""
