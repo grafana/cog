@@ -84,11 +84,17 @@ package {{ .Converter.Package | formatPackageName }};
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" false) }}
             {{- if and .ValueType.IsScalar (not (eq .ValueType.AsScalar.ScalarKind "string")) }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }}.toString());
-            {{- else }}
+            {{- else if resolvesToBuilder .ValueType}}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }} + ".build()");
+            {{- else }}
+            tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }});
             {{- end }}
         }
+        {{- if resolvesToBuilder .ValueType }}
         String {{ $.IntoVar }} = "() -> List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +")";
+        {{- else }}
+        String {{ $.IntoVar }} = "List.of("+ tmp{{ $.IntoVar | upperCamelCase }} +")";
+        {{- end }}
     {{- end -}}
     {{- with .Arg.Map -}}
         {{- $reflect := importStdPkg "java.util" "StringJoiner" -}}

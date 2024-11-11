@@ -24,11 +24,24 @@ public class Runtime {
     }
     
     public static String escapeString(String input) {
-        return "\"" + input
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n\" +\n\"")
-                .replace("\r", "") + "\"";
+        if (input.contains("\n")) {
+            String[] lines = input.split("\n");
+            StringBuilder formatted = new StringBuilder("\"\"\"\n");
+            for (String line : lines) {
+                formatted.append(line.replace("\\", "\\\\")
+                                .replace("\"", "\\\"")
+                                .replaceAll("\\s+$", "\\\\s"))
+                        .append("\n");
+            }
+            formatted.append("\"\"\"");
+            return formatted.toString();
+        }
+
+        return "\"" +
+                input.replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                + "\"";
+
     }
     
     public static <T extends Enum<T>> String formatEnum(Class<T> enumClass, T enumValue) {
