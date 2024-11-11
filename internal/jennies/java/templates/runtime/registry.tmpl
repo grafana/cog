@@ -46,7 +46,12 @@ public class Registry {
     }
     
     public static String convertDataqueryToCode(Dataquery dataquery) {
-        return dataqueryRegistry.get(dataquery.dataqueryName()).getConverter().convert(dataquery);
+        DataqueryConfig config = dataqueryRegistry.get(dataquery.dataqueryName());
+        if (config != null) {
+            return config.getConverter().convert(dataquery);
+        }
+        
+        return null;
     }
     {{- end }}
     
