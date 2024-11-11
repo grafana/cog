@@ -10,7 +10,7 @@ package {{ .Converter.Package | formatPackageName }};
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
         {{ $leftOperand }} != null
     {{- else if and $type.IsScalar (eq $type.AsScalar.ScalarKind "bool") -}}
-        !{{- $leftOperand }}
+        {{- $leftOperand }} != null && !{{- $leftOperand }}
     {{- else if and $type.IsScalar (eq $type.AsScalar.ScalarKind "string") -}}
         {{- if .Value }}
             !{{- $leftOperand }}.equals("{{ cleanString .Value }}")
@@ -23,6 +23,8 @@ package {{ .Converter.Package | formatPackageName }};
         {{- end }}
     {{- else if $type.IsRef }}
         {{- formatRefType $type .Value }}
+    {{- else if $type.IsArray }}
+        {{- $leftOperand }} != null && !{{- $leftOperand }}.isEmpty()
     {{- else -}}
         {{- $operator := .Op -}} 
         {{- if eq .Op "minLength" -}}
@@ -41,7 +43,8 @@ package {{ .Converter.Package | formatPackageName }};
 {{- define "value_formatter" -}}
     {{- if .Type.IsScalar }}
         {{- if and (eq .Type.AsScalar.ScalarKind "string") (not .IsMapEntry) -}}
-        "\""+{{- .Path | formatGuardPath }}+"\""
+        {{- $reflect := importStdPkg "cog" "Runtime" -}}
+        Runtime.escapeString({{- .Path | formatGuardPath }})
         {{- else }}
         {{- .Path | formatGuardPath }}
         {{- end }}

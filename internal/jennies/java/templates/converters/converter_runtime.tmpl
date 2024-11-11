@@ -23,6 +23,14 @@ public class Runtime {
         return "Unsupported type: " + object.getClass().getSimpleName();
     }
     
+    public static String escapeString(String input) {
+        return "\"" + input
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n\" +\n\"")
+                .replace("\r", "") + "\"";
+    }
+    
     public static <T extends Enum<T>> String formatEnum(Class<T> enumClass, T enumValue) {
         String className = enumClass.getSimpleName();
         String value;
