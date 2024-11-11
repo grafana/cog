@@ -10,10 +10,12 @@ package {{ .Converter.Package | formatPackageName }};
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
         {{ $leftOperand }} != null
     {{- else if and $type.IsScalar (eq $type.AsScalar.ScalarKind "bool") -}}
+        {{- if not $type.Nullable }}
         {{- $leftOperand }} != null && !{{- $leftOperand }}
+        {{- else }}!{{- $leftOperand }}
+        {{- end }}
     {{- else if and $type.IsScalar (eq $type.AsScalar.ScalarKind "string") -}}
-        {{- if .Value }}
-            !{{- $leftOperand }}.equals("{{ cleanString .Value }}")
+        {{- if .Value }}!{{- $leftOperand }}.equals("{{ cleanString .Value }}")
         {{- else if not $type.Nullable }}
             {{- $reflect := importStdPkg "java.util" "Objects" -}}
             {{- $leftOperand }} != null && !Objects.equals({{- $leftOperand }}, "")
@@ -24,7 +26,10 @@ package {{ .Converter.Package | formatPackageName }};
     {{- else if $type.IsRef }}
         {{- formatRefType $type .Value }}
     {{- else if $type.IsArray }}
+        {{- if not $type.Nullable }}
         {{- $leftOperand }} != null && !{{- $leftOperand }}.isEmpty()
+        {{- else }}!{{- $leftOperand }}.isEmpty()
+        {{- end }}
     {{- else -}}
         {{- $operator := .Op -}} 
         {{- if eq .Op "minLength" -}}
@@ -41,12 +46,14 @@ package {{ .Converter.Package | formatPackageName }};
 {{- end }}
 
 {{- define "value_formatter" -}}
-    {{- if .Type.IsScalar }}
-        {{- if and (eq .Type.AsScalar.ScalarKind "string") (not .IsMapEntry) -}}
+    {{- if .IsMapEntry }}
+    {{- .Path | formatGuardPath }}
+    {{- else if .Type.IsScalar }}
+        {{- if and (eq .Type.AsScalar.ScalarKind "string") -}}
         {{- $reflect := importStdPkg "cog" "Runtime" -}}
         Runtime.escapeString({{- .Path | formatGuardPath }})
         {{- else }}
-        {{- .Path | formatGuardPath }}
+        {{- .Path | formatGuardPath }} + "{{ formatIntegerLetter .Type }}"
         {{- end }}
     {{- else if resolvesToEnum .Type -}}
         {{- $reflect := importStdPkg "cog" "Runtime" -}}
@@ -113,7 +120,7 @@ package {{ .Converter.Package | formatPackageName }};
         String {{ $.IntoVar }} = Registry.{{ .FuncName | lowerCamelCase }}({{ range $i, $runtimeArg := .Args }}{{ if gt $i 0 }}, {{ end }}{{ $runtimeArg.ValuePath | formatPath }}{{ end }});
     {{- end -}}
     {{- with .Arg.Direct -}}
-        {{ if .ValueType.IsScalar }}{{ .ValueType | formatType }}{{ else }}String{{ end }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath "IsMapEntry" $.IsMapEntry) -}}{{ if $.IsMapEntry }}.getValue(){{ end }};
+        {{ if and .ValueType.IsScalar (eq .ValueType.AsScalar.ScalarKind "any") }}{{ .ValueType | formatType }}{{ else }}String{{ end }} {{ $.IntoVar }} = {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath "IsMapEntry" $.IsMapEntry) -}}{{ if $.IsMapEntry }}.getValue(){{ end }};
     {{- end -}}
 {{- end }}
 

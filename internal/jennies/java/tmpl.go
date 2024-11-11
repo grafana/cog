@@ -38,6 +38,15 @@ func functions() template.FuncMap {
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
+		"formatIntegerLetter": func(t ast.Type) string {
+			switch t.AsScalar().ScalarKind {
+			case ast.KindInt64, ast.KindUint64:
+				return "L"
+			case ast.KindFloat32, ast.KindFloat64:
+				return "f"
+			}
+			return ""
+		},
 		"importStdPkg": func(_ ast.Type) string {
 			panic("formatRawRef() needs to be overridden by a jenny")
 		},
