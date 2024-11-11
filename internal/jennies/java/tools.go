@@ -164,7 +164,3 @@ func objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object) bo
 
 	return false
 }
-
-func is(t ast.Type, kind string) bool {
-	return t.Kind == ast.Kind(kind)
-}

@@ -22,6 +22,20 @@ public class Runtime {
 
         return "Unsupported type: " + object.getClass().getSimpleName();
     }
+    
+    public static <T extends Enum<T>> String formatEnum(Class<T> enumClass, T enumValue) {
+        String className = enumClass.getSimpleName();
+        String value;
+
+        if (enumValue != null) {
+            value = enumValue.name();
+        } else {
+            T defaultEnumValue = enumClass.getEnumConstants()[0];
+            value = defaultEnumValue.name();
+        }
+
+        return String.format("%s.%s", className, value);
+    }
 
     private static String formatList(List<?> list) {
         StringJoiner joiner = new StringJoiner(", ");

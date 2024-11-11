@@ -6,18 +6,23 @@ package {{ .Converter.Package | formatPackageName }};
 
 {{- define "guard" }}
     {{- $leftOperand := print (.Path | formatGuardPath) -}}
+    {{- $type := .Path.Last.Type }}
     {{- if and (eq .Op "!=") (eq .Value nil) -}}
         {{ $leftOperand }} != null
-    {{- else if isScalarType .Path "bool" -}}
+    {{- else if and $type.IsScalar (eq $type.AsScalar.ScalarKind "bool") -}}
         !{{- $leftOperand }}
-    {{- else if isScalarType .Path "string" -}}
+    {{- else if and $type.IsScalar (eq $type.AsScalar.ScalarKind "string") -}}
         {{- if .Value }}
             !{{- $leftOperand }}.equals("{{ cleanString .Value }}")
+        {{- else if not $type.Nullable }}
+            {{- $reflect := importStdPkg "java.util" "Objects" -}}
+            {{- $leftOperand }} != null && !Objects.equals({{- $leftOperand }}, "")
         {{- else }}
-            !{{- $leftOperand }}.isEmpty()
+            {{- $reflect := importStdPkg "java.util" "Objects" -}}
+            !Objects.equals({{- $leftOperand }}, "")
         {{- end }}
-    {{- else if is .Path.Last.Type "ref" }}
-        {{- formatRefType .Path.Last.Type .Value }}
+    {{- else if $type.IsRef }}
+        {{- formatRefType $type .Value }}
     {{- else -}}
         {{- $operator := .Op -}} 
         {{- if eq .Op "minLength" -}}
@@ -41,7 +46,9 @@ package {{ .Converter.Package | formatPackageName }};
         {{- .Path | formatGuardPath }}
         {{- end }}
     {{- else if resolvesToEnum .Type -}}
-        "{{ .Type.AsRef.ReferredType }}." + {{- .Path | formatGuardPath }}.name()
+        {{- $reflect := importStdPkg "cog" "Runtime" -}}
+        {{- $reflect := importStdPkg .Type.AsRef.ReferredPkg .Type.AsRef.ReferredType -}}
+        Runtime.formatEnum({{ .Type.AsRef.ReferredType }}.class, {{- .Path | formatGuardPath }})
     {{- else }}
         {{- $reflect := importStdPkg "cog" "Runtime" -}}
         Runtime.dump({{ .Path | formatGuardPath }})
@@ -72,7 +79,7 @@ package {{ .Converter.Package | formatPackageName }};
         for ({{ .ValueType | formatType }} {{ .ValueAs | formatPath }} : {{ .For | formatGuardPath }}) {
             {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg "IsMapEntry" false) }}
-            {{- if and .ValueType.IsScalar (not (isScalarType .For "string")) }}
+            {{- if and .ValueType.IsScalar (not (eq .ValueType.AsScalar.ScalarKind "string")) }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }}.toString());
             {{- else }}
             tmp{{ $.IntoVar | upperCamelCase }}.add({{ $subIntoVar }} + ".build()");
