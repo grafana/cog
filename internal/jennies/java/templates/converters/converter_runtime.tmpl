@@ -21,10 +21,60 @@ public class Runtime {
             return "null";
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("new ").append(object.getClass().getSimpleName()).append("(");
+        if (object.getClass().getConstructors().length == 0) {
+            return formatFactory(object);
+        }
 
-        Field[] fields = object.getClass().getDeclaredFields();
+        return formatConstructor(object);
+    }
+    
+    public static String formatFactory(Object object) {
+        StringBuilder sb = new StringBuilder();
+
+        Class<?> clazz = object.getClass();
+        boolean hasBuilderArgument = false;
+
+        Map<String, Class<?>> constructorList = new HashMap<>();
+
+        // Looking for static functions
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method m : methods) {
+            if (Modifier.isStatic(m.getModifiers())) {
+                constructorList.put(m.getName(), m.getParameterTypes()[0]);
+            }
+
+            // Check kind if the method ask for a builder
+            for (Class<?> param : m.getParameterTypes()) {
+                if (param.isAssignableFrom(Builder.class)) {
+                    hasBuilderArgument = true;
+                }
+            }
+        }
+
+        // Factories only ask for one argument
+        String expectedFunction = Arrays.stream(clazz.getDeclaredFields()).
+                map((f) -> fieldAsFunctionName(f.getName())).
+                filter(constructorList::containsKey).
+                findFirst().get();
+
+        sb.append(clazz.getSimpleName()).append(".").append(expectedFunction).append("(new ").append(expectedFunction.replace("create", ""));
+        // TODO: Set fields into builder constructors with arguments and add missing builder options
+        if (hasBuilderArgument) {
+            sb.append(".Builder()");
+        } else {
+            sb.append("()");
+        }
+
+        sb.append(")");
+        return sb.toString();
+    }
+
+    public static String formatConstructor(Object object) {
+        StringBuilder sb = new StringBuilder();
+
+        Class<?> clazz = object.getClass();
+        sb.append("new ").append(clazz.getSimpleName()).append("(");
+        Field[] fields = clazz.getDeclaredFields();
 
         for(int i = 0; i < fields.length; i++) {
             fields[i].setAccessible(true);
@@ -39,7 +89,12 @@ public class Runtime {
         }
 
         sb.append(")");
+
         return sb.toString();
+    }
+
+    public static String fieldAsFunctionName(String f) {
+        return "create"  + f.substring(0, 1).toUpperCase() + f.substring(1);
     }
     
     public static String escapeString(String input) {
