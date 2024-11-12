@@ -23,6 +23,16 @@ type Config struct {
 	// If enabled, PackageRoot is used as module path.
 	GenerateGoMod bool `yaml:"go_mod"`
 
+	// GenerateStrictUnmarshaller controls the generation of
+	// `UnmarshalJSONStrict()` methods on types.
+	GenerateStrictUnmarshaller bool `yaml:"generate_strict_unmarshaller"`
+
+	// GenerateEqual controls the generation of `Equal()` methods on types.
+	GenerateEqual bool `yaml:"generate_equal"`
+
+	// GenerateValidate controls the generation of `Validate()` methods on types.
+	GenerateValidate bool `yaml:"generate_validate"`
+
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.

@@ -76,22 +76,28 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			return
 		}
 
-		innerErr = strictUnmarshallerGenerator.generateForObject(&buffer, context, object)
-		if innerErr != nil {
-			err = innerErr
-			return
+		if !jenny.Config.SkipRuntime && jenny.Config.GenerateStrictUnmarshaller {
+			innerErr = strictUnmarshallerGenerator.generateForObject(&buffer, context, object)
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
 		}
 
-		innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, object, imports)
-		if innerErr != nil {
-			err = innerErr
-			return
+		if jenny.Config.GenerateEqual {
+			innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, object, imports)
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
 		}
 
-		innerErr = validationMethodsGenerator.generateForObject(&buffer, context, object, imports)
-		if innerErr != nil {
-			err = innerErr
-			return
+		if !jenny.Config.SkipRuntime && (jenny.Config.generateBuilders || jenny.Config.GenerateValidate) {
+			innerErr = validationMethodsGenerator.generateForObject(&buffer, context, object, imports)
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
 		}
 	})
 	if err != nil {
