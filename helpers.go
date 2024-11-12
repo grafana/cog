@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"cuelang.org/go/cue"
+	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/golang"
@@ -70,9 +71,9 @@ func (pipeline *SchemaToTypesPipeline) Debug(enabled bool) *SchemaToTypesPipelin
 	return pipeline
 }
 
-// Run executes the codegen pipeline and returns its output.
-func (pipeline *SchemaToTypesPipeline) Run(ctx context.Context) ([]byte, error) {
-	// Validation
+// Run executes the codegen pipeline and returns the files generated as a result.
+func (pipeline *SchemaToTypesPipeline) Run(ctx context.Context) (codejen.Files, error) {
+	// At least a tiny bit of validation
 	if pipeline.input == nil {
 		return nil, fmt.Errorf("no input configured")
 	}
@@ -84,6 +85,7 @@ func (pipeline *SchemaToTypesPipeline) Run(ctx context.Context) ([]byte, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	codegenPipeline.Inputs = []*codegen.Input{pipeline.input}
 	codegenPipeline.Transforms = codegen.Transforms{
 		FinalPasses: pipeline.finalPasses,
@@ -93,20 +95,12 @@ func (pipeline *SchemaToTypesPipeline) Run(ctx context.Context) ([]byte, error) 
 		Languages: []*codegen.OutputLanguage{pipeline.output},
 	}
 
-	// Run the codegen pipeline and return the generated file's content.
-	// Note: since this pipeline is about types with no runtime, we expect a
-	// single file to be generated.
 	generatedFS, err := codegenPipeline.Run(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	generatedFiles := generatedFS.AsFiles()
-	if len(generatedFiles) != 1 {
-		return nil, fmt.Errorf("expected a single generated file, got %d", len(generatedFiles))
-	}
-
-	return generatedFiles[0].Data, nil
+	return generatedFS.AsFiles(), nil
 }
 
 /**********
@@ -145,19 +139,32 @@ func (pipeline *SchemaToTypesPipeline) SchemaTransformations(passes ...compiler.
  * Outputs *
  ***********/
 
+// GoConfig defines a set of configuration options specific to Go outputs.
+type GoConfig struct {
+	// GenerateEqual controls the generation of `Equal()` methods on types.
+	GenerateEqual bool `yaml:"generate_equal"`
+}
+
 // Golang sets the output to Golang types.
-func (pipeline *SchemaToTypesPipeline) Golang() *SchemaToTypesPipeline {
+func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Go: &golang.Config{
 			GenerateGoMod: false,
 			SkipRuntime:   true,
+
+			GenerateEqual: config.GenerateEqual,
 		},
 	}
 	return pipeline
 }
 
+// TypescriptConfig defines a set of configuration options specific to Go outputs.
+type TypescriptConfig struct {
+	// placeholder: to be able to define options later without breaking the API.
+}
+
 // Typescript sets the output to Typescript types.
-func (pipeline *SchemaToTypesPipeline) Typescript() *SchemaToTypesPipeline {
+func (pipeline *SchemaToTypesPipeline) Typescript(config TypescriptConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Typescript: &typescript.Config{
 			SkipRuntime: true,
