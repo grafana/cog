@@ -40,7 +40,8 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.generateBuilders = global.Builders
-	newConfig.generateConverters = global.Converters
+	// newConfig.generateConverters = global.Converters
+	newConfig.generateConverters = false
 
 	return newConfig
 }
@@ -72,7 +73,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
 		common.If[languages.Context](!config.SkipGradleDev, Gradle{config: config, tmpl: tmpl}),
-		// common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime && config.generateBuilders && config.generateConverters, &Converter{config: config, tmpl: tmpl}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

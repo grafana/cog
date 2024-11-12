@@ -9,7 +9,7 @@ public class PanelConfig {
     private final Converter<Panel> converter;
     {{- end }}
 
-    public PanelConfig(Class<?> optionsClass, Class<?> fieldConfigClass, Converter<Panel> converter) {
+    public PanelConfig(Class<?> optionsClass, Class<?> fieldConfigClass{{ if .ShouldAddConverters }}, Converter<Panel> converter{{ end }}) {
         this.optionsClass = optionsClass;
         this.fieldConfigClass = fieldConfigClass;
         {{- if .ShouldAddConverters }}
