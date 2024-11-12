@@ -23,40 +23,6 @@ type SchemaToTypesPipeline struct {
 	output      *codegen.OutputLanguage
 }
 
-// AppendCommentToObjects adds the given comment to every object definition.
-func AppendCommentToObjects(comment string) compiler.Pass {
-	return &compiler.AppendCommentObjects{
-		Comment: comment,
-	}
-}
-
-// PrefixObjectsNames adds the given prefix to every object's name.
-func PrefixObjectsNames(prefix string) compiler.Pass {
-	return &compiler.PrefixObjectNames{
-		Prefix: prefix,
-	}
-}
-
-type CUEOption func(*codegen.CueInput)
-
-// ForceEnvelope decorates the parsed cue Value with an envelope whose
-// name is given. This is useful for dataqueries for example, where the
-// schema doesn't define any suitable top-level object.
-func ForceEnvelope(envelopeName string) CUEOption {
-	return func(input *codegen.CueInput) {
-		input.ForcedEnvelope = envelopeName
-	}
-}
-
-// NameFunc specifies the naming strategy used for objects and references.
-// It is called with the value passed to the top level method or function and
-// the path to the entity being parsed.
-func NameFunc(nameFunc simplecue.NameFunc) CUEOption {
-	return func(input *codegen.CueInput) {
-		input.NameFunc = nameFunc
-	}
-}
-
 // TypesFromSchema generates types from a single input schema and a single
 // output language.
 func TypesFromSchema() *SchemaToTypesPipeline {
@@ -107,6 +73,50 @@ func (pipeline *SchemaToTypesPipeline) Run(ctx context.Context) (codejen.Files, 
  * Inputs *
  **********/
 
+type CUEOption func(*codegen.CueInput)
+
+// ForceEnvelope decorates the parsed cue Value with an envelope whose
+// name is given. This is useful for dataqueries for example, where the
+// schema doesn't define any suitable top-level object.
+func ForceEnvelope(envelopeName string) CUEOption {
+	return func(input *codegen.CueInput) {
+		input.ForcedEnvelope = envelopeName
+	}
+}
+
+// NameFunc specifies the naming strategy used for objects and references.
+// It is called with the value passed to the top level method or function and
+// the path to the entity being parsed.
+func NameFunc(nameFunc simplecue.NameFunc) CUEOption {
+	return func(input *codegen.CueInput) {
+		input.NameFunc = nameFunc
+	}
+}
+
+// CUEImports allows referencing additional libraries/modules.
+func CUEImports(importsMap map[string]string) CUEOption {
+	return func(input *codegen.CueInput) {
+		for importPkg, pkgPath := range importsMap {
+			input.CueImports = append(input.CueImports, fmt.Sprintf("%s:%s", pkgPath, importPkg))
+		}
+	}
+}
+
+// CUEModule sets the pipeline's input to the given cue module.
+func (pipeline *SchemaToTypesPipeline) CUEModule(modulePath string, opts ...CUEOption) *SchemaToTypesPipeline {
+	cueInput := &codegen.CueInput{
+		Entrypoint: modulePath,
+	}
+
+	for _, opt := range opts {
+		opt(cueInput)
+	}
+
+	pipeline.input = &codegen.Input{Cue: cueInput}
+
+	return pipeline
+}
+
 // CUEValue sets the pipeline's input to the given cue value.
 func (pipeline *SchemaToTypesPipeline) CUEValue(pkgName string, value cue.Value, opts ...CUEOption) *SchemaToTypesPipeline {
 	cueInput := &codegen.CueInput{
@@ -126,6 +136,20 @@ func (pipeline *SchemaToTypesPipeline) CUEValue(pkgName string, value cue.Value,
 /*******************
  * Transformations *
  *******************/
+
+// AppendCommentToObjects adds the given comment to every object definition.
+func AppendCommentToObjects(comment string) compiler.Pass {
+	return &compiler.AppendCommentObjects{
+		Comment: comment,
+	}
+}
+
+// PrefixObjectsNames adds the given prefix to every object's name.
+func PrefixObjectsNames(prefix string) compiler.Pass {
+	return &compiler.PrefixObjectNames{
+		Prefix: prefix,
+	}
+}
 
 // SchemaTransformations adds the given transformations to the set of
 // transformations that will be applied to the input schema.

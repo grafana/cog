@@ -81,6 +81,23 @@ Bar: {
 	fmt.Println(string(files[0].Data))
 }
 
+// ExampleCueModule demonstrates how to generate types from a CUE module living on the filesystem.
+func Example_cueModule() {
+	files, err := TypesFromSchema().
+		CUEModule("/path/to/cue/module").
+		Golang(GoConfig{}).
+		Run(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
+	if len(files) != 1 {
+		panic("expected a single file :(")
+	}
+
+	fmt.Println(string(files[0].Data))
+}
+
 // ExampleGoOutput demonstrates how to generate Go types from a CUE value.
 func Example_goOutput() {
 	schema := `
