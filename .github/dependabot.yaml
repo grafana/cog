@@ -4,8 +4,19 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      go:
+        exclude-patterns:
+          - "cuelang.org/*"
+      cue:
+        patterns:
+          - "cuelang.org/*"
