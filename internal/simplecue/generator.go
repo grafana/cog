@@ -843,30 +843,17 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
 	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints), ast.Default(defVal))
 
-	// works only for a closed/concrete list
-	if v.IsConcrete() {
-		i, err := v.List()
-		if err != nil {
-			return ast.Type{}, err
-		}
-
-		// fixme: this is wrong
-		for i.Next() {
-			node, err := g.declareNode(i.Value())
-			if err != nil {
-				return ast.Type{}, err
-			}
-
-			typeDef.Array.ValueType = node
-		}
-
-		return typeDef, nil
+	// closed list are not supported: our IR can't represent them :/
+	// example of closed list:
+	// ```cue
+	// someList: [string, string] // a list with exactly two strings
+	// ```
+	if !v.Allows(cue.AnyIndex) {
+		return ast.Type{}, errorWithCueRef(v, "closed lists are not supported")
 	}
 
-	// open list
-
 	// If the default (all lists have a default, usually self, ugh) differs from the
-	// input list, peel it off. Otherwise our AnyIndex lookup may end up getting
+	// input list, peel it off. Otherwise, our AnyIndex lookup may end up getting
 	// sent on the wrong path.
 	defv, _ := v.Default()
 	if !defv.Equals(v) {
