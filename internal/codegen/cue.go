@@ -113,7 +113,7 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, expectedCuePkgName string) (cue.Value, error) {
 	cueFsOverlay, err := buildCueOverlay(imports, entrypoint, expectedCuePkgName)
 	if err != nil {
-		return cue.Value{}, err
+		return cue.Value{}, fmt.Errorf("could not build cue overlay: %w", err)
 	}
 
 	// Load Cue files into Cue build.Instances slice
@@ -124,7 +124,7 @@ func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, e
 
 	value := cuecontext.New().BuildInstance(bis[0])
 	if err := value.Err(); err != nil {
-		return cue.Value{}, err
+		return cue.Value{}, fmt.Errorf("could not building cue instance: %w", err)
 	}
 
 	return value, nil
