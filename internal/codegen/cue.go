@@ -117,9 +117,8 @@ func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, e
 	}
 
 	// Load Cue files into Cue build.Instances slice
-	bis := load.Instances([]string{"/" + expectedCuePkgName}, &load.Config{
-		Overlay:    cueFsOverlay,
-		ModuleRoot: "/",
+	bis := load.Instances([]string{"github.com/cog-vfs/" + expectedCuePkgName}, &load.Config{
+		Overlay: cueFsOverlay,
 	})
 
 	value := cuecontext.New().BuildInstance(bis[0])
@@ -137,7 +136,7 @@ func buildCueOverlay(imports []simplecue.LibraryInclude, entrypoint string, expe
 		return nil, err
 	}
 
-	entrypointFS, err := dirToPrefixedFS(entrypoint, expectedCuePkgName)
+	entrypointFS, err := dirToPrefixedFS(entrypoint, "cue.mod/pkg/github.com/cog-vfs/"+expectedCuePkgName)
 	if err != nil {
 		return nil, err
 	}
@@ -171,6 +170,13 @@ Core: {
 Custom: {
 	...
 }`),
+		},
+		"cue.mod/module.cue": &fstest.MapFile{
+			Data: []byte(`language: {
+	version: "v0.10.1"
+}
+module: "cog.vfs"
+`),
 		},
 	}
 }
