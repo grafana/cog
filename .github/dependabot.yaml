@@ -9,3 +9,5 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "cuelang.org/go"  # Schema are fixed to 0.8.0 and newer version includes breaking changes.
