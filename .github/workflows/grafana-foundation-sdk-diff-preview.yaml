@@ -4,6 +4,7 @@ on:
 
 env:
   DEVBOX_VERSION: 0.13.1
+  FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
 
 jobs:
   sdk_diff:
@@ -12,6 +13,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Restore go vendors
         uses: actions/cache@v4
@@ -29,16 +32,24 @@ jobs:
           enable-cache: 'true'
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
+      - name: Build cog with current branch
+        shell: bash
+        run: |
+          devbox run go build -o cog ./cmd/cli
+          mkdir -p "${HOME}/.local/bin/"
+          mv cog "${HOME}/.local/bin/"
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
       - name: Dry-run release with current branch
         shell: bash
         run: |
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./scripts/release-version.sh next
+          devbox run ./config/foundation-sdk/scripts/release-version.sh next
         env:
-          FOUNDATION_SDK_PATH: ../grafana-foundation-sdk-current
-          FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
+          WORKSPACE_PATH: /tmp/foundation-workspace-current
+          CLEANUP_WORKSPACE: 'no'
           LOG_LEVEL: '7' # debug
           GOGC: 'off'
 
@@ -47,16 +58,22 @@ jobs:
         with:
           ref: main
 
+      - name: Build cog with main branch
+        shell: bash
+        run: |
+          devbox run go build -o cog ./cmd/cli
+          mv cog "${HOME}/.local/bin/"
+
       - name: Dry-run release with main branch
         shell: bash
         run: |
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./scripts/release-version.sh next
+          devbox run ./config/foundation-sdk/scripts/release-version.sh next
         env:
-          FOUNDATION_SDK_PATH: ../grafana-foundation-sdk-main
-          FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
+          WORKSPACE_PATH: /tmp/foundation-workspace-main
+          CLEANUP_WORKSPACE: 'no'
           LOG_LEVEL: '7' # debug
           GOGC: 'off'
 
@@ -88,7 +105,7 @@ jobs:
             --exclude='pyproject.toml' \
             --exclude='package.json' \
             --exclude='*.md' \
-            ../grafana-foundation-sdk-main/ ../grafana-foundation-sdk-current/ >> preview.md || true # diff returns 1 if the two targets have differences
+            /tmp/foundation-workspace-main/foundation-sdk/ /tmp/foundation-workspace-current/foundation-sdk/ >> preview.md || true # diff returns 1 if the two targets have differences
           
           cat <<'EOF' >> preview.md
           ```
