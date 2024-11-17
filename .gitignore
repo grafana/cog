@@ -4,6 +4,7 @@
 /.devbox
 /gradle.properties
 /vendor
+/cog
 
 # Java building folders
 .gradle/
