@@ -72,36 +72,6 @@ That disjunction serves as "dataquery entrypoint" for cloudwatch.
 cloudwatch: {}
 ```
 
-## `dashboard_panels`
-
-DashboardPanelsRewrite rewrites the definition of "panels" fields in the "dashboard" package.
-
-In the original schema, panels are defined as follows:
-
-	```
-	# In the Dashboard object
-	panels?: [...#Panel | #RowPanel | #GraphPanel | #HeatmapPanel]
-
-	# In the RowPanel object
-	panels: [...#Panel | #GraphPanel | #HeatmapPanel]
-	```
-
-These definitions become:
-
-	```
-	# In the Dashboard object
-	panels?: [...#Panel | #RowPanel]
-
-	# In the RowPanel object
-	panels: [...#Panel]
-	```
-
-### Usage
-
-```yaml
-dashboard_panels: {}
-```
-
 ## `dataquery_identification`
 
 N/A

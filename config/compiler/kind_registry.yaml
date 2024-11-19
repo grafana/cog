@@ -48,6 +48,24 @@ passes:
       field: dashboard.Dashboard.timepicker
       as: TimePicker
 
+  # From: `panels: [...#Panel | #RowPanel | #GraphPanel | #HeatmapPanel]`
+  # To: `panels: [...#Panel | #GraphPanel | #HeatmapPanel]`
+  - retype_field:
+      field: dashboard.Dashboard.panels
+      as:
+        kind: array
+        array:
+          value_type:
+            kind: disjunction
+            disjunction:
+              branches:
+                - { kind: ref, ref: { referred_pkg: dashboard, referred_type: Panel } }
+                - { kind: ref, ref: { referred_pkg: dashboard, referred_type: RowPanel } }
+              discriminator: type
+              discriminator_mapping:
+                row: RowPanel
+                cog_discriminator_catch_all: Panel
+
   - retype_field:
       field: dashboard.Panel.options
       as:
@@ -78,8 +96,6 @@ passes:
           value_type:
             kind: ref
             ref: { referred_pkg: dashboard, referred_type: DashboardLink }
-
-  - dashboard_panels: {}
 
   # Add a few missing fields.
   # This is meant to be removed once the schema is updated.
@@ -113,6 +129,21 @@ passes:
   - name_anonymous_struct:
       field: testdata.SimulationQuery.key
       as: Key
+
+  #############
+  # row panel #
+  #############
+
+  # From: `panels: [...#Panel | #RowPanel]`
+  # To: `panels: [...#Panel]`
+  - retype_field:
+      field: dashboard.RowPanel.panels
+      as:
+        kind: array
+        array:
+          value_type:
+            kind: ref
+            ref: { referred_pkg: dashboard, referred_type: Panel }
 
   ###############
   # table panel #

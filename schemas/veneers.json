@@ -71,7 +71,7 @@
           "type": "string",
           "description": "If the branches are references to structs, some languages will need\nextra context to be able to distinguish between them. Golang, for\nexample, doesn't support sum types (disjunctions of fixed types).\nTo emulate sum types for these languages, we need a way to\ndiscriminate against every possible type.\n\nTo do that, we need two things:\n\t- a discriminator: the name of a field that is present in all types.\n\t  The value of which identifies the type being used.\n - a mapping: associating a \"discriminator value\" to a type."
         },
-        "discriminatormapping": {
+        "discriminator_mapping": {
           "additionalProperties": {
             "type": "string"
           },
