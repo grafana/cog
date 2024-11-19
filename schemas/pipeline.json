@@ -208,6 +208,9 @@
         "converters": {
           "type": "boolean"
         },
+        "api_reference": {
+          "type": "boolean"
+        },
         "languages": {
           "items": {
             "$ref": "#/$defs/CodegenOutputLanguage"
@@ -312,6 +315,18 @@
         "go_mod": {
           "type": "boolean",
           "description": "GenerateGoMod indicates whether a go.mod file should be generated.\nIf enabled, PackageRoot is used as module path."
+        },
+        "generate_strict_unmarshaller": {
+          "type": "boolean",
+          "description": "GenerateStrictUnmarshaller controls the generation of\n`UnmarshalJSONStrict()` methods on types."
+        },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `Equal()` methods on types."
+        },
+        "generate_validate": {
+          "type": "boolean",
+          "description": "GenerateValidate controls the generation of `Validate()` methods on types."
         },
         "skip_runtime": {
           "type": "boolean",

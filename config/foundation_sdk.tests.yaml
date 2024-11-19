@@ -22,3 +22,6 @@ output:
   languages:
     - go:
         package_root: '%go_package_root%'
+        generate_strict_unmarshaller: true
+        generate_equal: true
+        generate_validate: true
