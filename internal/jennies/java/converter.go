@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -43,15 +44,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 
 	var err error
 	for _, schema := range context.Schemas {
-		schema.Objects = schema.Objects.Filter(func(key string, obj ast.Object) bool {
-			if obj.Type.ImplementedVariant() != string(ast.SchemaVariantDataQuery) {
-				return false
-			}
-
-			return !obj.Type.HasHint(ast.HintSkipVariantPluginRegistration)
-		})
-
-		schema.Objects.Iterate(func(key string, obj ast.Object) {
+		filterDataqueryObjects(schema).Iterate(func(key string, obj ast.Object) {
 			output, genErr := jenny.generateDataqueryConverter(context, schema, obj)
 			if genErr != nil {
 				err = genErr
@@ -68,6 +61,20 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 	}
 
 	return files, err
+}
+
+func filterDataqueryObjects(schema *ast.Schema) *orderedmap.Map[string, ast.Object] {
+	filteredObjects := orderedmap.New[string, ast.Object]()
+
+	schema.Objects.Iterate(func(key string, obj ast.Object) {
+		if obj.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
+			if !obj.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
+				filteredObjects.Set(key, obj)
+			}
+		}
+	})
+
+	return filteredObjects
 }
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
