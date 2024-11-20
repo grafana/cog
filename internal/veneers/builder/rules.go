@@ -88,13 +88,13 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 
 		newRoot, err := destinationBuilder.MakePath(builders, underPath)
 		if err != nil {
-			return destinationBuilder, err
+			return destinationBuilder, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
 		}
 
 		// TODO: initializations
 		newBuilder, err := mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions, renameOptions)
 		if err != nil {
-			return ast.Builder{}, err
+			return ast.Builder{}, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
 		}
 
 		newBuilder.AddToVeneerTrail("MergeInto")
@@ -180,7 +180,7 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		panelBuilderPkg, panelBuilderNameWithoutPkg, found := strings.Cut(panelBuilderName, ".")
 		if !found {
-			return nil, fmt.Errorf("panelBuilderName '%s' is incorrect: no package found", panelBuilderPkg)
+			return nil, fmt.Errorf("could not apply ComposeDashboardPanel builder veneer: panelBuilderName '%s' is incorrect: no package found", panelBuilderPkg)
 		}
 
 		panelBuilder, found := builders.LocateByObject(panelBuilderPkg, panelBuilderNameWithoutPkg)
@@ -216,7 +216,7 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 		for panelType, buildersForType := range composableBuilders {
 			composedBuilders, err := composePanelType(builders, panelType, panelBuilder, buildersForType, panelOptionsToExclude)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("could not apply ComposeDashboardPanel builder veneer: %w", err)
 			}
 
 			for _, b := range composedBuilders {
@@ -320,7 +320,7 @@ func Initialize(selector Selector, statements []Initialization) RewriteRule {
 			for _, statement := range statements {
 				path, err := builders[i].MakePath(builders, statement.PropertyPath)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("could not apply Initialize builder veneer: %w", err)
 				}
 
 				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, ast.ConstantAssignment(path, statement.Value))
@@ -374,7 +374,7 @@ func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
 
 			newOpt, err := newOption.AsIR(builders, builder)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("could not apply AddOption builder veneer: %w", err)
 			}
 
 			builders[i].Options = append(builders[i].Options, newOpt)
