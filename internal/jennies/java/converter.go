@@ -3,7 +3,6 @@ package java
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -13,6 +12,8 @@ import (
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
+
+const variableModel = "VariableModel"
 
 type Converter struct {
 	config         Config
@@ -97,16 +98,8 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	if isPanel {
 		builderNameFormat = fmt.Sprintf("%s.PanelBuilder", typeFormatter.formatPackage(converter.Package))
 	} else if converter.BuilderName != converter.Input.TypeRef.ReferredType {
-		isRenamed := false
-		for _, v := range builder.VeneerTrail {
-			if strings.Contains(v, "Rename") {
-				isRenamed = true
-				break
-			}
-		}
-
-		if !isRenamed {
-			builderNameFormat = fmt.Sprintf("%s.%sBuilder", tools.UpperCamelCase(converter.Input.TypeRef.ReferredType), tools.UpperCamelCase(converter.BuilderName))
+		if converter.Input.TypeRef.ReferredType == variableModel { // TODO: Find a better way to identify this...
+			builderNameFormat = fmt.Sprintf("%s.%sBuilder", variableModel, tools.UpperCamelCase(converter.BuilderName))
 		} else {
 			builderNameFormat = fmt.Sprintf("%s.Builder", tools.UpperCamelCase(converter.Input.TypeRef.ReferredType))
 		}
