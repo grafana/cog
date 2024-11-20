@@ -23,6 +23,7 @@ type CompilerPass struct {
 	HintObject               *HintObject               `yaml:"hint_object"`
 	RetypeField              *RetypeField              `yaml:"retype_field"`
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
+	DuplicateObject          *DuplicateObject          `yaml:"duplicate_object"`
 
 	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 
@@ -31,8 +32,7 @@ type CompilerPass struct {
 	DisjunctionInferMapping                 *DisjunctionInferMapping                 `yaml:"disjunction_infer_mapping"`
 	DisjunctionWithConstantToDefault        *DisjunctionWithConstantToDefault        `yaml:"disjunction_with_constant_to_default"`
 
-	Cloudwatch    *Cloudwatch    `yaml:"cloudwatch"`
-	LibraryPanels *LibraryPanels `yaml:"library_panels"`
+	Cloudwatch *Cloudwatch `yaml:"cloudwatch"`
 }
 
 func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
@@ -81,6 +81,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.SchemaSetIdentifier != nil {
 		return pass.SchemaSetIdentifier.AsCompilerPass()
 	}
+	if pass.DuplicateObject != nil {
+		return pass.DuplicateObject.AsCompilerPass()
+	}
 
 	if pass.AnonymousStructsToNamed != nil {
 		return pass.AnonymousStructsToNamed.AsCompilerPass()
@@ -101,9 +104,6 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 
 	if pass.Cloudwatch != nil {
 		return pass.Cloudwatch.AsCompilerPass(), nil
-	}
-	if pass.LibraryPanels != nil {
-		return pass.LibraryPanels.AsCompilerPass(), nil
 	}
 
 	return nil, fmt.Errorf("empty compiler pass")
@@ -283,6 +283,30 @@ func (pass HintObject) AsCompilerPass() (*compiler.HintObject, error) {
 	}, nil
 }
 
+type DuplicateObject struct {
+	Object     string // Expected format: [package].[object]
+	As         string
+	OmitFields []string `yaml:"omit_fields"`
+}
+
+func (pass DuplicateObject) AsCompilerPass() (*compiler.DuplicateObject, error) {
+	objectRef, err := compiler.ObjectReferenceFromString(pass.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	destinationRef, err := compiler.ObjectReferenceFromString(pass.As)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.DuplicateObject{
+		Object:     objectRef,
+		As:         destinationRef,
+		OmitFields: pass.OmitFields,
+	}, nil
+}
+
 type RenameObject struct {
 	From string // Expected format: [package].[object]
 	To   string
@@ -371,11 +395,4 @@ type Cloudwatch struct {
 
 func (pass Cloudwatch) AsCompilerPass() *compiler.Cloudwatch {
 	return &compiler.Cloudwatch{}
-}
-
-type LibraryPanels struct {
-}
-
-func (pass LibraryPanels) AsCompilerPass() *compiler.LibraryPanels {
-	return &compiler.LibraryPanels{}
 }
