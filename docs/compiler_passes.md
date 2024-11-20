@@ -168,6 +168,22 @@ N/A
 disjunction_with_constant_to_default: {}
 ```
 
+## `duplicate_object`
+
+DuplicateObject duplicates the source object. The duplicate is created under
+a different name, possibly in a different package.
+
+Note: if the source object isn't found, this pass does nothing.
+
+### Usage
+
+```yaml
+duplicate_object:
+  object: string
+  as: string
+  omit_fields: []string
+```
+
 ## `entrypoint_identification`
 
 N/A
@@ -221,30 +237,6 @@ N/A
 hint_object:
   object: string
   hints: JenniesHints
-```
-
-## `library_panels`
-
-LibraryPanels rewrites the definition of the "LibraryPanel" object in the "librarypanel" package.
-
-In the original schema, the "model" field is left mainly undefined but a comment indicates
-that it should be the same panel schema defined in dashboard with a few fields omitted.
-
-This compiler pass implements the modifications described in that comment to define the
-"model" field as:
-
-	```
-	# In the LibraryPanel object
-	model: Omit<dashboard.Panel, 'gridPos' | 'id' | 'libraryPanel'>
-	```
-
-Note: this pass needs the "dashboard.Panel" schema to be parsed. Barring that, it leaves
-the schemas untouched.
-
-### Usage
-
-```yaml
-library_panels: {}
 ```
 
 ## `name_anonymous_struct`

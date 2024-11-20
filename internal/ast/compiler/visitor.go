@@ -62,7 +62,16 @@ func (visitor *Visitor) VisitSchema(schema *ast.Schema) (*ast.Schema, error) {
 	}()
 
 	if visitor.OnSchema != nil {
-		return visitor.OnSchema(visitor, schema)
+		visitedSchema, err := visitor.OnSchema(visitor, schema)
+		if err != nil {
+			return nil, err
+		}
+
+		// to ensure that new objects will be added to the visited schema by
+		// the defer statement above.
+		newSchema = *visitedSchema
+
+		return &newSchema, nil
 	}
 
 	var err error

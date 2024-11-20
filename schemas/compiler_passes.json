@@ -318,6 +318,9 @@
         "schema_set_identifier": {
           "$ref": "#/$defs/YamlSchemaSetIdentifier"
         },
+        "duplicate_object": {
+          "$ref": "#/$defs/YamlDuplicateObject"
+        },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
         },
@@ -335,9 +338,6 @@
         },
         "cloudwatch": {
           "$ref": "#/$defs/YamlCloudwatch"
-        },
-        "library_panels": {
-          "$ref": "#/$defs/YamlLibraryPanels"
         }
       },
       "additionalProperties": false,
@@ -365,6 +365,25 @@
     },
     "YamlDisjunctionWithConstantToDefault": {
       "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDuplicateObject": {
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "as": {
+          "type": "string"
+        },
+        "omit_fields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     },
@@ -419,11 +438,6 @@
           "$ref": "#/$defs/AstJenniesHints"
         }
       },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlLibraryPanels": {
-      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },

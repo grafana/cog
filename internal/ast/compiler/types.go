@@ -16,6 +16,13 @@ func (ref ObjectReference) Matches(object ast.Object) bool {
 	return object.SelfRef.ReferredPkg == ref.Package && strings.EqualFold(object.Name, ref.Object)
 }
 
+func (ref ObjectReference) AsRef() ast.RefType {
+	return ast.RefType{
+		ReferredPkg:  ref.Package,
+		ReferredType: ref.Object,
+	}
+}
+
 func (ref ObjectReference) String() string {
 	return fmt.Sprintf("%s.%s", ref.Package, ref.Object)
 }
