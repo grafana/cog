@@ -336,9 +336,6 @@
         "cloudwatch": {
           "$ref": "#/$defs/YamlCloudwatch"
         },
-        "google_cloud_monitoring": {
-          "$ref": "#/$defs/YamlGoogleCloudMonitoring"
-        },
         "library_panels": {
           "$ref": "#/$defs/YamlLibraryPanels"
         }
@@ -409,11 +406,6 @@
           "description": "Expected format: [package].[object].[field]"
         }
       },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlGoogleCloudMonitoring": {
-      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },

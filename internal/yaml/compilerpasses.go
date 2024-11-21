@@ -31,9 +31,8 @@ type CompilerPass struct {
 	DisjunctionInferMapping                 *DisjunctionInferMapping                 `yaml:"disjunction_infer_mapping"`
 	DisjunctionWithConstantToDefault        *DisjunctionWithConstantToDefault        `yaml:"disjunction_with_constant_to_default"`
 
-	Cloudwatch            *Cloudwatch            `yaml:"cloudwatch"`
-	GoogleCloudMonitoring *GoogleCloudMonitoring `yaml:"google_cloud_monitoring"`
-	LibraryPanels         *LibraryPanels         `yaml:"library_panels"`
+	Cloudwatch    *Cloudwatch    `yaml:"cloudwatch"`
+	LibraryPanels *LibraryPanels `yaml:"library_panels"`
 }
 
 func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
@@ -102,9 +101,6 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 
 	if pass.Cloudwatch != nil {
 		return pass.Cloudwatch.AsCompilerPass(), nil
-	}
-	if pass.GoogleCloudMonitoring != nil {
-		return pass.GoogleCloudMonitoring.AsCompilerPass(), nil
 	}
 	if pass.LibraryPanels != nil {
 		return pass.LibraryPanels.AsCompilerPass(), nil
@@ -375,13 +371,6 @@ type Cloudwatch struct {
 
 func (pass Cloudwatch) AsCompilerPass() *compiler.Cloudwatch {
 	return &compiler.Cloudwatch{}
-}
-
-type GoogleCloudMonitoring struct {
-}
-
-func (pass GoogleCloudMonitoring) AsCompilerPass() *compiler.GoogleCloudMonitoring {
-	return &compiler.GoogleCloudMonitoring{}
 }
 
 type LibraryPanels struct {

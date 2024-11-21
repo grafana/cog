@@ -249,6 +249,30 @@ passes:
             kind: ref
             ref: { referred_pkg: dashboard, referred_type: Dashboard }
 
+  ###########################
+  # Google Cloud Monitoring #
+  ###########################
+
+  - retype_field:
+      field: googlecloudmonitoring.CloudMonitoringQuery.timeSeriesList
+      as:
+        kind: ref
+        ref: { referred_pkg: googlecloudmonitoring, referred_type: TimeSeriesList }
+
+  - add_fields:
+      to: googlecloudmonitoring.TimeSeriesList
+      fields:
+        - name: title
+          comments: [ "Annotation title." ]
+          type:
+            kind: scalar
+            scalar: { scalar_kind: string }
+        - name: text
+          comments: [ "Annotation text." ]
+          type:
+            kind: scalar
+            scalar: { scalar_kind: string }
+
   ##########
   # Others #
   ##########
@@ -263,7 +287,6 @@ passes:
         - 'A specific timezone from https://en.wikipedia.org/wiki/Tz_database'
 
   - cloudwatch: {}
-  - google_cloud_monitoring: {}
   - library_panels: {}
 
   - omit:
