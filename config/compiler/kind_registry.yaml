@@ -107,6 +107,37 @@ passes:
             kind: scalar
             scalar: { scalar_kind: string }
 
+  #######################
+  # Dashboard variables #
+  #######################
+
+  - add_fields:
+      to: dashboard.VariableModel
+      fields:
+        - name: auto
+          comments: [ 'Dynamically calculates interval by dividing time range by the count specified.' ]
+          type:
+            kind: scalar
+            scalar: { scalar_kind: bool }
+            default: false
+        - name: auto_min
+          comments: [ 'The minimum threshold below which the step count intervals will not divide the time.' ]
+          type:
+            kind: scalar
+            default: '10s'
+            scalar: { scalar_kind: string }
+        - name: auto_count
+          comments:
+            - 'How many times the current time range should be divided to calculate the value, similar to the Max data points query option.'
+            - 'For example, if the current visible time range is 30 minutes, then the auto interval groups the data into 30 one-minute increments.'
+          type:
+            kind: scalar
+            default: 30
+            scalar:
+              scalar_kind: int32
+              constraints:
+                - { op: '>', args: [0] }
+
   ########################
   # Prometheus dataquery #
   ########################
