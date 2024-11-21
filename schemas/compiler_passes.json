@@ -249,12 +249,20 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "YamlAnonymousStructsToNamed": {
-      "properties": {},
+    "YamlAddObject": {
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "as": {
+          "$ref": "#/$defs/AstType"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     },
-    "YamlCloudwatch": {
+    "YamlAnonymousStructsToNamed": {
       "properties": {},
       "additionalProperties": false,
       "type": "object"
@@ -303,6 +311,9 @@
         "name_anonymous_struct": {
           "$ref": "#/$defs/YamlNameAnonymousStruct"
         },
+        "add_object": {
+          "$ref": "#/$defs/YamlAddObject"
+        },
         "rename_object": {
           "$ref": "#/$defs/YamlRenameObject"
         },
@@ -317,6 +328,9 @@
         },
         "schema_set_identifier": {
           "$ref": "#/$defs/YamlSchemaSetIdentifier"
+        },
+        "schema_set_entry_point": {
+          "$ref": "#/$defs/YamlSchemaSetEntryPoint"
         },
         "duplicate_object": {
           "$ref": "#/$defs/YamlDuplicateObject"
@@ -335,9 +349,6 @@
         },
         "disjunction_with_constant_to_default": {
           "$ref": "#/$defs/YamlDisjunctionWithConstantToDefault"
-        },
-        "cloudwatch": {
-          "$ref": "#/$defs/YamlCloudwatch"
         }
       },
       "additionalProperties": false,
@@ -513,6 +524,18 @@
             "type": "string"
           },
           "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlSchemaSetEntryPoint": {
+      "properties": {
+        "package": {
+          "type": "string"
+        },
+        "entry_point": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
