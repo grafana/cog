@@ -211,25 +211,6 @@ fields_set_required:
   fields: []string
 ```
 
-## `google_cloud_monitoring`
-
-GoogleCloudMonitoring rewrites a part of the googlecloudmonitoring schema.
-
-Older schemas (pre 10.2.x) define `CloudMonitoringQuery.timeSeriesList`
-as a disjunction that cog can't handle: `timeSeriesList?: #TimeSeriesList | #AnnotationQuery`,
-where `AnnotationQuery` is a type that extends `TimeSeriesList` to add two
-fields.
-
-This compiler pass checks for the presence of that disjunction, and rewrites
-it as a reference to `TimeSeriesList`. It also adds the two missing fields
-to this type if they aren't already defined.
-
-### Usage
-
-```yaml
-google_cloud_monitoring: {}
-```
-
 ## `hint_object`
 
 N/A
