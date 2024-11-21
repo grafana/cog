@@ -17,6 +17,7 @@ type raw string
 type pkgMapper func(string) string
 
 type RawTypes struct {
+	config        Config
 	typeFormatter *typeFormatter
 	schemas       ast.Schemas
 }
@@ -51,7 +52,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	var buffer strings.Builder
 	var err error
 
-	imports := NewImportMap()
+	imports := NewImportMap(jenny.config.PackagesImportMap)
 	packageMapper := func(pkg string) string {
 		if imports.IsIdentical(pkg, schema.Package) {
 			return ""

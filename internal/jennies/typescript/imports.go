@@ -8,8 +8,9 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-func NewImportMap() *common.DirectImportMap {
+func NewImportMap(packagesImportMap map[string]string) *common.DirectImportMap {
 	return common.NewDirectImportMap(
+		common.WithPackagesImportMap[common.DirectImportMap](packagesImportMap),
 		common.WithAliasSanitizer[common.DirectImportMap](formatPackageName),
 		common.WithImportPathSanitizer[common.DirectImportMap](func(importPath string) string {
 			parts := strings.Split(importPath, "/")

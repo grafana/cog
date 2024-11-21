@@ -25,10 +25,16 @@ type Config struct {
 	// BuilderTemplatesDirectories holds a list of directories containing templates
 	// to be used to override parts of builders.
 	BuilderTemplatesDirectories []string `yaml:"builder_templates"`
+
+	// PackagesImportMap associates package names to their import path.
+	PackagesImportMap map[string]string `yaml:"packages_import_map"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.BuilderTemplatesDirectories = tools.Map(config.BuilderTemplatesDirectories, interpolator)
+	for pkg, importPath := range config.PackagesImportMap {
+		config.PackagesImportMap[pkg] = interpolator(importPath)
+	}
 }
 
 type Language struct {
@@ -56,8 +62,12 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AppendOneToMany(
 		common.If[languages.Context](!language.config.SkipRuntime, Runtime{}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{}),
-		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{config: language.config}),
+		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{
+			config:          language.config,
+			tmpl:            tmpl,
+			apiRefCollector: language.apiRefCollector,
+		}),
 
 		common.If[languages.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
 

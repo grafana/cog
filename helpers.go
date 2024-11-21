@@ -166,7 +166,7 @@ func (pipeline *SchemaToTypesPipeline) SchemaTransformations(passes ...compiler.
 // GoConfig defines a set of configuration options specific to Go outputs.
 type GoConfig struct {
 	// GenerateEqual controls the generation of `Equal()` methods on types.
-	GenerateEqual bool `yaml:"generate_equal"`
+	GenerateEqual bool
 }
 
 // Golang sets the output to Golang types.
@@ -184,15 +184,17 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 
 // TypescriptConfig defines a set of configuration options specific to Go outputs.
 type TypescriptConfig struct {
-	// placeholder: to be able to define options later without breaking the API.
+	// ImportsMap associates package names to their import path.
+	ImportsMap map[string]string
 }
 
 // Typescript sets the output to Typescript types.
 func (pipeline *SchemaToTypesPipeline) Typescript(config TypescriptConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Typescript: &typescript.Config{
-			SkipRuntime: true,
-			SkipIndex:   true,
+			SkipRuntime:       true,
+			SkipIndex:         true,
+			PackagesImportMap: config.ImportsMap,
 		},
 	}
 	return pipeline

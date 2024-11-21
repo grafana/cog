@@ -12,6 +12,7 @@ type ImportMapConfig[M any] struct {
 	Formatter           func(importMap M) string
 	AliasSanitizer      func(string) string
 	ImportPathSanitizer func(string) string
+	PackagesImportMap   map[string]string
 }
 
 type ImportMapOption[M any] func(importMap *ImportMapConfig[M])
@@ -34,6 +35,16 @@ func WithFormatter[M any](formatter func(M) string) ImportMapOption[M] {
 	}
 }
 
+func WithPackagesImportMap[M any](packagesImportMap map[string]string) ImportMapOption[M] {
+	return func(importMap *ImportMapConfig[M]) {
+		if packagesImportMap == nil {
+			importMap.PackagesImportMap = map[string]string{}
+		} else {
+			importMap.PackagesImportMap = packagesImportMap
+		}
+	}
+}
+
 type DirectImportMap struct {
 	Imports *orderedmap.Map[string, string] // alias → importPath
 	config  ImportMapConfig[DirectImportMap]
@@ -46,6 +57,7 @@ func NewDirectImportMap(opts ...ImportMapOption[DirectImportMap]) *DirectImportM
 		},
 		AliasSanitizer:      NoopImportSanitizer,
 		ImportPathSanitizer: NoopImportSanitizer,
+		PackagesImportMap:   map[string]string{},
 	}
 
 	for _, opt := range opts {
@@ -64,7 +76,13 @@ func (im DirectImportMap) IsIdentical(aliasA string, aliasB string) bool {
 
 func (im DirectImportMap) Add(alias string, importPath string) string {
 	sanitizedAlias := im.config.AliasSanitizer(alias)
-	im.Imports.Set(sanitizedAlias, im.config.ImportPathSanitizer(importPath))
+
+	importPathSanitized := im.config.ImportPathSanitizer(importPath)
+	if im.config.PackagesImportMap[sanitizedAlias] != "" {
+		importPathSanitized = im.config.PackagesImportMap[alias]
+	}
+
+	im.Imports.Set(sanitizedAlias, importPathSanitized)
 
 	return sanitizedAlias
 }

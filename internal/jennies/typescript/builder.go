@@ -14,6 +14,7 @@ import (
 )
 
 type Builder struct {
+	config          Config
 	tmpl            *template.Template
 	apiRefCollector *common.APIReferenceCollector
 
@@ -52,7 +53,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Builder) ([]byte, error) {
-	jenny.imports = NewImportMap()
+	jenny.imports = NewImportMap(jenny.config.PackagesImportMap)
 	jenny.imports.Add("cog", "../cog")
 	jenny.typeImportMapper = func(pkg string) string {
 		return jenny.imports.Add(pkg, fmt.Sprintf("../%s", pkg))
