@@ -15,6 +15,18 @@ add_fields:
   fields: []ast.StructField
 ```
 
+## `add_object`
+
+AddObject adds a new object to a schema.
+
+### Usage
+
+```yaml
+add_object:
+  object: string
+  as: Type
+```
+
 ## `anonymous_structs_to_named`
 
 AnonymousStructsToNamed turns "anonymous structs" into a named object.
@@ -45,31 +57,6 @@ Will become:
 
 ```yaml
 anonymous_structs_to_named: {}
-```
-
-## `cloudwatch`
-
-Cloudwatch rewrites a part of the cloudwatch schema.
-
-In that schema, the `QueryEditorExpression` type is defined as a disjunction
-for which the discriminator and mapping can not be inferred.
-This compiler pass is here to define that mapping.
-
-The `QueryEditorArrayExpression` struct type is also modified to simplify the
-definition of its `expression` field from `[...#QueryEditorExpression] | [...#QueryEditorArrayExpression]` to
-`[...#QueryEditorExpression]`.
-This should be semantically equivalent since `#QueryEditorExpression` is a
-union type that includes `#QueryEditorArrayExpression`.
-
-The Cloudwatch pass also alerts the definition of the `#CloudWatchMetricsQuery`, `#CloudWatchLogsQuery` and
-`#CloudWatchAnnotationQuery` types.
-It removes the "dataquery variant" hint they carry, and defines a `CloudWatchQuery` type instead as a disjunction.
-That disjunction serves as "dataquery entrypoint" for cloudwatch.
-
-### Usage
-
-```yaml
-cloudwatch: {}
 ```
 
 ## `dataquery_identification`
@@ -299,6 +286,18 @@ retype_object:
   object: string
   as: Type
   comments: []string
+```
+
+## `schema_set_entry_point`
+
+N/A
+
+### Usage
+
+```yaml
+schema_set_entry_point:
+  package: string
+  entry_point: string
 ```
 
 ## `schema_set_identifier`

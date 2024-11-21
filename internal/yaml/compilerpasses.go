@@ -18,11 +18,13 @@ type CompilerPass struct {
 	Omit                     *Omit                     `yaml:"omit"`
 	AddFields                *AddFields                `yaml:"add_fields"`
 	NameAnonymousStruct      *NameAnonymousStruct      `yaml:"name_anonymous_struct"`
+	AddObject                *AddObject                `yaml:"add_object"`
 	RenameObject             *RenameObject             `yaml:"rename_object"`
 	RetypeObject             *RetypeObject             `yaml:"retype_object"`
 	HintObject               *HintObject               `yaml:"hint_object"`
 	RetypeField              *RetypeField              `yaml:"retype_field"`
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
+	SchemaSetEntryPoint      *SchemaSetEntryPoint      `yaml:"schema_set_entry_point"`
 	DuplicateObject          *DuplicateObject          `yaml:"duplicate_object"`
 
 	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
@@ -31,8 +33,6 @@ type CompilerPass struct {
 	DisjunctionOfAnonymousStructsToExplicit *DisjunctionOfAnonymousStructsToExplicit `yaml:"disjunction_of_anonymous_structs_to_explicit"`
 	DisjunctionInferMapping                 *DisjunctionInferMapping                 `yaml:"disjunction_infer_mapping"`
 	DisjunctionWithConstantToDefault        *DisjunctionWithConstantToDefault        `yaml:"disjunction_with_constant_to_default"`
-
-	Cloudwatch *Cloudwatch `yaml:"cloudwatch"`
 }
 
 func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
@@ -72,6 +72,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.HintObject != nil {
 		return pass.HintObject.AsCompilerPass()
 	}
+	if pass.AddObject != nil {
+		return pass.AddObject.AsCompilerPass()
+	}
 	if pass.RenameObject != nil {
 		return pass.RenameObject.AsCompilerPass()
 	}
@@ -80,6 +83,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.SchemaSetIdentifier != nil {
 		return pass.SchemaSetIdentifier.AsCompilerPass()
+	}
+	if pass.SchemaSetEntryPoint != nil {
+		return pass.SchemaSetEntryPoint.AsCompilerPass()
 	}
 	if pass.DuplicateObject != nil {
 		return pass.DuplicateObject.AsCompilerPass()
@@ -100,10 +106,6 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DisjunctionWithConstantToDefault != nil {
 		return pass.DisjunctionWithConstantToDefault.AsCompilerPass()
-	}
-
-	if pass.Cloudwatch != nil {
-		return pass.Cloudwatch.AsCompilerPass(), nil
 	}
 
 	return nil, fmt.Errorf("empty compiler pass")
@@ -307,6 +309,23 @@ func (pass DuplicateObject) AsCompilerPass() (*compiler.DuplicateObject, error) 
 	}, nil
 }
 
+type AddObject struct {
+	Object string // Expected format: [package].[object]
+	As     ast.Type
+}
+
+func (pass AddObject) AsCompilerPass() (*compiler.AddObject, error) {
+	objectRef, err := compiler.ObjectReferenceFromString(pass.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.AddObject{
+		Object: objectRef,
+		As:     pass.As,
+	}, nil
+}
+
 type RenameObject struct {
 	From string // Expected format: [package].[object]
 	To   string
@@ -355,6 +374,18 @@ func (pass SchemaSetIdentifier) AsCompilerPass() (*compiler.SchemaSetIdentifier,
 	}, nil
 }
 
+type SchemaSetEntryPoint struct {
+	Package    string
+	EntryPoint string `yaml:"entry_point"`
+}
+
+func (pass SchemaSetEntryPoint) AsCompilerPass() (*compiler.SchemaSetEntrypoint, error) {
+	return &compiler.SchemaSetEntrypoint{
+		Package:    pass.Package,
+		EntryPoint: pass.EntryPoint,
+	}, nil
+}
+
 type AnonymousStructsToNamed struct {
 }
 
@@ -388,11 +419,4 @@ type DisjunctionWithConstantToDefault struct {
 
 func (pass DisjunctionWithConstantToDefault) AsCompilerPass() (*compiler.DisjunctionWithConstantToDefault, error) {
 	return &compiler.DisjunctionWithConstantToDefault{}, nil
-}
-
-type Cloudwatch struct {
-}
-
-func (pass Cloudwatch) AsCompilerPass() *compiler.Cloudwatch {
-	return &compiler.Cloudwatch{}
 }
