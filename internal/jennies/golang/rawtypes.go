@@ -230,15 +230,37 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 		if extraDefault, ok := extraDefaults[field.Name]; ok {
 			defaultValue = formatScalar(extraDefault)
 
-			defaultValue = jenny.maybeScalarValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
+			if field.Type.IsRef() && resolvedFieldType.IsStructGeneratedFromDisjunction() {
+				disjunctionBranchName := formatFieldName(anyToDisjunctionBranchName(extraDefault))
+				disjunctionBranch, found := resolvedFieldType.Struct.FieldByName(disjunctionBranchName)
+				if !found {
+					disjunctionBranchName = "Any"
+					disjunctionBranch, _ = resolvedFieldType.Struct.FieldByName(disjunctionBranchName)
+				}
+
+				actualDefault := jenny.maybeValueAsPointer(defaultValue, true, disjunctionBranch.Type)
+
+				nonNullableRefType := field.Type.DeepCopy()
+				nonNullableRefType.Nullable = false
+
+				defaultValue = jenny.typeFormatter.formatRef(nonNullableRefType, false) + "{\n"
+				defaultValue += fmt.Sprintf("\t%s: %s,\n", formatFieldName(disjunctionBranchName), actualDefault)
+				defaultValue += "}"
+
+				if field.Type.Nullable {
+					defaultValue = "&" + defaultValue
+				}
+			} else {
+				defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
+			}
 		} else if field.Type.IsConcreteScalar() {
 			defaultValue = formatScalar(field.Type.Scalar.Value)
 
-			defaultValue = jenny.maybeScalarValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
+			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
 		} else if resolvedFieldType.IsAnyOf(ast.KindScalar, ast.KindMap, ast.KindArray) && field.Type.Default != nil {
 			defaultValue = formatScalar(field.Type.Default)
 
-			defaultValue = jenny.maybeScalarValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
+			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
 		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.Default != nil {
 			defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.Default)
 			if field.Type.Nullable {
@@ -271,10 +293,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 				defaultValue = referredPkg + "." + defaultValue
 			}
 
-			if field.Type.Nullable {
-				jenny.packageMapper("cog")
-				defaultValue = "cog.ToPtr(" + defaultValue + ")"
-			}
+			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type)
 		} else {
 			defaultValue = "\"unsupported default value case: this is likely a bug in cog\""
 		}
@@ -287,15 +306,19 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 	return buffer.String()
 }
 
-func (jenny RawTypes) maybeScalarValueAsPointer(value string, nullable bool, typeDef ast.Type) string {
-	if nullable && typeDef.IsScalar() {
-		nonNullableField := typeDef.DeepCopy()
-		nonNullableField.Nullable = false
-		typeHint := jenny.typeFormatter.formatType(nonNullableField)
-
-		jenny.packageMapper("cog")
-		return fmt.Sprintf("cog.ToPtr[%s](%s)", typeHint, value)
+func (jenny RawTypes) maybeValueAsPointer(value string, nullable bool, typeDef ast.Type) string {
+	if !nullable {
+		return value
 	}
 
-	return value
+	if typeDef.IsAnyOf(ast.KindArray, ast.KindMap) {
+		return value
+	}
+
+	nonNullableField := typeDef.DeepCopy()
+	nonNullableField.Nullable = false
+	typeHint := jenny.typeFormatter.formatType(nonNullableField)
+
+	// we don't use cog.ToPtr() to avoid a dependency on cog's runtime
+	return fmt.Sprintf("(func (input %[1]s) *%[1]s { return &input })(%[2]s)", typeHint, value)
 }
