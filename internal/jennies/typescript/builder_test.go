@@ -18,8 +18,10 @@ func TestBuilder_Generate(t *testing.T) {
 		},
 	}
 
-	language := New(Config{})
+	config := Config{}
+	language := New(config)
 	jenny := Builder{
+		config:          config,
 		tmpl:            initTemplates([]string{}),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}

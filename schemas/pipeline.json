@@ -443,6 +443,13 @@
           },
           "type": "array",
           "description": "BuilderTemplatesDirectories holds a list of directories containing templates\nto be used to override parts of builders."
+        },
+        "packages_import_map": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "PackagesImportMap associates package names to their import path."
         }
       },
       "additionalProperties": false,

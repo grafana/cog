@@ -15,8 +15,9 @@ func TestRawTypes_Generate(t *testing.T) {
 		Name:         "TypescriptRawTypes",
 	}
 
-	jenny := RawTypes{}
-	compilerPasses := New(Config{}).CompilerPasses()
+	config := Config{}
+	jenny := RawTypes{config: config}
+	compilerPasses := New(config).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test[ast.Schema]) {
 		req := require.New(tc)
