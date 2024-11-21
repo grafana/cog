@@ -10,6 +10,8 @@ parameters:
 
 inputs:
   - cue:
+      entrypoint: '%__config_dir%/../testdata/schemas/defaults'
+  - cue:
       entrypoint: '%__config_dir%/../testdata/schemas/equality'
   - cue:
       entrypoint: '%__config_dir%/../testdata/schemas/validation'

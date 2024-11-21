@@ -1,6 +1,7 @@
 package golang
 
 import (
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -96,4 +97,27 @@ func isReservedGoKeyword(input string) bool {
 		input == "switch" ||
 		input == "type" ||
 		input == "var"
+}
+
+func anyToDisjunctionBranchName(value any) string {
+	return valueToDisjunctionBranchName(reflect.ValueOf(value))
+}
+
+func valueToDisjunctionBranchName(value reflect.Value) string {
+	reflectKind := value.Kind()
+
+	if reflectKind == reflect.Slice || reflectKind == reflect.Array {
+		if value.Len() != 0 {
+			return "ArrayOf" + valueToDisjunctionBranchName(unpackValue(value.Index(0)))
+		}
+	}
+
+	return tools.UpperCamelCase(value.Kind().String())
+}
+
+func unpackValue(value reflect.Value) reflect.Value {
+	if value.Kind() == reflect.Interface && !value.IsNil() {
+		value = value.Elem()
+	}
+	return value
 }
