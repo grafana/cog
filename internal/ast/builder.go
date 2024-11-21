@@ -410,7 +410,7 @@ func (constraint AssignmentConstraint) DeepCopy() AssignmentConstraint {
 	return AssignmentConstraint{
 		Argument:  constraint.Argument.DeepCopy(),
 		Op:        constraint.Op,
-		Parameter: constraint.Argument,
+		Parameter: constraint.Parameter,
 	}
 }
 
