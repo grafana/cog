@@ -58,7 +58,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	jenny.typeImportMapper = func(pkg string) string {
 		return jenny.imports.Add(pkg, fmt.Sprintf("../%s", pkg))
 	}
-	jenny.typeFormatter = builderTypeFormatter(context, jenny.typeImportMapper)
+	jenny.typeFormatter = builderTypeFormatter(jenny.config, context, jenny.typeImportMapper)
 
 	buildObjectSignature := formatPackageName(builder.For.SelfRef.ReferredPkg) + "." + tools.CleanupNames(builder.For.Name)
 	if builder.For.Type.ImplementsVariant() {
@@ -89,7 +89,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				if destinationType.IsRef() {
 					referredObj, found := context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
 					if found && referredObj.Type.IsEnum() {
-						return jenny.typeFormatter.formatEnumValue(referredObj, value)
+						return jenny.typeFormatter.enums.formatValue(referredObj, value)
 					}
 				}
 

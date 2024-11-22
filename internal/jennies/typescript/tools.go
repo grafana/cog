@@ -1,11 +1,27 @@
 package typescript
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
+func formatPackageName(pkg string) string {
+	return tools.LowerCamelCase(pkg)
+}
+
+func formatObjectName(name string) string {
+	return tools.CleanupNames(name)
+}
+
 func formatIdentifier(name string) string {
 	return tools.LowerCamelCase(escapeIdentifier(name))
+}
+
+func formatEnumMemberName(name string) string {
+	return tools.CleanupNames(tools.UpperCamelCase(escapeEnumMemberName(name)))
 }
 
 func escapeIdentifier(name string) string {
@@ -14,6 +30,14 @@ func escapeIdentifier(name string) string {
 	}
 
 	return name
+}
+
+func escapeEnumMemberName(identifier string) string {
+	if strings.EqualFold("nan", identifier) {
+		return "not_a_number"
+	}
+
+	return identifier
 }
 
 func isReservedTypescriptKeyword(input string) bool {
@@ -28,4 +52,48 @@ func isReservedTypescriptKeyword(input string) bool {
 	default:
 		return false
 	}
+}
+
+func formatValue(val any) string {
+	if rawVal, ok := val.(raw); ok {
+		return string(rawVal)
+	}
+
+	var buffer strings.Builder
+
+	if array, ok := val.([]any); ok {
+		buffer.WriteString("[\n")
+		for _, v := range array {
+			buffer.WriteString(fmt.Sprintf("%s,\n", formatValue(v)))
+		}
+		buffer.WriteString("]")
+
+		return buffer.String()
+	}
+
+	if mapVal, ok := val.(map[string]any); ok {
+		buffer.WriteString("{\n")
+
+		for key, value := range mapVal {
+			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(value)))
+		}
+
+		buffer.WriteString("}")
+
+		return buffer.String()
+	}
+
+	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
+		buffer.WriteString("{\n")
+
+		orderedMap.Iterate(func(key string, value any) {
+			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(value)))
+		})
+
+		buffer.WriteString("}")
+
+		return buffer.String()
+	}
+
+	return fmt.Sprintf("%#v", val)
 }

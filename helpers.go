@@ -186,6 +186,23 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 type TypescriptConfig struct {
 	// ImportsMap associates package names to their import path.
 	ImportsMap map[string]string
+
+	// EnumsAsUnionTypes generates enums as a union of values instead of using
+	// an actual `enum` declaration.
+	// If EnumsAsUnionTypes is false, an enum will be generated as:
+	// ```ts
+	// enum Direction {
+	//   Up = "up",
+	//   Down = "down",
+	//   Left = "left",
+	//   Right = "right",
+	// }
+	// ```
+	// If EnumsAsUnionTypes is true, the same enum will be generated as:
+	// ```ts
+	// type Direction = "up" | "down" | "left" | "right";
+	// ```
+	EnumsAsUnionTypes bool `yaml:"enums_as_union_types"`
 }
 
 // Typescript sets the output to Typescript types.
@@ -195,6 +212,7 @@ func (pipeline *SchemaToTypesPipeline) Typescript(config TypescriptConfig) *Sche
 			SkipRuntime:       true,
 			SkipIndex:         true,
 			PackagesImportMap: config.ImportsMap,
+			EnumsAsUnionTypes: config.EnumsAsUnionTypes,
 		},
 	}
 	return pipeline

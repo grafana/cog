@@ -28,6 +28,23 @@ type Config struct {
 
 	// PackagesImportMap associates package names to their import path.
 	PackagesImportMap map[string]string `yaml:"packages_import_map"`
+
+	// EnumsAsUnionTypes generates enums as a union of values instead of using
+	// an actual `enum` declaration.
+	// If EnumsAsUnionTypes is false, an enum will be generated as:
+	// ```ts
+	// enum Direction {
+	//   Up = "up",
+	//   Down = "down",
+	//   Left = "left",
+	//   Right = "right",
+	// }
+	// ```
+	// If EnumsAsUnionTypes is true, the same enum will be generated as:
+	// ```ts
+	// type Direction = "up" | "down" | "left" | "right";
+	// ```
+	EnumsAsUnionTypes bool `yaml:"enums_as_union_types"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
@@ -35,6 +52,14 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 	for pkg, importPath := range config.PackagesImportMap {
 		config.PackagesImportMap[pkg] = interpolator(importPath)
 	}
+}
+
+func (config *Config) enumFormatter(packageMapper packageMapper) enumFormatter {
+	if config.EnumsAsUnionTypes {
+		return &enumAsDisjunctionFormatter{}
+	}
+
+	return &enumAsTypeFormatter{packageMapper: packageMapper}
 }
 
 type Language struct {
@@ -74,7 +99,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
-			Formatter: apiReferenceFormatter(),
+			Formatter: apiReferenceFormatter(language.config),
 			Tmpl:      tmpl,
 		}),
 	)
