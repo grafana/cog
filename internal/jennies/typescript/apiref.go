@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-func apiReferenceFormatter() common.APIReferenceFormatter {
+func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 	return common.APIReferenceFormatter{
 		KindName: func(kind ast.Kind) string {
 			if kind == ast.KindStruct {
@@ -31,7 +31,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			return tools.CleanupNames(object.Name)
 		},
 		ObjectDefinition: func(context languages.Context, object ast.Object) string {
-			typesFormatter := defaultTypeFormatter(context, func(pkg string) string {
+			typesFormatter := defaultTypeFormatter(config, context, func(pkg string) string {
 				return pkg
 			})
 
@@ -53,7 +53,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			return tools.UpperCamelCase(builder.Name) + "Builder"
 		},
 		ConstructorSignature: func(context languages.Context, builder ast.Builder) string {
-			typesFormatter := builderTypeFormatter(context, func(pkg string) string {
+			typesFormatter := builderTypeFormatter(config, context, func(pkg string) string {
 				return pkg
 			})
 			args := tools.Map(builder.Constructor.Args, func(arg ast.Argument) string {
@@ -66,7 +66,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 			return formatIdentifier(option.Name)
 		},
 		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
-			typesFormatter := builderTypeFormatter(context, func(pkg string) string {
+			typesFormatter := builderTypeFormatter(config, context, func(pkg string) string {
 				return pkg
 			})
 

@@ -6,29 +6,37 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
-type typeFormatter struct {
-	packageMapper func(pkg string) string
-
-	forBuilder bool
-	context    languages.Context
+type enumFormatter interface {
+	formatDeclaration(def ast.Object) string
+	formatValue(enumObj ast.Object, val any) string
 }
 
-func defaultTypeFormatter(context languages.Context, packageMapper func(pkg string) string) *typeFormatter {
+type packageMapper func(pkg string) string
+
+type typeFormatter struct {
+	packageMapper func(pkg string) string
+	enums         enumFormatter
+	forBuilder    bool
+	context       languages.Context
+}
+
+func defaultTypeFormatter(config Config, context languages.Context, packageMapper packageMapper) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
 		context:       context,
+		enums:         config.enumFormatter(packageMapper),
 	}
 }
 
-func builderTypeFormatter(context languages.Context, packageMapper func(pkg string) string) *typeFormatter {
+func builderTypeFormatter(config Config, context languages.Context, packageMapper packageMapper) *typeFormatter {
 	return &typeFormatter{
 		packageMapper: packageMapper,
 		forBuilder:    true,
 		context:       context,
+		enums:         config.enumFormatter(packageMapper),
 	}
 }
 
@@ -43,7 +51,7 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 
 	buffer.WriteString("export ")
 
-	objectName := tools.CleanupNames(def.Name)
+	objectName := formatObjectName(def.Name)
 
 	switch def.Type.Kind {
 	case ast.KindStruct:
@@ -51,13 +59,8 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 		buffer.WriteString(formatter.formatStructFields(def.Type))
 		buffer.WriteString("\n")
 	case ast.KindEnum:
-		buffer.WriteString(fmt.Sprintf("enum %s {\n", objectName))
-		for _, val := range def.Type.AsEnum().Values {
-			name := tools.CleanupNames(tools.UpperCamelCase(escapeEnumMemberName(val.Name)))
-
-			buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", name, formatValue(val.Value)))
-		}
-		buffer.WriteString("}\n")
+		buffer.WriteString(formatter.enums.formatDeclaration(def))
+		buffer.WriteString("\n")
 	case ast.KindDisjunction, ast.KindMap, ast.KindArray, ast.KindRef:
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, formatter.formatType(def.Type)))
 	case ast.KindScalar:
@@ -200,6 +203,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 
 	return buffer.String()
 }
+
 func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
 	switch kind {
 	case ast.KindNull:
@@ -303,7 +307,24 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	return buffer.String()
 }
 
-func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
+type enumAsTypeFormatter struct {
+	packageMapper func(pkg string) string
+}
+
+func (formatter *enumAsTypeFormatter) formatDeclaration(def ast.Object) string {
+	var buffer strings.Builder
+	objectName := formatObjectName(def.Name)
+
+	buffer.WriteString(fmt.Sprintf("enum %s {\n", objectName))
+	for _, val := range def.Type.AsEnum().Values {
+		buffer.WriteString(fmt.Sprintf("\t%s = %s,\n", formatEnumMemberName(val.Name), formatValue(val.Value)))
+	}
+	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+func (formatter *enumAsTypeFormatter) formatValue(enumObj ast.Object, val any) string {
 	enum := enumObj.Type.AsEnum()
 
 	referredPkg := formatter.packageMapper(enumObj.SelfRef.ReferredPkg)
@@ -314,57 +335,28 @@ func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) str
 
 	for _, v := range enum.Values {
 		if v.Value == val {
-			return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, tools.CleanupNames(tools.UpperCamelCase(v.Name)))
+			return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, formatEnumMemberName(v.Name))
 		}
 	}
 
-	return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, tools.CleanupNames(tools.UpperCamelCase(enum.Values[0].Name)))
+	return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, formatEnumMemberName(enum.Values[0].Name))
 }
 
-func formatValue(val any) string {
-	if rawVal, ok := val.(raw); ok {
-		return string(rawVal)
-	}
-
-	var buffer strings.Builder
-
-	if array, ok := val.([]any); ok {
-		buffer.WriteString("[\n")
-		for _, v := range array {
-			buffer.WriteString(fmt.Sprintf("%s,\n", formatValue(v)))
-		}
-		buffer.WriteString("]")
-
-		return buffer.String()
-	}
-
-	if mapVal, ok := val.(map[string]any); ok {
-		buffer.WriteString("{\n")
-
-		for key, value := range mapVal {
-			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(value)))
-		}
-
-		buffer.WriteString("}")
-
-		return buffer.String()
-	}
-
-	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
-		buffer.WriteString("{\n")
-
-		orderedMap.Iterate(func(key string, value any) {
-			buffer.WriteString(fmt.Sprintf("\t%s: %s,\n", key, formatValue(value)))
-		})
-
-		buffer.WriteString("}")
-
-		return buffer.String()
-	}
-
-	return fmt.Sprintf("%#v", val)
+type enumAsDisjunctionFormatter struct {
 }
 
-func formatPackageName(pkg string) string {
-	return tools.LowerCamelCase(pkg)
+func (formatter *enumAsDisjunctionFormatter) formatDeclaration(def ast.Object) string {
+	values := tools.Map(def.Type.Enum.Values, func(value ast.EnumValue) string {
+		return formatValue(value.Value)
+	})
+
+	return fmt.Sprintf("type %s = %s;", formatObjectName(def.Name), strings.Join(values, " | "))
+}
+
+func (formatter *enumAsDisjunctionFormatter) formatValue(enumObj ast.Object, val any) string {
+	if val == nil {
+		return formatValue(enumObj.Type.Enum.Values[0].Value)
+	}
+
+	return formatValue(val)
 }

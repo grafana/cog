@@ -14,8 +14,6 @@ import (
 
 type raw string
 
-type pkgMapper func(string) string
-
 type RawTypes struct {
 	config        Config
 	typeFormatter *typeFormatter
@@ -53,7 +51,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	var err error
 
 	imports := NewImportMap(jenny.config.PackagesImportMap)
-	packageMapper := func(pkg string) string {
+	pkgMapper := func(pkg string) string {
 		if imports.IsIdentical(pkg, schema.Package) {
 			return ""
 		}
@@ -61,10 +59,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return imports.Add(pkg, fmt.Sprintf("../%s", pkg))
 	}
 
-	jenny.typeFormatter = defaultTypeFormatter(context, packageMapper)
+	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, pkgMapper)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		typeDefGen, innerErr := jenny.formatObject(object, packageMapper)
+		typeDefGen, innerErr := jenny.formatObject(object, pkgMapper)
 		if innerErr != nil {
 			err = innerErr
 			return
@@ -85,7 +83,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	return []byte(importStatements + buffer.String()), nil
 }
 
-func (jenny RawTypes) formatObject(def ast.Object, packageMapper pkgMapper) ([]byte, error) {
+func (jenny RawTypes) formatObject(def ast.Object, packageMapper packageMapper) ([]byte, error) {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -126,7 +124,7 @@ func prefixLinesWith(input string, prefix string) string {
 * 					 Default and "empty" values management 					  *
 ******************************************************************************/
 
-func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pkgMapper) any {
+func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper packageMapper) any {
 	switch object.Type.Kind {
 	case ast.KindEnum:
 		enum := object.Type.AsEnum()
@@ -135,13 +133,13 @@ func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pkg
 			defaultValue = object.Type.Default
 		}
 
-		return raw(jenny.typeFormatter.formatEnumValue(object, defaultValue))
+		return raw(jenny.typeFormatter.enums.formatValue(object, defaultValue))
 	default:
 		return jenny.defaultValueForType(object.Type, packageMapper)
 	}
 }
 
-func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper pkgMapper) any {
+func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper packageMapper) any {
 	if typeDef.Default != nil {
 		return typeDef.Default
 	}
@@ -173,7 +171,7 @@ func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper pkgMap
 	}
 }
 
-func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMapper pkgMapper) *orderedmap.Map[string, any] {
+func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMapper packageMapper) *orderedmap.Map[string, any] {
 	defaults := orderedmap.New[string, any]()
 
 	for _, field := range structType.AsStruct().Fields {
@@ -239,7 +237,7 @@ func defaultValueForScalar(scalar ast.ScalarType) any {
 	}
 }
 
-func (jenny RawTypes) defaultValuesForIntersection(intersectDef ast.IntersectionType, packageMapper pkgMapper) *orderedmap.Map[string, any] {
+func (jenny RawTypes) defaultValuesForIntersection(intersectDef ast.IntersectionType, packageMapper packageMapper) *orderedmap.Map[string, any] {
 	defaults := orderedmap.New[string, any]()
 
 	for _, branch := range intersectDef.Branches {
@@ -260,12 +258,12 @@ func (jenny RawTypes) defaultValuesForIntersection(intersectDef ast.Intersection
 	return defaults
 }
 
-func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper pkgMapper) any {
+func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper packageMapper) any {
 	ref := typeDef.AsRef()
 
 	pkg := packageMapper(ref.ReferredPkg)
 	referredType, _ := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
-	referredTypeName := tools.CleanupNames(referredType.Name)
+	referredTypeName := formatObjectName(referredType.Name)
 
 	// is the reference to a constant?
 	if referredType.Type.IsConcreteScalar() {
@@ -277,7 +275,7 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	if referredType.Type.IsEnum() {
-		return raw(jenny.typeFormatter.formatEnumValue(referredType, typeDef.Default))
+		return raw(jenny.typeFormatter.enums.formatValue(referredType, typeDef.Default))
 	}
 
 	if hasStructDefaults(referredType.Type, typeDef.Default) {
@@ -308,7 +306,7 @@ func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.M
 					referredType, refFound := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 
 					if refFound && referredType.Type.IsEnum() {
-						buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.typeFormatter.formatEnumValue(referredType, x)))
+						buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.typeFormatter.enums.formatValue(referredType, x)))
 						continue
 					}
 				}
@@ -351,12 +349,4 @@ func defaultEmptyValuesForStructs(def ast.StructType) string {
 func hasStructDefaults(typeDef ast.Type, defaults any) bool {
 	_, ok := defaults.(map[string]interface{})
 	return ok && typeDef.IsStruct()
-}
-
-func escapeEnumMemberName(identifier string) string {
-	if strings.EqualFold("nan", identifier) {
-		return "not_a_number"
-	}
-
-	return identifier
 }

@@ -450,6 +450,10 @@
           },
           "type": "object",
           "description": "PackagesImportMap associates package names to their import path."
+        },
+        "enums_as_union_types": {
+          "type": "boolean",
+          "description": "EnumsAsUnionTypes generates enums as a union of values instead of using\nan actual `enum` declaration.\nIf EnumsAsUnionTypes is false, an enum will be generated as:\n```ts\nenum Direction {\n  Up = \"up\",\n  Down = \"down\",\n  Left = \"left\",\n  Right = \"right\",\n}\n```\nIf EnumsAsUnionTypes is true, the same enum will be generated as:\n```ts\ntype Direction = \"up\" | \"down\" | \"left\" | \"right\";\n```"
         }
       },
       "additionalProperties": false,
