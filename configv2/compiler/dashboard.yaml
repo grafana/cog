@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json
+
+passes:
+  #############
+  # Dashboard #
+  #############
+
+  - rename_object:
+      from: dashboard.DashboardV2Spec
+      to: Dashboard
+
+  - rename_object:
+      from: dashboard.PanelSpec
+      to: Panel
+
+  - rename_object:
+      from: dashboard.TimeSettingsSpec
+      to: TimeSettings
+
+  - retype_field:
+      field: dashboard.VizConfigSpec.options
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
