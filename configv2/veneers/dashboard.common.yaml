@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json
+
+language: all
+
+package: dashboard
+
+builders:
+  ##############
+  # Dashboards #
+  ##############
+
+  # No need for builders for structs generated from a disjunction
+  - omit: { generated_from_disjunction: true }
+
+  - promote_options_to_constructor:
+      by_object: Dashboard
+      options: [title]
+
+  # Rearrange things a bit
+  - merge_into:
+      source: FieldConfig
+      destination: VizConfigSpec
+      under_path: fieldConfig.defaults
+      rename_options:
+        color: colorScheme
+        links: dataLinks
+  - merge_into:
+      source: FieldConfigSource
+      destination: VizConfigSpec
+      under_path: fieldConfig
+  - merge_into:
+      source: VizConfigSpec
+      destination: VizConfigKind
+      under_path: spec
+
+  # Panels VizConfigSpec composability
+  - compose_dashboard_panel:
+      panel_builder_name: dashboard.VizConfigKind
+      plugin_discriminator_field: kind
+      composition_map: # Builder → assignment root path
+        Options: "spec.options"
+        FieldConfig": "spec.fieldConfig.defaults.custom"
+      exclude_panel_options: [
+        "defaults",      # merged with another builder
+        "fieldConfig",   # merged with another builder
+        "options",       # comes from a panel plugin
+        "custom",        # comes from a panel plugin
+        "pluginVersion", # TODO: check if it's relevant or not
+      ]
+
+options: []
