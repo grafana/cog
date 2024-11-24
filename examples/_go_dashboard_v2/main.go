@@ -43,8 +43,9 @@ func dashboardBuilder() []byte {
 				Title("Some panel").
 				Description("veeery descriptive").
 				VizConfig(
-					timeseries.NewVizConfigKindBuilder().
-						Unit("s"),
+					timeseries.NewVizConfigBuilder().
+						Unit("s").
+						PointSize(5),
 				),
 		))
 
