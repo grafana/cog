@@ -17,8 +17,14 @@ passes:
       from: dashboard.TimeSettingsSpec
       to: TimeSettings
 
+  # To make our composability veneers shenanigans work
   - retype_field:
       field: dashboard.VizConfigSpec.options
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+  - retype_field:
+      field: dashboard.FieldConfig.custom
       as:
         kind: scalar
         scalar: { scalar_kind: any }
