@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json
+
+language: go
+
+package: dashboard
+
+builders: ~
+
+options:
+  ##############
+  #   Panels   #
+  ##############
+
+  # WithOverride(matcher, properties) instead of WithOverride(struct{...})
+  - struct_fields_as_arguments:
+      by_name: VizConfigKind.withOverride
