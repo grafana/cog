@@ -5,6 +5,14 @@ language: all
 package: dashboard
 
 builders:
+  # We don't want these builders at all
+  - omit: { by_object: DataSourceRef }
+
+  # overrides and transformations related
+  - omit: { by_object: DashboardFieldConfigSourceOverrides }
+  - omit: { by_object: MatcherConfig }
+  - omit: { by_object: DynamicConfigValue }
+
   ##############
   # Dashboards #
   ##############
@@ -56,6 +64,20 @@ options:
   # Append a single `element` value instead of a map of everything
   - duplicate:
       by_name: Dashboard.Elements
-      as: element
+      as: withElement
   - map_to_append:
-      by_name: Dashboard.element
+      by_name: Dashboard.withElement
+
+  # Append a single override instead forcing to define all of them at once
+  - duplicate:
+      by_name: VizConfigKind.overrides
+      as: withOverride
+  - array_to_append:
+      by_name: VizConfigKind.withOverride
+
+  # Append a single transformation instead forcing to define all of them at once
+  - duplicate:
+      by_name: QueryGroupSpec.transformations
+      as: withTransformation
+  - array_to_append:
+      by_name: QueryGroupSpec.withTransformation

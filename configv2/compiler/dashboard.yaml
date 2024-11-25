@@ -28,3 +28,9 @@ passes:
       as:
         kind: scalar
         scalar: { scalar_kind: any }
+
+  - retype_field:
+      field: dashboard.DataQueryKind.spec
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
