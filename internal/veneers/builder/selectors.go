@@ -38,15 +38,7 @@ func ByName(pkg string, builderName string) Selector {
 // generated from a disjunction (see the Disjunction compiler pass).
 func StructGeneratedFromDisjunction() Selector {
 	return func(schemas ast.Schemas, builder ast.Builder) bool {
-		schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
-		if !found {
-			return false
-		}
-
-		resolved, found := schema.Resolve(builder.For.Type)
-		if !found {
-			return false
-		}
+		resolved := schemas.ResolveToType(builder.For.Type)
 
 		return resolved.IsStructGeneratedFromDisjunction()
 	}
