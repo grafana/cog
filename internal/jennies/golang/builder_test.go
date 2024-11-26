@@ -3,8 +3,10 @@ package golang
 import (
 	"testing"
 
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -42,4 +44,73 @@ func TestBuilder_Generate(t *testing.T) {
 
 		tc.WriteFiles(files)
 	})
+}
+
+func TestBuilder_emptyValueForGuard(t *testing.T) {
+	jenny := Builder{
+		Config: Config{
+			PackageRoot: "github.com/grafana/cog/generated",
+		},
+		Tmpl:            initTemplates([]string{}),
+		apiRefCollector: common.NewAPIReferenceCollector(),
+	}
+
+	jenny.typeImportMapper = func(pkg string) string {
+		return pkg
+	}
+	imports := NewImportMap(jenny.Config.PackageRoot)
+
+	testCases := []struct {
+		desc     string
+		context  languages.Context
+		input    ast.Type
+		expected string
+	}{
+		{
+			desc:     "map",
+			context:  languages.Context{},
+			input:    ast.NewMap(ast.String(), ast.String()),
+			expected: "map[string]string{}",
+		},
+		{
+			desc:     "array",
+			context:  languages.Context{},
+			input:    ast.NewArray(ast.String()),
+			expected: "[]string{}",
+		},
+		{
+			desc: "ref",
+			context: languages.Context{
+				Schemas: []*ast.Schema{
+					{
+						Package: "somePkg",
+						Objects: orderedmap.FromMap(map[string]ast.Object{
+							"SomeType": ast.NewObject("somePkg", "SomeType", ast.NewStruct( /* the fields don't actually matter here */ )),
+						}),
+					},
+				},
+			},
+			input:    ast.NewRef("somePkg", "SomeType"),
+			expected: "somePkg.NewSomeType()",
+		},
+		{
+			desc:    "struct",
+			context: languages.Context{},
+			input:   ast.NewStruct(ast.NewStructField("field", ast.String())),
+			expected: `&struct {
+    Field string ` + "`" + `json:"field,omitempty"` + "`" + `
+}{}`,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			req := require.New(t)
+
+			jenny.typeFormatter = builderTypeFormatter(jenny.Config, tc.context, imports, jenny.typeImportMapper)
+			jenny.pathFormatter = makePathFormatter(jenny.typeFormatter)
+
+			req.Equal(tc.expected, jenny.emptyValueForGuard(tc.context, tc.input))
+		})
+	}
 }
