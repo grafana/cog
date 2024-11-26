@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
 
       - name: Restore go vendors
-        uses: actions/cache@v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #v4.1.2
         with:
           path: |
             ~/go/pkg/mod
@@ -26,7 +26,7 @@ jobs:
             go-deps-${{ runner.os }}
 
       - name: Install devbox
-        uses: jetify-com/devbox-install-action@v0.11.0
+        uses: jetify-com/devbox-install-action@a03caf5813591bc882139eba6ae947930a83a427 #v0.11.0
         with:
           enable-cache: 'true'
           devbox-version: ${{ env.DEVBOX_VERSION }}
@@ -39,10 +39,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
 
       - name: Restore go vendors
-        uses: actions/cache@v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #4.1.2
         with:
           path: |
             ~/go/pkg/mod
@@ -52,7 +52,7 @@ jobs:
             go-deps-${{ runner.os }}
 
       - name: Install devbox
-        uses: jetify-com/devbox-install-action@v0.11.0
+        uses: jetify-com/devbox-install-action@a03caf5813591bc882139eba6ae947930a83a427 #v0.11.0
         with:
           enable-cache: 'true'
           devbox-version: ${{ env.DEVBOX_VERSION }}
@@ -69,12 +69,12 @@ jobs:
         kind_version: [next, v11.3.x, v11.2.x, v11.1.x, v11.0.x, v10.4.x, v10.3.x, v10.2.x, v10.1.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
         with:
           submodules: recursive
 
       - name: Restore go vendors
-        uses: actions/cache@v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #4.1.2
         with:
           path: |
             ~/go/pkg/mod
@@ -84,7 +84,7 @@ jobs:
             go-deps-${{ runner.os }}
 
       - name: Install devbox
-        uses: jetify-com/devbox-install-action@v0.11.0
+        uses: jetify-com/devbox-install-action@a03caf5813591bc882139eba6ae947930a83a427 #v0.11.0
         with:
           enable-cache: 'true'
           devbox-version: ${{ env.DEVBOX_VERSION }}
@@ -111,7 +111,7 @@ jobs:
 
       # See https://docs.gradle.org/current/userguide/build_cache.html
       - name: Restore Gradle build cache
-        uses: actions/cache@v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #4.1.2
         with:
           path: |
             ~/.gradle/caches
@@ -125,7 +125,7 @@ jobs:
       # See https://phpstan.org/user-guide/result-cache
       # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
       - name: Restore PHP linters cache
-        uses: actions/cache@v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #4.1.2
         with:
           path: |
             /tmp/phpstan
@@ -145,12 +145,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
         with:
           submodules: recursive
 
       - name: Restore go vendors
-        uses: actions/cache@v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #4.1.2
         with:
           path: |
             ~/go/pkg/mod
@@ -160,7 +160,7 @@ jobs:
             go-deps-${{ runner.os }}
 
       - name: Install devbox
-        uses: jetify-com/devbox-install-action@v0.11.0
+        uses: jetify-com/devbox-install-action@a03caf5813591bc882139eba6ae947930a83a427 #v0.11.0
         with:
           enable-cache: 'true'
           devbox-version: ${{ env.DEVBOX_VERSION }}
@@ -184,7 +184,7 @@ jobs:
 
       # See https://docs.gradle.org/current/userguide/build_cache.html
       - name: Restore Gradle build cache
-        uses: actions/cache@v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a #4.1.2
         with:
           path: |
             ~/.gradle/caches
