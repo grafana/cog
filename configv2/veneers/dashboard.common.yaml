@@ -43,11 +43,28 @@ builders:
   # Dashboards #
   ##############
 
+  - rename:
+      by_object: DashboardV2Spec
+      as: Dashboard
+
+  - rename:
+      by_object: TimeSettingsSpec
+      as: TimeSettings
+
   - promote_options_to_constructor:
-      by_object: Dashboard
+      by_name: Dashboard
       options: [title]
 
   # Rearrange panel-related builders
+  - merge_into:
+      source: PanelSpec
+      destination: PanelKind
+      under_path: spec
+  - omit: { by_object: PanelSpec }
+  - rename:
+      by_object: PanelKind
+      as: Panel
+
   - merge_into:
       source: FieldConfig
       destination: VizConfigSpec
@@ -106,10 +123,10 @@ options:
 
   # Append a single `element` value instead of a map of everything
   - duplicate:
-      by_name: Dashboard.Elements
+      by_builder: Dashboard.Elements
       as: withElement
   - map_to_append:
-      by_name: Dashboard.withElement
+      by_builder: Dashboard.withElement
 
   # Append a single override instead forcing to define all of them at once
   - duplicate:
