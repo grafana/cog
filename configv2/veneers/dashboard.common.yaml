@@ -39,6 +39,28 @@ builders:
       as: GridLayoutItem
   - omit: { by_object: GridLayoutItemSpec }
 
+  ###########
+  # Queries #
+  ###########
+
+  - merge_into:
+      source: QueryGroupSpec
+      destination: QueryGroupKind
+      under_path: spec
+  - omit: { by_object: QueryGroupSpec }
+  - rename:
+      by_object: QueryGroupKind
+      as: QueryGroup
+
+  - merge_into:
+      source: PanelQuerySpec
+      destination: PanelQueryKind
+      under_path: spec
+  - omit: { by_object: PanelQuerySpec }
+  - rename:
+      by_object: PanelQueryKind
+      as: PanelQuery
+
   ##############
   # Dashboards #
   ##############
@@ -117,6 +139,30 @@ options:
   - array_to_append:
       by_builder: GridLayout.withItem
 
+  ###########
+  # Queries #
+  ###########
+
+  # spec options were merged into QueryGroup
+  - omit: { by_builder: QueryGroup.spec }
+
+  # spec options were merged into PanelQuery
+  - omit: { by_builder: PanelQuery.spec }
+
+  # Append a single query instead forcing to define all of them at once
+  - duplicate:
+      by_name: QueryGroupKind.queries
+      as: withQuery
+  - array_to_append:
+      by_name: QueryGroupKind.withQuery
+
+  # Append a single transformation instead forcing to define all of them at once
+  - duplicate:
+      by_name: QueryGroupKind.transformations
+      as: withTransformation
+  - array_to_append:
+      by_name: QueryGroupKind.withTransformation
+
   ##############
   # Dashboards #
   ##############
@@ -134,10 +180,3 @@ options:
       as: withOverride
   - array_to_append:
       by_name: VizConfigKind.withOverride
-
-  # Append a single transformation instead forcing to define all of them at once
-  - duplicate:
-      by_name: QueryGroupSpec.transformations
-      as: withTransformation
-  - array_to_append:
-      by_name: QueryGroupSpec.withTransformation
