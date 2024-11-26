@@ -22,19 +22,13 @@ func dashboardBuilder() []byte {
 			Timezone("browser"),
 		).
 		CursorSync(dashboard.DashboardCursorSyncCrosshair).
-		Layout(dashboard.NewGridLayoutKindBuilder().
-			Spec(
-				dashboard.NewGridLayoutSpecBuilder().
-					Items([]cog.Builder[dashboard.GridLayoutItemKind]{
-						dashboard.NewGridLayoutItemKindBuilder().Spec(
-							dashboard.NewGridLayoutItemSpecBuilder().
-								X(0).
-								Y(0).
-								Height(200).
-								Width(200).
-								Element(dashboard.NewElementReferenceBuilder().Name("somePanel")),
-						),
-					}),
+		Layout(dashboard.NewGridLayoutBuilder().
+			WithItem(dashboard.NewGridLayoutItemBuilder().
+				X(0).
+				Y(0).
+				Height(200).
+				Width(200).
+				Element(dashboard.NewElementReferenceBuilder().Name("somePanel")),
 			),
 		).
 		WithElement("somePanel", dashboard.NewPanelKindBuilder().Spec(
