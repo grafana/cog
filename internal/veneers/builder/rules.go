@@ -103,7 +103,7 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 	})
 }
 
-func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders, panelOptionsToExclude []string) (ast.Builders, error) {
+func composePanelType(builders ast.Builders, config PanelCompositionConfig, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders) (ast.Builders, error) {
 	newBuilder := ast.Builder{
 		Package:     composableBuilders[0].Package,
 		For:         panelBuilder.For,
@@ -111,10 +111,13 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 		Constructor: panelBuilder.Constructor,
 		Properties:  panelBuilder.Properties,
 	}
+	if config.ComposedBuilderName != "" {
+		newBuilder.Name = config.ComposedBuilderName
+	}
 
-	typeField, ok := panelBuilder.For.Type.AsStruct().FieldByName("type")
+	typeField, ok := panelBuilder.For.Type.AsStruct().FieldByName(config.PluginDiscriminatorField)
 	if !ok {
-		return nil, fmt.Errorf("could not find field 'type' in panel builder")
+		return nil, fmt.Errorf("could not find plugin discriminator field '%s' in panel builder", config.PluginDiscriminatorField)
 	}
 
 	typeAssignment := ast.ConstantAssignment(ast.PathFromStructField(typeField), panelType)
@@ -123,31 +126,21 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 	// re-add panel-related options
 	for _, panelOpt := range panelBuilder.Options {
 		// this value is a constant that depends on the plugin being composed into a panel
-		if panelOpt.Name == "type" {
-			continue
-		}
-
-		// We don't need these options anymore since we're composing them.
-		if panelOpt.Name == "options" || panelOpt.Name == "custom" {
+		if panelOpt.Name == config.PluginDiscriminatorField {
 			continue
 		}
 
 		// Is the option explicitly excluded?
-		if tools.ItemInList(panelOpt.Name, panelOptionsToExclude) {
+		if tools.StringInListEqualFold(panelOpt.Name, config.ExcludePanelOptions) {
 			continue
 		}
 
 		newBuilder.Options = append(newBuilder.Options, panelOpt)
 	}
 
-	compositionMap := map[string]string{ // Builder → assignment root path
-		"Options":     "options",
-		"FieldConfig": "fieldConfig.defaults.custom",
-	}
-
 	composedBuilders := make([]ast.Builder, 0, len(composableBuilders))
 	for _, composableBuilder := range composableBuilders {
-		underPath, exists := compositionMap[composableBuilder.For.Name]
+		underPath, exists := config.CompositionMap[composableBuilder.For.Name]
 		if !exists {
 			// schemas for composable panels can define more types than just "Options"
 			// and "FieldConfig": we need to leave these objects untouched and
@@ -161,8 +154,7 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 			return nil, err
 		}
 
-		ref := composableBuilder.For.SelfRef
-		refType := ast.NewRef(ref.ReferredPkg, ref.ReferredType)
+		refType := composableBuilder.For.SelfRef.AsType()
 		newRoot[len(newRoot)-1].TypeHint = &refType
 
 		newBuilder, err = mergeOptions(composableBuilder, newBuilder, newRoot, nil, nil)
@@ -176,11 +168,47 @@ func composePanelType(builders ast.Builders, panelType string, panelBuilder ast.
 	return composedBuilders, nil
 }
 
-func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOptionsToExclude []string) RewriteRule {
+type PanelCompositionConfig struct {
+	// PanelBuilderName refers to the builder to use as a source for the
+	// composition. Builders for "composable" objects will be composed into
+	// this source builder following the mapping defined in the CompositionMap
+	// field.
+	// Note: The builder name must follow the [package].[builder_name] pattern.
+	// Example: "dashboard.Panel"
+	PanelBuilderName string
+
+	// PluginDiscriminatorField contains the name of the field used to identify
+	// the plugin implementing this object.
+	// Example: "type"
+	PluginDiscriminatorField string
+
+	// Composition map describes how to perform the composition.
+	// Each entry in this map associates a builder (referenced by its name)
+	// to a path under witch the assignments should be performed.
+	//
+	// Example:
+	// ```go
+	// compositionMap := map[string]string{
+	//   "Options": "options",
+	//   "FieldConfig": "fieldConfig.defaults.custom",
+	// }
+	// ```
+	CompositionMap map[string]string
+
+	// ExcludePanelOptions lists option names to exclude in the resulting
+	// composed builders.
+	ExcludePanelOptions []string
+
+	// ComposedBuilderName configures the name of the newly composed builders.
+	// If left empty, the name is taken from PanelBuilderName.
+	ComposedBuilderName string
+}
+
+func ComposeDashboardPanel(selector Selector, config PanelCompositionConfig) RewriteRule {
 	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		panelBuilderPkg, panelBuilderNameWithoutPkg, found := strings.Cut(panelBuilderName, ".")
+		panelBuilderPkg, panelBuilderNameWithoutPkg, found := strings.Cut(config.PanelBuilderName, ".")
 		if !found {
-			return nil, fmt.Errorf("could not apply ComposeDashboardPanel builder veneer: panelBuilderName '%s' is incorrect: no package found", panelBuilderPkg)
+			return nil, fmt.Errorf("could not apply ComposeDashboardPanel builder veneer: PanelBuilderName '%s' is incorrect: no package found", panelBuilderPkg)
 		}
 
 		panelBuilder, found := builders.LocateByObject(panelBuilderPkg, panelBuilderNameWithoutPkg)
@@ -214,7 +242,7 @@ func ComposeDashboardPanel(selector Selector, panelBuilderName string, panelOpti
 		}
 
 		for panelType, buildersForType := range composableBuilders {
-			composedBuilders, err := composePanelType(builders, panelType, panelBuilder, buildersForType, panelOptionsToExclude)
+			composedBuilders, err := composePanelType(builders, config, panelType, panelBuilder, buildersForType)
 			if err != nil {
 				return nil, fmt.Errorf("could not apply ComposeDashboardPanel builder veneer: %w", err)
 			}

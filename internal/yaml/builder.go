@@ -109,15 +109,23 @@ func (rule MergeInto) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 }
 
 type ComposeDashboardPanel struct {
-	PanelBuilderName    string   `yaml:"panel_builder_name"`
-	ExcludePanelOptions []string `yaml:"exclude_panel_options"`
+	PanelBuilderName         string            `yaml:"panel_builder_name"`
+	PluginDiscriminatorField string            `yaml:"plugin_discriminator_field"`
+	ExcludePanelOptions      []string          `yaml:"exclude_panel_options"`
+	CompositionMap           map[string]string `yaml:"composition_map"`
+	ComposedBuilderName      string            `yaml:"composed_builder_name"`
 }
 
 func (rule ComposeDashboardPanel) AsRewriteRule() (builder.RewriteRule, error) {
 	return builder.ComposeDashboardPanel(
 		builder.ComposableDashboardPanel(),
-		rule.PanelBuilderName,
-		rule.ExcludePanelOptions,
+		builder.PanelCompositionConfig{
+			PanelBuilderName:         rule.PanelBuilderName,
+			PluginDiscriminatorField: rule.PluginDiscriminatorField,
+			ExcludePanelOptions:      rule.ExcludePanelOptions,
+			CompositionMap:           rule.CompositionMap,
+			ComposedBuilderName:      rule.ComposedBuilderName,
+		},
 	), nil
 }
 
