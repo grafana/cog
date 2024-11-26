@@ -123,7 +123,7 @@ func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, e
 
 	value := cuecontext.New().BuildInstance(bis[0])
 	if err := value.Err(); err != nil {
-		return cue.Value{}, fmt.Errorf("could not building cue instance: %w", err)
+		return cue.Value{}, fmt.Errorf("could not build cue instance: %w", err)
 	}
 
 	return value, nil
