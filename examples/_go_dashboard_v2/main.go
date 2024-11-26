@@ -31,55 +31,54 @@ func dashboardBuilder() []byte {
 				Element(dashboard.NewElementReferenceBuilder().Name("somePanel")),
 			),
 		).
-		WithElement("somePanel", dashboard.NewPanelKindBuilder().Spec(
-			dashboard.NewPanelBuilder().
-				Uid("somePanel").
-				Title("Some panel").
-				Description("veeery descriptive").
-				VizConfig(
-					timeseries.NewVizConfigBuilder().
-						Unit("s").
-						PointSize(5).
-						WithOverride(
-							dashboard.MatcherConfig{Id: "byName", Options: "Available"},
-							[]dashboard.DynamicConfigValue{
-								{Id: "custom.width", Value: 88},
-							},
-						),
-				).
-				Data(dashboard.NewQueryGroupKindBuilder().Spec(
-					dashboard.NewQueryGroupSpecBuilder().
-						Queries([]cog.Builder[dashboard.PanelQueryKind]{
-							dashboard.NewPanelQueryKindBuilder().Spec(
-								dashboard.NewPanelQuerySpecBuilder().
-									Query(dashboard.NewDataQueryKindBuilder().
-										Kind("prometheus").
-										Spec(map[string]string{
-											"expr": "query here",
-										}),
-									).
-									Datasource(dashboard.DataSourceRef{
-										Type: cog.ToPtr("prometheus"),
-										Uid:  cog.ToPtr("some-prometheus-datasource"),
-									}).
-									RefId("A"), // this field is also present in dataquery schemas
-							),
-						}).
-						WithTransformation(dashboard.NewTransformationKindBuilder().
-							Kind("transformation ID. eg: `sortBy`").
-							Spec(
-								dashboard.NewDataTransformerConfigBuilder().
-									Id("what's this ID?").
-									Topic(dashboard.DataTransformerConfigTopicSeries).
-									Options(map[string]any{
-										"fields": map[string]any{},
-										"sort": []map[string]any{
-											{"field": "Mounted on"},
-										},
+		WithElement("somePanel", dashboard.NewPanelBuilder().
+			Uid("somePanelUid"). // TODO: should this be equal to the element ref, or unrelated?
+			Title("Some panel").
+			Description("veeery descriptive").
+			VizConfig(
+				timeseries.NewVizConfigBuilder().
+					Unit("s").
+					PointSize(5).
+					WithOverride(
+						dashboard.MatcherConfig{Id: "byName", Options: "Available"},
+						[]dashboard.DynamicConfigValue{
+							{Id: "custom.width", Value: 88},
+						},
+					),
+			).
+			Data(dashboard.NewQueryGroupKindBuilder().Spec(
+				dashboard.NewQueryGroupSpecBuilder().
+					Queries([]cog.Builder[dashboard.PanelQueryKind]{
+						dashboard.NewPanelQueryKindBuilder().Spec(
+							dashboard.NewPanelQuerySpecBuilder().
+								Query(dashboard.NewDataQueryKindBuilder().
+									Kind("prometheus").
+									Spec(map[string]string{
+										"expr": "query here",
 									}),
-							)),
-				)),
-		))
+								).
+								Datasource(dashboard.DataSourceRef{
+									Type: cog.ToPtr("prometheus"),
+									Uid:  cog.ToPtr("some-prometheus-datasource"),
+								}).
+								RefId("A"), // this field is also present in dataquery schemas
+						),
+					}).
+					WithTransformation(dashboard.NewTransformationKindBuilder().
+						Kind("transformation ID. eg: `sortBy`").
+						Spec(
+							dashboard.NewDataTransformerConfigBuilder().
+								Id("what's this ID?").
+								Topic(dashboard.DataTransformerConfigTopicSeries).
+								Options(map[string]any{
+									"fields": map[string]any{},
+									"sort": []map[string]any{
+										{"field": "Mounted on"},
+									},
+								}),
+						)),
+			)),
+		)
 
 	sampleDashboard, err := builder.Build()
 	if err != nil {

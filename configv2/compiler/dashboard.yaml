@@ -5,18 +5,6 @@ passes:
   # Dashboard #
   #############
 
-  - rename_object:
-      from: dashboard.DashboardV2Spec
-      to: Dashboard
-
-  - rename_object:
-      from: dashboard.PanelSpec
-      to: Panel
-
-  - rename_object:
-      from: dashboard.TimeSettingsSpec
-      to: TimeSettings
-
   # To make our composability veneers shenanigans work
   - retype_field:
       field: dashboard.VizConfigSpec.options
