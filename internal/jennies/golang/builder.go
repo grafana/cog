@@ -129,7 +129,9 @@ func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ast.
 		}
 
 		return jenny.emptyValueForGuard(context, resolvedType)
-	case ast.KindStruct, ast.KindArray, ast.KindMap:
+	case ast.KindArray, ast.KindMap:
+		return jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
+	case ast.KindStruct:
 		return "&" + jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
 	case ast.KindEnum:
 		jenny.typeImportMapper("cog")
