@@ -48,12 +48,6 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{ .ToJSONFunction }}
     {{- end }}
 
-    {{- if and .HasBuilder (not .Extends) }}
-    {{- range .Builders }}
-    {{- $builderName := gt (len $.Builders) 1 | ternary .BuilderName  "" }}
-    {{ template "builder" (dict "Builder" . "BuilderName" $builderName) }}
-    {{- end }}
-    {{- end }}
 }
 {{- end }}
 

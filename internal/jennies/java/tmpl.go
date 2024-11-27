@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/template"
 )
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.*
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.* templates/builders/*.*
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -94,7 +94,7 @@ type ClassTemplate struct {
 	Comments []string
 
 	Fields     []ast.StructField
-	Builders   []Builder
+	Builders   []BuilderTemplate
 	HasBuilder bool
 
 	Variant                 string
@@ -119,7 +119,7 @@ type Constant struct {
 	Value any
 }
 
-type Builder struct {
+type BuilderTemplate struct {
 	Package              string
 	BuilderSignatureType string
 	BuilderName          string
