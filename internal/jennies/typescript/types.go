@@ -325,21 +325,15 @@ func (formatter *enumAsTypeFormatter) formatDeclaration(def ast.Object) string {
 }
 
 func (formatter *enumAsTypeFormatter) formatValue(enumObj ast.Object, val any) string {
-	enum := enumObj.Type.AsEnum()
-
 	referredPkg := formatter.packageMapper(enumObj.SelfRef.ReferredPkg)
 	pkgPrefix := ""
 	if referredPkg != "" {
 		pkgPrefix = referredPkg + "."
 	}
 
-	for _, v := range enum.Values {
-		if v.Value == val {
-			return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, formatEnumMemberName(v.Name))
-		}
-	}
+	member, _ := enumObj.Type.AsEnum().MemberForValue(val)
 
-	return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, formatEnumMemberName(enum.Values[0].Name))
+	return fmt.Sprintf("%s%s.%s", pkgPrefix, enumObj.Name, formatEnumMemberName(member.Name))
 }
 
 type enumAsDisjunctionFormatter struct {
