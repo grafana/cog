@@ -12,6 +12,11 @@ func AnyToInt64(value any) int64 {
 		return int64(value.(int32))
 	case int64:
 		return value.(int64)
+
+	case float32:
+		return int64(value.(float32))
+	case float64:
+		return int64(value.(float64))
 	}
 
 	return value.(int64)
