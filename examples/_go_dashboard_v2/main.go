@@ -54,7 +54,7 @@ func dashboardBuilder() []byte {
 					Kind("transformation ID. eg: `sortBy`").
 					Spec(dashboard.NewDataTransformerConfigBuilder().
 						Id("what's this ID?").
-						Topic(dashboard.DataTransformerConfigTopicSeries).
+						Topic(dashboard.DataTopicSeries).
 						Options(map[string]any{
 							"fields": map[string]any{},
 							"sort": []map[string]any{
