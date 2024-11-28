@@ -102,15 +102,8 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 					return formatScalar(value)
 				}
 
-				memberName := resolved.Enum.Values[0].Name
-				for _, member := range resolved.Enum.Values {
-					if member.Value == value {
-						memberName = member.Name
-						break
-					}
-				}
-
-				formatted := memberName
+				member, _ := resolved.Enum.MemberForValue(value)
+				formatted := member.Name
 
 				referredPkg := jenny.typeImportMapper(destinationType.Ref.ReferredPkg)
 				if referredPkg != "" {
