@@ -251,19 +251,14 @@ func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) str
 	referredPkg := enumObj.SelfRef.ReferredPkg
 	referredPkg = formatter.importModule(referredPkg, "..models", referredPkg)
 
-	enumName := tools.UpperSnakeCase(enumObj.Type.AsEnum().Values[0].Name)
-	for _, enumValue := range enumObj.Type.AsEnum().Values {
-		if enumValue.Value == val {
-			enumName = tools.UpperSnakeCase(enumValue.Name)
-			break
-		}
-	}
+	member, _ := enumObj.Type.AsEnum().MemberForValue(val)
+	memberName := tools.UpperSnakeCase(member.Name)
 
 	if referredPkg == "" {
-		return fmt.Sprintf("%s.%s", enumObj.Name, enumName)
+		return fmt.Sprintf("%s.%s", enumObj.Name, memberName)
 	}
 
-	return fmt.Sprintf("%s.%s.%s", referredPkg, enumObj.Name, enumName)
+	return fmt.Sprintf("%s.%s.%s", referredPkg, enumObj.Name, memberName)
 }
 
 func (formatter *typeFormatter) formatScalarKind(kind ast.ScalarKind) string {
