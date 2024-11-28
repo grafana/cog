@@ -177,16 +177,9 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 
 func (formatter *typeFormatter) formatEnumValue(enumObj ast.Object, val any) string {
 	referredPkg := formatPackageName(enumObj.SelfRef.ReferredPkg)
-	enumName := formatObjectName(enumObj.Type.AsEnum().Values[0].Name)
+	member, _ := enumObj.Type.Enum.MemberForValue(val)
 
-	for _, enumValue := range enumObj.Type.AsEnum().Values {
-		if enumValue.Value == val {
-			enumName = formatEnumMemberName(enumValue.Name)
-			break
-		}
-	}
-
-	return fmt.Sprintf(formatter.config.fullNamespaceRef(referredPkg+"\\"+enumObj.Name)+"::%s()", enumName)
+	return fmt.Sprintf(formatter.config.fullNamespaceRef(referredPkg+"\\"+enumObj.Name)+"::%s()", formatEnumMemberName(member.Name))
 }
 
 func (formatter *typeFormatter) formatScalar(def ast.Type) string {
