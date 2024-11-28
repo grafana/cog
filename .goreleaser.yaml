@@ -46,7 +46,7 @@ snapshot:
 
 changelog:
   use: github
-  sort: asc
+  sort: '' # use the output of `git log` as is
   filters:
     exclude:
       - '^docs:'
