@@ -672,6 +672,10 @@ func (t EnumType) MemberForValue(value any) (EnumValue, bool) {
 		return EnumValue{}, false
 	}
 
+	if value == nil {
+		return t.Values[0], false
+	}
+
 	equal := func(a, b any) bool {
 		return a == b
 	}

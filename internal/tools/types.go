@@ -1,22 +1,22 @@
 package tools
 
 func AnyToInt64(value any) int64 {
-	switch value.(type) {
+	switch v := value.(type) {
 	case int:
-		return int64(value.(int))
+		return int64(v)
 	case int8:
-		return int64(value.(int8))
+		return int64(v)
 	case int16:
-		return int64(value.(int16))
+		return int64(v)
 	case int32:
-		return int64(value.(int32))
+		return int64(v)
 	case int64:
-		return value.(int64)
+		return v
 
 	case float32:
-		return int64(value.(float32))
+		return int64(v)
 	case float64:
-		return int64(value.(float64))
+		return int64(v)
 	}
 
 	return value.(int64)
