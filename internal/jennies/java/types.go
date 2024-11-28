@@ -338,14 +338,9 @@ func (tf *typeFormatter) formatValue(destinationType ast.Type, value any) string
 }
 
 func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
-	enum := obj.Type.AsEnum()
-	for _, v := range enum.Values {
-		if v.Value == val {
-			return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(v.Name)))
-		}
-	}
+	member, _ := obj.Type.AsEnum().MemberForValue(val)
 
-	return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(enum.Values[0].Name)))
+	return fmt.Sprintf("%s.%s", obj.Name, tools.UpperSnakeCase(member.Name))
 }
 
 func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {

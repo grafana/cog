@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type Kind string
@@ -664,6 +665,29 @@ func (t ArrayType) IsArrayOfScalars() bool {
 
 type EnumType struct {
 	Values []EnumValue // possible values. Value types might be different
+}
+
+func (t EnumType) MemberForValue(value any) (EnumValue, bool) {
+	if len(t.Values) == 0 {
+		return EnumValue{}, false
+	}
+
+	equal := func(a, b any) bool {
+		return a == b
+	}
+	if t.Values[0].Type.Scalar.ScalarKind != KindString {
+		equal = func(a, b any) bool {
+			return tools.AnyToInt64(a) == tools.AnyToInt64(b)
+		}
+	}
+
+	for _, v := range t.Values {
+		if equal(v.Value, value) {
+			return v, true
+		}
+	}
+
+	return t.Values[0], false
 }
 
 func (t EnumType) DeepCopy() EnumType {
