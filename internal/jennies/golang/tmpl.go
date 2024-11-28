@@ -60,6 +60,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"resolvesToConstraints": func(_ ast.Type) string {
 				panic("resolvesToConstraints() needs to be overridden by a jenny")
 			},
+			"formatValue": func(destinationType ast.Type, value any) string {
+				panic("formatValue() needs to be overridden by a jenny")
+			},
 		}),
 		template.Funcs(map[string]any{
 			"formatPackageName":  formatPackageName,

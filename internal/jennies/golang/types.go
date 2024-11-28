@@ -241,21 +241,6 @@ func (formatter *typeFormatter) formatMap(def ast.MapType) string {
 	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)
 }
 
-func formatScalar(val any) string {
-	if list, ok := val.([]any); ok {
-		items := make([]string, 0, len(list))
-
-		for _, item := range list {
-			items = append(items, formatScalar(item))
-		}
-
-		// FIXME: this is wrong, we can't just assume a list of strings.
-		return fmt.Sprintf("[]string{%s}", strings.Join(items, ", "))
-	}
-
-	return fmt.Sprintf("%#v", val)
-}
-
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)

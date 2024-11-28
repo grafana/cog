@@ -95,6 +95,30 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
 				return jenny.emptyValueForGuard(context, guard.EmptyValueType)
 			},
+			"formatValue": func(destinationType ast.Type, value any) string {
+				resolved := context.ResolveRefs(destinationType)
+
+				if !destinationType.IsRef() || !resolved.IsEnum() {
+					return formatScalar(value)
+				}
+
+				memberName := resolved.Enum.Values[0].Name
+				for _, member := range resolved.Enum.Values {
+					if member.Value == value {
+						memberName = member.Name
+						break
+					}
+				}
+
+				formatted := memberName
+
+				referredPkg := jenny.typeImportMapper(destinationType.Ref.ReferredPkg)
+				if referredPkg != "" {
+					formatted = referredPkg + "." + formatted
+				}
+
+				return formatted
+			},
 		}).
 		RenderAsBytes("builders/builder.tmpl", map[string]any{
 			"Package":              builder.Package,
