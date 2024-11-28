@@ -50,7 +50,7 @@ func (b Builders) genBuilders(pkg string, name string) ([]Builder, bool) {
 	}
 
 	return tools.Map(builders, func(builder ast.Builder) Builder {
-		object, _ := b.context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
+		object, _ := b.context.LocateObjectByRef(builder.For.SelfRef)
 		return Builder{
 			Package:              b.typeFormatter.formatPackage(pkg),
 			ObjectName:           tools.UpperCamelCase(object.Name),
@@ -125,7 +125,7 @@ func (b Builders) formatInitializers(args []ast.Argument) []string {
 		}
 
 		ref := arg.Type.AsRef()
-		object, _ := b.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+		object, _ := b.context.LocateObjectByRef(ref)
 		if !object.Type.IsStruct() {
 			return nil
 		}
