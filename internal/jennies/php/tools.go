@@ -63,9 +63,29 @@ func formatCommentsBlock(comments []string) string {
 }
 
 func formatFieldPath(fieldPath ast.Path) string {
-	return strings.Join(tools.Map(fieldPath, func(item ast.PathItem) string {
-		return formatFieldName(item.Identifier)
-	}), "->")
+	path := ""
+
+	for i, chunk := range fieldPath {
+		last := i == len(fieldPath)-1
+		output := formatFieldName(chunk.Identifier)
+
+		if chunk.Index != nil {
+			output += "["
+			if chunk.Index.Constant != nil {
+				output += formatValue(chunk.Index.Constant)
+			} else {
+				output += "$" + formatArgName(chunk.Index.Argument.Name)
+			}
+			output += "]"
+		}
+
+		path += output
+		if !last && fieldPath[i+1].Index == nil {
+			path += "->"
+		}
+	}
+
+	return path
 }
 
 func formatValue(val any) string {
