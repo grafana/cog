@@ -34,7 +34,7 @@ func GenerateBuilderNilChecks(language Language, context Context) (Context, erro
 		OnAssignment: func(_ *ast.BuilderVisitor, _ ast.Schemas, b ast.Builder, assignment ast.Assignment) (ast.Assignment, error) {
 			for i, chunk := range assignment.Path {
 				protectArrayAppend := nullableKinds.ProtectArrayAppend && assignment.Method == ast.AppendAssignment
-				if i == len(assignment.Path)-1 && !protectArrayAppend && assignment.Method != ast.IndexAssignment {
+				if i == len(assignment.Path)-1 && !protectArrayAppend {
 					continue
 				}
 

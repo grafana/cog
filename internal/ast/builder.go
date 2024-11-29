@@ -418,7 +418,6 @@ type Assignment struct {
 
 	// How
 	Method AssignmentMethod
-	Index  *AssignmentIndex
 
 	Constraints []AssignmentConstraint `json:",omitempty"`
 
@@ -430,7 +429,7 @@ func (assignment *Assignment) HasConstantValue() bool {
 }
 
 func (assignment *Assignment) DeepCopy() Assignment {
-	clone := Assignment{
+	return Assignment{
 		Path:   assignment.Path.DeepCopy(),
 		Value:  assignment.Value.DeepCopy(),
 		Method: assignment.Method,
@@ -441,13 +440,6 @@ func (assignment *Assignment) DeepCopy() Assignment {
 			return check.DeepCopy()
 		}),
 	}
-
-	if assignment.Index != nil {
-		index := assignment.Index.DeepCopy()
-		clone.Index = &index
-	}
-
-	return clone
 }
 
 type AssignmentConstraint struct {
