@@ -60,3 +60,7 @@ func Unptr[T any](v *T) T {
 	}
 	return *v
 }
+
+func ToPtr[T any](v T) *T {
+	return &v
+}
