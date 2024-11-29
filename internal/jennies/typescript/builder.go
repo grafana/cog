@@ -3,7 +3,6 @@ package typescript
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -120,7 +119,27 @@ func (jenny *Builder) importType(typeRef ast.RefType) string {
 }
 
 func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
-	return strings.Join(tools.Map(fieldPath, func(chunk ast.PathItem) string {
-		return chunk.Identifier
-	}), ".")
+	path := ""
+
+	for i, chunk := range fieldPath {
+		last := i == len(fieldPath)-1
+		output := chunk.Identifier
+
+		if chunk.Index != nil {
+			output += "["
+			if chunk.Index.Constant != nil {
+				output += formatValue(chunk.Index.Constant)
+			} else {
+				output += formatIdentifier(chunk.Index.Argument.Name)
+			}
+			output += "]"
+		}
+
+		path += output
+		if !last && fieldPath[i+1].Index == nil {
+			path += "."
+		}
+	}
+
+	return path
 }

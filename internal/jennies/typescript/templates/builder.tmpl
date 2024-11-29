@@ -93,6 +93,7 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
 {{- end }}
 
 {{- define "assignment_method" }}
-        {{ if eq .Method "direct" }}this.internal.{{ .Path }} = {{ .Value }};{{ end -}}
-        {{ if eq .Method "append" }}this.internal.{{ .Path }}.push({{ .Value }});{{ end -}}
+        {{ if eq .Method "direct" }}this.internal.{{ .Path|formatPath }} = {{ .Value }};{{ end -}}
+        {{ if eq .Method "index" }}this.internal.{{ .Path|formatPath }} = {{ .Value }};{{ end -}}
+        {{ if eq .Method "append" }}this.internal.{{ .Path|formatPath }}.push({{ .Value }});{{ end -}}
 {{- end }}
