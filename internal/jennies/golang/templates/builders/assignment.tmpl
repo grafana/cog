@@ -10,7 +10,7 @@
     {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
     {{- includeIfExists $preTmpl (dict) -}}
 
-    {{- template "assignment_method" (dict "Method" .Assignment.Method "Index" .Assignment.Index "Path" .Assignment.Path "Value" $value) }}
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
 
     {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
     {{- includeIfExists $postTmpl (dict) -}}
