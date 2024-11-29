@@ -16,27 +16,31 @@ func (jenny Runtime) JennyName() string {
 }
 
 func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
-	runtime, err := jenny.Runtime()
+	runtime, err := jenny.runtime()
+	if err != nil {
+		return nil, err
+	}
+
+	tools, err := jenny.tools()
 	if err != nil {
 		return nil, err
 	}
 
 	files := []codejen.File{
 		*codejen.NewFile("cog/runtime.go", runtime, jenny),
-		*codejen.NewFile("cog/errors.go", jenny.generateErrorTools(), jenny),
+		*codejen.NewFile("cog/errors.go", tools, jenny),
 	}
 
 	if jenny.Config.generateBuilders {
 		files = append(files,
-			*codejen.NewFile("cog/builder.go", jenny.generateBuilderInterface(), jenny),
-			*codejen.NewFile("cog/tools.go", jenny.generateToPtrFunc(), jenny),
+			*codejen.NewFile("cog/builder.go", jenny.builderInterface(), jenny),
 		)
 	}
 
 	return files, nil
 }
 
-func (jenny Runtime) generateBuilderInterface() []byte {
+func (jenny Runtime) builderInterface() []byte {
 	return []byte(`package cog
 
 type Builder[ResourceT any] interface {
@@ -46,7 +50,7 @@ type Builder[ResourceT any] interface {
 `)
 }
 
-func (jenny Runtime) Runtime() ([]byte, error) {
+func (jenny Runtime) runtime() ([]byte, error) {
 	imports := NewImportMap(jenny.Config.PackageRoot)
 	imports.Add("", jenny.Config.importPath("cog/variants"))
 	imports.Add("json", "encoding/json")
@@ -59,74 +63,6 @@ func (jenny Runtime) Runtime() ([]byte, error) {
 	})
 }
 
-func (jenny Runtime) generateErrorTools() []byte {
-	return []byte(`package cog
-
-import (
-	"errors"
-	"fmt"
-)
-
-type BuildErrors []*BuildError
-
-func (errs BuildErrors) Error() string {
-	var b []byte
-	for i, err := range errs {
-		if i > 0 {
-			b = append(b, '\n')
-		}
-		b = append(b, err.Error()...)
-	}
-	return string(b)
-}
-
-type BuildError struct {
-	Path string
-	Message string
-}
-
-func (err *BuildError) Error() string {
-	return fmt.Sprintf("%s: %s", err.Path, err.Message)
-}
-
-func MakeBuildErrors(rootPath string, err error) BuildErrors {
-	var buildErrs BuildErrors
-	if errors.As(err, &buildErrs) {
-		for _, buildErr := range buildErrs {
-			buildErr.Path = rootPath + "." + buildErr.Path
-		}
-
-		return buildErrs
-	}
-	
-	var buildErr *BuildError
-	if errors.As(err, &buildErr) {
-		return BuildErrors{buildErr}
-	}
-
-	return BuildErrors{&BuildError{
-		Path:    rootPath,
-		Message: err.Error(),
-	}}
-}
-
-func Unptr[T any](v *T) T {
-	var val T
-	if v == nil {
-		return val
-	}
-	return *v
-}
-
-`)
-}
-
-func (jenny Runtime) generateToPtrFunc() []byte {
-	return []byte(`package cog
-
-func ToPtr[T any](v T) *T {
-  return &v
-}
-
-`)
+func (jenny Runtime) tools() ([]byte, error) {
+	return jenny.Tmpl.RenderAsBytes("runtime/tools.tmpl", map[string]any{})
 }
