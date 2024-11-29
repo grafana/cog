@@ -305,6 +305,17 @@ func (tf *typeFormatter) formatAssignmentPath(fieldPath ast.Path) string {
 	}
 
 	for i, p := range fieldPath[1:] {
+		if p.Index != nil {
+			path += "["
+			if p.Index.Constant != nil {
+				path += fmt.Sprintf("%#v", p.Index.Constant)
+			} else {
+				path += tools.LowerCamelCase(p.Index.Argument.Name)
+			}
+			path += "]"
+			continue
+		}
+
 		if fieldPath[i].Type.IsAny() && i != len(fieldPath)-1 {
 			return path
 		}
