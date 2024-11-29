@@ -101,6 +101,9 @@
 {{- end }}
 
 {{- define "assignment_method" }}
-    {{ if eq .Method "direct" }}builder.internal.{{ .Path|formatPath }} = {{ .Value }}{{ end -}}
-    {{ if eq .Method "append" }}builder.internal.{{ .Path|formatPath }} = append(builder.internal.{{ .Path|formatPath }}, {{ .Value }}){{ end -}}
+    {{ if eq .Method "append" -}}
+        builder.internal.{{ .Path|formatPath }} = append(builder.internal.{{ .Path|formatPath }}, {{ .Value }})
+    {{- else -}}
+        builder.internal.{{ .Path|formatPath }} = {{ .Value }}
+    {{- end -}}
 {{- end }}

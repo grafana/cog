@@ -225,8 +225,27 @@ func (arg *Argument) DeepCopy() Argument {
 	}
 }
 
+type PathIndex struct {
+	Argument *Argument
+	Constant any // string or int
+}
+
+func (index PathIndex) DeepCopy() PathIndex {
+	clone := PathIndex{
+		Constant: index.Constant,
+	}
+
+	if index.Argument != nil {
+		arg := index.Argument.DeepCopy()
+		clone.Argument = &arg
+	}
+
+	return clone
+}
+
 type PathItem struct {
 	Identifier string
+	Index      *PathIndex
 	Type       Type // any
 	// useful mostly for composability purposes, when a field Type is "any"
 	// and we're trying to "compose in" something of a known type.
@@ -240,6 +259,11 @@ func (item PathItem) DeepCopy() PathItem {
 		Identifier: item.Identifier,
 		Type:       item.Type.DeepCopy(),
 		Root:       item.Root,
+	}
+
+	if item.Index != nil {
+		index := item.Index.DeepCopy()
+		clone.Index = &index
 	}
 
 	if item.TypeHint != nil {
@@ -352,6 +376,7 @@ type AssignmentMethod string
 const (
 	DirectAssignment AssignmentMethod = "direct" // `foo = bar`
 	AppendAssignment AssignmentMethod = "append" // `foo = append(foo, bar)`
+	IndexAssignment  AssignmentMethod = "index"  // `foo[key] = bar`
 )
 
 type AssignmentNilCheck struct {
