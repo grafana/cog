@@ -29,10 +29,27 @@ func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 		return nil, err
 	}
 
-	return codejen.Files{
+	files := codejen.Files{
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/variants/Dataquery.java"), []byte(variants), jenny),
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/Builder.java"), []byte(builder), jenny),
-	}, nil
+	}
+
+	if jenny.config.generateConverters {
+		converter, err := jenny.renderConverterInterface()
+		if err != nil {
+			return nil, err
+		}
+
+		runtime, err := jenny.renderRuntime()
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, *codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/Converter.java"), []byte(converter), jenny))
+		files = append(files, *codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/Runtime.java"), []byte(runtime), jenny))
+	}
+
+	return files, nil
 }
 
 func (jenny Runtime) renderDataQueryVariant(variant string) (string, error) {
@@ -44,6 +61,22 @@ func (jenny Runtime) renderDataQueryVariant(variant string) (string, error) {
 
 func (jenny Runtime) renderBuilderInterface() (string, error) {
 	return jenny.tmpl.Render("runtime/builder.tmpl", map[string]any{
+		"Package": jenny.formatPackage("cog"),
+	})
+}
+
+func (jenny Runtime) renderConverterInterface() (string, error) {
+	imports := NewImportMap(jenny.config.PackagePath)
+	imports.Add("Dataquery", "cog.variants")
+
+	return jenny.tmpl.Render("runtime/converter_interface.tmpl", map[string]any{
+		"Package": jenny.formatPackage("cog"),
+		"Imports": imports.String(),
+	})
+}
+
+func (jenny Runtime) renderRuntime() (string, error) {
+	return jenny.tmpl.Render("converters/converter_runtime.tmpl", map[string]any{
 		"Package": jenny.formatPackage("cog"),
 	})
 }

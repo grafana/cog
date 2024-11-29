@@ -1,12 +1,20 @@
 package {{ .Package }};
 
+{{ .Imports }}
+
 public class PanelConfig {
     private final Class<?> optionsClass;
     private final Class<?> fieldConfigClass;
+    {{- if .ShouldAddConverters }}
+    private final Converter<Panel> converter;
+    {{- end }}
 
-    public PanelConfig(Class<?> optionsClass, Class<?> fieldConfigClass) {
+    public PanelConfig(Class<?> optionsClass, Class<?> fieldConfigClass{{ if .ShouldAddConverters }}, Converter<Panel> converter{{ end }}) {
         this.optionsClass = optionsClass;
         this.fieldConfigClass = fieldConfigClass;
+        {{- if .ShouldAddConverters }}
+        this.converter = converter;
+        {{- end }}
     }
 
     public Class<?> getOptionsClass() {
@@ -16,4 +24,10 @@ public class PanelConfig {
     public Class<?> getFieldConfigClass() {
         return fieldConfigClass;
     }
+    
+    {{- if .ShouldAddConverters }}
+    public Converter<Panel> getConverter() {
+        return converter;
+    }
+    {{- end }}
 }

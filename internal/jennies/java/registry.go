@@ -58,14 +58,29 @@ func (jenny Registry) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny Registry) renderPanelConfig() (string, error) {
+	imports := NewImportMap(jenny.config.PackagePath)
+	if jenny.config.generateConverters {
+		imports.Add("Converter", "cog")
+		imports.Add("Panel", "dashboard")
+	}
+
 	return jenny.tmpl.Render("runtime/panel_config.tmpl", map[string]any{
-		"Package": jenny.formatPackage("cog.variants"),
+		"Package":             jenny.formatPackage("cog.variants"),
+		"Imports":             imports.String(),
+		"ShouldAddConverters": jenny.config.generateConverters,
 	})
 }
 
 func (jenny Registry) renderDataqueryConfig() (string, error) {
+	imports := NewImportMap(jenny.config.PackagePath)
+	if jenny.config.generateConverters {
+		imports.Add("Converter", "cog")
+	}
+
 	return jenny.tmpl.Render("runtime/dataquery_config.tmpl", map[string]any{
-		"Package": jenny.formatPackage("cog.variants"),
+		"Package":             jenny.formatPackage("cog.variants"),
+		"Imports":             imports.String(),
+		"ShouldAddConverters": jenny.config.generateConverters,
 	})
 }
 
@@ -82,13 +97,15 @@ func (jenny Registry) renderRegistry(context languages.Context) (string, error) 
 		if schema.Metadata.Variant == ast.SchemaVariantDataQuery {
 			dataquerySchemas = append(dataquerySchemas, DataquerySchema{
 				Identifier: strings.ToLower(schema.Metadata.Identifier),
-				Class:      jenny.formatPackage(fmt.Sprintf("%s.%s", schema.Package, jenny.findDataqueryClass(schema))),
+				Class:      jenny.formatPackage(fmt.Sprintf("%s.%s.class", schema.Package, jenny.findDataqueryClass(schema))),
+				Converter:  jenny.formatPackage(fmt.Sprintf("%s.%sMapperConverter()", schema.Package, jenny.findDataqueryClass(schema))),
 			})
 		} else if schema.Metadata.Variant == ast.SchemaVariantPanel {
 			panelSchemas = append(panelSchemas, PanelSchema{
 				Identifier:  strings.ToLower(schema.Metadata.Identifier),
 				Options:     jenny.formatPackage(fmt.Sprintf("%s.Options.class", schema.Package)),
 				FieldConfig: jenny.findFieldConfig(schema),
+				Converter:   jenny.formatPackage(fmt.Sprintf("%s.PanelConverter()", schema.Package)),
 			})
 		}
 	}
@@ -97,15 +114,22 @@ func (jenny Registry) renderRegistry(context languages.Context) (string, error) 
 		return panelSchemas[i].Identifier < panelSchemas[j].Identifier
 	})
 
+	if jenny.config.generateConverters {
+		imports.Add("Panel", "dashboard")
+		imports.Add("reflect.InvocationTargetException", "java.lang")
+		imports.Add("Converter", "cog")
+	}
+
 	sort.SliceStable(dataquerySchemas, func(i, j int) bool {
 		return dataquerySchemas[i].Identifier < dataquerySchemas[j].Identifier
 	})
 
 	return jenny.tmpl.Render("runtime/registry.tmpl", map[string]any{
-		"Package":          jenny.formatPackage("cog.variants"),
-		"Imports":          imports,
-		"PanelSchemas":     panelSchemas,
-		"DataquerySchemas": dataquerySchemas,
+		"Package":             jenny.formatPackage("cog.variants"),
+		"Imports":             imports.String(),
+		"PanelSchemas":        panelSchemas,
+		"DataquerySchemas":    dataquerySchemas,
+		"ShouldAddConverters": jenny.config.generateConverters,
 	})
 }
 
