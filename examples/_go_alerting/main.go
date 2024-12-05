@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/grafana/cog/generated/alerting"
-	"github.com/grafana/cog/generated/cog/plugins"
-	"github.com/grafana/cog/generated/expr"
-	"github.com/grafana/cog/generated/prometheus"
+	"github.com/grafana/cog/generated/go/alerting"
+	"github.com/grafana/cog/generated/go/cog/plugins"
+	"github.com/grafana/cog/generated/go/expr"
+	"github.com/grafana/cog/generated/go/prometheus"
 )
 
 func main() {
