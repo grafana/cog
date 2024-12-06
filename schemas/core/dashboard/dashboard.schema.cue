@@ -1,6 +1,10 @@
 // Copied from packages/grafana-schema/src/schema/dashboard/v2alpha0/dashboard.schema.cue in grafana/grafana
 package dashboard
 
+import (
+	"github.com/grafana/grafana/packages/grafana-schema/src/common"
+)
+
 DashboardV2Spec: {
   // Unique numeric identifier for the dashboard.
   // `id` is internal to a specific Grafana instance. `uid` should be used to identify a dashboard across Grafana instances.
@@ -103,8 +107,6 @@ DataSourceRef: {
   uid?: string
 }
 
-DataTopic: "alertStates" | "annotations" | "series"
-
 // Transformations allow to manipulate data returned by a query before the system applies a visualization.
 // Using transformations you can: rename fields, join time series data, perform mathematical operations across queries,
 // use the output of one transformation as the input to another transformation, etc.
@@ -116,7 +118,7 @@ DataTransformerConfig: {
   // Optional frame matcher. When missing it will be applied to all results
   filter?: MatcherConfig
   // Where to pull DataFrames from as input to transformation
-  topic?: DataTopic
+  topic?: common.DataTopic
   // Options to be passed to the transformer
   // Valid options depend on the transformer id
   options: _
@@ -361,12 +363,9 @@ VizConfigKind: {
 }
 
 AnnotationQuerySpec: {
-  datasource: DataSourceRef
+  datasource?: DataSourceRef
   query: DataQueryKind
-
-  // TODO: Should be figured out based on datasource (Grafana ds)
-  // builtIn?: int
-  // Below are currently existing options for annotation queries
+  builtIn?: bool
   enable: bool
   filter: AnnotationPanelFilter
   hide: bool
@@ -397,7 +396,7 @@ DataQueryKind: {
 
 PanelQuerySpec: {
   query: DataQueryKind
-  datasource: DataSourceRef
+  datasource?: DataSourceRef
 
   refId: string
   hidden: bool
@@ -597,7 +596,7 @@ QueryVariableSpec: {
   refresh: VariableRefresh
   skipUrlSync: bool | *false
   description?: string
-  datasource: DataSourceRef | *{}
+  datasource?: DataSourceRef
   query: string | DataQueryKind | *""
   regex: string | *""
   sort: VariableSort
@@ -731,7 +730,7 @@ CustomVariableKind: {
 // GroupBy variable specification
 GroupByVariableSpec: {
   name: string | *""
-  datasource: DataSourceRef | *{}
+  datasource?: DataSourceRef
   current: VariableOption | *{
     text: ""
     value: ""
@@ -755,7 +754,7 @@ GroupByVariableKind: {
 // Adhoc variable specification
 AdhocVariableSpec: {
   name: string | *""
-  datasource: DataSourceRef | *{}
+  datasource?: DataSourceRef
   baseFilters: [...AdHocFilterWithLabels] | *[]
   filters: [...AdHocFilterWithLabels] | *[]
   defaultKeys: [...MetricFindValue] | *[]
