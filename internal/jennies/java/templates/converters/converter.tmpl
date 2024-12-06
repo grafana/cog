@@ -56,11 +56,11 @@ package {{ .Converter.Package | formatPackageName }};
         {{- .Path | formatGuardPath }} + "{{ formatIntegerLetter .Type }}"
         {{- end }}
     {{- else if resolvesToEnum .Type -}}
-        {{- $reflect := importStdPkg "cog" "Runtime" -}}
+        {{- $runtime := importStdPkg "cog" "Runtime" -}}
         {{- $reflect := importStdPkg .Type.AsRef.ReferredPkg .Type.AsRef.ReferredType -}}
         Runtime.formatEnum({{ .Type.AsRef.ReferredType }}.class, {{- .Path | formatGuardPath }})
     {{- else }}
-        {{- $reflect := importStdPkg "cog" "Runtime" -}}
+        {{- $runtime := importStdPkg "cog" "Runtime" -}}
         Runtime.dump({{ .Path | formatGuardPath }})
     {{- end }}
 {{- end }}
@@ -144,8 +144,16 @@ package {{ .Converter.Package | formatPackageName }};
     {{- $firstOpt := .Options | first }}
     {{- with $firstOpt.Guards -}}if ({{ template "guards" . }}) { {{- end }}
     {{- if ne .RepeatFor nil -}}
+        {{- if .RepeatFor.Last.Type.IsArray -}}
         {{ $repeatFor := .RepeatFor.Last.Type.AsArray.ValueType | formatType }}
-        for ({{ $repeatFor }} item : {{ .RepeatFor }}) { 
+        for ({{ $repeatFor }} {{ .RepeatAs }} : {{ .RepeatFor }}) {
+        {{- else -}}
+        for (var entry : {{ .RepeatFor }}.entrySet()) {
+            var {{ .RepeatAs }} = entry.getValue();
+            {{- if ne .RepeatIndex "" }}
+            var {{ .RepeatIndex }} = entry.getKey();
+            {{- end -}}
+        {{- end -}}
     {{ end }}
     {{- range $optMapping := .Options }}
         {{ template "option_mapping" $optMapping }}
