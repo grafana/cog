@@ -371,7 +371,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 		}
 	}
 
-	possibleBuilders := generator.buildersForType(context, typeDef)
+	possibleBuilders := context.BuildersForType(typeDef)
 	// hack to use the runtime to convert panels
 	// TODO: find a better way to handle this case (ie: something more generic than hardcoding it :/)
 	if len(possibleBuilders) > 1 && strings.EqualFold(possibleBuilders[0].Package, "dashboard") && strings.EqualFold("panel", possibleBuilders[0].For.Name) {
@@ -567,40 +567,4 @@ func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) st
 	}
 
 	return path
-}
-
-func (generator *ConverterGenerator) buildersForType(context Context, typeDef ast.Type) ast.Builders {
-	var candidateBuilders ast.Builders
-
-	var search func(def ast.Type)
-	search = func(def ast.Type) {
-		if def.IsArray() {
-			search(def.AsArray().ValueType)
-			return
-		}
-		if def.IsMap() {
-			search(def.AsMap().ValueType)
-			return
-		}
-
-		if def.IsDisjunction() {
-			for _, branch := range def.AsDisjunction().Branches {
-				search(branch)
-			}
-
-			return
-		}
-
-		if !def.IsRef() {
-			return
-		}
-
-		ref := def.AsRef()
-		builders := context.Builders.LocateAllByObject(ref.ReferredPkg, ref.ReferredType)
-		candidateBuilders = append(candidateBuilders, builders...)
-	}
-
-	search(typeDef)
-
-	return candidateBuilders
 }

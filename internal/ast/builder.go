@@ -157,6 +157,10 @@ func (builders Builders) LocateAllByObject(pkg string, name string) Builders {
 	return results
 }
 
+func (builders Builders) LocateAllByRef(ref RefType) Builders {
+	return builders.LocateAllByObject(ref.ReferredPkg, ref.ReferredType)
+}
+
 func (builders Builders) HaveConstantConstructorAssignment() bool {
 	for _, builder := range builders {
 		constantAssignmentFound := false
