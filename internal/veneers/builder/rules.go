@@ -163,10 +163,6 @@ func composePanelType(builders ast.Builders, config PanelCompositionConfig, pane
 		}
 	}
 
-	if config.ComposedBuilderName != "" {
-		newBuilder.Name = config.ComposedBuilderName
-	}
-
 	composedBuilders = append(composedBuilders, newBuilder)
 
 	return composedBuilders, nil

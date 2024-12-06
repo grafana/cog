@@ -171,7 +171,7 @@ options:
   - duplicate:
       by_builder: Dashboard.Elements
       as: withElement
-  - map_to_append:
+  - map_to_index:
       by_builder: Dashboard.withElement
 
   # Append a single override instead forcing to define all of them at once
