@@ -30,7 +30,7 @@ package {{ .Converter.Package | formatPackageName }}
         cog.Dump({{ .Path | formatPath }})
     {{- else if .Type.IsScalar -}}
         {{- $reflect := importStdPkg "fmt" -}}
-        fmt.Sprintf("%#v", {{ maybeUnptr (.Path | formatPath) .Type }})
+        fmt.Sprintf("%#v", {{ .Type | maybeDereference }}{{ .Path | formatPath }})
     {{- else -}}
         {{- $cog := importPkg "cog" -}}
         cog.Dump({{ .Type | maybeDereference }}{{ .Path | formatPath }})
@@ -76,7 +76,7 @@ package {{ .Converter.Package | formatPackageName }}
     {{- end -}}
     {{- with .Arg.Runtime -}}
         {{- $cog := importPkg "cog" -}}
-        {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath | formatPath }}{{ else }}{{ maybeUnptr ($runtimeArg.ValuePath | formatPath) $runtimeArg.ValueType }}{{ end }}, {{ end }})
+        {{ $.IntoVar }} := cog.{{ .FuncName }}({{ range $i, $runtimeArg := .Args }}{{ if eq $i 0}}{{ $runtimeArg.ValuePath | formatPath }}{{ else }}{{ $runtimeArg.ValueType | maybeDereference }} {{ $runtimeArg.ValuePath | formatPath }}{{ end }}, {{ end }})
     {{- end -}}
     {{- with .Arg.Direct -}}
         {{ $.IntoVar }} := {{- template "value_formatter" (dict "Type" .ValueType "Path" .ValuePath) -}}
@@ -105,7 +105,7 @@ package {{ .Converter.Package | formatPackageName }}
 {{- define "conversion_mapping" -}}
     {{- $firstOpt := .Options | first }}
     {{- with $firstOpt.Guards -}}if {{ template "guards" . }} { {{- end }}
-    {{- if ne .RepeatFor nil -}}for _, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} { {{- end }}
+    {{- if ne .RepeatFor nil -}}for {{ .RepeatIndex | default "_" }}, {{ .RepeatAs }} := range {{ .RepeatFor | formatPath }} { {{- end }}
     {{- range $optMapping := .Options }}
         {{ template "option_mapping" $optMapping }}
     {{- end }}

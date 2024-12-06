@@ -88,13 +88,6 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			"formatTypeNoBuilder": defaultTypeFormatter(jenny.Config, context, dummyImports, dummyImportMapper).formatType,
 			"formatPath":          makePathFormatter(formatter),
 			"formatRawRef":        formatRawRef,
-			"maybeUnptr": func(variableName string, intoType ast.Type) string {
-				if !intoType.Nullable || intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot() {
-					return variableName
-				}
-				typeImportMapper("cog")
-				return "cog.Unptr(" + variableName + ")"
-			},
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
 			"Imports":   imports,

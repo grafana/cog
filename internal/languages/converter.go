@@ -83,9 +83,10 @@ type ArgumentMapping struct {
 }
 
 type ConversionMapping struct {
-	// for _, panel := range input.Panels { WithPanel(panel) }
-	RepeatFor ast.Path // `input.Panels`
-	RepeatAs  string   // `panel`
+	// for i, panel := range input.Panels { WithPanel(panel) }
+	RepeatFor   ast.Path // `input.Panels`
+	RepeatAs    string   // `panel`
+	RepeatIndex string   // `i`
 
 	Options []OptionMapping
 }
@@ -227,6 +228,13 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		mapping.RepeatAs = "item"
 	}
 
+	if len(assignments) == 1 && assignments[0].Method == ast.IndexAssignment {
+		assignmentPath := assignments[0].Path
+		mapping.RepeatFor = converter.inputRootPath().Append(assignmentPath[:len(assignmentPath)-1])
+		mapping.RepeatAs = "value"
+		mapping.RepeatIndex = "key"
+	}
+
 	// if the option appends one possible branch of a disjunction to a list,
 	// we need to treat it differently
 	if mapping.RepeatFor != nil && generator.isAssignmentFromDisjunctionStruct(context, assignments[0]) {
@@ -273,11 +281,27 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 		argName := fmt.Sprintf("arg%d", i)
 		valueType := assignment.Path.Last().Type
 		valuePath := converter.inputRootPath().Append(assignment.Path)
-		if mapping.RepeatFor != nil {
+		if mapping.RepeatFor != nil && valueType.IsArray() {
 			valueType = valueType.AsArray().ValueType
 			valuePath = ast.Path{
 				{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
 			}
+		} else if mapping.RepeatFor != nil && assignment.Method == ast.IndexAssignment {
+			// index
+			indexPath := ast.Path{
+				{Identifier: mapping.RepeatIndex, Type: valueType, Root: true},
+			}
+			indexType := assignment.Path.Last().Index.Argument.Type
+			argument := generator.argumentForType(context, converter, mapping.RepeatIndex, indexPath, indexType)
+			optMapping.Args = append(optMapping.Args, argument)
+
+			// value
+			valuePath = ast.Path{
+				{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+			}
+			argument = generator.argumentForType(context, converter, argName, valuePath, valueType)
+			optMapping.Args = append(optMapping.Args, argument)
+			continue
 		}
 
 		if argument, ok := generator.argumentFromDisjunctionStruct(context, converter, argName, valuePath, assignment); ok {
@@ -371,7 +395,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 		}
 	}
 
-	possibleBuilders := generator.buildersForType(context, typeDef)
+	possibleBuilders := context.BuildersForType(typeDef)
 	// hack to use the runtime to convert panels
 	// TODO: find a better way to handle this case (ie: something more generic than hardcoding it :/)
 	if len(possibleBuilders) > 1 && strings.EqualFold(possibleBuilders[0].Package, "dashboard") && strings.EqualFold("panel", possibleBuilders[0].For.Name) {
@@ -474,6 +498,10 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 			guards.Set(guard.String(), guard)
 		}
 
+		if assignment.Method == ast.IndexAssignment {
+			continue
+		}
+
 		if assignment.Value.Constant != nil {
 			guard := MappingGuard{
 				Path:  valuesRootPath.Append(assignment.Path),
@@ -567,40 +595,4 @@ func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) st
 	}
 
 	return path
-}
-
-func (generator *ConverterGenerator) buildersForType(context Context, typeDef ast.Type) ast.Builders {
-	var candidateBuilders ast.Builders
-
-	var search func(def ast.Type)
-	search = func(def ast.Type) {
-		if def.IsArray() {
-			search(def.AsArray().ValueType)
-			return
-		}
-		if def.IsMap() {
-			search(def.AsMap().ValueType)
-			return
-		}
-
-		if def.IsDisjunction() {
-			for _, branch := range def.AsDisjunction().Branches {
-				search(branch)
-			}
-
-			return
-		}
-
-		if !def.IsRef() {
-			return
-		}
-
-		ref := def.AsRef()
-		builders := context.Builders.LocateAllByObject(ref.ReferredPkg, ref.ReferredType)
-		candidateBuilders = append(candidateBuilders, builders...)
-	}
-
-	search(typeDef)
-
-	return candidateBuilders
 }

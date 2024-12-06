@@ -42,11 +42,29 @@ func formatValue(val any) string {
 }
 
 func formatFieldPath(fieldPath ast.Path) string {
-	parts := tools.Map(fieldPath, func(part ast.PathItem) string {
-		return formatIdentifier(part.Identifier)
-	})
+	path := ""
 
-	return strings.Join(parts, ".")
+	for i, chunk := range fieldPath {
+		last := i == len(fieldPath)-1
+		output := formatIdentifier(chunk.Identifier)
+
+		if chunk.Index != nil {
+			output += "["
+			if chunk.Index.Constant != nil {
+				output += formatValue(chunk.Index.Constant)
+			} else {
+				output += formatIdentifier(chunk.Index.Argument.Name)
+			}
+			output += "]"
+		}
+
+		path += output
+		if !last && fieldPath[i+1].Index == nil {
+			path += "."
+		}
+	}
+
+	return path
 }
 
 func formatIdentifier(name string) string {

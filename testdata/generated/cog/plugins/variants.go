@@ -5,10 +5,6 @@
 
 package plugins
 
-import (
-	cog "github.com/grafana/cog/testdata/generated/cog"
-)
-
 func RegisterDefaultPlugins() {
 
 	// Panelcfg variants

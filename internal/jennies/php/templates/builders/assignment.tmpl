@@ -92,5 +92,6 @@
 
 {{- define "assignment_method" }}
     {{ if eq .Method "direct" }}$this->internal->{{ .Path|formatPath }} = {{ .Value }};{{ end -}}
+    {{ if eq .Method "index" }}$this->internal->{{ .Path|formatPath }} = {{ .Value }};{{ end -}}
     {{ if eq .Method "append" }}$this->internal->{{ .Path|formatPath }}[] = {{ .Value }};{{ end -}}
 {{- end }}

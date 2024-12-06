@@ -139,3 +139,37 @@ func (context *Context) ResolveRefs(def ast.Type) ast.Type {
 
 	return context.ResolveRefs(referredObj.Type)
 }
+
+func (context *Context) BuildersForType(typeDef ast.Type) ast.Builders {
+	var candidateBuilders ast.Builders
+
+	var search func(def ast.Type)
+	search = func(def ast.Type) {
+		if def.IsArray() {
+			search(def.AsArray().ValueType)
+			return
+		}
+		if def.IsMap() {
+			search(def.AsMap().ValueType)
+			return
+		}
+
+		if def.IsDisjunction() {
+			for _, branch := range def.AsDisjunction().Branches {
+				search(branch)
+			}
+
+			return
+		}
+
+		if !def.IsRef() {
+			return
+		}
+
+		candidateBuilders = append(candidateBuilders, context.Builders.LocateAllByRef(def.AsRef())...)
+	}
+
+	search(typeDef)
+
+	return candidateBuilders
+}
