@@ -346,24 +346,6 @@ func (envelope *AssignmentEnvelope) DeepCopy() AssignmentEnvelope {
 	return clone
 }
 
-type AssignmentIndex struct {
-	Argument *Argument `json:",omitempty"`
-	Constant any       `json:",omitempty"`
-}
-
-func (value *AssignmentIndex) DeepCopy() AssignmentIndex {
-	clone := AssignmentIndex{
-		Constant: value.Constant,
-	}
-
-	if value.Argument != nil {
-		arg := value.Argument.DeepCopy()
-		clone.Argument = &arg
-	}
-
-	return clone
-}
-
 type AssignmentValue struct {
 	Argument *Argument           `json:",omitempty"`
 	Constant any                 `json:",omitempty"`
