@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/cog/plugins"
+	"github.com/grafana/cog/generated/go/common"
 	"github.com/grafana/cog/generated/go/dashboard"
 	"github.com/grafana/cog/generated/go/timeseries"
 )
@@ -50,11 +51,12 @@ func dashboardBuilder() []byte {
 					}).
 					RefId("A"), // this field is also present in dataquery schemas
 				).
+				// TODO: simplify this
 				WithTransformation(dashboard.NewTransformationKindBuilder().
 					Kind("transformation ID. eg: `sortBy`").
 					Spec(dashboard.NewDataTransformerConfigBuilder().
 						Id("what's this ID?").
-						Topic(dashboard.DataTopicSeries).
+						Topic(common.DataTopicSeries).
 						Options(map[string]any{
 							"fields": map[string]any{},
 							"sort": []map[string]any{
