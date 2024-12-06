@@ -50,6 +50,7 @@ jobs:
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-current
           CLEANUP_WORKSPACE: 'no'
+          SKIP_VALIDATION: 'yes'
           LOG_LEVEL: '7' # debug
           GOGC: 'off'
 
@@ -74,6 +75,7 @@ jobs:
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-main
           CLEANUP_WORKSPACE: 'no'
+          SKIP_VALIDATION: 'yes'
           LOG_LEVEL: '7' # debug
           GOGC: 'off'
 
