@@ -126,7 +126,7 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 {{- define "conversion_mapping" -}}
     {{- $firstOpt := .Options | first }}
     {{- with $firstOpt.Guards -}}if ({{ template "guards" . }}) { {{- end }}
-    {{ if ne .RepeatFor nil -}}foreach (${{ .RepeatFor | formatPath }} as ${{ .RepeatAs }}) { {{- end }}
+    {{ if ne .RepeatFor nil -}}foreach (${{ .RepeatFor | formatPath }} as {{if ne .RepeatIndex "" }}${{ .RepeatIndex }} => {{ end }}${{ .RepeatAs }}) { {{- end }}
     {{- range $optMapping := .Options }}
         {{ template "option_mapping" $optMapping }}
     {{- end }}

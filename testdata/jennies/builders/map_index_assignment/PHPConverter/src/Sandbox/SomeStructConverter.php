@@ -10,19 +10,22 @@ final class SomeStructConverter
         $calls = [
             '(new \Grafana\Foundation\Sandbox\SomeStructBuilder())',
         ];
-            if ($input->annotations[$key] !== "") {
-    
-        
+            
+    foreach ($input->annotations as $key => $value) {
+        {
     $buffer = 'annotations(';
-        $arg0 =\var_export($input->annotations[$key], true);
+        $arg0 =\var_export($key, true);
         $buffer .= $arg0;
+        $buffer .= ', ';
+        $arg1 =\var_export($value, true);
+        $buffer .= $arg1;
         
     $buffer .= ')';
 
     $calls[] = $buffer;
-    
-    
     }
+    }
+    
 
         return \implode("\n\t->", $calls);
     }
