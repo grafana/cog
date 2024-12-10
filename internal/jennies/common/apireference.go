@@ -393,7 +393,7 @@ title: %[2]s %[1]s
 
 func (jenny APIReference) packageBadge(schema *ast.Schema) string {
 	if schema.Metadata.Kind == ast.SchemaKindCore {
-		return fmt.Sprintf("<span class=\"badge package-core\"></span>")
+		return "<span class=\"badge package-core\"></span>"
 	}
 
 	if schema.Metadata.Variant == "" {
