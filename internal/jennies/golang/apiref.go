@@ -12,7 +12,7 @@ import (
 
 func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 	builderName := func(builder ast.Builder) string {
-		return tools.UpperCamelCase(builder.Name) + "Builder"
+		return formatObjectName(builder.Name) + "Builder"
 	}
 	methodSignature := func(context languages.Context, method common.MethodReference) string {
 		args := tools.Map(method.Arguments, func(arg common.ArgumentReference) string {
@@ -93,7 +93,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			})
 		},
 		OptionName: func(option ast.Option) string {
-			return tools.UpperCamelCase(option.Name)
+			return formatFunctionName(option.Name)
 		},
 		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
 			dummyImports := NewImportMap("")
