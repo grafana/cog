@@ -142,11 +142,13 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 				}
 			}
 
+			objectName := tools.UpperCamelCase(referredObj.Name)
+
 			if referredPkg == "" {
-				return raw(fmt.Sprintf("%s.%s", referredObj.Name, enumName))
+				return raw(objectName + "." + enumName)
 			}
 
-			return raw(fmt.Sprintf("%s.%s.%s", referredPkg, referredObj.Name, enumName))
+			return raw(referredPkg + "." + objectName + "." + enumName)
 		} else if found && referredObj.Type.IsDisjunction() {
 			return defaultValueForType(schemas, referredObj.Type, importModule, nil)
 		}
@@ -180,7 +182,7 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 
 		formattedRef := ref.ReferredType
 		if referredPkg != "" {
-			formattedRef = fmt.Sprintf("%s.%s", referredPkg, ref.ReferredType)
+			formattedRef = referredPkg + "." + ref.ReferredType
 		}
 
 		if referredObj.Type.IsConcreteScalar() {
