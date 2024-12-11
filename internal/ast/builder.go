@@ -147,14 +147,9 @@ func (builders Builders) ByPackage(pkg string) Builders {
 }
 
 func (builders Builders) LocateAllByObject(pkg string, name string) Builders {
-	var results Builders
-	for _, builder := range builders {
-		if builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name {
-			results = append(results, builder)
-		}
-	}
-
-	return results
+	return tools.Filter(builders, func(builder Builder) bool {
+		return builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name
+	})
 }
 
 func (builders Builders) LocateAllByRef(ref RefType) Builders {
