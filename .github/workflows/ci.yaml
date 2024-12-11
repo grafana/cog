@@ -134,11 +134,8 @@ jobs:
           restore-keys: |
             php-linters-result-cache-
 
-      - name: Lint generated PHP code with phpstan
-        run: devbox run phpstan analyze --memory-limit 512M -c .config/ci/php/phpstan.neon
-
-      - name: Lint generated PHP code with psalm
-        run: devbox run psalm -c .config/ci/php/psalm.xml generated/php
+      - name: Lint generated PHP code
+        run: devbox run ./scripts/ci/build-php.sh
 
   examples:
     name: Run examples

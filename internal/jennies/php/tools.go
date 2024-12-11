@@ -185,7 +185,7 @@ func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, d
 				}
 			}
 
-			return raw(fmt.Sprintf(config.fullNamespaceRef(referredPkg+"\\"+referredObj.Name)+"::%s()", enumName))
+			return raw(fmt.Sprintf(config.fullNamespaceRef(referredPkg+"\\"+formatObjectName(referredObj.Name))+"::%s()", enumName))
 		} else if found && referredObj.Type.IsDisjunction() {
 			return defaultValueForType(config, schemas, referredObj.Type, nil)
 		}
@@ -217,9 +217,9 @@ func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, d
 			})
 		}
 
-		formattedRef := ref.ReferredType
+		formattedRef := formatObjectName(ref.ReferredType)
 		if referredPkg != "" {
-			formattedRef = config.fullNamespaceRef(referredPkg + "\\" + ref.ReferredType)
+			formattedRef = config.fullNamespaceRef(referredPkg + "\\" + formattedRef)
 		}
 
 		if referredObj.Type.IsConcreteScalar() {
