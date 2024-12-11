@@ -16,7 +16,7 @@ func DashboardConverter(input Dashboard) string {
         if input.Panels != nil {
         
     buffer.WriteString(`Panels(`)
-        arg0 := "map[string]map_of_builders.Panel{"
+        arg0 := "map[string]cog.Builder[map_of_builders.Panel]{"
         for key, arg1 := range input.Panels {
             tmppanelsarg1 := PanelConverter(arg1)
             arg0 += "\t" + fmt.Sprintf("%#v", key) + ": " + tmppanelsarg1 +","
