@@ -18,7 +18,7 @@ class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
     def annotations(self, key: str, value: str) -> typing.Self:        
         if self._internal.annotations is None:
             self._internal.annotations = {}
-        assert isinstance(self._internal.annotations, dict[str, str])
+        
         self._internal.annotations[key] = value
     
         return self
