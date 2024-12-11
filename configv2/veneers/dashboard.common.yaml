@@ -59,7 +59,7 @@ builders:
   - omit: { by_object: PanelQuerySpec }
   - rename:
       by_object: PanelQueryKind
-      as: PanelQuery
+      as: Target
 
   # Dataquery DataQueryKind composability
   - compose_dataquery:
@@ -117,7 +117,7 @@ builders:
   # Panels VizConfigSpec composability
   - compose_dashboard_panel:
       panel_builder_name: dashboard.VizConfigKind
-      composed_builder_name: VizConfig
+      composed_builder_name: Visualization
       plugin_discriminator_field: kind
       composition_map: # Builder → assignment root path
         Options: "spec.options"
@@ -146,9 +146,9 @@ options:
   # Append a single `item` value instead of a map of everything
   - duplicate:
       by_builder: GridLayout.items
-      as: withItem
+      as: item
   - array_to_append:
-      by_builder: GridLayout.withItem
+      by_builder: GridLayout.item
 
   ###########
   # Queries #
@@ -160,19 +160,33 @@ options:
   # spec options were merged into PanelQuery
   - omit: { by_builder: PanelQuery.spec }
 
-  # Append a single query instead forcing to define all of them at once
-  - duplicate:
+  # queries() → targets()
+  - rename:
       by_name: QueryGroupKind.queries
-      as: withQuery
+      as: targets
+
+  # Append a single target instead forcing to define all of them at once
+  - duplicate:
+      by_name: QueryGroupKind.targets
+      as: target
   - array_to_append:
-      by_name: QueryGroupKind.withQuery
+      by_name: QueryGroupKind.target
 
   # Append a single transformation instead forcing to define all of them at once
   - duplicate:
       by_name: QueryGroupKind.transformations
-      as: withTransformation
+      as: transformation
   - array_to_append:
-      by_name: QueryGroupKind.withTransformation
+      by_name: QueryGroupKind.transformation
+
+  ##########
+  # Panels #
+  ##########
+
+  # VizConfig() → Visualization()
+  - rename:
+      by_name: PanelKind.VizConfig
+      as: visualization
 
   ##############
   # Dashboards #
@@ -188,6 +202,6 @@ options:
   # Append a single override instead forcing to define all of them at once
   - duplicate:
       by_name: VizConfigKind.overrides
-      as: withOverride
+      as: override
   - array_to_append:
-      by_name: VizConfigKind.withOverride
+      by_name: VizConfigKind.override

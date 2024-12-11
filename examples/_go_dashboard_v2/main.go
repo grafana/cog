@@ -16,6 +16,7 @@ func dashboardBuilder() []byte {
 	builder := dashboard.NewDashboardBuilder("[TEST] Node Exporter / Raspberry").
 		//Uid("test-dashboard-raspberry"). // no more dashboard UID? (is it because the schema is just for a dashboard "spec"?)
 		Tags([]string{"generated", "raspberrypi-node-integration"}).
+		CursorSync(dashboard.DashboardCursorSyncCrosshair).
 		TimeSettings(dashboard.NewTimeSettingsBuilder().
 			AutoRefresh("30s").
 			AutoRefreshIntervals([]string{"5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"}).
@@ -23,16 +24,21 @@ func dashboardBuilder() []byte {
 			To("now").
 			Timezone("browser"),
 		).
-		CursorSync(dashboard.DashboardCursorSyncCrosshair).
 		WithElement("somePanel", dashboard.NewPanelBuilder().
 			Uid("somePanelUid"). // TODO: should this be equal to the element ref, or unrelated?
 			Title("Some panel").
 			Description("veeery descriptive").
-			// TODO: better method names. Maybe Vizualization(timeseries.NewVizualization())
-			VizConfig(timeseries.NewVizConfigBuilder().
+			Visualization(timeseries.NewVisualizationBuilder().
 				Unit("s").
 				PointSize(5).
-				WithOverride(
+				/*
+					// This would be nice
+					overrideByName("Available", []dashboard.DynamicConfigValue{
+							{Id: "custom.width", Value: 88},
+						},
+					))
+				*/
+				Override(
 					dashboard.MatcherConfig{Id: "byName", Options: "Available"},
 					[]dashboard.DynamicConfigValue{
 						{Id: "custom.width", Value: 88},
@@ -40,24 +46,21 @@ func dashboardBuilder() []byte {
 				),
 			).
 			Data(dashboard.NewQueryGroupBuilder().
-				// TODO: WithQuery() followed by Query() is a bit repetitive/confusing. Better names needed.
-				// Maybe WithTarget(
-				//   Query(),
-				//   Datasource(),
-				//   RefId(),
-				// )
-				WithQuery(dashboard.NewPanelQueryBuilder().
+				Target(dashboard.NewTargetBuilder().
 					Query(loki.NewQueryBuilder().
+						RefId("A").  // TODO: also present on the target builder
+						Hide(false). // TODO: also present on the target builder
 						Expr("loki expr"),
 					).
 					Datasource(dashboard.DataSourceRef{
 						Type: cog.ToPtr("loki"),
 						Uid:  cog.ToPtr("some-loki-datasource"),
 					}).
+					Hidden(false).
 					RefId("A"), // this field is also present in dataquery schemas
 				).
 				// TODO: simplify this
-				WithTransformation(dashboard.NewTransformationKindBuilder().
+				Transformation(dashboard.NewTransformationKindBuilder().
 					Kind("transformation ID. eg: `sortBy`").
 					Spec(dashboard.NewDataTransformerConfigBuilder().
 						Id("what's this ID?").
@@ -73,11 +76,12 @@ func dashboardBuilder() []byte {
 			),
 		).
 		Layout(dashboard.NewGridLayoutBuilder().
-			WithItem(dashboard.NewGridLayoutItemBuilder().
-				X(0).
+			Item(dashboard.NewGridLayoutItemBuilder().
+				X(0). // TODO: X/Y calculations based on height and width?
 				Y(0).
 				Height(200).
 				Width(200).
+				// TODO: proper references
 				Element(dashboard.NewElementReferenceBuilder().Name("somePanel")),
 			),
 		)
