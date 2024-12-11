@@ -120,7 +120,7 @@ jobs:
             gradle-build-cache-${{ runner.os }}-
 
       - name: Compile generated Java code
-        run: devbox run gradle build --build-cache -p generated/java
+        run: devbox run ./scripts/ci/build-java.sh
 
       # See https://phpstan.org/user-guide/result-cache
       # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
