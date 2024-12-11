@@ -284,7 +284,7 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	if pkg != "" {
-		return raw(fmt.Sprintf("%s.default%s()", pkg, referredTypeName))
+		return raw(fmt.Sprintf("%s.default%s()", pkg, tools.UpperCamelCase(referredTypeName)))
 	}
 
 	return raw(fmt.Sprintf("default%s()", tools.UpperCamelCase(referredTypeName)))
