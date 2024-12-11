@@ -25,7 +25,7 @@
         {{- $argName := formatArgName .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-            {{- $argName = .Type.IsArray | ternary (print $argName "Resources") (print $argName "Resource") }}
+            {{- $argName = (or .Type.IsArray .Type.IsMap) | ternary (print $argName "Resources") (print $argName "Resource") }}
         {{- end }}
 
         {{- print "$" $argName }}
@@ -39,7 +39,7 @@
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- $builtResultName := (print (formatArgName .Name) "Resource") }}
-        {{- if .Type.IsArray }}
+        {{- if or .Type.IsArray .Type.IsMap }}
         {{- $builtResultName = (print (formatArgName .Name) "Resources") }}
         ${{ $builtResultName }} = [];
         {{- end }}
@@ -68,6 +68,22 @@
                 ${{ .ResultVar }}[] = $r{{ .Depth }} instanceof {{ "Cog\\Builder" | fullNamespaceRef }} ? $r{{ .Depth }}->build() : $r{{ .Depth }};
                 {{- else }}
                 ${{ .ResultVar }}[] = $r{{ .Depth }}->build();
+                {{- end }}
+            {{- end }}
+        }
+    {{- else if .InputType.IsMap }}
+        foreach (${{ .InputVar }} as $key{{ .Depth }} => $val{{ .Depth }}) {
+            {{- if or .InputType.Map.ValueType.IsArray .InputType.Map.ValueType.IsMap }}
+                ${{ .OriginalInputVar }}Depth{{ .Depth }} = [];
+
+                {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Map.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "val" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
+
+                ${{ .ResultVar }}[$key{{ .Depth }}] = ${{ .OriginalInputVar }}Depth{{ .Depth }};
+            {{- else }}
+                {{- if and .InputType.Map.ValueType.IsDisjunction (not (isDisjunctionOfBuilders .InputType.Map.ValueType)) }}
+                ${{ .ResultVar }}[$key{{ .Depth }}] = $val{{ .Depth }} instanceof {{ "Cog\\Builder" | fullNamespaceRef }} ? $val{{ .Depth }}->build() : $val{{ .Depth }};
+                {{- else }}
+                ${{ .ResultVar }}[$key{{ .Depth }}] = $val{{ .Depth }}->build();
                 {{- end }}
             {{- end }}
         }
