@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/cog/generated/go/cog/plugins"
 	"github.com/grafana/cog/generated/go/common"
 	"github.com/grafana/cog/generated/go/dashboard"
+	"github.com/grafana/cog/generated/go/loki"
 	"github.com/grafana/cog/generated/go/timeseries"
 )
 
@@ -27,6 +28,7 @@ func dashboardBuilder() []byte {
 			Uid("somePanelUid"). // TODO: should this be equal to the element ref, or unrelated?
 			Title("Some panel").
 			Description("veeery descriptive").
+			// TODO: better method names. Maybe Vizualization(timeseries.NewVizualization())
 			VizConfig(timeseries.NewVizConfigBuilder().
 				Unit("s").
 				PointSize(5).
@@ -38,16 +40,19 @@ func dashboardBuilder() []byte {
 				),
 			).
 			Data(dashboard.NewQueryGroupBuilder().
+				// TODO: WithQuery() followed by Query() is a bit repetitive/confusing. Better names needed.
+				// Maybe WithTarget(
+				//   Query(),
+				//   Datasource(),
+				//   RefId(),
+				// )
 				WithQuery(dashboard.NewPanelQueryBuilder().
-					Query(dashboard.NewDataQueryKindBuilder().
-						Kind("prometheus").
-						Spec(map[string]string{
-							"expr": "query here",
-						}),
+					Query(loki.NewQueryBuilder().
+						Expr("loki expr"),
 					).
 					Datasource(dashboard.DataSourceRef{
-						Type: cog.ToPtr("prometheus"),
-						Uid:  cog.ToPtr("some-prometheus-datasource"),
+						Type: cog.ToPtr("loki"),
+						Uid:  cog.ToPtr("some-loki-datasource"),
 					}).
 					RefId("A"), // this field is also present in dataquery schemas
 				).
