@@ -53,13 +53,8 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"formatBuilderFieldType":        jenny.typeFormatter.formatBuilderFieldType,
 		"formatType":                    jenny.typeFormatter.formatFieldType,
 		"typeHasBuilder":                jenny.typeFormatter.typeHasBuilder,
-		"resolvesToComposableSlot":      jenny.typeFormatter.resolvesToComposableSlot,
 		"emptyValueForType":             jenny.typeFormatter.defaultValueFor,
-		"formatCastValue":               jenny.typeFormatter.formatCastValue,
-		"formatAssignmentPath":          jenny.typeFormatter.formatAssignmentPath,
-		"formatPath":                    jenny.typeFormatter.formatFieldPath,
 		"shouldCastNilCheck":            jenny.typeFormatter.shouldCastNilCheck,
-		"formatRefType":                 jenny.typeFormatter.formatRefType,
 		"fillNullableAnnotationPattern": jenny.typeFormatter.fillNullableAnnotationPattern,
 	})
 }
@@ -266,10 +261,6 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 
 func (jenny RawTypes) defaultConstructor(object ast.Object) []ast.Argument {
 	if object.Type.IsStructGeneratedFromDisjunction() {
-		return nil
-	}
-
-	if object.Name == "Options" || object.Name == "FieldConfig" {
 		return nil
 	}
 

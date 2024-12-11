@@ -47,7 +47,6 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- if and (ne .ToJSONFunction "") (not .Extends) }}
     {{ .ToJSONFunction }}
     {{- end }}
-
 }
 {{- end }}
 

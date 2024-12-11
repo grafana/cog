@@ -68,9 +68,16 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 	}
 
 	return jenny.tmpl.Funcs(map[string]any{
-		"formatBuilderFieldType": jenny.typeFormatter.formatBuilderFieldType,
-		"emptyValueForType":      jenny.typeFormatter.defaultValueFor,
-		"shouldCastNilCheck":     jenny.typeFormatter.shouldCastNilCheck,
+		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
+		"emptyValueForType":        jenny.typeFormatter.defaultValueFor,
+		"shouldCastNilCheck":       jenny.typeFormatter.shouldCastNilCheck,
+		"formatCastValue":          jenny.typeFormatter.formatCastValue,
+		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
+		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
+		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,
+		"formatPath":               jenny.typeFormatter.formatFieldPath,
+		"formatRefType":            jenny.typeFormatter.formatRefType,
+		"formatType":               jenny.typeFormatter.formatFieldType,
 	}).RenderAsBytes("builders/builder.tmpl", tmpl)
 }
 
