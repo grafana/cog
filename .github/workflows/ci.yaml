@@ -107,7 +107,7 @@ jobs:
         run: devbox run ./scripts/ci/build-ts.sh
 
       - name: Lint generated Python code
-        run: devbox run mypy generated/python/
+        run: devbox run ./scripts/ci/build-python.sh
 
       # See https://docs.gradle.org/current/userguide/build_cache.html
       - name: Restore Gradle build cache
