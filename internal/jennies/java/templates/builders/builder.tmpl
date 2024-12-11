@@ -7,7 +7,7 @@ package {{ .Package }};
 {{- $class }}
 
 {{- define "builder2" }}
-public class {{ .BuilderName }}Builder{{ if .IsGeneric }}<T extends {{ .BuilderName }}Builder<T>>{{ end }} implements {{ if not (eq .ImportAlias "") }}{{ .ImportAlias }}.{{ end }}cog.Builder<{{ .BuilderSignatureType }}> {
+public class {{ .BuilderName }}Builder{{ if .IsGenericPanel }}<T extends {{ .BuilderName }}Builder<T>>{{ end }} implements {{ if not (eq .ImportAlias "") }}{{ .ImportAlias }}.{{ end }}cog.Builder<{{ .BuilderSignatureType }}> {
     protected final {{ .ObjectName }} internal;
     
     {{- range .Properties }}
@@ -33,11 +33,11 @@ public class {{ .BuilderName }}Builder{{ if .IsGeneric }}<T extends {{ .BuilderN
     }
     
 {{- range $opt := .Options }}
-public {{ if $.IsGeneric }}T {{ else }}{{ $.BuilderName }}Builder {{ end }}{{ .Name | lowerCamelCase | escapeVar }}({{- template "args" (dict "Arguments" .Args "IsBuilder" true) }}) {
+public {{ if $.IsGenericPanel }}T {{ else }}{{ $.BuilderName }}Builder {{ end }}{{ .Name | lowerCamelCase | escapeVar }}({{- template "args" (dict "Arguments" .Args "IsBuilder" true) }}) {
     {{- range .Assignments }}
         {{- template "assignment" (dict "Assignment" . "BuilderName" $.BuilderName "OptionName" $opt.Name) }}
     {{- end }}
-    return {{ if $.IsGeneric }}(T) {{ end }}this;
+    return {{ if $.IsGenericPanel }}(T) {{ end }}this;
 }
 {{ end -}}
     

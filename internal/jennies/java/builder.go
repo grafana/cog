@@ -64,7 +64,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		Properties:           builder.Properties,
 		Defaults:             jenny.genDefaults(context, builder.Options),
 		ImportAlias:          jenny.config.PackagePath,
-		IsGeneric:            builder.For.SelfRef.ReferredPkg == "dashboard" && object.Name == "Panel",
+		IsGenericPanel:       jenny.isGenericPanel(builder),
 	}
 
 	return jenny.tmpl.Funcs(map[string]any{
@@ -84,6 +84,14 @@ func (jenny Builder) getBuilderSignature(pkg string, obj ast.Object) string {
 	}
 
 	return fmt.Sprintf("%s.%s", jenny.typeFormatter.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Type.ImplementedVariant()))
+}
+
+func (jenny Builder) isGenericPanel(builder ast.Builder) bool {
+	if builder.Package != builder.For.SelfRef.ReferredPkg {
+		return false
+	}
+
+	return builder.Name == "Panel"
 }
 
 func (jenny Builder) genDefaults(context languages.Context, options []ast.Option) []OptionCall {

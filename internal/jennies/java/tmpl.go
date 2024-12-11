@@ -131,7 +131,7 @@ type BuilderTemplate struct {
 	Properties           []ast.StructField
 	Options              []ast.Option
 	Defaults             []OptionCall
-	IsGeneric            bool
+	IsGenericPanel       bool
 }
 
 type OptionCall struct {
