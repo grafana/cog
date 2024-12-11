@@ -13,4 +13,4 @@ options:
 
   # WithOverride(matcher, properties) instead of WithOverride(struct{...})
   - struct_fields_as_arguments:
-      by_name: VizConfigKind.withOverride
+      by_name: VizConfigKind.override
