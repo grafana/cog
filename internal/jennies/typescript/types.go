@@ -127,7 +127,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 	case ast.KindStruct:
 		return formatter.formatStructFields(def)
 	case ast.KindMap:
-		return formatter.formatMap(def.AsMap())
+		return formatter.formatMap(def.AsMap(), resolveBuilders)
 	case ast.KindEnum:
 		return formatter.formatAnonymousEnum(def.AsEnum())
 	case ast.KindScalar:
@@ -247,9 +247,9 @@ func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType, resol
 	return strings.Join(subTypes, " | ")
 }
 
-func (formatter *typeFormatter) formatMap(def ast.MapType) string {
-	keyTypeString := formatter.doFormatType(def.IndexType, false)
-	valueTypeString := formatter.doFormatType(def.ValueType, false)
+func (formatter *typeFormatter) formatMap(def ast.MapType, resolveBuilders bool) string {
+	keyTypeString := formatter.doFormatType(def.IndexType, resolveBuilders)
+	valueTypeString := formatter.doFormatType(def.ValueType, resolveBuilders)
 
 	return fmt.Sprintf("Record<%s, %s>", keyTypeString, valueTypeString)
 }
