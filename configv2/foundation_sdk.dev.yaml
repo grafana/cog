@@ -51,10 +51,10 @@ output:
         generate_strict_unmarshaller: true
         generate_equal: true
         generate_validate: true
-    #- jsonschema: {}
-    #- openapi: {}
-    #- php:
-    #    namespace_root: '%php_namespace_root%'
+    - jsonschema: {}
+    - openapi: {}
+    - php:
+        namespace_root: '%php_namespace_root%'
         #builder_templates:
         #  - '%__config_dir%/templates/php'
     #- python:
