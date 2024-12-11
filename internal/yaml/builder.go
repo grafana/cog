@@ -268,9 +268,5 @@ func (selector BuilderSelector) AsSelector(pkg string) (builder.Selector, error)
 		return builder.StructGeneratedFromDisjunction(), nil
 	}
 
-	if selector.ByVariant != nil {
-		return builder.ByVariant(ast.SchemaVariant(*selector.ByVariant)), nil
-	}
-
 	return nil, fmt.Errorf("empty selector")
 }
