@@ -17,7 +17,7 @@ type BuilderRule struct {
 	Omit                     *BuilderSelector          `yaml:"omit"`
 	Rename                   *RenameBuilder            `yaml:"rename"`
 	MergeInto                *MergeInto                `yaml:"merge_into"`
-	ComposeDashboardPanel    *ComposeDashboardPanel    `yaml:"compose_dashboard_panel"`
+	ComposeBuilders          *ComposeBuilders          `yaml:"compose"`
 	Properties               *Properties               `yaml:"properties"`
 	Duplicate                *Duplicate                `yaml:"duplicate"`
 	Initialize               *Initialize               `yaml:"initialize"`
@@ -44,8 +44,8 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 		return rule.MergeInto.AsRewriteRule(pkg)
 	}
 
-	if rule.ComposeDashboardPanel != nil {
-		return rule.ComposeDashboardPanel.AsRewriteRule()
+	if rule.ComposeBuilders != nil {
+		return rule.ComposeBuilders.AsRewriteRule(pkg)
 	}
 
 	if rule.Properties != nil {
@@ -108,21 +108,28 @@ func (rule MergeInto) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	), nil
 }
 
-type ComposeDashboardPanel struct {
-	PanelBuilderName         string            `yaml:"panel_builder_name"`
+type ComposeBuilders struct {
+	BuilderSelector `yaml:",inline"`
+
+	SourceBuilderName        string            `yaml:"source_builder_name"`
 	PluginDiscriminatorField string            `yaml:"plugin_discriminator_field"`
-	ExcludePanelOptions      []string          `yaml:"exclude_panel_options"`
+	ExcludeOptions           []string          `yaml:"exclude_options"`
 	CompositionMap           map[string]string `yaml:"composition_map"`
 	ComposedBuilderName      string            `yaml:"composed_builder_name"`
 }
 
-func (rule ComposeDashboardPanel) AsRewriteRule() (builder.RewriteRule, error) {
-	return builder.ComposeDashboardPanel(
-		builder.ComposableDashboardPanel(),
-		builder.PanelCompositionConfig{
-			PanelBuilderName:         rule.PanelBuilderName,
+func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.ComposeBuilders(
+		selector,
+		builder.CompositionConfig{
+			SourceBuilderName:        rule.SourceBuilderName,
 			PluginDiscriminatorField: rule.PluginDiscriminatorField,
-			ExcludePanelOptions:      rule.ExcludePanelOptions,
+			ExcludeOptions:           rule.ExcludeOptions,
 			CompositionMap:           rule.CompositionMap,
 			ComposedBuilderName:      rule.ComposedBuilderName,
 		},
@@ -239,6 +246,8 @@ type BuilderSelector struct {
 	ByObject *string `yaml:"by_object"`
 	ByName   *string `yaml:"by_name"`
 
+	ByVariant *string `yaml:"by_variant"`
+
 	GeneratedFromDisjunction *bool `yaml:"generated_from_disjunction"` // noop?
 }
 
@@ -249,6 +258,10 @@ func (selector BuilderSelector) AsSelector(pkg string) (builder.Selector, error)
 
 	if selector.ByName != nil {
 		return builder.ByName(pkg, *selector.ByName), nil
+	}
+
+	if selector.ByVariant != nil {
+		return builder.ByVariant(ast.SchemaVariant(*selector.ByVariant)), nil
 	}
 
 	if selector.GeneratedFromDisjunction != nil {
