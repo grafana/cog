@@ -180,9 +180,9 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 			})
 		}
 
-		formattedRef := ref.ReferredType
+		formattedRef := tools.UpperCamelCase(ref.ReferredType)
 		if referredPkg != "" {
-			formattedRef = referredPkg + "." + ref.ReferredType
+			formattedRef = referredPkg + "." + formattedRef
 		}
 
 		if referredObj.Type.IsConcreteScalar() {
