@@ -113,7 +113,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 		}
 
 		if def.IsMap() {
-			return formatter.formatMap(def.AsMap())
+			return formatter.formatMap(def.AsMap(), resolveBuilders)
 		}
 
 		if def.IsScalar() {
@@ -234,9 +234,9 @@ func (formatter *typeFormatter) formatArray(def ast.ArrayType, resolveBuilders b
 	return "[]" + subTypeString
 }
 
-func (formatter *typeFormatter) formatMap(def ast.MapType) string {
-	keyTypeString := formatter.doFormatType(def.IndexType, false)
-	valueTypeString := formatter.doFormatType(def.ValueType, false)
+func (formatter *typeFormatter) formatMap(def ast.MapType, resolveBuilders bool) string {
+	keyTypeString := formatter.doFormatType(def.IndexType, resolveBuilders)
+	valueTypeString := formatter.doFormatType(def.ValueType, resolveBuilders)
 
 	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)
 }
