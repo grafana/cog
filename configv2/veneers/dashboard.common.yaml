@@ -61,6 +61,17 @@ builders:
       by_object: PanelQueryKind
       as: PanelQuery
 
+  # Dataquery DataQueryKind composability
+  - compose_dataquery:
+      source_builder_name: dashboard.DataQueryKind
+      composed_builder_name: Query
+      plugin_discriminator_field: kind
+      composition_map: # Builder → assignment root path
+        __schema_entrypoint: spec
+      exclude_options: [
+        "spec",
+      ]
+
   ##############
   # Dashboards #
   ##############

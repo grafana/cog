@@ -58,3 +58,17 @@ func ByVariant(variant ast.SchemaVariant) Selector {
 			schema.Metadata.Identifier != ""
 	}
 }
+
+// ComposableDataquery matches builders for dataquery variants.
+func ComposableDataquery() Selector {
+	return func(schemas ast.Schemas, builder ast.Builder) bool {
+		schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
+		if !found {
+			return false
+		}
+
+		return schema.Metadata.Kind == ast.SchemaKindComposable &&
+			schema.Metadata.Variant == ast.SchemaVariantDataQuery &&
+			schema.Metadata.Identifier != ""
+	}
+}
