@@ -20,7 +20,7 @@
 {{- define "assignment_setup" }}
 {{- with .Value.Argument }}
 {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-{{- $builtResultSuffix := ternary "_resources" "_resource" .Type.IsArray }}
+{{- $builtResultSuffix := ternary "_resources" "_resource" (or .Type.IsArray .Type.IsMap) }}
 {{ .Name|formatIdentifier }}{{ $builtResultSuffix }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (formatIdentifier .Name) "Depth" 1) }}
 {{- end }}
 {{- end }}
@@ -34,6 +34,8 @@
 {{- define "unfold_builders" }}
 {{- if .InputType.IsArray -}}
 [{{ template "unfold_builders" (dict "InputType" .InputType.Array.ValueType "InputVar" (print "r" .Depth ) "Depth" (add1 .Depth)) }} for r{{ .Depth }} in {{ .InputVar }}]
+{{- else if .InputType.IsMap -}}
+{ key{{.Depth}}: {{ template "unfold_builders" (dict "InputType" .InputType.Map.ValueType "InputVar" (print "val" .Depth ) "Depth" (add1 .Depth)) }} for (key{{.Depth}}, val{{ .Depth }}) in {{ .InputVar }}.items() }
 {{- else -}}
 {{ .InputVar }}.build()
 {{- end -}}
@@ -45,7 +47,7 @@
 {{- end }}
 {{- with .Value.Argument }}
 {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-{{- .Name|formatIdentifier }}{{- .Type.IsArray | ternary "_resources" "_resource" }}
+{{- .Name|formatIdentifier }}{{- (or .Type.IsArray .Type.IsMap) | ternary "_resources" "_resource" }}
 {{- else }}
 {{- .Name|formatIdentifier }}
 {{- end }}
