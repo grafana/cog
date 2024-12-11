@@ -51,20 +51,20 @@ output:
         generate_strict_unmarshaller: true
         generate_equal: true
         generate_validate: true
-    - jsonschema: {}
-    - openapi: {}
-    - php:
-        namespace_root: '%php_namespace_root%'
-        #builder_templates:
-        #  - '%__config_dir%/templates/php'
-    - python:
-        path_prefix: grafana_foundation_sdk
-        #builder_templates:
-        #  - '%__config_dir%/templates/python'
+    #- jsonschema: {}
+    #- openapi: {}
+    #- php:
+    #    namespace_root: '%php_namespace_root%'
+    #    #builder_templates:
+    #    #  - '%__config_dir%/templates/php'
+    #- python:
+    #    path_prefix: grafana_foundation_sdk
+    #    #builder_templates:
+    #    #  - '%__config_dir%/templates/python'
     - typescript: {}
-        #builder_templates:
-        #  - '%__config_dir%/templates/typescript'
-    - java:
-        package_path: '%java_package_path%'
-        #builder_templates:
-        #  - '%__config_dir%/templates/java'
+    #    #builder_templates:
+    #    #  - '%__config_dir%/templates/typescript'
+    #- java:
+    #    package_path: '%java_package_path%'
+    #    #builder_templates:
+    #    #  - '%__config_dir%/templates/java'
