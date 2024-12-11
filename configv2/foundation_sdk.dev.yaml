@@ -61,10 +61,10 @@ output:
         path_prefix: grafana_foundation_sdk
         #builder_templates:
         #  - '%__config_dir%/templates/python'
-    #- typescript: {}
+    - typescript: {}
         #builder_templates:
         #  - '%__config_dir%/templates/typescript'
-    #- java:
-    #    package_path: '%java_package_path%'
+    - java:
+        package_path: '%java_package_path%'
         #builder_templates:
         #  - '%__config_dir%/templates/java'
