@@ -44,7 +44,7 @@
         {{- if not (eq $castPath.Value "") }}
         {{- $castPath.Value | lowerCamelCase }}Resource
         {{- else }}
-        {{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
+        {{- formatRefType .Assignment.Path.Last.Type .Value.Constant }}
         {{- end }}
     {{- end }}
     {{- with .Value.Argument }}
@@ -73,5 +73,6 @@
 {{- define "assignment_method" }}
     {{ $path := formatAssignmentPath .Path }}
         {{- if eq .Method "direct" }}this.internal.{{ $path }} = {{ .Value }};{{ end }}
+        {{- if eq .Method "index" }}this.internal.{{ $path }} = {{ .Value }};{{ end }}
         {{- if eq .Method "append" }}this.internal.{{ $path }}.add({{ .Value }});{{ end -}}
 {{- end }}

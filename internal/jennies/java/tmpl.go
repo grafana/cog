@@ -5,16 +5,19 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.* templates/builders/*.*
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.* templates/converters/*.tmpl templates/builders/*.*
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
 func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	tmpl, err := template.New(
 		"java",
+		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(functions()),
 		template.ParseFS(templatesFS, "templates"),
 		template.ParseDirectories(extraTemplatesDirectories...),
@@ -30,10 +33,29 @@ func functions() template.FuncMap {
 	return template.FuncMap{
 		"escapeVar":             escapeVarName,
 		"formatScalar":          formatScalar,
+		"cleanString":           cleanString,
 		"lastPathIdentifier":    lastPathIdentifier,
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
+		"formatIntegerLetter": func(t ast.Type) string {
+			switch t.AsScalar().ScalarKind {
+			case ast.KindInt64, ast.KindUint64:
+				return "L"
+			case ast.KindFloat32:
+				return "f"
+			}
+			return ""
+		},
+		"importStdPkg": func(_ ast.Type) string {
+			panic("formatRawRef() needs to be overridden by a jenny")
+		},
+		"formatPackageName": func(_ ast.Type) string {
+			panic("formatRawRef() needs to be overridden by a jenny")
+		},
+		"formatRawRef": func(_ ast.Type) string {
+			panic("formatRawRef() needs to be overridden by a jenny")
+		},
 		"fillNullableAnnotationPattern": func(_ ast.Type) string {
 			panic("fillNullableAnnotationPattern() needs to be overridden by a jenny")
 		},
@@ -69,6 +91,12 @@ func functions() template.FuncMap {
 		},
 		"resolvesToComposableSlot": func(_ ast.Type) bool {
 			panic("resolvesToComposableSlot() needs to be overridden by a jenny")
+		},
+		"formatRefType": func(_ ast.Type, value any) string {
+			panic("formatRefType() needs to be overridden by a jenny")
+		},
+		"formatGuardPath": func(_ ast.Path) string {
+			panic("formatGuardPath() needs to be overridden by a jenny")
 		},
 	}
 }
@@ -143,12 +171,14 @@ type OptionCall struct {
 type DataquerySchema struct {
 	Identifier string
 	Class      string
+	Converter  string
 }
 
 type PanelSchema struct {
 	Identifier  string
 	Options     string
 	FieldConfig string
+	Converter   string
 }
 
 type Unmarshalling struct {

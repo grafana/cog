@@ -41,7 +41,7 @@
 {{- define "assignment_setup" }}
     {{- if not (eq .Value.Constant nil) }}
         {{- if .Assignment.Path.Last.Type.Nullable }}
-            val{{ .Assignment.Path.Last.Identifier | upperCamelCase }} := {{ formatScalar .Value.Constant }}
+            val{{ .Assignment.Path.Last.Identifier | upperCamelCase }} := {{ formatValue .Assignment.Path.Last.Type .Value.Constant }}
         {{- end }}
     {{- end }}
     {{- with .Value.Argument }}
@@ -101,6 +101,9 @@
 {{- end }}
 
 {{- define "assignment_method" }}
-    {{ if eq .Method "direct" }}builder.internal.{{ .Path|formatPath }} = {{ .Value }}{{ end -}}
-    {{ if eq .Method "append" }}builder.internal.{{ .Path|formatPath }} = append(builder.internal.{{ .Path|formatPath }}, {{ .Value }}){{ end -}}
+    {{ if eq .Method "append" -}}
+        builder.internal.{{ .Path|formatPath }} = append(builder.internal.{{ .Path|formatPath }}, {{ .Value }})
+    {{- else -}}
+        builder.internal.{{ .Path|formatPath }} = {{ .Value }}
+    {{- end -}}
 {{- end }}

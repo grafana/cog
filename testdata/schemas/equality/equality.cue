@@ -22,7 +22,7 @@ optionals: {
 arrays: {
     ints: [...int]
     strings: [...string]
-    arrayOfArray: [...[string]]
+    arrayOfArray: [...[...string]]
     refs: [...#Variable]
     anonymousStructs: [...{
     	inner: string

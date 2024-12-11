@@ -26,8 +26,9 @@ type Config struct {
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.
-	SkipRuntime      bool `yaml:"skip_runtime"`
-	generateBuilders bool
+	SkipRuntime        bool `yaml:"skip_runtime"`
+	generateBuilders   bool
+	generateConverters bool
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
@@ -39,6 +40,8 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.generateBuilders = global.Builders
+	// newConfig.generateConverters = global.Converters
+	newConfig.generateConverters = false
 
 	return newConfig
 }
@@ -64,13 +67,14 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](!config.SkipRuntime, Runtime{config: language.config, tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime, Registry{config: language.config, tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: language.config, tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: language.config, tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime, Runtime{config: config, tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime, Registry{config: config, tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: config, tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
 		common.If[languages.Context](config.generateBuilders, Builder{config: config, tmpl: tmpl}),
 		common.If[languages.Context](!config.SkipGradleDev, Gradle{config: config, tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime && config.generateBuilders && config.generateConverters, &Converter{config: config, tmpl: tmpl}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

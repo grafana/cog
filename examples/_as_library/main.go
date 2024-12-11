@@ -47,9 +47,9 @@ func main() {
 		panic(v.Err())
 	}
 
-	types, err := cog.TypesFromSchema().
+	files, err := cog.TypesFromSchema().
 		CUEValue("sandbox", v).
-		Golang().
+		Golang(cog.GoConfig{}).
 		//Typescript().
 		SchemaTransformations(
 			cog.AppendCommentToObjects("+k8s:openapi-gen=true"),
@@ -60,5 +60,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(string(types))
+	fmt.Println(string(files[0].Data))
 }

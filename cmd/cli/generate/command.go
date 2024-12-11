@@ -36,12 +36,12 @@ func Command() *cobra.Command {
 func doGenerate(opts options) error {
 	ctx := context.Background()
 
-	ppipeline, err := codegen.PipelineFromFile(opts.ConfigPath, codegen.Parameters(opts.ExtraParameters), codegen.Reporter(codegen.StdoutReporter))
+	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, codegen.Parameters(opts.ExtraParameters), codegen.Reporter(codegen.StdoutReporter))
 	if err != nil {
 		return err
 	}
 
-	generatedFS, err := ppipeline.Run(ctx)
+	generatedFS, err := pipeline.Run(ctx)
 	if err != nil {
 		return err
 	}

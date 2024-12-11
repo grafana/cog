@@ -20,6 +20,7 @@ type OptionRule struct {
 	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
 	StructFieldsAsOptions   *StructFieldsAsOptions   `yaml:"struct_fields_as_options"`
 	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append"`
+	MapToIndex              *MapToIndex              `yaml:"map_to_index"`
 	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
 	Duplicate               *DuplicateOption         `yaml:"duplicate"`
 	AddAssignment           *AddAssignment           `yaml:"add_assignment"`
@@ -57,6 +58,10 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 
 	if rule.ArrayToAppend != nil {
 		return rule.ArrayToAppend.AsRewriteRule(pkg)
+	}
+
+	if rule.MapToIndex != nil {
+		return rule.MapToIndex.AsRewriteRule(pkg)
 	}
 
 	if rule.DisjunctionAsOptions != nil {
@@ -162,6 +167,19 @@ func (rule ArrayToAppend) AsRewriteRule(pkg string) (option.RewriteRule, error) 
 	}
 
 	return option.ArrayToAppend(selector), nil
+}
+
+type MapToIndex struct {
+	OptionSelector `yaml:",inline"`
+}
+
+func (rule MapToIndex) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.MapToIndex(selector), nil
 }
 
 type DisjunctionAsOptions struct {

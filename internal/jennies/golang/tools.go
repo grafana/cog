@@ -1,6 +1,7 @@
 package golang
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -48,6 +49,21 @@ func escapeVarName(varName string) string {
 	}
 
 	return varName
+}
+
+func formatScalar(val any) string {
+	if list, ok := val.([]any); ok {
+		items := make([]string, 0, len(list))
+
+		for _, item := range list {
+			items = append(items, formatScalar(item))
+		}
+
+		// FIXME: this is wrong, we can't just assume a list of strings.
+		return fmt.Sprintf("[]string{%s}", strings.Join(items, ", "))
+	}
+
+	return fmt.Sprintf("%#v", val)
 }
 
 func isReservedGoKeyword(input string) bool {

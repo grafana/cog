@@ -1,16 +1,15 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
   "packages": [
-    "python3Minimal@3.12",
     "go@1.23",
     "php@8.3",
+    "php83Packages.composer@2.7",
     "php83Packages.phpstan@1.11",
+    "php83Packages.psalm@5.25",
     "python312Packages.mypy@1.10",
     "golangci-lint@1.61",
-    "php83Packages.psalm@5.25",
     "nodejs-slim_18@18.20",
     "nodePackages.ts-node@10.9.2",
-    "jre17_minimal@17",
     "gradle@8.10",
     "goreleaser@2.2"
   ],

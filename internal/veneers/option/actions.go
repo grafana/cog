@@ -64,13 +64,11 @@ func RenameArgumentsAction(newNames []string) RewriteAction {
 //	```
 //
 // This action returns the option unchanged if:
-//   - it has no arguments
+//   - it doesn't have exactly one argument
 //   - the argument is not an array
-//
-// FIXME: considers the first arg only.
 func ArrayToAppendAction() RewriteAction {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
-		if len(option.Args) < 1 || !option.Args[0].Type.IsArray() {
+		if len(option.Args) != 1 || !option.Args[0].Type.IsArray() {
 			return []ast.Option{option}
 		}
 
@@ -96,6 +94,74 @@ func ArrayToAppendAction() RewriteAction {
 		newOpt.Args = []ast.Argument{newFirstArg}
 		newOpt.Assignments = []ast.Assignment{newFirstAssignment}
 		newOpt.AddToVeneerTrail("ArrayToAppend")
+
+		if len(oldArgs) > 1 {
+			newOpt.Args = append(newOpt.Args, oldArgs[1:]...)
+		}
+		if len(oldAssignments) > 1 {
+			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
+		}
+
+		return []ast.Option{newOpt}
+	}
+}
+
+// MapToIndexAction updates the option to perform an "index" assignment.
+//
+// Example:
+//
+//	```
+//	func Elements(elements map[string]Element) {
+//		this.resource.elements = elements
+//	}
+//	```
+//
+// Will become:
+//
+//	```
+//	func Elements(key string, elements Element) {
+//		this.resource.elements[key] = tags
+//	}
+//	```
+//
+// This action returns the option unchanged if:
+//   - it doesn't have exactly one argument
+//   - the argument is not a map
+func MapToIndexAction() RewriteAction {
+	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+		if len(option.Args) != 1 || !option.Args[0].Type.IsMap() {
+			return []ast.Option{option}
+		}
+
+		oldArgs := option.Args
+
+		newFirstArg := option.Args[0]
+		newFirstArg.Type = option.Args[0].Type.Map.IndexType
+		newFirstArg.Name = "key"
+
+		newSecondArg := option.Args[0]
+		newSecondArg.Type = option.Args[0].Type.Map.ValueType
+		newSecondArg.Name = tools.Singularize(option.Args[0].Name)
+
+		// Update the assignment to do an append instead of a list assignment
+		oldAssignments := option.Assignments
+
+		newFirstAssignment := option.Assignments[0]
+		newFirstAssignment.Method = ast.IndexAssignment
+		newFirstAssignment.Path = newFirstAssignment.Path.Append(ast.Path{{
+			Index: &ast.PathIndex{Argument: &newFirstArg},
+			Type:  option.Args[0].Type.Map.ValueType,
+		}})
+		// TODO: what if there is an envelope in the value assignment?
+		if newFirstAssignment.Value.Argument != nil {
+			newFirstAssignment.Value.Argument.Name = newSecondArg.Name
+			newFirstAssignment.Value.Argument.Type = newSecondArg.Type
+		}
+
+		newOpt := option
+		newOpt.Args = []ast.Argument{newFirstArg, newSecondArg}
+		newOpt.Assignments = []ast.Assignment{newFirstAssignment}
+		newOpt.AddToVeneerTrail("MapToIndex")
 
 		if len(oldArgs) > 1 {
 			newOpt.Args = append(newOpt.Args, oldArgs[1:]...)

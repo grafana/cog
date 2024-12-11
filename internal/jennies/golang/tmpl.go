@@ -39,9 +39,6 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"importPkg": func(_ string) string {
 				panic("importPkg() needs to be overridden by a jenny")
 			},
-			"maybeUnptr": func(variableName string, intoType ast.Type) string {
-				panic("maybeUnptr() needs to be overridden by a jenny")
-			},
 			"emptyValueForGuard": func(_ ast.Type) string {
 				panic("emptyValueForGuard() needs to be overridden by a jenny")
 			},
@@ -60,6 +57,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"resolvesToConstraints": func(_ ast.Type) string {
 				panic("resolvesToConstraints() needs to be overridden by a jenny")
 			},
+			"formatValue": func(destinationType ast.Type, value any) string {
+				panic("formatValue() needs to be overridden by a jenny")
+			},
 		}),
 		template.Funcs(map[string]any{
 			"formatPackageName":  formatPackageName,
@@ -70,14 +70,14 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"formatFunctionName": formatFunctionName,
 			"formatScalar":       formatScalar,
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
-				if intoType.Nullable && !(intoType.IsArray() || intoType.IsMap() || intoType.IsComposableSlot()) {
+				if intoType.Nullable && !intoType.IsAnyOf(ast.KindArray, ast.KindMap, ast.KindComposableSlot) {
 					return "&" + variableName
 				}
 
 				return variableName
 			},
 			"maybeDereference": func(typeDef ast.Type) string {
-				if typeDef.Nullable && !typeDef.IsAnyOf(ast.KindArray, ast.KindMap) {
+				if typeDef.Nullable && !typeDef.IsAnyOf(ast.KindArray, ast.KindMap, ast.KindComposableSlot) {
 					return "*"
 				}
 

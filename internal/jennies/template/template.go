@@ -217,7 +217,23 @@ func (template *Template) builtins() FuncMap {
 			switch tp {
 			case reflect.Slice, reflect.Array:
 				l2 := reflect.ValueOf(list)
-				return l2.Index(0).Interface() // this will *willingly* panic if the list is empty
+				if l2.Len() > 0 {
+					return l2.Index(0).Interface() // this will *willingly* panic if the list is empty
+				}
+				return l2.Interface()
+			default:
+				panic(fmt.Sprintf("Cannot find first on type %s", tp))
+			}
+		},
+		"last": func(list any) any {
+			tp := reflect.TypeOf(list).Kind()
+			switch tp {
+			case reflect.Slice, reflect.Array:
+				l2 := reflect.ValueOf(list)
+				if l2.Len() > 0 {
+					return l2.Index(l2.Len() - 1).Interface() // this will *willingly* panic if the list is empty
+				}
+				return l2.Interface()
 			default:
 				panic(fmt.Sprintf("Cannot find first on type %s", tp))
 			}

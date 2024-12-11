@@ -147,7 +147,11 @@ func (jenny APIReference) index(context languages.Context) (codejen.File, error)
 	})
 
 	for _, schema := range context.Schemas {
-		buffer.WriteString(fmt.Sprintf(" * [%[1]s](./%[1]s/index.md)\n", schema.Package))
+		badge := jenny.packageBadge(schema)
+		if badge != "" {
+			badge += " "
+		}
+		buffer.WriteString(fmt.Sprintf(" * %[1]s[%[2]s](./%[2]s/index.md)\n", badge, schema.Package))
 	}
 
 	return *codejen.NewFile("docs/Reference/index.md", buffer.Bytes(), jenny), nil
@@ -184,7 +188,12 @@ func (jenny APIReference) referenceForSchema(context languages.Context, schema *
 func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Schema) (codejen.File, error) {
 	var buffer bytes.Buffer
 
-	buffer.WriteString(fmt.Sprintf("# %s\n\n", schema.Package))
+	badge := jenny.packageBadge(schema)
+	if badge != "" {
+		badge += " "
+	}
+
+	buffer.WriteString(fmt.Sprintf("# %s%s\n\n", badge, schema.Package))
 
 	buffer.WriteString("## Objects\n\n")
 
@@ -380,6 +389,18 @@ title: %[2]s %[1]s
 	}
 
 	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/builder-%s.md", builder.Package, builderName), buffer.Bytes(), jenny), nil
+}
+
+func (jenny APIReference) packageBadge(schema *ast.Schema) string {
+	if schema.Metadata.Kind == ast.SchemaKindCore {
+		return "<span class=\"badge package-core\"></span>"
+	}
+
+	if schema.Metadata.Variant == "" {
+		return ""
+	}
+
+	return fmt.Sprintf("<span class=\"badge package-variant-%s\"></span>", string(schema.Metadata.Variant))
 }
 
 func (jenny APIReference) kindBadge(kind ast.Kind) string {

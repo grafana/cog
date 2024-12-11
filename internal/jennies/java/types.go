@@ -305,6 +305,17 @@ func (tf *typeFormatter) formatAssignmentPath(fieldPath ast.Path) string {
 	}
 
 	for i, p := range fieldPath[1:] {
+		if p.Index != nil {
+			path += "["
+			if p.Index.Constant != nil {
+				path += fmt.Sprintf("%#v", p.Index.Constant)
+			} else {
+				path += tools.LowerCamelCase(p.Index.Argument.Name)
+			}
+			path += "]"
+			continue
+		}
+
 		if fieldPath[i].Type.IsAny() && i != len(fieldPath)-1 {
 			return path
 		}
@@ -326,7 +337,7 @@ func (tf *typeFormatter) formatPackage(pkg string) string {
 	return pkg
 }
 
-func (tf *typeFormatter) formatValue(destinationType ast.Type, value any) string {
+func (tf *typeFormatter) formatRefType(destinationType ast.Type, value any) string {
 	if destinationType.IsRef() {
 		referredObj, found := tf.context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
 		if found && referredObj.Type.IsEnum() {
@@ -338,14 +349,9 @@ func (tf *typeFormatter) formatValue(destinationType ast.Type, value any) string
 }
 
 func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
-	enum := obj.Type.AsEnum()
-	for _, v := range enum.Values {
-		if v.Value == val {
-			return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(v.Name)))
-		}
-	}
+	member, _ := obj.Type.AsEnum().MemberForValue(val)
 
-	return fmt.Sprintf("%s.%s", obj.Name, tools.CleanupNames(strings.ToUpper(enum.Values[0].Name)))
+	return fmt.Sprintf("%s.%s", obj.Name, tools.UpperSnakeCase(member.Name))
 }
 
 func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
@@ -390,4 +396,30 @@ func (tf *typeFormatter) fillNullableAnnotationPattern(t ast.Type) string {
 	}
 
 	return ""
+}
+
+func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
+	parts := make([]string, 0)
+	var castedPath string
+
+	for i := range fieldPath {
+		output := fieldPath[i].Identifier
+		if !fieldPath[i].Root {
+			output = escapeVarName(tools.LowerCamelCase(output))
+		}
+
+		// don't generate type hints if:
+		// * there isn't one defined
+		// * the type isn't "any"
+		// * as a trailing element in the path
+		if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
+			parts = append(parts, output)
+			continue
+		}
+
+		castedPath = fmt.Sprintf("((%s) %s.%s).", tf.formatFieldType(*fieldPath[i].TypeHint), strings.Join(parts, "."), output)
+		parts = nil
+	}
+
+	return castedPath + strings.Join(parts, ".")
 }

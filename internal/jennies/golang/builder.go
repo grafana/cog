@@ -95,6 +95,23 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
 				return jenny.emptyValueForGuard(context, guard.EmptyValueType)
 			},
+			"formatValue": func(destinationType ast.Type, value any) string {
+				resolved := context.ResolveRefs(destinationType)
+
+				if !destinationType.IsRef() || !resolved.IsEnum() {
+					return formatScalar(value)
+				}
+
+				member, _ := resolved.Enum.MemberForValue(value)
+				formatted := member.Name
+
+				referredPkg := jenny.typeImportMapper(destinationType.Ref.ReferredPkg)
+				if referredPkg != "" {
+					formatted = referredPkg + "." + formatted
+				}
+
+				return formatted
+			},
 		}).
 		RenderAsBytes("builders/builder.tmpl", map[string]any{
 			"Package":              builder.Package,
@@ -129,7 +146,9 @@ func (jenny *Builder) emptyValueForGuard(context languages.Context, typeDef ast.
 		}
 
 		return jenny.emptyValueForGuard(context, resolvedType)
-	case ast.KindStruct, ast.KindArray, ast.KindMap:
+	case ast.KindArray, ast.KindMap:
+		return jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
+	case ast.KindStruct:
 		return "&" + jenny.typeFormatter.doFormatType(typeDef, false) + "{}"
 	case ast.KindEnum:
 		jenny.typeImportMapper("cog")

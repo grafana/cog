@@ -46,8 +46,6 @@ func (jenny VariantsPlugins) variantPlugins(context languages.Context) ([]byte, 
 	var panelSchemas []*ast.Schema
 	var dataquerySchemas []*ast.Schema
 
-	imports.Add("cog", jenny.Config.importPath("cog"))
-
 	for _, schema := range context.Schemas {
 		if schema.Metadata.Kind != ast.SchemaKindComposable || schema.Metadata.Identifier == "" {
 			continue
@@ -60,6 +58,10 @@ func (jenny VariantsPlugins) variantPlugins(context languages.Context) ([]byte, 
 		}
 
 		imports.Add(schema.Package, jenny.Config.importPath(formatPackageName(schema.Package)))
+	}
+
+	if len(panelSchemas) != 0 || len(dataquerySchemas) != 0 {
+		imports.Add("cog", jenny.Config.importPath("cog"))
 	}
 
 	// to guarantee a consistent output for this jenny

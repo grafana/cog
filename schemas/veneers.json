@@ -155,10 +155,25 @@
       },
       "type": "array"
     },
+    "AstPathIndex": {
+      "properties": {
+        "argument": {
+          "$ref": "#/$defs/AstArgument"
+        },
+        "constant": {
+          "description": "string or int"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "AstPathItem": {
       "properties": {
         "identifier": {
           "type": "string"
+        },
+        "index": {
+          "$ref": "#/$defs/AstPathIndex"
         },
         "type": {
           "$ref": "#/$defs/AstType",
@@ -473,11 +488,23 @@
         "panel_builder_name": {
           "type": "string"
         },
+        "plugin_discriminator_field": {
+          "type": "string"
+        },
         "exclude_panel_options": {
           "items": {
             "type": "string"
           },
           "type": "array"
+        },
+        "composition_map": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "composed_builder_name": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
@@ -599,6 +626,23 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlMapToIndex": {
+      "properties": {
+        "by_name": {
+          "type": "string",
+          "description": "objectName.optionName"
+        },
+        "by_builder": {
+          "type": "string",
+          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
+        },
+        "by_names": {
+          "$ref": "#/$defs/YamlByNamesSelector"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlMergeInto": {
       "properties": {
         "destination": {
@@ -648,6 +692,9 @@
         },
         "array_to_append": {
           "$ref": "#/$defs/YamlArrayToAppend"
+        },
+        "map_to_index": {
+          "$ref": "#/$defs/YamlMapToIndex"
         },
         "disjunction_as_options": {
           "$ref": "#/$defs/YamlDisjunctionAsOptions"

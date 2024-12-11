@@ -241,21 +241,6 @@ func (formatter *typeFormatter) formatMap(def ast.MapType) string {
 	return fmt.Sprintf("map[%s]%s", keyTypeString, valueTypeString)
 }
 
-func formatScalar(val any) string {
-	if list, ok := val.([]any); ok {
-		items := make([]string, 0, len(list))
-
-		for _, item := range list {
-			items = append(items, formatScalar(item))
-		}
-
-		// FIXME: this is wrong, we can't just assume a list of strings.
-		return fmt.Sprintf("[]string{%s}", strings.Join(items, ", "))
-	}
-
-	return fmt.Sprintf("%#v", val)
-}
-
 func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) string {
 	referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
 	typeName := formatObjectName(def.AsRef().ReferredType)
@@ -320,12 +305,23 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 
 func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string {
 	return func(fieldPath ast.Path) string {
-		parts := make([]string, len(fieldPath))
+		path := ""
 
 		for i := range fieldPath {
+			last := i == len(fieldPath)-1
 			output := fieldPath[i].Identifier
 			if !fieldPath[i].Root {
 				output = formatFieldName(output)
+			}
+
+			if fieldPath[i].Index != nil {
+				output += "["
+				if fieldPath[i].Index.Constant != nil {
+					output += formatScalar(fieldPath[i].Index.Constant)
+				} else {
+					output += formatArgName(fieldPath[i].Index.Argument.Name)
+				}
+				output += "]"
 			}
 
 			// don't generate type hints if:
@@ -333,14 +329,20 @@ func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string 
 			// * the type isn't "any"
 			// * as a trailing element in the path
 			if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
-				parts[i] = output
+				path += output
+				if !last && fieldPath[i+1].Index == nil {
+					path += "."
+				}
 				continue
 			}
 
 			formattedTypeHint := typeFormatter.formatType(*fieldPath[i].TypeHint)
-			parts[i] = output + fmt.Sprintf(".(*%s)", formattedTypeHint)
+			path += output + fmt.Sprintf(".(*%s)", formattedTypeHint)
+			if !last && fieldPath[i+1].Index == nil {
+				path += "."
+			}
 		}
 
-		return strings.Join(parts, ".")
+		return path
 	}
 }
