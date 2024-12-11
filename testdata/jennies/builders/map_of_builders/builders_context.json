@@ -1,0 +1,296 @@
+{
+  "Schemas": [
+    {
+      "Package": "map_of_builders",
+      "Metadata": {
+        "Kind": "core"
+      },
+      "EntryPointType": {
+        "Kind": "",
+        "Nullable": false
+      },
+      "Objects": {
+        "Panel": {
+          "Name": "Panel",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "map_of_builders",
+            "ReferredType": "Panel"
+          }
+        },
+        "Dashboard": {
+          "Name": "Dashboard",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "panels",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "map_of_builders",
+                          "ReferredType": "Panel"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "map_of_builders",
+            "ReferredType": "Dashboard"
+          }
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "For": {
+        "Name": "Panel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "map_of_builders",
+          "ReferredType": "Panel"
+        }
+      },
+      "Package": "map_of_builders",
+      "Name": "Panel",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "For": {
+        "Name": "Dashboard",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "panels",
+                "Type": {
+                  "Kind": "map",
+                  "Nullable": false,
+                  "Map": {
+                    "IndexType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "ValueType": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "map_of_builders",
+                        "ReferredType": "Panel"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "map_of_builders",
+          "ReferredType": "Dashboard"
+        }
+      },
+      "Package": "map_of_builders",
+      "Name": "Dashboard",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "panels",
+          "Args": [
+            {
+              "Name": "panels",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "map_of_builders",
+                      "ReferredType": "Panel"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "panels",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "map_of_builders",
+                          "ReferredType": "Panel"
+                        }
+                      }
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "panels",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "map_of_builders",
+                          "ReferredType": "Panel"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
