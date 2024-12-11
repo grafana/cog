@@ -336,8 +336,7 @@ func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string 
 				continue
 			}
 
-			formattedTypeHint := typeFormatter.formatType(*fieldPath[i].TypeHint)
-			path += output + fmt.Sprintf(".(*%s)", formattedTypeHint)
+			path += output + fmt.Sprintf(".(*%s)", typeFormatter.doFormatType(*fieldPath[i].TypeHint, false))
 			if !last && fieldPath[i+1].Index == nil {
 				path += "."
 			}
