@@ -32,6 +32,10 @@ func (context *Context) ResolveAsBuilder(def ast.Type) (ast.Builder, bool) {
 		return context.ResolveAsBuilder(def.AsArray().ValueType)
 	}
 
+	if def.IsMap() {
+		return context.ResolveAsBuilder(def.AsMap().ValueType)
+	}
+
 	if def.IsDisjunction() {
 		for _, branch := range def.AsDisjunction().Branches {
 			if builder, found := context.ResolveAsBuilder(branch); found {
