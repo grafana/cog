@@ -78,8 +78,7 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 	}
 	if outputLanguage.Python != nil {
 		outputLanguage.Python.InterpolateParameters(interpolator)
-		// TODO
-		// outputLanguage.Python.ExtraFilesTemplatesData = output.TemplatesData
+		outputLanguage.Python.ExtraFilesTemplatesData = output.TemplatesData
 	}
 	if outputLanguage.Java != nil {
 		outputLanguage.Java.InterpolateParameters(interpolator)
