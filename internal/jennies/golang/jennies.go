@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -18,10 +19,6 @@ type Config struct {
 	debug              bool
 	generateBuilders   bool
 	generateConverters bool
-
-	// GenerateGoMod indicates whether a go.mod file should be generated.
-	// If enabled, PackageRoot is used as module path.
-	GenerateGoMod bool `yaml:"go_mod"`
 
 	// GenerateStrictUnmarshaller controls the generation of
 	// `UnmarshalJSONStrict()` methods on types.
@@ -38,9 +35,17 @@ type Config struct {
 	// rely on the runtime to function.
 	SkipRuntime bool `yaml:"skip_runtime"`
 
-	// BuilderTemplatesDirectories holds a list of directories containing templates
-	// to be used to override parts of builders.
-	BuilderTemplatesDirectories []string `yaml:"builder_templates"`
+	// OverridesTemplatesDirectories holds a list of directories containing templates
+	// defining blocks used to override parts of builders/types/....
+	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
+
+	// ExtraFilesTemplatesDirectories holds a list of directories containing
+	// templates describing files to be added to the generated output.
+	ExtraFilesTemplatesDirectories []string `yaml:"extra_files_templates"`
+
+	// ExtraFilesTemplatesData holds additional data to be injected into the
+	// templates described in ExtraFilesTemplatesDirectories.
+	ExtraFilesTemplatesData map[string]string `yaml:"-"`
 
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
@@ -49,7 +54,12 @@ type Config struct {
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.PackageRoot = interpolator(config.PackageRoot)
-	config.BuilderTemplatesDirectories = tools.Map(config.BuilderTemplatesDirectories, interpolator)
+	config.OverridesTemplatesDirectories = tools.Map(config.OverridesTemplatesDirectories, interpolator)
+	config.ExtraFilesTemplatesDirectories = tools.Map(config.ExtraFilesTemplatesDirectories, interpolator)
+
+	for key, value := range config.ExtraFilesTemplatesData {
+		config.ExtraFilesTemplatesData[key] = interpolator(value)
+	}
 }
 
 func (config Config) MergeWithGlobal(global languages.Config) Config {
@@ -85,16 +95,13 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
-	tmpl := initTemplates(language.config.BuilderTemplatesDirectories)
+	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
 		common.If[languages.Context](!config.SkipRuntime, Runtime{Config: config, Tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime, VariantsPlugins{Config: config, Tmpl: tmpl}),
-
-		common.If[languages.Context](config.GenerateGoMod, GoMod{Config: config}),
 
 		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 
@@ -112,6 +119,18 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			Formatter: apiReferenceFormatter(config),
 			Tmpl:      tmpl,
 		}),
+
+		common.PackageTemplate{
+			TemplateDirectories: config.ExtraFilesTemplatesDirectories,
+			Data: map[string]any{
+				"Debug":       config.debug,
+				"PackageRoot": config.PackageRoot,
+			},
+			ExtraData: config.ExtraFilesTemplatesData,
+			TmplFuncs: template.FuncMap{
+				"formatPackageName": formatPackageName,
+			},
+		},
 	)
 	jenny.AddPostprocessors(formatGoFiles, common.GeneratedCommentHeader(globalConfig))
 

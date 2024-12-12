@@ -2,7 +2,6 @@ package common
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -15,19 +14,35 @@ import (
 )
 
 type PackageTemplate struct {
-	Language    string
-	TemplateDir string
-	ExtraData   map[string]string
+	TmplFuncs           template.FuncMap
+	TemplateDirectories []string
+	Data                map[string]any
+	ExtraData           map[string]string
 }
 
 func (jenny PackageTemplate) JennyName() string {
-	return fmt.Sprintf("PackageTemplate[%s]", jenny.Language)
+	return "PackageTemplate"
 }
 
 func (jenny PackageTemplate) Generate(context languages.Context) (codejen.Files, error) {
+	var allFiles codejen.Files
+
+	for _, templatesDir := range jenny.TemplateDirectories {
+		files, err := jenny.generateForTemplatesDirectory(context, templatesDir)
+		if err != nil {
+			return nil, err
+		}
+
+		allFiles = append(allFiles, files...)
+	}
+
+	return allFiles, nil
+}
+
+func (jenny PackageTemplate) generateForTemplatesDirectory(context languages.Context, directory string) (codejen.Files, error) {
 	var files codejen.Files
 
-	templateRoot := filepath.Join(jenny.TemplateDir, jenny.Language)
+	templateRoot := directory
 	cleanedRoot := filepath.Clean(templateRoot) + string(filepath.Separator)
 
 	err := filepath.WalkDir(templateRoot, func(path string, d fs.DirEntry, err error) error {
@@ -45,10 +60,12 @@ func (jenny PackageTemplate) Generate(context languages.Context) (codejen.Files,
 		}
 
 		tmpl, err := template.New(
-			jenny.JennyName(),
+			path,
+			template.Funcs(TypeResolvingTemplateHelpers(context)),
 			template.Funcs(template.FuncMap{
 				"registryToSemver": jenny.registryToSemver,
 			}),
+			template.Funcs(jenny.TmplFuncs),
 			template.Parse(string(templateContent)),
 		)
 		if err != nil {
@@ -81,14 +98,11 @@ func (jenny PackageTemplate) templateData(context languages.Context) map[string]
 
 	sort.Strings(packages)
 
-	extra := map[string]string{}
-	if jenny.ExtraData != nil {
-		extra = jenny.ExtraData
-	}
-
 	return map[string]any{
+		"Context":  context,
 		"Packages": packages,
-		"Extra":    extra,
+		"Data":     jenny.Data,
+		"Extra":    jenny.ExtraData,
 	}
 }
 

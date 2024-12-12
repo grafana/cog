@@ -1,7 +1,10 @@
 package languages
 
 import (
+	"sort"
+
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/tools"
 )
 
 //nolint:musttag
@@ -172,4 +175,16 @@ func (context *Context) BuildersForType(typeDef ast.Type) ast.Builders {
 	search(typeDef)
 
 	return candidateBuilders
+}
+
+func (context Context) PackagesForVariant(variant string) []string {
+	packages := tools.Map(tools.Filter(context.Schemas, func(schema *ast.Schema) bool {
+		return schema.Metadata.Kind == ast.SchemaKindComposable && string(schema.Metadata.Variant) == variant && schema.Metadata.Identifier != ""
+	}), func(schema *ast.Schema) string {
+		return schema.Package
+	})
+
+	sort.Strings(packages)
+
+	return packages
 }
