@@ -73,8 +73,7 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 	}
 	if outputLanguage.PHP != nil {
 		outputLanguage.PHP.InterpolateParameters(interpolator)
-		// TODO
-		// outputLanguage.PHP.ExtraFilesTemplatesData = output.TemplatesData
+		outputLanguage.PHP.ExtraFilesTemplatesData = output.TemplatesData
 	}
 	if outputLanguage.Python != nil {
 		outputLanguage.Python.InterpolateParameters(interpolator)
