@@ -3,6 +3,7 @@ package java
 import (
 	"embed"
 	"fmt"
+	"reflect"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -38,6 +39,19 @@ func functions() template.FuncMap {
 		"fillAnnotationPattern": fillAnnotationPattern,
 		"containsValue":         containsValue,
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
+		"slice": func(arr interface{}, start int) interface{} {
+			v := reflect.ValueOf(arr)
+			if v.Kind() == reflect.String {
+
+			}
+			if v.Kind() != reflect.Slice {
+				panic("slice: input must be a slice")
+			}
+			if start >= v.Len() {
+				return reflect.MakeSlice(v.Type(), 0, 0).Interface()
+			}
+			return v.Slice(start, v.Len()).Interface()
+		},
 		"formatIntegerLetter": func(t ast.Type) string {
 			switch t.AsScalar().ScalarKind {
 			case ast.KindInt64, ast.KindUint64:

@@ -257,6 +257,7 @@ func (template *Template) builtins() FuncMap {
 		"lowerCamelCase": tools.LowerCamelCase,
 		// Parameter order is reversed to stay compatible with sprig: https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/functions.go#L135
 		"trimPrefix":     func(a, b string) string { return strings.TrimPrefix(b, a) },
+		"upper":          strings.ToUpper,
 		"upperCamelCase": tools.UpperCamelCase,
 
 		// --------- \\

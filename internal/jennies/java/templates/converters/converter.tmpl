@@ -24,7 +24,7 @@ package {{ .Converter.Package | formatPackageName }};
             !Objects.equals({{- $leftOperand }}, "")
         {{- end }}
     {{- else if $type.IsRef }}
-        {{- formatRefType $type .Value }}
+        {{ $leftOperand }} {{ .Op }} {{ formatRefType $type .Value }}
     {{- else if $type.IsArray }}
         {{- if not $type.Nullable }}
         {{- $leftOperand }} != null && !{{- $leftOperand }}.isEmpty()
@@ -78,8 +78,14 @@ package {{ .Converter.Package | formatPackageName }};
             String {{ $.IntoVar }} = "";        
             switch ({{ (first (first .).Guards).Path }}) {
             {{- range $builderChoice := . }}
-                case {{ last (split "." (include "guards" $builderChoice.Guards)) }}:
+                case {{ upper (index $builderChoice.Guards 0).Value }}:
+                    {{- if ne (len $builderChoice.Guards) 1 }}
+                    if ({{ template "guards" (slice $builderChoice.Guards 1) }}) {
+                    {{- end }}
                     {{ $.IntoVar }} = {{ formatRawRef $builderChoice.Builder.BuilderPkg (print $builderChoice.Builder.BuilderName "Converter") }}.convert({{ $builderChoice.Builder.ValuePath }});
+                    {{- if ne (len $builderChoice.Guards) 1 }}
+                    }
+                    {{- end }}
             {{- end }}
             }
     {{- end -}}
