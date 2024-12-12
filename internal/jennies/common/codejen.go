@@ -9,6 +9,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type noopOneToManyJenny[Input any] struct {
@@ -87,7 +88,8 @@ func GeneratedCommentHeader(config languages.Config) codejen.FileMapper {
 }
 
 type pathPrefixerCfg struct {
-	except []string
+	except                 []string
+	exceptCreatedByJennies []string
 }
 
 type PathPrefixerOption func(*pathPrefixerCfg)
@@ -95,6 +97,12 @@ type PathPrefixerOption func(*pathPrefixerCfg)
 func PrefixExcept(pathPrefix ...string) PathPrefixerOption {
 	return func(cfg *pathPrefixerCfg) {
 		cfg.except = append(cfg.except, pathPrefix...)
+	}
+}
+
+func ExcludeCreatedByJenny(jennyNames ...string) PathPrefixerOption {
+	return func(cfg *pathPrefixerCfg) {
+		cfg.exceptCreatedByJennies = append(cfg.exceptCreatedByJennies, jennyNames...)
 	}
 }
 
@@ -110,6 +118,15 @@ func PathPrefixer(prefix string, opts ...PathPrefixerOption) codejen.FileMapper 
 	return func(f codejen.File) (codejen.File, error) {
 		for _, ignoredPrefix := range cfg.except {
 			if strings.HasPrefix(f.RelativePath, ignoredPrefix) {
+				return f, nil
+			}
+		}
+
+		createdByJennies := tools.Map(f.From, func(namedJenny codejen.NamedJenny) string {
+			return namedJenny.JennyName()
+		})
+		for _, ignoredJenny := range cfg.exceptCreatedByJennies {
+			if tools.ItemInList(ignoredJenny, createdByJennies) {
 				return f, nil
 			}
 		}

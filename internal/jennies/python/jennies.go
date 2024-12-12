@@ -57,6 +57,14 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
+	extraTemplatesJenny := common.PackageTemplate{
+		TemplateDirectories: language.config.ExtraFilesTemplatesDirectories,
+		Data: map[string]any{
+			"Debug": globalConfig.Debug,
+		},
+		ExtraData: language.config.ExtraFilesTemplatesData,
+	}
+
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
@@ -74,18 +82,16 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			Tmpl:      tmpl,
 		}),
 
-		common.PackageTemplate{
-			TemplateDirectories: language.config.ExtraFilesTemplatesDirectories,
-			Data: map[string]any{
-				"Debug": globalConfig.Debug,
-			},
-			ExtraData: language.config.ExtraFilesTemplatesData,
-		},
+		extraTemplatesJenny,
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
 	if language.config.PathPrefix != "" {
-		jenny.AddPostprocessors(common.PathPrefixer(language.config.PathPrefix, common.PrefixExcept("docs/")))
+		jenny.AddPostprocessors(common.PathPrefixer(
+			language.config.PathPrefix,
+			common.PrefixExcept("docs/"),
+			common.ExcludeCreatedByJenny(extraTemplatesJenny.JennyName()),
+		))
 	}
 
 	return jenny
