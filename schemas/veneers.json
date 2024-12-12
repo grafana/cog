@@ -388,6 +388,9 @@
         "by_name": {
           "type": "string"
         },
+        "by_variant": {
+          "type": "string"
+        },
         "generated_from_disjunction": {
           "type": "boolean",
           "description": "noop?"
@@ -427,8 +430,8 @@
         "merge_into": {
           "$ref": "#/$defs/YamlMergeInto"
         },
-        "compose_dashboard_panel": {
-          "$ref": "#/$defs/YamlComposeDashboardPanel"
+        "compose": {
+          "$ref": "#/$defs/YamlComposeBuilders"
         },
         "properties": {
           "$ref": "#/$defs/YamlProperties"
@@ -460,6 +463,9 @@
         "by_name": {
           "type": "string"
         },
+        "by_variant": {
+          "type": "string"
+        },
         "generated_from_disjunction": {
           "type": "boolean",
           "description": "noop?"
@@ -483,15 +489,28 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "YamlComposeDashboardPanel": {
+    "YamlComposeBuilders": {
       "properties": {
-        "panel_builder_name": {
+        "by_object": {
+          "type": "string"
+        },
+        "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
+          "type": "string"
+        },
+        "generated_from_disjunction": {
+          "type": "boolean",
+          "description": "noop?"
+        },
+        "source_builder_name": {
           "type": "string"
         },
         "plugin_discriminator_field": {
           "type": "string"
         },
-        "exclude_panel_options": {
+        "exclude_options": {
           "items": {
             "type": "string"
           },
@@ -516,6 +535,9 @@
           "type": "string"
         },
         "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
           "type": "string"
         },
         "generated_from_disjunction": {
@@ -555,6 +577,9 @@
           "type": "string"
         },
         "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
           "type": "string"
         },
         "generated_from_disjunction": {
@@ -610,6 +635,9 @@
           "type": "string"
         },
         "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
           "type": "string"
         },
         "generated_from_disjunction": {
@@ -734,6 +762,9 @@
         "by_name": {
           "type": "string"
         },
+        "by_variant": {
+          "type": "string"
+        },
         "generated_from_disjunction": {
           "type": "boolean",
           "description": "noop?"
@@ -754,6 +785,9 @@
           "type": "string"
         },
         "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
           "type": "string"
         },
         "generated_from_disjunction": {
@@ -799,6 +833,9 @@
           "type": "string"
         },
         "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
           "type": "string"
         },
         "generated_from_disjunction": {

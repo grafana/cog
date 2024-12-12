@@ -16,6 +16,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	tmpl, err := template.New(
 		"python",
 
+		template.Funcs(formattingTemplateFuncs()),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
 			"formatType": func(_ ast.Type) string {
@@ -49,10 +50,6 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 				panic("importPkg() needs to be overridden by a jenny")
 			},
 		}),
-		template.Funcs(map[string]any{
-			"formatIdentifier": formatIdentifier,
-			"formatPath":       formatFieldPath,
-		}),
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
@@ -63,4 +60,11 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	}
 
 	return tmpl
+}
+
+func formattingTemplateFuncs() template.FuncMap {
+	return template.FuncMap{
+		"formatIdentifier": formatIdentifier,
+		"formatPath":       formatFieldPath,
+	}
 }

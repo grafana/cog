@@ -48,7 +48,7 @@ func main() {
 	for _, t := range types {
 		fmt.Printf("Generating schema for type '%s'\n", t.name)
 
-		if err := reflector.AddGoComments("github.com/grafana/cog", "./"); err != nil {
+		if err := reflector.AddGoComments("github.com/grafana/cog", "./internal"); err != nil {
 			panic(fmt.Errorf("could not add Go comments to reflector: %w", err))
 		}
 

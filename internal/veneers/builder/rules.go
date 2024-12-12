@@ -103,35 +103,35 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 	})
 }
 
-func composePanelType(builders ast.Builders, config PanelCompositionConfig, panelType string, panelBuilder ast.Builder, composableBuilders ast.Builders) (ast.Builders, error) {
+func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config CompositionConfig, typeDiscriminator string, sourceBuilder ast.Builder, composableBuilders ast.Builders) (ast.Builders, error) {
 	newBuilder := ast.Builder{
 		Package:     composableBuilders[0].Package,
-		For:         panelBuilder.For,
-		Name:        panelBuilder.For.Name,
-		Constructor: panelBuilder.Constructor,
-		Properties:  panelBuilder.Properties,
+		For:         sourceBuilder.For,
+		Name:        sourceBuilder.For.Name,
+		Constructor: sourceBuilder.Constructor,
+		Properties:  sourceBuilder.Properties,
 	}
 	if config.ComposedBuilderName != "" {
 		newBuilder.Name = config.ComposedBuilderName
 	}
 
-	typeField, ok := panelBuilder.For.Type.AsStruct().FieldByName(config.PluginDiscriminatorField)
+	typeField, ok := sourceBuilder.For.Type.AsStruct().FieldByName(config.PluginDiscriminatorField)
 	if !ok {
-		return nil, fmt.Errorf("could not find plugin discriminator field '%s' in panel builder", config.PluginDiscriminatorField)
+		return nil, fmt.Errorf("could not find plugin discriminator field '%s' in builder", config.PluginDiscriminatorField)
 	}
 
-	typeAssignment := ast.ConstantAssignment(ast.PathFromStructField(typeField), panelType)
+	typeAssignment := ast.ConstantAssignment(ast.PathFromStructField(typeField), typeDiscriminator)
 	newBuilder.Constructor.Assignments = append(newBuilder.Constructor.Assignments, typeAssignment)
 
-	// re-add panel-related options
-	for _, panelOpt := range panelBuilder.Options {
-		// this value is a constant that depends on the plugin being composed into a panel
+	// re-add options coming from the source builder
+	for _, panelOpt := range sourceBuilder.Options {
+		// this value is now a constant
 		if panelOpt.Name == config.PluginDiscriminatorField {
 			continue
 		}
 
 		// Is the option explicitly excluded?
-		if tools.StringInListEqualFold(panelOpt.Name, config.ExcludePanelOptions) {
+		if tools.StringInListEqualFold(panelOpt.Name, config.ExcludeOptions) {
 			continue
 		}
 
@@ -142,8 +142,8 @@ func composePanelType(builders ast.Builders, config PanelCompositionConfig, pane
 	for _, composableBuilder := range composableBuilders {
 		underPath, exists := config.CompositionMap[composableBuilder.For.Name]
 		if !exists {
-			// schemas for composable panels can define more types than just "Options"
-			// and "FieldConfig": we need to leave these objects untouched and
+			// schemas might define more types than just those present in the
+			// composition map. We need to leave these objects untouched and
 			// compose only the builders that we know of.
 			composedBuilders = append(composedBuilders, composableBuilder)
 			continue
@@ -163,23 +163,87 @@ func composePanelType(builders ast.Builders, config PanelCompositionConfig, pane
 		}
 	}
 
+	if config.CompositionMap["__schema_entrypoint"] != "" {
+		schema, _ := schemas.Locate(composableBuilders[0].Package)
+		if schema.EntryPoint == "" {
+			return nil, fmt.Errorf("schema '%s' does not have an entrypoint", schema.Package)
+		}
+
+		newRoot, err := newBuilder.MakePath(builders, config.CompositionMap["__schema_entrypoint"])
+		if err != nil {
+			return nil, err
+		}
+
+		resolvedEntrypointType := schemas.ResolveToType(schema.EntryPointType)
+
+		switch {
+		case resolvedEntrypointType.IsStructGeneratedFromDisjunction():
+			for _, field := range resolvedEntrypointType.Struct.Fields {
+				newRoot[len(newRoot)-1].TypeHint = &schema.EntryPointType
+				arg := ast.Argument{Name: field.Name, Type: field.Type}
+
+				branchOpt := ast.Option{
+					Name: field.Name,
+					Args: []ast.Argument{arg},
+					Assignments: []ast.Assignment{
+						ast.ArgumentAssignment(newRoot.AppendStructField(field), arg),
+					},
+					VeneerTrail: []string{"ComposeBuilders[created]"},
+				}
+
+				newBuilder.Options = append(newBuilder.Options, branchOpt)
+			}
+		case resolvedEntrypointType.IsDisjunction():
+			for _, branch := range resolvedEntrypointType.Disjunction.Branches {
+				newRoot[len(newRoot)-1].TypeHint = &schema.EntryPointType
+				arg := ast.Argument{Name: ast.TypeName(branch), Type: branch}
+
+				branchOpt := ast.Option{
+					Name: ast.TypeName(branch),
+					Args: []ast.Argument{arg},
+					Assignments: []ast.Assignment{
+						ast.ArgumentAssignment(newRoot, arg),
+					},
+					VeneerTrail: []string{"ComposeBuilders[created]"},
+				}
+
+				newBuilder.Options = append(newBuilder.Options, branchOpt)
+			}
+		case resolvedEntrypointType.IsStruct():
+			entrypointBuilder, found := composableBuilders.LocateByObject(schema.Package, schema.EntryPoint)
+			if !found {
+				return nil, fmt.Errorf("builder for schema entrypoint '%s.%s' not found", schema.Package, schema.EntryPoint)
+			} else {
+				refType := entrypointBuilder.For.SelfRef.AsType()
+				newRoot[len(newRoot)-1].TypeHint = &refType
+
+				newBuilder, err = mergeOptions(entrypointBuilder, newBuilder, newRoot, nil, nil)
+				if err != nil {
+					return nil, err
+				}
+			}
+		default:
+			return nil, fmt.Errorf("entrypoint '%s.%s' is a %s: not implemented", schema.Package, schema.EntryPoint, resolvedEntrypointType.Kind)
+		}
+	}
+
 	composedBuilders = append(composedBuilders, newBuilder)
 
 	return composedBuilders, nil
 }
 
-type PanelCompositionConfig struct {
-	// PanelBuilderName refers to the builder to use as a source for the
+type CompositionConfig struct {
+	// SourceBuilderName refers to the builder to use as a source for the
 	// composition. Builders for "composable" objects will be composed into
 	// this source builder following the mapping defined in the CompositionMap
 	// field.
 	// Note: The builder name must follow the [package].[builder_name] pattern.
 	// Example: "dashboard.Panel"
-	PanelBuilderName string
+	SourceBuilderName string
 
 	// PluginDiscriminatorField contains the name of the field used to identify
 	// the plugin implementing this object.
-	// Example: "type"
+	// Example: "type", "kind", ...
 	PluginDiscriminatorField string
 
 	// Composition map describes how to perform the composition.
@@ -195,32 +259,31 @@ type PanelCompositionConfig struct {
 	// ```
 	CompositionMap map[string]string
 
-	// ExcludePanelOptions lists option names to exclude in the resulting
+	// ExcludeOptions lists option names to exclude in the resulting
 	// composed builders.
-	ExcludePanelOptions []string
+	ExcludeOptions []string
 
 	// ComposedBuilderName configures the name of the newly composed builders.
-	// If left empty, the name is taken from PanelBuilderName.
+	// If left empty, the name is taken from SourceBuilderName.
 	ComposedBuilderName string
 }
 
-func ComposeDashboardPanel(selector Selector, config PanelCompositionConfig) RewriteRule {
+func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
 	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		panelBuilderPkg, panelBuilderNameWithoutPkg, found := strings.Cut(config.PanelBuilderName, ".")
+		sourceBuilderPkg, sourceBuilderNameWithoutPkg, found := strings.Cut(config.SourceBuilderName, ".")
 		if !found {
-			return nil, fmt.Errorf("could not apply ComposeDashboardPanel builder veneer: PanelBuilderName '%s' is incorrect: no package found", panelBuilderPkg)
+			return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: SourceBuilderName '%s' is incorrect: no package found", sourceBuilderPkg)
 		}
 
-		panelBuilder, found := builders.LocateByObject(panelBuilderPkg, panelBuilderNameWithoutPkg)
+		sourceBuilder, found := builders.LocateByObject(sourceBuilderPkg, sourceBuilderNameWithoutPkg)
 		if !found {
-			// We couldn't find the panel builder: let's return the builders untouched.
-			return builders, nil
+			return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: source builder '%s' not found", config.SourceBuilderName)
 		}
 
 		// - add to newBuilders all the builders that are not composable (ie: don't comply to the selector)
-		// - build a map of composable builders, indexed by panel type
-		// - aggregate the composable builders into a new, composed panel builder
-		// - add the new composed panel builders to newBuilders
+		// - build a map of composable builders, indexed by type
+		// - aggregate the composable builders into a new, composed builder
+		// - add the new composed builders to newBuilders
 
 		newBuilders := make([]ast.Builder, 0, len(builders))
 		composableBuilders := make(map[string]ast.Builders)
@@ -242,13 +305,13 @@ func ComposeDashboardPanel(selector Selector, config PanelCompositionConfig) Rew
 		}
 
 		for panelType, buildersForType := range composableBuilders {
-			composedBuilders, err := composePanelType(builders, config, panelType, panelBuilder, buildersForType)
+			composedBuilders, err := composeBuilderForType(schemas, builders, config, panelType, sourceBuilder, buildersForType)
 			if err != nil {
-				return nil, fmt.Errorf("could not apply ComposeDashboardPanel builder veneer: %w", err)
+				return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: %w", err)
 			}
 
 			for _, b := range composedBuilders {
-				b.AddToVeneerTrail("ComposeDashboardPanel")
+				b.AddToVeneerTrail("ComposeBuilders")
 			}
 
 			newBuilders = append(newBuilders, composedBuilders...)

@@ -44,8 +44,9 @@ func StructGeneratedFromDisjunction() Selector {
 	}
 }
 
-// ComposableDashboardPanel matches builders for Panel variants.
-func ComposableDashboardPanel() Selector {
+// ByVariant matches builders defined within a schema marked as "composable"
+// and implementing the given variant.
+func ByVariant(variant ast.SchemaVariant) Selector {
 	return func(schemas ast.Schemas, builder ast.Builder) bool {
 		schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
 		if !found {
@@ -53,7 +54,7 @@ func ComposableDashboardPanel() Selector {
 		}
 
 		return schema.Metadata.Kind == ast.SchemaKindComposable &&
-			schema.Metadata.Variant == ast.SchemaVariantPanel &&
+			schema.Metadata.Variant == variant &&
 			schema.Metadata.Identifier != ""
 	}
 }

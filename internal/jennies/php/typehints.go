@@ -52,7 +52,7 @@ func (generator *typehints) forType(def ast.Type, resolveBuilders bool) string {
 	case def.IsArray():
 		hint = generator.arrayHint(def, resolveBuilders)
 	case def.IsMap():
-		hint = generator.mapHint(def)
+		hint = generator.mapHint(def, resolveBuilders)
 	case def.IsScalar():
 		hint = scalarHint(def)
 	case def.IsRef():
@@ -80,9 +80,9 @@ func (generator *typehints) arrayHint(def ast.Type, resolveBuilders bool) string
 	return fmt.Sprintf("array<%s>", valueType)
 }
 
-func (generator *typehints) mapHint(def ast.Type) string {
-	indexType := generator.forType(def.Map.IndexType, false)
-	valueType := generator.forType(def.Map.ValueType, false)
+func (generator *typehints) mapHint(def ast.Type, resolveBuilders bool) string {
+	indexType := generator.forType(def.Map.IndexType, resolveBuilders)
+	valueType := generator.forType(def.Map.ValueType, resolveBuilders)
 
 	return fmt.Sprintf("array<%s, %s>", indexType, valueType)
 }

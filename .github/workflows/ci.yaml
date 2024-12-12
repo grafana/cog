@@ -107,7 +107,7 @@ jobs:
         run: devbox run ./scripts/ci/build-ts.sh
 
       - name: Lint generated Python code
-        run: devbox run mypy generated/python/
+        run: devbox run ./scripts/ci/build-python.sh
 
       # See https://docs.gradle.org/current/userguide/build_cache.html
       - name: Restore Gradle build cache
@@ -120,7 +120,7 @@ jobs:
             gradle-build-cache-${{ runner.os }}-
 
       - name: Compile generated Java code
-        run: devbox run gradle build --build-cache -p generated/java
+        run: devbox run ./scripts/ci/build-java.sh
 
       # See https://phpstan.org/user-guide/result-cache
       # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
@@ -134,11 +134,8 @@ jobs:
           restore-keys: |
             php-linters-result-cache-
 
-      - name: Lint generated PHP code with phpstan
-        run: devbox run phpstan analyze --memory-limit 512M -c .config/ci/php/phpstan.neon
-
-      - name: Lint generated PHP code with psalm
-        run: devbox run psalm -c .config/ci/php/psalm.xml generated/php
+      - name: Lint generated PHP code
+        run: devbox run ./scripts/ci/build-php.sh
 
   examples:
     name: Run examples
