@@ -204,7 +204,7 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 	}
 
 	return jenny.getTemplate().RenderAsBytes("types/enum.tmpl", EnumTemplate{
-		Package:  jenny.typeFormatter.formatPackage(pkg),
+		Package:  jenny.config.formatPackage(pkg),
 		Name:     object.Name,
 		Values:   values,
 		Type:     enumType,
@@ -216,7 +216,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
 
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
-		Package:                 jenny.typeFormatter.formatPackage(pkg),
+		Package:                 jenny.config.formatPackage(pkg),
 		Imports:                 jenny.imports,
 		Name:                    tools.UpperCamelCase(object.Name),
 		Fields:                  object.Type.AsStruct().Fields,
@@ -245,7 +245,7 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 	}
 
 	return jenny.getTemplate().RenderAsBytes("types/constants.tmpl", ConstantTemplate{
-		Package:   jenny.typeFormatter.formatPackage(pkg),
+		Package:   jenny.config.formatPackage(pkg),
 		Name:      "Constants",
 		Constants: constants,
 	})
@@ -255,7 +255,7 @@ func (jenny RawTypes) formatReference(pkg string, identifier string, object ast.
 	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
 
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
-		Package:    jenny.typeFormatter.formatPackage(pkg),
+		Package:    jenny.config.formatPackage(pkg),
 		Imports:    jenny.imports,
 		Name:       tools.UpperCamelCase(object.Name),
 		Extends:    []string{reference},
@@ -280,7 +280,7 @@ func (jenny RawTypes) formatIntersection(pkg string, identifier string, object a
 	}
 
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
-		Package:    jenny.typeFormatter.formatPackage(pkg),
+		Package:    jenny.config.formatPackage(pkg),
 		Imports:    jenny.imports,
 		Name:       object.Name,
 		Extends:    extensions,
@@ -295,7 +295,7 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 	variant := ""
 	if t.ImplementsVariant() {
 		variant = fmt.Sprintf("cog.variants.%s", tools.UpperCamelCase(t.ImplementedVariant()))
-		variant = jenny.typeFormatter.formatPackage(variant)
+		variant = jenny.config.formatPackage(variant)
 	}
 	return variant
 }

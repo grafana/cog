@@ -65,7 +65,7 @@ func (jenny Registry) renderPanelConfig() (string, error) {
 	}
 
 	return jenny.tmpl.Render("runtime/panel_config.tmpl", map[string]any{
-		"Package":             jenny.formatPackage("cog.variants"),
+		"Package":             jenny.config.formatPackage("cog.variants"),
 		"Imports":             imports.String(),
 		"ShouldAddConverters": jenny.config.generateConverters,
 	})
@@ -78,7 +78,7 @@ func (jenny Registry) renderDataqueryConfig() (string, error) {
 	}
 
 	return jenny.tmpl.Render("runtime/dataquery_config.tmpl", map[string]any{
-		"Package":             jenny.formatPackage("cog.variants"),
+		"Package":             jenny.config.formatPackage("cog.variants"),
 		"Imports":             imports.String(),
 		"ShouldAddConverters": jenny.config.generateConverters,
 	})
@@ -97,15 +97,15 @@ func (jenny Registry) renderRegistry(context languages.Context) (string, error) 
 		if schema.Metadata.Variant == ast.SchemaVariantDataQuery {
 			dataquerySchemas = append(dataquerySchemas, DataquerySchema{
 				Identifier: strings.ToLower(schema.Metadata.Identifier),
-				Class:      jenny.formatPackage(fmt.Sprintf("%s.%s.class", schema.Package, jenny.findDataqueryClass(schema))),
-				Converter:  jenny.formatPackage(fmt.Sprintf("%s.%sMapperConverter()", schema.Package, jenny.findDataqueryClass(schema))),
+				Class:      jenny.config.formatPackage(fmt.Sprintf("%s.%s.class", schema.Package, jenny.findDataqueryClass(schema))),
+				Converter:  jenny.config.formatPackage(fmt.Sprintf("%s.%sMapperConverter()", schema.Package, jenny.findDataqueryClass(schema))),
 			})
 		} else if schema.Metadata.Variant == ast.SchemaVariantPanel {
 			panelSchemas = append(panelSchemas, PanelSchema{
 				Identifier:  strings.ToLower(schema.Metadata.Identifier),
-				Options:     jenny.formatPackage(fmt.Sprintf("%s.Options.class", schema.Package)),
+				Options:     jenny.config.formatPackage(fmt.Sprintf("%s.Options.class", schema.Package)),
 				FieldConfig: jenny.findFieldConfig(schema),
-				Converter:   jenny.formatPackage(fmt.Sprintf("%s.PanelConverter()", schema.Package)),
+				Converter:   jenny.config.formatPackage(fmt.Sprintf("%s.PanelConverter()", schema.Package)),
 			})
 		}
 	}
@@ -125,7 +125,7 @@ func (jenny Registry) renderRegistry(context languages.Context) (string, error) 
 	})
 
 	return jenny.tmpl.Render("runtime/registry.tmpl", map[string]any{
-		"Package":             jenny.formatPackage("cog.variants"),
+		"Package":             jenny.config.formatPackage("cog.variants"),
 		"Imports":             imports.String(),
 		"PanelSchemas":        panelSchemas,
 		"DataquerySchemas":    dataquerySchemas,
@@ -148,29 +148,21 @@ func (jenny Registry) findFieldConfig(schema *ast.Schema) string {
 	name := "null"
 	schema.Objects.Iterate(func(key string, value ast.Object) {
 		if key == "FieldConfig" {
-			name = jenny.formatPackage(fmt.Sprintf("%s.FieldConfig.class", schema.Package))
+			name = jenny.config.formatPackage(fmt.Sprintf("%s.FieldConfig.class", schema.Package))
 		}
 	})
 
 	return name
 }
 
-func (jenny Registry) formatPackage(pkg string) string {
-	if jenny.config.PackagePath != "" {
-		return fmt.Sprintf("%s.%s", jenny.config.PackagePath, pkg)
-	}
-
-	return pkg
-}
-
 func (jenny Registry) unknownDataquery() (string, error) {
 	return jenny.tmpl.Render("runtime/unknown_dataquery.tmpl", map[string]any{
-		"Package": jenny.formatPackage("cog.variants"),
+		"Package": jenny.config.formatPackage("cog.variants"),
 	})
 }
 
 func (jenny Registry) unknownDataquerySerializer() (string, error) {
 	return jenny.tmpl.Render("runtime/unknown_dataquery_serializer.tmpl", map[string]any{
-		"Package": jenny.formatPackage("cog.variants"),
+		"Package": jenny.config.formatPackage("cog.variants"),
 	})
 }

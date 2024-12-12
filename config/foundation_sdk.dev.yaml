@@ -123,11 +123,19 @@ output:
   converters: true
   api_reference: true
 
+  templates_data:
+    GrafanaVersion: '%kind_registry_version%'
+    ReleaseBranch: 'release_branch_name'
+    CogVersion: 'snapshot'
+    BuildTimestamp: '1733964347'
+
   languages:
     - go:
         package_root: '%go_package_root%'
-        builder_templates:
-          - '%__config_dir%/foundation-sdk/.cog/templates/go'
+        extra_files_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/go/extra'
+        overrides_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/go/overrides'
         generate_strict_unmarshaller: true
         generate_equal: true
         generate_validate: true
@@ -135,16 +143,24 @@ output:
     - openapi: {}
     - php:
         namespace_root: '%php_namespace_root%'
-        builder_templates:
-          - '%__config_dir%/foundation-sdk/.cog/templates/php'
+        extra_files_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/php/extra'
+        overrides_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/php/overrides'
     - python:
         path_prefix: grafana_foundation_sdk
-        builder_templates:
-          - '%__config_dir%/foundation-sdk/.cog/templates/python'
+        extra_files_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/python/extra'
+        overrides_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/python/overrides'
     - typescript:
-        builder_templates:
-          - '%__config_dir%/foundation-sdk/.cog/templates/typescript'
+        extra_files_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/typescript/extra'
+        overrides_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/typescript/overrides'
     - java:
         package_path: '%java_package_path%'
-        builder_templates:
-          - '%__config_dir%/foundation-sdk/.cog/templates/java'
+        extra_files_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/java/extra'
+        overrides_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/java/overrides'

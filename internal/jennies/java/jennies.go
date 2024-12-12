@@ -15,13 +15,20 @@ import (
 const LanguageRef = "java"
 
 type Config struct {
-	ProjectPath   string `yaml:"-"`
-	PackagePath   string `yaml:"package_path"`
-	SkipGradleDev bool   `yaml:"skip_gradle_dev"`
+	ProjectPath string `yaml:"-"`
+	PackagePath string `yaml:"package_path"`
 
-	// BuilderTemplatesDirectories holds a list of directories containing templates
-	// to be used to override parts of builders.
-	BuilderTemplatesDirectories []string `yaml:"builder_templates"`
+	// OverridesTemplatesDirectories holds a list of directories containing templates
+	// defining blocks used to override parts of builders/types/....
+	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
+
+	// ExtraFilesTemplatesDirectories holds a list of directories containing
+	// templates describing files to be added to the generated output.
+	ExtraFilesTemplatesDirectories []string `yaml:"extra_files_templates"`
+
+	// ExtraFilesTemplatesData holds additional data to be injected into the
+	// templates described in ExtraFilesTemplatesDirectories.
+	ExtraFilesTemplatesData map[string]string `yaml:"-"`
 
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
@@ -31,9 +38,18 @@ type Config struct {
 	generateConverters bool
 }
 
+func (config *Config) formatPackage(pkg string) string {
+	if config.PackagePath != "" {
+		return fmt.Sprintf("%s.%s", config.PackagePath, pkg)
+	}
+
+	return pkg
+}
+
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.PackagePath = interpolator(config.PackagePath)
-	config.BuilderTemplatesDirectories = tools.Map(config.BuilderTemplatesDirectories, interpolator)
+	config.OverridesTemplatesDirectories = tools.Map(config.OverridesTemplatesDirectories, interpolator)
+	config.ExtraFilesTemplatesDirectories = tools.Map(config.ExtraFilesTemplatesDirectories, interpolator)
 	config.ProjectPath = fmt.Sprintf("src/main/java/%s", strings.ReplaceAll(config.PackagePath, ".", "/"))
 }
 
@@ -61,7 +77,7 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
-	tmpl := initTemplates(language.config.BuilderTemplatesDirectories)
+	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
@@ -72,8 +88,15 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: config, tmpl: tmpl}),
 		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
-		common.If[languages.Context](!config.SkipGradleDev, Gradle{config: config, tmpl: tmpl}),
 		common.If[languages.Context](!config.SkipRuntime && config.generateBuilders && config.generateConverters, &Converter{config: config, tmpl: tmpl}),
+
+		common.PackageTemplate{
+			TemplateDirectories: config.ExtraFilesTemplatesDirectories,
+			Data: map[string]any{
+				"Debug": globalConfig.Debug,
+			},
+			ExtraData: config.ExtraFilesTemplatesData,
+		},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

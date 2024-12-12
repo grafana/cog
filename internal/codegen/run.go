@@ -59,17 +59,6 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 		if err := runJenny(languageJennies, jenniesInput, generatedFS); err != nil {
 			return nil, err
 		}
-
-		if pipeline.Output.PackageTemplates != "" {
-			packageJennies, err := packageTemplatesJenny(pipeline, language)
-			if err != nil {
-				return nil, err
-			}
-
-			if err := runJenny(packageJennies, jenniesInput, generatedFS); err != nil {
-				return nil, err
-			}
-		}
 	}
 
 	if pipeline.Output.RepositoryTemplates != "" {

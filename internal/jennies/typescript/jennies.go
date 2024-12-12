@@ -22,9 +22,17 @@ type Config struct {
 	// SkipIndex disables the generation of `index.ts` files.
 	SkipIndex bool `yaml:"skip_index"`
 
-	// BuilderTemplatesDirectories holds a list of directories containing templates
-	// to be used to override parts of builders.
-	BuilderTemplatesDirectories []string `yaml:"builder_templates"`
+	// OverridesTemplatesDirectories holds a list of directories containing templates
+	// defining blocks used to override parts of builders/types/....
+	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
+
+	// ExtraFilesTemplatesDirectories holds a list of directories containing
+	// templates describing files to be added to the generated output.
+	ExtraFilesTemplatesDirectories []string `yaml:"extra_files_templates"`
+
+	// ExtraFilesTemplatesData holds additional data to be injected into the
+	// templates described in ExtraFilesTemplatesDirectories.
+	ExtraFilesTemplatesData map[string]string `yaml:"-"`
 
 	// PackagesImportMap associates package names to their import path.
 	PackagesImportMap map[string]string `yaml:"packages_import_map"`
@@ -48,7 +56,8 @@ type Config struct {
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
-	config.BuilderTemplatesDirectories = tools.Map(config.BuilderTemplatesDirectories, interpolator)
+	config.OverridesTemplatesDirectories = tools.Map(config.OverridesTemplatesDirectories, interpolator)
+	config.ExtraFilesTemplatesDirectories = tools.Map(config.ExtraFilesTemplatesDirectories, interpolator)
 	for pkg, importPath := range config.PackagesImportMap {
 		config.PackagesImportMap[pkg] = interpolator(importPath)
 	}
@@ -79,7 +88,7 @@ func (language *Language) Name() string {
 }
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
-	tmpl := initTemplates(language.config.BuilderTemplatesDirectories)
+	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
@@ -102,6 +111,14 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			Formatter: apiReferenceFormatter(language.config),
 			Tmpl:      tmpl,
 		}),
+
+		common.PackageTemplate{
+			TemplateDirectories: language.config.ExtraFilesTemplatesDirectories,
+			Data: map[string]any{
+				"Debug": globalConfig.Debug,
+			},
+			ExtraData: language.config.ExtraFilesTemplatesData,
+		},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 

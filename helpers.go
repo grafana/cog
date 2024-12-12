@@ -173,8 +173,7 @@ type GoConfig struct {
 func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Go: &golang.Config{
-			GenerateGoMod: false,
-			SkipRuntime:   true,
+			SkipRuntime: true,
 
 			GenerateEqual: config.GenerateEqual,
 		},

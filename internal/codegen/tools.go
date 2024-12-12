@@ -11,8 +11,6 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 func guessPackageFromFilename(filename string) string {
@@ -77,25 +75,6 @@ func repositoryTemplatesJenny(pipeline *Pipeline) (*codejen.JennyList[common.Bui
 	)
 
 	return repoTemplatesJenny, nil
-}
-
-func packageTemplatesJenny(pipeline *Pipeline, language string) (*codejen.JennyList[languages.Context], error) {
-	outputDir, err := pipeline.languageOutputDir(pipeline.currentDirectory, language)
-	if err != nil {
-		return nil, err
-	}
-
-	pkgTemplatesJenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
-		return "PackageTemplates" + tools.UpperCamelCase(language)
-	})
-	pkgTemplatesJenny.AppendOneToMany(&common.PackageTemplate{
-		Language:    language,
-		TemplateDir: pipeline.Output.PackageTemplates,
-		ExtraData:   pipeline.Output.TemplatesData,
-	})
-	pkgTemplatesJenny.AddPostprocessors(common.PathPrefixer(outputDir))
-
-	return pkgTemplatesJenny, nil
 }
 
 func runJenny[I any](jenny *codejen.JennyList[I], input I, destinationFS *codejen.FS) error {
