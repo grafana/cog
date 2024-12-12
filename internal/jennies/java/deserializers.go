@@ -59,7 +59,7 @@ func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, 
 	jenny.imports = jenny.genImports(obj)
 
 	rendered, err := jenny.tmpl.Render("marshalling/unmarshalling.tmpl", Unmarshalling{
-		Package:                   jenny.formatPackage(obj.SelfRef.ReferredPkg),
+		Package:                   jenny.config.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:                      obj.Name,
 		ShouldUnmarshallingPanels: obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel",
 		Imports:                   jenny.imports,
@@ -103,7 +103,7 @@ func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field 
 
 		hintField = &obj.Type.AsStruct().Fields[i]
 		if obj.SelfRef.ReferredPkg != f.Type.AsRef().ReferredPkg {
-			jenny.imports = append(jenny.imports, jenny.formatPackage(fmt.Sprintf("%s.%s", f.Type.AsRef().ReferredPkg, "DataSourceRef")))
+			jenny.imports = append(jenny.imports, jenny.config.formatPackage(fmt.Sprintf("%s.%s", f.Type.AsRef().ReferredPkg, "DataSourceRef")))
 		}
 	}
 
@@ -124,12 +124,12 @@ func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field 
 
 func (jenny *Deserializers) genImports(obj ast.Object) []string {
 	imports := []string{
-		jenny.formatPackage("cog.variants.Dataquery"),
-		jenny.formatPackage("cog.variants.Registry"),
+		jenny.config.formatPackage("cog.variants.Dataquery"),
+		jenny.config.formatPackage("cog.variants.Registry"),
 	}
 
 	if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" {
-		imports = append(imports, jenny.formatPackage("cog.variants.PanelConfig"))
+		imports = append(imports, jenny.config.formatPackage("cog.variants.PanelConfig"))
 	}
 
 	return imports
@@ -137,7 +137,7 @@ func (jenny *Deserializers) genImports(obj ast.Object) []string {
 
 func (jenny *Deserializers) genDisjunctionsDeserialiser(obj ast.Object, tmpl string) (*codejen.File, error) {
 	rendered, err := jenny.tmpl.Render(fmt.Sprintf("marshalling/%s.json_unmarshall.tmpl", tmpl), Unmarshalling{
-		Package: jenny.formatPackage(obj.SelfRef.ReferredPkg),
+		Package: jenny.config.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:    tools.UpperCamelCase(obj.Name),
 		Fields:  obj.Type.AsStruct().Fields,
 		Hint:    obj.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs],
@@ -148,12 +148,4 @@ func (jenny *Deserializers) genDisjunctionsDeserialiser(obj ast.Object, tmpl str
 
 	path := filepath.Join(jenny.config.ProjectPath, obj.SelfRef.ReferredPkg, fmt.Sprintf("%sDeserializer.java", tools.UpperCamelCase(obj.SelfRef.ReferredType)))
 	return codejen.NewFile(path, []byte(rendered), jenny), nil
-}
-
-func (jenny *Deserializers) formatPackage(pkg string) string {
-	if jenny.config.PackagePath != "" {
-		return fmt.Sprintf("%s.%s", jenny.config.PackagePath, pkg)
-	}
-
-	return pkg
 }

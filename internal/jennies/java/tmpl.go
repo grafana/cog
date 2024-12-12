@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/gradle/*.* templates/converters/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/converters/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
