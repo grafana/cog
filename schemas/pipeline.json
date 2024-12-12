@@ -217,10 +217,6 @@
           },
           "type": "array"
         },
-        "package_templates": {
-          "type": "string",
-          "description": "PackageTemplates is the path to a directory containing \"package templates\".\nThese templates are used to add arbitrary files to the generated code, with\nthe goal of turning it into a fully-fledged package.\nTemplates in that directory are expected to be organized by language:\n```\npackage_templates\n├── go\n│   ├── LICENSE\n│   └── README.md\n└── typescript\n    ├── babel.config.json\n    ├── package.json\n    ├── README.md\n    └── tsconfig.json\n```"
-        },
         "repository_templates": {
           "type": "string",
           "description": "RepositoryTemplates is the path to a directory containing\n\"repository-level templates\".\nThese templates are used to add arbitrary files to the repository, such as CI pipelines.\n\nTemplates in that directory are expected to be organized by language:\n```\nrepository_templates\n├── go\n│   └── .github\n│   \t   └── workflows\n│   \t       └── go-ci.yaml\n└── typescript\n    └── .github\n    \t   └── workflows\n    \t       └── typescript-ci.yaml\n```"
@@ -312,10 +308,6 @@
     },
     "GolangConfig": {
       "properties": {
-        "go_mod": {
-          "type": "boolean",
-          "description": "GenerateGoMod indicates whether a go.mod file should be generated.\nIf enabled, PackageRoot is used as module path."
-        },
         "generate_strict_unmarshaller": {
           "type": "boolean",
           "description": "GenerateStrictUnmarshaller controls the generation of\n`UnmarshalJSONStrict()` methods on types."
@@ -332,12 +324,19 @@
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
         },
-        "builder_templates": {
+        "overrides_templates": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "BuilderTemplatesDirectories holds a list of directories containing templates\nto be used to override parts of builders."
+          "description": "OverridesTemplatesDirectories holds a list of directories containing templates\ndefining blocks used to override parts of builders/types/...."
+        },
+        "extra_files_templates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "ExtraFilesTemplatesDirectories holds a list of directories containing\ntemplates describing files to be added to the generated output."
         },
         "package_root": {
           "type": "string",
@@ -352,15 +351,19 @@
         "package_path": {
           "type": "string"
         },
-        "skip_gradle_dev": {
-          "type": "boolean"
-        },
-        "builder_templates": {
+        "overrides_templates": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "BuilderTemplatesDirectories holds a list of directories containing templates\nto be used to override parts of builders."
+          "description": "OverridesTemplatesDirectories holds a list of directories containing templates\ndefining blocks used to override parts of builders/types/...."
+        },
+        "extra_files_templates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "ExtraFilesTemplatesDirectories holds a list of directories containing\ntemplates describing files to be added to the generated output."
         },
         "skip_runtime": {
           "type": "boolean",
@@ -393,12 +396,19 @@
         "namespace_root": {
           "type": "string"
         },
-        "builder_templates": {
+        "overrides_templates": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "BuilderTemplatesDirectories holds a list of directories containing templates\nto be used to override parts of builders."
+          "description": "OverridesTemplatesDirectories holds a list of directories containing templates\ndefining blocks used to override parts of builders/types/...."
+        },
+        "extra_files_templates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "ExtraFilesTemplatesDirectories holds a list of directories containing\ntemplates describing files to be added to the generated output."
         }
       },
       "additionalProperties": false,
@@ -413,12 +423,19 @@
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
         },
-        "builder_templates": {
+        "overrides_templates": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "BuilderTemplatesDirectories holds a list of directories containing templates\nto be used to override parts of builders."
+          "description": "OverridesTemplatesDirectories holds a list of directories containing templates\ndefining blocks used to override parts of builders/types/...."
+        },
+        "extra_files_templates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "ExtraFilesTemplatesDirectories holds a list of directories containing\ntemplates describing files to be added to the generated output."
         }
       },
       "additionalProperties": false,
@@ -437,12 +454,19 @@
           "type": "boolean",
           "description": "SkipIndex disables the generation of `index.ts` files."
         },
-        "builder_templates": {
+        "overrides_templates": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "BuilderTemplatesDirectories holds a list of directories containing templates\nto be used to override parts of builders."
+          "description": "OverridesTemplatesDirectories holds a list of directories containing templates\ndefining blocks used to override parts of builders/types/...."
+        },
+        "extra_files_templates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "ExtraFilesTemplatesDirectories holds a list of directories containing\ntemplates describing files to be added to the generated output."
         },
         "packages_import_map": {
           "additionalProperties": {
