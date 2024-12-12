@@ -88,7 +88,6 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 	}
 	if outputLanguage.Typescript != nil {
 		outputLanguage.Typescript.InterpolateParameters(interpolator)
-		// TODO
-		// outputLanguage.Typescript.ExtraFilesTemplatesData = output.TemplatesData
+		outputLanguage.Typescript.ExtraFilesTemplatesData = output.TemplatesData
 	}
 }

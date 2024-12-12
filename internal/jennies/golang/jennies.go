@@ -56,10 +56,6 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 	config.PackageRoot = interpolator(config.PackageRoot)
 	config.OverridesTemplatesDirectories = tools.Map(config.OverridesTemplatesDirectories, interpolator)
 	config.ExtraFilesTemplatesDirectories = tools.Map(config.ExtraFilesTemplatesDirectories, interpolator)
-
-	for key, value := range config.ExtraFilesTemplatesData {
-		config.ExtraFilesTemplatesData[key] = interpolator(value)
-	}
 }
 
 func (config Config) MergeWithGlobal(global languages.Config) Config {
