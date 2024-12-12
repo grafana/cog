@@ -1,50 +1,51 @@
 package test;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.grafana.foundation.cog.Builder;
-import com.grafana.foundation.dashboard.*;
-
-import java.util.List;
+import com.grafana.foundation.dashboard.Dashboard;
+import com.grafana.foundation.dashboard.DashboardBuilder;
+import com.grafana.foundation.dashboard.DashboardCursorSync;
+import com.grafana.foundation.dashboard.DashboardDashboardTimeBuilder;
+import com.grafana.foundation.dashboard.DataSourceRef;
+import com.grafana.foundation.dashboard.DatasourceVariableBuilder;
+import com.grafana.foundation.dashboard.QueryVariableBuilder;
+import com.grafana.foundation.dashboard.RowBuilder;
+import com.grafana.foundation.dashboard.StringOrArrayOfString;
+import com.grafana.foundation.dashboard.StringOrMap;
+import com.grafana.foundation.dashboard.TimePickerBuilder;
+import com.grafana.foundation.dashboard.VariableHide;
+import com.grafana.foundation.dashboard.VariableModel;
+import com.grafana.foundation.dashboard.VariableOption;
+import com.grafana.foundation.dashboard.VariableRefresh;
+import com.grafana.foundation.dashboard.VariableSort;
 
 public class Main {
     public static void main(String[] args) {
-        Dashboard dashboard = new Dashboard.Builder("[TEST] Node Exporter / Raspberry").
-                uid("test-dashboard-raspberry").
-                tags(List.of("generated", "raspberrypi-node-integration")).
-                refresh("30s").
-                time(new DashboardDashboardTime.Builder().from("now-30m").to("now")).
-                timezone("browser").
-                timepicker(new TimePickerConfig.Builder().
-                        refreshIntervals(List.of("5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d")).
-                        timeOptions(List.of("5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"))
-                ).
-                tooltip(DashboardCursorSync.CROSSHAIR).
-                withVariable(datasourceVariable()).
-                withVariable(queryVariable()).
+        Dashboard dashboard = new DashboardBuilder("[TEST] Node Exporter / Raspberry").uid("test-dashboard-raspberry")
+                .tags(List.of("generated", "raspberrypi-node-integration")).refresh("30s")
+                .time(new DashboardDashboardTimeBuilder().from("now-30m").to("now")).timezone("browser")
+                .timepicker(new TimePickerBuilder()
+                        .refreshIntervals(List.of("5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"))
+                        .timeOptions(List.of("5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d")))
+                .tooltip(DashboardCursorSync.CROSSHAIR).withVariable(datasourceVariable()).withVariable(queryVariable())
+                .
                 // CPU
-                withRow(new RowPanel.Builder("CPU")).
-                withPanel(CPU.cpuUsageTimeseries()).
-                withPanel(CPU.cpuTemperatureGauge()).
-                withPanel(CPU.loadAverageTimeseries()).
+                withRow(new RowBuilder("CPU")).withPanel(CPU.cpuUsageTimeseries())
+                .withPanel(CPU.cpuTemperatureGauge()).withPanel(CPU.loadAverageTimeseries()).
                 // Memory
-                withRow(new RowPanel.Builder("Memory")).
-                withPanel(Memory.memoryUsageTimeseries()).
-                withPanel(Memory.memoryUsageGauge()).
+                withRow(new RowBuilder("Memory")).withPanel(Memory.memoryUsageTimeseries())
+                .withPanel(Memory.memoryUsageGauge()).
                 // Disk
-                withRow(new RowPanel.Builder("Disk")).
-                withPanel(Disk.diskIOTimeseries()).
-                withPanel(Disk.diskSpaceUsageTable()).
+                withRow(new RowBuilder("Disk")).withPanel(Disk.diskIOTimeseries())
+                .withPanel(Disk.diskSpaceUsageTable()).
                 // Network
-                withRow(new RowPanel.Builder("Network")).
-                withPanel(Network.networkReceivedTimeseries()).
-                withPanel(Network.networkTransmittedTimeseries()).
+                withRow(new RowBuilder("Network")).withPanel(Network.networkReceivedTimeseries())
+                .withPanel(Network.networkTransmittedTimeseries()).
                 // Logs
-                withRow(new RowPanel.Builder("Logs")).
-                withPanel(Logs.errorsInSystemLogs()).
-                withPanel(Logs.authLogs()).
-                withPanel(Logs.kernelLogs()).
-                withPanel(Logs.allSystemLogs()).
-                build();
+                withRow(new RowBuilder("Logs")).withPanel(Logs.errorsInSystemLogs()).withPanel(Logs.authLogs())
+                .withPanel(Logs.kernelLogs()).withPanel(Logs.allSystemLogs()).build();
         try {
             System.out.println(dashboard.toJSON());
         } catch (JsonProcessingException e) {
@@ -53,22 +54,20 @@ public class Main {
     }
 
     private static Builder<VariableModel> datasourceVariable() {
-        return new VariableModel.DatasourceVariableBuilder("datasource").
-                label("Data Source").
-                hide(VariableHide.DONT_HIDE).
-                type("prometheus").
-                current(new VariableOption(true, StringOrArrayOfString.createString("grafanacloud-potatopi-prom"), StringOrArrayOfString.createString("grafanacloud-prom")));
+        return new DatasourceVariableBuilder("datasource").label("Data Source")
+                .hide(VariableHide.DONT_HIDE).type("prometheus")
+                .current(new VariableOption(true, StringOrArrayOfString.createString("grafanacloud-potatopi-prom"),
+                        StringOrArrayOfString.createString("grafanacloud-prom")));
     }
 
     private static Builder<VariableModel> queryVariable() {
-        return new VariableModel.QueryVariableBuilder("instance").
-                label("Instance").
-                hide(VariableHide.DONT_HIDE).
-                refresh(VariableRefresh.ON_TIME_RANGE_CHANGED).
-                query(StringOrMap.createString("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)")).
-                datasource(new DataSourceRef("$datasource", "prometheus")).
-                current(new VariableOption(false, StringOrArrayOfString.createString("potato"), StringOrArrayOfString.createString("potato"))).
-                sort(VariableSort.DISABLED);
+        return new QueryVariableBuilder("instance").label("Instance").hide(VariableHide.DONT_HIDE)
+                .refresh(VariableRefresh.ON_TIME_RANGE_CHANGED)
+                .query(StringOrMap.createString(
+                        "label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"))
+                .datasource(new DataSourceRef("$datasource", "prometheus")).current(new VariableOption(false,
+                        StringOrArrayOfString.createString("potato"), StringOrArrayOfString.createString("potato")))
+                .sort(VariableSort.DISABLED);
     }
 
 }
