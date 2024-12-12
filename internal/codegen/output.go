@@ -81,8 +81,7 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 	}
 	if outputLanguage.Java != nil {
 		outputLanguage.Java.InterpolateParameters(interpolator)
-		// TODO
-		// outputLanguage.Java.ExtraFilesTemplatesData = output.TemplatesData
+		outputLanguage.Java.ExtraFilesTemplatesData = output.TemplatesData
 	}
 	if outputLanguage.Typescript != nil {
 		outputLanguage.Typescript.InterpolateParameters(interpolator)

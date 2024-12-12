@@ -52,7 +52,7 @@ func (b Builders) genBuilders(pkg string, name string) ([]Builder, bool) {
 	return tools.Map(builders, func(builder ast.Builder) Builder {
 		object, _ := b.context.LocateObjectByRef(builder.For.SelfRef)
 		return Builder{
-			Package:              b.typeFormatter.formatPackage(pkg),
+			Package:              b.config.formatPackage(pkg),
 			ObjectName:           tools.UpperCamelCase(object.Name),
 			BuilderName:          builder.Name,
 			BuilderSignatureType: b.getBuilderSignature(object),
@@ -94,7 +94,7 @@ func (b Builders) getBuilderSignature(obj ast.Object) string {
 		return obj.Name
 	}
 
-	return fmt.Sprintf("%s.%s", b.typeFormatter.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Type.ImplementedVariant()))
+	return fmt.Sprintf("%s.%s", b.config.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Type.ImplementedVariant()))
 }
 
 func (b Builders) genDefaults(options []ast.Option) []OptionCall {

@@ -160,5 +160,7 @@ output:
           - '%__config_dir%/foundation-sdk/.cog/templates/typescript/overrides'
     - java:
         package_path: '%java_package_path%'
-        builder_templates:
-          - '%__config_dir%/foundation-sdk/.cog/templates/java'
+        extra_files_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/java/extra'
+        overrides_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/java/overrides'

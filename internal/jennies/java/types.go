@@ -61,7 +61,7 @@ func (tf *typeFormatter) resolvesToComposableSlot(typeDef ast.Type) bool {
 func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 	value := tf.formatFieldType(def)
 	if tf.resolvesToComposableSlot(def) || tf.typeHasBuilder(def) {
-		value = fmt.Sprintf("%s.Builder<%s>", tf.formatPackage("cog"), value)
+		value = fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), value)
 	}
 
 	return value
@@ -148,9 +148,9 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if tf.typeHasBuilder(def) {
-			return fmt.Sprintf("new %s.Builder().build()", tf.formatPackage(refDef))
+			return fmt.Sprintf("new %s.Builder().build()", tf.config.formatPackage(refDef))
 		}
-		return fmt.Sprintf("new %s()", tf.formatPackage(refDef))
+		return fmt.Sprintf("new %s()", tf.config.formatPackage(refDef))
 	case ast.KindStruct:
 		return "new Object()"
 	case ast.KindScalar:
@@ -233,7 +233,7 @@ func (tf *typeFormatter) formatCastValue(fieldPath ast.Path) CastPath {
 	}
 
 	return CastPath{
-		Class:        fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), refType),
+		Class:        fmt.Sprintf("%s.%s", tf.config.formatPackage(refPkg), refType),
 		Value:        refType,
 		Path:         castedPath,
 		IsNilChecked: isNilChecked,
@@ -273,7 +273,7 @@ func (tf *typeFormatter) shouldCastNilCheck(fieldPath ast.Path) CastPath {
 	}
 
 	return CastPath{
-		Class:        fmt.Sprintf("%s.%s", tf.formatPackage(refPkg), tools.UpperCamelCase(refType)),
+		Class:        fmt.Sprintf("%s.%s", tf.config.formatPackage(refPkg), tools.UpperCamelCase(refType)),
 		Value:        refType,
 		Path:         castedPath,
 		IsNilChecked: isNilChecked,
@@ -327,14 +327,6 @@ func (tf *typeFormatter) formatAssignmentPath(fieldPath ast.Path) string {
 	}
 
 	return path
-}
-
-func (tf *typeFormatter) formatPackage(pkg string) string {
-	if tf.config.PackagePath != "" {
-		return fmt.Sprintf("%s.%s", tf.config.PackagePath, pkg)
-	}
-
-	return pkg
 }
 
 func (tf *typeFormatter) formatRefType(destinationType ast.Type, value any) string {
