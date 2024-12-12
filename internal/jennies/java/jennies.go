@@ -53,13 +53,13 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 	config.ProjectPath = fmt.Sprintf("src/main/java/%s", strings.ReplaceAll(config.PackagePath, ".", "/"))
 }
 
-func (config Config) MergeWithGlobal(global languages.Config) Config {
+func (config *Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.generateBuilders = global.Builders
 	// newConfig.generateConverters = global.Converters
 	newConfig.generateConverters = false
 
-	return newConfig
+	return *newConfig
 }
 
 type Language struct {

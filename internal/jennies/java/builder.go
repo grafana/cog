@@ -54,7 +54,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 
 	object, _ := context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 	tmpl := BuilderTemplate{
-		Package:              jenny.typeFormatter.formatPackage(builder.Package),
+		Package:              jenny.config.formatPackage(builder.Package),
 		Imports:              jenny.imports,
 		ObjectName:           tools.UpperCamelCase(object.Name),
 		BuilderName:          tools.UpperCamelCase(builder.Name),
@@ -90,7 +90,7 @@ func (jenny Builder) getBuilderSignature(pkg string, obj ast.Object) string {
 		return obj.Name
 	}
 
-	return fmt.Sprintf("%s.%s", jenny.typeFormatter.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Type.ImplementedVariant()))
+	return fmt.Sprintf("%s.%s", jenny.config.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Type.ImplementedVariant()))
 }
 
 func (jenny Builder) isGenericPanel(builder ast.Builder) bool {
