@@ -16,18 +16,12 @@ func (jenny Runtime) JennyName() string {
 }
 
 func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
-	runtime, err := jenny.runtime()
-	if err != nil {
-		return nil, err
-	}
-
 	tools, err := jenny.tools()
 	if err != nil {
 		return nil, err
 	}
 
 	files := []codejen.File{
-		*codejen.NewFile("cog/runtime.go", runtime, jenny),
 		*codejen.NewFile("cog/errors.go", tools, jenny),
 	}
 
@@ -48,19 +42,6 @@ type Builder[ResourceT any] interface {
 }
 
 `)
-}
-
-func (jenny Runtime) runtime() ([]byte, error) {
-	imports := NewImportMap(jenny.Config.PackageRoot)
-	imports.Add("", jenny.Config.importPath("cog/variants"))
-	imports.Add("json", "encoding/json")
-	imports.Add("fmt", "fmt")
-	imports.Add("reflect", "reflect")
-	imports.Add("strings", "strings")
-
-	return jenny.Tmpl.RenderAsBytes("runtime/runtime.tmpl", map[string]any{
-		"imports": imports,
-	})
 }
 
 func (jenny Runtime) tools() ([]byte, error) {

@@ -20,23 +20,6 @@ type Output struct {
 
 	Languages []*OutputLanguage `yaml:"languages"`
 
-	// PackageTemplates is the path to a directory containing "package templates".
-	// These templates are used to add arbitrary files to the generated code, with
-	// the goal of turning it into a fully-fledged package.
-	// Templates in that directory are expected to be organized by language:
-	// ```
-	// package_templates
-	// ├── go
-	// │   ├── LICENSE
-	// │   └── README.md
-	// └── typescript
-	//     ├── babel.config.json
-	//     ├── package.json
-	//     ├── README.md
-	//     └── tsconfig.json
-	// ```
-	PackageTemplates string `yaml:"package_templates"`
-
 	// RepositoryTemplates is the path to a directory containing
 	// "repository-level templates".
 	// These templates are used to add arbitrary files to the repository, such as CI pipelines.
@@ -62,16 +45,14 @@ type Output struct {
 
 func (output *Output) interpolateParameters(interpolator ParametersInterpolator) {
 	output.Directory = interpolator(output.Directory)
-
-	for _, outputLanguage := range output.Languages {
-		outputLanguage.interpolateParameters(interpolator)
-	}
-
-	output.PackageTemplates = interpolator(output.PackageTemplates)
 	output.RepositoryTemplates = interpolator(output.RepositoryTemplates)
 
 	for key, value := range output.TemplatesData {
 		output.TemplatesData[key] = interpolator(value)
+	}
+
+	for _, outputLanguage := range output.Languages {
+		outputLanguage.interpolateParameters(output, interpolator)
 	}
 }
 
@@ -85,20 +66,29 @@ type OutputLanguage struct {
 	Typescript *typescript.Config `yaml:"typescript"`
 }
 
-func (outputLanguage *OutputLanguage) interpolateParameters(interpolator ParametersInterpolator) {
+func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, interpolator ParametersInterpolator) {
 	if outputLanguage.Go != nil {
 		outputLanguage.Go.InterpolateParameters(interpolator)
+		outputLanguage.Go.ExtraFilesTemplatesData = output.TemplatesData
 	}
 	if outputLanguage.PHP != nil {
 		outputLanguage.PHP.InterpolateParameters(interpolator)
+		// TODO
+		// outputLanguage.PHP.ExtraFilesTemplatesData = output.TemplatesData
 	}
 	if outputLanguage.Python != nil {
 		outputLanguage.Python.InterpolateParameters(interpolator)
+		// TODO
+		// outputLanguage.Python.ExtraFilesTemplatesData = output.TemplatesData
 	}
 	if outputLanguage.Java != nil {
 		outputLanguage.Java.InterpolateParameters(interpolator)
+		// TODO
+		// outputLanguage.Java.ExtraFilesTemplatesData = output.TemplatesData
 	}
 	if outputLanguage.Typescript != nil {
 		outputLanguage.Typescript.InterpolateParameters(interpolator)
+		// TODO
+		// outputLanguage.Typescript.ExtraFilesTemplatesData = output.TemplatesData
 	}
 }
