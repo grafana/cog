@@ -112,7 +112,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			Tmpl:      tmpl,
 		}),
 
-		common.PackageTemplate{
+		common.CustomTemplates{
 			TemplateDirectories: language.config.ExtraFilesTemplatesDirectories,
 			Data: map[string]any{
 				"Debug": globalConfig.Debug,

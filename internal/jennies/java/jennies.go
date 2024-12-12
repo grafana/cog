@@ -90,7 +90,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		RawTypes{config: config, tmpl: tmpl},
 		common.If[languages.Context](!config.SkipRuntime && config.generateBuilders && config.generateConverters, &Converter{config: config, tmpl: tmpl}),
 
-		common.PackageTemplate{
+		common.CustomTemplates{
 			TemplateDirectories: config.ExtraFilesTemplatesDirectories,
 			Data: map[string]any{
 				"Debug": globalConfig.Debug,

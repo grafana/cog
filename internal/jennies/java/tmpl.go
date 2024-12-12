@@ -47,8 +47,11 @@ func functions() template.FuncMap {
 			}
 			return ""
 		},
+		"lastItem": func(index int, values []EnumValue) bool {
+			return len(values)-1 == index
+		},
 		"importStdPkg": func(_ ast.Type) string {
-			panic("formatRawRef() needs to be overridden by a jenny")
+			panic("importStdPkg() needs to be overridden by a jenny")
 		},
 		"formatPackageName": func(_ ast.Type) string {
 			panic("formatRawRef() needs to be overridden by a jenny")
@@ -58,9 +61,6 @@ func functions() template.FuncMap {
 		},
 		"fillNullableAnnotationPattern": func(_ ast.Type) string {
 			panic("fillNullableAnnotationPattern() needs to be overridden by a jenny")
-		},
-		"lastItem": func(index int, values []EnumValue) bool {
-			return len(values)-1 == index
 		},
 		"formatValue": func(_ ast.Type) string {
 			panic("formatValue() needs to be overridden by a jenny")
