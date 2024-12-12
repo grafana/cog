@@ -25,3 +25,7 @@ func ExtraObjectDocsBlock(obj ast.Object) string {
 func ExtraBuilderDocsBlock(builder ast.Builder) string {
 	return fmt.Sprintf("api_reference_builder_%s_%s_extra", builder.Package, builder.Name)
 }
+
+func CustomObjectVariantBlock(object ast.Object) string {
+	return fmt.Sprintf("object_variant_%s", object.Type.ImplementedVariant())
+}
