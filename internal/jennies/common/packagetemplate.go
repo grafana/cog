@@ -13,18 +13,20 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
-type PackageTemplate struct {
+// CustomTemplates allows the addition of user-originated templates and files to be included
+// in the codegen pipeline's output.
+type CustomTemplates struct {
 	TmplFuncs           template.FuncMap
 	TemplateDirectories []string
 	Data                map[string]any
 	ExtraData           map[string]string
 }
 
-func (jenny PackageTemplate) JennyName() string {
-	return "PackageTemplate"
+func (jenny CustomTemplates) JennyName() string {
+	return "CustomTemplates"
 }
 
-func (jenny PackageTemplate) Generate(context languages.Context) (codejen.Files, error) {
+func (jenny CustomTemplates) Generate(context languages.Context) (codejen.Files, error) {
 	var allFiles codejen.Files
 
 	for _, templatesDir := range jenny.TemplateDirectories {
@@ -39,7 +41,7 @@ func (jenny PackageTemplate) Generate(context languages.Context) (codejen.Files,
 	return allFiles, nil
 }
 
-func (jenny PackageTemplate) generateForTemplatesDirectory(context languages.Context, directory string) (codejen.Files, error) {
+func (jenny CustomTemplates) generateForTemplatesDirectory(context languages.Context, directory string) (codejen.Files, error) {
 	var files codejen.Files
 
 	templateRoot := directory
@@ -90,7 +92,7 @@ func (jenny PackageTemplate) generateForTemplatesDirectory(context languages.Con
 	return files, nil
 }
 
-func (jenny PackageTemplate) templateData(context languages.Context) map[string]any {
+func (jenny CustomTemplates) templateData(context languages.Context) map[string]any {
 	packages := make([]string, 0, len(context.Schemas))
 	for _, schema := range context.Schemas {
 		packages = append(packages, schema.Package)
@@ -108,7 +110,7 @@ func (jenny PackageTemplate) templateData(context languages.Context) map[string]
 
 // registryToSemver turns a "v10.2.x" input (version string coming from
 // the kind-registry) into a semver-compatible version "10.2.0"
-func (jenny PackageTemplate) registryToSemver(registryVersion string) string {
+func (jenny CustomTemplates) registryToSemver(registryVersion string) string {
 	semver := strings.TrimPrefix(registryVersion, "v")
 
 	if strings.HasSuffix(semver, "x") {

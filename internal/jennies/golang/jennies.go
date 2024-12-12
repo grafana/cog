@@ -8,7 +8,6 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -116,16 +115,14 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			Tmpl:      tmpl,
 		}),
 
-		common.PackageTemplate{
+		common.CustomTemplates{
 			TemplateDirectories: config.ExtraFilesTemplatesDirectories,
 			Data: map[string]any{
 				"Debug":       config.debug,
 				"PackageRoot": config.PackageRoot,
 			},
 			ExtraData: config.ExtraFilesTemplatesData,
-			TmplFuncs: template.FuncMap{
-				"formatPackageName": formatPackageName,
-			},
+			TmplFuncs: formattingTemplateFuncs(),
 		},
 	)
 	jenny.AddPostprocessors(formatGoFiles, common.GeneratedCommentHeader(globalConfig))

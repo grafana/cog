@@ -20,6 +20,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
+		template.Funcs(formattingTemplateFuncs()),
 		template.Funcs(template.FuncMap{
 			"formatPath": func(_ ast.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
@@ -61,14 +62,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 				panic("formatValue() needs to be overridden by a jenny")
 			},
 		}),
-		template.Funcs(map[string]any{
-			"formatPackageName":  formatPackageName,
-			"formatObjectName":   formatObjectName,
-			"formatFieldName":    formatFieldName,
-			"formatArgName":      formatArgName,
-			"formatVarName":      formatVarName,
-			"formatFunctionName": formatFunctionName,
-			"formatScalar":       formatScalar,
+		template.Funcs(template.FuncMap{
 			"maybeAsPointer": func(intoType ast.Type, variableName string) string {
 				if intoType.Nullable && !intoType.IsAnyOf(ast.KindArray, ast.KindMap, ast.KindComposableSlot) {
 					return "&" + variableName
@@ -97,4 +91,16 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	}
 
 	return tmpl
+}
+
+func formattingTemplateFuncs() template.FuncMap {
+	return template.FuncMap{
+		"formatPackageName":  formatPackageName,
+		"formatObjectName":   formatObjectName,
+		"formatFieldName":    formatFieldName,
+		"formatArgName":      formatArgName,
+		"formatVarName":      formatVarName,
+		"formatFunctionName": formatFunctionName,
+		"formatScalar":       formatScalar,
+	}
 }

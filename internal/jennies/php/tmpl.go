@@ -22,16 +22,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 		// Jennies will override these with proper dependencies.
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(templateHelpers(templateDeps{})),
-		template.Funcs(map[string]any{
-			"formatPath":           formatFieldPath,
-			"formatPackageName":    formatPackageName,
-			"formatObjectName":     formatObjectName,
-			"formatOptionName":     formatOptionName,
-			"formatEnumMemberName": formatEnumMemberName,
-			"formatArgName":        formatArgName,
-			"formatScalar":         formatValue,
-			"formatDocsBlock":      formatCommentsBlock,
-		}),
+		template.Funcs(formattingTemplateFuncs()),
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
@@ -42,6 +33,19 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	}
 
 	return tmpl
+}
+
+func formattingTemplateFuncs() template.FuncMap {
+	return template.FuncMap{
+		"formatPath":           formatFieldPath,
+		"formatPackageName":    formatPackageName,
+		"formatObjectName":     formatObjectName,
+		"formatOptionName":     formatOptionName,
+		"formatEnumMemberName": formatEnumMemberName,
+		"formatArgName":        formatArgName,
+		"formatScalar":         formatValue,
+		"formatDocsBlock":      formatCommentsBlock,
+	}
 }
 
 type templateDeps struct {
