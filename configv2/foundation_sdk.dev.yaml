@@ -51,6 +51,8 @@ output:
         generate_strict_unmarshaller: true
         generate_equal: true
         generate_validate: true
+        extra_files_templates:
+          - '%__config_dir%/templates/go/extra'
     #- jsonschema: {}
     #- openapi: {}
     #- php:
