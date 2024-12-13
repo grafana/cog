@@ -189,11 +189,10 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 			return "", fmt.Errorf("can not generate custom unmarshal function for composable slot with variant '%s': template block %s not found", variant, unmarshalVariantBlock)
 		}
 
-		err := jenny.tmpl.RenderInBuffer(&buffer, unmarshalVariantBlock, map[string]any{
+		if err := jenny.tmpl.RenderInBuffer(&buffer, unmarshalVariantBlock, map[string]any{
 			"Object": obj,
 			"Field":  field,
-		})
-		if err != nil {
+		}); err != nil {
 			return "", err
 		}
 	}
