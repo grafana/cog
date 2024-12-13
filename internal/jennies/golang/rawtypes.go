@@ -155,14 +155,12 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 
 		customVariantTmpl := template.CustomObjectVariantBlock(object)
 		if jenny.Tmpl.Exists(customVariantTmpl) {
-			rendered, err := jenny.Tmpl.Render(customVariantTmpl, map[string]any{
+			if err := jenny.Tmpl.RenderInBuffer(buffer, customVariantTmpl, map[string]any{
 				"Object": object,
 				"Schema": schema,
-			})
-			if err != nil {
+			}); err != nil {
 				return err
 			}
-			buffer.WriteString(rendered)
 		}
 	}
 
