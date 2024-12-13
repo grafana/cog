@@ -29,3 +29,7 @@ func ExtraBuilderDocsBlock(builder ast.Builder) string {
 func CustomObjectVariantBlock(object ast.Object) string {
 	return fmt.Sprintf("object_variant_%s", object.Type.ImplementedVariant())
 }
+
+func CustomSchemaVariantBlock(schema *ast.Schema) string {
+	return fmt.Sprintf("schema_variant_%s", schema.Metadata.Variant)
+}

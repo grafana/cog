@@ -17,7 +17,7 @@ const LanguageRef = "go"
 type Config struct {
 	debug              bool
 	generateBuilders   bool
-	generateConverters bool
+	GenerateConverters bool `yaml:"-"`
 
 	// GenerateStrictUnmarshaller controls the generation of
 	// `UnmarshalJSONStrict()` methods on types.
@@ -61,7 +61,7 @@ func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug
 	newConfig.generateBuilders = global.Builders
-	newConfig.generateConverters = global.Converters
+	newConfig.GenerateConverters = global.Converters
 
 	return newConfig
 }

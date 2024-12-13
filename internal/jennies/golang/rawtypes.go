@@ -109,8 +109,14 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return nil, err
 	}
 
-	if err := unmarshallerGenerator.generateForSchema(&buffer, schema); err != nil {
-		return nil, err
+	customSchemaVariant := template.CustomSchemaVariantBlock(schema)
+	if jenny.Tmpl.Exists(customSchemaVariant) {
+		if err := jenny.Tmpl.RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
+			"Schema": schema,
+			"Config": jenny.Config,
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	importStatements := imports.String()
