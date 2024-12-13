@@ -33,3 +33,7 @@ func CustomObjectVariantBlock(object ast.Object) string {
 func CustomSchemaVariantBlock(schema *ast.Schema) string {
 	return fmt.Sprintf("schema_variant_%s", schema.Metadata.Variant)
 }
+
+func VariantFieldUnmarshalBlock(variant string) string {
+	return fmt.Sprintf("variant_%s_field_unmarshal", variant)
+}
