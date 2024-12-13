@@ -25,8 +25,12 @@ public class Dashboard {
         public Builder() {
             this.internal = new Dashboard();
         }
-    public Builder panels(cog.Builder<Map<String, Panel>> panels) {
-    this.internal.panels = panels.build();
+    public Builder panels(Map<String, cog.Builder<Panel>> panels) {
+        Map<String, Panel> panelsResource = new HashMap<>();
+        for (var entry : panels.entrySet()) {
+           panelsResource.put(entry.getKey(), entry.getValue().build());
+        }
+    this.internal.panels = panelsResource;
         return this;
     }
     public Dashboard build() {
