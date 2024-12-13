@@ -11,7 +11,8 @@ For types, the following blocks are supported:
 
 * `object_{{ Package }}_{{ ObjectName }}_custom_unmarshal`: allows the definition of a custom unmarshal function for the object.
 * `object_{{ Package }}_{{ ObjectName }}_field_{{ FieldName}}_custom_strict_unmarshal`: allows the definition of a custom — strict — unmarshal logic for a field.
-* `object_variant_{{ VariantName }}`: allows the definition of a custom methods for all objects implementing the variant `{{ VariantName }}`.
+* `object_variant_{{ VariantName }}`: allows the definition of custom methods for all objects implementing the variant `{{ VariantName }}`.
+* `schema_variant_{{ VariantName }}`: allows the definition of custom code for all schemas implementing the variant `{{ VariantName }}`.
 
 For builders, the following blocks are supported:
 

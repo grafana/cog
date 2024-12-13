@@ -147,6 +147,17 @@ func (template *Template) Render(file string, data any) (string, error) {
 	return buf.String(), nil
 }
 
+func (template *Template) RenderInBuffer(buffer *strings.Builder, file string, data any) error {
+	rendered, err := template.Render(file, data)
+	if err != nil {
+		return err
+	}
+
+	buffer.WriteString(rendered)
+
+	return nil
+}
+
 func (template *Template) RenderAsBytes(file string, data any) ([]byte, error) {
 	rendered, err := template.Render(file, data)
 	if err != nil {
