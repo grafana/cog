@@ -14,6 +14,9 @@ func TestRawTypes_Generate(t *testing.T) {
 	test := testutils.GoldenFilesTestSuite[ast.Schema]{
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "GoRawTypes",
+		Skip: map[string]string{
+			"dashboard": "the dashboard test schema includes a composable slot, which rely on external input to be properly supported",
+		},
 	}
 
 	config := Config{
