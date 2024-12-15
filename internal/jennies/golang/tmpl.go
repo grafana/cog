@@ -14,12 +14,13 @@ import (
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(extraTemplatesDirectories []string) *template.Template {
+func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplatesDirectories []string) *template.Template {
 	tmpl, err := template.New(
 		"golang",
 
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
+		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(formattingTemplateFuncs()),
 		template.Funcs(template.FuncMap{
 			"formatPath": func(_ ast.Path) string {
