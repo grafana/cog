@@ -223,6 +223,9 @@ func (template *Template) builtins() FuncMap {
 			}
 			return given[0]
 		},
+		"listStr": func(v ...string) []string {
+			return v
+		},
 		"first": func(list any) any {
 			tp := reflect.TypeOf(list).Kind()
 			switch tp {
