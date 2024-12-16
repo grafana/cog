@@ -16,7 +16,7 @@ env:
 jobs:
   prepare-release:
     name: Prepare release page
-    runs-on: ububtu-latest
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout
