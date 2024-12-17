@@ -13,8 +13,6 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-const variableModel = "VariableModel"
-
 type Converter struct {
 	config         Config
 	nullableConfig languages.NullableConfig

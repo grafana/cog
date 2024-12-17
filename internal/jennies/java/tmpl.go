@@ -41,9 +41,6 @@ func functions() template.FuncMap {
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
 		"slice": func(arr interface{}, start int) interface{} {
 			v := reflect.ValueOf(arr)
-			if v.Kind() == reflect.String {
-
-			}
 			if v.Kind() != reflect.Slice {
 				panic("slice: input must be a slice")
 			}
