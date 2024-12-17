@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
-//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/converters/*.tmpl
+//go:embed templates/runtime/*.tmpl templates/types/*.tmpl templates/marshalling/*.tmpl templates/converters/*.tmpl templates/builders/*.*
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -122,7 +122,7 @@ type ClassTemplate struct {
 	Comments []string
 
 	Fields     []ast.StructField
-	Builders   []Builder
+	Builders   []BuilderTemplate
 	HasBuilder bool
 
 	Variant                 string
@@ -147,7 +147,7 @@ type Constant struct {
 	Value any
 }
 
-type Builder struct {
+type BuilderTemplate struct {
 	Package              string
 	BuilderSignatureType string
 	BuilderName          string
@@ -159,7 +159,7 @@ type Builder struct {
 	Properties           []ast.StructField
 	Options              []ast.Option
 	Defaults             []OptionCall
-	IsGeneric            bool
+	IsGenericPanel       bool
 }
 
 type OptionCall struct {
