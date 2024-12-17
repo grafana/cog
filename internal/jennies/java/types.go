@@ -147,7 +147,7 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		return "new LinkedList<>()"
 	case ast.KindMap:
 		tf.packageMapper("java.util", "HashMap")
-		return "new Hashmap<>()"
+		return "new HashMap<>()"
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if tf.typeHasBuilder(def) {

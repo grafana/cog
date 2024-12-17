@@ -38,7 +38,7 @@
     {{- end }}
     {{- $type := $.Assignment.Path.Last.Type }}
     {{- if and $type.IsMap (typeHasBuilder $type) }}
-        {{ $type | formatType }} {{ $.Assignment.Path }}Resource = new HashMap<>();
+        {{ $type | formatType }} {{ $.Assignment.Path }}Resource = {{ $type | emptyValueForType }};
         for (var entry : {{ $.Assignment.Path }}.entrySet()) {
            {{ $.Assignment.Path }}Resource.put(entry.getKey(), entry.getValue().build());
         }

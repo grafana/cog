@@ -1,6 +1,7 @@
 package map_of_builders;
 
 import java.util.Map;
+import java.util.HashMap;
 
 public class DashboardBuilder implements cog.Builder<Dashboard> {
     protected final Dashboard internal;
