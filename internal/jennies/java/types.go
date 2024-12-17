@@ -65,7 +65,6 @@ func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 			return fmt.Sprintf("Map<String, %s.Builder<%s>>", tf.config.formatPackage("cog"), tf.formatFieldType(def.AsMap().ValueType))
 		}
 		return fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), tf.formatFieldType(def))
-
 	}
 
 	return tf.formatFieldType(def)
