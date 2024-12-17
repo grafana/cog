@@ -53,13 +53,13 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 	config.ProjectPath = fmt.Sprintf("src/main/java/%s", strings.ReplaceAll(config.PackagePath, ".", "/"))
 }
 
-func (config Config) MergeWithGlobal(global languages.Config) Config {
+func (config *Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.generateBuilders = global.Builders
 	// newConfig.generateConverters = global.Converters
 	newConfig.generateConverters = false
 
-	return newConfig
+	return *newConfig
 }
 
 type Language struct {
@@ -88,6 +88,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: config, tmpl: tmpl}),
 		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
+		common.If[languages.Context](config.generateBuilders, Builder{config: config, tmpl: tmpl}),
 		common.If[languages.Context](!config.SkipRuntime && config.generateBuilders && config.generateConverters, &Converter{config: config, tmpl: tmpl}),
 
 		common.CustomTemplates{

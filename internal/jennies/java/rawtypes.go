@@ -19,7 +19,6 @@ type RawTypes struct {
 	imports *common.DirectImportMap
 
 	typeFormatter  *typeFormatter
-	builders       Builders
 	jsonMarshaller JSONMarshaller
 }
 
@@ -31,7 +30,6 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	files := make(codejen.Files, 0)
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
-	jenny.builders = parseBuilders(jenny.config, context, jenny.typeFormatter)
 	jenny.jsonMarshaller = JSONMarshaller{
 		config:        jenny.config,
 		tmpl:          jenny.tmpl,
@@ -55,13 +53,8 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"formatBuilderFieldType":        jenny.typeFormatter.formatBuilderFieldType,
 		"formatType":                    jenny.typeFormatter.formatFieldType,
 		"typeHasBuilder":                jenny.typeFormatter.typeHasBuilder,
-		"resolvesToComposableSlot":      jenny.typeFormatter.resolvesToComposableSlot,
 		"emptyValueForType":             jenny.typeFormatter.defaultValueFor,
-		"formatCastValue":               jenny.typeFormatter.formatCastValue,
-		"formatAssignmentPath":          jenny.typeFormatter.formatAssignmentPath,
-		"formatPath":                    jenny.typeFormatter.formatFieldPath,
 		"shouldCastNilCheck":            jenny.typeFormatter.shouldCastNilCheck,
-		"formatRefType":                 jenny.typeFormatter.formatRefType,
 		"fillNullableAnnotationPattern": jenny.typeFormatter.fillNullableAnnotationPattern,
 	})
 }
@@ -81,7 +74,6 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	jenny.typeFormatter = jenny.typeFormatter.withPackageMapper(packageMapper)
 
-	alreadyValidatedPanel := make(map[string]bool)
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		jenny.imports = NewImportMap(jenny.config.PackagePath)
 		if object.Type.IsMap() || object.Type.IsArray() {
@@ -104,22 +96,6 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 		filename := filepath.Join(jenny.config.ProjectPath, pkg, fmt.Sprintf("%s.java", tools.UpperCamelCase(object.Name)))
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
-
-		// Because we need to check the package only, it could have multiple files, and we want to generate
-		// the builder once.
-		if !alreadyValidatedPanel[schema.Package] {
-			panelOutput, innerErr := jenny.generatePanelBuilder(schema.Package)
-			if innerErr != nil {
-				err = innerErr
-				return
-			}
-
-			if panelOutput != nil {
-				alreadyValidatedPanel[schema.Package] = true
-				filename := filepath.Join(jenny.config.ProjectPath, strings.ToLower(schema.Package), "PanelBuilder.java")
-				files = append(files, *codejen.NewFile(filename, panelOutput, jenny))
-			}
-		}
 	})
 
 	if err != nil {
@@ -152,19 +128,6 @@ func (jenny RawTypes) generateSchema(pkg string, identifier string, object ast.O
 	}
 
 	return nil, nil
-}
-
-// generatePanelBuilder generates the builder for the panels. Panel's builders uses generic "Panel" name, and they don't match
-// with any Schema name. These builders accept values from the different models of the panels, being easier to make it them independent.
-func (jenny RawTypes) generatePanelBuilder(pkg string) ([]byte, error) {
-	builder, hasBuilder := jenny.builders.genPanelBuilder(pkg)
-	if !hasBuilder {
-		return nil, nil
-	}
-
-	builder.Imports = jenny.imports
-
-	return jenny.getTemplate().RenderAsBytes("types/panel_builder.tmpl", builder)
 }
 
 func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) {
@@ -213,8 +176,6 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 }
 
 func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Object) ([]byte, error) {
-	builders, hasBuilder := jenny.builders.genBuilders(pkg, object.Name)
-
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:                 jenny.config.formatPackage(pkg),
 		Imports:                 jenny.imports,
@@ -223,8 +184,6 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		Comments:                object.Comments,
 		Variant:                 jenny.getVariant(object.Type),
 		Identifier:              identifier,
-		Builders:                builders,
-		HasBuilder:              hasBuilder,
 		Annotation:              jenny.jsonMarshaller.annotation(object.Type),
 		ToJSONFunction:          jenny.jsonMarshaller.genToJSONFunction(object.Type),
 		ShouldAddSerializer:     jenny.typeFormatter.objectNeedsCustomSerializer(object),
@@ -301,16 +260,7 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 }
 
 func (jenny RawTypes) defaultConstructor(object ast.Object) []ast.Argument {
-	if jenny.builders.getBuilders(object.SelfRef.ReferredPkg, object.Name) != nil {
-		return nil
-	}
-
-	if jenny.builders.isPanel[object.SelfRef.ReferredPkg] {
-		return nil
-	}
-
-	// Skip schemas without builder that aren't set directly into the builders.
-	if object.Name == "FieldConfig" || object.Name == "FieldConfigSource" {
+	if object.Type.IsStructGeneratedFromDisjunction() {
 		return nil
 	}
 
