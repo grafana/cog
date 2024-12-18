@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json
+
+passes:
+  #############
+  # Dashboard #
+  #############
+
+  # To make our composability veneers shenanigans work
+  - retype_field:
+      field: dashboard.VizConfigSpec.options
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+  - retype_field:
+      field: dashboard.FieldConfig.custom
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+
+  - retype_field:
+      field: dashboard.DataQueryKind.spec
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
