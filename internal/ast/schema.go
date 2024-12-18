@@ -172,11 +172,15 @@ func (schema *Schema) DeepCopy() Schema {
 }
 
 func (schema *Schema) LocateObject(name string) (Object, bool) {
-	if !schema.Objects.Has(name) {
+	if !schema.HasObject(name) {
 		return Object{}, false
 	}
 
 	return schema.Objects.Get(name), true
+}
+
+func (schema *Schema) HasObject(name string) bool {
+	return schema.Objects.Has(name)
 }
 
 func (schema *Schema) Resolve(typeDef Type) (Type, bool) {

@@ -65,12 +65,17 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	validationMethodsGenerator := newValidationMethods(jenny.Tmpl, jenny.packageMapper, jenny.apiRefCollector)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		jenny.formatObject(&buffer, schema, object)
+		innerErr := jenny.formatObject(&buffer, schema, object)
+		if innerErr != nil {
+			err = innerErr
+			return
+		}
+
 		buffer.WriteString("\n")
 
 		jenny.generateConstructor(&buffer, context, object)
 
-		innerErr := unmarshallerGenerator.generateForObject(&buffer, context, schema, object)
+		innerErr = unmarshallerGenerator.generateForObject(&buffer, context, schema, object)
 		if innerErr != nil {
 			err = innerErr
 			return
@@ -104,8 +109,14 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return nil, err
 	}
 
-	if err := unmarshallerGenerator.generateForSchema(&buffer, schema); err != nil {
-		return nil, err
+	customSchemaVariant := template.CustomSchemaVariantBlock(schema)
+	if jenny.Tmpl.Exists(customSchemaVariant) {
+		if err := jenny.Tmpl.RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
+			"Schema": schema,
+			"Config": jenny.Config,
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	importStatements := imports.String()
@@ -118,7 +129,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 %[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
 }
 
-func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, object ast.Object) {
+func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, object ast.Object) error {
 	objectName := formatObjectName(object.Name)
 
 	comments := object.Comments
@@ -142,12 +153,18 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", objectName, variant))
 		buffer.WriteString("\n")
 
-		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
-			buffer.WriteString(fmt.Sprintf("func (resource %s) DataqueryType() string {\n", objectName))
-			buffer.WriteString(fmt.Sprintf("\treturn \"%s\"\n", strings.ToLower(schema.Metadata.Identifier)))
-			buffer.WriteString("}\n")
+		customVariantTmpl := template.CustomObjectVariantBlock(object)
+		if jenny.Tmpl.Exists(customVariantTmpl) {
+			if err := jenny.Tmpl.RenderInBuffer(buffer, customVariantTmpl, map[string]any{
+				"Object": object,
+				"Schema": schema,
+			}); err != nil {
+				return err
+			}
 		}
 	}
+
+	return nil
 }
 
 func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context languages.Context, object ast.Object) {

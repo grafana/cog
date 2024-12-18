@@ -1,7 +1,6 @@
 package variant_dataquery
 
 import (
-	variants "github.com/grafana/cog/generated/cog/variants"
 	"encoding/json"
 	cog "github.com/grafana/cog/generated/cog"
 	"errors"
@@ -14,42 +13,12 @@ type Query struct {
 }
 func (resource Query) ImplementsDataqueryVariant() {}
 
-func (resource Query) DataqueryType() string {
-	return "prometheus"
-}
 
 // NewQuery creates a new Query object.
 func NewQuery() *Query {
 	return &Query{
 }
 }
-// VariantConfig returns the configuration related to prometheus dataqueries.
-// This configuration describes how to unmarshal it, convert it to code, …
-func VariantConfig() variants.DataqueryConfig {
-	return variants.DataqueryConfig{
-		Identifier: "prometheus",
-	    DataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
-            dataquery := &Query{}
-
-            if err := json.Unmarshal(raw, dataquery); err != nil {
-                return nil, err
-            }
-
-            return dataquery, nil
-       },
-	    StrictDataqueryUnmarshaler: func (raw []byte) (variants.Dataquery, error) {
-            dataquery := &Query{}
-
-            if err := dataquery.UnmarshalJSONStrict(raw); err != nil {
-                return nil, err
-            }
-
-            return dataquery, nil
-       },
-	}
-}
-
-
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Query` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *Query) UnmarshalJSONStrict(raw []byte) error {

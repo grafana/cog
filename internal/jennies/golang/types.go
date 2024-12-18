@@ -211,9 +211,9 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	// we need to use the constant's type instead.
 	// ie: `SomeField string` instead of `SomeField MyStringConstant`
 	if def.Type.IsRef() {
-		referredType, found := formatter.context.LocateObject(def.Type.AsRef().ReferredPkg, def.Type.AsRef().ReferredType)
-		if found && referredType.Type.IsConcreteScalar() {
-			fieldType = referredType.Type
+		referredType := formatter.context.ResolveRefs(def.Type)
+		if referredType.IsConcreteScalar() {
+			fieldType = referredType
 		}
 	}
 

@@ -17,7 +17,7 @@ const LanguageRef = "go"
 type Config struct {
 	debug              bool
 	generateBuilders   bool
-	generateConverters bool
+	GenerateConverters bool `yaml:"-"`
 
 	// GenerateStrictUnmarshaller controls the generation of
 	// `UnmarshalJSONStrict()` methods on types.
@@ -61,7 +61,7 @@ func (config Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
 	newConfig.debug = global.Debug
 	newConfig.generateBuilders = global.Builders
-	newConfig.generateConverters = global.Converters
+	newConfig.GenerateConverters = global.Converters
 
 	return newConfig
 }
@@ -90,7 +90,7 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
-	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
+	tmpl := initTemplates(language.apiRefCollector, language.config.OverridesTemplatesDirectories)
 
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
