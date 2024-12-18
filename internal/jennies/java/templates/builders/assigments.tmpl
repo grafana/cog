@@ -36,6 +36,13 @@
     {{- if and (not (eq .Value.Constant nil)) (not (eq $castPath.Value "")) }}
         {{ $castPath.Value | lowerCamelCase }}Resource.{{ lastPathIdentifier $.Assignment.Path }} = {{ .Value.Constant }};
     {{- end }}
+    {{- $type := $.Assignment.Path.Last.Type }}
+    {{- if and $type.IsMap (typeHasBuilder $type) }}
+        {{ $type | formatType }} {{ $.Assignment.Path }}Resource = {{ $type | emptyValueForType }};
+        for (var entry : {{ $.Assignment.Path }}.entrySet()) {
+           {{ $.Assignment.Path }}Resource.put(entry.getKey(), entry.getValue().build());
+        }
+    {{- end }}
 {{- end }}
 
 {{- define "assignment_value" }}
@@ -51,7 +58,11 @@
         {{- if not (eq $castPath.Value "") }}
             {{- $castPath.Value | lowerCamelCase }}Resource
         {{- else if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+            {{- if .Type.IsMap }}
+            {{- .Name | escapeVar | lowerCamelCase }}Resource
+            {{- else }}
             {{- .Name | escapeVar | lowerCamelCase }}.build()
+            {{- end }}
         {{- else }}
             {{- .Name | escapeVar | lowerCamelCase }}
         {{- end }}

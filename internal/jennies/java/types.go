@@ -59,12 +59,15 @@ func (tf *typeFormatter) resolvesToComposableSlot(typeDef ast.Type) bool {
 }
 
 func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
-	value := tf.formatFieldType(def)
 	if tf.resolvesToComposableSlot(def) || tf.typeHasBuilder(def) {
-		value = fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), value)
+		if def.Kind == ast.KindMap {
+			tf.packageMapper("java.util", "Map")
+			return fmt.Sprintf("Map<String, %s.Builder<%s>>", tf.config.formatPackage("cog"), tf.formatFieldType(def.AsMap().ValueType))
+		}
+		return fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), tf.formatFieldType(def))
 	}
 
-	return value
+	return tf.formatFieldType(def)
 }
 
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
@@ -144,7 +147,7 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		return "new LinkedList<>()"
 	case ast.KindMap:
 		tf.packageMapper("java.util", "HashMap")
-		return "new Hashmap<>()"
+		return "new HashMap<>()"
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if tf.typeHasBuilder(def) {
