@@ -123,6 +123,7 @@ type ClassTemplate struct {
 
 	Fields     []ast.StructField
 	Builders   []BuilderTemplate
+	Defaults   []Default
 	HasBuilder bool
 
 	Variant                 string
@@ -158,14 +159,12 @@ type BuilderTemplate struct {
 	Constructor          ast.Constructor
 	Properties           []ast.StructField
 	Options              []ast.Option
-	Defaults             []OptionCall
 	IsGenericPanel       bool
 }
 
-type OptionCall struct {
-	Initializers []string
-	OptionName   string
-	Args         []string
+type Default struct {
+	Name  string
+	Value string
 }
 
 type DataquerySchema struct {
