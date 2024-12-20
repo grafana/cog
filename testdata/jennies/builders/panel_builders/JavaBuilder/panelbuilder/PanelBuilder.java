@@ -7,15 +7,6 @@ public class PanelBuilder<T extends PanelBuilder<T>> implements cog.Builder<Opti
     
     public PanelBuilder() {
         this.internal = new Options();
-    this.onlyFromThisDashboard(false);
-    this.onlyInTimeRange(false);
-    this.limit(10);
-    this.showUser(true);
-    this.showTime(true);
-    this.showTags(true);
-    this.navigateToPanel(true);
-    this.navigateBefore("10m");
-    this.navigateAfter("10m");
     }
     public T onlyFromThisDashboard(Boolean onlyFromThisDashboard) {
     this.internal.onlyFromThisDashboard = onlyFromThisDashboard;

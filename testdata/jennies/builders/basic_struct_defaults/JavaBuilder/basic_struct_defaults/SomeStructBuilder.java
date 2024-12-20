@@ -7,10 +7,6 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
     
     public SomeStructBuilder() {
         this.internal = new SomeStruct();
-    this.id(42L);
-    this.uid("default-uid");
-    this.tags(List.of("generated", "cog"));
-    this.liveNow(true);
     }
     public SomeStructBuilder id(Long id) {
     this.internal.id = id;

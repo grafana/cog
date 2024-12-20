@@ -31,9 +31,9 @@ func cleanString(s string) string {
 	return s
 }
 
-func formatType(t ast.ScalarKind, val any) string {
+func formatType(t ast.ScalarKind, val interface{}) string {
 	// When the default is 0, is detected as integer even if it's a float.
-	parseFloatVal := func(val any) any {
+	parseFloatVal := func(val interface{}) interface{} {
 		if v, ok := val.(int64); ok {
 			return float64(v)
 		}
@@ -41,20 +41,32 @@ func formatType(t ast.ScalarKind, val any) string {
 	}
 
 	// Integers could be floats in JSON
-	parseIntVal := func(val any) any {
+	parseIntVal := func(val interface{}) interface{} {
 		if v, ok := val.(float64); ok {
 			return int64(v)
+		}
+
+		if v, ok := val.(int); ok {
+			return v
 		}
 
 		return val.(int64)
 	}
 
+	if list, ok := val.([]interface{}); ok {
+		items := make([]string, 0, len(list))
+
+		for _, item := range list {
+			items = append(items, formatType(t, item))
+		}
+
+		return strings.Join(items, ", ")
+	}
+
 	switch t {
-	case ast.KindInt64:
+	case ast.KindInt64, ast.KindUint64:
 		return fmt.Sprintf("%dL", parseIntVal(val))
-	case ast.KindUint64:
-		return fmt.Sprintf("%dL", parseIntVal(val))
-	case ast.KindInt32:
+	case ast.KindInt32, ast.KindUint32:
 		return fmt.Sprintf("%d", parseIntVal(val))
 	case ast.KindFloat32:
 		return fmt.Sprintf("%.1ff", parseFloatVal(val))

@@ -6,7 +6,6 @@ public class PanelBuilder<T extends PanelBuilder<T>> implements cog.Builder<Pane
     
     public PanelBuilder() {
         this.internal = new Panel();
-    this.onlyFromThisDashboard(false);
     }
     public T onlyFromThisDashboard(Boolean onlyFromThisDashboard) {
     this.internal.onlyFromThisDashboard = onlyFromThisDashboard;
