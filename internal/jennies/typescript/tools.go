@@ -97,3 +97,11 @@ func formatValue(val any) string {
 
 	return fmt.Sprintf("%#v", val)
 }
+
+func trimStringSpaces(value any) any {
+	if rawVal, ok := value.(string); ok {
+		return strings.TrimSpace(rawVal)
+	}
+
+	return value
+}

@@ -257,7 +257,7 @@ func (formatter *typeFormatter) formatMap(def ast.MapType, resolveBuilders bool)
 func (formatter *typeFormatter) formatAnonymousEnum(def ast.EnumType) string {
 	values := make([]string, 0, len(def.Values))
 	for _, value := range def.Values {
-		values = append(values, fmt.Sprintf("%#v", value.Value))
+		values = append(values, fmt.Sprintf("%#v", trimStringSpaces(value.Value)))
 	}
 
 	enumeration := strings.Join(values, " | ")
