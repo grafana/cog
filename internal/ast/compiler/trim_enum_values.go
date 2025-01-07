@@ -11,7 +11,6 @@ var _ Pass = (*TrimEnumValues)(nil)
 // TrimEnumValues removes leading and trailing spaces from string values.
 // It could happen when they add them by mistake in jsonschema/openapi when they define the enums
 type TrimEnumValues struct {
-	Prefix string
 }
 
 func (t TrimEnumValues) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
