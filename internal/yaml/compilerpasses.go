@@ -26,6 +26,7 @@ type CompilerPass struct {
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
 	SchemaSetEntryPoint      *SchemaSetEntryPoint      `yaml:"schema_set_entry_point"`
 	DuplicateObject          *DuplicateObject          `yaml:"duplicate_object"`
+	TrimEnumValues           *TrimEnumValues           `yaml:"trim_enum_values"`
 
 	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 
@@ -106,6 +107,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DisjunctionWithConstantToDefault != nil {
 		return pass.DisjunctionWithConstantToDefault.AsCompilerPass()
+	}
+	if pass.TrimEnumValues != nil {
+		return pass.TrimEnumValues.AsCompilerPass()
 	}
 
 	return nil, fmt.Errorf("empty compiler pass")
@@ -419,4 +423,10 @@ type DisjunctionWithConstantToDefault struct {
 
 func (pass DisjunctionWithConstantToDefault) AsCompilerPass() (*compiler.DisjunctionWithConstantToDefault, error) {
 	return &compiler.DisjunctionWithConstantToDefault{}, nil
+}
+
+type TrimEnumValues struct{}
+
+func (pass TrimEnumValues) AsCompilerPass() (*compiler.TrimEnumValues, error) {
+	return &compiler.TrimEnumValues{}, nil
 }
