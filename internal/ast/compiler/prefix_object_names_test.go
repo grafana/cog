@@ -19,6 +19,10 @@ func TestPrefixObjectNames(t *testing.T) {
 			ast.NewObject("prefix_names", "NotANiceName", ast.NewStruct(
 				ast.NewStructField("AString", ast.String(ast.Nullable())),
 			)),
+			ast.NewObject("prefix_names", "VariableRefresh", ast.NewEnum([]ast.EnumValue{
+				{Name: "Never", Value: "never", Type: ast.String()},
+				{Name: "Always", Value: "always", Type: ast.String()},
+			})),
 		),
 	}
 	expected := &ast.Schema{
@@ -31,6 +35,10 @@ func TestPrefixObjectNames(t *testing.T) {
 			ast.NewObject("prefix_names", "PreNotANiceName", ast.NewStruct(
 				ast.NewStructField("AString", ast.String(ast.Nullable())),
 			), "PrefixObjectNames[NotANiceName → PreNotANiceName]"),
+			ast.NewObject("prefix_names", "PreVariableRefresh", ast.NewEnum([]ast.EnumValue{
+				{Name: "PreNever", Value: "never", Type: ast.String()},
+				{Name: "PreAlways", Value: "always", Type: ast.String()},
+			}), "PrefixObjectNames[VariableRefresh → PreVariableRefresh]"),
 		),
 	}
 
