@@ -66,7 +66,7 @@ func formatType(t ast.ScalarKind, val interface{}) string {
 	switch t {
 	case ast.KindInt64, ast.KindUint64:
 		return fmt.Sprintf("%dL", parseIntVal(val))
-	case ast.KindInt32, ast.KindUint32:
+	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32:
 		return fmt.Sprintf("%d", parseIntVal(val))
 	case ast.KindFloat32:
 		return fmt.Sprintf("%.1ff", parseFloatVal(val))
