@@ -6,7 +6,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
-func TrimEnumValuesTest(t *testing.T) {
+func TestTrimEnumValues(t *testing.T) {
 	objects := []ast.Object{
 		ast.NewObject("enum_with_leading_and_trailing_spaces", "MyEnum", ast.NewEnum([]ast.EnumValue{
 			{Type: ast.String(), Name: "Leading", Value: " Leading"},
