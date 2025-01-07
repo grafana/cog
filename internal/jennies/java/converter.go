@@ -13,8 +13,6 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-const variableModel = "VariableModel"
-
 type Converter struct {
 	config         Config
 	nullableConfig languages.NullableConfig
@@ -94,17 +92,6 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 	}
 	typeFormatter := createFormatter(context, jenny.config).withPackageMapper(packageMapper)
 
-	builderNameFormat := fmt.Sprintf("%s.Builder", tools.UpperCamelCase(converter.BuilderName))
-	if isPanel {
-		builderNameFormat = fmt.Sprintf("%s.PanelBuilder", jenny.config.formatPackage(converter.Package))
-	} else if converter.BuilderName != converter.Input.TypeRef.ReferredType {
-		if converter.Input.TypeRef.ReferredType == variableModel { // TODO: Find a better way to identify this...
-			builderNameFormat = fmt.Sprintf("%s.%sBuilder", variableModel, tools.UpperCamelCase(converter.BuilderName))
-		} else {
-			builderNameFormat = fmt.Sprintf("%s.Builder", tools.UpperCamelCase(converter.Input.TypeRef.ReferredType))
-		}
-	}
-
 	return jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(map[string]any{
@@ -121,7 +108,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
 			"Imports":           imports,
 			"Converter":         converter,
-			"BuilderNameFormat": builderNameFormat,
+			"BuilderNameFormat": fmt.Sprintf("%sBuilder", tools.UpperCamelCase(converter.BuilderName)),
 			"IsPanel":           isPanel,
 		})
 }
