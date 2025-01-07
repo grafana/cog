@@ -140,7 +140,7 @@ func formatScalarType(def ast.ScalarType) string {
 	return scalarType
 }
 
-func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
+func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 	switch def.Kind {
 	case ast.KindArray:
 		tf.packageMapper("java.util", "LinkedList")
@@ -153,6 +153,18 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 		if tf.typeHasBuilder(def) {
 			return fmt.Sprintf("new %sBuilder().build()", tf.config.formatPackage(refDef))
 		}
+
+		referredObj, found := tf.context.LocateObjectByRef(def.AsRef())
+		if found && referredObj.Type.IsEnum() {
+			enum := referredObj.Type.AsEnum()
+			enumValue, _ := enum.MemberForValue(0)
+			if enum.Values[0].Type.Kind == ast.KindScalar {
+				enumValue, _ = enum.MemberForValue("")
+			}
+
+			return fmt.Sprintf("%s.%s", referredObj.Name, tools.UpperSnakeCase(enumValue.Name))
+		}
+
 		return fmt.Sprintf("new %s()", tf.config.formatPackage(refDef))
 	case ast.KindStruct:
 		return "new Object()"
@@ -178,21 +190,6 @@ func (tf *typeFormatter) defaultValueFor(def ast.Type) string {
 	default:
 		return "unknown"
 	}
-}
-
-func (tf *typeFormatter) formatScalar(v any) string {
-	if list, ok := v.([]any); ok {
-		items := make([]string, 0, len(list))
-
-		for _, item := range list {
-			items = append(items, tf.formatScalar(item))
-		}
-
-		// FIXME: this is wrong, we can't just assume a list of strings.
-		return strings.Join(items, ", ")
-	}
-
-	return fmt.Sprintf("%#v", v)
 }
 
 type CastPath struct {

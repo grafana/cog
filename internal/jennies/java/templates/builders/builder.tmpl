@@ -23,13 +23,6 @@ public class {{ .BuilderName }}Builder{{ if .IsGenericPanel }}<T extends {{ .Bui
     {{- range .Properties }}
     this.{{ .Name | escapeVar }} = {{ .Type | emptyValueForType }};
     {{- end }}
-
-    {{- range .Defaults }}
-    {{- range .Initializers }}
-    {{ . }}
-    {{- end }}
-    this.{{ .OptionName | lowerCamelCase | escapeVar }}({{ .Args|join ", " }});
-    {{- end }}
     }
     
     {{- range $opt := .Options }}

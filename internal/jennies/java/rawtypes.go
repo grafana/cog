@@ -53,8 +53,6 @@ func (jenny RawTypes) getTemplate() *template.Template {
 		"formatBuilderFieldType":        jenny.typeFormatter.formatBuilderFieldType,
 		"formatType":                    jenny.typeFormatter.formatFieldType,
 		"typeHasBuilder":                jenny.typeFormatter.typeHasBuilder,
-		"emptyValueForType":             jenny.typeFormatter.defaultValueFor,
-		"shouldCastNilCheck":            jenny.typeFormatter.shouldCastNilCheck,
 		"fillNullableAnnotationPattern": jenny.typeFormatter.fillNullableAnnotationPattern,
 	})
 }
@@ -181,6 +179,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		Imports:                 jenny.imports,
 		Name:                    tools.UpperCamelCase(object.Name),
 		Fields:                  object.Type.AsStruct().Fields,
+		Defaults:                jenny.genDefaults(object.Type.AsStruct().Fields),
 		Comments:                object.Comments,
 		Variant:                 jenny.getVariant(object.Type),
 		Identifier:              identifier,
@@ -275,4 +274,69 @@ func (jenny RawTypes) defaultConstructor(object ast.Object) []ast.Argument {
 	}
 
 	return args
+}
+
+func (jenny RawTypes) genDefaults(fields []ast.StructField) []Default {
+	calls := make([]Default, 0)
+	for _, field := range fields {
+		if field.Type.Default == nil {
+			continue
+		}
+
+		calls = append(calls, Default{
+			Name:  field.Name,
+			Value: jenny.genDefaultForType(field.Type, field.Type.Default),
+		})
+	}
+
+	return calls
+}
+
+func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {
+	switch t.Kind {
+	case ast.KindScalar:
+		return formatType(t.AsScalar().ScalarKind, value)
+	case ast.KindRef:
+		return jenny.formatReferenceDefaults(t, value)
+	case ast.KindArray:
+		if value == nil {
+			return "List.of()"
+		}
+		return fmt.Sprintf("List.of(%s)", jenny.genDefaultForType(t.AsArray().ValueType, value))
+	}
+
+	return ""
+}
+
+func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
+	// Enums
+	if _, ok := value.(map[string]interface{}); !ok {
+		jenny.typeFormatter.packageMapper(ref.AsRef().ReferredPkg, ref.AsRef().ReferredType)
+		return jenny.typeFormatter.formatRefType(ref, value)
+	}
+
+	obj, ok := jenny.typeFormatter.context.LocateObjectByRef(ref.AsRef())
+	if !ok {
+		return ""
+	}
+
+	defaultValues := value.(map[string]interface{})
+	objectFields := obj.Type.AsStruct().Fields
+
+	args := make([]string, len(objectFields))
+	for i, f := range objectFields {
+		if v, ok := defaultValues[f.Name]; ok {
+			args[i] = jenny.genDefaultForType(f.Type, v)
+		} else {
+			args[i] = jenny.typeFormatter.emptyValueForType(f.Type)
+		}
+	}
+
+	class := fmt.Sprintf("%s.%s", ref.AsRef().ReferredPkg, ref.AsRef().ReferredType)
+	if ref.AsRef().ReferredPkg == obj.SelfRef.ReferredPkg {
+		class = ref.AsRef().ReferredType
+	}
+
+	jenny.typeFormatter.packageMapper(ref.AsRef().ReferredPkg, ref.AsRef().ReferredType)
+	return fmt.Sprintf("new %s(%s)", class, strings.Join(args, ", "))
 }
