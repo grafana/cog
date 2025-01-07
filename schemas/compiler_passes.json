@@ -335,6 +335,9 @@
         "duplicate_object": {
           "$ref": "#/$defs/YamlDuplicateObject"
         },
+        "trim_enum_values": {
+          "$ref": "#/$defs/YamlTrimEnumValues"
+        },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
         },
@@ -554,6 +557,11 @@
       "type": "object"
     },
     "YamlSetDatasourceToDataquery": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlTrimEnumValues": {
       "properties": {},
       "additionalProperties": false,
       "type": "object"
