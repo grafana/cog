@@ -380,6 +380,29 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlAddComments": {
+      "properties": {
+        "by_name": {
+          "type": "string",
+          "description": "objectName.optionName"
+        },
+        "by_builder": {
+          "type": "string",
+          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
+        },
+        "by_names": {
+          "$ref": "#/$defs/YamlByNamesSelector"
+        },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlAddOption": {
       "properties": {
         "by_object": {
@@ -732,6 +755,9 @@
         },
         "add_assignment": {
           "$ref": "#/$defs/YamlAddAssignment"
+        },
+        "add_comments": {
+          "$ref": "#/$defs/YamlAddComments"
         }
       },
       "additionalProperties": false,

@@ -2,6 +2,7 @@ package option
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
@@ -666,6 +667,16 @@ func AddAssignmentAction(assignment veneers.Assignment) RewriteAction {
 
 		option.Assignments = append(option.Assignments, irAssignment)
 		option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[%s]", irAssignment.Path.String()))
+
+		return []ast.Option{option}
+	}
+}
+
+// AddCommentsAction adds comments to an option.
+func AddCommentsAction(comments []string) RewriteAction {
+	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+		option.Comments = append(option.Comments, comments...)
+		option.AddToVeneerTrail(fmt.Sprintf("AddComments[%s]", strings.Join(comments, " ")))
 
 		return []ast.Option{option}
 	}

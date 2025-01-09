@@ -325,6 +325,17 @@ between them.
 set_datasource_to_dataquery: {}
 ```
 
+## `trim_enum_values`
+
+TrimEnumValues removes leading and trailing spaces from string values.
+It could happen when they add them by mistake in jsonschema/openapi when they define the enums
+
+### Usage
+
+```yaml
+trim_enum_values: {}
+```
+
 ## `unspec`
 
 Unspec removes the Kubernetes-style envelope added by kindsys.
