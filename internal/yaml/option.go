@@ -24,6 +24,7 @@ type OptionRule struct {
 	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
 	Duplicate               *DuplicateOption         `yaml:"duplicate"`
 	AddAssignment           *AddAssignment           `yaml:"add_assignment"`
+	AddComments             *AddComments             `yaml:"add_comments"`
 }
 
 func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -74,6 +75,10 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 
 	if rule.AddAssignment != nil {
 		return rule.AddAssignment.AsRewriteRule(pkg)
+	}
+
+	if rule.AddComments != nil {
+		return rule.AddComments.AsRewriteRule(pkg)
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
@@ -221,6 +226,20 @@ func (rule AddAssignment) AsRewriteRule(pkg string) (option.RewriteRule, error) 
 	}
 
 	return option.AddAssignment(selector, rule.Assignment), nil
+}
+
+type AddComments struct {
+	OptionSelector `yaml:",inline"`
+	Comments       []string `yaml:"comments"`
+}
+
+func (rule AddComments) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.AddComments(selector, rule.Comments), nil
 }
 
 /******************************************************************************

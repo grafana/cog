@@ -92,3 +92,10 @@ func AddAssignment(selector Selector, assignment veneers.Assignment) RewriteRule
 		Action:   AddAssignmentAction(assignment),
 	}
 }
+
+func AddComments(selector Selector, comments []string) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   AddCommentsAction(comments),
+	}
+}
