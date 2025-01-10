@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+debug: true
+
+parameters:
+  output_dir: './generated/%l'
+  kind_registry_path: '../kind-registry'
+  kind_registry_version: 'next'
+  grafana_version: 'main'
+  go_package_root: 'github.com/grafana/cog/generated/go'
+  php_namespace_root: 'Grafana\Foundation'
+  java_package_path: 'com.grafana.foundation'
+
+inputs:
+  - cue:
+      entrypoint: '%__config_dir%/../schemas/playground'
+      metadata:
+        kind: core
+
+transformations:
+  schemas: []
+
+  builders: []
+    #- '%__config_dir%/veneers'
+
+output:
+  directory: '%output_dir%'
+
+  types: true
+  builders: true
+  converters: true
+  api_reference: true
+
+  languages:
+    - go:
+        package_root: '%go_package_root%'
+        builder_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/go'
+        generate_strict_unmarshaller: false
+        generate_equal: false
+        generate_validate: false
+
+    - php:
+        namespace_root: '%php_namespace_root%'
+        builder_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/php'
+
+    - java:
+        package_path: '%java_package_path%'
+        builder_templates:
+          - '%__config_dir%/foundation-sdk/.cog/templates/java'
