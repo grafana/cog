@@ -48,6 +48,17 @@ func APIRefTemplateHelpers(apiRefCollector *APIReferenceCollector) template.Func
 
 			return ""
 		},
+		"apiDeclareMethod": func(data map[string]any) string {
+			apiRefCollector.ObjectMethod(maybeGet[ast.Object](data, "object"), MethodReference{
+				Name:      maybeGet[string](data, "name"),
+				Comments:  maybeGet[[]string](data, "comments"),
+				Arguments: tools.Map(maybeGet[[]map[string]any](data, "arguments"), dataToArgumentRef),
+				Return:    maybeGet[string](data, "return"),
+				Static:    false,
+			})
+
+			return ""
+		},
 	}
 }
 

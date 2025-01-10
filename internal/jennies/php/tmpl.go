@@ -14,13 +14,14 @@ import (
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(extraTemplatesDirectories []string) *template.Template {
+func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplatesDirectories []string) *template.Template {
 	tmpl, err := template.New(
 		"php",
 
 		// "dummy"/unimplemented helpers, to be able to parse the templates before jennies are initialized.
 		// Jennies will override these with proper dependencies.
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
+		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(templateHelpers(templateDeps{})),
 		template.Funcs(formattingTemplateFuncs()),
 
