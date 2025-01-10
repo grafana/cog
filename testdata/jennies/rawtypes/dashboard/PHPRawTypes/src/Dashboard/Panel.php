@@ -56,12 +56,7 @@ class Panel implements \JsonSerializable
     	return \Grafana\Foundation\Dashboard\DataSourceRef::fromArray($val);
     })($data["datasource"]) : null,
             options: $data["options"] ?? null,
-            targets: isset($data["targets"]) ? (function ($in) {
-    	/** @var array{datasource?: array{type?: mixed}} $in */
-        $hint = (isset($in["datasource"], $in["datasource"]["type"]) && is_string($in["datasource"]["type"])) ? $in["datasource"]["type"] : "";
-        /** @var array<array<string, mixed>> $in */
-        return \Grafana\Foundation\Cog\Runtime::get()->dataqueriesFromArray($in, $hint);
-    })($data["targets"]): null,
+            targets: can not generate custom unmarshal function for composable slot with variant 'dataquery': template block variant_dataquery_field_unmarshal not found,
             fieldConfig: isset($data["fieldConfig"]) ? (function($input) {
     	/** @var array{defaults?: mixed} */
     $val = $input;
