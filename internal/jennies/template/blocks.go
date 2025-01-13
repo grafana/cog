@@ -37,3 +37,7 @@ func CustomSchemaVariantBlock(schema *ast.Schema) string {
 func VariantFieldUnmarshalBlock(variant string) string {
 	return fmt.Sprintf("variant_%s_field_unmarshal", variant)
 }
+
+func DynamicFilesBlock() string {
+	return "dynamic_files"
+}

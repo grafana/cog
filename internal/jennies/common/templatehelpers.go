@@ -24,6 +24,9 @@ func TypeResolvingTemplateHelpers(context languages.Context) template.FuncMap {
 		"resolvesToStruct": func(typeDef ast.Type) bool {
 			return context.ResolveRefs(typeDef).IsStruct()
 		},
+		"resolvesToDisjunction": func(typeDef ast.Type) bool {
+			return context.ResolveRefs(typeDef).IsDisjunction()
+		},
 		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 			_, found := context.ResolveToComposableSlot(typeDef)
 			return found
@@ -33,6 +36,9 @@ func TypeResolvingTemplateHelpers(context languages.Context) template.FuncMap {
 			return found
 		},
 		"resolveRefs": context.ResolveRefs,
+		"schemaHasObject": func(schema *ast.Schema, name string) bool {
+			return schema.HasObject(name)
+		},
 	}
 }
 
