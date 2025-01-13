@@ -99,6 +99,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			buffer.WriteString(fromJSON)
 		}
 
+		// TODO(kgz): this shouldn't be done by cog
 		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
 			buffer.WriteString("\n\n\n")
 			buffer.WriteString(jenny.generateDataqueryVariantConfigFunc(schema, object))
@@ -113,6 +114,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return nil, err
 	}
 
+	// TODO(kgz): this shouldn't be done by cog
 	if schema.Metadata.Kind == ast.SchemaKindComposable && schema.Metadata.Variant == ast.SchemaVariantPanel {
 		buffer.WriteString("\n\n\n")
 		buffer.WriteString(jenny.generatePanelCfgVariantConfigFunc(schema))
@@ -308,6 +310,7 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	return buffer.String(), nil
 }
 
+// TODO(kgz): this shouldn't be done by cog
 func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) string {
 	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
 	identifier := schema.Metadata.Identifier
@@ -330,6 +333,7 @@ func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) stri
     )`, cogruntime, identifier, options, fieldConfig)
 }
 
+// TODO(kgz): this shouldn't be done by cog
 func (jenny RawTypes) generateDataqueryVariantConfigFunc(schema *ast.Schema, object ast.Object) string {
 	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
 	objectName := tools.UpperCamelCase(object.Name)
@@ -394,6 +398,7 @@ func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, input
 }
 
 func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentStruct ast.StructType, field ast.StructField) string {
+	// TODO(kgz): this shouldn't be done by cog
 	slot, _ := context.ResolveToComposableSlot(field.Type)
 	if slot.AsComposableSlot().Variant != ast.SchemaVariantDataQuery {
 		return "unknown composable slot variant"
