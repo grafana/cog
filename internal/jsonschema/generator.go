@@ -73,7 +73,7 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		}
 	}
 
-	if c.SchemaMetadata.Variant == ast.SchemaVariantDataQuery || c.SchemaMetadata.Variant == ast.SchemaVariantPanel {
+	if c.SchemaMetadata.Variant != "" {
 		g.schema.Objects.Get(rootObjectName).Type.Hints[ast.HintImplementsVariant] = string(c.SchemaMetadata.Variant)
 	}
 
