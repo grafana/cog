@@ -26,5 +26,8 @@ For API reference documentation, the following blocks are supported:
 * `api_reference_object_{{ Package }}_{{ ObjectName }}_extra`: additional content that will be rendered on the documentation page for an object.
 * `api_reference_builder_{{ Package }}_{{ BuilderName }}_extra`: additional content that will be rendered on the documentation page for a builder.
 
+For dynamically generating files, the following block is supported:
+* `dynamic_files`: in conjunction with the `declareFile $filepath $content` template helper.
+
 > [!NOTE]
 > The variables components of block names are **case-sensitive**.

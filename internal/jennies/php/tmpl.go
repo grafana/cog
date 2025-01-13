@@ -22,6 +22,8 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 		// Jennies will override these with proper dependencies.
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
+		template.Funcs(common.DynamicFilesTemplateHelpers()),
+
 		template.Funcs(templateHelpers(templateDeps{})),
 		template.Funcs(formattingTemplateFuncs()),
 
@@ -50,9 +52,11 @@ func formattingTemplateFuncs() template.FuncMap {
 }
 
 type templateDeps struct {
-	config           Config
-	context          languages.Context
-	unmarshalForType func(typeDef ast.Type, inputVar string) string
+	config                   Config
+	context                  languages.Context
+	unmarshalForType         func(typeDef ast.Type, inputVar string) string
+	unmarshalDisjunctionFunc func(typeDef ast.Type) string
+	convertDisjunctionFunc   func(typeDef ast.Type) string
 }
 
 func templateHelpers(deps templateDeps) template.FuncMap {
@@ -61,6 +65,7 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 	shaper := &shape{context: deps.context}
 
 	return template.FuncMap{
+		"fullNamespace":           deps.config.fullNamespace,
 		"fullNamespaceRef":        deps.config.fullNamespaceRef,
 		"typeHasBuilder":          deps.context.ResolveToBuilder,
 		"isDisjunctionOfBuilders": deps.context.IsDisjunctionOfBuilders,
@@ -103,6 +108,8 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 			return disjunctionCaseForType(typesFormatter, input, typeDef)
 		},
 
-		"unmarshalForType": deps.unmarshalForType,
+		"unmarshalForType":         deps.unmarshalForType,
+		"unmarshalDisjunctionFunc": deps.unmarshalDisjunctionFunc,
+		"convertDisjunctionFunc":   deps.convertDisjunctionFunc,
 	}
 }

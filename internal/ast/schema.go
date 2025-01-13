@@ -113,6 +113,10 @@ func NewSchema(pkg string, metadata SchemaMeta) *Schema {
 	}
 }
 
+func (schema *Schema) IsComposableVariant(variant string) bool {
+	return schema.Metadata.Kind == SchemaKindComposable && string(schema.Metadata.Variant) == variant
+}
+
 func (schema *Schema) AddObject(object Object) {
 	schema.Objects.Set(object.Name, object)
 }
