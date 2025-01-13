@@ -66,13 +66,16 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	jenny.typeFormatter = defaultTypeFormatter(context, jenny.importPkg, jenny.importModule)
 
 	jenny.tmpl = jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(template.FuncMap{
 			"formatFullyQualifiedRef": func(typeDef ast.RefType) string {
 				return jenny.typeFormatter.formatFullyQualifiedRef(typeDef, false)
 			},
-			"importModule":        jenny.importModule,
-			"importPkg":           jenny.importPkg,
-			"disjunctionFromJSON": jenny.disjunctionFromJSON,
+			"importModule": jenny.importModule,
+			"importPkg":    jenny.importPkg,
+			"disjunctionFromJSON": func(typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
+				return jenny.disjunctionFromJSON(context, typeDef, inputVar)
+			},
 		})
 
 	i := 0
@@ -286,7 +289,7 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 			}
 		} else if field.Type.IsArray() && field.Type.Array.ValueType.IsDisjunction() {
 			valueType := field.Type.Array.ValueType
-			code := jenny.disjunctionFromJSON(valueType, "item")
+			code := jenny.disjunctionFromJSON(context, valueType, "item")
 			if code.Setup != "" {
 				code.Setup += "\n            "
 			}
@@ -298,7 +301,7 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 			assignments = append(assignments, assignment)
 			continue
 		} else if field.Type.IsDisjunction() {
-			code := jenny.disjunctionFromJSON(field.Type, fmt.Sprintf(`data["%s"]`, field.Name))
+			code := jenny.disjunctionFromJSON(context, field.Type, fmt.Sprintf(`data["%s"]`, field.Name))
 			if code.Setup != "" {
 				code.Setup += "\n            "
 			}
@@ -331,8 +334,8 @@ type disjunctionFromJSONCode struct {
 	DecodingCall string
 }
 
-func (jenny RawTypes) disjunctionFromJSON(typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
-	disjunction := typeDef.AsDisjunction()
+func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
+	disjunction := context.ResolveRefs(typeDef).AsDisjunction()
 
 	// this potentially generates incorrect code, but there isn't much we can do without more information.
 	if disjunction.Discriminator == "" || disjunction.DiscriminatorMapping == nil {

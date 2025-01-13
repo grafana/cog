@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 //go:embed templates/*/*.tmpl
@@ -17,6 +18,7 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 	tmpl, err := template.New(
 		"python",
 
+		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(common.TypesTemplateHelpers()),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(formattingTemplateFuncs()),
@@ -40,19 +42,13 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 			"defaultForType": func(_ ast.Type) string {
 				panic("defaultForType() needs to be overridden by a jenny")
 			},
-			"typeHasBuilder": func(_ ast.Type) bool {
-				panic("typeHasBuilder() needs to be overridden by a jenny")
-			},
-			"resolvesToComposableSlot": func(_ ast.Type) bool {
-				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
-			},
 			"importModule": func(alias string, pkg string, module string) string {
 				panic("importModule() needs to be overridden by a jenny")
 			},
 			"importPkg": func(alias string, pkg string) string {
 				panic("importPkg() needs to be overridden by a jenny")
 			},
-			"disjunctionFromJSON": func(disjunction ast.DisjunctionType, inputVar string) disjunctionFromJSONCode {
+			"disjunctionFromJSON": func(typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
 				panic("disjunctionFromJSON() needs to be overridden by a jenny")
 			},
 		}),

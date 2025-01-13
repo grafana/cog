@@ -19,7 +19,7 @@
 
 {{- define "assignment_setup" }}
 {{- with .Value.Argument }}
-{{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+{{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
 {{- $builtResultSuffix := ternary "_resources" "_resource" (or .Type.IsArray .Type.IsMap) }}
 {{ .Name|formatIdentifier }}{{ $builtResultSuffix }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (formatIdentifier .Name) "Depth" 1) }}
 {{- end }}
@@ -46,7 +46,7 @@
 {{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
 {{- end }}
 {{- with .Value.Argument }}
-{{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+{{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
 {{- .Name|formatIdentifier }}{{- (or .Type.IsArray .Type.IsMap) | ternary "_resources" "_resource" }}
 {{- else }}
 {{- .Name|formatIdentifier }}
