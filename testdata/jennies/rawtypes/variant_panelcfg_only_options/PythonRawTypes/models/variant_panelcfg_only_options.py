@@ -1,5 +1,4 @@
 import typing
-from ..cog import runtime as cogruntime
 
 
 class Options:
@@ -22,11 +21,3 @@ class Options:
             args["content"] = data["content"]        
 
         return cls(**args)
-
-
-def variant_config():
-    return cogruntime.PanelCfgConfig(
-        identifier="text",
-        options_from_json_hook=Options.from_json,
-        field_config_from_json_hook=None,
-    )

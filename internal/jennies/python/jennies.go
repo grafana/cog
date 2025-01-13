@@ -55,7 +55,7 @@ func (language *Language) Name() string {
 }
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
-	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
+	tmpl := initTemplates(language.apiRefCollector, language.config.OverridesTemplatesDirectories)
 
 	extraTemplatesJenny := common.CustomTemplates{
 		TemplateDirectories: language.config.ExtraFilesTemplatesDirectories,

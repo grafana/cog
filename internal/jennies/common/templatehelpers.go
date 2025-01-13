@@ -36,6 +36,11 @@ func TypeResolvingTemplateHelpers(context languages.Context) template.FuncMap {
 			return found
 		},
 		"resolveRefs": context.ResolveRefs,
+	}
+}
+
+func TypesTemplateHelpers() template.FuncMap {
+	return template.FuncMap{
 		"schemaHasObject": func(schema *ast.Schema, name string) bool {
 			return schema.HasObject(name)
 		},

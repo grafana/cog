@@ -67,6 +67,10 @@ func formatFieldPath(fieldPath ast.Path) string {
 	return path
 }
 
+func formatObjectName(name string) string {
+	return tools.UpperCamelCase(name)
+}
+
 func formatIdentifier(name string) string {
 	name = strings.TrimLeft(name, "$_")
 	return tools.SnakeCase(escapeIdentifier(name))

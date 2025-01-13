@@ -34,7 +34,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 		},
 
 		ObjectName: func(object ast.Object) string {
-			return tools.UpperCamelCase(object.Name)
+			return formatObjectName(object.Name)
 		},
 		ObjectDefinition: func(context languages.Context, object ast.Object) string {
 			typesFormatter := defaultTypeFormatter(context, func(alias string, pkg string) string {
@@ -73,7 +73,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 		},
 
 		BuilderName: func(builder ast.Builder) string {
-			return tools.UpperCamelCase(builder.Name)
+			return formatObjectName(builder.Name)
 		},
 		ConstructorSignature: func(context languages.Context, builder ast.Builder) string {
 			typesFormatter := builderTypeFormatter(context, func(alias string, pkg string) string {
@@ -90,7 +90,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 				return formatIdentifier(arg.Name) + argType
 			})
 
-			return fmt.Sprintf("%[1]s(%[2]s)", tools.UpperCamelCase(builder.Name), strings.Join(args, ", "))
+			return fmt.Sprintf("%[1]s(%[2]s)", formatObjectName(builder.Name), strings.Join(args, ", "))
 		},
 		OptionName: func(option ast.Option) string {
 			return formatIdentifier(option.Name)

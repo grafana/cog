@@ -37,29 +37,29 @@ func builderTypeFormatter(context languages.Context, importPkg pkgImporter, impo
 	}
 }
 
-func (formatter *typeFormatter) formatObject(def ast.Object) (string, error) {
+func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) {
 	var buffer strings.Builder
 
-	defName := tools.UpperCamelCase(def.Name)
+	defName := formatObjectName(object.Name)
 
-	if !def.Type.IsAnyOf(ast.KindStruct, ast.KindEnum) {
-		buffer.WriteString(formatter.formatComments(def.Comments))
+	if !object.Type.IsAnyOf(ast.KindStruct, ast.KindEnum) {
+		buffer.WriteString(formatter.formatComments(object.Comments))
 	}
 
-	if def.Type.IsConcreteScalar() {
-		buffer.WriteString(fmt.Sprintf("%s: %s = %s", defName, formatter.formatType(def.Type), formatValue(def.Type.AsScalar().Value)))
+	if object.Type.IsConcreteScalar() {
+		buffer.WriteString(fmt.Sprintf("%s: %s = %s", defName, formatter.formatType(object.Type), formatValue(object.Type.AsScalar().Value)))
 
 		return buffer.String(), nil
 	}
 
-	switch def.Type.Kind {
+	switch object.Type.Kind {
 	case ast.KindEnum:
-		buffer.WriteString(formatter.formatEnum(def))
+		buffer.WriteString(formatter.formatEnum(object))
 	case ast.KindStruct:
-		return formatter.formatStruct(def), nil
+		return formatter.formatStruct(object), nil
 	default:
 		typingPkg := formatter.importPkg("typing", "typing")
-		buffer.WriteString(fmt.Sprintf("%s: %s.TypeAlias = %s", defName, typingPkg, formatter.formatType(def.Type)))
+		buffer.WriteString(fmt.Sprintf("%s: %s.TypeAlias = %s", defName, typingPkg, formatter.formatType(object.Type)))
 	}
 
 	return buffer.String(), nil
@@ -126,7 +126,7 @@ func (formatter *typeFormatter) formatEnum(def ast.Object) string {
 
 	enumPkg := formatter.importPkg("enum", "enum")
 
-	enumName := tools.UpperCamelCase(def.Name)
+	enumName := formatObjectName(def.Name)
 	enumType := def.Type.AsEnum()
 
 	enumKind := enumPkg + ".IntEnum"
@@ -168,7 +168,7 @@ func (formatter *typeFormatter) formatStruct(def ast.Object) string {
 		classBases = fmt.Sprintf("(%s.%s)", cogVariants, variant)
 	}
 
-	buffer.WriteString(fmt.Sprintf("class %s%s:\n", tools.UpperCamelCase(def.Name), classBases))
+	buffer.WriteString(fmt.Sprintf("class %s%s:\n", formatObjectName(def.Name), classBases))
 	buffer.WriteString(formatter.formatClassComments(def.Comments))
 
 	fields := def.Type.AsStruct().Fields
@@ -224,7 +224,7 @@ func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeF
 		return formatter.formatType(referredObject.Type)
 	}
 
-	formatted := tools.UpperCamelCase(def.ReferredType)
+	formatted := formatObjectName(def.ReferredType)
 
 	referredPkg := def.ReferredPkg
 	referredPkg = formatter.importModule(referredPkg, "..models", referredPkg)
