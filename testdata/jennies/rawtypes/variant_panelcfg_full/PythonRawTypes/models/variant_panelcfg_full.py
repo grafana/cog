@@ -1,5 +1,4 @@
 import typing
-from ..cog import runtime as cogruntime
 
 
 class Options:
@@ -47,11 +46,3 @@ class FieldConfig:
 
 
 
-
-
-def variant_config():
-    return cogruntime.PanelCfgConfig(
-        identifier="timeseries",
-        options_from_json_hook=Options.from_json,
-        field_config_from_json_hook=FieldConfig.from_json,
-    )

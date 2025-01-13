@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 )
 
@@ -12,10 +13,12 @@ import (
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(extraTemplatesDirectories []string) *template.Template {
+func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplatesDirectories []string) *template.Template {
 	tmpl, err := template.New(
 		"python",
 
+		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(formattingTemplateFuncs()),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
@@ -49,6 +52,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"importPkg": func(alias string, pkg string) string {
 				panic("importPkg() needs to be overridden by a jenny")
 			},
+			"disjunctionFromJSON": func(disjunction ast.DisjunctionType, inputVar string) disjunctionFromJSONCode {
+				panic("disjunctionFromJSON() needs to be overridden by a jenny")
+			},
 		}),
 
 		// parse templates
@@ -66,5 +72,6 @@ func formattingTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"formatIdentifier": formatIdentifier,
 		"formatPath":       formatFieldPath,
+		"formatObjectName": formatObjectName,
 	}
 }

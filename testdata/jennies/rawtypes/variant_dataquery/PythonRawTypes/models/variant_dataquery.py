@@ -1,6 +1,5 @@
 from ..cog import variants as cogvariants
 import typing
-from ..cog import runtime as cogruntime
 
 
 class Query(cogvariants.Dataquery):
@@ -29,10 +28,3 @@ class Query(cogvariants.Dataquery):
             args["instant"] = data["instant"]        
 
         return cls(**args)
-
-
-def variant_config() -> cogruntime.DataqueryConfig:
-    return cogruntime.DataqueryConfig(
-        identifier="prometheus",
-        from_json_hook=Query.from_json,
-    )
