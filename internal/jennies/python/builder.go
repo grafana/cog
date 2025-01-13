@@ -85,6 +85,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	})
 
 	return jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(map[string]any{
 			"formatType":    jenny.typeFormatter.formatType,
 			"formatRawType": jenny.rawTypeFormatter.formatType,
@@ -93,11 +94,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				typeDef.Nullable = false
 
 				return jenny.rawTypeFormatter.formatType(typeDef)
-			},
-			"typeHasBuilder": context.ResolveToBuilder,
-			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
-				_, found := context.ResolveToComposableSlot(typeDef)
-				return found
 			},
 			"formatValue": func(destinationType ast.Type, value any) string {
 				if destinationType.IsRef() {
