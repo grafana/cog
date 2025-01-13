@@ -252,6 +252,7 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	}
 
 	var buffer strings.Builder
+	var err error
 
 	typingPkg := jenny.importPkg("typing", "typing")
 
@@ -271,7 +272,10 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 		}
 
 		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
-			value = jenny.composableSlotFromJSON(context, object.Type.AsStruct(), field)
+			value, err = jenny.composableSlotFromJSON(context, object, field)
+			if err != nil {
+				return "", err
+			}
 		} else if field.Type.IsRef() { //nolint:gocritic
 			ref := field.Type.AsRef()
 			referredObject, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
@@ -371,38 +375,16 @@ func (jenny RawTypes) disjunctionFromJSON(typeDef ast.Type, inputVar string) dis
 	}
 }
 
-func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentStruct ast.StructType, field ast.StructField) string {
-	// TODO(kgz): this shouldn't be done by cog
+func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentObject ast.Object, field ast.StructField) (string, error) {
 	slot, _ := context.ResolveToComposableSlot(field.Type)
-	if slot.AsComposableSlot().Variant != ast.SchemaVariantDataQuery {
-		return "unknown composable slot variant"
+	variant := string(slot.AsComposableSlot().Variant)
+	unmarshalVariantBlock := template.VariantFieldUnmarshalBlock(variant)
+	if !jenny.tmpl.Exists(unmarshalVariantBlock) {
+		return "", fmt.Errorf("can not generate custom unmarshal function for composable slot with variant '%s': template block %s not found", variant, unmarshalVariantBlock)
 	}
 
-	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
-
-	// First: try to locate a field that would contain the type of datasource being used.
-	// We're looking for a field defined as a reference to the `DataSourceRef` type.
-	var hintField *ast.StructField
-	for i, candidate := range parentStruct.Fields {
-		if !candidate.Type.IsRef() {
-			continue
-		}
-		if candidate.Type.AsRef().ReferredType != "DataSourceRef" {
-			continue
-		}
-
-		hintField = &parentStruct.Fields[i]
-	}
-
-	// then: unmarshalling boilerplate
-	hintValue := `""`
-	if hintField != nil {
-		hintValue = fmt.Sprintf(`data["%[1]s"]["type"] if data.get("%[1]s") is not None and data["%[1]s"].get("type", "") != "" else ""`, hintField.Name)
-	}
-
-	if field.Type.IsArray() {
-		return fmt.Sprintf(`[%[3]s.dataquery_from_json(dataquery_json, %[2]s) for dataquery_json in data["%[1]s"]]`, field.Name, hintValue, cogruntime)
-	}
-
-	return fmt.Sprintf(`%[3]s.dataquery_from_json(data["%[1]s"], %[2]s)`, field.Name, hintValue, cogruntime)
+	return jenny.tmpl.Render(unmarshalVariantBlock, map[string]any{
+		"Object": parentObject,
+		"Field":  field,
+	})
 }
