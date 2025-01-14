@@ -34,8 +34,8 @@ type Config struct {
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.
 	SkipRuntime        bool `yaml:"skip_runtime"`
-	generateBuilders   bool
-	generateConverters bool
+	GenerateBuilders   bool `yaml:"-"`
+	GenerateConverters bool `yaml:"-"`
 }
 
 func (config *Config) formatPackage(pkg string) string {
@@ -55,9 +55,9 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 
 func (config *Config) MergeWithGlobal(global languages.Config) Config {
 	newConfig := config
-	newConfig.generateBuilders = global.Builders
-	// newConfig.generateConverters = global.Converters
-	newConfig.generateConverters = false
+	newConfig.GenerateBuilders = global.Builders
+	// newConfig.GenerateConverters = global.Converters
+	newConfig.GenerateConverters = false
 
 	return *newConfig
 }
@@ -84,17 +84,18 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	})
 	jenny.AppendOneToMany(
 		common.If[languages.Context](!config.SkipRuntime, Runtime{config: config, tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime, Registry{config: config, tmpl: tmpl}),
 		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: config, tmpl: tmpl}),
 		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
-		common.If[languages.Context](config.generateBuilders, Builder{config: config, tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime && config.generateBuilders && config.generateConverters, &Converter{config: config, tmpl: tmpl}),
+		common.If[languages.Context](config.GenerateBuilders, Builder{config: config, tmpl: tmpl}),
+		common.If[languages.Context](!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
 
 		common.CustomTemplates{
+			TmplFuncs:           formattingTemplateFuncs(),
 			TemplateDirectories: config.ExtraFilesTemplatesDirectories,
 			Data: map[string]any{
-				"Debug": globalConfig.Debug,
+				"Debug":  globalConfig.Debug,
+				"Config": config,
 			},
 			ExtraData: config.ExtraFilesTemplatesData,
 		},

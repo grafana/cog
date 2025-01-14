@@ -3,7 +3,6 @@ package java
 import (
 	"embed"
 	"fmt"
-	"reflect"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -20,6 +19,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 		"java",
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(functions()),
+		template.Funcs(formattingTemplateFuncs()),
 		template.ParseFS(templatesFS, "templates"),
 		template.ParseDirectories(extraTemplatesDirectories...),
 	)
@@ -30,25 +30,13 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	return tmpl
 }
 
-func functions() template.FuncMap {
+func formattingTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
-		"escapeVar":             escapeVarName,
-		"formatScalar":          formatScalar,
-		"cleanString":           cleanString,
-		"lastPathIdentifier":    lastPathIdentifier,
-		"fillAnnotationPattern": fillAnnotationPattern,
-		"containsValue":         containsValue,
-		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
-		"slice": func(arr interface{}, start int) interface{} {
-			v := reflect.ValueOf(arr)
-			if v.Kind() != reflect.Slice {
-				panic("slice: input must be a slice")
-			}
-			if start >= v.Len() {
-				return reflect.MakeSlice(v.Type(), 0, 0).Interface()
-			}
-			return v.Slice(start, v.Len()).Interface()
-		},
+		"formatPackageName": formatPackageName,
+		"formatObjectName":  formatObjectName,
+		"escapeVar":         escapeVarName,
+		"formatScalar":      formatScalar,
+		"cleanString":       cleanString,
 		"formatIntegerLetter": func(t ast.Type) string {
 			switch t.AsScalar().ScalarKind {
 			case ast.KindInt64, ast.KindUint64:
@@ -58,6 +46,15 @@ func functions() template.FuncMap {
 			}
 			return ""
 		},
+	}
+}
+
+func functions() template.FuncMap {
+	return template.FuncMap{
+		"lastPathIdentifier":    lastPathIdentifier,
+		"fillAnnotationPattern": fillAnnotationPattern,
+		"containsValue":         containsValue,
+		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
@@ -65,7 +62,7 @@ func functions() template.FuncMap {
 			panic("importStdPkg() needs to be overridden by a jenny")
 		},
 		"formatPackageName": func(_ ast.Type) string {
-			panic("formatRawRef() needs to be overridden by a jenny")
+			panic("formatPackageName() needs to be overridden by a jenny")
 		},
 		"formatRawRef": func(_ ast.Type) string {
 			panic("formatRawRef() needs to be overridden by a jenny")

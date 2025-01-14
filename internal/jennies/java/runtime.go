@@ -27,7 +27,7 @@ func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 		*codejen.NewFile(filepath.Join(jenny.config.ProjectPath, "cog/Builder.java"), []byte(builder), jenny),
 	}
 
-	if jenny.config.generateConverters {
+	if jenny.config.GenerateConverters {
 		converter, err := jenny.renderConverterInterface()
 		if err != nil {
 			return nil, err

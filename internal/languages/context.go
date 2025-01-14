@@ -182,13 +182,19 @@ func (context *Context) BuildersForType(typeDef ast.Type) ast.Builders {
 }
 
 func (context Context) PackagesForVariant(variant string) []string {
-	packages := tools.Map(tools.Filter(context.Schemas, func(schema *ast.Schema) bool {
-		return schema.Metadata.Kind == ast.SchemaKindComposable && string(schema.Metadata.Variant) == variant && schema.Metadata.Identifier != ""
-	}), func(schema *ast.Schema) string {
+	return tools.Map(context.SchemasForVariant(variant), func(schema *ast.Schema) string {
 		return schema.Package
 	})
+}
 
-	sort.Strings(packages)
+func (context Context) SchemasForVariant(variant string) []*ast.Schema {
+	schemas := tools.Filter(context.Schemas, func(schema *ast.Schema) bool {
+		return schema.Metadata.Kind == ast.SchemaKindComposable && string(schema.Metadata.Variant) == variant && schema.Metadata.Identifier != ""
+	})
 
-	return packages
+	sort.Slice(schemas, func(i int, j int) bool {
+		return schemas[i].Package < schemas[j].Package
+	})
+
+	return schemas
 }
