@@ -110,8 +110,8 @@ package {{ .Converter.Package | formatPackageName }};
         {{- end }}
     {{- end -}}
     {{- with .Arg.Map -}}
-        {{- $reflect := importStdPkg "java.util" "StringJoiner" -}}
-        {{- $reflect := importStdPkg "java.util" "Map" -}}
+        {{- $_ := importStdPkg "java.util" "StringJoiner" -}}
+        {{- $_ = importStdPkg "java.util" "Map" -}}
         StringJoiner tmp{{ $.IntoVar | upperCamelCase }} = new StringJoiner(", ");
         for (Map.Entry<{{ .IndexType | formatType }}, {{ .ValueType | formatType }}> {{ .ValueAs | formatPath }} : {{ .For }}.entrySet()) {
             {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs) }}

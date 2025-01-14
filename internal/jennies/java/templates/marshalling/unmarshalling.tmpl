@@ -37,7 +37,7 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
         }
         {{- end }}
         {{- end }}
-        
+        {{- /* TODO(kgz): this shouldn't be done by cog */ -}}
         {{- if .ShouldUnmarshallingPanels }}
         // Deserialise panels
         PanelConfig config = Registry.getPanel(panel.type);
@@ -66,6 +66,7 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
        
        // Dataquery stuff
        String datasourceType = "";
+       {{- /* TODO(kgz): this shouldn't be done by cog */ -}}
        {{- range .DataqueryUnmarshalling }}
        {{- if ne .DatasourceField "" }}
        {{ $.Name | lowerCamelCase }}.{{ .DatasourceField }} = mapper.treeToValue(root.get({{ printf "%#v" .DatasourceField }}), DataSourceRef.class);

@@ -52,9 +52,11 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 		return jenny.genDisjunctionsDeserialiser(obj, "disjunctions_of_refs")
 	}
 
+	// TODO(kgz): this shouldn't be done by cog
 	return jenny.genDataqueryDeserialiser(context, obj)
 }
 
+// TODO(kgz): this shouldn't be done by cog
 func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
 	jenny.imports = jenny.genImports(obj)
 
@@ -74,6 +76,7 @@ func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, 
 	return codejen.NewFile(path, []byte(rendered), jenny), nil
 }
 
+// TODO(kgz): this shouldn't be done by cog
 func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.Object) []DataqueryUnmarshalling {
 	dataqueryUnmarshalling := make([]DataqueryUnmarshalling, 0)
 	for _, field := range obj.Type.AsStruct().Fields {
@@ -90,6 +93,7 @@ func (jenny *Deserializers) genDataqueryCode(context languages.Context, obj ast.
 	return dataqueryUnmarshalling
 }
 
+// TODO(kgz): this shouldn't be done by cog
 func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field ast.StructField) DataqueryUnmarshalling {
 	var hintField *ast.StructField
 	for i, f := range obj.Type.AsStruct().Fields {
@@ -122,6 +126,7 @@ func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field 
 	}
 }
 
+// TODO(kgz): this shouldn't be done by cog
 func (jenny *Deserializers) genImports(obj ast.Object) []string {
 	imports := []string{
 		jenny.config.formatPackage("cog.variants.Dataquery"),
