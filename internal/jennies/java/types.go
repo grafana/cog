@@ -347,7 +347,7 @@ func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
 }
 
 func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
-	if !tf.config.generateBuilders || tf.config.SkipRuntime {
+	if !tf.config.GenerateBuilders || tf.config.SkipRuntime {
 		return false
 	}
 	if obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
@@ -359,7 +359,7 @@ func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
 }
 
 func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object) bool {
-	if !tf.config.generateBuilders || tf.config.SkipRuntime {
+	if !tf.config.GenerateBuilders || tf.config.SkipRuntime {
 		return false
 	}
 	if objectNeedsCustomDeserialiser(tf.context, obj) {
