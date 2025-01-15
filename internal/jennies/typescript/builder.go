@@ -2,7 +2,6 @@ package typescript
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -39,8 +38,7 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 			return nil, err
 		}
 
-		filename := filepath.Join(
-			"src",
+		filename := jenny.config.pathWithPrefix(
 			formatPackageName(builder.Package),
 			fmt.Sprintf("%sBuilder.gen.ts", tools.LowerCamelCase(builder.Name)),
 		)

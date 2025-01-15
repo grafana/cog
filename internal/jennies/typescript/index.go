@@ -2,7 +2,6 @@ package typescript
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -11,6 +10,7 @@ import (
 )
 
 type Index struct {
+	config  Config
 	Targets languages.Config
 }
 
@@ -35,7 +35,8 @@ func (jenny Index) Generate(context languages.Context) (codejen.Files, error) {
 	}
 
 	for pkg, refs := range packages {
-		files = append(files, *codejen.NewFile(filepath.Join("src", formatPackageName(pkg), "index.ts"), jenny.generateIndex(refs), jenny))
+		filename := jenny.config.pathWithPrefix(formatPackageName(pkg), "index.ts")
+		files = append(files, *codejen.NewFile(filename, jenny.generateIndex(refs), jenny))
 	}
 
 	return files, nil
