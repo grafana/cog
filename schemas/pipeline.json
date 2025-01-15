@@ -444,7 +444,8 @@
     "TypescriptConfig": {
       "properties": {
         "path_prefix": {
-          "type": "string"
+          "type": "string",
+          "description": "PathPrefix holds an optional prefix for all Typescript file paths generated.\nIf left undefined, `src` is used as a default prefix."
         },
         "skip_runtime": {
           "type": "boolean",

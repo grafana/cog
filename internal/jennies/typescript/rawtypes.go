@@ -2,7 +2,6 @@ package typescript
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -34,8 +33,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 			return nil, err
 		}
 
-		filename := filepath.Join(
-			"src",
+		filename := jenny.config.pathWithPrefix(
 			formatPackageName(schema.Package),
 			"types.gen.ts",
 		)

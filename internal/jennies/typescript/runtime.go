@@ -6,6 +6,7 @@ import (
 )
 
 type Runtime struct {
+	config Config
 }
 
 func (jenny Runtime) JennyName() string {
@@ -14,9 +15,9 @@ func (jenny Runtime) JennyName() string {
 
 func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 	return codejen.Files{
-		*codejen.NewFile("src/cog/variants_gen.ts", []byte(jenny.generateVariantsFile()), jenny),
-		*codejen.NewFile("src/cog/builder_gen.ts", []byte(jenny.generateOptionsBuilderFile()), jenny),
-		*codejen.NewFile("src/cog/index.ts", []byte(jenny.generateIndexFile()), jenny),
+		*codejen.NewFile(jenny.config.pathWithPrefix("cog/variants_gen.ts"), []byte(jenny.generateVariantsFile()), jenny),
+		*codejen.NewFile(jenny.config.pathWithPrefix("cog/builder_gen.ts"), []byte(jenny.generateOptionsBuilderFile()), jenny),
+		*codejen.NewFile(jenny.config.pathWithPrefix("cog/index.ts"), []byte(jenny.generateIndexFile()), jenny),
 	}, nil
 }
 
