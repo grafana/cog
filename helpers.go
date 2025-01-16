@@ -167,6 +167,9 @@ func (pipeline *SchemaToTypesPipeline) SchemaTransformations(passes ...compiler.
 type GoConfig struct {
 	// GenerateEqual controls the generation of `Equal()` methods on types.
 	GenerateEqual bool
+
+	// AnyAsInterface instructs cog to emit `interface{}` instead of `any`.
+	AnyAsInterface bool
 }
 
 // Golang sets the output to Golang types.
@@ -175,7 +178,8 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 		Go: &golang.Config{
 			SkipRuntime: true,
 
-			GenerateEqual: config.GenerateEqual,
+			GenerateEqual:  config.GenerateEqual,
+			AnyAsInterface: config.AnyAsInterface,
 		},
 	}
 	return pipeline

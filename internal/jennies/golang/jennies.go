@@ -49,6 +49,9 @@ type Config struct {
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string `yaml:"package_root"`
+
+	// AnyAsInterface instructs this jenny to emit `interface{}` instead of `any`.
+	AnyAsInterface bool `yaml:"any_as_interface"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
@@ -90,7 +93,7 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
-	tmpl := initTemplates(language.apiRefCollector, language.config.OverridesTemplatesDirectories)
+	tmpl := initTemplates(config, language.apiRefCollector)
 
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
@@ -122,7 +125,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 				"PackageRoot": config.PackageRoot,
 			},
 			ExtraData: config.ExtraFilesTemplatesData,
-			TmplFuncs: formattingTemplateFuncs(),
+			TmplFuncs: formattingTemplateFuncs(config),
 		},
 	)
 	jenny.AddPostprocessors(formatGoFiles, common.GeneratedCommentHeader(globalConfig))

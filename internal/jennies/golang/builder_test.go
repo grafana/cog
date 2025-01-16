@@ -27,7 +27,7 @@ func TestBuilder_Generate(t *testing.T) {
 	language := New(config)
 	jenny := Builder{
 		Config:          config,
-		Tmpl:            initTemplates(common.NewAPIReferenceCollector(), []string{}),
+		Tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 
@@ -47,11 +47,12 @@ func TestBuilder_Generate(t *testing.T) {
 }
 
 func TestBuilder_emptyValueForGuard(t *testing.T) {
+	config := Config{
+		PackageRoot: "github.com/grafana/cog/generated",
+	}
 	jenny := Builder{
-		Config: Config{
-			PackageRoot: "github.com/grafana/cog/generated",
-		},
-		Tmpl:            initTemplates(common.NewAPIReferenceCollector(), []string{}),
+		Config:          config,
+		Tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 

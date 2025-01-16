@@ -341,6 +341,10 @@
         "package_root": {
           "type": "string",
           "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"
+        },
+        "any_as_interface": {
+          "type": "boolean",
+          "description": "AnyAsInterface instructs this jenny to emit `interface{}` instead of `any`."
         }
       },
       "additionalProperties": false,
