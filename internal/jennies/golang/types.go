@@ -92,6 +92,9 @@ func (formatter *typeFormatter) formatEnumDef(def ast.Object) string {
 
 func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool) string {
 	actualFormatter := func() string {
+		if def.IsAny() && formatter.config.AnyAsInterface {
+			return "interface{}"
+		}
 		if def.IsAny() {
 			return "any"
 		}

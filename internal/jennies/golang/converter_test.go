@@ -27,7 +27,7 @@ func TestConverter_Generate(t *testing.T) {
 	jenny := Converter{
 		Config:          config,
 		NullableConfig:  language.NullableKinds(),
-		Tmpl:            initTemplates(common.NewAPIReferenceCollector(), []string{}),
+		Tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 
