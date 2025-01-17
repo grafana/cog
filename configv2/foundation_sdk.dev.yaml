@@ -53,6 +53,8 @@ output:
         generate_validate: true
         extra_files_templates:
           - '%__config_dir%/templates/go/extra'
+        overrides_templates:
+          - '%__config_dir%/templates/go/overrides'
     #- jsonschema: {}
     #- openapi: {}
     #- php:
