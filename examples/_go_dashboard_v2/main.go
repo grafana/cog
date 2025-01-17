@@ -25,7 +25,6 @@ func dashboardBuilder() []byte {
 			Timezone("browser"),
 		).
 		WithElement("somePanel", dashboard.NewPanelBuilder().
-			Uid("somePanelUid"). // TODO: should this be equal to the element ref, or unrelated?
 			Title("Some panel").
 			Description("veeery descriptive").
 			Visualization(timeseries.NewVisualizationBuilder().
