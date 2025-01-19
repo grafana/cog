@@ -5,6 +5,7 @@
 /gradle.properties
 /vendor
 /cog
+/docs-site
 
 # Java building folders
 .gradle/
