@@ -6,7 +6,7 @@
     "php83Packages.composer@2.7",
     "php83Packages.phpstan@1.11",
     "php83Packages.psalm@5.25",
-    "python312Packages.mypy@1.10",
+    "python@3.12",
     "golangci-lint@1.61",
     "nodejs-slim_18@18.20",
     "nodePackages.ts-node@10.9.2",
@@ -15,6 +15,7 @@
   ],
   "shell": {
     "init_hook": [
+      "echo 'Entering Python venv' && . $VENV_DIR/bin/activate",
       "echo 'Installing dependencies...' && make deps",
       "export PYTHONPATH=$PYTHONPATH:$(pwd)/generated/python"
     ]
