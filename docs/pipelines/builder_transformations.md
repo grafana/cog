@@ -4,6 +4,69 @@ weight: 10
 
 # Applying builder transformations
 
+`cog` supports modifying its [intermediate representation](../reference/glossary.md#intermediate-representation)
+of [builders](../reference/glossary.md#builder).
+
+These transformations can be useful to ensure that [builders](../reference/glossary.md#builder)
+and [options](../reference/glossary.md#builder-option) expose meaningful names,
+make their APIs easier to understand and use, …
+
+Builder transformations are defined within their own configuration files and are
+then referenced by codegen pipeline configurations.
+
+```yaml hl_lines="9-11"
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+# cog.yaml
+
+debug: true
+
+inputs:
+  - …
+
+transformations:
+  builders:
+    - '%__config_dir%/transformations/builders/'
+
+output:
+  directory: './generated/%l'
+
+  # …
+```
+
+!!! note
+    Contrary to schema transformations, builder transformations always
+    target a specific schema, and can target a specific language.
+
+## Structure of builder transformations
+
+A typical configuration file for builder transformations looks like this:
+
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json
+# transformations/builders/dashboard.yaml
+
+# Which language is being targetted.
+# `all` targets every language configured by the codegen pipeline.
+# To apply the transformations to a specific language, use its name as value.
+# Required.
+language: all
+
+# Package for which the transformation apply.
+# Required.
+package: dashboard
+
+# List of transformation applied to builder objects.
+builders: [ … ]
+
+# List of transformation applied to builder options.
+options: [ … ]
+```
+
+## Reference
+
+See [the builder transformations reference](../reference/builders_transformations.md) for a list of all supported transformations.
+
 ## Example
 
 ??? tip "Recommended: configuration validation and auto-complete"
@@ -35,10 +98,11 @@ weight: 10
 
 ```yaml
 # yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json
+# transformations/builders/dashboard.yaml
 
 language: all
 
-package: package_name
+package: dashboard
 
 builders:
   # We don't want this builder at all

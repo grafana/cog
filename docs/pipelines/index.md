@@ -1,6 +1,6 @@
 # Codegen pipelines
 
-Code generation is configured via a *codegen pipeline* describing:
+Code generation is configured via a [*codegen pipeline*](../reference/glossary.md#pipeline) describing:
 
 * the schemas used as [inputs](./creating_pipeline.md#inputs)
 * possible [transformations applied to the schemas](./schema_transformations.md)
