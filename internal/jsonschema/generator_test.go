@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -52,4 +53,29 @@ func TestGenerateAST_parsesEnumValues(t *testing.T) {
 	enumType := schemaAst.Objects.At(0).Type.Enum
 
 	req.Equal(int64(1), enumType.Values[0].Value)
+}
+
+func TestGenerateAST_parseDraft2020Array(t *testing.T) {
+	req := require.New(t)
+
+	input := strings.NewReader(`{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/definitions/EntryPoint",
+  "definitions": {
+    "EntryPoint": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}`)
+
+	schemaAst, err := GenerateAST(input, Config{Package: "grafanatest"})
+	req.NoError(err)
+	req.NotNil(t, schemaAst)
+
+	objectType := schemaAst.Objects.Get("EntryPoint").Type
+
+	req.True(objectType.IsArray())
+	req.True(objectType.AsArray().ValueType.IsScalar())
+	req.Equal(ast.KindString, objectType.AsArray().ValueType.AsScalar().ScalarKind)
 }
