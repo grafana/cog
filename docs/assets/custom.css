@@ -20,6 +20,12 @@
   }
 }
 
+/* code highlighting */
+
+.highlight .hll {
+  box-shadow: none;
+}
+
 /* TOC */
 /* Make it wider */
 .md-sidebar--secondary {

@@ -22,7 +22,7 @@ const compilerPassTypesSourceDir = "./internal/ast/compiler"
 //nolint:gosec
 const yamlCompilerPassTypesSourceDir = "./internal/yaml"
 
-const outputFile = "./docs/reference/compiler_passes.md"
+const outputFile = "./docs/reference/schema_transformations.md"
 
 type compilerPassParam struct {
 	Name          string
@@ -163,7 +163,7 @@ func docEntriesToMarkdown(entries []compilerPassDocEntry) []byte {
 
 	markdown.WriteString("<!-- Generated with `make docs` -->\n")
 
-	markdown.WriteString("# Compiler passes\n\n")
+	markdown.WriteString("# Schema transformations\n\n")
 	for _, entry := range entries {
 		markdown.WriteString(fmt.Sprintf("## `%s`\n", entry.YamlName))
 		markdown.WriteString("\n")

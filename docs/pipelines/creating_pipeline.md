@@ -62,7 +62,7 @@ output:
     === "Other"
 
         1.  Ensure your editor of choice has support for YAML schema validation.
-        2.  Add the following lines at the top of `mkdocs.yml`:
+        2.  Add the following lines at the top of `cog.yaml`:
 
             ``` yaml
             # yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json

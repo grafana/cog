@@ -1,0 +1,5 @@
+# Glossary
+
+## Intermediate representation
+
+TBD
