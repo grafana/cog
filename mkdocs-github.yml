@@ -3,14 +3,18 @@ site_author: 'Grafana Labs'
 
 repo_name: "grafana/cog"
 repo_url: "https://github.com/grafana/cog"
+edit_uri: edit/main/docs/
 
 docs_dir: ./docs/
 
-plugins: []
+plugins:
+  - mkdocs-nav-weight
+  - search
 
 markdown_extensions:
   - admonition
   - pymdownx.magiclink
+  - pymdownx.details
   - pymdownx.tabbed:
       alternate_style: true
       slugify: !!python/object/apply:pymdownx.slugs.slugify
@@ -18,7 +22,11 @@ markdown_extensions:
           case: lower
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - toc:
       permalink: 🔗
 
@@ -30,6 +38,12 @@ theme:
     - navigation.top
     - navigation.prune
     - search.highlight
+    - content.action.edit
+    - toc.follow
+    - toc.integrate
+
+  icon:
+    edit: material/pencil
 
   logo: "assets/logo.svg"
 
