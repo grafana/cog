@@ -29,5 +29,6 @@ For API reference documentation, the following blocks are supported:
 For dynamically generating files, the following block is supported:
 * `dynamic_files`: in conjunction with the `declareFile $filepath $content` template helper.
 
-> [!NOTE]
-> The variables components of block names are **case-sensitive**.
+!!! note
+
+    The variables components of block names are **case-sensitive**.
