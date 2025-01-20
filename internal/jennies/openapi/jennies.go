@@ -11,6 +11,8 @@ const LanguageRef = "openapi"
 type Config struct {
 	debug bool
 
+	// Compact controls whether the generated JSON should be pretty printed or
+	// not.
 	Compact bool `yaml:"compact"`
 }
 

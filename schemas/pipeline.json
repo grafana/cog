@@ -380,7 +380,8 @@
     "JsonschemaConfig": {
       "properties": {
         "compact": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Compact controls whether the generated JSON should be pretty printed or\nnot."
         }
       },
       "additionalProperties": false,
@@ -389,7 +390,8 @@
     "OpenapiConfig": {
       "properties": {
         "compact": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Compact controls whether the generated JSON should be pretty printed or\nnot."
         }
       },
       "additionalProperties": false,

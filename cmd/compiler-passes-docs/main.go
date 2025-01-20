@@ -161,6 +161,10 @@ func buildCompilerPassTypesCommentsMap(typesInputDir string) (map[string]string,
 func docEntriesToMarkdown(entries []compilerPassDocEntry) []byte {
 	var markdown bytes.Buffer
 
+	markdown.WriteString(`---
+weight: 10
+---
+`)
 	markdown.WriteString("<!-- Generated with `make docs` -->\n")
 
 	markdown.WriteString("# Schema transformations\n\n")
