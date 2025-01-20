@@ -22,7 +22,7 @@ const compilerPassTypesSourceDir = "./internal/ast/compiler"
 //nolint:gosec
 const yamlCompilerPassTypesSourceDir = "./internal/yaml"
 
-const outputFile = "./docs/compiler_passes.md"
+const outputFile = "./docs/reference/compiler_passes.md"
 
 type compilerPassParam struct {
 	Name          string
