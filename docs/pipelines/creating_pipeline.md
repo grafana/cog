@@ -112,12 +112,14 @@ cog generate --config cog.yaml
 
 The following parameters are defined by `cog` and can be used within pipelines:
 
-* `%__config_dir%`: refers to the directory holding the codegen pipeline.
-* `%__current_dir%`: refers to current working directory (the directory from which the `cog` binary was invoked).
+* `%__config_dir%`: refers to the directory containing the codegen pipeline.
+* `%__current_dir%`: refers to current working directory (the directory from
+  which the `cog` binary was invoked).
 
 ## Inputs
 
-Pipeline can rely on an arbitrary number of inputs, in any of languages described below.
+Pipeline can rely on an arbitrary number of inputs, in any of schema languages
+described below.
 
 !!! tip
 
@@ -138,11 +140,11 @@ inputs:
       forced_envelope: envelope_name
 
       # Package name to use for the input schema. If empty, it will be guessed
-	  # from the entrypoint.
+      # from the entrypoint.
       package: package_name
 
       # `cue_imports` allows importing additional libraries.
-	  # Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common
+      # Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common
       cue_imports:
         - 'path/to/library:github.com/owner/library/path/to/cue/'
 
@@ -172,7 +174,7 @@ inputs:
       url: 'https://example.com/schemas/jsonschema.json'
 
       # Package name to use for the input schema. If empty, it will be guessed
-	  # from the entrypoint.
+      # from the entrypoint.
       package: package_name
 
       # List of object names that will be allowed when parsing the input schema.
@@ -201,12 +203,12 @@ inputs:
       url: 'https://example.com/schemas/openapi.json'
 
       # Package name to use for the input schema. If empty, it will be guessed
-	  # from the entrypoint.
+      # from the entrypoint.
       package: package_name
 
       # Disables the validation of the OpenAPI spec.
       # Default: false
-      no_validate: package_name
+      no_validate: false
 
       # List of object names that will be allowed when parsing the input schema.
       # Note: if the list is empty/not specifiec, no filter is applied.
@@ -253,7 +255,7 @@ output:
 
   languages:
     - go:
-	    # Root path for imports.
+        # Root path for imports.
         # Required.
         package_root: 'github.com/owner/repo/generated/go'
 
@@ -274,8 +276,8 @@ output:
         any_as_interface: true
 
         # Disables runtime-related code generation.
-	    # Note: builders can NOT be generated with this flag turned on, as they
-	    # rely on the runtime to function.
+        # Note: builders can NOT be generated with this flag turned on, as they
+        # rely on the runtime to function.
         # Default: false
         skip_runtime: false
 
@@ -298,13 +300,13 @@ output:
 
   languages:
     - java:
-	    # Root path for imports.
+        # Root path for imports.
         # Required.
         package_path: 'com.org.package'
 
         # Disables runtime-related code generation.
-	    # Note: builders can NOT be generated with this flag turned on, as they
-	    # rely on the runtime to function.
+        # Note: builders can NOT be generated with this flag turned on, as they
+        # rely on the runtime to function.
         # Default: false
         skip_runtime: false
 
@@ -319,6 +321,30 @@ output:
           - '%__config_dir%/templates/java/overrides'
 ```
 
+### JSON Schema
+
+```yaml
+output:
+  # …
+
+  languages:
+    - jsonschema:
+        # Controls whether the generated JSON should be pretty printed or not.
+        compact: false
+```
+
+### OpenAPI
+
+```yaml
+output:
+  # …
+
+  languages:
+    - openapi:
+        # Controls whether the generated JSON should be pretty printed or not.
+        compact: false
+```
+
 ### PHP
 
 ```yaml
@@ -327,7 +353,7 @@ output:
 
   languages:
     - php:
-	    # Namespace root.
+        # Namespace root.
         # Required.
         namespace_root: 'Vendor\Package'
 
@@ -350,13 +376,13 @@ output:
 
   languages:
     - python:
-	    # Prefix to add to every generated file path.
+        # Prefix to add to every generated file path.
         # Default: ''
         path_prefix: ''
 
         # Disables runtime-related code generation.
-	    # Note: builders can NOT be generated with this flag turned on, as they
-	    # rely on the runtime to function.
+        # Note: builders can NOT be generated with this flag turned on, as they
+        # rely on the runtime to function.
         # Default: false
         skip_runtime: false
 
@@ -379,13 +405,13 @@ output:
 
   languages:
     - typescript:
-	    # Prefix to add to every generated file path.
+        # Prefix to add to every generated file path.
         # Default: 'src'
         path_prefix: 'src'
 
         # Disables runtime-related code generation.
-	    # Note: builders can NOT be generated with this flag turned on, as they
-	    # rely on the runtime to function.
+        # Note: builders can NOT be generated with this flag turned on, as they
+        # rely on the runtime to function.
         # Default: false
         skip_runtime: false
 
@@ -395,22 +421,22 @@ output:
 
         # Generates enums as a union of values instead of using an actual `enum`
         # declaration.
-	    # If enums_as_union_types is false, an enum will be generated as:
+        # If enums_as_union_types is false, an enum will be generated as:
         #
-	    # ```ts
-	    # enum Direction {
-	    #   Up = "up",
-	    #   Down = "down",
-	    #   Left = "left",
-	    #   Right = "right",
-	    # }
-	    # ```
+        # ```ts
+        # enum Direction {
+        #   Up = "up",
+        #   Down = "down",
+        #   Left = "left",
+        #   Right = "right",
+        # }
+        # ```
         #
-	    # If enums_as_union_types is true, the same enum will be generated as:
+        # If enums_as_union_types is true, the same enum will be generated as:
         #
-	    # ```ts
-	    # type Direction = "up" | "down" | "left" | "right";
-	    # ```
+        # ```ts
+        # type Direction = "up" | "down" | "left" | "right";
+        # ```
         #
         # Default: false
         enums_as_union_types: false
