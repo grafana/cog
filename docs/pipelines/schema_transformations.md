@@ -11,14 +11,21 @@ elements or fix incorrect ones.
 This feature can be useful when the original schemas can not be fixed
 directly and should be used with caution.
 
-Transformations are defined within their own configuration files and are then
-referenced by codegen pipeline configurations.
+!!! note
+    Since transformations are applied on the [intermediate representation](../reference/glossary.md#intermediate-representation),
+    their effects automatically impact the code generated in every language.
+
+Schema transformations are defined within their own configuration files and are
+then referenced by codegen pipeline configurations.
+
+## Globally
 
 When defined within the `transformations` block of a codegen pipeline,
 transformations are applied to every input in that pipeline:
 
-```yaml hl_lines="8-10"
+```yaml hl_lines="9-11"
 # yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+# cog.yaml
 
 debug: true
 
@@ -27,7 +34,7 @@ inputs:
 
 transformations:
   schemas:
-    - '%__config_dir%/transformations/common.yaml'
+    - '%__config_dir%/transformations/schemas/common.yaml'
 
 output:
   directory: './generated/%l'
@@ -35,11 +42,14 @@ output:
   # …
 ```
 
+## Per schema
+
 When defined within `input` block of a codegen pipeline, transformations are
 applied to that input only:
 
-```yaml hl_lines="9-10"
+```yaml hl_lines="10-11"
 # yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+# cog.yaml
 
 debug: true
 
@@ -48,7 +58,7 @@ inputs:
       url: 'https://example.com/schema.json'
       package: example
       transformations:
-        - '%__config_dir%/transformations/example.yaml'
+        - '%__config_dir%/transformations/schemas/example.yaml'
 
 output:
   directory: './generated/%l'
@@ -58,7 +68,7 @@ output:
 
 ## Reference
 
-See [the transformations reference](../reference/schema_transformations.md) for a list of all supported transformations.
+See [the schema transformations reference](../reference/schema_transformations.md) for a list of all supported transformations.
 
 ## Example
 
@@ -91,6 +101,7 @@ See [the transformations reference](../reference/schema_transformations.md) for 
 
 ```yaml
 # yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json
+# transformations/schemas/example.yaml
 
 passes:
   # Rename the AlertRuleGroup object to RuleGroup to avoid stuttering.
