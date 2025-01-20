@@ -1,5 +1,5 @@
 <!-- Generated with `make docs` -->
-# Compiler passes
+# Schema transformations
 
 ## `add_fields`
 
