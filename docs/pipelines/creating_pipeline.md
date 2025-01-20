@@ -5,7 +5,7 @@ weight: 1
 
 Pipelines are defined in YAML files usually named `cog.yaml`.
 
-A typical pipeline will revolve around three main blogs:
+A typical pipeline will revolve around three main blocks:
 
 * `inputs`: a list of schemas from which code will be generated
 * `transformations`: modifications made by cog to the types described by the schemas and/or the builders it will generate. This block is optional.
@@ -41,7 +41,7 @@ output:
 
 ??? tip "Recommended: configuration validation and auto-complete"
 
-    In order to help with configuring cog pipelines, a [schema][schema.json] for
+    In order to help with configuring codegen pipelines, a [schema][schema.json] for
     `cog.yaml` files is provided. If your editor supports YAML schema validation,
     it is definitely recommended to set it up:
 
@@ -108,41 +108,328 @@ You can run it yourself with:
 cog generate --config cog.yaml
 ```
 
+## Built-in parameters
+
+The following parameters are defined by `cog` and can be used within pipelines:
+
+* `%__config_dir%`: refers to the directory holding the codegen pipeline.
+* `%__current_dir%`: refers to current working directory (the directory from which the `cog` binary was invoked).
+
 ## Inputs
+
+Pipeline can rely on an arbitrary number of inputs, in any of languages described below.
+
+!!! tip
+
+    A pipeline **can** mix inputs defined in different schema languages.
 
 ### CUE
 
-TBD
+```yaml
+inputs:
+  - cue:
+      # Directory containing the CUE files to parse.
+      # Required.
+      entrypoint: '%__config_dir%/schemas/cue_module'
+
+      # Decorates the parsed cue Value with an envelope whose name is given.
+      # This is useful for dataqueries for example, where the schema doesn't
+      # define any suitable top-level object.
+      forced_envelope: envelope_name
+
+      # Package name to use for the input schema. If empty, it will be guessed
+	  # from the entrypoint.
+      package: package_name
+
+      # `cue_imports` allows importing additional libraries.
+	  # Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common
+      cue_imports:
+        - 'path/to/library:github.com/owner/library/path/to/cue/'
+
+      # List of object names that will be allowed when parsing the input schema.
+      # Note: if the list is empty/not specifiec, no filter is applied.
+      allowed_objects:
+        - ObjectName
+        - OtherObjectName
+
+      # List of paths to files containing schema transformations to apply to
+      # this input.
+      transforms:
+        - '%__config_dir%/transformations/schemas/cue_module.yaml'
+```
 
 ### JSON schema
 
-TBD
+```yaml
+inputs:
+  - jsonschema:
+      # Path to a JSONSchema file.
+      # Required if `url` is empty.
+      path: '%__config_dir%/schemas/jsonschema.json'
+
+      # URL to a JSONSchema file.
+      # Required if `path` is empty.
+      url: 'https://example.com/schemas/jsonschema.json'
+
+      # Package name to use for the input schema. If empty, it will be guessed
+	  # from the entrypoint.
+      package: package_name
+
+      # List of object names that will be allowed when parsing the input schema.
+      # Note: if the list is empty/not specifiec, no filter is applied.
+      allowed_objects:
+        - ObjectName
+        - OtherObjectName
+
+      # List of paths to files containing schema transformations to apply to
+      # this input.
+      transforms:
+        - '%__config_dir%/transformations/schemas/jsonschema.yaml'
+```
 
 ### OpenAPI
 
-TBD
+```yaml
+inputs:
+  - openapi:
+      # Path to a OpenAPI file.
+      # Required if `url` is empty.
+      path: '%__config_dir%/schemas/openapi.json'
+
+      # URL to a OpenAPI file.
+      # Required if `path` is empty.
+      url: 'https://example.com/schemas/openapi.json'
+
+      # Package name to use for the input schema. If empty, it will be guessed
+	  # from the entrypoint.
+      package: package_name
+
+      # Disables the validation of the OpenAPI spec.
+      # Default: false
+      no_validate: package_name
+
+      # List of object names that will be allowed when parsing the input schema.
+      # Note: if the list is empty/not specifiec, no filter is applied.
+      allowed_objects:
+        - ObjectName
+        - OtherObjectName
+
+      # List of paths to files containing schema transformations to apply to
+      # this input.
+      transforms:
+        - '%__config_dir%/transformations/schemas/openapi.yaml'
+```
 
 ## Outputs
 
+```yaml
+output:
+  # Path to a directory in which the generated code will be written.
+  # Note: `%l` refers to the language name and means that the code for each
+  # language will be written in its own sub-directory.
+  directory: './generated/%l'
+
+  # Generate types.
+  types: true
+
+  # Generate builders.
+  builders: true
+
+  # Generate converters.
+  converters: true
+
+  # Generate a markdown API reference.
+  api_reference: true
+
+  # List of languages to generate code for.
+  languages: []
+```
+
 ### Go
 
-TBD
+```yaml
+output:
+  # …
+
+  languages:
+    - go:
+	    # Root path for imports.
+        # Required.
+        package_root: 'github.com/owner/repo/generated/go'
+
+        # Controls the generation of `UnmarshalJSONStrict()` methods on types.
+        # Default: false
+        generate_strict_unmarshaller: true
+
+        # Controls the generation of `Equal()` methods on types.
+        # Default: false
+        generate_equal: true
+
+        # Controls the generation of `Validate()` methods on types.
+        # Default: false
+        generate_validate: true
+
+        # Instructs cog to emit `interface{}` instead of `any`.
+        # Default: false
+        any_as_interface: true
+
+        # Disables runtime-related code generation.
+	    # Note: builders can NOT be generated with this flag turned on, as they
+	    # rely on the runtime to function.
+        # Default: false
+        skip_runtime: false
+
+        # List of directories containing templates describing files to be added
+        # to the generated output.
+        extra_files_templates:
+          - '%__config_dir%/templates/go/extra'
+
+        # List of directories containing templates defining blocks used to
+        # override parts of builders/types/....
+        overrides_templates:
+          - '%__config_dir%/templates/go/overrides'
+```
 
 ### Java
 
-TBD
+```yaml
+output:
+  # …
+
+  languages:
+    - java:
+	    # Root path for imports.
+        # Required.
+        package_path: 'com.org.package'
+
+        # Disables runtime-related code generation.
+	    # Note: builders can NOT be generated with this flag turned on, as they
+	    # rely on the runtime to function.
+        # Default: false
+        skip_runtime: false
+
+        # List of directories containing templates describing files to be added
+        # to the generated output.
+        extra_files_templates:
+          - '%__config_dir%/templates/java/extra'
+
+        # List of directories containing templates defining blocks used to
+        # override parts of builders/types/....
+        overrides_templates:
+          - '%__config_dir%/templates/java/overrides'
+```
 
 ### PHP
 
-TBD
+```yaml
+output:
+  # …
+
+  languages:
+    - php:
+	    # Namespace root.
+        # Required.
+        namespace_root: 'Vendor\Package'
+
+        # List of directories containing templates describing files to be added
+        # to the generated output.
+        extra_files_templates:
+          - '%__config_dir%/templates/php/extra'
+
+        # List of directories containing templates defining blocks used to
+        # override parts of builders/types/....
+        overrides_templates:
+          - '%__config_dir%/templates/php/overrides'
+```
 
 ### Python
 
-TBD
+```yaml
+output:
+  # …
+
+  languages:
+    - python:
+	    # Prefix to add to every generated file path.
+        # Default: ''
+        path_prefix: ''
+
+        # Disables runtime-related code generation.
+	    # Note: builders can NOT be generated with this flag turned on, as they
+	    # rely on the runtime to function.
+        # Default: false
+        skip_runtime: false
+
+        # List of directories containing templates describing files to be added
+        # to the generated output.
+        extra_files_templates:
+          - '%__config_dir%/templates/python/extra'
+
+        # List of directories containing templates defining blocks used to
+        # override parts of builders/types/....
+        overrides_templates:
+          - '%__config_dir%/templates/python/overrides'
+```
 
 ### Typescript
 
-TBD
+```yaml
+output:
+  # …
+
+  languages:
+    - typescript:
+	    # Prefix to add to every generated file path.
+        # Default: 'src'
+        path_prefix: 'src'
+
+        # Disables runtime-related code generation.
+	    # Note: builders can NOT be generated with this flag turned on, as they
+	    # rely on the runtime to function.
+        # Default: false
+        skip_runtime: false
+
+        # Disables the generation of `index.ts` files.
+        # Default: false
+        skip_index: false
+
+        # Generates enums as a union of values instead of using an actual `enum`
+        # declaration.
+	    # If enums_as_union_types is false, an enum will be generated as:
+        #
+	    # ```ts
+	    # enum Direction {
+	    #   Up = "up",
+	    #   Down = "down",
+	    #   Left = "left",
+	    #   Right = "right",
+	    # }
+	    # ```
+        #
+	    # If enums_as_union_types is true, the same enum will be generated as:
+        #
+	    # ```ts
+	    # type Direction = "up" | "down" | "left" | "right";
+	    # ```
+        #
+        # Default: false
+        enums_as_union_types: false
+
+        # Associates package names to their import path.
+        # Default: {}
+        packages_import_map:
+            'common': '@org/common'
+
+        # List of directories containing templates describing files to be added
+        # to the generated output.
+        extra_files_templates:
+          - '%__config_dir%/templates/typescript/extra'
+
+        # List of directories containing templates defining blocks used to
+        # override parts of builders/types/....
+        overrides_templates:
+          - '%__config_dir%/templates/typescript/overrides'
+```
 
 ## Transformations
 
