@@ -41,7 +41,6 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
                 text: "grafanacloud-potatopi-prom",
                 value: "grafanacloud-prom",
             })
-            .build() // TODO
     )
     // "Instance" variable
     .withVariable(
@@ -61,7 +60,6 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
                 value: "potato"
             })
             .sort(VariableSort.Disabled)
-            .build()
     )
 
     .elements({
