@@ -14,6 +14,11 @@ builders:
   - omit: { by_object: DynamicConfigValue }
   - omit: { by_object: Threshold }
 
+  - omit: { by_object: ValueMap }
+  - omit: { by_object: RangeMap }
+  - omit: { by_object: RegexMap }
+  - omit: { by_object: SpecialValueMap }
+
   # No need for builders for structs generated from a disjunction
   - omit: { generated_from_disjunction: true }
 
