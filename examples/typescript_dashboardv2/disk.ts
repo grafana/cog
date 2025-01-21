@@ -6,13 +6,11 @@ import {
     TableFooterOptionsBuilder
 } from "../../generated/typescript/src/common";
 import {
-    DataTransformerConfigBuilder,
     PanelBuilder,
     QueryGroupBuilder,
     TargetBuilder,
     ThresholdsConfigBuilder,
-    ThresholdsMode,
-    TransformationKindBuilder
+    ThresholdsMode, TransformationBuilder,
 } from "../../generated/typescript/src/dashboard";
 
 export const diskIOTimeseries = (): PanelBuilder => {
@@ -91,95 +89,88 @@ export const diskSpaceUsageTable = (): PanelBuilder => {
                 new TargetBuilder().query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "B")),
             ])
             // TODO: transformations are very clunky
-            .transformation(new TransformationKindBuilder()
+            .transformation(new TransformationBuilder()
                 .kind("groupBy")
-                .spec(new DataTransformerConfigBuilder()
-                    .id("groupBy")
-                    .options({
-                        fields: {
-                            "Value #A": {
-                                aggregations: ["lastNotNull"],
-                                operation: "aggregate"
-                            },
-                            "Value #B": {
-                                aggregations: ["lastNotNull"],
-                                operation: "aggregate"
-                            },
-                            mountpoint: {
-                                aggregations: [],
-                                operation: "groupby"
-                            }
+                .id("groupBy")
+                .options({
+                    fields: {
+                        "Value #A": {
+                            aggregations: ["lastNotNull"],
+                            operation: "aggregate"
+                        },
+                        "Value #B": {
+                            aggregations: ["lastNotNull"],
+                            operation: "aggregate"
+                        },
+                        mountpoint: {
+                            aggregations: [],
+                            operation: "groupby"
                         }
-                    })
-                )
+                    }
+                })
             )
-            .transformation(new TransformationKindBuilder()
+            .transformation(new TransformationBuilder()
                 .kind("merge")
-                .spec(new DataTransformerConfigBuilder()
-                    .id("merge")
-                    .options({})
-                )
+                .id("merge")
+                .options({})
             )
-            .transformation(new TransformationKindBuilder()
+            .transformation(new TransformationBuilder()
+                .kind("merge")
+                .id("merge")
+                .options({})
+            )
+            .transformation(new TransformationBuilder()
+                .kind("calculateField") // is `kind` the type of transformation?
+                .id("calculateField") // should this be different from `kind`?
+                .options({
+                    alias: "Used",
+                    binary: {
+                        left: "Value #A (lastNotNull)",
+                        operator: "-",
+                        reducer: "sum",
+                        right: "Value #B (lastNotNull)"
+                    },
+                    mode: "binary",
+                    reduce: {reducer: "sum"}
+                })
+            )
+            .transformation(new TransformationBuilder()
                 .kind("calculateField")
-                .spec(new DataTransformerConfigBuilder()
-                    .id("calculateField")
-                    .options({
-                        alias: "Used",
-                        binary: {
-                            left: "Value #A (lastNotNull)",
-                            operator: "-",
-                            reducer: "sum",
-                            right: "Value #B (lastNotNull)"
-                        },
-                        mode: "binary",
-                        reduce: {reducer: "sum"}
-                    })
-                )
+                .id("calculateField")
+                .options({
+                    alias: "Used, %",
+                    binary: {
+                        left: "Used",
+                        operator: "/",
+                        reducer: "sum",
+                        right: "Value #A (lastNotNull)"
+                    },
+                    mode: "binary",
+                    reduce: {"reducer": "sum"}
+                })
             )
-            .transformation(new TransformationKindBuilder()
-                .kind("calculateField")
-                .spec(new DataTransformerConfigBuilder()
-                    .id("calculateField")
-                    .options({
-                        alias: "Used, %",
-                        binary: {
-                            left: "Used",
-                            operator: "/",
-                            reducer: "sum",
-                            right: "Value #A (lastNotNull)"
-                        },
-                        mode: "binary",
-                        reduce: {"reducer": "sum"}
-                    })
-                )
-            )
-            .transformation(new TransformationKindBuilder()
+            .transformation(new TransformationBuilder()
                 .kind("organize")
-                .spec(new DataTransformerConfigBuilder()
-                    .id("organize")
-                    .options({
-                        excludeByName: {},
-                        indexByName: {},
-                        renameByName: {
-                            "Value #A (lastNotNull)": "Size",
-                            "Value #B (lastNotNull)": "Available",
-                            mountpoint: "Mounted on"
-                        }
-                    })
-                )
+                .id("organize")
+                .options({
+                    excludeByName: {},
+                    indexByName: {},
+                    renameByName: {
+                        "Value #A (lastNotNull)": "Size",
+                        "Value #B (lastNotNull)": "Available",
+                        mountpoint: "Mounted on"
+                    }
+                })
             )
-            .transformation(new TransformationKindBuilder()
+            .transformation(new TransformationBuilder()
                 .kind("sortBy")
-                .spec(new DataTransformerConfigBuilder()
-                    .id("sortBy")
-                    .options({
-                        fields: {},
-                        sort: [
-                            {field: "Mounted on"}
-                        ]
-                    })
-                )
+                .id("sortBy")
+                .options({
+                    fields: {},
+                    sort: [
+                        {field: "Mounted on"}
+                    ]
+                })
             )
         );
 };

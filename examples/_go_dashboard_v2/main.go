@@ -59,18 +59,16 @@ func dashboardBuilder() []byte {
 					RefId("A"), // this field is also present in dataquery schemas
 				).
 				// TODO: simplify this
-				Transformation(dashboard.NewTransformationKindBuilder().
+				Transformation(dashboard.NewTransformationBuilder().
 					Kind("transformation ID. eg: `sortBy`").
-					Spec(dashboard.NewDataTransformerConfigBuilder().
-						Id("what's this ID?").
-						Topic(common.DataTopicSeries).
-						Options(map[string]any{
-							"fields": map[string]any{},
-							"sort": []map[string]any{
-								{"field": "Mounted on"},
-							},
-						}),
-					),
+					Id("what's this ID?").
+					Topic(common.DataTopicSeries).
+					Options(map[string]any{
+						"fields": map[string]any{},
+						"sort": []map[string]any{
+							{"field": "Mounted on"},
+						},
+					}),
 				),
 			),
 		).

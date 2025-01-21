@@ -74,6 +74,19 @@ builders:
         "spec",
       ]
 
+  ###################
+  # Transformations #
+  ###################
+
+  - merge_into:
+      source: DataTransformerConfig
+      destination: TransformationKind
+      under_path: spec
+  - omit: { by_object: DataTransformerConfig }
+  - rename:
+      by_object: TransformationKind
+      as: Transformation
+
   ##############
   # Dashboards #
   ##############
@@ -181,6 +194,12 @@ options:
       as: transformation
   - array_to_append:
       by_name: QueryGroupKind.transformation
+
+  ###################
+  # Transformations #
+  ###################
+
+  - omit: { by_builder: Transformation.spec }
 
   ##########
   # Panels #
