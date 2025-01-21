@@ -27,15 +27,12 @@ func TypeResolvingTemplateHelpers(context languages.Context) template.FuncMap {
 		"resolvesToDisjunction": func(typeDef ast.Type) bool {
 			return context.ResolveRefs(typeDef).IsDisjunction()
 		},
+		"resolvesToBuilder": context.ResolveToBuilder,
+		"resolveRefs":       context.ResolveRefs,
 		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 			_, found := context.ResolveToComposableSlot(typeDef)
 			return found
 		},
-		"resolvesToBuilder": func(typeDef ast.Type) bool {
-			_, found := context.ResolveAsBuilder(typeDef)
-			return found
-		},
-		"resolveRefs": context.ResolveRefs,
 	}
 }
 

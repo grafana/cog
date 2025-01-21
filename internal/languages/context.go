@@ -50,6 +50,11 @@ func (context *Context) ResolveAsBuilder(def ast.Type) (ast.Builder, bool) {
 		return ast.Builder{}, false
 	}
 
+	resolvedRef := context.ResolveRefs(def)
+	if resolvedRef.IsDisjunction() {
+		return context.ResolveAsBuilder(resolvedRef)
+	}
+
 	ref := def.AsRef()
 	return context.Builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
 }
