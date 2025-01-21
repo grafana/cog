@@ -12,6 +12,7 @@ builders:
   - omit: { by_object: DashboardFieldConfigSourceOverrides }
   - omit: { by_object: MatcherConfig }
   - omit: { by_object: DynamicConfigValue }
+  - omit: { by_object: Threshold }
 
   # No need for builders for structs generated from a disjunction
   - omit: { generated_from_disjunction: true }
@@ -207,3 +208,10 @@ options:
       as: override
   - array_to_append:
       by_name: VizConfigKind.override
+
+  # Append a single variable instead forcing to define all of them at once
+  - duplicate:
+      by_builder: Dashboard.variables
+      as: withVariable
+  - array_to_append:
+      by_builder: Dashboard.withVariable

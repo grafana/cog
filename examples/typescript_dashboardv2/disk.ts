@@ -1,0 +1,185 @@
+import {VisualizationBuilder as TableVizBuilder} from "../../generated/typescript/src/table";
+import {basicPrometheusQuery, defaultTimeseries, tablePrometheusQuery} from "./common";
+import {
+    FieldTextAlignment,
+    TableCellHeight,
+    TableFooterOptionsBuilder
+} from "../../generated/typescript/src/common";
+import {
+    DataTransformerConfigBuilder,
+    PanelBuilder,
+    QueryGroupBuilder,
+    TargetBuilder,
+    ThresholdsConfigBuilder,
+    ThresholdsMode,
+    TransformationKindBuilder
+} from "../../generated/typescript/src/dashboard";
+
+export const diskIOTimeseries = (): PanelBuilder => {
+    return new PanelBuilder()
+        .title("Disk I/O")
+        .visualization(defaultTimeseries()
+            .fillOpacity(0)
+            .unit("Bps")
+            .thresholds(
+                new ThresholdsConfigBuilder()
+                    .mode(ThresholdsMode.Absolute)
+                    .steps([
+                        {value: null, color: "green"},
+                        {value: 80.0, color: "red"},
+                    ])
+            )
+            .override({
+                matcher: {id: "byRegexp", options: "/ io time/"},
+                properties: [
+                    {id: "unit", value: "percentunit"},
+                ]
+            })
+        )
+        .data(new QueryGroupBuilder()
+            .targets([
+                new TargetBuilder().query(basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read")),
+                new TargetBuilder().query(basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written")),
+                new TargetBuilder().query(basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time")),
+            ])
+        );
+};
+
+export const diskSpaceUsageTable = (): PanelBuilder => {
+    return new PanelBuilder()
+        .title("Disk Space Usage")
+        .visualization(new TableVizBuilder()
+            .align(FieldTextAlignment.Auto)
+            .cellOptions({type: "auto"})
+            .cellHeight(TableCellHeight.Sm)
+            .footer(new TableFooterOptionsBuilder().countRows(false).reducer(["sum"]))
+            .unit("decbytes")
+
+            // Overrides configuration
+            .override({
+                matcher: {id: "byName", options: "Mounted on"},
+                properties: [{id: "custom.width", value: 260}]
+            })
+            .override({
+                matcher: {id: "byName", options: "Size"},
+                properties: [{id: "custom.width", value: 93}]
+            })
+            .override({
+                matcher: {id: "byName", options: "Used"},
+                properties: [{id: "custom.width", value: 72}]
+            })
+            .override({
+                matcher: {id: "byName", options: "Available"},
+                properties: [{id: "custom.width", value: 88}]
+            })
+            .override({
+                matcher: {id: "byName", options: "Used, %"},
+                properties: [
+                    {id: "unit", value: "percentunit"},
+                    {
+                        id: "custom.cellOptions",
+                        value: {mode: "gradient", type: "gauge"}
+                    },
+                    {id: "max", value: 1},
+                    {id: "min", value: 0}
+                ]
+            })
+        )
+        .data(new QueryGroupBuilder()
+            .targets([
+                new TargetBuilder().query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "A")),
+                new TargetBuilder().query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "B")),
+            ])
+            // TODO: transformations are very clunky
+            .transformation(new TransformationKindBuilder()
+                .kind("groupBy")
+                .spec(new DataTransformerConfigBuilder()
+                    .id("groupBy")
+                    .options({
+                        fields: {
+                            "Value #A": {
+                                aggregations: ["lastNotNull"],
+                                operation: "aggregate"
+                            },
+                            "Value #B": {
+                                aggregations: ["lastNotNull"],
+                                operation: "aggregate"
+                            },
+                            mountpoint: {
+                                aggregations: [],
+                                operation: "groupby"
+                            }
+                        }
+                    })
+                )
+            )
+            .transformation(new TransformationKindBuilder()
+                .kind("merge")
+                .spec(new DataTransformerConfigBuilder()
+                    .id("merge")
+                    .options({})
+                )
+            )
+            .transformation(new TransformationKindBuilder()
+                .kind("calculateField")
+                .spec(new DataTransformerConfigBuilder()
+                    .id("calculateField")
+                    .options({
+                        alias: "Used",
+                        binary: {
+                            left: "Value #A (lastNotNull)",
+                            operator: "-",
+                            reducer: "sum",
+                            right: "Value #B (lastNotNull)"
+                        },
+                        mode: "binary",
+                        reduce: {reducer: "sum"}
+                    })
+                )
+            )
+            .transformation(new TransformationKindBuilder()
+                .kind("calculateField")
+                .spec(new DataTransformerConfigBuilder()
+                    .id("calculateField")
+                    .options({
+                        alias: "Used, %",
+                        binary: {
+                            left: "Used",
+                            operator: "/",
+                            reducer: "sum",
+                            right: "Value #A (lastNotNull)"
+                        },
+                        mode: "binary",
+                        reduce: {"reducer": "sum"}
+                    })
+                )
+            )
+            .transformation(new TransformationKindBuilder()
+                .kind("organize")
+                .spec(new DataTransformerConfigBuilder()
+                    .id("organize")
+                    .options({
+                        excludeByName: {},
+                        indexByName: {},
+                        renameByName: {
+                            "Value #A (lastNotNull)": "Size",
+                            "Value #B (lastNotNull)": "Available",
+                            mountpoint: "Mounted on"
+                        }
+                    })
+                )
+            )
+            .transformation(new TransformationKindBuilder()
+                .kind("sortBy")
+                .spec(new DataTransformerConfigBuilder()
+                    .id("sortBy")
+                    .options({
+                        fields: {},
+                        sort: [
+                            {field: "Mounted on"}
+                        ]
+                    })
+                )
+            )
+        );
+};
