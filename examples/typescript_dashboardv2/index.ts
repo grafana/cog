@@ -45,7 +45,6 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
     // "Instance" variable
     .withVariable(
         new QueryVariableBuilder("instance")
-            .name("instance")
             .label("Instance")
             .hide(VariableHide.DontHide)
             .refresh(VariableRefresh.OnTimeRangeChanged)
@@ -90,7 +89,6 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
             .element(new ElementReferenceBuilder().name("cpu_usage"))
         )
     )
-
 ;
 
 console.log(JSON.stringify(builder.build(), null, 2));
