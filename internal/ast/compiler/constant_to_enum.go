@@ -27,16 +27,14 @@ func (pass *ConstantToEnum) processObject(_ *Visitor, _ *ast.Schema, object ast.
 		return object, nil
 	}
 
-	trailMessage := "ConstantToEnum"
-
 	object.Type = ast.NewEnum([]ast.EnumValue{
 		{
-			Type:  object.Type,
+			Type:  ast.String(),
 			Name:  object.Type.Scalar.Value.(string),
 			Value: object.Type.Scalar.Value.(string),
 		},
 	})
-	object.AddToPassesTrail(trailMessage)
+	object.AddToPassesTrail("ConstantToEnum")
 
 	return object, nil
 }
