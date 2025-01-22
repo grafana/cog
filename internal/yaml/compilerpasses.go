@@ -27,6 +27,7 @@ type CompilerPass struct {
 	SchemaSetEntryPoint      *SchemaSetEntryPoint      `yaml:"schema_set_entry_point"`
 	DuplicateObject          *DuplicateObject          `yaml:"duplicate_object"`
 	TrimEnumValues           *TrimEnumValues           `yaml:"trim_enum_values"`
+	ConstantToEnum           *ConstantToEnum           `yaml:"constant_to_enum"`
 
 	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 
@@ -91,6 +92,12 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.DuplicateObject != nil {
 		return pass.DuplicateObject.AsCompilerPass()
 	}
+	if pass.TrimEnumValues != nil {
+		return pass.TrimEnumValues.AsCompilerPass()
+	}
+	if pass.ConstantToEnum != nil {
+		return pass.ConstantToEnum.AsCompilerPass()
+	}
 
 	if pass.AnonymousStructsToNamed != nil {
 		return pass.AnonymousStructsToNamed.AsCompilerPass()
@@ -107,9 +114,6 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DisjunctionWithConstantToDefault != nil {
 		return pass.DisjunctionWithConstantToDefault.AsCompilerPass()
-	}
-	if pass.TrimEnumValues != nil {
-		return pass.TrimEnumValues.AsCompilerPass()
 	}
 
 	return nil, fmt.Errorf("empty compiler pass")
@@ -429,4 +433,23 @@ type TrimEnumValues struct{}
 
 func (pass TrimEnumValues) AsCompilerPass() (*compiler.TrimEnumValues, error) {
 	return &compiler.TrimEnumValues{}, nil
+}
+
+type ConstantToEnum struct {
+	Objects []string // Expected format: [package].[object]
+}
+
+func (pass ConstantToEnum) AsCompilerPass() (*compiler.ConstantToEnum, error) {
+	objectRefs := make([]compiler.ObjectReference, 0, len(pass.Objects))
+
+	for _, ref := range pass.Objects {
+		objectRef, err := compiler.ObjectReferenceFromString(ref)
+		if err != nil {
+			return nil, err
+		}
+
+		objectRefs = append(objectRefs, objectRef)
+	}
+
+	return &compiler.ConstantToEnum{Objects: objectRefs}, nil
 }
