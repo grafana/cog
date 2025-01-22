@@ -66,10 +66,14 @@ output:
           - '%__config_dir%/templates/go/overrides'
     #- jsonschema: {}
     #- openapi: {}
-    #- php:
-    #    namespace_root: '%php_namespace_root%'
-    #    #builder_templates:
-    #    #  - '%__config_dir%/templates/php'
+    - php:
+        namespace_root: '%php_namespace_root%'
+        extra_files_templates:
+          - '%__config_dir%/templates/php/extra'
+        overrides_templates:
+          - '%__config_dir%/templates/php/overrides'
+        #builder_templates:
+        #  - '%__config_dir%/templates/php'
     #- python:
     #    path_prefix: grafana_foundation_sdk
     #    #builder_templates:
