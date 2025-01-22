@@ -5,6 +5,11 @@ passes:
   # Dashboard #
   #############
 
+  # Some future-proofing
+  - constant_to_enum:
+      objects:
+        - dashboard.RepeatMode
+
   # To make our composability veneers shenanigans work
   - retype_field:
       field: dashboard.VizConfigSpec.options
