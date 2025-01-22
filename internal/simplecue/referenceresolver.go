@@ -9,7 +9,8 @@ import (
 )
 
 type referenceResolverConfig struct {
-	Libraries []LibraryInclude
+	SchemaPackage string
+	Libraries     []LibraryInclude
 }
 
 type referenceResolver struct {
@@ -26,6 +27,15 @@ func newReferenceResolver(root cue.Value, config referenceResolverConfig) *refer
 
 	resolver.importsAliasMap = resolver.buildImportsAliasMap(root)
 	resolver.librariesMap = resolver.buildLibrariesMap(config.Libraries)
+
+	// map the package originally declared in the CUE file to the one configured by the user
+	if fileAst, ok := root.Source().(*cueast.File); ok {
+		for _, decl := range fileAst.Decls {
+			if pkgDecl, ok := decl.(*cueast.Package); ok {
+				resolver.importsAliasMap[pkgDecl.Name.String()] = config.SchemaPackage
+			}
+		}
+	}
 
 	return resolver
 }

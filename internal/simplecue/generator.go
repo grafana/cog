@@ -75,7 +75,8 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 	g := &generator{
 		schema: ast.NewSchema(c.Package, c.SchemaMetadata),
 		refResolver: newReferenceResolver(val, referenceResolverConfig{
-			Libraries: c.Libraries,
+			Libraries:     c.Libraries,
+			SchemaPackage: c.Package,
 		}),
 		rootVal:    val,
 		rootPath:   val.Path(),
