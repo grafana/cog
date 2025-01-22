@@ -34,6 +34,33 @@ func TestGenerateAST(t *testing.T) {
 	})
 }
 
+func TestGenerateAST_withPackageOverride(t *testing.T) {
+	req := require.New(t)
+	schema := `
+package foo
+
+#Ref: string
+Container: {
+  ref: #Ref
+}
+`
+
+	cueVal := cuecontext.New().CompileString(schema)
+
+	schemaAst, err := GenerateAST(cueVal, Config{Package: "grafanatest"})
+	req.NoError(err)
+	require.NotNil(t, schemaAst)
+
+	objects := []ast.Object{
+		ast.NewObject("grafanatest", "Ref", ast.String()),
+		ast.NewObject("grafanatest", "Container", ast.NewStruct(
+			ast.NewStructField("ref", ast.NewRef("grafanatest", "Ref"), ast.Required()),
+		)),
+	}
+
+	req.Equal(testutils.ObjectsMap(objects...), schemaAst.Objects)
+}
+
 func TestGenerateAST_withOutOfRootReference(t *testing.T) {
 	req := require.New(t)
 	schema := `

@@ -169,7 +169,7 @@
               "Kind": "ref",
               "Nullable": false,
               "Ref": {
-                "ReferredPkg": "test",
+                "ReferredPkg": "grafanatest",
                 "ReferredType": "HelloMsg"
               }
             },
@@ -177,7 +177,7 @@
               "Kind": "ref",
               "Nullable": false,
               "Ref": {
-                "ReferredPkg": "test",
+                "ReferredPkg": "grafanatest",
                 "ReferredType": "ByeMsg"
               }
             }
@@ -200,7 +200,7 @@
               "Kind": "ref",
               "Nullable": false,
               "Ref": {
-                "ReferredPkg": "test",
+                "ReferredPkg": "grafanatest",
                 "ReferredType": "ChitChat"
               }
             },
@@ -208,7 +208,7 @@
               "Kind": "ref",
               "Nullable": false,
               "Ref": {
-                "ReferredPkg": "test",
+                "ReferredPkg": "grafanatest",
                 "ReferredType": "QuestionMsg"
               }
             },
@@ -216,7 +216,7 @@
               "Kind": "ref",
               "Nullable": false,
               "Ref": {
-                "ReferredPkg": "test",
+                "ReferredPkg": "grafanatest",
                 "ReferredType": "AnswerMsg"
               }
             }
