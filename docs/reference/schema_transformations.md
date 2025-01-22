@@ -62,6 +62,20 @@ Will become:
 anonymous_structs_to_named: {}
 ```
 
+## `constant_to_enum`
+
+ConstantToEnum turns `string` constants into an enum definition with a
+single member.
+This is useful to "future-proof" a schema where a type can have a single
+value for now but is expected to allow more in the future.
+
+### Usage
+
+```yaml
+constant_to_enum:
+  objects: []string
+```
+
 ## `dataquery_identification`
 
 N/A

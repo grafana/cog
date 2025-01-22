@@ -6,6 +6,10 @@ import (
 
 var _ Pass = (*ConstantToEnum)(nil)
 
+// ConstantToEnum turns `string` constants into an enum definition with a
+// single member.
+// This is useful to "future-proof" a schema where a type can have a single
+// value for now but is expected to allow more in the future.
 type ConstantToEnum struct {
 	Objects ObjectReferences
 }

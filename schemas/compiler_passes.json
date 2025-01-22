@@ -338,6 +338,9 @@
         "trim_enum_values": {
           "$ref": "#/$defs/YamlTrimEnumValues"
         },
+        "constant_to_enum": {
+          "$ref": "#/$defs/YamlConstantToEnum"
+        },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
         },
@@ -352,6 +355,19 @@
         },
         "disjunction_with_constant_to_default": {
           "$ref": "#/$defs/YamlDisjunctionWithConstantToDefault"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlConstantToEnum": {
+      "properties": {
+        "objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object]"
         }
       },
       "additionalProperties": false,
