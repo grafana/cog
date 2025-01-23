@@ -11,7 +11,7 @@ type CompilerPass struct {
 	EntrypointIdentification *EntrypointIdentification `yaml:"entrypoint_identification"`
 	DataqueryIdentification  *DataqueryIdentification  `yaml:"dataquery_identification"`
 	Unspec                   *Unspec                   `yaml:"unspec"`
-	SetDatasourceToDataquery *SetDatasourceToDataquery `yaml:"set_datasource_to_dataquery"`
+	ReplaceReference         *ReplaceReference         `yaml:"replace_reference"`
 	FieldsSetDefault         *FieldsSetDefault         `yaml:"fields_set_default"`
 	FieldsSetRequired        *FieldsSetRequired        `yaml:"fields_set_required"`
 	FieldsSetNotRequired     *FieldsSetNotRequired     `yaml:"fields_set_not_required"`
@@ -47,8 +47,8 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.Unspec != nil {
 		return pass.Unspec.AsCompilerPass(), nil
 	}
-	if pass.SetDatasourceToDataquery != nil {
-		return pass.SetDatasourceToDataquery.AsCompilerPass(), nil
+	if pass.ReplaceReference != nil {
+		return pass.ReplaceReference.AsCompilerPass()
 	}
 	if pass.FieldsSetDefault != nil {
 		return pass.FieldsSetDefault.AsCompilerPass()
@@ -140,10 +140,26 @@ func (pass Unspec) AsCompilerPass() *compiler.Unspec {
 	return &compiler.Unspec{}
 }
 
-type SetDatasourceToDataquery struct{}
+type ReplaceReference struct {
+	From string // Expected format: [package].[object]
+	To   string // Expected format: [package].[object]
+}
 
-func (pass SetDatasourceToDataquery) AsCompilerPass() *compiler.SetDatasourceToDataquery {
-	return &compiler.SetDatasourceToDataquery{}
+func (pass ReplaceReference) AsCompilerPass() (*compiler.ReplaceReference, error) {
+	fromRef, err := compiler.ObjectReferenceFromString(pass.From)
+	if err != nil {
+		return nil, err
+	}
+
+	toRef, err := compiler.ObjectReferenceFromString(pass.To)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.ReplaceReference{
+		From: fromRef,
+		To:   toRef,
+	}, nil
 }
 
 type FieldsSetDefault struct {
