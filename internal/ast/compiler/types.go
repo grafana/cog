@@ -7,6 +7,18 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
+type ObjectReferences []ObjectReference
+
+func (refs ObjectReferences) Matches(object ast.Object) bool {
+	for _, ref := range refs {
+		if ref.Matches(object) {
+			return true
+		}
+	}
+
+	return false
+}
+
 type ObjectReference struct {
 	Package string
 	Object  string
