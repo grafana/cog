@@ -290,8 +290,8 @@
         "unspec": {
           "$ref": "#/$defs/YamlUnspec"
         },
-        "set_datasource_to_dataquery": {
-          "$ref": "#/$defs/YamlSetDatasourceToDataquery"
+        "replace_reference": {
+          "$ref": "#/$defs/YamlReplaceReference"
         },
         "fields_set_default": {
           "$ref": "#/$defs/YamlFieldsSetDefault"
@@ -510,6 +510,20 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlReplaceReference": {
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "to": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlRetypeField": {
       "properties": {
         "field": {
@@ -569,11 +583,6 @@
           "type": "string"
         }
       },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlSetDatasourceToDataquery": {
-      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },
