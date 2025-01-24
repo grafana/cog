@@ -48,6 +48,7 @@ jobs:
 
           devbox run ./config/foundation-sdk/scripts/release-version.sh next
         env:
+          CODEGEN_PIPELINE_CONFIG: ./config/foundation_sdk.dev.yaml
           WORKSPACE_PATH: /tmp/foundation-workspace-current
           CLEANUP_WORKSPACE: 'no'
           SKIP_VALIDATION: 'yes'
@@ -74,6 +75,7 @@ jobs:
 
           devbox run ./config/foundation-sdk/scripts/release-version.sh next
         env:
+          CODEGEN_PIPELINE_CONFIG: ./config/foundation_sdk.dev.yaml
           WORKSPACE_PATH: /tmp/foundation-workspace-main
           CLEANUP_WORKSPACE: 'no'
           SKIP_VALIDATION: 'yes'
@@ -85,12 +87,12 @@ jobs:
           cat <<'EOF' > preview.md
           <!-- grafana-foundation-sdk-diff-preview-marker -->
           
-          **Note:** the diff show code changes that would be introduced by this PR to the Foundation SDK. Changes already on `main` are excluded.
+          **Note:** the diff show code changes that would be introduced by this PR to the output of the `config/foundation_sdk.dev.yaml` codegen pipeline (dev version of the Foundation SDK).
           
           <details>
           <summary>
           
-          ### 🔎 Changes to `grafana-foundation-sdk@next+cog-v0.0.x`
+          ### 🔎 Changes to `config/foundation_sdk.dev.yaml`
           
           </summary>
           
