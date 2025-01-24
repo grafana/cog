@@ -61,7 +61,8 @@ class Dashboard(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboard])
         will be expanded to cog.Builder<DashboardLink> | string
         """
             
-        single_link_or_string_resource = single_link_or_string.build()
+        single_link_or_string_resource = single_link_or_string.build() if hasattr(single_link_or_string, 'build') and callable(single_link_or_string.build) else single_link_or_string
+        assert isinstance(single_link_or_string_resource, builder_delegation_in_disjunction.DashboardLink) or isinstance(single_link_or_string_resource, str)
         self._internal.single_link_or_string = single_link_or_string_resource
     
         return self
@@ -71,7 +72,7 @@ class Dashboard(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboard])
         will be expanded to [](cog.Builder<DashboardLink> | string)
         """
             
-        links_or_strings_resources = [r1.build() for r1 in links_or_strings]
+        links_or_strings_resources = [r1.build() if hasattr(r1, 'build') and callable(r1.build) else r1 for r1 in links_or_strings]
         self._internal.links_or_strings = links_or_strings_resources
     
         return self

@@ -24,6 +24,9 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 		template.Funcs(formattingTemplateFuncs()),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
+			"isDisjunctionOfBuilders": func(_ ast.Type) string {
+				panic("isDisjunctionOfBuilders() needs to be overridden by a jenny")
+			},
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
