@@ -178,9 +178,14 @@ func (pipeline *Pipeline) languageOutputDir(relativeToDir string, language strin
 	return strings.ReplaceAll(outputDir, "%l", language), nil
 }
 
+// LoadSchemas parses the schemas described by the pipeline and  applies common
+// // transformations.
+// Note: input-specific transformations are applied.
 func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	var allSchemas ast.Schemas
+	var err error
 
+	// Parse inputs
 	for _, input := range pipeline.Inputs {
 		schemas, err := input.LoadSchemas(ctx)
 		if err != nil {
@@ -194,7 +199,18 @@ func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) 
 		return nil, nil
 	}
 
-	return allSchemas.Consolidate()
+	allSchemas, err = allSchemas.Consolidate()
+	if err != nil {
+		return nil, err
+	}
+
+	// Apply common and final compiler passes
+	commonPasses, err := pipeline.commonPasses()
+	if err != nil {
+		return nil, err
+	}
+
+	return commonPasses.Concat(pipeline.finalPasses()).Process(allSchemas)
 }
 
 func (pipeline *Pipeline) outputLanguages() (languages.Languages, error) {
