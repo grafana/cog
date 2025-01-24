@@ -21,7 +21,12 @@
 {{- with .Value.Argument }}
 {{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
 {{- $builtResultSuffix := ternary "_resources" "_resource" (or .Type.IsArray .Type.IsMap) }}
-{{ .Name|formatIdentifier }}{{ $builtResultSuffix }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (formatIdentifier .Name) "Depth" 1) }}
+{{- $name := print (.Name|formatIdentifier) $builtResultSuffix }}
+{{ $name }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (formatIdentifier .Name) "Depth" 1) }}
+{{- if and .Type.IsDisjunction (not (isDisjunctionOfBuilders .Type)) }}
+{{ $branchesCount := sub1 (len .Type.Disjunction.Branches) -}}
+assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name }}, {{ $branch|formatRawType}}){{ if ne $i $branchesCount }} or {{ end }}{{ end -}}
+{{- end -}}
 {{- end }}
 {{- end }}
 {{- with .Value.Envelope }}
@@ -36,6 +41,8 @@
 [{{ template "unfold_builders" (dict "InputType" .InputType.Array.ValueType "InputVar" (print "r" .Depth ) "Depth" (add1 .Depth)) }} for r{{ .Depth }} in {{ .InputVar }}]
 {{- else if .InputType.IsMap -}}
 { key{{.Depth}}: {{ template "unfold_builders" (dict "InputType" .InputType.Map.ValueType "InputVar" (print "val" .Depth ) "Depth" (add1 .Depth)) }} for (key{{.Depth}}, val{{ .Depth }}) in {{ .InputVar }}.items() }
+{{- else if and .InputType.IsDisjunction (not (isDisjunctionOfBuilders .InputType)) -}}
+{{ .InputVar }}.build() if hasattr({{ .InputVar }}, 'build') and callable({{ .InputVar }}.build) else {{ .InputVar }}
 {{- else -}}
 {{ .InputVar }}.build()
 {{- end -}}

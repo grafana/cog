@@ -87,8 +87,9 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	return jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(map[string]any{
-			"formatType":    jenny.typeFormatter.formatType,
-			"formatRawType": jenny.rawTypeFormatter.formatType,
+			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
+			"formatType":              jenny.typeFormatter.formatType,
+			"formatRawType":           jenny.rawTypeFormatter.formatType,
 			"formatRawTypeNotNullable": func(def ast.Type) string {
 				typeDef := def.DeepCopy()
 				typeDef.Nullable = false
