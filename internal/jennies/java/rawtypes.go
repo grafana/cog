@@ -216,12 +216,13 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 }
 
 func (jenny RawTypes) formatReference(pkg string, identifier string, object ast.Object) ([]byte, error) {
-	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
+	ref := object.Type.AsRef()
+	reference := fmt.Sprintf("%s.%s", jenny.config.formatPackage(formatPackageName(ref.ReferredPkg)), formatObjectName(ref.ReferredType))
 
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:    jenny.config.formatPackage(pkg),
 		Imports:    jenny.imports,
-		Name:       tools.UpperCamelCase(object.Name),
+		Name:       formatObjectName(object.Name),
 		Extends:    []string{reference},
 		Comments:   object.Comments,
 		Variant:    jenny.getVariant(object.Type),
