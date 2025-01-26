@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -32,6 +33,9 @@ func (pass *HintObject) processObject(_ *Visitor, _ *ast.Schema, object ast.Obje
 		object.Type.Hints[hint] = val
 		hintsTrail = append(hintsTrail, fmt.Sprintf("%s=%v", hint, val))
 	}
+
+	// to ensure a consistent trail
+	sort.Strings(hintsTrail)
 
 	object.AddToPassesTrail(fmt.Sprintf("HintObject[%s]", strings.Join(hintsTrail, ", ")))
 
