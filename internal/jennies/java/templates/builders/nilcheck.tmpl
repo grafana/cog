@@ -1,13 +1,6 @@
 {{- define "nil_check" }}
-        {{- $castPath := shouldCastNilCheck .Path }}
-        {{- if $castPath.IsNilChecked }}
-        {{ $castPath.Class }} {{ $castPath.Value | lowerCamelCase }}Resource = ({{ $castPath.Class }}) this.internal.{{ $castPath.Path }};
-        if ({{ $castPath.Value | lowerCamelCase }}Resource.{{ .Path|formatPath }} == null) {
-            {{ $castPath.Value | lowerCamelCase }}Resource.{{ .Path|formatPath }} = {{ .EmptyValueType|emptyValueForType }};
-        }
-        {{- else }}
-		if (this.internal.{{ .Path|formatPath }} == null) {
-			this.internal.{{ .Path|formatPath }} = {{ .EmptyValueType|emptyValueForType }};
+        {{- $path := formatAssignmentPath "this.internal" .Path }}
+		if ({{ $path }} == null) {
+			{{ $path }} = {{ .EmptyValueType|emptyValueForType }};
 		}
-		{{- end }}
 {{- end }}
