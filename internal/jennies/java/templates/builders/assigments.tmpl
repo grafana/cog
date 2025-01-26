@@ -67,6 +67,11 @@
 {{- define "assignment_method" }}
     {{ $path := formatAssignmentPath "this.internal" .Path }}
         {{- if eq .Method "direct" }}{{ $path }} = {{ .Value }};{{ end }}
-        {{- if eq .Method "index" }}{{ $path }} = {{ .Value }};{{ end }}
+        {{- if eq .Method "index" }}
+            {{ $index := .Path.Last.Index }}
+            {{ $path = formatAssignmentPath "this.internal" .Path.RemoveLast }}
+            {{ $path }}.put({{ $index|formatPathIndex }}, {{ .Value }});
+        {{ end }}
+        {{- if and (eq .Method "index") (.Path.Last.Type.IsArray) }}{{ $path }} = {{ .Value }};{{ end }}
         {{- if eq .Method "append" }}{{ $path }}.add({{ .Value }});{{ end -}}
 {{- end }}

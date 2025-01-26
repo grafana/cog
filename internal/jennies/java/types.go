@@ -207,6 +207,14 @@ func (tf *typeFormatter) formatFieldPath(fieldPath ast.Path) string {
 	return strings.Join(parts, ".")
 }
 
+func (tf *typeFormatter) formatPathIndex(pathIndex *ast.PathIndex) string {
+	if pathIndex.Constant != nil {
+		return fmt.Sprintf("%#v", pathIndex.Constant)
+	}
+
+	return formatArgName(pathIndex.Argument.Name)
+}
+
 // formatAssignmentPath generates the pad to assign the value. When the value is a generic one (Object) like Custom or FieldConfig
 // we should return until this pad to set the object to it.
 func (tf *typeFormatter) formatAssignmentPath(resourceRoot string, fieldPath ast.Path) string {
@@ -215,19 +223,11 @@ func (tf *typeFormatter) formatAssignmentPath(resourceRoot string, fieldPath ast
 	for i := range fieldPath {
 		output := fieldPath[i].Identifier
 		if !fieldPath[i].Root {
-			output = escapeVarName(tools.LowerCamelCase(output))
+			output = formatFieldName(output)
 		}
 
 		if fieldPath[i].Index != nil {
-			output += "["
-			if fieldPath[i].Index.Constant != nil {
-				output += fmt.Sprintf("%#v", fieldPath[i].Index.Constant)
-			} else {
-				output += escapeVarName(tools.LowerCamelCase(fieldPath[i].Index.Argument.Name))
-			}
-			output += "]"
-
-			path += output
+			path += output + "[" + tf.formatPathIndex(fieldPath[i].Index) + "]"
 			continue
 		}
 
