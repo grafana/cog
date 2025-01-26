@@ -247,14 +247,41 @@ func (tf *typeFormatter) formatAssignmentPath(resourceRoot string, fieldPath ast
 }
 
 func (tf *typeFormatter) formatRefType(destinationType ast.Type, value any) string {
-	if destinationType.IsRef() {
-		referredObj, found := tf.context.LocateObjectByRef(destinationType.AsRef())
-		if found && referredObj.Type.IsEnum() {
-			return tf.formatEnumValue(referredObj, value)
-		}
+	if !destinationType.IsRef() {
+		return fmt.Sprintf("%#v", value)
+	}
+
+	referredObj, found := tf.context.LocateObjectByRef(destinationType.AsRef())
+	if !found {
+		return fmt.Sprintf("%#v", value)
+	}
+
+	if referredObj.Type.IsEnum() {
+		return tf.formatEnumValue(referredObj, value)
+	}
+
+	if referredObj.Type.IsStructGeneratedFromDisjunction() {
+		return tf.formatDisjunctionValue(referredObj, value)
 	}
 
 	return fmt.Sprintf("%#v", value)
+}
+
+func (tf *typeFormatter) formatDisjunctionValue(object ast.Object, value any) string {
+	var field ast.StructField
+	for _, candidate := range object.Type.Struct.Fields {
+		if candidate.Type.AcceptsValue(value) {
+			field = candidate
+			break
+		}
+	}
+
+	if field.Name == "" {
+		return fmt.Sprintf("%#v", value)
+	}
+
+	tf.packageMapper(object.SelfRef.ReferredPkg, object.SelfRef.ReferredType)
+	return fmt.Sprintf("%s.create%s(%#v)", object.SelfRef.ReferredType, tools.UpperCamelCase(field.Name), value)
 }
 
 func (tf *typeFormatter) formatEnumValue(obj ast.Object, val any) string {
