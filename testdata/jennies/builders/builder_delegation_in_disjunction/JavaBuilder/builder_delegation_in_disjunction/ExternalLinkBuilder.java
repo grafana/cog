@@ -8,7 +8,7 @@ public class ExternalLinkBuilder implements cog.Builder<ExternalLink> {
         this.internal = new ExternalLink();
     }
     public ExternalLinkBuilder url(String url) {
-    this.internal.url = url;
+        this.internal.url = url;
         return this;
     }
     public ExternalLink build() {

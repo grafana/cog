@@ -8,12 +8,12 @@ public class NestedStructBuilder implements cog.Builder<NestedStruct> {
         this.internal = new NestedStruct();
     }
     public NestedStructBuilder stringVal(String stringVal) {
-    this.internal.stringVal = stringVal;
+        this.internal.stringVal = stringVal;
         return this;
     }
     
     public NestedStructBuilder intVal(Long intVal) {
-    this.internal.intVal = intVal;
+        this.internal.intVal = intVal;
         return this;
     }
     public NestedStruct build() {

@@ -8,7 +8,7 @@ public class PanelBuilder<T extends PanelBuilder<T>> implements cog.Builder<Pane
         this.internal = new Panel();
     }
     public T title(String title) {
-    this.internal.title = title;
+        this.internal.title = title;
         return (T) this;
     }
     public Panel build() {

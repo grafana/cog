@@ -8,12 +8,12 @@ public class DashboardLinkBuilder implements cog.Builder<DashboardLink> {
         this.internal = new DashboardLink();
     }
     public DashboardLinkBuilder title(String title) {
-    this.internal.title = title;
+        this.internal.title = title;
         return this;
     }
     
     public DashboardLinkBuilder url(String url) {
-    this.internal.url = url;
+        this.internal.url = url;
         return this;
     }
     public DashboardLink build() {

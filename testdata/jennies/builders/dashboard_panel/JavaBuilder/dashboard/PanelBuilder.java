@@ -8,7 +8,7 @@ public class PanelBuilder<T extends PanelBuilder<T>> implements cog.Builder<Pane
         this.internal = new Panel();
     }
     public T onlyFromThisDashboard(Boolean onlyFromThisDashboard) {
-    this.internal.onlyFromThisDashboard = onlyFromThisDashboard;
+        this.internal.onlyFromThisDashboard = onlyFromThisDashboard;
         return (T) this;
     }
     public Panel build() {

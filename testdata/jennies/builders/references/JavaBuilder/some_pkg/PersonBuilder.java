@@ -9,7 +9,7 @@ public class PersonBuilder implements cog.Builder<Person> {
         this.internal = new Person();
     }
     public PersonBuilder name(Name name) {
-    this.internal.name = name;
+        this.internal.name = name;
         return this;
     }
     public Person build() {

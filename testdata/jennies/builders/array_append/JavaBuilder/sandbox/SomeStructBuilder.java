@@ -12,7 +12,7 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
 		if (this.internal.tags == null) {
 			this.internal.tags = new LinkedList<>();
 		}
-    this.internal.tags.add(tags);
+        this.internal.tags.add(tags);
         return this;
     }
     public SomeStruct build() {
