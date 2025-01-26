@@ -11,9 +11,7 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
 		if (this.internal.config == null) {
 			this.internal.config = new known_any.Config();
 		}
-        known_any.Config configResource = (known_any.Config) this.internal.config;
-        configResource.title = title;
-    this.internal.config = configResource;
+    ((Config) this.internal.config).title = title;
         return this;
     }
     public SomeStruct build() {

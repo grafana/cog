@@ -19,22 +19,12 @@
 {{- end }}
 
 {{- define "assignment_setup" }}
-    {{- $castPath := formatCastValue $.Assignment.Path }}
-    {{- with .Value.Argument }}
-        {{- if not (eq $castPath.Value "") }}
-        {{ if not $castPath.IsNilChecked }}{{ $castPath.Class }} {{ $castPath.Value | lowerCamelCase }}Resource = ({{- $castPath.Class }}) this.internal.{{ $castPath.Path }};{{ end }}
-        {{ $castPath.Value | lowerCamelCase }}Resource.{{ lastPathIdentifier $.Assignment.Path }} = {{ .Name | lowerCamelCase }}{{ if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}.build(){{ end }};
-        {{- end }}
-    {{- end }}
     {{- with .Value.Envelope }}
         {{- range .Values }}
         {{- template "assignment_setup" (dict "Assignment" $.Assignment "Value" .Value) }}
         {{- end }}
 
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
-    {{- end }}
-    {{- if and (not (eq .Value.Constant nil)) (not (eq $castPath.Value "")) }}
-        {{ $castPath.Value | lowerCamelCase }}Resource.{{ lastPathIdentifier $.Assignment.Path }} = {{ .Value.Constant }};
     {{- end }}
     {{- $type := $.Assignment.Path.Last.Type }}
     {{- if and $type.IsMap (typeHasBuilder $type) }}
@@ -46,18 +36,11 @@
 {{- end }}
 
 {{- define "assignment_value" }}
-    {{- $castPath := formatCastValue $.Assignment.Path }}
     {{- if not (eq .Value.Constant nil) }}
-        {{- if not (eq $castPath.Value "") }}
-        {{- $castPath.Value | lowerCamelCase }}Resource
-        {{- else }}
         {{- formatRefType .Assignment.Path.Last.Type .Value.Constant }}
-        {{- end }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- if not (eq $castPath.Value "") }}
-            {{- $castPath.Value | lowerCamelCase }}Resource
-        {{- else if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
             {{- if .Type.IsMap }}
             {{- .Name | escapeVar | lowerCamelCase }}Resource
             {{- else }}
@@ -82,8 +65,8 @@
 {{- end }}
 
 {{- define "assignment_method" }}
-    {{ $path := formatAssignmentPath .Path }}
-        {{- if eq .Method "direct" }}this.internal.{{ $path }} = {{ .Value }};{{ end }}
-        {{- if eq .Method "index" }}this.internal.{{ $path }} = {{ .Value }};{{ end }}
-        {{- if eq .Method "append" }}this.internal.{{ $path }}.add({{ .Value }});{{ end -}}
+    {{ $path := formatAssignmentPath "this.internal" .Path }}
+        {{- if eq .Method "direct" }}{{ $path }} = {{ .Value }};{{ end }}
+        {{- if eq .Method "index" }}{{ $path }} = {{ .Value }};{{ end }}
+        {{- if eq .Method "append" }}{{ $path }}.add({{ .Value }});{{ end -}}
 {{- end }}
