@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -18,31 +20,32 @@ type options struct {
 	ConfigPath      string
 	ExtraParameters map[string]string
 	Selector        string
+	Language        string
 }
 
 func Command() *cobra.Command {
 	opts := options{}
 
-	// TODO:
-	//  - better support for inspecting "transformed" IRs: language-specific compiler passes, veneers, ...
 	cmd := &cobra.Command{
 		Use:   "inspect",
 		Short: "Inspects the intermediate representation.",
 		Long: `Inspects the intermediate representation of types and builders.
 
 Common and schema-specific transformations are applied.
-Language-specific transformations are NOT applied.
+Language-specific transformations are NOT applied until a language is specified with the --language flag.
 
-Builder transformations are currently NOT applied.
+Common builder transformations are applied.
+Language-specific builder transformations are NOT applied until a language is specified with the --language flag.
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return doInspect(opts)
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.BuilderIR, "builder-ir", false, "Inspect the \"builder IR\" instead of the \"types\" one.") // TODO: better usage text
+	cmd.Flags().BoolVar(&opts.BuilderIR, "builders", false, "Inspect the intermediate representation of builders instead of schemas.")
 	cmd.Flags().StringToStringVar(&opts.ExtraParameters, "parameters", nil, "Sets or overrides parameters used in the config file.")
 	cmd.Flags().StringVar(&opts.Selector, "selector", "", "Selector allowing to narrow down the result of the inspection to selected objects. Format: package.[object] for types, package.[builder].[option] for builders.")
+	cmd.Flags().StringVar(&opts.Language, "language", "", "Language to use when applying language-specific schema and builder transformations. If left empty, only common transformations are applied.")
 
 	cmd.Flags().StringVar(&opts.ConfigPath, "config", "", "Codegen pipeline configuration file.")
 	_ = cmd.MarkFlagFilename("config")
@@ -63,13 +66,20 @@ func doInspect(opts options) error {
 		return err
 	}
 
-	// apply compiler passes
-
-	if opts.BuilderIR {
-		return inspectBuilderIR(opts, schemas)
+	language, err := inspectedLanguage(pipeline, opts)
+	if err != nil {
+		return err
 	}
 
-	selectedResult, err := applyTypesIRSelector(schemas, opts.Selector)
+	codegenCtx, err := pipeline.ContextForLanguage(language, schemas)
+	if err != nil {
+		return err
+	}
+	if opts.BuilderIR {
+		return inspectBuilderIR(codegenCtx, opts.Selector)
+	}
+
+	selectedResult, err := applyTypesIRSelector(codegenCtx, opts.Selector)
 	if err != nil {
 		return err
 	}
@@ -77,19 +87,26 @@ func doInspect(opts options) error {
 	return prettyPrintJSON(selectedResult)
 }
 
-func inspectBuilderIR(opts options, schemas []*ast.Schema) error {
-	var err error
-	codegenCtx := languages.Context{
-		Schemas:  schemas,
-		Builders: (&ast.BuilderGenerator{}).FromAST(schemas),
+func inspectedLanguage(pipeline *codegen.Pipeline, opts options) (languages.Language, error) {
+	if opts.Language == "" {
+		return dummyLanguage{}, nil
 	}
 
-	codegenCtx, err = languages.GenerateBuilderNilChecks(nil, codegenCtx)
+	languagesMap, err := pipeline.OutputLanguages()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	selectedResult, err := applyBuilderIRSelector(codegenCtx, opts.Selector)
+	language := languagesMap[opts.Language]
+	if language == nil {
+		return nil, fmt.Errorf("language \"%s\" is not supported", opts.Language)
+	}
+
+	return language, nil
+}
+
+func inspectBuilderIR(codegenCtx languages.Context, selector string) error {
+	selectedResult, err := applyBuilderIRSelector(codegenCtx, selector)
 	if err != nil {
 		return err
 	}
@@ -108,7 +125,9 @@ func prettyPrintJSON(input any) error {
 	return nil
 }
 
-func applyTypesIRSelector(schemas ast.Schemas, selector string) (any, error) {
+func applyTypesIRSelector(codegenCtx languages.Context, selector string) (any, error) {
+	schemas := codegenCtx.Schemas
+
 	if selector == "" {
 		return schemas, nil
 	}
@@ -179,4 +198,19 @@ func applyBuilderIRSelector(context languages.Context, selector string) (any, er
 	}
 
 	return opts[0], nil
+}
+
+type dummyLanguage struct {
+}
+
+func (language dummyLanguage) Name() string {
+	return "dummy"
+}
+
+func (language dummyLanguage) Jennies(_ languages.Config) *codejen.JennyList[languages.Context] {
+	return nil
+}
+
+func (language dummyLanguage) CompilerPasses() compiler.Passes {
+	return nil
 }

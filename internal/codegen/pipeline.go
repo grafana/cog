@@ -81,6 +81,7 @@ type Pipeline struct {
 
 	currentDirectory string
 	reporter         ProgressReporter
+	veneersRewriter  *rewrite.Rewriter
 }
 
 func NewPipeline() (*Pipeline, error) {
@@ -144,8 +145,11 @@ func (pipeline *Pipeline) finalPasses() compiler.Passes {
 }
 
 func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
-	var veneers []string
+	if pipeline.veneersRewriter != nil {
+		return pipeline.veneersRewriter, nil
+	}
 
+	var veneerFiles []string
 	for _, dir := range pipeline.Transforms.VeneersDirectories {
 		globPattern := filepath.Join(dir, "*.yaml")
 		matches, err := filepath.Glob(globPattern)
@@ -153,12 +157,19 @@ func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
 			return nil, err
 		}
 
-		veneers = append(veneers, matches...)
+		veneerFiles = append(veneerFiles, matches...)
 	}
 
-	return cogyaml.NewVeneersLoader().RewriterFrom(veneers, rewrite.Config{
+	rewriter, err := cogyaml.NewVeneersLoader().RewriterFrom(veneerFiles, rewrite.Config{
 		Debug: pipeline.Debug,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	pipeline.veneersRewriter = rewriter
+
+	return pipeline.veneersRewriter, nil
 }
 
 func (pipeline *Pipeline) outputDir(relativeToDir string) (string, error) {
@@ -213,7 +224,7 @@ func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) 
 	return commonPasses.Concat(pipeline.finalPasses()).Process(allSchemas)
 }
 
-func (pipeline *Pipeline) outputLanguages() (languages.Languages, error) {
+func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 	outputs := make(languages.Languages)
 
 	for _, output := range pipeline.Output.Languages {

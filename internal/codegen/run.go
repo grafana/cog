@@ -8,17 +8,11 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/veneers/rewrite"
 )
 
 func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
-	veneers, err := pipeline.veneers()
-	if err != nil {
-		return nil, err
-	}
-
 	// Here begins the code generation setup
-	targetsByLanguage, err := pipeline.outputLanguages()
+	targetsByLanguage, err := pipeline.OutputLanguages()
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +32,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 			return nil, err
 		}
 
-		jenniesInput, err := pipeline.jenniesInputForLanguage(target, schemas, veneers)
+		jenniesInput, err := pipeline.ContextForLanguage(target, schemas)
 		if err != nil {
 			return nil, err
 		}
@@ -58,6 +52,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		jennyInput := common.BuildOptions{
 			Languages: targetsByLanguage.AsLanguageRefs(),
 		}
@@ -70,7 +65,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 	return generatedFS, nil
 }
 
-func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, schemas ast.Schemas, veneers *rewrite.Rewriter) (languages.Context, error) {
+func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schemas ast.Schemas) (languages.Context, error) {
 	var err error
 	jenniesInput := languages.Context{
 		Schemas: schemas,
@@ -87,11 +82,15 @@ func (pipeline *Pipeline) jenniesInputForLanguage(language languages.Language, s
 	}
 
 	// from schemas, derive builders
-	builderGenerator := &ast.BuilderGenerator{}
-	jenniesInput.Builders = builderGenerator.FromAST(jenniesInput.Schemas)
+	jenniesInput.Builders = (&ast.BuilderGenerator{}).FromAST(jenniesInput.Schemas)
 
 	// apply veneers to builders
-	jenniesInput.Builders, err = veneers.ApplyTo(jenniesInput.Schemas, jenniesInput.Builders, language.Name())
+	veneersRewriter, err := pipeline.veneers()
+	if err != nil {
+		return languages.Context{}, err
+	}
+
+	jenniesInput.Builders, err = veneersRewriter.ApplyTo(jenniesInput.Schemas, jenniesInput.Builders, language.Name())
 	if err != nil {
 		return languages.Context{}, err
 	}
