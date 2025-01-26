@@ -9,7 +9,7 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
         this.internal = new SomeStruct();
     }
     public SomeStructBuilder config(Map<String, String> config) {
-    this.internal.config = config;
+        this.internal.config = config;
         return this;
     }
     public SomeStruct build() {

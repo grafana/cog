@@ -10,7 +10,7 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
     this.someBuilderProperty = "";
     }
     public SomeStructBuilder id(Long id) {
-    this.internal.id = id;
+        this.internal.id = id;
         return this;
     }
     public SomeStruct build() {

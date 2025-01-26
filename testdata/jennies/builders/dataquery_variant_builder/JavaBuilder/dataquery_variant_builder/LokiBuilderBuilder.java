@@ -8,7 +8,7 @@ public class LokiBuilderBuilder implements cog.Builder<cog.variants.Dataquery> {
         this.internal = new Loki();
     }
     public LokiBuilderBuilder expr(String expr) {
-    this.internal.expr = expr;
+        this.internal.expr = expr;
         return this;
     }
     public Loki build() {

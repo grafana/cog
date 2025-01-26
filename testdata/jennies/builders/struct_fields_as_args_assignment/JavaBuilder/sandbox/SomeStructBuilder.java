@@ -11,8 +11,8 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
 		if (this.internal.time == null) {
 			this.internal.time = new Object();
 		}
-    this.internal.time.from = from;
-    this.internal.time.to = to;
+        this.internal.time.from = from;
+        this.internal.time.to = to;
         return this;
     }
     public SomeStruct build() {

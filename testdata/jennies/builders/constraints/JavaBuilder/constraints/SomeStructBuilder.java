@@ -14,7 +14,7 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
         if (!(id < 10)) {
             throw new IllegalArgumentException("id must be < 10");
         }
-    this.internal.id = id;
+        this.internal.id = id;
         return this;
     }
     
@@ -22,7 +22,7 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
         if (!(title.length() >= 1)) {
             throw new IllegalArgumentException("title.length() must be >= 1");
         }
-    this.internal.title = title;
+        this.internal.title = title;
         return this;
     }
     public SomeStruct build() {

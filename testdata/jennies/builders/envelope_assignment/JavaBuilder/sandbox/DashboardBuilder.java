@@ -15,7 +15,7 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
     Variable variable = new Variable();
         variable.name = name;
         variable.value = value;
-    this.internal.variables.add(variable);
+        this.internal.variables.add(variable);
         return this;
     }
     public Dashboard build() {

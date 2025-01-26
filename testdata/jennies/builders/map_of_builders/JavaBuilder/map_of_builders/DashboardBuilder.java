@@ -14,7 +14,7 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
         for (var entry : panels.entrySet()) {
            panelsResource.put(entry.getKey(), entry.getValue().build());
         }
-    this.internal.panels = panelsResource;
+        this.internal.panels = panelsResource;
         return this;
     }
     public Dashboard build() {

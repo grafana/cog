@@ -8,7 +8,7 @@ public class SomePanelBuilder implements cog.Builder<SomePanel> {
         this.internal = new SomePanel();
     }
     public SomePanelBuilder title(String title) {
-    this.internal.title = title;
+        this.internal.title = title;
         return this;
     }
     
@@ -19,7 +19,7 @@ public class SomePanelBuilder implements cog.Builder<SomePanel> {
 		if (this.internal.options.legend == null) {
 			this.internal.options.legend = new initialization_safeguards.LegendOptions();
 		}
-    this.internal.options.legend.show = show;
+        this.internal.options.legend.show = show;
         return this;
     }
     public SomePanel build() {
