@@ -73,11 +73,8 @@ func functions() template.FuncMap {
 		"formatValue": func(_ ast.Type) string {
 			panic("formatValue() needs to be overridden by a jenny")
 		},
-		"formatCastValue": func(_ ast.Type) string {
-			panic("formatCastValue() needs to be overridden by a jenny")
-		},
-		"shouldCastNilCheck": func(_ ast.Type) string {
-			panic("shouldCastNilCheck() needs to be overridden by a jenny")
+		"formatPathIndex": func(_ *ast.PathIndex) string {
+			panic("formatPathIndex() needs to be overridden by a jenny")
 		},
 		"formatPath": func(_ ast.Type) string {
 			panic("formatPath() needs to be overridden by a jenny")

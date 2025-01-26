@@ -75,6 +75,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		"formatPath":               jenny.typeFormatter.formatFieldPath,
 		"formatRefType":            jenny.typeFormatter.formatRefType,
 		"formatType":               jenny.typeFormatter.formatFieldType,
+		"formatPathIndex":          jenny.typeFormatter.formatPathIndex,
 	}).RenderAsBytes("builders/builder.tmpl", tmpl)
 }
 
