@@ -161,6 +161,12 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 		if err != nil {
 			return nil, err
 		}
+
+		// we do this to ensure that the same builder can be composed more than once
+		// ie: dashboard and dashboardv2 packages
+		if config.PreserveOriginalBuilders {
+			composedBuilders = append(composedBuilders, composableBuilder)
+		}
 	}
 
 	if config.CompositionMap["__schema_entrypoint"] != "" {
@@ -266,6 +272,13 @@ type CompositionConfig struct {
 	// ComposedBuilderName configures the name of the newly composed builders.
 	// If left empty, the name is taken from SourceBuilderName.
 	ComposedBuilderName string
+
+	// PreserveOriginalBuilders ensures that builders used as part of the
+	// composition process are preserved.
+	// It is useful when the same builders need to be composed more than once
+	// (ex: dashboard and dashboardv2 packages both use Options & FieldConfig
+	// types from panels for their composition needs)
+	PreserveOriginalBuilders bool
 }
 
 func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
@@ -289,19 +302,19 @@ func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
 		composableBuilders := make(map[string]ast.Builders)
 
 		for _, builder := range builders {
-			// the builder is for a composable type
-			if selector(schemas, builder) {
-				schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
-				if !found {
-					continue
-				}
-
-				panelType := schema.Metadata.Identifier
-				composableBuilders[panelType] = append(composableBuilders[panelType], builder)
+			// the builder isn't selected: let's leave it untouched
+			if !selector(schemas, builder) {
+				newBuilders = append(newBuilders, builder)
 				continue
 			}
 
-			newBuilders = append(newBuilders, builder)
+			schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
+			if !found {
+				continue
+			}
+
+			panelType := schema.Metadata.Identifier
+			composableBuilders[panelType] = append(composableBuilders[panelType], builder)
 		}
 
 		for panelType, buildersForType := range composableBuilders {
