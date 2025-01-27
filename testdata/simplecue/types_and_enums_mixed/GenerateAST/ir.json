@@ -1,0 +1,239 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "stringEnum": {
+      "Name": "stringEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "c",
+              "Value": "c"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "stringEnum"
+      }
+    },
+    "expressionTypes": {
+      "Name": "expressionTypes",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "expressionA"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "expressionB"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "expressionC"
+              }
+            }
+          ]
+        },
+        "Hints": {
+          "kind": "type"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "expressionTypes"
+      }
+    },
+    "container": {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "expressionTypes"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "disj",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "expressionA"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "expressionC"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    },
+    "expressionA": {
+      "Name": "expressionA",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "enumA",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "a",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "stringEnum"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "expressionA"
+      }
+    },
+    "expressionB": {
+      "Name": "expressionB",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "enumB",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "b",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "stringEnum"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "expressionB"
+      }
+    },
+    "expressionC": {
+      "Name": "expressionC",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "enumC",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "c",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "stringEnum"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "expressionC"
+      }
+    }
+  }
+}

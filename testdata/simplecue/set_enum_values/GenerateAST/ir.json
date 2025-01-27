@@ -1,0 +1,203 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "stringEnum": {
+      "Name": "stringEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "c",
+              "Value": "c"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "stringEnum"
+      }
+    },
+    "intEnum": {
+      "Name": "intEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "X",
+              "Value": 1
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "Y",
+              "Value": 2
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Name": "Z",
+              "Value": 3
+            }
+          ]
+        },
+        "Hints": {
+          "kind": "enum",
+          "memberNames": "X|Y|Z"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "intEnum"
+      }
+    },
+    "container": {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "enumA",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "a",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "stringEnum"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "enumB",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "b",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "stringEnum"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "enumC",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "c",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "stringEnum"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "enum1",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": 1,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "intEnum"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "enum2",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": 2,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "intEnum"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "enum3",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": 3,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "intEnum"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    }
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "stringType": {
+      "Name": "stringType",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "c",
+              "Value": "c"
+            }
+          ]
+        },
+        "Hints": {
+          "kind": "type"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "stringType"
+      }
+    },
+    "container": {
+      "Name": "container",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "stringA",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "stringType"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "container"
+      }
+    },
+    "withoutOverride": {
+      "Name": "withoutOverride",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "stringA",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Default": "a",
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "stringType"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "withoutOverride"
+      }
+    }
+  }
+}

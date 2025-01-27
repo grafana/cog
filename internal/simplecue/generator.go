@@ -435,6 +435,15 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 		return true, exprs[0], exprs[1]
 	}
 
+	r, path := exprs[0].ReferencePath()
+	if !r.Exists() {
+		return false, v, v
+	}
+
+	if ok, _ := isImplicitEnum(r.LookupPath(path)); ok {
+		return true, exprs[0], exprs[1]
+	}
+
 	return false, v, v
 }
 
@@ -479,6 +488,20 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 		defValue, err := g.extractDefault(defV)
 		if err != nil {
 			return ast.Type{}, err
+		}
+
+		ok, err := isImplicitEnum(referenceRootValue.LookupPath(path))
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		if ok && defValue == nil {
+			switch defV.Kind() {
+			case cue.StringKind:
+				defValue, _ = defV.String()
+			case cue.IntKind:
+				defValue, _ = defV.Int64()
+			}
 		}
 
 		refType := g.namingFunc(g.rootVal, path)
