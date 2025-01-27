@@ -149,7 +149,7 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 		tf.packageMapper("java.util", "HashMap")
 		return "new HashMap<>()"
 	case ast.KindRef:
-		refDef := fmt.Sprintf("%s.%s", def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		refDef := fmt.Sprintf("%s.%s", formatPackageName(def.AsRef().ReferredPkg), formatObjectName(def.AsRef().ReferredType))
 		if tf.typeHasBuilder(def) {
 			return fmt.Sprintf("new %sBuilder().build()", tf.config.formatPackage(refDef))
 		}
