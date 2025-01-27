@@ -104,7 +104,7 @@ func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
-	modifiedOpts := DisjunctionAsOptionsAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts := DisjunctionAsOptionsAction(0)(ast.Schemas{}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 2)
 
@@ -117,6 +117,50 @@ func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 	req.Len(modifiedOpts[1].Args, 1)
 	req.Equal(disjunctionType.Disjunction.Branches[1], modifiedOpts[1].Args[0].Type)
 	req.Equal("row", modifiedOpts[1].Args[0].Name)
+}
+
+func TestDisjunctionAsOptionsAction_withDisjunctionAsSecondArg(t *testing.T) {
+	req := require.New(t)
+
+	disjunctionType := ast.NewDisjunction(ast.Types{
+		ast.NewRef("dashboard", "Panel"),
+		ast.NewRef("dashboard", "Row"),
+	})
+
+	option := ast.Option{
+		Name: "Panel",
+		Args: []ast.Argument{
+			{Name: "key", Type: ast.String()},
+			{Name: "panel", Type: disjunctionType},
+		},
+		Assignments: []ast.Assignment{
+			ast.ArgumentAssignment(ast.Path{ // This assignment doesn't make sense, but for the purpose of this test it doesn't matter.
+				{Identifier: "key", Type: ast.String()},
+			}, ast.Argument{Name: "key", Type: ast.String()}),
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "panel", Type: disjunctionType},
+			}, ast.Argument{Name: "tags", Type: disjunctionType}),
+		},
+	}
+	modifiedOpts := DisjunctionAsOptionsAction(1)(ast.Schemas{}, ast.Builder{}, option)
+
+	req.Len(modifiedOpts, 2)
+
+	req.Equal("panel", modifiedOpts[0].Name)
+	req.Len(modifiedOpts[0].Args, 2)
+	req.Len(modifiedOpts[0].Assignments, 2)
+	req.Equal("key", modifiedOpts[0].Args[0].Name)
+	req.Equal(ast.String(), modifiedOpts[0].Args[0].Type)
+	req.Equal("panel", modifiedOpts[0].Args[1].Name)
+	req.Equal(disjunctionType.Disjunction.Branches[0], modifiedOpts[0].Args[1].Type)
+
+	req.Equal("row", modifiedOpts[1].Name)
+	req.Len(modifiedOpts[1].Args, 2)
+	req.Len(modifiedOpts[1].Assignments, 2)
+	req.Equal("key", modifiedOpts[1].Args[0].Name)
+	req.Equal(ast.String(), modifiedOpts[1].Args[0].Type)
+	req.Equal("row", modifiedOpts[1].Args[1].Name)
+	req.Equal(disjunctionType.Disjunction.Branches[1], modifiedOpts[1].Args[1].Type)
 }
 
 func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
@@ -149,7 +193,7 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: ref}),
 		},
 	}
-	modifiedOpts := DisjunctionAsOptionsAction()(ast.Schemas{schema}, ast.Builder{}, option)
+	modifiedOpts := DisjunctionAsOptionsAction(0)(ast.Schemas{schema}, ast.Builder{}, option)
 
 	req.Len(modifiedOpts, 2)
 
@@ -162,6 +206,61 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 	req.Len(modifiedOpts[1].Args, 1)
 	req.Equal(ast.NewRef("dashboard", "Row"), modifiedOpts[1].Args[0].Type)
 	req.Equal("Row", modifiedOpts[1].Args[0].Name)
+}
+
+func TestDisjunctionAsOptionsAction_withDisjunctionStructAsSecondArg(t *testing.T) {
+	req := require.New(t)
+
+	panelType := ast.NewStruct()
+	rowType := ast.NewStruct()
+	panelOrRow := ast.NewStruct(
+		ast.NewStructField("Panel", ast.NewRef("dashboard", "Panel")),
+		ast.NewStructField("Row", ast.NewRef("dashboard", "Row")),
+	)
+	panelOrRow.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = "not nil"
+	ref := ast.NewRef("dashboard", "PanelOrRow")
+	schema := &ast.Schema{
+		Package: "dashboard",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("dashboard", "PanelOrRow", panelOrRow),
+			ast.NewObject("dashboard", "Row", rowType),
+			ast.NewObject("dashboard", "Panel", panelType),
+		),
+	}
+	option := ast.Option{
+		Name: "Panel",
+		Args: []ast.Argument{
+			{Name: "key", Type: ast.String()},
+			{Name: "panel", Type: ref},
+		},
+		Assignments: []ast.Assignment{
+			ast.ArgumentAssignment(ast.Path{ // This assignment doesn't make sense, but for the purpose of this test it doesn't matter.
+				{Identifier: "key", Type: ast.String()},
+			}, ast.Argument{Name: "key", Type: ast.String()}),
+			ast.ArgumentAssignment(ast.Path{
+				{Identifier: "panel", Type: ref},
+			}, ast.Argument{Name: "tags", Type: ref}),
+		},
+	}
+	modifiedOpts := DisjunctionAsOptionsAction(1)(ast.Schemas{schema}, ast.Builder{}, option)
+
+	req.Len(modifiedOpts, 2)
+
+	req.Equal("Panel", modifiedOpts[0].Name)
+	req.Len(modifiedOpts[0].Args, 2)
+	req.Len(modifiedOpts[0].Assignments, 2)
+	req.Equal("key", modifiedOpts[0].Args[0].Name)
+	req.Equal(ast.String(), modifiedOpts[0].Args[0].Type)
+	req.Equal(ast.NewRef("dashboard", "Panel"), modifiedOpts[0].Args[1].Type)
+	req.Equal("Panel", modifiedOpts[0].Args[1].Name)
+
+	req.Equal("Row", modifiedOpts[1].Name)
+	req.Len(modifiedOpts[1].Args, 2)
+	req.Len(modifiedOpts[1].Assignments, 2)
+	req.Equal("key", modifiedOpts[0].Args[0].Name)
+	req.Equal(ast.String(), modifiedOpts[0].Args[0].Type)
+	req.Equal(ast.NewRef("dashboard", "Row"), modifiedOpts[1].Args[1].Type)
+	req.Equal("Row", modifiedOpts[1].Args[1].Name)
 }
 
 func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {

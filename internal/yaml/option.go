@@ -189,6 +189,7 @@ func (rule MapToIndex) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 
 type DisjunctionAsOptions struct {
 	OptionSelector `yaml:",inline"`
+	ArgumentIndex  int `yaml:"argument_index"`
 }
 
 func (rule DisjunctionAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -197,7 +198,7 @@ func (rule DisjunctionAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, 
 		return option.RewriteRule{}, err
 	}
 
-	return option.DisjunctionAsOptions(selector), nil
+	return option.DisjunctionAsOptions(selector, rule.ArgumentIndex), nil
 }
 
 type DuplicateOption struct {

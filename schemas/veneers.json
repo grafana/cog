@@ -601,6 +601,9 @@
         },
         "by_names": {
           "$ref": "#/$defs/YamlByNamesSelector"
+        },
+        "argument_index": {
+          "type": "integer"
         }
       },
       "additionalProperties": false,
