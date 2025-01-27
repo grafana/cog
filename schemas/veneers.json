@@ -559,6 +559,9 @@
         },
         "composed_builder_name": {
           "type": "string"
+        },
+        "preserve_original_builders": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
