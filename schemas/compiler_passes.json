@@ -326,6 +326,9 @@
         "retype_field": {
           "$ref": "#/$defs/YamlRetypeField"
         },
+        "omit_fields": {
+          "$ref": "#/$defs/YamlOmitFields"
+        },
         "schema_set_identifier": {
           "$ref": "#/$defs/YamlSchemaSetIdentifier"
         },
@@ -492,6 +495,19 @@
           },
           "type": "array",
           "description": "Expected format: [package].[object]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlOmitFields": {
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object].[field]"
         }
       },
       "additionalProperties": false,

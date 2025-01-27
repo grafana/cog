@@ -23,6 +23,7 @@ type CompilerPass struct {
 	RetypeObject             *RetypeObject             `yaml:"retype_object"`
 	HintObject               *HintObject               `yaml:"hint_object"`
 	RetypeField              *RetypeField              `yaml:"retype_field"`
+	OmitFields               *OmitFields               `yaml:"omit_fields"`
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
 	SchemaSetEntryPoint      *SchemaSetEntryPoint      `yaml:"schema_set_entry_point"`
 	DuplicateObject          *DuplicateObject          `yaml:"duplicate_object"`
@@ -82,6 +83,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.RetypeField != nil {
 		return pass.RetypeField.AsCompilerPass()
+	}
+	if pass.OmitFields != nil {
+		return pass.OmitFields.AsCompilerPass()
 	}
 	if pass.SchemaSetIdentifier != nil {
 		return pass.SchemaSetIdentifier.AsCompilerPass()
@@ -383,6 +387,25 @@ func (pass RetypeField) AsCompilerPass() (*compiler.RetypeField, error) {
 		Field:    fieldRef,
 		As:       pass.As,
 		Comments: pass.Comments,
+	}, nil
+}
+
+type OmitFields struct {
+	Fields []string // Expected format: [package].[object].[field]
+}
+
+func (pass OmitFields) AsCompilerPass() (*compiler.OmitFields, error) {
+	fieldRefs := make([]compiler.FieldReference, 0, len(pass.Fields))
+	for _, field := range pass.Fields {
+		fieldRef, err := compiler.FieldReferenceFromString(field)
+		if err != nil {
+			return nil, err
+		}
+		fieldRefs = append(fieldRefs, fieldRef)
+	}
+
+	return &compiler.OmitFields{
+		Fields: fieldRefs,
 	}, nil
 }
 
