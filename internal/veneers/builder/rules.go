@@ -277,7 +277,7 @@ func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
 
 		sourceBuilder, found := builders.LocateByObject(sourceBuilderPkg, sourceBuilderNameWithoutPkg)
 		if !found {
-			return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: source builder '%s' not found", config.SourceBuilderName)
+			return builders, nil
 		}
 
 		// - add to newBuilders all the builders that are not composable (ie: don't comply to the selector)
