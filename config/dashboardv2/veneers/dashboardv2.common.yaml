@@ -1,0 +1,253 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json
+
+language: all
+
+package: dashboardv2
+
+builders:
+  # overrides and transformations related
+  - omit: { by_object: DashboardFieldConfigSourceOverrides }
+  - omit: { by_object: MatcherConfig }
+  - omit: { by_object: DynamicConfigValue }
+  - omit: { by_object: Threshold }
+
+  - omit: { by_object: ValueMap }
+  - omit: { by_object: RangeMap }
+  - omit: { by_object: RegexMap }
+  - omit: { by_object: SpecialValueMap }
+
+  - omit: { by_object: CustomVariableValue }
+
+  # No need for builders for structs generated from a disjunction
+  - omit: { generated_from_disjunction: true }
+
+  ###########
+  # Layouts #
+  ###########
+
+  # Rearrange layout-related builders
+  - merge_into:
+      source: GridLayoutSpec
+      destination: GridLayoutKind
+      under_path: spec
+  - rename:
+      by_object: GridLayoutKind
+      as: GridLayout
+  - omit: { by_object: GridLayoutSpec }
+
+  - merge_into:
+      source: GridLayoutItemSpec
+      destination: GridLayoutItemKind
+      under_path: spec
+  - rename:
+      by_object: GridLayoutItemKind
+      as: GridLayoutItem
+  - omit: { by_object: GridLayoutItemSpec }
+
+  ###########
+  # Queries #
+  ###########
+
+  - merge_into:
+      source: QueryGroupSpec
+      destination: QueryGroupKind
+      under_path: spec
+  - omit: { by_object: QueryGroupSpec }
+  - rename:
+      by_object: QueryGroupKind
+      as: QueryGroup
+
+  - merge_into:
+      source: PanelQuerySpec
+      destination: PanelQueryKind
+      under_path: spec
+  - omit: { by_object: PanelQuerySpec }
+  - rename:
+      by_object: PanelQueryKind
+      as: Target
+
+  # Dataquery DataQueryKind composability
+  - compose:
+      by_variant: dataquery
+      source_builder_name: dashboardv2.DataQueryKind
+      composed_builder_name: Query
+      plugin_discriminator_field: kind
+      composition_map: # Builder → assignment root path
+        __schema_entrypoint: spec
+      exclude_options: [
+        "spec",
+      ]
+
+  ###################
+  # Transformations #
+  ###################
+
+  - merge_into:
+      source: DataTransformerConfig
+      destination: TransformationKind
+      under_path: spec
+  - omit: { by_object: DataTransformerConfig }
+  - rename:
+      by_object: TransformationKind
+      as: Transformation
+
+  ##############
+  # Dashboards #
+  ##############
+
+  - rename:
+      by_object: DashboardV2Spec
+      as: Dashboard
+
+  - rename:
+      by_object: TimeSettingsSpec
+      as: TimeSettings
+
+  - promote_options_to_constructor:
+      by_name: Dashboard
+      options: [title]
+
+  # Rearrange panel-related builders
+  - merge_into:
+      source: PanelSpec
+      destination: PanelKind
+      under_path: spec
+  - omit: { by_object: PanelSpec }
+  - rename:
+      by_object: PanelKind
+      as: Panel
+
+  - merge_into:
+      source: FieldConfig
+      destination: VizConfigSpec
+      under_path: fieldConfig.defaults
+      rename_options:
+        color: colorScheme
+        links: dataLinks
+  - merge_into:
+      source: FieldConfigSource
+      destination: VizConfigSpec
+      under_path: fieldConfig
+  - merge_into:
+      source: VizConfigSpec
+      destination: VizConfigKind
+      under_path: spec
+
+  # Panels VizConfigSpec composability
+  - compose:
+      by_variant: panelcfg
+      # this should run after the "dashboard" package has done its thing
+      # so these builders aren't needed anymore once the composition is done.
+      preserve_original_builders: false
+      source_builder_name: dashboardv2.VizConfigKind
+      composed_builder_name: Visualization
+      plugin_discriminator_field: kind
+      composition_map: # Builder → assignment root path
+        Options: "spec.options"
+        FieldConfig: "spec.fieldConfig.defaults.custom"
+      exclude_options: [
+        "spec",          # merged with another builder
+        "defaults",      # merged with another builder
+        "fieldConfig",   # merged with another builder
+        "options",       # comes from a panel plugin
+        "custom",        # comes from a panel plugin
+        "pluginVersion", # TODO: check if it's relevant or not
+        "filterable",    # TODO: check if it's relevant or not
+        "writeable",     # TODO: check if it's relevant or not
+      ]
+
+options:
+  ###########
+  # Layouts #
+  ###########
+
+  # spec options were merged into GridLayout
+  - omit: { by_builder: GridLayout.spec }
+  # spec options were merged into GridLayoutItem
+  - omit: { by_builder: GridLayoutItem.spec }
+
+  # Append a single `item` value instead of a map of everything
+  - duplicate:
+      by_builder: GridLayout.items
+      as: item
+  - array_to_append:
+      by_builder: GridLayout.item
+
+  ###########
+  # Queries #
+  ###########
+
+  # spec options were merged into QueryGroup
+  - omit: { by_builder: QueryGroup.spec }
+
+  # spec options were merged into PanelQuery
+  - omit: { by_builder: PanelQuery.spec }
+
+  # queries() → targets()
+  - rename:
+      by_name: QueryGroupKind.queries
+      as: targets
+
+  # Append a single target instead forcing to define all of them at once
+  - duplicate:
+      by_name: QueryGroupKind.targets
+      as: target
+  - array_to_append:
+      by_name: QueryGroupKind.target
+
+  # Append a single transformation instead forcing to define all of them at once
+  - duplicate:
+      by_name: QueryGroupKind.transformations
+      as: transformation
+  - array_to_append:
+      by_name: QueryGroupKind.transformation
+
+  ###################
+  # Transformations #
+  ###################
+
+  - omit: { by_builder: Transformation.spec }
+
+  ##########
+  # Panels #
+  ##########
+
+  # VizConfig() → Visualization()
+  - rename:
+      by_name: PanelKind.VizConfig
+      as: visualization
+
+  ##############
+  # Dashboards #
+  ##############
+
+  # Append a single `element` value instead of a map of everything
+  - duplicate:
+      by_builder: Dashboard.Elements
+      as: element
+  - map_to_index:
+      by_builder: Dashboard.element
+  # panel + library panel
+  - disjunction_as_options:
+      by_builder: Dashboard.element
+      argument_index: 1
+  - rename:
+      by_builder: Dashboard.PanelKind
+      as: panel
+  - rename:
+      by_builder: Dashboard.LibraryPanelKind
+      as: libraryPanel
+
+  # Append a single override instead forcing to define all of them at once
+  - duplicate:
+      by_name: VizConfigKind.overrides
+      as: override
+  - array_to_append:
+      by_name: VizConfigKind.override
+
+  # Append a single variable instead forcing to define all of them at once
+  - duplicate:
+      by_builder: Dashboard.variables
+      as: variable
+  - array_to_append:
+      by_builder: Dashboard.variable
