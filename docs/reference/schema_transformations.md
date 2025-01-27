@@ -267,6 +267,17 @@ omit:
   objects: []string
 ```
 
+## `omit_fields`
+
+OmitFields removes the selected fields from their object definition.
+
+### Usage
+
+```yaml
+omit_fields:
+  fields: []string
+```
+
 ## `rename_object`
 
 N/A
