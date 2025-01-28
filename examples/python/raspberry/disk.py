@@ -21,12 +21,9 @@ def disk_io_timeseries() -> cogbuilder.Builder[dashboard.Panel]:
         .with_target(
             basic_prometheus_query('rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', "{{device}} IO time")
         )
-        .with_override(
-            dashboard.MatcherConfig(id_val="byRegexp", options="/ io time/"),
-            [
-                dashboard.DynamicConfigValue(id_val="unit", value="percentunit"),
-            ],
-        )
+        .override_by_regexp("/ io time/", [
+            dashboard.DynamicConfigValue(id_val="unit", value="percentunit"),
+        ])
     )
 
 
@@ -130,33 +127,26 @@ def disk_space_usage_table() -> cogbuilder.Builder[dashboard.Panel]:
             )
         )
         # Overrides configuration
-        .with_override(
-            dashboard.MatcherConfig(id_val="byName", options="Mounted on"),
-            [dashboard.DynamicConfigValue(id_val="custom.width", value=260)]
-        )
-        .with_override(
-            dashboard.MatcherConfig(id_val="byName", options="Size"),
-            [dashboard.DynamicConfigValue(id_val="custom.width", value=93)]
-        )
-        .with_override(
-            dashboard.MatcherConfig(id_val="byName", options="Used"),
-            [dashboard.DynamicConfigValue(id_val="custom.width", value=72)]
-        )
-        .with_override(
-            dashboard.MatcherConfig(id_val="byName", options="Available"),
-            [dashboard.DynamicConfigValue(id_val="custom.width", value=88)]
-        )
-        .with_override(
-            dashboard.MatcherConfig(id_val="byName", options="Used, %"),
-            [
-                dashboard.DynamicConfigValue(id_val="unit", value="percentunit"),
-                dashboard.DynamicConfigValue(
-                    id_val="custom.cellOptions",
-                    value={"mode": "gradient", "type": "gauge"},
-                ),
-                dashboard.DynamicConfigValue(id_val="max", value="1"),
-                dashboard.DynamicConfigValue(id_val="min", value="0"),
-            ]
-        )
+        .override_by_name("Mounted on", [
+            dashboard.DynamicConfigValue(id_val="custom.width", value=260),
+        ])
+        .override_by_name("Size", [
+            dashboard.DynamicConfigValue(id_val="custom.width", value=93),
+        ])
+        .override_by_name("Used", [
+            dashboard.DynamicConfigValue(id_val="custom.width", value=72),
+        ])
+        .override_by_name("Available", [
+            dashboard.DynamicConfigValue(id_val="custom.width", value=88),
+        ])
+        .override_by_name("Used, %", [
+            dashboard.DynamicConfigValue(id_val="unit", value="percentunit"),
+            dashboard.DynamicConfigValue(
+                id_val="custom.cellOptions",
+                value={"mode": "gradient", "type": "gauge"},
+            ),
+            dashboard.DynamicConfigValue(id_val="max", value="1"),
+            dashboard.DynamicConfigValue(id_val="min", value="0"),
+        ])
     )
 
