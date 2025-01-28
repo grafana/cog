@@ -17,12 +17,9 @@ export const diskIOTimeseries = (): TimeseriesPanelBuilder => {
         .withTarget(
             basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time"),
         )
-        .withOverride({
-            matcher: {id: "byRegexp", options: "/ io time/"},
-            properties: [
-                {id: "unit", value: "percentunit"},
-            ]
-        });
+        .overrideByRegexp("/ io time/", [
+            {id: "unit", value: "percentunit"},
+        ]);
 };
 
 export const diskSpaceUsageTable = (): TablePanelBuilder => {
@@ -115,33 +112,18 @@ export const diskSpaceUsageTable = (): TablePanelBuilder => {
         })
 
         // Overrides configuration
-        .withOverride({
-            matcher: {id: "byName", options: "Mounted on"},
-            properties: [{id: "custom.width", value: 260}]
-        })
-        .withOverride({
-            matcher: {id: "byName", options: "Size"},
-            properties: [{id: "custom.width", value: 93}]
-        })
-        .withOverride({
-            matcher: {id: "byName", options: "Used"},
-            properties: [{id: "custom.width", value: 72}]
-        })
-        .withOverride({
-            matcher: {id: "byName", options: "Available"},
-            properties: [{id: "custom.width", value: 88}]
-        })
-        .withOverride({
-            matcher: {id: "byName", options: "Used, %"},
-            properties: [
-                {id: "unit", value: "percentunit"},
-                {
-                    id: "custom.cellOptions",
-                    value: {mode: "gradient", type: "gauge"}
-                },
-                {id: "max", value: 1},
-                {id: "min", value: 0}
-            ]
-        })
+        .overrideByName("Mounted on", [{id: "custom.width", value: 260}])
+        .overrideByName("Size", [{id: "custom.width", value: 93}])
+        .overrideByName("Used", [{id: "custom.width", value: 72}])
+        .overrideByName("Available", [{id: "custom.width", value: 88}])
+        .overrideByName("Used, %", [
+            {id: "unit", value: "percentunit"},
+            {
+                id: "custom.cellOptions",
+                value: {mode: "gradient", type: "gauge"}
+            },
+            {id: "max", value: 1},
+            {id: "min", value: 0}
+        ])
     ;
 };
