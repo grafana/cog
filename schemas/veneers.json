@@ -350,6 +350,18 @@
         "name": {
           "type": "string"
         },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "arguments": {
+          "items": {
+            "$ref": "#/$defs/AstArgument"
+          },
+          "type": "array"
+        },
         "assignments": {
           "items": {
             "$ref": "#/$defs/VeneersAssignment"
