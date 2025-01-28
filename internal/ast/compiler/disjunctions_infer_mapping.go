@@ -95,16 +95,26 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
-			if !field.Type.IsConcreteScalar() {
-				continue
+			if field.Type.IsConcreteScalar() && field.Type.AsScalar().ScalarKind == ast.KindString {
+				candidates[typeName][field.Name] = field.Type.AsScalar().Value
 			}
 
-			scalarField := field.Type.AsScalar()
-			if scalarField.ScalarKind != ast.KindString {
-				continue
-			}
+			if field.Type.IsRef() {
+				ref := field.Type.AsRef()
+				obj, ok := schema.LocateObject(ref.ReferredType)
+				if !ok {
+					continue
+				}
 
-			candidates[typeName][field.Name] = scalarField.Value
+				if obj.Type.Kind == ast.KindEnum {
+					enum := obj.Type.AsEnum()
+					if enum.Values[0].Type.Kind != ast.KindScalar {
+						continue
+					}
+
+					candidates[typeName][field.Name] = field.Type.Default
+				}
+			}
 		}
 	}
 
@@ -155,18 +165,23 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 			return nil, fmt.Errorf("discriminator field '%s' not found", def.Discriminator)
 		}
 
-		// trust, but verify: we need the field to be an actual scalar with a concrete value?
-		if !field.Type.IsScalar() {
-			return nil, fmt.Errorf("discriminator field '%s' is not a scalar", field.Name)
-		}
-
 		typeName := branch.AsRef().ReferredType
 
-		switch {
-		case field.Type.AsScalar().IsConcrete():
-			mapping[field.Type.AsScalar().Value.(string)] = typeName
-		case field.Type.Default != nil:
-			mapping[field.Type.Default.(string)] = typeName
+		switch field.Type.Kind {
+		case ast.KindScalar:
+			if field.Type.AsScalar().IsConcrete() {
+				mapping[field.Type.AsScalar().Value.(string)] = typeName
+			}
+		case ast.KindRef:
+			ref := field.Type.AsRef()
+			obj, ok := schema.LocateObject(ref.ReferredType)
+			if !ok {
+				break
+			}
+
+			if obj.Type.Kind == ast.KindEnum && obj.Type.AsEnum().Values[0].Type.Kind == ast.KindScalar {
+				mapping[field.Type.Default.(string)] = typeName
+			}
 		default:
 			return nil, fmt.Errorf("discriminator field '%s' is not concrete", field.Name)
 		}
