@@ -463,7 +463,7 @@ func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
 				continue
 			}
 
-			newOpt, err := newOption.AsIR(builders, builder)
+			newOpt, err := newOption.AsIR(schemas, builders, builder)
 			if err != nil {
 				return nil, fmt.Errorf("could not apply AddOption builder veneer: %w", err)
 			}
