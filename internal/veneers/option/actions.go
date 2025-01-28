@@ -657,8 +657,8 @@ func DuplicateAction(duplicateName string) RewriteAction {
 
 // AddAssignmentAction adds an assignment to an existing option.
 func AddAssignmentAction(assignment veneers.Assignment) RewriteAction {
-	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
-		irAssignment, err := assignment.AsIR(ast.Builders{builder}, builder)
+	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+		irAssignment, err := assignment.AsIR(schemas, ast.Builders{builder}, builder)
 		if err != nil {
 			// TODO: let veneers return errors
 			option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[err=%s]", err.Error()))
