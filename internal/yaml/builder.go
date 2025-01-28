@@ -133,6 +133,7 @@ func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, erro
 			ExcludeOptions:           rule.ExcludeOptions,
 			CompositionMap:           rule.CompositionMap,
 			ComposedBuilderName:      rule.ComposedBuilderName,
+			PreserveOriginalBuilders: rule.PreserveOriginalBuilders,
 		},
 	), nil
 }

@@ -24,35 +24,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstAssignmentEnvelope": {
-      "properties": {
-        "type": {
-          "$ref": "#/$defs/AstType",
-          "description": "Should be a ref or a struct only"
-        },
-        "values": {
-          "items": {
-            "$ref": "#/$defs/AstEnvelopeFieldValue"
-          },
-          "type": "array"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "AstAssignmentValue": {
-      "properties": {
-        "argument": {
-          "$ref": "#/$defs/AstArgument"
-        },
-        "constant": true,
-        "envelope": {
-          "$ref": "#/$defs/AstAssignmentEnvelope"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "AstComposableSlotType": {
       "properties": {
         "variant": {
@@ -107,20 +78,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "AstEnvelopeFieldValue": {
-      "properties": {
-        "path": {
-          "$ref": "#/$defs/AstPath",
-          "description": "where to assign within the struct/ref"
-        },
-        "value": {
-          "$ref": "#/$defs/AstAssignmentValue",
-          "description": "what to assign"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "AstIntersectionType": {
       "properties": {
         "branches": {
@@ -144,48 +101,6 @@
         },
         "valuetype": {
           "$ref": "#/$defs/AstType"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "AstPath": {
-      "items": {
-        "$ref": "#/$defs/AstPathItem"
-      },
-      "type": "array"
-    },
-    "AstPathIndex": {
-      "properties": {
-        "argument": {
-          "$ref": "#/$defs/AstArgument"
-        },
-        "constant": {
-          "description": "string or int"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "AstPathItem": {
-      "properties": {
-        "identifier": {
-          "type": "string"
-        },
-        "index": {
-          "$ref": "#/$defs/AstPathIndex"
-        },
-        "type": {
-          "$ref": "#/$defs/AstType",
-          "description": "any"
-        },
-        "typehint": {
-          "$ref": "#/$defs/AstType",
-          "description": "useful mostly for composability purposes, when a field Type is \"any\"\nand we're trying to \"compose in\" something of a known type."
-        },
-        "root": {
-          "type": "boolean",
-          "description": "Is this element of the path the root? (ie: a variable, not a member of a struct)"
         }
       },
       "additionalProperties": false,
@@ -339,7 +254,46 @@
           "type": "string"
         },
         "value": {
-          "$ref": "#/$defs/AstAssignmentValue"
+          "$ref": "#/$defs/VeneersAssignmentValue"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "VeneersAssignmentEnvelope": {
+      "properties": {
+        "values": {
+          "items": {
+            "$ref": "#/$defs/VeneersEnvelopeFieldValue"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "VeneersAssignmentValue": {
+      "properties": {
+        "argument": {
+          "$ref": "#/$defs/AstArgument"
+        },
+        "constant": true,
+        "envelope": {
+          "$ref": "#/$defs/VeneersAssignmentEnvelope"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "VeneersEnvelopeFieldValue": {
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "where to assign within the struct/ref"
+        },
+        "value": {
+          "$ref": "#/$defs/VeneersAssignmentValue",
+          "description": "what to assign"
         }
       },
       "additionalProperties": false,
