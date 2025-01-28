@@ -5,8 +5,10 @@ import (
 )
 
 type Option struct {
-	Name        string       `yaml:"name"`
-	Assignments []Assignment `yaml:"assignments"`
+	Name        string         `yaml:"name"`
+	Comments    []string       `yaml:"comments"`
+	Arguments   []ast.Argument `yaml:"arguments"`
+	Assignments []Assignment   `yaml:"assignments"`
 }
 
 func (opt Option) AsIR(builders ast.Builders, root ast.Builder) (ast.Option, error) {
@@ -22,6 +24,8 @@ func (opt Option) AsIR(builders ast.Builders, root ast.Builder) (ast.Option, err
 
 	return ast.Option{
 		Name:        opt.Name,
+		Comments:    opt.Comments,
+		Args:        opt.Arguments,
 		Assignments: assignments,
 	}, nil
 }

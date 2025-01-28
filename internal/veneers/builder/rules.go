@@ -468,8 +468,8 @@ func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
 				return nil, fmt.Errorf("could not apply AddOption builder veneer: %w", err)
 			}
 
+			newOpt.AddToVeneerTrail("AddOption")
 			builders[i].Options = append(builders[i].Options, newOpt)
-			builders[i].AddToVeneerTrail("AddOption")
 		}
 
 		return builders, nil
