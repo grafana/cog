@@ -8,6 +8,7 @@ use App\Monitoring\Network;
 use Grafana\Foundation\Common;
 use Grafana\Foundation\Dashboardv2\DashboardBuilder;
 use Grafana\Foundation\Dashboardv2\DashboardCursorSync;
+use Grafana\Foundation\Dashboardv2\DashboardV2Spec;
 use Grafana\Foundation\Dashboardv2\DatasourceVariableBuilder;
 use Grafana\Foundation\Dashboardv2\ElementReferenceBuilder;
 use Grafana\Foundation\Dashboardv2\GridLayoutBuilder;
@@ -88,4 +89,11 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
     )
 ;
 
-echo(json_encode($builder->build(), JSON_PRETTY_PRINT).PHP_EOL);
+$jsonEncodedDashboard = json_encode($builder->build(), JSON_PRETTY_PRINT);
+
+echo($jsonEncodedDashboard.PHP_EOL);
+
+// Try decoding it.
+$jsonDecodedAsArray = json_decode($jsonEncodedDashboard, true);
+$dashboard = DashboardV2Spec::fromArray($jsonDecodedAsArray);
+var_dump($dashboard->elements['cpu_usage']);
