@@ -4,13 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
-	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/cog/plugins"
-	"github.com/grafana/cog/generated/go/common"
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2"
-	"github.com/grafana/cog/generated/go/loki"
-	"github.com/grafana/cog/generated/go/timeseries"
 )
 
 func dashboardBuilder() []byte {
@@ -25,44 +20,25 @@ func dashboardBuilder() []byte {
 			To("now").
 			Timezone("browser"),
 		).
-		Panel("somePanel", dashboard.NewPanelBuilder().
-			Title("Some panel").
-			Description("veeery descriptive").
-			Visualization(timeseries.NewVisualizationBuilder().
-				Unit("s").
-				PointSize(5).
-				OverrideByName("Available", []dashboard.DynamicConfigValue{
-					{Id: "custom.width", Value: 88},
-				}),
-			).
-			Data(dashboard.NewQueryGroupBuilder().
-				Target(dashboard.NewTargetBuilder().
-					Query(loki.NewQueryBuilder().
-						RefId("A").  // TODO: also present on the target builder
-						Hide(false). // TODO: also present on the target builder
-						Expr("loki expr"),
-					).
-					Datasource(common.DataSourceRef{
-						Type: cog.ToPtr("loki"),
-						Uid:  cog.ToPtr("some-loki-datasource"),
-					}).
-					Hidden(false).
-					RefId("A"), // this field is also present in dataquery schemas
-				).
-				// TODO: simplify this
-				Transformation(dashboard.NewTransformationBuilder().
-					Kind("transformation ID. eg: `sortBy`").
-					Id("what's this ID?").
-					Topic(common.DataTopicSeries).
-					Options(map[string]any{
-						"fields": map[string]any{},
-						"sort": []map[string]any{
-							{"field": "Mounted on"},
-						},
-					}),
-				),
-			),
-		).
+		// TODO: Element() and Elements() should take builders
+		// CPU
+		Panel("cpu_usage", cpuUsageTimeseries()).
+		Panel("cpu_temp", cpuTemperatureGauge()).
+		Panel("load_avg", loadAverageTimeseries()).
+		// Memory
+		Panel("mem_usage", memoryUsageTimeseries()).
+		Panel("mem_usage_current", memoryUsageGauge()).
+		// Disk
+		Panel("disk_io", diskIOTimeseries()).
+		Panel("disk_usage", diskSpaceUsageTable()).
+		// Network
+		Panel("network_in", networkReceivedTimeseries()).
+		Panel("network_out", networkTransmittedTimeseries()).
+		// Logs
+		Panel("sys_error_logs", errorsInSystemLogs()).
+		Panel("auth_logs", authLogs()).
+		Panel("kernel_logs", kernelLogs()).
+		Panel("all_sys_logs", allSystemLogs()).
 		// TODO: rows?
 		Layout(dashboard.NewGridLayoutBuilder().
 			Item(dashboard.NewGridLayoutItemBuilder().
@@ -71,7 +47,7 @@ func dashboardBuilder() []byte {
 				Height(200).
 				Width(200).
 				// TODO: proper references
-				Element(dashboard.NewElementReferenceBuilder().Name("somePanel")),
+				Element(dashboard.NewElementReferenceBuilder().Name("cpu_usage")),
 			),
 		)
 
@@ -99,7 +75,6 @@ func main() {
 	if err := json.Unmarshal(dashboardAsBytes, &dash); err != nil {
 		panic(err)
 	} else {
-		//fmt.Printf("%+v\n", dash)
-		spew.Dump(dash)
+		fmt.Printf("%+v\n", dash)
 	}
 }
