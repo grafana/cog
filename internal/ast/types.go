@@ -103,6 +103,38 @@ type Type struct {
 	PassesTrail []string     `json:",omitempty"`
 }
 
+func (t *Type) AcceptsValue(value any) bool {
+	if t.Disjunction != nil {
+		return t.Disjunction.AcceptsValue(value)
+	}
+	if t.Array != nil {
+		return t.Array.AcceptsValue(value)
+	}
+	if t.Enum != nil {
+		return t.Enum.AcceptsValue(value)
+	}
+	if t.Map != nil {
+		return t.Map.AcceptsValue(value)
+	}
+	if t.Struct != nil {
+		return false // TODO: implement later if needed
+	}
+	if t.Ref != nil {
+		return false // TODO: implement later if needed
+	}
+	if t.Scalar != nil {
+		return t.Scalar.AcceptsValue(value)
+	}
+	if t.Intersection != nil {
+		return false // TODO: implement later if needed
+	}
+	if t.ComposableSlot != nil {
+		return false // TODO: implement later if needed
+	}
+
+	return false
+}
+
 func (t *Type) AddToPassesTrail(trail string) {
 	t.PassesTrail = append(t.PassesTrail, trail)
 }
@@ -627,6 +659,15 @@ type DisjunctionType struct {
 	DiscriminatorMapping map[string]string `json:",omitempty" yaml:"discriminator_mapping"`
 }
 
+func (t *DisjunctionType) AcceptsValue(value any) bool {
+	for _, branch := range t.Branches {
+		if branch.AcceptsValue(value) {
+			return true
+		}
+	}
+	return false
+}
+
 func (t DisjunctionType) DeepCopy() DisjunctionType {
 	newT := DisjunctionType{
 		Branches:             make([]Type, 0, len(t.Branches)),
@@ -649,6 +690,10 @@ type ArrayType struct {
 	ValueType Type `yaml:"value_type"`
 }
 
+func (t *ArrayType) AcceptsValue(value any) bool {
+	return t.ValueType.AcceptsValue(value)
+}
+
 func (t ArrayType) DeepCopy() ArrayType {
 	return ArrayType{
 		ValueType: t.ValueType.DeepCopy(),
@@ -665,6 +710,11 @@ func (t ArrayType) IsArrayOfScalars() bool {
 
 type EnumType struct {
 	Values []EnumValue // possible values. Value types might be different
+}
+
+func (t *EnumType) AcceptsValue(value any) bool {
+	_, ok := t.MemberForValue(value)
+	return ok
 }
 
 func (t EnumType) MemberForValue(value any) (EnumValue, bool) {
@@ -723,6 +773,10 @@ func (t EnumValue) DeepCopy() EnumValue {
 type MapType struct {
 	IndexType Type
 	ValueType Type
+}
+
+func (t *MapType) AcceptsValue(value any) bool {
+	return t.ValueType.AcceptsValue(value)
 }
 
 func (t MapType) DeepCopy() MapType {
@@ -849,6 +903,76 @@ type ScalarType struct {
 	ScalarKind  ScalarKind       `yaml:"scalar_kind"` // bool, bytes, string, int, float, ...
 	Value       any              `json:",omitempty"`  // if value isn't nil, we're representing a constant scalar
 	Constraints []TypeConstraint `json:",omitempty"`
+}
+
+func (scalarType *ScalarType) AcceptsValue(value any) bool {
+	if scalarType.ScalarKind == KindNull {
+		return value == nil
+	}
+
+	if scalarType.ScalarKind == KindAny {
+		return true
+	}
+
+	if scalarType.ScalarKind == KindBool {
+		_, ok := value.(bool)
+		return ok
+	}
+
+	if scalarType.ScalarKind == KindBytes {
+		_, ok := value.([]byte)
+		return ok
+	}
+
+	if scalarType.ScalarKind == KindString {
+		_, ok := value.(string)
+		return ok
+	}
+
+	if scalarType.ScalarKind == KindFloat32 {
+		_, ok := value.(float32)
+		return ok
+	}
+	if scalarType.ScalarKind == KindFloat64 {
+		_, ok := value.(float64)
+		return ok
+	}
+
+	if scalarType.ScalarKind == KindUint8 {
+		_, ok := value.(uint8)
+		return ok
+	}
+	if scalarType.ScalarKind == KindUint16 {
+		_, ok := value.(uint16)
+		return ok
+	}
+	if scalarType.ScalarKind == KindUint32 {
+		_, ok := value.(uint32)
+		return ok
+	}
+	if scalarType.ScalarKind == KindUint64 {
+		_, ok := value.(uint64)
+		return ok
+	}
+
+	if scalarType.ScalarKind == KindInt8 {
+		_, ok := value.(int8)
+		return ok
+	}
+	if scalarType.ScalarKind == KindInt16 {
+		_, ok := value.(int16)
+		return ok
+	}
+	if scalarType.ScalarKind == KindInt32 {
+		_, ok := value.(int32)
+		return ok
+	}
+	if scalarType.ScalarKind == KindInt64 {
+		_, ok := value.(int64)
+		return ok
+	}
+
+	return false
 }
 
 func (scalarType ScalarType) DeepCopy() ScalarType {

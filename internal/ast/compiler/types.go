@@ -7,13 +7,29 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
+type ObjectReferences []ObjectReference
+
+func (refs ObjectReferences) Matches(object ast.Object) bool {
+	for _, ref := range refs {
+		if ref.Matches(object) {
+			return true
+		}
+	}
+
+	return false
+}
+
 type ObjectReference struct {
 	Package string
 	Object  string
 }
 
 func (ref ObjectReference) Matches(object ast.Object) bool {
-	return object.SelfRef.ReferredPkg == ref.Package && strings.EqualFold(object.Name, ref.Object)
+	return ref.MatchesRef(object.SelfRef)
+}
+
+func (ref ObjectReference) MatchesRef(refType ast.RefType) bool {
+	return refType.ReferredPkg == ref.Package && strings.EqualFold(refType.ReferredType, ref.Object)
 }
 
 func (ref ObjectReference) AsRef() ast.RefType {

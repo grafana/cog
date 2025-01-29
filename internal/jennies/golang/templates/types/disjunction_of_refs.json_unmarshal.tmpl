@@ -8,7 +8,7 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) erro
 	}
 
 	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
-	parsedAsMap := make(map[string]any)
+	parsedAsMap := make(map[string]{{ formatAny }})
 	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
 		return err
 	}

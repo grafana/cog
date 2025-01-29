@@ -73,7 +73,7 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		}
 	}
 
-	if c.SchemaMetadata.Variant == ast.SchemaVariantDataQuery || c.SchemaMetadata.Variant == ast.SchemaVariantPanel {
+	if c.SchemaMetadata.Variant != "" {
 		g.schema.Objects.Get(rootObjectName).Type.Hints[ast.HintImplementsVariant] = string(c.SchemaMetadata.Variant)
 	}
 
@@ -388,17 +388,21 @@ func (g *generator) walkList(schema *schemaparser.Schema) (ast.Type, error) {
 	var itemsDef ast.Type
 	var err error
 
-	if schema.Items == nil {
+	switch {
+	case schema.Items == nil && schema.Items2020 == nil:
 		itemsDef = ast.Any()
-	} else {
+	case schema.Items2020 != nil:
+		itemsDef, err = g.walkDefinition(schema.Items2020)
+	default:
 		// TODO: schema.Items might not be a schema?
 		itemsDef, err = g.walkDefinition(schema.Items.(*schemaparser.Schema))
-		// items contains an empty schema: `{}`
-		if errors.Is(err, errUndescriptiveSchema) {
-			itemsDef = ast.Any()
-		} else if err != nil {
-			return ast.Type{}, err
-		}
+	}
+
+	// items contains an empty schema: `{}`
+	if errors.Is(err, errUndescriptiveSchema) {
+		itemsDef = ast.Any()
+	} else if err != nil {
+		return ast.Type{}, err
 	}
 
 	return ast.NewArray(itemsDef, ast.Default(schema.Default)), nil

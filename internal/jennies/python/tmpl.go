@@ -5,20 +5,28 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 //go:embed templates/*/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(extraTemplatesDirectories []string) *template.Template {
+func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplatesDirectories []string) *template.Template {
 	tmpl, err := template.New(
 		"python",
 
+		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
+		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(formattingTemplateFuncs()),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
+			"isDisjunctionOfBuilders": func(_ ast.Type) string {
+				panic("isDisjunctionOfBuilders() needs to be overridden by a jenny")
+			},
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
@@ -37,17 +45,14 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"defaultForType": func(_ ast.Type) string {
 				panic("defaultForType() needs to be overridden by a jenny")
 			},
-			"typeHasBuilder": func(_ ast.Type) bool {
-				panic("typeHasBuilder() needs to be overridden by a jenny")
-			},
-			"resolvesToComposableSlot": func(_ ast.Type) bool {
-				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
-			},
 			"importModule": func(alias string, pkg string, module string) string {
 				panic("importModule() needs to be overridden by a jenny")
 			},
 			"importPkg": func(alias string, pkg string) string {
 				panic("importPkg() needs to be overridden by a jenny")
+			},
+			"disjunctionFromJSON": func(typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
+				panic("disjunctionFromJSON() needs to be overridden by a jenny")
 			},
 		}),
 
@@ -66,5 +71,6 @@ func formattingTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"formatIdentifier": formatIdentifier,
 		"formatPath":       formatFieldPath,
+		"formatObjectName": formatObjectName,
 	}
 }

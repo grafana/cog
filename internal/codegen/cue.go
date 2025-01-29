@@ -3,7 +3,6 @@ package codegen
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -119,6 +118,10 @@ func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, e
 	// Load Cue files into Cue build.Instances slice
 	bis := load.Instances([]string{"github.com/cog-vfs/" + expectedCuePkgName}, &load.Config{
 		Overlay: cueFsOverlay,
+		// Point cue to a directory defined by the cueFsOverlay as base directory
+		// for import path resolution instead of using the current working directory.
+		// This ensures that only files/schemas defined in the vfs will be parsed.
+		Dir: "/cog/vfs",
 	})
 
 	value := cuecontext.New().BuildInstance(bis[0])
@@ -130,48 +133,44 @@ func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, e
 }
 
 func buildCueOverlay(imports []simplecue.LibraryInclude, entrypoint string, expectedCuePkgName string) (map[string]load.Source, error) {
-	mockKindsysFS := buildMockKindsysFS()
 	libFs, err := buildBaseFSWithLibraries(imports)
 	if err != nil {
 		return nil, err
 	}
 
-	entrypointFS, err := dirToPrefixedFS(entrypoint, "cue.mod/pkg/github.com/cog-vfs/"+expectedCuePkgName)
+	entrypointFS, err := dirToPrefixedFS(entrypoint, "cog/vfs/cue.mod/pkg/github.com/cog-vfs/"+expectedCuePkgName)
 	if err != nil {
 		return nil, err
 	}
 
-	mergedFS := merged_fs.MergeMultiple(append(libFs, mockKindsysFS, entrypointFS)...)
-
-	overlay := make(map[string]load.Source)
-	if err := toCueOverlay("/", mergedFS, overlay); err != nil {
-		return nil, err
-	}
-
-	return overlay, nil
+	return toCueOverlay("/", merged_fs.MergeMultiple(
+		libFs,
+		buildMockKindsysFS(),
+		entrypointFS,
+	))
 }
 
 func buildMockKindsysFS() fs.FS {
 	return fstest.MapFS{
-		"cue.mod/pkg/github.com/grafana/kindsys/composable.cue": &fstest.MapFile{
+		"cog/vfs/cue.mod/pkg/github.com/grafana/kindsys/composable.cue": &fstest.MapFile{
 			Data: []byte(`package kindsys
 Composable: {
 	...
 }`),
 		},
-		"cue.mod/pkg/github.com/grafana/kindsys/core.cue": &fstest.MapFile{
+		"cog/vfs/cue.mod/pkg/github.com/grafana/kindsys/core.cue": &fstest.MapFile{
 			Data: []byte(`package kindsys
 Core: {
 	...
 }`),
 		},
-		"cue.mod/pkg/github.com/grafana/kindsys/custom.cue": &fstest.MapFile{
+		"cog/vfs/cue.mod/pkg/github.com/grafana/kindsys/custom.cue": &fstest.MapFile{
 			Data: []byte(`package kindsys
 Custom: {
 	...
 }`),
 		},
-		"cue.mod/module.cue": &fstest.MapFile{
+		"cog/vfs/cue.mod/module.cue": &fstest.MapFile{
 			Data: []byte(`language: {
 	version: "v0.10.1"
 }
@@ -181,7 +180,7 @@ module: "cog.vfs"
 	}
 }
 
-func buildBaseFSWithLibraries(imports []simplecue.LibraryInclude) ([]fs.FS, error) {
+func buildBaseFSWithLibraries(imports []simplecue.LibraryInclude) (fs.FS, error) {
 	var librariesFS []fs.FS
 	for _, importDefinition := range imports {
 		absPath, err := filepath.Abs(importDefinition.FSPath)
@@ -189,7 +188,7 @@ func buildBaseFSWithLibraries(imports []simplecue.LibraryInclude) ([]fs.FS, erro
 			return nil, err
 		}
 
-		libraryFS, err := dirToPrefixedFS(absPath, "cue.mod/pkg/"+importDefinition.ImportPath)
+		libraryFS, err := dirToPrefixedFS(absPath, "cog/vfs/cue.mod/pkg/"+importDefinition.ImportPath)
 		if err != nil {
 			return nil, err
 		}
@@ -197,7 +196,7 @@ func buildBaseFSWithLibraries(imports []simplecue.LibraryInclude) ([]fs.FS, erro
 		librariesFS = append(librariesFS, libraryFS)
 	}
 
-	return librariesFS, nil
+	return merged_fs.MergeMultiple(librariesFS...), nil
 }
 
 func dirToPrefixedFS(directory string, prefix string) (fs.FS, error) {
@@ -206,7 +205,7 @@ func dirToPrefixedFS(directory string, prefix string) (fs.FS, error) {
 		return nil, err
 	}
 
-	commonFS := fstest.MapFS{}
+	prefixedFS := fstest.MapFS{}
 	for _, file := range dirHandle {
 		if file.IsDir() {
 			continue
@@ -217,18 +216,20 @@ func dirToPrefixedFS(directory string, prefix string) (fs.FS, error) {
 			return nil, err
 		}
 
-		commonFS[filepath.Join(prefix, file.Name())] = &fstest.MapFile{Data: content}
+		prefixedFS[filepath.Join(prefix, file.Name())] = &fstest.MapFile{Data: content}
 	}
 
-	return commonFS, nil
+	return prefixedFS, nil
 }
 
 // ToOverlay converts a fs.FS into a CUE loader overlay.
-func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) error {
+func toCueOverlay(prefix string, vfs fs.FS) (map[string]load.Source, error) {
 	// TODO why not just stick the prefix on automatically...?
 	if !filepath.IsAbs(prefix) {
-		return fmt.Errorf("must provide absolute path prefix when generating cue overlay, got %q", prefix)
+		return nil, fmt.Errorf("must provide absolute path prefix when generating cue overlay, got %q", prefix)
 	}
+
+	overlay := make(map[string]load.Source)
 	err := fs.WalkDir(vfs, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -238,13 +239,7 @@ func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 			return nil
 		}
 
-		f, err := vfs.Open(path)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = f.Close() }()
-
-		b, err := io.ReadAll(f)
+		b, err := fs.ReadFile(vfs, path)
 		if err != nil {
 			return err
 		}
@@ -254,9 +249,5 @@ func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 		return nil
 	})
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return overlay, err
 }

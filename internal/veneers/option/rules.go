@@ -72,10 +72,10 @@ func StructFieldsAsOptions(selector Selector, explicitFields ...string) RewriteR
 	}
 }
 
-func DisjunctionAsOptions(selector Selector) RewriteRule {
+func DisjunctionAsOptions(selector Selector, argumentIndex int) RewriteRule {
 	return RewriteRule{
 		Selector: selector,
-		Action:   DisjunctionAsOptionsAction(),
+		Action:   DisjunctionAsOptionsAction(argumentIndex),
 	}
 }
 
@@ -90,5 +90,12 @@ func AddAssignment(selector Selector, assignment veneers.Assignment) RewriteRule
 	return RewriteRule{
 		Selector: selector,
 		Action:   AddAssignmentAction(assignment),
+	}
+}
+
+func AddComments(selector Selector, comments []string) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   AddCommentsAction(comments),
 	}
 }

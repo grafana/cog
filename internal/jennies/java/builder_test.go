@@ -18,7 +18,7 @@ func TestBuilder_Generate(t *testing.T) {
 	}
 
 	language := New(Config{
-		generateBuilders: true,
+		GenerateBuilders: true,
 	})
 	jenny := Builder{config: language.config, tmpl: initTemplates([]string{})}
 

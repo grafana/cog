@@ -66,12 +66,16 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	jenny.typeFormatter = defaultTypeFormatter(context, jenny.importPkg, jenny.importModule)
 
 	jenny.tmpl = jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(template.FuncMap{
 			"formatFullyQualifiedRef": func(typeDef ast.RefType) string {
 				return jenny.typeFormatter.formatFullyQualifiedRef(typeDef, false)
 			},
 			"importModule": jenny.importModule,
 			"importPkg":    jenny.importPkg,
+			"disjunctionFromJSON": func(typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
+				return jenny.disjunctionFromJSON(context, typeDef, inputVar)
+			},
 		})
 
 	i := 0
@@ -99,9 +103,16 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			buffer.WriteString(fromJSON)
 		}
 
-		if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
+		customVariantTmpl := template.CustomObjectVariantBlock(object)
+		if object.Type.ImplementsVariant() && jenny.tmpl.Exists(customVariantTmpl) {
 			buffer.WriteString("\n\n\n")
-			buffer.WriteString(jenny.generateDataqueryVariantConfigFunc(schema, object))
+			if innerErr := jenny.tmpl.RenderInBuffer(&buffer, customVariantTmpl, map[string]any{
+				"Object": object,
+				"Schema": schema,
+			}); innerErr != nil {
+				err = innerErr
+				return
+			}
 		}
 
 		// we want two blank lines between objects, except at the end of the file
@@ -113,9 +124,15 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return nil, err
 	}
 
-	if schema.Metadata.Kind == ast.SchemaKindComposable && schema.Metadata.Variant == ast.SchemaVariantPanel {
+	customSchemaVariant := template.CustomSchemaVariantBlock(schema)
+	if schema.Metadata.Kind == ast.SchemaKindComposable && jenny.tmpl.Exists(customSchemaVariant) {
 		buffer.WriteString("\n\n\n")
-		buffer.WriteString(jenny.generatePanelCfgVariantConfigFunc(schema))
+
+		if err := jenny.tmpl.RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
+			"Schema": schema,
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	buffer.WriteString("\n")
@@ -238,6 +255,7 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	}
 
 	var buffer strings.Builder
+	var err error
 
 	typingPkg := jenny.importPkg("typing", "typing")
 
@@ -257,7 +275,10 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 		}
 
 		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
-			value = jenny.composableSlotFromJSON(context, object.Type.AsStruct(), field)
+			value, err = jenny.composableSlotFromJSON(context, object, field)
+			if err != nil {
+				return "", err
+			}
 		} else if field.Type.IsRef() { //nolint:gocritic
 			ref := field.Type.AsRef()
 			referredObject, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
@@ -268,25 +289,25 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 			}
 		} else if field.Type.IsArray() && field.Type.Array.ValueType.IsDisjunction() {
 			valueType := field.Type.Array.ValueType
-			decodingMap, decodingCall := jenny.disjunctionFromJSON(valueType.AsDisjunction(), "item")
-			if decodingMap != "" {
-				decodingMap += "\n            "
+			code := jenny.disjunctionFromJSON(context, valueType, "item")
+			if code.Setup != "" {
+				code.Setup += "\n            "
 			}
 
-			value = fmt.Sprintf(`[%[2]s for item in data["%[1]s"]]`, field.Name, decodingCall)
+			value = fmt.Sprintf(`[%[2]s for item in data["%[1]s"]]`, field.Name, code.DecodingCall)
 
 			assignment := fmt.Sprintf(`        if "%s" in data:
-            %sargs["%s"] = %s`, field.Name, decodingMap, fieldName, value)
+            %sargs["%s"] = %s`, field.Name, code.Setup, fieldName, value)
 			assignments = append(assignments, assignment)
 			continue
 		} else if field.Type.IsDisjunction() {
-			decodingMap, decodingCall := jenny.disjunctionFromJSON(field.Type.AsDisjunction(), fmt.Sprintf(`data["%s"]`, field.Name))
-			if decodingMap != "" {
-				decodingMap += "\n            "
+			code := jenny.disjunctionFromJSON(context, field.Type, fmt.Sprintf(`data["%s"]`, field.Name))
+			if code.Setup != "" {
+				code.Setup += "\n            "
 			}
 
 			assignment := fmt.Sprintf(`        if "%s" in data:
-            %sargs["%s"] = %s`, field.Name, decodingMap, fieldName, decodingCall)
+            %sargs["%s"] = %s`, field.Name, code.Setup, fieldName, code.DecodingCall)
 			assignments = append(assignments, assignment)
 			continue
 		}
@@ -308,56 +329,17 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	return buffer.String(), nil
 }
 
-func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) string {
-	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
-	identifier := schema.Metadata.Identifier
-
-	options := "Options.from_json"
-	if _, hasOptions := schema.LocateObject("Options"); !hasOptions {
-		options = "None"
-	}
-
-	fieldConfig := "FieldConfig.from_json"
-	if _, hasFieldConfig := schema.LocateObject("FieldConfig"); !hasFieldConfig {
-		fieldConfig = "None"
-	}
-
-	return fmt.Sprintf(`def variant_config():
-    return %[1]s.PanelCfgConfig(
-        identifier="%[2]s",
-        options_from_json_hook=%[3]s,
-        field_config_from_json_hook=%[4]s,
-    )`, cogruntime, identifier, options, fieldConfig)
+type disjunctionFromJSONCode struct {
+	Setup        string
+	DecodingCall string
 }
 
-func (jenny RawTypes) generateDataqueryVariantConfigFunc(schema *ast.Schema, object ast.Object) string {
-	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
-	objectName := tools.UpperCamelCase(object.Name)
-	identifier := schema.Metadata.Identifier
+func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
+	disjunction := context.ResolveRefs(typeDef).AsDisjunction()
 
-	setup := ""
-
-	// The `from_json_hook` needs to be generated differently if `object.Type` is a disjunction
-	// since there is no "from_json" method to call
-	fromJSONHook := fmt.Sprintf("%s.from_json", objectName)
-	if object.Type.IsDisjunction() {
-		decodingMap, decodingCall := jenny.disjunctionFromJSON(object.Type.AsDisjunction(), "data")
-		fromJSONHook = "lambda data: " + decodingCall
-
-		setup = decodingMap + "\n    "
-	}
-
-	return fmt.Sprintf(`def variant_config() -> %[2]s.DataqueryConfig:
-    %[4]sreturn %[2]s.DataqueryConfig(
-        identifier="%[3]s",
-        from_json_hook=%[1]s,
-    )`, fromJSONHook, cogruntime, identifier, setup)
-}
-
-func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, inputVar string) (string, string) {
 	// this potentially generates incorrect code, but there isn't much we can do without more information.
 	if disjunction.Discriminator == "" || disjunction.DiscriminatorMapping == nil {
-		return "", inputVar
+		return disjunctionFromJSONCode{DecodingCall: inputVar}
 	}
 
 	typingPkg := jenny.importPkg("typing", "typing")
@@ -390,40 +372,22 @@ func (jenny RawTypes) disjunctionFromJSON(disjunction ast.DisjunctionType, input
 		decodingCall = fmt.Sprintf(`decoding_map.get(%[3]s["%[1]s"]%[2]s).from_json(%[3]s)`, disjunction.Discriminator, defaultBranch, inputVar)
 	}
 
-	return decodingMap, decodingCall
+	return disjunctionFromJSONCode{
+		Setup:        decodingMap,
+		DecodingCall: decodingCall,
+	}
 }
 
-func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentStruct ast.StructType, field ast.StructField) string {
+func (jenny RawTypes) composableSlotFromJSON(context languages.Context, parentObject ast.Object, field ast.StructField) (string, error) {
 	slot, _ := context.ResolveToComposableSlot(field.Type)
-	if slot.AsComposableSlot().Variant != ast.SchemaVariantDataQuery {
-		return "unknown composable slot variant"
+	variant := string(slot.AsComposableSlot().Variant)
+	unmarshalVariantBlock := template.VariantFieldUnmarshalBlock(variant)
+	if !jenny.tmpl.Exists(unmarshalVariantBlock) {
+		return "", fmt.Errorf("can not generate custom unmarshal function for composable slot with variant '%s': template block %s not found", variant, unmarshalVariantBlock)
 	}
 
-	cogruntime := jenny.importModule("cogruntime", "..cog", "runtime")
-
-	// First: try to locate a field that would contain the type of datasource being used.
-	// We're looking for a field defined as a reference to the `DataSourceRef` type.
-	var hintField *ast.StructField
-	for i, candidate := range parentStruct.Fields {
-		if !candidate.Type.IsRef() {
-			continue
-		}
-		if candidate.Type.AsRef().ReferredType != "DataSourceRef" {
-			continue
-		}
-
-		hintField = &parentStruct.Fields[i]
-	}
-
-	// then: unmarshalling boilerplate
-	hintValue := `""`
-	if hintField != nil {
-		hintValue = fmt.Sprintf(`data["%[1]s"]["type"] if data.get("%[1]s") is not None and data["%[1]s"].get("type", "") != "" else ""`, hintField.Name)
-	}
-
-	if field.Type.IsArray() {
-		return fmt.Sprintf(`[%[3]s.dataquery_from_json(dataquery_json, %[2]s) for dataquery_json in data["%[1]s"]]`, field.Name, hintValue, cogruntime)
-	}
-
-	return fmt.Sprintf(`%[3]s.dataquery_from_json(data["%[1]s"], %[2]s)`, field.Name, hintValue, cogruntime)
+	return jenny.tmpl.Render(unmarshalVariantBlock, map[string]any{
+		"Object": parentObject,
+		"Field":  field,
+	})
 }

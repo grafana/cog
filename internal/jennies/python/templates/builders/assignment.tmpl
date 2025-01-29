@@ -19,9 +19,14 @@
 
 {{- define "assignment_setup" }}
 {{- with .Value.Argument }}
-{{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+{{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
 {{- $builtResultSuffix := ternary "_resources" "_resource" (or .Type.IsArray .Type.IsMap) }}
-{{ .Name|formatIdentifier }}{{ $builtResultSuffix }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (formatIdentifier .Name) "Depth" 1) }}
+{{- $name := print (.Name|formatIdentifier) $builtResultSuffix }}
+{{ $name }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (formatIdentifier .Name) "Depth" 1) }}
+{{- if and .Type.IsDisjunction (not (isDisjunctionOfBuilders .Type)) }}
+{{ $branchesCount := sub1 (len .Type.Disjunction.Branches) -}}
+assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name }}, {{ $branch|formatRawType}}){{ if ne $i $branchesCount }} or {{ end }}{{ end -}}
+{{- end -}}
 {{- end }}
 {{- end }}
 {{- with .Value.Envelope }}
@@ -36,6 +41,8 @@
 [{{ template "unfold_builders" (dict "InputType" .InputType.Array.ValueType "InputVar" (print "r" .Depth ) "Depth" (add1 .Depth)) }} for r{{ .Depth }} in {{ .InputVar }}]
 {{- else if .InputType.IsMap -}}
 { key{{.Depth}}: {{ template "unfold_builders" (dict "InputType" .InputType.Map.ValueType "InputVar" (print "val" .Depth ) "Depth" (add1 .Depth)) }} for (key{{.Depth}}, val{{ .Depth }}) in {{ .InputVar }}.items() }
+{{- else if and .InputType.IsDisjunction (not (isDisjunctionOfBuilders .InputType)) -}}
+{{ .InputVar }}.build() if hasattr({{ .InputVar }}, 'build') and callable({{ .InputVar }}.build) else {{ .InputVar }}
 {{- else -}}
 {{ .InputVar }}.build()
 {{- end -}}
@@ -46,7 +53,7 @@
 {{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
 {{- end }}
 {{- with .Value.Argument }}
-{{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+{{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
 {{- .Name|formatIdentifier }}{{- (or .Type.IsArray .Type.IsMap) | ternary "_resources" "_resource" }}
 {{- else }}
 {{- .Name|formatIdentifier }}

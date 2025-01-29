@@ -92,6 +92,9 @@ func (formatter *typeFormatter) formatEnumDef(def ast.Object) string {
 
 func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool) string {
 	actualFormatter := func() string {
+		if def.IsAny() && formatter.config.AnyAsInterface {
+			return "interface{}"
+		}
 		if def.IsAny() {
 			return "any"
 		}
@@ -211,9 +214,9 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	// we need to use the constant's type instead.
 	// ie: `SomeField string` instead of `SomeField MyStringConstant`
 	if def.Type.IsRef() {
-		referredType, found := formatter.context.LocateObject(def.Type.AsRef().ReferredPkg, def.Type.AsRef().ReferredType)
-		if found && referredType.Type.IsConcreteScalar() {
-			fieldType = referredType.Type
+		referredType := formatter.context.ResolveRefs(def.Type)
+		if referredType.IsConcreteScalar() {
+			fieldType = referredType
 		}
 	}
 

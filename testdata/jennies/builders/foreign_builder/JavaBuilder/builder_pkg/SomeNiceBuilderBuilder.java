@@ -9,7 +9,7 @@ public class SomeNiceBuilderBuilder implements cog.Builder<SomeStruct> {
         this.internal = new SomeStruct();
     }
     public SomeNiceBuilderBuilder title(String title) {
-    this.internal.title = title;
+        this.internal.title = title;
         return this;
     }
     public SomeStruct build() {

@@ -25,3 +25,19 @@ func ExtraObjectDocsBlock(obj ast.Object) string {
 func ExtraBuilderDocsBlock(builder ast.Builder) string {
 	return fmt.Sprintf("api_reference_builder_%s_%s_extra", builder.Package, builder.Name)
 }
+
+func CustomObjectVariantBlock(object ast.Object) string {
+	return fmt.Sprintf("object_variant_%s", object.Type.ImplementedVariant())
+}
+
+func CustomSchemaVariantBlock(schema *ast.Schema) string {
+	return fmt.Sprintf("schema_variant_%s", schema.Metadata.Variant)
+}
+
+func VariantFieldUnmarshalBlock(variant string) string {
+	return fmt.Sprintf("variant_%s_field_unmarshal", variant)
+}
+
+func DynamicFilesBlock() string {
+	return "dynamic_files"
+}

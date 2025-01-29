@@ -12,7 +12,7 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
 		if (this.internal.annotations == null) {
 			this.internal.annotations = new HashMap<>();
 		}
-    this.internal.annotations[key] = value;
+        this.internal.annotations.put(key, value);
         return this;
     }
     public SomeStruct build() {

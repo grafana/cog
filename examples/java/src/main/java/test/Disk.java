@@ -26,9 +26,9 @@ public class Disk {
                                 .withTarget(Common.basicPrometheusQuery(
                                                 "rate(node_disk_io_time_seconds_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])",
                                                 "{{device}} IO time"))
-                                .withOverride(new DashboardFieldConfigSourceOverridesBuilder()
-                                                .matcher(new MatcherConfig("byRegexp", "/ io time/"))
-                                                .properties(List.of(new DynamicConfigValue("unit", "percentunit"))));
+                                .overrideByRegexp("/ io time/", List.of(
+                                    new DynamicConfigValue("unit", "percentunit")
+                                ));
         }
 
         public static com.grafana.foundation.table.PanelBuilder diskSpaceUsageTable() {
@@ -47,17 +47,16 @@ public class Disk {
                                 .withTransformation(transformation("calculateField", transformer4Options()))
                                 .withTransformation(transformation("organize", transformer5Options()))
                                 .withTransformation(transformation("sortBy", transformer6Options()))
-                                .withOverride(defaultOverrides("Mounted on", 260))
-                                .withOverride(defaultOverrides("Size", 93)).withOverride(defaultOverrides("Used", 72))
-                                .withOverride(defaultOverrides("Available", 88))
-                                .withOverride(new DashboardFieldConfigSourceOverridesBuilder()
-                                                .matcher(new MatcherConfig("byName", "Used, %")).properties(List.of(
-                                                                new DynamicConfigValue("unit", "percentunit"),
-                                                                new DynamicConfigValue("custom.cellOptions",
-                                                                                Map.of("mode", "gradient", "type",
-                                                                                                "gauge")),
-                                                                new DynamicConfigValue("min", 0),
-                                                                new DynamicConfigValue("max", 1))));
+                                .overrideByName("Mounted on", List.of(new DynamicConfigValue("custom.width", 260)))
+                                .overrideByName("Size", List.of(new DynamicConfigValue("custom.width", 93)))
+                                .overrideByName("Used", List.of(new DynamicConfigValue("custom.width", 72)))
+                                .overrideByName("Available", List.of(new DynamicConfigValue("custom.width", 88)))
+                                .overrideByName("Used, %", List.of(
+                                    new DynamicConfigValue("unit", "percentunit"),
+                                    new DynamicConfigValue("custom.cellOptions", Map.of("mode", "gradient", "type", "gauge")),
+                                    new DynamicConfigValue("min", 0),
+                                    new DynamicConfigValue("max", 1)
+                                ));
         }
 
         private static DataTransformerConfig transformation(String id, Object options) {
@@ -116,10 +115,5 @@ public class Disk {
                 return Map.of(
                                 "fields", List.of(),
                                 "sort", Map.of("field", "Mounted on"));
-        }
-
-        private static Builder<DashboardFieldConfigSourceOverrides> defaultOverrides(String options, Integer value) {
-                return new DashboardFieldConfigSourceOverridesBuilder().matcher(new MatcherConfig("byName", options))
-                                .properties(List.of(new DynamicConfigValue("custom.width", value)));
         }
 }

@@ -11,7 +11,7 @@ type CompilerPass struct {
 	EntrypointIdentification *EntrypointIdentification `yaml:"entrypoint_identification"`
 	DataqueryIdentification  *DataqueryIdentification  `yaml:"dataquery_identification"`
 	Unspec                   *Unspec                   `yaml:"unspec"`
-	SetDatasourceToDataquery *SetDatasourceToDataquery `yaml:"set_datasource_to_dataquery"`
+	ReplaceReference         *ReplaceReference         `yaml:"replace_reference"`
 	FieldsSetDefault         *FieldsSetDefault         `yaml:"fields_set_default"`
 	FieldsSetRequired        *FieldsSetRequired        `yaml:"fields_set_required"`
 	FieldsSetNotRequired     *FieldsSetNotRequired     `yaml:"fields_set_not_required"`
@@ -23,10 +23,12 @@ type CompilerPass struct {
 	RetypeObject             *RetypeObject             `yaml:"retype_object"`
 	HintObject               *HintObject               `yaml:"hint_object"`
 	RetypeField              *RetypeField              `yaml:"retype_field"`
+	OmitFields               *OmitFields               `yaml:"omit_fields"`
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
 	SchemaSetEntryPoint      *SchemaSetEntryPoint      `yaml:"schema_set_entry_point"`
 	DuplicateObject          *DuplicateObject          `yaml:"duplicate_object"`
 	TrimEnumValues           *TrimEnumValues           `yaml:"trim_enum_values"`
+	ConstantToEnum           *ConstantToEnum           `yaml:"constant_to_enum"`
 
 	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 
@@ -46,8 +48,8 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.Unspec != nil {
 		return pass.Unspec.AsCompilerPass(), nil
 	}
-	if pass.SetDatasourceToDataquery != nil {
-		return pass.SetDatasourceToDataquery.AsCompilerPass(), nil
+	if pass.ReplaceReference != nil {
+		return pass.ReplaceReference.AsCompilerPass()
 	}
 	if pass.FieldsSetDefault != nil {
 		return pass.FieldsSetDefault.AsCompilerPass()
@@ -82,6 +84,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.RetypeField != nil {
 		return pass.RetypeField.AsCompilerPass()
 	}
+	if pass.OmitFields != nil {
+		return pass.OmitFields.AsCompilerPass()
+	}
 	if pass.SchemaSetIdentifier != nil {
 		return pass.SchemaSetIdentifier.AsCompilerPass()
 	}
@@ -90,6 +95,12 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DuplicateObject != nil {
 		return pass.DuplicateObject.AsCompilerPass()
+	}
+	if pass.TrimEnumValues != nil {
+		return pass.TrimEnumValues.AsCompilerPass()
+	}
+	if pass.ConstantToEnum != nil {
+		return pass.ConstantToEnum.AsCompilerPass()
 	}
 
 	if pass.AnonymousStructsToNamed != nil {
@@ -107,9 +118,6 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DisjunctionWithConstantToDefault != nil {
 		return pass.DisjunctionWithConstantToDefault.AsCompilerPass()
-	}
-	if pass.TrimEnumValues != nil {
-		return pass.TrimEnumValues.AsCompilerPass()
 	}
 
 	return nil, fmt.Errorf("empty compiler pass")
@@ -136,10 +144,26 @@ func (pass Unspec) AsCompilerPass() *compiler.Unspec {
 	return &compiler.Unspec{}
 }
 
-type SetDatasourceToDataquery struct{}
+type ReplaceReference struct {
+	From string // Expected format: [package].[object]
+	To   string // Expected format: [package].[object]
+}
 
-func (pass SetDatasourceToDataquery) AsCompilerPass() *compiler.SetDatasourceToDataquery {
-	return &compiler.SetDatasourceToDataquery{}
+func (pass ReplaceReference) AsCompilerPass() (*compiler.ReplaceReference, error) {
+	fromRef, err := compiler.ObjectReferenceFromString(pass.From)
+	if err != nil {
+		return nil, err
+	}
+
+	toRef, err := compiler.ObjectReferenceFromString(pass.To)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.ReplaceReference{
+		From: fromRef,
+		To:   toRef,
+	}, nil
 }
 
 type FieldsSetDefault struct {
@@ -366,6 +390,25 @@ func (pass RetypeField) AsCompilerPass() (*compiler.RetypeField, error) {
 	}, nil
 }
 
+type OmitFields struct {
+	Fields []string // Expected format: [package].[object].[field]
+}
+
+func (pass OmitFields) AsCompilerPass() (*compiler.OmitFields, error) {
+	fieldRefs := make([]compiler.FieldReference, 0, len(pass.Fields))
+	for _, field := range pass.Fields {
+		fieldRef, err := compiler.FieldReferenceFromString(field)
+		if err != nil {
+			return nil, err
+		}
+		fieldRefs = append(fieldRefs, fieldRef)
+	}
+
+	return &compiler.OmitFields{
+		Fields: fieldRefs,
+	}, nil
+}
+
 type SchemaSetIdentifier struct {
 	Package    string
 	Identifier string
@@ -429,4 +472,23 @@ type TrimEnumValues struct{}
 
 func (pass TrimEnumValues) AsCompilerPass() (*compiler.TrimEnumValues, error) {
 	return &compiler.TrimEnumValues{}, nil
+}
+
+type ConstantToEnum struct {
+	Objects []string // Expected format: [package].[object]
+}
+
+func (pass ConstantToEnum) AsCompilerPass() (*compiler.ConstantToEnum, error) {
+	objectRefs := make([]compiler.ObjectReference, 0, len(pass.Objects))
+
+	for _, ref := range pass.Objects {
+		objectRef, err := compiler.ObjectReferenceFromString(ref)
+		if err != nil {
+			return nil, err
+		}
+
+		objectRefs = append(objectRefs, objectRef)
+	}
+
+	return &compiler.ConstantToEnum{Objects: objectRefs}, nil
 }

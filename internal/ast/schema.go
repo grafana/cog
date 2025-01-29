@@ -113,6 +113,10 @@ func NewSchema(pkg string, metadata SchemaMeta) *Schema {
 	}
 }
 
+func (schema *Schema) IsComposableVariant(variant string) bool {
+	return schema.Metadata.Kind == SchemaKindComposable && string(schema.Metadata.Variant) == variant
+}
+
 func (schema *Schema) AddObject(object Object) {
 	schema.Objects.Set(object.Name, object)
 }
@@ -172,11 +176,15 @@ func (schema *Schema) DeepCopy() Schema {
 }
 
 func (schema *Schema) LocateObject(name string) (Object, bool) {
-	if !schema.Objects.Has(name) {
+	if !schema.HasObject(name) {
 		return Object{}, false
 	}
 
 	return schema.Objects.Get(name), true
+}
+
+func (schema *Schema) HasObject(name string) bool {
+	return schema.Objects.Has(name)
 }
 
 func (schema *Schema) Resolve(typeDef Type) (Type, bool) {

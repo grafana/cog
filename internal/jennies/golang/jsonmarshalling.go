@@ -35,20 +35,6 @@ func NewJSONMarshalling(config Config, tmpl *template.Template, imports *common.
 	}
 }
 
-func (jenny JSONMarshalling) generateForSchema(buffer *strings.Builder, schema *ast.Schema) error {
-	if schema.Metadata.Kind != ast.SchemaKindComposable || schema.Metadata.Variant != ast.SchemaVariantPanel {
-		return nil
-	}
-
-	variantUnmarshal, err := jenny.renderPanelcfgVariantUnmarshal(schema)
-	if err != nil {
-		return err
-	}
-	buffer.WriteString(variantUnmarshal)
-
-	return nil
-}
-
 func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object) error {
 	if jenny.objectNeedsCustomMarshal(object) {
 		jsonMarshal, err := jenny.renderCustomMarshal(object)
@@ -65,15 +51,6 @@ func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context 
 			return err
 		}
 		buffer.WriteString(jsonUnmarshal)
-		buffer.WriteString("\n")
-	}
-
-	if object.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) && !object.Type.HasHint(ast.HintSkipVariantPluginRegistration) && !object.Type.IsStructGeneratedFromDisjunction() {
-		variantUnmarshal, err := jenny.renderDataqueryVariantUnmarshal(schema, object)
-		if err != nil {
-			return err
-		}
-		buffer.WriteString(variantUnmarshal)
 		buffer.WriteString("\n")
 	}
 
@@ -183,8 +160,6 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 	var buffer strings.Builder
 	fields := obj.Type.AsStruct().Fields
 
-	jenny.packageMapper("cog")
-
 	// unmarshal "normal" fields (ie: with no composable slot)
 	for _, field := range fields {
 		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
@@ -208,14 +183,17 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 			continue
 		}
 
-		variant := composableSlotType.AsComposableSlot().Variant
+		variant := string(composableSlotType.AsComposableSlot().Variant)
+		unmarshalVariantBlock := template.VariantFieldUnmarshalBlock(variant)
+		if !jenny.tmpl.Exists(unmarshalVariantBlock) {
+			return "", fmt.Errorf("can not generate custom unmarshal function for composable slot with variant '%s': template block %s not found", variant, unmarshalVariantBlock)
+		}
 
-		switch variant {
-		case ast.SchemaVariantDataQuery:
-			source := jenny.renderUnmarshalDataqueryField(obj, field)
-			buffer.WriteString(source)
-		default:
-			return "", fmt.Errorf("can not generate custom unmarshal function for composable slot with variant '%s'", variant)
+		if err := jenny.tmpl.RenderInBuffer(&buffer, unmarshalVariantBlock, map[string]any{
+			"Object": obj,
+			"Field":  field,
+		}); err != nil {
+			return "", err
 		}
 	}
 
@@ -234,114 +212,4 @@ func (resource *%[1]s) UnmarshalJSON(raw []byte) error {
 	return nil
 }
 `, formatObjectName(obj.Name), buffer.String()), nil
-}
-
-func (jenny JSONMarshalling) renderUnmarshalDataqueryField(parentStruct ast.Object, field ast.StructField) string {
-	// First: try to locate a field that would contain the type of datasource being used.
-	// We're looking for a field defined as a reference to the `DataSourceRef` type.
-	var hintField *ast.StructField
-	for i, candidate := range parentStruct.Type.AsStruct().Fields {
-		if !candidate.Type.IsRef() {
-			continue
-		}
-		if candidate.Type.AsRef().ReferredType != "DataSourceRef" {
-			continue
-		}
-
-		hintField = &parentStruct.Type.AsStruct().Fields[i]
-	}
-
-	// then: unmarshalling boilerplate
-	hintValue := `dataqueryTypeHint := ""
-`
-
-	if hintField != nil {
-		hintValue += fmt.Sprintf(`if resource.%[1]s != nil && resource.%[1]s.Type != nil {
-dataqueryTypeHint = *resource.%[1]s.Type
-}
-`, formatFieldName(hintField.Name))
-	}
-
-	jenny.packageMapper("cog")
-
-	if field.Type.IsArray() {
-		jenny.packageMapper("cog")
-		return fmt.Sprintf(`
-	%[3]s
-	if fields["%[2]s"] != nil {
-		%[2]s, err := cog.UnmarshalDataqueryArray(fields["%[2]s"], dataqueryTypeHint)
-		if err != nil {
-			return err
-		}
-		resource.%[1]s = %[2]s
-	}
-`, formatFieldName(field.Name), field.Name, hintValue)
-	}
-
-	return fmt.Sprintf(`
-	%[3]s
-	if fields["%[2]s"] != nil {
-		%[2]s, err := cog.UnmarshalDataquery(fields["%[2]s"], dataqueryTypeHint)
-		if err != nil {
-			return err
-		}
-		resource.%[1]s = %[2]s
-	}
-`, formatFieldName(field.Name), field.Name, hintValue)
-}
-
-func (jenny JSONMarshalling) renderPanelcfgVariantUnmarshal(schema *ast.Schema) (string, error) {
-	jenny.packageMapper("cog/variants")
-
-	_, hasOptions := schema.LocateObject("Options")
-	_, hasFieldConfig := schema.LocateObject("FieldConfig")
-
-	if jenny.config.generateConverters {
-		jenny.packageMapper("dashboard")
-	}
-
-	jenny.apiRefCollector.RegisterFunction(schema.Package, common.FunctionReference{
-		Name: "VariantConfig",
-		Comments: []string{
-			fmt.Sprintf("VariantConfig returns the configuration related to %s panels.", strings.ToLower(schema.Metadata.Identifier)),
-			"This configuration describes how to unmarshal it, convert it to code, …",
-		},
-		Return: "variants.PanelcfgConfig",
-	})
-
-	return jenny.tmpl.Render("types/variant_panelcfg.json_unmarshal.tmpl", map[string]any{
-		"schema":         schema,
-		"hasOptions":     hasOptions,
-		"hasFieldConfig": hasFieldConfig,
-		"hasConverter":   jenny.config.generateConverters,
-	})
-}
-
-func (jenny JSONMarshalling) renderDataqueryVariantUnmarshal(schema *ast.Schema, obj ast.Object) (string, error) {
-	jenny.packageMapper("cog/variants")
-
-	jenny.apiRefCollector.RegisterFunction(schema.Package, common.FunctionReference{
-		Name: "VariantConfig",
-		Comments: []string{
-			fmt.Sprintf("VariantConfig returns the configuration related to %s dataqueries.", strings.ToLower(schema.Metadata.Identifier)),
-			"This configuration describes how to unmarshal it, convert it to code, …",
-		},
-		Return: "variants.DataqueryConfig",
-	})
-
-	var disjunctionStruct *ast.StructType
-
-	if obj.Type.IsRef() {
-		resolved, _ := schema.Resolve(obj.Type)
-		if resolved.IsStructGeneratedFromDisjunction() {
-			disjunctionStruct = resolved.Struct
-		}
-	}
-
-	return jenny.tmpl.Render("types/variant_dataquery.json_unmarshal.tmpl", map[string]any{
-		"schema":            schema,
-		"object":            obj,
-		"hasConverter":      jenny.config.generateConverters,
-		"disjunctionStruct": disjunctionStruct,
-	})
 }

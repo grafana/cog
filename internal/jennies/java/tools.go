@@ -7,7 +7,20 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
+
+func formatObjectName(name string) string {
+	return tools.UpperCamelCase(name)
+}
+
+func formatArgName(name string) string {
+	return escapeVarName(tools.LowerCamelCase(name))
+}
+
+func formatFieldName(name string) string {
+	return escapeVarName(tools.LowerCamelCase(name))
+}
 
 func formatPackageName(pkg string) string {
 	rgx := regexp.MustCompile("[^a-zA-Z0-9_]+")

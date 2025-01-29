@@ -1,5 +1,8 @@
+---
+weight: 10
+---
 <!-- Generated with `make docs` -->
-# Compiler passes
+# Schema transformations
 
 ## `add_fields`
 
@@ -57,6 +60,20 @@ Will become:
 
 ```yaml
 anonymous_structs_to_named: {}
+```
+
+## `constant_to_enum`
+
+ConstantToEnum turns `string` constants into an enum definition with a
+single member.
+This is useful to "future-proof" a schema where a type can have a single
+value for now but is expected to allow more in the future.
+
+### Usage
+
+```yaml
+constant_to_enum:
+  objects: []string
 ```
 
 ## `dataquery_identification`
@@ -250,6 +267,17 @@ omit:
   objects: []string
 ```
 
+## `omit_fields`
+
+OmitFields removes the selected fields from their object definition.
+
+### Usage
+
+```yaml
+omit_fields:
+  fields: []string
+```
+
 ## `rename_object`
 
 N/A
@@ -258,6 +286,18 @@ N/A
 
 ```yaml
 rename_object:
+  from: string
+  to: string
+```
+
+## `replace_reference`
+
+ReplaceReference replaces any usage of the `From` reference by the one given in `To`.
+
+### Usage
+
+```yaml
+replace_reference:
   from: string
   to: string
 ```
@@ -312,17 +352,15 @@ schema_set_identifier:
   identifier: string
 ```
 
-## `set_datasource_to_dataquery`
+## `trim_enum_values`
 
-SetDatasourceToDataquery uses dashboard.DataSourceRef reference for the datasource field in each dataquery.
-
-Depending on the type of schema, this value can be an any or an internal Datasource struct generating an inconsistency
-between them.
+TrimEnumValues removes leading and trailing spaces from string values.
+It could happen when they add them by mistake in jsonschema/openapi when they define the enums
 
 ### Usage
 
 ```yaml
-set_datasource_to_dataquery: {}
+trim_enum_values: {}
 ```
 
 ## `unspec`

@@ -2,6 +2,7 @@ package option
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
@@ -464,70 +465,74 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 //
 // This action returns the option unchanged if:
 //   - it has no arguments
-//   - the first argument is not a disjunction or a reference to one
-//
-// FIXME: considers the first argument only.
-func DisjunctionAsOptionsAction() RewriteAction {
+//   - the given argument is not a disjunction or a reference to one
+func DisjunctionAsOptionsAction(argumentIndex int) RewriteAction {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
-		if len(option.Args) < 1 {
+		if len(option.Args) == 0 {
 			return []ast.Option{option}
 		}
 
-		firstArgType := option.Args[0].Type
+		targetArgType := option.Args[argumentIndex].Type
 
 		// "proper" disjunction
-		if firstArgType.IsDisjunction() {
-			return disjunctionAsOptions(option)
+		if targetArgType.IsDisjunction() {
+			return disjunctionAsOptions(option, argumentIndex)
 		}
 
 		// or maybe a reference to a struct that was created to simulate a disjunction?
-		if firstArgType.IsRef() {
-			// FIXME: we only try to resolve the reference within the same package
-			referredObj, found := schemas.LocateObject(firstArgType.AsRef().ReferredPkg, firstArgType.AsRef().ReferredType)
-			if !found {
+		if targetArgType.IsRef() {
+			referredType := schemas.ResolveToType(targetArgType)
+			if !referredType.IsStructGeneratedFromDisjunction() {
 				return []ast.Option{option}
 			}
 
-			if !referredObj.Type.IsStructGeneratedFromDisjunction() {
-				return []ast.Option{option}
-			}
-
-			return disjunctionStructAsOptions(option, referredObj)
+			return disjunctionStructAsOptions(option, referredType, argumentIndex)
 		}
 
 		return []ast.Option{option}
 	}
 }
 
-func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Object) []ast.Option {
-	firstArgType := option.Args[0].Type
-	firstAssignmentPath := option.Assignments[0].Path
-	firstAssignmentMethod := option.Assignments[0].Method
+func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, argIndex int) []ast.Option {
+	newOpts := make([]ast.Option, 0, len(disjunctionStruct.AsStruct().Fields))
+	for _, field := range disjunctionStruct.AsStruct().Fields {
+		optClone := option.DeepCopy()
 
-	newOpts := make([]ast.Option, 0, len(disjunctionStruct.Type.AsStruct().Fields))
-	for _, field := range disjunctionStruct.Type.AsStruct().Fields {
 		arg := ast.Argument{Name: field.Name, Type: field.Type}
+		args := optClone.Args[0:argIndex]
+		args = append(args, arg)
+		if len(option.Args) > argIndex+1 {
+			args = append(args, option.Args[argIndex+1:]...)
+		}
 
-		opt := ast.Option{
-			Name: field.Name,
-			Args: []ast.Argument{arg},
-			Assignments: []ast.Assignment{
-				{
-					Path: firstAssignmentPath,
-					Value: ast.AssignmentValue{
-						Envelope: &ast.AssignmentEnvelope{
-							Type: firstArgType,
-							Values: []ast.EnvelopeFieldValue{
-								{
-									Path:  ast.PathFromStructField(field),
-									Value: ast.AssignmentValue{Argument: &arg},
-								},
+		assignments := optClone.Assignments
+		for i, assignment := range assignments {
+			if assignment.Value.Argument == nil || assignment.Value.Argument.Name != option.Args[argIndex].Name {
+				continue
+			}
+
+			assignments[i] = ast.Assignment{
+				Path: assignments[i].Path,
+				Value: ast.AssignmentValue{
+					Envelope: &ast.AssignmentEnvelope{
+						Type: option.Args[argIndex].Type,
+						Values: []ast.EnvelopeFieldValue{
+							{
+								Path:  ast.PathFromStructField(field),
+								Value: ast.AssignmentValue{Argument: &arg},
 							},
 						},
 					},
-					Method: firstAssignmentMethod,
 				},
-			},
+				Method: assignments[i].Method,
+			}
+			break
+		}
+
+		opt := ast.Option{
+			Name:        field.Name,
+			Args:        args,
+			Assignments: assignments,
 		}
 		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
@@ -543,23 +548,40 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Object)
 	return newOpts
 }
 
-func disjunctionAsOptions(option ast.Option) []ast.Option {
-	firstArgType := option.Args[0].Type
-	firstAssignmentPath := option.Assignments[0].Path
-	firstAssignmentMethod := option.Assignments[0].Method
+func disjunctionAsOptions(option ast.Option, argIndex int) []ast.Option {
+	disjunction := option.Args[argIndex].Type.AsDisjunction()
 
-	newOpts := make([]ast.Option, 0, len(firstArgType.AsDisjunction().Branches))
-	for _, branch := range firstArgType.AsDisjunction().Branches {
+	newOpts := make([]ast.Option, 0, len(disjunction.Branches))
+	for _, branch := range disjunction.Branches {
+		optClone := option.DeepCopy()
 		typeName := tools.LowerCamelCase(ast.TypeName(branch))
 
 		arg := ast.Argument{Name: typeName, Type: branch}
 
+		args := optClone.Args[0:argIndex]
+		args = append(args, arg)
+		if len(option.Args) > argIndex+1 {
+			args = append(args, option.Args[argIndex+1:]...)
+		}
+
+		assignments := optClone.Assignments
+		for i, assignment := range assignments {
+			if assignment.Value.Argument == nil || assignment.Value.Argument.Name != option.Args[argIndex].Name {
+				continue
+			}
+
+			assignments[i] = ast.ArgumentAssignment(
+				assignments[i].Path,
+				arg,
+				ast.Method(assignments[i].Method),
+			)
+			break
+		}
+
 		opt := ast.Option{
-			Name: typeName,
-			Args: []ast.Argument{arg},
-			Assignments: []ast.Assignment{
-				ast.ArgumentAssignment(firstAssignmentPath, arg, ast.Method(firstAssignmentMethod)),
-			},
+			Name:        typeName,
+			Args:        args,
+			Assignments: assignments,
 		}
 		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
@@ -656,8 +678,8 @@ func DuplicateAction(duplicateName string) RewriteAction {
 
 // AddAssignmentAction adds an assignment to an existing option.
 func AddAssignmentAction(assignment veneers.Assignment) RewriteAction {
-	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
-		irAssignment, err := assignment.AsIR(ast.Builders{builder}, builder)
+	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+		irAssignment, err := assignment.AsIR(schemas, ast.Builders{builder}, builder)
 		if err != nil {
 			// TODO: let veneers return errors
 			option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[err=%s]", err.Error()))
@@ -666,6 +688,16 @@ func AddAssignmentAction(assignment veneers.Assignment) RewriteAction {
 
 		option.Assignments = append(option.Assignments, irAssignment)
 		option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[%s]", irAssignment.Path.String()))
+
+		return []ast.Option{option}
+	}
+}
+
+// AddCommentsAction adds comments to an option.
+func AddCommentsAction(comments []string) RewriteAction {
+	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+		option.Comments = append(option.Comments, comments...)
+		option.AddToVeneerTrail(fmt.Sprintf("AddComments[%s]", strings.Join(comments, " ")))
 
 		return []ast.Option{option}
 	}

@@ -6,11 +6,11 @@ public class SomePanelBuilder implements cog.Builder<SomePanel> {
     
     public SomePanelBuilder() {
         this.internal = new SomePanel();
-    this.internal.type = "panel_type";
-    this.internal.cursor = CursorMode.TOOLTIP;
+        this.internal.type = "panel_type";
+        this.internal.cursor = CursorMode.TOOLTIP;
     }
     public SomePanelBuilder title(String title) {
-    this.internal.title = title;
+        this.internal.title = title;
         return this;
     }
     public SomePanel build() {

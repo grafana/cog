@@ -8,7 +8,7 @@ public class SomeStructBuilder implements cog.Builder<SomeStruct> {
         this.internal = new SomeStruct();
     }
     public SomeStructBuilder time(Object time) {
-    this.internal.time = time;
+        this.internal.time = time;
         return this;
     }
     public SomeStruct build() {

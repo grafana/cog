@@ -9,7 +9,10 @@ import (
 
 func TestRuntime(t *testing.T) {
 	req := require.New(t)
-	jenny := Runtime{}
+
+	config := Config{}
+	config.applyDefaults()
+	jenny := Runtime{config: config}
 
 	files, err := jenny.Generate(languages.Context{})
 	req.NoError(err)

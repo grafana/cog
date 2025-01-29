@@ -21,3 +21,7 @@ func AnyToInt64(value any) int64 {
 
 	return value.(int64)
 }
+
+func ToPtr[T any](v T) *T {
+	return &v
+}

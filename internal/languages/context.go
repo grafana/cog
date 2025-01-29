@@ -22,36 +22,34 @@ func (context *Context) LocateObjectByRef(ref ast.RefType) (ast.Object, bool) {
 }
 
 func (context *Context) ResolveToBuilder(def ast.Type) bool {
-	_, ok := context.ResolveAsBuilder(def)
-
-	return ok
-}
-
-func (context *Context) ResolveAsBuilder(def ast.Type) (ast.Builder, bool) {
 	if def.IsArray() {
-		return context.ResolveAsBuilder(def.AsArray().ValueType)
+		return context.ResolveToBuilder(def.AsArray().ValueType)
 	}
 
 	if def.IsMap() {
-		return context.ResolveAsBuilder(def.AsMap().ValueType)
+		return context.ResolveToBuilder(def.AsMap().ValueType)
 	}
 
 	if def.IsDisjunction() {
 		for _, branch := range def.AsDisjunction().Branches {
-			if builder, found := context.ResolveAsBuilder(branch); found {
-				return builder, true
+			if found := context.ResolveToBuilder(branch); found {
+				return true
 			}
 		}
 
-		return ast.Builder{}, false
+		return false
 	}
 
 	if !def.IsRef() {
-		return ast.Builder{}, false
+		return false
 	}
 
-	ref := def.AsRef()
-	return context.Builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+	resolvedRef := context.ResolveRefs(def)
+	if resolvedRef.IsDisjunction() {
+		return context.ResolveToBuilder(resolvedRef)
+	}
+
+	return len(context.Builders.LocateAllByRef(def.AsRef())) != 0
 }
 
 func (context *Context) IsDisjunctionOfBuilders(def ast.Type) bool {
@@ -182,13 +180,19 @@ func (context *Context) BuildersForType(typeDef ast.Type) ast.Builders {
 }
 
 func (context Context) PackagesForVariant(variant string) []string {
-	packages := tools.Map(tools.Filter(context.Schemas, func(schema *ast.Schema) bool {
-		return schema.Metadata.Kind == ast.SchemaKindComposable && string(schema.Metadata.Variant) == variant && schema.Metadata.Identifier != ""
-	}), func(schema *ast.Schema) string {
+	return tools.Map(context.SchemasForVariant(variant), func(schema *ast.Schema) string {
 		return schema.Package
 	})
+}
 
-	sort.Strings(packages)
+func (context Context) SchemasForVariant(variant string) []*ast.Schema {
+	schemas := tools.Filter(context.Schemas, func(schema *ast.Schema) bool {
+		return schema.Metadata.Kind == ast.SchemaKindComposable && string(schema.Metadata.Variant) == variant && schema.Metadata.Identifier != ""
+	})
 
-	return packages
+	sort.Slice(schemas, func(i int, j int) bool {
+		return schemas[i].Package < schemas[j].Package
+	})
+
+	return schemas
 }

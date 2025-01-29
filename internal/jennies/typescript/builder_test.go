@@ -19,6 +19,7 @@ func TestBuilder_Generate(t *testing.T) {
 	}
 
 	config := Config{}
+	config.applyDefaults()
 	language := New(config)
 	jenny := Builder{
 		config:          config,

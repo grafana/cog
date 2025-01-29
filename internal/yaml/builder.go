@@ -116,6 +116,7 @@ type ComposeBuilders struct {
 	ExcludeOptions           []string          `yaml:"exclude_options"`
 	CompositionMap           map[string]string `yaml:"composition_map"`
 	ComposedBuilderName      string            `yaml:"composed_builder_name"`
+	PreserveOriginalBuilders bool              `yaml:"preserve_original_builders"`
 }
 
 func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -132,6 +133,7 @@ func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, erro
 			ExcludeOptions:           rule.ExcludeOptions,
 			CompositionMap:           rule.CompositionMap,
 			ComposedBuilderName:      rule.ComposedBuilderName,
+			PreserveOriginalBuilders: rule.PreserveOriginalBuilders,
 		},
 	), nil
 }

@@ -5,10 +5,16 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: write
+  contents: write   # To create a GitHub release
 
 env:
   DEVBOX_VERSION: 0.13.1
+
+# Allow only one concurrent release, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "releases"
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -32,7 +38,7 @@ jobs:
             go-deps-${{ runner.os }}
 
       - name: Install devbox
-        uses: jetify-com/devbox-install-action@a03caf5813591bc882139eba6ae947930a83a427 #v0.11.0
+        uses: jetify-com/devbox-install-action@975fb35b9a6472bed4edf51e5db534d5efec2817 #v0.12.0
         with:
           enable-cache: 'true'
           devbox-version: ${{ env.DEVBOX_VERSION }}

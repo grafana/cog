@@ -290,8 +290,8 @@
         "unspec": {
           "$ref": "#/$defs/YamlUnspec"
         },
-        "set_datasource_to_dataquery": {
-          "$ref": "#/$defs/YamlSetDatasourceToDataquery"
+        "replace_reference": {
+          "$ref": "#/$defs/YamlReplaceReference"
         },
         "fields_set_default": {
           "$ref": "#/$defs/YamlFieldsSetDefault"
@@ -326,6 +326,9 @@
         "retype_field": {
           "$ref": "#/$defs/YamlRetypeField"
         },
+        "omit_fields": {
+          "$ref": "#/$defs/YamlOmitFields"
+        },
         "schema_set_identifier": {
           "$ref": "#/$defs/YamlSchemaSetIdentifier"
         },
@@ -337,6 +340,9 @@
         },
         "trim_enum_values": {
           "$ref": "#/$defs/YamlTrimEnumValues"
+        },
+        "constant_to_enum": {
+          "$ref": "#/$defs/YamlConstantToEnum"
         },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
@@ -352,6 +358,19 @@
         },
         "disjunction_with_constant_to_default": {
           "$ref": "#/$defs/YamlDisjunctionWithConstantToDefault"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlConstantToEnum": {
+      "properties": {
+        "objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object]"
         }
       },
       "additionalProperties": false,
@@ -481,6 +500,19 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlOmitFields": {
+      "properties": {
+        "fields": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Expected format: [package].[object].[field]"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlRenameObject": {
       "properties": {
         "from": {
@@ -489,6 +521,20 @@
         },
         "to": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlReplaceReference": {
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "to": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
         }
       },
       "additionalProperties": false,
@@ -553,11 +599,6 @@
           "type": "string"
         }
       },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlSetDatasourceToDataquery": {
-      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },

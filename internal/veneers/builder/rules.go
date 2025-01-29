@@ -161,6 +161,12 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 		if err != nil {
 			return nil, err
 		}
+
+		// we do this to ensure that the same builder can be composed more than once
+		// ie: dashboard and dashboardv2 packages
+		if config.PreserveOriginalBuilders {
+			composedBuilders = append(composedBuilders, composableBuilder)
+		}
 	}
 
 	if config.CompositionMap["__schema_entrypoint"] != "" {
@@ -266,6 +272,13 @@ type CompositionConfig struct {
 	// ComposedBuilderName configures the name of the newly composed builders.
 	// If left empty, the name is taken from SourceBuilderName.
 	ComposedBuilderName string
+
+	// PreserveOriginalBuilders ensures that builders used as part of the
+	// composition process are preserved.
+	// It is useful when the same builders need to be composed more than once
+	// (ex: dashboard and dashboardv2 packages both use Options & FieldConfig
+	// types from panels for their composition needs)
+	PreserveOriginalBuilders bool
 }
 
 func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
@@ -277,7 +290,7 @@ func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
 
 		sourceBuilder, found := builders.LocateByObject(sourceBuilderPkg, sourceBuilderNameWithoutPkg)
 		if !found {
-			return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: source builder '%s' not found", config.SourceBuilderName)
+			return builders, nil
 		}
 
 		// - add to newBuilders all the builders that are not composable (ie: don't comply to the selector)
@@ -289,19 +302,19 @@ func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
 		composableBuilders := make(map[string]ast.Builders)
 
 		for _, builder := range builders {
-			// the builder is for a composable type
-			if selector(schemas, builder) {
-				schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
-				if !found {
-					continue
-				}
-
-				panelType := schema.Metadata.Identifier
-				composableBuilders[panelType] = append(composableBuilders[panelType], builder)
+			// the builder isn't selected: let's leave it untouched
+			if !selector(schemas, builder) {
+				newBuilders = append(newBuilders, builder)
 				continue
 			}
 
-			newBuilders = append(newBuilders, builder)
+			schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
+			if !found {
+				continue
+			}
+
+			panelType := schema.Metadata.Identifier
+			composableBuilders[panelType] = append(composableBuilders[panelType], builder)
 		}
 
 		for panelType, buildersForType := range composableBuilders {
@@ -463,13 +476,13 @@ func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
 				continue
 			}
 
-			newOpt, err := newOption.AsIR(builders, builder)
+			newOpt, err := newOption.AsIR(schemas, builders, builder)
 			if err != nil {
 				return nil, fmt.Errorf("could not apply AddOption builder veneer: %w", err)
 			}
 
+			newOpt.AddToVeneerTrail("AddOption")
 			builders[i].Options = append(builders[i].Options, newOpt)
-			builders[i].AddToVeneerTrail("AddOption")
 		}
 
 		return builders, nil

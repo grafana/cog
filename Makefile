@@ -35,11 +35,17 @@ tests: dev-env-check-binaries gen-tests ## Runs the tests.
 .PHONY: deps
 deps: dev-env-check-binaries ## Installs the dependencies.
 	$(RUN_DEVBOX) go mod vendor
+	$(RUN_DEVBOX) pip install -r requirements.txt
 
 .PHONY: docs
 docs: dev-env-check-binaries ## Generates the documentation.
-	$(RUN_DEVBOX) go run cmd/compiler-passes-docs/*
-	$(RUN_DEVBOX) go run cmd/cog-config-schemas/*
+	@$(RUN_DEVBOX) go run cmd/compiler-passes-docs/*
+	@$(RUN_DEVBOX) go run cmd/cog-config-schemas/*
+	$(RUN_DEVBOX) mkdocs build -f ./mkdocs-github.yml -d ./docs-site/
+
+.PHONY: serve-docs
+serve-docs: dev-env-check-binaries ## Builds and serves the documentation.
+	$(RUN_DEVBOX) mkdocs serve -w ./docs/ -f ./mkdocs-github.yml
 
 .PHONY: gen-sdk-dev
 gen-sdk-dev: dev-env-check-binaries ## Generates a dev version of the Foundation SDK.

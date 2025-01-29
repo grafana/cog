@@ -5,7 +5,6 @@ import (
 	cog "github.com/grafana/cog/generated/cog"
 	"errors"
 	"fmt"
-	variants "github.com/grafana/cog/generated/cog/variants"
 )
 
 type Options struct {
@@ -69,30 +68,4 @@ func (resource Options) Validate() error {
 	return nil
 }
 
-
-// VariantConfig returns the configuration related to text panels.
-// This configuration describes how to unmarshal it, convert it to code, …
-func VariantConfig() variants.PanelcfgConfig {
-	return variants.PanelcfgConfig{
-		Identifier: "text",
-		OptionsUnmarshaler: func (raw []byte) (any, error) {
-			options := &Options{}
-
-			if err := json.Unmarshal(raw, options); err != nil {
-				return nil, err
-			}
-
-			return options, nil
-		},
-		StrictOptionsUnmarshaler: func (raw []byte) (any, error) {
-			options := &Options{}
-
-			if err := options.UnmarshalJSONStrict(raw); err != nil {
-                return nil, err
-            }
-
-			return options, nil
-		},
-	}
-}
 

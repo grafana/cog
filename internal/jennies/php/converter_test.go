@@ -3,6 +3,7 @@ package php
 import (
 	"testing"
 
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
@@ -26,7 +27,7 @@ func TestConverter_Generate(t *testing.T) {
 	jenny := Converter{
 		config:         config,
 		nullableConfig: language.NullableKinds(),
-		tmpl:           initTemplates([]string{}),
+		tmpl:           initTemplates(common.NewAPIReferenceCollector(), []string{}),
 	}
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {

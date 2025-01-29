@@ -1,6 +1,8 @@
 package typescript
 
 import (
+	"path/filepath"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
@@ -12,7 +14,9 @@ import (
 const LanguageRef = "typescript"
 
 type Config struct {
-	PathPrefix string `yaml:"path_prefix"`
+	// PathPrefix holds an optional prefix for all Typescript file paths generated.
+	// If left undefined, `src` is used as a default prefix.
+	PathPrefix *string `yaml:"path_prefix"`
 
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
@@ -56,6 +60,9 @@ type Config struct {
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
+	if config.PathPrefix != nil {
+		config.PathPrefix = tools.ToPtr(interpolator(*config.PathPrefix))
+	}
 	config.OverridesTemplatesDirectories = tools.Map(config.OverridesTemplatesDirectories, interpolator)
 	config.ExtraFilesTemplatesDirectories = tools.Map(config.ExtraFilesTemplatesDirectories, interpolator)
 	for pkg, importPath := range config.PackagesImportMap {
@@ -69,6 +76,16 @@ func (config *Config) enumFormatter(packageMapper packageMapper) enumFormatter {
 	}
 
 	return &enumAsTypeFormatter{packageMapper: packageMapper}
+}
+
+func (config *Config) pathWithPrefix(pathParts ...string) string {
+	return filepath.Join(append([]string{*config.PathPrefix}, pathParts...)...)
+}
+
+func (config *Config) applyDefaults() {
+	if config.PathPrefix == nil {
+		config.PathPrefix = tools.ToPtr("src")
+	}
 }
 
 type Language struct {
@@ -88,13 +105,15 @@ func (language *Language) Name() string {
 }
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
+	language.config.applyDefaults()
+
 	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](!language.config.SkipRuntime, Runtime{}),
+		common.If[languages.Context](!language.config.SkipRuntime, Runtime{config: language.config}),
 
 		common.If[languages.Context](globalConfig.Types, RawTypes{config: language.config}),
 		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{
@@ -103,7 +122,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			apiRefCollector: language.apiRefCollector,
 		}),
 
-		common.If[languages.Context](!language.config.SkipIndex, Index{Targets: globalConfig}),
+		common.If[languages.Context](!language.config.SkipIndex, Index{config: language.config, Targets: globalConfig}),
 
 		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
 			Collector: language.apiRefCollector,

@@ -147,6 +147,17 @@ func (template *Template) Render(file string, data any) (string, error) {
 	return buf.String(), nil
 }
 
+func (template *Template) RenderInBuffer(buffer *strings.Builder, file string, data any) error {
+	rendered, err := template.Render(file, data)
+	if err != nil {
+		return err
+	}
+
+	buffer.WriteString(rendered)
+
+	return nil
+}
+
 func (template *Template) RenderAsBytes(file string, data any) ([]byte, error) {
 	rendered, err := template.Render(file, data)
 	if err != nil {
@@ -212,6 +223,9 @@ func (template *Template) builtins() FuncMap {
 			}
 			return given[0]
 		},
+		"listStr": func(v ...string) []string {
+			return v
+		},
 		"first": func(list any) any {
 			tp := reflect.TypeOf(list).Kind()
 			switch tp {
@@ -237,6 +251,17 @@ func (template *Template) builtins() FuncMap {
 			default:
 				panic(fmt.Sprintf("Cannot find first on type %s", tp))
 			}
+		},
+
+		"slice": func(arr interface{}, start int) interface{} {
+			v := reflect.ValueOf(arr)
+			if v.Kind() != reflect.Slice {
+				panic("slice: input must be a slice")
+			}
+			if start >= v.Len() {
+				return reflect.MakeSlice(v.Type(), 0, 0).Interface()
+			}
+			return v.Slice(start, v.Len()).Interface()
 		},
 
 		// ------- \\

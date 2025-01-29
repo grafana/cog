@@ -9,7 +9,7 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte
 
 	{{- $hint := index .def.Type.Hints "disjunction_of_refs" }}
 	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
-	parsedAsMap := make(map[string]any)
+	parsedAsMap := make(map[string]{{ formatAny }})
 	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
 		return err
 	}

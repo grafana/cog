@@ -23,12 +23,9 @@ class Disk
                 Common::basicPrometheusQuery('rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', '{{ device }} written'),
                 Common::basicPrometheusQuery('rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', '{{ device }} IO time'),
             ])
-            ->withOverride(
-                new MatcherConfig(id: 'byRegexp', options: '/ io time/'),
-                [
-                    new DynamicConfigValue(id: 'unit', value: 'percentunit'),
-                ],
-            );
+            ->overrideByRegexp('/ io time/', [
+                new DynamicConfigValue(id: 'unit', value: 'percentunit'),
+            ]);
     }
 
     public static function spaceUsageTable(): Table\PanelBuilder
@@ -116,33 +113,26 @@ class Disk
                 ],
             ))
             // Overrides
-            ->withOverride(
-                new MatcherConfig(id: 'byName', options: 'Mounted on'),
-                [new DynamicConfigValue(id: 'custom.width', value: 260)],
-            )
-            ->withOverride(
-                new MatcherConfig(id: 'byName', options: 'Size'),
-                [new DynamicConfigValue(id: 'custom.width', value: 93)],
-            )
-            ->withOverride(
-                new MatcherConfig(id: 'byName', options: 'Used'),
-                [new DynamicConfigValue(id: 'custom.width', value: 72)],
-            )
-            ->withOverride(
-                new MatcherConfig(id: 'byName', options: 'Available'),
-                [new DynamicConfigValue(id: 'custom.width', value: 88)],
-            )
-            ->withOverride(
-                new MatcherConfig(id: 'byName', options: 'Used, %'),
-                [
-                    new DynamicConfigValue(id: 'unit', value: 'percentunit'),
-                    new DynamicConfigValue(id: 'custom.cellOptions', value: [
-                        'mode' => 'gradient',
-                        'type' => 'gauge',
-                    ]),
-                    new DynamicConfigValue(id: 'min', value: 0),
-                    new DynamicConfigValue(id: 'max', value: 1),
-                ],
-            );
+            ->overrideByName('Mounted on', [
+                new DynamicConfigValue(id: 'custom.width', value: 260),
+            ])
+            ->overrideByName('Size', [
+                new DynamicConfigValue(id: 'custom.width', value: 93),
+            ])
+            ->overrideByName('Used', [
+                new DynamicConfigValue(id: 'custom.width', value: 72),
+            ])
+            ->overrideByName('Available', [
+                new DynamicConfigValue(id: 'custom.width', value: 88),
+            ])
+            ->overrideByName('Used, %', [
+                new DynamicConfigValue(id: 'unit', value: 'percentunit'),
+                new DynamicConfigValue(id: 'custom.cellOptions', value: [
+                    'mode' => 'gradient',
+                    'type' => 'gauge',
+                ]),
+                new DynamicConfigValue(id: 'min', value: 0),
+                new DynamicConfigValue(id: 'max', value: 1),
+            ]);
     }
 }

@@ -33,6 +33,10 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	jenny.shaper = &shape{context: context}
+	jenny.tmpl = jenny.tmpl.Funcs(templateHelpers(templateDeps{
+		config:  jenny.config,
+		context: context,
+	}))
 
 	// generate typehints with a compiler pass
 	context.Schemas, err = (&AddTypehintsComments{config: jenny.config}).Process(context.Schemas)
@@ -81,14 +85,6 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		files = append(files, jenny.generateConstants(schema, constants))
 	}
 
-	if schema.Metadata.Kind == ast.SchemaKindComposable && schema.Metadata.Variant == ast.SchemaVariantPanel {
-		files = append(files, jenny.generatePanelCfgVariantConfigFunc(schema))
-	}
-
-	if file := jenny.generateDataqueryVariantConfig(context, schema); file != nil {
-		files = append(files, *file)
-	}
-
 	return files, nil
 }
 
@@ -120,50 +116,6 @@ final class Constants
 		"src",
 		formatPackageName(schema.Package),
 		"Constants.php",
-	)
-
-	return *codejen.NewFile(filename, []byte(content), jenny)
-}
-
-func (jenny RawTypes) generatePanelCfgVariantConfigFunc(schema *ast.Schema) codejen.File {
-	identifier := schema.Metadata.Identifier
-
-	options := "null"
-	if _, hasOptions := schema.LocateObject("Options"); hasOptions {
-		options = `[` + jenny.config.fullNamespaceRef(fmt.Sprintf("%s\\Options", formatPackageName(schema.Package))) + `::class, 'fromArray']`
-	}
-
-	fieldConfig := "null"
-	if _, hasFieldConfig := schema.LocateObject("FieldConfig"); hasFieldConfig {
-		fieldConfig = `[` + jenny.config.fullNamespaceRef(fmt.Sprintf("%s\\FieldConfig", formatPackageName(schema.Package))) + `::class, 'fromArray']`
-	}
-
-	panelcfgConfigRef := jenny.config.fullNamespaceRef("Cog\\PanelcfgConfig")
-	convert := ""
-	if jenny.config.converters {
-		convert = fmt.Sprintf("\n            convert: [\\%[1]s\\PanelConverter::class, 'convert'],\n", jenny.config.fullNamespace(formatPackageName(schema.Package)))
-	}
-
-	content := fmt.Sprintf(`<?php
-
-namespace %[5]s;
-
-final class VariantConfig
-{
-    public static function get(): %[1]s
-    {
-        return new %[1]s(
-            identifier: '%[2]s',
-            optionsFromArray: %[3]s,
-            fieldConfigFromArray: %[4]s,%[6]s
-        );
-    }
-}`, panelcfgConfigRef, identifier, options, fieldConfig, jenny.config.fullNamespace(formatPackageName(schema.Package)), convert)
-
-	filename := filepath.Join(
-		"src",
-		formatPackageName(schema.Package),
-		"VariantConfig.php",
 	)
 
 	return *codejen.NewFile(filename, []byte(content), jenny)
@@ -221,96 +173,52 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 	return *codejen.NewFile(filename, []byte(output), jenny), nil
 }
 
-func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Schema, def ast.Object) (string, error) {
+func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Schema, object ast.Object) (string, error) {
 	var buffer strings.Builder
 
 	variant := ""
-	if def.Type.ImplementsVariant() {
-		variant = ", " + jenny.config.fullNamespaceRef("Cog\\"+formatObjectName(def.Type.ImplementedVariant()))
+	if object.Type.ImplementsVariant() {
+		variant = ", " + jenny.config.fullNamespaceRef("Cog\\"+formatObjectName(object.Type.ImplementedVariant()))
 	}
 
-	buffer.WriteString(fmt.Sprintf("class %s implements \\JsonSerializable%s\n{\n", formatObjectName(def.Name), variant))
+	buffer.WriteString(fmt.Sprintf("class %s implements \\JsonSerializable%s\n{\n", formatObjectName(object.Name), variant))
 
-	for _, fieldDef := range def.Type.Struct.Fields {
+	for _, fieldDef := range object.Type.Struct.Fields {
 		buffer.WriteString(tools.Indent(jenny.typeFormatter.formatField(fieldDef), 4))
 		buffer.WriteString("\n\n")
 	}
 
-	buffer.WriteString(tools.Indent(jenny.generateConstructor(context, def), 4))
+	buffer.WriteString(tools.Indent(jenny.generateConstructor(context, object), 4))
 	buffer.WriteString("\n\n")
 
-	fromJSON, err := jenny.generateFromJSON(context, def)
+	fromJSON, err := jenny.generateFromJSON(context, object)
 	if err != nil {
 		return "", err
 	}
 	buffer.WriteString(tools.Indent(fromJSON, 4))
 	buffer.WriteString("\n\n")
 
-	buffer.WriteString(tools.Indent(jenny.generateJSONSerialize(def), 4))
+	buffer.WriteString(tools.Indent(jenny.generateJSONSerialize(object), 4))
 
-	if def.Type.IsDataqueryVariant() {
-		buffer.WriteString("\n\n")
-		buffer.WriteString(tools.Indent(jenny.generateDataqueryType(schema, def), 4))
+	if object.Type.ImplementsVariant() {
+		customVariantTmpl := template.CustomObjectVariantBlock(object)
+		if jenny.tmpl.Exists(customVariantTmpl) {
+			var customVariantBlock strings.Builder
+			if err := jenny.tmpl.RenderInBuffer(&customVariantBlock, customVariantTmpl, map[string]any{
+				"Object": object,
+				"Schema": schema,
+			}); err != nil {
+				return "", err
+			}
+
+			buffer.WriteString("\n\n")
+			buffer.WriteString(tools.Indent(customVariantBlock.String(), 4))
+		}
 	}
 
 	buffer.WriteString("\n}")
 
 	return buffer.String(), nil
-}
-
-func (jenny RawTypes) generateDataqueryVariantConfig(context languages.Context, schema *ast.Schema) *codejen.File {
-	if schema.Metadata.Variant != ast.SchemaVariantDataQuery || schema.EntryPoint == "" {
-		return nil
-	}
-
-	dataqueryConfigRef := jenny.config.fullNamespaceRef("Cog\\DataqueryConfig")
-	var fromArrayCallable string
-
-	_, entryPointFound := schema.LocateObject(schema.EntryPoint)
-
-	switch {
-	case !entryPointFound && schema.EntryPointType.Kind == "": // no entrypoint at all
-		return nil
-	case !entryPointFound && schema.EntryPointType.IsDisjunction(): // the entrypoint is a disjunction that was inlined (its object no longer exists)
-		fromArrayCallable = jenny.unmarshalDisjunctionFunc(context, schema.EntryPointType.AsDisjunction())
-	case entryPointFound: // the entrypoint is a valid reference to an object
-		fromArrayCallable = `[` + jenny.config.fullNamespaceRef(fmt.Sprintf("%s\\%s", formatPackageName(schema.Package), formatObjectName(schema.EntryPoint))) + `::class, 'fromArray']`
-	default: // No valid entrypoint found
-		return nil
-	}
-
-	converterCallable := ""
-	if jenny.config.converters {
-		converterCallable = `[` + jenny.config.fullNamespaceRef(fmt.Sprintf("%s\\%s", formatPackageName(schema.Package), formatObjectName(schema.EntryPoint))) + `Converter::class, 'convert']`
-		if !entryPointFound && schema.EntryPointType.IsDisjunction() {
-			converterCallable = jenny.convertDisjunctionFunc(schema.EntryPointType.AsDisjunction())
-		}
-
-		converterCallable = fmt.Sprintf("\n            convert: %s,", converterCallable)
-	}
-
-	content := fmt.Sprintf(`<?php
-
-namespace %[4]s;
-
-final class VariantConfig
-{
-    public static function get(): %[1]s
-    {
-        return new %[1]s(
-            identifier: "%[2]s",
-            fromArray: %[3]s,%[5]s
-        );
-    }
-}`, dataqueryConfigRef, schema.Metadata.Identifier, fromArrayCallable, jenny.config.fullNamespace(formatPackageName(schema.Package)), converterCallable)
-
-	filename := filepath.Join(
-		"src",
-		formatPackageName(schema.Package),
-		"VariantConfig.php",
-	)
-
-	return codejen.NewFile(filename, []byte(content), jenny)
 }
 
 func (jenny RawTypes) convertDisjunctionFunc(disjunction ast.DisjunctionType) string {
@@ -525,49 +433,23 @@ func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ast.Typ
 
 func (jenny RawTypes) unmarshalComposableSlot(context languages.Context, parentObject ast.Object, def ast.Type, inputVar string) string {
 	slotType, _ := context.ResolveToComposableSlot(def)
+	variant := string(slotType.ComposableSlot.Variant)
 
-	if slotType.ComposableSlot.Variant == ast.SchemaVariantDataQuery {
-		return jenny.renderUnmarshalDataqueryField(parentObject, def, inputVar)
+	unmarshalVariantBlock := template.VariantFieldUnmarshalBlock(variant)
+	if !jenny.tmpl.Exists(unmarshalVariantBlock) {
+		return fmt.Sprintf("can not generate custom unmarshal function for composable slot with variant '%s': template block %s not found", variant, unmarshalVariantBlock)
 	}
 
-	// TODO
-	return inputVar
-}
-
-func (jenny RawTypes) renderUnmarshalDataqueryField(parentObject ast.Object, def ast.Type, inputVar string) string {
-	dataqueryHint := `""`
-
-	// First: try to locate a field that would contain the type of datasource being used.
-	// We're looking for a field defined as a reference to the `DataSourceRef` type.
-	for _, candidate := range parentObject.Type.AsStruct().Fields {
-		if !candidate.Type.IsRef() {
-			continue
-		}
-		if candidate.Type.AsRef().ReferredType != "DataSourceRef" {
-			continue
-		}
-
-		dataqueryHint = fmt.Sprintf(`(isset($in["%[1]s"], $in["%[1]s"]["type"]) && is_string($in["%[1]s"]["type"])) ? $in["%[1]s"]["type"] : ""`, candidate.Name)
-		break
+	rendered, err := jenny.tmpl.Render(unmarshalVariantBlock, map[string]any{
+		"Object":   parentObject,
+		"Type":     def,
+		"InputVar": inputVar,
+	})
+	if err != nil {
+		return err.Error()
 	}
 
-	runtimeRef := jenny.config.fullNamespaceRef("Cog\\Runtime")
-
-	if def.IsArray() {
-		return fmt.Sprintf(`isset(%[1]s) ? (function ($in) {
-	/** @var array{datasource?: array{type?: mixed}} $in */
-    $hint = %[3]s;
-    /** @var array<array<string, mixed>> $in */
-    return %[2]s::get()->dataqueriesFromArray($in, $hint);
-})(%[1]s): null`, inputVar, runtimeRef, dataqueryHint)
-	}
-
-	return fmt.Sprintf(`isset(%[1]s) ? (function($in) {
-	/** @var array{datasource?: array{type?: mixed}} $in */
-    $hint = %[3]s;
-    /** @var array<string, mixed> $in */
-    return %[2]s::get()->dataqueryFromArray($in, $hint);
-})(%[1]s): null`, inputVar, runtimeRef, dataqueryHint)
+	return rendered
 }
 
 func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjunction ast.DisjunctionType) string {
@@ -719,25 +601,6 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 			"Returns the data representing this object, preparing it for JSON serialization with `json_encode()`.",
 		},
 		Return: "array",
-	})
-
-	return buffer.String()
-}
-
-func (jenny RawTypes) generateDataqueryType(schema *ast.Schema, object ast.Object) string {
-	var buffer strings.Builder
-
-	buffer.WriteString("public function dataqueryType(): string\n")
-	buffer.WriteString("{\n")
-	buffer.WriteString(fmt.Sprintf("    return \"%s\";\n", strings.ToLower(schema.Metadata.Identifier)))
-	buffer.WriteString("}")
-
-	jenny.apiRefCollector.ObjectMethod(object, common.MethodReference{
-		Name: "dataqueryType",
-		Comments: []string{
-			"Returns the type of this dataquery object.",
-		},
-		Return: "string",
 	})
 
 	return buffer.String()

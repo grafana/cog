@@ -5,6 +5,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -72,14 +73,15 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
-	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
+	tmpl := initTemplates(language.apiRefCollector, language.config.OverridesTemplatesDirectories)
+	rawTypesJenny := RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}
 
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
 		Runtime{config: config, tmpl: tmpl},
-		common.If[languages.Context](globalConfig.Types, RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If[languages.Context](globalConfig.Types, rawTypesJenny),
 		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 		common.If[languages.Context](globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
 
@@ -89,6 +91,25 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			Formatter: apiReferenceFormatter(tmpl, config),
 			Tmpl:      tmpl,
 		}),
+
+		common.DynamicFiles{
+			Tmpl: tmpl,
+			Data: map[string]any{
+				"Config": map[string]any{
+					"Converters": config.converters,
+				},
+			},
+			FuncsProvider: func(context languages.Context) template.FuncMap {
+				return template.FuncMap{
+					"unmarshalDisjunctionFunc": func(typeDef ast.Type) string {
+						return rawTypesJenny.unmarshalDisjunctionFunc(context, typeDef.AsDisjunction())
+					},
+					"convertDisjunctionFunc": func(typeDef ast.Type) string {
+						return rawTypesJenny.convertDisjunctionFunc(typeDef.AsDisjunction())
+					},
+				}
+			},
+		},
 
 		common.CustomTemplates{
 			TemplateDirectories: config.ExtraFilesTemplatesDirectories,

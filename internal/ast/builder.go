@@ -310,6 +310,10 @@ func (path Path) Last() PathItem {
 	return path[len(path)-1]
 }
 
+func (path Path) RemoveLast() Path {
+	return path[:len(path)-1]
+}
+
 func (path Path) String() string {
 	return strings.Join(tools.Map(path, func(t PathItem) string {
 		return t.Identifier

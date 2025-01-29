@@ -3,6 +3,7 @@ package java
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -202,6 +203,11 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 		})
 	}
 
+	// To ensure deterministic output
+	sort.SliceStable(constants, func(i, j int) bool {
+		return constants[i].Name < constants[j].Name
+	})
+
 	return jenny.getTemplate().RenderAsBytes("types/constants.tmpl", ConstantTemplate{
 		Package:   jenny.config.formatPackage(pkg),
 		Name:      "Constants",
@@ -210,12 +216,13 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 }
 
 func (jenny RawTypes) formatReference(pkg string, identifier string, object ast.Object) ([]byte, error) {
-	reference := jenny.typeFormatter.formatReference(object.Type.AsRef())
+	ref := object.Type.AsRef()
+	reference := fmt.Sprintf("%s.%s", jenny.config.formatPackage(formatPackageName(ref.ReferredPkg)), formatObjectName(ref.ReferredType))
 
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:    jenny.config.formatPackage(pkg),
 		Imports:    jenny.imports,
-		Name:       tools.UpperCamelCase(object.Name),
+		Name:       formatObjectName(object.Name),
 		Extends:    []string{reference},
 		Comments:   object.Comments,
 		Variant:    jenny.getVariant(object.Type),

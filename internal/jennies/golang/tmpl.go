@@ -14,13 +14,15 @@ import (
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(extraTemplatesDirectories []string) *template.Template {
+func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector) *template.Template {
 	tmpl, err := template.New(
 		"golang",
 
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
-		template.Funcs(formattingTemplateFuncs()),
+		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
+		template.Funcs(formattingTemplateFuncs(config)),
 		template.Funcs(template.FuncMap{
 			"formatPath": func(_ ast.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
@@ -84,7 +86,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
-		template.ParseDirectories(extraTemplatesDirectories...),
+		template.ParseDirectories(config.OverridesTemplatesDirectories...),
 	)
 	if err != nil {
 		panic(fmt.Errorf("could not initialize templates: %w", err))
@@ -93,7 +95,7 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 	return tmpl
 }
 
-func formattingTemplateFuncs() template.FuncMap {
+func formattingTemplateFuncs(config Config) template.FuncMap {
 	return template.FuncMap{
 		"formatPackageName":  formatPackageName,
 		"formatObjectName":   formatObjectName,
@@ -102,5 +104,12 @@ func formattingTemplateFuncs() template.FuncMap {
 		"formatVarName":      formatVarName,
 		"formatFunctionName": formatFunctionName,
 		"formatScalar":       formatScalar,
+		"formatAny": func() string {
+			if config.AnyAsInterface {
+				return "interface{}"
+			}
+
+			return "any"
+		},
 	}
 }
