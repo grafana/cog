@@ -1,0 +1,11 @@
+{
+    "name": "grafana/cog-example",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "./src",
+            "Grafana\\Foundation\\": "../../generated/php/src"
+        }
+    },
+    "require": {}
+}
