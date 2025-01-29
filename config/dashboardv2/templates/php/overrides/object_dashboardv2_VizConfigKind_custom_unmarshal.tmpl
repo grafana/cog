@@ -29,7 +29,9 @@ isset($data['spec']) ? (function($input) {
     return new VizConfigSpec(
         {{- range $field := (.Field.Type|resolveRefs).Struct.Fields }}
         {{ $field.Name }}: {{ if eq $field.Name "options" -}}
-        {{ template "object_dashboardv2_VizConfigKind_spec_options_unmarshal" }}
+            {{ template "object_dashboardv2_VizConfigKind_spec_options_unmarshal" }}
+        {{- else if eq $field.Name "fieldConfig" -}}
+            {{ template "object_dashboardv2_VizConfigKind_spec_fieldConfig_unmarshal" }}
         {{- else if $field.Type.IsConcreteScalar }}
         {{ continue}}
         {{- else -}}
@@ -38,6 +40,37 @@ isset($data['spec']) ? (function($input) {
         {{- end }}
    );
 })($data) : null
+{{- end }}
+
+{{- define "object_dashboardv2_VizConfigKind_spec_fieldConfig_unmarshal" -}}
+isset($spec["fieldConfig"]) ? (function(string $panelType, $panel) {
+    /** @var array<string, mixed> $fieldConfigData */
+    $fieldConfigData = $panel["fieldConfig"];
+    $fieldConfigSource = FieldConfigSource::fromArray($fieldConfigData);
+
+    if (!\Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantExists($panelType)) {
+        return $fieldConfigSource;
+    }
+
+    $config = \Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantConfig($panelType);
+    if ($config->fieldConfigFromArray === null) {
+        return $fieldConfigSource;
+    }
+
+    if (!isset($fieldConfigData["defaults"])) {
+        return $fieldConfigSource;
+    }
+
+    /** @var array{custom?: array<string, mixed>} $defaults */
+    $defaults = $fieldConfigData["defaults"];
+    if (!isset($defaults["custom"])) {
+        return $fieldConfigSource;
+    }
+
+    $fieldConfigSource->defaults->custom = ($config->fieldConfigFromArray)($defaults["custom"]);
+
+    return $fieldConfigSource;
+})($kind, $spec) : null
 {{- end }}
 
 {{- define "object_dashboardv2_VizConfigKind_spec_options_unmarshal" -}}
