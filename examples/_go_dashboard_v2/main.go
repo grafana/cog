@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/cog/plugins"
 	"github.com/grafana/cog/generated/go/common"
@@ -30,19 +31,9 @@ func dashboardBuilder() []byte {
 			Visualization(timeseries.NewVisualizationBuilder().
 				Unit("s").
 				PointSize(5).
-				/*
-					// This would be nice
-					overrideByName("Available", []dashboard.DynamicConfigValue{
-							{Id: "custom.width", Value: 88},
-						},
-					))
-				*/
-				Override(
-					dashboard.MatcherConfig{Id: "byName", Options: "Available"},
-					[]dashboard.DynamicConfigValue{
-						{Id: "custom.width", Value: 88},
-					},
-				),
+				OverrideByName("Available", []dashboard.DynamicConfigValue{
+					{Id: "custom.width", Value: 88},
+				}),
 			).
 			Data(dashboard.NewQueryGroupBuilder().
 				Target(dashboard.NewTargetBuilder().
@@ -103,4 +94,12 @@ func main() {
 	dashboardAsBytes := dashboardBuilder()
 
 	fmt.Println(string(dashboardAsBytes))
+
+	dash := dashboard.DashboardV2Spec{}
+	if err := json.Unmarshal(dashboardAsBytes, &dash); err != nil {
+		panic(err)
+	} else {
+		//fmt.Printf("%+v\n", dash)
+		spew.Dump(dash)
+	}
 }
