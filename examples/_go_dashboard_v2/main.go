@@ -20,6 +20,7 @@ func dashboardBuilder() []byte {
 			To("now").
 			Timezone("browser"),
 		).
+		// TODO: variables
 		// TODO: Element() and Elements() should take builders
 		// CPU
 		Panel("cpu_usage", cpuUsageTimeseries()).
