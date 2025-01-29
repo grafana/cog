@@ -1,0 +1,59 @@
+{{- define "object_dashboardv2_VizConfigKind_custom_unmarshal" }}
+/**
+ * @param array<string, mixed> $inputData
+ */
+public static function fromArray(array $inputData): self
+{
+    /** @var {{ typeShape .Object.Type }} $inputData */
+    $data = $inputData;
+    return new self(
+        {{- range $field := .Object.Type.Struct.Fields }}
+        {{ $field.Name }}: {{ if eq $field.Name "spec" -}}
+        {{ template "object_dashboardv2_VizConfigKind_spec_unmarshal" (dict "Field" $field) }}
+        {{- else if $field.Type.IsConcreteScalar }}
+        {{ continue}}
+        {{- else -}}
+        {{ unmarshalForType $field.Type (print "$data[\"" $field.Name "\"]") }}
+        {{- end -}},
+        {{- end }}
+   );
+}
+{{- end }}
+
+{{- define "object_dashboardv2_VizConfigKind_spec_unmarshal" -}}
+isset($data['spec']) ? (function($input) {
+    /** @var {{ typeShape (.Field.Type|resolveRefs) }} $spec */
+    $spec = $input['spec'];
+    /** @var string $kind */
+    $kind = $input['kind'] ?? '';
+    return new VizConfigSpec(
+        {{- range $field := (.Field.Type|resolveRefs).Struct.Fields }}
+        {{ $field.Name }}: {{ if eq $field.Name "options" -}}
+        {{ template "object_dashboardv2_VizConfigKind_spec_options_unmarshal" }}
+        {{- else if $field.Type.IsConcreteScalar }}
+        {{ continue}}
+        {{- else -}}
+        {{ unmarshalForType $field.Type (print "$spec[\"" $field.Name "\"]") }}
+        {{- end -}},
+        {{- end }}
+   );
+})($data) : null
+{{- end }}
+
+{{- define "object_dashboardv2_VizConfigKind_spec_options_unmarshal" -}}
+isset($spec["options"]) ? (function(string $panelType, $panel) {
+    /** @var array<string, mixed> $options */
+    $options = $panel["options"];
+
+    if (!\Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantExists($panelType)) {
+        return $options;
+    }
+
+    $config = \Grafana\Foundation\Cog\Runtime::get()->panelcfgVariantConfig($panelType);
+    if ($config->optionsFromArray === null) {
+        return $options;
+    }
+
+    return ($config->optionsFromArray)($options);
+})($kind, $spec) : null
+{{- end }}

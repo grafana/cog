@@ -96,4 +96,4 @@ echo($jsonEncodedDashboard.PHP_EOL);
 // Try decoding it.
 $jsonDecodedAsArray = json_decode($jsonEncodedDashboard, true);
 $dashboard = DashboardV2Spec::fromArray($jsonDecodedAsArray);
-var_dump($dashboard->elements['cpu_usage']);
+var_dump($dashboard->elements['cpu_usage']->spec->vizConfig);
