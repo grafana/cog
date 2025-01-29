@@ -171,6 +171,8 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 		case ast.KindScalar:
 			if field.Type.AsScalar().IsConcrete() {
 				mapping[field.Type.AsScalar().Value.(string)] = typeName
+			} else {
+				return nil, fmt.Errorf("discriminator field '%s' is not concrete", def.Discriminator)
 			}
 		case ast.KindRef:
 			ref := field.Type.AsRef()

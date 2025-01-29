@@ -106,7 +106,7 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_NoDiscriminato
 	}
 
 	disjunctionOfRef := objects[0].DeepCopy()
-	disjunctionOfRef.Type.PassesTrail = []string{"DisjunctionInferMapping[no_mapping_found:discriminator field 'MapOfString' is not a scalar]"}
+	disjunctionOfRef.Type.PassesTrail = []string{"DisjunctionInferMapping[no_mapping_found:discriminator field 'MapOfString' is not concrete]"}
 	expected := []ast.Object{
 		disjunctionOfRef,
 		objects[1],
@@ -288,4 +288,57 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_WithDiscrimina
 
 	// Call the compiler pass
 	runPassOnObjects(t, &DisjunctionInferMapping{}, objects, objects)
+}
+
+func TestDisjunctionInferMapping_WithDisjunctionOfRefs_WithEnumDiscriminatorAndMappingSet(t *testing.T) {
+	// Prepare test input
+	disjunctionType := ast.NewDisjunction([]ast.Type{
+		ast.NewRef("test", "SomeStruct"),
+		ast.NewRef("test", "OtherStruct"),
+	})
+
+	objects := []ast.Object{
+		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
+		ast.NewObject("test", "Enum", ast.NewEnum([]ast.EnumValue{
+			{
+				Type:  ast.String(),
+				Name:  "A",
+				Value: "a",
+			},
+			{
+				Type:  ast.String(),
+				Name:  "B",
+				Value: "b",
+			},
+			{
+				Type:  ast.String(),
+				Name:  "C",
+				Value: "c",
+			},
+		})),
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
+			ast.NewStructField("Type", ast.NewRef("test", "Enum", ast.Default("a"))),
+		)),
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
+			ast.NewStructField("Type", ast.NewRef("test", "Enum", ast.Default("c"))),
+		)),
+	}
+
+	// Prepare expected output
+	newDisjunction := objects[0].DeepCopy()
+	newDisjunction.Type.Disjunction.Discriminator = "Type"
+	newDisjunction.Type.Disjunction.DiscriminatorMapping = map[string]string{
+		"c": "OtherStruct",
+		"a": "SomeStruct",
+	}
+
+	expectedObjects := []ast.Object{
+		newDisjunction,
+		objects[1],
+		objects[2],
+		objects[3],
+	}
+
+	// Call the compiler pass
+	runPassOnObjects(t, &DisjunctionInferMapping{}, objects, expectedObjects)
 }
