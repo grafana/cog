@@ -200,6 +200,7 @@ output:
           - '%__config_dir%/foundation-sdk/.cog/templates/php/extra'
         overrides_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/php/overrides'
+          - '%__config_dir%/dashboardv2/templates/php/overrides'
     - python:
         path_prefix: grafana_foundation_sdk
         generate_json_marshaller: true
