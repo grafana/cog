@@ -61,6 +61,7 @@ gen-tests: dev-env-check-binaries ## Generates the code described by tests schem
 .PHONY: run-go-example
 run-go-example: dev-env-check-binaries ## Runs the Go example.
 	$(RUN_DEVBOX) go run ./examples/_go/*
+	$(RUN_DEVBOX) go run ./examples/_go_dashboard_v2/*
 
 .PHONY: run-java-example
 run-java-example: dev-env-check-binaries ## Runs the Java example.
@@ -75,6 +76,7 @@ run-php-example: dev-env-check-binaries ## Runs the PHP example.
 .PHONY: run-ts-example
 run-ts-example: dev-env-check-binaries ## Runs the Typescript example.
 	$(RUN_DEVBOX) ts-node examples/typescript
+	$(RUN_DEVBOX) ts-node examples/typescript_dashboardv2
 
 .PHONY: run-python-example
 run-python-example: dev-env-check-binaries ## Runs the Python example.
