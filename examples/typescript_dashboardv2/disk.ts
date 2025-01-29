@@ -105,11 +105,6 @@ export const diskSpaceUsageTable = (): PanelBuilder => {
                 .options({})
             )
             .transformation(new TransformationBuilder()
-                .kind("merge")
-                .id("merge")
-                .options({})
-            )
-            .transformation(new TransformationBuilder()
                 .kind("calculateField") // is `kind` the type of transformation?
                 .id("calculateField") // should this be different from `kind`?
                 .options({
