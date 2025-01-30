@@ -595,11 +595,7 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 
 	return fmt.Sprintf(`(function($input) {
     \assert(is_array($input), 'expected disjunction value to be an array');
-<<<<<<< HEAD
     /** @var array<string, mixed> $input */
-=======
-    /** @var array<string, mixed> $input */ 
->>>>>>> 56beed2e (Fix unmarshalling of maps in PHP)
     %s
 })`, decodingSwitch)
 }
