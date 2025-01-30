@@ -83,6 +83,7 @@ run-ts-example: dev-env-check-binaries ## Runs the Typescript example.
 .PHONY: run-python-example
 run-python-example: dev-env-check-binaries ## Runs the Python example.
 	$(RUN_DEVBOX) python examples/python/main.py
+	$(RUN_DEVBOX) python examples/python_dashboardv2/main.py
 
 .PHONY: dev-env-check-binaires
 dev-env-check-binaries: ## Check that the required binary are present.
