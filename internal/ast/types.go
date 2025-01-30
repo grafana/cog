@@ -876,8 +876,9 @@ func NewStructField(name string, fieldType Type, opts ...StructFieldOption) Stru
 }
 
 type RefType struct {
-	ReferredPkg  string `yaml:"referred_pkg"`
-	ReferredType string `yaml:"referred_type"`
+	ReferredPkg   string  `yaml:"referred_pkg"`
+	ReferredType  string  `yaml:"referred_type"`
+	ReferredValue *string `yaml:"referred_value"`
 }
 
 func (t RefType) String() string {

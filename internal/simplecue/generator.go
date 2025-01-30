@@ -330,8 +330,21 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	v = g.removeTautologicalUnification(v)
 
 	// This node is referring to another definition
-	if ok, v, defV := getReference(v); ok {
-		return g.declareReference(v, defV)
+	if ok, v, defV, concreteValue := getReference(v); ok {
+		referenceIr, err := g.declareReference(v, defV)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		if concreteValue.Exists() {
+			val, err := cueConcreteToScalar(concreteValue)
+			if err != nil {
+				return ast.Type{}, err
+			}
+			referenceIr.Value = val
+		}
+
+		return referenceIr, nil
 	}
 
 	defVal, err := g.extractDefault(v)
@@ -407,36 +420,48 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	}
 }
 
-func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
+// getReference returns:
+// * a boolean indicating whether the input indeed contained a reference
+// * the CUE value describing the reference
+// * a possible default value for the reference
+// * a concrete value taken by the reference
+func getReference(v cue.Value) (bool, cue.Value, cue.Value, cue.Value) {
 	_, path := v.ReferencePath()
 	if path.String() != "" {
-		return true, v, v
+		return true, v, v, cue.Value{}
 	}
 
 	op, exprs := v.Expr()
 
 	if len(exprs) != 2 {
-		return false, v, v
+		return false, v, v, cue.Value{}
 	}
 
 	_, path = exprs[0].ReferencePath()
 	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind && path.String() != "" {
 		// When a struct with defaults is completely filled, it usually has a NoOp op.
 		if op == cue.NoOp {
-			return true, exprs[0], v
+			return true, exprs[0], v, cue.Value{}
 		}
 
 		// Accepts [AStruct | *{ ... }] and skips [AStruct | BStruct]
 		if _, ok := v.Default(); ok {
-			return true, exprs[0], v
+			return true, exprs[0], v, cue.Value{}
 		}
 	}
 
-	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
-		return true, exprs[0], exprs[1]
+	conjuncts := appendSplit(nil, cue.AndOp, v)
+	// len(conjuncts) should be 2
+	// meaning (or hoping for): [reference to something] & ["concrete value"]
+	if len(conjuncts) == 2 {
+		return true, conjuncts[0], cue.Value{}, conjuncts[1]
 	}
 
-	return false, v, v
+	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
+		return true, exprs[0], exprs[1], cue.Value{}
+	}
+
+	return false, v, v, cue.Value{}
 }
 
 func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, error) {
