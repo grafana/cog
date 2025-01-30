@@ -65,7 +65,7 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 	hinter := &typehints{config: deps.config, context: deps.context, resolveBuilders: false}
 	shaper := &shape{context: deps.context}
 
-	return template.FuncMap{
+	funcs := template.FuncMap{
 		"fullNamespace":           deps.config.fullNamespace,
 		"fullNamespaceRef":        deps.config.fullNamespaceRef,
 		"typeHasBuilder":          deps.context.ResolveToBuilder,
@@ -113,4 +113,6 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 		"unmarshalDisjunctionFunc": deps.unmarshalDisjunctionFunc,
 		"convertDisjunctionFunc":   deps.convertDisjunctionFunc,
 	}
+
+	return funcs.MergeWith(common.TypeResolvingTemplateHelpers(deps.context))
 }

@@ -16,7 +16,15 @@ import (
 
 const recursionMaxNums = 1000
 
-type FuncMap = gotemplate.FuncMap
+type FuncMap gotemplate.FuncMap
+
+func (funcMap FuncMap) MergeWith(other FuncMap) FuncMap {
+	for k, v := range other {
+		funcMap[k] = v
+	}
+
+	return funcMap
+}
 
 type Option func(*Template) error
 
@@ -130,7 +138,7 @@ func New(name string, opts ...Option) (*Template, error) {
 }
 
 func (template *Template) Funcs(funcs FuncMap) *Template {
-	template.tmpl.Funcs(funcs)
+	template.tmpl.Funcs(gotemplate.FuncMap(funcs))
 	return template
 }
 
@@ -193,7 +201,7 @@ func (template *Template) builtins() FuncMap {
 		return buf.String(), err
 	}
 
-	return gotemplate.FuncMap{
+	return FuncMap{
 		"add1": func(i int) int { return i + 1 },
 		"sub1": func(i int) int { return i - 1 },
 		// https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/dict.go#L76

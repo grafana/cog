@@ -84,7 +84,6 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	if constants.Len() != 0 {
 		files = append(files, jenny.generateConstants(schema, constants))
 	}
-
 	return files, nil
 }
 
@@ -395,20 +394,36 @@ func (jenny RawTypes) unmarshalForType(context languages.Context, object ast.Obj
 
 		return fmt.Sprintf(`isset(%[1]s) ? %[2]s(%[1]s) : null`, inputVar, decodingFunc)
 	case def.IsMap():
-		return jenny.unmarshalMap(context, def.AsMap(), inputVar)
+		return jenny.unmarshalMap(context, object, def.AsMap(), inputVar)
 	default:
 		return fmt.Sprintf(`%[1]s ?? null`, inputVar)
 	}
 }
 
-func (jenny RawTypes) unmarshalMap(context languages.Context, mapDef ast.MapType, inputVar string) string {
-	if !mapDef.ValueType.IsRef() {
+func (jenny RawTypes) unmarshalMap(context languages.Context, object ast.Object, mapDef ast.MapType, inputVar string) string {
+	if mapDef.IsMapOf(ast.KindScalar, ast.KindMap, ast.KindArray) {
 		return fmt.Sprintf("%s ?? null", inputVar)
 	}
 
-	decodeRef := jenny.unmarshalRefFunc(context, mapDef.ValueType)
+	mapType := ast.Type{
+		Kind:     ast.KindMap,
+		Map:      &mapDef,
+		Nullable: false,
+	}
+	hinter := typehints{config: jenny.config, context: context}
+	tmpl := `(function($input) {
+    /** @var %[2]s $results */
+    $results = [];
+    foreach ($input as $key => $val) {
+        $results[$key] = %[1]s;
+    }
+    return array_filter($results);
+})`
 
-	return fmt.Sprintf(`isset(%[1]s) ? array_map(%[2]s, %[1]s) : null`, inputVar, decodeRef)
+	valueUnmarshal := jenny.unmarshalForType(context, object, mapDef.ValueType, "$val")
+	unmarshaller := fmt.Sprintf(tmpl, valueUnmarshal, hinter.forType(mapType, false))
+
+	return fmt.Sprintf(`isset(%[1]s) ? %[2]s(%[1]s) : null`, inputVar, unmarshaller)
 }
 
 func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ast.Type) string {
@@ -553,7 +568,7 @@ func (jenny RawTypes) unmarshalDisjunctionFunc(context languages.Context, disjun
 
 	return fmt.Sprintf(`(function($input) {
     \assert(is_array($input), 'expected disjunction value to be an array');
-
+    /** @var array<string, mixed> $input */
     %s
 })`, decodingSwitch)
 }

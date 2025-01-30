@@ -700,12 +700,24 @@ func (t ArrayType) DeepCopy() ArrayType {
 	}
 }
 
-func (t ArrayType) IsArrayOfScalars() bool {
-	if t.ValueType.Kind == KindArray {
-		return t.ValueType.AsArray().IsArrayOfScalars()
+func (t ArrayType) IsArrayOf(acceptedKinds ...Kind) bool {
+	if !tools.ItemInList(t.ValueType.Kind, acceptedKinds) {
+		return false
 	}
 
-	return t.ValueType.Kind == KindScalar
+	if t.ValueType.IsArray() {
+		return t.ValueType.AsArray().IsArrayOf(acceptedKinds...)
+	}
+
+	if t.ValueType.IsMap() {
+		return t.ValueType.AsMap().IsMapOf(acceptedKinds...)
+	}
+
+	return true
+}
+
+func (t ArrayType) IsArrayOfScalars() bool {
+	return t.IsArrayOf(KindScalar, KindArray)
 }
 
 type EnumType struct {
@@ -773,6 +785,22 @@ func (t EnumValue) DeepCopy() EnumValue {
 type MapType struct {
 	IndexType Type
 	ValueType Type
+}
+
+func (t MapType) IsMapOf(acceptedKinds ...Kind) bool {
+	if !tools.ItemInList(t.ValueType.Kind, acceptedKinds) {
+		return false
+	}
+
+	if t.ValueType.IsArray() {
+		return t.ValueType.AsArray().IsArrayOf(acceptedKinds...)
+	}
+
+	if t.ValueType.IsMap() {
+		return t.ValueType.AsMap().IsMapOf(acceptedKinds...)
+	}
+
+	return true
 }
 
 func (t *MapType) AcceptsValue(value any) bool {

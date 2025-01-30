@@ -89,7 +89,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	})
 
 	return jenny.tmpl.
-		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(templateHelpers(templateDeps{
 			config:  jenny.config,
 			context: context,
