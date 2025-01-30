@@ -92,6 +92,10 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 				}
 			}
 
+			if destinationType.IsScalar() && (destinationType.Scalar.ScalarKind == ast.KindFloat32 || destinationType.Scalar.ScalarKind == ast.KindFloat64) {
+				return fmt.Sprintf("(float) %s", formatValue(value))
+			}
+
 			return formatValue(value)
 		},
 
