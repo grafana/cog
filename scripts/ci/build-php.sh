@@ -9,6 +9,4 @@ set -o nounset
 # Catch the error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
 set -o pipefail
 
-phpstan analyze --memory-limit 512M -c .config/ci/php/phpstan.neon
-
-psalm -c .config/ci/php/psalm.xml generated/php
+phpstan analyze --memory-limit 512M -c config/ci/php/phpstan.neon

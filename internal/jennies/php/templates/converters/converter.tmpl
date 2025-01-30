@@ -6,7 +6,7 @@ namespace {{ .NamespaceRoot }}\{{ .Converter.Package | formatPackageName }};
 
 {{- define "guard" }}
 {{- $operator := .Op -}}
-{{- $value := formatScalar .Value -}}
+{{- $value := formatValue .Path.Last.Type .Value -}}
 {{- if .Path.Last.Type.IsRef -}}{{ $value = print (.Path.Last.Type | formatRawTypeNotNullable) "::fromValue(" (.Value | formatScalar) ")" }}{{- end -}}
 {{- if eq $operator "==" -}}{{ $operator = "===" }}{{- end -}}
 {{- if eq $operator "!=" -}}{{ $operator = "!==" }}{{- end -}}

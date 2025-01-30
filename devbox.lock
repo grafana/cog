@@ -355,99 +355,51 @@
         }
       }
     },
-    "php83Packages.phpstan@1.11": {
-      "last_modified": "2024-11-28T07:51:56Z",
-      "resolved": "github:NixOS/nixpkgs/226216574ada4c3ecefcbbec41f39ce4655f78ef#php83Packages.phpstan",
+    "php83Packages.phpstan@2.1.1": {
+      "last_modified": "2025-01-25T23:17:58Z",
+      "resolved": "github:NixOS/nixpkgs/b582bb5b0d7af253b05d58314b85ab8ec46b8d19#php83Packages.phpstan",
       "source": "devbox-search",
-      "version": "1.11.8",
+      "version": "2.1.1",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/n8w93g8p7hk0vyza8g5dw6jggccy4xh1-phpstan-1.11.8",
+              "path": "/nix/store/jly06w68p2shjrscxgnaw7k04m2bz13h-phpstan-2.1.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/n8w93g8p7hk0vyza8g5dw6jggccy4xh1-phpstan-1.11.8"
+          "store_path": "/nix/store/jly06w68p2shjrscxgnaw7k04m2bz13h-phpstan-2.1.1"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2d0dk0llcnh14zwbzhqj5c0g628iiri9-phpstan-1.11.8",
+              "path": "/nix/store/id87a78h5ch2lylvf8jpxzs3gscx6vc4-phpstan-2.1.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/2d0dk0llcnh14zwbzhqj5c0g628iiri9-phpstan-1.11.8"
+          "store_path": "/nix/store/id87a78h5ch2lylvf8jpxzs3gscx6vc4-phpstan-2.1.1"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/yny29sy5lk53wb6lwlj9w04ijfmshdk3-phpstan-1.11.8",
+              "path": "/nix/store/26li9wcij0y6fbd3gnpin3nvsy6ncka7-phpstan-2.1.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/yny29sy5lk53wb6lwlj9w04ijfmshdk3-phpstan-1.11.8"
+          "store_path": "/nix/store/26li9wcij0y6fbd3gnpin3nvsy6ncka7-phpstan-2.1.1"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dwan11yh2fb62l4d1p75zwjxvgaix2mw-phpstan-1.11.8",
+              "path": "/nix/store/r71q2zsjd6r0afnqkhk9s939dwg58jns-phpstan-2.1.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dwan11yh2fb62l4d1p75zwjxvgaix2mw-phpstan-1.11.8"
-        }
-      }
-    },
-    "php83Packages.psalm@5.25": {
-      "last_modified": "2025-01-03T14:51:55Z",
-      "resolved": "github:NixOS/nixpkgs/a27871180d30ebee8aa6b11bf7fef8a52f024733#php83Packages.psalm",
-      "source": "devbox-search",
-      "version": "5.25.0",
-      "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/p8np2s9mdciqr2bzld9bdyzb3f38nlhm-psalm-5.25.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/p8np2s9mdciqr2bzld9bdyzb3f38nlhm-psalm-5.25.0"
-        },
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/lmbk5r1qq4pzpj8a7dkd9l6xgy9nynby-psalm-5.25.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/lmbk5r1qq4pzpj8a7dkd9l6xgy9nynby-psalm-5.25.0"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/bp4kcifnj54303yrh3x1y9gz1ikqzkw8-psalm-5.25.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/bp4kcifnj54303yrh3x1y9gz1ikqzkw8-psalm-5.25.0"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/9ga4f4nyippzb2crn7hcpkwjhk4vk9bi-psalm-5.25.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/9ga4f4nyippzb2crn7hcpkwjhk4vk9bi-psalm-5.25.0"
+          "store_path": "/nix/store/r71q2zsjd6r0afnqkhk9s939dwg58jns-phpstan-2.1.1"
         }
       }
     },
