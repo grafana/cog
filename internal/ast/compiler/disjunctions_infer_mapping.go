@@ -3,6 +3,7 @@ package compiler
 import (
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -95,12 +96,20 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
-			if !field.Type.IsConcreteScalar() {
+			resolvedType, resolved := schema.Resolve(field.Type)
+			if !resolved {
 				continue
 			}
 
-			scalarField := field.Type.AsScalar()
-			if scalarField.ScalarKind != ast.KindString {
+			if !(resolvedType.IsConcrete() && resolvedType.IsAnyOf(ast.KindEnum, ast.KindScalar)) {
+				continue
+			}
+
+			if resolvedType.IsScalar() && resolvedType.AsScalar().ScalarKind != ast.KindString {
+				continue
+			}
+
+			if resolvedType.IsEnum() && resolvedType.Enum.Values[0].Type.Scalar.ScalarKind != ast.KindString {
 				continue
 			}
 
@@ -116,6 +125,13 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 
 	for typeName := range candidates {
 		allTypes = append(allTypes, typeName)
+	}
+
+	if schema.Package == "elasticsearch" {
+		obj, _ := schema.LocateObject("Histogram")
+
+		spew.Dump(obj)
+
 	}
 
 	for candidateFieldName := range candidates[someType] {

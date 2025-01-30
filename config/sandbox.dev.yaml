@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+debug: true
+
+parameters:
+  output_dir: './generated/%l'
+  kind_registry_path: '../kind-registry'
+  kind_registry_version: 'next'
+  grafana_version: 'main'
+  go_package_root: 'github.com/grafana/cog/generated/go'
+  php_namespace_root: 'Grafana\Foundation'
+  java_package_path: 'com.grafana.foundation'
+
+inputs:
+  - cue:
+      entrypoint: '%__config_dir%/../schemas/sandbox'
+      package: sandbox
+
+transformations:
+  schemas: []
+
+  builders: []
+
+output:
+  directory: '%output_dir%'
+
+  types: true
+  builders: false
+  converters: false
+  api_reference: false
+
+  templates_data:
+    GrafanaVersion: '%kind_registry_version%'
+    ReleaseBranch: 'release_branch_name'
+    CogVersion: 'snapshot'
+    BuildTimestamp: '1733964347'
+
+  languages:
+    - go:
+        package_root: '%go_package_root%'
+        generate_strict_unmarshaller: false
+        generate_equal: false
+        generate_validate: false
