@@ -61,7 +61,7 @@ func (pass *DisjunctionOfAnonymousStructsToExplicit) processDisjunction(visitor 
 func (pass *DisjunctionOfAnonymousStructsToExplicit) generateBranchName(branch ast.Type, index int) string {
 	for _, field := range branch.Struct.Fields {
 		if field.Type.IsConcreteScalar() {
-			val := fmt.Sprintf("%v", field.Type.Scalar.Value)
+			val := fmt.Sprintf("%v", field.Type.Value)
 			return fmt.Sprintf("%s%s", tools.UpperCamelCase(field.Name), tools.UpperCamelCase(val))
 		}
 	}

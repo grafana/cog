@@ -124,9 +124,6 @@
           "type": "string",
           "description": "bool, bytes, string, int, float, ..."
         },
-        "value": {
-          "description": "if value isn't nil, we're representing a constant scalar"
-        },
         "constraints": {
           "items": {
             "$ref": "#/$defs/AstTypeConstraint"
@@ -183,6 +180,9 @@
         },
         "nullable": {
           "type": "boolean"
+        },
+        "value": {
+          "description": "meaning: concrete value"
         },
         "default": true,
         "disjunction": {

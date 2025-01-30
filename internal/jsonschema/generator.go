@@ -296,7 +296,7 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 	def := ast.String(ast.Default(schema.Default))
 
 	if schema.Constant != nil {
-		def.Scalar.Value = schema.Constant[0]
+		def.Value = schema.Constant[0]
 	}
 
 	// to handle constant values defined as a string with a "static" regex:
@@ -307,7 +307,7 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 	// }
 	// ```
 	if schema.Pattern != nil && tools.RegexMatchesConstantString(schema.Pattern.String()) {
-		def.Scalar.Value = tools.ConstantStringFromRegex(schema.Pattern.String())
+		def.Value = tools.ConstantStringFromRegex(schema.Pattern.String())
 	}
 
 	if schema.Format == formatDateTime {
@@ -334,7 +334,7 @@ func (g *generator) walkBool(schema *schemaparser.Schema) (ast.Type, error) {
 	def := ast.Bool(ast.Default(schema.Default))
 
 	if schema.Constant != nil {
-		def.Scalar.Value = schema.Constant[0]
+		def.Value = schema.Constant[0]
 	}
 
 	return def, nil
@@ -349,7 +349,7 @@ func (g *generator) walkNumber(schema *schemaparser.Schema) (ast.Type, error) {
 	def := ast.NewScalar(scalarKind, ast.Default(schema.Default))
 
 	if schema.Constant != nil {
-		def.Scalar.Value = unwrapJSONNumber(schema.Constant[0])
+		def.Value = unwrapJSONNumber(schema.Constant[0])
 	}
 
 	if schema.Minimum != nil {

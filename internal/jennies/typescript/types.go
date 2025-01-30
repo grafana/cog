@@ -65,10 +65,10 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 		buffer.WriteString(fmt.Sprintf("type %s = %s;\n", objectName, formatter.formatType(def.Type)))
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
-		typeValue := formatValue(scalarType.Value)
+		typeValue := formatValue(def.Type.Value)
 
-		if !scalarType.IsConcrete() || def.Type.Hints["kind"] == "type" {
-			if !scalarType.IsConcrete() {
+		if !def.Type.IsConcrete() || def.Type.Hints["kind"] == "type" {
+			if !def.Type.IsConcrete() {
 				typeValue = formatter.formatScalarKind(scalarType.ScalarKind)
 			}
 
@@ -132,8 +132,8 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 		return formatter.formatAnonymousEnum(def.AsEnum())
 	case ast.KindScalar:
 		// This scalar actually refers to a constant
-		if def.AsScalar().Value != nil {
-			return formatValue(def.AsScalar().Value)
+		if def.Value != nil {
+			return formatValue(def.Value)
 		}
 
 		return formatter.formatScalarKind(def.AsScalar().ScalarKind)

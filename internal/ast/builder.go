@@ -536,16 +536,18 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 
 	structType := schemas.ResolveToType(object.Type).AsStruct()
 	for _, field := range structType.Fields {
-		if field.Type.IsScalar() && field.Type.AsScalar().IsConcrete() {
-			constantAssignment := ConstantAssignment(PathFromStructField(field), field.Type.AsScalar().Value)
+		// Options aren't needed for concrete/constant fields, so instead we add a constant assignment
+		// in the builder's constructor.
+		if field.Type.IsConcrete() {
+			constantAssignment := ConstantAssignment(PathFromStructField(field), field.Type.Value)
 
 			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
 			continue
 		}
-		if field.Required && !field.Type.Nullable && generator.fieldIsRefToConcrete(schemas, field) {
+		if field.Required && !field.Type.Nullable && schemas.ResolveToType(field.Type).IsConcrete() {
 			resolvedType := schemas.ResolveToType(field.Type)
 
-			constantAssignment := ConstantAssignment(PathFromStructField(field), resolvedType.AsScalar().Value)
+			constantAssignment := ConstantAssignment(PathFromStructField(field), resolvedType.Value)
 			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
 			continue
 		}
@@ -554,14 +556,6 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 	}
 
 	return builder
-}
-
-func (generator *BuilderGenerator) fieldIsRefToConcrete(schemas Schemas, field StructField) bool {
-	if !field.Type.IsRef() {
-		return false
-	}
-
-	return schemas.ResolveToType(field.Type).IsConcreteScalar()
 }
 
 func (generator *BuilderGenerator) structFieldToOption(field StructField) Option {

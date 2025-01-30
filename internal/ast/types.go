@@ -87,6 +87,7 @@ type JenniesHints map[string]any
 type Type struct {
 	Kind     Kind
 	Nullable bool
+	Value    any `json:",omitempty"` // meaning: concrete value
 	Default  any `json:",omitempty"`
 
 	Disjunction    *DisjunctionType    `json:",omitempty"`
@@ -101,6 +102,10 @@ type Type struct {
 
 	Hints       JenniesHints `json:",omitempty"`
 	PassesTrail []string     `json:",omitempty"`
+}
+
+func (t Type) IsConcrete() bool {
+	return t.Value != nil
 }
 
 func (t *Type) AcceptsValue(value any) bool {
@@ -192,7 +197,7 @@ func (t Type) IsScalar() bool {
 }
 
 func (t Type) IsConcreteScalar() bool {
-	return t.IsScalar() && t.AsScalar().IsConcrete()
+	return t.IsScalar() && t.IsConcrete()
 }
 
 func (t Type) IsArray() bool {
@@ -252,6 +257,7 @@ func (t Type) DeepCopy() Type {
 	newType := Type{
 		Kind:     t.Kind,
 		Nullable: t.Nullable,
+		Value:    t.Value,
 		Default:  t.Default,
 		Hints:    make(JenniesHints, len(t.Hints)),
 	}
@@ -330,11 +336,7 @@ func Trail(trail string) TypeOption {
 
 func Value(value any) TypeOption {
 	return func(def *Type) {
-		if def.Kind != KindScalar {
-			return
-		}
-
-		def.Scalar.Value = value
+		def.Value = value
 	}
 }
 
@@ -901,7 +903,6 @@ func (t RefType) AsType() Type {
 
 type ScalarType struct {
 	ScalarKind  ScalarKind       `yaml:"scalar_kind"` // bool, bytes, string, int, float, ...
-	Value       any              `json:",omitempty"`  // if value isn't nil, we're representing a constant scalar
 	Constraints []TypeConstraint `json:",omitempty"`
 }
 
@@ -978,7 +979,6 @@ func (scalarType *ScalarType) AcceptsValue(value any) bool {
 func (scalarType ScalarType) DeepCopy() ScalarType {
 	newT := ScalarType{
 		ScalarKind: scalarType.ScalarKind,
-		Value:      scalarType.Value,
 	}
 
 	if len(scalarType.Constraints) != 0 {
@@ -990,10 +990,6 @@ func (scalarType ScalarType) DeepCopy() ScalarType {
 	}
 
 	return newT
-}
-
-func (scalarType ScalarType) IsConcrete() bool {
-	return scalarType.Value != nil
 }
 
 type IntersectionType struct {

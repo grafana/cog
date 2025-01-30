@@ -51,12 +51,10 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 	case ast.KindEnum:
 		buffer.WriteString(formatter.formatEnumDef(def))
 	case ast.KindScalar:
-		scalarType := def.Type.AsScalar()
-
 		//nolint: gocritic
-		if scalarType.Value != nil {
-			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
-		} else if scalarType.ScalarKind == ast.KindBytes {
+		if def.Type.Value != nil {
+			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(def.Type.Value)))
+		} else if def.Type.Scalar.ScalarKind == ast.KindBytes {
 			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
 		} else {
 			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatter.formatType(def.Type)))

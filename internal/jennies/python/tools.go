@@ -201,19 +201,19 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 	case ast.KindArray:
 		return raw("[]")
 	case ast.KindScalar:
-		return defaultValueForScalar(typeDef.AsScalar())
+		return defaultValueForScalar(typeDef)
 	default:
 		return "unknown"
 	}
 }
 
-func defaultValueForScalar(scalar ast.ScalarType) any {
+func defaultValueForScalar(scalarDef ast.Type) any {
 	// The scalar represents a constant
-	if scalar.Value != nil {
-		return scalar.Value
+	if scalarDef.Value != nil {
+		return scalarDef.Value
 	}
 
-	switch scalar.ScalarKind {
+	switch scalarDef.Scalar.ScalarKind {
 	case ast.KindNull, ast.KindAny:
 		return nil
 

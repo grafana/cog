@@ -104,7 +104,7 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 				continue
 			}
 
-			candidates[typeName][field.Name] = scalarField.Value
+			candidates[typeName][field.Name] = field.Type.Value
 		}
 	}
 
@@ -163,8 +163,8 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 		typeName := branch.AsRef().ReferredType
 
 		switch {
-		case field.Type.AsScalar().IsConcrete():
-			mapping[field.Type.AsScalar().Value.(string)] = typeName
+		case field.Type.IsConcrete():
+			mapping[field.Type.Value.(string)] = typeName
 		case field.Type.Default != nil:
 			mapping[field.Type.Default.(string)] = typeName
 		default:

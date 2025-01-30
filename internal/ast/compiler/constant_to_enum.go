@@ -34,8 +34,8 @@ func (pass *ConstantToEnum) processObject(_ *Visitor, _ *ast.Schema, object ast.
 	object.Type = ast.NewEnum([]ast.EnumValue{
 		{
 			Type:  ast.String(),
-			Name:  object.Type.Scalar.Value.(string),
-			Value: object.Type.Scalar.Value.(string),
+			Name:  object.Type.Value.(string),
+			Value: object.Type.Value.(string),
 		},
 	})
 	object.AddToPassesTrail("ConstantToEnum")

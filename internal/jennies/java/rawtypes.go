@@ -61,7 +61,7 @@ func (jenny RawTypes) getTemplate() *template.Template {
 func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, error) {
 	var err error
 	files := make(codejen.Files, 0)
-	scalars := make(map[string]ast.ScalarType)
+	scalars := make(map[string]ast.Type)
 
 	packageMapper := func(pkg string, class string) string {
 		if jenny.imports.IsIdentical(pkg, schema.Package) {
@@ -78,10 +78,8 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 		if object.Type.IsMap() || object.Type.IsArray() {
 			return
 		}
-		if object.Type.IsScalar() {
-			if object.Type.AsScalar().IsConcrete() {
-				scalars[object.Name] = object.Type.AsScalar()
-			}
+		if object.Type.IsConcreteScalar() {
+			scalars[object.Name] = object.Type
 			return
 		}
 
@@ -193,12 +191,12 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 	})
 }
 
-func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarType) ([]byte, error) {
+func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.Type) ([]byte, error) {
 	constants := make([]Constant, 0)
 	for name, scalar := range scalars {
 		constants = append(constants, Constant{
 			Name:  name,
-			Type:  formatScalarType(scalar),
+			Type:  formatScalarType(scalar.AsScalar()),
 			Value: scalar.Value,
 		})
 	}

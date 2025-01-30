@@ -93,7 +93,7 @@ func (jenny RawTypes) generateConstants(schema *ast.Schema, objects *orderedmap.
 
 	objects.Iterate(func(_ string, object ast.Object) {
 		name := formatConstantName(object.Name)
-		value := formatValue(object.Type.Scalar.Value)
+		value := formatValue(object.Type.Value)
 
 		constant := fmt.Sprintf("const %s = %s;", name, value)
 		if len(object.Comments) != 0 {
@@ -280,7 +280,7 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 
 		// initialize constant fields
 		if field.Type.IsConcreteScalar() {
-			assignments = append(assignments, fmt.Sprintf("    $this->%s = %s;\n", fieldName, formatValue(field.Type.AsScalar().Value)))
+			assignments = append(assignments, fmt.Sprintf("    $this->%s = %s;\n", fieldName, formatValue(field.Type.Value)))
 			continue
 		}
 

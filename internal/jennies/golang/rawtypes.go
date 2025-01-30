@@ -271,7 +271,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 				defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
 			}
 		} else if field.Type.IsConcreteScalar() {
-			defaultValue = formatScalar(field.Type.Scalar.Value)
+			defaultValue = formatScalar(field.Type.Value)
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
 		} else if resolvedFieldType.IsAnyOf(ast.KindScalar, ast.KindMap, ast.KindArray) && field.Type.Default != nil {
