@@ -109,7 +109,7 @@ def build_dashboard() -> Dashboard:
         .layout(
             GridLayout()
             .row(GridLayoutRow("CPU"))
-            .item(GridLayoutItem().element(ElementReference("cpu_usage")))
+            .item(GridLayoutItem("cpu_usage"))
             .row(GridLayoutRow("Memory"))
             .row(GridLayoutRow("Disk"))
             .row(GridLayoutRow("Network"))
