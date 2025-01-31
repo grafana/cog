@@ -40,15 +40,14 @@ func dashboardBuilder() []byte {
 		Panel("auth_logs", authLogs()).
 		Panel("kernel_logs", kernelLogs()).
 		Panel("all_sys_logs", allSystemLogs()).
+		// Layout building
 		Layout(dashboard.NewGridLayoutBuilder().
 			Row(dashboard.NewGridLayoutRowBuilder("CPU")).
-			Item(dashboard.NewGridLayoutItemBuilder().
+			Item(dashboard.NewGridLayoutItemBuilder("cpu_usage").
 				X(0). // TODO: X/Y calculations based on height and width?
 				Y(0).
 				Height(200).
-				Width(200).
-				// TODO: check references
-				Element(dashboard.NewElementReferenceBuilder("cpu_usage")),
+				Width(200),
 			).
 			Row(dashboard.NewGridLayoutRowBuilder("Memory")).
 			Row(dashboard.NewGridLayoutRowBuilder("Disk")).

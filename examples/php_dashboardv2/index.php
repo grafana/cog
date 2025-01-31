@@ -87,7 +87,7 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
         // TODO: automatic calculation of grid positions
         (new GridLayoutBuilder())
             ->row(new GridLayoutRowBuilder("CPU"))
-            ->item((new GridLayoutItemBuilder())->element(new ElementReferenceBuilder("cpu_usage")))
+            ->item(new GridLayoutItemBuilder("cpu_usage"))
             ->row(new GridLayoutRowBuilder("Memory"))
             ->row(new GridLayoutRowBuilder("Disk"))
             ->row(new GridLayoutRowBuilder("Network"))

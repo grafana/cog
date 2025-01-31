@@ -87,7 +87,7 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
     // TODO: rows?
     .layout(new GridLayoutBuilder()
         .row(new GridLayoutRowBuilder("CPU"))
-        .item(new GridLayoutItemBuilder().element(new ElementReferenceBuilder("cpu_usage")))
+        .item(new GridLayoutItemBuilder("cpu_usage"))
         .row(new GridLayoutRowBuilder("Memory"))
         .row(new GridLayoutRowBuilder("Disk"))
         .row(new GridLayoutRowBuilder("Network"))
