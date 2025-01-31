@@ -13,6 +13,7 @@ use Grafana\Foundation\Dashboardv2\DatasourceVariableBuilder;
 use Grafana\Foundation\Dashboardv2\ElementReferenceBuilder;
 use Grafana\Foundation\Dashboardv2\GridLayoutBuilder;
 use Grafana\Foundation\Dashboardv2\GridLayoutItemBuilder;
+use Grafana\Foundation\Dashboardv2\GridLayoutRowBuilder;
 use Grafana\Foundation\Dashboardv2\QueryVariableBuilder;
 use Grafana\Foundation\Dashboardv2\VariableHide;
 use Grafana\Foundation\Dashboardv2\VariableOption;
@@ -82,10 +83,15 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
     ])
     ->layout(
         // TODO: very clunky
-        // TODO: rows? size?
+        // TODO: size?
         // TODO: automatic calculation of grid positions
         (new GridLayoutBuilder())
-            ->item((new GridLayoutItemBuilder())->element((new ElementReferenceBuilder())->name("cpu_usage")))
+            ->row(new GridLayoutRowBuilder("CPU"))
+            ->item((new GridLayoutItemBuilder())->element(new ElementReferenceBuilder("cpu_usage")))
+            ->row(new GridLayoutRowBuilder("Memory"))
+            ->row(new GridLayoutRowBuilder("Disk"))
+            ->row(new GridLayoutRowBuilder("Network"))
+            ->row(new GridLayoutRowBuilder("Logs"))
     )
 ;
 

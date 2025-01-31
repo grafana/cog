@@ -5,6 +5,7 @@ import {
     ElementReferenceBuilder,
     GridLayoutBuilder,
     GridLayoutItemBuilder,
+    GridLayoutRowBuilder,
     QueryVariableBuilder,
     TimeSettingsBuilder,
     VariableHide,
@@ -85,9 +86,12 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
     // TODO build layout
     // TODO: rows?
     .layout(new GridLayoutBuilder()
-        .item(new GridLayoutItemBuilder()
-            .element(new ElementReferenceBuilder().name("cpu_usage"))
-        )
+        .row(new GridLayoutRowBuilder("CPU"))
+        .item(new GridLayoutItemBuilder().element(new ElementReferenceBuilder("cpu_usage")))
+        .row(new GridLayoutRowBuilder("Memory"))
+        .row(new GridLayoutRowBuilder("Disk"))
+        .row(new GridLayoutRowBuilder("Network"))
+        .row(new GridLayoutRowBuilder("Logs"))
     )
 ;
 

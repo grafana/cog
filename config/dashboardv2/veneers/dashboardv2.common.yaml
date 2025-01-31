@@ -44,6 +44,21 @@ builders:
       as: GridLayoutItem
   - omit: { by_object: GridLayoutItemSpec }
 
+  - merge_into:
+      source: GridLayoutRowSpec
+      destination: GridLayoutRowKind
+      under_path: spec
+  - rename:
+      by_object: GridLayoutRowKind
+      as: GridLayoutRow
+  - promote_options_to_constructor:
+      by_object: GridLayoutRowKind
+      options: [title]
+
+  - promote_options_to_constructor:
+      by_object: ElementReference
+      options: [name]
+
   ###########
   # Queries #
   ###########
@@ -306,6 +321,16 @@ options:
       as: item
   - array_to_append:
       by_builder: GridLayout.item
+
+  # GridLayoutItemKind + GridLayoutRowKind
+  - disjunction_as_options:
+      by_builder: GridLayout.item
+  - rename:
+      by_builder: GridLayout.GridLayoutItemKind
+      as: item
+  - rename:
+      by_builder: GridLayout.GridLayoutRowKind
+      as: row
 
   ###########
   # Queries #

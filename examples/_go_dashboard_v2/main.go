@@ -40,16 +40,20 @@ func dashboardBuilder() []byte {
 		Panel("auth_logs", authLogs()).
 		Panel("kernel_logs", kernelLogs()).
 		Panel("all_sys_logs", allSystemLogs()).
-		// TODO: rows?
 		Layout(dashboard.NewGridLayoutBuilder().
+			Row(dashboard.NewGridLayoutRowBuilder("CPU")).
 			Item(dashboard.NewGridLayoutItemBuilder().
 				X(0). // TODO: X/Y calculations based on height and width?
 				Y(0).
 				Height(200).
 				Width(200).
-				// TODO: proper references
-				Element(dashboard.NewElementReferenceBuilder().Name("cpu_usage")),
-			),
+				// TODO: check references
+				Element(dashboard.NewElementReferenceBuilder("cpu_usage")),
+			).
+			Row(dashboard.NewGridLayoutRowBuilder("Memory")).
+			Row(dashboard.NewGridLayoutRowBuilder("Disk")).
+			Row(dashboard.NewGridLayoutRowBuilder("Network")).
+			Row(dashboard.NewGridLayoutRowBuilder("Logs")),
 		)
 
 	sampleDashboard, err := builder.Build()
@@ -76,6 +80,6 @@ func main() {
 	if err := json.Unmarshal(dashboardAsBytes, &dash); err != nil {
 		panic(err)
 	} else {
-		fmt.Printf("%+v\n", dash)
+		fmt.Printf("%#v\n", dash)
 	}
 }

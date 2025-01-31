@@ -6,6 +6,7 @@ from grafana_foundation_sdk.builders.dashboardv2 import (
     QueryVariable,
     GridLayout,
     GridLayoutItem,
+    GridLayoutRow,
     ElementReference,
 )
 from grafana_foundation_sdk.models.dashboardv2 import (
@@ -106,9 +107,13 @@ def build_dashboard() -> Dashboard:
             }
         )
         .layout(
-            GridLayout().item(
-                GridLayoutItem().element(ElementReference().name("cpu_usage"))
-            )
+            GridLayout()
+            .row(GridLayoutRow("CPU"))
+            .item(GridLayoutItem().element(ElementReference("cpu_usage")))
+            .row(GridLayoutRow("Memory"))
+            .row(GridLayoutRow("Disk"))
+            .row(GridLayoutRow("Network"))
+            .row(GridLayoutRow("Logs"))
         )
     )
 
