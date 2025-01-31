@@ -208,6 +208,7 @@ output:
           - '%__config_dir%/foundation-sdk/.cog/templates/python/extra'
         overrides_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/python/overrides'
+          - '%__config_dir%/dashboardv2/templates/python/overrides'
     - typescript:
         extra_files_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/typescript/extra'
