@@ -30,24 +30,25 @@ builders:
       source: GridLayoutSpec
       destination: GridLayoutKind
       under_path: spec
+  - omit: { by_object: GridLayoutSpec }
   - rename:
       by_object: GridLayoutKind
       as: GridLayout
-  - omit: { by_object: GridLayoutSpec }
 
   - merge_into:
       source: GridLayoutItemSpec
       destination: GridLayoutItemKind
       under_path: spec
+  - omit: { by_object: GridLayoutItemSpec }
   - rename:
       by_object: GridLayoutItemKind
       as: GridLayoutItem
-  - omit: { by_object: GridLayoutItemSpec }
 
   - merge_into:
       source: GridLayoutRowSpec
       destination: GridLayoutRowKind
       under_path: spec
+  - omit: { by_object: GridLayoutRowSpec }
   - rename:
       by_object: GridLayoutRowKind
       as: GridLayoutRow
@@ -304,6 +305,10 @@ builders:
         "filterable",    # TODO: check if it's relevant or not
         "writeable",     # TODO: check if it's relevant or not
       ]
+
+  - omit: { by_object: FieldConfig }
+  - omit: { by_object: FieldConfigSource }
+  - omit: { by_object: VizConfigSpec }
 
 options:
   ###########
