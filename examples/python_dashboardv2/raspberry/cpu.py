@@ -45,7 +45,7 @@ def cpu_usage_timeseries() -> Panel:
 def cpu_temperature_gauge() -> Panel:
     return (
         Panel()
-        .title("CPU Temperatore")
+        .title("CPU Temperature")
         .visualization(
             default_gauge()
             .min_val(0)
