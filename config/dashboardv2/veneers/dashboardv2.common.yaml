@@ -30,7 +30,6 @@ builders:
       source: GridLayoutSpec
       destination: GridLayoutKind
       under_path: spec
-  - omit: { by_object: GridLayoutSpec }
   - rename:
       by_object: GridLayoutKind
       as: GridLayout
@@ -39,16 +38,22 @@ builders:
       source: GridLayoutItemSpec
       destination: GridLayoutItemKind
       under_path: spec
-  - omit: { by_object: GridLayoutItemSpec }
   - rename:
       by_object: GridLayoutItemKind
       as: GridLayoutItem
 
   - merge_into:
+      source: ElementReference
+      destination: GridLayoutItemKind
+      under_path: spec.element
+  - promote_options_to_constructor:
+      by_object: GridLayoutItemKind
+      options: [name]
+
+  - merge_into:
       source: GridLayoutRowSpec
       destination: GridLayoutRowKind
       under_path: spec
-  - omit: { by_object: GridLayoutRowSpec }
   - rename:
       by_object: GridLayoutRowKind
       as: GridLayoutRow
@@ -56,9 +61,9 @@ builders:
       by_object: GridLayoutRowKind
       options: [title]
 
-  - promote_options_to_constructor:
-      by_object: ElementReference
-      options: [name]
+  - omit: { by_object: GridLayoutSpec }
+  - omit: { by_object: GridLayoutRowSpec }
+  - omit: { by_object: GridLayoutItemSpec }
 
   ###########
   # Queries #
@@ -315,10 +320,10 @@ options:
   # Layouts #
   ###########
 
-  # spec options were merged into GridLayout
+  # spec options are leftovers from the merge_into veneer
   - omit: { by_builder: GridLayout.spec }
-  # spec options were merged into GridLayoutItem
   - omit: { by_builder: GridLayoutItem.spec }
+  - omit: { by_builder: GridLayoutRow.spec }
 
   # Append a single `item` value instead of a map of everything
   - duplicate:
@@ -326,6 +331,11 @@ options:
       as: item
   - array_to_append:
       by_builder: GridLayout.item
+
+  - omit: { by_builder: GridLayoutItem.element }
+  - rename:
+      by_builder: GridLayoutItem.name
+      as: element
 
   # GridLayoutItemKind + GridLayoutRowKind
   - disjunction_as_options:
