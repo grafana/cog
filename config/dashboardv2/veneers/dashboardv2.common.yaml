@@ -351,11 +351,9 @@ options:
   # Queries #
   ###########
 
-  # spec options were merged into QueryGroup
+  # spec options are leftovers from the merge_into veneer
   - omit: { by_builder: QueryGroup.spec }
-
-  # spec options were merged into PanelQuery
-  - omit: { by_builder: PanelQuery.spec }
+  - omit: { by_name: PanelQueryKind.spec }
 
   # queries() → targets()
   - rename:
@@ -380,11 +378,15 @@ options:
   # Transformations #
   ###################
 
+  # spec options are leftovers from the merge_into veneer
   - omit: { by_builder: Transformation.spec }
 
   ##########
   # Panels #
   ##########
+
+  # spec options are leftovers from the merge_into veneer
+  - omit: { by_name: PanelKind.spec }
 
   # VizConfig() → Visualization()
   - rename:
