@@ -57,6 +57,9 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 			"unmarshalForType": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
 				panic("unmarshalForType() needs to be overridden by a jenny")
 			},
+			"unmarshalForType": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
+				panic("unmarshalForType() needs to be overridden by a jenny")
+			},
 		}),
 
 		// parse templates
