@@ -68,13 +68,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	jenny.tmpl = jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(template.FuncMap{
-			"formatFullyQualifiedRef": func(typeDef ast.RefType) string {
-				return jenny.typeFormatter.formatFullyQualifiedRef(typeDef, false)
-			},
 			"importModule": jenny.importModule,
 			"importPkg":    jenny.importPkg,
-			"disjunctionFromJSON": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
-				return jenny.disjunctionFromJSON(context, typeDef, inputVar, hint)
+			"formatFullyQualifiedRef": func(typeDef ast.RefType) string {
+				return jenny.typeFormatter.formatFullyQualifiedRef(typeDef, false)
 			},
 			"unmarshalForType": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
 				return jenny.fromJSONForType(context, typeDef, inputVar, hint)
