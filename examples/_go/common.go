@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/common"
 	"github.com/grafana/cog/generated/go/dashboard"
 	"github.com/grafana/cog/generated/go/gauge"
@@ -9,10 +10,6 @@ import (
 	"github.com/grafana/cog/generated/go/prometheus"
 	"github.com/grafana/cog/generated/go/timeseries"
 )
-
-func toPtr[T any](input T) *T {
-	return &input
-}
 
 func basicPrometheusQuery(query string, legend string) *prometheus.DataqueryBuilder {
 	return prometheus.NewDataqueryBuilder().
@@ -51,8 +48,8 @@ func defaultLogs() *logs.PanelBuilder {
 	return logs.NewPanelBuilder().
 		Span(24).
 		Datasource(dashboard.DataSourceRef{
-			Type: toPtr("loki"),
-			Uid:  toPtr("grafanacloud-logs"),
+			Type: cog.ToPtr("loki"),
+			Uid:  cog.ToPtr("grafanacloud-logs"),
 		}).
 		ShowTime(true).
 		EnableLogDetails(true).

@@ -5,12 +5,12 @@ use App\Monitoring\Disk;
 use App\Monitoring\Logs;
 use App\Monitoring\Memory;
 use App\Monitoring\Network;
+use App\Monitoring\Common as MonitoringCommon;
 use Grafana\Foundation\Common;
 use Grafana\Foundation\Dashboardv2\DashboardBuilder;
 use Grafana\Foundation\Dashboardv2\DashboardCursorSync;
 use Grafana\Foundation\Dashboardv2\DashboardV2Spec;
 use Grafana\Foundation\Dashboardv2\DatasourceVariableBuilder;
-use Grafana\Foundation\Dashboardv2\ElementReferenceBuilder;
 use Grafana\Foundation\Dashboardv2\GridLayoutBuilder;
 use Grafana\Foundation\Dashboardv2\GridLayoutItemBuilder;
 use Grafana\Foundation\Dashboardv2\GridLayoutRowBuilder;
@@ -52,7 +52,9 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
             ->label('Instance')
             ->hide(VariableHide::dontHide())
             ->refresh(VariableRefresh::onTimeRangeChanged())
-            ->query('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)')
+            ->query(
+                MonitoringCommon::basicPrometheusQuery('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)', ''),
+            )
             ->datasource(new Common\DataSourceRef(uid: '$datasource', type: 'prometheus'))
             ->current(new VariableOption(
                 selected: true,
@@ -82,7 +84,6 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
         "all_sys_logs" => Logs::allSystemLogs(),
     ])
     ->layout(
-        // TODO: very clunky
         // TODO: size?
         // TODO: automatic calculation of grid positions
         (new GridLayoutBuilder())

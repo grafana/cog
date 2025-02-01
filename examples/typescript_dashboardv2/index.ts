@@ -2,7 +2,6 @@ import {
     DashboardBuilder,
     DashboardCursorSync,
     DatasourceVariableBuilder,
-    ElementReferenceBuilder,
     GridLayoutBuilder,
     GridLayoutItemBuilder,
     GridLayoutRowBuilder,
@@ -17,6 +16,7 @@ import {memoryUsageGauge, memoryUsageTimeseries} from "./memory";
 import {diskIOTimeseries, diskSpaceUsageTable} from "./disk";
 import {networkReceivedTimeseries, networkTransmittedTimeseries} from "./network";
 import {allSystemLogs, authLogs, errorsInSystemLogs, kernelLogs} from "./logs";
+import {basicPrometheusQuery} from "./common";
 
 const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
     .tags(["generated", "raspberrypi-node-integration"])
@@ -49,7 +49,7 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
             .label("Instance")
             .hide(VariableHide.DontHide)
             .refresh(VariableRefresh.OnTimeRangeChanged)
-            .query('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)')
+            .query(basicPrometheusQuery('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)', ''))
             .datasource({
                 "type": "prometheus",
                 "uid": "$datasource"
