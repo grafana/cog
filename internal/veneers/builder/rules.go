@@ -107,7 +107,7 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 			return ast.Builder{}, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
 		}
 
-		newBuilder.AddToVeneerTrail(fmt.Sprintf("MergeInto[%s]", sourceBuilder.Name))
+		newBuilder.AddToVeneerTrail(fmt.Sprintf("MergeInto[source=%s]", sourceBuilder.Name))
 
 		return newBuilder, nil
 	})
@@ -333,8 +333,9 @@ func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
 				return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: %w", err)
 			}
 
-			for _, b := range composedBuilders {
-				b.AddToVeneerTrail("ComposeBuilders")
+			for i, b := range composedBuilders {
+				b.AddToVeneerTrail(fmt.Sprintf("ComposeBuilders[source=%s]", config.SourceBuilderName))
+				composedBuilders[i] = b
 			}
 
 			newBuilders = append(newBuilders, composedBuilders...)
