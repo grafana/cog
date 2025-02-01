@@ -80,12 +80,6 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			"defaultForType": func(typeDef ast.Type) string {
 				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
 			},
-			"unmarshalForType": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
-				return jenny.fromJSONForType(context, typeDef, inputVar, hint)
-			},
-			"defaultForType": func(typeDef ast.Type) string {
-				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
-			},
 		})
 
 	i := 0
