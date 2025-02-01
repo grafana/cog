@@ -7,7 +7,6 @@ from grafana_foundation_sdk.builders.dashboardv2 import (
     GridLayout,
     GridLayoutItem,
     GridLayoutRow,
-    ElementReference,
 )
 from grafana_foundation_sdk.models.dashboardv2 import (
     DashboardV2Spec as DashboardModel,
@@ -40,6 +39,7 @@ from raspberry.network import (
     network_received_timeseries,
     network_transmitted_timeseries,
 )
+from raspberry.common import basic_prometheus_query
 
 
 def build_dashboard() -> Dashboard:
@@ -78,7 +78,7 @@ def build_dashboard() -> Dashboard:
             .hide(VariableHide.DONT_HIDE)
             .refresh(VariableRefresh.ON_TIME_RANGE_CHANGED)
             .query(
-                'label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)'
+                basic_prometheus_query('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)', "")
             )
             .datasource(DataSourceRef(type_val="prometheus", uid="$datasource"))
             .current(VariableOption(selected=False, text="potato", value="potato"))

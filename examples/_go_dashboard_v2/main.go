@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/cog/plugins"
+	"github.com/grafana/cog/generated/go/common"
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2"
+	"github.com/grafana/cog/generated/go/prometheus"
 )
 
 func dashboardBuilder() []byte {
@@ -20,8 +23,36 @@ func dashboardBuilder() []byte {
 			To("now").
 			Timezone("browser"),
 		).
-		// TODO: variables
-		// TODO: Element() and Elements() should take builders
+		// "Data Source" variable
+		DatasourceVariable(dashboard.NewDatasourceVariableBuilder("datasource").
+			Label("Data Source").
+			Hide(dashboard.VariableHideDontHide).
+			PluginId("prometheus").
+			Current(dashboard.VariableOption{
+				Selected: cog.ToPtr(true),
+				Text:     dashboard.StringOrArrayOfString{String: cog.ToPtr("grafanacloud-potatopi-prom")},
+				Value:    dashboard.StringOrArrayOfString{String: cog.ToPtr("grafanacloud-prom")},
+			}),
+		).
+		// "Instance" variable
+		QueryVariable(dashboard.NewQueryVariableBuilder("instance").
+			Label("Instance").
+			Hide(dashboard.VariableHideDontHide).
+			Refresh(dashboard.VariableRefreshOnTimeRangeChanged).
+			Query(prometheus.NewQueryBuilder().
+				Expr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
+			).
+			Datasource(common.DataSourceRef{
+				Type: cog.ToPtr("prometheus"),
+				Uid:  cog.ToPtr("$datasource"),
+			}).
+			Current(dashboard.VariableOption{
+				Selected: cog.ToPtr(false),
+				Text:     dashboard.StringOrArrayOfString{String: cog.ToPtr("potato")},
+				Value:    dashboard.StringOrArrayOfString{String: cog.ToPtr("potato")},
+			}).
+			Sort(dashboard.VariableSortDisabled),
+		).
 		// CPU
 		Panel("cpu_usage", cpuUsageTimeseries()).
 		Panel("cpu_temp", cpuTemperatureGauge()).
