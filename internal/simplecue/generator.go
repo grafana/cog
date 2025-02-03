@@ -330,8 +330,67 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	v = g.removeTautologicalUnification(v)
 
 	// This node is referring to another definition
-	if ok, v, defV := getReference(v); ok {
-		return g.declareReference(v, defV)
+	if reference := getReference(v); reference.isRef {
+		declaredReference, err := g.declareReference(reference.defaultValue, reference.defaultValue)
+		if err != nil {
+			return ast.Type{}, err
+		}
+
+		if reference.constantValue.Exists() {
+			i, err := reference.constantValue.Fields()
+			if err != nil {
+				return ast.Type{}, err
+			}
+
+			selectors := make(map[string]any)
+			for i.Next() && i.Value().IsConcrete() {
+				concrete, err := cueConcreteToScalar(i.Value())
+				if err != nil {
+					return ast.Type{}, err
+				}
+				selectors[i.Selector().String()] = concrete
+			}
+
+			if len(selectors) == 0 {
+				return declaredReference, nil
+			}
+
+			i, err = reference.refVal.Fields(cue.Optional(true))
+			if err != nil {
+				return ast.Type{}, err
+			}
+
+			newTypes := make(map[string]ast.Type)
+			for i.Next() {
+				if val, ok := selectors[i.Selector().String()]; ok {
+					_, path := i.Value().ReferencePath()
+					if path.String() != "" {
+						refPkg, err := g.refResolver.PackageForNode(i.Value().Source(), g.schema.Package)
+						if err != nil {
+							return ast.Type{}, err
+						}
+
+						refType := g.namingFunc(g.rootVal, path)
+						newTypes[i.Selector().String()] = ast.NewConstantReferenceType(refPkg, refType, val)
+					}
+				}
+			}
+
+			fields, err := g.structFields(reference.refVal)
+			if err != nil {
+				return ast.Type{}, err
+			}
+
+			for x, field := range fields {
+				if t, ok := newTypes[field.Name]; ok {
+					fields[x].Type = t
+				}
+			}
+
+			return ast.NewStruct(fields...), nil
+		}
+
+		return declaredReference, nil
 	}
 
 	defVal, err := g.extractDefault(v)
@@ -407,36 +466,79 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	}
 }
 
-func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
+type refInformation struct {
+	isRef         bool
+	refVal        cue.Value
+	defaultValue  cue.Value
+	constantValue cue.Value
+}
+
+func getReference(v cue.Value) refInformation {
 	_, path := v.ReferencePath()
 	if path.String() != "" {
-		return true, v, v
+		return refInformation{
+			isRef:        true,
+			refVal:       v,
+			defaultValue: v,
+		}
 	}
 
 	op, exprs := v.Expr()
 
 	if len(exprs) != 2 {
-		return false, v, v
+		return refInformation{
+			isRef:        false,
+			refVal:       v,
+			defaultValue: v,
+		}
 	}
 
 	_, path = exprs[0].ReferencePath()
 	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind && path.String() != "" {
 		// When a struct with defaults is completely filled, it usually has a NoOp op.
 		if op == cue.NoOp {
-			return true, exprs[0], v
+			return refInformation{
+				isRef:        true,
+				refVal:       exprs[0],
+				defaultValue: v,
+			}
 		}
 
 		// Accepts [AStruct | *{ ... }] and skips [AStruct | BStruct]
 		if _, ok := v.Default(); ok {
-			return true, exprs[0], v
+			return refInformation{
+				isRef:        true,
+				refVal:       exprs[0],
+				defaultValue: v,
+			}
 		}
 	}
 
 	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
-		return true, exprs[0], exprs[1]
+		return refInformation{
+			isRef:        true,
+			refVal:       exprs[0],
+			defaultValue: exprs[1],
+		}
 	}
 
-	return false, v, v
+	conjuncts := appendSplit(nil, cue.AndOp, v)
+	// len(conjuncts) should be 2
+	// meaning (or hoping for): [reference to something] & ["concrete value"]
+	if len(conjuncts) == 2 && conjuncts[1].Kind() == cue.StructKind {
+		i, _ := conjuncts[1].Fields()
+		return refInformation{
+			isRef:         i.Next(),
+			refVal:        conjuncts[0],
+			constantValue: conjuncts[1],
+		}
+	}
+
+	return refInformation{
+		isRef:        false,
+		refVal:       v,
+		defaultValue: v,
+	}
 }
 
 func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, error) {
