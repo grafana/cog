@@ -113,12 +113,9 @@ func (g *generator) walkCueSchemaWithEnvelope(envelopeName string, v cue.Value) 
 	for i.Next() {
 		if i.Selector().IsDefinition() {
 			name := g.namingFunc(g.rootVal, i.Value().Path())
-			n, err := g.declareObject(name, i.Value())
-			if err != nil {
+			if err := g.declareObject(name, i.Value()); err != nil {
 				return err
 			}
-
-			g.schema.AddObject(n)
 			continue
 		}
 
@@ -167,66 +164,61 @@ func (g *generator) walkCueSchema(v cue.Value) error {
 
 	for i.Next() {
 		name := g.namingFunc(g.rootVal, i.Value().Path())
-
-		n, err := g.declareObject(name, i.Value())
-		if err != nil {
+		if err := g.declareObject(name, i.Value()); err != nil {
 			return err
 		}
-
-		g.schema.AddObject(n)
 	}
 
 	return nil
 }
 
-func (g *generator) declareObject(name string, v cue.Value) (ast.Object, error) {
-	// Try to guess if `v` can be represented as an enum
-	implicitEnum, err := isImplicitEnum(v)
-	if err != nil {
-		return ast.Object{}, err
-	}
-	if implicitEnum {
-		return g.declareEnum(name, v)
-	}
-
-	nodeType, err := g.declareNode(v)
-	if err != nil {
-		return ast.Object{}, err
+func (g *generator) declareObject(name string, v cue.Value) error {
+	if g.schema.Objects.Has(name) {
+		return nil
 	}
 
 	objectDef := ast.Object{
 		Name:     name,
 		Comments: commentsFromCueValue(v),
-		Type:     nodeType,
 		SelfRef: ast.RefType{
 			ReferredPkg:  g.schema.Package,
 			ReferredType: name,
 		},
 	}
 
-	return objectDef, nil
-}
+	// declare the object early, to help with recursive definitions
+	g.schema.AddObject(objectDef)
 
-func (g *generator) declareEnum(name string, v cue.Value) (ast.Object, error) {
-	defVal, err := g.extractDefault(v)
+	var err error
+	var nodeType ast.Type
+
+	// Try to guess if `v` can be represented as an enum
+	implicitEnum, err := isImplicitEnum(v)
 	if err != nil {
-		return ast.Object{}, err
+		return err
+	}
+	if implicitEnum {
+		defVal, err := g.extractDefault(v)
+		if err != nil {
+			return err
+		}
+
+		nodeType, err = g.declareAnonymousEnum(v, defVal, hintsFromCueValue(v))
+		if err != nil {
+			return err
+		}
+	} else {
+		nodeType, err = g.declareNode(v)
+		if err != nil {
+			return err
+		}
 	}
 
-	enumType, err := g.declareAnonymousEnum(v, defVal, hintsFromCueValue(v))
-	if err != nil {
-		return ast.Object{}, err
-	}
+	objectDef.Type = nodeType
 
-	return ast.Object{
-		Name:     name,
-		Comments: commentsFromCueValue(v),
-		Type:     enumType,
-		SelfRef: ast.RefType{
-			ReferredPkg:  g.schema.Package,
-			ReferredType: name,
-		},
-	}, nil
+	g.schema.Objects.Set(name, objectDef)
+
+	return nil
 }
 
 func (g *generator) extractEnumValues(v cue.Value) ([]ast.EnumValue, error) {
@@ -300,14 +292,11 @@ func (g *generator) structFields(v cue.Value) ([]ast.StructField, error) {
 	for i, _ := v.Fields(cue.Optional(true), cue.Definitions(true)); i.Next(); {
 		fieldLabel := selectorLabel(i.Selector())
 
-		// inline definition
+		// inline object definition
 		if i.Selector().IsDefinition() {
-			obj, err := g.declareObject(fieldLabel, i.Value())
-			if err != nil {
+			if err := g.declareObject(fieldLabel, i.Value()); err != nil {
 				return nil, err
 			}
-
-			g.schema.AddObject(obj)
 			continue
 		}
 
@@ -455,12 +444,9 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 	if areCuePathsFromSameRoot(g.rootPath, path) && !cuePathIsChildOf(g.rootPath, path) {
 		refType := g.namingFunc(g.rootVal, path)
 		if !g.schema.Objects.Has(refType) {
-			obj, err := g.declareObject(refType, referenceRootValue.LookupPath(path))
-			if err != nil {
+			if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
 				return ast.Type{}, err
 			}
-
-			g.schema.AddObject(obj)
 		}
 
 		defValue, err := g.extractDefault(defV)
@@ -488,6 +474,14 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			return ast.String(ast.Default(defValue), ast.Hints(ast.JenniesHints{
 				ast.HintStringFormatDateTime: true,
 			})), nil
+		}
+
+		// ensure that referenced objects are explored (in case they're not
+		// defined within the "root" cue value given to cog as parsing input)
+		if refPkg == g.schema.Package && !g.schema.Objects.Has(refType) {
+			if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
+				return ast.Type{}, err
+			}
 		}
 
 		return ast.NewRef(refPkg, refType, ast.Default(defValue)), nil
