@@ -148,7 +148,7 @@ inputs:
   - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v12.0.x"))'
     cue:
       entrypoint: '%__config_dir%/dashboardv2/schemas/dashboard/v2alpha0'
-      package: dashboardv2
+      package: dashboardv2alpha0
       metadata:
         kind: core
       transformations:

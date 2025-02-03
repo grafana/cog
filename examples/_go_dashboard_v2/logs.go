@@ -1,7 +1,7 @@
 package main
 
 import (
-	dashboard "github.com/grafana/cog/generated/go/dashboardv2"
+	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha0"
 )
 
 func errorsInSystemLogs() *dashboard.PanelBuilder {

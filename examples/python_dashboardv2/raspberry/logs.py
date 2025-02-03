@@ -1,5 +1,4 @@
-import grafana_foundation_sdk.models.dashboard as dashboard
-from grafana_foundation_sdk.builders.dashboardv2 import Panel, QueryGroup, Target
+from grafana_foundation_sdk.builders.dashboardv2alpha0 import Panel, QueryGroup, Target
 from .common import default_logs, basic_loki_query
 
 
@@ -29,7 +28,7 @@ def auth_logs() -> Panel:
     )
 
 
-def kernel_logs() -> dashboard.Panel:
+def kernel_logs() -> Panel:
     return (
         Panel()
         .title("Kernel logs")

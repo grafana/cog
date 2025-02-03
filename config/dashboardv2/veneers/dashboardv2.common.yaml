@@ -2,7 +2,7 @@
 
 language: all
 
-package: dashboardv2
+package: dashboardv2alpha0
 
 builders:
   # overrides and transformations related
@@ -90,7 +90,7 @@ builders:
   # Dataquery DataQueryKind composability
   - compose:
       by_variant: dataquery
-      source_builder_name: dashboardv2.DataQueryKind
+      source_builder_name: dashboardv2alpha0.DataQueryKind
       composed_builder_name: Query
       plugin_discriminator_field: kind
       composition_map: # Builder → assignment root path
@@ -118,7 +118,7 @@ builders:
           - name: properties
             type: &type_DynamicConfigValue_array
               kind: array
-              array: {value_type: {kind: ref, ref: {referred_pkg: dashboardv2, referred_type: DynamicConfigValue}}}
+              array: {value_type: {kind: ref, ref: {referred_pkg: dashboardv2alpha0, referred_type: DynamicConfigValue}}}
         assignments:
           - method: append
             path: overrides
@@ -294,7 +294,7 @@ builders:
       # this should run after the "dashboard" package has done its thing
       # so these builders aren't needed anymore once the composition is done.
       preserve_original_builders: false
-      source_builder_name: dashboardv2.VizConfigKind
+      source_builder_name: dashboardv2alpha0.VizConfigKind
       composed_builder_name: Visualization
       plugin_discriminator_field: kind
       composition_map: # Builder → assignment root path

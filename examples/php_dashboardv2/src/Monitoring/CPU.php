@@ -4,12 +4,12 @@ namespace App\Monitoring;
 
 use Grafana\Foundation\Common\StackingConfigBuilder;
 use Grafana\Foundation\Common\StackingMode;
-use Grafana\Foundation\Dashboardv2\Threshold;
-use Grafana\Foundation\Dashboardv2\ThresholdsConfigBuilder;
-use Grafana\Foundation\Dashboardv2\ThresholdsMode;
-use Grafana\Foundation\Dashboardv2\PanelBuilder;
-use Grafana\Foundation\Dashboardv2\QueryGroupBuilder;
-use Grafana\Foundation\Dashboardv2\TargetBuilder;
+use Grafana\Foundation\Dashboardv2alpha0\Threshold;
+use Grafana\Foundation\Dashboardv2alpha0\ThresholdsConfigBuilder;
+use Grafana\Foundation\Dashboardv2alpha0\ThresholdsMode;
+use Grafana\Foundation\Dashboardv2alpha0\PanelBuilder;
+use Grafana\Foundation\Dashboardv2alpha0\QueryGroupBuilder;
+use Grafana\Foundation\Dashboardv2alpha0\TargetBuilder;
 
 class CPU
 {

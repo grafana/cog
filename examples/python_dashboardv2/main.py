@@ -1,5 +1,5 @@
 import json
-from grafana_foundation_sdk.builders.dashboardv2 import (
+from grafana_foundation_sdk.builders.dashboardv2alpha0 import (
     Dashboard,
     TimeSettings,
     DatasourceVariable,
@@ -8,7 +8,7 @@ from grafana_foundation_sdk.builders.dashboardv2 import (
     GridLayoutItem,
     GridLayoutRow,
 )
-from grafana_foundation_sdk.models.dashboardv2 import (
+from grafana_foundation_sdk.models.dashboardv2alpha0 import (
     DashboardV2Spec as DashboardModel,
     DashboardCursorSync,
     VariableHide,

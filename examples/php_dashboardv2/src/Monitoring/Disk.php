@@ -5,12 +5,12 @@ namespace App\Monitoring;
 use Grafana\Foundation\Common\FieldTextAlignment;
 use Grafana\Foundation\Common\TableCellHeight;
 use Grafana\Foundation\Common\TableFooterOptionsBuilder;
-use Grafana\Foundation\Dashboardv2\DataTransformerConfig;
-use Grafana\Foundation\Dashboardv2\DynamicConfigValue;
-use Grafana\Foundation\Dashboardv2\PanelBuilder;
-use Grafana\Foundation\Dashboardv2\QueryGroupBuilder;
-use Grafana\Foundation\Dashboardv2\TargetBuilder;
-use Grafana\Foundation\Dashboardv2\TransformationBuilder;
+use Grafana\Foundation\Dashboardv2alpha0\DataTransformerConfig;
+use Grafana\Foundation\Dashboardv2alpha0\DynamicConfigValue;
+use Grafana\Foundation\Dashboardv2alpha0\PanelBuilder;
+use Grafana\Foundation\Dashboardv2alpha0\QueryGroupBuilder;
+use Grafana\Foundation\Dashboardv2alpha0\TargetBuilder;
+use Grafana\Foundation\Dashboardv2alpha0\TransformationBuilder;
 use Grafana\Foundation\Table;
 
 class Disk

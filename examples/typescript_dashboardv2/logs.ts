@@ -1,5 +1,5 @@
 import {basicLokiQuery, defaultLogs} from "./common";
-import {PanelBuilder, QueryGroupBuilder, TargetBuilder } from "../../generated/typescript/src/dashboardv2";
+import {PanelBuilder, QueryGroupBuilder, TargetBuilder } from "../../generated/typescript/src/dashboardv2alpha0";
 
 export const errorsInSystemLogs = (): PanelBuilder => {
     return new PanelBuilder()
