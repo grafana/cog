@@ -221,7 +221,7 @@ func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) 
 		return nil, err
 	}
 
-	return commonPasses.Concat(pipeline.finalPasses()).Process(allSchemas)
+	return commonPasses.Process(allSchemas)
 }
 
 func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
