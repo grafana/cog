@@ -10,7 +10,7 @@ import {
     VariableHide,
     VariableRefresh,
     VariableSort,
-} from "../../generated/typescript/src/dashboardv2";
+} from "../../generated/typescript/src/dashboardv2alpha0";
 import {cpuTemperatureGauge, cpuUsageTimeseries, loadAverageTimeseries} from "./cpu";
 import {memoryUsageGauge, memoryUsageTimeseries} from "./memory";
 import {diskIOTimeseries, diskSpaceUsageTable} from "./disk";

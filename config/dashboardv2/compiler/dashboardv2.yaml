@@ -1,47 +1,47 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json
 
 passes:
-  ################
-  # Dashboard v2 #
-  ################
+  ######################
+  # Dashboard v2alpha0 #
+  ######################
 
   # Some future-proofing
   - constant_to_enum:
       objects:
-        - dashboardv2.RepeatMode
+        - dashboardv2alpha0.RepeatMode
 
-  # DataSourceRef is defined by the common, dashboard and dashboardv2 packages.
+  # DataSourceRef is defined by the common, dashboard and dashboardv2alpha0 packages.
   # Since it is used by dataqueries, using the definition from the common package
   # makes the most sense.
   - replace_reference:
-      from: dashboardv2.DataSourceRef
+      from: dashboardv2alpha0.DataSourceRef
       to: common.DataSourceRef
-  - omit: { objects: [ dashboardv2.DataSourceRef ] }
+  - omit: { objects: [ dashboardv2alpha0.DataSourceRef ] }
 
   # To make our composability veneers shenanigans work
   - retype_field:
-      field: dashboardv2.VizConfigSpec.options
+      field: dashboardv2alpha0.VizConfigSpec.options
       as:
         kind: scalar
         scalar: { scalar_kind: any }
   - retype_field:
-      field: dashboardv2.FieldConfig.custom
+      field: dashboardv2alpha0.FieldConfig.custom
       as:
         kind: scalar
         scalar: { scalar_kind: any }
 
   - retype_field:
-      field: dashboardv2.DataQueryKind.spec
+      field: dashboardv2alpha0.DataQueryKind.spec
       as:
         kind: scalar
         scalar: { scalar_kind: any }
 
   # Is this object meant for frontend usage only?
   - omit:
-      objects: [ dashboardv2.VariableCustomFormatterFn ]
+      objects: [ dashboardv2alpha0.VariableCustomFormatterFn ]
 
   - retype_field:
-      field: dashboardv2.CustomVariableValue.formatter
+      field: dashboardv2alpha0.CustomVariableValue.formatter
       as:
         kind: scalar
         scalar: { scalar_kind: string }
@@ -49,7 +49,7 @@ passes:
 
   # To get rid of a "mixed" disjunction that cog doesn't handle well
   - retype_field:
-      field: dashboardv2.QueryVariableSpec.query
+      field: dashboardv2alpha0.QueryVariableSpec.query
       as:
         kind: ref
-        ref: { referred_pkg: dashboardv2, referred_type: DataQueryKind }
+        ref: { referred_pkg: dashboardv2alpha0, referred_type: DataQueryKind }

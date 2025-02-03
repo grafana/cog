@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/common"
-	dashboard "github.com/grafana/cog/generated/go/dashboardv2"
+	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha0"
 	"github.com/grafana/cog/generated/go/table"
 )
 
