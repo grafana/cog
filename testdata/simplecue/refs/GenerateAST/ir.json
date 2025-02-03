@@ -59,32 +59,6 @@
         "ReferredType": "IntEnum"
       }
     },
-    "SomeInlineDefinition": {
-      "Name": "SomeInlineDefinition",
-      "Type": {
-        "Kind": "struct",
-        "Nullable": false,
-        "Struct": {
-          "Fields": [
-            {
-              "Name": "field",
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
-                }
-              },
-              "Required": true
-            }
-          ]
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "grafanatest",
-        "ReferredType": "SomeInlineDefinition"
-      }
-    },
     "container": {
       "Name": "container",
       "Type": {
@@ -168,6 +142,32 @@
       "SelfRef": {
         "ReferredPkg": "grafanatest",
         "ReferredType": "container"
+      }
+    },
+    "SomeInlineDefinition": {
+      "Name": "SomeInlineDefinition",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "field",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "SomeInlineDefinition"
       }
     }
   }
