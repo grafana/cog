@@ -1,5 +1,5 @@
 import { basicPrometheusQuery, defaultTimeseries } from "./common";
-import { PanelBuilder, QueryGroupBuilder, TargetBuilder } from "../../generated/typescript/src/dashboardv2";
+import { PanelBuilder, QueryGroupBuilder, TargetBuilder } from "../../generated/typescript/src/dashboardv2alpha0";
 
 export const networkReceivedTimeseries = (): PanelBuilder => {
     return new PanelBuilder()

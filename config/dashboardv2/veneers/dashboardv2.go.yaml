@@ -2,7 +2,7 @@
 
 language: go
 
-package: dashboardv2
+package: dashboardv2alpha0
 
 options:
   ##############

@@ -1,4 +1,4 @@
-from grafana_foundation_sdk.builders.dashboardv2 import Panel, QueryGroup, Target
+from grafana_foundation_sdk.builders.dashboardv2alpha0 import Panel, QueryGroup, Target
 from .common import default_timeseries, basic_prometheus_query
 
 
