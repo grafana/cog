@@ -12,6 +12,7 @@ type Kind string
 const (
 	KindDisjunction Kind = "disjunction"
 	KindRef         Kind = "ref"
+	KindConstantRef Kind = "constant_ref"
 
 	KindStruct Kind = "struct"
 	KindEnum   Kind = "enum"
@@ -178,6 +179,10 @@ func (t Type) HasHint(hintName string) bool {
 
 func (t Type) IsRef() bool {
 	return t.Kind == KindRef
+}
+
+func (t Type) IsConstantRef() bool {
+	return t.Kind == KindConstantRef
 }
 
 func (t Type) IsStructOrRef() bool {
@@ -452,7 +457,7 @@ func NewStruct(fields ...StructField) Type {
 
 func NewConstantReferenceType(referredPkg string, referredTypeName string, value any, opts ...TypeOption) Type {
 	def := Type{
-		Kind:  KindRef,
+		Kind:  KindConstantRef,
 		Hints: make(JenniesHints),
 		ConstantReference: &ConstantReferenceType{
 			ReferredPkg:    referredPkg,
@@ -551,6 +556,10 @@ func (t Type) AsStruct() StructType {
 
 func (t Type) AsRef() RefType {
 	return *t.Ref
+}
+
+func (t Type) AsConstantRef() ConstantReferenceType {
+	return *t.ConstantReference
 }
 
 func (t Type) AsScalar() ScalarType {
