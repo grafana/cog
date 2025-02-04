@@ -235,7 +235,8 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 		needsExplicitDefault := field.Type.Default != nil ||
 			extraDefaults[field.Name] != nil ||
 			(field.Required && field.Type.IsRef() && resolvedFieldType.IsStruct()) ||
-			field.Type.IsConcreteScalar()
+			field.Type.IsConcreteScalar() ||
+			field.Type.IsConstantRef()
 		if !needsExplicitDefault {
 			continue
 		}
@@ -311,6 +312,21 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			}
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type)
+		} else if field.Type.IsConstantRef() {
+			constRef := field.Type.AsConstantRef()
+			t := context.ResolveRefs(ast.NewRef(constRef.ReferredPkg, constRef.ReferredType))
+
+			for _, member := range t.AsEnum().Values {
+				if member.Value == constRef.ReferenceValue {
+					defaultValue = member.Name
+					break
+				}
+			}
+
+			referredPkg = jenny.packageMapper(constRef.ReferredPkg)
+			if referredPkg != "" {
+				defaultValue = referredPkg + "." + defaultValue
+			}
 		} else {
 			defaultValue = "\"unsupported default value case: this is likely a bug in cog\""
 		}
