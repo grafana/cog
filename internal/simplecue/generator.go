@@ -330,8 +330,8 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	v = g.removeTautologicalUnification(v)
 
 	// This node is referring to another definition
-	if reference := getReference(v); reference.isRef {
-		return g.declareReference(reference.defaultValue, reference.defaultValue)
+	if ok, v, def := getReference(v); ok {
+		return g.declareReference(v, def)
 	}
 
 	defVal, err := g.extractDefault(v)
