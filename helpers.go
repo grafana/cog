@@ -102,10 +102,22 @@ func CUEImports(importsMap map[string]string) CUEOption {
 	}
 }
 
+// PreserveExternalReferences disables the inlining of external references.
+// This should be used in conjunction with "imports maps" on output languages
+// to properly handle external references.
+func PreserveExternalReferences() CUEOption {
+	return func(input *codegen.CueInput) {
+		input.InlineExternalReference = false
+	}
+}
+
 // CUEModule sets the pipeline's input to the given cue module.
 func (pipeline *SchemaToTypesPipeline) CUEModule(modulePath string, opts ...CUEOption) *SchemaToTypesPipeline {
 	cueInput := &codegen.CueInput{
 		Entrypoint: modulePath,
+		// this simplified pipeline is meant to produce a self-sufficient output,
+		// so inlining external references by default makes sense.
+		InlineExternalReference: true,
 	}
 
 	for _, opt := range opts {
@@ -122,6 +134,9 @@ func (pipeline *SchemaToTypesPipeline) CUEValue(pkgName string, value cue.Value,
 	cueInput := &codegen.CueInput{
 		Package: pkgName,
 		Value:   &value,
+		// this simplified pipeline is meant to produce a self-sufficient output,
+		// so inlining external references by default makes sense.
+		InlineExternalReference: true,
 	}
 
 	for _, opt := range opts {

@@ -43,6 +43,7 @@ func ParseImports(cueImports []string) ([]LibraryInclude, error) {
 }
 
 type NameFunc func(value cue.Value, path cue.Path) string
+type externalReferenceFunc func(referredPkg string, referredType string, defaultValue any, value cue.Value) (ast.Type, error)
 
 type Config struct {
 	// Package name used to generate code into.
@@ -61,6 +62,13 @@ type Config struct {
 	// objects and references. It is called with the value passed to the top
 	// level method or function and the path to the entity being parsed.
 	NameFunc NameFunc
+
+	// InlineExternalReference instructs the parser to follow external
+	// references (ie: references to objects outside the current schema)
+	// and inline them.
+	// By default, external references are parsed as actual `ast.Ref` to the
+	// external objects.
+	InlineExternalReference bool
 }
 
 type generator struct {
@@ -68,7 +76,9 @@ type generator struct {
 	refResolver *referenceResolver
 	rootVal     cue.Value
 	rootPath    cue.Path
-	namingFunc  NameFunc
+
+	namingFunc            NameFunc
+	externalReferenceFunc externalReferenceFunc
 }
 
 func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
@@ -88,6 +98,12 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 			selectors := path.Selectors()
 			return selectorLabel(selectors[len(selectors)-1])
 		}
+	}
+
+	if c.InlineExternalReference {
+		g.externalReferenceFunc = g.externalReferenceInlineTarget
+	} else {
+		g.externalReferenceFunc = g.externalReferenceAsReference
 	}
 
 	if c.ForceNamedEnvelope != "" {
@@ -484,10 +500,39 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			}
 		}
 
+		// Reference to another package
+		if refPkg != g.schema.Package {
+			return g.externalReferenceFunc(refPkg, refType, defValue, v)
+		}
+
 		return ast.NewRef(refPkg, refType, ast.Default(defValue)), nil
 	}
 
 	return ast.Type{}, nil
+}
+
+// externalReferenceAsReference represents external references as actual references.
+func (g *generator) externalReferenceAsReference(referredPkg string, referredType string, defaultValue any, _ cue.Value) (ast.Type, error) {
+	return ast.NewRef(referredPkg, referredType, ast.Default(defaultValue)), nil
+}
+
+// externalReferenceInlineTarget inlines external references into the current schema.
+func (g *generator) externalReferenceInlineTarget(_ string, referredType string, defaultValue any, value cue.Value) (ast.Type, error) {
+	if g.schema.Objects.Has(referredType) {
+		return ast.NewRef(g.schema.Package, referredType, ast.Default(defaultValue)), nil
+	}
+
+	// Follow the reference
+	refRoot, refPath := value.ReferencePath()
+	referredValue := refRoot.LookupPath(refPath)
+
+	// Declare the object into the current schema
+	if err := g.declareObject(referredType, referredValue); err != nil {
+		return ast.Type{}, err
+	}
+
+	// And return a local reference to it
+	return ast.NewRef(g.schema.Package, referredType, ast.Default(defaultValue)), nil
 }
 
 func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defaultValue any) (ast.Type, error) {

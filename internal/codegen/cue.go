@@ -49,7 +49,17 @@ type CueInput struct {
 	// Format: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common
 	CueImports []string `yaml:"cue_imports"`
 
+	// NameFunc allows users to specify an alternative naming strategy for
+	// objects and references. It is called with the value passed to the top
+	// level method or function and the path to the entity being parsed.
 	NameFunc simplecue.NameFunc `yaml:"-"`
+
+	// InlineExternalReference instructs the parser to follow external
+	// references (ie: references to objects outside the current schema)
+	// and inline them.
+	// By default, external references are parsed as actual `ast.Ref` to the
+	// external objects.
+	InlineExternalReference bool `yaml:"-"`
 }
 
 func (input *CueInput) packageName() string {
@@ -96,11 +106,12 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 	}
 
 	schema, err := simplecue.GenerateAST(schemaRootValue, simplecue.Config{
-		Package:            input.packageName(),
-		ForceNamedEnvelope: input.ForcedEnvelope,
-		SchemaMetadata:     input.schemaMetadata(),
-		Libraries:          libraries,
-		NameFunc:           input.NameFunc,
+		Package:                 input.packageName(),
+		ForceNamedEnvelope:      input.ForcedEnvelope,
+		SchemaMetadata:          input.schemaMetadata(),
+		Libraries:               libraries,
+		NameFunc:                input.NameFunc,
+		InlineExternalReference: input.InlineExternalReference,
 	})
 	if err != nil {
 		return nil, err
