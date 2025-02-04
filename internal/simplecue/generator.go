@@ -920,6 +920,12 @@ func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.
 		return false, ast.Type{}
 	}
 
+	// When a reference extends from other, and it appends a new value, but it does not
+	// override anything
+	if conjuncts[0].IsConcrete() {
+		return false, ast.Type{}
+	}
+
 	// When the element is overriding a value, the first two elements are pointing to
 	// the same reference.
 	if len(conjuncts) > 2 {
