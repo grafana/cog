@@ -33,7 +33,7 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInStruct(t *testing.T) {
 				ast.NewStructField("type", ast.NewEnum([]ast.EnumValue{
 					{Name: "Foo", Value: "foo", Type: ast.String()},
 					{Name: "Bar", Value: "bar", Type: ast.String()},
-				})),
+				}, ast.Nullable())),
 			)),
 			ast.NewObject("with_enums", "Mode", ast.NewEnum([]ast.EnumValue{
 				{Name: "Auto", Value: "auto", Type: ast.String()},
@@ -48,7 +48,7 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInStruct(t *testing.T) {
 		Objects: testutils.ObjectsMap(
 			ast.NewObject("with_enums", "Panel", ast.NewStruct(
 				ast.NewStructField("title", ast.String()),
-				ast.NewStructField("type", ast.NewRef("with_enums", "PanelType")),
+				ast.NewStructField("type", ast.NewRef("with_enums", "PanelType", ast.Nullable(), ast.Trail("AnonymousEnumToExplicitType"))),
 			)),
 
 			// this object is unchanged
@@ -85,7 +85,7 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInArray(t *testing.T) {
 		Package: "in_array",
 		Objects: testutils.ObjectsMap(
 			ast.NewObject("in_array", "TypesList", ast.NewArray(
-				ast.NewRef("in_array", "TypesListEnum")),
+				ast.NewRef("in_array", "TypesListEnum", ast.Trail("AnonymousEnumToExplicitType"))),
 			),
 
 			// the anonymous enum, turned into an object
@@ -121,7 +121,7 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInMap(t *testing.T) {
 		Objects: testutils.ObjectsMap(
 			ast.NewObject("in_map", "MapOfThings", ast.NewMap(
 				ast.String(),
-				ast.NewRef("in_map", "MapOfThingsEnum")),
+				ast.NewRef("in_map", "MapOfThingsEnum", ast.Trail("AnonymousEnumToExplicitType"))),
 			),
 
 			// the anonymous enum, turned into an object
@@ -157,7 +157,7 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInDisjunction(t *testing.T
 		Objects: testutils.ObjectsMap(
 			ast.NewObject("in_disjunction", "DisjunctionOfThings", ast.NewDisjunction([]ast.Type{
 				ast.String(),
-				ast.NewRef("in_disjunction", "DisjunctionOfThingsEnum"),
+				ast.NewRef("in_disjunction", "DisjunctionOfThingsEnum", ast.Trail("AnonymousEnumToExplicitType")),
 			})),
 
 			// the anonymous enum, turned into an object
@@ -193,7 +193,7 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInIntersection(t *testing.
 		Objects: testutils.ObjectsMap(
 			ast.NewObject("in_intersection", "IntersectionOfThings", ast.NewIntersection([]ast.Type{
 				ast.String(),
-				ast.NewRef("in_intersection", "IntersectionOfThingsEnum"),
+				ast.NewRef("in_intersection", "IntersectionOfThingsEnum", ast.Trail("AnonymousEnumToExplicitType")),
 			})),
 
 			// the anonymous enum, turned into an object
