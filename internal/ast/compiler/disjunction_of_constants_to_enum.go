@@ -57,7 +57,7 @@ func (pass *DisjunctionOfConstantsToEnum) processDisjunction(_ *Visitor, _ *ast.
 		if resolved.IsConcreteScalar() {
 			if isScalarValidEnumMember(*resolved.Scalar) {
 				identifiedMembers = append(identifiedMembers, ast.EnumValue{
-					Type:  resolved,
+					Type:  ast.NewScalar(*scalarKindCandidate),
 					Name:  valueToString(resolved.Scalar.Value),
 					Value: resolved.Scalar.Value,
 				})
