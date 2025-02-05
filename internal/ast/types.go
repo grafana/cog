@@ -843,6 +843,18 @@ func (structType StructType) FieldByName(name string) (StructField, bool) {
 	return StructField{}, false
 }
 
+func (structType StructType) FieldByRefName(refName string) StructField {
+	for _, field := range structType.Fields {
+		if !field.Type.IsRef() || field.Type.Ref.ReferredType != refName {
+			continue
+		}
+
+		return field
+	}
+
+	return StructField{}
+}
+
 type StructField struct {
 	Name        string
 	Comments    []string `json:",omitempty"`
