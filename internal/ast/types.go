@@ -945,6 +945,20 @@ type ScalarType struct {
 	Constraints []TypeConstraint `json:",omitempty"`
 }
 
+func (scalarType ScalarType) IsNumeric() bool {
+	switch scalarType.ScalarKind {
+	case KindFloat32, KindFloat64:
+		return true
+	case KindUint8, KindUint16, KindUint32, KindUint64:
+		return true
+	case KindInt8, KindInt16, KindInt32, KindInt64:
+		return true
+
+	default:
+		return false
+	}
+}
+
 func (scalarType *ScalarType) AcceptsValue(value any) bool {
 	if scalarType.ScalarKind == KindNull {
 		return value == nil
