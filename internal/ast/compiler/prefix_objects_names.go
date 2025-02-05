@@ -20,9 +20,11 @@ func (pass *PrefixObjectNames) Process(schemas []*ast.Schema) ([]*ast.Schema, er
 	}
 
 	visitor := &Visitor{
-		OnObject: pass.processObject,
-		OnRef:    pass.processRef,
-		OnEnum:   pass.processEnum,
+		OnObject:      pass.processObject,
+		OnStruct:      pass.processStruct,
+		OnRef:         pass.processRef,
+		OnEnum:        pass.processEnum,
+		OnDisjunction: pass.processDisjunction,
 	}
 
 	return visitor.VisitSchemas(schemas)
@@ -42,6 +44,49 @@ func (pass *PrefixObjectNames) processObject(visitor *Visitor, schema *ast.Schem
 	}
 
 	return object, nil
+}
+
+func (pass *PrefixObjectNames) processStruct(visitor *Visitor, schema *ast.Schema, structDef ast.Type) (ast.Type, error) {
+	var err error
+	for i, field := range structDef.Struct.Fields {
+		structDef.Struct.Fields[i], err = visitor.VisitStructField(schema, field)
+		if err != nil {
+			return ast.Type{}, err
+		}
+	}
+
+	if structDef.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
+		disjunction := structDef.Hints[ast.HintDiscriminatedDisjunctionOfRefs].(ast.DisjunctionType)
+		disjunction.DiscriminatorMapping = pass.processDisjunctionMapping(disjunction.DiscriminatorMapping)
+		structDef.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunction
+		structDef.AddToPassesTrail(fmt.Sprintf("PrefixObjectNames[prefix=%s]", pass.Prefix))
+	}
+
+	return structDef, nil
+}
+
+func (pass *PrefixObjectNames) processDisjunction(visitor *Visitor, schema *ast.Schema, disjunction ast.Type) (ast.Type, error) {
+	disjunction.Disjunction.DiscriminatorMapping = pass.processDisjunctionMapping(disjunction.Disjunction.DiscriminatorMapping)
+	disjunction.AddToPassesTrail(fmt.Sprintf("PrefixObjectNames[prefix=%s]", pass.Prefix))
+
+	var err error
+	for i, branch := range disjunction.Disjunction.Branches {
+		disjunction.Disjunction.Branches[i], err = visitor.VisitType(schema, branch)
+		if err != nil {
+			return ast.Type{}, err
+		}
+	}
+
+	return disjunction, nil
+}
+
+func (pass *PrefixObjectNames) processDisjunctionMapping(discriminatorMapping map[string]string) map[string]string {
+	newMapping := make(map[string]string, len(discriminatorMapping))
+	for discriminator, typeName := range discriminatorMapping {
+		newMapping[discriminator] = pass.Prefix + typeName
+	}
+
+	return newMapping
 }
 
 func (pass *PrefixObjectNames) processRef(_ *Visitor, _ *ast.Schema, ref ast.Type) (ast.Type, error) {
