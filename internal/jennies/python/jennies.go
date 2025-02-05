@@ -99,11 +99,12 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
-		&compiler.FlattenDisjunctions{},
-		&compiler.DisjunctionWithNullToOptional{},
-		&compiler.DisjunctionInferMapping{},
-		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.AnonymousStructsToNamed{},
+		&compiler.NotRequiredFieldAsNullableType{},
+		&compiler.DisjunctionWithNullToOptional{},
+		&compiler.DisjunctionOfConstantsToEnum{},
+		&compiler.FlattenDisjunctions{},
+		&compiler.DisjunctionInferMapping{},
 		&compiler.RenameNumericEnumValues{},
 	}
 }
