@@ -964,20 +964,22 @@ func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.
 	if conjuncts[0].IsConcrete() {
 		return false, ast.Type{}
 	}
-
-	// When the element is overriding a value, the first two elements are pointing to
-	// the same reference.
+	// When an element is overriding a field and/or a value, the last element is the value that we want and
+	// the rest of them are similar.
 	if len(conjuncts) > 2 {
-		conjuncts[1] = conjuncts[2]
-		conjuncts = conjuncts[:len(conjuncts)-1]
+		conjuncts[1] = conjuncts[len(conjuncts)-1]
 	}
 
-	refPkg, err := g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
+	val, err := cueConcreteToScalar(conjuncts[1])
 	if err != nil {
 		return false, ast.Type{}
 	}
 
-	val, err := cueConcreteToScalar(conjuncts[1])
+	if val == nil {
+		return false, ast.Type{}
+	}
+
+	refPkg, err := g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
 	if err != nil {
 		return false, ast.Type{}
 	}
