@@ -114,6 +114,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.AnonymousEnumToExplicitType{},
 		&compiler.FlattenDisjunctions{},
 		&compiler.DisjunctionInferMapping{},
+		&compiler.UndiscriminatedDisjunctionToAny{},
 		&compiler.DisjunctionToType{},
 		&compiler.RemoveIntersections{},
 	}

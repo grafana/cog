@@ -44,6 +44,8 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 	case ast.KindStruct:
 		// TODO: Manage anonymous structs
 		return "Object"
+	case ast.KindConstantRef:
+		return tf.formatConstantReference(def.AsConstantRef())
 	}
 
 	return "unknown"
@@ -85,6 +87,16 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	}
 }
 
+func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) string {
+	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	switch object.Type.Kind {
+	case ast.KindEnum:
+		return formatObjectName(def.ReferredType)
+	}
+
+	return "unknown"
+}
+
 func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
 	tf.packageMapper("java.util", "List")
 	return fmt.Sprintf("List<%s>", tf.formatFieldType(def.ValueType))
@@ -102,6 +114,8 @@ func (tf *typeFormatter) formatMap(def ast.MapType) string {
 		mapType = tf.formatMap(def.ValueType.AsMap())
 	case ast.KindArray:
 		mapType = tf.formatArray(def.ValueType.AsArray())
+	case ast.KindConstantRef:
+		mapType = tf.formatConstantReference(def.ValueType.AsConstantRef())
 	}
 
 	return fmt.Sprintf("Map<String, %s>", mapType)
