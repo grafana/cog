@@ -68,13 +68,16 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	jenny.tmpl = jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(template.FuncMap{
+			"importModule": jenny.importModule,
+			"importPkg":    jenny.importPkg,
 			"formatFullyQualifiedRef": func(typeDef ast.RefType) string {
 				return jenny.typeFormatter.formatFullyQualifiedRef(typeDef, false)
 			},
-			"importModule": jenny.importModule,
-			"importPkg":    jenny.importPkg,
-			"disjunctionFromJSON": func(typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
-				return jenny.disjunctionFromJSON(context, typeDef, inputVar)
+			"unmarshalForType": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
+				return jenny.fromJSONForType(context, typeDef, inputVar, hint)
+			},
+			"defaultForType": func(typeDef ast.Type) string {
+				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
 			},
 		})
 
@@ -249,9 +252,11 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 
 	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(object)
 	if jenny.tmpl.Exists(customUnmarshalTmpl) {
-		return jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
+		rendered, err := jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
 			"Object": object,
 		})
+
+		return tools.Indent(rendered, 4), err
 	}
 
 	var buffer strings.Builder
@@ -265,8 +270,8 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	buffer.WriteString(fmt.Sprintf("        args: dict[str, %s.Any] = {}\n", typingPkg))
 	var assignments []string
 	for _, field := range object.Type.AsStruct().Fields {
-		fieldName := formatIdentifier(field.Name)
 		value := fmt.Sprintf(`data["%s"]`, field.Name)
+		setup := ""
 
 		// No need to unmarshal constant scalar fields since they're set in
 		// the object's constructor
@@ -279,42 +284,17 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 			if err != nil {
 				return "", err
 			}
-		} else if field.Type.IsRef() { //nolint:gocritic
-			ref := field.Type.AsRef()
-			referredObject, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType)
-			if found && referredObject.Type.IsStruct() {
-				formattedRef := jenny.typeFormatter.formatFullyQualifiedRef(ref, false)
-
-				value = fmt.Sprintf(`%s.from_json(data["%s"])`, formattedRef, field.Name)
-			}
-		} else if field.Type.IsArray() && field.Type.Array.ValueType.IsDisjunction() {
-			valueType := field.Type.Array.ValueType
-			code := jenny.disjunctionFromJSON(context, valueType, "item")
-			if code.Setup != "" {
-				code.Setup += "\n            "
+		} else {
+			fromJSON := jenny.fromJSONForType(context, field.Type, value, field.Name)
+			if fromJSON.Setup != "" {
+				setup += fromJSON.Setup + "\n            "
 			}
 
-			value = fmt.Sprintf(`[%[2]s for item in data["%[1]s"]]`, field.Name, code.DecodingCall)
-
-			assignment := fmt.Sprintf(`        if "%s" in data:
-            %sargs["%s"] = %s`, field.Name, code.Setup, fieldName, value)
-			assignments = append(assignments, assignment)
-			continue
-		} else if field.Type.IsDisjunction() {
-			code := jenny.disjunctionFromJSON(context, field.Type, fmt.Sprintf(`data["%s"]`, field.Name))
-			if code.Setup != "" {
-				code.Setup += "\n            "
-			}
-
-			assignment := fmt.Sprintf(`        if "%s" in data:
-            %sargs["%s"] = %s`, field.Name, code.Setup, fieldName, code.DecodingCall)
-			assignments = append(assignments, assignment)
-			continue
+			value = fromJSON.DecodingCall
 		}
 
 		assignment := fmt.Sprintf(`        if "%s" in data:
-            args["%s"] = %s`, field.Name, fieldName, value)
-
+            %sargs["%s"] = %s`, field.Name, setup, formatIdentifier(field.Name), value)
 		assignments = append(assignments, assignment)
 	}
 
@@ -329,17 +309,60 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	return buffer.String(), nil
 }
 
-type disjunctionFromJSONCode struct {
+func (jenny RawTypes) fromJSONForType(context languages.Context, typeDef ast.Type, inputVar string, hint string) fromJSONCode {
+	if typeDef.IsRef() { //nolint:gocritic
+		resolvedType := context.ResolveRefs(typeDef)
+		if resolvedType.IsStruct() {
+			formattedRef := jenny.typeFormatter.formatFullyQualifiedRef(typeDef.AsRef(), false)
+
+			return fromJSONCode{
+				DecodingCall: fmt.Sprintf(`%s.from_json(%s)`, formattedRef, inputVar),
+			}
+		}
+
+		return jenny.fromJSONForType(context, resolvedType, inputVar, hint+"_ref")
+	} else if typeDef.IsArray() {
+		if typeDef.Array.IsArrayOf(ast.KindScalar) {
+			return fromJSONCode{DecodingCall: inputVar}
+		}
+
+		valueType := typeDef.Array.ValueType
+		valueTypeFromJSON := jenny.fromJSONForType(context, valueType, "item", hint+"_array")
+
+		return fromJSONCode{
+			Setup:        valueTypeFromJSON.Setup,
+			DecodingCall: fmt.Sprintf(`[%[2]s for item in %[1]s]`, inputVar, valueTypeFromJSON.DecodingCall),
+		}
+	} else if typeDef.IsMap() {
+		if typeDef.Map.IsMapOf(ast.KindScalar) {
+			return fromJSONCode{DecodingCall: inputVar}
+		}
+
+		valueType := typeDef.Map.ValueType
+		valueTypeFromJSON := jenny.fromJSONForType(context, valueType, inputVar+"[key]", hint+"_map")
+
+		return fromJSONCode{
+			Setup:        valueTypeFromJSON.Setup,
+			DecodingCall: fmt.Sprintf(`{key: %[2]s for key in %[1]s.keys()}`, inputVar, valueTypeFromJSON.DecodingCall),
+		}
+	} else if typeDef.IsDisjunction() {
+		return jenny.disjunctionFromJSON(context, typeDef, inputVar, hint+"_union")
+	}
+
+	return fromJSONCode{DecodingCall: inputVar}
+}
+
+type fromJSONCode struct {
 	Setup        string
 	DecodingCall string
 }
 
-func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
+func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast.Type, inputVar string, hint string) fromJSONCode {
 	disjunction := context.ResolveRefs(typeDef).AsDisjunction()
 
 	// this potentially generates incorrect code, but there isn't much we can do without more information.
 	if disjunction.Discriminator == "" || disjunction.DiscriminatorMapping == nil {
-		return disjunctionFromJSONCode{DecodingCall: inputVar}
+		return fromJSONCode{DecodingCall: inputVar}
 	}
 
 	typingPkg := jenny.importPkg("typing", "typing")
@@ -363,16 +386,17 @@ func (jenny RawTypes) disjunctionFromJSON(context languages.Context, typeDef ast
 
 	typeDecl := fmt.Sprintf("dict[str, %s.Union[%s]]", typingPkg, strings.Join(branchTypes, ", "))
 
-	decodingMap = fmt.Sprintf("decoding_map: %s = %s", typeDecl, decodingMap)
-	decodingCall := fmt.Sprintf(`decoding_map[%[2]s["%[1]s"]].from_json(%[2]s)`, disjunction.Discriminator, inputVar)
+	decodingMapName := "decoding_map_" + hint
+	decodingMap = fmt.Sprintf("%s: %s = %s", decodingMapName, typeDecl, decodingMap)
+	decodingCall := fmt.Sprintf(`%[3]s[%[2]s["%[1]s"]].from_json(%[2]s)`, disjunction.Discriminator, inputVar, decodingMapName)
 
 	if defaultBranchType, ok := disjunction.DiscriminatorMapping[ast.DiscriminatorCatchAll]; ok {
 		defaultBranch = fmt.Sprintf(`, %s`, defaultBranchType)
 
-		decodingCall = fmt.Sprintf(`decoding_map.get(%[3]s["%[1]s"]%[2]s).from_json(%[3]s)`, disjunction.Discriminator, defaultBranch, inputVar)
+		decodingCall = fmt.Sprintf(`%[4]s.get(%[3]s["%[1]s"]%[2]s).from_json(%[3]s)`, disjunction.Discriminator, defaultBranch, inputVar, decodingMapName)
 	}
 
-	return disjunctionFromJSONCode{
+	return fromJSONCode{
 		Setup:        decodingMap,
 		DecodingCall: decodingCall,
 	}

@@ -30,13 +30,24 @@ func mapToSelected(selector Selector, mapFunc func(builders ast.Builders, builde
 	}
 }
 
-func mergeOptions(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath ast.Path, excludeOptions []string, renameOptions map[string]string) (ast.Builder, error) {
+func mergeBuilderInto(fromBuilder ast.Builder, intoBuilder ast.Builder, underPath ast.Path, excludeOptions []string, renameOptions map[string]string) (ast.Builder, error) {
 	newBuilder := intoBuilder
-
 	if renameOptions == nil {
 		renameOptions = map[string]string{}
 	}
 
+	// keep constant assignments
+	for _, assignment := range fromBuilder.Constructor.Assignments {
+		if assignment.Value.Constant == nil {
+			continue
+		}
+
+		newAssignment := assignment
+		newAssignment.Path = underPath.Append(assignment.Path)
+		newBuilder.Constructor.Assignments = append(newBuilder.Constructor.Assignments, newAssignment)
+	}
+
+	// copy options
 	for _, opt := range fromBuilder.Options {
 		if tools.ItemInList(opt.Name, excludeOptions) {
 			continue
@@ -91,13 +102,12 @@ func MergeInto(selector Selector, sourceBuilderName string, underPath string, ex
 			return destinationBuilder, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
 		}
 
-		// TODO: initializations
-		newBuilder, err := mergeOptions(sourceBuilder, destinationBuilder, newRoot, excludeOptions, renameOptions)
+		newBuilder, err := mergeBuilderInto(sourceBuilder, destinationBuilder, newRoot, excludeOptions, renameOptions)
 		if err != nil {
 			return ast.Builder{}, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
 		}
 
-		newBuilder.AddToVeneerTrail("MergeInto")
+		newBuilder.AddToVeneerTrail(fmt.Sprintf("MergeInto[source=%s]", sourceBuilder.Name))
 
 		return newBuilder, nil
 	})
@@ -157,7 +167,7 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 		refType := composableBuilder.For.SelfRef.AsType()
 		newRoot[len(newRoot)-1].TypeHint = &refType
 
-		newBuilder, err = mergeOptions(composableBuilder, newBuilder, newRoot, nil, nil)
+		newBuilder, err = mergeBuilderInto(composableBuilder, newBuilder, newRoot, nil, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -223,7 +233,7 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 				refType := entrypointBuilder.For.SelfRef.AsType()
 				newRoot[len(newRoot)-1].TypeHint = &refType
 
-				newBuilder, err = mergeOptions(entrypointBuilder, newBuilder, newRoot, nil, nil)
+				newBuilder, err = mergeBuilderInto(entrypointBuilder, newBuilder, newRoot, nil, nil)
 				if err != nil {
 					return nil, err
 				}
@@ -323,8 +333,9 @@ func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
 				return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: %w", err)
 			}
 
-			for _, b := range composedBuilders {
-				b.AddToVeneerTrail("ComposeBuilders")
+			for i, b := range composedBuilders {
+				b.AddToVeneerTrail(fmt.Sprintf("ComposeBuilders[source=%s]", config.SourceBuilderName))
+				composedBuilders[i] = b
 			}
 
 			newBuilders = append(newBuilders, composedBuilders...)

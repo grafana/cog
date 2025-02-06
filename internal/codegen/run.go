@@ -72,7 +72,8 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 	}
 
 	// apply  language-specific compiler passes
-	jenniesInput.Schemas, err = language.CompilerPasses().Process(jenniesInput.Schemas)
+	compilerPasses := language.CompilerPasses().Concat(pipeline.finalPasses())
+	jenniesInput.Schemas, err = compilerPasses.Process(jenniesInput.Schemas)
 	if err != nil {
 		return languages.Context{}, err
 	}

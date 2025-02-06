@@ -244,13 +244,6 @@ func (resource SomeOtherStruct) Validate() error {
 }
 
 
-type SomeStructOperator string
-const (
-	SomeStructOperatorGreaterThan SomeStructOperator = ">"
-	SomeStructOperatorLessThan SomeStructOperator = "<"
-)
-
-
 type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
     FieldAny any `json:"FieldAny"`
 }
@@ -312,5 +305,12 @@ func (resource StructOptionalFieldsSomeStructFieldAnonymousStruct) Equals(other 
 func (resource StructOptionalFieldsSomeStructFieldAnonymousStruct) Validate() error {
 	return nil
 }
+
+
+type SomeStructOperator string
+const (
+	SomeStructOperatorGreaterThan SomeStructOperator = ">"
+	SomeStructOperatorLessThan SomeStructOperator = "<"
+)
 
 

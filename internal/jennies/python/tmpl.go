@@ -51,8 +51,8 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 			"importPkg": func(alias string, pkg string) string {
 				panic("importPkg() needs to be overridden by a jenny")
 			},
-			"disjunctionFromJSON": func(typeDef ast.Type, inputVar string) disjunctionFromJSONCode {
-				panic("disjunctionFromJSON() needs to be overridden by a jenny")
+			"unmarshalForType": func(typeDef ast.Type, inputVar string, hint string) fromJSONCode {
+				panic("unmarshalForType() needs to be overridden by a jenny")
 			},
 		}),
 

@@ -875,6 +875,18 @@ func (structType StructType) FieldByName(name string) (StructField, bool) {
 	return StructField{}, false
 }
 
+func (structType StructType) FieldByRefName(refName string) StructField {
+	for _, field := range structType.Fields {
+		if !field.Type.IsRef() || field.Type.Ref.ReferredType != refName {
+			continue
+		}
+
+		return field
+	}
+
+	return StructField{}
+}
+
 type StructField struct {
 	Name        string
 	Comments    []string `json:",omitempty"`
@@ -977,6 +989,20 @@ type ScalarType struct {
 	ScalarKind  ScalarKind       `yaml:"scalar_kind"` // bool, bytes, string, int, float, ...
 	Value       any              `json:",omitempty"`  // if value isn't nil, we're representing a constant scalar
 	Constraints []TypeConstraint `json:",omitempty"`
+}
+
+func (scalarType ScalarType) IsNumeric() bool {
+	switch scalarType.ScalarKind {
+	case KindFloat32, KindFloat64:
+		return true
+	case KindUint8, KindUint16, KindUint32, KindUint64:
+		return true
+	case KindInt8, KindInt16, KindInt32, KindInt64:
+		return true
+
+	default:
+		return false
+	}
 }
 
 func (scalarType *ScalarType) AcceptsValue(value any) bool {

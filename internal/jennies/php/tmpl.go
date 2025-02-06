@@ -47,6 +47,7 @@ func formattingTemplateFuncs() template.FuncMap {
 		"formatOptionName":     formatOptionName,
 		"formatEnumMemberName": formatEnumMemberName,
 		"formatArgName":        formatArgName,
+		"formatFieldName":      formatFieldName,
 		"formatScalar":         formatValue,
 		"formatDocsBlock":      formatCommentsBlock,
 	}

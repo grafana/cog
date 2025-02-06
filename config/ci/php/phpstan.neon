@@ -11,9 +11,6 @@ parameters:
       paths:
         - ../../../generated/php/src/Cog/Runtime.php
 
-    # TODO: check these errors
-    - identifier: varTag.nativeType
-
     # cog being very defensive isn't a bad thing
     - identifier: isset.variable
     - identifier: instanceof.alwaysTrue

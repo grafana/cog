@@ -35,7 +35,7 @@ tests: dev-env-check-binaries gen-tests ## Runs the tests.
 .PHONY: deps
 deps: dev-env-check-binaries ## Installs the dependencies.
 	$(RUN_DEVBOX) go mod vendor
-	$(RUN_DEVBOX) pip install -r requirements.txt
+	$(RUN_DEVBOX) pip install -qq -r requirements.txt
 
 .PHONY: docs
 docs: dev-env-check-binaries ## Generates the documentation.
