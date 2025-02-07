@@ -103,6 +103,9 @@ func functions() template.FuncMap {
 		"formatGuardPath": func(_ ast.Path) string {
 			panic("formatGuardPath() needs to be overridden by a jenny")
 		},
+		"enumFromConstantRef": func(_ ast.Type) string {
+			panic("enumFromConstantRef() needs to be overridden by a jenny")
+		},
 	}
 }
 
@@ -138,7 +141,18 @@ type ClassTemplate struct {
 	ShouldAddSerializer     bool
 	ShouldAddDeserializer   bool
 	ShouldAddFactoryMethods bool
-	DefaultConstructorArgs  []ast.Argument
+	Constructors            []ConstructorTemplate
+}
+
+type ConstructorTemplate struct {
+	Args        []ast.Argument
+	Assignments []ConstructorAssignmentTemplate
+}
+
+type ConstructorAssignmentTemplate struct {
+	Name  string
+	Type  ast.Type
+	Value any
 }
 
 type ConstantTemplate struct {

@@ -373,3 +373,25 @@ func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
 
 	return castedPath + strings.Join(parts, ".")
 }
+
+func (tf *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) string {
+	obj, ok := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	if obj.Type.IsEnum() {
+		enumVale, ok := obj.Type.AsEnum().MemberForValue(def.ReferenceValue)
+		if !ok {
+			return "unknown"
+		}
+
+		if refPkg := tf.packageMapper(def.ReferredPkg, def.ReferredType); refPkg != "" {
+			return fmt.Sprintf("%s.%s.%s", refPkg, def.ReferredType, enumVale.Name)
+		}
+
+		return fmt.Sprintf("%s.%s", def.ReferredType, tools.UpperSnakeCase(enumVale.Name))
+	}
+
+	return "unknown"
+}

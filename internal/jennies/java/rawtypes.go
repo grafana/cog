@@ -189,7 +189,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		ShouldAddSerializer:     jenny.typeFormatter.objectNeedsCustomSerializer(object),
 		ShouldAddDeserializer:   jenny.typeFormatter.objectNeedsCustomDeserializer(object),
 		ShouldAddFactoryMethods: object.Type.HasHint(ast.HintDisjunctionOfScalars) || object.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs),
-		DefaultConstructorArgs:  jenny.defaultConstructor(object),
+		Constructors:            jenny.constructors(object),
 	})
 }
 
@@ -265,22 +265,59 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 	return variant
 }
 
-func (jenny RawTypes) defaultConstructor(object ast.Object) []ast.Argument {
+func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 	if object.Type.IsStructGeneratedFromDisjunction() {
 		return nil
 	}
 
 	fields := object.Type.AsStruct().Fields
 
-	args := make([]ast.Argument, len(fields))
-	for i, field := range object.Type.AsStruct().Fields {
-		args[i] = ast.Argument{
-			Name: field.Name,
+	args := make([]ast.Argument, 0)
+	assignments := make([]ConstructorAssignmentTemplate, 0)
+	for _, field := range fields {
+		name := tools.LowerCamelCase(escapeVarName(field.Name))
+		if field.Type.IsConstantRef() {
+			assignments = append(assignments, ConstructorAssignmentTemplate{
+				Name:  name,
+				Type:  field.Type,
+				Value: jenny.typeFormatter.enumFromConstantRef(field.Type.AsConstantRef()),
+			})
+			continue
+		}
+		args = append(args, ast.Argument{
+			Name: name,
 			Type: field.Type,
+		})
+
+		assignments = append(assignments, ConstructorAssignmentTemplate{
+			Name: name,
+			Type: field.Type,
+		})
+	}
+
+	defaultConstructorAssignments := make([]ConstructorAssignmentTemplate, 0)
+	for _, assignment := range assignments {
+		if assignment.Value != nil {
+			defaultConstructorAssignments = append(defaultConstructorAssignments, assignment)
 		}
 	}
 
-	return args
+	constructors := []ConstructorTemplate{
+		// Default constructor
+		{
+			Args:        []ast.Argument{},
+			Assignments: defaultConstructorAssignments,
+		},
+	}
+
+	if len(args) > 0 {
+		constructors = append(constructors, ConstructorTemplate{
+			Args:        args,
+			Assignments: assignments,
+		})
+	}
+
+	return constructors
 }
 
 func (jenny RawTypes) genDefaults(fields []ast.StructField) []Default {
