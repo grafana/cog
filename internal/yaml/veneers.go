@@ -26,40 +26,27 @@ func NewVeneersLoader() *VeneersLoader {
 }
 
 func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Config) (*rewrite.Rewriter, error) {
-	readers := make([]io.Reader, 0, len(filenames))
+	languageRules := make([]rewrite.LanguageRules, 0, len(filenames))
+
 	for _, filename := range filenames {
 		reader, err := os.Open(filename)
 		if err != nil {
 			return nil, err
 		}
+		defer reader.Close()
 
-		readers = append(readers, reader)
-	}
-
-	rules, err := loader.LoadAll(readers)
-	if err != nil {
-		return nil, err
-	}
-
-	return rewrite.NewRewrite(rules, config), nil
-}
-
-func (loader *VeneersLoader) LoadAll(readers []io.Reader) ([]rewrite.LanguageRules, error) {
-	languageRules := make([]rewrite.LanguageRules, 0, len(readers))
-
-	for _, filename := range readers {
-		rules, err := loader.Load(filename)
+		rules, err := loader.load(reader)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not load '%s': %w", filename, err)
 		}
 
 		languageRules = append(languageRules, rules)
 	}
 
-	return languageRules, nil
+	return rewrite.NewRewrite(languageRules, config), nil
 }
 
-func (loader *VeneersLoader) Load(reader io.Reader) (rewrite.LanguageRules, error) {
+func (loader *VeneersLoader) load(reader io.Reader) (rewrite.LanguageRules, error) {
 	var builderRules []builder.RewriteRule
 	var optionRules []option.RewriteRule
 
