@@ -171,7 +171,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 		if field.Type.IsConcreteScalar() {
 			assignments = append(assignments, fmt.Sprintf("        self.%s = %s", fieldName, formatValue(field.Type.AsScalar().Value)))
 			continue
-		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray) {
+		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray, ast.KindDisjunction) {
 			if !field.Type.Nullable {
 				typingPkg := jenny.importPkg("typing", "typing")
 				fieldType = fmt.Sprintf("%s.Optional[%s]", typingPkg, fieldType)
