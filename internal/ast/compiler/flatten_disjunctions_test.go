@@ -51,6 +51,20 @@ func TestFlattenDisjunctions_WithNestedDisjunctionOfRefs_AsAnObject(t *testing.T
 	runPassOnObjects(t, &FlattenDisjunctions{}, objects, expectedObjects)
 }
 
+func TestFlattenDisjunctions_WithDisjunctionOfStringAndConstants(t *testing.T) {
+	// Prepare test input
+	objects := []ast.Object{
+		ast.NewObject("test", "ADisjunction", ast.NewDisjunction([]ast.Type{
+			ast.String(),
+			ast.String(ast.Value("*")),
+			ast.String(ast.Value("none")),
+		})),
+	}
+
+	// Call the compiler pass
+	runPassOnObjects(t, &FlattenDisjunctions{}, objects, objects)
+}
+
 func TestFlattenDisjunctions_WithDisjunctionsOfAnonymousStructs(t *testing.T) {
 	// Prepare test input
 	objects := []ast.Object{
