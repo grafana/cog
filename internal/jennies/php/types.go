@@ -225,3 +225,16 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 
 	return typeName
 }
+
+func (formatter *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) string {
+	obj, ok := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	if obj.Type.IsEnum() {
+		return formatter.formatEnumValue(obj, def)
+	}
+
+	return "unknown"
+}

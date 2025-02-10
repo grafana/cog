@@ -267,6 +267,13 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 		fieldName := formatFieldName(field.Name)
 		defaultValue := (any)(nil)
 
+		// values with enums that we don't want to add in the constructor
+		if field.Type.IsConstantRef() {
+			val := jenny.typeFormatter.enumFromConstantRef(field.Type.AsConstantRef())
+			assignments = append(assignments, fmt.Sprintf("    $this->%[1]s = $%[1]s ?: %[2]s;", fieldName, val))
+			continue
+		}
+
 		// set for default values for fields that need one or have one
 		if !field.Type.Nullable || field.Type.Default != nil {
 			var defaultsOverrides map[string]any
