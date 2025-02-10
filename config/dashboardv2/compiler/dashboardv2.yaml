@@ -46,10 +46,3 @@ passes:
         kind: scalar
         scalar: { scalar_kind: string }
         nullable: true
-
-  # To get rid of a "mixed" disjunction that cog doesn't handle well
-  - retype_field:
-      field: dashboardv2alpha0.QueryVariableSpec.query
-      as:
-        kind: ref
-        ref: { referred_pkg: dashboardv2alpha0, referred_type: DataQueryKind }

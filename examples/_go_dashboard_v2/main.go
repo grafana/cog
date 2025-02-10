@@ -72,7 +72,7 @@ func dashboardBuilder() []byte {
 		Panel("kernel_logs", kernelLogs()).
 		Panel("all_sys_logs", allSystemLogs()).
 		// Layout building
-		Layout(dashboard.NewGridLayoutBuilder().
+		GridLayout(dashboard.NewGridLayoutBuilder().
 			Row(dashboard.NewGridLayoutRowBuilder("CPU")).
 			Item(dashboard.NewGridLayoutItemBuilder("cpu_usage").
 				X(0). // TODO: X/Y calculations based on height and width?
