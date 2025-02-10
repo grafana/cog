@@ -110,15 +110,15 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
 			},
 		}).
-		RenderAsBytes("builders/builder.tmpl", template.Builder{
-			Package:              builder.Package,
-			BuilderSignatureType: buildObjectSignature,
-			BuilderName:          tools.UpperCamelCase(builder.Name),
-			ObjectName:           fullObjectName,
-			Comments:             builder.For.Comments,
-			Constructor:          builder.Constructor,
-			Properties:           builder.Properties,
-			Options:              tools.Map(builder.Options, jenny.generateOption),
+		RenderAsBytes("builders/builder.tmpl", map[string]any{
+			"Package":              builder.Package,
+			"BuilderSignatureType": buildObjectSignature,
+			"BuilderName":          tools.UpperCamelCase(builder.Name),
+			"ObjectName":           fullObjectName,
+			"Comments":             builder.For.Comments,
+			"Constructor":          builder.Constructor,
+			"Properties":           builder.Properties,
+			"Options":              tools.Map(builder.Options, jenny.generateOption),
 		})
 }
 
