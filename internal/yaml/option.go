@@ -287,12 +287,17 @@ func (selector OptionSelector) AsSelector(pkg string) (option.Selector, error) {
 
 type ByNamesSelector struct {
 	Object  string   `yaml:"object"`
+	Builder string   `yaml:"builder"`
 	Options []string `yaml:"options"`
 }
 
 func (selector ByNamesSelector) AsSelector(pkg string) (option.Selector, error) {
-	if selector.Object == "" {
-		return nil, fmt.Errorf("`object` is required")
+	if selector.Object == "" && selector.Builder == "" {
+		return nil, fmt.Errorf("`object` or `builder` is required")
+	}
+
+	if selector.Builder != "" {
+		return option.ByBuilder(pkg, selector.Builder, selector.Options...), nil
 	}
 
 	return option.ByName(pkg, selector.Object, selector.Options...), nil

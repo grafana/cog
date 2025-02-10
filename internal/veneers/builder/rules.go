@@ -91,7 +91,7 @@ func Omit(selector Selector) RewriteRule {
 
 func MergeInto(selector Selector, sourceBuilderName string, underPath string, excludeOptions []string, renameOptions map[string]string) RewriteRule {
 	return mapToSelected(selector, func(builders ast.Builders, destinationBuilder ast.Builder) (ast.Builder, error) {
-		sourceBuilder, found := builders.LocateByObject(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
+		sourceBuilder, found := builders.LocateByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
 		if !found {
 			// We couldn't find the source builder: let's return the selected builder untouched.
 			return destinationBuilder, nil

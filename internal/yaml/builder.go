@@ -100,7 +100,7 @@ type MergeInto struct {
 
 func (rule MergeInto) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	return builder.MergeInto(
-		builder.ByObjectName(pkg, rule.Destination),
+		builder.ByName(pkg, rule.Destination),
 		rule.Source,
 		rule.UnderPath,
 		rule.ExcludeOptions,
