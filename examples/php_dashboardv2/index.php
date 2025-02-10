@@ -83,7 +83,7 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
         "kernel_logs" => Logs::kernelLogs(),
         "all_sys_logs" => Logs::allSystemLogs(),
     ])
-    ->layout(
+    ->gridLayout(
         // TODO: size?
         // TODO: automatic calculation of grid positions
         (new GridLayoutBuilder())

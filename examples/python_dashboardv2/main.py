@@ -106,7 +106,7 @@ def build_dashboard() -> Dashboard:
                 "all_sys_logs": all_system_logs(),
             }
         )
-        .layout(
+        .grid_layout(
             GridLayout()
             .row(GridLayoutRow("CPU"))
             .item(GridLayoutItem("cpu_usage"))

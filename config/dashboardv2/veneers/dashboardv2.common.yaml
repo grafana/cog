@@ -25,6 +25,77 @@ builders:
   # Layouts #
   ###########
 
+  ########################
+  # ResponsiveGridLayout #
+  ########################
+
+  - merge_into:
+      source: ResponsiveGridLayoutSpec
+      destination: ResponsiveGridLayoutKind
+      under_path: spec
+  - rename:
+      by_object: ResponsiveGridLayoutKind
+      as: ResponsiveGridLayout
+
+  - merge_into:
+      source: ResponsiveGridLayoutItemSpec
+      destination: ResponsiveGridLayoutItemKind
+      under_path: spec
+  - rename:
+      by_object: ResponsiveGridLayoutItemKind
+      as: ResponsiveGridLayoutItem
+
+  - merge_into:
+      source: ElementReference
+      destination: ResponsiveGridLayoutItemKind
+      under_path: spec.element
+  - promote_options_to_constructor:
+      by_object: ResponsiveGridLayoutItemKind
+      options: [name]
+
+  ##############
+  # RowsLayout #
+  ##############
+
+  - merge_into:
+      source: RowsLayoutSpec
+      destination: RowsLayoutKind
+      under_path: spec
+  - rename:
+      by_object: RowsLayoutKind
+      as: RowsLayout
+
+  - merge_into:
+      source: RowsLayoutItemSpec
+      destination: RowsLayoutItemKind
+      under_path: spec
+  - rename:
+      by_object: RowsLayoutItemKind
+      as: RowsLayoutItem
+
+  - merge_into:
+      source: ElementReference
+      destination: RowsLayoutItemKind
+      under_path: spec.element
+  - promote_options_to_constructor:
+      by_object: RowsLayoutItemKind
+      options: [name]
+
+  - merge_into:
+      source: RowsLayoutRowSpec
+      destination: RowsLayoutRowKind
+      under_path: spec
+  - rename:
+      by_object: RowsLayoutRowKind
+      as: RowsLayoutRow
+  - promote_options_to_constructor:
+      by_name: RowsLayoutRow
+      options: [title]
+
+  ##############
+  # GridLayout #
+  ##############
+
   # Rearrange layout-related builders
   - merge_into:
       source: GridLayoutSpec
@@ -320,12 +391,78 @@ options:
   # Layouts #
   ###########
 
+  # GridLayoutKind + RowsLayoutKind + ResponsiveGridLayoutKind
+  - disjunction_as_options:
+      by_builder: Dashboard.Layout
+  - rename:
+      by_builder: Dashboard.GridLayoutKind
+      as: gridLayout
+  - rename:
+      by_builder: Dashboard.RowsLayoutKind
+      as: rowsLayout
+  - rename:
+      by_builder: Dashboard.ResponsiveGridLayoutKind
+      as: responsiveGridLayout
+
+  ##############
+  # RowsLayout #
+  ##############
+
+  - omit: { by_builder: RowsLayout.spec }
+  - omit: { by_builder: RowsLayoutItem.spec }
+  - omit: { by_builder: RowsLayoutRow.spec }
+
+  # Append a single `row` value instead of a map of everything
+  - duplicate:
+      by_builder: RowsLayout.rows
+      as: row
+  - array_to_append:
+      by_builder: RowsLayout.row
+
+  # GridLayoutKind + ResponsiveGridLayoutKind
+  - disjunction_as_options:
+      by_builder: RowsLayoutRow.Layout
+  - rename:
+      by_builder: RowsLayoutRow.GridLayoutKind
+      as: gridLayout
+  - rename:
+      by_builder: RowsLayoutRow.ResponsiveGridLayoutKind
+      as: responsiveGridLayout
+
+  ########################
+  # ResponsiveGridLayout #
+  ########################
+
+  - omit: { by_builder: ResponsiveGridLayout.spec }
+  - omit: { by_builder: ResponsiveGridLayoutItem.spec }
+
+  # Append a single `item` value instead of a map of everything
+  - duplicate:
+      by_builder: ResponsiveGridLayout.items
+      as: item
+  - array_to_append:
+      by_builder: ResponsiveGridLayout.item
+
+  ##############
+  # GridLayout #
+  ##############
+
   # spec options are leftovers from the merge_into veneer
   - omit: { by_builder: GridLayout.spec }
   - omit: { by_builder: GridLayoutItem.spec }
   - omit: { by_builder: GridLayoutRow.spec }
 
-  # Append a single `item` value instead of a map of everything
+  - rename:
+      by_builder: GridLayoutRow.elements
+      as: items
+  # Append a single `item` value instead of a list of everything
+  - duplicate:
+      by_builder: GridLayoutRow.items
+      as: item
+  - array_to_append:
+      by_builder: GridLayoutRow.item
+
+  # Append a single `item` value instead of a list of everything
   - duplicate:
       by_builder: GridLayout.items
       as: item
