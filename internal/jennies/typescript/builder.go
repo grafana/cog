@@ -97,16 +97,16 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return formatValue(jenny.rawTypes.defaultValueForType(guard.EmptyValueType, jenny.typeImportMapper))
 			},
 		}).
-		RenderAsBytes("builder.tmpl", template.Builder{
-			BuilderName:          builder.Name,
-			ObjectName:           tools.CleanupNames(builder.For.Name),
-			BuilderSignatureType: buildObjectSignature,
-			Imports:              jenny.imports,
-			ImportAlias:          jenny.importType(builder.For.SelfRef),
-			Comments:             builder.For.Comments,
-			Constructor:          builder.Constructor,
-			Properties:           builder.Properties,
-			Options:              builder.Options,
+		RenderAsBytes("builder.tmpl", map[string]any{
+			"BuilderName":          builder.Name,
+			"ObjectName":           tools.CleanupNames(builder.For.Name),
+			"BuilderSignatureType": buildObjectSignature,
+			"Imports":              jenny.imports,
+			"ImportAlias":          jenny.importType(builder.For.SelfRef),
+			"Comments":             builder.For.Comments,
+			"Constructor":          builder.Constructor,
+			"Properties":           builder.Properties,
+			"Options":              builder.Options,
 		})
 }
 
