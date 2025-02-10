@@ -149,6 +149,8 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 		cogAlias := formatter.packageMapper("cog")
 
 		return fmt.Sprintf("%s.Builder<%s>", cogAlias, formatted)
+	case ast.KindConstantRef:
+		return formatter.formatConstantReferences(def.AsConstantRef())
 	default:
 		return string(def.Kind)
 	}
@@ -305,6 +307,26 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	buffer.WriteString("}")
 
 	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatConstantReferences(def ast.ConstantReferenceType) string {
+	formatted := tools.CleanupNames(def.ReferredType)
+
+	referredPkg := formatter.packageMapper(def.ReferredPkg)
+	if referredPkg != "" {
+		formatted = referredPkg + "." + formatted
+	}
+
+	referredType, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	if !found {
+		return "unknown"
+	}
+
+	if referredType.Type.IsEnum() {
+		return formatter.enums.formatValue(referredType, def.ReferenceValue)
+	}
+
+	return "unknown"
 }
 
 type enumAsTypeFormatter struct {
