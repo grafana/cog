@@ -6,14 +6,14 @@
 {{- end }}
 
 {{- template "assignment_setup" (dict "Value" .Assignment.Value) -}}
-{{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
+{{- $value := include "assignment_value" (dict "Assignment" .Assignment "IntoType" .Assignment.Path.Last.Type "Value" .Assignment.Value) -}}
 
-{{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
+{{- $preTmpl := print "pre_assignment_" (.Builder.Name|formatObjectName) "_" .Option.Name }}
 {{- includeIfExists $preTmpl (dict) -}}
 
 {{ template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
 
-{{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
+{{- $postTmpl := print "post_assignment_" (.Builder.Name|formatObjectName) "_" .Option.Name }}
 {{- includeIfExists $postTmpl (dict) -}}
 {{- end }}
 
@@ -50,7 +50,7 @@ assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name 
 
 {{- define "assignment_value" }}
 {{- if not (eq .Value.Constant nil) }}
-{{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
+{{- formatValue .IntoType .Value.Constant }}
 {{- end }}
 {{- with .Value.Argument }}
 {{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
@@ -67,7 +67,7 @@ assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name 
 {{- define "value_envelope" }}
 {{- .Envelope.Type | formatRawType }}(
 {{- range .Envelope.Values }}
-    {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
+    {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "IntoType" .Path.Last.Type "Value" .Value) }}
     {{ (index .Path 0).Identifier | formatIdentifier }}={{ $value }},
 {{- end }}
 )

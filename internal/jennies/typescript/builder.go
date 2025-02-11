@@ -72,6 +72,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 	return jenny.tmpl.
 		Funcs(map[string]any{
+			"importPkg":                   jenny.typeImportMapper,
 			"typeHasBuilder":              context.ResolveToBuilder,
 			"typeIsDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
 			"formatType":                  jenny.typeFormatter.formatType,
@@ -98,16 +99,11 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 		}).
 		RenderAsBytes("builder.tmpl", map[string]any{
-			"BuilderPackage":       builder.Package,
-			"BuilderName":          builder.Name,
+			"Builder":              builder,
 			"ObjectName":           tools.CleanupNames(builder.For.Name),
 			"BuilderSignatureType": buildObjectSignature,
 			"Imports":              jenny.imports,
 			"ImportAlias":          jenny.importType(builder.For.SelfRef),
-			"Comments":             builder.For.Comments,
-			"Constructor":          builder.Constructor,
-			"Properties":           builder.Properties,
-			"Options":              builder.Options,
 		})
 }
 

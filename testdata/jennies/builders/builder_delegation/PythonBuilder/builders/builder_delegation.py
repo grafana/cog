@@ -26,6 +26,7 @@ class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):
         return self
     
 
+
 class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
     _internal: builder_delegation.Dashboard
 

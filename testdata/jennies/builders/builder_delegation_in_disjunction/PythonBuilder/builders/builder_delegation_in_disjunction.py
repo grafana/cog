@@ -26,6 +26,7 @@ class DashboardLink(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboa
         return self
     
 
+
 class ExternalLink(cogbuilder.Builder[builder_delegation_in_disjunction.ExternalLink]):
     _internal: builder_delegation_in_disjunction.ExternalLink
 
@@ -43,6 +44,7 @@ class ExternalLink(cogbuilder.Builder[builder_delegation_in_disjunction.External
     
         return self
     
+
 
 class Dashboard(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboard]):
     _internal: builder_delegation_in_disjunction.Dashboard

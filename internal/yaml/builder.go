@@ -24,6 +24,7 @@ type BuilderRule struct {
 	PromoteOptsToConstructor *PromoteOptsToConstructor `yaml:"promote_options_to_constructor"`
 	AddOption                *AddOption                `yaml:"add_option"`
 	DefaultToConstant        *DefaultToConstant        `yaml:"default_to_constant"`
+	AddFactory               *AddFactory               `yaml:"add_factory"`
 }
 
 func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -70,6 +71,10 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 	if rule.DefaultToConstant != nil {
 		return rule.DefaultToConstant.AsRewriteRule(pkg)
+	}
+
+	if rule.AddFactory != nil {
+		return rule.AddFactory.AsRewriteRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -238,6 +243,20 @@ func (rule DefaultToConstant) AsRewriteRule(pkg string) (builder.RewriteRule, er
 	}
 
 	return builder.DefaultToConstant(selector, rule.Options), nil
+}
+
+type AddFactory struct {
+	BuilderSelector `yaml:",inline"`
+	Factory         ast.BuilderFactory `yaml:"factory"`
+}
+
+func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.AddFactory(selector, rule.Factory), nil
 }
 
 /******************************************************************************

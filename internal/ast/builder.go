@@ -19,6 +19,8 @@ type Builder struct {
 	Constructor Constructor   `json:",omitempty"`
 	Options     []Option
 	VeneerTrail []string `json:",omitempty"`
+
+	Factories []BuilderFactory `json:",omitempty"`
 }
 
 func (builder *Builder) OptionByName(name string) (Option, bool) {

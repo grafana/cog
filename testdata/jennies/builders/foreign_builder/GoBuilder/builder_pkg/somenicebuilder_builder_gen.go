@@ -22,6 +22,8 @@ func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
 	return builder
 }
 
+
+
 func (builder *SomeNiceBuilderBuilder) Build() (some_pkg.SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return some_pkg.SomeStruct{}, err

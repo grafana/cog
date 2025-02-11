@@ -30,6 +30,9 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},
+			"formatTypeNotNullable": func(_ ast.Type) string {
+				panic("formatTypeNotNullable() needs to be overridden by a jenny")
+			},
 			"formatFullyQualifiedRef": func(_ ast.Type) string {
 				panic("formatFullyQualifiedRef() needs to be overridden by a jenny")
 			},
