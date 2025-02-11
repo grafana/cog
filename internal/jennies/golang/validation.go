@@ -79,6 +79,11 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 			return resolvesToConstraints(typeDef.AsArray().ValueType)
 		}
 
+		if typeDef.IsConstantRef() {
+			obj, _ := context.LocateObject(typeDef.AsConstantRef().ReferredPkg, typeDef.AsConstantRef().ReferredType)
+			return obj.Type.IsEnum()
+		}
+
 		return false
 	}
 
