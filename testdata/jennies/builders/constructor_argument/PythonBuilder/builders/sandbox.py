@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import sandbox
 
 
-class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):    
+class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
     _internal: sandbox.SomeStruct
 
     def __init__(self, title: str):
@@ -16,7 +16,7 @@ class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
         """
         return self._internal    
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         self._internal.title = title
     
         return self

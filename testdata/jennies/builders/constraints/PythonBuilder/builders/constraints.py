@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import constraints
 
 
-class SomeStruct(cogbuilder.Builder[constraints.SomeStruct]):    
+class SomeStruct(cogbuilder.Builder[constraints.SomeStruct]):
     _internal: constraints.SomeStruct
 
     def __init__(self):
@@ -15,7 +15,7 @@ class SomeStruct(cogbuilder.Builder[constraints.SomeStruct]):
         """
         return self._internal    
     
-    def id_val(self, id_val: int) -> typing.Self:        
+    def id_val(self, id_val: int) -> typing.Self:    
         if not id_val >= 5:
             raise ValueError("id_val must be >= 5")
         if not id_val < 10:
@@ -24,7 +24,7 @@ class SomeStruct(cogbuilder.Builder[constraints.SomeStruct]):
     
         return self
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         if not len(title) >= 1:
             raise ValueError("len(title) must be >= 1")
         self._internal.title = title

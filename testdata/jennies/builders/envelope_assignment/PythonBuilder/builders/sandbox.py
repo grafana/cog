@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import sandbox
 
 
-class Dashboard(cogbuilder.Builder[sandbox.Dashboard]):    
+class Dashboard(cogbuilder.Builder[sandbox.Dashboard]):
     _internal: sandbox.Dashboard
 
     def __init__(self):
@@ -15,7 +15,7 @@ class Dashboard(cogbuilder.Builder[sandbox.Dashboard]):
         """
         return self._internal    
     
-    def with_variable(self, name: str, value: str) -> typing.Self:        
+    def with_variable(self, name: str, value: str) -> typing.Self:    
         if self._internal.variables is None:
             self._internal.variables = []
         

@@ -120,11 +120,12 @@ type EnumValue struct {
 }
 
 type ClassTemplate struct {
-	Package  string
-	Imports  fmt.Stringer
-	Name     string
-	Extends  []string
-	Comments []string
+	Package    string
+	RawPackage string
+	Imports    fmt.Stringer
+	Name       string
+	Extends    []string
+	Comments   []string
 
 	Fields     []ast.StructField
 	Builders   []BuilderTemplate

@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import dataquery_variant_builder
 
 
-class LokiBuilder(cogbuilder.Builder[dataquery_variant_builder.Loki]):    
+class LokiBuilder(cogbuilder.Builder[dataquery_variant_builder.Loki]):
     _internal: dataquery_variant_builder.Loki
 
     def __init__(self):
@@ -15,7 +15,7 @@ class LokiBuilder(cogbuilder.Builder[dataquery_variant_builder.Loki]):
         """
         return self._internal    
     
-    def expr(self, expr: str) -> typing.Self:        
+    def expr(self, expr: str) -> typing.Self:    
         self._internal.expr = expr
     
         return self

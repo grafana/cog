@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import map_of_builders
 
 
-class Panel(cogbuilder.Builder[map_of_builders.Panel]):    
+class Panel(cogbuilder.Builder[map_of_builders.Panel]):
     _internal: map_of_builders.Panel
 
     def __init__(self):
@@ -15,13 +15,13 @@ class Panel(cogbuilder.Builder[map_of_builders.Panel]):
         """
         return self._internal    
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         self._internal.title = title
     
         return self
     
 
-class Dashboard(cogbuilder.Builder[map_of_builders.Dashboard]):    
+class Dashboard(cogbuilder.Builder[map_of_builders.Dashboard]):
     _internal: map_of_builders.Dashboard
 
     def __init__(self):
@@ -33,7 +33,7 @@ class Dashboard(cogbuilder.Builder[map_of_builders.Dashboard]):
         """
         return self._internal    
     
-    def panels(self, panels: dict[str, cogbuilder.Builder[map_of_builders.Panel]]) -> typing.Self:        
+    def panels(self, panels: dict[str, cogbuilder.Builder[map_of_builders.Panel]]) -> typing.Self:    
         panels_resources = { key1: val1.build() for (key1, val1) in panels.items() }
         self._internal.panels = panels_resources
     
