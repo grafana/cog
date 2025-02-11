@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import sandbox
 
 
-class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):    
+class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
     _internal: sandbox.SomeStruct
 
     def __init__(self):
@@ -15,7 +15,7 @@ class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
         """
         return self._internal    
     
-    def annotations(self, key: str, value: str) -> typing.Self:        
+    def annotations(self, key: str, value: str) -> typing.Self:    
         if self._internal.annotations is None:
             self._internal.annotations = {}
         

@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import basic_struct_defaults
 
 
-class SomeStruct(cogbuilder.Builder[basic_struct_defaults.SomeStruct]):    
+class SomeStruct(cogbuilder.Builder[basic_struct_defaults.SomeStruct]):
     _internal: basic_struct_defaults.SomeStruct
 
     def __init__(self):
@@ -15,22 +15,22 @@ class SomeStruct(cogbuilder.Builder[basic_struct_defaults.SomeStruct]):
         """
         return self._internal    
     
-    def id_val(self, id_val: int) -> typing.Self:        
+    def id_val(self, id_val: int) -> typing.Self:    
         self._internal.id_val = id_val
     
         return self
     
-    def uid(self, uid: str) -> typing.Self:        
+    def uid(self, uid: str) -> typing.Self:    
         self._internal.uid = uid
     
         return self
     
-    def tags(self, tags: list[str]) -> typing.Self:        
+    def tags(self, tags: list[str]) -> typing.Self:    
         self._internal.tags = tags
     
         return self
     
-    def live_now(self, live_now: bool) -> typing.Self:        
+    def live_now(self, live_now: bool) -> typing.Self:    
         self._internal.live_now = live_now
     
         return self

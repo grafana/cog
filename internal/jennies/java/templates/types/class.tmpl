@@ -51,6 +51,9 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- if and (ne .ToJSONFunction "") (not .Extends) }}
     {{ .ToJSONFunction }}
     {{- end }}
+
+{{- $customMethodsTmpl := print "object_" .RawPackage "_" .Name "_custom_methods" }}
+{{- includeIfExists $customMethodsTmpl (dict)|indent 4 }}
 }
 {{- end }}
 

@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import nullable_map_assignment
 
 
-class SomeStruct(cogbuilder.Builder[nullable_map_assignment.SomeStruct]):    
+class SomeStruct(cogbuilder.Builder[nullable_map_assignment.SomeStruct]):
     _internal: nullable_map_assignment.SomeStruct
 
     def __init__(self):
@@ -15,7 +15,7 @@ class SomeStruct(cogbuilder.Builder[nullable_map_assignment.SomeStruct]):
         """
         return self._internal    
     
-    def config(self, config: dict[str, str]) -> typing.Self:        
+    def config(self, config: dict[str, str]) -> typing.Self:    
         self._internal.config = config
     
         return self

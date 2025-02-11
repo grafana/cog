@@ -215,6 +215,19 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 		}
 	}
 
+	customMethodsBlock := template.CustomObjectMethodsBlock(object)
+	if jenny.tmpl.Exists(customMethodsBlock) {
+		rendered, err := jenny.tmpl.Render(customMethodsBlock, map[string]any{
+			"Object": object,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		buffer.WriteString("\n\n")
+		buffer.WriteString(tools.Indent(rendered, 4))
+	}
+
 	buffer.WriteString("\n}")
 
 	return buffer.String(), nil

@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import constructor_initializations
 
 
-class SomePanel(cogbuilder.Builder[constructor_initializations.SomePanel]):    
+class SomePanel(cogbuilder.Builder[constructor_initializations.SomePanel]):
     _internal: constructor_initializations.SomePanel
 
     def __init__(self):
@@ -17,7 +17,7 @@ class SomePanel(cogbuilder.Builder[constructor_initializations.SomePanel]):
         """
         return self._internal    
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         self._internal.title = title
     
         return self

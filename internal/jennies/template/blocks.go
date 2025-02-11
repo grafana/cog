@@ -30,6 +30,10 @@ func CustomObjectVariantBlock(object ast.Object) string {
 	return fmt.Sprintf("object_variant_%s", object.Type.ImplementedVariant())
 }
 
+func CustomObjectMethodsBlock(obj ast.Object) string {
+	return fmt.Sprintf("object_%s_%s_custom_methods", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
+}
+
 func CustomSchemaVariantBlock(schema *ast.Schema) string {
 	return fmt.Sprintf("schema_variant_%s", schema.Metadata.Variant)
 }

@@ -115,7 +115,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AppendOneToMany(
 		common.If[languages.Context](!language.config.SkipRuntime, Runtime{config: language.config}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{config: language.config}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl}),
 		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{
 			config:          language.config,
 			tmpl:            tmpl,
