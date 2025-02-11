@@ -33,12 +33,14 @@ class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     public function uid(string $uid): static
     {
         $this->internal->uid = $uid;
     
         return $this;
     }
+
     /**
      * @param array<string> $tags
      */
@@ -48,6 +50,7 @@ class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     /**
      * This thing could be live.
      * Or maybe not.

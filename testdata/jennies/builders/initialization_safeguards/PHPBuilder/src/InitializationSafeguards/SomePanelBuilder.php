@@ -29,6 +29,7 @@ class SomePanelBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     public function showLegend(bool $show): static
     {    
         if ($this->internal->options === null) {

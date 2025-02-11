@@ -156,6 +156,7 @@ type Constant struct {
 
 type BuilderTemplate struct {
 	Package              string
+	RawPackage           string
 	BuilderSignatureType string
 	BuilderName          string
 	ObjectName           string

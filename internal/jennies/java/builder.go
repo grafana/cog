@@ -55,6 +55,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 	object, _ := context.LocateObject(builder.For.SelfRef.ReferredPkg, builder.For.SelfRef.ReferredType)
 	tmpl := BuilderTemplate{
 		Package:              jenny.config.formatPackage(builder.Package),
+		RawPackage:           builder.Package,
 		Imports:              jenny.imports,
 		ObjectName:           tools.UpperCamelCase(object.Name),
 		BuilderName:          tools.UpperCamelCase(builder.Name),

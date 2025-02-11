@@ -37,5 +37,7 @@ public class {{ .BuilderName }}Builder{{ if .IsGenericPanel }}<T extends {{ .Bui
     public {{ .ObjectName }} build() {
         return this.internal;
     }
+{{- $customMethodsTmpl := print "builder_" .RawPackage "_" .BuilderName "_custom_methods" }}
+{{- includeIfExists $customMethodsTmpl (dict)|indent 4 }}
 }
 {{- end }}

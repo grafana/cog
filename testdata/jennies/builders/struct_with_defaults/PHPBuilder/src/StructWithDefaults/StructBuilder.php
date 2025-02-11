@@ -33,6 +33,7 @@ class StructBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     /**
      * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct> $partialFields
      */
@@ -43,6 +44,7 @@ class StructBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     /**
      * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\StructWithDefaults\NestedStruct> $emptyFields
      */
@@ -53,12 +55,14 @@ class StructBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     public function complexField(unknown $complexField): static
     {
         $this->internal->complexField = $complexField;
     
         return $this;
     }
+
     public function partialComplexField(unknown $partialComplexField): static
     {
         $this->internal->partialComplexField = $partialComplexField;

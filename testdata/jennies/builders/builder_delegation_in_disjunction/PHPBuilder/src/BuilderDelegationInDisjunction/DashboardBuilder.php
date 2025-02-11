@@ -35,6 +35,7 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     /**
      * will be expanded to [](cog.Builder<DashboardLink> | string)
      * @param array<\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegationInDisjunction\DashboardLink>|string> $linksOrStrings
@@ -49,6 +50,7 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     /**
      * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegationInDisjunction\DashboardLink>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegationInDisjunction\ExternalLink> $disjunctionOfBuilders
      */

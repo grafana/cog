@@ -29,6 +29,7 @@ class DashboardLinkBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     public function url(string $url): static
     {
         $this->internal->url = $url;
