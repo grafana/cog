@@ -38,9 +38,6 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
         this.{{ .Name }} = {{ .Name }};
         {{- end }}
         {{- end }}
-        {{- range .Defaults }}
-        this.{{ .Name }} = {{ .Value }};
-        {{- end }}
     }
     {{- end }}
     {{- end }}

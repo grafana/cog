@@ -146,7 +146,6 @@ type ClassTemplate struct {
 type ConstructorTemplate struct {
 	Args        []ast.Argument
 	Assignments []ConstructorAssignmentTemplate
-	Defaults    []Default
 }
 
 type ConstructorAssignmentTemplate struct {

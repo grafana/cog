@@ -273,15 +273,17 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 
 	args := make([]ast.Argument, 0)
 	assignments := make([]ConstructorAssignmentTemplate, 0)
-	defaults := make([]Default, 0)
+	defaultConstructorAssignments := make([]ConstructorAssignmentTemplate, 0)
 	for _, field := range fields {
 		name := tools.LowerCamelCase(escapeVarName(field.Name))
 		if field.Type.IsConstantRef() {
-			assignments = append(assignments, ConstructorAssignmentTemplate{
+			assign := ConstructorAssignmentTemplate{
 				Name:  name,
 				Type:  field.Type,
 				Value: jenny.typeFormatter.enumFromConstantRef(field.Type.AsConstantRef()),
-			})
+			}
+			assignments = append(assignments, assign)
+			defaultConstructorAssignments = append(defaultConstructorAssignments, assign)
 			continue
 		}
 
@@ -296,17 +298,11 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 		})
 
 		if field.Type.Default != nil {
-			defaults = append(defaults, Default{
+			defaultConstructorAssignments = append(defaultConstructorAssignments, ConstructorAssignmentTemplate{
 				Name:  name,
+				Type:  field.Type,
 				Value: jenny.genDefaultForType(field.Type, field.Type.Default),
 			})
-		}
-	}
-
-	defaultConstructorAssignments := make([]ConstructorAssignmentTemplate, 0)
-	for _, assignment := range assignments {
-		if assignment.Value != nil {
-			defaultConstructorAssignments = append(defaultConstructorAssignments, assignment)
 		}
 	}
 
@@ -315,7 +311,6 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 		{
 			Args:        []ast.Argument{},
 			Assignments: defaultConstructorAssignments,
-			Defaults:    defaults,
 		},
 	}
 
