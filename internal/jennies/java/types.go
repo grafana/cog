@@ -89,8 +89,7 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 
 func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) string {
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
-	switch object.Type.Kind {
-	case ast.KindEnum:
+	if object.Type.Kind == ast.KindEnum {
 		return formatObjectName(def.ReferredType)
 	}
 

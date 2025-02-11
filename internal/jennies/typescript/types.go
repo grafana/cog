@@ -310,13 +310,6 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 }
 
 func (formatter *typeFormatter) formatConstantReferences(def ast.ConstantReferenceType) string {
-	formatted := tools.CleanupNames(def.ReferredType)
-
-	referredPkg := formatter.packageMapper(def.ReferredPkg)
-	if referredPkg != "" {
-		formatted = referredPkg + "." + formatted
-	}
-
 	referredType, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if !found {
 		return "unknown"
