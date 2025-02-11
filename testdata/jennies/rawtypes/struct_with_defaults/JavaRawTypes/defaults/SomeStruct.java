@@ -13,7 +13,6 @@ public class SomeStruct {
         this.fieldFloat32 = 42.4f;
         this.fieldInt32 = 42;
     }
-    
     public SomeStruct(Boolean fieldBool,String fieldString,String fieldStringWithConstantValue,Float fieldFloat32,Integer fieldInt32) {
         this.fieldBool = fieldBool;
         this.fieldString = fieldString;

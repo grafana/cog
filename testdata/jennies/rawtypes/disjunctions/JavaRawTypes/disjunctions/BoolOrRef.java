@@ -6,7 +6,6 @@ public class BoolOrRef {
     public SomeStruct someStruct;
     public BoolOrRef() {
     }
-    
     public BoolOrRef(Boolean bool,SomeStruct someStruct) {
         this.bool = bool;
         this.someStruct = someStruct;

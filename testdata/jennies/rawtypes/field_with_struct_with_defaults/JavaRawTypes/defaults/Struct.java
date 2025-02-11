@@ -13,7 +13,6 @@ public class Struct {
         this.complexField = new DefaultsStructComplexField("myUID", new DefaultsStructComplexFieldNested("nested"), List.of("hello"));
         this.partialComplexField = new DefaultsStructPartialComplexField("", 0L);
     }
-    
     public Struct(NestedStruct allFields,NestedStruct partialFields,NestedStruct emptyFields,DefaultsStructComplexField complexField,DefaultsStructPartialComplexField partialComplexField) {
         this.allFields = allFields;
         this.partialFields = partialFields;

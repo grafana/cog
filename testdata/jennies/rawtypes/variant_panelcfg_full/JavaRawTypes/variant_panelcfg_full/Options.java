@@ -5,7 +5,6 @@ public class Options {
     public String timeseriesOption;
     public Options() {
     }
-    
     public Options(String timeseriesOption) {
         this.timeseriesOption = timeseriesOption;
     }

@@ -16,7 +16,6 @@ public class SomeStruct {
     public String fieldRefToConstant;
     public SomeStruct() {
     }
-    
     public SomeStruct(SomeOtherStruct fieldRef,StringOrBool fieldDisjunctionOfScalars,StringOrSomeOtherStruct fieldMixedDisjunction,String fieldDisjunctionWithNull,SomeStructOperator operator,List<String> fieldArrayOfStrings,Map<String, String> fieldMapOfStringToString,StructComplexFieldsSomeStructFieldAnonymousStruct fieldAnonymousStruct,String fieldRefToConstant) {
         this.fieldRef = fieldRef;
         this.fieldDisjunctionOfScalars = fieldDisjunctionOfScalars;

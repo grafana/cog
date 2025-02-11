@@ -8,7 +8,6 @@ public class SomeStruct {
     public RefStruct refStruct;
     public SomeStruct() {
     }
-    
     public SomeStruct(Long id,Long maybeId,String title,RefStruct refStruct) {
         this.id = id;
         this.maybeId = maybeId;

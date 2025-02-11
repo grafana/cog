@@ -10,7 +10,6 @@ public class SomeStruct {
     public StructOptionalFieldsSomeStructFieldAnonymousStruct fieldAnonymousStruct;
     public SomeStruct() {
     }
-    
     public SomeStruct(SomeOtherStruct fieldRef,String fieldString,SomeStructOperator operator,List<String> fieldArrayOfStrings,StructOptionalFieldsSomeStructFieldAnonymousStruct fieldAnonymousStruct) {
         this.fieldRef = fieldRef;
         this.fieldString = fieldString;

@@ -6,7 +6,6 @@ public class Query implements cog.variants.Dataquery {
     public Boolean instant;
     public Query() {
     }
-    
     public Query(String expr,Boolean instant) {
         this.expr = expr;
         this.instant = instant;

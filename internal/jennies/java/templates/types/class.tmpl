@@ -37,9 +37,9 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
         {{- else }}
         this.{{ .Name }} = {{ .Name }};
         {{- end }}
-        {{- range $.Defaults }}
-        this.{{ .Name | lowerCamelCase | escapeVar }} = {{ .Value }};
         {{- end }}
+        {{- range .Defaults }}
+        this.{{ .Name }} = {{ .Value }};
         {{- end }}
     }
     {{- end }}

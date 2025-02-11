@@ -180,7 +180,6 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		Imports:                 jenny.imports,
 		Name:                    tools.UpperCamelCase(object.Name),
 		Fields:                  object.Type.AsStruct().Fields,
-		Defaults:                jenny.genDefaults(object.Type.AsStruct().Fields),
 		Comments:                object.Comments,
 		Variant:                 jenny.getVariant(object.Type),
 		Identifier:              identifier,
@@ -274,6 +273,7 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 
 	args := make([]ast.Argument, 0)
 	assignments := make([]ConstructorAssignmentTemplate, 0)
+	defaults := make([]Default, 0)
 	for _, field := range fields {
 		name := tools.LowerCamelCase(escapeVarName(field.Name))
 		if field.Type.IsConstantRef() {
@@ -284,6 +284,7 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 			})
 			continue
 		}
+
 		args = append(args, ast.Argument{
 			Name: name,
 			Type: field.Type,
@@ -293,6 +294,13 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 			Name: name,
 			Type: field.Type,
 		})
+
+		if field.Type.Default != nil {
+			defaults = append(defaults, Default{
+				Name:  name,
+				Value: jenny.genDefaultForType(field.Type, field.Type.Default),
+			})
+		}
 	}
 
 	defaultConstructorAssignments := make([]ConstructorAssignmentTemplate, 0)
@@ -307,6 +315,7 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 		{
 			Args:        []ast.Argument{},
 			Assignments: defaultConstructorAssignments,
+			Defaults:    defaults,
 		},
 	}
 
@@ -318,22 +327,6 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 	}
 
 	return constructors
-}
-
-func (jenny RawTypes) genDefaults(fields []ast.StructField) []Default {
-	calls := make([]Default, 0)
-	for _, field := range fields {
-		if field.Type.Default == nil {
-			continue
-		}
-
-		calls = append(calls, Default{
-			Name:  field.Name,
-			Value: jenny.genDefaultForType(field.Type, field.Type.Default),
-		})
-	}
-
-	return calls
 }
 
 func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {

@@ -131,7 +131,6 @@ type ClassTemplate struct {
 
 	Fields     []ast.StructField
 	Builders   []BuilderTemplate
-	Defaults   []Default
 	HasBuilder bool
 
 	Variant                 string
@@ -147,6 +146,7 @@ type ClassTemplate struct {
 type ConstructorTemplate struct {
 	Args        []ast.Argument
 	Assignments []ConstructorAssignmentTemplate
+	Defaults    []Default
 }
 
 type ConstructorAssignmentTemplate struct {
