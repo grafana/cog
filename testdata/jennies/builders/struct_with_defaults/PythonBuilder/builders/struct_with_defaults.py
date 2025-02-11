@@ -26,6 +26,7 @@ class NestedStruct(cogbuilder.Builder[struct_with_defaults.NestedStruct]):
         return self
     
 
+
 class Struct(cogbuilder.Builder[struct_with_defaults.Struct]):
     _internal: struct_with_defaults.Struct
 

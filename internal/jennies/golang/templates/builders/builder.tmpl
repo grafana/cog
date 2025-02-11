@@ -1,35 +1,39 @@
-package {{ .Package | formatPackageName }}
+package {{ .Builder.Package | formatPackageName }}
 {{ $options := include "options" . }}
 {{ .Imports }}
 
-var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .BuilderName }}Builder)(nil)
-{{ range .Comments }}
+var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name|formatObjectName }}Builder)(nil)
+{{ range .Builder.For.Comments }}
 // {{ . }}
 {{- end }}
-type {{ .BuilderName }}Builder struct {
+type {{ .Builder.Name|formatObjectName }}Builder struct {
     internal *{{ .ObjectName }}
     errors map[string]cog.BuildErrors
 
-    {{- range .Properties }}
+    {{- range .Builder.Properties }}
     {{ .Name }} {{ .Type | formatType }}
     {{- end }}
 }
 
-func New{{ .BuilderName }}Builder({{- template "args" .Constructor.Args }}) *{{ .BuilderName }}Builder {
+func New{{ .Builder.Name|formatObjectName }}Builder({{- template "args" .Builder.Constructor.Args }}) *{{ .Builder.Name|formatObjectName }}Builder {
 	resource := {{ .ConstructorName }}()
-	builder := &{{ .BuilderName }}Builder{
+	builder := &{{ .Builder.Name|formatObjectName }}Builder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
 
-    {{- range .Constructor.Assignments }}
-        {{- template "assignment" (dict "Assignment" . "Builder" $ "Option" (dict "Name" "")) }}
+    {{- range .Builder.Constructor.Assignments }}
+        {{- template "assignment" (dict "Assignment" . "Builder" $.Builder "Option" (dict "Name" "")) }}
     {{- end }}
 
 	return builder
 }
 
-func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
+{{ range .Builder.Factories }}
+	{{ template "factory" (dict "Builder" $.Builder "Factory" .) }}
+{{- end }}
+
+func (builder *{{ .Builder.Name|formatObjectName }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return {{ .ObjectName }}{}, err
 	}
@@ -37,7 +41,7 @@ func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, 
 	return *builder.internal, nil
 }
 
-{{- $customMethodsTmpl := print "builder_" .Package "_" .BuilderName "_custom_methods" }}
+{{- $customMethodsTmpl := print "builder_" .Builder.Package "_" (.Builder.Name|formatObjectName) "_custom_methods" }}
 {{- includeIfExists $customMethodsTmpl (dict) -}}
 
 {{- $options }}

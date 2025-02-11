@@ -114,16 +114,11 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 		}).
 		RenderAsBytes("builders/builder.tmpl", map[string]any{
-			"Package":              builder.Package,
+			"Builder":              builder,
 			"BuilderSignatureType": buildObjectSignature,
 			"Imports":              imports,
-			"BuilderName":          formatObjectName(builder.Name),
 			"ObjectName":           fullObjectName,
-			"Comments":             builder.For.Comments,
 			"ConstructorName":      constructorName,
-			"Constructor":          builder.Constructor,
-			"Properties":           builder.Properties,
-			"Options":              builder.Options,
 		})
 }
 

@@ -43,6 +43,9 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
+			"importPkg": func(pkg string) string {
+				panic("importPkg() needs to be overridden by a jenny")
+			},
 		}),
 
 		// parse templates

@@ -21,6 +21,8 @@ func NewStructBuilder() *StructBuilder {
 	return builder
 }
 
+
+
 func (builder *StructBuilder) Build() (Struct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Struct{}, err

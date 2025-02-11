@@ -9,7 +9,6 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/tools"
 )
 
 type Builder struct {
@@ -89,7 +88,13 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		Funcs(map[string]any{
 			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
 			"formatType":              jenny.typeFormatter.formatType,
-			"formatRawType":           jenny.rawTypeFormatter.formatType,
+			"formatTypeNotNullable": func(def ast.Type) string {
+				typeDef := def.DeepCopy()
+				typeDef.Nullable = false
+
+				return jenny.typeFormatter.formatType(typeDef)
+			},
+			"formatRawType": jenny.rawTypeFormatter.formatType,
 			"formatRawTypeNotNullable": func(def ast.Type) string {
 				typeDef := def.DeepCopy()
 				typeDef.Nullable = false
@@ -98,7 +103,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 			"formatValue": func(destinationType ast.Type, value any) string {
 				if destinationType.IsRef() {
-					referredObj, found := context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
+					referredObj, found := context.LocateObjectByRef(destinationType.AsRef())
 					if found && referredObj.Type.IsEnum() {
 						return jenny.typeFormatter.formatEnumValue(referredObj, value)
 					}
@@ -111,24 +116,8 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 		}).
 		RenderAsBytes("builders/builder.tmpl", map[string]any{
-			"Package":              builder.Package,
+			"Builder":              builder,
 			"BuilderSignatureType": buildObjectSignature,
-			"BuilderName":          tools.UpperCamelCase(builder.Name),
 			"ObjectName":           fullObjectName,
-			"Comments":             builder.For.Comments,
-			"Constructor":          builder.Constructor,
-			"Properties":           builder.Properties,
-			"Options":              tools.Map(builder.Options, jenny.generateOption),
 		})
-}
-
-func (jenny *Builder) generateOption(option ast.Option) ast.Option {
-	option.Args = tools.Map(option.Args, func(arg ast.Argument) ast.Argument {
-		newArg := arg.DeepCopy()
-		newArg.Type.Nullable = false
-
-		return newArg
-	})
-
-	return option
 }

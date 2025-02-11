@@ -1,6 +1,6 @@
 {{- define "options" }}
-{{- $builder := . }}
-{{ range .Options }}
+{{- $builder := .Builder }}
+{{ range $builder.Options }}
 {{- $option := . }}
 def {{ .Name|formatIdentifier }}(self{{- template "args" .Args }}) -> typing.Self:
     {{- include "comments" . | indent 4 }}

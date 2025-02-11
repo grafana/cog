@@ -21,6 +21,7 @@ class Panel(cogbuilder.Builder[map_of_builders.Panel]):
         return self
     
 
+
 class Dashboard(cogbuilder.Builder[map_of_builders.Dashboard]):
     _internal: map_of_builders.Dashboard
 
