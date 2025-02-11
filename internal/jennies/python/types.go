@@ -118,6 +118,10 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 		result = fmt.Sprintf("%s.Optional[%s]", typingPkg, result)
 	}
 
+	if def.IsConstantRef() {
+		result = formatter.formatConstantReference(def.AsConstantRef(), false)
+	}
+
 	return result
 }
 
@@ -315,4 +319,26 @@ func (formatter *typeFormatter) formatComments(comments []string) string {
 	}
 
 	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatConstantReference(def ast.ConstantReferenceType, shouldSetValue bool) string {
+	referredObject, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	if !found {
+		return "unknown"
+	}
+
+	if !referredObject.Type.IsEnum() {
+		return "unknown"
+	}
+
+	if shouldSetValue {
+		return formatter.formatEnumValue(referredObject, def.ReferenceValue)
+	}
+
+	t := referredObject.Type.AsEnum().Values[0].Type
+	if t.AsScalar().ScalarKind == ast.KindString {
+		return "str"
+	}
+
+	return "int"
 }

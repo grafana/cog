@@ -159,6 +159,12 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 		fieldType := jenny.typeFormatter.formatType(field.Type)
 		defaultValue := (any)(nil)
 
+		if field.Type.IsConstantRef() {
+			value := jenny.typeFormatter.formatConstantReference(field.Type.AsConstantRef(), true)
+			assignments = append(assignments, fmt.Sprintf("        self.%s = %s", fieldName, value))
+			continue
+		}
+
 		if !field.Type.Nullable || field.Type.Default != nil {
 			var defaultsOverrides map[string]any
 			if overrides, ok := field.Type.Default.(map[string]interface{}); ok {
