@@ -35,6 +35,7 @@ class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     public function title(string $title): static
     {
         if (!(strlen($title) >= 1)) {

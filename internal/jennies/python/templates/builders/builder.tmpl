@@ -17,4 +17,7 @@ class {{ .BuilderName }}(cogbuilder.Builder[{{ .BuilderSignatureType }}]):
         """
         return self._internal
 
+{{- $customMethodsTmpl := print "builder_" .Package "_" .BuilderName "_custom_methods" }}
+{{- includeIfExists $customMethodsTmpl (dict)|indent 4 -}}
+
 {{- include "options" . | indent 4 -}}

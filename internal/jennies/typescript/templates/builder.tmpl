@@ -24,6 +24,10 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
     build(): {{ .ImportAlias }}.{{ .ObjectName }} {
         return this.internal;
     }
+
+{{- $customMethodsTmpl := print "builder_" .BuilderPackage "_" .BuilderName "_custom_methods" }}
+{{- includeIfExists $customMethodsTmpl (dict) -}}
+
 {{- $options -}}
 }
 

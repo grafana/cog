@@ -29,8 +29,9 @@ class {{ .Builder.Name|formatObjectName }}Builder implements \{{ .NamespaceRoot 
     {
         return $this->internal;
     }
-
-{{ range .Builder.Options }}
-    {{- include "option" (dict "Builder" $.Builder "Option" .) | indent 4}}
+{{- $customMethodsTmpl := print "builder_" .Builder.Package "_" .Builder.Name "_custom_methods" }}
+{{ includeIfExists $customMethodsTmpl (dict) | indent 4 }}
+{{- range .Builder.Options }}
+{{ include "option" (dict "Builder" $.Builder "Option" .) | indent 4}}
 {{ end }}
 }

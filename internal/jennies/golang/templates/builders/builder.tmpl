@@ -36,4 +36,8 @@ func (builder *{{ .BuilderName }}Builder) Build() ({{ .BuilderSignatureType }}, 
 
 	return *builder.internal, nil
 }
+
+{{- $customMethodsTmpl := print "builder_" .Package "_" .BuilderName "_custom_methods" }}
+{{- includeIfExists $customMethodsTmpl (dict) -}}
+
 {{- $options }}

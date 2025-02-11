@@ -98,6 +98,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 		}).
 		RenderAsBytes("builder.tmpl", map[string]any{
+			"BuilderPackage":       builder.Package,
 			"BuilderName":          builder.Name,
 			"ObjectName":           tools.CleanupNames(builder.For.Name),
 			"BuilderSignatureType": buildObjectSignature,

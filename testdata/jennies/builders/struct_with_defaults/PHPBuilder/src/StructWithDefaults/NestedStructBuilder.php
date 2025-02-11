@@ -29,6 +29,7 @@ class NestedStructBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     public function intVal(int $intVal): static
     {
         $this->internal->intVal = $intVal;

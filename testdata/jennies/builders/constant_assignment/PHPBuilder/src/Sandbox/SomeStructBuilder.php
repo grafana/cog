@@ -29,18 +29,21 @@ class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     public function readonly(): static
     {
         $this->internal->editable = false;
     
         return $this;
     }
+
     public function autoRefresh(): static
     {
         $this->internal->autoRefresh = true;
     
         return $this;
     }
+
     public function noAutoRefresh(): static
     {
         $this->internal->autoRefresh = false;
