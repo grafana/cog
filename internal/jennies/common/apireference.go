@@ -37,7 +37,13 @@ type FunctionReference struct {
 	Return    string
 }
 
+type VirtualObject struct {
+	Object  ast.Object
+	Methods []MethodReference
+}
+
 type APIReferenceCollector struct {
+	virtualObjects   map[string]map[string]VirtualObject
 	objectMethods    map[string][]MethodReference
 	builderMethods   map[string][]MethodReference
 	packageFunctions map[string][]FunctionReference
@@ -45,10 +51,39 @@ type APIReferenceCollector struct {
 
 func NewAPIReferenceCollector() *APIReferenceCollector {
 	return &APIReferenceCollector{
+		virtualObjects:   make(map[string]map[string]VirtualObject),
 		objectMethods:    make(map[string][]MethodReference),
 		builderMethods:   make(map[string][]MethodReference),
 		packageFunctions: make(map[string][]FunctionReference),
 	}
+}
+
+func (collector *APIReferenceCollector) VirtualObject(object ast.Object) {
+	objectRef := object.SelfRef.String()
+	pkg := object.SelfRef.ReferredPkg
+	if collector.virtualObjects[pkg] == nil {
+		collector.virtualObjects[pkg] = make(map[string]VirtualObject)
+	}
+
+	if _, ok := collector.virtualObjects[pkg][objectRef]; ok {
+		return
+	}
+
+	collector.virtualObjects[pkg][objectRef] = VirtualObject{
+		Object: object,
+	}
+}
+
+func (collector *APIReferenceCollector) VirtualObjectMethod(object ast.Object, method MethodReference) {
+	pkg := object.SelfRef.ReferredPkg
+	objectRef := object.SelfRef.String()
+
+	collector.VirtualObject(object)
+
+	virtualObject := collector.virtualObjects[pkg][objectRef]
+	virtualObject.Methods = append(virtualObject.Methods, method)
+
+	collector.virtualObjects[pkg][objectRef] = virtualObject
 }
 
 func (collector *APIReferenceCollector) ObjectMethod(object ast.Object, methodReference MethodReference) {
@@ -57,8 +92,15 @@ func (collector *APIReferenceCollector) ObjectMethod(object ast.Object, methodRe
 	collector.objectMethods[objectRef] = append(collector.objectMethods[objectRef], methodReference)
 }
 
-func (collector *APIReferenceCollector) MethodsForObject(object ast.Object) []MethodReference {
-	return collector.objectMethods[object.SelfRef.String()]
+func (collector *APIReferenceCollector) methodsForObject(object ast.Object) []MethodReference {
+	pkg := object.SelfRef.ReferredPkg
+	objectRef := object.SelfRef.String()
+
+	if collector.virtualObjects[pkg] != nil && len(collector.virtualObjects[pkg][objectRef].Methods) != 0 {
+		return collector.virtualObjects[pkg][objectRef].Methods
+	}
+
+	return collector.objectMethods[objectRef]
 }
 
 func (collector *APIReferenceCollector) BuilderMethod(builder ast.Builder, methodReference MethodReference) {
@@ -67,7 +109,7 @@ func (collector *APIReferenceCollector) BuilderMethod(builder ast.Builder, metho
 	collector.builderMethods[ref] = append(collector.builderMethods[ref], methodReference)
 }
 
-func (collector *APIReferenceCollector) MethodsForBuilder(builder ast.Builder) []MethodReference {
+func (collector *APIReferenceCollector) methodsForBuilder(builder ast.Builder) []MethodReference {
 	ref := fmt.Sprintf("%s_%s", builder.Package, builder.Name)
 	return collector.builderMethods[ref]
 }
@@ -76,7 +118,7 @@ func (collector *APIReferenceCollector) RegisterFunction(pkg string, functionRef
 	collector.packageFunctions[pkg] = append(collector.packageFunctions[pkg], functionReference)
 }
 
-func (collector *APIReferenceCollector) FunctionsForPackage(pkg string) []FunctionReference {
+func (collector *APIReferenceCollector) functionsForPackage(pkg string) []FunctionReference {
 	return collector.packageFunctions[pkg]
 }
 
@@ -183,6 +225,15 @@ func (jenny APIReference) referenceForSchema(context languages.Context, schema *
 		return nil, inner
 	}
 
+	virtualObjects := jenny.Collector.virtualObjects[schema.Package]
+	for _, virtualObject := range virtualObjects {
+		objFile, err := jenny.referenceForObject(context, virtualObject.Object)
+		if err != nil {
+			inner = err
+		}
+		files = append(files, objFile)
+	}
+
 	return files, nil
 }
 
@@ -198,9 +249,17 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 
 	buffer.WriteString("## Objects\n\n")
 
-	schema.Objects.Sort(orderedmap.SortStrings)
+	objects := orderedmap.New[string, string]()
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./object-%[1]s.md)\n", jenny.Formatter.ObjectName(object), jenny.kindBadge(object.Type.Kind)))
+		objects.Set(object.Name, fmt.Sprintf(" * %[2]s [%[1]s](./object-%[1]s.md)\n", jenny.Formatter.ObjectName(object), jenny.kindBadge(object.Type.Kind)))
+	})
+	for _, virtualObject := range jenny.Collector.virtualObjects[schema.Package] {
+		objects.Set(virtualObject.Object.Name, fmt.Sprintf(" * %[2]s [%[1]s](./object-%[1]s.md)\n", jenny.Formatter.ObjectName(virtualObject.Object), jenny.kindBadge(virtualObject.Object.Type.Kind)))
+	}
+
+	objects.Sort(orderedmap.SortStrings)
+	objects.Iterate(func(_ string, value string) {
+		buffer.WriteString(value)
 	})
 
 	buffer.WriteString("## Builders\n\n")
@@ -214,7 +273,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
 	}
 
-	functions := jenny.Collector.FunctionsForPackage(schema.Package)
+	functions := jenny.Collector.functionsForPackage(schema.Package)
 
 	if len(functions) > 0 {
 		buffer.WriteString("## Functions\n\n")
@@ -266,8 +325,9 @@ title: %[2]s %[1]s
 	buffer.WriteString(jenny.Formatter.ObjectDefinition(context, object))
 	buffer.WriteString("\n```\n")
 
-	if object.Type.IsStruct() {
-		jenny.referenceStructMethods(&buffer, context, object)
+	methods := jenny.Collector.methodsForObject(object)
+	if len(methods) != 0 {
+		jenny.referenceStructMethods(&buffer, context, methods)
 	}
 
 	err := jenny.renderIfExists(&buffer, template.ExtraObjectDocsBlock(object), map[string]any{
@@ -298,10 +358,8 @@ title: %[2]s %[1]s
 	return *codejen.NewFile(fmt.Sprintf("docs/Reference/%s/object-%s.md", object.SelfRef.ReferredPkg, objectName), buffer.Bytes(), jenny), nil
 }
 
-func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context languages.Context, object ast.Object) {
+func (jenny APIReference) referenceStructMethods(buffer *bytes.Buffer, context languages.Context, methods []MethodReference) {
 	buffer.WriteString("## Methods\n\n")
-
-	methods := jenny.Collector.MethodsForObject(object)
 
 	for _, method := range methods {
 		jenny.formatMethodReference(buffer, context, method)
@@ -345,7 +403,7 @@ title: %[2]s %[1]s
 
 	buffer.WriteString("## Methods\n\n")
 
-	builderMethods := jenny.Collector.MethodsForBuilder(builder)
+	builderMethods := jenny.Collector.methodsForBuilder(builder)
 	slices.SortFunc(builderMethods, func(methodA, methodB MethodReference) int {
 		return strings.Compare(methodA.Name, methodB.Name)
 	})

@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type builderAndFactory struct {
@@ -36,6 +37,28 @@ func (jenny *Factory) Generate(context languages.Context) (codejen.Files, error)
 			factoryByPackage[builder.Package] = append(factoryByPackage[builder.Package], builderAndFactory{
 				Builder: builder,
 				Factory: factory,
+			})
+
+			factoriesClassName := jenny.config.builderFactoryClassForPackage(builder.Package)
+			fakeFactoryObject := ast.Object{
+				Name: factoriesClassName,
+				Type: ast.NewStruct(),
+				SelfRef: ast.RefType{
+					ReferredPkg:  builder.Package,
+					ReferredType: factoriesClassName,
+				},
+			}
+			jenny.apiRefCollector.VirtualObjectMethod(fakeFactoryObject, common.MethodReference{
+				Name:     factory.Name,
+				Comments: factory.Comments,
+				Static:   true,
+				Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+					return common.ArgumentReference{
+						Name: arg.Name,
+						Type: jenny.typeFormatter.formatType(arg.Type),
+					}
+				}),
+				Return: builder.Name,
 			})
 		}
 	}
