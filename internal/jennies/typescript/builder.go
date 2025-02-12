@@ -70,6 +70,20 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		Return: fmt.Sprintf("%s.%s", jenny.importType(builder.For.SelfRef), tools.CleanupNames(builder.For.Name)),
 	})
 
+	for _, factory := range builder.Factories {
+		jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
+			Name:     factory.Name,
+			Comments: factory.Comments,
+			Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+				return common.ArgumentReference{
+					Name: arg.Name,
+					Type: jenny.typeFormatter.formatType(arg.Type),
+				}
+			}),
+			Return: builder.Name + "Builder",
+		})
+	}
+
 	return jenny.tmpl.
 		Funcs(map[string]any{
 			"importPkg":                   jenny.typeImportMapper,
