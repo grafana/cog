@@ -15,7 +15,9 @@ func TestRawTypes_Generate(t *testing.T) {
 		Name:         "JavaRawTypes",
 	}
 
-	cfg := Config{}
+	cfg := Config{
+		GenerateJSONMarshaller: true,
+	}
 
 	jenny := RawTypes{config: cfg, tmpl: initTemplates([]string{})}
 	compilerPasses := New(cfg).CompilerPasses()
