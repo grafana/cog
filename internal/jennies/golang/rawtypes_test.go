@@ -22,12 +22,13 @@ func TestRawTypes_Generate(t *testing.T) {
 	config := Config{
 		PackageRoot:                "github.com/grafana/cog/generated",
 		GenerateEqual:              true,
+		GenerateJSONMarshaller:     true,
 		GenerateStrictUnmarshaller: true,
 		GenerateValidate:           true,
 	}
 	jenny := RawTypes{
-		Config:          config,
-		Tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
+		config:          config,
+		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 	compilerPasses := New(config).CompilerPasses()

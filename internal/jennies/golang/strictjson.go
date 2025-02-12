@@ -12,14 +12,16 @@ import (
 
 type strictJSONUnmarshal struct {
 	tmpl            *template.Template
+	config          Config
 	imports         *common.DirectImportMap
 	packageMapper   func(string) string
 	typeFormatter   *typeFormatter
 	apiRefCollector *common.APIReferenceCollector
 }
 
-func newStrictJSONUnmarshal(tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *common.APIReferenceCollector) strictJSONUnmarshal {
+func newStrictJSONUnmarshal(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *common.APIReferenceCollector) strictJSONUnmarshal {
 	return strictJSONUnmarshal{
+		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
 			"formatType": typeFormatter.formatType,
 			"importStdPkg": func(pkg string) string {
@@ -35,6 +37,10 @@ func newStrictJSONUnmarshal(tmpl *template.Template, imports *common.DirectImpor
 }
 
 func (jenny strictJSONUnmarshal) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object) error {
+	if !jenny.config.GenerateJSONMarshaller || !jenny.config.GenerateStrictUnmarshaller {
+		return nil
+	}
+
 	if !jenny.objectNeedsUnmarshal(object) {
 		return nil
 	}

@@ -14,8 +14,8 @@ import (
 )
 
 type RawTypes struct {
-	Config          Config
-	Tmpl            *template.Template
+	config          Config
+	tmpl            *template.Template
 	apiRefCollector *common.APIReferenceCollector
 
 	typeFormatter *typeFormatter
@@ -29,7 +29,7 @@ func (jenny RawTypes) JennyName() string {
 func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
-	jenny.Tmpl = jenny.Tmpl.Funcs(common.TypeResolvingTemplateHelpers(context))
+	jenny.tmpl = jenny.tmpl.Funcs(common.TypeResolvingTemplateHelpers(context))
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.generateSchema(context, schema)
@@ -52,19 +52,19 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	var buffer strings.Builder
 	var err error
 
-	imports := NewImportMap(jenny.Config.PackageRoot)
+	imports := NewImportMap(jenny.config.PackageRoot)
 	jenny.packageMapper = func(pkg string) string {
 		if imports.IsIdentical(pkg, schema.Package) {
 			return ""
 		}
 
-		return imports.Add(pkg, jenny.Config.importPath(pkg))
+		return imports.Add(pkg, jenny.config.importPath(pkg))
 	}
-	jenny.typeFormatter = defaultTypeFormatter(jenny.Config, context, imports, jenny.packageMapper)
-	unmarshallerGenerator := NewJSONMarshalling(jenny.Config, jenny.Tmpl, imports, jenny.packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
-	strictUnmarshallerGenerator := newStrictJSONUnmarshal(jenny.Tmpl, imports, jenny.packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
-	equalityMethodsGenerator := newEqualityMethods(jenny.Tmpl, jenny.apiRefCollector)
-	validationMethodsGenerator := newValidationMethods(jenny.Tmpl, jenny.packageMapper, jenny.apiRefCollector)
+	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, imports, jenny.packageMapper)
+	unmarshallerGenerator := newJSONMarshalling(jenny.config, jenny.tmpl, imports, jenny.packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
+	strictUnmarshallerGenerator := newStrictJSONUnmarshal(jenny.config, jenny.tmpl, imports, jenny.packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
+	equalityMethodsGenerator := newEqualityMethods(jenny.tmpl, jenny.apiRefCollector)
+	validationMethodsGenerator := newValidationMethods(jenny.tmpl, jenny.packageMapper, jenny.apiRefCollector)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		innerErr := jenny.formatObject(&buffer, schema, object)
@@ -77,13 +77,13 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		jenny.generateConstructor(&buffer, context, object)
 
-		innerErr = unmarshallerGenerator.generateForObject(&buffer, context, schema, object)
+		innerErr = unmarshallerGenerator.generateForObject(&buffer, context, object)
 		if innerErr != nil {
 			err = innerErr
 			return
 		}
 
-		if !jenny.Config.SkipRuntime && jenny.Config.GenerateStrictUnmarshaller {
+		if !jenny.config.SkipRuntime {
 			innerErr = strictUnmarshallerGenerator.generateForObject(&buffer, context, object)
 			if innerErr != nil {
 				err = innerErr
@@ -91,7 +91,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			}
 		}
 
-		if jenny.Config.GenerateEqual {
+		if jenny.config.GenerateEqual {
 			innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, object, imports)
 			if innerErr != nil {
 				err = innerErr
@@ -99,7 +99,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			}
 		}
 
-		if !jenny.Config.SkipRuntime && (jenny.Config.generateBuilders || jenny.Config.GenerateValidate) {
+		if !jenny.config.SkipRuntime && (jenny.config.generateBuilders || jenny.config.GenerateValidate) {
 			innerErr = validationMethodsGenerator.generateForObject(&buffer, context, object, imports)
 			if innerErr != nil {
 				err = innerErr
@@ -108,8 +108,8 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		}
 
 		customMethodsBlock := template.CustomObjectMethodsBlock(object)
-		if jenny.Tmpl.Exists(customMethodsBlock) {
-			innerErr = jenny.Tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+		if jenny.tmpl.Exists(customMethodsBlock) {
+			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
 				"Object": object,
 			})
 			if innerErr != nil {
@@ -124,10 +124,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	}
 
 	customSchemaVariant := template.CustomSchemaVariantBlock(schema)
-	if jenny.Tmpl.Exists(customSchemaVariant) {
-		if err := jenny.Tmpl.RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
+	if jenny.tmpl.Exists(customSchemaVariant) {
+		if err := jenny.tmpl.RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
 			"Schema": schema,
-			"Config": jenny.Config,
+			"Config": jenny.config,
 		}); err != nil {
 			return nil, err
 		}
@@ -147,7 +147,7 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 	objectName := formatObjectName(object.Name)
 
 	comments := object.Comments
-	if jenny.Config.debug {
+	if jenny.config.debug {
 		passesTrail := tools.Map(object.PassesTrail, func(trail string) string {
 			return fmt.Sprintf("Modified by compiler pass '%s'", trail)
 		})
@@ -168,8 +168,8 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 		buffer.WriteString("\n")
 
 		customVariantTmpl := template.CustomObjectVariantBlock(object)
-		if jenny.Tmpl.Exists(customVariantTmpl) {
-			if err := jenny.Tmpl.RenderInBuffer(buffer, customVariantTmpl, map[string]any{
+		if jenny.tmpl.Exists(customVariantTmpl) {
+			if err := jenny.tmpl.RenderInBuffer(buffer, customVariantTmpl, map[string]any{
 				"Object": object,
 				"Schema": schema,
 			}); err != nil {

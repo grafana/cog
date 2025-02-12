@@ -164,6 +164,7 @@ output:
           - '%__config_dir%/foundation-sdk/.cog/templates/go/extra'
         overrides_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/go/overrides'
+        generate_json_marshaller: true
         generate_strict_unmarshaller: true
         generate_equal: true
         generate_validate: true

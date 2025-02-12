@@ -191,7 +191,8 @@ type GoConfig struct {
 func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Go: &golang.Config{
-			SkipRuntime: true,
+			SkipRuntime:            true,
+			GenerateJSONMarshaller: true,
 
 			GenerateEqual:  config.GenerateEqual,
 			AnyAsInterface: config.AnyAsInterface,
