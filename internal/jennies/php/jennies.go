@@ -19,6 +19,10 @@ type Config struct {
 
 	NamespaceRoot string `yaml:"namespace_root"`
 
+	// GenerateJSONMarshaller controls the generation of `fromArray()` and
+	// `jsonSerialize()` methods on types.
+	GenerateJSONMarshaller bool `yaml:"generate_json_marshaller"`
+
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
 	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
@@ -76,16 +80,16 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	tmpl := initTemplates(language.apiRefCollector, language.config.OverridesTemplatesDirectories)
 	rawTypesJenny := RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}
 
-	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
+	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
 		Runtime{config: config, tmpl: tmpl},
-		common.If[languages.Context](globalConfig.Types, rawTypesJenny),
-		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If[languages.Context](globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
+		common.If(globalConfig.Types, rawTypesJenny),
+		common.If(globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If(globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
 
-		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+		common.If(globalConfig.APIReference, common.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(tmpl, config),
