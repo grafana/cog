@@ -12,9 +12,11 @@ var _ Pass = (*DisjunctionInferMapping)(nil)
 // describe a disjunction of references.
 // See https://swagger.io/docs/specification/data-models/inheritance-and-polymorphism/
 type DisjunctionInferMapping struct {
+	schemas ast.Schemas
 }
 
 func (pass *DisjunctionInferMapping) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	pass.schemas = schemas
 	visitor := &Visitor{
 		OnDisjunction: pass.processDisjunction,
 	}
@@ -95,16 +97,16 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
-			if !field.Type.IsConcreteScalar() {
+			if !(field.Type.IsConcreteScalar() && field.Type.AsScalar().ScalarKind == ast.KindString) && !field.Type.IsConstantRef() {
 				continue
 			}
 
-			scalarField := field.Type.AsScalar()
-			if scalarField.ScalarKind != ast.KindString {
-				continue
+			switch field.Type.Kind {
+			case ast.KindScalar:
+				candidates[typeName][field.Name] = field.Type.AsScalar().Value
+			case ast.KindConstantRef:
+				candidates[typeName][field.Name] = field.Type.AsConstantRef().ReferenceValue // TODO: Check if its a string
 			}
-
-			candidates[typeName][field.Name] = scalarField.Value
 		}
 	}
 
@@ -156,17 +158,17 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 		}
 
 		// trust, but verify: we need the field to be an actual scalar with a concrete value?
-		if !field.Type.IsScalar() {
-			return nil, fmt.Errorf("discriminator field '%s' is not a scalar", field.Name)
+		if !(field.Type.IsScalar() && field.Type.AsScalar().IsConcrete()) && !field.Type.IsConstantRef() {
+			return nil, fmt.Errorf("discriminator field '%s' is not a scalar or constant reference", field.Name)
 		}
 
 		typeName := branch.AsRef().ReferredType
 
-		switch {
-		case field.Type.AsScalar().IsConcrete():
+		switch field.Type.Kind {
+		case ast.KindScalar:
 			mapping[field.Type.AsScalar().Value.(string)] = typeName
-		case field.Type.Default != nil:
-			mapping[field.Type.Default.(string)] = typeName
+		case ast.KindConstantRef:
+			mapping[field.Type.AsConstantRef().ReferenceValue.(string)] = typeName
 		default:
 			return nil, fmt.Errorf("discriminator field '%s' is not concrete", field.Name)
 		}
