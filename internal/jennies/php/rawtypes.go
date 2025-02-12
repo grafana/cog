@@ -270,7 +270,7 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 		// values with enums that we don't want to add in the constructor
 		if field.Type.IsConstantRef() {
 			val := jenny.typeFormatter.enumFromConstantRef(field.Type.AsConstantRef())
-			assignments = append(assignments, fmt.Sprintf("    $this->%[1]s = $%[1]s ?: %[2]s;", fieldName, val))
+			assignments = append(assignments, fmt.Sprintf("    $this->%s = %s;", fieldName, val))
 			continue
 		}
 
