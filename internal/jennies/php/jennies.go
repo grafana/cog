@@ -42,6 +42,14 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 	config.ExtraFilesTemplatesDirectories = tools.Map(config.ExtraFilesTemplatesDirectories, interpolator)
 }
 
+func (config Config) builderFactoryClassForPackage(pkg string) string {
+	// TODO: this should be overridable, to support cases where an Object
+	// that has the same than as the package exists.
+	// Ex: `Dashboard`, in a `Dashboard` package
+
+	return pkg
+}
+
 func (config Config) fullNamespace(typeName string) string {
 	return config.NamespaceRoot + "\\" + typeName
 }
@@ -87,6 +95,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		Runtime{config: config, tmpl: tmpl},
 		common.If(globalConfig.Types, rawTypesJenny),
 		common.If(globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 		common.If(globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
 
 		common.If(globalConfig.APIReference, common.APIReference{
