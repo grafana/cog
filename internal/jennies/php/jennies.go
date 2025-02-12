@@ -34,6 +34,14 @@ type Config struct {
 	// ExtraFilesTemplatesData holds additional data to be injected into the
 	// templates described in ExtraFilesTemplatesDirectories.
 	ExtraFilesTemplatesData map[string]string `yaml:"-"`
+
+	// BuilderFactoriesClassMap allows to choose the name of the class that
+	// will be generated to hold "builder factories".
+	// By default, this class name is equal to the package name in which
+	// factories are defined.
+	// BuilderFactoriesClassMap associates these package names with a class
+	// name.
+	BuilderFactoriesClassMap map[string]string `yaml:"builder_factories_class_map"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
@@ -43,9 +51,9 @@ func (config *Config) InterpolateParameters(interpolator func(input string) stri
 }
 
 func (config Config) builderFactoryClassForPackage(pkg string) string {
-	// TODO: this should be overridable, to support cases where an Object
-	// that has the same than as the package exists.
-	// Ex: `Dashboard`, in a `Dashboard` package
+	if config.BuilderFactoriesClassMap != nil && config.BuilderFactoriesClassMap[pkg] != "" {
+		return config.BuilderFactoriesClassMap[pkg]
+	}
 
 	return pkg
 }
