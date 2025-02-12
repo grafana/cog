@@ -14,6 +14,10 @@ const LanguageRef = "python"
 type Config struct {
 	PathPrefix string `yaml:"path_prefix"`
 
+	// GenerateJSONMarshaller controls the generation of `to_json()` and
+	// `from_json()` methods on types.
+	GenerateJSONMarshaller bool `yaml:"generate_json_marshaller"`
+
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.
@@ -65,17 +69,17 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		ExtraData: language.config.ExtraFilesTemplatesData,
 	}
 
-	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
+	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
 		ModuleInit{},
-		common.If[languages.Context](!language.config.SkipRuntime, Runtime{tmpl: tmpl}),
+		common.If(!language.config.SkipRuntime, Runtime{tmpl: tmpl}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If(globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If(!language.config.SkipRuntime && globalConfig.Builders, &Builder{tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 
-		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+		common.If(globalConfig.APIReference, common.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(),

@@ -16,6 +16,7 @@ import (
 )
 
 type RawTypes struct {
+	config          Config
 	tmpl            *template.Template
 	typeFormatter   *typeFormatter
 	importModule    moduleImporter
@@ -94,16 +95,20 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			buffer.WriteString("\n\n")
 			buffer.WriteString(jenny.generateInitMethod(context.Schemas, object))
 
-			buffer.WriteString("\n\n")
-			buffer.WriteString(jenny.generateToJSONMethod(object))
-
-			buffer.WriteString("\n\n")
-			fromJSON, innerErr := jenny.generateFromJSONMethod(context, object)
-			if innerErr != nil {
-				err = innerErr
-				return
+			if jenny.config.GenerateJSONMarshaller {
+				buffer.WriteString("\n\n")
+				buffer.WriteString(jenny.generateToJSONMethod(object))
 			}
-			buffer.WriteString(fromJSON)
+
+			if jenny.config.GenerateJSONMarshaller {
+				buffer.WriteString("\n\n")
+				fromJSON, innerErr := jenny.generateFromJSONMethod(context, object)
+				if innerErr != nil {
+					err = innerErr
+					return
+				}
+				buffer.WriteString(fromJSON)
+			}
 		}
 
 		customMethodsBlock := template.CustomObjectMethodsBlock(object)

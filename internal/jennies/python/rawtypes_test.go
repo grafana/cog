@@ -20,11 +20,15 @@ func TestRawTypes_Generate(t *testing.T) {
 		},
 	}
 
+	config := Config{
+		GenerateJSONMarshaller: true,
+	}
 	jenny := RawTypes{
+		config:          config,
 		tmpl:            initTemplates(common.NewAPIReferenceCollector(), []string{}),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
-	compilerPasses := New(Config{}).CompilerPasses()
+	compilerPasses := New(config).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test[ast.Schema]) {
 		req := require.New(tc)
