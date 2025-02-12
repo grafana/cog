@@ -376,6 +376,10 @@
         "skip_runtime": {
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        },
+        "generate_json_marshaller": {
+          "type": "boolean",
+          "description": "GenerateJSONMarshaller controls the generation of `MarshalJSON()` and\n`UnmarshalJSON()` methods on types."
         }
       },
       "additionalProperties": false,
