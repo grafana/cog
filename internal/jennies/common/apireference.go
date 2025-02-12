@@ -83,6 +83,7 @@ func (collector *APIReferenceCollector) FunctionsForPackage(pkg string) []Functi
 type APIReferenceFormatter struct {
 	KindName func(kind ast.Kind) string
 
+	FunctionName      func(function FunctionReference) string
 	FunctionSignature func(context languages.Context, function FunctionReference) string
 
 	ObjectName       func(object ast.Object) string
@@ -219,7 +220,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 		buffer.WriteString("## Functions\n\n")
 
 		for _, functionReference := range functions {
-			buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", functionReference.Name, jenny.functionBadge()))
+			buffer.WriteString(fmt.Sprintf("### %[2]s %[1]s\n\n", jenny.Formatter.FunctionName(functionReference), jenny.functionBadge()))
 
 			if len(functionReference.Comments) != 0 {
 				buffer.WriteString(strings.Join(functionReference.Comments, "\n\n") + "\n\n")
