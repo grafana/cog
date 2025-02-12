@@ -406,6 +406,10 @@
         "namespace_root": {
           "type": "string"
         },
+        "generate_json_marshaller": {
+          "type": "boolean",
+          "description": "GenerateJSONMarshaller controls the generation of `fromArray()` and\n`jsonSerialize()` methods on types."
+        },
         "overrides_templates": {
           "items": {
             "type": "string"
@@ -428,6 +432,10 @@
       "properties": {
         "path_prefix": {
           "type": "string"
+        },
+        "generate_json_marshaller": {
+          "type": "boolean",
+          "description": "GenerateJSONMarshaller controls the generation of `to_json()` and\n`from_json()` methods on types."
         },
         "skip_runtime": {
           "type": "boolean",

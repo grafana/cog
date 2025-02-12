@@ -20,7 +20,8 @@ func TestRawTypes_Generate(t *testing.T) {
 	}
 
 	config := Config{
-		NamespaceRoot: "Grafana\\Foundation",
+		NamespaceRoot:          "Grafana\\Foundation",
+		GenerateJSONMarshaller: true,
 	}
 	jenny := RawTypes{
 		config:          config,
