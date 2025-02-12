@@ -114,6 +114,10 @@ func templateHelpers(deps templateDeps) template.FuncMap {
 			return disjunctionCaseForType(typesFormatter, input, typeDef)
 		},
 
+		"factoryClassForPkg": func(pkg string) string {
+			return deps.config.builderFactoryClassForPackage(pkg)
+		},
+
 		"unmarshalForType":         deps.unmarshalForType,
 		"unmarshalDisjunctionFunc": deps.unmarshalDisjunctionFunc,
 		"convertDisjunctionFunc":   deps.convertDisjunctionFunc,

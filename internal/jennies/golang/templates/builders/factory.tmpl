@@ -6,7 +6,7 @@ func {{ .Factory.Name|formatFunctionName}}({{- template "args" .Factory.Args }})
 	builder := New{{ .Builder.Name|formatObjectName }}Builder()
 
 {{- range $call := .Factory.OptionCalls }}
-    builder.{{ $call.Name|formatFunctionName }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }});
+    builder.{{ $call.Name|formatFunctionName }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
 {{- end }}
 
 	return builder
