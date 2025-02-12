@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Enum": {
+      "enum": [
+        "ValueA",
+        "ValueB",
+        "ValueC"
+      ]
+    },
+    "ParentStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "myEnum"
+      ],
+      "properties": {
+        "myEnum": {
+          "$ref": "#/definitions/Enum"
+        }
+      }
+    },
+    "Struct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "myValue",
+        "myEnum"
+      ],
+      "properties": {
+        "myValue": {
+          "type": "string"
+        },
+        "myEnum": {
+          "$ref": "#/definitions/Enum"
+        }
+      }
+    },
+    "StructA": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "myEnum"
+      ],
+      "properties": {
+        "myEnum": {}
+      }
+    },
+    "StructB": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "myEnum",
+        "myValue"
+      ],
+      "properties": {
+        "myEnum": {},
+        "myValue": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
