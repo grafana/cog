@@ -24,6 +24,33 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "AstBuilderFactory": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "arguments": {
+          "items": {
+            "$ref": "#/$defs/AstArgument"
+          },
+          "type": "array"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/AstOptionCall"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "AstComposableSlotType": {
       "properties": {
         "variant": {
@@ -78,6 +105,36 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "AstFactoryCall": {
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/AstFactoryRef"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/AstOptionCallParameter"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AstFactoryRef": {
+      "properties": {
+        "package": {
+          "type": "string"
+        },
+        "builder": {
+          "type": "string"
+        },
+        "factory": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "AstIntersectionType": {
       "properties": {
         "branches": {
@@ -101,6 +158,36 @@
         },
         "valuetype": {
           "$ref": "#/$defs/AstType"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AstOptionCall": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/AstOptionCallParameter"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AstOptionCallParameter": {
+      "properties": {
+        "argument": {
+          "$ref": "#/$defs/AstArgument"
+        },
+        "constant": {
+          "$ref": "#/$defs/AstTypedConstant"
+        },
+        "factory": {
+          "$ref": "#/$defs/AstFactoryCall"
         }
       },
       "additionalProperties": false,
@@ -239,6 +326,16 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "AstTypedConstant": {
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/AstType"
+        },
+        "value": true
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "AstTypes": {
       "items": {
         "$ref": "#/$defs/AstType"
@@ -369,6 +466,28 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlAddFactory": {
+      "properties": {
+        "by_object": {
+          "type": "string"
+        },
+        "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
+          "type": "string"
+        },
+        "generated_from_disjunction": {
+          "type": "boolean",
+          "description": "noop?"
+        },
+        "factory": {
+          "$ref": "#/$defs/AstBuilderFactory"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlAddOption": {
       "properties": {
         "by_object": {
@@ -439,6 +558,9 @@
         },
         "default_to_constant": {
           "$ref": "#/$defs/YamlDefaultToConstant"
+        },
+        "add_factory": {
+          "$ref": "#/$defs/YamlAddFactory"
         }
       },
       "additionalProperties": false,
