@@ -34,6 +34,7 @@ func formattingTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"formatPackageName": formatPackageName,
 		"formatObjectName":  formatObjectName,
+		"formatArgName":     formatArgName,
 		"escapeVar":         escapeVarName,
 		"formatScalar":      formatScalar,
 		"cleanString":       cleanString,
@@ -102,6 +103,9 @@ func functions() template.FuncMap {
 		},
 		"formatGuardPath": func(_ ast.Path) string {
 			panic("formatGuardPath() needs to be overridden by a jenny")
+		},
+		"factoryClassForPkg": func(_ string) string {
+			panic("factoryClassForPkg() needs to be overridden by a jenny")
 		},
 	}
 }

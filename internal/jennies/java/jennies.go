@@ -41,6 +41,22 @@ type Config struct {
 
 	GenerateBuilders   bool `yaml:"-"`
 	GenerateConverters bool `yaml:"-"`
+
+	// BuilderFactoriesClassMap allows to choose the name of the class that
+	// will be generated to hold "builder factories".
+	// By default, this class name is equal to the package name in which
+	// factories are defined.
+	// BuilderFactoriesClassMap associates these package names with a class
+	// name.
+	BuilderFactoriesClassMap map[string]string `yaml:"builder_factories_class_map"`
+}
+
+func (config *Config) builderFactoryClassForPackage(pkg string) string {
+	if config.BuilderFactoriesClassMap != nil && config.BuilderFactoriesClassMap[pkg] != "" {
+		return config.BuilderFactoriesClassMap[pkg]
+	}
+
+	return pkg
 }
 
 func (config *Config) formatPackage(pkg string) string {
@@ -93,6 +109,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
 		common.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl}),
+		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl}),
 		common.If(!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
 
 		common.CustomTemplates{
