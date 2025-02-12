@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type Builder struct {
@@ -79,6 +80,20 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		},
 		Return: fmt.Sprintf("(%s, error)", buildObjectSignature),
 	})
+
+	for _, factory := range builder.Factories {
+		jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
+			Name:     factory.Name,
+			Comments: factory.Comments,
+			Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+				return common.ArgumentReference{
+					Name: arg.Name,
+					Type: jenny.typeFormatter.formatType(arg.Type),
+				}
+			}),
+			Return: "*" + builder.Name + "Builder",
+		})
+	}
 
 	return jenny.Tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
