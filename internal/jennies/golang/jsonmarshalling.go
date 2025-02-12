@@ -19,7 +19,7 @@ type JSONMarshalling struct {
 	apiRefCollector *common.APIReferenceCollector
 }
 
-func NewJSONMarshalling(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *common.APIReferenceCollector) JSONMarshalling {
+func newJSONMarshalling(config Config, tmpl *template.Template, imports *common.DirectImportMap, packageMapper func(string) string, typeFormatter *typeFormatter, apiRefCollector *common.APIReferenceCollector) JSONMarshalling {
 	return JSONMarshalling{
 		config: config,
 		tmpl: tmpl.Funcs(template.FuncMap{
@@ -35,7 +35,11 @@ func NewJSONMarshalling(config Config, tmpl *template.Template, imports *common.
 	}
 }
 
-func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context languages.Context, schema *ast.Schema, object ast.Object) error {
+func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context languages.Context, object ast.Object) error {
+	if !jenny.config.GenerateJSONMarshaller {
+		return nil
+	}
+
 	if jenny.objectNeedsCustomMarshal(object) {
 		jsonMarshal, err := jenny.renderCustomMarshal(object)
 		if err != nil {

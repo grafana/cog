@@ -19,6 +19,10 @@ type Config struct {
 	generateBuilders   bool
 	GenerateConverters bool `yaml:"-"`
 
+	// GenerateJSONMarshaller controls the generation of `MarshalJSON()` and
+	// `UnmarshalJSON()` methods on types.
+	GenerateJSONMarshaller bool `yaml:"generate_json_marshaller"`
+
 	// GenerateStrictUnmarshaller controls the generation of
 	// `UnmarshalJSONStrict()` methods on types.
 	GenerateStrictUnmarshaller bool `yaml:"generate_strict_unmarshaller"`
@@ -95,23 +99,23 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 	tmpl := initTemplates(config, language.apiRefCollector)
 
-	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
+	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](!config.SkipRuntime, Runtime{Config: config, Tmpl: tmpl}),
+		common.If(!config.SkipRuntime, Runtime{Config: config, Tmpl: tmpl}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If(globalConfig.Types, RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 
-		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If[languages.Context](!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{
+		common.If(!config.SkipRuntime && globalConfig.Builders, &Builder{Config: config, Tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If(!config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, &Converter{
 			Config:          config,
 			Tmpl:            tmpl,
 			NullableConfig:  language.NullableKinds(),
 			apiRefCollector: language.apiRefCollector,
 		}),
 
-		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+		common.If(globalConfig.APIReference, common.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(config),

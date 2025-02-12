@@ -308,6 +308,10 @@
     },
     "GolangConfig": {
       "properties": {
+        "generate_json_marshaller": {
+          "type": "boolean",
+          "description": "GenerateJSONMarshaller controls the generation of `MarshalJSON()` and\n`UnmarshalJSON()` methods on types."
+        },
         "generate_strict_unmarshaller": {
           "type": "boolean",
           "description": "GenerateStrictUnmarshaller controls the generation of\n`UnmarshalJSONStrict()` methods on types."

@@ -468,6 +468,9 @@
         "object": {
           "type": "string"
         },
+        "builder": {
+          "type": "string"
+        },
         "options": {
           "items": {
             "type": "string"
