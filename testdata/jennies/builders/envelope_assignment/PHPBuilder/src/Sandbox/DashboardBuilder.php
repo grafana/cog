@@ -23,7 +23,7 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
         return $this->internal;
     }
 
-    public function withVariable(string $name,string $value): static
+    public function withVariable(string $name, string $value): static
     {
         $this->internal->variables[] = new \Grafana\Foundation\Sandbox\Variable(
             name: $name,

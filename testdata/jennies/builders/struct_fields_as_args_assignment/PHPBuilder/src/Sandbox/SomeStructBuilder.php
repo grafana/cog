@@ -23,7 +23,7 @@ class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
         return $this->internal;
     }
 
-    public function time(string $from,string $to): static
+    public function time(string $from, string $to): static
     {    
         if ($this->internal->time === null) {
             $this->internal->time = "unknown";
