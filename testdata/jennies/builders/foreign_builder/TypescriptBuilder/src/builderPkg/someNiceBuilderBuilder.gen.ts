@@ -20,3 +20,4 @@ export class SomeNiceBuilderBuilder implements cog.Builder<somePkg.SomeStruct> {
         return this;
     }
 }
+

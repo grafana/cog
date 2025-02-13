@@ -20,3 +20,4 @@ export class LokiBuilderBuilder implements cog.Builder<cog.Dataquery> {
         return this;
     }
 }
+

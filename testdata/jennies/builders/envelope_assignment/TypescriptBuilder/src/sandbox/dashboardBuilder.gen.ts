@@ -26,3 +26,4 @@ export class DashboardBuilder implements cog.Builder<sandbox.Dashboard> {
         return this;
     }
 }
+

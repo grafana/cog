@@ -35,3 +35,4 @@ export class DashboardBuilder implements cog.Builder<builderDelegationInDisjunct
         return this;
     }
 }
+

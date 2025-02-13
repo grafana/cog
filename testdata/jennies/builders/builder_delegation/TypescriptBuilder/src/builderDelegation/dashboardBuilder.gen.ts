@@ -46,3 +46,4 @@ export class DashboardBuilder implements cog.Builder<builderDelegation.Dashboard
         return this;
     }
 }
+

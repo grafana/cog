@@ -23,3 +23,4 @@ export class SomeStructBuilder implements cog.Builder<anonymousStruct.SomeStruct
         return this;
     }
 }
+

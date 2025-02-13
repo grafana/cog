@@ -25,3 +25,4 @@ export class DashboardLinkBuilder implements cog.Builder<builderDelegation.Dashb
         return this;
     }
 }
+

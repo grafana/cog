@@ -34,3 +34,4 @@ export class SomeStructBuilder implements cog.Builder<constraints.SomeStruct> {
         return this;
     }
 }
+

@@ -35,3 +35,4 @@ export class SomeStructBuilder implements cog.Builder<basicStructDefaults.SomeSt
         return this;
     }
 }
+
