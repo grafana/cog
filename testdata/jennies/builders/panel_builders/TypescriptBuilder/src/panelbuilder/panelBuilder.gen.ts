@@ -65,3 +65,4 @@ export class PanelBuilder implements cog.Builder<panelbuilder.Panel> {
         return this;
     }
 }
+

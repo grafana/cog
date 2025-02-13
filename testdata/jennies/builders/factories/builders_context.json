@@ -1,0 +1,1838 @@
+{
+  "Schemas": [
+    {
+      "Package": "promql",
+      "Metadata": {},
+      "EntryPointType": {
+        "Kind": "",
+        "Nullable": false
+      },
+      "Objects": {
+        "Expr": {
+          "Name": "Expr",
+          "Type": {
+            "Kind": "disjunction",
+            "Nullable": false,
+            "Disjunction": {
+              "Branches": [
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "promql",
+                    "ReferredType": "NumberLiteralExpr"
+                  }
+                },
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "promql",
+                    "ReferredType": "StringLiteralExpr"
+                  }
+                },
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "promql",
+                    "ReferredType": "SubqueryExpr"
+                  }
+                },
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "promql",
+                    "ReferredType": "AggregationExpr"
+                  }
+                },
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "promql",
+                    "ReferredType": "VectorExpr"
+                  }
+                },
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "promql",
+                    "ReferredType": "BinaryExpr"
+                  }
+                },
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "promql",
+                    "ReferredType": "UnaryExpr"
+                  }
+                },
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "promql",
+                    "ReferredType": "FuncCallExpr"
+                  }
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "Expr"
+          }
+        },
+        "NumberLiteralExpr": {
+          "Name": "NumberLiteralExpr",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "numberLiteralExpr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "float64"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "NumberLiteralExpr"
+          }
+        },
+        "StringLiteralExpr": {
+          "Name": "StringLiteralExpr",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "stringLiteralExpr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "StringLiteralExpr"
+          }
+        },
+        "SubqueryExpr": {
+          "Name": "SubqueryExpr",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "subqueryExpr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "expr",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "Expr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "offset",
+                  "Comments": [
+                    "https://prometheus.io/docs/prometheus/latest/querying/basics/#offset-modifier"
+                  ],
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "at",
+                  "Comments": [
+                    "https://prometheus.io/docs/prometheus/latest/querying/basics/#modifier"
+                  ],
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "range",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "resolution",
+                  "Comments": [
+                    "empty string for default resolution"
+                  ],
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "SubqueryExpr"
+          }
+        },
+        "AggregationExpr": {
+          "Name": "AggregationExpr",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "aggregationExpr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "op",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "AggregationOp"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "expr",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "Expr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "param",
+                  "Comments": [
+                    "just a literal?"
+                  ],
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "Expr"
+                    }
+                  },
+                  "Required": false
+                },
+                {
+                  "Name": "by",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "without",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "AggregationExpr"
+          }
+        },
+        "AggregationOp": {
+          "Name": "AggregationOp",
+          "Type": {
+            "Kind": "enum",
+            "Nullable": false,
+            "Enum": {
+              "Values": [
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "sum",
+                  "Value": "sum"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "min",
+                  "Value": "min"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "max",
+                  "Value": "max"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "avg",
+                  "Value": "avg"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "stddev",
+                  "Value": "stddev"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "stdvar",
+                  "Value": "stdvar"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "count",
+                  "Value": "count"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "group",
+                  "Value": "group"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "count_values",
+                  "Value": "count_values"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "bottomk",
+                  "Value": "bottomk"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "topk",
+                  "Value": "topk"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "quantile",
+                  "Value": "quantile"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "limitk",
+                  "Value": "limitk"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "limit_ratio",
+                  "Value": "limit_ratio"
+                }
+              ]
+            },
+            "Hints": {
+              "kind": "enum",
+              "memberNames": "sum|min|max|avg|stddev|stdvar|count|group|count_values|bottomk|topk|quantile|limitk|limit_ratio"
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "AggregationOp"
+          }
+        },
+        "VectorExpr": {
+          "Name": "VectorExpr",
+          "Comments": [
+            "Represents both instant and range vectors"
+          ],
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "vectorExpr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "metric",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "labels",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "promql",
+                          "ReferredType": "Label"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "offset",
+                  "Comments": [
+                    "https://prometheus.io/docs/prometheus/latest/querying/basics/#offset-modifier"
+                  ],
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "at",
+                  "Comments": [
+                    "https://prometheus.io/docs/prometheus/latest/querying/basics/#modifier"
+                  ],
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "range",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "VectorExpr"
+          }
+        },
+        "Label": {
+          "Name": "Label",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "name",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "operator",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "LabelOperator"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "Label"
+          }
+        },
+        "LabelOperator": {
+          "Name": "LabelOperator",
+          "Type": {
+            "Kind": "enum",
+            "Nullable": false,
+            "Enum": {
+              "Values": [
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "equal",
+                  "Value": "="
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "notEqual",
+                  "Value": "!="
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "matchRegexp",
+                  "Value": "=~"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "notMatchRegexp",
+                  "Value": "!~"
+                }
+              ]
+            },
+            "Hints": {
+              "kind": "enum",
+              "memberNames": "equal|notEqual|matchRegexp|notMatchRegexp"
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "LabelOperator"
+          }
+        },
+        "BinaryExpr": {
+          "Name": "BinaryExpr",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "binaryExpr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "op",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "BinaryOp"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "left",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "Expr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "right",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "Expr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "matchType",
+                  "Comments": [
+                    "https://prometheus.io/docs/prometheus/latest/querying/operators/#vector-matching-keywords"
+                  ],
+                  "Type": {
+                    "Kind": "enum",
+                    "Nullable": false,
+                    "Enum": {
+                      "Values": [
+                        {
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Name": "on",
+                          "Value": "on"
+                        },
+                        {
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Name": "ignore",
+                          "Value": "ignore"
+                        }
+                      ]
+                    },
+                    "Hints": {
+                      "kind": "enum",
+                      "memberNames": "on|ignore"
+                    }
+                  },
+                  "Required": false
+                },
+                {
+                  "Name": "matchLabels",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": false
+                },
+                {
+                  "Name": "groupModifier",
+                  "Type": {
+                    "Kind": "enum",
+                    "Nullable": false,
+                    "Enum": {
+                      "Values": [
+                        {
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Name": "left",
+                          "Value": "left"
+                        },
+                        {
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "string"
+                            }
+                          },
+                          "Name": "right",
+                          "Value": "right"
+                        }
+                      ]
+                    },
+                    "Hints": {
+                      "kind": "enum",
+                      "memberNames": "left|right"
+                    }
+                  },
+                  "Required": false
+                },
+                {
+                  "Name": "groupLabels",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "BinaryExpr"
+          }
+        },
+        "BinaryOp": {
+          "Name": "BinaryOp",
+          "Type": {
+            "Kind": "enum",
+            "Nullable": false,
+            "Enum": {
+              "Values": [
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "add",
+                  "Value": "+"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "sub",
+                  "Value": "-"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "mul",
+                  "Value": "*"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "div",
+                  "Value": "/"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "mod",
+                  "Value": "%"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "pow",
+                  "Value": "^"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "eql",
+                  "Value": "=="
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "neq",
+                  "Value": "!="
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "gtr",
+                  "Value": "\u003e"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "lss",
+                  "Value": "\u003c"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "gte",
+                  "Value": "\u003e="
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "lte",
+                  "Value": "\u003c="
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "and",
+                  "Value": "and"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "or",
+                  "Value": "or"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "unless",
+                  "Value": "unless"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "atan2",
+                  "Value": "atan2"
+                }
+              ]
+            },
+            "Hints": {
+              "kind": "enum",
+              "memberNames": "add|sub|mul|div|mod|pow|eql|neq|gtr|lss|gte|lte|and|or|unless|atan2"
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "BinaryOp"
+          }
+        },
+        "UnaryExpr": {
+          "Name": "UnaryExpr",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "unaryExpr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "op",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "UnaryOp"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "expr",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "Expr"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "UnaryExpr"
+          }
+        },
+        "UnaryOp": {
+          "Name": "UnaryOp",
+          "Type": {
+            "Kind": "enum",
+            "Nullable": false,
+            "Enum": {
+              "Values": [
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "plus",
+                  "Value": "+"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "minus",
+                  "Value": "-"
+                }
+              ]
+            },
+            "Hints": {
+              "kind": "enum",
+              "memberNames": "plus|minus"
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "UnaryOp"
+          }
+        },
+        "FuncCallExpr": {
+          "Name": "FuncCallExpr",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "type",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "funcCallExpr"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "function",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "args",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "promql",
+                          "ReferredType": "Expr"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "FuncCallExpr"
+          }
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "For": {
+        "Name": "FuncCallExpr",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "type",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "funcCallExpr"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "function",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Constraints": [
+                      {
+                        "Op": "minLength",
+                        "Args": [
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "args",
+                "Type": {
+                  "Kind": "array",
+                  "Nullable": false,
+                  "Array": {
+                    "ValueType": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "promql",
+                        "ReferredType": "Expr"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "promql",
+          "ReferredType": "FuncCallExpr"
+        }
+      },
+      "Package": "promql",
+      "Name": "FuncCallExpr",
+      "Constructor": {
+        "Assignments": [
+          {
+            "Path": [
+              {
+                "Identifier": "type",
+                "Index": null,
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "funcCallExpr"
+                  }
+                },
+                "Root": false
+              }
+            ],
+            "Value": {
+              "Constant": "funcCallExpr"
+            },
+            "Method": "direct"
+          }
+        ]
+      },
+      "Options": [
+        {
+          "Name": "function",
+          "Args": [
+            {
+              "Name": "function",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "minLength",
+                      "Args": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "function",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "function",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Constraints": [
+                        {
+                          "Op": "minLength",
+                          "Args": [
+                            1
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Method": "direct",
+              "Constraints": [
+                {
+                  "Argument": {
+                    "Name": "function",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Constraints": [
+                          {
+                            "Op": "minLength",
+                            "Args": [
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "Op": "minLength",
+                  "Parameter": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "args",
+          "Args": [
+            {
+              "Name": "args",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "Expr"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "args",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "promql",
+                          "ReferredType": "Expr"
+                        }
+                      }
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "args",
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "promql",
+                          "ReferredType": "Expr"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        },
+        {
+          "Name": "arg",
+          "Comments": [
+            "Modified by veneer 'Duplicate[args]'",
+            "Modified by veneer 'ArrayToAppend'"
+          ],
+          "VeneerTrail": [
+            "Duplicate[args]",
+            "ArrayToAppend"
+          ],
+          "Args": [
+            {
+              "Name": "arg",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "promql",
+                  "ReferredType": "Expr"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "args",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "array",
+                    "Nullable": false,
+                    "Array": {
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "promql",
+                          "ReferredType": "Expr"
+                        }
+                      }
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "arg",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "promql",
+                      "ReferredType": "Expr"
+                    }
+                  }
+                }
+              },
+              "Method": "append"
+            }
+          ]
+        }
+      ],
+      "Factories": [
+        {
+          "Name": "Abs",
+          "Comments": [
+            "Returns the input vector with all sample values converted to their absolute value.",
+            "See https://prometheus.io/docs/prometheus/latest/querying/functions/#abs"
+          ],
+          "Args": [
+            {
+              "Name": "v",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "promql",
+                  "ReferredType": "Expr"
+                }
+              }
+            }
+          ],
+          "OptionCalls": [
+            {
+              "Name": "function",
+              "Parameters": [
+                {
+                  "Constant": {
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Value": "abs"
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "arg",
+              "Parameters": [
+                {
+                  "Argument": {
+                    "Name": "v",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "promql",
+                        "ReferredType": "Expr"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "Absent",
+          "Comments": [
+            "Returns an empty vector if the vector passed to it has any elements (floats or native histograms) and a 1-element vector with the value 1 if the vector passed to it has no elements.",
+            "This is useful for alerting on when no time series exist for a given metric name and label combination.",
+            "See https://prometheus.io/docs/prometheus/latest/querying/functions/#absent"
+          ],
+          "Args": [
+            {
+              "Name": "v",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "promql",
+                  "ReferredType": "Expr"
+                }
+              }
+            }
+          ],
+          "OptionCalls": [
+            {
+              "Name": "function",
+              "Parameters": [
+                {
+                  "Constant": {
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Value": "absent"
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "arg",
+              "Parameters": [
+                {
+                  "Argument": {
+                    "Name": "v",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "promql",
+                        "ReferredType": "Expr"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "pi",
+          "Comments": [
+            "Returns pi.",
+            "See https://prometheus.io/docs/prometheus/latest/querying/functions/#trigonometric-functions"
+          ],
+          "OptionCalls": [
+            {
+              "Name": "function",
+              "Parameters": [
+                {
+                  "Constant": {
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Value": "pi"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "quantile_over_time",
+          "Comments": [
+            "Calculates the φ-quantile (0 ≤ φ ≤ 1) of the values in the specified interval.",
+            "See https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation_over_time"
+          ],
+          "Args": [
+            {
+              "Name": "phi",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float64"
+                }
+              }
+            },
+            {
+              "Name": "v",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "promql",
+                  "ReferredType": "Expr"
+                }
+              }
+            }
+          ],
+          "OptionCalls": [
+            {
+              "Name": "function",
+              "Parameters": [
+                {
+                  "Constant": {
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "Value": "quantile_over_time"
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "arg",
+              "Parameters": [
+                {
+                  "Factory": {
+                    "Ref": {
+                      "Package": "promql",
+                      "Builder": "NumberLiteralExpr",
+                      "Factory": "n"
+                    },
+                    "Parameters": [
+                      {
+                        "Argument": {
+                          "Name": "phi",
+                          "Type": {
+                            "Kind": "scalar",
+                            "Nullable": false,
+                            "Scalar": {
+                              "ScalarKind": "float64"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "arg",
+              "Parameters": [
+                {
+                  "Argument": {
+                    "Name": "v",
+                    "Type": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "promql",
+                        "ReferredType": "Expr"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

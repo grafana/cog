@@ -20,3 +20,4 @@ export class PanelBuilder implements cog.Builder<mapOfBuilders.Panel> {
         return this;
     }
 }
+

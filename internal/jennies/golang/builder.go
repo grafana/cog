@@ -98,6 +98,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	return jenny.Tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(map[string]any{
+			"importPkg": jenny.typeImportMapper,
 			"importStdPkg": func(pkg string) string {
 				return imports.Add(pkg, pkg)
 			},

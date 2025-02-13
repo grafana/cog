@@ -22,3 +22,4 @@ export class SomePanelBuilder implements cog.Builder<constructorInitializations.
         return this;
     }
 }
+
