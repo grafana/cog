@@ -45,7 +45,7 @@ def build_dashboard() -> Dashboard:
             DatasourceVariable("datasource")
             .label("Data Source")
             .hide(VariableHide.DONT_HIDE)
-            .type_val("prometheus")
+            .type("prometheus")
             .current(VariableOption(selected=True, text="grafanacloud-potatopi-prom", value="grafanacloud-prom"))
         )
         # "Instance" variable
