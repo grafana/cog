@@ -15,7 +15,7 @@ class SomeStruct(cogbuilder.Builder[constraints.SomeStruct]):
         """
         return self._internal    
     
-    def id_val(self, id_val: int) -> typing.Self:    
+    def id(self, id_val: int) -> typing.Self:    
         if not id_val >= 5:
             raise ValueError("id_val must be >= 5")
         if not id_val < 10:

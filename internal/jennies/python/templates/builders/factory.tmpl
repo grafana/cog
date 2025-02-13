@@ -5,11 +5,11 @@
 {{ . }}{{ end }}
 """
 {{- end }}
-def {{ .Factory.Name|formatIdentifier}}({{- template "factory_args" .Factory.Args }}):
+def {{ .Factory.Name|formatFunctionName}}({{- template "factory_args" .Factory.Args }}):
     builder = {{ .Builder.Name|formatObjectName }}()
 
 {{- range $call := .Factory.OptionCalls }}
-    builder.{{ $call.Name|formatIdentifier }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
+    builder.{{ $call.Name|formatFunctionName }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
 {{- end }}
 
     return builder
@@ -27,6 +27,6 @@ def {{ .Factory.Name|formatIdentifier}}({{- template "factory_args" .Factory.Arg
         {{- .Name|formatIdentifier -}}
     {{- end -}}
     {{- with .Value.Factory -}}
-        {{ .Ref.Factory|lowerCamelCase }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $arg)}}{{ end }})
+        {{ .Ref.Factory|formatFunctionName }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $arg)}}{{ end }})
     {{- end -}}
 {{- end }}

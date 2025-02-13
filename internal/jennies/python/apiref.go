@@ -21,7 +21,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 		},
 
 		FunctionName: func(function common.FunctionReference) string {
-			return formatIdentifier(function.Name)
+			return formatFunctionName(function.Name)
 		},
 		FunctionSignature: func(context languages.Context, function common.FunctionReference) string {
 			args := tools.Map(function.Arguments, func(arg common.ArgumentReference) string {
@@ -33,7 +33,7 @@ func apiReferenceFormatter() common.APIReferenceFormatter {
 				returnType = " -> " + function.Return
 			}
 
-			return fmt.Sprintf("def %[1]s(%[2]s)%[3]s", formatIdentifier(function.Name), strings.Join(args, ", "), returnType)
+			return fmt.Sprintf("def %[1]s(%[2]s)%[3]s", formatFunctionName(function.Name), strings.Join(args, ", "), returnType)
 		},
 
 		ObjectName: func(object ast.Object) string {

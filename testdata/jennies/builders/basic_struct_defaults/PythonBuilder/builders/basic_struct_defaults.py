@@ -15,7 +15,7 @@ class SomeStruct(cogbuilder.Builder[basic_struct_defaults.SomeStruct]):
         """
         return self._internal    
     
-    def id_val(self, id_val: int) -> typing.Self:    
+    def id(self, id_val: int) -> typing.Self:    
         self._internal.id_val = id_val
     
         return self

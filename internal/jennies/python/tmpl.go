@@ -72,8 +72,9 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 
 func formattingTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
-		"formatIdentifier": formatIdentifier,
-		"formatPath":       formatFieldPath,
-		"formatObjectName": formatObjectName,
+		"formatIdentifier":   formatIdentifier,
+		"formatFunctionName": formatFunctionName,
+		"formatPath":         formatFieldPath,
+		"formatObjectName":   formatObjectName,
 	}
 }

@@ -2,7 +2,7 @@
 {{- $builder := .Builder }}
 {{ range $builder.Options }}
 {{- $option := . }}
-def {{ .Name|formatIdentifier }}(self{{- template "args" .Args }}) -> typing.Self:
+def {{ .Name|formatFunctionName }}(self{{- template "args" .Args }}) -> typing.Self:
     {{- include "comments" . | indent 4 }}
     {{- range .Assignments }}
     {{- include "assignment" (dict "Assignment" . "Builder" $builder "Option" $option) | indent 4 }}

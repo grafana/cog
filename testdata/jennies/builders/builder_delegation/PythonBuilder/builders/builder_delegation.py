@@ -39,7 +39,7 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
         """
         return self._internal    
     
-    def id_val(self, id_val: int) -> typing.Self:    
+    def id(self, id_val: int) -> typing.Self:    
         self._internal.id_val = id_val
     
         return self
