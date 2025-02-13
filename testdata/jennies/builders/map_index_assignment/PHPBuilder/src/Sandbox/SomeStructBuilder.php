@@ -23,7 +23,7 @@ class SomeStructBuilder implements \Grafana\Foundation\Cog\Builder
         return $this->internal;
     }
 
-    public function annotations(string $key,string $value): static
+    public function annotations(string $key, string $value): static
     {
         $this->internal->annotations[$key] = $value;
     
