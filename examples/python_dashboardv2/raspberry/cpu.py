@@ -30,8 +30,8 @@ def cpu_usage_timeseries() -> Panel:
                     ]
                 )
             )
-            .min_val(0)
-            .max_val(1)
+            .min(0)
+            .max(1)
             .unit("percentunit")
         )
         .data(
@@ -48,8 +48,8 @@ def cpu_temperature_gauge() -> Panel:
         .title("CPU Temperature")
         .visualization(
             default_gauge()
-            .min_val(0)
-            .max_val(100)
+            .min(0)
+            .max(100)
             .unit("celsius")
             .thresholds(
                 ThresholdsConfig()
@@ -94,7 +94,7 @@ def cpu_load_average_timeseries() -> Panel:
                     ]
                 )
             )
-            .min_val(0)
+            .min(0)
             .unit("short")
         )
         .data(
