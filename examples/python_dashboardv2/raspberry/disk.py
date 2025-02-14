@@ -130,7 +130,7 @@ def disk_space_usage_table() -> Panel:
             # Transformations
             .transformation(
                 Transformation()
-                .id_val("groupBy")
+                .id("groupBy")
                 .kind("groupBy")
                 .options(
                     {
@@ -148,10 +148,10 @@ def disk_space_usage_table() -> Panel:
                     }
                 )
             )
-            .transformation(Transformation().id_val("merge").kind("merge").options({}))
+            .transformation(Transformation().id("merge").kind("merge").options({}))
             .transformation(
                 Transformation()
-                .id_val("calculateField")
+                .id("calculateField")
                 .kind("calculateField")
                 .options(
                     {
@@ -169,7 +169,7 @@ def disk_space_usage_table() -> Panel:
             )
             .transformation(
                 Transformation()
-                .id_val("calculateField")
+                .id("calculateField")
                 .kind("calculateField")
                 .options(
                     {
@@ -187,7 +187,7 @@ def disk_space_usage_table() -> Panel:
             )
             .transformation(
                 Transformation()
-                .id_val("organize")
+                .id("organize")
                 .kind("organize")
                 .options(
                     {
@@ -203,7 +203,7 @@ def disk_space_usage_table() -> Panel:
             )
             .transformation(
                 Transformation()
-                .id_val("sortBy")
+                .id("sortBy")
                 .kind("sortBy")
                 .options({"fields": {}, "sort": [{"field": "Mounted on"}]})
             )

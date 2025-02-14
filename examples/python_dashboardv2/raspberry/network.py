@@ -7,7 +7,7 @@ def network_received_timeseries() -> Panel:
         Panel()
         .title("Network Received")
         .description("Network received (bits/s)")
-        .visualization(default_timeseries().min_val(0).unit("bps").fill_opacity(0))
+        .visualization(default_timeseries().min(0).unit("bps").fill_opacity(0))
         .data(
             QueryGroup().target(
                 Target().query(
@@ -26,7 +26,7 @@ def network_transmitted_timeseries() -> Panel:
         Panel()
         .title("Network Transmitted")
         .description("Network transmitted (bits/s)")
-        .visualization(default_timeseries().min_val(0).unit("bps").fill_opacity(0))
+        .visualization(default_timeseries().min(0).unit("bps").fill_opacity(0))
         .data(
             QueryGroup().target(
                 Target().query(
