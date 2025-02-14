@@ -47,10 +47,10 @@ builders:
 
   - merge_into:
       source: ElementReference
-      destination: ResponsiveGridLayoutItemKind
+      destination: ResponsiveGridLayoutItem
       under_path: spec.element
   - promote_options_to_constructor:
-      by_object: ResponsiveGridLayoutItemKind
+      by_name: ResponsiveGridLayoutItem
       options: [name]
 
   ##############
@@ -75,7 +75,7 @@ builders:
 
   - merge_into:
       source: ElementReference
-      destination: RowsLayoutItemKind
+      destination: RowsLayoutItem
       under_path: spec.element
   - promote_options_to_constructor:
       by_object: RowsLayoutItemKind
@@ -115,10 +115,10 @@ builders:
 
   - merge_into:
       source: ElementReference
-      destination: GridLayoutItemKind
+      destination: GridLayoutItem
       under_path: spec.element
   - promote_options_to_constructor:
-      by_object: GridLayoutItemKind
+      by_name: GridLayoutItem
       options: [name]
 
   - merge_into:
@@ -129,7 +129,7 @@ builders:
       by_object: GridLayoutRowKind
       as: GridLayoutRow
   - promote_options_to_constructor:
-      by_object: GridLayoutRowKind
+      by_name: GridLayoutRow
       options: [title]
 
   - omit: { by_object: GridLayoutSpec }
