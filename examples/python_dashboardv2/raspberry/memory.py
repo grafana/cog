@@ -34,7 +34,7 @@ def memory_usage_timeseries() -> Panel:
                     ]
                 )
             )
-            .min_val(0)
+            .min(0)
             .unit("bytes")
             .decimals(2)
         )
@@ -80,8 +80,8 @@ def memory_usage_gauge() -> Panel:
         .title("Memory Usage")
         .visualization(
             default_gauge()
-            .min_val(30)
-            .max_val(100)
+            .min(30)
+            .max(100)
             .unit("percent")
             .thresholds(
                 ThresholdsConfig()
