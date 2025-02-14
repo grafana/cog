@@ -31,6 +31,8 @@ func (generator *shape) typeShape(def ast.Type) string {
 		return generator.structShape(def)
 	case def.IsEnum():
 		return generator.enumShape(def)
+	case def.IsConstantRef():
+		return generator.constantRefShape(def)
 	}
 
 	return ""
@@ -86,4 +88,8 @@ func (generator *shape) structShape(def ast.Type) string {
 	}
 
 	return fmt.Sprintf("array{%s}", strings.Join(fields, ", "))
+}
+
+func (generator *shape) constantRefShape(def ast.Type) string {
+	return formatValue(def.AsConstantRef().ReferenceValue)
 }

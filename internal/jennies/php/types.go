@@ -116,7 +116,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 		}
 
 		if def.IsConstantRef() {
-			return formatter.formatConstantReference(def.AsConstantRef())
+			return formatter.formatConstantReference(def)
 		}
 
 		// FIXME: we should never be here
@@ -230,14 +230,17 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 	return typeName
 }
 
-func (formatter *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) string {
-	obj, ok := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
+func (formatter *typeFormatter) formatConstantReference(def ast.Type) string {
+	ref := def.AsConstantRef()
+	referredPkg := formatPackageName(ref.ReferredPkg)
+
+	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 	if !ok {
 		return "unknown"
 	}
 
 	if obj.Type.IsEnum() {
-		return formatter.config.fullNamespaceRef(def.ReferredPkg + "\\" + formatObjectName(def.ReferredType))
+		return formatter.config.fullNamespaceRef(referredPkg + "\\" + formatObjectName(ref.ReferredType))
 	}
 
 	return "unknown"

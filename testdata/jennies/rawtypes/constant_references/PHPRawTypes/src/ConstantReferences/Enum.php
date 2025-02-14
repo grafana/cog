@@ -72,3 +72,4 @@ final class Enum implements \JsonSerializable, \Stringable {
         return $this->value;
     }
 }
+

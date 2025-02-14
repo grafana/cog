@@ -4,7 +4,7 @@ namespace Grafana\Foundation\ConstantReferences;
 
 class StructB implements \JsonSerializable
 {
-    public \Grafana\Foundation\constant_references\Enum $myEnum;
+    public \Grafana\Foundation\ConstantReferences\Enum $myEnum;
 
     public string $myValue;
 
@@ -22,10 +22,9 @@ class StructB implements \JsonSerializable
      */
     public static function fromArray(array $inputData): self
     {
-        /** @var array{myEnum?: , myValue?: string} $inputData */
+        /** @var array{myEnum?: "ValueB", myValue?: string} $inputData */
         $data = $inputData;
         return new self(
-            myEnum: $data["myEnum"] ?? null,
             myValue: $data["myValue"] ?? null,
         );
     }

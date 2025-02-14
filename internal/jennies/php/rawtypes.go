@@ -340,7 +340,7 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	for _, field := range def.Type.AsStruct().Fields {
 		// No need to unmarshal constant scalar fields since they're set in
 		// the object's constructor
-		if field.Type.IsConcreteScalar() {
+		if field.Type.IsConcreteScalar() || field.Type.IsConstantRef() {
 			continue
 		}
 
