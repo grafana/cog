@@ -285,6 +285,9 @@ func (template *Template) builtins() FuncMap {
 		"split": func(separator string, input string) []string {
 			return strings.Split(input, separator)
 		},
+		"replace": func(old string, replacement string, input string) string {
+			return strings.ReplaceAll(input, old, replacement)
+		},
 
 		"lower":          strings.ToLower,
 		"lowerCamelCase": tools.LowerCamelCase,

@@ -36,6 +36,11 @@ func mergeBuilderInto(fromBuilder ast.Builder, intoBuilder ast.Builder, underPat
 		renameOptions = map[string]string{}
 	}
 
+	// copy factories
+	for _, factory := range fromBuilder.Factories {
+		newBuilder.Factories = append(newBuilder.Factories, factory.DeepCopy())
+	}
+
 	// keep constant assignments
 	for _, assignment := range fromBuilder.Constructor.Assignments {
 		if assignment.Value.Constant == nil {
@@ -91,7 +96,7 @@ func Omit(selector Selector) RewriteRule {
 
 func MergeInto(selector Selector, sourceBuilderName string, underPath string, excludeOptions []string, renameOptions map[string]string) RewriteRule {
 	return mapToSelected(selector, func(builders ast.Builders, destinationBuilder ast.Builder) (ast.Builder, error) {
-		sourceBuilder, found := builders.LocateByObject(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
+		sourceBuilder, found := builders.LocateByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
 		if !found {
 			// We couldn't find the source builder: let's return the selected builder untouched.
 			return destinationBuilder, nil
@@ -458,6 +463,10 @@ func PromoteOptionsToConstructor(selector Selector, optionNames []string) Rewrit
 				continue
 			}
 
+			if len(builder.Factories) != 0 {
+				return nil, fmt.Errorf("could not apply PromoteOptionsToConstructor builder veneer: constructor arguments can not be added to builders that have factories")
+			}
+
 			for _, optName := range optionNames {
 				opt, ok := builder.OptionByName(optName)
 				if !ok {
@@ -531,6 +540,27 @@ func DefaultToConstant(selector Selector, options []string) RewriteRule {
 
 				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, opt.Assignments...)
 			}
+		}
+
+		return builders, nil
+	}
+}
+
+// AddFactory adds a builder factory to the selected builders.
+// These factories are meant to be used to simplify the instantiation of
+// builders for common use-cases.
+func AddFactory(selector Selector, factory ast.BuilderFactory) RewriteRule {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
+		for i, builder := range builders {
+			if !selector(schemas, builder) {
+				continue
+			}
+
+			if len(builder.Constructor.Args) != 0 {
+				return nil, fmt.Errorf("could not apply AddFactory builder veneer: builder factories can not be defined on builders that accept parameters in their constructor")
+			}
+
+			builders[i].Factories = append(builders[i].Factories, factory)
 		}
 
 		return builders, nil

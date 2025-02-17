@@ -27,3 +27,4 @@ export class LokiBuilderBuilder implements cog.Builder<composableSlot.Dashboard>
         return this;
     }
 }
+

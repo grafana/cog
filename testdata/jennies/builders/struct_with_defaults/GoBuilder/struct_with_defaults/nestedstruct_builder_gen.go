@@ -21,6 +21,8 @@ func NewNestedStructBuilder() *NestedStructBuilder {
 	return builder
 }
 
+
+
 func (builder *NestedStructBuilder) Build() (NestedStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return NestedStruct{}, err

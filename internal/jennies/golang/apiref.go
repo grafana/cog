@@ -55,6 +55,9 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return string(kind)
 		},
 
+		FunctionName: func(function common.FunctionReference) string {
+			return formatFunctionName(function.Name)
+		},
 		FunctionSignature: functionSignature,
 
 		ObjectName: func(object ast.Object) string {

@@ -20,3 +20,4 @@ export class SomeStructBuilder implements cog.Builder<nullableMapAssignment.Some
         return this;
     }
 }
+

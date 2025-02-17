@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import builder_delegation_in_disjunction
 
 
-class DashboardLink(cogbuilder.Builder[builder_delegation_in_disjunction.DashboardLink]):    
+class DashboardLink(cogbuilder.Builder[builder_delegation_in_disjunction.DashboardLink]):
     _internal: builder_delegation_in_disjunction.DashboardLink
 
     def __init__(self):
@@ -15,18 +15,19 @@ class DashboardLink(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboa
         """
         return self._internal    
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         self._internal.title = title
     
         return self
     
-    def url(self, url: str) -> typing.Self:        
+    def url(self, url: str) -> typing.Self:    
         self._internal.url = url
     
         return self
     
 
-class ExternalLink(cogbuilder.Builder[builder_delegation_in_disjunction.ExternalLink]):    
+
+class ExternalLink(cogbuilder.Builder[builder_delegation_in_disjunction.ExternalLink]):
     _internal: builder_delegation_in_disjunction.ExternalLink
 
     def __init__(self):
@@ -38,13 +39,14 @@ class ExternalLink(cogbuilder.Builder[builder_delegation_in_disjunction.External
         """
         return self._internal    
     
-    def url(self, url: str) -> typing.Self:        
+    def url(self, url: str) -> typing.Self:    
         self._internal.url = url
     
         return self
     
 
-class Dashboard(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboard]):    
+
+class Dashboard(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboard]):
     _internal: builder_delegation_in_disjunction.Dashboard
 
     def __init__(self):
@@ -77,7 +79,7 @@ class Dashboard(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboard])
     
         return self
     
-    def disjunction_of_builders(self, disjunction_of_builders: typing.Union[cogbuilder.Builder[builder_delegation_in_disjunction.DashboardLink], cogbuilder.Builder[builder_delegation_in_disjunction.ExternalLink]]) -> typing.Self:        
+    def disjunction_of_builders(self, disjunction_of_builders: typing.Union[cogbuilder.Builder[builder_delegation_in_disjunction.DashboardLink], cogbuilder.Builder[builder_delegation_in_disjunction.ExternalLink]]) -> typing.Self:    
         disjunction_of_builders_resource = disjunction_of_builders.build()
         self._internal.disjunction_of_builders = disjunction_of_builders_resource
     

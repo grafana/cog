@@ -37,8 +37,7 @@ def build_dashboard() -> Dashboard:
         .timezone(TimeZoneBrowser)
         .timezone("browser")
         .timepicker(
-            TimePicker()
-            .refresh_intervals(["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"])
+            TimePicker().refresh_intervals(["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"])
         )
         .tooltip(DashboardCursorSync.CROSSHAIR)
         # "Data Source" variable
@@ -46,7 +45,7 @@ def build_dashboard() -> Dashboard:
             DatasourceVariable("datasource")
             .label("Data Source")
             .hide(VariableHide.DONT_HIDE)
-            .type_val("prometheus")
+            .type("prometheus")
             .current(VariableOption(selected=True, text="grafanacloud-potatopi-prom", value="grafanacloud-prom"))
         )
         # "Instance" variable

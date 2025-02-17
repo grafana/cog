@@ -1,6 +1,6 @@
 {{- define "options" }}
-{{- $builder := . }}
-{{ range .Options }}
+{{- $builder := .Builder }}
+{{ range .Builder.Options }}
 {{- $option := . }}
     {{- range .Comments}}
     // {{ . }}

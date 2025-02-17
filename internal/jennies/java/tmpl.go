@@ -34,6 +34,7 @@ func formattingTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"formatPackageName": formatPackageName,
 		"formatObjectName":  formatObjectName,
+		"formatArgName":     formatArgName,
 		"escapeVar":         escapeVarName,
 		"formatScalar":      formatScalar,
 		"cleanString":       cleanString,
@@ -105,6 +106,9 @@ func functions() template.FuncMap {
 		},
 		"enumFromConstantRef": func(_ ast.Type) string {
 			panic("enumFromConstantRef() needs to be overridden by a jenny")
+			},
+		"factoryClassForPkg": func(_ string) string {
+			panic("factoryClassForPkg() needs to be overridden by a jenny")
 		},
 	}
 }
@@ -123,11 +127,12 @@ type EnumValue struct {
 }
 
 type ClassTemplate struct {
-	Package  string
-	Imports  fmt.Stringer
-	Name     string
-	Extends  []string
-	Comments []string
+	Package    string
+	RawPackage string
+	Imports    fmt.Stringer
+	Name       string
+	Extends    []string
+	Comments   []string
 
 	Fields     []ast.StructField
 	Builders   []BuilderTemplate
@@ -168,6 +173,7 @@ type Constant struct {
 
 type BuilderTemplate struct {
 	Package              string
+	RawPackage           string
 	BuilderSignatureType string
 	BuilderName          string
 	ObjectName           string

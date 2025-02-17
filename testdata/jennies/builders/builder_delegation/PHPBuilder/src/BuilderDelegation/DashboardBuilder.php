@@ -29,12 +29,14 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     public function title(string $title): static
     {
         $this->internal->title = $title;
     
         return $this;
     }
+
     /**
      * will be expanded to []cog.Builder<DashboardLink>
      * @param array<\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink>> $links
@@ -49,6 +51,7 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     /**
      * will be expanded to [][]cog.Builder<DashboardLink>
      * @param array<array<\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink>>> $linksOfLinks
@@ -68,6 +71,7 @@ class DashboardBuilder implements \Grafana\Foundation\Cog\Builder
     
         return $this;
     }
+
     /**
      * will be expanded to cog.Builder<DashboardLink>
      * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\BuilderDelegation\DashboardLink> $singleLink

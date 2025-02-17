@@ -8,7 +8,7 @@ def network_received_timeseries() -> cogbuilder.Builder[dashboard.Panel]:
         default_timeseries()
         .title("Network Received")
         .description("Network received (bits/s)")
-        .min_val(0)
+        .min(0)
         .unit("bps")
         .fill_opacity(0)
         .with_target(
@@ -22,7 +22,7 @@ def network_transmitted_timeseries() -> cogbuilder.Builder[dashboard.Panel]:
         default_timeseries()
         .title("Network Transmitted")
         .description("Network transmitted (bits/s)")
-        .min_val(0)
+        .min(0)
         .unit("bps")
         .fill_opacity(0)
         .with_target(

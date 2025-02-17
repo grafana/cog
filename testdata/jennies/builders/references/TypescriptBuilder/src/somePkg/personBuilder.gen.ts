@@ -21,3 +21,4 @@ export class PersonBuilder implements cog.Builder<somePkg.Person> {
         return this;
     }
 }
+

@@ -29,8 +29,8 @@ def cpu_usage_timeseries() -> cogbuilder.Builder[dashboard.Panel]:
                 dashboard.Threshold(color="red", value=80.0),
             ])
         )
-        .min_val(0)
-        .max_val(1)
+        .min(0)
+        .max(1)
         .unit("percentunit")
         .with_target(basic_prometheus_query(query, "{{ cpu }}"))
     )
@@ -41,8 +41,8 @@ def cpu_temperature_gauge() -> cogbuilder.Builder[dashboard.Panel]:
         default_gauge()
         .title("CPU Temperatore")
         .span(6)
-        .min_val(0)
-        .max_val(100)
+        .min(0)
+        .max(100)
         .unit("celsius")
         .thresholds(
             ThresholdsConfigBuilder()
@@ -70,7 +70,7 @@ def cpu_load_average_timeseries() -> cogbuilder.Builder[dashboard.Panel]:
                 dashboard.Threshold(color="red", value=80.0),
             ])
         )
-        .min_val(0)
+        .min(0)
         .unit("short")
         .with_target(basic_prometheus_query("node_load1{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "1m load average"))
         .with_target(basic_prometheus_query("node_load5{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}", "5m load average"))

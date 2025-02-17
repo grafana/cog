@@ -79,6 +79,10 @@ func (pass *FlattenDisjunctions) flattenDisjunction(schema *ast.Schema, disjunct
 			typeName = fmt.Sprintf("branch_%d", i)
 		}
 
+		if branch.IsConcreteScalar() {
+			typeName = fmt.Sprintf("concrete_%s_%v", typeName, branch.Scalar.Value)
+		}
+
 		if !branch.IsRef() {
 			addBranch(typeName, branch)
 			continue

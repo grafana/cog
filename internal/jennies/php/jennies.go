@@ -19,6 +19,10 @@ type Config struct {
 
 	NamespaceRoot string `yaml:"namespace_root"`
 
+	// GenerateJSONMarshaller controls the generation of `fromArray()` and
+	// `jsonSerialize()` methods on types.
+	GenerateJSONMarshaller bool `yaml:"generate_json_marshaller"`
+
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
 	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
@@ -30,12 +34,28 @@ type Config struct {
 	// ExtraFilesTemplatesData holds additional data to be injected into the
 	// templates described in ExtraFilesTemplatesDirectories.
 	ExtraFilesTemplatesData map[string]string `yaml:"-"`
+
+	// BuilderFactoriesClassMap allows to choose the name of the class that
+	// will be generated to hold "builder factories".
+	// By default, this class name is equal to the package name in which
+	// factories are defined.
+	// BuilderFactoriesClassMap associates these package names with a class
+	// name.
+	BuilderFactoriesClassMap map[string]string `yaml:"builder_factories_class_map"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.NamespaceRoot = interpolator(config.NamespaceRoot)
 	config.OverridesTemplatesDirectories = tools.Map(config.OverridesTemplatesDirectories, interpolator)
 	config.ExtraFilesTemplatesDirectories = tools.Map(config.ExtraFilesTemplatesDirectories, interpolator)
+}
+
+func (config Config) builderFactoryClassForPackage(pkg string) string {
+	if config.BuilderFactoriesClassMap != nil && config.BuilderFactoriesClassMap[pkg] != "" {
+		return config.BuilderFactoriesClassMap[pkg]
+	}
+
+	return pkg
 }
 
 func (config Config) fullNamespace(typeName string) string {
@@ -76,16 +96,17 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	tmpl := initTemplates(language.apiRefCollector, language.config.OverridesTemplatesDirectories)
 	rawTypesJenny := RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}
 
-	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
+	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
 		Runtime{config: config, tmpl: tmpl},
-		common.If[languages.Context](globalConfig.Types, rawTypesJenny),
-		common.If[languages.Context](globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
-		common.If[languages.Context](globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
+		common.If(globalConfig.Types, rawTypesJenny),
+		common.If(globalConfig.Builders, &Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
+		common.If(globalConfig.Builders && globalConfig.Converters, &Converter{config: config, tmpl: tmpl, nullableConfig: language.NullableKinds()}),
 
-		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+		common.If(globalConfig.APIReference, common.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(tmpl, config),

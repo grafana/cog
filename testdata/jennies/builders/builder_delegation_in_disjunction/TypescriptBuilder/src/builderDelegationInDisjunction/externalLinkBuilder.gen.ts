@@ -20,3 +20,4 @@ export class ExternalLinkBuilder implements cog.Builder<builderDelegationInDisju
         return this;
     }
 }
+

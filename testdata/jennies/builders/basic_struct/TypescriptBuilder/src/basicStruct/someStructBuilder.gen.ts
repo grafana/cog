@@ -39,3 +39,4 @@ export class SomeStructBuilder implements cog.Builder<basicStruct.SomeStruct> {
         return this;
     }
 }
+

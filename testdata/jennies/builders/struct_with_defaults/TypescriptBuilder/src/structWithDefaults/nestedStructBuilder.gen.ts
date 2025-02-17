@@ -25,3 +25,4 @@ export class NestedStructBuilder implements cog.Builder<structWithDefaults.Neste
         return this;
     }
 }
+

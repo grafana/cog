@@ -76,8 +76,21 @@ func formatIdentifier(name string) string {
 	return tools.SnakeCase(escapeIdentifier(name))
 }
 
+func formatFunctionName(name string) string {
+	name = strings.TrimLeft(name, "$_")
+	return tools.SnakeCase(escapeFunctionName(name))
+}
+
 func escapeIdentifier(name string) string {
 	if isReservedPythonKeyword(name) || isBuiltInFunction(name) {
+		return name + "_val"
+	}
+
+	return name
+}
+
+func escapeFunctionName(name string) string {
+	if isReservedPythonKeyword(name) {
 		return name + "_val"
 	}
 

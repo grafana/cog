@@ -84,12 +84,32 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		Return: fullObjectName,
 	})
 
+	for _, factory := range builder.Factories {
+		jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
+			Name:     factory.Name,
+			Comments: factory.Comments,
+			Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+				return common.ArgumentReference{
+					Name: arg.Name,
+					Type: jenny.typeFormatter.formatType(arg.Type),
+				}
+			}),
+			Return: builder.Name,
+		})
+	}
+
 	return jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(map[string]any{
 			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
 			"formatType":              jenny.typeFormatter.formatType,
-			"formatRawType":           jenny.rawTypeFormatter.formatType,
+			"formatTypeNotNullable": func(def ast.Type) string {
+				typeDef := def.DeepCopy()
+				typeDef.Nullable = false
+
+				return jenny.typeFormatter.formatType(typeDef)
+			},
+			"formatRawType": jenny.rawTypeFormatter.formatType,
 			"formatRawTypeNotNullable": func(def ast.Type) string {
 				typeDef := def.DeepCopy()
 				typeDef.Nullable = false
@@ -98,7 +118,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 			"formatValue": func(destinationType ast.Type, value any) string {
 				if destinationType.IsRef() {
-					referredObj, found := context.LocateObject(destinationType.AsRef().ReferredPkg, destinationType.AsRef().ReferredType)
+					referredObj, found := context.LocateObjectByRef(destinationType.AsRef())
 					if found && referredObj.Type.IsEnum() {
 						return jenny.typeFormatter.formatEnumValue(referredObj, value)
 					}
@@ -110,25 +130,9 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 				return formatValue(defaultValueForType(context.Schemas, typeDef, jenny.importModule, nil))
 			},
 		}).
-		RenderAsBytes("builders/builder.tmpl", template.Builder{
-			Package:              builder.Package,
-			BuilderSignatureType: buildObjectSignature,
-			BuilderName:          tools.UpperCamelCase(builder.Name),
-			ObjectName:           fullObjectName,
-			Comments:             builder.For.Comments,
-			Constructor:          builder.Constructor,
-			Properties:           builder.Properties,
-			Options:              tools.Map(builder.Options, jenny.generateOption),
+		RenderAsBytes("builders/builder.tmpl", map[string]any{
+			"Builder":              builder,
+			"BuilderSignatureType": buildObjectSignature,
+			"ObjectName":           fullObjectName,
 		})
-}
-
-func (jenny *Builder) generateOption(option ast.Option) ast.Option {
-	option.Args = tools.Map(option.Args, func(arg ast.Argument) ast.Argument {
-		newArg := arg.DeepCopy()
-		newArg.Type.Nullable = false
-
-		return newArg
-	})
-
-	return option
 }

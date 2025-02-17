@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import known_any
 
 
-class SomeStruct(cogbuilder.Builder[known_any.SomeStruct]):    
+class SomeStruct(cogbuilder.Builder[known_any.SomeStruct]):
     _internal: known_any.SomeStruct
 
     def __init__(self):
@@ -15,7 +15,7 @@ class SomeStruct(cogbuilder.Builder[known_any.SomeStruct]):
         """
         return self._internal    
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         if self._internal.config is None:
             self._internal.config = known_any.Config()
         assert isinstance(self._internal.config, known_any.Config)

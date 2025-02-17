@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import with-dashes
 
 
-class SomeNiceBuilder(cogbuilder.Builder[with-dashes.SomeStruct]):    
+class SomeNiceBuilder(cogbuilder.Builder[with-dashes.SomeStruct]):
     _internal: with-dashes.SomeStruct
 
     def __init__(self):
@@ -15,7 +15,7 @@ class SomeNiceBuilder(cogbuilder.Builder[with-dashes.SomeStruct]):
         """
         return self._internal    
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         self._internal.title = title
     
         return self

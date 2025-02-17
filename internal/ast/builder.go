@@ -19,6 +19,8 @@ type Builder struct {
 	Constructor Constructor   `json:",omitempty"`
 	Options     []Option
 	VeneerTrail []string `json:",omitempty"`
+
+	Factories []BuilderFactory `json:",omitempty"`
 }
 
 func (builder *Builder) OptionByName(name string) (Option, bool) {
@@ -133,6 +135,16 @@ type Builders []Builder
 func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
 		if builder.For.SelfRef.ReferredPkg == pkg && builder.For.SelfRef.ReferredType == name {
+			return builder, true
+		}
+	}
+
+	return Builder{}, false
+}
+
+func (builders Builders) LocateByName(pkg string, name string) (Builder, bool) {
+	for _, builder := range builders {
+		if builder.For.SelfRef.ReferredPkg == pkg && builder.Name == name {
 			return builder, true
 		}
 	}

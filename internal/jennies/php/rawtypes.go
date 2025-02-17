@@ -180,7 +180,11 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 		variant = ", " + jenny.config.fullNamespaceRef("Cog\\"+formatObjectName(object.Type.ImplementedVariant()))
 	}
 
-	buffer.WriteString(fmt.Sprintf("class %s implements \\JsonSerializable%s\n{\n", formatObjectName(object.Name), variant))
+	buffer.WriteString(fmt.Sprintf("class %s", formatObjectName(object.Name)))
+	if jenny.config.GenerateJSONMarshaller {
+		buffer.WriteString(" implements \\JsonSerializable")
+	}
+	buffer.WriteString(fmt.Sprintf("%s\n{\n", variant))
 
 	for _, fieldDef := range object.Type.Struct.Fields {
 		buffer.WriteString(tools.Indent(jenny.typeFormatter.formatField(fieldDef), 4))
@@ -188,16 +192,19 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 	}
 
 	buffer.WriteString(tools.Indent(jenny.generateConstructor(context, object), 4))
-	buffer.WriteString("\n\n")
 
-	fromJSON, err := jenny.generateFromJSON(context, object)
-	if err != nil {
-		return "", err
+	if jenny.config.GenerateJSONMarshaller {
+		fromJSON, err := jenny.generateFromJSON(context, object)
+		if err != nil {
+			return "", err
+		}
+
+		buffer.WriteString("\n\n")
+		buffer.WriteString(tools.Indent(fromJSON, 4))
+		buffer.WriteString("\n\n")
+
+		buffer.WriteString(tools.Indent(jenny.generateJSONSerialize(object), 4))
 	}
-	buffer.WriteString(tools.Indent(fromJSON, 4))
-	buffer.WriteString("\n\n")
-
-	buffer.WriteString(tools.Indent(jenny.generateJSONSerialize(object), 4))
 
 	if object.Type.ImplementsVariant() {
 		customVariantTmpl := template.CustomObjectVariantBlock(object)
@@ -213,6 +220,19 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 			buffer.WriteString("\n\n")
 			buffer.WriteString(tools.Indent(customVariantBlock.String(), 4))
 		}
+	}
+
+	customMethodsBlock := template.CustomObjectMethodsBlock(object)
+	if jenny.tmpl.Exists(customMethodsBlock) {
+		rendered, err := jenny.tmpl.Render(customMethodsBlock, map[string]any{
+			"Object": object,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		buffer.WriteString("\n\n")
+		buffer.WriteString(tools.Indent(rendered, 4))
 	}
 
 	buffer.WriteString("\n}")

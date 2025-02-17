@@ -33,7 +33,7 @@ def memory_usage_timeseries() -> cogbuilder.Builder[dashboard.Panel]:
                 dashboard.Threshold(color="red", value=80.0),
             ])
         )
-        .min_val(0)
+        .min(0)
         .unit("bytes")
         .decimals(2)
         .with_target(basic_prometheus_query(mem_used_query, "Used"))
@@ -53,8 +53,8 @@ def memory_usage_gauge() -> cogbuilder.Builder[dashboard.Panel]:
         default_gauge()
         .title("Memory Temperatore")
         .span(6)
-        .min_val(30)
-        .max_val(100)
+        .min(30)
+        .max(100)
         .unit("percent")
         .thresholds(
             ThresholdsConfigBuilder()

@@ -24,8 +24,7 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
     .timezone("browser")
 
     .timepicker(
-        new TimePickerBuilder()
-            .refreshIntervals(["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"])
+        new TimePickerBuilder().refreshIntervals(["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]),
     )
 
     .tooltip(DashboardCursorSync.Crosshair)

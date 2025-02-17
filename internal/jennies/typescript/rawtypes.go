@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
@@ -15,6 +16,7 @@ type raw string
 
 type RawTypes struct {
 	config        Config
+	tmpl          *template.Template
 	typeFormatter *typeFormatter
 	schemas       ast.Schemas
 }
@@ -102,6 +104,17 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper packageMapper) 
 		buffer.WriteString(formattedDefaults)
 
 		buffer.WriteString(");\n")
+	}
+
+	customMethodsBlock := template.CustomObjectMethodsBlock(def)
+	if jenny.tmpl.Exists(customMethodsBlock) {
+		err := jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+			"Object": def,
+		})
+		if err != nil {
+			return nil, err
+		}
+		buffer.WriteString("\n")
 	}
 
 	return []byte(buffer.String()), nil

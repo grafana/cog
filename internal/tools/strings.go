@@ -54,6 +54,10 @@ func CleanupNames(s string) string {
 }
 
 func Indent(input string, spaces int) string {
+	if input == "" {
+		return ""
+	}
+
 	pad := strings.Repeat(" ", spaces)
 	return pad + strings.ReplaceAll(input, "\n", "\n"+pad)
 }

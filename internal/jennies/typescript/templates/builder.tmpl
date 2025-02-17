@@ -1,18 +1,17 @@
-{{- $builder := . -}}
 {{- $options := include "options" . -}}
 {{- .Imports }}
-{{- range .Comments }}
+{{- range .Builder.For.Comments }}
 // {{ . }}
 {{- end }}
-export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ .BuilderSignatureType }}> {
+export class {{ .Builder.Name|upperCamelCase }}Builder implements cog.Builder<{{ .BuilderSignatureType }}> {
     protected readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};
-    {{- range .Properties }}
+    {{- range .Builder.Properties }}
     private {{ .Name }}: {{ .Type | formatType }} = {{ .Type | defaultValueForType }};
     {{- end }}
 
-    constructor({{ template "args" .Constructor.Args }}) {
+    constructor({{ template "args" .Builder.Constructor.Args }}) {
         this.internal = {{ .ImportAlias }}.default{{ .ObjectName | upperCamelCase }}();
-        {{- range $arg := .Constructor.Assignments }}
+        {{- range $arg := .Builder.Constructor.Assignments }}
         {{- template "constraints" $arg.Constraints }}
         this.internal.{{ $arg.Path }} = {{ template "assignment_value" (dict "Assignment" $arg "Value" $arg.Value) }};
         {{- end }}
@@ -24,8 +23,15 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
     build(): {{ .ImportAlias }}.{{ .ObjectName }} {
         return this.internal;
     }
+
+{{- $customMethodsTmpl := print "builder_" .Builder.Package "_" .Builder.Name "_custom_methods" }}
+{{- includeIfExists $customMethodsTmpl (dict) -}}
+
 {{- $options -}}
 }
+{{ range .Builder.Factories }}
+    {{- template "factory" (dict "Builder" $.Builder "Factory" .) }}
+{{- end }}
 
 {{- define "assignment" }}
 {{- range .Assignment.NilChecks }}
@@ -37,12 +43,12 @@ export class {{ .BuilderName|upperCamelCase }}Builder implements cog.Builder<{{ 
 
     {{- $value := include "assignment_value" (dict "Assignment" .Assignment "Value" .Assignment.Value) -}}
 
-    {{- $preTmpl := print "pre_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- $preTmpl := print "pre_assignment_" .Builder.Name "_" .Option.Name }}
     {{- includeIfExists $preTmpl (dict) -}}
 
     {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) }}
 
-    {{- $postTmpl := print "post_assignment_" .Builder.BuilderName "_" .Option.Name }}
+    {{- $postTmpl := print "post_assignment_" .Builder.Name "_" .Option.Name }}
     {{- includeIfExists $postTmpl (dict) -}}
 {{- end }}
 

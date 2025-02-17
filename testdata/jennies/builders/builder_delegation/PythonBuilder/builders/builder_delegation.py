@@ -3,7 +3,7 @@ from ..cog import builder as cogbuilder
 from ..models import builder_delegation
 
 
-class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):    
+class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):
     _internal: builder_delegation.DashboardLink
 
     def __init__(self):
@@ -15,18 +15,19 @@ class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):
         """
         return self._internal    
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         self._internal.title = title
     
         return self
     
-    def url(self, url: str) -> typing.Self:        
+    def url(self, url: str) -> typing.Self:    
         self._internal.url = url
     
         return self
     
 
-class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):    
+
+class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
     _internal: builder_delegation.Dashboard
 
     def __init__(self):
@@ -38,12 +39,12 @@ class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
         """
         return self._internal    
     
-    def id_val(self, id_val: int) -> typing.Self:        
+    def id(self, id_val: int) -> typing.Self:    
         self._internal.id_val = id_val
     
         return self
     
-    def title(self, title: str) -> typing.Self:        
+    def title(self, title: str) -> typing.Self:    
         self._internal.title = title
     
         return self

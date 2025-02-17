@@ -177,6 +177,7 @@ func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) 
 func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Object) ([]byte, error) {
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:                 jenny.config.formatPackage(pkg),
+		RawPackage:              pkg,
 		Imports:                 jenny.imports,
 		Name:                    tools.UpperCamelCase(object.Name),
 		Fields:                  object.Type.AsStruct().Fields,

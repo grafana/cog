@@ -52,3 +52,4 @@ export class StructBuilder implements cog.Builder<structWithDefaults.Struct> {
         return this;
     }
 }
+

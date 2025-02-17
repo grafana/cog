@@ -33,9 +33,30 @@ type Config struct {
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.
-	SkipRuntime        bool `yaml:"skip_runtime"`
+	SkipRuntime bool `yaml:"skip_runtime"`
+
+	// GenerateJSONMarshaller controls the generation of `MarshalJSON()` and
+	// `UnmarshalJSON()` methods on types.
+	GenerateJSONMarshaller bool `yaml:"generate_json_marshaller"`
+
 	GenerateBuilders   bool `yaml:"-"`
 	GenerateConverters bool `yaml:"-"`
+
+	// BuilderFactoriesClassMap allows to choose the name of the class that
+	// will be generated to hold "builder factories".
+	// By default, this class name is equal to the package name in which
+	// factories are defined.
+	// BuilderFactoriesClassMap associates these package names with a class
+	// name.
+	BuilderFactoriesClassMap map[string]string `yaml:"builder_factories_class_map"`
+}
+
+func (config *Config) builderFactoryClassForPackage(pkg string) string {
+	if config.BuilderFactoriesClassMap != nil && config.BuilderFactoriesClassMap[pkg] != "" {
+		return config.BuilderFactoriesClassMap[pkg]
+	}
+
+	return pkg
 }
 
 func (config *Config) formatPackage(pkg string) string {
@@ -79,16 +100,17 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
-	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
+	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](!config.SkipRuntime, Runtime{config: config, tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime, &Deserializers{config: config, tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime, &Serializers{config: config, tmpl: tmpl}),
+		common.If(!config.SkipRuntime, Runtime{config: config, tmpl: tmpl}),
+		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Deserializers{config: config, tmpl: tmpl}),
+		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
-		common.If[languages.Context](config.GenerateBuilders, Builder{config: config, tmpl: tmpl}),
-		common.If[languages.Context](!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
+		common.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl}),
+		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl}),
+		common.If(!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
 
 		common.CustomTemplates{
 			TmplFuncs:           formattingTemplateFuncs(),

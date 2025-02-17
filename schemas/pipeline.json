@@ -308,6 +308,10 @@
     },
     "GolangConfig": {
       "properties": {
+        "generate_json_marshaller": {
+          "type": "boolean",
+          "description": "GenerateJSONMarshaller controls the generation of `MarshalJSON()` and\n`UnmarshalJSON()` methods on types."
+        },
         "generate_strict_unmarshaller": {
           "type": "boolean",
           "description": "GenerateStrictUnmarshaller controls the generation of\n`UnmarshalJSONStrict()` methods on types."
@@ -372,6 +376,10 @@
         "skip_runtime": {
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        },
+        "generate_json_marshaller": {
+          "type": "boolean",
+          "description": "GenerateJSONMarshaller controls the generation of `MarshalJSON()` and\n`UnmarshalJSON()` methods on types."
         }
       },
       "additionalProperties": false,
@@ -402,6 +410,10 @@
         "namespace_root": {
           "type": "string"
         },
+        "generate_json_marshaller": {
+          "type": "boolean",
+          "description": "GenerateJSONMarshaller controls the generation of `fromArray()` and\n`jsonSerialize()` methods on types."
+        },
         "overrides_templates": {
           "items": {
             "type": "string"
@@ -415,6 +427,13 @@
           },
           "type": "array",
           "description": "ExtraFilesTemplatesDirectories holds a list of directories containing\ntemplates describing files to be added to the generated output."
+        },
+        "builder_factories_class_map": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "BuilderFactoriesClassMap allows to choose the name of the class that\nwill be generated to hold \"builder factories\".\nBy default, this class name is equal to the package name in which\nfactories are defined.\nBuilderFactoriesClassMap associates these package names with a class\nname."
         }
       },
       "additionalProperties": false,
@@ -424,6 +443,10 @@
       "properties": {
         "path_prefix": {
           "type": "string"
+        },
+        "generate_json_marshaller": {
+          "type": "boolean",
+          "description": "GenerateJSONMarshaller controls the generation of `to_json()` and\n`from_json()` methods on types."
         },
         "skip_runtime": {
           "type": "boolean",

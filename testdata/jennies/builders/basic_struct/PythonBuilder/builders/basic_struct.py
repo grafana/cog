@@ -19,7 +19,7 @@ class SomeStruct(cogbuilder.Builder[basic_struct.SomeStruct]):
         """
         return self._internal    
     
-    def id_val(self, id_val: int) -> typing.Self:    
+    def id(self, id_val: int) -> typing.Self:    
         """
         id identifies something. Weird, right?
         """
@@ -28,12 +28,12 @@ class SomeStruct(cogbuilder.Builder[basic_struct.SomeStruct]):
     
         return self
     
-    def uid(self, uid: str) -> typing.Self:        
+    def uid(self, uid: str) -> typing.Self:    
         self._internal.uid = uid
     
         return self
     
-    def tags(self, tags: list[str]) -> typing.Self:        
+    def tags(self, tags: list[str]) -> typing.Self:    
         self._internal.tags = tags
     
         return self

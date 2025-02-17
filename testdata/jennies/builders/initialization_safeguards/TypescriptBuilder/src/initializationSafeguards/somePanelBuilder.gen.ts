@@ -33,3 +33,4 @@ export class SomePanelBuilder implements cog.Builder<initializationSafeguards.So
         return this;
     }
 }
+

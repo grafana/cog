@@ -17,7 +17,10 @@ func TestRawTypes_Generate(t *testing.T) {
 
 	config := Config{}
 	config.applyDefaults()
-	jenny := RawTypes{config: config}
+	jenny := RawTypes{
+		tmpl:   initTemplates([]string{}),
+		config: config,
+	}
 	compilerPasses := New(config).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test[ast.Schema]) {

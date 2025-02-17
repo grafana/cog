@@ -27,3 +27,4 @@ export class SomeStructBuilder implements cog.Builder<sandbox.SomeStruct> {
         return this;
     }
 }
+

@@ -21,3 +21,4 @@ export class SomeStructBuilder implements cog.Builder<properties.SomeStruct> {
         return this;
     }
 }
+

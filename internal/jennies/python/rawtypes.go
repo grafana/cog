@@ -16,6 +16,7 @@ import (
 )
 
 type RawTypes struct {
+	config          Config
 	tmpl            *template.Template
 	typeFormatter   *typeFormatter
 	importModule    moduleImporter
@@ -94,16 +95,34 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			buffer.WriteString("\n\n")
 			buffer.WriteString(jenny.generateInitMethod(context.Schemas, object))
 
-			buffer.WriteString("\n\n")
-			buffer.WriteString(jenny.generateToJSONMethod(object))
+			if jenny.config.GenerateJSONMarshaller {
+				buffer.WriteString("\n\n")
+				buffer.WriteString(jenny.generateToJSONMethod(object))
+			}
 
+			if jenny.config.GenerateJSONMarshaller {
+				buffer.WriteString("\n\n")
+				fromJSON, innerErr := jenny.generateFromJSONMethod(context, object)
+				if innerErr != nil {
+					err = innerErr
+					return
+				}
+				buffer.WriteString(fromJSON)
+			}
+		}
+
+		customMethodsBlock := template.CustomObjectMethodsBlock(object)
+		if jenny.tmpl.Exists(customMethodsBlock) {
 			buffer.WriteString("\n\n")
-			fromJSON, innerErr := jenny.generateFromJSONMethod(context, object)
+			rendered, innerErr := jenny.tmpl.Render(customMethodsBlock, map[string]any{
+				"Object": object,
+			})
 			if innerErr != nil {
 				err = innerErr
 				return
 			}
-			buffer.WriteString(fromJSON)
+
+			buffer.WriteString(tools.Indent(rendered, 4))
 		}
 
 		customVariantTmpl := template.CustomObjectVariantBlock(object)
@@ -177,7 +196,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 		if field.Type.IsConcreteScalar() {
 			assignments = append(assignments, fmt.Sprintf("        self.%s = %s", fieldName, formatValue(field.Type.AsScalar().Value)))
 			continue
-		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray) {
+		} else if field.Type.IsAnyOf(ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindMap, ast.KindArray, ast.KindDisjunction) {
 			if !field.Type.Nullable {
 				typingPkg := jenny.importPkg("typing", "typing")
 				fieldType = fmt.Sprintf("%s.Optional[%s]", typingPkg, fieldType)
