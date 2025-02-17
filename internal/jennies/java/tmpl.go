@@ -106,7 +106,7 @@ func functions() template.FuncMap {
 		},
 		"enumFromConstantRef": func(_ ast.Type) string {
 			panic("enumFromConstantRef() needs to be overridden by a jenny")
-			},
+		},
 		"factoryClassForPkg": func(_ string) string {
 			panic("factoryClassForPkg() needs to be overridden by a jenny")
 		},

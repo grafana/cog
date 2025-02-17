@@ -369,5 +369,4 @@ func TestDisjunctionInferMapping_WithDisjunctionOfRefs_AsAnObject_ConcreteRefere
 
 	// Call the compiler pass
 	runPassOnObjects(t, &DisjunctionInferMapping{}, objects, objects)
-
 }
