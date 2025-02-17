@@ -304,6 +304,10 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 			continue
 		}
 
+		if field.Type.IsConstantRef() {
+			continue
+		}
+
 		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
 			value, err = jenny.composableSlotFromJSON(context, object, field)
 			if err != nil {
