@@ -72,10 +72,6 @@ class StructA:
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
-        
-        if "myEnum" in data:
-            args["my_enum"] = data["myEnum"]        
-
         return cls(**args)
 
 
@@ -98,8 +94,6 @@ class StructB:
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
         
-        if "myEnum" in data:
-            args["my_enum"] = data["myEnum"]
         if "myValue" in data:
             args["my_value"] = data["myValue"]        
 
