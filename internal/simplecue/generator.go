@@ -781,7 +781,7 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 			return typeDef, err
 		}
 
-		typeDef.Scalar.Value = val
+		typeDef.Value = val
 	}
 
 	// If the default (all lists have a default, usually self, ugh) differs from the

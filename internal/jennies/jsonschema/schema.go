@@ -160,8 +160,8 @@ func (jenny Schema) formatScalar(typeDef ast.Type) Definition {
 	}
 
 	// constant value?
-	if typeDef.AsScalar().IsConcrete() {
-		definition.Set("const", typeDef.AsScalar().Value)
+	if typeDef.IsConcrete() {
+		definition.Set("const", typeDef.Value)
 	}
 
 	return definition

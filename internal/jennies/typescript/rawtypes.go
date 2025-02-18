@@ -95,7 +95,7 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper packageMapper) 
 	objectName := tools.CleanupNames(def.Name)
 
 	// generate a "default value factory" for every object, except for constants or composability slots
-	if (!def.Type.IsScalar() && !def.Type.IsComposableSlot()) || (def.Type.IsScalar() && !def.Type.AsScalar().IsConcrete()) {
+	if (!def.Type.IsScalar() && !def.Type.IsComposableSlot()) || (def.Type.IsScalar() && !def.Type.IsConcrete()) {
 		buffer.WriteString("\n")
 
 		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(objectName), objectName))
@@ -174,7 +174,7 @@ func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper packag
 	case ast.KindArray:
 		return raw("[]")
 	case ast.KindScalar:
-		return defaultValueForScalar(typeDef.AsScalar())
+		return defaultValueForScalar(typeDef)
 	case ast.KindIntersection:
 		return jenny.defaultValuesForIntersection(typeDef.AsIntersection(), packageMapper)
 	default:
@@ -216,13 +216,13 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 	return defaults
 }
 
-func defaultValueForScalar(scalar ast.ScalarType) any {
+func defaultValueForScalar(scalar ast.Type) any {
 	// The scalar represents a constant
 	if scalar.Value != nil {
 		return scalar.Value
 	}
 
-	switch scalar.ScalarKind {
+	switch scalar.Scalar.ScalarKind {
 	case ast.KindNull:
 		return raw("null")
 	case ast.KindAny:
@@ -331,7 +331,7 @@ func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.M
 			case ast.KindArray:
 				buffer.WriteString(fmt.Sprintf("%s: []", f.Name))
 			case ast.KindScalar:
-				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar())))
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForScalar(f.Type)))
 			}
 		}
 	}
@@ -349,7 +349,7 @@ func defaultEmptyValuesForStructs(def ast.StructType) string {
 		case ast.KindArray:
 			buffer.WriteString(fmt.Sprintf("%s: []", f.Name))
 		case ast.KindScalar:
-			buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar())))
+			buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForScalar(f.Type)))
 		default:
 		}
 	}

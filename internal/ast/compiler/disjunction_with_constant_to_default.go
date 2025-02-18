@@ -36,16 +36,16 @@ func (pass *DisjunctionWithConstantToDefault) processDisjunction(_ *Visitor, _ *
 		return def, nil
 	}
 
-	if branches[0].Scalar.IsConcrete() == branches[1].Scalar.IsConcrete() {
+	if branches[0].IsConcrete() == branches[1].IsConcrete() {
 		return def, nil
 	}
 
-	if branches[0].Scalar.IsConcrete() {
+	if branches[0].IsConcrete() {
 		def = branches[1]
-		def.Default = branches[0].Scalar.Value
+		def.Default = branches[0].Value
 	} else {
 		def = branches[0]
-		def.Default = branches[1].Scalar.Value
+		def.Default = branches[1].Value
 	}
 
 	def.AddToPassesTrail("DisjunctionWithConstantToDefault")

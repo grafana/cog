@@ -47,7 +47,7 @@ func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) 
 	}
 
 	if object.Type.IsConcreteScalar() {
-		buffer.WriteString(fmt.Sprintf("%s: %s = %s", defName, formatter.formatType(object.Type), formatValue(object.Type.AsScalar().Value)))
+		buffer.WriteString(fmt.Sprintf("%s: %s = %s", defName, formatter.formatType(object.Type), formatValue(object.Type.Value)))
 
 		return buffer.String(), nil
 	}
@@ -85,9 +85,9 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 
 	if def.IsScalar() {
 		// This scalar actually refers to a constant
-		if def.AsScalar().IsConcrete() {
+		if def.IsConcrete() {
 			typingPkg := formatter.importPkg("typing", "typing")
-			result = fmt.Sprintf("%s.Literal[%s]", typingPkg, formatValue(def.AsScalar().Value))
+			result = fmt.Sprintf("%s.Literal[%s]", typingPkg, formatValue(def.Value))
 		} else {
 			result = formatter.formatScalarKind(def.AsScalar().ScalarKind)
 		}

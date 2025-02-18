@@ -284,7 +284,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 			}
 
 			// if the field has a value, it's a constant and we don't need to add it as an argument
-			isConstant := field.Type.IsConcreteScalar()
+			isConstant := field.Type.IsConcrete()
 			if !isConstant {
 				newOpt.Args = append(newOpt.Args, newArg)
 			}
@@ -294,7 +294,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 				if isConstant {
 					newAssignment = ast.ConstantAssignment(
 						assignmentPathPrefix.Append(ast.PathFromStructField(field)),
-						field.Type.AsScalar().Value,
+						field.Type.Value,
 					)
 				} else {
 					newAssignment = ast.ArgumentAssignment(
@@ -309,7 +309,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 			} else {
 				var assignmentValue ast.AssignmentValue
 				if isConstant {
-					assignmentValue = ast.AssignmentValue{Constant: field.Type.AsScalar().Value}
+					assignmentValue = ast.AssignmentValue{Constant: field.Type.Value}
 				} else {
 					assignmentValue = ast.AssignmentValue{Argument: &newArg}
 				}

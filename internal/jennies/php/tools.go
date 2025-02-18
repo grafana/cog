@@ -232,19 +232,19 @@ func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, d
 	case ast.KindMap, ast.KindArray:
 		return raw("[]")
 	case ast.KindScalar:
-		return defaultValueForScalar(typeDef.AsScalar())
+		return defaultValueForScalar(typeDef)
 	default:
 		return "unknown"
 	}
 }
 
-func defaultValueForScalar(scalar ast.ScalarType) any {
+func defaultValueForScalar(scalar ast.Type) any {
 	// The scalar represents a constant
 	if scalar.Value != nil {
 		return scalar.Value
 	}
 
-	switch scalar.ScalarKind {
+	switch scalar.Scalar.ScalarKind {
 	case ast.KindNull, ast.KindAny:
 		return nil
 
