@@ -177,6 +177,8 @@ func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper packag
 		return defaultValueForScalar(typeDef.AsScalar())
 	case ast.KindIntersection:
 		return jenny.defaultValuesForIntersection(typeDef.AsIntersection(), packageMapper)
+	case ast.KindConstantRef:
+		return jenny.defaultValueForConstantReferences(typeDef.AsConstantRef())
 	default:
 		return "unknown"
 	}
@@ -355,6 +357,19 @@ func defaultEmptyValuesForStructs(def ast.StructType) string {
 	}
 
 	return buffer.String()
+}
+
+func (jenny RawTypes) defaultValueForConstantReferences(def ast.ConstantReferenceType) any {
+	referredType, ok := jenny.schemas.LocateObject(def.ReferredPkg, def.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	if referredType.Type.IsEnum() {
+		return raw(jenny.typeFormatter.enums.formatValue(referredType, def.ReferenceValue))
+	}
+
+	return "unknown"
 }
 
 func hasStructDefaults(typeDef ast.Type, defaults any) bool {

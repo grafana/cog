@@ -7,7 +7,6 @@ public class Dashboard {
     public List<Panel> panels;
     public Dashboard() {
     }
-    
     public Dashboard(String title,List<Panel> panels) {
         this.title = title;
         this.panels = panels;

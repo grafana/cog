@@ -561,6 +561,9 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
 			continue
 		}
+		if field.Type.IsConstantRef() {
+			continue
+		}
 
 		builder.Options = append(builder.Options, generator.structFieldToOption(field))
 	}

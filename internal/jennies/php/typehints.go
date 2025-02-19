@@ -24,7 +24,7 @@ func (generator *typehints) requiresHint(def ast.Type) bool {
 		return true
 	}
 
-	return !def.IsAnyOf(ast.KindScalar, ast.KindStruct, ast.KindRef, ast.KindEnum)
+	return !def.IsAnyOf(ast.KindScalar, ast.KindStruct, ast.KindRef, ast.KindEnum, ast.KindConstantRef)
 }
 
 func (generator *typehints) paramAnnotationForType(paramName string, def ast.Type) string {
@@ -61,6 +61,8 @@ func (generator *typehints) forType(def ast.Type, resolveBuilders bool) string {
 		hint = generator.composableSlotHint(def, resolveBuilders)
 	case def.IsDisjunction():
 		hint = generator.disjunctionHint(def, resolveBuilders)
+	case def.IsConstantRef():
+		hint = generator.constantRefHint(def)
 	}
 
 	if hint == "" {
@@ -148,4 +150,11 @@ func (generator *typehints) disjunctionHint(def ast.Type, resolveBuilders bool) 
 	})
 
 	return strings.Join(branches, "|")
+}
+
+func (generator *typehints) constantRefHint(def ast.Type) string {
+	referredPkg := formatPackageName(def.AsConstantRef().ReferredPkg)
+	typeName := formatObjectName(def.AsConstantRef().ReferredType)
+
+	return generator.config.fullNamespaceRef(referredPkg + "\\" + typeName)
 }

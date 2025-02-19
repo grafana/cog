@@ -1,0 +1,190 @@
+ {
+  "Package": "constant_references",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "Enum": {
+      "Name": "Enum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "ValueA",
+              "Value": "ValueA"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "ValueB",
+              "Value": "ValueB"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "ValueC",
+              "Value": "ValueC"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constant_references",
+        "ReferredType": "Enum"
+      }
+    },
+    "ParentStruct": {
+      "Name": "ParentStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "myEnum",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "constant_references",
+                  "ReferredType": "Enum"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constant_references",
+        "ReferredType": "ParentStruct"
+      }
+    },
+    "Struct": {
+      "Name": "Struct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "myValue",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "myEnum",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "constant_references",
+                  "ReferredType": "Enum"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constant_references",
+        "ReferredType": "Struct"
+      }
+    },
+    "StructA": {
+      "Name": "StructA",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "myEnum",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": false,
+                "ConstantReference": {
+                  "ReferredPkg": "constant_references",
+                  "ReferredType": "Enum",
+                  "ReferenceValue": "ValueA"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constant_references",
+        "ReferredType": "StructA"
+      }
+    },
+    "StructB": {
+      "Name": "StructB",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "myEnum",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": false,
+                "ConstantReference": {
+                  "ReferredPkg": "constant_references",
+                  "ReferredType": "Enum",
+                  "ReferenceValue": "ValueB"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "myValue",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constant_references",
+        "ReferredType": "StructB"
+      }
+    }
+  }
+}

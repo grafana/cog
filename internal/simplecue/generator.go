@@ -335,8 +335,8 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 	v = g.removeTautologicalUnification(v)
 
 	// This node is referring to another definition
-	if ok, v, defV := getReference(v); ok {
-		return g.declareReference(v, defV)
+	if ok, v, def := getReference(v); ok {
+		return g.declareReference(v, def)
 	}
 
 	defVal, err := g.extractDefault(v)
@@ -440,7 +440,6 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
 		return true, exprs[0], exprs[1]
 	}
-
 	return false, v, v
 }
 
@@ -622,6 +621,10 @@ func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHint
 	opts, err := g.scalarTypeOptions(v, defVal, hints)
 	if err != nil {
 		return ast.Type{}, err
+	}
+
+	if ok, t := g.stringOrIntegerFromEnum(v, defVal, opts); ok {
+		return t, nil
 	}
 
 	typeDef := ast.String(opts...)
@@ -940,4 +943,52 @@ func (g *generator) removeTautologicalUnification(v cue.Value) cue.Value {
 	}
 
 	return v
+}
+
+// stringOrIntegerFromEnum detects the case when the string is defined with an enum value.
+// When a definition extends from other and override a field defined as enum with a specific value,
+// it detected as its type instead as a reference. Ex: MyEnum & "value"
+func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.TypeOption) (bool, ast.Type) {
+	if defVal != nil {
+		return false, ast.Type{}
+	}
+
+	conjuncts := appendSplit(nil, cue.AndOp, v)
+
+	if len(conjuncts) == 1 {
+		return false, ast.Type{}
+	}
+
+	// When a reference extends from other, and it appends a new value, but it does not
+	// override anything
+	if conjuncts[0].IsConcrete() {
+		return false, ast.Type{}
+	}
+	// When an element is overriding a field and/or a value, the last element is the value that we want and
+	// the rest of them are similar.
+	if len(conjuncts) > 2 {
+		conjuncts[1] = conjuncts[len(conjuncts)-1]
+	}
+
+	val, err := cueConcreteToScalar(conjuncts[1])
+	if err != nil {
+		return false, ast.Type{}
+	}
+
+	if val == nil {
+		return false, ast.Type{}
+	}
+
+	refPkg, err := g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
+	if err != nil {
+		return false, ast.Type{}
+	}
+
+	_, path := conjuncts[0].ReferencePath()
+	if path.String() != "" {
+		refType := g.namingFunc(g.rootVal, path)
+		return true, ast.NewConstantReferenceType(refPkg, refType, val, opts...)
+	}
+
+	return false, ast.Type{}
 }

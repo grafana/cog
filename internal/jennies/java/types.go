@@ -44,6 +44,8 @@ func (tf *typeFormatter) formatFieldType(def ast.Type) string {
 	case ast.KindStruct:
 		// TODO: Manage anonymous structs
 		return "Object"
+	case ast.KindConstantRef:
+		return tf.formatConstantReference(def.AsConstantRef())
 	}
 
 	return "unknown"
@@ -85,6 +87,15 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	}
 }
 
+func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) string {
+	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	if object.Type.Kind == ast.KindEnum {
+		return formatObjectName(def.ReferredType)
+	}
+
+	return "unknown"
+}
+
 func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
 	tf.packageMapper("java.util", "List")
 	return fmt.Sprintf("List<%s>", tf.formatFieldType(def.ValueType))
@@ -102,6 +113,8 @@ func (tf *typeFormatter) formatMap(def ast.MapType) string {
 		mapType = tf.formatMap(def.ValueType.AsMap())
 	case ast.KindArray:
 		mapType = tf.formatArray(def.ValueType.AsArray())
+	case ast.KindConstantRef:
+		mapType = tf.formatConstantReference(def.ValueType.AsConstantRef())
 	}
 
 	return fmt.Sprintf("Map<String, %s>", mapType)
@@ -358,4 +371,26 @@ func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
 	}
 
 	return castedPath + strings.Join(parts, ".")
+}
+
+func (tf *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) string {
+	obj, ok := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	if obj.Type.IsEnum() {
+		enumVale, ok := obj.Type.AsEnum().MemberForValue(def.ReferenceValue)
+		if !ok {
+			return "unknown"
+		}
+
+		if refPkg := tf.packageMapper(def.ReferredPkg, def.ReferredType); refPkg != "" {
+			return fmt.Sprintf("%s.%s.%s", refPkg, def.ReferredType, enumVale.Name)
+		}
+
+		return fmt.Sprintf("%s.%s", def.ReferredType, tools.UpperSnakeCase(enumVale.Name))
+	}
+
+	return "unknown"
 }

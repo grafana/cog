@@ -88,6 +88,10 @@ func (resource {{ .def.Name|formatObjectName }}) Equals(other {{ .def.Name|forma
 		if {{ $dereference }}{{ .SelfName }} != {{ $dereference }}{{ .OtherName }} {
 			return false
 		}
+    {{- else if .Type.IsConstantRef }}
+        if {{ .SelfName }} != {{ .OtherName}} {
+            return false
+        }
 	{{- else }}
 		found an unimplemented equality case // intentionally left uncommented, to trigger a failure during codegen
 	{{- end }}

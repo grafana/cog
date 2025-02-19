@@ -28,18 +28,18 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
         return {{ $.Name | lowerCamelCase }};
     }
     {{- end }}
-    {{- else if .DefaultConstructorArgs }}
-    public {{ $.Name }}() {
-        {{- range .Defaults }}
-        this.{{ .Name | lowerCamelCase | escapeVar }} = {{ .Value }};
+    {{- else }}
+    {{- range .Constructors }}
+    public {{ $.Name }}({{- template "args" dict "Arguments" .Args "IsBuilder" false }}) {
+        {{- range .Assignments }}
+        {{- if .Value }}
+        this.{{ .Name }} = {{ .Value }};
+        {{- else }}
+        this.{{ .Name }} = {{ .Name }};
+        {{- end }}
         {{- end }}
     }
-    
-    public {{ $.Name }}({{- template "args" dict "Arguments" .DefaultConstructorArgs "IsBuilder" false }}) {
-        {{- range .DefaultConstructorArgs }}
-        this.{{ .Name | escapeVar | lowerCamelCase }} = {{ .Name | escapeVar | lowerCamelCase }};
-        {{- end }}
-    }
+    {{- end }}
     {{- end }}
     
     {{- if .Variant }}

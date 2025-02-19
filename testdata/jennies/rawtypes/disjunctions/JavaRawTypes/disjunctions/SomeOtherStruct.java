@@ -6,7 +6,6 @@ public class SomeOtherStruct {
     public Byte foo;
     public SomeOtherStruct() {
     }
-    
     public SomeOtherStruct(String type,Byte foo) {
         this.type = type;
         this.foo = foo;

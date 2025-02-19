@@ -287,6 +287,13 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 		fieldName := formatFieldName(field.Name)
 		defaultValue := (any)(nil)
 
+		// values with enums that we don't want to add in the constructor
+		if field.Type.IsConstantRef() {
+			val := jenny.typeFormatter.enumFromConstantRef(field.Type.AsConstantRef())
+			assignments = append(assignments, fmt.Sprintf("    $this->%s = %s;", fieldName, val))
+			continue
+		}
+
 		// set for default values for fields that need one or have one
 		if !field.Type.Nullable || field.Type.Default != nil {
 			var defaultsOverrides map[string]any
@@ -353,7 +360,7 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	for _, field := range def.Type.AsStruct().Fields {
 		// No need to unmarshal constant scalar fields since they're set in
 		// the object's constructor
-		if field.Type.IsConcreteScalar() {
+		if field.Type.IsConcreteScalar() || field.Type.IsConstantRef() {
 			continue
 		}
 

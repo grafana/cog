@@ -8,7 +8,6 @@ public class RefStruct {
     public List<String> tags;
     public RefStruct() {
     }
-    
     public RefStruct(Map<String, String> labels,List<String> tags) {
         this.labels = labels;
         this.tags = tags;

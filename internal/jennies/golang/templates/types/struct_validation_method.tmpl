@@ -76,6 +76,10 @@ func (resource {{ .def.Name|formatObjectName }}) Validate() error {
 		}
 	{{- else if .Type.IsScalar }}
 		{{- template "type_constraints" (dict "ConstraintPath" .ConstraintPath "Type" .Type "Constraints" .Type.Scalar.Constraints "SelfName" .SelfName) }}
+	{{- else if .Type.IsConstantRef }}
+    if {{ .SelfName }} != "{{ .Type.ConstantReference.ReferenceValue }}" {
+        errs = append(errs, cog.MakeBuildErrors("{{ .ConstraintPath }}", errors.New("must be {{ .Type.ConstantReference.ReferenceValue }}"))...)
+    }
 	{{- else }}
 		found an unimplemented validate case // intentionally left uncommented, to trigger a failure during codegen
 	{{- end }}

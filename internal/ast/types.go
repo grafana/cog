@@ -12,6 +12,7 @@ type Kind string
 const (
 	KindDisjunction Kind = "disjunction"
 	KindRef         Kind = "ref"
+	KindConstantRef Kind = "constant_ref"
 
 	KindStruct Kind = "struct"
 	KindEnum   Kind = "enum"
@@ -78,10 +79,10 @@ func (constraint TypeConstraint) DeepCopy() TypeConstraint {
 	return newConstraint
 }
 
-// meant to be used by jennies, to gain a finer control on the codegen from schemas
+// JenniesHints meant to be used by jennies, to gain a finer control on the codegen from schemas
 type JenniesHints map[string]any
 
-// Struct representing every type defined by the IR.
+// Type representing every type defined by the IR.
 // Bonus: in a way that can be (un)marshaled to/from JSON,
 // which is useful for unit tests.
 type Type struct {
@@ -89,15 +90,16 @@ type Type struct {
 	Nullable bool
 	Default  any `json:",omitempty"`
 
-	Disjunction    *DisjunctionType    `json:",omitempty"`
-	Array          *ArrayType          `json:",omitempty"`
-	Enum           *EnumType           `json:",omitempty"`
-	Map            *MapType            `json:",omitempty"`
-	Struct         *StructType         `json:",omitempty"`
-	Ref            *RefType            `json:",omitempty"`
-	Scalar         *ScalarType         `json:",omitempty"`
-	Intersection   *IntersectionType   `json:",omitempty"`
-	ComposableSlot *ComposableSlotType `json:",omitempty" yaml:"composable_slot"`
+	Disjunction       *DisjunctionType       `json:",omitempty"`
+	Array             *ArrayType             `json:",omitempty"`
+	Enum              *EnumType              `json:",omitempty"`
+	Map               *MapType               `json:",omitempty"`
+	Struct            *StructType            `json:",omitempty"`
+	Ref               *RefType               `json:",omitempty"`
+	ConstantReference *ConstantReferenceType `json:",omitempty"`
+	Scalar            *ScalarType            `json:",omitempty"`
+	Intersection      *IntersectionType      `json:",omitempty"`
+	ComposableSlot    *ComposableSlotType    `json:",omitempty" yaml:"composable_slot"`
 
 	Hints       JenniesHints `json:",omitempty"`
 	PassesTrail []string     `json:",omitempty"`
@@ -177,6 +179,10 @@ func (t Type) HasHint(hintName string) bool {
 
 func (t Type) IsRef() bool {
 	return t.Kind == KindRef
+}
+
+func (t Type) IsConstantRef() bool {
+	return t.Kind == KindConstantRef
 }
 
 func (t Type) IsStructOrRef() bool {
@@ -291,6 +297,10 @@ func (t Type) DeepCopy() Type {
 	if t.ComposableSlot != nil {
 		newComposableSlot := t.ComposableSlot.DeepCopy()
 		newType.ComposableSlot = &newComposableSlot
+	}
+	if t.ConstantReference != nil {
+		newConstantReference := t.ConstantReference.DeepCopy()
+		newType.ConstantReference = &newConstantReference
 	}
 
 	for k, v := range t.Hints {
@@ -445,6 +455,24 @@ func NewStruct(fields ...StructField) Type {
 	}
 }
 
+func NewConstantReferenceType(referredPkg string, referredTypeName string, value any, opts ...TypeOption) Type {
+	def := Type{
+		Kind:  KindConstantRef,
+		Hints: make(JenniesHints),
+		ConstantReference: &ConstantReferenceType{
+			ReferredPkg:    referredPkg,
+			ReferredType:   referredTypeName,
+			ReferenceValue: value,
+		},
+	}
+
+	for _, opt := range opts {
+		opt(&def)
+	}
+
+	return def
+}
+
 func NewRef(referredPkg string, referredTypeName string, opts ...TypeOption) Type {
 	def := Type{
 		Kind:  KindRef,
@@ -528,6 +556,10 @@ func (t Type) AsStruct() StructType {
 
 func (t Type) AsRef() RefType {
 	return *t.Ref
+}
+
+func (t Type) AsConstantRef() ConstantReferenceType {
+	return *t.ConstantReference
 }
 
 func (t Type) AsScalar() ScalarType {
@@ -911,6 +943,20 @@ func NewStructField(name string, fieldType Type, opts ...StructFieldOption) Stru
 	}
 
 	return field
+}
+
+type ConstantReferenceType struct {
+	ReferredPkg    string `yaml:"referred_pkg"`
+	ReferredType   string `yaml:"referred_type"`
+	ReferenceValue any    `yaml:"reference_value"`
+}
+
+func (t ConstantReferenceType) DeepCopy() ConstantReferenceType {
+	return ConstantReferenceType{
+		ReferredPkg:    t.ReferredPkg,
+		ReferredType:   t.ReferredType,
+		ReferenceValue: t.ReferenceValue,
+	}
 }
 
 type RefType struct {

@@ -6,7 +6,6 @@ public class StringOrSomeOtherStruct {
     public SomeOtherStruct someOtherStruct;
     public StringOrSomeOtherStruct() {
     }
-    
     public StringOrSomeOtherStruct(String string,SomeOtherStruct someOtherStruct) {
         this.string = string;
         this.someOtherStruct = someOtherStruct;

@@ -6,7 +6,6 @@ public class SomeStruct {
     public SomeStruct() {
         this.fieldBool = true;
     }
-    
     public SomeStruct(Boolean fieldBool) {
         this.fieldBool = fieldBool;
     }

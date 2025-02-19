@@ -27,11 +27,11 @@ public class Main {
                 .tags(List.of("generated", "raspberrypi-node-integration")).refresh("30s")
                 .time(new DashboardDashboardTimeBuilder().from("now-30m").to("now")).timezone("browser")
                 .timepicker(new TimePickerBuilder()
+                        .refreshIntervals(List.of("5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"))
                         .refreshIntervals(List.of("5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d")))
                 .tooltip(DashboardCursorSync.CROSSHAIR).withVariable(datasourceVariable()).withVariable(queryVariable())
-                .
                 // CPU
-                withRow(new RowBuilder("CPU")).withPanel(CPU.cpuUsageTimeseries())
+                .withRow(new RowBuilder("CPU")).withPanel(CPU.cpuUsageTimeseries())
                 .withPanel(CPU.cpuTemperatureGauge()).withPanel(CPU.loadAverageTimeseries()).
                 // Memory
                 withRow(new RowBuilder("Memory")).withPanel(Memory.memoryUsageTimeseries())

@@ -53,7 +53,7 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 	case ast.KindScalar:
 		scalarType := def.Type.AsScalar()
 
-		//nolint: gocritic
+		// nolint: gocritic
 		if scalarType.Value != nil {
 			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
 		} else if scalarType.ScalarKind == ast.KindBytes {
@@ -137,6 +137,10 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 
 		if def.IsRef() {
 			return formatter.formatRef(def, resolveBuilders)
+		}
+
+		if def.IsConstantRef() {
+			return formatter.formatConstantRef(def)
 		}
 
 		// anonymous struct or struct body
@@ -260,6 +264,18 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 
 	if def.Nullable {
 		typeName = "*" + typeName
+	}
+
+	return typeName
+}
+
+func (formatter *typeFormatter) formatConstantRef(def ast.Type) string {
+	constRef := def.AsConstantRef()
+	referredPkg := formatter.packageMapper(constRef.ReferredPkg)
+	typeName := formatObjectName(constRef.ReferredType)
+
+	if referredPkg != "" {
+		typeName = referredPkg + "." + typeName
 	}
 
 	return typeName

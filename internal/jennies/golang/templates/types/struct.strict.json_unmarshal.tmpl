@@ -52,7 +52,7 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte
 
 {{/* arguments: RawInputRef, InputType, UnmarshalInto, ErrorBreadcrumb, Depth */}}
 {{- define "strict_unmarshal_field_type" -}}
-	{{- if or (resolvesToScalar .InputType) (resolvesToEnum .InputType) -}}
+	{{- if or (resolvesToScalar .InputType) (resolvesToEnum .InputType) .InputType.IsConstantRef -}}
 			if err := json.Unmarshal({{ .RawInputRef }}, &{{ .UnmarshalInto }}); err != nil {
 				errs = append(errs, cog.MakeBuildErrors("{{ .ErrorBreadcrumb }}", err)...)
 			}

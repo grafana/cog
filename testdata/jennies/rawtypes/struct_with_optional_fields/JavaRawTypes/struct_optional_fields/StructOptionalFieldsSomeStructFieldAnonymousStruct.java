@@ -5,7 +5,6 @@ public class StructOptionalFieldsSomeStructFieldAnonymousStruct {
     public Object fieldAny;
     public StructOptionalFieldsSomeStructFieldAnonymousStruct() {
     }
-    
     public StructOptionalFieldsSomeStructFieldAnonymousStruct(Object fieldAny) {
         this.fieldAny = fieldAny;
     }

@@ -8,7 +8,6 @@ public class DefaultsStructComplexField {
     public List<String> array;
     public DefaultsStructComplexField() {
     }
-    
     public DefaultsStructComplexField(String uid,DefaultsStructComplexFieldNested nested,List<String> array) {
         this.uid = uid;
         this.nested = nested;
