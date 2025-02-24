@@ -6,7 +6,7 @@ require (
 	cuelang.org/go v0.11.0
 	github.com/expr-lang/expr v1.16.9
 	github.com/getkin/kin-openapi v0.128.0
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/grafana/codejen v0.0.4-0.20230321061741-77f656893a3d
 	github.com/huandu/xstrings v1.5.0
 	github.com/invopop/jsonschema v0.13.0
