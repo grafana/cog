@@ -2,7 +2,7 @@ package yaml
 
 import (
 	"fmt"
-	
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers"
@@ -32,52 +32,52 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 		if err != nil {
 			return nil, err
 		}
-		
+
 		return builder.Omit(selector), nil
 	}
-	
+
 	if rule.Rename != nil {
 		return rule.Rename.AsRewriteRule(pkg)
 	}
-	
+
 	if rule.MergeInto != nil {
 		return rule.MergeInto.AsRewriteRule(pkg)
 	}
-	
+
 	if rule.ComposeBuilders != nil {
 		return rule.ComposeBuilders.AsRewriteRule(pkg)
 	}
-	
+
 	if rule.Properties != nil {
 		return rule.Properties.AsRewriteRule(pkg)
 	}
-	
+
 	if rule.Duplicate != nil {
 		return rule.Duplicate.AsRewriteRule(pkg)
 	}
-	
+
 	if rule.Initialize != nil {
 		return rule.Initialize.AsRewriteRule(pkg)
 	}
-	
+
 	if rule.PromoteOptsToConstructor != nil {
 		return rule.PromoteOptsToConstructor.AsRewriteRule(pkg)
 	}
-	
+
 	if rule.AddOption != nil {
 		return rule.AddOption.AsRewriteRule(pkg)
 	}
-	
+
 	if rule.AddFactory != nil {
 		return rule.AddFactory.AsRewriteRule(pkg)
 	}
-	
+
 	return nil, fmt.Errorf("empty rule")
 }
 
 type RenameBuilder struct {
 	BuilderSelector `yaml:",inline"`
-	
+
 	As string `yaml:"as"`
 }
 
@@ -86,7 +86,7 @@ func (rule RenameBuilder) AsRewriteRule(pkg string) (builder.RewriteRule, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return builder.Rename(selector, rule.As), nil
 }
 
@@ -110,7 +110,7 @@ func (rule MergeInto) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 type ComposeBuilders struct {
 	BuilderSelector `yaml:",inline"`
-	
+
 	SourceBuilderName        string            `yaml:"source_builder_name"`
 	PluginDiscriminatorField string            `yaml:"plugin_discriminator_field"`
 	ExcludeOptions           []string          `yaml:"exclude_options"`
@@ -124,7 +124,7 @@ func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, erro
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return builder.ComposeBuilders(
 		selector,
 		builder.CompositionConfig{
@@ -148,7 +148,7 @@ func (rule Properties) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return builder.Properties(
 		selector,
 		rule.Set,
@@ -166,7 +166,7 @@ func (rule Duplicate) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return builder.Duplicate(
 		selector,
 		rule.As,
@@ -189,7 +189,7 @@ func (rule Initialize) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return builder.Initialize(
 		selector,
 		tools.Map(rule.Set, func(init Initialization) builder.Initialization {
@@ -208,7 +208,7 @@ func (rule PromoteOptsToConstructor) AsRewriteRule(pkg string) (builder.RewriteR
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return builder.PromoteOptionsToConstructor(selector, rule.Options), nil
 }
 
@@ -222,7 +222,7 @@ func (rule AddOption) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return builder.AddOption(selector, rule.Option), nil
 }
 
@@ -236,7 +236,7 @@ func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return builder.AddFactory(selector, rule.Factory), nil
 }
 
@@ -247,9 +247,9 @@ func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 type BuilderSelector struct {
 	ByObject *string `yaml:"by_object"`
 	ByName   *string `yaml:"by_name"`
-	
+
 	ByVariant *string `yaml:"by_variant"`
-	
+
 	GeneratedFromDisjunction *bool `yaml:"generated_from_disjunction"` // noop?
 }
 
@@ -257,18 +257,18 @@ func (selector BuilderSelector) AsSelector(pkg string) (builder.Selector, error)
 	if selector.ByObject != nil {
 		return builder.ByObjectName(pkg, *selector.ByObject), nil
 	}
-	
+
 	if selector.ByName != nil {
 		return builder.ByName(pkg, *selector.ByName), nil
 	}
-	
+
 	if selector.ByVariant != nil {
 		return builder.ByVariant(ast.SchemaVariant(*selector.ByVariant)), nil
 	}
-	
+
 	if selector.GeneratedFromDisjunction != nil {
 		return builder.StructGeneratedFromDisjunction(), nil
 	}
-	
+
 	return nil, fmt.Errorf("empty selector")
 }
