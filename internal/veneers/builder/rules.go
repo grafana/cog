@@ -509,43 +509,6 @@ func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
 	}
 }
 
-// DefaultToConstant sets a default value into a constant.
-// When we unfold a value, omit an option, or any other action; we can lose the default value in the Builder struct.
-// If we parse the defaults using the Builder and not the Schema, we might not have all the defaults and with this rule,
-// we set these defaults as constants inside the constructor.
-func DefaultToConstant(selector Selector, options []string) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for i, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
-			}
-
-			for _, option := range options {
-				opt, ok := builder.OptionByName(option)
-				if !ok {
-					continue
-				}
-
-				values := make([]any, 0)
-				for _, args := range opt.Args {
-					if args.Type.Default != nil {
-						values = append(values, args.Type.Default)
-					}
-				}
-
-				for v := range opt.Assignments {
-					opt.Assignments[v].Value.Argument = nil
-					opt.Assignments[v].Value.Constant = values[v]
-				}
-
-				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, opt.Assignments...)
-			}
-		}
-
-		return builders, nil
-	}
-}
-
 // AddFactory adds a builder factory to the selected builders.
 // These factories are meant to be used to simplify the instantiation of
 // builders for common use-cases.
