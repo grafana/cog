@@ -25,6 +25,7 @@ func (pass *PrefixObjectNames) Process(schemas []*ast.Schema) ([]*ast.Schema, er
 		OnRef:         pass.processRef,
 		OnEnum:        pass.processEnum,
 		OnDisjunction: pass.processDisjunction,
+		OnConstantRef: pass.processConstantRef,
 	}
 
 	return visitor.VisitSchemas(schemas)
@@ -110,4 +111,12 @@ func (pass *PrefixObjectNames) processEnum(_ *Visitor, _ *ast.Schema, enum ast.T
 	enum.Enum.Values = values
 
 	return enum, nil
+}
+
+func (pass *PrefixObjectNames) processConstantRef(_ *Visitor, _ *ast.Schema, ref ast.Type) (ast.Type, error) {
+	originalName := ref.ConstantReference.ReferredType
+	ref.ConstantReference.ReferredType = pass.Prefix + originalName
+	ref.AddToPassesTrail(fmt.Sprintf("PrefixObjectNames[%s → %s]", originalName, ref.ConstantReference.ReferredType))
+
+	return ref, nil
 }
