@@ -138,6 +138,43 @@ schema: {
 	req.Equal(testutils.ObjectsMap(objects...), schemaAst.Objects)
 }
 
+func TestGenerateAST_withEnvelopeAndConstantRef(t *testing.T) {
+	req := require.New(t)
+	schema := `
+Spec: {
+	type: ValueMap
+}
+
+MappingType: "value" | "range"
+
+ValueMap: {
+	type: MappingType & "value"
+}
+`
+
+	cueVal := cuecontext.New().CompileString(schema)
+	specCueVal := cueVal.LookupPath(cue.ParsePath("Spec"))
+
+	schemaAst, err := GenerateAST(specCueVal, Config{Package: "grafanatest", ForceNamedEnvelope: "Spec"})
+	req.NoError(err)
+	require.NotNil(t, schemaAst)
+
+	objects := []ast.Object{
+		ast.NewObject("grafanatest", "ValueMap", ast.NewStruct(
+			ast.NewStructField("type", ast.NewConstantReferenceType("grafanatest", "MappingType", "value"), ast.Required()),
+		)),
+		ast.NewObject("grafanatest", "MappingType", ast.NewEnum([]ast.EnumValue{
+			{Name: "value", Value: "value", Type: ast.String()},
+			{Name: "range", Value: "range", Type: ast.String()},
+		})),
+		ast.NewObject("grafanatest", "Spec", ast.NewStruct(
+			ast.NewStructField("type", ast.NewRef("grafanatest", "ValueMap"), ast.Required()),
+		)),
+	}
+
+	req.Equal(testutils.ObjectsMap(objects...), schemaAst.Objects)
+}
+
 // ToOverlay converts a fs.FS into a CUE loader overlay.
 func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) error {
 	// TODO why not just stick the prefix on automatically...?

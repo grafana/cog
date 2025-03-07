@@ -623,7 +623,11 @@ func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHint
 		return ast.Type{}, err
 	}
 
-	if ok, t := g.stringOrIntegerFromEnum(v, defVal, opts); ok {
+	ok, t, err := g.stringOrIntegerFromEnum(v, defVal, opts)
+	if err != nil {
+		return ast.Type{}, err
+	}
+	if ok {
 		return t, nil
 	}
 
@@ -948,22 +952,23 @@ func (g *generator) removeTautologicalUnification(v cue.Value) cue.Value {
 // stringOrIntegerFromEnum detects the case when the string is defined with an enum value.
 // When a definition extends from other and override a field defined as enum with a specific value,
 // it detected as its type instead as a reference. Ex: MyEnum & "value"
-func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.TypeOption) (bool, ast.Type) {
+func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.TypeOption) (bool, ast.Type, error) {
 	if defVal != nil {
-		return false, ast.Type{}
+		return false, ast.Type{}, nil
 	}
 
 	conjuncts := appendSplit(nil, cue.AndOp, v)
 
 	if len(conjuncts) == 1 {
-		return false, ast.Type{}
+		return false, ast.Type{}, nil
 	}
 
 	// When a reference extends from other, and it appends a new value, but it does not
 	// override anything
 	if conjuncts[0].IsConcrete() {
-		return false, ast.Type{}
+		return false, ast.Type{}, nil
 	}
+
 	// When an element is overriding a field and/or a value, the last element is the value that we want and
 	// the rest of them are similar.
 	if len(conjuncts) > 2 {
@@ -972,23 +977,29 @@ func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.
 
 	val, err := cueConcreteToScalar(conjuncts[1])
 	if err != nil {
-		return false, ast.Type{}
+		return false, ast.Type{}, err
 	}
 
 	if val == nil {
-		return false, ast.Type{}
+		return false, ast.Type{}, nil
 	}
 
 	refPkg, err := g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
 	if err != nil {
-		return false, ast.Type{}
+		return false, ast.Type{}, err
 	}
 
 	_, path := conjuncts[0].ReferencePath()
 	if path.String() != "" {
+		// ensure that the type referenced in the conjunction is discovered by
+		// the parser and added into the IR
+		if _, err = g.declareNode(conjuncts[0]); err != nil {
+			return false, ast.Type{}, err
+		}
+
 		refType := g.namingFunc(g.rootVal, path)
-		return true, ast.NewConstantReferenceType(refPkg, refType, val, opts...)
+		return true, ast.NewConstantReferenceType(refPkg, refType, val, opts...), nil
 	}
 
-	return false, ast.Type{}
+	return false, ast.Type{}, nil
 }
