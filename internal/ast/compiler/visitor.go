@@ -25,6 +25,7 @@ type Visitor struct {
 	OnEnum         VisitTypeFunc
 	OnScalar       VisitTypeFunc
 	OnRef          VisitTypeFunc
+	OnConstantRef  VisitTypeFunc
 
 	newObjects *orderedmap.Map[string, ast.Object]
 }
@@ -149,6 +150,10 @@ func (visitor *Visitor) VisitType(schema *ast.Schema, def ast.Type) (ast.Type, e
 		return visitor.VisitRef(schema, def)
 	}
 
+	if def.IsConstantRef() {
+		return visitor.VisitConsantRef(schema, def)
+	}
+
 	return def, nil
 }
 
@@ -270,6 +275,14 @@ func (visitor *Visitor) VisitScalar(schema *ast.Schema, def ast.Type) (ast.Type,
 func (visitor *Visitor) VisitRef(schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	if visitor.OnRef != nil {
 		return visitor.OnRef(visitor, schema, def)
+	}
+
+	return def, nil
+}
+
+func (visitor *Visitor) VisitConsantRef(schema *ast.Schema, def ast.Type) (ast.Type, error) {
+	if visitor.OnConstantRef != nil {
+		return visitor.OnConstantRef(visitor, schema, def)
 	}
 
 	return def, nil
