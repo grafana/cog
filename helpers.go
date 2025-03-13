@@ -185,6 +185,10 @@ type GoConfig struct {
 
 	// AnyAsInterface instructs cog to emit `interface{}` instead of `any`.
 	AnyAsInterface bool
+
+	// AllowMarshalEmptyDisjunctions makes generated `MarshalJSON()`
+	// ignore errors when marshaling an empty disjunction.
+	AllowMarshalEmptyDisjunctions bool
 }
 
 // Golang sets the output to Golang types.
@@ -194,8 +198,9 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 			SkipRuntime:            true,
 			GenerateJSONMarshaller: true,
 
-			GenerateEqual:  config.GenerateEqual,
-			AnyAsInterface: config.AnyAsInterface,
+			GenerateEqual:                 config.GenerateEqual,
+			AnyAsInterface:                config.AnyAsInterface,
+			AllowMarshalEmptyDisjunctions: config.AllowMarshalEmptyDisjunctions,
 		},
 	}
 	return pipeline
