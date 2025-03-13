@@ -3,7 +3,7 @@ on:
   pull_request: ~
 
 env:
-  DEVBOX_VERSION: 0.13.1
+  DEVBOX_VERSION: 0.14.0
   FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
 
 jobs:

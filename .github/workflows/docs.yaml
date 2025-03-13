@@ -11,7 +11,7 @@ permissions:
   id-token: write   # to verify the deployment originates from an appropriate source
 
 env:
-  DEVBOX_VERSION: 0.13.1
+  DEVBOX_VERSION: 0.14.0
 
 # Allow only one docs publishing job, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
