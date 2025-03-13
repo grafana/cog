@@ -21,6 +21,19 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "AstConstantReferenceType": {
+      "properties": {
+        "referred_pkg": {
+          "type": "string"
+        },
+        "referred_type": {
+          "type": "string"
+        },
+        "reference_value": true
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "AstDisjunctionType": {
       "properties": {
         "branches": {
@@ -80,7 +93,7 @@
     },
     "AstJenniesHints": {
       "type": "object",
-      "description": "meant to be used by jennies, to gain a finer control on the codegen from schemas"
+      "description": "JenniesHints meant to be used by jennies, to gain a finer control on the codegen from schemas"
     },
     "AstMapType": {
       "properties": {
@@ -191,6 +204,9 @@
         "ref": {
           "$ref": "#/$defs/AstRefType"
         },
+        "constantreference": {
+          "$ref": "#/$defs/AstConstantReferenceType"
+        },
         "scalar": {
           "$ref": "#/$defs/AstScalarType"
         },
@@ -212,7 +228,7 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "description": "Struct representing every type defined by the IR."
+      "description": "Type representing every type defined by the IR."
     },
     "AstTypeConstraint": {
       "properties": {
