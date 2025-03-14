@@ -2,6 +2,8 @@ module github.com/grafana/cog
 
 go 1.23
 
+toolchain go1.23.6
+
 require (
 	cuelang.org/go v0.11.0
 	github.com/expr-lang/expr v1.16.9
