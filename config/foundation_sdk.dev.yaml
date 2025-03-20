@@ -125,22 +125,12 @@ inputs:
       cue_imports:
         - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
 
-  # The schema for "datasource" queries
-  - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/composable/datasource'
-      metadata:
-        kind: composable
-        variant: dataquery
-        identifier: datasource
-      cue_imports:
-        - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
-
   # Dashboard v2 appears with v12.0.x
   # TODO: find a way to get this schema into the kind-registry or to pull it directly from grafana/grafana
   - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v12.0.x"))'
     cue:
-      entrypoint: '%__config_dir%/dashboardv2/schemas/dashboard/v2alpha0'
-      package: dashboardv2alpha0
+      entrypoint: '%__config_dir%/dashboardv2/schemas/dashboard/v2alpha1'
+      package: dashboardv2alpha1
       metadata:
         kind: core
       transformations:

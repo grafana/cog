@@ -7,7 +7,7 @@ import (
 	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/cog/plugins"
 	"github.com/grafana/cog/generated/go/common"
-	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha0"
+	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha1"
 	"github.com/grafana/cog/generated/go/prometheus"
 )
 
@@ -106,7 +106,7 @@ func main() {
 
 	fmt.Println(string(dashboardAsBytes))
 
-	dash := dashboard.DashboardV2Spec{}
+	dash := dashboard.DashboardSpec{}
 	if err := json.Unmarshal(dashboardAsBytes, &dash); err != nil {
 		panic(err)
 	} else {

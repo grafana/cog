@@ -1,5 +1,5 @@
-import grafana_foundation_sdk.models.dashboardv2alpha0 as dashboard
-from grafana_foundation_sdk.builders.dashboardv2alpha0 import (
+import grafana_foundation_sdk.models.dashboardv2alpha1 as dashboard
+from grafana_foundation_sdk.builders.dashboardv2alpha1 import (
     Panel,
     ThresholdsConfig,
     QueryGroup,

@@ -7,19 +7,19 @@ use App\Monitoring\Memory;
 use App\Monitoring\Network;
 use App\Monitoring\Common as MonitoringCommon;
 use Grafana\Foundation\Common;
-use Grafana\Foundation\Dashboardv2alpha0\DashboardBuilder;
-use Grafana\Foundation\Dashboardv2alpha0\DashboardCursorSync;
-use Grafana\Foundation\Dashboardv2alpha0\DashboardV2Spec;
-use Grafana\Foundation\Dashboardv2alpha0\DatasourceVariableBuilder;
-use Grafana\Foundation\Dashboardv2alpha0\GridLayoutBuilder;
-use Grafana\Foundation\Dashboardv2alpha0\GridLayoutItemBuilder;
-use Grafana\Foundation\Dashboardv2alpha0\GridLayoutRowBuilder;
-use Grafana\Foundation\Dashboardv2alpha0\QueryVariableBuilder;
-use Grafana\Foundation\Dashboardv2alpha0\VariableHide;
-use Grafana\Foundation\Dashboardv2alpha0\VariableOption;
-use Grafana\Foundation\Dashboardv2alpha0\VariableRefresh;
-use Grafana\Foundation\Dashboardv2alpha0\VariableSort;
-use Grafana\Foundation\Dashboardv2alpha0\TimeSettingsBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\DashboardBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\DashboardCursorSync;
+use Grafana\Foundation\Dashboardv2alpha1\DashboardSpec;
+use Grafana\Foundation\Dashboardv2alpha1\DatasourceVariableBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\GridLayoutBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\GridLayoutItemBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\GridLayoutRowBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\QueryVariableBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\VariableHide;
+use Grafana\Foundation\Dashboardv2alpha1\VariableOption;
+use Grafana\Foundation\Dashboardv2alpha1\VariableRefresh;
+use Grafana\Foundation\Dashboardv2alpha1\VariableSort;
+use Grafana\Foundation\Dashboardv2alpha1\TimeSettingsBuilder;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -102,5 +102,5 @@ echo($jsonEncodedDashboard.PHP_EOL);
 
 // Try decoding it.
 $jsonDecodedAsArray = json_decode($jsonEncodedDashboard, true);
-$dashboard = DashboardV2Spec::fromArray($jsonDecodedAsArray);
+$dashboard = DashboardSpec::fromArray($jsonDecodedAsArray);
 var_dump($dashboard->elements['cpu_usage']->spec->vizConfig);

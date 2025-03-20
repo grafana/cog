@@ -2,9 +2,9 @@
 
 namespace App\Monitoring;
 
-use Grafana\Foundation\Dashboardv2alpha0\PanelBuilder;
-use Grafana\Foundation\Dashboardv2alpha0\QueryGroupBuilder;
-use Grafana\Foundation\Dashboardv2alpha0\TargetBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\PanelBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\QueryGroupBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\TargetBuilder;
 
 class Network
 {

@@ -1,4 +1,4 @@
-{{- define "object_dashboardv2alpha0_VizConfigKind_custom_unmarshal" }}
+{{- define "object_dashboardv2alpha1_VizConfigKind_custom_unmarshal" }}
 {{- $fmt := importStdPkg "fmt" -}}
 {{- $json := importStdPkg "encoding/json" -}}
 func (resource *{{ .Object.Name|formatObjectName }}) UnmarshalJSON(raw []byte) error {
@@ -13,7 +13,7 @@ func (resource *{{ .Object.Name|formatObjectName }}) UnmarshalJSON(raw []byte) e
     {{- range $field := .Object.Type.Struct.Fields }}
 	if fields["{{ $field.Name }}"] != nil {
 	{{- if eq $field.Name "spec" }}
-		{{ template "object_dashboardv2alpha0_VizConfigKind_spec" (dict "Field" $field) }}
+		{{ template "object_dashboardv2alpha1_VizConfigKind_spec" (dict "Field" $field) }}
 	{{- else }}
 		if err := json.Unmarshal(fields["{{ $field.Name }}"], &resource.{{ $field.Name|formatFieldName }}); err != nil {
 			return fmt.Errorf("error decoding field '{{ $field.Name }}': %w", err)
@@ -27,7 +27,7 @@ func (resource *{{ .Object.Name|formatObjectName }}) UnmarshalJSON(raw []byte) e
 
 {{ end }}
 
-{{- define "object_dashboardv2alpha0_VizConfigKind_spec" -}}
+{{- define "object_dashboardv2alpha1_VizConfigKind_spec" -}}
 	{{- $fmt := importStdPkg "fmt" -}}
 	{{- $json := importStdPkg "encoding/json" -}}
 	spec := {{ .Field.Type|formatType }}{}
@@ -39,9 +39,9 @@ func (resource *{{ .Object.Name|formatObjectName }}) UnmarshalJSON(raw []byte) e
 	{{ range $field := (.Field.Type|resolveRefs).Struct.Fields }}
 		if specFields["{{ $field.Name }}"] != nil {
 		{{- if eq $field.Name "options" }}
-			{{ template "object_dashboardv2alpha0_VizConfigKind_spec_options" }}
+			{{ template "object_dashboardv2alpha1_VizConfigKind_spec_options" }}
 		{{- else if eq $field.Name "fieldConfig" }}
-			{{ template "object_dashboardv2alpha0_VizConfigKind_spec_fieldConfig" }}
+			{{ template "object_dashboardv2alpha1_VizConfigKind_spec_fieldConfig" }}
 		{{- else }}
 			if err := json.Unmarshal(specFields["{{ $field.Name }}"], &spec.{{ $field.Name|formatFieldName }}); err != nil {
 				return fmt.Errorf("error decoding field 'spec.{{ $field.Name }}': %w", err)
@@ -52,7 +52,7 @@ func (resource *{{ .Object.Name|formatObjectName }}) UnmarshalJSON(raw []byte) e
 	resource.Spec = spec
 {{- end -}}
 
-{{- define "object_dashboardv2alpha0_VizConfigKind_spec_fieldConfig" -}}
+{{- define "object_dashboardv2alpha1_VizConfigKind_spec_fieldConfig" -}}
 	{{- $fmt := importStdPkg "fmt" -}}
 	{{- $json := importStdPkg "encoding/json" -}}
 	{{- $cog := importPkg "cog" -}}
@@ -82,7 +82,7 @@ func (resource *{{ .Object.Name|formatObjectName }}) UnmarshalJSON(raw []byte) e
 	}
 {{- end -}}
 
-{{- define "object_dashboardv2alpha0_VizConfigKind_spec_options" -}}
+{{- define "object_dashboardv2alpha1_VizConfigKind_spec_options" -}}
 	{{- $json := importStdPkg "encoding/json" -}}
 	{{- $cog := importPkg "cog" -}}
 	variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Kind)

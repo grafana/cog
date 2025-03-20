@@ -6,7 +6,7 @@ import {
     TargetBuilder,
     ThresholdsConfigBuilder,
     ThresholdsMode
-} from "../../generated/typescript/src/dashboardv2alpha0";
+} from "../../generated/typescript/src/dashboardv2alpha1";
 
 export const cpuUsageTimeseries = (): PanelBuilder => {
     const query = `(

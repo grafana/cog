@@ -1,4 +1,4 @@
-{{- define "object_dashboardv2alpha0_DataQueryKind_custom_unmarshal" }}
+{{- define "object_dashboardv2alpha1_DataQueryKind_custom_unmarshal" }}
 /**
  * @param array<string, mixed> $inputData
  */
@@ -9,7 +9,7 @@ public static function fromArray(array $inputData): self
     return new self(
         {{- range $field := .Object.Type.Struct.Fields }}
         {{ $field.Name }}: {{ if eq $field.Name "spec" -}}
-        {{ template "dashboardv2alpha0_DataQueryKind_spec_unmarshal" }}
+        {{ template "dashboardv2alpha1_DataQueryKind_spec_unmarshal" }}
         {{- else if $field.Type.IsConcreteScalar }}
         {{ continue}}
         {{- else -}}
@@ -20,7 +20,7 @@ public static function fromArray(array $inputData): self
 }
 {{- end }}
 
-{{- define "dashboardv2alpha0_DataQueryKind_spec_unmarshal" -}}
+{{- define "dashboardv2alpha1_DataQueryKind_spec_unmarshal" -}}
 isset($data['spec']) ? (function($input) {
     /** @var array<string, mixed> $spec */
     $spec = $input['spec'];

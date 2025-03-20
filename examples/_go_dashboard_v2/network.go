@@ -1,7 +1,7 @@
 package main
 
 import (
-	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha0"
+	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha1"
 )
 
 func networkReceivedTimeseries() *dashboard.PanelBuilder {
