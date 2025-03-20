@@ -2,6 +2,7 @@ import {VisualizationBuilder as TableVizBuilder} from "../../generated/typescrip
 import {basicPrometheusQuery, defaultTimeseries, tablePrometheusQuery} from "./common";
 import {
     FieldTextAlignment,
+    TableCellDisplayMode,
     TableCellHeight,
     TableFooterOptionsBuilder
 } from "../../generated/typescript/src/common";
@@ -10,7 +11,8 @@ import {
     QueryGroupBuilder,
     TargetBuilder,
     ThresholdsConfigBuilder,
-    ThresholdsMode, TransformationBuilder,
+    ThresholdsMode,
+    TransformationBuilder,
 } from "../../generated/typescript/src/dashboardv2alpha0";
 
 export const diskIOTimeseries = (): PanelBuilder => {
@@ -45,7 +47,7 @@ export const diskSpaceUsageTable = (): PanelBuilder => {
         .title("Disk Space Usage")
         .visualization(new TableVizBuilder()
             .align(FieldTextAlignment.Auto)
-            .cellOptions({type: "auto"})
+            .cellOptions({type: TableCellDisplayMode.Auto})
             .cellHeight(TableCellHeight.Sm)
             .footer(new TableFooterOptionsBuilder().countRows(false).reducer(["sum"]))
             .unit("decbytes")
