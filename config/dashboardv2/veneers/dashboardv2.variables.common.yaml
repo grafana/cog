@@ -2,7 +2,7 @@
 
 language: all
 
-package: dashboardv2alpha0
+package: dashboardv2alpha1
 
 builders:
   - omit: { by_object: VariableOption }

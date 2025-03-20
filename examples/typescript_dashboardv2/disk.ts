@@ -13,7 +13,7 @@ import {
     ThresholdsConfigBuilder,
     ThresholdsMode,
     TransformationBuilder,
-} from "../../generated/typescript/src/dashboardv2alpha0";
+} from "../../generated/typescript/src/dashboardv2alpha1";
 
 export const diskIOTimeseries = (): PanelBuilder => {
     return new PanelBuilder()

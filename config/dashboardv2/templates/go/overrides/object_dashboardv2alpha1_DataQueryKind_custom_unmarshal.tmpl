@@ -1,4 +1,4 @@
-{{- define "object_dashboardv2alpha0_DataQueryKind_custom_unmarshal" }}
+{{- define "object_dashboardv2alpha1_DataQueryKind_custom_unmarshal" }}
 {{- $fmt := importStdPkg "fmt" -}}
 {{- $json := importStdPkg "encoding/json" -}}
 func (resource *{{ .Object.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) error {
@@ -22,14 +22,14 @@ func (resource *{{ .Object.Name|upperCamelCase }}) UnmarshalJSON(raw []byte) err
 	{{- end }}
 	{{- end }}
 
-	{{ template "unmarshal_dashboardv2alpha0_DataQueryKind_spec" }}
+	{{ template "unmarshal_dashboardv2alpha1_DataQueryKind_spec" }}
 
 	return nil
 }
 
 {{ end }}
 
-{{- define "unmarshal_dashboardv2alpha0_DataQueryKind_spec" -}}
+{{- define "unmarshal_dashboardv2alpha1_DataQueryKind_spec" -}}
 	{{- $fmt := importStdPkg "fmt" -}}
 	{{- $cog := importPkg "cog" }}
 	if fields["spec"] != nil {
