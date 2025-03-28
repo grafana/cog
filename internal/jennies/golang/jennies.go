@@ -38,6 +38,10 @@ type Config struct {
 	// rely on the runtime to function.
 	SkipRuntime bool `yaml:"skip_runtime"`
 
+	// SkipPostFormatting disables formatting of Go files done with go imports
+	// after code generation.
+	SkipPostFormatting bool `yaml:"skip_post_formatting"`
+
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
 	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
@@ -138,7 +142,10 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 			TmplFuncs: formattingTemplateFuncs(config),
 		},
 	)
-	jenny.AddPostprocessors(formatGoFiles, common.GeneratedCommentHeader(globalConfig))
+	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	if !config.SkipPostFormatting {
+		jenny.AddPostprocessors(formatGoFiles)
+	}
 
 	return jenny
 }

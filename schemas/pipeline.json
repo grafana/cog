@@ -328,6 +328,10 @@
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
         },
+        "skip_post_formatting": {
+          "type": "boolean",
+          "description": "SkipPostFormatting disables formatting of Go files done with go imports\nafter code generation."
+        },
         "overrides_templates": {
           "items": {
             "type": "string"
