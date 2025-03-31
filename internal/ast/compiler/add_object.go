@@ -8,8 +8,9 @@ var _ Pass = (*AddObject)(nil)
 
 // AddObject adds a new object to a schema.
 type AddObject struct {
-	Object ObjectReference
-	As     ast.Type
+	Object   ObjectReference
+	As       ast.Type
+	Comments []string
 }
 
 func (pass *AddObject) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
@@ -26,6 +27,7 @@ func (pass *AddObject) processSchema(visitor *Visitor, schema *ast.Schema) (*ast
 	}
 
 	newObject := ast.NewObject(pass.Object.Package, pass.Object.Object, pass.As)
+	newObject.Comments = pass.Comments
 	newObject.AddToPassesTrail("AddObject[created]")
 
 	visitor.RegisterNewObject(newObject)

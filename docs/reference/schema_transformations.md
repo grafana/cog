@@ -28,6 +28,7 @@ AddObject adds a new object to a schema.
 add_object:
   object: string
   as: Type
+  comments: []string
 ```
 
 ## `anonymous_structs_to_named`

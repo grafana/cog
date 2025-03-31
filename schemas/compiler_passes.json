@@ -273,6 +273,12 @@
         },
         "as": {
           "$ref": "#/$defs/AstType"
+        },
+        "comments": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         }
       },
       "additionalProperties": false,
