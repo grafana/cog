@@ -338,8 +338,9 @@ func (pass DuplicateObject) AsCompilerPass() (*compiler.DuplicateObject, error) 
 }
 
 type AddObject struct {
-	Object string // Expected format: [package].[object]
-	As     ast.Type
+	Object   string // Expected format: [package].[object]
+	As       ast.Type
+	Comments []string
 }
 
 func (pass AddObject) AsCompilerPass() (*compiler.AddObject, error) {
@@ -349,8 +350,9 @@ func (pass AddObject) AsCompilerPass() (*compiler.AddObject, error) {
 	}
 
 	return &compiler.AddObject{
-		Object: objectRef,
-		As:     pass.As,
+		Object:   objectRef,
+		As:       pass.As,
+		Comments: pass.Comments,
 	}, nil
 }
 
