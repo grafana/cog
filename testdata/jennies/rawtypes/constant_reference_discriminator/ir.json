@@ -1,254 +1,258 @@
-{
-  "Package": "constant_reference_discriminator",
-  "Metadata": {},
-  "EntryPointType": {
-    "Kind": "",
-    "Nullable": false
-  },
-  "Objects": {
-    "LayoutWithValue": {
-      "Name": "LayoutWithValue",
-      "Type": {
-        "Kind": "disjunction",
-        "Nullable": false,
-        "Disjunction": {
-          "Branches": [
-            {
-              "Kind": "ref",
-              "Nullable": false,
-              "Ref": {
-                "ReferredPkg": "constant_reference_discriminator",
-                "ReferredType": "GridLayoutUsingValue"
-              }
-            },
-            {
-              "Kind": "ref",
-              "Nullable": false,
-              "Ref": {
-                "ReferredPkg": "constant_reference_discriminator",
-                "ReferredType": "RowsLayoutUsingValue"
-              }
-            }
-          ]
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "constant_reference_discriminator",
-        "ReferredType": "LayoutWithValue"
-      }
+ {
+    "Package": "constant_reference_discriminator",
+    "Metadata": {},
+    "EntryPointType": {
+      "Kind": "",
+      "Nullable": false
     },
-    "GridLayoutUsingValue": {
-      "Name": "GridLayoutUsingValue",
-      "Type": {
-        "Kind": "struct",
-        "Nullable": false,
-        "Struct": {
-          "Fields": [
-            {
-              "Name": "kind",
-              "Type": {
+    "Objects": {
+      "LayoutWithValue": {
+        "Name": "LayoutWithValue",
+        "Type": {
+          "Kind": "disjunction",
+          "Nullable": false,
+          "Disjunction": {
+            "Branches": [
+              {
                 "Kind": "ref",
                 "Nullable": false,
                 "Ref": {
                   "ReferredPkg": "constant_reference_discriminator",
-                  "ReferredType": "GridLayoutKindType"
+                  "ReferredType": "GridLayoutUsingValue"
                 }
               },
-              "Required": true
-            },
-            {
-              "Name": "gridLayoutProperty",
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
-                }
-              },
-              "Required": true
-            }
-          ]
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "constant_reference_discriminator",
-        "ReferredType": "GridLayoutUsingValue"
-      }
-    },
-    "GridLayoutKindType": {
-      "Name": "GridLayoutKindType",
-      "Type": {
-        "Kind": "scalar",
-        "Nullable": false,
-        "Scalar": {
-          "ScalarKind": "string",
-          "Value": "GridLayout"
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "constant_reference_discriminator",
-        "ReferredType": "GridLayoutKindType"
-      }
-    },
-    "RowsLayoutUsingValue": {
-      "Name": "RowsLayoutUsingValue",
-      "Type": {
-        "Kind": "struct",
-        "Nullable": false,
-        "Struct": {
-          "Fields": [
-            {
-              "Name": "kind",
-              "Type": {
+              {
                 "Kind": "ref",
                 "Nullable": false,
                 "Ref": {
                   "ReferredPkg": "constant_reference_discriminator",
-                  "ReferredType": "RowsLayoutKindType"
+                  "ReferredType": "RowsLayoutUsingValue"
                 }
-              },
-              "Required": true
-            },
-            {
-              "Name": "rowsLayoutProperty",
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
-                }
-              },
-              "Required": true
-            }
-          ]
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "constant_reference_discriminator",
-        "ReferredType": "RowsLayoutUsingValue"
-      }
-    },
-    "RowsLayoutKindType": {
-      "Name": "RowsLayoutKindType",
-      "Type": {
-        "Kind": "scalar",
-        "Nullable": false,
-        "Scalar": {
-          "ScalarKind": "string",
-          "Value": "RowsLayout"
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "constant_reference_discriminator",
-        "ReferredType": "RowsLayoutKindType"
-      }
-    },
-    "LayoutWithoutValue": {
-      "Name": "LayoutWithoutValue",
-      "Type": {
-        "Kind": "disjunction",
-        "Nullable": false,
-        "Disjunction": {
-          "Branches": [
-            {
-              "Kind": "ref",
-              "Nullable": false,
-              "Ref": {
-                "ReferredPkg": "constant_reference_discriminator",
-                "ReferredType": "GridLayoutWithoutValue"
               }
-            },
-            {
-              "Kind": "ref",
-              "Nullable": false,
-              "Ref": {
-                "ReferredPkg": "constant_reference_discriminator",
-                "ReferredType": "RowsLayoutWithoutValue"
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constant_reference_discriminator",
+          "ReferredType": "LayoutWithValue"
+        }
+      },
+      "GridLayoutUsingValue": {
+        "Name": "GridLayoutUsingValue",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "kind",
+                "Type": {
+                  "Kind": "constant_ref",
+                  "Nullable": false,
+                  "ConstantReference": {
+                    "ReferredPkg": "constant_reference_discriminator",
+                    "ReferredType": "GridLayoutKindType",
+                    "ReferenceValue": "GridLayout"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "gridLayoutProperty",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
               }
-            }
-          ]
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constant_reference_discriminator",
+          "ReferredType": "GridLayoutUsingValue"
         }
       },
-      "SelfRef": {
-        "ReferredPkg": "constant_reference_discriminator",
-        "ReferredType": "LayoutWithoutValue"
-      }
-    },
-    "GridLayoutWithoutValue": {
-      "Name": "GridLayoutWithoutValue",
-      "Type": {
-        "Kind": "struct",
-        "Nullable": false,
-        "Struct": {
-          "Fields": [
-            {
-              "Name": "kind",
-              "Type": {
+      "RowsLayoutUsingValue": {
+        "Name": "RowsLayoutUsingValue",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "kind",
+                "Type": {
+                  "Kind": "constant_ref",
+                  "Nullable": false,
+                  "ConstantReference": {
+                    "ReferredPkg": "constant_reference_discriminator",
+                    "ReferredType": "RowsLayoutKindType",
+                    "ReferenceValue": "RowsLayout"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "rowsLayoutProperty",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constant_reference_discriminator",
+          "ReferredType": "RowsLayoutUsingValue"
+        }
+      },
+      "LayoutWithoutValue": {
+        "Name": "LayoutWithoutValue",
+        "Type": {
+          "Kind": "disjunction",
+          "Nullable": false,
+          "Disjunction": {
+            "Branches": [
+              {
                 "Kind": "ref",
                 "Nullable": false,
                 "Ref": {
                   "ReferredPkg": "constant_reference_discriminator",
-                  "ReferredType": "GridLayoutKindType"
+                  "ReferredType": "GridLayoutWithoutValue"
                 }
               },
-              "Required": true
-            },
-            {
-              "Name": "gridLayoutProperty",
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
-                }
-              },
-              "Required": true
-            }
-          ]
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "constant_reference_discriminator",
-        "ReferredType": "GridLayoutWithoutValue"
-      }
-    },
-    "RowsLayoutWithoutValue": {
-      "Name": "RowsLayoutWithoutValue",
-      "Type": {
-        "Kind": "struct",
-        "Nullable": false,
-        "Struct": {
-          "Fields": [
-            {
-              "Name": "kind",
-              "Type": {
+              {
                 "Kind": "ref",
                 "Nullable": false,
                 "Ref": {
                   "ReferredPkg": "constant_reference_discriminator",
-                  "ReferredType": "RowsLayoutKindType"
+                  "ReferredType": "RowsLayoutWithoutValue"
                 }
-              },
-              "Required": true
-            },
-            {
-              "Name": "rowsLayoutProperty",
-              "Type": {
-                "Kind": "scalar",
-                "Nullable": false,
-                "Scalar": {
-                  "ScalarKind": "string"
-                }
-              },
-              "Required": true
-            }
-          ]
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constant_reference_discriminator",
+          "ReferredType": "LayoutWithoutValue"
         }
       },
-      "SelfRef": {
-        "ReferredPkg": "constant_reference_discriminator",
-        "ReferredType": "RowsLayoutWithoutValue"
+      "GridLayoutWithoutValue": {
+        "Name": "GridLayoutWithoutValue",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "kind",
+                "Type": {
+                  "Kind": "constant_ref",
+                  "Nullable": false,
+                  "ConstantReference": {
+                    "ReferredPkg": "constant_reference_discriminator",
+                    "ReferredType": "GridLayoutKindType",
+                    "ReferenceValue": "GridLayout"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "gridLayoutProperty",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constant_reference_discriminator",
+          "ReferredType": "GridLayoutWithoutValue"
+        }
+      },
+      "RowsLayoutWithoutValue": {
+        "Name": "RowsLayoutWithoutValue",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "kind",
+                "Type": {
+                  "Kind": "constant_ref",
+                  "Nullable": false,
+                  "ConstantReference": {
+                    "ReferredPkg": "constant_reference_discriminator",
+                    "ReferredType": "RowsLayoutKindType",
+                    "ReferenceValue": "RowsLayout"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "rowsLayoutProperty",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constant_reference_discriminator",
+          "ReferredType": "RowsLayoutWithoutValue"
+        }
+      },
+      "GridLayoutKindType": {
+        "Name": "GridLayoutKindType",
+        "Type": {
+          "Kind": "scalar",
+          "Nullable": false,
+          "Scalar": {
+            "ScalarKind": "string",
+            "Value": "GridLayout"
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constant_reference_discriminator",
+          "ReferredType": "GridLayoutKindType"
+        }
+      },
+      "RowsLayoutKindType": {
+        "Name": "RowsLayoutKindType",
+        "Type": {
+          "Kind": "scalar",
+          "Nullable": false,
+          "Scalar": {
+            "ScalarKind": "string",
+            "Value": "RowsLayout"
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "constant_reference_discriminator",
+          "ReferredType": "RowsLayoutKindType"
+        }
       }
     }
   }
-}
