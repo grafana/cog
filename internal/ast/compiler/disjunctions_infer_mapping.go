@@ -97,8 +97,7 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
-			valueFromReference, isStringReference := pass.getStringReference(field.Type)
-			if !(field.Type.IsConcreteScalar() && field.Type.AsScalar().ScalarKind == ast.KindString) && !field.Type.IsConstantRef() && !isStringReference {
+			if !(field.Type.IsConcreteScalar() && field.Type.AsScalar().ScalarKind == ast.KindString) && !field.Type.IsConstantRef() {
 				continue
 			}
 
@@ -107,8 +106,6 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 				candidates[typeName][field.Name] = field.Type.AsScalar().Value
 			case ast.KindConstantRef:
 				candidates[typeName][field.Name] = field.Type.AsConstantRef().ReferenceValue // TODO: Check if its a string
-			case ast.KindRef:
-				candidates[typeName][field.Name] = valueFromReference // TODO: Check if its a string
 			}
 		}
 	}
@@ -160,9 +157,8 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 			return nil, fmt.Errorf("discriminator field '%s' not found", def.Discriminator)
 		}
 
-		valueFromReference, isStringReference := pass.getStringReference(field.Type)
 		// trust, but verify: we need the field to be an actual scalar with a concrete value?
-		if !(field.Type.IsScalar() && field.Type.AsScalar().IsConcrete()) && !field.Type.IsConstantRef() && !isStringReference {
+		if !(field.Type.IsScalar() && field.Type.AsScalar().IsConcrete()) && !field.Type.IsConstantRef() {
 			return nil, fmt.Errorf("discriminator field '%s' is not a scalar or constant reference", field.Name)
 		}
 
@@ -173,33 +169,10 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 			mapping[field.Type.AsScalar().Value.(string)] = typeName
 		case ast.KindConstantRef:
 			mapping[field.Type.AsConstantRef().ReferenceValue.(string)] = typeName
-		case ast.KindRef:
-			mapping[valueFromReference.(string)] = typeName
 		default:
 			return nil, fmt.Errorf("discriminator field '%s' is not concrete", field.Name)
 		}
 	}
 
 	return mapping, nil
-}
-
-func (pass *DisjunctionInferMapping) getStringReference(def ast.Type) (any, bool) {
-	if !def.IsRef() {
-		return nil, false
-	}
-
-	obj, ok := pass.schemas.LocateObjectByRef(def.AsRef())
-	if !ok {
-		return nil, false
-	}
-
-	if !obj.Type.IsScalar() {
-		return nil, false
-	}
-
-	if obj.Type.AsScalar().ScalarKind != ast.KindString {
-		return nil, false
-	}
-
-	return obj.Type.AsScalar().Value, true
 }
