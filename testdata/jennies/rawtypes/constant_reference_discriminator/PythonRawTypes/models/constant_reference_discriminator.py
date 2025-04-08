@@ -5,11 +5,11 @@ LayoutWithValue: typing.TypeAlias = typing.Union['GridLayoutUsingValue', 'RowsLa
 
 
 class GridLayoutUsingValue:
-    kind: typing.Literal["GridLayout"]
+    kind: str
     grid_layout_property: str
 
-    def __init__(self, kind: typing.Optional[typing.Literal["GridLayout"]] = None, grid_layout_property: str = ""):
-        self.kind = kind if kind is not None else GridLayoutKindType
+    def __init__(self, grid_layout_property: str = ""):
+        self.kind = GridLayoutKindType
         self.grid_layout_property = grid_layout_property
 
     def to_json(self) -> dict[str, object]:
@@ -23,23 +23,18 @@ class GridLayoutUsingValue:
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
         
-        if "kind" in data:
-            args["kind"] = data["kind"]
         if "gridLayoutProperty" in data:
             args["grid_layout_property"] = data["gridLayoutProperty"]        
 
         return cls(**args)
 
 
-GridLayoutKindType: typing.Literal["GridLayout"] = "GridLayout"
-
-
 class RowsLayoutUsingValue:
-    kind: typing.Literal["RowsLayout"]
+    kind: str
     rows_layout_property: str
 
-    def __init__(self, kind: typing.Optional[typing.Literal["RowsLayout"]] = None, rows_layout_property: str = ""):
-        self.kind = kind if kind is not None else RowsLayoutKindType
+    def __init__(self, rows_layout_property: str = ""):
+        self.kind = RowsLayoutKindType
         self.rows_layout_property = rows_layout_property
 
     def to_json(self) -> dict[str, object]:
@@ -53,26 +48,21 @@ class RowsLayoutUsingValue:
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
         
-        if "kind" in data:
-            args["kind"] = data["kind"]
         if "rowsLayoutProperty" in data:
             args["rows_layout_property"] = data["rowsLayoutProperty"]        
 
         return cls(**args)
 
 
-RowsLayoutKindType: typing.Literal["RowsLayout"] = "RowsLayout"
-
-
 LayoutWithoutValue: typing.TypeAlias = typing.Union['GridLayoutWithoutValue', 'RowsLayoutWithoutValue']
 
 
 class GridLayoutWithoutValue:
-    kind: typing.Literal["GridLayout"]
+    kind: str
     grid_layout_property: str
 
-    def __init__(self, kind: typing.Optional[typing.Literal["GridLayout"]] = None, grid_layout_property: str = ""):
-        self.kind = kind if kind is not None else GridLayoutKindType
+    def __init__(self, grid_layout_property: str = ""):
+        self.kind = GridLayoutKindType
         self.grid_layout_property = grid_layout_property
 
     def to_json(self) -> dict[str, object]:
@@ -86,8 +76,6 @@ class GridLayoutWithoutValue:
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
         
-        if "kind" in data:
-            args["kind"] = data["kind"]
         if "gridLayoutProperty" in data:
             args["grid_layout_property"] = data["gridLayoutProperty"]        
 
@@ -95,11 +83,11 @@ class GridLayoutWithoutValue:
 
 
 class RowsLayoutWithoutValue:
-    kind: typing.Literal["RowsLayout"]
+    kind: str
     rows_layout_property: str
 
-    def __init__(self, kind: typing.Optional[typing.Literal["RowsLayout"]] = None, rows_layout_property: str = ""):
-        self.kind = kind if kind is not None else RowsLayoutKindType
+    def __init__(self, rows_layout_property: str = ""):
+        self.kind = RowsLayoutKindType
         self.rows_layout_property = rows_layout_property
 
     def to_json(self) -> dict[str, object]:
@@ -113,9 +101,13 @@ class RowsLayoutWithoutValue:
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
         
-        if "kind" in data:
-            args["kind"] = data["kind"]
         if "rowsLayoutProperty" in data:
             args["rows_layout_property"] = data["rowsLayoutProperty"]        
 
         return cls(**args)
+
+
+GridLayoutKindType: typing.Literal["GridLayout"] = "GridLayout"
+
+
+RowsLayoutKindType: typing.Literal["RowsLayout"] = "RowsLayout"
