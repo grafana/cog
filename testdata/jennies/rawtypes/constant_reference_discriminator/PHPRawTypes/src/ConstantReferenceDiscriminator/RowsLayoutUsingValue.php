@@ -9,12 +9,11 @@ class RowsLayoutUsingValue implements \JsonSerializable
     public string $rowsLayoutProperty;
 
     /**
-     * @param \Grafana\Foundation\ConstantReferenceDiscriminator\RowsLayoutKindType|null $kind
      * @param string|null $rowsLayoutProperty
      */
-    public function __construct(?\Grafana\Foundation\ConstantReferenceDiscriminator\RowsLayoutKindType $kind = null, ?string $rowsLayoutProperty = null)
+    public function __construct(?string $rowsLayoutProperty = null)
     {
-        $this->kind = $kind ?: \Grafana\Foundation\ConstantReferenceDiscriminator\RowsLayoutKindType;
+        $this->kind = \Grafana\Foundation\ConstantReferenceDiscriminator\RowsLayoutKindType;
         $this->rowsLayoutProperty = $rowsLayoutProperty ?: "";
     }
 
@@ -23,10 +22,9 @@ class RowsLayoutUsingValue implements \JsonSerializable
      */
     public static function fromArray(array $inputData): self
     {
-        /** @var array{kind?: string, rowsLayoutProperty?: string} $inputData */
+        /** @var array{kind?: "RowsLayout", rowsLayoutProperty?: string} $inputData */
         $data = $inputData;
         return new self(
-            kind: isset($data["kind"]) ? /* ref to a non-struct, non-enum, this should have been inlined */ (function(array $input) { return $input; })($data["kind"]) : null,
             rowsLayoutProperty: $data["rowsLayoutProperty"] ?? null,
         );
     }
