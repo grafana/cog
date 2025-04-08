@@ -12,8 +12,6 @@ export const defaultGridLayoutUsingValue = (): GridLayoutUsingValue => ({
 	gridLayoutProperty: "",
 });
 
-export const GridLayoutKindType = "GridLayout";
-
 export interface RowsLayoutUsingValue {
 	kind: "RowsLayout";
 	rowsLayoutProperty: string;
@@ -23,8 +21,6 @@ export const defaultRowsLayoutUsingValue = (): RowsLayoutUsingValue => ({
 	kind: RowsLayoutKindType,
 	rowsLayoutProperty: "",
 });
-
-export const RowsLayoutKindType = "RowsLayout";
 
 export type LayoutWithoutValue = GridLayoutWithoutValue | RowsLayoutWithoutValue;
 
@@ -49,3 +45,7 @@ export const defaultRowsLayoutWithoutValue = (): RowsLayoutWithoutValue => ({
 	kind: RowsLayoutKindType,
 	rowsLayoutProperty: "",
 });
+
+export const GridLayoutKindType = "GridLayout";
+
+export const RowsLayoutKindType = "RowsLayout";
