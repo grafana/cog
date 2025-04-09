@@ -27,10 +27,6 @@
         }
       }
     },
-    "GridLayoutKindType": {
-      "type": "string",
-      "const": "GridLayout"
-    },
     "RowsLayoutUsingValue": {
       "type": "object",
       "additionalProperties": false,
@@ -46,10 +42,6 @@
           "type": "string"
         }
       }
-    },
-    "RowsLayoutKindType": {
-      "type": "string",
-      "const": "RowsLayout"
     },
     "LayoutWithoutValue": {
       "anyOf": [
@@ -92,6 +84,14 @@
           "type": "string"
         }
       }
+    },
+    "GridLayoutKindType": {
+      "type": "string",
+      "const": "GridLayout"
+    },
+    "RowsLayoutKindType": {
+      "type": "string",
+      "const": "RowsLayout"
     }
   }
 }
