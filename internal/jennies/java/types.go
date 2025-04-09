@@ -92,7 +92,7 @@ func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) 
 	if object.Type.IsEnum() {
 		return formatObjectName(def.ReferredType)
 	}
-	
+
 	if object.Type.IsScalar() {
 		return formatScalarType(object.Type.AsScalar())
 	}
