@@ -89,8 +89,12 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 
 func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) string {
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
-	if object.Type.IsEnum() || object.Type.IsScalar() {
+	if object.Type.IsEnum() {
 		return formatObjectName(def.ReferredType)
+	}
+	
+	if object.Type.IsScalar() {
+		return formatScalarType(object.Type.AsScalar())
 	}
 
 	return "unknown"
