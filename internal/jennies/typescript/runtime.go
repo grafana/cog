@@ -13,11 +13,20 @@ func (jenny Runtime) JennyName() string {
 	return "TypescriptRuntime"
 }
 
+func (jenny Runtime) If(condition bool, file *codejen.File) codejen.File {
+	if !condition {
+		return codejen.File{}
+	}
+
+	return *file
+}
+
 func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 	return codejen.Files{
 		*codejen.NewFile(jenny.config.pathWithPrefix("cog/variants_gen.ts"), []byte(jenny.generateVariantsFile()), jenny),
 		*codejen.NewFile(jenny.config.pathWithPrefix("cog/builder_gen.ts"), []byte(jenny.generateOptionsBuilderFile()), jenny),
 		*codejen.NewFile(jenny.config.pathWithPrefix("cog/index.ts"), []byte(jenny.generateIndexFile()), jenny),
+		jenny.If(jenny.config.GenerateValidate, codejen.NewFile(jenny.config.pathWithPrefix("cog/validate.ts"), []byte(jenny.generateValidateFile()), jenny)),
 	}, nil
 }
 
@@ -51,4 +60,8 @@ export function isBuilder<T>(input: Builder<T> | any): input is Builder<T> {
   return typeof input.build === "function";
 }
 `
+}
+
+func (jenny Runtime) generateValidateFile() string {
+	return `type ValidationResult = { ok: true } | { ok: false; errors: string[] };`
 }

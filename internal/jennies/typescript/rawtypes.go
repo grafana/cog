@@ -2,6 +2,7 @@ package typescript
 
 import (
 	"fmt"
+	"github.com/grafana/cog/internal/jennies/common"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -15,10 +16,11 @@ import (
 type raw string
 
 type RawTypes struct {
-	config        Config
-	tmpl          *template.Template
-	typeFormatter *typeFormatter
-	schemas       ast.Schemas
+	config          Config
+	tmpl            *template.Template
+	typeFormatter   *typeFormatter
+	schemas         ast.Schemas
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -60,6 +62,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	}
 
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, pkgMapper)
+	validationMethodsGenerator := newValidationMethods(jenny.tmpl, context, pkgMapper, jenny.apiRefCollector)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		typeDefGen, innerErr := jenny.formatObject(object, pkgMapper)
@@ -70,6 +73,13 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		buffer.Write(typeDefGen)
 		buffer.WriteString("\n")
+
+		if !jenny.config.SkipRuntime && (jenny.config.generateBuilders || jenny.config.GenerateValidate) {
+			if innerErr = validationMethodsGenerator.generateForObject(&buffer, object, imports); innerErr != nil {
+				err = innerErr
+				return
+			}
+		}
 	})
 	if err != nil {
 		return nil, err

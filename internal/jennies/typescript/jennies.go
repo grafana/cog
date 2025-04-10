@@ -14,6 +14,8 @@ import (
 const LanguageRef = "typescript"
 
 type Config struct {
+	generateBuilders bool
+
 	// PathPrefix holds an optional prefix for all Typescript file paths generated.
 	// If left undefined, `src` is used as a default prefix.
 	PathPrefix *string `yaml:"path_prefix"`
@@ -25,6 +27,9 @@ type Config struct {
 
 	// SkipIndex disables the generation of `index.ts` files.
 	SkipIndex bool `yaml:"skip_index"`
+
+	// GenerateValidate controls the generation of `Validate()` methods on types.
+	GenerateValidate bool `yaml:"generate_validate"`
 
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
@@ -106,6 +111,7 @@ func (language *Language) Name() string {
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	language.config.applyDefaults()
+	language.config.generateBuilders = globalConfig.Builders
 
 	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
@@ -115,7 +121,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AppendOneToMany(
 		common.If[languages.Context](!language.config.SkipRuntime, Runtime{config: language.config}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl}),
+		common.If[languages.Context](globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{
 			config:          language.config,
 			tmpl:            tmpl,
