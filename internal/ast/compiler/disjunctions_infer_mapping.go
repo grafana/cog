@@ -151,6 +151,10 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 			return nil, fmt.Errorf("could not resolve reference '%s'", branch.AsRef().String())
 		}
 
+		if !referredType.IsStruct() {
+			continue
+		}
+
 		structType := referredType.AsStruct()
 
 		field, found := structType.FieldByName(def.Discriminator)
