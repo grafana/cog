@@ -294,9 +294,13 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
 		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.Default != nil {
-			defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.Default)
-			if field.Type.Nullable {
-				defaultValue = "&" + defaultValue
+			if objectType.IsDisjunctionOfRefs() {
+				defaultValue = "New" + formatObjectName(field.Type.Ref.ReferredType) + "()"
+			} else {
+				defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.Default)
+				if field.Type.Nullable {
+					defaultValue = "&" + defaultValue
+				}
 			}
 		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() {
 			defaultValue = "New" + formatObjectName(field.Type.Ref.ReferredType) + "()"

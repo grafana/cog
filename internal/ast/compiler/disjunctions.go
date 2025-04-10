@@ -110,7 +110,12 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 		processedBranch := branch
 		processedBranch.Nullable = true
 
-		fields = append(fields, ast.NewStructField(ast.TypeName(processedBranch), processedBranch))
+		structField := ast.NewStructField(ast.TypeName(processedBranch), processedBranch)
+		if pass.shouldSetDefault(branch, disjunction.DiscriminatorMapping, def.Default) {
+			structField.Type.Default = def.Default
+		}
+
+		fields = append(fields, structField)
 	}
 
 	structType := ast.NewStruct(fields...)
@@ -187,4 +192,27 @@ func (pass *DisjunctionToType) hasOnlySingleTypeScalars(schema *ast.Schema, disj
 	}
 
 	return true
+}
+
+func (pass *DisjunctionToType) shouldSetDefault(t ast.Type, discriminator map[string]string, def any) bool {
+	structFields, ok := def.(map[string]interface{})
+	if !ok {
+		return false
+	}
+
+	if !t.IsRef() {
+		return false
+	}
+
+	for _, field := range structFields {
+		if stringField, ok := field.(string); ok {
+			if v, ok := discriminator[stringField]; ok {
+				if t.AsRef().ReferredType == v {
+					return true
+				}
+			}
+		}
+
+	}
+	return false
 }
