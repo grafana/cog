@@ -294,7 +294,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			defaultValue = formatScalar(field.Type.Default)
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
-		} else if objectType.Default != nil {
+		} else if objectType.Default != nil && objectType.IsRef() {
 			defaultValue = fmt.Sprintf("New%s()", field.Name)
 		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.Default != nil {
 			defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.Default)
