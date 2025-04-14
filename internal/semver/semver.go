@@ -16,9 +16,11 @@ func Parse(version string) Version {
 	}
 }
 
-// registryToSemver turns a "v10.2.x" input (version string coming from the
+// ParseTolerant turns a "v10.2.x" input (version string coming from the
 // kind-registry) into a semver-compatible version "10.2.0"
 func ParseTolerant(version string) Version {
+	version = strings.TrimPrefix(version, "release-")
+
 	if !strings.HasPrefix(version, "v") {
 		version = "v" + version
 	}
