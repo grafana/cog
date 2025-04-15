@@ -27,6 +27,8 @@ func NewSomeStruct() *SomeStruct {
 		FieldRef: *NewSomeOtherStruct(),
 		FieldDisjunctionOfScalars: *NewStringOrBool(),
 		FieldMixedDisjunction: *NewStringOrSomeOtherStruct(),
+		FieldArrayOfStrings: []string{},
+		FieldMapOfStringToString: map[string]string{},
 		FieldAnonymousStruct: *NewStructComplexFieldsSomeStructFieldAnonymousStruct(),
 }
 }
