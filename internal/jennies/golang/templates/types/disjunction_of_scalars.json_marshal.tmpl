@@ -8,9 +8,5 @@ func (resource {{ .def.Name|formatObjectName }}) MarshalJSON() ([]byte, error) {
 	}
 {{ end }}
 
-{{- if .allowEmpty }}
 	return []byte("null"), nil
-{{- else }}
-	return nil, fmt.Errorf("no value for disjunction of scalars")
-{{- end }}
 }

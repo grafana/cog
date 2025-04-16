@@ -83,15 +83,13 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 	// 	  structs and these structs have a common "discriminator" field.
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
 		return jenny.tmpl.Render("types/disjunction_of_scalars.json_marshal.tmpl", map[string]any{
-			"def":        obj,
-			"allowEmpty": jenny.config.AllowMarshalEmptyDisjunctions,
+			"def": obj,
 		})
 	}
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_refs.json_marshal.tmpl", map[string]any{
-			"def":        obj,
-			"allowEmpty": jenny.config.AllowMarshalEmptyDisjunctions,
+			"def": obj,
 		})
 	}
 
