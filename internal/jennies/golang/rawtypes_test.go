@@ -58,9 +58,8 @@ func TestRawTypes_Generate_AllowMarshalEmptyDisjunctions(t *testing.T) {
 	req := require.New(t)
 
 	config := Config{
-		PackageRoot:                   "github.com/grafana/cog/generated",
-		GenerateJSONMarshaller:        true,
-		AllowMarshalEmptyDisjunctions: true,
+		PackageRoot:            "github.com/grafana/cog/generated",
+		GenerateJSONMarshaller: true,
 	}
 	jenny := RawTypes{
 		config:          config,
