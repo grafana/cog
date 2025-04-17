@@ -27,13 +27,12 @@ class ParentStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "myEnum" => $this->myEnum,
-        ];
+        $data = new \stdClass;
+        $data->myEnum = $this->myEnum;
         return $data;
     }
 }
