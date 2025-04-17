@@ -332,14 +332,20 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			constRef := field.Type.AsConstantRef()
 			t := context.ResolveRefs(ast.NewRef(constRef.ReferredPkg, constRef.ReferredType))
 
-			if !t.IsEnum() {
+			if !t.IsEnum() && !t.IsScalar() {
 				break
 			}
 
-			for _, member := range t.AsEnum().Values {
-				if member.Value == constRef.ReferenceValue {
-					defaultValue = member.Name
-					break
+			if t.IsScalar() && t.AsScalar().ScalarKind == ast.KindString {
+				defaultValue = constRef.ReferredType
+			}
+
+			if t.IsEnum() {
+				for _, member := range t.AsEnum().Values {
+					if member.Value == constRef.ReferenceValue {
+						defaultValue = member.Name
+						break
+					}
 				}
 			}
 

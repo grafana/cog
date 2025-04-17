@@ -491,6 +491,18 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			})), nil
 		}
 
+		if v.Kind() == cue.StringKind || v.Kind() == cue.NumberKind {
+			var referenceValue any
+			referenceValue, err = v.String()
+			if err != nil {
+				referenceValue, err = v.Int64()
+				if err != nil {
+					return ast.Type{}, errorWithCueRef(v, err.Error())
+				}
+			}
+			return ast.NewConstantReferenceType(refPkg, refType, referenceValue), nil
+		}
+
 		// ensure that referenced objects are explored (in case they're not
 		// defined within the "root" cue value given to cog as parsing input)
 		if refPkg == g.schema.Package && !g.schema.Objects.Has(refType) {
