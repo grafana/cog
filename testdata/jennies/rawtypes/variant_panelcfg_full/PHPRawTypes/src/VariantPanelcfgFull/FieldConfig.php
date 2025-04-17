@@ -27,13 +27,12 @@ class FieldConfig implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "timeseries_field_config_option" => $this->timeseriesFieldConfigOption,
-        ];
+        $data = new \stdClass;
+        $data->timeseries_field_config_option = $this->timeseriesFieldConfigOption;
         return $data;
     }
 }

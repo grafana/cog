@@ -604,22 +604,20 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("/**\n")
-	buffer.WriteString(" * @return array<string, mixed>\n")
+	buffer.WriteString(" * @return mixed\n")
 	buffer.WriteString(" */\n")
-	buffer.WriteString("public function jsonSerialize(): array\n")
+	buffer.WriteString("public function jsonSerialize(): mixed\n")
 	buffer.WriteString("{\n")
 
-	buffer.WriteString("    $data = [\n")
+	buffer.WriteString("    $data = new \\stdClass;\n")
 
 	for _, field := range def.Type.AsStruct().Fields {
 		if field.Type.Nullable {
 			continue
 		}
 
-		buffer.WriteString(fmt.Sprintf(`        "%s" => $this->%s,`+"\n", field.Name, formatFieldName(field.Name)))
+		buffer.WriteString(fmt.Sprintf(`    $data->%s = $this->%s;`+"\n", field.Name, formatFieldName(field.Name)))
 	}
-
-	buffer.WriteString("    ];\n")
 
 	for _, field := range def.Type.AsStruct().Fields {
 		if !field.Type.Nullable {
@@ -629,7 +627,7 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 		fieldName := formatFieldName(field.Name)
 
 		buffer.WriteString(fmt.Sprintf("    if (isset($this->%s)) {\n", fieldName))
-		buffer.WriteString(fmt.Sprintf(`        $data["%s"] = $this->%s;`+"\n", field.Name, fieldName))
+		buffer.WriteString(fmt.Sprintf(`        $data->%s = $this->%s;`+"\n", field.Name, fieldName))
 		buffer.WriteString("    }\n")
 	}
 

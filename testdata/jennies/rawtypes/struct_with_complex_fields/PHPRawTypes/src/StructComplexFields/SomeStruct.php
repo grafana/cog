@@ -107,22 +107,21 @@ class SomeStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "FieldRef" => $this->fieldRef,
-            "FieldDisjunctionOfScalars" => $this->fieldDisjunctionOfScalars,
-            "FieldMixedDisjunction" => $this->fieldMixedDisjunction,
-            "Operator" => $this->operator,
-            "FieldArrayOfStrings" => $this->fieldArrayOfStrings,
-            "FieldMapOfStringToString" => $this->fieldMapOfStringToString,
-            "FieldAnonymousStruct" => $this->fieldAnonymousStruct,
-            "fieldRefToConstant" => $this->fieldRefToConstant,
-        ];
+        $data = new \stdClass;
+        $data->FieldRef = $this->fieldRef;
+        $data->FieldDisjunctionOfScalars = $this->fieldDisjunctionOfScalars;
+        $data->FieldMixedDisjunction = $this->fieldMixedDisjunction;
+        $data->Operator = $this->operator;
+        $data->FieldArrayOfStrings = $this->fieldArrayOfStrings;
+        $data->FieldMapOfStringToString = $this->fieldMapOfStringToString;
+        $data->FieldAnonymousStruct = $this->fieldAnonymousStruct;
+        $data->fieldRefToConstant = $this->fieldRefToConstant;
         if (isset($this->fieldDisjunctionWithNull)) {
-            $data["FieldDisjunctionWithNull"] = $this->fieldDisjunctionWithNull;
+            $data->FieldDisjunctionWithNull = $this->fieldDisjunctionWithNull;
         }
         return $data;
     }

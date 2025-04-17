@@ -30,14 +30,13 @@ class StructB implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "myEnum" => $this->myEnum,
-            "myValue" => $this->myValue,
-        ];
+        $data = new \stdClass;
+        $data->myEnum = $this->myEnum;
+        $data->myValue = $this->myValue;
         return $data;
     }
 }

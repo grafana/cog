@@ -66,25 +66,24 @@ class Panel implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "title" => $this->title,
-            "type" => $this->type,
-        ];
+        $data = new \stdClass;
+        $data->title = $this->title;
+        $data->type = $this->type;
         if (isset($this->datasource)) {
-            $data["datasource"] = $this->datasource;
+            $data->datasource = $this->datasource;
         }
         if (isset($this->options)) {
-            $data["options"] = $this->options;
+            $data->options = $this->options;
         }
         if (isset($this->targets)) {
-            $data["targets"] = $this->targets;
+            $data->targets = $this->targets;
         }
         if (isset($this->fieldConfig)) {
-            $data["fieldConfig"] = $this->fieldConfig;
+            $data->fieldConfig = $this->fieldConfig;
         }
         return $data;
     }

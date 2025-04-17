@@ -30,13 +30,12 @@ class StructOptionalFieldsSomeStructFieldAnonymousStruct implements \JsonSeriali
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "FieldAny" => $this->fieldAny,
-        ];
+        $data = new \stdClass;
+        $data->FieldAny = $this->fieldAny;
         return $data;
     }
 }

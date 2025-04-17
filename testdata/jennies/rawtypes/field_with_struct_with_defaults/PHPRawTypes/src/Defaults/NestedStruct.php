@@ -32,14 +32,13 @@ class NestedStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "stringVal" => $this->stringVal,
-            "intVal" => $this->intVal,
-        ];
+        $data = new \stdClass;
+        $data->stringVal = $this->stringVal;
+        $data->intVal = $this->intVal;
         return $data;
     }
 }

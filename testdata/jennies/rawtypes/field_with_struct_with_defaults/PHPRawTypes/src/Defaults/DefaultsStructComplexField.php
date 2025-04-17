@@ -44,15 +44,14 @@ class DefaultsStructComplexField implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "uid" => $this->uid,
-            "nested" => $this->nested,
-            "array" => $this->array,
-        ];
+        $data = new \stdClass;
+        $data->uid = $this->uid;
+        $data->nested = $this->nested;
+        $data->array = $this->array;
         return $data;
     }
 }

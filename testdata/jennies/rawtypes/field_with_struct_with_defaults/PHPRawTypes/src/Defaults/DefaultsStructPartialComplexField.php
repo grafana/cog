@@ -32,14 +32,13 @@ class DefaultsStructPartialComplexField implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "uid" => $this->uid,
-            "intVal" => $this->intVal,
-        ];
+        $data = new \stdClass;
+        $data->uid = $this->uid;
+        $data->intVal = $this->intVal;
         return $data;
     }
 }

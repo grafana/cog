@@ -107,27 +107,26 @@ class SomeStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "FieldAny" => $this->fieldAny,
-            "FieldBool" => $this->fieldBool,
-            "FieldBytes" => $this->fieldBytes,
-            "FieldString" => $this->fieldString,
-            "FieldStringWithConstantValue" => $this->fieldStringWithConstantValue,
-            "FieldFloat32" => $this->fieldFloat32,
-            "FieldFloat64" => $this->fieldFloat64,
-            "FieldUint8" => $this->fieldUint8,
-            "FieldUint16" => $this->fieldUint16,
-            "FieldUint32" => $this->fieldUint32,
-            "FieldUint64" => $this->fieldUint64,
-            "FieldInt8" => $this->fieldInt8,
-            "FieldInt16" => $this->fieldInt16,
-            "FieldInt32" => $this->fieldInt32,
-            "FieldInt64" => $this->fieldInt64,
-        ];
+        $data = new \stdClass;
+        $data->FieldAny = $this->fieldAny;
+        $data->FieldBool = $this->fieldBool;
+        $data->FieldBytes = $this->fieldBytes;
+        $data->FieldString = $this->fieldString;
+        $data->FieldStringWithConstantValue = $this->fieldStringWithConstantValue;
+        $data->FieldFloat32 = $this->fieldFloat32;
+        $data->FieldFloat64 = $this->fieldFloat64;
+        $data->FieldUint8 = $this->fieldUint8;
+        $data->FieldUint16 = $this->fieldUint16;
+        $data->FieldUint32 = $this->fieldUint32;
+        $data->FieldUint64 = $this->fieldUint64;
+        $data->FieldInt8 = $this->fieldInt8;
+        $data->FieldInt16 = $this->fieldInt16;
+        $data->FieldInt32 = $this->fieldInt32;
+        $data->FieldInt64 = $this->fieldInt64;
         return $data;
     }
 }

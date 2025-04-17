@@ -46,19 +46,18 @@ class SomeStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "id" => $this->id,
-            "title" => $this->title,
-        ];
+        $data = new \stdClass;
+        $data->id = $this->id;
+        $data->title = $this->title;
         if (isset($this->maybeId)) {
-            $data["maybeId"] = $this->maybeId;
+            $data->maybeId = $this->maybeId;
         }
         if (isset($this->refStruct)) {
-            $data["refStruct"] = $this->refStruct;
+            $data->refStruct = $this->refStruct;
         }
         return $data;
     }
