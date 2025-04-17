@@ -110,7 +110,8 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 		processedBranch := branch
 		processedBranch.Nullable = true
 
-		fields = append(fields, ast.NewStructField(ast.TypeName(processedBranch), processedBranch))
+		structField := ast.NewStructField(ast.TypeName(processedBranch), processedBranch)
+		fields = append(fields, structField)
 	}
 
 	structType := ast.NewStruct(fields...)
@@ -129,6 +130,8 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 		}
 		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunction
 	}
+
+	structType.Default = def.Default
 
 	newObject := ast.NewObject(schema.Package, newTypeName, structType)
 	newObject.AddToPassesTrail("DisjunctionToType[created]")
