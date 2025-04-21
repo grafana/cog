@@ -169,7 +169,7 @@ Container: {
   }
 }`
 
-	t.Run("generating typescript from cue", func(t *testing.T) {
+	t.Run("generating openAPI from cue", func(t *testing.T) {
 		req := require.New(t)
 
 		cueValue := cuecontext.New().CompileString(schema)
@@ -182,7 +182,7 @@ Container: {
 		req.NoError(err)
 
 		req.Len(files, 1, "expected a single file")
-		testutils.TrimSpacesDiffComparator(t, []byte(expectedCode), files[0].Data, "test.go")
+		testutils.TrimSpacesDiffComparator(t, []byte(expectedCode), files[0].Data, "test.json")
 	})
 }
 
