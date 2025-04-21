@@ -6,8 +6,9 @@ import (
 
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
+
+	"github.com/grafana/cog/internal/testutils"
 )
 
 func TestTypesFromSchema_OutputGo(t *testing.T) {
@@ -124,6 +125,59 @@ export const defaultContainer = (): Container => ({
 		files, err := TypesFromSchema().
 			CUEValue("sandbox", cueValue).
 			Typescript(TypescriptConfig{}).
+			Run(context.Background())
+		req.NoError(err)
+
+		req.Len(files, 1, "expected a single file")
+		testutils.TrimSpacesDiffComparator(t, []byte(expectedCode), files[0].Data, "test.go")
+	})
+}
+
+func TestTypesFromSchema_OutputOpenAPI(t *testing.T) {
+	schema := `
+// Contains things.
+Container: {
+    str: string
+}
+`
+
+	expectedCode := `{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "sandbox",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Container": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "str"
+        ],
+        "properties": {
+          "str": {
+            "type": "string"
+          }
+        },
+        "description": "Contains things."
+      }
+    }
+  }
+}`
+
+	t.Run("generating typescript from cue", func(t *testing.T) {
+		req := require.New(t)
+
+		cueValue := cuecontext.New().CompileString(schema)
+		req.NoError(cueValue.Err())
+
+		files, err := TypesFromSchema().
+			CUEValue("sandbox", cueValue).
+			GenerateOpenAPI(OpenAPIGenerationConfig{}).
 			Run(context.Background())
 		req.NoError(err)
 
