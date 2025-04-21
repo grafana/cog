@@ -27,13 +27,12 @@ class ObjWithTimeField implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "registeredAt" => $this->registeredAt,
-        ];
+        $data = new \stdClass;
+        $data->registeredAt = $this->registeredAt;
         return $data;
     }
 }

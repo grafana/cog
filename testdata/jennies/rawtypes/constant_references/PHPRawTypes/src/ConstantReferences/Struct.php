@@ -32,14 +32,13 @@ class Struct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "myValue" => $this->myValue,
-            "myEnum" => $this->myEnum,
-        ];
+        $data = new \stdClass;
+        $data->myValue = $this->myValue;
+        $data->myEnum = $this->myEnum;
         return $data;
     }
 }

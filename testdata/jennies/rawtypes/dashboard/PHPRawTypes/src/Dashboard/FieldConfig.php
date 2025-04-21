@@ -35,17 +35,16 @@ class FieldConfig implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-        ];
+        $data = new \stdClass;
         if (isset($this->unit)) {
-            $data["unit"] = $this->unit;
+            $data->unit = $this->unit;
         }
         if (isset($this->custom)) {
-            $data["custom"] = $this->custom;
+            $data->custom = $this->custom;
         }
         return $data;
     }

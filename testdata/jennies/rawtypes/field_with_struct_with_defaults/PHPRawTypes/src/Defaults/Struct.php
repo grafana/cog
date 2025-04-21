@@ -67,17 +67,16 @@ class Struct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "allFields" => $this->allFields,
-            "partialFields" => $this->partialFields,
-            "emptyFields" => $this->emptyFields,
-            "complexField" => $this->complexField,
-            "partialComplexField" => $this->partialComplexField,
-        ];
+        $data = new \stdClass;
+        $data->allFields = $this->allFields;
+        $data->partialFields = $this->partialFields;
+        $data->emptyFields = $this->emptyFields;
+        $data->complexField = $this->complexField;
+        $data->partialComplexField = $this->partialComplexField;
         return $data;
     }
 }

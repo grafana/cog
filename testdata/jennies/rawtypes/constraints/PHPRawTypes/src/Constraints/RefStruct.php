@@ -38,14 +38,13 @@ class RefStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "labels" => $this->labels,
-            "tags" => $this->tags,
-        ];
+        $data = new \stdClass;
+        $data->labels = $this->labels;
+        $data->tags = $this->tags;
         return $data;
     }
 }

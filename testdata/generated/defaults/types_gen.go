@@ -280,7 +280,7 @@ func (resource BoolOrString) MarshalJSON() ([]byte, error) {
 		return json.Marshal(resource.String)
 	}
 
-	return nil, fmt.Errorf("no value for disjunction of scalars")
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode `BoolOrString` from JSON.
@@ -404,7 +404,7 @@ func (resource StringOrArrayOfString) MarshalJSON() ([]byte, error) {
 		return json.Marshal(resource.ArrayOfString)
 	}
 
-	return nil, fmt.Errorf("no value for disjunction of scalars")
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode `StringOrArrayOfString` from JSON.

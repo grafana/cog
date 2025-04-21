@@ -181,6 +181,8 @@ type RefStruct struct {
 // NewRefStruct creates a new RefStruct object.
 func NewRefStruct() *RefStruct {
 	return &RefStruct{
+		Labels: map[string]string{},
+		Tags: []string{},
 }
 }
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `RefStruct` from JSON.

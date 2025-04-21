@@ -60,12 +60,6 @@ type Config struct {
 
 	// AnyAsInterface instructs this jenny to emit `interface{}` instead of `any`.
 	AnyAsInterface bool `yaml:"any_as_interface"`
-
-	// AllowMarshalEmptyDisjunctions makes generated `MarshalJSON()`
-	// ignore errors when marshaling an empty disjunction.
-	// No-op if `GenerateJSONMarshaller` is disabled.
-	// Does not affect strict marshaling & unmarshalling.
-	AllowMarshalEmptyDisjunctions bool `yaml:"allow_marshal_empty_disjunctions"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {

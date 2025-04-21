@@ -287,7 +287,8 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 		return json.Marshal(resource.Bool)
 	}
 
-	return nil, fmt.Errorf("no value for disjunction of scalars")
+
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode `StringOrBool` from JSON.
@@ -517,7 +518,8 @@ func (resource SomeStructOrSomeOtherStructOrYetAnotherStruct) MarshalJSON() ([]b
 	if resource.YetAnotherStruct != nil {
 		return json.Marshal(resource.YetAnotherStruct)
 	}
-	return nil, fmt.Errorf("no value for disjunction of refs")
+
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode `SomeStructOrSomeOtherStructOrYetAnotherStruct` from JSON.
@@ -534,7 +536,7 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 
 	discriminator, found := parsedAsMap["Type"]
 	if !found {
-		return errors.New("discriminator field 'Type' not found in payload")
+		return nil
 	}
 
 	switch discriminator {
@@ -564,7 +566,7 @@ func (resource *SomeStructOrSomeOtherStructOrYetAnotherStruct) UnmarshalJSON(raw
 		return nil
 	}
 
-	return fmt.Errorf("could not unmarshal resource with `Type = %v`", discriminator)
+	return nil
 }
 
 

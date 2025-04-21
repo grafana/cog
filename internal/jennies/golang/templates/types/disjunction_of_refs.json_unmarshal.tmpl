@@ -16,7 +16,7 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) erro
 
 	discriminator, found := parsedAsMap["{{ .hint.Discriminator }}"]
 	if !found {
-		return errors.New("discriminator field '{{ .hint.Discriminator }}' not found in payload")
+		return nil
 	}
 
 	switch discriminator {
@@ -36,6 +36,6 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) erro
 {{- end }}
 	}
 
-	return fmt.Errorf("could not unmarshal resource with `{{ .hint.Discriminator }} = %v`", discriminator)
+	return nil
 }
 

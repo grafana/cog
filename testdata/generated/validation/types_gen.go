@@ -27,7 +27,11 @@ type Dashboard struct {
 
 // NewDashboard creates a new Dashboard object.
 func NewDashboard() *Dashboard {
-	return &Dashboard{}
+	return &Dashboard{
+		Tags:   []string{},
+		Labels: map[string]string{},
+		Panels: []Panel{},
+	}
 }
 
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Dashboard` from JSON.
