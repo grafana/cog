@@ -249,6 +249,8 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 		needsExplicitDefault := field.Type.Default != nil ||
 			extraDefaults[field.Name] != nil ||
 			(field.Required && field.Type.IsRef() && resolvedFieldType.IsStruct()) ||
+			(field.Required && field.Type.IsArray()) ||
+			(field.Required && field.Type.IsMap()) ||
 			field.Type.IsConcreteScalar() ||
 			field.Type.IsConstantRef() ||
 			(objectType.Default != nil && field.Name == objectType.Default)
@@ -348,6 +350,10 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			if referredPkg != "" {
 				defaultValue = referredPkg + "." + defaultValue
 			}
+		} else if field.Type.IsArray() {
+			defaultValue = "[]" + jenny.typeFormatter.formatType(field.Type.Array.ValueType) + "{}"
+		} else if field.Type.IsMap() {
+			defaultValue = "map[" + jenny.typeFormatter.formatType(field.Type.Map.IndexType) + "]" + jenny.typeFormatter.formatType(field.Type.Map.ValueType) + "{}"
 		} else {
 			defaultValue = "\"unsupported default value case: this is likely a bug in cog\""
 		}

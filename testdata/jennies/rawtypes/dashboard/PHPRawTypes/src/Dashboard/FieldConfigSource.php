@@ -31,14 +31,13 @@ class FieldConfigSource implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-        ];
+        $data = new \stdClass;
         if (isset($this->defaults)) {
-            $data["defaults"] = $this->defaults;
+            $data->defaults = $this->defaults;
         }
         return $data;
     }

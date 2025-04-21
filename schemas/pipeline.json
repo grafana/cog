@@ -353,10 +353,6 @@
         "any_as_interface": {
           "type": "boolean",
           "description": "AnyAsInterface instructs this jenny to emit `interface{}` instead of `any`."
-        },
-        "allow_marshal_empty_disjunctions": {
-          "type": "boolean",
-          "description": "AllowMarshalEmptyDisjunctions makes generated `MarshalJSON()`\nignore errors when marshaling an empty disjunction.\nNo-op if `GenerateJSONMarshaller` is disabled.\nDoes not affect strict marshaling \u0026 unmarshalling."
         }
       },
       "additionalProperties": false,

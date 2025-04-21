@@ -52,6 +52,10 @@ func escapeVarName(varName string) string {
 }
 
 func formatScalar(val any) string {
+	if val == nil {
+		return "nil"
+	}
+
 	if list, ok := val.([]any); ok {
 		items := make([]string, 0, len(list))
 

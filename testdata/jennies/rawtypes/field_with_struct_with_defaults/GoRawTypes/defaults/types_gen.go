@@ -329,6 +329,7 @@ type DefaultsStructComplexField struct {
 func NewDefaultsStructComplexField() *DefaultsStructComplexField {
 	return &DefaultsStructComplexField{
 		Nested: *NewDefaultsStructComplexFieldNested(),
+		Array: []string{},
 }
 }
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `DefaultsStructComplexField` from JSON.

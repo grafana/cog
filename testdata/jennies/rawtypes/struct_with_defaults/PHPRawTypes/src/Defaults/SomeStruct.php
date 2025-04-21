@@ -46,17 +46,16 @@ class SomeStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "fieldBool" => $this->fieldBool,
-            "fieldString" => $this->fieldString,
-            "FieldStringWithConstantValue" => $this->fieldStringWithConstantValue,
-            "FieldFloat32" => $this->fieldFloat32,
-            "FieldInt32" => $this->fieldInt32,
-        ];
+        $data = new \stdClass;
+        $data->fieldBool = $this->fieldBool;
+        $data->fieldString = $this->fieldString;
+        $data->FieldStringWithConstantValue = $this->fieldStringWithConstantValue;
+        $data->FieldFloat32 = $this->fieldFloat32;
+        $data->FieldInt32 = $this->fieldInt32;
         return $data;
     }
 }

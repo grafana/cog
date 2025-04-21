@@ -347,7 +347,14 @@ type Arrays struct {
 
 // NewArrays creates a new Arrays object.
 func NewArrays() *Arrays {
-	return &Arrays{}
+	return &Arrays{
+		Ints:             []int64{},
+		Strings:          []string{},
+		ArrayOfArray:     [][]string{},
+		Refs:             []Variable{},
+		AnonymousStructs: []EqualityArraysAnonymousStructs{},
+		ArrayOfAny:       []any{},
+	}
 }
 
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Arrays` from JSON.
@@ -593,7 +600,13 @@ type Maps struct {
 
 // NewMaps creates a new Maps object.
 func NewMaps() *Maps {
-	return &Maps{}
+	return &Maps{
+		Ints:             map[string]int64{},
+		Strings:          map[string]string{},
+		Refs:             map[string]Variable{},
+		AnonymousStructs: map[string]EqualityMapsAnonymousStructs{},
+		StringToAny:      map[string]any{},
+	}
 }
 
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Maps` from JSON.
