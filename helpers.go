@@ -6,7 +6,6 @@ import (
 
 	"cuelang.org/go/cue"
 	"github.com/grafana/codejen"
-
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/golang"
