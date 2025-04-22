@@ -84,11 +84,15 @@ func (config *Config) MergeWithGlobal(global languages.Config) Config {
 }
 
 type Language struct {
-	config Config
+	config          Config
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func New(config Config) *Language {
-	return &Language{config}
+	return &Language{
+		config:          config,
+		apiRefCollector: common.NewAPIReferenceCollector(),
+	}
 }
 
 func (language *Language) Name() string {
@@ -111,6 +115,13 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl}),
 		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl}),
 		common.If(!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
+
+		common.If(globalConfig.APIReference, common.APIReference{
+			Collector: language.apiRefCollector,
+			Language:  LanguageRef,
+			Formatter: apiReferenceFormatter(config),
+			Tmpl:      tmpl,
+		}),
 
 		common.CustomTemplates{
 			TmplFuncs:           formattingTemplateFuncs(),
