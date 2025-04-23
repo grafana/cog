@@ -112,7 +112,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Deserializers{config: config, tmpl: tmpl}),
 		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
-		common.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl}),
+		common.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl}),
 		common.If(!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
 

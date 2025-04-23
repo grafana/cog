@@ -11,6 +11,10 @@ import (
 )
 
 func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
+	pkgMapper := func(pkg string, class string) string {
+		return pkg
+	}
+
 	return common.APIReferenceFormatter{
 		KindName: func(kind ast.Kind) string {
 			if kind == ast.KindStruct {
@@ -28,14 +32,14 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 				return fmt.Sprintf("%s %s", arg.Type, arg.Name)
 			})
 
-			return fmt.Sprintf("%[1]s(%[2]s)", tools.LowerCamelCase(function.Name), strings.Join(args, ", "))
+			return fmt.Sprintf("public %[1]s(%[2]s)", tools.LowerCamelCase(function.Name), strings.Join(args, ", "))
 		},
 
 		ObjectName: func(object ast.Object) string {
 			return formatObjectName(object.Name)
 		},
 		ObjectDefinition: func(context languages.Context, object ast.Object) string {
-			typesFormatter := createFormatter(context, config)
+			typesFormatter := createFormatter(context, config).withPackageMapper(pkgMapper)
 			return typesFormatter.formatFieldType(object.Type)
 		},
 
@@ -47,7 +51,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 				return fmt.Sprintf("%s %s", arg.Type, arg.Name)
 			})
 
-			return fmt.Sprintf("%[1]s(%[2]s)", tools.LowerCamelCase(method.Name), strings.Join(args, ", "))
+			return fmt.Sprintf("public %[1]s %[2]s(%[3]s)", method.Return, tools.LowerCamelCase(method.Name), strings.Join(args, ", "))
 		},
 
 		BuilderName: func(builder ast.Builder) string {
@@ -68,17 +72,17 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return tools.LowerCamelCase(option.Name)
 		},
 		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
-			typesFormatter := createFormatter(context, config)
+			typesFormatter := createFormatter(context, config).withPackageMapper(pkgMapper)
 			args := tools.Map(option.Args, func(arg ast.Argument) string {
 				argType := typesFormatter.formatFieldType(arg.Type)
 				if argType != "" {
 					argType += " "
 				}
 
-				return argType + "$" + formatArgName(arg.Name)
+				return argType + formatArgName(arg.Name)
 			})
 
-			return fmt.Sprintf("%[1]s(%[2]s)", tools.LowerCamelCase(option.Name), strings.Join(args, ", "))
+			return fmt.Sprintf("public %[1]sBuilder %[2]s(%[3]s)", builder.Name, tools.LowerCamelCase(option.Name), strings.Join(args, ", "))
 		},
 	}
 }
