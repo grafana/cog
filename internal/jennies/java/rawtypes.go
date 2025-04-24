@@ -75,9 +75,6 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		jenny.imports = NewImportMap(jenny.config.PackagePath)
-		if object.Type.IsMap() || object.Type.IsArray() {
-			return
-		}
 		if object.Type.IsScalar() {
 			if object.Type.AsScalar().IsConcrete() {
 				scalars[object.Name] = object.Type.AsScalar()
