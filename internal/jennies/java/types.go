@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -393,4 +394,49 @@ func (tf *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) stri
 	}
 
 	return "unknown"
+}
+
+func formatEnum(pkg string, object ast.Object, tmpl *template.Template) ([]byte, error) {
+	enum := object.Type.AsEnum()
+	values := make([]EnumValue, 0)
+	for _, value := range enum.Values {
+		if value.Name == "" {
+			value.Name = "None"
+		}
+		values = append(values, EnumValue{
+			Name:  tools.UpperSnakeCase(value.Name),
+			Value: value.Value,
+		})
+	}
+
+	enumType := "Integer"
+	if enum.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
+		enumType = "String"
+	}
+
+	// Adds empty value if it doesn't exist to avoid
+	// to break in deserialization.
+	if enumType == "String" {
+		hasEmptyValue := false
+		for _, value := range values {
+			if value.Value == "" {
+				hasEmptyValue = true
+			}
+		}
+
+		if !hasEmptyValue {
+			values = append(values, EnumValue{
+				Name:  "_EMPTY",
+				Value: "",
+			})
+		}
+	}
+
+	return tmpl.RenderAsBytes("types/enum.tmpl", EnumTemplate{
+		Package:  pkg,
+		Name:     object.Name,
+		Values:   values,
+		Type:     enumType,
+		Comments: object.Comments,
+	})
 }

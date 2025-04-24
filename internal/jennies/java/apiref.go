@@ -6,11 +6,17 @@ import (
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
-func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
+type ApiRef struct {
+	config Config
+	tmpl   *template.Template
+}
+
+func (apiRef *ApiRef) apiReferenceFormatter() common.APIReferenceFormatter {
 	pkgMapper := func(pkg string, class string) string {
 		return pkg
 	}
@@ -39,8 +45,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return formatObjectName(object.Name)
 		},
 		ObjectDefinition: func(context languages.Context, object ast.Object) string {
-			typesFormatter := createFormatter(context, config).withPackageMapper(pkgMapper)
-			return typesFormatter.formatFieldType(object.Type)
+			return apiRef.definition(object)
 		},
 
 		MethodName: func(method common.MethodReference) string {
@@ -58,7 +63,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return formatObjectName(builder.Name) + "Builder"
 		},
 		ConstructorSignature: func(context languages.Context, builder ast.Builder) string {
-			typesFormatter := createFormatter(context, config).withPackageMapper(func(pkg string, class string) string {
+			typesFormatter := createFormatter(context, apiRef.config).withPackageMapper(func(pkg string, class string) string {
 				return pkg
 			})
 			args := tools.Map(builder.Constructor.Args, func(arg ast.Argument) string {
@@ -72,7 +77,7 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return tools.LowerCamelCase(option.Name)
 		},
 		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
-			typesFormatter := createFormatter(context, config).withPackageMapper(pkgMapper)
+			typesFormatter := createFormatter(context, apiRef.config).withPackageMapper(pkgMapper)
 			args := tools.Map(option.Args, func(arg ast.Argument) string {
 				argType := typesFormatter.formatFieldType(arg.Type)
 				if argType != "" {
@@ -85,4 +90,26 @@ func apiReferenceFormatter(config Config) common.APIReferenceFormatter {
 			return fmt.Sprintf("public %[1]sBuilder %[2]s(%[3]s)", builder.Name, tools.LowerCamelCase(option.Name), strings.Join(args, ", "))
 		},
 	}
+}
+
+func (apiRef *ApiRef) definition(def ast.Object) string {
+	switch def.Type.Kind {
+	case ast.KindStruct:
+
+	case ast.KindScalar:
+		return fmt.Sprintf("public static final %s %s = %v", formatScalarType(def.Type.AsScalar()), def.Name, def.Type.AsScalar().Value)
+	case ast.KindRef:
+		return fmt.Sprintf("public class %s extends %s {}", def.Name, apiRef.config.formatPackage(def.Type.AsRef().String()))
+	case ast.KindEnum:
+		b, err := formatEnum(apiRef.config.formatPackage(def.SelfRef.String()), def, apiRef.tmpl)
+		if err != nil {
+			return ""
+		}
+
+		return string(b)
+	default:
+		fmt.Printf(" not definded: %s\n", def.Type.Kind)
+	}
+
+	return ""
 }
