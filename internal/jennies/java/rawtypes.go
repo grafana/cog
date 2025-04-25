@@ -116,7 +116,7 @@ func (jenny RawTypes) generateSchema(pkg string, identifier string, object ast.O
 	case ast.KindStruct:
 		return jenny.formatStruct(pkg, identifier, object)
 	case ast.KindEnum:
-		return formatEnum(pkg, object, jenny.getTemplate())
+		return formatEnum(jenny.config.formatPackage(pkg), object, jenny.getTemplate())
 	case ast.KindRef:
 		return jenny.formatReference(pkg, identifier, object)
 	case ast.KindIntersection:

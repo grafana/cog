@@ -45,7 +45,8 @@ func (apiRef *ApiRef) apiReferenceFormatter() common.APIReferenceFormatter {
 			return formatObjectName(object.Name)
 		},
 		ObjectDefinition: func(context languages.Context, object ast.Object) string {
-			return apiRef.definition(object)
+			typesFormatter := createFormatter(context, apiRef.config).withPackageMapper(pkgMapper)
+			return apiRef.definition(typesFormatter, object)
 		},
 
 		MethodName: func(method common.MethodReference) string {
@@ -92,10 +93,10 @@ func (apiRef *ApiRef) apiReferenceFormatter() common.APIReferenceFormatter {
 	}
 }
 
-func (apiRef *ApiRef) definition(def ast.Object) string {
+func (apiRef *ApiRef) definition(typesFormatter *typeFormatter, def ast.Object) string {
 	switch def.Type.Kind {
 	case ast.KindStruct:
-
+		return apiRef.defineStruct(typesFormatter, def)
 	case ast.KindScalar:
 		return fmt.Sprintf("public static final %s %s = %v", formatScalarType(def.Type.AsScalar()), def.Name, def.Type.AsScalar().Value)
 	case ast.KindRef:
@@ -112,4 +113,24 @@ func (apiRef *ApiRef) definition(def ast.Object) string {
 	}
 
 	return ""
+}
+
+func (apiRef *ApiRef) defineStruct(typesFormatter *typeFormatter, def ast.Object) string {
+	buffer := strings.Builder{}
+
+	buffer.WriteString(fmt.Sprintf("public class %s ", tools.UpperCamelCase(def.Name)))
+	if def.Type.HasHint(ast.HintImplementsVariant) {
+		if def.Type.Hints[ast.HintImplementsVariant] == string(ast.SchemaVariantDataQuery) {
+			buffer.WriteString(fmt.Sprintf("extends %s ", apiRef.config.formatPackage("cog.variants.Dataquery")))
+		}
+	}
+
+	buffer.WriteString("{\n")
+
+	for _, field := range def.Type.AsStruct().Fields {
+		buffer.WriteString(fmt.Sprintf("  public %s %s;\n", typesFormatter.formatFieldType(field.Type), formatFieldName(field.Name)))
+	}
+
+	buffer.WriteString("}")
+	return buffer.String()
 }
