@@ -13,7 +13,7 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
         return this;
     }
     
-    public DashboardBuilder linksOrStrings(cog.Builder<List<unknown>> linksOrStrings) {
+    public DashboardBuilder linksOrStrings(List<cog.Builder<unknown>> linksOrStrings) {
         this.internal.linksOrStrings = linksOrStrings.build();
         return this;
     }
