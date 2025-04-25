@@ -722,7 +722,7 @@ type ArrayType struct {
 	ValueType Type `yaml:"value_type"`
 }
 
-func (t ArrayType) AcceptsValue(value any) bool {
+func (t *ArrayType) AcceptsValue(value any) bool {
 	return t.ValueType.AcceptsValue(value)
 }
 
@@ -750,10 +750,6 @@ func (t ArrayType) IsArrayOf(acceptedKinds ...Kind) bool {
 
 func (t ArrayType) IsArrayOfScalars() bool {
 	return t.IsArrayOf(KindScalar, KindArray)
-}
-
-func (t ArrayType) InnerValue() Type {
-	return t.ValueType
 }
 
 type EnumType struct {
@@ -839,7 +835,7 @@ func (t MapType) IsMapOf(acceptedKinds ...Kind) bool {
 	return true
 }
 
-func (t MapType) AcceptsValue(value any) bool {
+func (t *MapType) AcceptsValue(value any) bool {
 	return t.ValueType.AcceptsValue(value)
 }
 
@@ -848,10 +844,6 @@ func (t MapType) DeepCopy() MapType {
 		IndexType: t.IndexType.DeepCopy(),
 		ValueType: t.ValueType.DeepCopy(),
 	}
-}
-
-func (t MapType) InnerValue() Type {
-	return t.ValueType
 }
 
 type StructType struct {
@@ -1126,8 +1118,4 @@ func (slot ComposableSlotType) DeepCopy() ComposableSlotType {
 	return ComposableSlotType{
 		Variant: slot.Variant,
 	}
-}
-
-type ValueType interface {
-	InnerValue() Type
 }
