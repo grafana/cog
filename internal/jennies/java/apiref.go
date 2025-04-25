@@ -11,12 +11,12 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type ApiRef struct {
+type APIRef struct {
 	config Config
 	tmpl   *template.Template
 }
 
-func (apiRef *ApiRef) apiReferenceFormatter() common.APIReferenceFormatter {
+func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
 	pkgMapper := func(pkg string, class string) string {
 		return pkg
 	}
@@ -93,7 +93,7 @@ func (apiRef *ApiRef) apiReferenceFormatter() common.APIReferenceFormatter {
 	}
 }
 
-func (apiRef *ApiRef) definition(typesFormatter *typeFormatter, def ast.Object) string {
+func (apiRef *APIRef) definition(typesFormatter *typeFormatter, def ast.Object) string {
 	switch def.Type.Kind {
 	case ast.KindStruct:
 		return apiRef.defineStruct(typesFormatter, def)
@@ -115,7 +115,7 @@ func (apiRef *ApiRef) definition(typesFormatter *typeFormatter, def ast.Object) 
 	return ""
 }
 
-func (apiRef *ApiRef) defineStruct(typesFormatter *typeFormatter, def ast.Object) string {
+func (apiRef *APIRef) defineStruct(typesFormatter *typeFormatter, def ast.Object) string {
 	buffer := strings.Builder{}
 
 	buffer.WriteString(fmt.Sprintf("public class %s ", tools.UpperCamelCase(def.Name)))

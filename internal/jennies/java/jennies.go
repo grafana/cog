@@ -104,7 +104,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
-	apiRef := ApiRef{config: config, tmpl: tmpl}
+	apiRef := APIRef{config: config, tmpl: tmpl}
 
 	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
