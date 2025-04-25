@@ -1,9 +1,9 @@
 package java
 
 import (
-	"github.com/grafana/cog/internal/jennies/common"
 	"testing"
 
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
