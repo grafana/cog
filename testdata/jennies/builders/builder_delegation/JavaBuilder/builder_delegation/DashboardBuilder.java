@@ -23,7 +23,7 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
         return this;
     }
     
-    public DashboardBuilder linksOfLinks(List<List<cog.Builder<DashboardLink>>> linksOfLinks) {
+    public DashboardBuilder linksOfLinks(List<cog.Builder<List<DashboardLink>>> linksOfLinks) {
         this.internal.linksOfLinks = linksOfLinks.build();
         return this;
     }
