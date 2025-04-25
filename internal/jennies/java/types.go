@@ -67,9 +67,6 @@ func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 		case ast.KindMap:
 			tf.packageMapper("java.util", "Map")
 			return fmt.Sprintf("Map<String, %s.Builder<%s>>", tf.config.formatPackage("cog"), tf.formatFieldType(def.AsMap().ValueType))
-		case ast.KindArray:
-			tf.packageMapper("java.util", "List")
-			return fmt.Sprintf("List<%s.Builder<%s>>", tf.config.formatPackage("cog"), tf.formatFieldType(def.AsArray().ValueType))
 		default:
 			return fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), tf.formatFieldType(def))
 		}

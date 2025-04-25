@@ -14,7 +14,7 @@ public class LokiBuilderBuilder implements cog.Builder<Dashboard> {
         return this;
     }
     
-    public LokiBuilderBuilder targets(List<cog.Builder<Dataquery>> targets) {
+    public LokiBuilderBuilder targets(cog.Builder<List<Dataquery>> targets) {
         this.internal.targets = targets.build();
         return this;
     }
