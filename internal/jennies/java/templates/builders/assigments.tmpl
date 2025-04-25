@@ -33,6 +33,14 @@
            {{ $.Assignment.Path }}Resource.put(entry.getKey(), entry.getValue().build());
         }
     {{- end }}
+    {{- with .Value.Argument }}
+    {{- if and .Type.IsArray (or (typeHasBuilder $type) $type.AsArray.ValueType.IsComposableSlot) }}
+        {{ $type | formatType }} {{ $.Assignment.Path }}Resource = {{ $type | emptyValueForType }};
+        for ({{ $type | formatType }} {{ $.Assignment.Path }}Val : {{ $.Assignment.Path }}) {
+           {{ $.Assignment.Path }}Resource.add({{ $.Assignment.Path }}Val.build());
+        }
+    {{- end }}
+    {{- end }}
 {{- end }}
 
 {{- define "assignment_value" }}
@@ -41,7 +49,7 @@
     {{- end }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-            {{- if .Type.IsMap }}
+            {{- if or .Type.IsMap .Type.IsArray }}
             {{- .Name | escapeVar | lowerCamelCase }}Resource
             {{- else }}
             {{- .Name | escapeVar | lowerCamelCase }}.build()

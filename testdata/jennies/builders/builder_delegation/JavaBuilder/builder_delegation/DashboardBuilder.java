@@ -1,6 +1,7 @@
 package builder_delegation;
 
 import java.util.List;
+import java.util.LinkedList;
 
 public class DashboardBuilder implements cog.Builder<Dashboard> {
     protected final Dashboard internal;
@@ -18,13 +19,21 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
         return this;
     }
     
-    public DashboardBuilder links(cog.Builder<List<DashboardLink>> links) {
-        this.internal.links = links.build();
+    public DashboardBuilder links(List<cog.Builder<DashboardLink>> links) {
+        List<DashboardLink> linksResource = new LinkedList<>();
+        for (List<DashboardLink> linksVal : links) {
+           linksResource.add(linksVal.build());
+        }
+        this.internal.links = linksResource;
         return this;
     }
     
-    public DashboardBuilder linksOfLinks(cog.Builder<List<List<DashboardLink>>> linksOfLinks) {
-        this.internal.linksOfLinks = linksOfLinks.build();
+    public DashboardBuilder linksOfLinks(List<List<cog.Builder<DashboardLink>>> linksOfLinks) {
+        List<List<DashboardLink>> linksOfLinksResource = new LinkedList<>();
+        for (List<List<DashboardLink>> linksOfLinksVal : linksOfLinks) {
+           linksOfLinksResource.add(linksOfLinksVal.build());
+        }
+        this.internal.linksOfLinks = linksOfLinksResource;
         return this;
     }
     

@@ -1,6 +1,7 @@
 package builder_delegation_in_disjunction;
 
 import java.util.List;
+import java.util.LinkedList;
 
 public class DashboardBuilder implements cog.Builder<Dashboard> {
     protected final Dashboard internal;
@@ -13,8 +14,12 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
         return this;
     }
     
-    public DashboardBuilder linksOrStrings(cog.Builder<List<unknown>> linksOrStrings) {
-        this.internal.linksOrStrings = linksOrStrings.build();
+    public DashboardBuilder linksOrStrings(List<cog.Builder<unknown>> linksOrStrings) {
+        List<unknown> linksOrStringsResource = new LinkedList<>();
+        for (List<unknown> linksOrStringsVal : linksOrStrings) {
+           linksOrStringsResource.add(linksOrStringsVal.build());
+        }
+        this.internal.linksOrStrings = linksOrStringsResource;
         return this;
     }
     
