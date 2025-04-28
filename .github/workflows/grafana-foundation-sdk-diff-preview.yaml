@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Restore go vendors
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #v4.2.3
@@ -29,7 +30,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 #v0.12.0
         with:
-          enable-cache: 'true'
+          enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Build cog with current branch
@@ -50,16 +51,17 @@ jobs:
         env:
           CODEGEN_PIPELINE_CONFIG: ./config/foundation_sdk.dev.yaml
           WORKSPACE_PATH: /tmp/foundation-workspace-current
-          CLEANUP_WORKSPACE: 'no'
-          SKIP_VALIDATION: 'yes'
-          LOG_LEVEL: '7' # debug
-          GOGC: 'off'
+          CLEANUP_WORKSPACE: "no"
+          SKIP_VALIDATION: "yes"
+          LOG_LEVEL: "7" # debug
+          GOGC: "off"
 
       - name: Checkout main branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
         with:
           ref: main
           submodules: recursive
+          persist-credentials: false
 
       - name: Build cog with main branch
         shell: bash
@@ -77,28 +79,28 @@ jobs:
         env:
           CODEGEN_PIPELINE_CONFIG: ./config/foundation_sdk.dev.yaml
           WORKSPACE_PATH: /tmp/foundation-workspace-main
-          CLEANUP_WORKSPACE: 'no'
-          SKIP_VALIDATION: 'yes'
-          LOG_LEVEL: '7' # debug
-          GOGC: 'off'
+          CLEANUP_WORKSPACE: "no"
+          SKIP_VALIDATION: "yes"
+          LOG_LEVEL: "7" # debug
+          GOGC: "off"
 
       - name: Preview diff
         run: |
           cat <<'EOF' > preview.md
           <!-- grafana-foundation-sdk-diff-preview-marker -->
-          
+
           **Note:** the diff show code changes that would be introduced by this PR to the output of the `config/foundation_sdk.dev.yaml` codegen pipeline (dev version of the Foundation SDK).
-          
+
           <details>
           <summary>
-          
+
           ### 🔎 Changes to `config/foundation_sdk.dev.yaml`
-          
+
           </summary>
-          
+
           ```patch
           EOF
-          
+
           diff \
             --new-file \
             --unidirectional-new-file \
@@ -111,7 +113,7 @@ jobs:
             --exclude='package.json' \
             --exclude='*.md' \
             /tmp/foundation-workspace-main/foundation-sdk/ /tmp/foundation-workspace-current/foundation-sdk/ >> preview.md || true # diff returns 1 if the two targets have differences
-          
+
           cat <<'EOF' >> preview.md
           ```
           </details>
@@ -123,8 +125,8 @@ jobs:
         if: "!contains(github.actor, 'dependabot') && github.repository == 'grafana/cog'" # only run on main repo, and not on dependabot PRs
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: 'grafana-foundation-sdk-diff-preview-marker'
+          comment-author: "github-actions[bot]"
+          body-includes: "grafana-foundation-sdk-diff-preview-marker"
 
       - name: Upsert preview comment
         uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 #v4.0.0
@@ -133,4 +135,4 @@ jobs:
           comment-id: ${{ steps.preview-comment-find.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           edit-mode: replace
-          body-path: './preview.md'
+          body-path: "./preview.md"

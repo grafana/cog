@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Restore go vendors
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #v4.2.3
@@ -28,7 +30,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 #v0.12.0
         with:
-          enable-cache: 'true'
+          enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Run golangci-lint
@@ -40,6 +42,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Restore go vendors
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #4.2.3
@@ -54,7 +58,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 #v0.12.0
         with:
-          enable-cache: 'true'
+          enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Tests
@@ -66,11 +70,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 #v0.12.0
         with:
-          enable-cache: 'true'
+          enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Docs
@@ -88,6 +94,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Restore go vendors
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #4.2.3
@@ -102,7 +109,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 #v0.12.0
         with:
-          enable-cache: 'true'
+          enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Clone kind-registry
@@ -114,7 +121,7 @@ jobs:
             --config ./config/foundation_sdk.dev.yaml \
             --parameters grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }}
         env:
-          GOGC: 'off'
+          GOGC: "off"
 
       - name: Compile generated Go code
         run: devbox run ./scripts/ci/build-go.sh
@@ -161,6 +168,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Restore go vendors
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #4.2.3
@@ -175,7 +183,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 #v0.12.0
         with:
-          enable-cache: 'true'
+          enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Clone kind-registry
@@ -184,7 +192,7 @@ jobs:
       - name: Run code generation
         run: make gen-sdk-dev
         env:
-          GOGC: 'off'
+          GOGC: "off"
 
       - name: Run the Go example
         run: make run-go-example
