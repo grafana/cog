@@ -17,6 +17,8 @@ type Builder struct {
 	tmpl          *template.Template
 	imports       *common.DirectImportMap
 	typeFormatter *typeFormatter
+
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func (jenny Builder) JennyName() string {
@@ -66,6 +68,14 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		ImportAlias:          jenny.config.PackagePath,
 		IsGenericPanel:       jenny.isGenericPanel(builder),
 	}
+
+	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
+		Name: "build",
+		Comments: []string{
+			"Builds the object.",
+		},
+		Return: tools.UpperCamelCase(builder.Name),
+	})
 
 	return jenny.tmpl.Funcs(map[string]any{
 		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
