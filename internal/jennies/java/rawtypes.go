@@ -75,9 +75,6 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		jenny.imports = NewImportMap(jenny.config.PackagePath)
-		if object.Type.IsMap() || object.Type.IsArray() {
-			return
-		}
 		if object.Type.IsScalar() {
 			if object.Type.AsScalar().IsConcrete() {
 				scalars[object.Name] = object.Type.AsScalar()
@@ -119,7 +116,7 @@ func (jenny RawTypes) generateSchema(pkg string, identifier string, object ast.O
 	case ast.KindStruct:
 		return jenny.formatStruct(pkg, identifier, object)
 	case ast.KindEnum:
-		return jenny.formatEnum(pkg, object)
+		return formatEnum(jenny.config.formatPackage(pkg), object, jenny.getTemplate())
 	case ast.KindRef:
 		return jenny.formatReference(pkg, identifier, object)
 	case ast.KindIntersection:
@@ -127,51 +124,6 @@ func (jenny RawTypes) generateSchema(pkg string, identifier string, object ast.O
 	}
 
 	return nil, nil
-}
-
-func (jenny RawTypes) formatEnum(pkg string, object ast.Object) ([]byte, error) {
-	enum := object.Type.AsEnum()
-	values := make([]EnumValue, 0)
-	for _, value := range enum.Values {
-		if value.Name == "" {
-			value.Name = "None"
-		}
-		values = append(values, EnumValue{
-			Name:  tools.UpperSnakeCase(value.Name),
-			Value: value.Value,
-		})
-	}
-
-	enumType := "Integer"
-	if enum.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
-		enumType = "String"
-	}
-
-	// Adds empty value if it doesn't exist to avoid
-	// to break in deserialization.
-	if enumType == "String" {
-		hasEmptyValue := false
-		for _, value := range values {
-			if value.Value == "" {
-				hasEmptyValue = true
-			}
-		}
-
-		if !hasEmptyValue {
-			values = append(values, EnumValue{
-				Name:  "_EMPTY",
-				Value: "",
-			})
-		}
-	}
-
-	return jenny.getTemplate().RenderAsBytes("types/enum.tmpl", EnumTemplate{
-		Package:  jenny.config.formatPackage(pkg),
-		Name:     object.Name,
-		Values:   values,
-		Type:     enumType,
-		Comments: object.Comments,
-	})
 }
 
 func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Object) ([]byte, error) {
