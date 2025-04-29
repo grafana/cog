@@ -19,11 +19,12 @@ public class FuncCallExprBuilder implements cog.Builder<FuncCallExpr> {
     }
     
     public FuncCallExprBuilder args(List<cog.Builder<Expr>> args) {
-        List<Expr> argsResource = new LinkedList<>();
-        for (List<Expr> argsVal : args) {
-           argsResource.add(argsVal.build());
+        List<Expr> argsResources = new LinkedList<>();
+        for (Expr r1 : args) {
+                Expr argsDepth1 = r1.build();
+                argsResources.add(argsDepth1); 
         }
-        this.internal.args = argsResource;
+        this.internal.args = argsResources;
         return this;
     }
     
@@ -31,7 +32,8 @@ public class FuncCallExprBuilder implements cog.Builder<FuncCallExpr> {
 		if (this.internal.args == null) {
 			this.internal.args = new LinkedList<>();
 		}
-        this.internal.args.add(arg.build());
+    Expr argResource = arg.build();
+        this.internal.args.add(argResource);
         return this;
     }
     public FuncCallExpr build() {

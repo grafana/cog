@@ -10,21 +10,24 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
         this.internal = new Dashboard();
     }
     public DashboardBuilder singleLinkOrString(cog.Builder<unknown> singleLinkOrString) {
-        this.internal.singleLinkOrString = singleLinkOrString.build();
+    unknown singleLinkOrStringResource = singleLinkOrString.build();
+        this.internal.singleLinkOrString = singleLinkOrStringResource;
         return this;
     }
     
     public DashboardBuilder linksOrStrings(List<cog.Builder<unknown>> linksOrStrings) {
-        List<unknown> linksOrStringsResource = new LinkedList<>();
-        for (List<unknown> linksOrStringsVal : linksOrStrings) {
-           linksOrStringsResource.add(linksOrStringsVal.build());
+        List<unknown> linksOrStringsResources = new LinkedList<>();
+        for (unknown r1 : linksOrStrings) {
+                unknown linksOrStringsDepth1 = r1.build();
+                linksOrStringsResources.add(linksOrStringsDepth1); 
         }
-        this.internal.linksOrStrings = linksOrStringsResource;
+        this.internal.linksOrStrings = linksOrStringsResources;
         return this;
     }
     
     public DashboardBuilder disjunctionOfBuilders(cog.Builder<unknown> disjunctionOfBuilders) {
-        this.internal.disjunctionOfBuilders = disjunctionOfBuilders.build();
+    unknown disjunctionOfBuildersResource = disjunctionOfBuilders.build();
+        this.internal.disjunctionOfBuilders = disjunctionOfBuildersResource;
         return this;
     }
     public Dashboard build() {

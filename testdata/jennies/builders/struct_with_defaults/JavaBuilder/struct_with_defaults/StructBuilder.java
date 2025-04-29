@@ -8,17 +8,20 @@ public class StructBuilder implements cog.Builder<Struct> {
         this.internal = new Struct();
     }
     public StructBuilder allFields(cog.Builder<NestedStruct> allFields) {
-        this.internal.allFields = allFields.build();
+    NestedStruct allFieldsResource = allFields.build();
+        this.internal.allFields = allFieldsResource;
         return this;
     }
     
     public StructBuilder partialFields(cog.Builder<NestedStruct> partialFields) {
-        this.internal.partialFields = partialFields.build();
+    NestedStruct partialFieldsResource = partialFields.build();
+        this.internal.partialFields = partialFieldsResource;
         return this;
     }
     
     public StructBuilder emptyFields(cog.Builder<NestedStruct> emptyFields) {
-        this.internal.emptyFields = emptyFields.build();
+    NestedStruct emptyFieldsResource = emptyFields.build();
+        this.internal.emptyFields = emptyFieldsResource;
         return this;
     }
     

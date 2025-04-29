@@ -20,25 +20,33 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
     }
     
     public DashboardBuilder links(List<cog.Builder<DashboardLink>> links) {
-        List<DashboardLink> linksResource = new LinkedList<>();
-        for (List<DashboardLink> linksVal : links) {
-           linksResource.add(linksVal.build());
+        List<DashboardLink> linksResources = new LinkedList<>();
+        for (DashboardLink r1 : links) {
+                DashboardLink linksDepth1 = r1.build();
+                linksResources.add(linksDepth1); 
         }
-        this.internal.links = linksResource;
+        this.internal.links = linksResources;
         return this;
     }
     
     public DashboardBuilder linksOfLinks(List<List<cog.Builder<DashboardLink>>> linksOfLinks) {
-        List<List<DashboardLink>> linksOfLinksResource = new LinkedList<>();
-        for (List<List<DashboardLink>> linksOfLinksVal : linksOfLinks) {
-           linksOfLinksResource.add(linksOfLinksVal.build());
+        List<List<DashboardLink>> linksOfLinksResources = new LinkedList<>();
+        for (List<DashboardLink> r1 : linksOfLinks) {
+                List<DashboardLink> linksOfLinksDepth1 = new LinkedList<>();
+        for (DashboardLink r2 : r1) {
+                DashboardLink linksOfLinksDepth2 = r2.build();
+                linksOfLinksDepth1.add(linksOfLinksDepth2); 
         }
-        this.internal.linksOfLinks = linksOfLinksResource;
+                
+                linksOfLinksResources.add(linksOfLinksDepth1); 
+        }
+        this.internal.linksOfLinks = linksOfLinksResources;
         return this;
     }
     
     public DashboardBuilder singleLink(cog.Builder<DashboardLink> singleLink) {
-        this.internal.singleLink = singleLink.build();
+    DashboardLink singleLinkResource = singleLink.build();
+        this.internal.singleLink = singleLinkResource;
         return this;
     }
     public Dashboard build() {
