@@ -82,7 +82,7 @@
 
 {{- define "unfold_builders" }}
     {{- if .InputType.IsArray }}
-        for ({{ .InputType.AsArray.ValueType | formatType }} r{{ .Depth }} : {{ .InputVar }}) {
+        for ({{ .InputType.AsArray.ValueType | formatBuilderFieldType }} r{{ .Depth }} : {{ .InputVar }}) {
             {{- if .InputType.Array.ValueType.IsArray }}
                 {{ .InputType.Array.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = {{ .InputType | emptyValueForType }};
                 
