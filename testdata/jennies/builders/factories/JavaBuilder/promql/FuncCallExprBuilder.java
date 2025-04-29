@@ -20,7 +20,7 @@ public class FuncCallExprBuilder implements cog.Builder<FuncCallExpr> {
     
     public FuncCallExprBuilder args(List<cog.Builder<Expr>> args) {
         List<Expr> argsResources = new LinkedList<>();
-        for (Expr r1 : args) {
+        for (cog.Builder<Expr> r1 : args) {
                 Expr argsDepth1 = r1.build();
                 argsResources.add(argsDepth1); 
         }

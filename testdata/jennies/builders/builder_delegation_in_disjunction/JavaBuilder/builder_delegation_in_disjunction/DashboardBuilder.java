@@ -17,7 +17,7 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
     
     public DashboardBuilder linksOrStrings(List<cog.Builder<unknown>> linksOrStrings) {
         List<unknown> linksOrStringsResources = new LinkedList<>();
-        for (unknown r1 : linksOrStrings) {
+        for (cog.Builder<unknown> r1 : linksOrStrings) {
                 unknown linksOrStringsDepth1 = r1.build();
                 linksOrStringsResources.add(linksOrStringsDepth1); 
         }

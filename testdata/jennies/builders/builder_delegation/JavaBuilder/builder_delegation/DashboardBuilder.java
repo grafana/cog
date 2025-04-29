@@ -21,7 +21,7 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
     
     public DashboardBuilder links(List<cog.Builder<DashboardLink>> links) {
         List<DashboardLink> linksResources = new LinkedList<>();
-        for (DashboardLink r1 : links) {
+        for (cog.Builder<DashboardLink> r1 : links) {
                 DashboardLink linksDepth1 = r1.build();
                 linksResources.add(linksDepth1); 
         }
@@ -31,9 +31,9 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
     
     public DashboardBuilder linksOfLinks(List<List<cog.Builder<DashboardLink>>> linksOfLinks) {
         List<List<DashboardLink>> linksOfLinksResources = new LinkedList<>();
-        for (List<DashboardLink> r1 : linksOfLinks) {
+        for (List<cog.Builder<DashboardLink>> r1 : linksOfLinks) {
                 List<DashboardLink> linksOfLinksDepth1 = new LinkedList<>();
-        for (DashboardLink r2 : r1) {
+        for (cog.Builder<DashboardLink> r2 : r1) {
                 DashboardLink linksOfLinksDepth2 = r2.build();
                 linksOfLinksDepth1.add(linksOfLinksDepth2); 
         }

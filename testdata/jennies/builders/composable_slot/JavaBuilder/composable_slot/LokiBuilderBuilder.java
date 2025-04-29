@@ -18,7 +18,7 @@ public class LokiBuilderBuilder implements cog.Builder<Dashboard> {
     
     public LokiBuilderBuilder targets(List<cog.Builder<Dataquery>> targets) {
         List<Dataquery> targetsResources = new LinkedList<>();
-        for (Dataquery r1 : targets) {
+        for (cog.Builder<Dataquery> r1 : targets) {
                 Dataquery targetsDepth1 = r1.build();
                 targetsResources.add(targetsDepth1); 
         }

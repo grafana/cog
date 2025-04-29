@@ -98,3 +98,6 @@ class StructB:
             args["my_value"] = data["myValue"]        
 
         return cls(**args)
+
+
+
