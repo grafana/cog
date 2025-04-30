@@ -149,14 +149,16 @@ type ClassTemplate struct {
 }
 
 type ConstructorTemplate struct {
+	IsDefault   bool
 	Args        []ast.Argument
 	Assignments []ConstructorAssignmentTemplate
 }
 
 type ConstructorAssignmentTemplate struct {
-	Name  string
-	Type  ast.Type
-	Value any
+	Name         string
+	Type         ast.Type
+	Value        any
+	ValueFromArg string
 }
 
 type ConstantTemplate struct {

@@ -32,10 +32,10 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- range .Constructors }}
     public {{ $.Name }}({{- template "args" dict "Arguments" .Args "IsBuilder" false }}) {
         {{- range .Assignments }}
-        {{- if .Value }}
-        this.{{ .Name }} = {{ .Value }};
+        {{- if .ValueFromArg }}
+        this.{{ .Name }} = {{ .ValueFromArg }};
         {{- else }}
-        this.{{ .Name }} = {{ .Name }};
+        this.{{ .Name }} = {{ .Value }};
         {{- end }}
         {{- end }}
     }
