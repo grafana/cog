@@ -149,7 +149,6 @@ type ClassTemplate struct {
 }
 
 type ConstructorTemplate struct {
-	IsDefault   bool
 	Args        []ast.Argument
 	Assignments []ConstructorAssignmentTemplate
 }
