@@ -11,6 +11,8 @@ public class Panel {
     public List<Dataquery> targets;
     public FieldConfigSource fieldConfig;
     public Panel() {
+        this.title = "";
+        this.type = "";
     }
     public Panel(String title,String type,DataSourceRef datasource,Object options,List<Dataquery> targets,FieldConfigSource fieldConfig) {
         this.title = title;
