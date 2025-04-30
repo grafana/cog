@@ -6,6 +6,7 @@ public class StructB {
     public String myValue;
     public StructB() {
         this.myEnum = Enum.VALUE_B;
+        this.myValue = "";
     }
     public StructB(String myValue) {
         this.myEnum = Enum.VALUE_B;
