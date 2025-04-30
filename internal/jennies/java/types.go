@@ -182,13 +182,9 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 
 		referredObj, found := tf.context.LocateObjectByRef(def.AsRef())
 		if found && referredObj.Type.IsEnum() {
-			enum := referredObj.Type.AsEnum()
-			enumValue, _ := enum.MemberForValue(0)
-			if enum.Values[0].Type.Kind == ast.KindScalar {
-				enumValue, _ = enum.MemberForValue("")
-			}
+			defaultMember := referredObj.Type.AsEnum().Values[0]
 
-			return fmt.Sprintf("%s.%s", referredObj.Name, tools.UpperSnakeCase(enumValue.Name))
+			return fmt.Sprintf("%s.%s", referredObj.Name, tools.UpperSnakeCase(defaultMember.Name))
 		}
 
 		return fmt.Sprintf("new %s()", tf.config.formatPackage(refDef))
@@ -210,6 +206,8 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 			return `""`
 		case ast.KindBytes:
 			return "(byte) 0"
+		case ast.KindAny:
+			return "new Object()"
 		default:
 			return "unknown"
 		}
