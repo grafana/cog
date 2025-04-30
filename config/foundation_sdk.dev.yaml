@@ -137,11 +137,11 @@ inputs:
 
   # The schema for units
   - cue:
-      entrypoint: '%__config_dir%/schemas/units'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/units'
 
   # The schema for resource manifests
   - cue:
-      entrypoint: '%__config_dir%/schemas/resource'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/resource'
 
 transformations:
   schemas:
