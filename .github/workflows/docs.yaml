@@ -20,7 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write
 
     steps:
       - name: Checkout
@@ -47,8 +46,8 @@ jobs:
   deploy:
     needs: build_docs
     permissions:
-      contents: read
-      id-token: write
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
 
     name: Deploy documentation
     runs-on: ubuntu-latest
