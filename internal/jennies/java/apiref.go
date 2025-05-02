@@ -80,7 +80,7 @@ func (apiRef *APIRef) apiReferenceFormatter() common.APIReferenceFormatter {
 		OptionSignature: func(context languages.Context, builder ast.Builder, option ast.Option) string {
 			typesFormatter := createFormatter(context, apiRef.config).withPackageMapper(pkgMapper)
 			args := tools.Map(option.Args, func(arg ast.Argument) string {
-				argType := typesFormatter.formatFieldType(arg.Type)
+				argType := typesFormatter.formatBuilderFieldType(arg.Type)
 				if argType != "" {
 					argType += " "
 				}
