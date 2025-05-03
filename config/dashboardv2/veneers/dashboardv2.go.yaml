@@ -5,9 +5,9 @@ language: go
 package: dashboardv2alpha1
 
 options:
-  ##############
-  # Variables  #
-  ##############
+  #############
+  # Variables #
+  #############
 
   - disjunction_as_options:
       by_builder: Dashboard.variable
@@ -39,9 +39,9 @@ options:
   - disjunction_as_options:
       by_builder: QueryVariable.query
 
-  ##############
-  # Panels     #
-  ##############
+  ##########
+  # Panels #
+  ##########
 
   # WithOverride(matcher, properties) instead of WithOverride(struct{...})
   - struct_fields_as_arguments:

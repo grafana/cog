@@ -25,32 +25,32 @@ builders:
   # Layouts #
   ###########
 
-  ########################
-  # ResponsiveGridLayout #
-  ########################
+  ##################
+  # AutoGridLayout #
+  ##################
 
   - merge_into:
-      source: ResponsiveGridLayoutSpec
-      destination: ResponsiveGridLayoutKind
+      source: AutoGridLayoutSpec
+      destination: AutoGridLayoutKind
       under_path: spec
   - rename:
-      by_object: ResponsiveGridLayoutKind
-      as: ResponsiveGridLayout
+      by_object: AutoGridLayoutKind
+      as: AutoGridLayout
 
   - merge_into:
-      source: ResponsiveGridLayoutItemSpec
-      destination: ResponsiveGridLayoutItemKind
+      source: AutoGridLayoutItemSpec
+      destination: AutoGridLayoutItemKind
       under_path: spec
   - rename:
-      by_object: ResponsiveGridLayoutItemKind
-      as: ResponsiveGridLayoutItem
+      by_object: AutoGridLayoutItemKind
+      as: AutoGridLayoutItem
 
   - merge_into:
       source: ElementReference
-      destination: ResponsiveGridLayoutItem
+      destination: AutoGridLayoutItem
       under_path: spec.element
   - promote_options_to_constructor:
-      by_name: ResponsiveGridLayoutItem
+      by_name: AutoGridLayoutItem
       options: [name]
 
   ##############
@@ -391,7 +391,7 @@ options:
   # Layouts #
   ###########
 
-  # GridLayoutKind + RowsLayoutKind + ResponsiveGridLayoutKind
+  # GridLayoutKind + RowsLayoutKind + AutoGridLayoutKind + TabsLayoutKind
   - disjunction_as_options:
       by_builder: Dashboard.Layout
   - rename:
@@ -401,8 +401,11 @@ options:
       by_builder: Dashboard.RowsLayoutKind
       as: rowsLayout
   - rename:
-      by_builder: Dashboard.ResponsiveGridLayoutKind
-      as: responsiveGridLayout
+      by_builder: Dashboard.AutoGridLayoutKind
+      as: autoGridLayout
+  - rename:
+      by_builder: Dashboard.TabsLayoutKind
+      as: tabsLayout
 
   ##############
   # RowsLayout #
@@ -419,29 +422,29 @@ options:
   - array_to_append:
       by_builder: RowsLayout.row
 
-  # GridLayoutKind + ResponsiveGridLayoutKind
+  # GridLayoutKind + AutoGridLayoutKind
   - disjunction_as_options:
       by_builder: RowsLayoutRow.Layout
   - rename:
       by_builder: RowsLayoutRow.GridLayoutKind
       as: gridLayout
   - rename:
-      by_builder: RowsLayoutRow.ResponsiveGridLayoutKind
+      by_builder: RowsLayoutRow.AutoGridLayoutKind
       as: responsiveGridLayout
 
-  ########################
-  # ResponsiveGridLayout #
-  ########################
+  ##################
+  # AutoGridLayout #
+  ##################
 
-  - omit: { by_builder: ResponsiveGridLayout.spec }
-  - omit: { by_builder: ResponsiveGridLayoutItem.spec }
+  - omit: { by_builder: AutoGridLayout.spec }
+  - omit: { by_builder: AutoGridLayoutItem.spec }
 
   # Append a single `item` value instead of a map of everything
   - duplicate:
-      by_builder: ResponsiveGridLayout.items
+      by_builder: AutoGridLayout.items
       as: item
   - array_to_append:
-      by_builder: ResponsiveGridLayout.item
+      by_builder: AutoGridLayout.item
 
   ##############
   # GridLayout #
