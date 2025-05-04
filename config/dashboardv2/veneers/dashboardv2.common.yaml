@@ -93,10 +93,33 @@ builders:
       options: [title]
 
   ##############
+  # TabsLayout #
+  ##############
+
+  - merge_into:
+      source: TabsLayoutSpec
+      destination: TabsLayoutKind
+      under_path: spec
+  - rename:
+      by_object: TabsLayoutKind
+      as: TabsLayout
+
+  - merge_into:
+      source: TabsLayoutTabSpec
+      destination: TabsLayoutTabKind
+      under_path: spec
+  - rename:
+      by_object: TabsLayoutTabKind
+      as: TabsLayoutTab
+
+  - promote_options_to_constructor:
+      by_name: TabsLayoutTab
+      options: [title]
+
+  ##############
   # GridLayout #
   ##############
 
-  # Rearrange layout-related builders
   - merge_into:
       source: GridLayoutSpec
       destination: GridLayoutKind
@@ -422,7 +445,7 @@ options:
   - array_to_append:
       by_builder: RowsLayout.row
 
-  # GridLayoutKind + AutoGridLayoutKind
+  # GridLayoutKind + AutoGridLayoutKind + TabsLayoutKind + RowsLayoutKind
   - disjunction_as_options:
       by_builder: RowsLayoutRow.Layout
   - rename:
@@ -430,7 +453,13 @@ options:
       as: gridLayout
   - rename:
       by_builder: RowsLayoutRow.AutoGridLayoutKind
-      as: responsiveGridLayout
+      as: AutoGridLayout
+  - rename:
+      by_builder: RowsLayoutRow.TabsLayoutKind
+      as: TabsLayout
+  - rename:
+      by_builder: RowsLayoutRow.RowsLayoutKind
+      as: RowsLayout
 
   ##################
   # AutoGridLayout #
@@ -445,6 +474,36 @@ options:
       as: item
   - array_to_append:
       by_builder: AutoGridLayout.item
+
+  ##############
+  # TabsLayout #
+  ##############
+
+  - omit: { by_builder: TabsLayout.spec }
+  - omit: { by_builder: TabsLayoutTab.spec }
+
+  # Append a single `tab` value instead of a list of everything
+  - duplicate:
+      by_builder: TabsLayout.tabs
+      as: tab
+  - array_to_append:
+      by_builder: TabsLayout.tab
+
+  # GridLayoutKind + AutoGridLayoutKind + TabsLayoutKind + RowsLayoutKind
+  - disjunction_as_options:
+      by_builder: TabsLayoutTab.Layout
+  - rename:
+      by_builder: TabsLayoutTab.GridLayoutKind
+      as: gridLayout
+  - rename:
+      by_builder: TabsLayoutTab.AutoGridLayoutKind
+      as: AutoGridLayout
+  - rename:
+      by_builder: TabsLayoutTab.TabsLayoutKind
+      as: TabsLayout
+  - rename:
+      by_builder: TabsLayoutTab.RowsLayoutKind
+      as: RowsLayout
 
   ##############
   # GridLayout #

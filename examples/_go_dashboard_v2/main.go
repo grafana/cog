@@ -9,11 +9,11 @@ import (
 	"github.com/grafana/cog/generated/go/common"
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha1"
 	"github.com/grafana/cog/generated/go/prometheus"
+	"github.com/grafana/cog/generated/go/resource"
 )
 
 func dashboardBuilder() []byte {
 	builder := dashboard.NewDashboardBuilder("[TEST] Node Exporter / Raspberry").
-		//Uid("test-dashboard-raspberry"). // no more dashboard UID? (is it because the schema is just for a dashboard "spec"?)
 		Tags([]string{"generated", "raspberrypi-node-integration"}).
 		CursorSync(dashboard.DashboardCursorSyncCrosshair).
 		TimeSettings(dashboard.NewTimeSettingsBuilder().
@@ -71,7 +71,101 @@ func dashboardBuilder() []byte {
 		Panel("auth_logs", authLogs()).
 		Panel("kernel_logs", kernelLogs()).
 		Panel("all_sys_logs", allSystemLogs()).
-		// Layout building
+		// Tabs layout
+		TabsLayout(dashboard.NewTabsLayoutBuilder().
+			Tab(dashboard.NewTabsLayoutTabBuilder("CPU").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("cpu_usage")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("cpu_temp")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("load_avg")),
+				),
+			).
+			Tab(dashboard.NewTabsLayoutTabBuilder("Memory").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("mem_usage")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("mem_usage_current")),
+				),
+			).
+			Tab(dashboard.NewTabsLayoutTabBuilder("Disk").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("disk_io")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("disk_usage")),
+				),
+			).
+			Tab(dashboard.NewTabsLayoutTabBuilder("Network").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("network_in")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("network_out")),
+				),
+			).
+			Tab(dashboard.NewTabsLayoutTabBuilder("Logs").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("sys_error_logs")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("auth_logs")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("kernel_logs")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("all_sys_logs")),
+				),
+			),
+		)
+	// Rows layout
+	/*
+		RowsLayout(dashboard.NewRowsLayoutBuilder().
+			Row(dashboard.NewRowsLayoutRowBuilder("CPU").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("cpu_usage")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("cpu_temp")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("load_avg")),
+				),
+			).
+			Row(dashboard.NewRowsLayoutRowBuilder("Memory").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("mem_usage")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("mem_usage_current")),
+				),
+			).
+			Row(dashboard.NewRowsLayoutRowBuilder("Disk").
+				Collapse(true).
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("disk_io")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("disk_usage")),
+				),
+			).
+			Row(dashboard.NewRowsLayoutRowBuilder("Network").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("network_in")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("network_out")),
+				),
+			).
+			Row(dashboard.NewRowsLayoutRowBuilder("Logs").
+				AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+					Item(dashboard.NewAutoGridLayoutItemBuilder("sys_error_logs")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("auth_logs")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("kernel_logs")).
+					Item(dashboard.NewAutoGridLayoutItemBuilder("all_sys_logs")),
+				),
+			),
+		)
+	*/
+	// Auto grid layout
+	/*
+		AutoGridLayout(dashboard.NewAutoGridLayoutBuilder().
+			Item(dashboard.NewAutoGridLayoutItemBuilder("cpu_usage")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("cpu_temp")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("load_avg")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("mem_usage")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("mem_usage_current")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("disk_io")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("disk_usage")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("network_in")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("network_out")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("sys_error_logs")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("auth_logs")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("kernel_logs")).
+			Item(dashboard.NewAutoGridLayoutItemBuilder("all_sys_logs")),
+		)
+	*/
+	// "Manual" grid layout
+	/*
 		GridLayout(dashboard.NewGridLayoutBuilder().
 			Row(dashboard.NewGridLayoutRowBuilder("CPU")).
 			Item(dashboard.NewGridLayoutItemBuilder("cpu_usage").
@@ -80,22 +174,35 @@ func dashboardBuilder() []byte {
 				Height(200).
 				Width(200),
 			).
+			Item(dashboard.NewGridLayoutItemBuilder("cpu_temp")).
+			Item(dashboard.NewGridLayoutItemBuilder("load_avg")).
 			Row(dashboard.NewGridLayoutRowBuilder("Memory")).
 			Row(dashboard.NewGridLayoutRowBuilder("Disk")).
 			Row(dashboard.NewGridLayoutRowBuilder("Network")).
 			Row(dashboard.NewGridLayoutRowBuilder("Logs")),
 		)
+	*/
 
 	sampleDashboard, err := builder.Build()
 	if err != nil {
 		panic(err)
 	}
-	dashboardJson, err := json.MarshalIndent(sampleDashboard, "", "  ")
+
+	manifest := resource.Manifest{
+		ApiVersion: "dashboard.grafana.app/v2alpha1",
+		Kind:       "Dashboard",
+		Metadata: resource.Metadata{
+			Name: "test-v2-go",
+		},
+		Spec: sampleDashboard,
+	}
+
+	manifestJson, err := json.MarshalIndent(manifest, "", "  ")
 	if err != nil {
 		panic(err)
 	}
 
-	return dashboardJson
+	return manifestJson
 }
 
 func main() {
