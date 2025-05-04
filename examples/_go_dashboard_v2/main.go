@@ -189,8 +189,8 @@ func dashboardBuilder() []byte {
 	}
 
 	manifest := resource.Manifest{
-		ApiVersion: "dashboard.grafana.app/v2alpha1",
-		Kind:       "Dashboard",
+		ApiVersion: resource.DashboardV2Alpha1,
+		Kind:       resource.DashboardKind,
 		Metadata: resource.Metadata{
 			Name: "test-v2-go",
 		},
