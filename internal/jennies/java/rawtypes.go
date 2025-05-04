@@ -261,7 +261,7 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 			defaultConstructorAssignments = append(defaultConstructorAssignments, ConstructorAssignmentTemplate{
 				Name:  name,
 				Type:  field.Type,
-				Value: jenny.typeFormatter.emptyValueForType(field.Type),
+				Value: jenny.typeFormatter.emptyValueForType(field.Type, false),
 			})
 		}
 	}
@@ -320,7 +320,7 @@ func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
 		if v, ok := defaultValues[f.Name]; ok {
 			args[i] = jenny.genDefaultForType(f.Type, v)
 		} else {
-			args[i] = jenny.typeFormatter.emptyValueForType(f.Type)
+			args[i] = jenny.typeFormatter.emptyValueForType(f.Type, false)
 		}
 	}
 
