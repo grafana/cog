@@ -78,8 +78,10 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 	})
 
 	return jenny.tmpl.Funcs(map[string]any{
-		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
-		"emptyValueForType":        jenny.typeFormatter.emptyValueForType,
+		"formatBuilderFieldType": jenny.typeFormatter.formatBuilderFieldType,
+		"emptyValueForType": func(def ast.Type) string {
+			return jenny.typeFormatter.emptyValueForType(def, true)
+		},
 		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
 		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
 		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,

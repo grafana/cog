@@ -166,7 +166,7 @@ func formatScalarType(def ast.ScalarType) string {
 	return scalarType
 }
 
-func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
+func (tf *typeFormatter) emptyValueForType(def ast.Type, useBuilders bool) string {
 	switch def.Kind {
 	case ast.KindArray:
 		tf.packageMapper("java.util", "LinkedList")
@@ -176,7 +176,7 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 		return "new HashMap<>()"
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", formatPackageName(def.AsRef().ReferredPkg), formatObjectName(def.AsRef().ReferredType))
-		if tf.typeHasBuilder(def) {
+		if useBuilders && tf.typeHasBuilder(def) {
 			return fmt.Sprintf("new %sBuilder().build()", tf.config.formatPackage(refDef))
 		}
 
