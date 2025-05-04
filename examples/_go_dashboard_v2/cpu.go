@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/grafana/cog/generated/go/common"
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha1"
+	"github.com/grafana/cog/generated/go/units"
 )
 
 func cpuUsageTimeseries() *dashboard.PanelBuilder {
@@ -19,7 +20,7 @@ func cpuUsageTimeseries() *dashboard.PanelBuilder {
 				Stacking(common.NewStackingConfigBuilder().Mode(common.StackingModeNormal)). // TODO: painful, not intuitive
 				Min(0).
 				Max(1).
-				Unit("percentunit").
+				Unit(units.PercentUnit).
 				Thresholds(
 					dashboard.NewThresholdsConfigBuilder().
 						Mode(dashboard.ThresholdsModeAbsolute).
@@ -53,7 +54,7 @@ func loadAverageTimeseries() *dashboard.PanelBuilder {
 						}),
 				).
 				Min(0).
-				Unit("short"),
+				Unit(units.Short),
 		).
 		Data(
 			dashboard.NewQueryGroupBuilder().
@@ -79,7 +80,7 @@ func cpuTemperatureGauge() *dashboard.PanelBuilder {
 			defaultGauge().
 				Min(30).
 				Max(100).
-				Unit("celsius").
+				Unit(units.Celsius).
 				Thresholds(
 					dashboard.NewThresholdsConfigBuilder().
 						Mode(dashboard.ThresholdsModeAbsolute).

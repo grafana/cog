@@ -5,6 +5,7 @@ import (
 	"github.com/grafana/cog/generated/go/common"
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha1"
 	"github.com/grafana/cog/generated/go/table"
+	"github.com/grafana/cog/generated/go/units"
 )
 
 func diskIOTimeseries() *dashboard.PanelBuilder {
@@ -13,9 +14,9 @@ func diskIOTimeseries() *dashboard.PanelBuilder {
 		Visualization(
 			defaultTimeseries().
 				FillOpacity(0).
-				Unit("Bps").
+				Unit(units.BytesPerSecondSI).
 				OverrideByRegexp("/ io time/", []dashboard.DynamicConfigValue{
-					{Id: "unit", Value: "percentunit"},
+					{Id: "unit", Value: units.PercentUnit},
 				}),
 		).
 		Data(
@@ -35,7 +36,7 @@ func diskSpaceUsageTable() *dashboard.PanelBuilder {
 		Visualization(
 			table.NewVisualizationBuilder().
 				Align(common.FieldTextAlignmentAuto).
-				Unit("decbytes").
+				Unit(units.BytesSI).
 				CellHeight(common.TableCellHeightSm).
 				Footer(common.NewTableFooterOptionsBuilder().CountRows(false).Reducer([]string{"sum"})).
 				// Overrides configuration
@@ -52,7 +53,7 @@ func diskSpaceUsageTable() *dashboard.PanelBuilder {
 					{Id: "custom.width", Value: 88},
 				}).
 				OverrideByName("Used, %", []dashboard.DynamicConfigValue{
-					{Id: "unit", Value: "percentunit"},
+					{Id: "unit", Value: units.PercentUnit},
 					{Id: "custom.cellOptions", Value: struct {
 						Mode string `json:"mode"`
 						Type string `json:"type"`

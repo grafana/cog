@@ -4,6 +4,7 @@ import (
 	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/common"
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha1"
+	"github.com/grafana/cog/generated/go/units"
 )
 
 func memoryUsageTimeseries() *dashboard.PanelBuilder {
@@ -32,7 +33,7 @@ func memoryUsageTimeseries() *dashboard.PanelBuilder {
 						}),
 				).
 				Min(0).
-				Unit("bytes").
+				Unit(units.BytesIEC).
 				Decimals(2),
 		).
 		Data(
@@ -58,7 +59,7 @@ func memoryUsageGauge() *dashboard.PanelBuilder {
 			defaultGauge().
 				Min(30).
 				Max(100).
-				Unit("percent").
+				Unit(units.Percent).
 				Thresholds(
 					dashboard.NewThresholdsConfigBuilder().
 						Mode(dashboard.ThresholdsModeAbsolute).

@@ -2,6 +2,7 @@ package main
 
 import (
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha1"
+	"github.com/grafana/cog/generated/go/units"
 )
 
 func networkReceivedTimeseries() *dashboard.PanelBuilder {
@@ -11,7 +12,7 @@ func networkReceivedTimeseries() *dashboard.PanelBuilder {
 		Visualization(
 			defaultTimeseries().
 				Min(0).
-				Unit("bps").
+				Unit(units.BitsPerSecondSI).
 				FillOpacity(0),
 		).
 		Data(
@@ -28,7 +29,7 @@ func networkTransmittedTimeseries() *dashboard.PanelBuilder {
 		Visualization(
 			defaultTimeseries().
 				Min(0).
-				Unit("bps").
+				Unit(units.BitsPerSecondSI).
 				FillOpacity(0),
 		).
 		Data(
