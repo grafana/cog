@@ -169,7 +169,7 @@ func dashboardBuilder() []byte {
 		GridLayout(dashboard.NewGridLayoutBuilder().
 			Row(dashboard.NewGridLayoutRowBuilder("CPU")).
 			Item(dashboard.NewGridLayoutItemBuilder("cpu_usage").
-				X(0). // TODO: X/Y calculations based on height and width?
+				X(0). // TODO: X/Y calculations based on height and width? Or we leave it to the user to handle since we have the "AutoGrid" layout?
 				Y(0).
 				Height(200).
 				Width(200),
