@@ -369,6 +369,10 @@ func (jenny RawTypes) defaultValueForConstantReferences(def ast.ConstantReferenc
 		return raw(jenny.typeFormatter.enums.formatValue(referredType, def.ReferenceValue))
 	}
 
+	if referredType.Type.IsScalar() {
+		return raw(def.ReferredType)
+	}
+
 	return "unknown"
 }
 

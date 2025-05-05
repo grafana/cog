@@ -60,19 +60,21 @@
         "Disjunction": {
           "Branches": [
             {
-              "Kind": "ref",
+              "Kind": "constant_ref",
               "Nullable": false,
-              "Ref": {
+              "ConstantReference": {
                 "ReferredPkg": "grafanatest",
-                "ReferredType": "TimeZoneUtc"
+                "ReferredType": "TimeZoneUtc",
+                "ReferenceValue": "utc"
               }
             },
             {
-              "Kind": "ref",
+              "Kind": "constant_ref",
               "Nullable": false,
-              "Ref": {
+              "ConstantReference": {
                 "ReferredPkg": "grafanatest",
-                "ReferredType": "TimeZoneBrowser"
+                "ReferredType": "TimeZoneBrowser",
+                "ReferenceValue": "browser"
               }
             },
             {

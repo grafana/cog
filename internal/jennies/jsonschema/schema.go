@@ -125,6 +125,8 @@ func (jenny Schema) formatType(typeDef ast.Type) Definition {
 		return jenny.formatDisjunction(typeDef)
 	case ast.KindComposableSlot:
 		return jenny.formatComposableSlot()
+	case ast.KindConstantRef:
+		return jenny.formatConstantRef(typeDef)
 	}
 
 	return orderedmap.New[string, any]()
@@ -246,6 +248,29 @@ func (jenny Schema) formatRef(typeDef ast.Type) Definition {
 
 	// TODO: handle foreign refs
 	definition.Set("$ref", jenny.ReferenceFormatter(ref))
+
+	return definition
+}
+
+func (jenny Schema) formatConstantRef(typeDef ast.Type) Definition {
+	definition := orderedmap.New[string, any]()
+	constRef := typeDef.AsConstantRef()
+	ref := ast.NewRef(constRef.ReferredPkg, constRef.ReferredType).AsRef()
+
+	if jenny.isForeignReference(ref) {
+		referredObject, found := jenny.referenceResolver(ref)
+
+		if found {
+			jenny.foreignObjects.Set(referredObject.SelfRef.String(), referredObject)
+		}
+	}
+
+	// TODO: handle foreign refs
+	definition.Set("$ref", jenny.ReferenceFormatter(ref))
+
+	if obj, ok := jenny.referenceResolver(ref); ok && obj.Type.IsEnum() {
+		definition.Set("default", constRef.ReferenceValue)
+	}
 
 	return definition
 }
