@@ -167,6 +167,12 @@ func PrefixObjectsNames(prefix string) compiler.Pass {
 	}
 }
 
+// AddOpenAPIFormatForUint8 adds a `// +format=int32` comment to fields of type uint8 or []uint8.
+// This aims to solve the issue where uint8 values are represented as strings in the OpenAPI spec.
+func AddOpenAPIFormatForUint8() compiler.Pass {
+	return &compiler.AddFormatUint8{}
+}
+
 // SchemaTransformations adds the given transformations to the set of
 // transformations that will be applied to the input schema.
 func (pipeline *SchemaToTypesPipeline) SchemaTransformations(passes ...compiler.Pass) *SchemaToTypesPipeline {
