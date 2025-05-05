@@ -51,7 +51,7 @@ def memory_usage_gauge() -> cogbuilder.Builder[dashboard.Panel]:
 
     return (
         default_gauge()
-        .title("Memory Temperatore")
+        .title("Memory Usage")
         .span(6)
         .min(30)
         .max(100)

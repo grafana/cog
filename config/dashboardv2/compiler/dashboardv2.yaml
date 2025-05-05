@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json
+
+passes:
+  ######################
+  # Dashboard v2alpha1 #
+  ######################
+
+  # Some future-proofing
+  - constant_to_enum:
+      objects:
+        - dashboardv2alpha1.RepeatMode
+
+  # DataSourceRef is defined by the common, dashboard and dashboardv2alpha1 packages.
+  # Since it is used by dataqueries, using the definition from the common package
+  # makes the most sense.
+  - replace_reference:
+      from: dashboardv2alpha1.DataSourceRef
+      to: common.DataSourceRef
+  - omit: { objects: [ dashboardv2alpha1.DataSourceRef ] }
+
+  # To make our composability veneers shenanigans work
+  - retype_field:
+      field: dashboardv2alpha1.VizConfigSpec.options
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+  - retype_field:
+      field: dashboardv2alpha1.FieldConfig.custom
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+
+  - retype_field:
+      field: dashboardv2alpha1.DataQueryKind.spec
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+
+  # Is this object meant for frontend usage only?
+  - omit:
+      objects: [ dashboardv2alpha1.VariableCustomFormatterFn ]
+
+  - retype_field:
+      field: dashboardv2alpha1.CustomVariableValue.formatter
+      as:
+        kind: scalar
+        scalar: { scalar_kind: string }
+        nullable: true
