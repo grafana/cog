@@ -102,5 +102,10 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 		return languages.Context{}, err
 	}
 
+	jenniesInput, err = languages.FormatIdentifiers(language, jenniesInput)
+	if err != nil {
+		return languages.Context{}, err
+	}
+
 	return jenniesInput, nil
 }

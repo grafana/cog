@@ -959,6 +959,17 @@ func (t ConstantReferenceType) DeepCopy() ConstantReferenceType {
 	}
 }
 
+func (t ConstantReferenceType) AsType() Type {
+	return Type{
+		Kind: KindConstantRef,
+		ConstantReference: &ConstantReferenceType{
+			ReferredPkg:    t.ReferredPkg,
+			ReferredType:   t.ReferredType,
+			ReferenceValue: t.ReferenceValue,
+		},
+	}
+}
+
 type RefType struct {
 	ReferredPkg  string `yaml:"referred_pkg"`
 	ReferredType string `yaml:"referred_type"`

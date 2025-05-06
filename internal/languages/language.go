@@ -28,6 +28,10 @@ func (nullableConfig NullableConfig) TypeIsNullable(typeDef ast.Type) bool {
 		typeDef.IsAnyOf(nullableConfig.Kinds...)
 }
 
+type IdentifiersFormatter interface {
+	Identifiers() IdentifiersConfig
+}
+
 type Languages map[string]Language
 
 func (languages Languages) AsLanguageRefs() []string {
