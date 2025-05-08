@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "oneOf",
+              "OriginalName": "oneOf",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -32,6 +33,7 @@
             },
             {
               "Name": "oneOfObj",
+              "OriginalName": "oneOfObj",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -93,6 +95,7 @@
                 "Fields": [
                   {
                     "Name": "bar",
+                    "OriginalName": "bar",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -112,6 +115,7 @@
                 "Fields": [
                   {
                     "Name": "foo",
+                    "OriginalName": "foo",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,

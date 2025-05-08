@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "registeredAt",
+              "OriginalName": "registeredAt",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -29,6 +30,7 @@
             },
             {
               "Name": "subscribedAt",
+              "OriginalName": "subscribedAt",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

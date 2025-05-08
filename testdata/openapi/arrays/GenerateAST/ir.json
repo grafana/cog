@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "arrayInt",
+              "OriginalName": "arrayInt",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -32,6 +33,7 @@
             },
             {
               "Name": "arrayRef",
+              "OriginalName": "arrayRef",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -50,6 +52,7 @@
             },
             {
               "Name": "arrayString",
+              "OriginalName": "arrayString",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -82,6 +85,7 @@
           "Fields": [
             {
               "Name": "a",
+              "OriginalName": "a",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

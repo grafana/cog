@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "text",
+              "OriginalName": "text",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -47,6 +48,7 @@
             },
             {
               "Name": "listWithDifferentTypes",
+              "OriginalName": "listWithDifferentTypes",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -85,6 +87,7 @@
             },
             {
               "Name": "stringOrBool",
+              "OriginalName": "stringOrBool",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -112,6 +115,7 @@
             },
             {
               "Name": "stringOrNull",
+              "OriginalName": "stringOrNull",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,

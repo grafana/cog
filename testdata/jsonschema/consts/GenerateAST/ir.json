@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "boolean",
+              "OriginalName": "boolean",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -32,6 +33,7 @@
             },
             {
               "Name": "boolean_with_type",
+              "OriginalName": "boolean_with_type",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -44,6 +46,7 @@
             },
             {
               "Name": "const_disguised_as_regex",
+              "OriginalName": "const_disguised_as_regex",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -56,6 +59,7 @@
             },
             {
               "Name": "integer",
+              "OriginalName": "integer",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -68,6 +72,7 @@
             },
             {
               "Name": "number",
+              "OriginalName": "number",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -80,6 +85,7 @@
             },
             {
               "Name": "number_with_type",
+              "OriginalName": "number_with_type",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -92,6 +98,7 @@
             },
             {
               "Name": "string",
+              "OriginalName": "string",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -104,6 +111,7 @@
             },
             {
               "Name": "string_with_type",
+              "OriginalName": "string_with_type",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "minute",
+              "OriginalName": "minute",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -45,6 +46,7 @@
             },
             {
               "Name": "seconds",
+              "OriginalName": "seconds",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "minLengthConstraints",
+              "OriginalName": "minLengthConstraints",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -34,6 +35,7 @@
             },
             {
               "Name": "maxLengthConstraints",
+              "OriginalName": "maxLengthConstraints",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -53,6 +55,7 @@
             },
             {
               "Name": "minMaxLengthConstraints",
+              "OriginalName": "minMaxLengthConstraints",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

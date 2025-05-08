@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "const_disguised_as_regex",
+              "OriginalName": "const_disguised_as_regex",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

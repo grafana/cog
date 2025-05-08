@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "foo",
+              "OriginalName": "foo",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,

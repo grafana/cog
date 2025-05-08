@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "array",
+              "OriginalName": "array",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,

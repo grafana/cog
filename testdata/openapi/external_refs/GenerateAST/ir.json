@@ -28,6 +28,7 @@
                 "Fields": [
                   {
                     "Name": "description",
+                    "OriginalName": "description",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -78,6 +79,7 @@
                 "Fields": [
                   {
                     "Name": "description",
+                    "OriginalName": "description",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,

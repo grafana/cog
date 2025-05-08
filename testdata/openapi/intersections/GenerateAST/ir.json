@@ -65,6 +65,7 @@
                 "Fields": [
                   {
                     "Name": "id",
+                    "OriginalName": "id",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -133,6 +134,7 @@
           "Fields": [
             {
               "Name": "discriminator",
+              "OriginalName": "discriminator",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -160,6 +162,7 @@
           "Fields": [
             {
               "Name": "discriminator",
+              "OriginalName": "discriminator",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -187,6 +190,7 @@
           "Fields": [
             {
               "Name": "discriminator",
+              "OriginalName": "discriminator",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "edges",
+              "OriginalName": "edges",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -38,6 +39,7 @@
             },
             {
               "Name": "value",
+              "OriginalName": "value",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

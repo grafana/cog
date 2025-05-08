@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "condition",
+              "OriginalName": "condition",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -31,6 +32,7 @@
             },
             {
               "Name": "key",
+              "OriginalName": "key",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -42,6 +44,7 @@
             },
             {
               "Name": "operator",
+              "OriginalName": "operator",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -53,6 +56,7 @@
             },
             {
               "Name": "value",
+              "OriginalName": "value",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -79,6 +83,7 @@
           "Fields": [
             {
               "Name": "type",
+              "OriginalName": "type",
               "Comments": [
                 "The plugin type-id"
               ],
@@ -93,6 +98,7 @@
             },
             {
               "Name": "uid",
+              "OriginalName": "uid",
               "Comments": [
                 "Specific datasource instance"
               ],
@@ -122,6 +128,7 @@
           "Fields": [
             {
               "Name": "adhocFilters",
+              "OriginalName": "adhocFilters",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -140,6 +147,7 @@
             },
             {
               "Name": "alias",
+              "OriginalName": "alias",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -151,6 +159,7 @@
             },
             {
               "Name": "datasource",
+              "OriginalName": "datasource",
               "Comments": [
                 "For mixed data sources the selected datasource is on the query level.",
                 "For non mixed scenarios this is undefined.",
@@ -184,6 +193,7 @@
             },
             {
               "Name": "fill",
+              "OriginalName": "fill",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -195,6 +205,7 @@
             },
             {
               "Name": "fromAnnotations",
+              "OriginalName": "fromAnnotations",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -206,6 +217,7 @@
             },
             {
               "Name": "groupBy",
+              "OriginalName": "groupBy",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -224,6 +236,7 @@
             },
             {
               "Name": "hide",
+              "OriginalName": "hide",
               "Comments": [
                 "true if query is disabled (ie should not be returned to the dashboard)",
                 "Note this does not always imply that the query should not be executed since",
@@ -240,6 +253,7 @@
             },
             {
               "Name": "key",
+              "OriginalName": "key",
               "Comments": [
                 "Unique, guid like, string (used only in explore mode)"
               ],
@@ -254,6 +268,7 @@
             },
             {
               "Name": "limit",
+              "OriginalName": "limit",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -280,6 +295,7 @@
             },
             {
               "Name": "matchAny",
+              "OriginalName": "matchAny",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -291,6 +307,7 @@
             },
             {
               "Name": "measurement",
+              "OriginalName": "measurement",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -302,6 +319,7 @@
             },
             {
               "Name": "name",
+              "OriginalName": "name",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -313,6 +331,7 @@
             },
             {
               "Name": "orderByTime",
+              "OriginalName": "orderByTime",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -324,6 +343,7 @@
             },
             {
               "Name": "policy",
+              "OriginalName": "policy",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -335,6 +355,7 @@
             },
             {
               "Name": "query",
+              "OriginalName": "query",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -346,6 +367,7 @@
             },
             {
               "Name": "queryType",
+              "OriginalName": "queryType",
               "Comments": [
                 "Specify the query flavor",
                 "TODO make this required and give it a default"
@@ -361,6 +383,7 @@
             },
             {
               "Name": "rawQuery",
+              "OriginalName": "rawQuery",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -372,6 +395,7 @@
             },
             {
               "Name": "refId",
+              "OriginalName": "refId",
               "Comments": [
                 "A unique identifier for the query within the list of targets.",
                 "In server side expressions, the refId is used as a variable name to identify results.",
@@ -388,6 +412,7 @@
             },
             {
               "Name": "resultFormat",
+              "OriginalName": "resultFormat",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -433,6 +458,7 @@
             },
             {
               "Name": "select",
+              "OriginalName": "select",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -457,6 +483,7 @@
             },
             {
               "Name": "slimit",
+              "OriginalName": "slimit",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -483,6 +510,7 @@
             },
             {
               "Name": "tags",
+              "OriginalName": "tags",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -501,6 +529,7 @@
             },
             {
               "Name": "tagsColumn",
+              "OriginalName": "tagsColumn",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -512,6 +541,7 @@
             },
             {
               "Name": "textColumn",
+              "OriginalName": "textColumn",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -523,6 +553,7 @@
             },
             {
               "Name": "textEditor",
+              "OriginalName": "textEditor",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -534,6 +565,7 @@
             },
             {
               "Name": "timeEndColumn",
+              "OriginalName": "timeEndColumn",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -545,6 +577,7 @@
             },
             {
               "Name": "titleColumn",
+              "OriginalName": "titleColumn",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -556,6 +589,7 @@
             },
             {
               "Name": "type",
+              "OriginalName": "type",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -567,6 +601,7 @@
             },
             {
               "Name": "tz",
+              "OriginalName": "tz",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -593,6 +628,7 @@
           "Fields": [
             {
               "Name": "interval",
+              "OriginalName": "interval",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -604,6 +640,7 @@
             },
             {
               "Name": "params",
+              "OriginalName": "params",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -636,6 +673,7 @@
             },
             {
               "Name": "type",
+              "OriginalName": "type",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -662,6 +700,7 @@
           "Fields": [
             {
               "Name": "condition",
+              "OriginalName": "condition",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -673,6 +712,7 @@
             },
             {
               "Name": "key",
+              "OriginalName": "key",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -684,6 +724,7 @@
             },
             {
               "Name": "operator",
+              "OriginalName": "operator",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -695,6 +736,7 @@
             },
             {
               "Name": "value",
+              "OriginalName": "value",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

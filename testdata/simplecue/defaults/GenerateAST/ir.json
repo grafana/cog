@@ -115,6 +115,7 @@
           "Fields": [
             {
               "Name": "from",
+              "OriginalName": "from",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -127,6 +128,7 @@
             },
             {
               "Name": "editable",
+              "OriginalName": "editable",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -139,6 +141,7 @@
             },
             {
               "Name": "IntEnum",
+              "OriginalName": "IntEnum",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -189,6 +192,7 @@
             },
             {
               "Name": "Number",
+              "OriginalName": "Number",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -201,6 +205,7 @@
             },
             {
               "Name": "repeatDirection",
+              "OriginalName": "repeatDirection",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -236,6 +241,7 @@
             },
             {
               "Name": "tags",
+              "OriginalName": "tags",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -257,6 +263,7 @@
             },
             {
               "Name": "stringEnum",
+              "OriginalName": "stringEnum",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -270,6 +277,7 @@
             },
             {
               "Name": "intEnum",
+              "OriginalName": "intEnum",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,

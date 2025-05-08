@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "any",
+              "OriginalName": "any",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -31,6 +32,7 @@
             },
             {
               "Name": "array",
+              "OriginalName": "array",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -48,6 +50,7 @@
             },
             {
               "Name": "array-multiple-types",
+              "OriginalName": "array-multiple-types",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -80,6 +83,7 @@
             },
             {
               "Name": "boolean",
+              "OriginalName": "boolean",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -91,6 +95,7 @@
             },
             {
               "Name": "integer",
+              "OriginalName": "integer",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -102,6 +107,7 @@
             },
             {
               "Name": "null",
+              "OriginalName": "null",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -113,6 +119,7 @@
             },
             {
               "Name": "number",
+              "OriginalName": "number",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -124,6 +131,7 @@
             },
             {
               "Name": "object",
+              "OriginalName": "object",
               "Type": {
                 "Kind": "struct",
                 "Nullable": false,
@@ -131,6 +139,7 @@
                   "Fields": [
                     {
                       "Name": "foo",
+                      "OriginalName": "foo",
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
@@ -147,6 +156,7 @@
             },
             {
               "Name": "string",
+              "OriginalName": "string",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

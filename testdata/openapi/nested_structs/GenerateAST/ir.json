@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "nested",
+              "OriginalName": "nested",
               "Type": {
                 "Kind": "struct",
                 "Nullable": false,
@@ -22,6 +23,7 @@
                   "Fields": [
                     {
                       "Name": "nested",
+                      "OriginalName": "nested",
                       "Type": {
                         "Kind": "struct",
                         "Nullable": false,
@@ -29,6 +31,7 @@
                           "Fields": [
                             {
                               "Name": "value",
+                              "OriginalName": "value",
                               "Type": {
                                 "Kind": "scalar",
                                 "Nullable": false,

@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "ref",
+              "OriginalName": "ref",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -42,6 +43,7 @@
           "Fields": [
             {
               "Name": "a",
+              "OriginalName": "a",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

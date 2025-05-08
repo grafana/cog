@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "things",
+              "OriginalName": "things",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -41,6 +42,7 @@
           "Fields": [
             {
               "Name": "things",
+              "OriginalName": "things",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -67,6 +69,7 @@
           "Fields": [
             {
               "Name": "ints",
+              "OriginalName": "ints",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -84,6 +87,7 @@
             },
             {
               "Name": "strings",
+              "OriginalName": "strings",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -101,6 +105,7 @@
             },
             {
               "Name": "refs",
+              "OriginalName": "refs",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -119,6 +124,7 @@
             },
             {
               "Name": "structs",
+              "OriginalName": "structs",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
@@ -137,6 +143,7 @@
             },
             {
               "Name": "arrayOfAnything",
+              "OriginalName": "arrayOfAnything",
               "Type": {
                 "Kind": "array",
                 "Nullable": false,

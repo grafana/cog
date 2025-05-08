@@ -25,6 +25,7 @@
                 "Fields": [
                   {
                     "Name": "bar",
+                    "OriginalName": "bar",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -44,6 +45,7 @@
                 "Fields": [
                   {
                     "Name": "foo",
+                    "OriginalName": "foo",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -78,6 +80,7 @@
                 "Fields": [
                   {
                     "Name": "bar",
+                    "OriginalName": "bar",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -97,6 +100,7 @@
                 "Fields": [
                   {
                     "Name": "foo",
+                    "OriginalName": "foo",
                     "Type": {
                       "Kind": "scalar",
                       "Nullable": false,
@@ -126,6 +130,7 @@
           "Fields": [
             {
               "Name": "allOf",
+              "OriginalName": "allOf",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -138,6 +143,7 @@
             },
             {
               "Name": "allOfObj",
+              "OriginalName": "allOfObj",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,

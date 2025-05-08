@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "loglevel",
+              "OriginalName": "loglevel",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -65,6 +66,7 @@
             },
             {
               "Name": "sort",
+              "OriginalName": "sort",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,

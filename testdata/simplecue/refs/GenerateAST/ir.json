@@ -68,6 +68,7 @@
           "Fields": [
             {
               "Name": "StringEnum",
+              "OriginalName": "StringEnum",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -113,6 +114,7 @@
             },
             {
               "Name": "TheIntEnum",
+              "OriginalName": "TheIntEnum",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -126,6 +128,7 @@
             },
             {
               "Name": "inline",
+              "OriginalName": "inline",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -153,6 +156,7 @@
           "Fields": [
             {
               "Name": "field",
+              "OriginalName": "field",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

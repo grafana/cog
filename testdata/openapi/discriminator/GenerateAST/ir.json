@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "mapping",
+              "OriginalName": "mapping",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -57,6 +58,7 @@
             },
             {
               "Name": "no-discriminator",
+              "OriginalName": "no-discriminator",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -93,6 +95,7 @@
             },
             {
               "Name": "only-property",
+              "OriginalName": "only-property",
               "Type": {
                 "Kind": "disjunction",
                 "Nullable": false,
@@ -145,6 +148,7 @@
           "Fields": [
             {
               "Name": "discriminator",
+              "OriginalName": "discriminator",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -172,6 +176,7 @@
           "Fields": [
             {
               "Name": "discriminator",
+              "OriginalName": "discriminator",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -199,6 +204,7 @@
           "Fields": [
             {
               "Name": "discriminator",
+              "OriginalName": "discriminator",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

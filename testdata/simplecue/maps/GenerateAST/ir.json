@@ -69,6 +69,7 @@
           "Fields": [
             {
               "Name": "bar",
+              "OriginalName": "bar",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -80,6 +81,7 @@
             },
             {
               "Name": "stringToAny",
+              "OriginalName": "stringToAny",
               "Type": {
                 "Kind": "map",
                 "Nullable": false,
@@ -187,6 +189,7 @@
           "Fields": [
             {
               "Name": "foo",
+              "OriginalName": "foo",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

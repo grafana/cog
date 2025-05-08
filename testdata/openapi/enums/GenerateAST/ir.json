@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "enumInt",
+              "OriginalName": "enumInt",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -49,6 +50,7 @@
             },
             {
               "Name": "enumString",
+              "OriginalName": "enumString",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
@@ -83,6 +85,7 @@
             },
             {
               "Name": "enumWithDefault",
+              "OriginalName": "enumWithDefault",
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,

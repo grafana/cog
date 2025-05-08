@@ -18,6 +18,7 @@
           "Fields": [
             {
               "Name": "boolean",
+              "OriginalName": "boolean",
               "Comments": [
                 "Comment for boolean"
               ],
@@ -32,6 +33,7 @@
             },
             {
               "Name": "bytes",
+              "OriginalName": "bytes",
               "Comments": [
                 "Comment for byte"
               ],
@@ -46,6 +48,7 @@
             },
             {
               "Name": "float32",
+              "OriginalName": "float32",
               "Comments": [
                 "Comment for float64"
               ],
@@ -61,6 +64,7 @@
             },
             {
               "Name": "float64",
+              "OriginalName": "float64",
               "Comments": [
                 "Comment for float64"
               ],
@@ -75,6 +79,7 @@
             },
             {
               "Name": "int32",
+              "OriginalName": "int32",
               "Comments": [
                 "Comment for integer32"
               ],
@@ -90,6 +95,7 @@
             },
             {
               "Name": "int64",
+              "OriginalName": "int64",
               "Comments": [
                 "Comment for integer32"
               ],
@@ -104,6 +110,7 @@
             },
             {
               "Name": "string",
+              "OriginalName": "string",
               "Comments": [
                 "Comment for string"
               ],

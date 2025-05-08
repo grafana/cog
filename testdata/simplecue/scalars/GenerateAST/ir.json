@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "str",
+              "OriginalName": "str",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -26,6 +27,7 @@
             },
             {
               "Name": "trueOrFalse",
+              "OriginalName": "trueOrFalse",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -37,6 +39,7 @@
             },
             {
               "Name": "anything",
+              "OriginalName": "anything",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -48,6 +51,7 @@
             },
             {
               "Name": "data",
+              "OriginalName": "data",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -59,6 +63,7 @@
             },
             {
               "Name": "num_unit8",
+              "OriginalName": "num_unit8",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -70,6 +75,7 @@
             },
             {
               "Name": "num_int8",
+              "OriginalName": "num_int8",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -81,6 +87,7 @@
             },
             {
               "Name": "num_uint16",
+              "OriginalName": "num_uint16",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -92,6 +99,7 @@
             },
             {
               "Name": "num_int16",
+              "OriginalName": "num_int16",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -103,6 +111,7 @@
             },
             {
               "Name": "num_uint32",
+              "OriginalName": "num_uint32",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -114,6 +123,7 @@
             },
             {
               "Name": "num_int32",
+              "OriginalName": "num_int32",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -125,6 +135,7 @@
             },
             {
               "Name": "num_uint64",
+              "OriginalName": "num_uint64",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -136,6 +147,7 @@
             },
             {
               "Name": "num_int64",
+              "OriginalName": "num_int64",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

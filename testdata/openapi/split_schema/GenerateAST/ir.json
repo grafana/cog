@@ -36,6 +36,7 @@
           "Fields": [
             {
               "Name": "id",
+              "OriginalName": "id",
               "Comments": [
                 "An identifier"
               ],

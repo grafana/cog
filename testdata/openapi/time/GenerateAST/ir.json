@@ -15,6 +15,7 @@
           "Fields": [
             {
               "Name": "registeredAt",
+              "OriginalName": "registeredAt",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
