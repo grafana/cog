@@ -107,6 +107,10 @@ func (visitor *Visitor) VisitObject(schema *ast.Schema, object ast.Object) (ast.
 		return visitor.OnObject(visitor, schema, object)
 	}
 
+	return visitor.TransverseObject(schema, object)
+}
+
+func (visitor *Visitor) TransverseObject(schema *ast.Schema, object ast.Object) (ast.Object, error) {
 	var err error
 
 	object.Type, err = visitor.VisitType(schema, object.Type)
@@ -151,7 +155,7 @@ func (visitor *Visitor) VisitType(schema *ast.Schema, def ast.Type) (ast.Type, e
 	}
 
 	if def.IsConstantRef() {
-		return visitor.VisitConsantRef(schema, def)
+		return visitor.VisitConstantRef(schema, def)
 	}
 
 	return def, nil
@@ -212,6 +216,10 @@ func (visitor *Visitor) VisitDisjunction(schema *ast.Schema, def ast.Type) (ast.
 		return visitor.OnDisjunction(visitor, schema, def)
 	}
 
+	return visitor.TransverseDisjunction(schema, def)
+}
+
+func (visitor *Visitor) TransverseDisjunction(schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	var err error
 
 	for i, branch := range def.Disjunction.Branches {
@@ -246,6 +254,10 @@ func (visitor *Visitor) VisitStructField(schema *ast.Schema, field ast.StructFie
 		return visitor.OnStructField(visitor, schema, field)
 	}
 
+	return visitor.TransverseStructField(schema, field)
+}
+
+func (visitor *Visitor) TransverseStructField(schema *ast.Schema, field ast.StructField) (ast.StructField, error) {
 	var err error
 
 	field.Type, err = visitor.VisitType(schema, field.Type)
@@ -280,7 +292,7 @@ func (visitor *Visitor) VisitRef(schema *ast.Schema, def ast.Type) (ast.Type, er
 	return def, nil
 }
 
-func (visitor *Visitor) VisitConsantRef(schema *ast.Schema, def ast.Type) (ast.Type, error) {
+func (visitor *Visitor) VisitConstantRef(schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	if visitor.OnConstantRef != nil {
 		return visitor.OnConstantRef(visitor, schema, def)
 	}

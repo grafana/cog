@@ -23,43 +23,52 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 	}
 
 	schemaVisitor := compiler.Visitor{
-		OnSchema: func(visitor *compiler.Visitor, schema *ast.Schema) (*ast.Schema, error) {
+		OnObject: func(visitor *compiler.Visitor, schema *ast.Schema, object ast.Object) (ast.Object, error) {
 			if identifiersConfig.PackageNameFunc != nil {
 				schema.Package = identifiersConfig.PackageNameFunc(schema.Package)
+				object.SelfRef.ReferredPkg = identifiersConfig.PackageNameFunc(schema.Package)
 			}
-			return schema, nil
-		},
-		OnObject: func(visitor *compiler.Visitor, schema *ast.Schema, object ast.Object) (ast.Object, error) {
 			if identifiersConfig.ObjectNameFunc != nil {
 				object.Name = identifiersConfig.ObjectNameFunc(object.Name)
+				object.SelfRef.ReferredType = identifiersConfig.ObjectNameFunc(object.Name)
 			}
-			return object, nil
+			return visitor.TransverseObject(schema, object)
 		},
 		OnStructField: func(visitor *compiler.Visitor, schema *ast.Schema, field ast.StructField) (ast.StructField, error) {
 			if identifiersConfig.FieldNameFunc != nil {
 				field.Name = identifiersConfig.FieldNameFunc(field.Name)
 			}
-			return field, nil
+			return visitor.TransverseStructField(schema, field)
 		},
 		OnRef: func(visitor *compiler.Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
-			ref := def.AsRef()
+			ref := def.AsRef().DeepCopy()
 			if identifiersConfig.PackageNameFunc != nil {
 				ref.ReferredPkg = identifiersConfig.PackageNameFunc(ref.ReferredPkg)
 			}
 			if identifiersConfig.ObjectNameFunc != nil {
 				ref.ReferredType = identifiersConfig.ObjectNameFunc(ref.ReferredType)
 			}
-			return ref.AsType(), nil
+			return ast.Type{
+				Kind:     ast.KindRef,
+				Nullable: def.Nullable,
+				Default:  def.Default,
+				Ref:      &ref,
+			}, nil
 		},
 		OnConstantRef: func(visitor *compiler.Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
-			ref := def.AsConstantRef()
+			ref := def.AsConstantRef().DeepCopy()
 			if identifiersConfig.PackageNameFunc != nil {
 				ref.ReferredPkg = identifiersConfig.PackageNameFunc(ref.ReferredPkg)
 			}
 			if identifiersConfig.ObjectNameFunc != nil {
 				ref.ReferredType = identifiersConfig.ObjectNameFunc(ref.ReferredType)
 			}
-			return ref.AsType(), nil
+			return ast.Type{
+				Kind:              ast.KindConstantRef,
+				Nullable:          def.Nullable,
+				Default:           def.Default,
+				ConstantReference: &ref,
+			}, nil
 		},
 	}
 
@@ -88,6 +97,11 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 			return argument, nil
 		},
 		OnAssignment: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, assignment ast.Assignment) (ast.Assignment, error) {
+			if identifiersConfig.AssignmentFunc != nil {
+				for i, p := range assignment.Path {
+					assignment.Path[i].Identifier = identifiersConfig.AssignmentFunc(p.Identifier)
+				}
+			}
 			return assignment, nil
 		},
 	}

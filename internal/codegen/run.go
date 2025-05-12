@@ -78,6 +78,11 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 		return languages.Context{}, err
 	}
 
+	jenniesInput, err = languages.FormatIdentifiers(language, jenniesInput)
+	if err != nil {
+		return languages.Context{}, err
+	}
+
 	if !pipeline.Output.Builders {
 		return jenniesInput, nil
 	}
@@ -98,11 +103,6 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 
 	// with the veneers applied, generate "nil-checks" for assignments
 	jenniesInput, err = languages.GenerateBuilderNilChecks(language, jenniesInput)
-	if err != nil {
-		return languages.Context{}, err
-	}
-
-	jenniesInput, err = languages.FormatIdentifiers(language, jenniesInput)
 	if err != nil {
 		return languages.Context{}, err
 	}
