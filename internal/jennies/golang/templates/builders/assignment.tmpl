@@ -25,7 +25,7 @@
         {{- end }}
     {{- end }}
     {{- with .Value.Argument }}
-        {{- $argName := formatArgName .Name }}
+        {{- $argName := .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
             {{- $argName = .Type.IsArray | ternary (print $argName "Resources") (print $argName "Resource") }}
@@ -46,13 +46,13 @@
     {{- end }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- $builtResultName := (print (formatArgName .Name) "Resource") }}
+        {{- $builtResultName := (print .Name "Resource") }}
         {{- if .Type.IsArray }}
-        {{ formatArgName .Name}}Resources := make({{ .Type | formatTypeNoBuilder }}, 0, len({{ formatArgName .Name}}))
-        {{- $builtResultName = (print (formatArgName .Name) "Resources") }}
+        {{ .Name}}Resources := make({{ .Type | formatTypeNoBuilder }}, 0, len({{ .Name }}))
+        {{- $builtResultName = (print .Name "Resources") }}
         {{- end }}
 
-        {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" (formatArgName .Name) "InputVar" (formatArgName .Name) "AssignmentPath" $.Assignment.Path "ResultVar" $builtResultName) }}
+        {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" .Name "InputVar" .Name "AssignmentPath" $.Assignment.Path "ResultVar" $builtResultName) }}
         {{- end }}
     {{- end }}
     {{- with .Value.Envelope }}
@@ -111,7 +111,7 @@
         {{- range .Envelope.Values }}
         {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "Value" .Value) }}
         {{- $value = maybeAsPointer (.Path.Last.Type) $value }}
-        {{ (index .Path 0).Identifier | formatFieldName }}: {{ $value }},
+        {{ (index .Path 0).Identifier }}: {{ $value }},
         {{- end }}
     }
 {{- end }}

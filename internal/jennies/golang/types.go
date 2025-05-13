@@ -334,7 +334,7 @@ func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string 
 				if fieldPath[i].Index.Constant != nil {
 					output += formatScalar(fieldPath[i].Index.Constant)
 				} else {
-					output += formatArgName(fieldPath[i].Index.Argument.Name)
+					output += fieldPath[i].Index.Argument.Name
 				}
 				output += "]"
 			}

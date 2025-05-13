@@ -102,6 +102,14 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 					assignment.Path[i].Identifier = identifiersConfig.AssignmentFunc(p.Identifier)
 				}
 			}
+			if identifiersConfig.ArgNameFunc != nil {
+				if assignment.Value.Argument != nil {
+					assignment.Value.Argument.Name = identifiersConfig.ArgNameFunc(assignment.Value.Argument.Name)
+				}
+			}
+
+			updateEnvelope(assignment.Value.Envelope, identifiersConfig.ArgNameFunc, identifiersConfig.AssignmentFunc)
+
 			return assignment, nil
 		},
 	}
@@ -112,4 +120,26 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 	}
 
 	return context, nil
+}
+
+func updateEnvelope(envelope *ast.AssignmentEnvelope, argFn func(string) string, assignFn func(string) string) {
+	if envelope == nil {
+		return
+	}
+
+	for i, env := range envelope.Values {
+		if env.Value.Argument != nil && argFn != nil {
+			envelope.Values[i].Value.Argument.Name = argFn(env.Value.Argument.Name)
+		}
+
+		for j, p := range env.Path {
+			if assignFn != nil {
+				envelope.Values[i].Path[j].Identifier = assignFn(p.Identifier)
+			}
+		}
+
+		if env.Value.Envelope != nil {
+			updateEnvelope(envelope.Values[i].Value.Envelope, argFn, assignFn)
+		}
+	}
 }

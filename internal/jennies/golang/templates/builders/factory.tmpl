@@ -2,11 +2,11 @@
 {{- range .Factory.Comments }}
 // {{ . }}
 {{- end }}
-func {{ .Factory.Name|formatFunctionName}}({{- template "args" .Factory.Args }}) *{{ .Builder.Name|formatObjectName }}Builder {
-	builder := New{{ .Builder.Name|formatObjectName }}Builder()
+func {{ .Factory.Name }}({{- template "args" .Factory.Args }}) *{{ .Builder.Name }}Builder {
+	builder := New{{ .Builder.Name }}Builder()
 
 {{- range $call := .Factory.OptionCalls }}
-    builder.{{ $call.Name|formatFunctionName }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
+    builder.{{ $call.Name }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
 {{- end }}
 
 	return builder
@@ -18,11 +18,11 @@ func {{ .Factory.Name|formatFunctionName}}({{- template "args" .Factory.Args }})
 		{{- formatValue .Value.Constant.Type .Value.Constant.Value }}
 	{{- end }}
 	{{- with .Value.Argument -}}
-		{{- .Name|formatArgName -}}
+		{{- .Name -}}
 	{{- end -}}
 	{{- with .Value.Factory -}}
 		{{- $pkg := .Ref.Package|importPkg -}}
 		{{- if ne $pkg "" -}}{{ $pkg }}.{{- end -}}
-		{{ .Ref.Factory|formatFunctionName }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $arg)}}{{ end }})
+		{{ .Ref.Factory }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $arg)}}{{ end }})
 	{{- end -}}
 {{- end }}

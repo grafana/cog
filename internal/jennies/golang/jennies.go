@@ -175,7 +175,7 @@ func (language *Language) Identifiers() languages.IdentifiersConfig {
 		FieldNameFunc:   formatFieldName,
 		BuilderNameFunc: tools.UpperCamelCase,
 		OptionNameFunc:  tools.UpperCamelCase,
-		ArgNameFunc:     tools.LowerCamelCase,
-		AssignmentFunc:  tools.LowerCamelCase,
+		ArgNameFunc:     formatArgName,
+		AssignmentFunc:  tools.UpperCamelCase,
 	}
 }
