@@ -37,10 +37,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 			return nil, err
 		}
 
-		filename := filepath.Join(
-			formatPackageName(schema.Package),
-			"types_gen.go",
-		)
+		filename := filepath.Join(schema.Package, "types_gen.go")
 
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
@@ -140,7 +137,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 	return []byte(fmt.Sprintf(`package %[1]s
 
-%[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
+%[2]s%[3]s`, schema.Package, importStatements, buffer.String())), nil
 }
 
 func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, object ast.Object) error {
