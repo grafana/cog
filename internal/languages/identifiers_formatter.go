@@ -86,13 +86,13 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 		},
 		OnOption: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, option ast.Option) (ast.Option, error) {
 			if identifiersConfig.OptionNameFunc != nil {
-				option.Name = identifiersConfig.OptionNameFunc(builder.Name)
+				option.Name = identifiersConfig.OptionNameFunc(option.Name)
 			}
 			return visitor.TraverseOption(schemas, builder, option)
 		},
 		OnArgument: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, argument ast.Argument) (ast.Argument, error) {
 			if identifiersConfig.ArgNameFunc != nil {
-				argument.Name = identifiersConfig.ArgNameFunc(builder.Name)
+				argument.Name = identifiersConfig.ArgNameFunc(argument.Name)
 			}
 			return argument, nil
 		},

@@ -5,7 +5,7 @@
 {{- range .Comments }}
 // {{ . }}
 {{- end }}
-func (builder *{{ $builder.Name|formatObjectName }}Builder) {{ .Name|formatFunctionName }}({{- template "args" .Args }}) *{{ $builder.Name|formatObjectName }}Builder {
+func (builder *{{ $builder.Name }}Builder) {{ .Name }}({{- template "args" .Args }}) *{{ $builder.Name }}Builder {
     {{- range .Assignments }}
         {{- template "assignment" (dict "Assignment" . "Builder" $builder "Option" $option) }}
     {{- end }}

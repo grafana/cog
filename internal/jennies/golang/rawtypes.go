@@ -180,7 +180,7 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 
 func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context languages.Context, object ast.Object) {
 	objectName := formatObjectName(object.Name)
-	constructorName := "New" + formatFunctionName(object.Name)
+	constructorName := "New" + object.Name
 
 	declareConstructor := func() {
 		jenny.apiRefCollector.RegisterFunction(object.SelfRef.ReferredPkg, common.FunctionReference{

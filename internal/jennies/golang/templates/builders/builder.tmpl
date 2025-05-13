@@ -1,12 +1,12 @@
-package {{ .Builder.Package | formatPackageName }}
+package {{ .Builder.Package }}
 {{ $options := include "options" . }}
 {{ .Imports }}
 
-var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name|formatObjectName }}Builder)(nil)
+var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name }}Builder)(nil)
 {{ range .Builder.For.Comments }}
 // {{ . }}
 {{- end }}
-type {{ .Builder.Name|formatObjectName }}Builder struct {
+type {{ .Builder.Name }}Builder struct {
     internal *{{ .ObjectName }}
     errors map[string]cog.BuildErrors
 
@@ -15,9 +15,9 @@ type {{ .Builder.Name|formatObjectName }}Builder struct {
     {{- end }}
 }
 
-func New{{ .Builder.Name|formatObjectName }}Builder({{- template "args" .Builder.Constructor.Args }}) *{{ .Builder.Name|formatObjectName }}Builder {
+func New{{ .Builder.Name }}Builder({{- template "args" .Builder.Constructor.Args }}) *{{ .Builder.Name }}Builder {
 	resource := {{ .ConstructorName }}()
-	builder := &{{ .Builder.Name|formatObjectName }}Builder{
+	builder := &{{ .Builder.Name }}Builder{
 		internal: resource,
 		errors: make(map[string]cog.BuildErrors),
 	}
@@ -33,7 +33,7 @@ func New{{ .Builder.Name|formatObjectName }}Builder({{- template "args" .Builder
 	{{ template "factory" (dict "Builder" $.Builder "Factory" .) }}
 {{- end }}
 
-func (builder *{{ .Builder.Name|formatObjectName }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
+func (builder *{{ .Builder.Name }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return {{ .ObjectName }}{}, err
 	}
@@ -41,7 +41,7 @@ func (builder *{{ .Builder.Name|formatObjectName }}Builder) Build() ({{ .Builder
 	return *builder.internal, nil
 }
 
-{{- $customMethodsTmpl := print "builder_" .Builder.Package "_" (.Builder.Name|formatObjectName) "_custom_methods" }}
+{{- $customMethodsTmpl := print "builder_" .Builder.Package "_" (.Builder.Name) "_custom_methods" }}
 {{- includeIfExists $customMethodsTmpl (dict) -}}
 
 {{- $options }}
