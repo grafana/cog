@@ -75,7 +75,7 @@
             {{- else }}
                 {{ .OriginalInputVar }}Depth{{ .Depth }}, err := r{{ .Depth }}.Build()
                 if err != nil {
-                    builder.errors["{{ .AssignmentPath }}"] = err.(cog.BuildErrors)
+                    builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
                     return builder
                 }
                 {{ .ResultVar }} = append({{ .ResultVar}}, {{ .OriginalInputVar }}Depth{{ .Depth }})
@@ -91,7 +91,7 @@
             {{- else }}
                 {{ .OriginalInputVar }}Depth{{ .Depth }}, err := val{{ .Depth }}.Build()
                 if err != nil {
-                    builder.errors["{{ .AssignmentPath }}"] = err.(cog.BuildErrors)
+                    builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
                     return builder
                 }
                 {{ .ResultVar }}[key{{ .Depth }}] = {{ .OriginalInputVar }}Depth{{ .Depth }}
@@ -100,7 +100,7 @@
     {{- else }}
     {{ .ResultVar }}, err := {{ .InputVar}}.Build()
     if err != nil {
-        builder.errors["{{ .AssignmentPath }}"] = err.(cog.BuildErrors)
+        builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
         return builder
     }
     {{- end }}
