@@ -27,8 +27,12 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return SomeStruct{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return SomeStruct{}, cog.MakeBuildErrors("anonymous_struct.someStruct", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("anonymous_struct.someStruct", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *SomeStructBuilder) Time(time struct {

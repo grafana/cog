@@ -28,8 +28,12 @@ func (builder *LokiBuilderBuilder) Build() (Dashboard, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Dashboard{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return Dashboard{}, cog.MakeBuildErrors("composable_slot.lokiBuilder", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("composable_slot.lokiBuilder", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *LokiBuilderBuilder) Target(target cog.Builder[variants.Dataquery]) *LokiBuilderBuilder {

@@ -27,8 +27,12 @@ func (builder *DashboardBuilder) Build() (Dashboard, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Dashboard{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return Dashboard{}, cog.MakeBuildErrors("sandbox.dashboard", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("sandbox.dashboard", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *DashboardBuilder) WithVariable(name string,value string) *DashboardBuilder {

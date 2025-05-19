@@ -27,8 +27,12 @@ func (builder *NestedStructBuilder) Build() (NestedStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return NestedStruct{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return NestedStruct{}, cog.MakeBuildErrors("struct_with_defaults.nestedStruct", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("struct_with_defaults.nestedStruct", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *NestedStructBuilder) StringVal(stringVal string) *NestedStructBuilder {

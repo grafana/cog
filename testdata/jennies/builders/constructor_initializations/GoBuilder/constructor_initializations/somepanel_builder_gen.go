@@ -29,8 +29,12 @@ func (builder *SomePanelBuilder) Build() (SomePanel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return SomePanel{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return SomePanel{}, cog.MakeBuildErrors("constructor_initializations.somePanel", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("constructor_initializations.somePanel", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {

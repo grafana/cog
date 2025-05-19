@@ -69,8 +69,12 @@ func (builder *FuncCallExprBuilder) Build() (FuncCallExpr, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return FuncCallExpr{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return FuncCallExpr{}, cog.MakeBuildErrors("promql.funcCallExpr", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("promql.funcCallExpr", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *FuncCallExprBuilder) Function(function string) *FuncCallExprBuilder {

@@ -27,8 +27,12 @@ func (builder *PanelBuilder) Build() (Panel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Panel{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return Panel{}, cog.MakeBuildErrors("panelbuilder.panel", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("panelbuilder.panel", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *PanelBuilder) OnlyFromThisDashboard(onlyFromThisDashboard bool) *PanelBuilder {

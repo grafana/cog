@@ -27,8 +27,12 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return SomeStruct{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return SomeStruct{}, cog.MakeBuildErrors("nullable_map_assignment.someStruct", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("nullable_map_assignment.someStruct", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *SomeStructBuilder) Config(config map[string]string) *SomeStructBuilder {

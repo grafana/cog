@@ -28,8 +28,12 @@ func (builder *SomeNiceBuilderBuilder) Build() (withdashes.SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return withdashes.SomeStruct{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return withdashes.SomeStruct{}, cog.MakeBuildErrors("builderpkg.someNiceBuilder", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("builderpkg.someNiceBuilder", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *SomeNiceBuilderBuilder) Title(title string) *SomeNiceBuilderBuilder {

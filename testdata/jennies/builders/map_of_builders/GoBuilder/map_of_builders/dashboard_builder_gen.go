@@ -27,8 +27,12 @@ func (builder *DashboardBuilder) Build() (Dashboard, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Dashboard{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return Dashboard{}, cog.MakeBuildErrors("map_of_builders.dashboard", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("map_of_builders.dashboard", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *DashboardBuilder) Panels(panels map[string]cog.Builder[Panel]) *DashboardBuilder {

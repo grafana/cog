@@ -27,8 +27,12 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return SomeStruct{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return SomeStruct{}, cog.MakeBuildErrors("sandbox.someStruct", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("sandbox.someStruct", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *SomeStructBuilder) Tags(tags string) *SomeStructBuilder {

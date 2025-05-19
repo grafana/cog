@@ -28,8 +28,12 @@ func (builder *LokiBuilderBuilder) Build() (variants.Dataquery, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Loki{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return Loki{}, cog.MakeBuildErrors("dataquery_variant_builder.lokiBuilder", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("dataquery_variant_builder.lokiBuilder", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *LokiBuilderBuilder) Expr(expr string) *LokiBuilderBuilder {

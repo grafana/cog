@@ -28,8 +28,12 @@ func (builder *PersonBuilder) Build() (Person, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Person{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return Person{}, cog.MakeBuildErrors("some_pkg.person", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("some_pkg.person", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *PersonBuilder) Name(name other_pkg.Name) *PersonBuilder {

@@ -27,8 +27,12 @@ func (builder *StructBuilder) Build() (Struct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Struct{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return Struct{}, cog.MakeBuildErrors("struct_with_defaults.struct", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("struct_with_defaults.struct", builder.errors)
+	return *builder.internal, nil
 }
 
 func (builder *StructBuilder) AllFields(allFields cog.Builder[NestedStruct]) *StructBuilder {
