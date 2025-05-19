@@ -37,8 +37,12 @@ func (builder *{{ .Builder.Name|formatObjectName }}Builder) Build() ({{ .Builder
 	if err := builder.internal.Validate(); err != nil {
 		return {{ .ObjectName }}{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return {{ .ObjectName }}{}, cog.MakeBuildErrors("{{ .Builder.Package | formatPackageName }}.{{ .Builder.Name | lowerCamelCase }}", builder.errors)
+	}
 
-	return *builder.internal, cog.MakeBuildErrors("{{ .Builder.Package | formatPackageName }}.{{ .Builder.Name | lowerCamelCase }}", builder.errors)
+	return *builder.internal, nil
 }
 
 {{- $customMethodsTmpl := print "builder_" .Builder.Package "_" (.Builder.Name|formatObjectName) "_custom_methods" }}
