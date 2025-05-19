@@ -9,14 +9,14 @@ var _ cog.Builder[Person] = (*PersonBuilder)(nil)
 
 type PersonBuilder struct {
     internal *Person
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewPersonBuilder() *PersonBuilder {
 	resource := NewPerson()
 	builder := &PersonBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -27,6 +27,10 @@ func NewPersonBuilder() *PersonBuilder {
 func (builder *PersonBuilder) Build() (Person, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Person{}, err
+	}
+	
+	if len(builder.errors) > 0 {
+	    return Person{}, cog.MakeBuildErrors("some_pkg.person", builder.errors)
 	}
 
 	return *builder.internal, nil

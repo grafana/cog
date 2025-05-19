@@ -8,14 +8,14 @@ var _ cog.Builder[DashboardLink] = (*DashboardLinkBuilder)(nil)
 
 type DashboardLinkBuilder struct {
     internal *DashboardLink
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewDashboardLinkBuilder() *DashboardLinkBuilder {
 	resource := NewDashboardLink()
 	builder := &DashboardLinkBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -26,6 +26,10 @@ func NewDashboardLinkBuilder() *DashboardLinkBuilder {
 func (builder *DashboardLinkBuilder) Build() (DashboardLink, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return DashboardLink{}, err
+	}
+	
+	if len(builder.errors) > 0 {
+	    return DashboardLink{}, cog.MakeBuildErrors("builder_delegation.dashboardLink", builder.errors)
 	}
 
 	return *builder.internal, nil

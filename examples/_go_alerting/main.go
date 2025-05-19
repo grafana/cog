@@ -21,6 +21,7 @@ func main() {
 		Interval(alerting.Duration(interval.Seconds())). // type is confusing
 		WithRule(alerting.NewRuleBuilder("cog alert rule name").
 			For("5m").
+			RuleGroup("group").
 			Annotations(map[string]string{
 				"summary":     "summary",
 				"description": "desc",
