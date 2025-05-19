@@ -8,14 +8,14 @@ var _ cog.Builder[Dashboard] = (*DashboardBuilder)(nil)
 
 type DashboardBuilder struct {
     internal *Dashboard
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewDashboardBuilder() *DashboardBuilder {
 	resource := NewDashboard()
 	builder := &DashboardBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -28,7 +28,7 @@ func (builder *DashboardBuilder) Build() (Dashboard, error) {
 		return Dashboard{}, err
 	}
 
-	return *builder.internal, nil
+	return *builder.internal, cog.MakeBuildErrors("sandbox.dashboard", builder.errors)
 }
 
 func (builder *DashboardBuilder) WithVariable(name string,value string) *DashboardBuilder {

@@ -8,14 +8,14 @@ var _ cog.Builder[SomePanel] = (*SomePanelBuilder)(nil)
 
 type SomePanelBuilder struct {
     internal *SomePanel
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewSomePanelBuilder() *SomePanelBuilder {
 	resource := NewSomePanel()
 	builder := &SomePanelBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
     builder.internal.Type = "panel_type"
     builder.internal.Cursor = "tooltip"
@@ -30,7 +30,7 @@ func (builder *SomePanelBuilder) Build() (SomePanel, error) {
 		return SomePanel{}, err
 	}
 
-	return *builder.internal, nil
+	return *builder.internal, cog.MakeBuildErrors("constructor_initializations.somePanel", builder.errors)
 }
 
 func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {

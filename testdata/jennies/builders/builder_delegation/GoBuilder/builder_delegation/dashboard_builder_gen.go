@@ -8,14 +8,14 @@ var _ cog.Builder[Dashboard] = (*DashboardBuilder)(nil)
 
 type DashboardBuilder struct {
     internal *Dashboard
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewDashboardBuilder() *DashboardBuilder {
 	resource := NewDashboard()
 	builder := &DashboardBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -28,7 +28,7 @@ func (builder *DashboardBuilder) Build() (Dashboard, error) {
 		return Dashboard{}, err
 	}
 
-	return *builder.internal, nil
+	return *builder.internal, cog.MakeBuildErrors("builder_delegation.dashboard", builder.errors)
 }
 
 func (builder *DashboardBuilder) Id(id int64) *DashboardBuilder {
@@ -49,7 +49,7 @@ func (builder *DashboardBuilder) Links(links []cog.Builder[DashboardLink]) *Dash
         for _, r1 := range links {
                 linksDepth1, err := r1.Build()
                 if err != nil {
-                    builder.errors["links"] = err.(cog.BuildErrors)
+                    builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
                     return builder
                 }
                 linksResources = append(linksResources, linksDepth1)
@@ -67,7 +67,7 @@ func (builder *DashboardBuilder) LinksOfLinks(linksOfLinks [][]cog.Builder[Dashb
         for _, r2 := range r1 {
                 linksOfLinksDepth2, err := r2.Build()
                 if err != nil {
-                    builder.errors["linksOfLinks"] = err.(cog.BuildErrors)
+                    builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
                     return builder
                 }
                 linksOfLinksDepth1 = append(linksOfLinksDepth1, linksOfLinksDepth2)
@@ -84,7 +84,7 @@ func (builder *DashboardBuilder) LinksOfLinks(linksOfLinks [][]cog.Builder[Dashb
 func (builder *DashboardBuilder) SingleLink(singleLink cog.Builder[DashboardLink]) *DashboardBuilder {
     singleLinkResource, err := singleLink.Build()
     if err != nil {
-        builder.errors["singleLink"] = err.(cog.BuildErrors)
+        builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
         return builder
     }
     builder.internal.SingleLink = singleLinkResource

@@ -8,7 +8,7 @@ var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
 
 type SomeStructBuilder struct {
     internal *SomeStruct
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
     someBuilderProperty string
 }
 
@@ -16,7 +16,7 @@ func NewSomeStructBuilder() *SomeStructBuilder {
 	resource := NewSomeStruct()
 	builder := &SomeStructBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -29,7 +29,7 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 		return SomeStruct{}, err
 	}
 
-	return *builder.internal, nil
+	return *builder.internal, cog.MakeBuildErrors("properties.someStruct", builder.errors)
 }
 
 func (builder *SomeStructBuilder) Id(id int64) *SomeStructBuilder {

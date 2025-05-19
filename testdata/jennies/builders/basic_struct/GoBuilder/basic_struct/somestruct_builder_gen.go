@@ -9,14 +9,14 @@ var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
 // SomeStruct, to hold data.
 type SomeStructBuilder struct {
     internal *SomeStruct
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewSomeStructBuilder() *SomeStructBuilder {
 	resource := NewSomeStruct()
 	builder := &SomeStructBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -29,7 +29,7 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 		return SomeStruct{}, err
 	}
 
-	return *builder.internal, nil
+	return *builder.internal, cog.MakeBuildErrors("basic_struct.someStruct", builder.errors)
 }
 
 // id identifies something. Weird, right?

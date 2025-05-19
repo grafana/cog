@@ -8,14 +8,14 @@ var _ cog.Builder[Panel] = (*PanelBuilder)(nil)
 
 type PanelBuilder struct {
     internal *Panel
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewPanelBuilder() *PanelBuilder {
 	resource := NewPanel()
 	builder := &PanelBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -28,7 +28,7 @@ func (builder *PanelBuilder) Build() (Panel, error) {
 		return Panel{}, err
 	}
 
-	return *builder.internal, nil
+	return *builder.internal, cog.MakeBuildErrors("panelbuilder.panel", builder.errors)
 }
 
 func (builder *PanelBuilder) OnlyFromThisDashboard(onlyFromThisDashboard bool) *PanelBuilder {

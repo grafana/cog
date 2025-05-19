@@ -8,14 +8,14 @@ var _ cog.Builder[NestedStruct] = (*NestedStructBuilder)(nil)
 
 type NestedStructBuilder struct {
     internal *NestedStruct
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewNestedStructBuilder() *NestedStructBuilder {
 	resource := NewNestedStruct()
 	builder := &NestedStructBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -28,7 +28,7 @@ func (builder *NestedStructBuilder) Build() (NestedStruct, error) {
 		return NestedStruct{}, err
 	}
 
-	return *builder.internal, nil
+	return *builder.internal, cog.MakeBuildErrors("struct_with_defaults.nestedStruct", builder.errors)
 }
 
 func (builder *NestedStructBuilder) StringVal(stringVal string) *NestedStructBuilder {
