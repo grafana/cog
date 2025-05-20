@@ -6,6 +6,7 @@ public class RowsLayoutWithoutValue {
     public String rowsLayoutProperty;
     public RowsLayoutWithoutValue() {
         this.kind = RowsLayoutKindType;
+        this.rowsLayoutProperty = "";
     }
     public RowsLayoutWithoutValue(String rowsLayoutProperty) {
         this.kind = RowsLayoutKindType;

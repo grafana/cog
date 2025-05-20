@@ -6,6 +6,7 @@ public class RowsLayoutUsingValue {
     public String rowsLayoutProperty;
     public RowsLayoutUsingValue() {
         this.kind = RowsLayoutKindType;
+        this.rowsLayoutProperty = "";
     }
     public RowsLayoutUsingValue(String rowsLayoutProperty) {
         this.kind = RowsLayoutKindType;

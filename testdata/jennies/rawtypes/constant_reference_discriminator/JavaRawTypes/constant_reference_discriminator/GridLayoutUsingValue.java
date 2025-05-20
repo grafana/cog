@@ -6,6 +6,7 @@ public class GridLayoutUsingValue {
     public String gridLayoutProperty;
     public GridLayoutUsingValue() {
         this.kind = GridLayoutKindType;
+        this.gridLayoutProperty = "";
     }
     public GridLayoutUsingValue(String gridLayoutProperty) {
         this.kind = GridLayoutKindType;

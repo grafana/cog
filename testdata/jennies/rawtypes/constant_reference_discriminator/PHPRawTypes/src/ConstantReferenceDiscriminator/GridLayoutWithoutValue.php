@@ -30,14 +30,13 @@ class GridLayoutWithoutValue implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "kind" => $this->kind,
-            "gridLayoutProperty" => $this->gridLayoutProperty,
-        ];
+        $data = new \stdClass;
+        $data->kind = $this->kind;
+        $data->gridLayoutProperty = $this->gridLayoutProperty;
         return $data;
     }
 }

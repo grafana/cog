@@ -6,6 +6,7 @@ public class GridLayoutWithoutValue {
     public String gridLayoutProperty;
     public GridLayoutWithoutValue() {
         this.kind = GridLayoutKindType;
+        this.gridLayoutProperty = "";
     }
     public GridLayoutWithoutValue(String gridLayoutProperty) {
         this.kind = GridLayoutKindType;
