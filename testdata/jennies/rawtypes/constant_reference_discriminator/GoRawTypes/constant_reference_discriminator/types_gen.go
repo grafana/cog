@@ -357,7 +357,8 @@ func (resource GridLayoutUsingValueOrRowsLayoutUsingValue) MarshalJSON() ([]byte
 	if resource.RowsLayoutUsingValue != nil {
 		return json.Marshal(resource.RowsLayoutUsingValue)
 	}
-	return nil, fmt.Errorf("no value for disjunction of refs")
+
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode `GridLayoutUsingValueOrRowsLayoutUsingValue` from JSON.
@@ -374,7 +375,7 @@ func (resource *GridLayoutUsingValueOrRowsLayoutUsingValue) UnmarshalJSON(raw []
 
 	discriminator, found := parsedAsMap["kind"]
 	if !found {
-		return errors.New("discriminator field 'kind' not found in payload")
+		return nil
 	}
 
 	switch discriminator {
@@ -396,7 +397,7 @@ func (resource *GridLayoutUsingValueOrRowsLayoutUsingValue) UnmarshalJSON(raw []
 		return nil
 	}
 
-	return fmt.Errorf("could not unmarshal resource with `kind = %v`", discriminator)
+	return nil
 }
 
 
@@ -504,7 +505,8 @@ func (resource GridLayoutWithoutValueOrRowsLayoutWithoutValue) MarshalJSON() ([]
 	if resource.RowsLayoutWithoutValue != nil {
 		return json.Marshal(resource.RowsLayoutWithoutValue)
 	}
-	return nil, fmt.Errorf("no value for disjunction of refs")
+
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode `GridLayoutWithoutValueOrRowsLayoutWithoutValue` from JSON.
@@ -521,7 +523,7 @@ func (resource *GridLayoutWithoutValueOrRowsLayoutWithoutValue) UnmarshalJSON(ra
 
 	discriminator, found := parsedAsMap["kind"]
 	if !found {
-		return errors.New("discriminator field 'kind' not found in payload")
+		return nil
 	}
 
 	switch discriminator {
@@ -543,7 +545,7 @@ func (resource *GridLayoutWithoutValueOrRowsLayoutWithoutValue) UnmarshalJSON(ra
 		return nil
 	}
 
-	return fmt.Errorf("could not unmarshal resource with `kind = %v`", discriminator)
+	return nil
 }
 
 
