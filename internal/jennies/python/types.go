@@ -327,6 +327,14 @@ func (formatter *typeFormatter) formatConstantReference(def ast.ConstantReferenc
 		return "unknown"
 	}
 
+	if referredObject.Type.IsScalar() {
+		if shouldSetValue {
+			return def.ReferredType
+		}
+
+		return formatter.formatScalarKind(referredObject.Type.AsScalar().ScalarKind)
+	}
+
 	if !referredObject.Type.IsEnum() {
 		return "unknown"
 	}

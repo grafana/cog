@@ -318,6 +318,9 @@ func (formatter *typeFormatter) formatConstantReferences(def ast.ConstantReferen
 	if referredType.Type.IsEnum() {
 		return formatter.enums.formatValue(referredType, def.ReferenceValue)
 	}
+	if referredType.Type.IsScalar() {
+		return formatValue(def.ReferenceValue)
+	}
 
 	return "unknown"
 }

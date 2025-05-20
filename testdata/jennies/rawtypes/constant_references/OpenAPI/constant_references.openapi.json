@@ -51,7 +51,10 @@
           "myEnum"
         ],
         "properties": {
-          "myEnum": {}
+          "myEnum": {
+            "$ref": "#/components/schemas/Enum",
+            "default": "ValueA"
+          }
         }
       },
       "StructB": {
@@ -62,7 +65,10 @@
           "myValue"
         ],
         "properties": {
-          "myEnum": {},
+          "myEnum": {
+            "$ref": "#/components/schemas/Enum",
+            "default": "ValueB"
+          },
           "myValue": {
             "type": "string"
           }
