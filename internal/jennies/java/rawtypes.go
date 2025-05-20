@@ -233,7 +233,7 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 			assign := ConstructorAssignmentTemplate{
 				Name:  name,
 				Type:  field.Type,
-				Value: jenny.typeFormatter.enumFromConstantRef(field.Type.AsConstantRef()),
+				Value: jenny.typeFormatter.constantRefValue(field.Type.AsConstantRef()),
 			}
 			assignments = append(assignments, assign)
 			defaultConstructorAssignments = append(defaultConstructorAssignments, assign)

@@ -8,14 +8,14 @@ var _ cog.Builder[SomeStruct] = (*SomeStructBuilder)(nil)
 
 type SomeStructBuilder struct {
     internal *SomeStruct
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewSomeStructBuilder() *SomeStructBuilder {
 	resource := NewSomeStruct()
 	builder := &SomeStructBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -26,6 +26,10 @@ func NewSomeStructBuilder() *SomeStructBuilder {
 func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return SomeStruct{}, err
+	}
+	
+	if len(builder.errors) > 0 {
+	    return SomeStruct{}, cog.MakeBuildErrors("known_any.someStruct", builder.errors)
 	}
 
 	return *builder.internal, nil

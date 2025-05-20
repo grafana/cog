@@ -102,8 +102,12 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 
 func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) string {
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
-	if object.Type.Kind == ast.KindEnum {
+	if object.Type.IsEnum() {
 		return formatObjectName(def.ReferredType)
+	}
+
+	if object.Type.IsScalar() {
+		return formatScalarType(object.Type.AsScalar())
 	}
 
 	return "unknown"
@@ -384,10 +388,20 @@ func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
 	return castedPath + strings.Join(parts, ".")
 }
 
-func (tf *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) string {
+func (tf *typeFormatter) constantRefValue(def ast.ConstantReferenceType) string {
 	obj, ok := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if !ok {
 		return "unknown"
+	}
+
+	refPkg := tf.packageMapper(def.ReferredPkg, def.ReferredType)
+
+	if obj.Type.IsScalar() {
+		if refPkg != "" {
+			return fmt.Sprintf("%s.%s", refPkg, def.ReferredType)
+		}
+
+		return def.ReferredType
 	}
 
 	if obj.Type.IsEnum() {
@@ -396,7 +410,7 @@ func (tf *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) stri
 			return "unknown"
 		}
 
-		if refPkg := tf.packageMapper(def.ReferredPkg, def.ReferredType); refPkg != "" {
+		if refPkg != "" {
 			return fmt.Sprintf("%s.%s.%s", refPkg, def.ReferredType, enumVale.Name)
 		}
 

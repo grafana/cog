@@ -9,14 +9,14 @@ var _ cog.Builder[withdashes.SomeStruct] = (*SomeNiceBuilderBuilder)(nil)
 
 type SomeNiceBuilderBuilder struct {
     internal *withdashes.SomeStruct
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
 	resource := withdashes.NewSomeStruct()
 	builder := &SomeNiceBuilderBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -27,6 +27,10 @@ func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
 func (builder *SomeNiceBuilderBuilder) Build() (withdashes.SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return withdashes.SomeStruct{}, err
+	}
+	
+	if len(builder.errors) > 0 {
+	    return withdashes.SomeStruct{}, cog.MakeBuildErrors("builderpkg.someNiceBuilder", builder.errors)
 	}
 
 	return *builder.internal, nil

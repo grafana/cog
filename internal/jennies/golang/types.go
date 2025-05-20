@@ -65,6 +65,8 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 		buffer.WriteString(fmt.Sprintf("type %s = %s", defName, formatter.formatType(def.Type)))
 	case ast.KindMap, ast.KindArray, ast.KindStruct, ast.KindIntersection:
 		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatter.formatType(def.Type)))
+	case ast.KindConstantRef:
+		buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(def.Type.AsConstantRef().ReferenceValue)))
 	default:
 		return fmt.Sprintf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -271,6 +273,16 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 
 func (formatter *typeFormatter) formatConstantRef(def ast.Type) string {
 	constRef := def.AsConstantRef()
+
+	obj, ok := formatter.context.LocateObject(constRef.ReferredPkg, constRef.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	if obj.Type.IsScalar() {
+		return string(obj.Type.AsScalar().ScalarKind)
+	}
+
 	referredPkg := formatter.packageMapper(constRef.ReferredPkg)
 	typeName := formatObjectName(constRef.ReferredType)
 
