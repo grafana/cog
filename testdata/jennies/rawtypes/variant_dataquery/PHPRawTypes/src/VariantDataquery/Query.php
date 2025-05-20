@@ -32,15 +32,14 @@ class Query implements \JsonSerializable, \Grafana\Foundation\Cog\Dataquery
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "expr" => $this->expr,
-        ];
+        $data = new \stdClass;
+        $data->expr = $this->expr;
         if (isset($this->instant)) {
-            $data["instant"] = $this->instant;
+            $data->instant = $this->instant;
         }
         return $data;
     }

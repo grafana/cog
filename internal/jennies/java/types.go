@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -62,14 +63,26 @@ func (tf *typeFormatter) resolvesToComposableSlot(typeDef ast.Type) bool {
 
 func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 	if tf.resolvesToComposableSlot(def) || tf.typeHasBuilder(def) {
-		if def.Kind == ast.KindMap {
-			tf.packageMapper("java.util", "Map")
-			return fmt.Sprintf("Map<String, %s.Builder<%s>>", tf.config.formatPackage("cog"), tf.formatFieldType(def.AsMap().ValueType))
+		switch def.Kind {
+		case ast.KindArray:
+			return tf.formatArrayOrMapFields(def.AsArray().ValueType, "List", "List<")
+		case ast.KindMap:
+			return tf.formatArrayOrMapFields(def.AsMap().ValueType, "Map", "Map<String, ")
+		default:
+			return fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), tf.formatFieldType(def))
 		}
-		return fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), tf.formatFieldType(def))
 	}
 
 	return tf.formatFieldType(def)
+}
+
+func (tf *typeFormatter) formatArrayOrMapFields(def ast.Type, importValue string, prefix string) string {
+	tf.packageMapper("java.util", importValue)
+	if def.Kind == ast.KindArray || def.Kind == ast.KindMap {
+		return fmt.Sprintf("%s%s>", prefix, tf.formatBuilderFieldType(def))
+	}
+
+	return fmt.Sprintf("%s%s.Builder<%s>>", prefix, tf.config.formatPackage("cog"), tf.formatFieldType(def))
 }
 
 func (tf *typeFormatter) formatReference(def ast.RefType) string {
@@ -157,7 +170,7 @@ func formatScalarType(def ast.ScalarType) string {
 	return scalarType
 }
 
-func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
+func (tf *typeFormatter) emptyValueForType(def ast.Type, useBuilders bool) string {
 	switch def.Kind {
 	case ast.KindArray:
 		tf.packageMapper("java.util", "LinkedList")
@@ -167,19 +180,15 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 		return "new HashMap<>()"
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", formatPackageName(def.AsRef().ReferredPkg), formatObjectName(def.AsRef().ReferredType))
-		if tf.typeHasBuilder(def) {
+		if useBuilders && tf.typeHasBuilder(def) {
 			return fmt.Sprintf("new %sBuilder().build()", tf.config.formatPackage(refDef))
 		}
 
 		referredObj, found := tf.context.LocateObjectByRef(def.AsRef())
 		if found && referredObj.Type.IsEnum() {
-			enum := referredObj.Type.AsEnum()
-			enumValue, _ := enum.MemberForValue(0)
-			if enum.Values[0].Type.Kind == ast.KindScalar {
-				enumValue, _ = enum.MemberForValue("")
-			}
+			defaultMember := referredObj.Type.AsEnum().Values[0]
 
-			return fmt.Sprintf("%s.%s", referredObj.Name, tools.UpperSnakeCase(enumValue.Name))
+			return fmt.Sprintf("%s.%s", referredObj.Name, tools.UpperSnakeCase(defaultMember.Name))
 		}
 
 		return fmt.Sprintf("new %s()", tf.config.formatPackage(refDef))
@@ -201,6 +210,8 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 			return `""`
 		case ast.KindBytes:
 			return "(byte) 0"
+		case ast.KindAny:
+			return "new Object()"
 		default:
 			return "unknown"
 		}
@@ -407,4 +418,49 @@ func (tf *typeFormatter) constantRefValue(def ast.ConstantReferenceType) string 
 	}
 
 	return "unknown"
+}
+
+func formatEnum(pkg string, object ast.Object, tmpl *template.Template) ([]byte, error) {
+	enum := object.Type.AsEnum()
+	values := make([]EnumValue, 0)
+	for _, value := range enum.Values {
+		if value.Name == "" {
+			value.Name = "None"
+		}
+		values = append(values, EnumValue{
+			Name:  tools.UpperSnakeCase(value.Name),
+			Value: value.Value,
+		})
+	}
+
+	enumType := "Integer"
+	if enum.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
+		enumType = "String"
+	}
+
+	// Adds empty value if it doesn't exist to avoid
+	// to break in deserialization.
+	if enumType == "String" {
+		hasEmptyValue := false
+		for _, value := range values {
+			if value.Value == "" {
+				hasEmptyValue = true
+			}
+		}
+
+		if !hasEmptyValue {
+			values = append(values, EnumValue{
+				Name:  "_EMPTY",
+				Value: "",
+			})
+		}
+	}
+
+	return tmpl.RenderAsBytes("types/enum.tmpl", EnumTemplate{
+		Package:  pkg,
+		Name:     object.Name,
+		Values:   values,
+		Type:     enumType,
+		Comments: object.Comments,
+	})
 }

@@ -10,6 +10,7 @@ public class SomeStruct {
     public SomeStruct() {
         this.fieldBool = true;
         this.fieldString = "foo";
+        this.fieldStringWithConstantValue = "";
         this.fieldFloat32 = 42.4f;
         this.fieldInt32 = 42;
     }

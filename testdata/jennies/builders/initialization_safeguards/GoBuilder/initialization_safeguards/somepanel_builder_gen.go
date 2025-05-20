@@ -8,14 +8,14 @@ var _ cog.Builder[SomePanel] = (*SomePanelBuilder)(nil)
 
 type SomePanelBuilder struct {
     internal *SomePanel
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewSomePanelBuilder() *SomePanelBuilder {
 	resource := NewSomePanel()
 	builder := &SomePanelBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -26,6 +26,10 @@ func NewSomePanelBuilder() *SomePanelBuilder {
 func (builder *SomePanelBuilder) Build() (SomePanel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return SomePanel{}, err
+	}
+	
+	if len(builder.errors) > 0 {
+	    return SomePanel{}, cog.MakeBuildErrors("initialization_safeguards.somePanel", builder.errors)
 	}
 
 	return *builder.internal, nil

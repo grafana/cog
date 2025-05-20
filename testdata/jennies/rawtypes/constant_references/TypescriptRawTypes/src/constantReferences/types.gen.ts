@@ -41,3 +41,4 @@ export const defaultStructB = (): StructB => ({
 	myEnum: Enum.ValueB,
 	myValue: "",
 });
+

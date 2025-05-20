@@ -31,14 +31,13 @@ class SomeOtherStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-            "Type" => $this->type,
-            "Foo" => $this->foo,
-        ];
+        $data = new \stdClass;
+        $data->Type = $this->type;
+        $data->Foo = $this->foo;
         return $data;
     }
 }

@@ -26,12 +26,16 @@
 
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
     {{- end }}
-    {{- $type := $.Assignment.Path.Last.Type }}
-    {{- if and $type.IsMap (typeHasBuilder $type) }}
-        {{ $type | formatType }} {{ $.Assignment.Path }}Resource = {{ $type | emptyValueForType }};
-        for (var entry : {{ $.Assignment.Path }}.entrySet()) {
-           {{ $.Assignment.Path }}Resource.put(entry.getKey(), entry.getValue().build());
-        }
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- $builtResultName := (print .Name "Resource") }}
+        {{- if or .Type.IsArray .Type.IsMap }}
+        {{- $builtResultName = (print .Name "Resources") }}
+        {{ .Type | formatType }} {{ $builtResultName | lowerCamelCase | escapeVar }} = {{ .Type | emptyValueForType }};
+        {{- end }}
+        
+        {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" (.Name  | lowerCamelCase | escapeVar) "InputVar" (.Name  | lowerCamelCase | escapeVar) "AssignmentPath" $.Assignment.Path "ResultVar" ($builtResultName | lowerCamelCase | escapeVar)) }}
+        {{- end }}
     {{- end }}
 {{- end }}
 
@@ -41,10 +45,10 @@
     {{- end }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-            {{- if .Type.IsMap }}
-            {{- .Name | escapeVar | lowerCamelCase }}Resource
+            {{- if or .Type.IsMap .Type.IsArray }}
+            {{- .Name | escapeVar | lowerCamelCase }}Resources
             {{- else }}
-            {{- .Name | escapeVar | lowerCamelCase }}.build()
+            {{- .Name | escapeVar | lowerCamelCase }}Resource
             {{- end }}
         {{- else }}
             {{- .Name | escapeVar | lowerCamelCase }}
@@ -74,4 +78,33 @@
         {{- end }}
         {{- if and (eq .Method "index") (.Path.Last.Type.IsArray) }}{{ $path }} = {{ .Value }};{{ end }}
         {{- if eq .Method "append" }}{{ $path }}.add({{ .Value }});{{ end -}}
+{{- end }}
+
+{{- define "unfold_builders" }}
+    {{- if .InputType.IsArray }}
+        for ({{ .InputType.AsArray.ValueType | formatBuilderFieldType }} r{{ .Depth }} : {{ .InputVar }}) {
+            {{- if .InputType.Array.ValueType.IsArray }}
+                {{ .InputType.Array.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = {{ .InputType | emptyValueForType }};
+                
+                {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Array.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "r" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
+                
+                {{ .ResultVar }}.add({{ .OriginalInputVar }}Depth{{ .Depth }});
+            {{- else }}
+                {{ .InputType.AsArray.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = r{{ .Depth }}.build();
+                {{ .ResultVar }}.add({{ .OriginalInputVar }}Depth{{ .Depth }});
+            {{- end }} 
+        }
+    {{- else if .InputType.IsMap }}
+        for (var entry{{ .Depth }} : {{ .InputVar }}.entrySet()) {
+            {{- if .InputType.Map.ValueType.IsArray }}
+                {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Map.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "entry" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
+                {{ .ResultVar }}.put(entry{{ .Depth }}.getKey(), entry{{ .Depth }}.getValue());
+            {{- else }}
+                {{ .OriginalInputVar }}Depth{{ .Depth }} = entry{{ .Depth }}.getValue().build();
+                {{ .ResultVar }}.put(entry{{ .Depth }}.getKey(), {{ .OriginalInputVar }}Depth{{ .Depth }});
+            {{- end }}           
+        }
+    {{- else }}
+    {{ .InputType | formatType }} {{ .ResultVar }} = {{ .InputVar }}.build();
+    {{- end }}
 {{- end }}

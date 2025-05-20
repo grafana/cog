@@ -27,6 +27,8 @@ func NewSomeStruct() *SomeStruct {
 		FieldRef: *NewSomeOtherStruct(),
 		FieldDisjunctionOfScalars: *NewStringOrBool(),
 		FieldMixedDisjunction: *NewStringOrSomeOtherStruct(),
+		FieldArrayOfStrings: []string{},
+		FieldMapOfStringToString: map[string]string{},
 		FieldAnonymousStruct: *NewStructComplexFieldsSomeStructFieldAnonymousStruct(),
 }
 }
@@ -405,7 +407,8 @@ func (resource StringOrBool) MarshalJSON() ([]byte, error) {
 		return json.Marshal(resource.Bool)
 	}
 
-	return nil, fmt.Errorf("no value for disjunction of scalars")
+
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode `StringOrBool` from JSON.

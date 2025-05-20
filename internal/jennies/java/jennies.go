@@ -84,11 +84,15 @@ func (config *Config) MergeWithGlobal(global languages.Config) Config {
 }
 
 type Language struct {
-	config Config
+	config          Config
+	apiRefCollector *common.APIReferenceCollector
 }
 
 func New(config Config) *Language {
-	return &Language{config}
+	return &Language{
+		config:          config,
+		apiRefCollector: common.NewAPIReferenceCollector(),
+	}
 }
 
 func (language *Language) Name() string {
@@ -100,6 +104,8 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
 
+	apiRef := APIRef{config: config, tmpl: tmpl}
+
 	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
@@ -108,9 +114,16 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Deserializers{config: config, tmpl: tmpl}),
 		common.If(!config.SkipRuntime && config.GenerateJSONMarshaller, &Serializers{config: config, tmpl: tmpl}),
 		RawTypes{config: config, tmpl: tmpl},
-		common.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl}),
+		common.If(config.GenerateBuilders, Builder{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}),
 		common.If(globalConfig.Builders, &Factory{config: config, tmpl: tmpl}),
 		common.If(!config.SkipRuntime && config.GenerateBuilders && config.GenerateConverters, &Converter{config: config, tmpl: tmpl}),
+
+		common.If(globalConfig.APIReference, common.APIReference{
+			Collector: language.apiRefCollector,
+			Language:  LanguageRef,
+			Formatter: apiRef.apiReferenceFormatter(),
+			Tmpl:      tmpl,
+		}),
 
 		common.CustomTemplates{
 			TmplFuncs:           formattingTemplateFuncs(),
@@ -139,6 +152,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.UndiscriminatedDisjunctionToAny{},
 		&compiler.DisjunctionToType{},
 		&compiler.RemoveIntersections{},
+		&compiler.InlineObjectsWithTypes{InlineTypes: []ast.Kind{ast.KindScalar, ast.KindMap, ast.KindArray}},
 	}
 }
 

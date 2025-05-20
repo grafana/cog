@@ -9,6 +9,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/golang"
+	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/simplecue"
 )
@@ -185,10 +186,6 @@ type GoConfig struct {
 
 	// AnyAsInterface instructs cog to emit `interface{}` instead of `any`.
 	AnyAsInterface bool
-
-	// AllowMarshalEmptyDisjunctions makes generated `MarshalJSON()`
-	// ignore errors when marshaling an empty disjunction.
-	AllowMarshalEmptyDisjunctions bool
 }
 
 // Golang sets the output to Golang types.
@@ -198,9 +195,8 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 			SkipRuntime:            true,
 			GenerateJSONMarshaller: true,
 
-			GenerateEqual:                 config.GenerateEqual,
-			AnyAsInterface:                config.AnyAsInterface,
-			AllowMarshalEmptyDisjunctions: config.AllowMarshalEmptyDisjunctions,
+			GenerateEqual:  config.GenerateEqual,
+			AnyAsInterface: config.AnyAsInterface,
 		},
 	}
 	return pipeline
@@ -237,6 +233,23 @@ func (pipeline *SchemaToTypesPipeline) Typescript(config TypescriptConfig) *Sche
 			SkipIndex:         true,
 			PackagesImportMap: config.ImportsMap,
 			EnumsAsUnionTypes: config.EnumsAsUnionTypes,
+		},
+	}
+	return pipeline
+}
+
+// OpenAPIGenerationConfig defines a set of configuration options specific to OpenAPI outputs.
+type OpenAPIGenerationConfig struct {
+	// Compact controls whether the generated JSON should be pretty printed or
+	// not.
+	Compact bool `yaml:"compact"`
+}
+
+// GenerateOpenAPI sets the output to OpenAPI types.
+func (pipeline *SchemaToTypesPipeline) GenerateOpenAPI(config OpenAPIGenerationConfig) *SchemaToTypesPipeline {
+	pipeline.output = &codegen.OutputLanguage{
+		OpenAPI: &openapi.Config{
+			Compact: config.Compact,
 		},
 	}
 	return pipeline

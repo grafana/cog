@@ -58,26 +58,25 @@ class SomeStruct implements \JsonSerializable
     }
 
     /**
-     * @return array<string, mixed>
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize(): mixed
     {
-        $data = [
-        ];
+        $data = new \stdClass;
         if (isset($this->fieldRef)) {
-            $data["FieldRef"] = $this->fieldRef;
+            $data->FieldRef = $this->fieldRef;
         }
         if (isset($this->fieldString)) {
-            $data["FieldString"] = $this->fieldString;
+            $data->FieldString = $this->fieldString;
         }
         if (isset($this->operator)) {
-            $data["Operator"] = $this->operator;
+            $data->Operator = $this->operator;
         }
         if (isset($this->fieldArrayOfStrings)) {
-            $data["FieldArrayOfStrings"] = $this->fieldArrayOfStrings;
+            $data->FieldArrayOfStrings = $this->fieldArrayOfStrings;
         }
         if (isset($this->fieldAnonymousStruct)) {
-            $data["FieldAnonymousStruct"] = $this->fieldAnonymousStruct;
+            $data->FieldAnonymousStruct = $this->fieldAnonymousStruct;
         }
         return $data;
     }

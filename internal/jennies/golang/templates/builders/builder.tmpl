@@ -8,7 +8,7 @@ var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name|formatObject
 {{- end }}
 type {{ .Builder.Name|formatObjectName }}Builder struct {
     internal *{{ .ObjectName }}
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 
     {{- range .Builder.Properties }}
     {{ .Name }} {{ .Type | formatType }}
@@ -19,7 +19,7 @@ func New{{ .Builder.Name|formatObjectName }}Builder({{- template "args" .Builder
 	resource := {{ .ConstructorName }}()
 	builder := &{{ .Builder.Name|formatObjectName }}Builder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
     {{- range .Builder.Constructor.Assignments }}
@@ -36,6 +36,10 @@ func New{{ .Builder.Name|formatObjectName }}Builder({{- template "args" .Builder
 func (builder *{{ .Builder.Name|formatObjectName }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return {{ .ObjectName }}{}, err
+	}
+	
+	if len(builder.errors) > 0 {
+	    return {{ .ObjectName }}{}, cog.MakeBuildErrors("{{ .Builder.Package | formatPackageName }}.{{ .Builder.Name | lowerCamelCase }}", builder.errors)
 	}
 
 	return *builder.internal, nil

@@ -154,9 +154,10 @@ type ConstructorTemplate struct {
 }
 
 type ConstructorAssignmentTemplate struct {
-	Name  string
-	Type  ast.Type
-	Value any
+	Name         string
+	Type         ast.Type
+	Value        any
+	ValueFromArg string
 }
 
 type ConstantTemplate struct {

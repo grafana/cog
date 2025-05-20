@@ -6,6 +6,7 @@ public class Dashboard {
     public String title;
     public List<Panel> panels;
     public Dashboard() {
+        this.title = "";
     }
     public Dashboard(String title,List<Panel> panels) {
         this.title = title;
