@@ -170,7 +170,7 @@ output:
 
   types: true
   builders: true
-  converters: false # TODO
+  converters: true
   api_reference: true
 
   templates_data:
