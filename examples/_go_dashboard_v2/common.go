@@ -1,9 +1,7 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/common"
-	"github.com/grafana/cog/generated/go/dashboard"
 	"github.com/grafana/cog/generated/go/gauge"
 	"github.com/grafana/cog/generated/go/logs"
 	"github.com/grafana/cog/generated/go/loki"
@@ -11,27 +9,26 @@ import (
 	"github.com/grafana/cog/generated/go/timeseries"
 )
 
-func basicPrometheusQuery(query string, legend string) *prometheus.DataqueryBuilder {
-	return prometheus.NewDataqueryBuilder().
+func basicPrometheusQuery(query string, legend string) *prometheus.QueryBuilder {
+	return prometheus.NewQueryBuilder().
 		Expr(query).
 		LegendFormat(legend)
 }
 
-func basicLokiQuery(query string) *loki.DataqueryBuilder {
-	return loki.NewDataqueryBuilder().
-		Expr(query)
+func basicLokiQuery(query string) *loki.QueryBuilder {
+	return loki.NewQueryBuilder().Expr(query)
 }
 
-func tablePrometheusQuery(query string, ref string) *prometheus.DataqueryBuilder {
-	return prometheus.NewDataqueryBuilder().
+func tablePrometheusQuery(query string, ref string) *prometheus.QueryBuilder {
+	return prometheus.NewQueryBuilder().
 		Expr(query).
 		Instant().
 		Format(prometheus.PromQueryFormatTable).
 		RefId(ref)
 }
 
-func defaultTimeseries() *timeseries.PanelBuilder {
-	return timeseries.NewPanelBuilder().
+func defaultTimeseries() *timeseries.VisualizationBuilder {
+	return timeseries.NewVisualizationBuilder().
 		LineWidth(1).
 		FillOpacity(10).
 		DrawStyle(common.GraphDrawStyleLine).
@@ -44,25 +41,21 @@ func defaultTimeseries() *timeseries.PanelBuilder {
 		)
 }
 
-func defaultLogs() *logs.PanelBuilder {
-	return logs.NewPanelBuilder().
-		Span(24).
-		Datasource(dashboard.DataSourceRef{
-			Type: cog.ToPtr("loki"),
-			Uid:  cog.ToPtr("grafanacloud-logs"),
-		}).
+func defaultLogs() *logs.VisualizationBuilder {
+	return logs.NewVisualizationBuilder().
 		ShowTime(true).
 		EnableLogDetails(true).
 		SortOrder(common.LogsSortOrderDescending).
 		WrapLogMessage(true)
 }
 
-func defaultGauge() *gauge.PanelBuilder {
-	return gauge.NewPanelBuilder().
+func defaultGauge() *gauge.VisualizationBuilder {
+	return gauge.NewVisualizationBuilder().
 		Orientation(common.VizOrientationAuto).
 		// TODO: not intuitive
 		ReduceOptions(
 			common.NewReduceDataOptionsBuilder().
-				Calcs([]string{"lastNotNull"}).Values(false),
+				Calcs([]string{"lastNotNull"}).
+				Values(false),
 		)
 }
