@@ -9,15 +9,9 @@ class SomeStruct implements \JsonSerializable
 {
     public \Grafana\Foundation\StructComplexFields\SomeOtherStruct $fieldRef;
 
-    /**
-     * @var string|bool
-     */
-    public $fieldDisjunctionOfScalars;
+    public \Grafana\Foundation\StructComplexFields\StringOrBool $fieldDisjunctionOfScalars;
 
-    /**
-     * @var string|\Grafana\Foundation\StructComplexFields\SomeOtherStruct
-     */
-    public $fieldMixedDisjunction;
+    public \Grafana\Foundation\StructComplexFields\StringOrSomeOtherStruct $fieldMixedDisjunction;
 
     public ?string $fieldDisjunctionWithNull;
 
@@ -39,8 +33,8 @@ class SomeStruct implements \JsonSerializable
 
     /**
      * @param \Grafana\Foundation\StructComplexFields\SomeOtherStruct|null $fieldRef
-     * @param string|bool|null $fieldDisjunctionOfScalars
-     * @param string|\Grafana\Foundation\StructComplexFields\SomeOtherStruct|null $fieldMixedDisjunction
+     * @param \Grafana\Foundation\StructComplexFields\StringOrBool|null $fieldDisjunctionOfScalars
+     * @param \Grafana\Foundation\StructComplexFields\StringOrSomeOtherStruct|null $fieldMixedDisjunction
      * @param string|null $fieldDisjunctionWithNull
      * @param \Grafana\Foundation\StructComplexFields\SomeStructOperator|null $operator
      * @param array<string>|null $fieldArrayOfStrings
@@ -48,11 +42,11 @@ class SomeStruct implements \JsonSerializable
      * @param \Grafana\Foundation\StructComplexFields\StructComplexFieldsSomeStructFieldAnonymousStruct|null $fieldAnonymousStruct
      * @param \Grafana\Foundation\StructComplexFields\ConnectionPath|null $fieldRefToConstant
      */
-    public function __construct(?\Grafana\Foundation\StructComplexFields\SomeOtherStruct $fieldRef = null,  $fieldDisjunctionOfScalars = null,  $fieldMixedDisjunction = null, ?string $fieldDisjunctionWithNull = null, ?\Grafana\Foundation\StructComplexFields\SomeStructOperator $operator = null, ?array $fieldArrayOfStrings = null, ?array $fieldMapOfStringToString = null, ?\Grafana\Foundation\StructComplexFields\StructComplexFieldsSomeStructFieldAnonymousStruct $fieldAnonymousStruct = null, ?\Grafana\Foundation\StructComplexFields\ConnectionPath $fieldRefToConstant = null)
+    public function __construct(?\Grafana\Foundation\StructComplexFields\SomeOtherStruct $fieldRef = null, ?\Grafana\Foundation\StructComplexFields\StringOrBool $fieldDisjunctionOfScalars = null, ?\Grafana\Foundation\StructComplexFields\StringOrSomeOtherStruct $fieldMixedDisjunction = null, ?string $fieldDisjunctionWithNull = null, ?\Grafana\Foundation\StructComplexFields\SomeStructOperator $operator = null, ?array $fieldArrayOfStrings = null, ?array $fieldMapOfStringToString = null, ?\Grafana\Foundation\StructComplexFields\StructComplexFieldsSomeStructFieldAnonymousStruct $fieldAnonymousStruct = null, ?\Grafana\Foundation\StructComplexFields\ConnectionPath $fieldRefToConstant = null)
     {
         $this->fieldRef = $fieldRef ?: new \Grafana\Foundation\StructComplexFields\SomeOtherStruct();
-        $this->fieldDisjunctionOfScalars = $fieldDisjunctionOfScalars ?: "";
-        $this->fieldMixedDisjunction = $fieldMixedDisjunction ?: "";
+        $this->fieldDisjunctionOfScalars = $fieldDisjunctionOfScalars ?: new \Grafana\Foundation\StructComplexFields\StringOrBool();
+        $this->fieldMixedDisjunction = $fieldMixedDisjunction ?: new \Grafana\Foundation\StructComplexFields\StringOrSomeOtherStruct();
         $this->fieldDisjunctionWithNull = $fieldDisjunctionWithNull;
         $this->operator = $operator ?: \Grafana\Foundation\StructComplexFields\SomeStructOperator::GreaterThan();
         $this->fieldArrayOfStrings = $fieldArrayOfStrings ?: [];
@@ -66,7 +60,7 @@ class SomeStruct implements \JsonSerializable
      */
     public static function fromArray(array $inputData): self
     {
-        /** @var array{FieldRef?: mixed, FieldDisjunctionOfScalars?: string|bool, FieldMixedDisjunction?: string|mixed, FieldDisjunctionWithNull?: string, Operator?: string, FieldArrayOfStrings?: array<string>, FieldMapOfStringToString?: array<string, string>, FieldAnonymousStruct?: mixed, fieldRefToConstant?: string} $inputData */
+        /** @var array{FieldRef?: mixed, FieldDisjunctionOfScalars?: mixed, FieldMixedDisjunction?: mixed, FieldDisjunctionWithNull?: string, Operator?: string, FieldArrayOfStrings?: array<string>, FieldMapOfStringToString?: array<string, string>, FieldAnonymousStruct?: mixed, fieldRefToConstant?: string} $inputData */
         $data = $inputData;
         return new self(
             fieldRef: isset($data["FieldRef"]) ? (function($input) {
@@ -75,23 +69,14 @@ class SomeStruct implements \JsonSerializable
     	return \Grafana\Foundation\StructComplexFields\SomeOtherStruct::fromArray($val);
     })($data["FieldRef"]) : null,
             fieldDisjunctionOfScalars: isset($data["FieldDisjunctionOfScalars"]) ? (function($input) {
-        switch (true) {
-        case is_string($input):
-            return $input;
-        case is_bool($input):
-            return $input;
-        default:
-            throw new \ValueError('incorrect value for disjunction');
-    }
+    	/** @var array{String?: string, Bool?: bool} */
+    $val = $input;
+    	return \Grafana\Foundation\StructComplexFields\StringOrBool::fromArray($val);
     })($data["FieldDisjunctionOfScalars"]) : null,
             fieldMixedDisjunction: isset($data["FieldMixedDisjunction"]) ? (function($input) {
-        switch (true) {
-        case is_string($input):
-            return $input;
-        default:
-            /** @var array{FieldAny?: mixed} $input */
-            return \Grafana\Foundation\StructComplexFields\SomeOtherStruct::fromArray($input);
-    }
+    	/** @var array{String?: string, SomeOtherStruct?: mixed} */
+    $val = $input;
+    	return \Grafana\Foundation\StructComplexFields\StringOrSomeOtherStruct::fromArray($val);
     })($data["FieldMixedDisjunction"]) : null,
             fieldDisjunctionWithNull: $data["FieldDisjunctionWithNull"] ?? null,
             operator: isset($data["Operator"]) ? (function($input) { return \Grafana\Foundation\StructComplexFields\SomeStructOperator::fromValue($input); })($data["Operator"]) : null,
