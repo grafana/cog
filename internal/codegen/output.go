@@ -41,6 +41,9 @@ type Output struct {
 	// TemplatesData holds data that will be injected into package and
 	// repository templates when rendering them.
 	TemplatesData map[string]string `yaml:"templates_data"`
+
+	// OutputOptions configures the output of the file
+	OutputOptions OutputOptions `yaml:"output_options"`
 }
 
 func (output *Output) interpolateParameters(interpolator ParametersInterpolator) {
@@ -87,4 +90,9 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 		outputLanguage.Typescript.InterpolateParameters(interpolator)
 		outputLanguage.Typescript.ExtraFilesTemplatesData = output.TemplatesData
 	}
+}
+
+type OutputOptions struct {
+	// ReplaceExtension updates file extensions to the new one
+	ReplaceExtension map[string]string `yaml:"replace_extension"`
 }

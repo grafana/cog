@@ -227,6 +227,10 @@
           },
           "type": "object",
           "description": "TemplatesData holds data that will be injected into package and\nrepository templates when rendering them."
+        },
+        "output_options": {
+          "$ref": "#/$defs/CodegenOutputOptions",
+          "description": "OutputOptions configures the output of the file"
         }
       },
       "additionalProperties": false,
@@ -254,6 +258,19 @@
         },
         "typescript": {
           "$ref": "#/$defs/TypescriptConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CodegenOutputOptions": {
+      "properties": {
+        "replace_extension": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "ReplaceExtension updates file extensions to the new one"
         }
       },
       "additionalProperties": false,
