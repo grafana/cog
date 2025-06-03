@@ -16,8 +16,9 @@ type BuildOptions struct {
 }
 
 type RepositoryTemplate struct {
-	TemplateDir string
-	ExtraData   map[string]string
+	TemplateDir       string
+	ExtraData         map[string]string
+	ReplaceExtensions map[string]string
 }
 
 func (jenny RepositoryTemplate) JennyName() string {
@@ -72,6 +73,11 @@ func (jenny RepositoryTemplate) renderDirectory(directory string) (codejen.Files
 		rendered, err := tmpl.ExecuteAsBytes(jenny.templateData())
 		if err != nil {
 			return err
+		}
+
+		ext := strings.TrimPrefix(filepath.Ext(path), ".")
+		if newExt, ok := jenny.ReplaceExtensions[ext]; ok {
+			path = strings.TrimSuffix(path, ext) + newExt
 		}
 
 		if len(rendered) != 0 {
