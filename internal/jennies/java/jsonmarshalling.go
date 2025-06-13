@@ -20,12 +20,10 @@ func (j JSONMarshaller) genToJSONFunction(t ast.Type) string {
 	j.typeFormatter.packageMapper(fasterXMLPackageName, "databind.ObjectMapper")
 	j.typeFormatter.packageMapper(fasterXMLPackageName, "databind.ObjectWriter")
 	if t.IsDisjunctionOfAnyKind() {
-		if t.IsStruct() && t.IsStructGeneratedFromDisjunction() {
-			rendered, _ := j.tmpl.Render("marshalling/disjunctions.json_marshall.tmpl", map[string]any{
-				"Fields": t.AsStruct().Fields,
-			})
-			return rendered
-		}
+		rendered, _ := j.tmpl.Render("marshalling/disjunctions.json_marshall.tmpl", map[string]any{
+			"Fields": t.AsStruct().Fields,
+		})
+		return rendered
 	}
 
 	rendered, _ := j.tmpl.Render("marshalling/marshalling.tmpl", map[string]any{})
