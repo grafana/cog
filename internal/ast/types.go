@@ -262,7 +262,6 @@ func (t Type) IsDisjunctionOfAnyKind() bool {
 	return t.Hints[HintDisjunctionOfScalars] != nil ||
 		t.Hints[HintDiscriminatedDisjunctionOfRefs] != nil ||
 		t.Hints[HintDisjunctionOfScalarsAndRefs] != nil
-
 }
 
 func (t Type) DeepCopy() Type {
