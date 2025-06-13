@@ -235,7 +235,8 @@ func (t Type) IsStructGeneratedFromDisjunction() bool {
 	}
 
 	return t.Hints[HintDisjunctionOfScalars] != nil ||
-		t.Hints[HintDiscriminatedDisjunctionOfRefs] != nil
+		t.Hints[HintDiscriminatedDisjunctionOfRefs] != nil ||
+		t.Hints[HintDisjunctionOfScalarsAndRefs] != nil
 }
 
 func (t Type) IsDisjunctionOfScalars() bool {

@@ -93,6 +93,12 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 		})
 	}
 
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
+		return jenny.tmpl.Render("types/disjunction_of_scalars_and_refs.json_marshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
 	return "", fmt.Errorf("could not determine how to render custom marshal")
 }
 

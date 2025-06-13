@@ -12,6 +12,10 @@ const (
 	// to this hint.
 	HintDiscriminatedDisjunctionOfRefs = "disjunction_of_refs"
 
+	// HintDisjunctionOfScalarsAndRefs indicates that the struct was
+	// previously in the IR by a disjunction of scalars and references
+	HintDisjunctionOfScalarsAndRefs = "disjunction_of_scalars_and_refs"
+
 	// HintImplementsVariant indicates that a type implements a variant.
 	// ie: dataquery, panelcfg, ...
 	HintImplementsVariant = "implements_variant"
