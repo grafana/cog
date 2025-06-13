@@ -99,7 +99,7 @@ func TestBuilder_emptyValueForGuard(t *testing.T) {
 			context: languages.Context{},
 			input:   ast.NewStruct(ast.NewStructField("field", ast.String())),
 			expected: `&struct {
-		Field string ` + "`" + `json:"field,omitempty" yaml:"field,omitempty"` + "`" + `
+    Field string ` + "`" + `json:"field,omitempty" yaml:"field,omitempty"` + "`" + `
 }{}`,
 		},
 	}
