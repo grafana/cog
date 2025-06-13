@@ -117,10 +117,10 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 	for hint, value := range def.Hints {
 		structType.Hints[hint] = value
 	}
-	if disjunction.Branches.HasOnlyScalarOrArrayOrMap() {
+	switch {
+	case disjunction.Branches.HasOnlyScalarOrArrayOrMap():
 		structType.Hints[ast.HintDisjunctionOfScalars] = disjunction
-	}
-	if disjunction.Branches.HasOnlyRefs() {
+	case disjunction.Branches.HasOnlyRefs():
 		if len(disjunction.Discriminator) == 0 {
 			return ast.Type{}, fmt.Errorf("discriminator not set")
 		}
@@ -128,6 +128,8 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 			return ast.Type{}, fmt.Errorf("discriminator mapping not set")
 		}
 		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunction
+	default:
+		structType.Hints[ast.HintDisjunctionOfScalarsAndRefs] = disjunction
 	}
 
 	newObject := ast.NewObject(schema.Package, newTypeName, structType)

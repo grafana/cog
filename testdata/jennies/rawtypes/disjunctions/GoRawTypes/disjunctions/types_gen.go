@@ -405,6 +405,43 @@ func NewBoolOrSomeStruct() *BoolOrSomeStruct {
 	return &BoolOrSomeStruct{
 }
 }
+// MarshalJSON implements a custom JSON marshalling logic to encode `BoolOrSomeStruct` as JSON.
+func (resource BoolOrSomeStruct) MarshalJSON() ([]byte, error) {
+	if resource.Bool != nil {
+		return json.Marshal(resource.Bool)
+	}
+	if resource.SomeStruct != nil {
+		return json.Marshal(resource.SomeStruct)
+	}
+
+	return []byte("null"), nil
+}
+
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode BoolOrSomeStruct from JSON.
+func (resource *BoolOrSomeStruct) UnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	
+	if fields["Bool"] != nil {
+		if err := json.Unmarshal(fields["Bool"], &resource.Bool); err != nil {
+			return fmt.Errorf("error decoding field 'Bool': %w", err)
+		}
+	}
+
+	if fields["SomeStruct"] != nil {
+		if err := json.Unmarshal(fields["SomeStruct"], &resource.SomeStruct); err != nil {
+			return fmt.Errorf("error decoding field 'SomeStruct': %w", err)
+		}
+	}
+
+	return nil
+}
+
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `BoolOrSomeStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *BoolOrSomeStruct) UnmarshalJSONStrict(raw []byte) error {
