@@ -227,7 +227,7 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 	}
 
 	buffer.WriteString(fmt.Sprintf(
-		"%s %s `json:\"%s%s\"`",
+		"%s %s `json:\"%[3]s%[4]s\" yaml:\"%[3]s%[4]s\"`",
 		formatFieldName(def.Name),
 		formatter.doFormatType(fieldType, false),
 		def.Name,

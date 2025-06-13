@@ -9,7 +9,7 @@ import (
 )
 
 type SomeStruct struct {
-    FieldAny any `json:"FieldAny"`
+    FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.
@@ -79,8 +79,8 @@ func NewRefreshRate() *RefreshRate {
 	return NewStringOrBool()
 }
 type StringOrBool struct {
-    String *string `json:"String,omitempty"`
-    Bool *bool `json:"Bool,omitempty"`
+    String *string `json:"String,omitempty" yaml:"String,omitempty"`
+    Bool *bool `json:"Bool,omitempty" yaml:"Bool,omitempty"`
 }
 
 // NewStringOrBool creates a new StringOrBool object.

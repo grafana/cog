@@ -10,15 +10,15 @@ import (
 
 // This struct does things.
 type SomeStruct struct {
-    FieldRef SomeOtherStruct `json:"FieldRef"`
-    FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars"`
-    FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction"`
-    FieldDisjunctionWithNull *string `json:"FieldDisjunctionWithNull"`
-    Operator SomeStructOperator `json:"Operator"`
-    FieldArrayOfStrings []string `json:"FieldArrayOfStrings"`
-    FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString"`
-    FieldAnonymousStruct StructComplexFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct"`
-    FieldRefToConstant string `json:"fieldRefToConstant"`
+    FieldRef SomeOtherStruct `json:"FieldRef" yaml:"FieldRef"`
+    FieldDisjunctionOfScalars StringOrBool `json:"FieldDisjunctionOfScalars" yaml:"FieldDisjunctionOfScalars"`
+    FieldMixedDisjunction StringOrSomeOtherStruct `json:"FieldMixedDisjunction" yaml:"FieldMixedDisjunction"`
+    FieldDisjunctionWithNull *string `json:"FieldDisjunctionWithNull" yaml:"FieldDisjunctionWithNull"`
+    Operator SomeStructOperator `json:"Operator" yaml:"Operator"`
+    FieldArrayOfStrings []string `json:"FieldArrayOfStrings" yaml:"FieldArrayOfStrings"`
+    FieldMapOfStringToString map[string]string `json:"FieldMapOfStringToString" yaml:"FieldMapOfStringToString"`
+    FieldAnonymousStruct StructComplexFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct" yaml:"FieldAnonymousStruct"`
+    FieldRefToConstant string `json:"fieldRefToConstant" yaml:"fieldRefToConstant"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.
@@ -255,7 +255,7 @@ func (resource SomeStruct) Validate() error {
 const ConnectionPath = "straight"
 
 type SomeOtherStruct struct {
-    FieldAny any `json:"FieldAny"`
+    FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 // NewSomeOtherStruct creates a new SomeOtherStruct object.
@@ -318,7 +318,7 @@ func (resource SomeOtherStruct) Validate() error {
 
 
 type StructComplexFieldsSomeStructFieldAnonymousStruct struct {
-    FieldAny any `json:"FieldAny"`
+    FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 // NewStructComplexFieldsSomeStructFieldAnonymousStruct creates a new StructComplexFieldsSomeStructFieldAnonymousStruct object.
@@ -388,8 +388,8 @@ const (
 
 
 type StringOrBool struct {
-    String *string `json:"String,omitempty"`
-    Bool *bool `json:"Bool,omitempty"`
+    String *string `json:"String,omitempty" yaml:"String,omitempty"`
+    Bool *bool `json:"Bool,omitempty" yaml:"Bool,omitempty"`
 }
 
 // NewStringOrBool creates a new StringOrBool object.
@@ -516,8 +516,8 @@ func (resource StringOrBool) Validate() error {
 
 
 type StringOrSomeOtherStruct struct {
-    String *string `json:"String,omitempty"`
-    SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
+    String *string `json:"String,omitempty" yaml:"String,omitempty"`
+    SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty" yaml:"SomeOtherStruct,omitempty"`
 }
 
 // NewStringOrSomeOtherStruct creates a new StringOrSomeOtherStruct object.

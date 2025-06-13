@@ -9,11 +9,11 @@ import (
 )
 
 type SomeStruct struct {
-    FieldRef *SomeOtherStruct `json:"FieldRef,omitempty"`
-    FieldString *string `json:"FieldString,omitempty"`
-    Operator *SomeStructOperator `json:"Operator,omitempty"`
-    FieldArrayOfStrings []string `json:"FieldArrayOfStrings,omitempty"`
-    FieldAnonymousStruct *StructOptionalFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct,omitempty"`
+    FieldRef *SomeOtherStruct `json:"FieldRef,omitempty" yaml:"FieldRef,omitempty"`
+    FieldString *string `json:"FieldString,omitempty" yaml:"FieldString,omitempty"`
+    Operator *SomeStructOperator `json:"Operator,omitempty" yaml:"Operator,omitempty"`
+    FieldArrayOfStrings []string `json:"FieldArrayOfStrings,omitempty" yaml:"FieldArrayOfStrings,omitempty"`
+    FieldAnonymousStruct *StructOptionalFieldsSomeStructFieldAnonymousStruct `json:"FieldAnonymousStruct,omitempty" yaml:"FieldAnonymousStruct,omitempty"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.
@@ -182,7 +182,7 @@ func (resource SomeStruct) Validate() error {
 
 
 type SomeOtherStruct struct {
-    FieldAny any `json:"FieldAny"`
+    FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 // NewSomeOtherStruct creates a new SomeOtherStruct object.
@@ -245,7 +245,7 @@ func (resource SomeOtherStruct) Validate() error {
 
 
 type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
-    FieldAny any `json:"FieldAny"`
+    FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 // NewStructOptionalFieldsSomeStructFieldAnonymousStruct creates a new StructOptionalFieldsSomeStructFieldAnonymousStruct object.

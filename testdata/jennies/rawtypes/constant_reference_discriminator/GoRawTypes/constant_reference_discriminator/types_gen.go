@@ -14,8 +14,8 @@ func NewLayoutWithValue() *LayoutWithValue {
 	return NewGridLayoutUsingValueOrRowsLayoutUsingValue()
 }
 type GridLayoutUsingValue struct {
-    Kind string `json:"kind"`
-    GridLayoutProperty string `json:"gridLayoutProperty"`
+    Kind string `json:"kind" yaml:"kind"`
+    GridLayoutProperty string `json:"gridLayoutProperty" yaml:"gridLayoutProperty"`
 }
 
 // NewGridLayoutUsingValue creates a new GridLayoutUsingValue object.
@@ -93,8 +93,8 @@ func (resource GridLayoutUsingValue) Validate() error {
 
 
 type RowsLayoutUsingValue struct {
-    Kind string `json:"kind"`
-    RowsLayoutProperty string `json:"rowsLayoutProperty"`
+    Kind string `json:"kind" yaml:"kind"`
+    RowsLayoutProperty string `json:"rowsLayoutProperty" yaml:"rowsLayoutProperty"`
 }
 
 // NewRowsLayoutUsingValue creates a new RowsLayoutUsingValue object.
@@ -178,8 +178,8 @@ func NewLayoutWithoutValue() *LayoutWithoutValue {
 	return NewGridLayoutWithoutValueOrRowsLayoutWithoutValue()
 }
 type GridLayoutWithoutValue struct {
-    Kind string `json:"kind"`
-    GridLayoutProperty string `json:"gridLayoutProperty"`
+    Kind string `json:"kind" yaml:"kind"`
+    GridLayoutProperty string `json:"gridLayoutProperty" yaml:"gridLayoutProperty"`
 }
 
 // NewGridLayoutWithoutValue creates a new GridLayoutWithoutValue object.
@@ -257,8 +257,8 @@ func (resource GridLayoutWithoutValue) Validate() error {
 
 
 type RowsLayoutWithoutValue struct {
-    Kind string `json:"kind"`
-    RowsLayoutProperty string `json:"rowsLayoutProperty"`
+    Kind string `json:"kind" yaml:"kind"`
+    RowsLayoutProperty string `json:"rowsLayoutProperty" yaml:"rowsLayoutProperty"`
 }
 
 // NewRowsLayoutWithoutValue creates a new RowsLayoutWithoutValue object.
@@ -340,8 +340,8 @@ const GridLayoutKindType = "GridLayout"
 const RowsLayoutKindType = "RowsLayout"
 
 type GridLayoutUsingValueOrRowsLayoutUsingValue struct {
-    GridLayoutUsingValue *GridLayoutUsingValue `json:"GridLayoutUsingValue,omitempty"`
-    RowsLayoutUsingValue *RowsLayoutUsingValue `json:"RowsLayoutUsingValue,omitempty"`
+    GridLayoutUsingValue *GridLayoutUsingValue `json:"GridLayoutUsingValue,omitempty" yaml:"GridLayoutUsingValue,omitempty"`
+    RowsLayoutUsingValue *RowsLayoutUsingValue `json:"RowsLayoutUsingValue,omitempty" yaml:"RowsLayoutUsingValue,omitempty"`
 }
 
 // NewGridLayoutUsingValueOrRowsLayoutUsingValue creates a new GridLayoutUsingValueOrRowsLayoutUsingValue object.
@@ -488,8 +488,8 @@ func (resource GridLayoutUsingValueOrRowsLayoutUsingValue) Validate() error {
 
 
 type GridLayoutWithoutValueOrRowsLayoutWithoutValue struct {
-    GridLayoutWithoutValue *GridLayoutWithoutValue `json:"GridLayoutWithoutValue,omitempty"`
-    RowsLayoutWithoutValue *RowsLayoutWithoutValue `json:"RowsLayoutWithoutValue,omitempty"`
+    GridLayoutWithoutValue *GridLayoutWithoutValue `json:"GridLayoutWithoutValue,omitempty" yaml:"GridLayoutWithoutValue,omitempty"`
+    RowsLayoutWithoutValue *RowsLayoutWithoutValue `json:"RowsLayoutWithoutValue,omitempty" yaml:"RowsLayoutWithoutValue,omitempty"`
 }
 
 // NewGridLayoutWithoutValueOrRowsLayoutWithoutValue creates a new GridLayoutWithoutValueOrRowsLayoutWithoutValue object.
