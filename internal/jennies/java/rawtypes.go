@@ -140,7 +140,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		ToJSONFunction:          jenny.jsonMarshaller.genToJSONFunction(object.Type),
 		ShouldAddSerializer:     jenny.typeFormatter.objectNeedsCustomSerializer(object),
 		ShouldAddDeserializer:   jenny.typeFormatter.objectNeedsCustomDeserializer(object),
-		ShouldAddFactoryMethods: object.Type.IsStructGeneratedFromDisjunction(),
+		ShouldAddFactoryMethods: object.Type.IsDisjunctionOfAnyKind(),
 		Constructors:            jenny.constructors(object),
 	})
 }
@@ -218,7 +218,7 @@ func (jenny RawTypes) getVariant(t ast.Type) string {
 }
 
 func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
-	if object.Type.IsStructGeneratedFromDisjunction() {
+	if object.Type.IsDisjunctionOfAnyKind() {
 		return nil
 	}
 

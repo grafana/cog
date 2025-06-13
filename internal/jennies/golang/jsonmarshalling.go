@@ -65,7 +65,7 @@ func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
 	// the only case for which we need a custom marshaller is for structs
 	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
 
-	return obj.Type.IsStructGeneratedFromDisjunction()
+	return obj.Type.IsDisjunctionOfAnyKind()
 }
 
 func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error) {
@@ -117,7 +117,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 	}
 
 	// is it a struct generated from a disjunction?
-	if obj.Type.IsStructGeneratedFromDisjunction() {
+	if obj.Type.IsDisjunctionOfAnyKind() {
 		return true
 	}
 
