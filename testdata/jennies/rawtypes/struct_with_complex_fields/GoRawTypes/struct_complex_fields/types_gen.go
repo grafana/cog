@@ -525,6 +525,43 @@ func NewStringOrSomeOtherStruct() *StringOrSomeOtherStruct {
 	return &StringOrSomeOtherStruct{
 }
 }
+// MarshalJSON implements a custom JSON marshalling logic to encode `StringOrSomeOtherStruct` as JSON.
+func (resource StringOrSomeOtherStruct) MarshalJSON() ([]byte, error) {
+	if resource.String != nil {
+		return json.Marshal(resource.String)
+	}
+	if resource.SomeOtherStruct != nil {
+		return json.Marshal(resource.SomeOtherStruct)
+	}
+
+	return []byte("null"), nil
+}
+
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode StringOrSomeOtherStruct from JSON.
+func (resource *StringOrSomeOtherStruct) UnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	
+	if fields["String"] != nil {
+		if err := json.Unmarshal(fields["String"], &resource.String); err != nil {
+			return fmt.Errorf("error decoding field 'String': %w", err)
+		}
+	}
+
+	if fields["SomeOtherStruct"] != nil {
+		if err := json.Unmarshal(fields["SomeOtherStruct"], &resource.SomeOtherStruct); err != nil {
+			return fmt.Errorf("error decoding field 'SomeOtherStruct': %w", err)
+		}
+	}
+
+	return nil
+}
+
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StringOrSomeOtherStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *StringOrSomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
