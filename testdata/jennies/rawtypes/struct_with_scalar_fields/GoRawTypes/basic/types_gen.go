@@ -15,21 +15,21 @@ import (
 type SomeStruct struct {
     // Anything can go in there.
     // Really, anything.
-    FieldAny any `json:"FieldAny"`
-    FieldBool bool `json:"FieldBool"`
-    FieldBytes []byte `json:"FieldBytes"`
-    FieldString string `json:"FieldString"`
-    FieldStringWithConstantValue string `json:"FieldStringWithConstantValue"`
-    FieldFloat32 float32 `json:"FieldFloat32"`
-    FieldFloat64 float64 `json:"FieldFloat64"`
-    FieldUint8 uint8 `json:"FieldUint8"`
-    FieldUint16 uint16 `json:"FieldUint16"`
-    FieldUint32 uint32 `json:"FieldUint32"`
-    FieldUint64 uint64 `json:"FieldUint64"`
-    FieldInt8 int8 `json:"FieldInt8"`
-    FieldInt16 int16 `json:"FieldInt16"`
-    FieldInt32 int32 `json:"FieldInt32"`
-    FieldInt64 int64 `json:"FieldInt64"`
+    FieldAny any `json:"FieldAny" yaml:"FieldAny"`
+    FieldBool bool `json:"FieldBool" yaml:"FieldBool"`
+    FieldBytes []byte `json:"FieldBytes" yaml:"FieldBytes"`
+    FieldString string `json:"FieldString" yaml:"FieldString"`
+    FieldStringWithConstantValue string `json:"FieldStringWithConstantValue" yaml:"FieldStringWithConstantValue"`
+    FieldFloat32 float32 `json:"FieldFloat32" yaml:"FieldFloat32"`
+    FieldFloat64 float64 `json:"FieldFloat64" yaml:"FieldFloat64"`
+    FieldUint8 uint8 `json:"FieldUint8" yaml:"FieldUint8"`
+    FieldUint16 uint16 `json:"FieldUint16" yaml:"FieldUint16"`
+    FieldUint32 uint32 `json:"FieldUint32" yaml:"FieldUint32"`
+    FieldUint64 uint64 `json:"FieldUint64" yaml:"FieldUint64"`
+    FieldInt8 int8 `json:"FieldInt8" yaml:"FieldInt8"`
+    FieldInt16 int16 `json:"FieldInt16" yaml:"FieldInt16"`
+    FieldInt32 int32 `json:"FieldInt32" yaml:"FieldInt32"`
+    FieldInt64 int64 `json:"FieldInt64" yaml:"FieldInt64"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.

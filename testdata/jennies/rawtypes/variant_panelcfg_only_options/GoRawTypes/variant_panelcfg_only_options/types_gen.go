@@ -8,7 +8,7 @@ import (
 )
 
 type Options struct {
-    Content string `json:"content"`
+    Content string `json:"content" yaml:"content"`
 }
 
 // NewOptions creates a new Options object.

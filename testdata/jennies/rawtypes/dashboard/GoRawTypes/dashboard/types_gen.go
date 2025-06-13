@@ -11,8 +11,8 @@ import (
 )
 
 type Dashboard struct {
-    Title string `json:"title"`
-    Panels []Panel `json:"panels,omitempty"`
+    Title string `json:"title" yaml:"title"`
+    Panels []Panel `json:"panels,omitempty" yaml:"panels,omitempty"`
 }
 
 // NewDashboard creates a new Dashboard object.
@@ -119,8 +119,8 @@ func (resource Dashboard) Validate() error {
 
 
 type DataSourceRef struct {
-    Type *string `json:"type,omitempty"`
-    Uid *string `json:"uid,omitempty"`
+    Type *string `json:"type,omitempty" yaml:"type,omitempty"`
+    Uid *string `json:"uid,omitempty" yaml:"uid,omitempty"`
 }
 
 // NewDataSourceRef creates a new DataSourceRef object.
@@ -207,7 +207,7 @@ func (resource DataSourceRef) Validate() error {
 
 
 type FieldConfigSource struct {
-    Defaults *FieldConfig `json:"defaults,omitempty"`
+    Defaults *FieldConfig `json:"defaults,omitempty" yaml:"defaults,omitempty"`
 }
 
 // NewFieldConfigSource creates a new FieldConfigSource object.
@@ -287,8 +287,8 @@ func (resource FieldConfigSource) Validate() error {
 
 
 type FieldConfig struct {
-    Unit *string `json:"unit,omitempty"`
-    Custom any `json:"custom,omitempty"`
+    Unit *string `json:"unit,omitempty" yaml:"unit,omitempty"`
+    Custom any `json:"custom,omitempty" yaml:"custom,omitempty"`
 }
 
 // NewFieldConfig creates a new FieldConfig object.
@@ -370,12 +370,12 @@ func (resource FieldConfig) Validate() error {
 
 
 type Panel struct {
-    Title string `json:"title"`
-    Type string `json:"type"`
-    Datasource *DataSourceRef `json:"datasource,omitempty"`
-    Options any `json:"options,omitempty"`
-    Targets []variants.Dataquery `json:"targets,omitempty"`
-    FieldConfig *FieldConfigSource `json:"fieldConfig,omitempty"`
+    Title string `json:"title" yaml:"title"`
+    Type string `json:"type" yaml:"type"`
+    Datasource *DataSourceRef `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+    Options any `json:"options,omitempty" yaml:"options,omitempty"`
+    Targets []variants.Dataquery `json:"targets,omitempty" yaml:"targets,omitempty"`
+    FieldConfig *FieldConfigSource `json:"fieldConfig,omitempty" yaml:"fieldConfig,omitempty"`
 }
 
 // NewPanel creates a new Panel object.

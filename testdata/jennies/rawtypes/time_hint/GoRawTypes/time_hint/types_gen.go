@@ -11,7 +11,7 @@ import (
 type ObjTime time.Time
 
 type ObjWithTimeField struct {
-    RegisteredAt time.Time `json:"registeredAt"`
+    RegisteredAt time.Time `json:"registeredAt" yaml:"registeredAt"`
 }
 
 // NewObjWithTimeField creates a new ObjWithTimeField object.

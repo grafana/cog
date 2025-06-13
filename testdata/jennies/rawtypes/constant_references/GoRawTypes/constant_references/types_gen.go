@@ -16,7 +16,7 @@ const (
 
 
 type ParentStruct struct {
-    MyEnum Enum `json:"myEnum"`
+    MyEnum Enum `json:"myEnum" yaml:"myEnum"`
 }
 
 // NewParentStruct creates a new ParentStruct object.
@@ -78,8 +78,8 @@ func (resource ParentStruct) Validate() error {
 
 
 type Struct struct {
-    MyValue string `json:"myValue"`
-    MyEnum Enum `json:"myEnum"`
+    MyValue string `json:"myValue" yaml:"myValue"`
+    MyEnum Enum `json:"myEnum" yaml:"myEnum"`
 }
 
 // NewStruct creates a new Struct object.
@@ -156,7 +156,7 @@ func (resource Struct) Validate() error {
 
 
 type StructA struct {
-    MyEnum Enum `json:"myEnum"`
+    MyEnum Enum `json:"myEnum" yaml:"myEnum"`
 }
 
 // NewStructA creates a new StructA object.
@@ -228,8 +228,8 @@ func (resource StructA) Validate() error {
 
 
 type StructB struct {
-    MyEnum Enum `json:"myEnum"`
-    MyValue string `json:"myValue"`
+    MyEnum Enum `json:"myEnum" yaml:"myEnum"`
+    MyValue string `json:"myValue" yaml:"myValue"`
 }
 
 // NewStructB creates a new StructB object.

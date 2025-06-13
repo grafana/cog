@@ -9,10 +9,10 @@ import (
 )
 
 type SomeStruct struct {
-    Id uint64 `json:"id"`
-    MaybeId *uint64 `json:"maybeId,omitempty"`
-    Title string `json:"title"`
-    RefStruct *RefStruct `json:"refStruct,omitempty"`
+    Id uint64 `json:"id" yaml:"id"`
+    MaybeId *uint64 `json:"maybeId,omitempty" yaml:"maybeId,omitempty"`
+    Title string `json:"title" yaml:"title"`
+    RefStruct *RefStruct `json:"refStruct,omitempty" yaml:"refStruct,omitempty"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.
@@ -174,8 +174,8 @@ func (resource SomeStruct) Validate() error {
 
 
 type RefStruct struct {
-    Labels map[string]string `json:"labels"`
-    Tags []string `json:"tags"`
+    Labels map[string]string `json:"labels" yaml:"labels"`
+    Tags []string `json:"tags" yaml:"tags"`
 }
 
 // NewRefStruct creates a new RefStruct object.

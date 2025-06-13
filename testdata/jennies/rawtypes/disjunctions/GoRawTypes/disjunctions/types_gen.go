@@ -18,8 +18,8 @@ func NewRefreshRate() *RefreshRate {
 type StringOrNull *string
 
 type SomeStruct struct {
-    Type string `json:"Type"`
-    FieldAny any `json:"FieldAny"`
+    Type string `json:"Type" yaml:"Type"`
+    FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.
@@ -104,8 +104,8 @@ func NewBoolOrRef() *BoolOrRef {
 	return NewBoolOrSomeStruct()
 }
 type SomeOtherStruct struct {
-    Type string `json:"Type"`
-    Foo []byte `json:"Foo"`
+    Type string `json:"Type" yaml:"Type"`
+    Foo []byte `json:"Foo" yaml:"Foo"`
 }
 
 // NewSomeOtherStruct creates a new SomeOtherStruct object.
@@ -183,8 +183,8 @@ func (resource SomeOtherStruct) Validate() error {
 
 
 type YetAnotherStruct struct {
-    Type string `json:"Type"`
-    Bar uint8 `json:"Bar"`
+    Type string `json:"Type" yaml:"Type"`
+    Bar uint8 `json:"Bar" yaml:"Bar"`
 }
 
 // NewYetAnotherStruct creates a new YetAnotherStruct object.
@@ -268,8 +268,8 @@ func NewSeveralRefs() *SeveralRefs {
 	return NewSomeStructOrSomeOtherStructOrYetAnotherStruct()
 }
 type StringOrBool struct {
-    String *string `json:"String,omitempty"`
-    Bool *bool `json:"Bool,omitempty"`
+    String *string `json:"String,omitempty" yaml:"String,omitempty"`
+    Bool *bool `json:"Bool,omitempty" yaml:"Bool,omitempty"`
 }
 
 // NewStringOrBool creates a new StringOrBool object.
@@ -396,8 +396,8 @@ func (resource StringOrBool) Validate() error {
 
 
 type BoolOrSomeStruct struct {
-    Bool *bool `json:"Bool,omitempty"`
-    SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
+    Bool *bool `json:"Bool,omitempty" yaml:"Bool,omitempty"`
+    SomeStruct *SomeStruct `json:"SomeStruct,omitempty" yaml:"SomeStruct,omitempty"`
 }
 
 // NewBoolOrSomeStruct creates a new BoolOrSomeStruct object.
@@ -497,9 +497,9 @@ func (resource BoolOrSomeStruct) Validate() error {
 
 
 type SomeStructOrSomeOtherStructOrYetAnotherStruct struct {
-    SomeStruct *SomeStruct `json:"SomeStruct,omitempty"`
-    SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty"`
-    YetAnotherStruct *YetAnotherStruct `json:"YetAnotherStruct,omitempty"`
+    SomeStruct *SomeStruct `json:"SomeStruct,omitempty" yaml:"SomeStruct,omitempty"`
+    SomeOtherStruct *SomeOtherStruct `json:"SomeOtherStruct,omitempty" yaml:"SomeOtherStruct,omitempty"`
+    YetAnotherStruct *YetAnotherStruct `json:"YetAnotherStruct,omitempty" yaml:"YetAnotherStruct,omitempty"`
 }
 
 // NewSomeStructOrSomeOtherStructOrYetAnotherStruct creates a new SomeStructOrSomeOtherStructOrYetAnotherStruct object.

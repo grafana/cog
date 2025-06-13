@@ -8,8 +8,8 @@ import (
 )
 
 type NestedStruct struct {
-    StringVal string `json:"stringVal"`
-    IntVal int64 `json:"intVal"`
+    StringVal string `json:"stringVal" yaml:"stringVal"`
+    IntVal int64 `json:"intVal" yaml:"intVal"`
 }
 
 // NewNestedStruct creates a new NestedStruct object.
@@ -86,11 +86,11 @@ func (resource NestedStruct) Validate() error {
 
 
 type Struct struct {
-    AllFields NestedStruct `json:"allFields"`
-    PartialFields NestedStruct `json:"partialFields"`
-    EmptyFields NestedStruct `json:"emptyFields"`
-    ComplexField DefaultsStructComplexField `json:"complexField"`
-    PartialComplexField DefaultsStructPartialComplexField `json:"partialComplexField"`
+    AllFields NestedStruct `json:"allFields" yaml:"allFields"`
+    PartialFields NestedStruct `json:"partialFields" yaml:"partialFields"`
+    EmptyFields NestedStruct `json:"emptyFields" yaml:"emptyFields"`
+    ComplexField DefaultsStructComplexField `json:"complexField" yaml:"complexField"`
+    PartialComplexField DefaultsStructPartialComplexField `json:"partialComplexField" yaml:"partialComplexField"`
 }
 
 // NewStruct creates a new Struct object.
@@ -258,7 +258,7 @@ func (resource Struct) Validate() error {
 
 
 type DefaultsStructComplexFieldNested struct {
-    NestedVal string `json:"nestedVal"`
+    NestedVal string `json:"nestedVal" yaml:"nestedVal"`
 }
 
 // NewDefaultsStructComplexFieldNested creates a new DefaultsStructComplexFieldNested object.
@@ -320,9 +320,9 @@ func (resource DefaultsStructComplexFieldNested) Validate() error {
 
 
 type DefaultsStructComplexField struct {
-    Uid string `json:"uid"`
-    Nested DefaultsStructComplexFieldNested `json:"nested"`
-    Array []string `json:"array"`
+    Uid string `json:"uid" yaml:"uid"`
+    Nested DefaultsStructComplexFieldNested `json:"nested" yaml:"nested"`
+    Array []string `json:"array" yaml:"array"`
 }
 
 // NewDefaultsStructComplexField creates a new DefaultsStructComplexField object.
@@ -435,8 +435,8 @@ func (resource DefaultsStructComplexField) Validate() error {
 
 
 type DefaultsStructPartialComplexField struct {
-    Uid string `json:"uid"`
-    IntVal int64 `json:"intVal"`
+    Uid string `json:"uid" yaml:"uid"`
+    IntVal int64 `json:"intVal" yaml:"intVal"`
 }
 
 // NewDefaultsStructPartialComplexField creates a new DefaultsStructPartialComplexField object.

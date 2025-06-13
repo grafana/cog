@@ -8,7 +8,7 @@ import (
 )
 
 type Options struct {
-    TimeseriesOption string `json:"timeseries_option"`
+    TimeseriesOption string `json:"timeseries_option" yaml:"timeseries_option"`
 }
 
 // NewOptions creates a new Options object.
@@ -70,7 +70,7 @@ func (resource Options) Validate() error {
 
 
 type FieldConfig struct {
-    TimeseriesFieldConfigOption string `json:"timeseries_field_config_option"`
+    TimeseriesFieldConfigOption string `json:"timeseries_field_config_option" yaml:"timeseries_field_config_option"`
 }
 
 // NewFieldConfig creates a new FieldConfig object.
