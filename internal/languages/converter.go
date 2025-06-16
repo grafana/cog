@@ -316,7 +316,7 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 			continue
 		}
 
-		if argument, ok := generator.argumentTypeHintAsDisjunction(context, converter, argName, valuePath, assignment); ok {
+		if argument, ok := generator.argumentFromTypeHintReference(converter, valuePath, assignment); ok {
 			optMapping.Args = append(optMapping.Args, argument)
 			continue
 		}
@@ -458,19 +458,19 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	}
 }
 
-func (generator *ConverterGenerator) argumentTypeHintAsDisjunction(context Context, converter Converter, name string, path ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+func (generator *ConverterGenerator) argumentFromTypeHintReference(converter Converter, path ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
 	if assignment.Value.Argument == nil || assignment.Path.Last().TypeHint == nil {
 		return ArgumentMapping{}, false
 	}
 
-	if assignment.Path.Last().TypeHint != nil && !assignment.Path.Last().TypeHint.IsDisjunction() {
+	if !assignment.Path.Last().TypeHint.IsRef() {
 		return ArgumentMapping{}, false
 	}
 
 	return ArgumentMapping{
 		Builder: &BuilderArgMapping{
 			ValuePath:   path,
-			ValueType:   ast.NewRef(converter.Package, assignment.Value.Argument.Name),
+			ValueType:   *assignment.Path.Last().TypeHint,
 			BuilderPkg:  converter.Package,
 			BuilderName: assignment.Value.Argument.Name,
 		},
@@ -582,6 +582,16 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 			}
 			continue
 		}
+
+		if assignment.Value.Argument != nil && assignment.Path.Last().TypeHint != nil {
+			assignment.Path[len(assignment.Path)-1].TypeHint = &assignment.Value.Argument.Type
+			guard := MappingGuard{
+				Path:  valuesRootPath.Append(assignment.Path),
+				Op:    ast.NotEqualOp,
+				Value: nil,
+			}
+			guards.Set(guard.String(), guard)
+		}
 	}
 
 	return guards.Values()
@@ -619,7 +629,8 @@ func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) st
 		}
 	}
 
-	if assignment.Path.Last().TypeHint != nil && assignment.Path.Last().TypeHint != nil {
+	// If we have an any or disjunction, some values could match the same key
+	if assignment.Value.Argument != nil && assignment.Path.Last().TypeHint != nil {
 		path += fmt.Sprintf("=%v", assignment.Value.Argument.Name)
 	}
 
