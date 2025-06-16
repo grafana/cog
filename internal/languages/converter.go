@@ -217,6 +217,7 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		_, pathAlreadyGenerated := generator.generatedPaths[generator.assignmentKey(assignment)]
 		return !pathAlreadyGenerated
 	})
+
 	if len(assignments) == 0 {
 		return ConversionMapping{}
 	}
@@ -312,6 +313,11 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 		if assignment.Value.Envelope != nil {
 			arguments := generator.argumentsForEnvelope(context, converter, argName, valuePath, assignment)
 			optMapping.Args = append(optMapping.Args, arguments...)
+			continue
+		}
+
+		if argument, ok := generator.argumentTypeHintAsDisjunction(context, converter, argName, valuePath, assignment); ok {
+			optMapping.Args = append(optMapping.Args, argument)
 			continue
 		}
 
@@ -450,6 +456,25 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 			ValueType: typeDef,
 		},
 	}
+}
+
+func (generator *ConverterGenerator) argumentTypeHintAsDisjunction(context Context, converter Converter, name string, path ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
+	if assignment.Value.Argument == nil || assignment.Path.Last().TypeHint == nil {
+		return ArgumentMapping{}, false
+	}
+
+	if assignment.Path.Last().TypeHint != nil && !assignment.Path.Last().TypeHint.IsDisjunction() {
+		return ArgumentMapping{}, false
+	}
+
+	return ArgumentMapping{
+		Builder: &BuilderArgMapping{
+			ValuePath:   path,
+			ValueType:   ast.NewRef(converter.Package, assignment.Value.Argument.Name),
+			BuilderPkg:  converter.Package,
+			BuilderName: assignment.Value.Argument.Name,
+		},
+	}, true
 }
 
 func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context Context, assignment ast.Assignment) bool {
@@ -592,6 +617,10 @@ func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) st
 		for _, envelopeAssignment := range assignment.Value.Envelope.Values {
 			path += "," + envelopeAssignment.Path.String()
 		}
+	}
+
+	if assignment.Path.Last().TypeHint != nil && assignment.Path.Last().TypeHint != nil {
+		path += fmt.Sprintf("=%v", assignment.Value.Argument.Name)
 	}
 
 	return path
