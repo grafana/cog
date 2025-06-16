@@ -2,12 +2,17 @@ package disjunctions;
 
 
 public class BoolOrRef {
-    public Boolean bool;
-    public SomeStruct someStruct;
-    public BoolOrRef() {
+    protected Boolean bool;
+    protected SomeStruct someStruct;
+    protected BoolOrRef() {}
+    public static BoolOrRef createBool(Boolean bool) {
+        BoolOrRef boolOrRef = new BoolOrRef();
+        boolOrRef.bool = bool;
+        return boolOrRef;
     }
-    public BoolOrRef(Boolean bool,SomeStruct someStruct) {
-        this.bool = bool;
-        this.someStruct = someStruct;
+    public static BoolOrRef createSomeStruct(SomeStruct someStruct) {
+        BoolOrRef boolOrRef = new BoolOrRef();
+        boolOrRef.someStruct = someStruct;
+        return boolOrRef;
     }
 }
