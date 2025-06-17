@@ -175,7 +175,8 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 		if _, ok := context.ResolveToComposableSlot(field.Type); ok {
 			continue
 		}
-		
+
+		jenny.imports.Add("fmt", "fmt")
 		buffer.WriteString(fmt.Sprintf(`
 	if fields["%[1]s"] != nil {
 		if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
@@ -198,7 +199,6 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 			return "", fmt.Errorf("can not generate custom unmarshal function for composable slot with variant '%s': template block %s not found", variant, unmarshalVariantBlock)
 		}
 
-		jenny.imports.Add("fmt", "fmt")
 		if err := jenny.tmpl.RenderInBuffer(&buffer, unmarshalVariantBlock, map[string]any{
 			"Object": obj,
 			"Field":  field,
