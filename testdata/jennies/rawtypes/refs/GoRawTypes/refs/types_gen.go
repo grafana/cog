@@ -10,7 +10,7 @@ import (
 )
 
 type SomeStruct struct {
-    FieldAny any `json:"FieldAny"`
+    FieldAny any `json:"FieldAny" yaml:"FieldAny"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.
