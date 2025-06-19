@@ -42,11 +42,11 @@ VizConfigSpec(
 
 {{- define "object_dashboardv2alpha1_VizConfigKind_spec_fieldConfig_unmarshal" -}}
 {{- $cogruntime := importModule "cogruntime" "..cog" "runtime" -}}
-FieldConfigSource.from_json({**data["spec"]["fieldConfig"], **{"defaults": {**defaults, **{"custom": {{ $cogruntime }}.panelcfg_field_config_from_json(custom, data["kind"])}}}})
+FieldConfigSource.from_json({**data["spec"]["fieldConfig"], **{"defaults": {**defaults, **{"custom": {{ $cogruntime }}.panelcfg_config(data["kind"]).field_config_from_json_hook(custom)}}}})
 {{- end }}
 
 {{- define "object_dashboardv2alpha1_VizConfigKind_spec_options_unmarshal" -}}
 {{- $input := print "data[\"spec\"][\"options\"]" -}}
 {{- $cogruntime := importModule "cogruntime" "..cog" "runtime" -}}
-{{ $cogruntime }}.panelcfg_options_from_json({{ $input }}, data["kind"])
+{{ $cogruntime }}.panelcfg_config(data["kind"]).options_from_json_hook({{ $input }})
 {{- end }}
