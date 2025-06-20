@@ -1,0 +1,7 @@
+{{- define "object_dashboardv2alpha1_VizConfigKind_custom_unmarshal" }}
+package {{ .Object.SelfRef.ReferredPkg }};
+
+public class {{ .Object.Name | upperCamelCase }}Deserializer extends JsonDeserializer<{{ .Object.Name | upperCamelCase }}> {
+    // BYE
+}
+{{- end }}

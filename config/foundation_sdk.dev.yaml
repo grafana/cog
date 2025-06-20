@@ -221,3 +221,4 @@ output:
           - '%__config_dir%/foundation-sdk/.cog/templates/java/extra'
         overrides_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/java/overrides'
+          - '%__config_dir%/dashboardv2/templates/java/overrides'

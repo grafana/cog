@@ -1,0 +1,7 @@
+{{- define "object_dashboardv2alpha1_DataQueryKind_custom_unmarshal" }}
+package {{ .Object.SelfRef.ReferredPkg }};
+
+public class {{ .Object.Name | upperCamelCase }}Deserializer extends JsonDeserializer<{{ .Object.Name | upperCamelCase }}> {
+    // HELLO
+}
+{{- end }}
