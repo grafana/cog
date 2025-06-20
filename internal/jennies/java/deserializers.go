@@ -26,7 +26,7 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 	for _, schema := range context.Schemas {
 		var hasErr error
 		schema.Objects.Iterate(func(key string, obj ast.Object) {
-			if objectNeedsCustomDeserialiser(context, obj) {
+			if objectNeedsCustomDeserialiser(context, obj, jenny.tmpl) {
 				f, err := jenny.genCustomDeserialiser(context, obj)
 				if err != nil {
 					hasErr = err
@@ -44,6 +44,21 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 }
 
 func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
+	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(obj)
+	fmt.Println(customUnmarshalTmpl)
+	if jenny.tmpl.Exists(customUnmarshalTmpl) {
+		rendered, err := jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
+			"Object": obj,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		path := filepath.Join(jenny.config.ProjectPath, obj.SelfRef.ReferredPkg, fmt.Sprintf("%sDeserializer.java", tools.UpperCamelCase(obj.SelfRef.ReferredType)))
+		return codejen.NewFile(path, []byte(rendered), jenny), nil
+	}
+
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
 		return jenny.genDisjunctionsDeserialiser(obj, "disjunctions_of_scalars")
 	}
