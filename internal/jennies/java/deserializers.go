@@ -6,15 +6,17 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type Deserializers struct {
-	config  Config
-	tmpl    *template.Template
-	imports []string
+	config        Config
+	tmpl          *template.Template
+	imports       *common.DirectImportMap
+	packageMapper func(pkg string, class string) string
 }
 
 func (jenny *Deserializers) JennyName() string {
@@ -22,10 +24,23 @@ func (jenny *Deserializers) JennyName() string {
 }
 
 func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, error) {
+	jenny.imports = NewImportMap(jenny.config.PackagePath)
+	jenny.tmpl = jenny.tmpl.Funcs(template.FuncMap{
+		"importPkg": jenny.config.formatPackage,
+	})
+
 	deserialisers := make(codejen.Files, 0)
 	for _, schema := range context.Schemas {
 		var hasErr error
 		schema.Objects.Iterate(func(key string, obj ast.Object) {
+			jenny.packageMapper = func(pkg string, class string) string {
+				if jenny.imports.IsIdentical(pkg, schema.Package) {
+					return ""
+				}
+
+				return jenny.imports.Add(class, pkg)
+			}
+
 			if objectNeedsCustomDeserialiser(context, obj, jenny.tmpl) {
 				f, err := jenny.genCustomDeserialiser(context, obj)
 				if err != nil {
@@ -45,9 +60,8 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 
 func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
 	customUnmarshalTmpl := template.CustomObjectUnmarshalBlock(obj)
-	fmt.Println(customUnmarshalTmpl)
 	if jenny.tmpl.Exists(customUnmarshalTmpl) {
-		rendered, err := jenny.tmpl.Render(customUnmarshalTmpl, map[string]any{
+		rendered, err := jenny.tmpl.RenderAsBytes(customUnmarshalTmpl, map[string]any{
 			"Object": obj,
 		})
 
@@ -56,7 +70,7 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 		}
 
 		path := filepath.Join(jenny.config.ProjectPath, obj.SelfRef.ReferredPkg, fmt.Sprintf("%sDeserializer.java", tools.UpperCamelCase(obj.SelfRef.ReferredType)))
-		return codejen.NewFile(path, []byte(rendered), jenny), nil
+		return codejen.NewFile(path, rendered, jenny), nil
 	}
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
@@ -73,7 +87,12 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 
 // TODO(kgz): this shouldn't be done by cog
 func (jenny *Deserializers) genDataqueryDeserialiser(context languages.Context, obj ast.Object) (*codejen.File, error) {
-	jenny.imports = jenny.genImports(obj)
+	jenny.packageMapper("cog.variants", "Dataquery")
+	jenny.packageMapper("cog.variants", "Registry")
+
+	if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" {
+		jenny.packageMapper("cog.variants", "PanelConfig")
+	}
 
 	rendered, err := jenny.tmpl.Render("marshalling/unmarshalling.tmpl", Unmarshalling{
 		Package:                   jenny.config.formatPackage(obj.SelfRef.ReferredPkg),
@@ -122,7 +141,7 @@ func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field 
 
 		hintField = &obj.Type.AsStruct().Fields[i]
 		if obj.SelfRef.ReferredPkg != f.Type.AsRef().ReferredPkg {
-			jenny.imports = append(jenny.imports, jenny.config.formatPackage(fmt.Sprintf("%s.%s", f.Type.AsRef().ReferredPkg, "DataSourceRef")))
+			jenny.packageMapper(f.Type.AsRef().ReferredPkg, "DataSourceRef")
 		}
 	}
 
@@ -139,20 +158,6 @@ func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field 
 		FieldName:       field.Name,
 		DatasourceField: hintFieldName,
 	}
-}
-
-// TODO(kgz): this shouldn't be done by cog
-func (jenny *Deserializers) genImports(obj ast.Object) []string {
-	imports := []string{
-		jenny.config.formatPackage("cog.variants.Dataquery"),
-		jenny.config.formatPackage("cog.variants.Registry"),
-	}
-
-	if obj.SelfRef.ReferredPkg == "dashboard" && obj.Name == "Panel" {
-		imports = append(imports, jenny.config.formatPackage("cog.variants.PanelConfig"))
-	}
-
-	return imports
 }
 
 func (jenny *Deserializers) genDisjunctionsDeserialiser(obj ast.Object, tmpl string) (*codejen.File, error) {
