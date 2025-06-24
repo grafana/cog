@@ -16,6 +16,7 @@ type Deserializers struct {
 	config        Config
 	tmpl          *template.Template
 	imports       *common.DirectImportMap
+	typeFormatter *typeFormatter
 	packageMapper func(pkg string, class string) string
 }
 
@@ -25,9 +26,13 @@ func (jenny *Deserializers) JennyName() string {
 
 func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, error) {
 	jenny.imports = NewImportMap(jenny.config.PackagePath)
-	jenny.tmpl = jenny.tmpl.Funcs(template.FuncMap{
-		"importPkg": jenny.config.formatPackage,
-	})
+	jenny.typeFormatter = createFormatter(context, jenny.config)
+	jenny.tmpl = jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(template.FuncMap{
+			"importPkg":  jenny.config.formatPackage,
+			"formatType": jenny.typeFormatter.formatFieldType,
+		})
 
 	deserialisers := make(codejen.Files, 0)
 	for _, schema := range context.Schemas {
@@ -40,6 +45,8 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 
 				return jenny.imports.Add(class, pkg)
 			}
+
+			jenny.typeFormatter.withPackageMapper(jenny.packageMapper)
 
 			if objectNeedsCustomDeserialiser(context, obj, jenny.tmpl) {
 				f, err := jenny.genCustomDeserialiser(context, obj)
