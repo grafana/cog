@@ -8,6 +8,15 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import {{ importPkg "cog.variants.UnknownDataquery" }};
+import {{ importPkg "cog.variants.Dataquery" }};
+import {{ importPkg "cog.variants.Registry" }};
+import {{ importPkg (print .Object.SelfRef.ReferredPkg "." .Object.SelfRef.ReferredType) }};
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+
 public class {{ .Object.Name | upperCamelCase }}Deserializer extends JsonDeserializer<{{ .Object.Name | upperCamelCase }}> {
     
     @Override
@@ -26,7 +35,7 @@ public class {{ .Object.Name | upperCamelCase }}Deserializer extends JsonDeseria
         {{- end }}
         {{- end }}
         if ({{ .Object.Name | lowerCamelCase }}.kind != null && !{{ .Object.Name | lowerCamelCase }}.kind.trim().isEmpty()) {
-            Class<? extends Dataquery> clazz = Registry.getDataquery({{ .Object.Name | lowerCamelCase }}.kind)
+            Class<? extends Dataquery> clazz = Registry.getDataquery({{ .Object.Name | lowerCamelCase }}.kind);
             if (clazz != null) {
                 {{ $.Object.Name | lowerCamelCase }}.spec = mapper.treeToValue(root.get("spec"), clazz);
             } else {
