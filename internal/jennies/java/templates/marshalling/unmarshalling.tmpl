@@ -10,9 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grafana.foundation.cog.variants.UnknownDataquery;
 import com.grafana.foundation.cog.variants.Registry;
 
-{{- range .Imports }}
-import {{ . }};
-{{- end }}
+{{ .Imports }}
 
 import java.io.IOException;
 import java.util.ArrayList;
