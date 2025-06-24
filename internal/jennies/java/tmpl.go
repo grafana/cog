@@ -62,6 +62,9 @@ func functions() template.FuncMap {
 		"importStdPkg": func(_ ast.Type) string {
 			panic("importStdPkg() needs to be overridden by a jenny")
 		},
+		"importPkg": func(_ string) string {
+			panic("importPkg() needs to be overridden by a jenny")
+		},
 		"formatPackageName": func(_ ast.Type) string {
 			panic("formatPackageName() needs to be overridden by a jenny")
 		},
@@ -209,7 +212,7 @@ type Unmarshalling struct {
 	Package                   string
 	Name                      string
 	ShouldUnmarshallingPanels bool
-	Imports                   []string
+	Imports                   fmt.Stringer
 	DataqueryUnmarshalling    []DataqueryUnmarshalling
 	Fields                    []ast.StructField
 	Hint                      any
