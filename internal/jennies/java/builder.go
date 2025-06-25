@@ -34,7 +34,7 @@ func (jenny Builder) Generate(context languages.Context) (codejen.Files, error) 
 			return nil, err
 		}
 
-		filename := filepath.Join(jenny.config.ProjectPath, formatPackageName(builder.Package), fmt.Sprintf("%sBuilder.java", tools.UpperCamelCase(builder.Name)))
+		filename := filepath.Join(jenny.config.ProjectPath, formatPackageName(builder.Package), fmt.Sprintf("%sBuilder.java", jenny.getBuilderName(builder)))
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
@@ -60,7 +60,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		RawPackage:           builder.Package,
 		Imports:              jenny.imports,
 		ObjectName:           tools.UpperCamelCase(object.Name),
-		BuilderName:          tools.UpperCamelCase(builder.Name),
+		BuilderName:          jenny.getBuilderName(builder),
 		BuilderSignatureType: jenny.getBuilderSignature(builder.Package, object),
 		Constructor:          builder.Constructor,
 		Options:              builder.Options,
@@ -90,6 +90,14 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		"formatType":               jenny.typeFormatter.formatFieldType,
 		"formatPathIndex":          jenny.typeFormatter.formatPathIndex,
 	}).RenderAsBytes("builders/builder.tmpl", tmpl)
+}
+
+func (jenny Builder) getBuilderName(builder ast.Builder) string {
+	if builder.For.SelfRef.ReferredPkg != builder.Package {
+		return tools.UpperCamelCase(builder.Package)
+	}
+
+	return tools.UpperCamelCase(builder.Name)
 }
 
 func (jenny Builder) getBuilderSignature(pkg string, obj ast.Object) string {
