@@ -34,7 +34,7 @@ func (jenny Builder) Generate(context languages.Context) (codejen.Files, error) 
 			return nil, err
 		}
 
-		filename := filepath.Join(jenny.config.ProjectPath, formatPackageName(builder.Package), fmt.Sprintf("%sBuilder.java", tools.UpperCamelCase(builder.Name)))
+		filename := filepath.Join(jenny.config.ProjectPath, formatPackageName(builder.Package), fmt.Sprintf("%sBuilder.java", jenny.getBuilderName(builder)))
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
