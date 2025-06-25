@@ -1,10 +1,10 @@
 package test;
 
-import com.grafana.foundation.timeseries.PanelBuilder;
+import com.grafana.foundation.timeseries.TimeseriesBuilder;
 
 public class Network {
 
-        public static PanelBuilder networkReceivedTimeseries() {
+        public static TimeseriesBuilder networkReceivedTimeseries() {
                 return Common.defaultTimeSeries().title("Network Received").description("Network received (bits/s)")
                                 .min(0.0).unit("bps").fillOpacity(0.0).withTarget(
                                                 Common.basicPrometheusQuery(
@@ -12,7 +12,7 @@ public class Network {
                                                                 "{{ device }}"));
         }
 
-        public static PanelBuilder networkTransmittedTimeseries() {
+        public static TimeseriesBuilder networkTransmittedTimeseries() {
                 return Common.defaultTimeSeries().title("Network Transmitted")
                                 .description("Network transmitted (bits/s)").min(0.0).unit("bps").fillOpacity(0.0)
                                 .withTarget(
