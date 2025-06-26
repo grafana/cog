@@ -266,7 +266,11 @@ func (g *generator) walkEnum(schema *openapi3.Schema) (ast.Type, error) {
 		format = "%s"
 	}
 
-	enumType, err := getEnumType(schema.Type.Slice()[0])
+	schemaSlice := schema.Type.Slice()
+	if schemaSlice == nil {
+		schemaSlice = []string{openapi3.TypeString}
+	}
+	enumType, err := getEnumType(schemaSlice[0])
 	if err != nil {
 		return ast.Type{}, err
 	}
