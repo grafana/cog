@@ -9,7 +9,10 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/golang"
+	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/openapi"
+	"github.com/grafana/cog/internal/jennies/php"
+	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/simplecue"
 )
@@ -19,6 +22,7 @@ import (
 // language.
 type SchemaToTypesPipeline struct {
 	debug       bool
+	genBuilders bool
 	input       *codegen.Input
 	finalPasses compiler.Passes
 	output      *codegen.OutputLanguage
@@ -35,6 +39,11 @@ func TypesFromSchema() *SchemaToTypesPipeline {
 // such as an audit trail of applied transformations.
 func (pipeline *SchemaToTypesPipeline) Debug(enabled bool) *SchemaToTypesPipeline {
 	pipeline.debug = enabled
+	return pipeline
+}
+
+func (pipeline *SchemaToTypesPipeline) GenerateBuilders() *SchemaToTypesPipeline {
+	pipeline.genBuilders = true
 	return pipeline
 }
 
@@ -59,6 +68,7 @@ func (pipeline *SchemaToTypesPipeline) Run(ctx context.Context) (codejen.Files, 
 	}
 	codegenPipeline.Output = codegen.Output{
 		Types:     true,
+		Builders:  pipeline.genBuilders,
 		Languages: []*codegen.OutputLanguage{pipeline.output},
 	}
 
@@ -258,6 +268,107 @@ func (pipeline *SchemaToTypesPipeline) GenerateOpenAPI(config OpenAPIGenerationC
 	pipeline.output = &codegen.OutputLanguage{
 		OpenAPI: &openapi.Config{
 			Compact: config.Compact,
+		},
+	}
+	return pipeline
+}
+
+type PythonConfig struct {
+	CustomTemplatesDirectories []string
+}
+
+// Python sets the output to Typescript types.
+func (pipeline *SchemaToTypesPipeline) Python(config PythonConfig) *SchemaToTypesPipeline {
+	pipeline.output = &codegen.OutputLanguage{
+		Python: &python.Config{
+			SkipRuntime:                   true,
+			GenerateJSONMarshaller:        true,
+			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
+		},
+	}
+	return pipeline
+}
+
+type PHPConfig struct {
+	NamespaceRoot              string
+	CustomTemplatesDirectories []string
+}
+
+// PHP sets the output to Typescript types.
+func (pipeline *SchemaToTypesPipeline) PHP(config PHPConfig) *SchemaToTypesPipeline {
+	pipeline.output = &codegen.OutputLanguage{
+		PHP: &php.Config{
+			GenerateJSONMarshaller:        true,
+			NamespaceRoot:                 config.NamespaceRoot,
+			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
+		},
+	}
+	return pipeline
+}
+
+type JavaConfig struct {
+	PackagePath                string
+	CustomTemplatesDirectories []string
+}
+
+// Java sets the output to Typescript types.
+func (pipeline *SchemaToTypesPipeline) Java(config JavaConfig) *SchemaToTypesPipeline {
+	pipeline.output = &codegen.OutputLanguage{
+		Java: &java.Config{
+			GenerateJSONMarshaller:        true,
+			SkipRuntime:                   true,
+			PackagePath:                   config.PackagePath,
+			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
+		},
+	}
+	return pipeline
+}
+
+type AllConfig struct {
+	Go      GoConfig
+	Ts      TypescriptConfig
+	Python  PythonConfig
+	PHP     PHPConfig
+	Java    JavaConfig
+	OpenAPI OpenAPIGenerationConfig
+}
+
+// All sets the output to All types.
+func (pipeline *SchemaToTypesPipeline) All(config AllConfig) *SchemaToTypesPipeline {
+	pipeline.output = &codegen.OutputLanguage{
+		Go: &golang.Config{
+			SkipRuntime:                   true,
+			GenerateJSONMarshaller:        true,
+			OverridesTemplatesDirectories: config.Go.CustomTemplatesDirectories,
+
+			GenerateEqual:  config.Go.GenerateEqual,
+			AnyAsInterface: config.Go.AnyAsInterface,
+		},
+		Typescript: &typescript.Config{
+			SkipRuntime:                   true,
+			SkipIndex:                     true,
+			PackagesImportMap:             config.Ts.ImportsMap,
+			OverridesTemplatesDirectories: config.Ts.CustomTemplatesDirectories,
+			EnumsAsUnionTypes:             config.Ts.EnumsAsUnionTypes,
+		},
+		Java: &java.Config{
+			SkipRuntime:                   true,
+			GenerateJSONMarshaller:        true,
+			PackagePath:                   config.Java.PackagePath,
+			OverridesTemplatesDirectories: config.Java.CustomTemplatesDirectories,
+		},
+		Python: &python.Config{
+			GenerateJSONMarshaller:        true,
+			SkipRuntime:                   true,
+			OverridesTemplatesDirectories: config.Python.CustomTemplatesDirectories,
+		},
+		PHP: &php.Config{
+			NamespaceRoot:                 config.PHP.NamespaceRoot,
+			GenerateJSONMarshaller:        true,
+			OverridesTemplatesDirectories: config.PHP.CustomTemplatesDirectories,
+		},
+		OpenAPI: &openapi.Config{
+			Compact: config.OpenAPI.Compact,
 		},
 	}
 	return pipeline
