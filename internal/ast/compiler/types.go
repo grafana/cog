@@ -45,13 +45,13 @@ func (ref ObjectReference) String() string {
 
 func ObjectReferenceFromString(ref string) (ObjectReference, error) {
 	parts := strings.Split(ref, ".")
-	if len(parts) != 2 {
+	if len(parts) < 2 {
 		return ObjectReference{}, fmt.Errorf("invalid object reference '%s'", ref)
 	}
 
 	return ObjectReference{
 		Package: parts[0],
-		Object:  parts[1],
+		Object:  strings.Join(parts[1:], "."),
 	}, nil
 }
 
