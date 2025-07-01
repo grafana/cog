@@ -74,8 +74,9 @@ func (input *InputBase) filterSchema(schema *ast.Schema) (ast.Schemas, error) {
 type Input struct {
 	If string `yaml:"if"`
 
-	JSONSchema *JSONSchemaInput `yaml:"jsonschema"`
-	OpenAPI    *OpenAPIInput    `yaml:"openapi"`
+	JSONSchema     *JSONSchemaInput `yaml:"jsonschema"`
+	OpenAPI        *OpenAPIInput    `yaml:"openapi"`
+	OpenApiSources *OpenAPISources  `yaml:"openapi_sources"`
 
 	KindRegistry      *KindRegistryInput `yaml:"kind_registry"`
 	KindsysCore       *CueInput          `yaml:"kindsys_core"`
@@ -104,6 +105,9 @@ func (input *Input) loader() (schemaLoader, error) {
 	}
 	if input.OpenAPI != nil {
 		return input.OpenAPI, nil
+	}
+	if input.OpenApiSources != nil {
+		return input.OpenApiSources, nil
 	}
 	if input.KindRegistry != nil {
 		return input.KindRegistry, nil
