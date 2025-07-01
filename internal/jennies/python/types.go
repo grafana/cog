@@ -60,6 +60,7 @@ func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) 
 	case ast.KindStruct:
 		return formatter.formatStruct(object), nil
 	case ast.KindIntersection:
+		fmt.Println("handling intersection type", object.Name)
 		return formatter.formatIntersection(object)
 	default:
 		typingPkg := formatter.importPkg("typing", "typing")
