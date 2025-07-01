@@ -212,6 +212,15 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 			continue
 		}
 
+		// HACK
+		if field.Type.IsIntersection() {
+			typingPkg := jenny.importPkg("typing", "typing")
+			args = append(args, fmt.Sprintf("%s: %s.Optional[%s] = None", fieldName, typingPkg, fieldType))
+			assignments = append(assignments, fmt.Sprintf(`        if %[1]s is not None:
+            self.%[1]s = %[1]s`, fieldName))
+			continue
+		}
+
 		args = append(args, fmt.Sprintf("%s: %s = %s", fieldName, fieldType, formatValue(defaultValue)))
 		assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s", fieldName))
 	}

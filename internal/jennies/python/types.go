@@ -59,9 +59,6 @@ func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) 
 		buffer.WriteString(formatter.formatEnum(object))
 	case ast.KindStruct:
 		return formatter.formatStruct(object), nil
-	case ast.KindIntersection:
-		fmt.Println("handling intersection type", object.Name)
-		return formatter.formatIntersection(object)
 	default:
 		typingPkg := formatter.importPkg("typing", "typing")
 		buffer.WriteString(fmt.Sprintf("%s: %s.TypeAlias = %s", defName, typingPkg, formatter.formatType(object.Type)))
@@ -108,7 +105,7 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 	}
 
 	if def.IsIntersection() {
-		panic("Intersection should be handled in other code")
+		result = formatter.formatIntersection(def)
 	}
 
 	if def.IsDisjunction() {
@@ -249,34 +246,18 @@ func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeF
 	return fmt.Sprintf("'%s'", formatted)
 }
 
-// HACK: just make a data class with fields. In future might want a better impl
-func (formatter *typeFormatter) formatIntersection(def ast.Object) (string, error) {
-	inter := def.Type.AsIntersection()
-	var buffer strings.Builder
+// HACK
+func (formatter *typeFormatter) formatIntersection(def ast.Type) string {
+	inter := def.AsIntersection()
+	// HACK: print info
+	typingPkg := formatter.importPkg("typing", "typing")
 
-	_ = formatter.importModule("dataclasses", "dataclasses", "dataclass")
-	refs := make([]ast.Type, 0)
-	rest := make([]ast.Type, 0)
-	for _, b := range inter.Branches {
-		if b.IsRef() {
-			refs = append(refs, b)
-			continue
-		}
-		rest = append(rest, b)
+	if len(inter.Branches) == 1 {
+		return formatter.formatType(inter.Branches[0])
 	}
 
-	buffer.WriteString("@dataclass\n")
-	buffer.WriteString(fmt.Sprintf("class %s:\n", def.Name))
-
-	for _, ref := range refs {
-		buffer.WriteString(fmt.Sprintf("    %s%s: %s", def.Name, ref.Kind, formatter.formatFullyQualifiedRef(ref.AsRef(), false))) // TODO should escapeForwardRef?
-	}
-
-	for _, res := range rest {
-		buffer.WriteString(fmt.Sprintf("    %s%s: %s", def.Name, res.Kind, formatter.formatType(res)))
-	}
-
-	return buffer.String(), nil
+	// If more than one branch, give up!
+	return fmt.Sprintf("%s.Any", typingPkg)
 }
 
 func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType) string {
