@@ -9,8 +9,10 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type pkgImporter func(alias string, pkg string) string
-type moduleImporter func(alias string, pkg string, module string) string
+type (
+	pkgImporter    func(alias string, pkg string) string
+	moduleImporter func(alias string, pkg string, module string) string
+)
 
 type typeFormatter struct {
 	importPkg    pkgImporter
@@ -103,7 +105,8 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 	}
 
 	if def.IsIntersection() {
-		panic("formatting intersection type is not implemented for python")
+		// TODO: need a real implementation of python intersection types
+		fmt.Println("Skipping intersection field", def.Kind)
 	}
 
 	if def.IsDisjunction() {
