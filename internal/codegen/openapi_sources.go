@@ -9,6 +9,8 @@ import (
     "net/http"
     "os"
     "regexp"
+    "strconv"
+    "syscall"
 
     "github.com/getkin/kin-openapi/openapi3"
 
@@ -19,10 +21,12 @@ import (
 type OpenAPISources struct {
     InputBase `yaml:",inline"`
 
-    URL          string `yaml:"url"`
-    Path         string `yaml:"path"`
-    PackageRegex string `yaml:"package_regex,omitempty"`
-    AuthBearer   string `yaml:"auth_bearer,omitempty"`
+    URL          string   `yaml:"url"`
+    Path         string   `yaml:"path"`
+    PackageRegex string   `yaml:"package_regex,omitempty"`
+    AuthBearer   string   `yaml:"auth_bearer,omitempty"` // To access to remote server
+    Private      string   `yaml:"private,omitempty"`     // Generates public or private api
+    SkipURLs     []string `yaml:"skip_urls,omitempty"`
 
     Validate bool `yaml:"validate,omitempty"`
 }
@@ -39,6 +43,8 @@ type source struct {
 func (input *OpenAPISources) loadSchemas(ctx context.Context) ([]*openapi3.T, error) {
     var body []byte
     var err error
+
+    private, _ := strconv.ParseBool(input.Private)
 
     if input.Path != "" {
         body, err = os.ReadFile(input.Path)
@@ -71,30 +77,35 @@ func (input *OpenAPISources) loadSchemas(ctx context.Context) ([]*openapi3.T, er
     loader.Context = ctx
     loader.IsExternalRefsAllowed = true
 
-    needsLogin := false
-
-    if len(parsedSources.Sources) > 0 {
-        needsLogin, err = input.checkIfLoging(parsedSources.Sources[0].Url)
-        if err != nil {
-            return nil, err
+    schemas := make([]*openapi3.T, 0)
+    for _, s := range parsedSources.Sources {
+        if input.shouldSkipURL(s.Url) {
+            continue
         }
-    }
-
-    schemas := make([]*openapi3.T, len(parsedSources.Sources))
-    for i, s := range parsedSources.Sources {
+        if s.Private != private {
+            continue
+        }
         req, err := http.NewRequest(http.MethodGet, s.Url, nil)
         if err != nil {
             return nil, err
         }
 
-        if needsLogin {
+        if ok, err := input.checkIfLoging(s.Url); err == nil && ok {
             req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", os.Getenv(input.AuthBearer)))
         }
 
         client := &http.Client{}
         resp, err := client.Do(req)
         if err != nil {
+            if errors.Is(err, syscall.ECONNREFUSED) {
+                continue // localhost ?
+            }
             return nil, err
+        }
+
+        if resp.StatusCode != http.StatusOK {
+            fmt.Println(s.Url)
+            continue
         }
 
         body, err = io.ReadAll(resp.Body)
@@ -102,19 +113,29 @@ func (input *OpenAPISources) loadSchemas(ctx context.Context) ([]*openapi3.T, er
             return nil, err
         }
 
-        schemas[i], err = loader.LoadFromData(body)
+        schema, err := loader.LoadFromData(body)
         if err != nil {
             return nil, err
         }
+
+        schemas = append(schemas, schema)
     }
 
     return schemas, nil
 }
 
 func (input *OpenAPISources) packageName(schema *openapi3.T) string {
-    if input.PackageRegex != "" {
-        reg := regexp.MustCompile(input.PackageRegex)
+    if input.PackageRegex != "" && schema.Info != nil {
+        reg, err := regexp.Compile(input.PackageRegex)
+        if err != nil {
+            fmt.Println(err)
+            return schema.Info.Title
+        }
         return reg.FindString(schema.Info.Title)
+    }
+
+    if schema.Info == nil {
+        return ""
     }
 
     return schema.Info.Title
@@ -122,6 +143,7 @@ func (input *OpenAPISources) packageName(schema *openapi3.T) string {
 
 func (input *OpenAPISources) interpolateParameters(interpolator ParametersInterpolator) {
     input.InputBase.interpolateParameters(interpolator)
+    input.Private = interpolator(input.Private)
 
     input.URL = interpolator(input.URL)
 }
@@ -169,4 +191,14 @@ func (input *OpenAPISources) checkIfLoging(url string) (bool, error) {
     }
 
     return false, nil
+}
+
+func (input *OpenAPISources) shouldSkipURL(url string) bool {
+    for _, skipURL := range input.SkipURLs {
+        if skipURL == url {
+            return true
+        }
+    }
+
+    return false
 }
