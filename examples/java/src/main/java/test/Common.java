@@ -13,10 +13,10 @@ import com.grafana.foundation.common.VisibilityMode;
 import com.grafana.foundation.common.VizLegendOptionsBuilder;
 import com.grafana.foundation.common.VizOrientation;
 import com.grafana.foundation.dashboard.DataSourceRef;
-import com.grafana.foundation.gauge.GaugeBuilder;
-import com.grafana.foundation.logs.LogsBuilder;
+import com.grafana.foundation.gauge.GaugePanelBuilder;
+import com.grafana.foundation.logs.LogsPanelBuilder;
 import com.grafana.foundation.prometheus.PromQueryFormat;
-import com.grafana.foundation.timeseries.TimeseriesBuilder;
+import com.grafana.foundation.timeseries.TimeseriesPanelBuilder;
 
 public class Common {
 
@@ -35,20 +35,20 @@ public class Common {
                 .legendFormat(PromQueryFormat.TABLE.Value()).refId(ref);
     }
 
-    public static TimeseriesBuilder defaultTimeSeries() {
-        return new TimeseriesBuilder().lineWidth(1.0).fillOpacity(10.0).drawStyle(GraphDrawStyle.LINE)
+    public static TimeseriesPanelBuilder defaultTimeSeries() {
+        return new TimeseriesPanelBuilder().lineWidth(1.0).fillOpacity(10.0).drawStyle(GraphDrawStyle.LINE)
                 .showPoints(VisibilityMode.NEVER).legend(new VizLegendOptionsBuilder().showLegend(true)
                         .placement(LegendPlacement.BOTTOM).displayMode(LegendDisplayMode.LIST));
     }
 
-    public static LogsBuilder defaultLogs() {
-        return new LogsBuilder().span(24)
+    public static LogsPanelBuilder defaultLogs() {
+        return new LogsPanelBuilder().span(24)
                 .datasource(new DataSourceRef("loki", "grafana-cloud-logs")).showTime(true).enableLogDetails(true)
                 .sortOrder(LogsSortOrder.DESCENDING).wrapLogMessage(true);
     }
 
-    public static GaugeBuilder defaultGauge() {
-        return new GaugeBuilder().orientation(VizOrientation.AUTO)
+    public static GaugePanelBuilder defaultGauge() {
+        return new GaugePanelBuilder().orientation(VizOrientation.AUTO)
                 .reduceOptions(new ReduceDataOptionsBuilder().calcs(List.of("lastNotNull")).values(false));
     }
 }

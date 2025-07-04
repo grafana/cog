@@ -12,11 +12,11 @@ import com.grafana.foundation.dashboard.DashboardFieldConfigSourceOverridesBuild
 import com.grafana.foundation.dashboard.DataTransformerConfig;
 import com.grafana.foundation.dashboard.DynamicConfigValue;
 import com.grafana.foundation.dashboard.MatcherConfig;
-import com.grafana.foundation.table.TableBuilder;
-import com.grafana.foundation.timeseries.TimeseriesBuilder;
+import com.grafana.foundation.table.TablePanelBuilder;
+import com.grafana.foundation.timeseries.TimeseriesPanelBuilder;
 
 public class Disk {
-        public static TimeseriesBuilder diskIOTimeseries() {
+        public static TimeseriesPanelBuilder diskIOTimeseries() {
                 return Common.defaultTimeSeries().title("Disk I/O").fillOpacity(0.0).unit("Bps")
                                 .withTarget(Common.basicPrometheusQuery(
                                                 "rate(node_disk_read_bytes_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])",
@@ -32,8 +32,8 @@ public class Disk {
                                 ));
         }
 
-        public static TableBuilder diskSpaceUsageTable() {
-                return new TableBuilder().title("Disk Space Usage")
+        public static TablePanelBuilder diskSpaceUsageTable() {
+                return new TablePanelBuilder().title("Disk Space Usage")
                                 .align(FieldTextAlignment.AUTO).unit("decbytes").cellHeight(TableCellHeight.SM)
                                 .footer(new TableFooterOptionsBuilder().countRows(false).reducer(List.of("sum")))
                                 .withTarget(Common.tablePrometheusQuery(
