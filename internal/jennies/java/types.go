@@ -330,11 +330,11 @@ func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
 	return false
 }
 
-func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object) bool {
+func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object, tmpl *template.Template) bool {
 	if !tf.config.GenerateBuilders || tf.config.SkipRuntime {
 		return false
 	}
-	if objectNeedsCustomDeserialiser(tf.context, obj) {
+	if objectNeedsCustomDeserializer(tf.context, obj, tmpl) {
 		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonDeserialize")
 		return true
 	}
