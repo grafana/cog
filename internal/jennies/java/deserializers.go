@@ -48,7 +48,7 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 
 			jenny.typeFormatter.withPackageMapper(jenny.packageMapper)
 
-			if objectNeedsCustomDeserialiser(context, obj, jenny.tmpl) {
+			if objectNeedsCustomDeserializer(context, obj, jenny.tmpl) {
 				f, err := jenny.genCustomDeserialiser(context, obj)
 				if err != nil {
 					hasErr = err
