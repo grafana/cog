@@ -217,7 +217,6 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		_, pathAlreadyGenerated := generator.generatedPaths[generator.assignmentKey(assignment)]
 		return !pathAlreadyGenerated
 	})
-
 	if len(assignments) == 0 {
 		return ConversionMapping{}
 	}

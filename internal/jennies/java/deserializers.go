@@ -45,7 +45,6 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 
 				return jenny.imports.Add(class, pkg)
 			}
-
 			jenny.typeFormatter.withPackageMapper(jenny.packageMapper)
 
 			if objectNeedsCustomDeserializer(context, obj, jenny.tmpl) {
