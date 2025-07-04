@@ -491,6 +491,14 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			})), nil
 		}
 
+		// ensure that referenced objects are explored (in case they're not
+		// defined within the "root" cue value given to cog as parsing input)
+		if refPkg == g.schema.Package && !g.schema.Objects.Has(refType) {
+			if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
+				return ast.Type{}, err
+			}
+		}
+
 		if v.Kind() == cue.StringKind || v.Kind() == cue.NumberKind {
 			var referenceValue any
 			referenceValue, err = v.String()
@@ -501,14 +509,6 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 				}
 			}
 			return ast.NewConstantReferenceType(refPkg, refType, referenceValue), nil
-		}
-
-		// ensure that referenced objects are explored (in case they're not
-		// defined within the "root" cue value given to cog as parsing input)
-		if refPkg == g.schema.Package && !g.schema.Objects.Has(refType) {
-			if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
-				return ast.Type{}, err
-			}
 		}
 
 		// Reference to another package

@@ -1,6 +1,5 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $errors := importStdPkg "errors" -}}
-{{- $fmt := importStdPkg "fmt" -}}
 {{- $struct := .def.Type.Struct -}}
 // UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
 func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) error {

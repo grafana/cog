@@ -167,7 +167,7 @@ func getJavaFieldTypeCheck(t ast.Type) string {
 	}
 }
 
-func objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object, tmpl *template.Template) bool {
+func objectNeedsCustomDeserializer(context languages.Context, obj ast.Object, tmpl *template.Template) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
 	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot

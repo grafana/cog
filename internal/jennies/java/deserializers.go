@@ -81,11 +81,11 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 	}
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
-		return jenny.genDisjunctionsDeserialiser(obj, "disjunctions_of_scalars")
+		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_scalars")
 	}
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
-		return jenny.genDisjunctionsDeserialiser(obj, "disjunctions_of_refs")
+		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_refs")
 	}
 
 	// TODO(kgz): this shouldn't be done by cog
@@ -167,7 +167,7 @@ func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field 
 	}
 }
 
-func (jenny *Deserializers) genDisjunctionsDeserialiser(obj ast.Object, tmpl string) (*codejen.File, error) {
+func (jenny *Deserializers) genDisjunctionsDeserializer(obj ast.Object, tmpl string) (*codejen.File, error) {
 	rendered, err := jenny.tmpl.Render(fmt.Sprintf("marshalling/%s.json_unmarshall.tmpl", tmpl), Unmarshalling{
 		Package: jenny.config.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:    tools.UpperCamelCase(obj.Name),

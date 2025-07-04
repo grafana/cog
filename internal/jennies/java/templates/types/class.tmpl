@@ -22,9 +22,9 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
     {{- if .ShouldAddFactoryMethods }}
     protected {{ .Name }}() {}
     {{- range .Fields }}
-    public static {{ $.Name }} create{{ .Name }}({{ .Type | formatBuilderFieldType }} {{ .Name | lowerCamelCase | escapeVar }}) {
+    public static {{ $.Name }} create{{ .Name }}({{ .Type | formatType }} {{ .Name | lowerCamelCase | escapeVar }}) {
         {{ $.Name }} {{ $.Name | lowerCamelCase }} = new {{ $.Name }}();
-        {{ $.Name | lowerCamelCase }}.{{ .Name | lowerCamelCase | escapeVar }} = {{ .Name | lowerCamelCase | escapeVar }}{{ if .Type | typeHasBuilder }}.build(){{ end }};
+        {{ $.Name | lowerCamelCase }}.{{ .Name | lowerCamelCase | escapeVar }} = {{ .Name | lowerCamelCase | escapeVar }};
         return {{ $.Name | lowerCamelCase }};
     }
     {{- end }}
