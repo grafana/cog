@@ -202,6 +202,11 @@ func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
 
 	definition.Set("type", "object")
 	definition.Set("additionalProperties", false)
+	if typeDef.HasHint("open") {
+		if val, _ := typeDef.Hints["open"].(string); strings.ToLower(val)[0] == 't' {
+			definition.Set("additionalProperties", map[string]any{})
+		}
+	}
 
 	properties := orderedmap.New[string, any]()
 	var required []string
