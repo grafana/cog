@@ -94,7 +94,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 
 func (jenny Builder) getBuilderName(builder ast.Builder) string {
 	if builder.For.SelfRef.ReferredPkg != builder.Package {
-		return tools.UpperCamelCase(builder.Package)
+		return fmt.Sprintf("%s%s", tools.UpperCamelCase(builder.Package), tools.UpperCamelCase(builder.For.SelfRef.ReferredType))
 	}
 
 	return tools.UpperCamelCase(builder.Name)

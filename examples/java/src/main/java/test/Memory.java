@@ -7,12 +7,12 @@ import com.grafana.foundation.common.StackingMode;
 import com.grafana.foundation.dashboard.Threshold;
 import com.grafana.foundation.dashboard.ThresholdsConfigBuilder;
 import com.grafana.foundation.dashboard.ThresholdsMode;
-import com.grafana.foundation.gauge.GaugeBuilder;
-import com.grafana.foundation.timeseries.TimeseriesBuilder;
+import com.grafana.foundation.gauge.GaugePanelBuilder;
+import com.grafana.foundation.timeseries.TimeseriesPanelBuilder;
 
 public class Memory {
 
-        public static TimeseriesBuilder memoryUsageTimeseries() {
+        public static TimeseriesPanelBuilder memoryUsageTimeseries() {
                 String memUsedQuery = "(" +
                                 "  node_memory_MemTotal_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}"
                                 +
@@ -49,7 +49,7 @@ public class Memory {
                                                                 "Free"));
         }
 
-        public static GaugeBuilder memoryUsageGauge() {
+        public static GaugePanelBuilder memoryUsageGauge() {
                 String query = "100 - (" +
                                 "  avg(node_memory_MemAvailable_bytes{job=\"integrations/raspberrypi-node\", instance=\"$instance\"}) /"
                                 +
