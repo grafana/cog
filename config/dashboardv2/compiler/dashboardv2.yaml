@@ -16,17 +16,21 @@ passes:
       as:
         kind: scalar
         scalar: { scalar_kind: any }
+        nullable: true
+
   - retype_field:
       field: dashboardv2alpha1.FieldConfig.custom
       as:
         kind: scalar
         scalar: { scalar_kind: any }
+        nullable: true
 
   - retype_field:
       field: dashboardv2alpha1.DataQueryKind.spec
       as:
         kind: scalar
         scalar: { scalar_kind: any }
+        nullable: true
 
   # Is this object meant for frontend usage only?
   - omit:
