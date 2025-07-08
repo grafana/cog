@@ -404,6 +404,8 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		}
 
 		def := ast.NewStruct(fields...)
+		// Add the hints since we can't supply them in the constructor
+		def.Hints = hints
 		def.Default = defVal
 
 		return def, nil
