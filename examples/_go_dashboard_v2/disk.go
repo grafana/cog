@@ -25,7 +25,6 @@ func diskIOTimeseries() *dashboard.PanelBuilder {
 					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read")),
 					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written")),
 					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time")),
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time")),
 				}),
 		)
 }

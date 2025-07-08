@@ -66,7 +66,8 @@ run-go-example: dev-env-check-binaries ## Runs the Go example.
 .PHONY: run-java-example
 run-java-example: dev-env-check-binaries ## Runs the Java example.
 	$(RUN_DEVBOX) gradle publishToMavenLocal -p generated/java
-	$(RUN_DEVBOX) gradle run -p examples/java
+	# $(RUN_DEVBOX) gradle run -p examples/java
+	$(RUN_DEVBOX) gradle run -p examples/java_dashboardv2
 
 .PHONY: run-php-example
 run-php-example: dev-env-check-binaries ## Runs the PHP example.
