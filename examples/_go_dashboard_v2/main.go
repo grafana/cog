@@ -6,7 +6,6 @@ import (
 
 	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/cog/plugins"
-	"github.com/grafana/cog/generated/go/common"
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2alpha1"
 	"github.com/grafana/cog/generated/go/prometheus"
 	"github.com/grafana/cog/generated/go/resource"
@@ -42,10 +41,7 @@ func dashboardBuilder() []byte {
 			Query(prometheus.NewQueryBuilder().
 				Expr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
 			).
-			Datasource(common.DataSourceRef{
-				Type: cog.ToPtr("prometheus"),
-				Uid:  cog.ToPtr("$datasource"),
-			}).
+			Datasource(dashboard.NewDataSourceRefBuilder("$datasource", "prometheus")).
 			Current(dashboard.VariableOption{
 				Selected: cog.ToPtr(false),
 				Text:     dashboard.StringOrArrayOfString{String: cog.ToPtr("potato")},
@@ -189,8 +185,8 @@ func dashboardBuilder() []byte {
 	}
 
 	manifest := resource.Manifest{
-		ApiVersion: resource.DashboardV2Alpha1,
-		Kind:       resource.DashboardKind,
+		ApiVersion: "v2Alpha1",
+		Kind:       "dashboard",
 		Metadata: resource.Metadata{
 			Name: "test-v2-go",
 		},

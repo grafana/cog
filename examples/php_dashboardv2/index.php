@@ -11,6 +11,7 @@ use Grafana\Foundation\Dashboardv2alpha1\DashboardBuilder;
 use Grafana\Foundation\Dashboardv2alpha1\DashboardCursorSync;
 use Grafana\Foundation\Dashboardv2alpha1\DashboardSpec;
 use Grafana\Foundation\Dashboardv2alpha1\DatasourceVariableBuilder;
+use Grafana\Foundation\Dashboardv2alpha1\DataSourceRefBuilder;
 use Grafana\Foundation\Dashboardv2alpha1\GridLayoutBuilder;
 use Grafana\Foundation\Dashboardv2alpha1\GridLayoutItemBuilder;
 use Grafana\Foundation\Dashboardv2alpha1\GridLayoutRowBuilder;
@@ -55,7 +56,7 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
             ->query(
                 MonitoringCommon::basicPrometheusQuery('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)', ''),
             )
-            ->datasource(new Common\DataSourceRef(uid: '$datasource', type: 'prometheus'))
+            ->datasource(new DataSourceRefBuilder('prometheus', '$datasource'))
             ->current(new VariableOption(
                 selected: true,
                 text: 'potato',

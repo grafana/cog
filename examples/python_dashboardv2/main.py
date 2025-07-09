@@ -7,6 +7,7 @@ from grafana_foundation_sdk.builders.dashboardv2alpha1 import (
     GridLayout,
     GridLayoutItem,
     GridLayoutRow,
+    DataSourceRef,
 )
 from grafana_foundation_sdk.models.dashboardv2alpha1 import (
     DashboardSpec as DashboardModel,
@@ -18,7 +19,6 @@ from grafana_foundation_sdk.models.dashboardv2alpha1 import (
 )
 from grafana_foundation_sdk.models.common import (
     TimeZoneBrowser,
-    DataSourceRef,
 )
 from grafana_foundation_sdk.cog.encoder import JSONEncoder
 from grafana_foundation_sdk.cog.plugins import register_default_plugins

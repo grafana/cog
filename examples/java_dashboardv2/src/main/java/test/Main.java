@@ -49,8 +49,7 @@ public class Main {
                                                 .refresh(VariableRefresh.ON_TIME_RANGE_CHANGED)
                                                 .query(new PrometheusDataQueryKindBuilder()
                                                                 .expr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"))
-                                                .datasource(new DataSourceRefBuilder().type("prometheus")
-                                                                .uid("$datasource"))
+                                                .datasource(new DataSourceRefBuilder("prometheus", "$datasource"))
                                                 .current(new VariableOption(
                                                                 false,
                                                                 StringOrArrayOfString.createString("potato"),

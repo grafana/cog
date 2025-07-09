@@ -1,6 +1,7 @@
 import {
     DashboardBuilder,
     DashboardCursorSync,
+    DataSourceRefBuilder,
     DatasourceVariableBuilder,
     GridLayoutBuilder,
     GridLayoutItemBuilder,
@@ -50,10 +51,7 @@ const builder = new DashboardBuilder("[TEST] Node Exporter / Raspberry")
             .hide(VariableHide.DontHide)
             .refresh(VariableRefresh.OnTimeRangeChanged)
             .query(basicPrometheusQuery('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)', ''))
-            .datasource({
-                "type": "prometheus",
-                "uid": "$datasource"
-            })
+            .datasource(new DataSourceRefBuilder("prometheus", "$datasource"))
             .current({
                 selected: false,
                 text: "potato",

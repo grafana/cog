@@ -33,7 +33,7 @@ public class Disk {
                                                                                 "{{device}} written")),
                                                                 new TargetBuilder().query(Common.basicPrometheusQuery(
                                                                                 "rate(node_disk_io_time_seconds_total{job=\"integrations/raspberrypi-node\", instance=\"$instance\", device!=\"\"}[$__rate_interval])",
-                                                                                "{{device}} read")))));
+                                                                                "{{device}} IO time")))));
 
         }
 
