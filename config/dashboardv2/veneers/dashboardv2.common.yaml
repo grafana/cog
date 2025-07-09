@@ -408,6 +408,10 @@ builders:
   - omit: { by_object: FieldConfig }
   - omit: { by_object: FieldConfigSource }
   - omit: { by_object: VizConfigSpec }
+    
+  - promote_options_to_constructor:
+      by_name: DatasourceRef
+      options: [ type, uid ]  
 
 options:
   ###########
