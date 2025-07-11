@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json
+
+passes:
+  ######################
+  # Dashboard v2alpha1 #
+  ######################
+
+  # Some future-proofing
+  - constant_to_enum:
+      objects:
+        - dashboardv2alpha1.RepeatMode
+
+  # To make our composability veneers shenanigans work
+  - retype_field:
+      field: dashboardv2alpha1.VizConfigSpec.options
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+        nullable: true
+
+  - retype_field:
+      field: dashboardv2alpha1.FieldConfig.custom
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+        nullable: true
+
+  - retype_field:
+      field: dashboardv2alpha1.DataQueryKind.spec
+      as:
+        kind: scalar
+        scalar: { scalar_kind: any }
+        nullable: true
+
+  # Is this object meant for frontend usage only?
+  - omit:
+      objects: [ dashboardv2alpha1.VariableCustomFormatterFn ]
+
+  - retype_field:
+      field: dashboardv2alpha1.CustomVariableValue.formatter
+      as:
+        kind: scalar
+        scalar: { scalar_kind: string }
+        nullable: true
