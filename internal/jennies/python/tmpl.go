@@ -14,7 +14,7 @@ import (
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplatesDirectories []string) *template.Template {
+func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector) *template.Template {
 	tmpl, err := template.New(
 		"python",
 
@@ -61,7 +61,8 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
-		template.ParseDirectories(extraTemplatesDirectories...),
+		template.ParseDirectories(config.OverridesTemplatesDirectories...),
+		template.ParseDirectories(config.ExtraFilesTemplatesDirectories...),
 	)
 	if err != nil {
 		panic(fmt.Errorf("could not initialize templates: %w", err))

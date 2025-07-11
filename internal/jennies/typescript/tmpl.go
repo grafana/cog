@@ -5,17 +5,21 @@ import (
 	"fmt"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/internal/languages"
 )
 
 //go:embed templates/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(extraTemplatesDirectories []string) *template.Template {
+func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector) *template.Template {
 	tmpl, err := template.New(
 		"typescript",
-
+		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
+		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
 			"formatType": func(_ ast.Type) string {
@@ -50,7 +54,8 @@ func initTemplates(extraTemplatesDirectories []string) *template.Template {
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
-		template.ParseDirectories(extraTemplatesDirectories...),
+		template.ParseDirectories(config.OverridesTemplatesDirectories...),
+		template.ParseDirectories(config.ExtraFilesTemplatesDirectories...),
 	)
 	if err != nil {
 		panic(fmt.Errorf("could not initialize templates: %w", err))

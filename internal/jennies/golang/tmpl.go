@@ -87,6 +87,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
 		template.ParseDirectories(config.OverridesTemplatesDirectories...),
+		template.ParseDirectories(config.ExtraFilesTemplatesDirectories...),
 	)
 	if err != nil {
 		panic(fmt.Errorf("could not initialize templates: %w", err))

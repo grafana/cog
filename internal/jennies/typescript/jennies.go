@@ -107,7 +107,7 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	language.config.applyDefaults()
 
-	tmpl := initTemplates(language.config.OverridesTemplatesDirectories)
+	tmpl := initTemplates(language.config, language.apiRefCollector)
 
 	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
 		return LanguageRef

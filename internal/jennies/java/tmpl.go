@@ -14,14 +14,19 @@ import (
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(extraTemplatesDirectories []string) *template.Template {
+func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector) *template.Template {
 	tmpl, err := template.New(
 		"java",
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
+		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(functions()),
 		template.Funcs(formattingTemplateFuncs()),
+
+		// parse templates
 		template.ParseFS(templatesFS, "templates"),
-		template.ParseDirectories(extraTemplatesDirectories...),
+		template.ParseDirectories(config.OverridesTemplatesDirectories...),
+		template.ParseDirectories(config.ExtraFilesTemplatesDirectories...),
 	)
 	if err != nil {
 		panic(fmt.Errorf("could not initialize templates: %w", err))
