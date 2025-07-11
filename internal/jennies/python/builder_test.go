@@ -21,7 +21,7 @@ func TestBuilder_Generate(t *testing.T) {
 
 	language := New(Config{})
 	jenny := Builder{
-		tmpl:            initTemplates(common.NewAPIReferenceCollector(), []string{}),
+		tmpl:            initTemplates(language.config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 

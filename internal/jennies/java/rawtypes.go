@@ -83,7 +83,7 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 		}
 
 		pkg := formatPackageName(schema.Package)
-		output, innerErr := jenny.generateSchema(pkg, schema.Metadata.Identifier, object)
+		output, innerErr := jenny.generateSchema(pkg, schema, object)
 		if innerErr != nil {
 			err = innerErr
 			return
@@ -111,22 +111,27 @@ func (jenny RawTypes) genFilesForSchema(schema *ast.Schema) (codejen.Files, erro
 	return files, nil
 }
 
-func (jenny RawTypes) generateSchema(pkg string, identifier string, object ast.Object) ([]byte, error) {
+func (jenny RawTypes) generateSchema(pkg string, schema *ast.Schema, object ast.Object) ([]byte, error) {
+	functionsBlock, err := jenny.extraFunctionsBlock(schema, object)
+	if err != nil {
+		return nil, err
+	}
+
 	switch object.Type.Kind {
 	case ast.KindStruct:
-		return jenny.formatStruct(pkg, identifier, object)
+		return jenny.formatStruct(pkg, schema.Metadata.Identifier, object, functionsBlock)
 	case ast.KindEnum:
 		return formatEnum(jenny.config.formatPackage(pkg), object, jenny.getTemplate())
 	case ast.KindRef:
-		return jenny.formatReference(pkg, identifier, object)
+		return jenny.formatReference(pkg, schema.Metadata.Identifier, object, functionsBlock)
 	case ast.KindIntersection:
-		return jenny.formatIntersection(pkg, identifier, object)
+		return jenny.formatIntersection(pkg, schema.Metadata.Identifier, object, functionsBlock)
 	}
 
 	return nil, nil
 }
 
-func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Object) ([]byte, error) {
+func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Object, functionsBlock string) ([]byte, error) {
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
 		Package:                 jenny.config.formatPackage(pkg),
 		RawPackage:              pkg,
@@ -142,6 +147,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		ShouldAddDeserializer:   jenny.typeFormatter.objectNeedsCustomDeserializer(object, jenny.tmpl),
 		ShouldAddFactoryMethods: object.Type.IsDisjunctionOfAnyKind(),
 		Constructors:            jenny.constructors(object),
+		ExtraFunctionsBlock:     functionsBlock,
 	})
 }
 
@@ -167,22 +173,23 @@ func (jenny RawTypes) formatScalars(pkg string, scalars map[string]ast.ScalarTyp
 	})
 }
 
-func (jenny RawTypes) formatReference(pkg string, identifier string, object ast.Object) ([]byte, error) {
+func (jenny RawTypes) formatReference(pkg string, identifier string, object ast.Object, extraFunctionsBlock string) ([]byte, error) {
 	ref := object.Type.AsRef()
 	reference := fmt.Sprintf("%s.%s", jenny.config.formatPackage(formatPackageName(ref.ReferredPkg)), formatObjectName(ref.ReferredType))
 
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
-		Package:    jenny.config.formatPackage(pkg),
-		Imports:    jenny.imports,
-		Name:       formatObjectName(object.Name),
-		Extends:    []string{reference},
-		Comments:   object.Comments,
-		Variant:    jenny.getVariant(object.Type),
-		Identifier: identifier,
+		Package:             jenny.config.formatPackage(pkg),
+		Imports:             jenny.imports,
+		Name:                formatObjectName(object.Name),
+		Extends:             []string{reference},
+		Comments:            object.Comments,
+		Variant:             jenny.getVariant(object.Type),
+		Identifier:          identifier,
+		ExtraFunctionsBlock: extraFunctionsBlock,
 	})
 }
 
-func (jenny RawTypes) formatIntersection(pkg string, identifier string, object ast.Object) ([]byte, error) {
+func (jenny RawTypes) formatIntersection(pkg string, identifier string, object ast.Object, extraFunctionsBlock string) ([]byte, error) {
 	intersection := object.Type.AsIntersection()
 	extensions := make([]string, 0)
 	fields := make([]ast.StructField, 0)
@@ -197,14 +204,15 @@ func (jenny RawTypes) formatIntersection(pkg string, identifier string, object a
 	}
 
 	return jenny.getTemplate().RenderAsBytes("types/class.tmpl", ClassTemplate{
-		Package:    jenny.config.formatPackage(pkg),
-		Imports:    jenny.imports,
-		Name:       object.Name,
-		Extends:    extensions,
-		Comments:   object.Comments,
-		Fields:     fields,
-		Variant:    jenny.getVariant(object.Type),
-		Identifier: identifier,
+		Package:             jenny.config.formatPackage(pkg),
+		Imports:             jenny.imports,
+		Name:                object.Name,
+		Extends:             extensions,
+		Comments:            object.Comments,
+		Fields:              fields,
+		Variant:             jenny.getVariant(object.Type),
+		Identifier:          identifier,
+		ExtraFunctionsBlock: extraFunctionsBlock,
 	})
 }
 
@@ -331,4 +339,33 @@ func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
 
 	jenny.typeFormatter.packageMapper(ref.AsRef().ReferredPkg, ref.AsRef().ReferredType)
 	return fmt.Sprintf("new %s(%s)", class, strings.Join(args, ", "))
+}
+
+func (jenny RawTypes) extraFunctionsBlock(schema *ast.Schema, object ast.Object) (string, error) {
+	buffer := strings.Builder{}
+
+	customMethodsBlock := template.CustomObjectMethodsBlock(object)
+	if jenny.tmpl.Exists(customMethodsBlock) {
+		buffer.WriteString("\n\n")
+		if err := jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+			"Object": object,
+		}); err != nil {
+			return "", err
+		}
+
+		buffer.WriteString("\n")
+	}
+
+	customVariantTmpl := template.CustomObjectVariantBlock(object)
+	if object.Type.ImplementsVariant() && jenny.tmpl.Exists(customVariantTmpl) {
+		buffer.WriteString("\n\n\n")
+		if err := jenny.tmpl.RenderInBuffer(&buffer, customVariantTmpl, map[string]any{
+			"Object": object,
+			"Schema": schema,
+		}); err != nil {
+			return "", err
+		}
+	}
+
+	return buffer.String(), nil
 }

@@ -47,6 +47,8 @@ public class {{ .Name }}{{ if .Extends }} extends {{ range $i, $e := .Extends }}
         return "{{ .Identifier | lower }}";
     }
     {{- end }}
+    
+    {{- .ExtraFunctionsBlock }}
 
     {{- if and (ne .ToJSONFunction "") (not .Extends) }}
     {{ .ToJSONFunction }}

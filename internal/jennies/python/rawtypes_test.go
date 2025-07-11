@@ -25,7 +25,7 @@ func TestRawTypes_Generate(t *testing.T) {
 	}
 	jenny := RawTypes{
 		config:          config,
-		tmpl:            initTemplates(common.NewAPIReferenceCollector(), []string{}),
+		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
 	compilerPasses := New(config).CompilerPasses()
