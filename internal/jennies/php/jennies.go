@@ -93,7 +93,7 @@ func (language *Language) Name() string {
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
 
-	tmpl := initTemplates(language.apiRefCollector, language.config.OverridesTemplatesDirectories)
+	tmpl := initTemplates(config, language.apiRefCollector)
 	rawTypesJenny := RawTypes{config: config, tmpl: tmpl, apiRefCollector: language.apiRefCollector}
 
 	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
