@@ -29,8 +29,6 @@ func (jenny RawTypes) JennyName() string {
 func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
-	jenny.tmpl = jenny.tmpl.Funcs(common.TypeResolvingTemplateHelpers(context))
-
 	for _, schema := range context.Schemas {
 		output, err := jenny.generateSchema(context, schema)
 		if err != nil {
@@ -60,6 +58,16 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		return imports.Add(pkg, jenny.config.importPath(pkg))
 	}
+
+	jenny.tmpl = jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(map[string]any{
+			"importPkg": jenny.packageMapper,
+			"importStdPkg": func(pkg string) string {
+				return imports.Add(pkg, pkg)
+			},
+		})
+
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, imports, jenny.packageMapper)
 	unmarshallerGenerator := newJSONMarshalling(jenny.config, jenny.tmpl, imports, jenny.packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
 	strictUnmarshallerGenerator := newStrictJSONUnmarshal(jenny.config, jenny.tmpl, imports, jenny.packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
@@ -109,11 +117,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		customMethodsBlock := template.CustomObjectMethodsBlock(object)
 		if jenny.tmpl.Exists(customMethodsBlock) {
-			innerErr = jenny.tmpl.Funcs(map[string]any{
-				"formatPkg": func(pkg string) string {
-					return imports.Add(pkg, pkg)
-				},
-			}).RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
 				"Object": object,
 			})
 			if innerErr != nil {
@@ -129,11 +133,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 	customSchemaVariant := template.CustomSchemaVariantBlock(schema)
 	if jenny.tmpl.Exists(customSchemaVariant) {
-		if err := jenny.tmpl.Funcs(map[string]any{
-			"formatPkg": func(pkg string) string {
-				return imports.Add(pkg, pkg)
-			},
-		}).RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
+		if err := jenny.tmpl.RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
 			"Schema": schema,
 			"Config": jenny.config,
 		}); err != nil {
