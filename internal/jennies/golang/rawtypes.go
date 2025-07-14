@@ -109,7 +109,11 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		customMethodsBlock := template.CustomObjectMethodsBlock(object)
 		if jenny.tmpl.Exists(customMethodsBlock) {
-			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+			innerErr = jenny.tmpl.Funcs(map[string]any{
+				"formatPkg": func(pkg string) string {
+					return imports.Add(pkg, pkg)
+				},
+			}).RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
 				"Object": object,
 			})
 			if innerErr != nil {
@@ -125,7 +129,11 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 	customSchemaVariant := template.CustomSchemaVariantBlock(schema)
 	if jenny.tmpl.Exists(customSchemaVariant) {
-		if err := jenny.tmpl.RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
+		if err := jenny.tmpl.Funcs(map[string]any{
+			"formatPkg": func(pkg string) string {
+				return imports.Add(pkg, pkg)
+			},
+		}).RenderInBuffer(&buffer, customSchemaVariant, map[string]any{
 			"Schema": schema,
 			"Config": jenny.config,
 		}); err != nil {
