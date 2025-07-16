@@ -29,6 +29,7 @@ type CompilerPass struct {
 	DuplicateObject          *DuplicateObject          `yaml:"duplicate_object"`
 	TrimEnumValues           *TrimEnumValues           `yaml:"trim_enum_values"`
 	ConstantToEnum           *ConstantToEnum           `yaml:"constant_to_enum"`
+	AddEnumValue             *AddEnumValue             `yaml:"add_enum_value"`
 
 	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 
@@ -118,6 +119,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DisjunctionWithConstantToDefault != nil {
 		return pass.DisjunctionWithConstantToDefault.AsCompilerPass()
+	}
+	if pass.AddEnumValue != nil {
+		return pass.AddEnumValue.AsCompilerPass()
 	}
 
 	return nil, fmt.Errorf("empty compiler pass")
@@ -493,4 +497,39 @@ func (pass ConstantToEnum) AsCompilerPass() (*compiler.ConstantToEnum, error) {
 	}
 
 	return &compiler.ConstantToEnum{Objects: objectRefs}, nil
+}
+
+type AddEnumValue struct {
+	InObject string // Expected format: [package].[object]
+	InField  string // Expected format: [package].[object].[field]
+	Name     string
+	Value    any
+}
+
+func (pass AddEnumValue) AsCompilerPass() (*compiler.AddEnumValue, error) {
+	if pass.InObject != "" {
+		objectRef, err := compiler.ObjectReferenceFromString(pass.InObject)
+		if err != nil {
+			return nil, err
+		}
+
+		return &compiler.AddEnumValue{
+			ObjectRef: objectRef,
+			FieldRef:  compiler.FieldReference{},
+			Name:      pass.Name,
+			Value:     pass.Value,
+		}, nil
+	}
+
+	fieldRef, err := compiler.FieldReferenceFromString(pass.InField)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.AddEnumValue{
+		ObjectRef: compiler.ObjectReference{},
+		FieldRef:  fieldRef,
+		Name:      pass.Name,
+		Value:     pass.Value,
+	}, nil
 }
