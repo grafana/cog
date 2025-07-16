@@ -70,7 +70,7 @@ func TestAddEnumFieldValueDirectEnum(t *testing.T) {
 					{Value: 1, Name: "A", Type: ast.NewScalar(ast.KindInt64)},
 					{Value: 2, Name: "B", Type: ast.NewScalar(ast.KindInt64)},
 					{Value: 3, Name: "C", Type: ast.NewScalar(ast.KindInt64)},
-				})),
+				}), ast.PassesTrail("AddEnumValue")),
 			)),
 		),
 	}
@@ -104,7 +104,7 @@ func TestAddEnumValueEnum(t *testing.T) {
 			{Value: "A", Name: "A", Type: ast.String()},
 			{Value: "B", Name: "B", Type: ast.String()},
 			{Value: "C", Name: "C", Type: ast.String()},
-		})),
+		}), "AddEnumValue"),
 		),
 	}
 

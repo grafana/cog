@@ -500,15 +500,15 @@ func (pass ConstantToEnum) AsCompilerPass() (*compiler.ConstantToEnum, error) {
 }
 
 type AddEnumValue struct {
-	InObject string // Expected format: [package].[object]
-	InField  string // Expected format: [package].[object].[field]
-	Name     string
-	Value    any
+	Enum  string // Expected format: [package].[object]
+	Field string // Expected format: [package].[object].[field]
+	Name  string
+	Value any
 }
 
 func (pass AddEnumValue) AsCompilerPass() (*compiler.AddEnumValue, error) {
-	if pass.InObject != "" {
-		objectRef, err := compiler.ObjectReferenceFromString(pass.InObject)
+	if pass.Enum != "" {
+		objectRef, err := compiler.ObjectReferenceFromString(pass.Enum)
 		if err != nil {
 			return nil, err
 		}
@@ -521,7 +521,7 @@ func (pass AddEnumValue) AsCompilerPass() (*compiler.AddEnumValue, error) {
 		}, nil
 	}
 
-	fieldRef, err := compiler.FieldReferenceFromString(pass.InField)
+	fieldRef, err := compiler.FieldReferenceFromString(pass.Field)
 	if err != nil {
 		return nil, err
 	}

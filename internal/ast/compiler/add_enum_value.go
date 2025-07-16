@@ -33,6 +33,7 @@ func (pass *AddEnumValue) onObject(visitor *Visitor, schema *ast.Schema, object 
 		}
 
 		object.Type = enum
+		object.AddToPassesTrail("AddEnumValue")
 		return object, nil
 	}
 
@@ -48,6 +49,7 @@ func (pass *AddEnumValue) onObject(visitor *Visitor, schema *ast.Schema, object 
 					return ast.Object{}, err
 				}
 				object.Type.AsStruct().Fields[i].Type = updatedType
+				object.Type.AsStruct().Fields[i].AddToPassesTrail("AddEnumValue")
 				return object, nil
 			}
 
