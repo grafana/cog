@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+inputs:
+  - cue:
+      entrypoint: '%__config_dir%/test_data/schemas/helloworld'
+      metadata:
+        kind: core
+        identifier: HelloWorld
+
+output:
+  directory: './generated/%l'
+    
+  types: true
+  
+  languages:
+    - go:
+        package_root: 'github.com/grafana/cog/generated/go'

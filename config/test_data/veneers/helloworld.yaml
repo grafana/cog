@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json
+
+language: all
+
+package: helloworld
+
+builders: ~
+
+options:
+  - omit:
+      by_name: Hello.message

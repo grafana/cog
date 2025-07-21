@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/compiler_passes.json
+
+passes:
+  - retype_field:
+      field: helloworld.Hello.uid
+      as:
+        kind: scalar
+        scalar:
+          scalar_kind: string

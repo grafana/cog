@@ -1,0 +1,5 @@
+{{- define "object_helloworld_Hello_custom_methods" }}
+func (h *{{ .Object.Name }}) SetMessage(message string) {
+    h.Message = message
+}
+{{- end }}
