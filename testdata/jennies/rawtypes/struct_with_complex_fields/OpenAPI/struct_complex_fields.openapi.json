@@ -55,7 +55,8 @@
             "enum": [
               "\u003e",
               "\u003c"
-            ]
+            ],
+            "type": "string"
           },
           "FieldArrayOfStrings": {
             "type": "array",

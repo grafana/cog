@@ -292,6 +292,11 @@ func (jenny Schema) formatEnum(typeDef ast.Type) Definition {
 	})
 
 	definition.Set("enum", values)
+	// Make an educated guess about the enum type by looking at the first element in the values set
+	if len(typeDef.AsEnum().Values) > 0 {
+		def := jenny.formatType(typeDef.AsEnum().Values[0].Type)
+		definition.Set("type", def.Get("type"))
+	}
 
 	return definition
 }
