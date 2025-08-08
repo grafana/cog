@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/cog/plugins"
 	"github.com/grafana/cog/generated/go/common"
 	"github.com/grafana/cog/generated/go/dashboard"
@@ -27,9 +28,9 @@ func dashboardBuilder() []byte {
 			Hide(dashboard.VariableHideDontHide).
 			Type("prometheus").
 			Current(dashboard.VariableOption{
-				Selected: toPtr(true),
-				Text:     dashboard.StringOrArrayOfString{String: toPtr("grafanacloud-potatopi-prom")},
-				Value:    dashboard.StringOrArrayOfString{String: toPtr("grafanacloud-prom")},
+				Selected: cog.ToPtr(true),
+				Text:     dashboard.StringOrArrayOfString{String: cog.ToPtr("grafanacloud-potatopi-prom")},
+				Value:    dashboard.StringOrArrayOfString{String: cog.ToPtr("grafanacloud-prom")},
 			}),
 		).
 		// "Instance" variable
@@ -38,16 +39,16 @@ func dashboardBuilder() []byte {
 			Hide(dashboard.VariableHideDontHide).
 			Refresh(dashboard.VariableRefreshOnTimeRangeChanged).
 			Query(dashboard.StringOrMap{
-				String: toPtr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
+				String: cog.ToPtr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
 			}).
 			Datasource(dashboard.DataSourceRef{
-				Type: toPtr("prometheus"),
-				Uid:  toPtr("$datasource"),
+				Type: cog.ToPtr("prometheus"),
+				Uid:  cog.ToPtr("$datasource"),
 			}).
 			Current(dashboard.VariableOption{
-				Selected: toPtr(false),
-				Text:     dashboard.StringOrArrayOfString{String: toPtr("potato")},
-				Value:    dashboard.StringOrArrayOfString{String: toPtr("potato")},
+				Selected: cog.ToPtr(false),
+				Text:     dashboard.StringOrArrayOfString{String: cog.ToPtr("potato")},
+				Value:    dashboard.StringOrArrayOfString{String: cog.ToPtr("potato")},
 			}).
 			Sort(dashboard.VariableSortDisabled),
 		).
