@@ -2,10 +2,11 @@ package struct_complex_fields
 
 import (
 	"encoding/json"
-	cog "github.com/grafana/cog/generated/cog"
 	"errors"
 	"fmt"
+	cog "github.com/grafana/cog/generated/cog"
 	"reflect"
+	"bytes"
 )
 
 // This struct does things.
@@ -547,7 +548,7 @@ func (resource *StringOrSomeOtherStruct) UnmarshalJSON(raw []byte) error {
 
 	// String
 	var String string
-	if err := json.Unmarshal(raw, &String ); err != nil {
+	if err := json.Unmarshal(raw, &String); err != nil {
 		errList = append(errList, err)
 		resource.String = nil
 	} else {
@@ -557,13 +558,15 @@ func (resource *StringOrSomeOtherStruct) UnmarshalJSON(raw []byte) error {
 
 	// SomeOtherStruct
 	var SomeOtherStruct SomeOtherStruct
-	if err := json.Unmarshal(raw, &SomeOtherStruct ); err != nil {
-		errList = append(errList, err)
-		resource.SomeOtherStruct = nil
-	} else {
-		resource.SomeOtherStruct = &SomeOtherStruct
-		return nil
-	}
+    someOtherStructdec := json.NewDecoder(bytes.NewReader(raw))
+    someOtherStructdec.DisallowUnknownFields()
+    if err := someOtherStructdec.Decode(&SomeOtherStruct); err != nil {
+        errList = append(errList, err)
+        resource.SomeOtherStruct = nil
+    } else {
+        resource.SomeOtherStruct = &SomeOtherStruct
+        return nil
+    }
 
 	return errors.Join(errList...)
 }
@@ -588,12 +591,14 @@ func (resource *StringOrSomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 
 	// SomeOtherStruct
 	var SomeOtherStruct SomeOtherStruct
-	if err := json.Unmarshal(raw, &SomeOtherStruct); err != nil {
-		errList = append(errList, err)
-	} else {
-		resource.SomeOtherStruct = &SomeOtherStruct
-		return nil
-	}
+    someOtherStructdec := json.NewDecoder(bytes.NewReader(raw))
+    someOtherStructdec.DisallowUnknownFields()
+    if err := someOtherStructdec.Decode(&SomeOtherStruct); err != nil {
+        errList = append(errList, err)
+    } else {
+        resource.SomeOtherStruct = &SomeOtherStruct
+        return nil
+    }
 
 	if len(errList) != 0 {
 		errs = append(errs, cog.MakeBuildErrors("StringOrSomeOtherStruct", errors.Join(errList...))...)

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"bytes"
 )
 
 // Refresh rate or disabled.
@@ -427,7 +428,7 @@ func (resource *BoolOrSomeStruct) UnmarshalJSON(raw []byte) error {
 
 	// Bool
 	var Bool bool
-	if err := json.Unmarshal(raw, &Bool ); err != nil {
+	if err := json.Unmarshal(raw, &Bool); err != nil {
 		errList = append(errList, err)
 		resource.Bool = nil
 	} else {
@@ -437,13 +438,15 @@ func (resource *BoolOrSomeStruct) UnmarshalJSON(raw []byte) error {
 
 	// SomeStruct
 	var SomeStruct SomeStruct
-	if err := json.Unmarshal(raw, &SomeStruct ); err != nil {
-		errList = append(errList, err)
-		resource.SomeStruct = nil
-	} else {
-		resource.SomeStruct = &SomeStruct
-		return nil
-	}
+    someStructdec := json.NewDecoder(bytes.NewReader(raw))
+    someStructdec.DisallowUnknownFields()
+    if err := someStructdec.Decode(&SomeStruct); err != nil {
+        errList = append(errList, err)
+        resource.SomeStruct = nil
+    } else {
+        resource.SomeStruct = &SomeStruct
+        return nil
+    }
 
 	return errors.Join(errList...)
 }
@@ -468,12 +471,14 @@ func (resource *BoolOrSomeStruct) UnmarshalJSONStrict(raw []byte) error {
 
 	// SomeStruct
 	var SomeStruct SomeStruct
-	if err := json.Unmarshal(raw, &SomeStruct); err != nil {
-		errList = append(errList, err)
-	} else {
-		resource.SomeStruct = &SomeStruct
-		return nil
-	}
+    someStructdec := json.NewDecoder(bytes.NewReader(raw))
+    someStructdec.DisallowUnknownFields()
+    if err := someStructdec.Decode(&SomeStruct); err != nil {
+        errList = append(errList, err)
+    } else {
+        resource.SomeStruct = &SomeStruct
+        return nil
+    }
 
 	if len(errList) != 0 {
 		errs = append(errs, cog.MakeBuildErrors("BoolOrSomeStruct", errors.Join(errList...))...)
