@@ -2,9 +2,9 @@ package struct_complex_fields
 
 import (
 	"encoding/json"
+	cog "github.com/grafana/cog/generated/cog"
 	"errors"
 	"fmt"
-	cog "github.com/grafana/cog/generated/cog"
 	"reflect"
 	"bytes"
 )
