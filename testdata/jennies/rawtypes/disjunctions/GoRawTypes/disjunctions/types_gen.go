@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"bytes"
 )
 
 // Refresh rate or disabled.
@@ -417,29 +418,37 @@ func (resource BoolOrSomeStruct) MarshalJSON() ([]byte, error) {
 	return []byte("null"), nil
 }
 
-// UnmarshalJSON implements a custom JSON unmarshalling logic to decode BoolOrSomeStruct from JSON.
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `BoolOrSomeStruct` from JSON.
 func (resource *BoolOrSomeStruct) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
-	fields := make(map[string]json.RawMessage)
-	if err := json.Unmarshal(raw, &fields); err != nil {
-		return err
-	}
-	
-	if fields["Bool"] != nil {
-		if err := json.Unmarshal(fields["Bool"], &resource.Bool); err != nil {
-			return fmt.Errorf("error decoding field 'Bool': %w", err)
-		}
+
+	var errList []error
+
+	// Bool
+	var Bool bool
+	if err := json.Unmarshal(raw, &Bool); err != nil {
+		errList = append(errList, err)
+		resource.Bool = nil
+	} else {
+		resource.Bool = &Bool
+		return nil
 	}
 
-	if fields["SomeStruct"] != nil {
-		if err := json.Unmarshal(fields["SomeStruct"], &resource.SomeStruct); err != nil {
-			return fmt.Errorf("error decoding field 'SomeStruct': %w", err)
-		}
-	}
+	// SomeStruct
+	var SomeStruct SomeStruct
+    someStructdec := json.NewDecoder(bytes.NewReader(raw))
+    someStructdec.DisallowUnknownFields()
+    if err := someStructdec.Decode(&SomeStruct); err != nil {
+        errList = append(errList, err)
+        resource.SomeStruct = nil
+    } else {
+        resource.SomeStruct = &SomeStruct
+        return nil
+    }
 
-	return nil
+	return errors.Join(errList...)
 }
 
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `BoolOrSomeStruct` from JSON.
@@ -449,38 +458,30 @@ func (resource *BoolOrSomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		return nil
 	}
 	var errs cog.BuildErrors
+	var errList []error
 
-	fields := make(map[string]json.RawMessage)
-	if err := json.Unmarshal(raw, &fields); err != nil {
-		return err
-	}
-	// Field "Bool"
-	if fields["Bool"] != nil {
-		if string(fields["Bool"]) != "null" {
-			if err := json.Unmarshal(fields["Bool"], &resource.Bool); err != nil {
-				errs = append(errs, cog.MakeBuildErrors("Bool", err)...)
-			}
-		
-		}
-		delete(fields, "Bool")
-	
-	}
-	// Field "SomeStruct"
-	if fields["SomeStruct"] != nil {
-		if string(fields["SomeStruct"]) != "null" {
-			
-			resource.SomeStruct = &SomeStruct{}
-			if err := resource.SomeStruct.UnmarshalJSONStrict(fields["SomeStruct"]); err != nil {
-				errs = append(errs, cog.MakeBuildErrors("SomeStruct", err)...)
-			}
-		
-		}
-		delete(fields, "SomeStruct")
-	
+	// Bool
+	var Bool bool
+	if err := json.Unmarshal(raw, &Bool); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.Bool = &Bool
+		return nil
 	}
 
-	for field := range fields {
-		errs = append(errs, cog.MakeBuildErrors("BoolOrSomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
+	// SomeStruct
+	var SomeStruct SomeStruct
+    someStructdec := json.NewDecoder(bytes.NewReader(raw))
+    someStructdec.DisallowUnknownFields()
+    if err := someStructdec.Decode(&SomeStruct); err != nil {
+        errList = append(errList, err)
+    } else {
+        resource.SomeStruct = &SomeStruct
+        return nil
+    }
+
+	if len(errList) != 0 {
+		errs = append(errs, cog.MakeBuildErrors("BoolOrSomeStruct", errors.Join(errList...))...)
 	}
 
 	if len(errs) == 0 {
@@ -489,7 +490,6 @@ func (resource *BoolOrSomeStruct) UnmarshalJSONStrict(raw []byte) error {
 
 	return errs
 }
-
 
 // Equals tests the equality of two `BoolOrSomeStruct` objects.
 func (resource BoolOrSomeStruct) Equals(other BoolOrSomeStruct) bool {
