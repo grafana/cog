@@ -81,6 +81,7 @@ type Input struct {
 	KindsysCore       *CueInput          `yaml:"kindsys_core"`
 	KindsysComposable *CueInput          `yaml:"kindsys_composable"`
 	Cue               *CueInput          `yaml:"cue"`
+	K8                *K8APIInput        `yaml:"k8"`
 }
 
 func (input *Input) InterpolateParameters(interpolator ParametersInterpolator) error {
