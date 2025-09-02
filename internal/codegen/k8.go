@@ -16,7 +16,13 @@ import (
 type K8APIInput struct {
 	InputBase `yaml:",inline"`
 
-	URL string `yaml:"url"`
+	URL            string                   `yaml:"url"`
+	AllowedSchemas map[string]AllowedSchema `yaml:"allowed_schemas"`
+}
+
+type AllowedSchema struct {
+	Version        string   `json:"version"`
+	AllowedObjects []string `yaml:"allowed_objects"`
 }
 
 func (k8 *K8APIInput) interpolateParameters(interpolator ParametersInterpolator) {
@@ -32,22 +38,24 @@ func (k8 *K8APIInput) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	}
 
 	var schemas ast.Schemas
-
 	for _, spec := range specs {
+		name := strings.Split(spec.name, ".")[0]
+		if !k8.shouldParseSchema(name) {
+			continue
+		}
+
 		oapiSchema, err := k8.loadSchema(ctx, spec.url)
 		if err != nil {
 			return nil, err
 		}
 
-		name := strings.Split(spec.name, ".")[0]
-
 		schema, err := openapi.GenerateAST(ctx, oapiSchema, openapi.Config{
-			Package: strings.Split(spec.name, ".")[0],
+			Package: name + spec.version,
 			SchemaMetadata: ast.SchemaMeta{
 				Kind:       ast.SchemaKindCore,
-				Identifier: name,
+				Identifier: name + spec.version,
 			},
-			Validate: true,
+			Validate: false,
 		})
 		if err != nil {
 			return nil, err
@@ -79,10 +87,11 @@ func (k8 *K8APIInput) extractGroups() ([]schemaSpecs, error) {
 
 	var paths []schemaSpecs
 	for _, g := range specs.Groups {
+		v := k8.getSchemaVersion(g)
 		paths = append(paths, schemaSpecs{
 			name:    g.Name,
-			version: g.PreferredVersion.Version,
-			url:     fmt.Sprintf("%s/%s/%s", k8.URL, "openapi/v3/apis", g.PreferredVersion.GroupVersion),
+			version: v.Version,
+			url:     fmt.Sprintf("%s/%s/%s", k8.URL, "openapi/v3/apis", v.GroupVersion),
 		})
 	}
 
@@ -102,6 +111,40 @@ func (k8 *K8APIInput) loadSchema(ctx context.Context, u string) (*openapi3.T, er
 	return loader.LoadFromURI(parsedURL)
 }
 
+func (k8 *K8APIInput) getSchemaVersion(g group) version {
+	if k8.AllowedSchemas == nil {
+		return g.PreferredVersion
+	}
+
+	name := strings.Split(g.Name, ".")[0]
+	schema, ok := k8.AllowedSchemas[name]
+	if !ok {
+		return g.PreferredVersion
+	}
+
+	for _, v := range g.Versions {
+		if v.Version == schema.Version {
+			return v
+		}
+	}
+
+	return g.PreferredVersion
+}
+
+func (k8 *K8APIInput) shouldParseSchema(name string) bool {
+	if len(k8.AllowedSchemas) == 0 {
+		return true
+	}
+
+	for allowed := range k8.AllowedSchemas {
+		if allowed == name {
+			return true
+		}
+	}
+
+	return false
+}
+
 type schemaSpecs struct {
 	name    string
 	version string
@@ -115,9 +158,12 @@ type groupSpec struct {
 }
 
 type group struct {
-	Name             string `yaml:"name"`
-	PreferredVersion struct {
-		GroupVersion string `yaml:"groupVersion"`
-		Version      string `yaml:"version"`
-	} `yaml:"preferredVersion"`
+	Name             string    `yaml:"name"`
+	Versions         []version `yaml:"versions"`
+	PreferredVersion version   `yaml:"preferredVersion"`
+}
+
+type version struct {
+	GroupVersion string `yaml:"groupVersion"`
+	Version      string `yaml:"version"`
 }

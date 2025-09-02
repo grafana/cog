@@ -118,6 +118,9 @@ func (input *Input) loader() (schemaLoader, error) {
 	if input.Cue != nil {
 		return &genericCueLoader{CueInput: input.Cue, loader: cueLoader}, nil
 	}
+	if input.K8 != nil {
+		return input.K8, nil
+	}
 
 	return nil, fmt.Errorf("empty input")
 }
