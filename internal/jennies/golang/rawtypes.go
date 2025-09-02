@@ -378,6 +378,10 @@ func (jenny RawTypes) maybeValueAsPointer(value string, nullable bool, typeDef a
 		return value
 	}
 
+	if typeDef.IsScalar() && typeDef.AsScalar().ScalarKind == ast.KindBytes {
+		return value
+	}
+
 	nonNullableField := typeDef.DeepCopy()
 	nonNullableField.Nullable = false
 	typeHint := jenny.typeFormatter.formatType(nonNullableField)
