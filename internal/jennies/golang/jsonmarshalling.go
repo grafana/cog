@@ -163,6 +163,12 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 		})
 	}
 
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
+		return jenny.tmpl.Render("types/disjunction_of_scalars_and_refs.json_unmarshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
 	return jenny.renderCustomComposableSlotUnmarshal(context, obj)
 }
 
