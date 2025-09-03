@@ -86,6 +86,10 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
 		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_refs")
 	}
+	
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
+		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_scalars_and_refs")
+	}
 
 	// TODO(kgz): this shouldn't be done by cog
 	return jenny.genDataqueryDeserialiser(context, obj)
