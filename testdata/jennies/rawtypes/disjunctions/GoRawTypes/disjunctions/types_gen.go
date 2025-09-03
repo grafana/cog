@@ -169,7 +169,7 @@ func (resource SomeOtherStruct) Equals(other SomeOtherStruct) bool {
 		if resource.Type != other.Type {
 			return false
 		}
-		if resource.Foo != other.Foo {
+	    if !bytes.Equal(resource.Foo, other.Foo) {
 			return false
 		}
 

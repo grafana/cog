@@ -6,6 +6,7 @@
 package equality
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -221,6 +222,8 @@ type Optionals struct {
 	EnumField *Direction `json:"enumField,omitempty"`
 	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
 	RefField *Variable `json:"refField,omitempty"`
+	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
+	ByteField []byte `json:"byteField,omitempty"`
 }
 
 // NewOptionals creates a new Optionals object.
@@ -275,6 +278,17 @@ func (resource *Optionals) UnmarshalJSONStrict(raw []byte) error {
 		delete(fields, "refField")
 
 	}
+	// Field "byteField"
+	if fields["byteField"] != nil {
+		if string(fields["byteField"]) != "null" {
+			if err := json.Unmarshal(fields["byteField"], &resource.ByteField); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("byteField", err)...)
+			}
+
+		}
+		delete(fields, "byteField")
+
+	}
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("Optionals", fmt.Errorf("unexpected field '%s'", field))...)
@@ -313,6 +327,15 @@ func (resource Optionals) Equals(other Optionals) bool {
 
 	if resource.RefField != nil {
 		if !resource.RefField.Equals(*other.RefField) {
+			return false
+		}
+	}
+	if resource.ByteField == nil && other.ByteField != nil || resource.ByteField != nil && other.ByteField == nil {
+		return false
+	}
+
+	if resource.ByteField != nil {
+		if !bytes.Equal(resource.ByteField, other.ByteField) {
 			return false
 		}
 	}
