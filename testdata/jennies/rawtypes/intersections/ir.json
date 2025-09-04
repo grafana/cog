@@ -89,6 +89,179 @@
           ]
         }
       }
+    },
+    "Common": {
+      "Name": "Common",
+      "Comments": ["Base properties for all metrics"],
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "name",
+              "Comments": ["The metric name"],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "type",
+              "Comments": ["The metric type"],
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "counter",
+                      "Value": "counter"
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "gauge", 
+                      "Value": "gauge"
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "contains",
+              "Comments": ["The type of data the metric contains"],
+              "Type": {
+                "Kind": "enum",
+                "Nullable": false,
+                "Enum": {
+                  "Values": [
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "default",
+                      "Value": "default"
+                    },
+                    {
+                      "Type": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "Name": "time",
+                      "Value": "time"
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "intersections",
+        "ReferredType": "Common"
+      }
+    },
+    "Counter": {
+      "Name": "Counter",
+      "Comments": ["Counter metric combining common properties with specific values"],
+      "Type": {
+        "Kind": "intersection",
+        "Nullable": false,
+        "Intersection": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "intersections",
+                "ReferredType": "Common"
+              }
+            },
+            {
+              "Kind": "struct",
+              "Nullable": false,
+              "Struct": {
+                "Fields": [
+                  {
+                    "Name": "type",
+                    "Type": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": "counter"
+                      }
+                    },
+                    "Required": true
+                  },
+                  {
+                    "Name": "values",
+                    "Comments": ["Counter metric values"],
+                    "Type": {
+                      "Kind": "struct",
+                      "Nullable": false,
+                      "Struct": {
+                        "Fields": [
+                          {
+                            "Name": "count",
+                            "Comments": ["Total count of events"],
+                            "Type": {
+                              "Kind": "scalar",
+                              "Nullable": false,
+                              "Scalar": {
+                                "ScalarKind": "float64",
+                                "Constraints": [
+                                  {
+                                    "Op": "\u003e=",
+                                    "Args": [0]
+                                  }
+                                ]
+                              }
+                            },
+                            "Required": true
+                          }
+                        ]
+                      }
+                    },
+                    "Required": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "intersections",
+        "ReferredType": "Counter"
+      }
     }
   }
 }
