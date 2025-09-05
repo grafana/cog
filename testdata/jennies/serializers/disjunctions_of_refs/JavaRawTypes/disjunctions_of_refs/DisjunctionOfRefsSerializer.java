@@ -10,10 +10,10 @@ public class DisjunctionOfRefsSerializer extends JsonSerializer<DisjunctionOfRef
 
     @Override
     public void serialize(DisjunctionOfRefs value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
-         if (value.myRefA != null) {
+        if (value.myRefA != null) {
             gen.writeObject(value.myRefA);
         }
-         else  if (value.myRefB != null) {
+        else if (value.myRefB != null) {
             gen.writeObject(value.myRefB);
         }
     }

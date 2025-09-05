@@ -11,7 +11,7 @@ public class {{ .Name }}Serializer extends JsonSerializer<{{ .Name }}> {
     @Override
     public void serialize({{ .Name }} value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
         {{- range $i, $val := .Fields }}
-        {{ if gt $i 0 }} else {{ end }} if (value.{{ .Name | lowerCamelCase | escapeVar }} != null) {
+        {{ if gt $i 0 }}else {{ end }}if (value.{{ .Name | lowerCamelCase | escapeVar }} != null) {
             gen.writeObject(value.{{ .Name | lowerCamelCase | escapeVar }});
         }
         {{- end }}

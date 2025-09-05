@@ -10,22 +10,22 @@ public class DisjunctionOfScalarsAndRefsSerializer extends JsonSerializer<Disjun
 
     @Override
     public void serialize(DisjunctionOfScalarsAndRefs value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
-         if (value.string != null) {
+        if (value.string != null) {
             gen.writeObject(value.string);
         }
-         else  if (value.bool != null) {
+        else if (value.bool != null) {
             gen.writeObject(value.bool);
         }
-         else  if (value.arrayOfString != null) {
+        else if (value.arrayOfString != null) {
             gen.writeObject(value.arrayOfString);
         }
-         else  if (value.myRefA != null) {
+        else if (value.myRefA != null) {
             gen.writeObject(value.myRefA);
         }
-         else  if (value.myRefB != null) {
+        else if (value.myRefB != null) {
             gen.writeObject(value.myRefB);
         }
-         else  if (value.any != null) {
+        else if (value.any != null) {
             gen.writeObject(value.any);
         }
     }
