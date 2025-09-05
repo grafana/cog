@@ -11,7 +11,7 @@ type JSONMarshaller struct {
 	typeFormatter *typeFormatter
 }
 
-func (j JSONMarshaller) genToJSONFunction(t ast.Type) string {
+func (j JSONMarshaller) genToJSONFunction() string {
 	if !j.config.GenerateJSONMarshaller || !j.config.GenerateBuilders || j.config.SkipRuntime {
 		return ""
 	}
@@ -19,13 +19,6 @@ func (j JSONMarshaller) genToJSONFunction(t ast.Type) string {
 	j.typeFormatter.packageMapper(fasterXMLPackageName, "core.JsonProcessingException")
 	j.typeFormatter.packageMapper(fasterXMLPackageName, "databind.ObjectMapper")
 	j.typeFormatter.packageMapper(fasterXMLPackageName, "databind.ObjectWriter")
-	if t.IsDisjunctionOfAnyKind() {
-		rendered, _ := j.tmpl.Render("marshalling/disjunctions.json_marshall.tmpl", map[string]any{
-			"Fields": t.AsStruct().Fields,
-		})
-		return rendered
-	}
-
 	rendered, _ := j.tmpl.Render("marshalling/marshalling.tmpl", map[string]any{})
 	return rendered
 }

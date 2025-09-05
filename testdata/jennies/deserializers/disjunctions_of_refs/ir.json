@@ -1,0 +1,117 @@
+{
+  "Package": "disjunctions_of_refs",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "DisjunctionOfRefs": {
+      "Name": "DisjunctionOfRefs",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "disjunctions_of_refs",
+                "ReferredType": "MyRefA"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "disjunctions_of_refs",
+                "ReferredType": "MyRefB"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_refs",
+        "ReferredType": "DisjunctionOfRefs"
+      }
+    },
+    "MyRefA": {
+      "Name": "MyRefA",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "A"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "foo",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_refs",
+        "ReferredType": "MyRefA"
+      }
+    },
+    "MyRefB": {
+      "Name": "MyRefB",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "B"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "bar",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_refs",
+        "ReferredType": "MyRefB"
+      }
+    }
+  }
+}

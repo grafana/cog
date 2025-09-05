@@ -25,7 +25,7 @@ func (jenny *Serializers) Generate(context languages.Context) (codejen.Files, er
 	for _, schema := range context.Schemas {
 		var hasErr error
 		schema.Objects.Iterate(func(key string, obj ast.Object) {
-			if obj.Type.HasHint(ast.HintDisjunctionOfScalars) {
+			if obj.Type.HasAnyHint(ast.HintDisjunctionOfScalars, ast.HintDiscriminatedDisjunctionOfRefs, ast.HintDisjunctionOfScalarsAndRefs) {
 				f, err := jenny.genSerializer(obj)
 				if err != nil {
 					hasErr = err
@@ -43,7 +43,7 @@ func (jenny *Serializers) Generate(context languages.Context) (codejen.Files, er
 }
 
 func (jenny *Serializers) genSerializer(obj ast.Object) (*codejen.File, error) {
-	rendered, err := jenny.tmpl.Render("marshalling/disjunctions_of_scalars.json_marshall.tmpl", Unmarshalling{
+	rendered, err := jenny.tmpl.Render("marshalling/disjunctions.json_marshall.tmpl", Unmarshalling{
 		Package: jenny.config.formatPackage(obj.SelfRef.ReferredPkg),
 		Name:    tools.UpperCamelCase(obj.Name),
 		Fields:  obj.Type.AsStruct().Fields,

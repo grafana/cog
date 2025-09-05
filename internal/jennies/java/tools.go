@@ -157,6 +157,10 @@ func getJavaFieldTypeCheck(t ast.Type) string {
 			return "isBoolean()"
 		case ast.KindInt8, ast.KindUint8, ast.KindInt32, ast.KindUint32:
 			return "isInt()"
+		case ast.KindInt64, ast.KindUint64:
+			return "isIntegralNumber()"
+		case ast.KindFloat32:
+			return "isFloatingPointNumber()"
 		case ast.KindFloat64:
 			return "isDouble()"
 		default:
