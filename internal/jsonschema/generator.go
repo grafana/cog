@@ -147,7 +147,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 		return ast.Any(), nil
 	}
 
-	//nolint: gocritic
+	// nolint: gocritic
 	if len(schema.Types) > 1 {
 		def, err = g.walkScalarDisjunction(schema.Types)
 	} else if schema.Enum != nil {
@@ -270,6 +270,10 @@ func (g *generator) walkAllOf(schema *schemaparser.Schema) (ast.Type, error) {
 		}
 
 		branches[i] = def
+	}
+
+	if len(branches) == 1 {
+		return branches[0], nil
 	}
 
 	return ast.NewIntersection(branches), nil
