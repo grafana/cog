@@ -11,6 +11,10 @@ func TestExtractK8ResourceNames(t *testing.T) {
 			ast.NewStruct(
 				ast.NewStructField("aRef", ast.NewRef("test", "my.super.large.name.ARef")),
 				ast.NewStructField("aConstantRef", ast.NewConstantReferenceType("test", "other.name.with.ugly.name.AConstantRef", "a")),
+				ast.NewStructField("aDisjunction", ast.NewDisjunction([]ast.Type{
+					ast.NewRef("test", "my.super.large.name.ARef"),
+					ast.NewRef("test", "other.name.with.ugly.name.AConstantRef"),
+				})),
 			),
 		),
 		ast.NewObject("test", "my.super.large.name.ARef", ast.NewStruct(
@@ -28,6 +32,10 @@ func TestExtractK8ResourceNames(t *testing.T) {
 			ast.NewStruct(
 				ast.NewStructField("aRef", ast.NewRef("test", "ARef")),
 				ast.NewStructField("aConstantRef", ast.NewConstantReferenceType("test", "AConstantRef", "a")),
+				ast.NewStructField("aDisjunction", ast.NewDisjunction([]ast.Type{
+					ast.NewRef("test", "ARef"),
+					ast.NewRef("test", "AConstantRef"),
+				})),
 			),
 		),
 		ast.NewObject("test", "ARef", ast.NewStruct(
