@@ -42,22 +42,22 @@ func (e *ExtractK8ResourceNames) parseObject(visitor *Visitor, schema *ast.Schem
 	return newObject, nil
 }
 
-func (*ExtractK8sResourceName) parseReference(visitor *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
+func (*ExtractK8ResourceNames) parseReference(visitor *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	refType := getReferenceName(def.AsRef().ReferredType)
 	return ast.NewRef(def.AsRef().ReferredPkg, refType), nil
 }
 
-func (*ExtractK8sResourceName) parseConstantReference(visitor *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
+func (*ExtractK8ResourceNames) parseConstantReference(visitor *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	refType := getReferenceName(def.AsConstantRef().ReferredType)
 	return ast.NewConstantReferenceType(def.AsConstantRef().ReferredPkg, refType, def.AsConstantRef().ReferenceValue), nil
 }
 
-func (*ExtractK8sResourceName) parseField(visitor *Visitor, schema *ast.Schema, field ast.StructField) (ast.StructField, error) {
+func (*ExtractK8ResourceNames) parseField(visitor *Visitor, schema *ast.Schema, field ast.StructField) (ast.StructField, error) {
 	field.Name = getReferenceName(field.Name)
 	return field, nil
 }
 
-func (e *ExtractK8sResourceName) parseDisjunction(visitor *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
+func (e *ExtractK8ResourceNames) parseDisjunction(visitor *Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
 	for i, b := range def.AsDisjunction().Branches {
 		t, err := visitor.VisitType(schema, b)
 		if err != nil {
