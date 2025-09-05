@@ -245,6 +245,10 @@ func (g *generator) walkAllOf(schema *openapi3.Schema) (ast.Type, error) {
 		branches[i] = def
 	}
 
+	if len(branches) == 1 {
+		return branches[0], nil
+	}
+
 	return ast.NewIntersection(branches), nil
 }
 
