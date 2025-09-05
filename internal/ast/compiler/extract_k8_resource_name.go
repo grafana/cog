@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"github.com/grafana/cog/internal/ast"
+
 	"strings"
 )
 
