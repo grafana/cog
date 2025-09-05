@@ -194,12 +194,32 @@ func (jenny RawTypes) formatIntersection(pkg string, identifier string, object a
 	extensions := make([]string, 0)
 	fields := make([]ast.StructField, 0)
 
+	// Collect field names from extended classes to avoid duplicates
+	extendedFieldNames := make(map[string]bool)
+	for _, branch := range intersection.Branches {
+		if branch.IsRef() {
+			if obj, found := jenny.typeFormatter.context.LocateObjectByRef(branch.AsRef()); found {
+				if obj.Type.IsStruct() {
+					for _, field := range obj.Type.AsStruct().Fields {
+						extendedFieldNames[field.Name] = true
+					}
+				}
+			}
+		}
+	}
+
 	for _, branch := range intersection.Branches {
 		switch branch.Kind {
 		case ast.KindRef:
 			extensions = append(extensions, jenny.typeFormatter.formatReference(branch.AsRef()))
 		case ast.KindStruct:
-			fields = append(fields, branch.AsStruct().Fields...)
+			for _, field := range branch.AsStruct().Fields {
+				// Skip fields that are already defined in extended classes
+				if extendedFieldNames[field.Name] {
+					continue
+				}
+				fields = append(fields, field)
+			}
 		}
 	}
 
