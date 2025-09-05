@@ -1,5 +1,7 @@
 package {{ .Package }};
 
+{{- $class := include "class_scalars_and_refs" . }}
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -8,7 +10,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+{{ .Imports }}
 
+{{- $class }}
+
+{{- define "class_scalars_and_refs" }}
 public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
 
     @Override
@@ -19,11 +25,23 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
         {{ .Name }} {{ .Name | lowerCamelCase }} = new {{ .Name }}();
         
         {{- range $i, $val := .Fields }}
-        {{ if gt $i 0 }}else {{ end }}if (root.{{ getJavaFieldTypeCheck .Type }}) {
-            {{ $.Name | lowerCamelCase }}.{{ $val.Name | lowerCamelCase }} = mapper.convertValue(root, new TypeReference<>() {});
+        {{ if gt $i 0 }}else {{ end }}if (root.{{ getJavaFieldTypeCheck .Type }}{{ if .Type.IsRef }} && couldBe(mapper, root, {{ .Type.Ref.ReferredType }}.class){{ end }}) {
+            {{ $.Name | lowerCamelCase }}.{{ $val.Name | lowerCamelCase }} = mapper.convertValue(root, {{ template "type_map_check" .Type }});
         }
         {{- end }}
         
         return {{ .Name | lowerCamelCase }};
     }
+    
+    private <T> boolean couldBe(ObjectMapper mapper, JsonNode root, Class<T> clazz) {
+        try {
+            mapper.convertValue(root, clazz);
+        } catch (IllegalArgumentException e) {
+           return false;
+        }
+        
+        return true;
+    }
 }
+
+{{- end }}

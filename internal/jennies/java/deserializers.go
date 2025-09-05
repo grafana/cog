@@ -46,6 +46,9 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 				return jenny.imports.Add(class, pkg)
 			}
 			jenny.typeFormatter.withPackageMapper(jenny.packageMapper)
+			jenny.tmpl = jenny.tmpl.Funcs(template.FuncMap{
+				"importStdPkg": jenny.packageMapper,
+			})
 
 			if objectNeedsCustomDeserializer(context, obj, jenny.tmpl) {
 				f, err := jenny.genCustomDeserialiser(context, obj)
@@ -86,7 +89,7 @@ func (jenny *Deserializers) genCustomDeserialiser(context languages.Context, obj
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDiscriminatedDisjunctionOfRefs) {
 		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_refs")
 	}
-	
+
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
 		return jenny.genDisjunctionsDeserializer(obj, "disjunctions_of_scalars_and_refs")
 	}
@@ -173,6 +176,7 @@ func (jenny *Deserializers) renderUnmarshalDataqueryField(obj ast.Object, field 
 func (jenny *Deserializers) genDisjunctionsDeserializer(obj ast.Object, tmpl string) (*codejen.File, error) {
 	rendered, err := jenny.tmpl.Render(fmt.Sprintf("marshalling/%s.json_unmarshall.tmpl", tmpl), Unmarshalling{
 		Package: jenny.config.formatPackage(obj.SelfRef.ReferredPkg),
+		Imports: jenny.imports,
 		Name:    tools.UpperCamelCase(obj.Name),
 		Fields:  obj.Type.AsStruct().Fields,
 		Hint:    obj.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs],
