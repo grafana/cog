@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"bytes"
 )
 
 // This
@@ -252,7 +253,7 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if resource.FieldBool != other.FieldBool {
 			return false
 		}
-		if resource.FieldBytes != other.FieldBytes {
+	    if !bytes.Equal(resource.FieldBytes, other.FieldBytes) {
 			return false
 		}
 		if resource.FieldString != other.FieldString {

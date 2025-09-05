@@ -123,6 +123,8 @@ func (jenny Schema) formatType(typeDef ast.Type) Definition {
 		return jenny.formatMap(typeDef)
 	case ast.KindDisjunction:
 		return jenny.formatDisjunction(typeDef)
+	case ast.KindIntersection:
+		return jenny.formatIntersection(typeDef)
 	case ast.KindComposableSlot:
 		return jenny.formatComposableSlot()
 	case ast.KindConstantRef:
@@ -202,6 +204,11 @@ func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
 
 	definition.Set("type", "object")
 	definition.Set("additionalProperties", false)
+	if typeDef.HasHint(ast.HintOpenStruct) {
+		if val, _ := typeDef.Hints[ast.HintOpenStruct].(string); strings.ToLower(val)[0] == 't' {
+			definition.Set("additionalProperties", map[string]any{})
+		}
+	}
 
 	properties := orderedmap.New[string, any]()
 	var required []string
@@ -287,6 +294,11 @@ func (jenny Schema) formatEnum(typeDef ast.Type) Definition {
 	})
 
 	definition.Set("enum", values)
+	// Make an educated guess about the enum type by looking at the first element in the values set
+	if len(typeDef.AsEnum().Values) > 0 {
+		def := jenny.formatType(typeDef.AsEnum().Values[0].Type)
+		definition.Set("type", def.Get("type"))
+	}
 
 	return definition
 }
@@ -314,6 +326,15 @@ func (jenny Schema) formatDisjunction(typeDef ast.Type) Definition {
 	branches := tools.Map(typeDef.AsDisjunction().Branches, jenny.formatType)
 
 	definition.Set("anyOf", branches)
+
+	return definition
+}
+
+func (jenny Schema) formatIntersection(typeDef ast.Type) Definition {
+	definition := orderedmap.New[string, any]()
+	branches := tools.Map(typeDef.AsIntersection().Branches, jenny.formatType)
+
+	definition.Set("allOf", branches)
 
 	return definition
 }

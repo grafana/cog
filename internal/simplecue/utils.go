@@ -73,7 +73,7 @@ outer:
 	}
 	args = args[:k]
 
-	//nolint: gocritic
+	// nolint: gocritic
 	if op == cue.NoOp && len(args) == 1 {
 		// TODO: this is to deal with default value removal. This may change
 		// when we completely separate default values from values.
@@ -143,7 +143,7 @@ func getTypeHint(v cue.Value) (string, error) {
 func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 	switch v.Kind() {
 	case cue.NullKind:
-		return nil, nil //nolint: nilnil
+		return nil, nil // nolint: nilnil
 	case cue.StringKind:
 		return v.String()
 	case cue.NumberKind, cue.FloatKind:
@@ -152,6 +152,8 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		return v.Int64()
 	case cue.BoolKind:
 		return v.Bool()
+	case cue.BytesKind:
+		return v.Bytes()
 	case cue.ListKind:
 		var values []any
 		it, err := v.List()
@@ -171,7 +173,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		}
 
 		if len(values) == 0 {
-			//nolint: nilnil
+			// nolint: nilnil
 			return nil, nil
 		}
 
@@ -189,7 +191,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		}
 
 		if len(newMap) == 0 {
-			//nolint: nilnil
+			// nolint: nilnil
 			return nil, nil
 		}
 
@@ -199,7 +201,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 		if defVal, ok := v.Default(); ok {
 			return cueConcreteToScalar(defVal)
 		}
-		//nolint: nilnil
+		// nolint: nilnil
 		return nil, nil
 	default:
 		return nil, errorWithCueRef(v, "can not convert kind to scalar: %s", v.Kind())

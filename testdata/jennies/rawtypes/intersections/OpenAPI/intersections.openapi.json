@@ -9,7 +9,42 @@
   "paths": {},
   "components": {
     "schemas": {
-      "Intersections": {},
+      "Intersections": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SomeStruct"
+          },
+          {
+            "$ref": "#/components/schemas/AnotherStruct"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fieldString"
+            ],
+            "properties": {
+              "fieldString": {
+                "type": "string",
+                "default": "hello"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fieldInteger"
+            ],
+            "properties": {
+              "fieldInteger": {
+                "type": "integer",
+                "default": 32
+              }
+            }
+          }
+        ]
+      },
       "SomeStruct": {
         "type": "object",
         "additionalProperties": false,
@@ -22,6 +57,75 @@
             "default": true
           }
         }
+      },
+      "Common": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "type",
+          "contains"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The metric name"
+          },
+          "type": {
+            "enum": [
+              "counter",
+              "gauge"
+            ],
+            "type": "string",
+            "description": "The metric type"
+          },
+          "contains": {
+            "enum": [
+              "default",
+              "time"
+            ],
+            "type": "string",
+            "description": "The type of data the metric contains"
+          }
+        },
+        "description": "Base properties for all metrics"
+      },
+      "Counter": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Common"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "values"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "counter"
+              },
+              "values": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "count"
+                ],
+                "properties": {
+                  "count": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Total count of events"
+                  }
+                },
+                "description": "Counter metric values"
+              }
+            }
+          }
+        ],
+        "description": "Counter metric combining common properties with specific values"
       }
     }
   }

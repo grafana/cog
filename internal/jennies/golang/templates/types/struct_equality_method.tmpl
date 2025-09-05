@@ -84,8 +84,13 @@ func (resource {{ .def.Name|formatObjectName }}) Equals(other {{ .def.Name|forma
 			return false
 		}
 	{{- else if or (resolvesToScalar .Type) (resolvesToEnum .Type) }}
+	    {{- if and (.Type.IsScalar) (eq .Type.Scalar.ScalarKind "bytes")}}
+	    {{- $bytes := importStdPkg "bytes" }}
+	    if !bytes.Equal({{ .SelfName }}, {{ .OtherName }}) {
+	    {{- else }}
 		{{- $dereference := ternary "*" "" .Dereference }}
 		if {{ $dereference }}{{ .SelfName }} != {{ $dereference }}{{ .OtherName }} {
+	    {{- end }}
 			return false
 		}
     {{- else if .Type.IsConstantRef }}

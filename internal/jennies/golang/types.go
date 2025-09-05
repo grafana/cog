@@ -309,6 +309,20 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 		rest = append(rest, b)
 	}
 
+	// Collect field names from embedded references to avoid duplicates
+	refFieldNames := make(map[string]bool)
+	for _, ref := range refs {
+		if ref.IsRef() {
+			if obj, found := formatter.context.LocateObjectByRef(ref.AsRef()); found {
+				if obj.Type.IsStruct() {
+					for _, field := range obj.Type.AsStruct().Fields {
+						refFieldNames[field.Name] = true
+					}
+				}
+			}
+		}
+	}
+
 	for _, ref := range refs {
 		buffer.WriteString("\t" + formatter.formatRef(ref, false) + "\n")
 	}
@@ -320,6 +334,10 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	for _, r := range rest {
 		if r.IsStruct() {
 			for _, fieldDef := range r.Struct.Fields {
+				// Skip fields that are already defined in embedded references
+				if refFieldNames[fieldDef.Name] {
+					continue
+				}
 				buffer.WriteString("\t" + formatter.formatField(fieldDef))
 				buffer.WriteString("\n")
 			}

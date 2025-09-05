@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
@@ -19,7 +20,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		GenerateJSONMarshaller: true,
 	}
 
-	jenny := RawTypes{config: cfg, tmpl: initTemplates([]string{})}
+	jenny := RawTypes{config: cfg, tmpl: initTemplates(cfg, common.NewAPIReferenceCollector())}
 	compilerPasses := New(cfg).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test[ast.Schema]) {

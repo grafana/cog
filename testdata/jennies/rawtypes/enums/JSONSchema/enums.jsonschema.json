@@ -6,19 +6,22 @@
         "\u003e",
         "\u003c"
       ],
+      "type": "string",
       "description": "This is a very interesting string enum."
     },
     "TableSortOrder": {
       "enum": [
         "asc",
         "desc"
-      ]
+      ],
+      "type": "string"
     },
     "LogsSortOrder": {
       "enum": [
         "time_asc",
         "time_desc"
-      ]
+      ],
+      "type": "string"
     },
     "DashboardCursorSync": {
       "enum": [
@@ -26,6 +29,7 @@
         1,
         2
       ],
+      "type": "integer",
       "description": "0 for no shared crosshair or tooltip (default).\n1 for shared crosshair.\n2 for shared crosshair AND shared tooltip."
     }
   }

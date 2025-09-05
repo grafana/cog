@@ -27,6 +27,11 @@ const (
 	// HintStringFormatDateTime hints refers to a string that should be formatted
 	// as a datetime as defined by RFC 3339, section 5.6 (ex: 2017-07-21T17:32:28Z)
 	HintStringFormatDateTime = "string_format_datetime"
+
+	// HintOpenStruct hints that the struct is to be considered open even if not type Any
+	// when generating outputs which make explicit allowances for
+	// arbitrary additional properties, such as OpenAPI/JSONSchema.
+	HintOpenStruct = "open"
 )
 
 const DiscriminatorCatchAll = "cog_discriminator_catch_all"

@@ -6,7 +6,8 @@
         "ValueA",
         "ValueB",
         "ValueC"
-      ]
+      ],
+      "type": "string"
     },
     "ParentStruct": {
       "type": "object",
