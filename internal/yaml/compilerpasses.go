@@ -29,7 +29,7 @@ type CompilerPass struct {
 	DuplicateObject          *DuplicateObject          `yaml:"duplicate_object"`
 	TrimEnumValues           *TrimEnumValues           `yaml:"trim_enum_values"`
 	ConstantToEnum           *ConstantToEnum           `yaml:"constant_to_enum"`
-	ExtractK8ResourceNames   *ExtractK8ResourceNames   `yaml:"extract_k8_resource_names"`
+	ExtractK8ResourceNames   *CleanupK8ResourceNames   `yaml:"cleanup_k8_resource_names"`
 
 	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 
@@ -499,8 +499,12 @@ func (pass ConstantToEnum) AsCompilerPass() (*compiler.ConstantToEnum, error) {
 	return &compiler.ConstantToEnum{Objects: objectRefs}, nil
 }
 
-type ExtractK8ResourceNames struct{}
+type CleanupK8ResourceNames struct {
+	PrefixToRemove string `yaml:"prefix_to_remove"`
+}
 
-func (ExtractK8ResourceNames) AsCompilerPass() (*compiler.ExtractK8ResourceNames, error) {
-	return &compiler.ExtractK8ResourceNames{}, nil
+func (pass CleanupK8ResourceNames) AsCompilerPass() (*compiler.CleanupK8ResourceNames, error) {
+	return &compiler.CleanupK8ResourceNames{
+		PrefixToRemove: pass.PrefixToRemove,
+	}, nil
 }
