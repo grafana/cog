@@ -1,9 +1,9 @@
 package compiler
 
 import (
-	"github.com/grafana/cog/internal/ast"
-
 	"strings"
+
+	"github.com/grafana/cog/internal/ast"
 )
 
 var _ Pass = (*ExtractK8ResourceNames)(nil)
