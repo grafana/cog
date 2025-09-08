@@ -1,0 +1,128 @@
+{
+  "Package": "disjunctions_of_scalars_and_refs",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "DisjunctionOfScalarsAndRefs": {
+      "Name": "DisjunctionOfScalarsAndRefs",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "string",
+                "Value": "a"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "bool"
+              }
+            },
+            {
+              "Kind": "array",
+              "Nullable": false,
+              "Array": {
+                "ValueType": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                }
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "disjunctions_of_scalars_and_refs",
+                "ReferredType": "MyRefA"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "disjunctions_of_scalars_and_refs",
+                "ReferredType": "MyRefB"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "any"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_scalars_and_refs",
+        "ReferredType": "DisjunctionOfScalarsAndRefs"
+      }
+    },
+    "MyRefA": {
+      "Name": "MyRefA",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "foo",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_scalars_and_refs",
+        "ReferredType": "MyRefA"
+      }
+    },
+    "MyRefB": {
+      "Name": "MyRefB",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "bar",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_scalars_and_refs",
+        "ReferredType": "MyRefB"
+      }
+    }
+  }
+}

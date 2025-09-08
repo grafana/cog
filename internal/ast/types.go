@@ -177,6 +177,16 @@ func (t Type) HasHint(hintName string) bool {
 	return found
 }
 
+func (t Type) HasAnyHint(hintNames ...string) bool {
+	for _, hintName := range hintNames {
+		if _, found := t.Hints[hintName]; found {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (t Type) IsRef() bool {
 	return t.Kind == KindRef
 }

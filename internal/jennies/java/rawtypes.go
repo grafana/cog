@@ -142,7 +142,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		Variant:                 jenny.getVariant(object.Type),
 		Identifier:              identifier,
 		Annotation:              jenny.jsonMarshaller.annotation(object.Type),
-		ToJSONFunction:          jenny.jsonMarshaller.genToJSONFunction(object.Type),
+		ToJSONFunction:          jenny.jsonMarshaller.genToJSONFunction(),
 		ShouldAddSerializer:     jenny.typeFormatter.objectNeedsCustomSerializer(object),
 		ShouldAddDeserializer:   jenny.typeFormatter.objectNeedsCustomDeserializer(object, jenny.tmpl),
 		ShouldAddFactoryMethods: object.Type.IsDisjunctionOfAnyKind(),
