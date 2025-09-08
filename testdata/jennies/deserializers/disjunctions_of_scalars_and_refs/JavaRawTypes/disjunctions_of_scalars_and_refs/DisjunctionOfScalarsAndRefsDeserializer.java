@@ -43,7 +43,7 @@ public class DisjunctionOfScalarsAndRefsDeserializer extends JsonDeserializer<Di
     private <T> boolean couldBe(ObjectMapper mapper, JsonNode root, Class<T> clazz) {
         try {
             mapper.convertValue(root, clazz);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
            return false;
         }
         
