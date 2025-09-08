@@ -1,0 +1,66 @@
+{
+  "Package": "disjunctions_of_scalars",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "DisjunctionOfScalars": {
+      "Name": "DisjunctionOfScalars",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "string"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "bool"
+              }
+            },
+            {
+              "Kind": "array",
+              "Nullable": false,
+              "Array": {
+                "ValueType": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                }
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "float32"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "int64"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_scalars",
+        "ReferredType": "DisjunctionOfScalars"
+      }
+    }
+  }
+}
