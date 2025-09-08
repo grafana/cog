@@ -1,8 +1,9 @@
 package compiler
 
 import (
-	"github.com/grafana/cog/internal/ast"
 	"testing"
+
+	"github.com/grafana/cog/internal/ast"
 )
 
 func TestExtractK8ResourceNames(t *testing.T) {
