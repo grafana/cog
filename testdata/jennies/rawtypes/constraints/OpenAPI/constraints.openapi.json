@@ -20,12 +20,14 @@
           "id": {
             "type": "integer",
             "minimum": 5,
-            "exclusiveMaximum": 10
+            "maximum": 10,
+            "exclusiveMaximum": true
           },
           "maybeId": {
             "type": "integer",
             "minimum": 5,
-            "exclusiveMaximum": 10
+            "maximum": 10,
+            "exclusiveMaximum": true
           },
           "title": {
             "type": "string",
