@@ -96,7 +96,7 @@ type Type struct {
 	Map               *MapType               `json:",omitempty"`
 	Struct            *StructType            `json:",omitempty"`
 	Ref               *RefType               `json:",omitempty"`
-	ConstantReference *ConstantReferenceType `json:",omitempty"`
+	ConstantReference *ConstantReferenceType `json:",omitempty" yaml:"constant_ref"`
 	Scalar            *ScalarType            `json:",omitempty"`
 	Intersection      *IntersectionType      `json:",omitempty"`
 	ComposableSlot    *ComposableSlotType    `json:",omitempty" yaml:"composable_slot"`
