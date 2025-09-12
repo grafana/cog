@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/languages"
@@ -43,6 +44,7 @@ func (jenny Schema) generateSchema(context languages.Context, schema *ast.Schema
 		ReferenceFormatter: func(ref ast.RefType) string {
 			return fmt.Sprintf("#/components/schemas/%s", ref.ReferredType)
 		},
+		OpenAPI3Compatible: true,
 	}
 
 	jsonSchema := jsonschemaJenny.GenerateSchema(context, schema)
