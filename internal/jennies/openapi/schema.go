@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
 	"github.com/grafana/cog/internal/languages"
