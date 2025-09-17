@@ -1,0 +1,279 @@
+{
+  "Package": "default_disjunction_value",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "DisjunctionClasses": {
+      "Name": "DisjunctionClasses",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Default": {
+          "anArray": null,
+          "otherRef": {
+            "aMap": null,
+            "def": 1,
+            "type": "B"
+          },
+          "type": "A"
+        },
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "default_disjunction_value",
+                "ReferredType": "ValueA"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "default_disjunction_value",
+                "ReferredType": "ValueB"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "default_disjunction_value",
+                "ReferredType": "ValueC"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "default_disjunction_value",
+        "ReferredType": "DisjunctionClasses"
+      }
+    },
+    "ValueA": {
+      "Name": "ValueA",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "A"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "anArray",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "otherRef",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "default_disjunction_value",
+                  "ReferredType": "ValueB"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "default_disjunction_value",
+        "ReferredType": "ValueA"
+      }
+    },
+    "ValueB": {
+      "Name": "ValueB",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "B"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "aMap",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  }
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "def",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Default": 1,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "int64",
+                        "Value": 1
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string",
+                        "Value": "a"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "bool"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "default_disjunction_value",
+        "ReferredType": "ValueB"
+      }
+    },
+    "ValueC": {
+      "Name": "ValueC",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Value": "C"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "other",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float32"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "default_disjunction_value",
+        "ReferredType": "ValueC"
+      }
+    },
+    "DisjunctionConstants": {
+      "Name": "DisjunctionConstants",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Default": 1,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "string",
+                "Value": "abc"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "int64",
+                "Value": 1
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "bool",
+                "Value": true
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "default_disjunction_value",
+        "ReferredType": "DisjunctionConstants"
+      }
+    }
+  }
+}
