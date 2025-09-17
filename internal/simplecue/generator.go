@@ -510,7 +510,22 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 					return ast.Type{}, errorWithCueRef(v, err.Error())
 				}
 			}
-			return ast.NewConstantReferenceType(refPkg, refType, referenceValue), nil
+
+			constantRef := ast.NewConstantReferenceType(refPkg, refType, referenceValue)
+			// Sometimes the object isn't added because the scope
+			if !g.schema.Objects.Has(refType) {
+				g.schema.AddObject(ast.Object{
+					Name:     refType,
+					Comments: commentsFromCueValue(referenceRootValue.LookupPath(path)),
+					Type:     constantRef,
+					SelfRef: ast.RefType{
+						ReferredPkg:  g.schema.Package,
+						ReferredType: refType,
+					},
+				})
+			}
+
+			return constantRef, nil
 		}
 
 		// Reference to another package
