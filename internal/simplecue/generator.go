@@ -511,7 +511,6 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 				}
 			}
 
-			constantRef := ast.NewConstantReferenceType(refPkg, refType, referenceValue)
 			// Sometimes the object isn't added because the scope
 			if !g.schema.Objects.Has(refType) {
 				if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
@@ -519,7 +518,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 				}
 			}
 
-			return constantRef, nil
+			return ast.NewConstantReferenceType(refPkg, refType, referenceValue), nil
 		}
 
 		// Reference to another package
