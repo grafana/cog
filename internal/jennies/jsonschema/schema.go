@@ -285,8 +285,18 @@ func (jenny Schema) formatConstantRef(typeDef ast.Type) Definition {
 		}
 	}
 
+	obj, ok := jenny.referenceResolver(ref)
+	if !ok { // Could happen?
+		definition.Set("$ref", jenny.ReferenceFormatter(ref))
+		return definition
+	}
+
 	// TODO: handle foreign refs
-	definition.Set("$ref", jenny.ReferenceFormatter(ref))
+	if obj.Type.IsEnum() {
+		definition.Set("allOf", []Definition{jenny.formatType(ref.AsType())})
+	} else {
+		definition.Set("$ref", jenny.ReferenceFormatter(ref))
+	}
 
 	if obj, ok := jenny.referenceResolver(ref); ok && obj.Type.IsEnum() {
 		definition.Set("default", constRef.ReferenceValue)
