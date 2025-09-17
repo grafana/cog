@@ -286,7 +286,7 @@ func (jenny Schema) formatConstantRef(typeDef ast.Type) Definition {
 	}
 
 	obj, ok := jenny.referenceResolver(ref)
-	if !ok { // Could happen?
+	if !ok {
 		definition.Set("$ref", jenny.ReferenceFormatter(ref))
 		return definition
 	}
