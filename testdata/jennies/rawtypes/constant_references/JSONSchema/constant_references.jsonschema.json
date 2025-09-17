@@ -45,7 +45,11 @@
       ],
       "properties": {
         "myEnum": {
-          "$ref": "#/definitions/Enum",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Enum"
+            }
+          ],
           "default": "ValueA"
         }
       }
@@ -59,7 +63,11 @@
       ],
       "properties": {
         "myEnum": {
-          "$ref": "#/definitions/Enum",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Enum"
+            }
+          ],
           "default": "ValueB"
         },
         "myValue": {
