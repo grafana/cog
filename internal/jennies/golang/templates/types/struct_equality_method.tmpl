@@ -58,7 +58,7 @@ func (resource {{ .def.Name|formatObjectName }}) Equals(other {{ .def.Name|forma
 			{{- template "type_equality_check" (dict "Type" (resolveRefs .Type).Map.ValueType "Nullable" (resolveRefs .Type).Map.ValueType.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey "Depth" (add1 $depth)) }}
 		}
 		{{- if $needsDereference }}}{{ end }}
-	{{- else if .Nullable }}
+	{{- else if and .Nullable (not .Type.IsConstantRef) }}
 		if {{ .SelfName }} == nil && {{ .OtherName }} != nil || {{ .SelfName }} != nil && {{ .OtherName }} == nil {
 			return false
 		}
