@@ -561,7 +561,7 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
 			continue
 		}
-		if field.Type.IsConstantRef() {
+		if field.Type.IsConstantRef() && !field.Required {
 			continue
 		}
 

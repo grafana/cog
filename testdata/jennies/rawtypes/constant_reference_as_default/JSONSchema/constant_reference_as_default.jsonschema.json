@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ConstantRefString": {
+      "type": "string",
+      "const": "AString"
+    },
+    "MyStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "aString"
+      ],
+      "properties": {
+        "aString": {
+          "$ref": "#/definitions/ConstantRefString"
+        },
+        "optString": {
+          "$ref": "#/definitions/ConstantRefString"
+        }
+      }
+    }
+  }
+}

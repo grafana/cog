@@ -279,8 +279,13 @@ func (formatter *typeFormatter) formatConstantRef(def ast.Type) string {
 		return "unknown"
 	}
 
+	nullable := ""
+	if def.Nullable {
+		nullable = "*"
+	}
+
 	if obj.Type.IsScalar() {
-		return string(obj.Type.AsScalar().ScalarKind)
+		return nullable + string(obj.Type.AsScalar().ScalarKind)
 	}
 
 	referredPkg := formatter.packageMapper(constRef.ReferredPkg)
@@ -290,7 +295,7 @@ func (formatter *typeFormatter) formatConstantRef(def ast.Type) string {
 		typeName = referredPkg + "." + typeName
 	}
 
-	return typeName
+	return nullable + typeName
 }
 
 func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) string {
