@@ -1,0 +1,88 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "constant_references",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Enum": {
+        "enum": [
+          "ValueA",
+          "ValueB",
+          "ValueC"
+        ],
+        "type": "string"
+      },
+      "ParentStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "myEnum"
+        ],
+        "properties": {
+          "myEnum": {
+            "$ref": "#/components/schemas/Enum"
+          }
+        }
+      },
+      "Struct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "myValue",
+          "myEnum"
+        ],
+        "properties": {
+          "myValue": {
+            "type": "string"
+          },
+          "myEnum": {
+            "$ref": "#/components/schemas/Enum"
+          }
+        }
+      },
+      "StructA": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "myEnum"
+        ],
+        "properties": {
+          "myEnum": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Enum"
+              }
+            ],
+            "default": "ValueA"
+          }
+        }
+      },
+      "StructB": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "myEnum",
+          "myValue"
+        ],
+        "properties": {
+          "myEnum": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Enum"
+              }
+            ],
+            "default": "ValueB"
+          },
+          "myValue": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
