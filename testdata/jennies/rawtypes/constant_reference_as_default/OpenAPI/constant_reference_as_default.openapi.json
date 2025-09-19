@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "constant_references",
+    "title": "constant_reference_as_default",
     "version": "0.0.0",
     "x-schema-identifier": "",
     "x-schema-kind": ""
@@ -9,77 +9,22 @@
   "paths": {},
   "components": {
     "schemas": {
-      "Enum": {
-        "enum": [
-          "ValueA",
-          "ValueB",
-          "ValueC"
-        ],
-        "type": "string"
+      "ConstantRefString": {
+        "type": "string",
+        "const": "AString"
       },
-      "ParentStruct": {
+      "MyStruct": {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "myEnum"
+          "aString"
         ],
         "properties": {
-          "myEnum": {
-            "$ref": "#/components/schemas/Enum"
-          }
-        }
-      },
-      "Struct": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "myValue",
-          "myEnum"
-        ],
-        "properties": {
-          "myValue": {
-            "type": "string"
+          "aString": {
+            "$ref": "#/components/schemas/ConstantRefString"
           },
-          "myEnum": {
-            "$ref": "#/components/schemas/Enum"
-          }
-        }
-      },
-      "StructA": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "myEnum"
-        ],
-        "properties": {
-          "myEnum": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Enum"
-              }
-            ],
-            "default": "ValueA"
-          }
-        }
-      },
-      "StructB": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "myEnum",
-          "myValue"
-        ],
-        "properties": {
-          "myEnum": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Enum"
-              }
-            ],
-            "default": "ValueB"
-          },
-          "myValue": {
-            "type": "string"
+          "optString": {
+            "$ref": "#/components/schemas/ConstantRefString"
           }
         }
       }
