@@ -94,7 +94,9 @@ func (resource {{ .def.Name|formatObjectName }}) Equals(other {{ .def.Name|forma
 			return false
 		}
     {{- else if .Type.IsConstantRef }}
-        if {{ .SelfName }} != {{ .OtherName}} {
+        {{- $needsDereference := .Type.Nullable }}
+        {{- $dereference := ternary "*" "" $needsDereference }}
+        if {{ $dereference }}{{ .SelfName }} != {{ $dereference }}{{ .OtherName }} {
             return false
         }
 	{{- else }}

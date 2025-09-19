@@ -79,7 +79,7 @@ func (resource MyStruct) Equals(other MyStruct) bool {
 		}
 
 		if resource.OptString != nil {
-        if resource.OptString != other.OptString {
+        if *resource.OptString != *other.OptString {
             return false
         }
 		}
