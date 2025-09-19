@@ -355,7 +355,6 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			}
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type)
-
 		} else if field.Type.IsArray() {
 			defaultValue = "[]" + jenny.typeFormatter.formatType(field.Type.Array.ValueType) + "{}"
 		} else if field.Type.IsMap() {
