@@ -3,7 +3,9 @@ package codegen
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/fs"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing/fstest"
@@ -31,6 +33,9 @@ type CueInput struct {
 
 	// Entrypoint refers to a directory containing CUE files.
 	Entrypoint string `yaml:"entrypoint"`
+
+	// URL to a cue file
+	URL string `yaml:"url"`
 
 	// Value represents the CUE value to use as an input. If specified, it
 	// supersedes the Entrypoint option.
@@ -71,6 +76,14 @@ func (input *CueInput) packageName() string {
 }
 
 func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecue.LibraryInclude, error) {
+	if input.Entrypoint == "" && input.URL == "" {
+		return cue.Value{}, nil, fmt.Errorf("no entrypoint or url defined in cue input")
+	}
+
+	if input.Entrypoint != "" && input.URL != "" {
+		return cue.Value{}, nil, fmt.Errorf("only one entrypoint or url defined in cue input")
+	}
+
 	if input.Value != nil {
 		return *input.Value, nil, nil
 	}
@@ -82,14 +95,13 @@ func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecu
 
 	if cuePkgName == "" {
 		cuePkgName = filepath.Base(input.Entrypoint)
+		if input.URL != "" {
+			cuePkgName = filepath.Base(filepath.Dir(input.URL))
+		}
 	}
 
-	value, err := parseCueEntrypoint(input.Entrypoint, libraries, cuePkgName)
-	if err != nil {
-		return cue.Value{}, nil, err
-	}
-
-	return value, libraries, nil
+	value, err := input.parseCueEntrypoint(libraries, cuePkgName)
+	return value, libraries, err
 }
 
 func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator) {
@@ -120,10 +132,22 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 	return input.filterSchema(schema)
 }
 
-func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, expectedCuePkgName string) (cue.Value, error) {
-	cueFsOverlay, err := buildCueOverlay(imports, entrypoint, expectedCuePkgName)
+func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude, expectedCuePkgName string) (cue.Value, error) {
+	libFs, err := buildBaseFSWithLibraries(imports)
 	if err != nil {
-		return cue.Value{}, fmt.Errorf("could not build cue overlay: %w", err)
+		return cue.Value{}, err
+	}
+
+	overlayFnc := buildCueOverlay
+	entrypoint := input.Entrypoint
+	if input.URL != "" {
+		overlayFnc = buildCueOverlayFromURL
+		entrypoint = input.URL
+	}
+
+	cueFsOverlay, err := overlayFnc(entrypoint, libFs, expectedCuePkgName)
+	if err != nil {
+		return cue.Value{}, err
 	}
 
 	// Load Cue files into Cue build.Instances slice
@@ -143,12 +167,7 @@ func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, e
 	return value, nil
 }
 
-func buildCueOverlay(imports []simplecue.LibraryInclude, entrypoint string, expectedCuePkgName string) (map[string]load.Source, error) {
-	libFs, err := buildBaseFSWithLibraries(imports)
-	if err != nil {
-		return nil, err
-	}
-
+func buildCueOverlay(entrypoint string, libFs fs.FS, expectedCuePkgName string) (map[string]load.Source, error) {
 	entrypointFS, err := dirToPrefixedFS(entrypoint, "cog/vfs/cue.mod/pkg/github.com/cog-vfs/"+expectedCuePkgName)
 	if err != nil {
 		return nil, err
@@ -261,4 +280,39 @@ func toCueOverlay(prefix string, vfs fs.FS) (map[string]load.Source, error) {
 	})
 
 	return overlay, err
+}
+
+func buildCueOverlayFromURL(url string, libFs fs.FS, expectedCuePkgName string) (map[string]load.Source, error) {
+	source, err := readCueURL(url, expectedCuePkgName)
+	if err != nil {
+		return nil, err
+	}
+
+	overlay, err := toCueOverlay("/", merged_fs.MergeMultiple(libFs, buildMockKindsysFS()))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range source {
+		overlay[k] = v
+	}
+
+	return overlay, nil
+}
+
+func readCueURL(url string, cuePackage string) (map[string]load.Source, error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]load.Source{
+		fmt.Sprintf(filepath.Join("/cog/vfs/cue.mod/pkg/github.com/cog-vfs/", cuePackage, filepath.Base(url))): load.FromBytes(data),
+	}, nil
 }
