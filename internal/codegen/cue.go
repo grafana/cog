@@ -78,16 +78,16 @@ func (input *CueInput) packageName() string {
 }
 
 func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecue.LibraryInclude, error) {
+	if input.Value != nil {
+		return *input.Value, nil, nil
+	}
+
 	if input.Entrypoint == "" && input.URL == "" {
 		return cue.Value{}, nil, fmt.Errorf("no entrypoint or url defined in cue input")
 	}
 
 	if input.Entrypoint != "" && input.URL != "" {
 		return cue.Value{}, nil, fmt.Errorf("only one entrypoint or url defined in cue input")
-	}
-
-	if input.Value != nil {
-		return *input.Value, nil, nil
 	}
 
 	libraries, err := simplecue.ParseImports(input.CueImports)
