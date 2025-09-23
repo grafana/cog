@@ -312,7 +312,12 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 		return nil, fmt.Errorf("entrypoint %q must be a cue url", entrypoint)
 	}
 
-	res, err := http.Get(u.String())
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
