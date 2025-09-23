@@ -6,8 +6,10 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing/fstest"
 
 	"cuelang.org/go/cue"
@@ -300,8 +302,17 @@ func buildCueOverlayFromURL(url string, libFs fs.FS, expectedCuePkgName string) 
 	return overlay, nil
 }
 
-func readCueURL(url string, cuePackage string) (map[string]load.Source, error) {
-	res, err := http.Get(url)
+func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, error) {
+	u, err := url.Parse(entrypoint)
+	if err != nil {
+		return nil, err
+	}
+
+	if !strings.HasSuffix(u.Path, ".cue") {
+		return nil, fmt.Errorf("entrypoint %q must be a cue url", entrypoint)
+	}
+
+	res, err := http.Get(u.String())
 	if err != nil {
 		return nil, err
 	}
@@ -313,6 +324,6 @@ func readCueURL(url string, cuePackage string) (map[string]load.Source, error) {
 	}
 
 	return map[string]load.Source{
-		fmt.Sprintf(filepath.Join("/cog/vfs/cue.mod/pkg/github.com/cog-vfs/", cuePackage, filepath.Base(url))): load.FromBytes(data),
+		filepath.Join("/cog/vfs/cue.mod/pkg/github.com/cog-vfs/", cuePackage, filepath.Base(u.Path)): load.FromBytes(data),
 	}, nil
 }
