@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "constant_reference_as_default",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "ConstantRefString": {
+        "type": "string",
+        "const": "AString"
+      },
+      "MyStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "aString"
+        ],
+        "properties": {
+          "aString": {
+            "$ref": "#/components/schemas/ConstantRefString"
+          },
+          "optString": {
+            "$ref": "#/components/schemas/ConstantRefString"
+          }
+        }
+      }
+    }
+  }
+}

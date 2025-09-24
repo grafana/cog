@@ -1,0 +1,66 @@
+{
+  "Package": "constant_reference_as_default",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "ConstantRefString": {
+      "Name": "ConstantRefString",
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "string",
+          "Value": "AString"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constant_reference_as_default",
+        "ReferredType": "ConstantRefString"
+      }
+    },
+    "MyStruct": {
+      "Name": "MyStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "aString",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": false,
+                "ConstantReference": {
+                  "ReferredPkg": "constant_reference_as_default",
+                  "ReferredType": "ConstantRefString",
+                  "ReferenceValue": "AString"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "optString",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": false,
+                "ConstantReference": {
+                  "ReferredPkg": "constant_reference_as_default",
+                  "ReferredType": "ConstantRefString",
+                  "ReferenceValue": "AString"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "constant_reference_as_default",
+        "ReferredType": "MyStruct"
+      }
+    }
+  }
+}

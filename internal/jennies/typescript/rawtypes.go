@@ -203,7 +203,7 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 			}
 		}
 
-		if !field.Required {
+		if !field.Required && !field.Type.IsConstantRef() {
 			continue
 		}
 
