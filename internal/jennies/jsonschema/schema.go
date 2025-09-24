@@ -17,6 +17,9 @@ type Definition = *orderedmap.Map[string, any]
 type Schema struct {
 	Config             Config
 	ReferenceFormatter func(ref ast.RefType) string
+	// OpenAPI3Compatible dictates whether the generated JSONSchema will be compatible with OpenAPI 3.0,
+	// rather than JSONSchema (OpenAPI 3.1 is fully compatible with JSON Schema)
+	OpenAPI3Compatible bool
 
 	foreignObjects     *orderedmap.Map[string, ast.Object]
 	referenceResolver  func(ref ast.RefType) (ast.Object, bool)
@@ -186,11 +189,21 @@ func (jenny Schema) addNumberConstraints(definition *orderedmap.Map[string, any]
 	for _, constraint := range typeDef.AsScalar().Constraints {
 		switch constraint.Op {
 		case ast.LessThanOp:
-			definition.Set("exclusiveMaximum", constraint.Args[0])
+			if jenny.OpenAPI3Compatible {
+				definition.Set("maximum", constraint.Args[0])
+				definition.Set("exclusiveMaximum", true)
+			} else {
+				definition.Set("exclusiveMaximum", constraint.Args[0])
+			}
 		case ast.LessThanEqualOp:
 			definition.Set("maximum", constraint.Args[0])
 		case ast.GreaterThanOp:
-			definition.Set("exclusiveMinimum", constraint.Args[0])
+			if jenny.OpenAPI3Compatible {
+				definition.Set("minimum", constraint.Args[0])
+				definition.Set("exclusiveMinimum", true)
+			} else {
+				definition.Set("exclusiveMinimum", constraint.Args[0])
+			}
 		case ast.GreaterThanEqualOp:
 			definition.Set("minimum", constraint.Args[0])
 		case ast.MultipleOfOp:
@@ -272,8 +285,18 @@ func (jenny Schema) formatConstantRef(typeDef ast.Type) Definition {
 		}
 	}
 
+	obj, ok := jenny.referenceResolver(ref)
+	if !ok {
+		definition.Set("$ref", jenny.ReferenceFormatter(ref))
+		return definition
+	}
+
 	// TODO: handle foreign refs
-	definition.Set("$ref", jenny.ReferenceFormatter(ref))
+	if obj.Type.IsEnum() {
+		definition.Set("allOf", []Definition{jenny.formatType(ref.AsType())})
+	} else {
+		definition.Set("$ref", jenny.ReferenceFormatter(ref))
+	}
 
 	if obj, ok := jenny.referenceResolver(ref); ok && obj.Type.IsEnum() {
 		definition.Set("default", constRef.ReferenceValue)
