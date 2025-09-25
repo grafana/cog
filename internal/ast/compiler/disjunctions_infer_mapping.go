@@ -37,6 +37,7 @@ func (pass *DisjunctionInferMapping) processDisjunction(_ *Visitor, schema *ast.
 		return def, nil
 	}
 
+	def.Default = pass.parseDefault(def)
 	return def, nil
 }
 
@@ -150,6 +151,10 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 			return nil, fmt.Errorf("could not resolve reference '%s'", branch.AsRef().String())
 		}
 
+		if !referredType.IsStruct() {
+			continue
+		}
+
 		structType := referredType.AsStruct()
 
 		field, found := structType.FieldByName(def.Discriminator)
@@ -175,4 +180,24 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 	}
 
 	return mapping, nil
+}
+
+func (pass *DisjunctionInferMapping) parseDefault(t ast.Type) any {
+	if t.Default == nil {
+		return nil
+	}
+
+	disjunction := t.Disjunction
+
+	defs := t.Default.(map[string]interface{})
+	for _, value := range defs {
+		if _, ok := value.(string); !ok {
+			continue
+		}
+		if referenceName, ok := disjunction.DiscriminatorMapping[value.(string)]; ok {
+			return referenceName
+		}
+	}
+
+	return t.Default
 }
