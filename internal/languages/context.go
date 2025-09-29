@@ -9,8 +9,9 @@ import (
 
 //nolint:musttag
 type Context struct {
-	Schemas  ast.Schemas
-	Builders ast.Builders
+	Schemas         ast.Schemas
+	Builders        ast.Builders
+	ConverterConfig ConverterConfig
 }
 
 func (context *Context) LocateObject(pkg string, name string) (ast.Object, bool) {

@@ -82,6 +82,7 @@ type Pipeline struct {
 	currentDirectory string
 	reporter         ProgressReporter
 	veneersRewriter  *rewrite.Rewriter
+	converterConfig  *languages.ConverterConfig
 }
 
 func NewPipeline() (*Pipeline, error) {
@@ -170,6 +171,32 @@ func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
 	pipeline.veneersRewriter = rewriter
 
 	return pipeline.veneersRewriter, nil
+}
+
+func (pipeline *Pipeline) readConverterConfig() (*languages.ConverterConfig, error) {
+	if pipeline.converterConfig != nil {
+		return pipeline.converterConfig, nil
+	}
+
+	cfg, err := cogyaml.NewConverterConfigReader().ReadConverterConfig(pipeline.Transforms.ConverterConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	runtimeConfig := make([]languages.RuntimeConfig, len(cfg.Runtime))
+	for i, rm := range cfg.Runtime {
+		runtimeConfig[i] = languages.RuntimeConfig{
+			Package:            rm.Package,
+			Name:               rm.Name,
+			NameFunc:           rm.NameFunc,
+			DiscriminatorField: rm.DiscriminatorField,
+		}
+	}
+
+	pipeline.converterConfig = &languages.ConverterConfig{
+		RuntimeConfig: runtimeConfig,
+	}
+	return pipeline.converterConfig, err
 }
 
 func (pipeline *Pipeline) outputDir(relativeToDir string) (string, error) {
