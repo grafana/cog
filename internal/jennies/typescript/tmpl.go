@@ -18,7 +18,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 	tmpl, err := template.New(
 		"typescript",
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
-		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
