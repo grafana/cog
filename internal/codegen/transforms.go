@@ -23,9 +23,13 @@ type Transforms struct {
 	// VeneersDirectories holds a list of paths to directories containing
 	// veneers to apply to all the builders.
 	VeneersDirectories []string `yaml:"builders"`
+
+	// ConverterConfig is the configuration modify the converters output.
+	ConverterConfig string `yaml:"converters"`
 }
 
 func (transforms *Transforms) interpolateParameters(interpolator ParametersInterpolator) {
 	transforms.CommonPassesFiles = tools.Map(transforms.CommonPassesFiles, interpolator)
 	transforms.VeneersDirectories = tools.Map(transforms.VeneersDirectories, interpolator)
+	transforms.ConverterConfig = interpolator(transforms.ConverterConfig)
 }

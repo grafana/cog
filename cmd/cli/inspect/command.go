@@ -149,7 +149,7 @@ func inspectConvertersIR(codegenCtx languages.Context, language languages.Langua
 		return fmt.Errorf("language '%s' does not appear to support converters", language.Name())
 	}
 
-	converter := languages.NewConverterGenerator(nullableConfig.NullableKinds()).FromBuilder(codegenCtx, builders[0])
+	converter := languages.NewConverterGenerator(nullableConfig.NullableKinds(), codegenCtx.ConverterConfig).FromBuilder(codegenCtx, builders[0])
 
 	return prettyPrintJSON(converter)
 }
