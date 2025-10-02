@@ -36,10 +36,14 @@ func TypeResolvingTemplateHelpers(context languages.Context) template.FuncMap {
 	}
 }
 
-func TypesTemplateHelpers() template.FuncMap {
+func TypesTemplateHelpers(context languages.Context) template.FuncMap {
 	return template.FuncMap{
 		"schemaHasObject": func(schema *ast.Schema, name string) bool {
 			return schema.HasObject(name)
+		},
+		"objectExists": func(pkg string, name string) bool {
+			_, ok := context.Schemas.LocateObject(pkg, name)
+			return ok
 		},
 	}
 }

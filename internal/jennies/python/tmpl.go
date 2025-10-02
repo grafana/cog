@@ -19,7 +19,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		"python",
 
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
-		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(formattingTemplateFuncs()),
 		// placeholder functions, will be overridden by jennies
