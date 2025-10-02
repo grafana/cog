@@ -404,32 +404,6 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 			},
 		}
 	}
-	if len(possibleBuilders) > 1 && strings.EqualFold(possibleBuilders[0].Package, "dashboardv2beta1") && strings.EqualFold("vizconfigkind", possibleBuilders[0].For.Name) {
-		typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName("group")
-
-		return ArgumentMapping{
-			Runtime: &RuntimeArgMapping{
-				FuncName: "ConvertPanelToCode",
-				Args: []*DirectArgMapping{
-					{ValuePath: valuePath, ValueType: typeDef},
-					{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
-				},
-			},
-		}
-	}
-	if len(possibleBuilders) > 1 && strings.EqualFold(possibleBuilders[0].Package, "dashboardv2beta1") && strings.EqualFold("dataquerykind", possibleBuilders[0].For.Name) {
-		typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName("group")
-
-		return ArgumentMapping{
-			Runtime: &RuntimeArgMapping{
-				FuncName: "ConvertDataQueryKindToCode",
-				Args: []*DirectArgMapping{
-					{ValuePath: valuePath, ValueType: typeDef},
-					{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
-				},
-			},
-		}
-	}
 	if len(possibleBuilders) > 1 && possibleBuilders.HaveConstantConstructorAssignment() {
 		choices := make([]BuilderChoiceMapping, 0, len(possibleBuilders))
 		for _, possibleBuilder := range possibleBuilders {
