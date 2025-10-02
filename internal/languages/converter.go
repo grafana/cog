@@ -197,14 +197,11 @@ func (generator *ConverterGenerator) constructorArgs(converter Converter, builde
 }
 
 func (generator *ConverterGenerator) convertListOfDisjunctionOptions(context Context, converter Converter, options []ast.Option) ConversionMapping {
-	mapping := ConversionMapping{
-		RepeatFor: converter.inputRootPath().Append(options[0].Assignments[0].Path),
-		RepeatAs:  "item",
-	}
-
+	mapping := generator.setupMappings(converter, options[0].Assignments)
 	mapping.Options = tools.Map(options, func(option ast.Option) OptionMapping {
 		return generator.mappingForOption(context, converter, mapping, option)
 	})
+
 	mapping.Options = tools.Filter(mapping.Options, func(optMapping OptionMapping) bool {
 		return optMapping.Option.Name != ""
 	})
@@ -221,19 +218,7 @@ func (generator *ConverterGenerator) convertOption(context Context, converter Co
 		return ConversionMapping{}
 	}
 
-	mapping := ConversionMapping{}
-
-	if len(assignments) == 1 && assignments[0].Method == ast.AppendAssignment {
-		mapping.RepeatFor = converter.inputRootPath().Append(assignments[0].Path)
-		mapping.RepeatAs = "item"
-	}
-
-	if len(assignments) == 1 && assignments[0].Method == ast.IndexAssignment {
-		assignmentPath := assignments[0].Path
-		mapping.RepeatFor = converter.inputRootPath().Append(assignmentPath[:len(assignmentPath)-1])
-		mapping.RepeatAs = "value"
-		mapping.RepeatIndex = "key"
-	}
+	mapping := generator.setupMappings(converter, assignments)
 
 	// if the option appends one possible branch of a disjunction to a list,
 	// we need to treat it differently
@@ -294,14 +279,17 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 			indexType := assignment.Path.Last().Index.Argument.Type
 			argument := generator.argumentForType(context, converter, mapping.RepeatIndex, indexPath, indexType)
 			optMapping.Args = append(optMapping.Args, argument)
+			// If it isn't a disjunction, we have to put the value in the second argument
+			if !generator.isAssignmentFromDisjunctionStruct(context, assignment) {
+				// value
+				valuePath = ast.Path{
+					{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+				}
 
-			// value
-			valuePath = ast.Path{
-				{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+				argument = generator.argumentForType(context, converter, argName, valuePath, valueType)
+				optMapping.Args = append(optMapping.Args, argument)
+				continue
 			}
-			argument = generator.argumentForType(context, converter, argName, valuePath, valueType)
-			optMapping.Args = append(optMapping.Args, argument)
-			continue
 		}
 
 		if argument, ok := generator.argumentFromDisjunctionStruct(context, converter, argName, valuePath, assignment); ok {
@@ -416,6 +404,32 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 			},
 		}
 	}
+	if len(possibleBuilders) > 1 && strings.EqualFold(possibleBuilders[0].Package, "dashboardv2beta1") && strings.EqualFold("vizconfigkind", possibleBuilders[0].For.Name) {
+		typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName("group")
+
+		return ArgumentMapping{
+			Runtime: &RuntimeArgMapping{
+				FuncName: "ConvertPanelToCode",
+				Args: []*DirectArgMapping{
+					{ValuePath: valuePath, ValueType: typeDef},
+					{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
+				},
+			},
+		}
+	}
+	if len(possibleBuilders) > 1 && strings.EqualFold(possibleBuilders[0].Package, "dashboardv2beta1") && strings.EqualFold("dataquerykind", possibleBuilders[0].For.Name) {
+		typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName("group")
+
+		return ArgumentMapping{
+			Runtime: &RuntimeArgMapping{
+				FuncName: "ConvertDataQueryKindToCode",
+				Args: []*DirectArgMapping{
+					{ValuePath: valuePath, ValueType: typeDef},
+					{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
+				},
+			},
+		}
+	}
 	if len(possibleBuilders) > 1 && possibleBuilders.HaveConstantConstructorAssignment() {
 		choices := make([]BuilderChoiceMapping, 0, len(possibleBuilders))
 		for _, possibleBuilder := range possibleBuilders {
@@ -481,13 +495,21 @@ func (generator *ConverterGenerator) isAssignmentFromDisjunctionStruct(context C
 		return false
 	}
 
-	envelopedType := assignment.Value.Envelope.Type
-	if envelopedType.IsRef() {
-		referredObject, _ := context.LocateObject(envelopedType.Ref.ReferredPkg, envelopedType.Ref.ReferredType)
-		envelopedType = referredObject.Type
+	var getEnvelopedType func(envelopedType ast.Type) ast.Type
+	getEnvelopedType = func(envelopedType ast.Type) ast.Type {
+		if envelopedType.IsRef() {
+			referredObject, _ := context.LocateObject(envelopedType.Ref.ReferredPkg, envelopedType.Ref.ReferredType)
+			envelopedType = referredObject.Type
+		}
+
+		if envelopedType.IsRef() {
+			return getEnvelopedType(envelopedType)
+		}
+
+		return envelopedType
 	}
 
-	return envelopedType.IsStructGeneratedFromDisjunction()
+	return getEnvelopedType(assignment.Value.Envelope.Type).IsStructGeneratedFromDisjunction()
 }
 
 func (generator *ConverterGenerator) argumentFromDisjunctionStruct(context Context, converter Converter, argName string, valuePath ast.Path, assignment ast.Assignment) (ArgumentMapping, bool) {
@@ -634,4 +656,21 @@ func (generator *ConverterGenerator) assignmentKey(assignment ast.Assignment) st
 	}
 
 	return path
+}
+
+func (generator *ConverterGenerator) setupMappings(converter Converter, assignments []ast.Assignment) ConversionMapping {
+	mapping := ConversionMapping{}
+	if len(assignments) == 1 && assignments[0].Method == ast.AppendAssignment {
+		mapping.RepeatFor = converter.inputRootPath().Append(assignments[0].Path)
+		mapping.RepeatAs = "item"
+	}
+
+	if len(assignments) == 1 && assignments[0].Method == ast.IndexAssignment {
+		assignmentPath := assignments[0].Path
+		mapping.RepeatFor = converter.inputRootPath().Append(assignmentPath[:len(assignmentPath)-1])
+		mapping.RepeatAs = "value"
+		mapping.RepeatIndex = "key"
+	}
+
+	return mapping
 }
