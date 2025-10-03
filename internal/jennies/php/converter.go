@@ -42,7 +42,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 }
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
-	converter := languages.NewConverterGenerator(jenny.nullableConfig).FromBuilder(context, builder)
+	converter := languages.NewConverterGenerator(jenny.nullableConfig, context.ConverterConfig).FromBuilder(context, builder)
 	schema, schemaFound := context.Schemas.Locate(builder.Package)
 
 	inputIsDataquery := schemaFound && schema.Metadata.Variant == ast.SchemaVariantDataQuery && schema.EntryPoint == builder.For.Name

@@ -172,7 +172,7 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 		refType := composableBuilder.For.SelfRef.AsType()
 		newRoot[len(newRoot)-1].TypeHint = &refType
 
-		newBuilder, err = mergeBuilderInto(composableBuilder, newBuilder, newRoot, nil, nil)
+		newBuilder, err = mergeBuilderInto(composableBuilder, newBuilder, newRoot, nil, config.RenameOptions)
 		if err != nil {
 			return nil, err
 		}
@@ -227,7 +227,6 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 					},
 					VeneerTrail: []string{"ComposeBuilders[created]"},
 				}
-
 				newBuilder.Options = append(newBuilder.Options, branchOpt)
 			}
 		case resolvedEntrypointType.IsStruct():
@@ -238,7 +237,7 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 				refType := entrypointBuilder.For.SelfRef.AsType()
 				newRoot[len(newRoot)-1].TypeHint = &refType
 
-				newBuilder, err = mergeBuilderInto(entrypointBuilder, newBuilder, newRoot, nil, nil)
+				newBuilder, err = mergeBuilderInto(entrypointBuilder, newBuilder, newRoot, nil, config.RenameOptions)
 				if err != nil {
 					return nil, err
 				}
@@ -294,6 +293,10 @@ type CompositionConfig struct {
 	// (ex: dashboard and dashboardv2 packages both use Options & FieldConfig
 	// types from panels for their composition needs)
 	PreserveOriginalBuilders bool
+
+	// RenameOption is used to rename the options from the original schema in order
+	// to avoid conflicts with composed builders.
+	RenameOptions map[string]string
 }
 
 func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {

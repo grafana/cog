@@ -135,6 +135,17 @@ func (converter Converter) inputRootPath() ast.Path {
 	}
 }
 
+type ConverterConfig struct {
+	RuntimeConfig []RuntimeConfig
+}
+
+type RuntimeConfig struct {
+	Package            string
+	Name               string
+	NameFunc           string
+	DiscriminatorField string
+}
+
 type ConverterGenerator struct {
 	nullableTypes NullableConfig
 
@@ -143,13 +154,16 @@ type ConverterGenerator struct {
 	generatedPaths map[string]struct{}
 
 	listOfDisjunctionOptions map[string][]ast.Option
+
+	config ConverterConfig
 }
 
-func NewConverterGenerator(nullableTypes NullableConfig) *ConverterGenerator {
+func NewConverterGenerator(nullableTypes NullableConfig, config ConverterConfig) *ConverterGenerator {
 	return &ConverterGenerator{
 		nullableTypes:            nullableTypes,
 		generatedPaths:           make(map[string]struct{}),
 		listOfDisjunctionOptions: make(map[string][]ast.Option),
+		config:                   config,
 	}
 }
 
@@ -402,18 +416,21 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 
 	possibleBuilders := context.BuildersForType(typeDef)
 	// hack to use the runtime to convert panels
-	// TODO: find a better way to handle this case (ie: something more generic than hardcoding it :/)
-	if len(possibleBuilders) > 1 && strings.EqualFold(possibleBuilders[0].Package, "dashboard") && strings.EqualFold("panel", possibleBuilders[0].For.Name) {
-		typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName("type")
+	if len(possibleBuilders) > 1 {
+		for _, runtimeConfig := range generator.config.RuntimeConfig {
+			if strings.EqualFold(possibleBuilders[0].Package, runtimeConfig.Package) && strings.EqualFold(runtimeConfig.Name, possibleBuilders[0].For.Name) {
+				typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName(runtimeConfig.DiscriminatorField)
 
-		return ArgumentMapping{
-			Runtime: &RuntimeArgMapping{
-				FuncName: "ConvertPanelToCode",
-				Args: []*DirectArgMapping{
-					{ValuePath: valuePath, ValueType: typeDef},
-					{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
-				},
-			},
+				return ArgumentMapping{
+					Runtime: &RuntimeArgMapping{
+						FuncName: runtimeConfig.NameFunc,
+						Args: []*DirectArgMapping{
+							{ValuePath: valuePath, ValueType: typeDef},
+							{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
+						},
+					},
+				}
+			}
 		}
 	}
 	if len(possibleBuilders) > 1 && possibleBuilders.HaveConstantConstructorAssignment() {

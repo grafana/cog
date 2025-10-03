@@ -21,7 +21,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		// "dummy"/unimplemented helpers, to be able to parse the templates before jennies are initialized.
 		// Jennies will override these with proper dependencies.
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
-		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(common.DynamicFilesTemplateHelpers()),
 
