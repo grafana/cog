@@ -27,6 +27,9 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 			"formatPath": func(_ ast.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
 			},
+			"formatPathForRange": func(_ ast.Path) string {
+				panic("formatPathForRange() needs to be overridden by a jenny")
+			},
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
 			},

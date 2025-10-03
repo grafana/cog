@@ -399,3 +399,36 @@ func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string 
 		return path
 	}
 }
+
+func formatPathForRange(typeFormatter *typeFormatter) func(path ast.Path) string {
+	return func(fieldPath ast.Path) string {
+		path := ""
+
+		for i := range fieldPath {
+			last := i == len(fieldPath)-1
+			output := fieldPath[i].Identifier
+			if !fieldPath[i].Root {
+				output = formatFieldName(output)
+			}
+
+			// don't generate type hints if:
+			// * there isn't one defined
+			// * the type isn't "any"
+			// * as a trailing element in the path
+			if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
+				path += output
+				if !last && fieldPath[i+1].Index == nil {
+					path += "."
+				}
+				continue
+			}
+
+			path += output + fmt.Sprintf(".(*%s)", typeFormatter.doFormatType(*fieldPath[i].TypeHint, false))
+			if !last && fieldPath[i+1].Index == nil {
+				path += "."
+			}
+		}
+
+		return path
+	}
+}
