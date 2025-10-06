@@ -18,7 +18,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 	tmpl, err := template.New(
 		"java",
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
-		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(functions()),
 		template.Funcs(formattingTemplateFuncs()),

@@ -77,7 +77,7 @@ func filterDataqueryObjects(schema *ast.Schema) *orderedmap.Map[string, ast.Obje
 }
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
-	converter := languages.NewConverterGenerator(jenny.nullableConfig).FromBuilder(context, builder)
+	converter := languages.NewConverterGenerator(jenny.nullableConfig, context.ConverterConfig).FromBuilder(context, builder)
 
 	schema, schemaFound := context.Schemas.Locate(builder.Package)
 	isPanel := schemaFound && schema.Metadata.Variant == ast.SchemaVariantPanel && builder.Name == "Panel"

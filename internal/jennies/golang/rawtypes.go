@@ -29,7 +29,9 @@ func (jenny RawTypes) JennyName() string {
 func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
-	jenny.tmpl = jenny.tmpl.Funcs(common.TypeResolvingTemplateHelpers(context))
+	jenny.tmpl = jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(common.TypesTemplateHelpers(context))
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.generateSchema(context, schema)
