@@ -105,7 +105,7 @@ package {{ .Converter.Package | formatPackageName }}
 {{- define "conversion_mapping" -}}
     {{- $firstOpt := .Options | first }}
     {{- with $firstOpt.Guards -}}if {{ template "guards" . }} { {{- end }}
-    {{- if ne .RepeatFor nil -}}for {{ .RepeatIndex | default "_" }}{{ if or (eq .RepeatIndex "_") (eq .RepeatIndex "") }}, {{ .RepeatAs }}{{ end }} := range {{ .RepeatFor | formatPathForRange }} { {{- end }}
+    {{- if ne .RepeatFor nil -}}for {{ .RepeatIndex | default "_" }}, {{ .RepeatAs }} := range {{ .RepeatFor | formatPathForRange }} { {{- end }}
     {{- range $optMapping := .Options }}
         {{ template "option_mapping" $optMapping }}
     {{- end }}

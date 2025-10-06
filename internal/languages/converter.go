@@ -294,12 +294,11 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 			argument := generator.argumentForType(context, converter, mapping.RepeatIndex, indexPath, indexType)
 			optMapping.Args = append(optMapping.Args, argument)
 			// If it isn't a disjunction, we have to put the value in the second argument
+			// value
+			valuePath = ast.Path{
+				{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+			}
 			if !generator.isAssignmentFromDisjunctionStruct(context, assignment) {
-				// value
-				valuePath = ast.Path{
-					{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
-				}
-
 				argument = generator.argumentForType(context, converter, argName, valuePath, valueType)
 				optMapping.Args = append(optMapping.Args, argument)
 				continue
