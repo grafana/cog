@@ -1,0 +1,881 @@
+{
+  "Schemas": [
+    {
+      "Package": "map_of_disjunctions",
+      "Metadata": {},
+      "EntryPointType": {
+        "Kind": "",
+        "Nullable": false
+      },
+      "Objects": {
+        "Element": {
+          "Name": "Element",
+          "Type": {
+            "Kind": "ref",
+            "Nullable": false,
+            "Ref": {
+              "ReferredPkg": "map_of_disjunctions",
+              "ReferredType": "PanelOrLibraryPanel"
+            },
+            "PassesTrail": [
+              "DisjunctionToType[disjunction → ref]"
+            ]
+          },
+          "SelfRef": {
+            "ReferredPkg": "map_of_disjunctions",
+            "ReferredType": "Element"
+          }
+        },
+        "Panel": {
+          "Name": "Panel",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "kind",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "Panel"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "map_of_disjunctions",
+            "ReferredType": "Panel"
+          }
+        },
+        "LibraryPanel": {
+          "Name": "LibraryPanel",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "kind",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string",
+                      "Value": "Library"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "text",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "map_of_disjunctions",
+            "ReferredType": "LibraryPanel"
+          }
+        },
+        "Dashboard": {
+          "Name": "Dashboard",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "panels",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "map_of_disjunctions",
+                          "ReferredType": "Element"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "map_of_disjunctions",
+            "ReferredType": "Dashboard"
+          }
+        },
+        "PanelOrLibraryPanel": {
+          "Name": "PanelOrLibraryPanel",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "Panel",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "Panel"
+                    }
+                  },
+                  "Required": false
+                },
+                {
+                  "Name": "LibraryPanel",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "LibraryPanel"
+                    }
+                  },
+                  "Required": false
+                }
+              ]
+            },
+            "Hints": {
+              "disjunction_of_refs": {
+                "Branches": [
+                  {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "Panel"
+                    }
+                  },
+                  {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "LibraryPanel"
+                    }
+                  }
+                ],
+                "Discriminator": "kind",
+                "DiscriminatorMapping": {
+                  "Library": "LibraryPanel",
+                  "Panel": "Panel"
+                }
+              }
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "map_of_disjunctions",
+            "ReferredType": "PanelOrLibraryPanel"
+          },
+          "PassesTrail": [
+            "DisjunctionToType[created]"
+          ]
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "For": {
+        "Name": "Element",
+        "Type": {
+          "Kind": "ref",
+          "Nullable": false,
+          "Ref": {
+            "ReferredPkg": "map_of_disjunctions",
+            "ReferredType": "PanelOrLibraryPanel"
+          },
+          "PassesTrail": [
+            "DisjunctionToType[disjunction → ref]"
+          ]
+        },
+        "SelfRef": {
+          "ReferredPkg": "map_of_disjunctions",
+          "ReferredType": "Element"
+        }
+      },
+      "Package": "map_of_disjunctions",
+      "Name": "Element",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "Panel",
+          "Args": [
+            {
+              "Name": "Panel",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": true,
+                "Ref": {
+                  "ReferredPkg": "map_of_disjunctions",
+                  "ReferredType": "Panel"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "Panel",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "Panel"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "Panel",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "Panel"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        },
+        {
+          "Name": "LibraryPanel",
+          "Args": [
+            {
+              "Name": "LibraryPanel",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": true,
+                "Ref": {
+                  "ReferredPkg": "map_of_disjunctions",
+                  "ReferredType": "LibraryPanel"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "LibraryPanel",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "LibraryPanel"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "LibraryPanel",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "LibraryPanel"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "For": {
+        "Name": "Panel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "kind",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "Panel"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "map_of_disjunctions",
+          "ReferredType": "Panel"
+        }
+      },
+      "Package": "map_of_disjunctions",
+      "Name": "Panel",
+      "Constructor": {
+        "Assignments": [
+          {
+            "Path": [
+              {
+                "Identifier": "kind",
+                "Index": null,
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "Panel"
+                  }
+                },
+                "Root": false
+              }
+            ],
+            "Value": {
+              "Constant": "Panel"
+            },
+            "Method": "direct"
+          }
+        ]
+      },
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "For": {
+        "Name": "LibraryPanel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "kind",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "Library"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "text",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "map_of_disjunctions",
+          "ReferredType": "LibraryPanel"
+        }
+      },
+      "Package": "map_of_disjunctions",
+      "Name": "LibraryPanel",
+      "Constructor": {
+        "Assignments": [
+          {
+            "Path": [
+              {
+                "Identifier": "kind",
+                "Index": null,
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string",
+                    "Value": "Library"
+                  }
+                },
+                "Root": false
+              }
+            ],
+            "Value": {
+              "Constant": "Library"
+            },
+            "Method": "direct"
+          }
+        ]
+      },
+      "Options": [
+        {
+          "Name": "text",
+          "Args": [
+            {
+              "Name": "text",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "text",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "text",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "For": {
+        "Name": "Dashboard",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "panels",
+                "Type": {
+                  "Kind": "map",
+                  "Nullable": false,
+                  "Map": {
+                    "IndexType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    "ValueType": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "map_of_disjunctions",
+                        "ReferredType": "Element"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "map_of_disjunctions",
+          "ReferredType": "Dashboard"
+        }
+      },
+      "Package": "map_of_disjunctions",
+      "Name": "Dashboard",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "panels",
+          "Args": [
+            {
+              "Name": "panels",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "Element"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "panels",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "map_of_disjunctions",
+                          "ReferredType": "Element"
+                        }
+                      }
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "panels",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "map_of_disjunctions",
+                          "ReferredType": "Element"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "For": {
+        "Name": "PanelOrLibraryPanel",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "Panel",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": true,
+                  "Ref": {
+                    "ReferredPkg": "map_of_disjunctions",
+                    "ReferredType": "Panel"
+                  }
+                },
+                "Required": false
+              },
+              {
+                "Name": "LibraryPanel",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": true,
+                  "Ref": {
+                    "ReferredPkg": "map_of_disjunctions",
+                    "ReferredType": "LibraryPanel"
+                  }
+                },
+                "Required": false
+              }
+            ]
+          },
+          "Hints": {
+            "disjunction_of_refs": {
+              "Branches": [
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "map_of_disjunctions",
+                    "ReferredType": "Panel"
+                  }
+                },
+                {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "map_of_disjunctions",
+                    "ReferredType": "LibraryPanel"
+                  }
+                }
+              ],
+              "Discriminator": "kind",
+              "DiscriminatorMapping": {
+                "Library": "LibraryPanel",
+                "Panel": "Panel"
+              }
+            }
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "map_of_disjunctions",
+          "ReferredType": "PanelOrLibraryPanel"
+        },
+        "PassesTrail": [
+          "DisjunctionToType[created]"
+        ]
+      },
+      "Package": "map_of_disjunctions",
+      "Name": "PanelOrLibraryPanel",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "Panel",
+          "Args": [
+            {
+              "Name": "Panel",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": true,
+                "Ref": {
+                  "ReferredPkg": "map_of_disjunctions",
+                  "ReferredType": "Panel"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "Panel",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "Panel"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "Panel",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "Panel"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        },
+        {
+          "Name": "LibraryPanel",
+          "Args": [
+            {
+              "Name": "LibraryPanel",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": true,
+                "Ref": {
+                  "ReferredPkg": "map_of_disjunctions",
+                  "ReferredType": "LibraryPanel"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "LibraryPanel",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "LibraryPanel"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "LibraryPanel",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": true,
+                    "Ref": {
+                      "ReferredPkg": "map_of_disjunctions",
+                      "ReferredType": "LibraryPanel"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
