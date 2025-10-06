@@ -1,14 +1,14 @@
 <?php
 
-namespace Grafana\Foundation\MapOfBuilders;
+namespace Grafana\Foundation\MapOfDisjunctions;
 
 final class PanelConverter
 {
-    public static function convert(\Grafana\Foundation\MapOfBuilders\Panel $input): string
+    public static function convert(\Grafana\Foundation\MapOfDisjunctions\Panel $input): string
     {
         
         $calls = [
-            '(new \Grafana\Foundation\MapOfBuilders\PanelBuilder())',
+            '(new \Grafana\Foundation\MapOfDisjunctions\PanelBuilder())',
         ];
             if ($input->title !== "") {
     
@@ -27,4 +27,3 @@ final class PanelConverter
         return \implode("\n\t->", $calls);
     }
 }
-
