@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/grafana/cog/internal/ast/compiler"
-	"gopkg.in/yaml.v3"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 type Compiler struct {
@@ -51,7 +51,7 @@ func (loader *CompilerLoader) LoadAll(readers []io.Reader) (compiler.Passes, err
 func (loader *CompilerLoader) Load(reader io.Reader) (compiler.Passes, error) {
 	compilerConfig := &Compiler{}
 
-	decoder := yaml.NewDecoder(reader)
+	decoder := yamlv3.NewDecoder(reader)
 	decoder.KnownFields(true)
 
 	if err := decoder.Decode(&compilerConfig); err != nil {

@@ -61,7 +61,7 @@ type GoldenFilesTestSuite[GoldenFileType any] struct {
 // out files.
 type Test[GoldenFileType any] struct {
 	// Allow Test to be used as a T.
-	*testing.T
+	T *testing.T
 
 	fileComparator FileComparator
 
@@ -81,10 +81,10 @@ func (t *Test[GoldenFileType]) WriteFile(f *codejen.File) {
 
 // WriteJSON marshals and writes the given input to `filename`.
 func (t *Test[GoldenFileType]) WriteJSON(filename string, input any) {
-	t.Helper()
+	t.T.Helper()
 
 	marshaledIR, err := json.MarshalIndent(input, "", "  ")
-	require.NoError(t, err)
+	require.NoError(t.T, err)
 
 	t.WriteFile(&codejen.File{
 		RelativePath: filename,
@@ -101,11 +101,11 @@ func (t *Test[GoldenFileType]) WriteFiles(files codejen.Files) {
 
 // UnmarshalJSONInput reads and unmarshals the specified input file.
 func (t *Test[GoldenFileType]) UnmarshalJSONInput(filename string) GoldenFileType {
-	t.Helper()
+	t.T.Helper()
 
 	var parsed GoldenFileType
 	if err := json.Unmarshal(t.ReadInput(filename), &parsed); err != nil {
-		t.Fatalf("could not unmarshal input: %s", err)
+		t.T.Fatalf("could not unmarshal input: %s", err)
 	}
 
 	return parsed
@@ -113,11 +113,11 @@ func (t *Test[GoldenFileType]) UnmarshalJSONInput(filename string) GoldenFileTyp
 
 // OpenInput opens the specified input file and returns an [io.Reader] to it.
 func (t *Test[GoldenFileType]) OpenInput(inputFile string) io.Reader {
-	t.Helper()
+	t.T.Helper()
 
 	reader, err := os.Open(filepath.Join(t.RootDir, inputFile))
 	if err != nil {
-		t.Fatalf("could not open input file '%s': %s", inputFile, err)
+		t.T.Fatalf("could not open input file '%s': %s", inputFile, err)
 	}
 
 	return reader
@@ -125,11 +125,11 @@ func (t *Test[GoldenFileType]) OpenInput(inputFile string) io.Reader {
 
 // ReadInput reads the specified input file and its contents.
 func (t *Test[GoldenFileType]) ReadInput(inputFile string) []byte {
-	t.Helper()
+	t.T.Helper()
 
 	content, err := io.ReadAll(t.OpenInput(inputFile))
 	if err != nil {
-		t.Fatalf("could not read input file '%s': %s", inputFile, err)
+		t.T.Fatalf("could not read input file '%s': %s", inputFile, err)
 	}
 
 	return content

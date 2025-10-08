@@ -19,7 +19,7 @@ import (
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	cogyaml "github.com/grafana/cog/internal/yaml"
-	"gopkg.in/yaml.v3"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 type ParametersInterpolator func(input string) string
@@ -48,7 +48,7 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 	}
 	defer func() { _ = fileHandle.Close() }()
 
-	decoder := yaml.NewDecoder(fileHandle)
+	decoder := yamlv3.NewDecoder(fileHandle)
 	decoder.KnownFields(true)
 
 	pipeline, err := NewPipeline()
