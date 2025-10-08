@@ -477,7 +477,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 	if path.String() != "" {
 		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
 		if err != nil {
-			return ast.Type{}, errorWithCueRef(v, err.Error())
+			return ast.Type{}, errorWithCueRef(v, "%s", err.Error())
 		}
 
 		defValue, err := g.extractDefault(defV)
@@ -507,7 +507,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			if err != nil {
 				referenceValue, err = v.Int64()
 				if err != nil {
-					return ast.Type{}, errorWithCueRef(v, err.Error())
+					return ast.Type{}, errorWithCueRef(v, "%s", err.Error())
 				}
 			}
 
@@ -897,7 +897,7 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 
 		op, arg, err := extractOperatorAndArg(part, v.IncompleteKind())
 		if err != nil {
-			return nil, errorWithCueRef(v, err.Error())
+			return nil, errorWithCueRef(v, "%s", err.Error())
 		}
 
 		constraints = append(constraints, ast.TypeConstraint{

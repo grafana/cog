@@ -36,7 +36,7 @@ func dumpsyn(v cue.Value) (string, error) {
 }
 
 func errorWithCueRef(v cue.Value, format string, args ...interface{}) error {
-	return fmt.Errorf(v.Pos().String() + ": " + fmt.Sprintf(format, args...))
+	return fmt.Errorf("%s: %s", v.Pos().String(), fmt.Sprintf(format, args...))
 }
 
 func selectorLabel(sel cue.Selector) string {
