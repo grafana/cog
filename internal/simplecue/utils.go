@@ -53,6 +53,8 @@ func selectorLabel(sel cue.Selector) string {
 	// fields and definitions because we've not asked the
 	// Fields iterator for those or created them explicitly.
 	panic(fmt.Sprintf("unreachable %v", sel.Type()))
+
+	return ""
 }
 
 // from https://github.com/cue-lang/cue/blob/99e8578ac45e5e7e6ebf25794303bc916744c0d3/encoding/openapi/build.go#L490

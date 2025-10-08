@@ -127,7 +127,7 @@ type Converter struct {
 
 func (converter Converter) inputRootPath() ast.Path {
 	return ast.Path{
-		{
+		ast.PathItem{
 			Identifier: converter.Input.ArgName,
 			Type:       converter.Input.TypeRef.AsType(),
 			Root:       true,
@@ -283,12 +283,12 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 		if mapping.RepeatFor != nil && valueType.IsArray() {
 			valueType = valueType.AsArray().ValueType
 			valuePath = ast.Path{
-				{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+				ast.PathItem{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
 			}
 		} else if mapping.RepeatFor != nil && assignment.Method == ast.IndexAssignment {
 			// index
 			indexPath := ast.Path{
-				{Identifier: mapping.RepeatIndex, Type: valueType, Root: true},
+				ast.PathItem{Identifier: mapping.RepeatIndex, Type: valueType, Root: true},
 			}
 			indexType := assignment.Path.Last().Index.Argument.Type
 			argument := generator.argumentForType(context, converter, mapping.RepeatIndex, indexPath, indexType)
@@ -296,7 +296,7 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 			// If it isn't a disjunction, we have to put the value in the second argument
 			// value
 			valuePath = ast.Path{
-				{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+				ast.PathItem{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
 			}
 			if !generator.isAssignmentFromDisjunctionStruct(context, assignment) {
 				argument = generator.argumentForType(context, converter, argName, valuePath, valueType)
@@ -366,7 +366,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 
 	if typeDef.IsArray() {
 		valueAs := ast.Path{
-			{Identifier: argName, Type: typeDef.Array.ValueType, Root: true},
+			ast.PathItem{Identifier: argName, Type: typeDef.Array.ValueType, Root: true},
 		}
 
 		forArg := generator.argumentForType(context, converter, argName+"Value", valueAs, typeDef.Array.ValueType)
@@ -384,7 +384,7 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 
 	if typeDef.IsMap() {
 		valueAs := ast.Path{
-			{Identifier: argName, Type: typeDef.Map.ValueType, Root: true},
+			ast.PathItem{Identifier: argName, Type: typeDef.Map.ValueType, Root: true},
 		}
 
 		forArg := generator.argumentForType(context, converter, argName+"Value", valueAs, typeDef.Map.ValueType)

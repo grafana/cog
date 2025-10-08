@@ -149,7 +149,7 @@ func MapToIndexAction() RewriteAction {
 
 		newFirstAssignment := option.Assignments[0]
 		newFirstAssignment.Method = ast.IndexAssignment
-		newFirstAssignment.Path = newFirstAssignment.Path.Append(ast.Path{{
+		newFirstAssignment.Path = newFirstAssignment.Path.Append(ast.Path{ast.PathItem{
 			Index: &ast.PathIndex{Argument: &newFirstArg},
 			Type:  option.Args[0].Type.Map.ValueType,
 		}})

@@ -36,7 +36,7 @@ func TestUnfoldBooleanAction(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "editable", Type: ast.Bool()},
+				ast.PathItem{Identifier: "editable", Type: ast.Bool()},
 			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
 		},
 	}
@@ -72,7 +72,7 @@ func TestUnfoldBooleanAction_onNonBooleanDoesNothing(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "tags", Type: ast.NewArray(ast.String())},
+				ast.PathItem{Identifier: "tags", Type: ast.NewArray(ast.String())},
 			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
 		},
 	}
@@ -100,7 +100,7 @@ func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "panel", Type: disjunctionType},
+				ast.PathItem{Identifier: "panel", Type: disjunctionType},
 			}, ast.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
@@ -135,10 +135,10 @@ func TestDisjunctionAsOptionsAction_withDisjunctionAsSecondArg(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{ // This assignment doesn't make sense, but for the purpose of this test it doesn't matter.
-				{Identifier: "key", Type: ast.String()},
+				ast.PathItem{Identifier: "key", Type: ast.String()},
 			}, ast.Argument{Name: "key", Type: ast.String()}),
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "panel", Type: disjunctionType},
+				ast.PathItem{Identifier: "panel", Type: disjunctionType},
 			}, ast.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
@@ -189,7 +189,7 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "panel", Type: ref},
+				ast.PathItem{Identifier: "panel", Type: ref},
 			}, ast.Argument{Name: "tags", Type: ref}),
 		},
 	}
@@ -235,10 +235,10 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStructAsSecondArg(t *testing.
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{ // This assignment doesn't make sense, but for the purpose of this test it doesn't matter.
-				{Identifier: "key", Type: ast.String()},
+				ast.PathItem{Identifier: "key", Type: ast.String()},
 			}, ast.Argument{Name: "key", Type: ast.String()}),
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "panel", Type: ref},
+				ast.PathItem{Identifier: "panel", Type: ref},
 			}, ast.Argument{Name: "tags", Type: ref}),
 		},
 	}
@@ -285,7 +285,7 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "time", Type: ref},
+				ast.PathItem{Identifier: "time", Type: ref},
 			}, ast.Argument{Name: "editable", Type: ref}),
 		},
 	}
@@ -314,7 +314,7 @@ func TestArrayToAppendAction_withNoArgument(t *testing.T) {
 	option := ast.Option{
 		Assignments: []ast.Assignment{
 			ast.ConstantAssignment(ast.Path{
-				{Identifier: "editable", Type: ast.Bool()},
+				ast.PathItem{Identifier: "editable", Type: ast.Bool()},
 			}, true),
 		},
 	}
@@ -332,7 +332,7 @@ func TestArrayToAppendAction_withNonArrayArgument(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "editable", Type: ast.Bool()},
+				ast.PathItem{Identifier: "editable", Type: ast.Bool()},
 			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
 		},
 	}
@@ -351,7 +351,7 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "tags", Type: ast.NewArray(ast.String())},
+				ast.PathItem{Identifier: "tags", Type: ast.NewArray(ast.String())},
 			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
 		},
 	}
@@ -364,7 +364,7 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(
 				ast.Path{
-					{Identifier: "tags", Type: ast.NewArray(ast.String())},
+					ast.PathItem{Identifier: "tags", Type: ast.NewArray(ast.String())},
 				},
 				ast.Argument{Name: "tag", Type: ast.String()},
 				ast.Method(ast.AppendAssignment),
@@ -384,7 +384,7 @@ func TestStructFieldsAsArgumentsAction_withNoArgument(t *testing.T) {
 	option := ast.Option{
 		Assignments: []ast.Assignment{
 			ast.ConstantAssignment(ast.Path{
-				{Identifier: "editable", Type: ast.Bool()},
+				ast.PathItem{Identifier: "editable", Type: ast.Bool()},
 			}, true),
 		},
 	}
@@ -402,7 +402,7 @@ func TestStructFieldsAsArgumentsAction_withNonStructArgument(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "tags", Type: ast.NewArray(ast.String())},
+				ast.PathItem{Identifier: "tags", Type: ast.NewArray(ast.String())},
 			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
 		},
 	}
@@ -427,7 +427,7 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "time", Type: structType},
+				ast.PathItem{Identifier: "time", Type: structType},
 			}, ast.Argument{Name: "time", Type: structType}),
 		},
 	}
@@ -440,16 +440,16 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "time", Type: structType},
-				{Identifier: "from", Type: ast.String()},
+				ast.PathItem{Identifier: "time", Type: structType},
+				ast.PathItem{Identifier: "from", Type: ast.String()},
 			}, ast.Argument{Name: "from", Type: ast.String()}),
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "time", Type: structType},
-				{Identifier: "to", Type: ast.String()},
+				ast.PathItem{Identifier: "time", Type: structType},
+				ast.PathItem{Identifier: "to", Type: ast.String()},
 			}, ast.Argument{Name: "to", Type: ast.String()}),
 			ast.ConstantAssignment(ast.Path{
-				{Identifier: "time", Type: structType},
-				{Identifier: "type", Type: ast.String(ast.Value("time"))},
+				ast.PathItem{Identifier: "time", Type: structType},
+				ast.PathItem{Identifier: "type", Type: ast.String(ast.Value("time"))},
 			}, "time"),
 		},
 		VeneerTrail: []string{"StructFieldsAsArguments"},
@@ -476,7 +476,7 @@ func TestStructFieldsAsArgumentsAction_withArrayOfStructArgument(t *testing.T) {
 		},
 		Assignments: []ast.Assignment{
 			ast.ArgumentAssignment(ast.Path{
-				{Identifier: "time", Type: ast.NewArray(structType)},
+				ast.PathItem{Identifier: "time", Type: ast.NewArray(structType)},
 			}, ast.Argument{Name: "time", Type: structType}),
 		},
 	}
@@ -490,27 +490,27 @@ func TestStructFieldsAsArgumentsAction_withArrayOfStructArgument(t *testing.T) {
 		Assignments: []ast.Assignment{
 			{
 				Method: ast.AppendAssignment,
-				Path:   ast.Path{{Identifier: "time", Type: ast.NewArray(structType)}},
+				Path:   ast.Path{ast.PathItem{Identifier: "time", Type: ast.NewArray(structType)}},
 				Value: ast.AssignmentValue{
 					Envelope: &ast.AssignmentEnvelope{
 						Type: structType,
 						Values: []ast.EnvelopeFieldValue{
 							{
-								Path: ast.Path{{Identifier: "from", Type: ast.String()}},
+								Path: ast.Path{ast.PathItem{Identifier: "from", Type: ast.String()}},
 								Value: ast.AssignmentValue{Argument: &ast.Argument{
 									Name: "from",
 									Type: ast.String(),
 								}},
 							},
 							{
-								Path: ast.Path{{Identifier: "to", Type: ast.String()}},
+								Path: ast.Path{ast.PathItem{Identifier: "to", Type: ast.String()}},
 								Value: ast.AssignmentValue{Argument: &ast.Argument{
 									Name: "to",
 									Type: ast.String(),
 								}},
 							},
 							{
-								Path:  ast.Path{{Identifier: "type", Type: ast.String(ast.Value("time"))}},
+								Path:  ast.Path{ast.PathItem{Identifier: "type", Type: ast.String(ast.Value("time"))}},
 								Value: ast.AssignmentValue{Constant: "time"},
 							},
 						},

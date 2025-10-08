@@ -51,7 +51,7 @@ func testData() []rewriteTestCase {
 			},
 			outputBuilders: ast.Builders{
 				dashboardBuilder(),
-				{
+				ast.Builder{
 					Package: "test_pkg",
 					For: ast.NewObject(
 						"test_pkg",
@@ -69,7 +69,7 @@ func testData() []rewriteTestCase {
 							},
 							Assignments: []ast.Assignment{
 								ast.ArgumentAssignment(
-									ast.Path{{Identifier: "id", Type: ast.NewScalar(ast.KindInt64)}},
+									ast.Path{ast.PathItem{Identifier: "id", Type: ast.NewScalar(ast.KindInt64)}},
 									ast.Argument{Name: "id", Type: ast.NewScalar(ast.KindInt64)},
 								),
 							},
@@ -81,7 +81,7 @@ func testData() []rewriteTestCase {
 							},
 							Assignments: []ast.Assignment{
 								ast.ArgumentAssignment(
-									ast.Path{{Identifier: "type", Type: ast.String()}},
+									ast.Path{ast.PathItem{Identifier: "type", Type: ast.String()}},
 									ast.Argument{Name: "type", Type: ast.String()},
 								),
 							},
@@ -102,7 +102,7 @@ func testData() []rewriteTestCase {
 				),
 			},
 			outputBuilders: ast.Builders{
-				{
+				ast.Builder{
 					Package: "test_pkg",
 					For: ast.NewObject(
 						"test_pkg",
@@ -120,7 +120,7 @@ func testData() []rewriteTestCase {
 							},
 							Assignments: []ast.Assignment{
 								ast.ArgumentAssignment(
-									ast.Path{{Identifier: "uid", Type: ast.String()}},
+									ast.Path{ast.PathItem{Identifier: "uid", Type: ast.String()}},
 									ast.Argument{Name: "uid", Type: ast.String()},
 								),
 							},
@@ -152,7 +152,7 @@ func dashboardBuilder() ast.Builder {
 				},
 				Assignments: []ast.Assignment{
 					ast.ArgumentAssignment(
-						ast.Path{{Identifier: "uid", Type: ast.String()}},
+						ast.Path{ast.PathItem{Identifier: "uid", Type: ast.String()}},
 						ast.Argument{Name: "uid", Type: ast.String()},
 					),
 				},
@@ -164,7 +164,7 @@ func dashboardBuilder() ast.Builder {
 				},
 				Assignments: []ast.Assignment{
 					ast.ArgumentAssignment(
-						ast.Path{{Identifier: "title", Type: ast.String()}},
+						ast.Path{ast.PathItem{Identifier: "title", Type: ast.String()}},
 						ast.Argument{Name: "title", Type: ast.String()},
 					),
 				},
@@ -192,7 +192,7 @@ func panelBuilder() ast.Builder {
 				},
 				Assignments: []ast.Assignment{
 					ast.ArgumentAssignment(
-						ast.Path{{Identifier: "id", Type: ast.NewScalar(ast.KindInt64)}},
+						ast.Path{ast.PathItem{Identifier: "id", Type: ast.NewScalar(ast.KindInt64)}},
 						ast.Argument{Name: "id", Type: ast.NewScalar(ast.KindInt64)},
 					),
 				},
@@ -204,7 +204,7 @@ func panelBuilder() ast.Builder {
 				},
 				Assignments: []ast.Assignment{
 					ast.ArgumentAssignment(
-						ast.Path{{Identifier: "type", Type: ast.String()}},
+						ast.Path{ast.PathItem{Identifier: "type", Type: ast.String()}},
 						ast.Argument{Name: "type", Type: ast.String()},
 					),
 				},

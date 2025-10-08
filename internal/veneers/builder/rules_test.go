@@ -22,7 +22,7 @@ func TestDuplicate(t *testing.T) {
 		},
 	}
 	originalBuilders := ast.Builders{
-		{
+		ast.Builder{
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
@@ -63,7 +63,7 @@ func TestInitialize(t *testing.T) {
 		},
 	}
 	originalBuilders := ast.Builders{
-		{
+		ast.Builder{
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
@@ -90,7 +90,7 @@ func TestInitialize(t *testing.T) {
 
 	expectedAssignments := []ast.Assignment{
 		{
-			Path:   ast.Path{{Identifier: "name", Type: ast.String()}},
+			Path:   ast.Path{ast.PathItem{Identifier: "name", Type: ast.String()}},
 			Value:  ast.AssignmentValue{Constant: "great name, isn't it?"},
 			Method: ast.DirectAssignment,
 		},
@@ -116,7 +116,7 @@ func TestPromoteOptionsToConstructor(t *testing.T) {
 		},
 	}
 	originalBuilders := ast.Builders{
-		{
+		ast.Builder{
 			For:     originalObject,
 			Package: "pkg",
 			Name:    "Dashboard",
