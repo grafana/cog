@@ -20,9 +20,7 @@ func (jenny fakeNamedJenny) JennyName() string {
 func TestPrefixer(t *testing.T) {
 	req := require.New(t)
 	fileContent := []byte("with content")
-	inputFile := codejen.NewFile("some.file", fileContent)
-
-	resultFile, err := PathPrefixer("/the/prefix")(*inputFile)
+	resultFile, err := PathPrefixer("/the/prefix")(*codejen.NewFile("some.file", fileContent))
 	req.NoError(err)
 
 	req.Equal("/the/prefix/some.file", resultFile.RelativePath)

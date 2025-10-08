@@ -8,7 +8,7 @@ import (
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
 	"github.com/grafana/cog/internal/veneers/rewrite"
-	"gopkg.in/yaml.v3"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 type Veneers struct {
@@ -52,7 +52,7 @@ func (loader *VeneersLoader) load(reader io.Reader) (rewrite.LanguageRules, erro
 
 	veneers := &Veneers{}
 
-	decoder := yaml.NewDecoder(reader)
+	decoder := yamlv3.NewDecoder(reader)
 	decoder.KnownFields(true)
 
 	if err := decoder.Decode(&veneers); err != nil {

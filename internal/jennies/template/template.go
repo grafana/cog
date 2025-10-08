@@ -19,11 +19,12 @@ const recursionMaxNums = 1000
 type FuncMap gotemplate.FuncMap
 
 func (funcMap FuncMap) MergeWith(other FuncMap) FuncMap {
+	fm := gotemplate.FuncMap(funcMap)
 	for k, v := range gotemplate.FuncMap(other) {
-		funcMap[k] = v
+		fm[k] = v
 	}
 
-	return funcMap
+	return FuncMap(fm)
 }
 
 type Option func(*Template) error
