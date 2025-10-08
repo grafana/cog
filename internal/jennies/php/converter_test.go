@@ -32,7 +32,7 @@ func TestConverter_Generate(t *testing.T) {
 
 	test.Run(t, func(tc *testutils.Test[languages.Context]) {
 		var err error
-		req := require.New(tc)
+		req := require.New(tc.T)
 
 		context := tc.UnmarshalJSONInput(testutils.BuildersContextInputFile)
 		context, err = languages.GenerateBuilderNilChecks(language, context)

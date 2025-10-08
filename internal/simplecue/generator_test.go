@@ -24,7 +24,7 @@ func TestGenerateAST(t *testing.T) {
 	}
 
 	test.Run(t, func(tc *testutils.Test[string]) {
-		req := require.New(tc)
+		req := require.New(tc.T)
 
 		schemaAst, err := GenerateAST(txtarTestToCueInstance(tc), Config{Package: "grafanatest"})
 		req.NoError(err)
@@ -214,7 +214,7 @@ func toCueOverlay(prefix string, vfs fs.FS, overlay map[string]load.Source) erro
 }
 
 func txtarTestToCueInstance(tc *testutils.Test[string]) cue.Value {
-	tc.Helper()
+	tc.T.Helper()
 
 	return bytesToCueValue(tc.T, tc.ReadInput("schema.cue"))
 }

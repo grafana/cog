@@ -16,7 +16,7 @@ func TestGenerateAST(t *testing.T) {
 	}
 
 	test.Run(t, func(tc *testutils.Test[string]) {
-		req := require.New(tc)
+		req := require.New(tc.T)
 
 		schemaAst, err := GenerateAST(tc.OpenInput("schema.json"), Config{Package: "grafanatest"})
 		req.NoError(err)
