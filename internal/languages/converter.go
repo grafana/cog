@@ -142,8 +142,8 @@ type ConverterConfig struct {
 type RuntimeConfig struct {
 	Package            string
 	Name               string
-	NameFunc           string
-	DiscriminatorField string
+	NameFunc           string `yaml:"name_func"`
+	DiscriminatorField string `yaml:"discriminator_field"`
 }
 
 type ConverterGenerator struct {
