@@ -1,0 +1,365 @@
+{
+  "Schemas": [
+    {
+      "Package": "discriminator_without_option",
+      "Metadata": {},
+      "EntryPointType": {
+        "Kind": "",
+        "Nullable": false
+      },
+      "Objects": {
+        "AnEnum": {
+          "Name": "AnEnum",
+          "Type": {
+            "Kind": "enum",
+            "Nullable": false,
+            "Enum": {
+              "Values": [
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "A",
+                  "Value": "A"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "B",
+                  "Value": "B"
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "discriminator_without_option",
+            "ReferredType": "AnEnum"
+          }
+        },
+        "NoShowFieldOption": {
+          "Name": "NoShowFieldOption",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "field",
+                  "Type": {
+                    "Kind": "constant_ref",
+                    "Nullable": false,
+                    "ConstantReference": {
+                      "ReferredPkg": "discriminator_without_option",
+                      "ReferredType": "AnEnum",
+                      "ReferenceValue": "A"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "text",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "discriminator_without_option",
+            "ReferredType": "NoShowFieldOption"
+          }
+        },
+        "ShowFieldOption": {
+          "Name": "ShowFieldOption",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "field",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "discriminator_without_option",
+                      "ReferredType": "AnEnum"
+                    }
+                  },
+                  "Required": true
+                },
+                {
+                  "Name": "text",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "discriminator_without_option",
+            "ReferredType": "ShowFieldOption"
+          }
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "For": {
+        "Name": "NoShowFieldOption",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "field",
+                "Type": {
+                  "Kind": "constant_ref",
+                  "Nullable": false,
+                  "ConstantReference": {
+                    "ReferredPkg": "discriminator_without_option",
+                    "ReferredType": "AnEnum",
+                    "ReferenceValue": "A"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "text",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "discriminator_without_option",
+          "ReferredType": "NoShowFieldOption"
+        }
+      },
+      "Package": "discriminator_without_option",
+      "Name": "NoShowFieldOption",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "text",
+          "Args": [
+            {
+              "Name": "text",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "text",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "text",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "For": {
+        "Name": "ShowFieldOption",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "field",
+                "Type": {
+                  "Kind": "ref",
+                  "Nullable": false,
+                  "Ref": {
+                    "ReferredPkg": "discriminator_without_option",
+                    "ReferredType": "AnEnum"
+                  }
+                },
+                "Required": true
+              },
+              {
+                "Name": "text",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "discriminator_without_option",
+          "ReferredType": "ShowFieldOption"
+        }
+      },
+      "Package": "discriminator_without_option",
+      "Name": "ShowFieldOption",
+      "Constructor": {},
+      "Options": [
+        {
+          "Name": "field",
+          "Args": [
+            {
+              "Name": "field",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "discriminator_without_option",
+                  "ReferredType": "AnEnum"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "field",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "discriminator_without_option",
+                      "ReferredType": "AnEnum"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "field",
+                  "Type": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "discriminator_without_option",
+                      "ReferredType": "AnEnum"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        },
+        {
+          "Name": "text",
+          "Args": [
+            {
+              "Name": "text",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "text",
+                  "Index": null,
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Root": false
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "text",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ConverterConfig": {
+    "RuntimeConfig": []
+  }
+}
