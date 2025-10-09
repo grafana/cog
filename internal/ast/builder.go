@@ -559,9 +559,10 @@ func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema
 
 			constantAssignment := ConstantAssignment(PathFromStructField(field), resolvedType.AsScalar().Value)
 			builder.Constructor.Assignments = append(builder.Constructor.Assignments, constantAssignment)
+
 			continue
 		}
-		if field.Type.IsConstantRef() && !field.Required {
+		if field.Required && !field.Type.Nullable && field.Type.IsConstantRef() {
 			continue
 		}
 
