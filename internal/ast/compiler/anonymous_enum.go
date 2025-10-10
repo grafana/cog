@@ -84,7 +84,7 @@ func (pass *AnonymousEnumToExplicitType) processType(pkg string, currentObjectNa
 	}
 
 	if def.IsEnum() {
-		return pass.processAnonymousEnum(pkg, suggestedEnumName, def.AsEnum(), def.Nullable)
+		return pass.processAnonymousEnum(pkg, suggestedEnumName, def)
 	}
 
 	if def.IsDisjunction() {
@@ -138,11 +138,12 @@ func (pass *AnonymousEnumToExplicitType) processStruct(pkg string, parentName st
 	return def
 }
 
-func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(pkg string, parentName string, def ast.EnumType, nullable bool) ast.Type {
+func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(pkg string, parentName string, def ast.Type) ast.Type {
+	enum := def.AsEnum()
 	enumTypeName := tools.UpperCamelCase(parentName)
 
-	values := make([]ast.EnumValue, 0, len(def.Values))
-	for _, val := range def.Values {
+	values := make([]ast.EnumValue, 0, len(enum.Values))
+	for _, val := range enum.Values {
 		values = append(values, ast.EnumValue{
 			Type:  val.Type,
 			Name:  tools.UpperCamelCase(val.Name),
@@ -157,8 +158,9 @@ func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(pkg string, parent
 
 	typeOpts := []ast.TypeOption{
 		ast.Trail("AnonymousEnumToExplicitType"),
+		ast.Default(def.Default),
 	}
-	if nullable {
+	if def.Nullable {
 		typeOpts = append(typeOpts, ast.Nullable())
 	}
 
