@@ -17,7 +17,7 @@ func TestGenerateAST(t *testing.T) {
 	}
 
 	test.Run(t, func(tc *testutils.Test[string]) {
-		req := require.New(tc)
+		req := require.New(tc.T)
 		ctx := context.TODO()
 
 		schemaAst, err := GenerateAST(ctx, getSchemaAsReader(tc), Config{Package: "grafanatest"})
@@ -29,14 +29,14 @@ func TestGenerateAST(t *testing.T) {
 }
 
 func getSchemaAsReader(tc *testutils.Test[string]) *openapi3.T {
-	tc.Helper()
+	tc.T.Helper()
 
 	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = true
 
 	oapi, err := loader.LoadFromFile(filepath.Join(tc.RootDir, "schema.json"))
 	if err != nil {
-		tc.Fatalf("could not open schema: %s", err)
+		tc.T.Fatalf("could not open schema: %s", err)
 	}
 
 	return oapi
