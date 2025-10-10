@@ -1,4 +1,4 @@
-{{- define "object_dashboardv2alpha1_VizConfigKind_field_spec_custom_strict_unmarshal" -}}
+{{- define "object_dashboardv2beta1_VizConfigKind_field_spec_custom_strict_unmarshal" -}}
 	{{- $fmt := importStdPkg "fmt" -}}
 	{{- $json := importStdPkg "encoding/json" -}}
 	{{- $cog := importPkg "cog" -}}
@@ -10,9 +10,9 @@
 		{{- range $field := (.Field.Type|resolveRefs).Struct.Fields }}
 			if specFields["{{ $field.Name }}"] != nil {
 			{{- if eq $field.Name "options" }}
-				{{ template "object_dashboardv2alpha1_VizConfigKind_spec_options_strict_unmarshal" }}
+				{{ template "object_dashboardv2beta1_VizConfigKind_spec_options_strict_unmarshal" }}
 			{{- else if eq $field.Name "fieldConfig" }}
-				{{ template "object_dashboardv2alpha1_VizConfigKind_spec_fieldConfig" }}
+				{{ template "object_dashboardv2beta1_VizConfigKind_spec_fieldConfig" }}
 			{{- else }}
 				{{- $inputRef := print "specFields[" ($field.Name|formatScalar) "]" }}
 				{{- $unmarshalInto := print "spec." ($field.Name|formatFieldName) }}
@@ -26,14 +26,14 @@
 	resource.Spec = spec
 {{ end }}
 
-{{- define "object_dashboardv2alpha1_VizConfigKind_spec_fieldConfig_strict_unmarshal" -}}
+{{- define "object_dashboardv2beta1_VizConfigKind_spec_fieldConfig_strict_unmarshal" -}}
 	{{- $fmt := importStdPkg "fmt" -}}
 	{{- $json := importStdPkg "encoding/json" -}}
 	{{- $cog := importPkg "cog" -}}
 	if err := json.Unmarshal(specFields["fieldConfig"], &spec.FieldConfig); err != nil {
 		errs = append(errs, cog.MakeBuildErrors("spec.fieldConfig", err)...)
 	} else {
-		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Kind)
+		variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Group)
 		if found && variantCfg.StrictFieldConfigUnmarshaler != nil {
 			fakeFieldConfigSource := struct {
 				Defaults struct {
@@ -54,10 +54,10 @@
 	}
 {{- end -}}
 
-{{- define "object_dashboardv2alpha1_VizConfigKind_spec_options_strict_unmarshal" -}}
+{{- define "object_dashboardv2beta1_VizConfigKind_spec_options_strict_unmarshal" -}}
 	{{- $json := importStdPkg "encoding/json" -}}
 	{{- $cog := importPkg "cog" -}}
-	variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Kind)
+	variantCfg, found := cog.ConfigForPanelcfgVariant(resource.Group)
 	if found && variantCfg.StrictOptionsUnmarshaler != nil {
 		options, err := variantCfg.StrictOptionsUnmarshaler(specFields["options"])
 		if err != nil {

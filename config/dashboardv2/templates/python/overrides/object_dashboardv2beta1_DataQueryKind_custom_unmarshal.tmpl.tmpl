@@ -1,11 +1,11 @@
-{{- define "object_dashboardv2alpha1_DataQueryKind_custom_unmarshal" }}
+{{- define "object_dashboardv2beta1_DataQueryKind_custom_unmarshal" }}
 @classmethod
 def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
     args: dict[str, typing.Any] = {}
 {{ range $field := .Object.Type.Struct.Fields }}
     {{- if eq $field.Name "spec" }}
     if "{{ $field.Name }}" in data:
-        args["{{ $field.Name }}"] = {{ template "dashboardv2alpha1_DataQueryKind_spec_unmarshal" (dict "Field" $field) }}
+        args["{{ $field.Name }}"] = {{ template "dashboardv2beta1_DataQueryKind_spec_unmarshal" (dict "Field" $field) }}
     {{- else if $field.Type.IsConcreteScalar }}
         {{ continue}}
     {{- else }}
@@ -16,7 +16,7 @@ def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
     return cls(**args)
 {{- end }}
 
-{{- define "dashboardv2alpha1_DataQueryKind_spec_unmarshal" -}}
+{{- define "dashboardv2beta1_DataQueryKind_spec_unmarshal" -}}
 {{- $cogruntime := importModule "cogruntime" "..cog" "runtime" -}}
-{{ $cogruntime }}.dataquery_from_json(data["{{ .Field.Name }}"],  data["kind"])
+{{ $cogruntime }}.dataquery_from_json(data["{{ .Field.Name }}"],  data["group"])
 {{- end }}

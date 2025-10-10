@@ -164,6 +164,8 @@ transformations:
   builders:
     - '%__config_dir%/foundation-sdk/.cog/veneers'
     - '%__config_dir%/dashboardv2/veneers'
+  
+  converters: '%__config_dir%/foundation-sdk/.cog/converters/config.yaml'
 
 output:
   directory: '%output_dir%'

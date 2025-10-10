@@ -1,4 +1,4 @@
-{{- define "object_dashboardv2alpha1_VizConfigKind_custom_unmarshal" }}
+{{- define "object_dashboardv2beta1_VizConfigKind_custom_unmarshal" }}
 /**
  * @param array<string, mixed> $inputData
  */
@@ -9,7 +9,7 @@ public static function fromArray(array $inputData): self
     return new self(
         {{- range $field := .Object.Type.Struct.Fields }}
         {{ $field.Name }}: {{ if eq $field.Name "spec" -}}
-        {{ template "object_dashboardv2alpha1_VizConfigKind_spec_unmarshal" (dict "Field" $field) }}
+        {{ template "object_dashboardv2beta1_VizConfigKind_spec_unmarshal" (dict "Field" $field) }}
         {{- else if $field.Type.IsConcreteScalar }}
         {{ continue}}
         {{- else -}}
@@ -20,7 +20,7 @@ public static function fromArray(array $inputData): self
 }
 {{- end }}
 
-{{- define "object_dashboardv2alpha1_VizConfigKind_spec_unmarshal" -}}
+{{- define "object_dashboardv2beta1_VizConfigKind_spec_unmarshal" -}}
 isset($data['spec']) ? (function($input) {
     /** @var {{ typeShape (.Field.Type|resolveRefs) }} $spec */
     $spec = $input['spec'];
@@ -29,9 +29,9 @@ isset($data['spec']) ? (function($input) {
     return new VizConfigSpec(
         {{- range $field := (.Field.Type|resolveRefs).Struct.Fields }}
         {{ $field.Name }}: {{ if eq $field.Name "options" -}}
-            {{ template "object_dashboardv2alpha1_VizConfigKind_spec_options_unmarshal" }}
+            {{ template "object_dashboardv2beta1_VizConfigKind_spec_options_unmarshal" }}
         {{- else if eq $field.Name "fieldConfig" -}}
-            {{ template "object_dashboardv2alpha1_VizConfigKind_spec_fieldConfig_unmarshal" }}
+            {{ template "object_dashboardv2beta1_VizConfigKind_spec_fieldConfig_unmarshal" }}
         {{- else if $field.Type.IsConcreteScalar }}
         {{ continue}}
         {{- else -}}
@@ -42,7 +42,7 @@ isset($data['spec']) ? (function($input) {
 })($data) : null
 {{- end }}
 
-{{- define "object_dashboardv2alpha1_VizConfigKind_spec_fieldConfig_unmarshal" -}}
+{{- define "object_dashboardv2beta1_VizConfigKind_spec_fieldConfig_unmarshal" -}}
 isset($spec["fieldConfig"]) ? (function(string $panelType, $panel) {
     /** @var array<string, mixed> $fieldConfigData */
     $fieldConfigData = $panel["fieldConfig"];
@@ -70,10 +70,10 @@ isset($spec["fieldConfig"]) ? (function(string $panelType, $panel) {
     $fieldConfigSource->defaults->custom = ($config->fieldConfigFromArray)($defaults["custom"]);
 
     return $fieldConfigSource;
-})($kind, $spec) : null
+})($group, $spec) : null
 {{- end }}
 
-{{- define "object_dashboardv2alpha1_VizConfigKind_spec_options_unmarshal" -}}
+{{- define "object_dashboardv2beta1_VizConfigKind_spec_options_unmarshal" -}}
 isset($spec["options"]) ? (function(string $panelType, $panel) {
     /** @var array<string, mixed> $options */
     $options = $panel["options"];
@@ -88,5 +88,5 @@ isset($spec["options"]) ? (function(string $panelType, $panel) {
     }
 
     return ($config->optionsFromArray)($options);
-})($kind, $spec) : null
+})($group, $spec) : null
 {{- end }}
