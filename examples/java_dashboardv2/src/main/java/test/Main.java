@@ -2,7 +2,7 @@ package test;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.grafana.relocated.jackson.core.JsonProcessingException;
 import com.grafana.foundation.dashboardv2alpha1.AutoGridLayoutBuilder;
 import com.grafana.foundation.dashboardv2alpha1.AutoGridLayoutItemBuilder;
 import com.grafana.foundation.dashboardv2alpha1.DashboardBuilder;

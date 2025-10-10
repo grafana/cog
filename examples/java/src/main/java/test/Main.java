@@ -2,7 +2,7 @@ package test;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.grafana.relocated.jackson.core.JsonProcessingException;
 import com.grafana.foundation.cog.Builder;
 import com.grafana.foundation.dashboard.Dashboard;
 import com.grafana.foundation.dashboard.DashboardBuilder;
