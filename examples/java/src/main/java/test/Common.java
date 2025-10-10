@@ -12,7 +12,7 @@ import com.grafana.foundation.common.ReduceDataOptionsBuilder;
 import com.grafana.foundation.common.VisibilityMode;
 import com.grafana.foundation.common.VizLegendOptionsBuilder;
 import com.grafana.foundation.common.VizOrientation;
-import com.grafana.foundation.dashboard.DataSourceRef;
+import com.grafana.foundation.common.DataSourceRef;
 import com.grafana.foundation.gauge.GaugePanelBuilder;
 import com.grafana.foundation.logs.LogsPanelBuilder;
 import com.grafana.foundation.prometheus.PromQueryFormat;
