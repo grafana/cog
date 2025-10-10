@@ -10,7 +10,7 @@
   "components": {
     "schemas": {
       "RefreshRate": {
-        "anyOf": [
+        "oneOf": [
           {
             "type": "string"
           },
@@ -42,7 +42,7 @@
         }
       },
       "BoolOrRef": {
-        "anyOf": [
+        "oneOf": [
           {
             "type": "boolean"
           },
@@ -86,7 +86,7 @@
         }
       },
       "SeveralRefs": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/components/schemas/SomeStruct"
           },

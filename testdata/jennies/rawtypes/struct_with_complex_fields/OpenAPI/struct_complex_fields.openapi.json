@@ -28,7 +28,7 @@
             "$ref": "#/components/schemas/SomeOtherStruct"
           },
           "FieldDisjunctionOfScalars": {
-            "anyOf": [
+            "oneOf": [
               {
                 "type": "string"
               },
@@ -38,7 +38,7 @@
             ]
           },
           "FieldMixedDisjunction": {
-            "anyOf": [
+            "oneOf": [
               {
                 "type": "string"
               },

@@ -15,7 +15,7 @@
       }
     },
     "RefreshRate": {
-      "anyOf": [
+      "oneOf": [
         {
           "type": "string"
         },

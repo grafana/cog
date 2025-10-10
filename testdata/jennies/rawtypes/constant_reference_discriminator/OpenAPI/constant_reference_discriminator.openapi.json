@@ -10,7 +10,7 @@
   "components": {
     "schemas": {
       "LayoutWithValue": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/components/schemas/GridLayoutUsingValue"
           },
@@ -52,7 +52,7 @@
         }
       },
       "LayoutWithoutValue": {
-        "anyOf": [
+        "oneOf": [
           {
             "$ref": "#/components/schemas/GridLayoutWithoutValue"
           },

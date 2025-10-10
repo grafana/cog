@@ -348,7 +348,7 @@ func (jenny Schema) formatDisjunction(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 	branches := tools.Map(typeDef.AsDisjunction().Branches, jenny.formatType)
 
-	definition.Set("anyOf", branches)
+	definition.Set("oneOf", branches)
 
 	return definition
 }
