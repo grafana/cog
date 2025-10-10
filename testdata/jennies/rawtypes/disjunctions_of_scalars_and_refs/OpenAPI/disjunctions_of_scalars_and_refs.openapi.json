@@ -10,7 +10,7 @@
   "components": {
     "schemas": {
       "DisjunctionOfScalarsAndRefs": {
-        "anyOf": [
+        "oneOf": [
           {
             "type": "string",
             "const": "a"

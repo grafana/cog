@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "LayoutWithValue": {
-      "anyOf": [
+      "oneOf": [
         {
           "$ref": "#/definitions/GridLayoutUsingValue"
         },
@@ -44,7 +44,7 @@
       }
     },
     "LayoutWithoutValue": {
-      "anyOf": [
+      "oneOf": [
         {
           "$ref": "#/definitions/GridLayoutWithoutValue"
         },
