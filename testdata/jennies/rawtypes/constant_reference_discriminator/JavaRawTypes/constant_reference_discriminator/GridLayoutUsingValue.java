@@ -5,11 +5,11 @@ public class GridLayoutUsingValue {
     public String kind;
     public String gridLayoutProperty;
     public GridLayoutUsingValue() {
-        this.kind = GridLayoutKindType;
+        this.kind = Constants.GridLayoutKindType;
         this.gridLayoutProperty = "";
     }
     public GridLayoutUsingValue(String gridLayoutProperty) {
-        this.kind = GridLayoutKindType;
+        this.kind = Constants.GridLayoutKindType;
         this.gridLayoutProperty = gridLayoutProperty;
     }
 }

@@ -5,11 +5,11 @@ public class GridLayoutWithoutValue {
     public String kind;
     public String gridLayoutProperty;
     public GridLayoutWithoutValue() {
-        this.kind = GridLayoutKindType;
+        this.kind = Constants.GridLayoutKindType;
         this.gridLayoutProperty = "";
     }
     public GridLayoutWithoutValue(String gridLayoutProperty) {
-        this.kind = GridLayoutKindType;
+        this.kind = Constants.GridLayoutKindType;
         this.gridLayoutProperty = gridLayoutProperty;
     }
 }
