@@ -19,11 +19,12 @@ const recursionMaxNums = 1000
 type FuncMap gotemplate.FuncMap
 
 func (funcMap FuncMap) MergeWith(other FuncMap) FuncMap {
-	for k, v := range other {
-		funcMap[k] = v
+	fm := gotemplate.FuncMap(funcMap)
+	for k, v := range gotemplate.FuncMap(other) {
+		fm[k] = v
 	}
 
-	return funcMap
+	return FuncMap(fm)
 }
 
 type Option func(*Template) error
@@ -246,6 +247,8 @@ func (template *Template) builtins() FuncMap {
 			default:
 				panic(fmt.Sprintf("Cannot find first on type %s", tp))
 			}
+
+			return nil
 		},
 		"last": func(list any) any {
 			tp := reflect.TypeOf(list).Kind()
@@ -259,6 +262,8 @@ func (template *Template) builtins() FuncMap {
 			default:
 				panic(fmt.Sprintf("Cannot find first on type %s", tp))
 			}
+
+			return nil
 		},
 
 		"slice": func(arr interface{}, start int) interface{} {

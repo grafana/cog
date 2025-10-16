@@ -3,7 +3,7 @@ package yaml
 import (
 	"os"
 
-	"gopkg.in/yaml.v3"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 type ConverterConfig struct {
@@ -35,7 +35,7 @@ func (c ConverterConfigReader) ReadConverterConfig(filename string) (ConverterCo
 
 	defer f.Close()
 
-	decoder := yaml.NewDecoder(f)
+	decoder := yamlv3.NewDecoder(f)
 	decoder.KnownFields(true)
 
 	var config ConverterConfig

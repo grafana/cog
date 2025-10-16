@@ -31,7 +31,7 @@ func TestRawTypes_Generate(t *testing.T) {
 	compilerPasses := New(config).CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test[ast.Schema]) {
-		req := require.New(tc)
+		req := require.New(tc.T)
 
 		// We run the compiler passes defined fo Python since without them, we
 		// might not be able to translate some of the IR's semantics into Python.
