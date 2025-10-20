@@ -22,9 +22,9 @@ func diskIOTimeseries() *dashboard.PanelBuilder {
 		Data(
 			dashboard.NewQueryGroupBuilder().
 				Targets([]cog.Builder[dashboard.PanelQueryKind]{
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read")),
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written")),
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time")),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} read")).RefId("A"),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} written")).RefId("B"),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])`, "{{device}} IO time")).RefId("C"),
 				}),
 		)
 }
@@ -69,10 +69,10 @@ func diskSpaceUsageTable() *dashboard.PanelBuilder {
 				Targets([]cog.Builder[dashboard.PanelQueryKind]{
 					dashboard.NewTargetBuilder().
 						RefId("A"). // TODO: unsure which refId should be set (this one, or on the query itself)
-						Query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "A")),
+						Query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`)).RefId("A"),
 					dashboard.NewTargetBuilder().
 						RefId("B").
-						Query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`, "B")),
+						Query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`)).RefId("B"),
 				}).
 				// TODO: transformations are clunky
 				Transformation(dashboard.NewTransformationBuilder().

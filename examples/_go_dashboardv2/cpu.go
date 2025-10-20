@@ -34,7 +34,7 @@ func cpuUsageTimeseries() *dashboard.PanelBuilder {
 		Data(
 			dashboard.NewQueryGroupBuilder().
 				Target(
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(query, "{{ cpu }}")),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(query, "{{ cpu }}")).RefId("A"),
 				),
 		)
 }
@@ -59,16 +59,16 @@ func loadAverageTimeseries() *dashboard.PanelBuilder {
 		Data(
 			dashboard.NewQueryGroupBuilder().
 				Target(
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_load1{job="integrations/raspberrypi-node", instance="$instance"}`, "1m load average")),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_load1{job="integrations/raspberrypi-node", instance="$instance"}`, "1m load average")).RefId("A"),
 				).
 				Target(
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_load5{job="integrations/raspberrypi-node", instance="$instance"}`, "5m load average")),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_load5{job="integrations/raspberrypi-node", instance="$instance"}`, "5m load average")).RefId("B"),
 				).
 				Target(
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_load15{job="integrations/raspberrypi-node", instance="$instance"}`, "15m load average")),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_load15{job="integrations/raspberrypi-node", instance="$instance"}`, "15m load average")).RefId("C"),
 				).
 				Target(
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`count(node_cpu_seconds_total{job="integrations/raspberrypi-node", instance="$instance", mode="idle"})`, "logical cores")),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`count(node_cpu_seconds_total{job="integrations/raspberrypi-node", instance="$instance", mode="idle"})`, "logical cores")).RefId("D"),
 				),
 		)
 }
@@ -95,7 +95,7 @@ func cpuTemperatureGauge() *dashboard.PanelBuilder {
 		Data(
 			dashboard.NewQueryGroupBuilder().
 				Target(
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`avg(node_hwmon_temp_celsius{job="integrations/raspberrypi-node", instance="$instance"})`, "")),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`avg(node_hwmon_temp_celsius{job="integrations/raspberrypi-node", instance="$instance"})`, "")).RefId("A"),
 				),
 		)
 }

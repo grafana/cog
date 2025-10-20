@@ -39,10 +39,10 @@ func memoryUsageTimeseries() *dashboard.PanelBuilder {
 		Data(
 			dashboard.NewQueryGroupBuilder().
 				Targets([]cog.Builder[dashboard.PanelQueryKind]{
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(memUsedQuery, "Used")),
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_memory_Buffers_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Buffers")),
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_memory_Cached_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Cached")),
-					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_memory_MemFree_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Free")),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(memUsedQuery, "Used")).RefId("A"),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_memory_Buffers_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Buffers")).RefId("B"),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_memory_Cached_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Cached")).RefId("C"),
+					dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`node_memory_MemFree_bytes{job="integrations/raspberrypi-node", instance="$instance"}`, "Free")).RefId("D"),
 				}),
 		)
 }
@@ -73,6 +73,6 @@ func memoryUsageGauge() *dashboard.PanelBuilder {
 		).
 		Data(
 			dashboard.NewQueryGroupBuilder().
-				Target(dashboard.NewTargetBuilder().Query(basicPrometheusQuery(query, ""))),
+				Target(dashboard.NewTargetBuilder().Query(basicPrometheusQuery(query, "")).RefId("A")),
 		)
 }

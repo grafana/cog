@@ -19,12 +19,11 @@ func basicLokiQuery(query string) *loki.QueryBuilder {
 	return loki.NewQueryBuilder().Expr(query)
 }
 
-func tablePrometheusQuery(query string, ref string) *prometheus.QueryBuilder {
+func tablePrometheusQuery(query string) *prometheus.QueryBuilder {
 	return prometheus.NewQueryBuilder().
 		Expr(query).
 		Instant().
-		Format(prometheus.PromQueryFormatTable).
-		RefId(ref)
+		Format(prometheus.PromQueryFormatTable)
 }
 
 func defaultTimeseries() *timeseries.VisualizationBuilder {

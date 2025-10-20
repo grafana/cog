@@ -17,7 +17,7 @@ func networkReceivedTimeseries() *dashboard.PanelBuilder {
 		).
 		Data(
 			dashboard.NewQueryGroupBuilder().Target(
-				dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_network_receive_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8`, "{{ device }}")),
+				dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_network_receive_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8`, "{{ device }}")).RefId("A"),
 			),
 		)
 }
@@ -34,7 +34,7 @@ func networkTransmittedTimeseries() *dashboard.PanelBuilder {
 		).
 		Data(
 			dashboard.NewQueryGroupBuilder().Target(
-				dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_network_transmit_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8`, "{{ device }}")),
+				dashboard.NewTargetBuilder().Query(basicPrometheusQuery(`rate(node_network_transmit_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8`, "{{ device }}")).RefId("A"),
 			),
 		)
 }

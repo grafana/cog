@@ -40,7 +40,7 @@ func dashboardBuilder() []byte {
 			Refresh(dashboard.VariableRefreshOnTimeRangeChanged).
 			Query(prometheus.NewQueryBuilder().
 				Expr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)").
-				Datasource(dashboard.NewDashboardv2beta1DataQueryKindDatasourceBuilder().Name("prometheus")),
+				RefId("A"),
 			).
 			Current(dashboard.VariableOption{
 				Selected: cog.ToPtr(false),
