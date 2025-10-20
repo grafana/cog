@@ -10,6 +10,7 @@
 # Java building folders
 .gradle/
 build/
+examples/java/bin/
 
 .idea
 

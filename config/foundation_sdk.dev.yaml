@@ -135,6 +135,17 @@ inputs:
       cue_imports:
         - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
 
+  # Dashboard v2 appears with v12.0.x
+  - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v12.0.x"))'
+    cue:
+      url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/apps/dashboard/kinds/v2beta1/dashboard_spec.cue'
+      package: dashboardv2beta1
+      metadata:
+        kind: core
+      transformations:
+        - '%__config_dir%/foundation-sdk/.cog/compiler/dashboardv2beta1.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/compiler/dataqueries_refid.yaml'
+
   # The schema for units
   - cue:
       entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/units'
@@ -150,6 +161,9 @@ transformations:
 
   builders:
     - '%__config_dir%/foundation-sdk/.cog/veneers'
+    - '%__config_dir%/foundation-sdk/.cog/veneers/dashboardv2'
+
+  converters: '%__config_dir%/foundation-sdk/.cog/converters/config.yaml'
 
 output:
   directory: '%output_dir%'
