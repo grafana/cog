@@ -72,11 +72,14 @@ run-java-example: dev-env-check-binaries ## Runs the Java example.
 .PHONY: run-php-example
 run-php-example: dev-env-check-binaries ## Runs the PHP example.
 	$(RUN_DEVBOX) composer install -d ./examples/php && \
+	$(RUN_DEVBOX) composer install -d ./examples/php_dashboardv2 && \
 	$(RUN_DEVBOX) php ./examples/php/index.php
+	$(RUN_DEVBOX) php ./examples/php_dashboardv2/index.php
 
 .PHONY: run-ts-example
 run-ts-example: dev-env-check-binaries ## Runs the Typescript example.
 	$(RUN_DEVBOX) ts-node examples/typescript
+	$(RUN_DEVBOX) ts-node examples/typescript_dashboardv2
 
 .PHONY: run-python-example
 run-python-example: dev-env-check-binaries ## Runs the Python example.
