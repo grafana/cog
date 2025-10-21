@@ -39,8 +39,7 @@ func dashboardBuilder() []byte {
 			Hide(dashboard.VariableHideDontHide).
 			Refresh(dashboard.VariableRefreshOnTimeRangeChanged).
 			Query(prometheus.NewQueryBuilder().
-				Expr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)").
-				RefId("A"),
+				Expr("label_values(node_uname_info{job=\"integrations/raspberrypi-node\", sysname!=\"Darwin\"}, instance)"),
 			).
 			Current(dashboard.VariableOption{
 				Selected: cog.ToPtr(false),

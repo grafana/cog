@@ -69,10 +69,10 @@ func diskSpaceUsageTable() *dashboard.PanelBuilder {
 				Targets([]cog.Builder[dashboard.PanelQueryKind]{
 					dashboard.NewTargetBuilder().
 						RefId("A"). // TODO: unsure which refId should be set (this one, or on the query itself)
-						Query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`)).RefId("A"),
+						Query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`)),
 					dashboard.NewTargetBuilder().
 						RefId("B").
-						Query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`)).RefId("B"),
+						Query(tablePrometheusQuery(`max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})`)),
 				}).
 				// TODO: transformations are clunky
 				Transformation(dashboard.NewTransformationBuilder().
