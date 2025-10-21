@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "CommonType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The identifier"
+        }
+      },
+      "required": ["id"]
+    }
+  }
+}
