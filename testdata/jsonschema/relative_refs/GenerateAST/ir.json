@@ -1,0 +1,82 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "EntryPoint": "MainType",
+  "EntryPointType": {
+    "Kind": "ref",
+    "Nullable": false,
+    "Ref": {
+      "ReferredPkg": "grafanatest",
+      "ReferredType": "MainType"
+    }
+  },
+  "Objects": {
+    "CommonType": {
+      "Name": "CommonType",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "id",
+              "Comments": [
+                "The identifier"
+              ],
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "CommonType"
+      }
+    },
+    "MainType": {
+      "Name": "MainType",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "common",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "CommonType"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "name",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "MainType"
+      }
+    }
+  }
+}
