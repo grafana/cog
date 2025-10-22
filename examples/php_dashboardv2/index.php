@@ -7,20 +7,24 @@ use App\Monitoring\Memory;
 use App\Monitoring\Network;
 use App\Monitoring\Common as MonitoringCommon;
 use Grafana\Foundation\Common;
+use Grafana\Foundation\Dashboardv2beta1\AutoGridLayoutBuilder;
+use Grafana\Foundation\Dashboardv2beta1\AutoGridLayoutItemBuilder;
 use Grafana\Foundation\Dashboardv2beta1\DashboardBuilder;
 use Grafana\Foundation\Dashboardv2beta1\DashboardCursorSync;
-use Grafana\Foundation\Dashboardv2beta1\DashboardSpec;
+use Grafana\Foundation\Dashboardv2beta1\Dashboard;
 use Grafana\Foundation\Dashboardv2beta1\DatasourceVariableBuilder;
 use Grafana\Foundation\Dashboardv2beta1\DataSourceRefBuilder;
 use Grafana\Foundation\Dashboardv2beta1\GridLayoutBuilder;
 use Grafana\Foundation\Dashboardv2beta1\GridLayoutItemBuilder;
 use Grafana\Foundation\Dashboardv2beta1\GridLayoutRowBuilder;
 use Grafana\Foundation\Dashboardv2beta1\QueryVariableBuilder;
+use Grafana\Foundation\Dashboardv2beta1\TimeSettingsBuilder;
+use Grafana\Foundation\Dashboardv2beta1\TabsLayoutBuilder;
+use Grafana\Foundation\Dashboardv2beta1\TabsLayoutTabBuilder;
 use Grafana\Foundation\Dashboardv2beta1\VariableHide;
 use Grafana\Foundation\Dashboardv2beta1\VariableOption;
 use Grafana\Foundation\Dashboardv2beta1\VariableRefresh;
 use Grafana\Foundation\Dashboardv2beta1\VariableSort;
-use Grafana\Foundation\Dashboardv2beta1\TimeSettingsBuilder;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -56,7 +60,6 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
             ->query(
                 MonitoringCommon::basicPrometheusQuery('label_values(node_uname_info{job="integrations/raspberrypi-node", sysname!="Darwin"}, instance)', ''),
             )
-            ->datasource(new DataSourceRefBuilder('prometheus', '$datasource'))
             ->current(new VariableOption(
                 selected: true,
                 text: 'potato',
@@ -84,7 +87,7 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
         "kernel_logs" => Logs::kernelLogs(),
         "all_sys_logs" => Logs::allSystemLogs(),
     ])
-    ->tabLayout(
+    ->tabsLayout(
         (new TabsLayoutBuilder())
             ->tab(
                 (new TabsLayoutTabBuilder("CPU"))
@@ -137,5 +140,4 @@ echo($jsonEncodedDashboard.PHP_EOL);
 
 // Try decoding it.
 $jsonDecodedAsArray = json_decode($jsonEncodedDashboard, true);
-$dashboard = DashboardSpec::fromArray($jsonDecodedAsArray);
-var_dump($dashboard->elements['cpu_usage']->spec->vizConfig);
+$dashboard = Dashboard::fromArray($jsonDecodedAsArray);

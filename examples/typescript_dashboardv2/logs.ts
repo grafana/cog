@@ -6,8 +6,8 @@ export const errorsInSystemLogs = (): PanelBuilder => {
         .title("Errors in system logs")
         .visualization(defaultLogs())
         .data(new QueryGroupBuilder().targets([
-            new TargetBuilder().query(basicLokiQuery(`{level=~"err|crit|alert|emerg", job="integrations/raspberrypi-node", instance="$instance"}`)),
-            new TargetBuilder().query(basicLokiQuery(`{filename=~"/var/log/syslog*|/var/log/messages*", job="integrations/raspberrypi-node", instance="$instance"} |~".+(?i)error(?-i).+"`)),
+            new TargetBuilder().query(basicLokiQuery(`{level=~"err|crit|alert|emerg", job="integrations/raspberrypi-node", instance="$instance"}`).refId("A")),
+            new TargetBuilder().query(basicLokiQuery(`{filename=~"/var/log/syslog*|/var/log/messages*", job="integrations/raspberrypi-node", instance="$instance"} |~".+(?i)error(?-i).+"`).refId("B")),
         ]));
 };
 

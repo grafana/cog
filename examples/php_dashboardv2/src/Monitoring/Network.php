@@ -21,7 +21,7 @@ class Network
             )
             ->data((new QueryGroupBuilder())
                 ->target(
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_network_receive_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8', '{{ device }}')),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_network_receive_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8', '{{ device }}'))->refId("A"),
                 )
             );
     }
@@ -39,7 +39,7 @@ class Network
             )
             ->data((new QueryGroupBuilder())
                 ->target(
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_network_transmit_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8', '{{ device }}')),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_network_transmit_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!="lo"}[$__rate_interval]) * 8', '{{ device }}'))->refId("A"),
                 )
             );
     }

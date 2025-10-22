@@ -28,9 +28,9 @@ class Disk
             )
             ->data((new QueryGroupBuilder())
                 ->targets([
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', '{{ device }} read')),
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', '{{ device }} written')),
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', '{{ device }} IO time')),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_disk_read_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', '{{ device }} read'))->refId("A"),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_disk_written_bytes_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', '{{ device }} written'))->refId("B"),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery('rate(node_disk_io_time_seconds_total{job="integrations/raspberrypi-node", instance="$instance", device!=""}[$__rate_interval])', '{{ device }} IO time'))->refId("C"),
                 ])
             );
     }
@@ -74,8 +74,8 @@ class Disk
             )
             ->data((new QueryGroupBuilder())
                 ->targets([
-                    (new TargetBuilder())->query(Common::tablePrometheusQuery('max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})', 'A')),
-                    (new TargetBuilder())->query(Common::tablePrometheusQuery('max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})', 'B')),
+                    (new TargetBuilder())->query(Common::tablePrometheusQuery('max by (mountpoint) (node_filesystem_size_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})'))->refId("A"),
+                    (new TargetBuilder())->query(Common::tablePrometheusQuery('max by (mountpoint) (node_filesystem_avail_bytes{job="integrations/raspberrypi-node", instance="$instance", fstype!=""})'))->refId("B"),
                 ])
                 // Transformations
                 ->transformation((new TransformationBuilder())

@@ -49,10 +49,10 @@ PROMQL;
             )
             ->data((new QueryGroupBuilder())
                 ->targets([
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery($query, 'Used')),
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery('node_memory_Buffers_bytes{job="integrations/raspberrypi-node", instance="$instance"}', 'Buffers')),
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery('node_memory_Cached_bytes{job="integrations/raspberrypi-node", instance="$instance"}', 'Cached')),
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery('node_memory_MemFree_bytes{job="integrations/raspberrypi-node", instance="$instance"}', 'Free')),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery($query, 'Used'))->refId("A"),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery('node_memory_Buffers_bytes{job="integrations/raspberrypi-node", instance="$instance"}', 'Buffers'))->refId("B"),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery('node_memory_Cached_bytes{job="integrations/raspberrypi-node", instance="$instance"}', 'Cached'))->refId("C"),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery('node_memory_MemFree_bytes{job="integrations/raspberrypi-node", instance="$instance"}', 'Free'))->refId("D"),
                 ])
             );
     }
@@ -87,7 +87,7 @@ PROMQL;
             )
             ->data((new QueryGroupBuilder())
                 ->target(
-                    (new TargetBuilder())->query(Common::basicPrometheusQuery($query, '')),
+                    (new TargetBuilder())->query(Common::basicPrometheusQuery($query, ''))->refId("A"),
                 )
             );
     }

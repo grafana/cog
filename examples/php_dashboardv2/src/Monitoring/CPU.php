@@ -98,10 +98,10 @@ PROMQL;
         ->data(
             (new QueryGroupBuilder())
                     ->targets([
-                        (new TargetBuilder())->query(Common::basicPrometheusQuery('node_load1{job="integrations/raspberrypi-node", instance="$instance"}', '1m load average')),
-                        (new TargetBuilder())->query(Common::basicPrometheusQuery('node_load5{job="integrations/raspberrypi-node", instance="$instance"}', '5m load average')),
-                        (new TargetBuilder())->query(Common::basicPrometheusQuery('node_load15{job="integrations/raspberrypi-node", instance="$instance"}', '15m load average')),
-                        (new TargetBuilder())->query(Common::basicPrometheusQuery('count(node_cpu_seconds_total{job="integrations/raspberrypi-node", instance="$instance", mode="idle"})', 'logical cores')),
+                        (new TargetBuilder())->query(Common::basicPrometheusQuery('node_load1{job="integrations/raspberrypi-node", instance="$instance"}', '1m load average'))->refId("A"),
+                        (new TargetBuilder())->query(Common::basicPrometheusQuery('node_load5{job="integrations/raspberrypi-node", instance="$instance"}', '5m load average'))->refId("B"),
+                        (new TargetBuilder())->query(Common::basicPrometheusQuery('node_load15{job="integrations/raspberrypi-node", instance="$instance"}', '15m load average'))->refId("C"),
+                        (new TargetBuilder())->query(Common::basicPrometheusQuery('count(node_cpu_seconds_total{job="integrations/raspberrypi-node", instance="$instance", mode="idle"})', 'logical cores'))->refId("D"),
                     ])
         );
     }

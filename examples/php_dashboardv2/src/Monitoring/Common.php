@@ -61,13 +61,12 @@ class Common
     }
 
 
-    public static function tablePrometheusQuery(string $query, string $ref): Prometheus\QueryBuilder
+    public static function tablePrometheusQuery(string $query): Prometheus\QueryBuilder
     {
         return (new Prometheus\QueryBuilder())
             ->expr($query)
             ->instant()
-            ->format(Prometheus\PromQueryFormat::table())
-            ->refId($ref);
+            ->format(Prometheus\PromQueryFormat::table());
     }
 
     public static function basicLokiQuery(string $query): Loki\QueryBuilder
