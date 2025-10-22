@@ -2,60 +2,60 @@ package panelbuilder;
 
 import java.util.List;
 
-public class PanelBuilder<T extends PanelBuilder<T>> implements cog.Builder<Options> {
+public class PanelBuilder implements cog.Builder<Options> {
     protected final Options internal;
     
     public PanelBuilder() {
         this.internal = new Options();
     }
-    public T onlyFromThisDashboard(Boolean onlyFromThisDashboard) {
+    public PanelBuilder onlyFromThisDashboard(Boolean onlyFromThisDashboard) {
         this.internal.onlyFromThisDashboard = onlyFromThisDashboard;
-        return (T) this;
+        return this;
     }
     
-    public T onlyInTimeRange(Boolean onlyInTimeRange) {
+    public PanelBuilder onlyInTimeRange(Boolean onlyInTimeRange) {
         this.internal.onlyInTimeRange = onlyInTimeRange;
-        return (T) this;
+        return this;
     }
     
-    public T tags(List<String> tags) {
+    public PanelBuilder tags(List<String> tags) {
         this.internal.tags = tags;
-        return (T) this;
+        return this;
     }
     
-    public T limit(Integer limit) {
+    public PanelBuilder limit(Integer limit) {
         this.internal.limit = limit;
-        return (T) this;
+        return this;
     }
     
-    public T showUser(Boolean showUser) {
+    public PanelBuilder showUser(Boolean showUser) {
         this.internal.showUser = showUser;
-        return (T) this;
+        return this;
     }
     
-    public T showTime(Boolean showTime) {
+    public PanelBuilder showTime(Boolean showTime) {
         this.internal.showTime = showTime;
-        return (T) this;
+        return this;
     }
     
-    public T showTags(Boolean showTags) {
+    public PanelBuilder showTags(Boolean showTags) {
         this.internal.showTags = showTags;
-        return (T) this;
+        return this;
     }
     
-    public T navigateToPanel(Boolean navigateToPanel) {
+    public PanelBuilder navigateToPanel(Boolean navigateToPanel) {
         this.internal.navigateToPanel = navigateToPanel;
-        return (T) this;
+        return this;
     }
     
-    public T navigateBefore(String navigateBefore) {
+    public PanelBuilder navigateBefore(String navigateBefore) {
         this.internal.navigateBefore = navigateBefore;
-        return (T) this;
+        return this;
     }
     
-    public T navigateAfter(String navigateAfter) {
+    public PanelBuilder navigateAfter(String navigateAfter) {
         this.internal.navigateAfter = navigateAfter;
-        return (T) this;
+        return this;
     }
     public Options build() {
         return this.internal;
