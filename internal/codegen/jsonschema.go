@@ -57,6 +57,7 @@ func (input *JSONSchemaInput) LoadSchemas(ctx context.Context) (ast.Schemas, err
 	schema, err := jsonschema.GenerateAST(schemaReader, jsonschema.Config{
 		Package:        input.packageName(),
 		SchemaMetadata: input.schemaMetadata(),
+		SchemaPath:     input.Path,
 	})
 	if err != nil {
 		return nil, err
