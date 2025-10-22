@@ -137,7 +137,3 @@ $builder = (new DashboardBuilder(title: '[TEST] Node Exporter / Raspberry'))
 $jsonEncodedDashboard = json_encode($builder->build(), JSON_PRETTY_PRINT);
 
 echo($jsonEncodedDashboard.PHP_EOL);
-
-// Try decoding it.
-$jsonDecodedAsArray = json_decode($jsonEncodedDashboard, true);
-$dashboard = Dashboard::fromArray($jsonDecodedAsArray);
