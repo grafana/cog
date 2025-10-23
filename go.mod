@@ -9,7 +9,7 @@ require (
 	github.com/expr-lang/expr v1.17.6
 	github.com/getkin/kin-openapi v0.128.0
 	github.com/google/go-cmp v0.7.0
-	github.com/grafana/codejen v0.0.4-0.20230321061741-77f656893a3d
+	github.com/grafana/codejen v0.0.4-0.20250428224353-8764ced07770
 	github.com/huandu/xstrings v1.5.0
 	github.com/invopop/jsonschema v0.13.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
