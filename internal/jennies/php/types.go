@@ -260,7 +260,7 @@ func (formatter *typeFormatter) constantRefValue(def ast.ConstantReferenceType) 
 		return formatter.formatEnumValue(obj, def)
 	}
 	if obj.Type.IsScalar() {
-		return formatter.config.fullNamespaceRef(formatPackageName(def.ReferredPkg) + "\\" + formatObjectName(def.ReferredType))
+		return formatter.config.fullNamespaceRef(formatPackageName(def.ReferredPkg) + "\\Constants::" + formatConstantName(def.ReferredType))
 	}
 
 	return "unknown"
