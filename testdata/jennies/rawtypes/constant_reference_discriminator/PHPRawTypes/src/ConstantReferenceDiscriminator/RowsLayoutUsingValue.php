@@ -13,7 +13,7 @@ class RowsLayoutUsingValue implements \JsonSerializable
      */
     public function __construct(?string $rowsLayoutProperty = null)
     {
-        $this->kind = \Grafana\Foundation\ConstantReferenceDiscriminator\RowsLayoutKindType;
+        $this->kind = \Grafana\Foundation\ConstantReferenceDiscriminator\Constants::ROWS_LAYOUT_KIND_TYPE;
         $this->rowsLayoutProperty = $rowsLayoutProperty ?: "";
     }
 
