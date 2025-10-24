@@ -10,8 +10,8 @@ class MyStruct implements \JsonSerializable
 
     public function __construct()
     {
-        $this->aString = \Grafana\Foundation\ConstantReferenceAsDefault\ConstantRefString;
-        $this->optString = \Grafana\Foundation\ConstantReferenceAsDefault\ConstantRefString;
+        $this->aString = \Grafana\Foundation\ConstantReferenceAsDefault\Constants::CONSTANT_REF_STRING;
+        $this->optString = \Grafana\Foundation\ConstantReferenceAsDefault\Constants::CONSTANT_REF_STRING;
     }
 
     /**

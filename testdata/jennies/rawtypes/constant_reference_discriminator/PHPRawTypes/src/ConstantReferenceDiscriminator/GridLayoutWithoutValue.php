@@ -13,7 +13,7 @@ class GridLayoutWithoutValue implements \JsonSerializable
      */
     public function __construct(?string $gridLayoutProperty = null)
     {
-        $this->kind = \Grafana\Foundation\ConstantReferenceDiscriminator\GridLayoutKindType;
+        $this->kind = \Grafana\Foundation\ConstantReferenceDiscriminator\Constants::GRID_LAYOUT_KIND_TYPE;
         $this->gridLayoutProperty = $gridLayoutProperty ?: "";
     }
 
