@@ -68,6 +68,7 @@ func (jenny CustomTemplates) generateForTemplatesDirectory(context languages.Con
 				"registryToSemver": jenny.registryToSemver,
 			}),
 			template.Funcs(jenny.TmplFuncs),
+			template.Funcs(TypesTemplateHelpers(context)),
 			template.Parse(string(templateContent)),
 		)
 		if err != nil {
