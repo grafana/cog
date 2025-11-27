@@ -374,51 +374,51 @@
         }
       }
     },
-    "php83Packages.phpstan@2.1.1": {
-      "last_modified": "2025-01-25T23:17:58Z",
-      "resolved": "github:NixOS/nixpkgs/b582bb5b0d7af253b05d58314b85ab8ec46b8d19#php83Packages.phpstan",
+    "php83Packages.phpstan@2.1.32": {
+      "last_modified": "2025-11-23T21:50:36Z",
+      "resolved": "github:NixOS/nixpkgs/ee09932cedcef15aaf476f9343d1dea2cb77e261#php83Packages.phpstan",
       "source": "devbox-search",
-      "version": "2.1.1",
+      "version": "2.1.32",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/jly06w68p2shjrscxgnaw7k04m2bz13h-phpstan-2.1.1",
+              "path": "/nix/store/5nfsjcq5wlw84h2aphsyvm4if91bc90k-phpstan-2.1.32",
               "default": true
             }
           ],
-          "store_path": "/nix/store/jly06w68p2shjrscxgnaw7k04m2bz13h-phpstan-2.1.1"
+          "store_path": "/nix/store/5nfsjcq5wlw84h2aphsyvm4if91bc90k-phpstan-2.1.32"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/id87a78h5ch2lylvf8jpxzs3gscx6vc4-phpstan-2.1.1",
+              "path": "/nix/store/89q9ka6srmf5xdifpdv00bahnmd7v1h2-phpstan-2.1.32",
               "default": true
             }
           ],
-          "store_path": "/nix/store/id87a78h5ch2lylvf8jpxzs3gscx6vc4-phpstan-2.1.1"
+          "store_path": "/nix/store/89q9ka6srmf5xdifpdv00bahnmd7v1h2-phpstan-2.1.32"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/26li9wcij0y6fbd3gnpin3nvsy6ncka7-phpstan-2.1.1",
+              "path": "/nix/store/2n1cgfhh5nnp70rwz6f7jf3w7563mkbq-phpstan-2.1.32",
               "default": true
             }
           ],
-          "store_path": "/nix/store/26li9wcij0y6fbd3gnpin3nvsy6ncka7-phpstan-2.1.1"
+          "store_path": "/nix/store/2n1cgfhh5nnp70rwz6f7jf3w7563mkbq-phpstan-2.1.32"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/r71q2zsjd6r0afnqkhk9s939dwg58jns-phpstan-2.1.1",
+              "path": "/nix/store/wj95km16dk13vazbc00b638s3wl7gdh7-phpstan-2.1.32",
               "default": true
             }
           ],
-          "store_path": "/nix/store/r71q2zsjd6r0afnqkhk9s939dwg58jns-phpstan-2.1.1"
+          "store_path": "/nix/store/wj95km16dk13vazbc00b638s3wl7gdh7-phpstan-2.1.32"
         }
       }
     },
