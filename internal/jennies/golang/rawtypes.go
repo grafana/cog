@@ -67,6 +67,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	strictUnmarshallerGenerator := newStrictJSONUnmarshal(jenny.config, jenny.tmpl, imports, jenny.packageMapper, jenny.typeFormatter, jenny.apiRefCollector)
 	equalityMethodsGenerator := newEqualityMethods(jenny.tmpl, jenny.apiRefCollector)
 	validationMethodsGenerator := newValidationMethods(jenny.tmpl, jenny.packageMapper, jenny.apiRefCollector)
+	openAPIModelNameGenerator := newOpenAPIModelNameMethods(jenny.config, jenny.tmpl, jenny.apiRefCollector)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		innerErr := jenny.formatObject(&buffer, schema, object)
@@ -95,6 +96,14 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		if jenny.config.GenerateEqual {
 			innerErr = equalityMethodsGenerator.generateForObject(&buffer, context, object, imports)
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+		}
+
+		if namerFunc := jenny.config.OpenAPIModelNamerFunc; namerFunc != nil {
+			innerErr = openAPIModelNameGenerator.generateForObject(&buffer, context, object, namerFunc)
 			if innerErr != nil {
 				err = innerErr
 				return

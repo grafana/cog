@@ -189,6 +189,10 @@ type GoConfig struct {
 
 	// CustomTemplates accepts a list of directories where are the custom templates
 	CustomTemplatesDirectories []string
+
+	// OpenAPIModelNamerFunc is a function used to generate OpenAPI model names for types.
+	// If set, OpenAPIModelName() methods will be generated on types.
+	OpenAPIModelNamerFunc func(string) string
 }
 
 // Golang sets the output to Golang types.
@@ -199,8 +203,9 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 			GenerateJSONMarshaller:        true,
 			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
 
-			GenerateEqual:  config.GenerateEqual,
-			AnyAsInterface: config.AnyAsInterface,
+			OpenAPIModelNamerFunc: config.OpenAPIModelNamerFunc,
+			GenerateEqual:         config.GenerateEqual,
+			AnyAsInterface:        config.AnyAsInterface,
 		},
 	}
 	return pipeline

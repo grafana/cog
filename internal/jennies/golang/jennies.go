@@ -33,6 +33,11 @@ type Config struct {
 	// GenerateValidate controls the generation of `Validate()` methods on types.
 	GenerateValidate bool `yaml:"generate_validate"`
 
+	// OpenAPIModelNamerFunc is a function used to generate OpenAPI model names for types.
+	// If set, OpenAPIModelName() methods will be generated on types.
+	// The function receives the Go type name and should return the OpenAPI model name.
+	OpenAPIModelNamerFunc func(string) string `yaml:"-"`
+
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.
