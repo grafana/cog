@@ -100,7 +100,7 @@
                 {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Map.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "entry" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
                 {{ .ResultVar }}.put(entry{{ .Depth }}.getKey(), entry{{ .Depth }}.getValue());
             {{- else }}
-                {{ .OriginalInputVar }}Depth{{ .Depth }} = entry{{ .Depth }}.getValue().build();
+                {{ .InputType.Map.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = entry{{ .Depth }}.getValue().build();
                 {{ .ResultVar }}.put(entry{{ .Depth }}.getKey(), {{ .OriginalInputVar }}Depth{{ .Depth }});
             {{- end }}           
         }

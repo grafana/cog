@@ -401,7 +401,7 @@ func (tf *typeFormatter) constantRefValue(def ast.ConstantReferenceType) string 
 			return fmt.Sprintf("%s.%s", refPkg, def.ReferredType)
 		}
 
-		return def.ReferredType
+		return fmt.Sprintf("Constants.%s", def.ReferredType)
 	}
 
 	if obj.Type.IsEnum() {

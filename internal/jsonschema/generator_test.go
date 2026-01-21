@@ -1,6 +1,7 @@
 package jsonschema
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -18,7 +19,11 @@ func TestGenerateAST(t *testing.T) {
 	test.Run(t, func(tc *testutils.Test[string]) {
 		req := require.New(tc.T)
 
-		schemaAst, err := GenerateAST(tc.OpenInput("schema.json"), Config{Package: "grafanatest"})
+		const schemaFile = "schema.json"
+		schemaAst, err := GenerateAST(tc.OpenInput(schemaFile), Config{
+			Package:    "grafanatest",
+			SchemaPath: filepath.Join(tc.RootDir, schemaFile),
+		})
 		req.NoError(err)
 		req.NotNil(schemaAst)
 

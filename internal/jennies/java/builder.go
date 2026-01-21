@@ -117,5 +117,9 @@ func (jenny Builder) isGenericPanel(builder ast.Builder) bool {
 		return false
 	}
 
-	return builder.Name == "Panel"
+	// TODO: remove this once we have a better way to identify generic builders
+	dashboardLegacy := builder.Package == "dashboard" && builder.Name == "Panel"
+	dashboardv2VizConfig := builder.Package == "dashboardv2beta1" && builder.Name == "VizConfigKind"
+	dashboardv2DataQueryKind := builder.Package == "dashboardv2beta1" && builder.Name == "DataQueryKind"
+	return dashboardLegacy || dashboardv2VizConfig || dashboardv2DataQueryKind
 }

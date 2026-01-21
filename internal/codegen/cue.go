@@ -110,6 +110,7 @@ func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator
 	input.InputBase.interpolateParameters(interpolator)
 
 	input.Entrypoint = interpolator(input.Entrypoint)
+	input.URL = interpolator(input.URL)
 	input.CueImports = tools.Map(input.CueImports, interpolator)
 }
 

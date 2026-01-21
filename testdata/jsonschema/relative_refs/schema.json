@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/MainType",
+  "definitions": {
+    "MainType": {
+      "type": "object",
+      "properties": {
+        "common": {
+          "$ref": "./refs/common/schema.json#/definitions/CommonType"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["common", "name"]
+    }
+  }
+}
