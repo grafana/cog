@@ -12,7 +12,7 @@ public class DashboardBuilder implements cog.Builder<Dashboard> {
     public DashboardBuilder panels(Map<String, cog.Builder<Element>> panels) {
         Map<String, Element> panelsResources = new HashMap<>();
         for (var entry1 : panels.entrySet()) {
-                panelsDepth1 = entry1.getValue().build();
+                Element panelsDepth1 = entry1.getValue().build();
                 panelsResources.put(entry1.getKey(), panelsDepth1);           
         }
         this.internal.panels = panelsResources;
