@@ -2,8 +2,8 @@ package open_struct
 
 import (
 	"encoding/json"
-	cog "github.com/grafana/cog/generated/cog"
 	"errors"
+	cog "github.com/grafana/cog/generated/cog"
 	"fmt"
 )
 
@@ -19,6 +19,63 @@ func NewOpenStruct() *OpenStruct {
 	return &OpenStruct{
 }
 }
+// MarshalJSON implements a custom JSON marshalling logic to encode `OpenStruct` as JSON.
+func (resource *OpenStruct) MarshalJSON() ([]byte, error) {
+	type Alias *OpenStruct
+	base, err := json.Marshal(Alias(resource))
+	if err != nil {
+		return nil, err
+	}
+	
+	var baseMap map[string]any
+	if err := json.Unmarshal(base, &baseMap); err != nil {
+	    return nil, err
+	}
+	
+	for k, v := range resource.ExtraFields {
+		baseMap[k] = v
+	}
+	
+	return json.Marshal(baseMap)
+}
+
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `OpenStruct` from JSON.
+func (resource *OpenStruct) UnmarshalJSON(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+
+    var data map[string]json.RawMessage
+    if err := json.Unmarshal(raw, &data); err != nil {
+        return err
+    }
+    // A
+    if v, ok := data["a"]; ok {
+        if err := json.Unmarshal(v, &resource.A); err != nil {
+            return err
+        }
+        delete(data, "a")
+    }
+    // B
+    if v, ok := data["b"]; ok {
+        if err := json.Unmarshal(v, &resource.B); err != nil {
+            return err
+        }
+        delete(data, "b")
+    }
+
+    resource.ExtraFields = make(map[string]any)
+    for key, value := range data {
+		var v any
+		if err := json.Unmarshal(value, &v); err != nil {
+			return err
+		}
+        resource.ExtraFields[key] = v
+    }
+    
+	return nil
+}
+
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `OpenStruct` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
 func (resource *OpenStruct) UnmarshalJSONStrict(raw []byte) error {
