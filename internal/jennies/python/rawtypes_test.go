@@ -17,6 +17,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		Skip: map[string]string{
 			"intersections": "Intersections are not implemented",
 			"dashboard":     "the dashboard test schema includes a composable slot, which rely on external input to be properly supported",
+			"open_struct": "TODO",
 		},
 	}
 

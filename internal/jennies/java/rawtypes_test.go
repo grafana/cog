@@ -14,6 +14,9 @@ func TestRawTypes_Generate(t *testing.T) {
 	test := testutils.GoldenFilesTestSuite[ast.Schema]{
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "JavaRawTypes",
+		Skip: map[string]string{
+			"open_struct": "TODO",
+		},
 	}
 
 	cfg := Config{

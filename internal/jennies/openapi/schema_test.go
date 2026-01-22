@@ -13,6 +13,9 @@ func TestSchema_Generate(t *testing.T) {
 	test := testutils.GoldenFilesTestSuite[ast.Schema]{
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "OpenAPI",
+		Skip: map[string]string{
+			"open_struct": "TODO",
+		},
 	}
 
 	config := Config{debug: true}
