@@ -2,7 +2,7 @@ package jsonschema
 
 import (
 	"testing"
-	
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
@@ -17,27 +17,27 @@ func TestSchema_Generate(t *testing.T) {
 			"open_struct": "TODO",
 		},
 	}
-	
+
 	config := Config{Debug: true}
 	jenny := Schema{Config: config}
 	compilerPasses := New(config).CompilerPasses()
-	
+
 	test.Run(t, func(tc *testutils.Test[ast.Schema]) {
 		req := require.New(tc)
-		
+
 		// We run the compiler passes defined fo JSONSchema since without them, we
 		// might not be able to translate some of the IR's semantics.
 		schema := tc.UnmarshalJSONInput(testutils.RawTypesIRInputFile)
 		processedAsts, err := compilerPasses.Process(ast.Schemas{&schema})
 		req.NoError(err)
-		
+
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
-		
+
 		files, err := jenny.Generate(languages.Context{
 			Schemas: processedAsts,
 		})
 		req.NoError(err)
-		
+
 		tc.WriteFiles(files)
 	})
 }
