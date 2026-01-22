@@ -216,7 +216,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 		assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s", fieldName))
 	}
 
-	buffer.WriteString(fmt.Sprintf("    def __init__(self, %s):\n", strings.Join(args, ", ")))
+	buffer.WriteString(fmt.Sprintf("    def __init__(self, %s) -> None:\n", strings.Join(args, ", ")))
 	buffer.WriteString(strings.Join(assignments, "\n"))
 
 	return strings.TrimSuffix(buffer.String(), "\n")
