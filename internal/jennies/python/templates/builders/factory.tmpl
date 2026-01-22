@@ -5,7 +5,7 @@
 {{ . }}{{ end }}
 """
 {{- end }}
-def {{ .Factory.Name|formatFunctionName}}({{- template "factory_args" .Factory.Args }}):
+def {{ .Factory.Name|formatFunctionName}}({{- template "factory_args" .Factory.Args }}) -> {{ .Builder.Name|formatObjectName }}:
     builder = {{ .Builder.Name|formatObjectName }}()
 
 {{- range $call := .Factory.OptionCalls }}

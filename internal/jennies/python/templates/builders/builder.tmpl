@@ -5,7 +5,7 @@ class {{ .Builder.Name|formatObjectName }}(cogbuilder.Builder[{{ .BuilderSignatu
     __{{ .Name|formatIdentifier }}: {{ .Type | formatType }} = {{ defaultForType .Type }}
     {{- end }}
 
-    def __init__(self{{- template "args" .Builder.Constructor.Args }}):
+    def __init__(self{{- template "args" .Builder.Constructor.Args }}) -> None:
         self._internal = {{ .ObjectName }}()
 {{- range .Builder.Constructor.Assignments }}
 {{- include "assignment" (dict "Assignment" . "Builder" $.Builder "Option" (dict "Name" ""))|indent 8 }}
