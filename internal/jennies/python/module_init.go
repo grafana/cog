@@ -7,6 +7,8 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
+var _ codejen.OneToMany[languages.Context] = ModuleInit{}
+
 type ModuleInit struct {
 }
 
@@ -15,17 +17,27 @@ func (jenny ModuleInit) JennyName() string {
 }
 
 func (jenny ModuleInit) Generate(context languages.Context) (codejen.Files, error) {
-	files := make(codejen.Files, 0, len(context.Schemas)+2)
+	module := func(name string) []byte {
+		return []byte(fmt.Sprintf(`"""%s module"""
+`, name))
+	}
 
-	files = append(files, *codejen.NewFile("__init__.py", jenny.module("root"), jenny))
-	files = append(files, *codejen.NewFile("builders/__init__.py", jenny.module("builders"), jenny))
-	files = append(files, *codejen.NewFile("models/__init__.py", jenny.module("models"), jenny))
-	files = append(files, *codejen.NewFile("cog/__init__.py", jenny.module("runtime"), jenny))
+	boilerplate := []struct {
+		name    string
+		content []byte
+	}{
+		{"py.typed", nil},
+		{"__init__.py", module("root")},
+		{"builders/__init__.py", module("builders")},
+		{"models/__init__.py", module("models")},
+		{"cog/__init__.py", module("runtime")},
+	}
+
+	files := make(codejen.Files, 0, len(boilerplate)+len(context.Schemas))
+
+	for _, file := range boilerplate {
+		files = append(files, *codejen.NewFile(file.name, file.content, jenny))
+	}
 
 	return files, nil
-}
-
-func (jenny ModuleInit) module(name string) []byte {
-	return []byte(fmt.Sprintf(`"""%s module"""
-`, name))
 }
