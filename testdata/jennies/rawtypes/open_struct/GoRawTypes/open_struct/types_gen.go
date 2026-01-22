@@ -21,8 +21,8 @@ func NewOpenStruct() *OpenStruct {
 }
 // MarshalJSON implements a custom JSON marshalling logic to encode `OpenStruct` as JSON.
 func (resource *OpenStruct) MarshalJSON() ([]byte, error) {
-	type Alias *OpenStruct
-	base, err := json.Marshal(Alias(resource))
+	type openStruct OpenStruct
+	base, err := json.Marshal((*openStruct)(resource))
 	if err != nil {
 		return nil, err
 	}
