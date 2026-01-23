@@ -24,6 +24,21 @@ public class SomeStruct {
     public Integer fieldInt32;
     public Long fieldInt64;
     public SomeStruct() {
+        this.fieldAny = new Object();
+        this.fieldBool = false;
+        this.fieldBytes = (byte) 0;
+        this.fieldString = "";
+        this.fieldStringWithConstantValue = "";
+        this.fieldFloat32 = 0.0f;
+        this.fieldFloat64 = 0.0;
+        this.fieldUint8 = 0;
+        this.fieldUint16 = 0;
+        this.fieldUint32 = 0;
+        this.fieldUint64 = 0L;
+        this.fieldInt8 = 0;
+        this.fieldInt16 = 0;
+        this.fieldInt32 = 0;
+        this.fieldInt64 = 0L;
     }
     public SomeStruct(Object fieldAny,Boolean fieldBool,Byte fieldBytes,String fieldString,String fieldStringWithConstantValue,Float fieldFloat32,Double fieldFloat64,Integer fieldUint8,Short fieldUint16,Integer fieldUint32,Long fieldUint64,Integer fieldInt8,Short fieldInt16,Integer fieldInt32,Long fieldInt64) {
         this.fieldAny = fieldAny;

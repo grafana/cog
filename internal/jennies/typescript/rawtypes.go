@@ -203,7 +203,7 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 			}
 		}
 
-		if !field.Required {
+		if !field.Required && !field.Type.IsConstantRef() {
 			continue
 		}
 
@@ -367,6 +367,10 @@ func (jenny RawTypes) defaultValueForConstantReferences(def ast.ConstantReferenc
 
 	if referredType.Type.IsEnum() {
 		return raw(jenny.typeFormatter.enums.formatValue(referredType, def.ReferenceValue))
+	}
+
+	if referredType.Type.IsScalar() {
+		return raw(def.ReferredType)
 	}
 
 	return "unknown"

@@ -96,7 +96,7 @@ type Type struct {
 	Map               *MapType               `json:",omitempty"`
 	Struct            *StructType            `json:",omitempty"`
 	Ref               *RefType               `json:",omitempty"`
-	ConstantReference *ConstantReferenceType `json:",omitempty"`
+	ConstantReference *ConstantReferenceType `json:",omitempty" yaml:"constant_ref"`
 	Scalar            *ScalarType            `json:",omitempty"`
 	Intersection      *IntersectionType      `json:",omitempty"`
 	ComposableSlot    *ComposableSlotType    `json:",omitempty" yaml:"composable_slot"`
@@ -177,6 +177,16 @@ func (t Type) HasHint(hintName string) bool {
 	return found
 }
 
+func (t Type) HasAnyHint(hintNames ...string) bool {
+	for _, hintName := range hintNames {
+		if _, found := t.Hints[hintName]; found {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (t Type) IsRef() bool {
 	return t.Kind == KindRef
 }
@@ -252,6 +262,16 @@ func (t Type) IsDisjunctionOfRefs() bool {
 	}
 
 	return t.Hints[HintDiscriminatedDisjunctionOfRefs] != nil
+}
+
+func (t Type) IsDisjunctionOfAnyKind() bool {
+	if t.Kind != KindStruct {
+		return false
+	}
+
+	return t.Hints[HintDisjunctionOfScalars] != nil ||
+		t.Hints[HintDiscriminatedDisjunctionOfRefs] != nil ||
+		t.Hints[HintDisjunctionOfScalarsAndRefs] != nil
 }
 
 func (t Type) DeepCopy() Type {

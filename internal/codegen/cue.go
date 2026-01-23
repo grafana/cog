@@ -3,9 +3,13 @@ package codegen
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/fs"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing/fstest"
 
 	"cuelang.org/go/cue"
@@ -31,6 +35,9 @@ type CueInput struct {
 
 	// Entrypoint refers to a directory containing CUE files.
 	Entrypoint string `yaml:"entrypoint"`
+
+	// URL to a cue file
+	URL string `yaml:"url"`
 
 	// Value represents the CUE value to use as an input. If specified, it
 	// supersedes the Entrypoint option.
@@ -75,6 +82,14 @@ func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecu
 		return *input.Value, nil, nil
 	}
 
+	if input.Entrypoint == "" && input.URL == "" {
+		return cue.Value{}, nil, fmt.Errorf("no entrypoint or url defined in cue input")
+	}
+
+	if input.Entrypoint != "" && input.URL != "" {
+		return cue.Value{}, nil, fmt.Errorf("only one entrypoint or url defined in cue input")
+	}
+
 	libraries, err := simplecue.ParseImports(input.CueImports)
 	if err != nil {
 		return cue.Value{}, nil, err
@@ -82,20 +97,20 @@ func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecu
 
 	if cuePkgName == "" {
 		cuePkgName = filepath.Base(input.Entrypoint)
+		if input.URL != "" {
+			cuePkgName = filepath.Base(filepath.Dir(input.URL))
+		}
 	}
 
-	value, err := parseCueEntrypoint(input.Entrypoint, libraries, cuePkgName)
-	if err != nil {
-		return cue.Value{}, nil, err
-	}
-
-	return value, libraries, nil
+	value, err := input.parseCueEntrypoint(libraries, cuePkgName)
+	return value, libraries, err
 }
 
 func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator) {
 	input.InputBase.interpolateParameters(interpolator)
 
 	input.Entrypoint = interpolator(input.Entrypoint)
+	input.URL = interpolator(input.URL)
 	input.CueImports = tools.Map(input.CueImports, interpolator)
 }
 
@@ -120,10 +135,22 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 	return input.filterSchema(schema)
 }
 
-func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, expectedCuePkgName string) (cue.Value, error) {
-	cueFsOverlay, err := buildCueOverlay(imports, entrypoint, expectedCuePkgName)
+func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude, expectedCuePkgName string) (cue.Value, error) {
+	libFs, err := buildBaseFSWithLibraries(imports)
 	if err != nil {
-		return cue.Value{}, fmt.Errorf("could not build cue overlay: %w", err)
+		return cue.Value{}, err
+	}
+
+	overlayFnc := buildCueOverlay
+	entrypoint := input.Entrypoint
+	if input.URL != "" {
+		overlayFnc = buildCueOverlayFromURL
+		entrypoint = input.URL
+	}
+
+	cueFsOverlay, err := overlayFnc(entrypoint, libFs, expectedCuePkgName)
+	if err != nil {
+		return cue.Value{}, err
 	}
 
 	// Load Cue files into Cue build.Instances slice
@@ -143,12 +170,7 @@ func parseCueEntrypoint(entrypoint string, imports []simplecue.LibraryInclude, e
 	return value, nil
 }
 
-func buildCueOverlay(imports []simplecue.LibraryInclude, entrypoint string, expectedCuePkgName string) (map[string]load.Source, error) {
-	libFs, err := buildBaseFSWithLibraries(imports)
-	if err != nil {
-		return nil, err
-	}
-
+func buildCueOverlay(entrypoint string, libFs fs.FS, expectedCuePkgName string) (map[string]load.Source, error) {
 	entrypointFS, err := dirToPrefixedFS(entrypoint, "cog/vfs/cue.mod/pkg/github.com/cog-vfs/"+expectedCuePkgName)
 	if err != nil {
 		return nil, err
@@ -261,4 +283,53 @@ func toCueOverlay(prefix string, vfs fs.FS) (map[string]load.Source, error) {
 	})
 
 	return overlay, err
+}
+
+func buildCueOverlayFromURL(url string, libFs fs.FS, expectedCuePkgName string) (map[string]load.Source, error) {
+	source, err := readCueURL(url, expectedCuePkgName)
+	if err != nil {
+		return nil, err
+	}
+
+	overlay, err := toCueOverlay("/", merged_fs.MergeMultiple(libFs, buildMockKindsysFS()))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range source {
+		overlay[k] = v
+	}
+
+	return overlay, nil
+}
+
+func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, error) {
+	u, err := url.Parse(entrypoint)
+	if err != nil {
+		return nil, err
+	}
+
+	if !strings.HasSuffix(u.Path, ".cue") {
+		return nil, fmt.Errorf("entrypoint %q must be a cue url", entrypoint)
+	}
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]load.Source{
+		filepath.Join("/cog/vfs/cue.mod/pkg/github.com/cog-vfs/", cuePackage, filepath.Base(u.Path)): load.FromBytes(data),
+	}, nil
 }

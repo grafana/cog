@@ -14,14 +14,18 @@ import (
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(extraTemplatesDirectories []string) *template.Template {
+func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector) *template.Template {
 	tmpl, err := template.New(
 		"java",
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
+		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
+		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(functions()),
 		template.Funcs(formattingTemplateFuncs()),
+
+		// parse templates
 		template.ParseFS(templatesFS, "templates"),
-		template.ParseDirectories(extraTemplatesDirectories...),
+		template.ParseDirectories(config.OverridesTemplatesDirectories...),
 	)
 	if err != nil {
 		panic(fmt.Errorf("could not initialize templates: %w", err))
@@ -61,6 +65,9 @@ func functions() template.FuncMap {
 		},
 		"importStdPkg": func(_ ast.Type) string {
 			panic("importStdPkg() needs to be overridden by a jenny")
+		},
+		"importPkg": func(_ string) string {
+			panic("importPkg() needs to be overridden by a jenny")
 		},
 		"formatPackageName": func(_ ast.Type) string {
 			panic("formatPackageName() needs to be overridden by a jenny")
@@ -146,6 +153,7 @@ type ClassTemplate struct {
 	ShouldAddDeserializer   bool
 	ShouldAddFactoryMethods bool
 	Constructors            []ConstructorTemplate
+	ExtraFunctionsBlock     string
 }
 
 type ConstructorTemplate struct {
@@ -154,9 +162,10 @@ type ConstructorTemplate struct {
 }
 
 type ConstructorAssignmentTemplate struct {
-	Name  string
-	Type  ast.Type
-	Value any
+	Name         string
+	Type         ast.Type
+	Value        any
+	ValueFromArg string
 }
 
 type ConstantTemplate struct {
@@ -208,7 +217,7 @@ type Unmarshalling struct {
 	Package                   string
 	Name                      string
 	ShouldUnmarshallingPanels bool
-	Imports                   []string
+	Imports                   fmt.Stringer
 	DataqueryUnmarshalling    []DataqueryUnmarshalling
 	Fields                    []ast.StructField
 	Hint                      any

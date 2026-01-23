@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -33,6 +34,9 @@ type Config struct {
 	Package string
 
 	SchemaMetadata ast.SchemaMeta
+
+	// Path to the schema file, if any.
+	SchemaPath string
 }
 
 type generator struct {
@@ -48,11 +52,22 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 
 	compiler := schemaparser.NewCompiler()
 	compiler.ExtractAnnotations = true
-	if err := compiler.AddResource("schema", schemaReader); err != nil {
+
+	schemaResourceURL := "schema"
+	if c.SchemaPath != "" {
+		absSchemaPath, err := filepath.Abs(c.SchemaPath)
+		if err != nil {
+			return nil, fmt.Errorf("[%s] could not resolve base directory: %w", c.Package, err)
+		}
+
+		schemaResourceURL = "file://" + absSchemaPath
+	}
+
+	if err := compiler.AddResource(schemaResourceURL, schemaReader); err != nil {
 		return nil, fmt.Errorf("[%s] %w", c.Package, err)
 	}
 
-	schema, err := compiler.Compile("schema")
+	schema, err := compiler.Compile(schemaResourceURL)
 	if err != nil {
 		return nil, fmt.Errorf("[%s] %w", c.Package, err)
 	}
@@ -147,7 +162,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 		return ast.Any(), nil
 	}
 
-	//nolint: gocritic
+	// nolint: gocritic
 	if len(schema.Types) > 1 {
 		def, err = g.walkScalarDisjunction(schema.Types)
 	} else if schema.Enum != nil {
@@ -270,6 +285,10 @@ func (g *generator) walkAllOf(schema *schemaparser.Schema) (ast.Type, error) {
 		}
 
 		branches[i] = def
+	}
+
+	if len(branches) == 1 {
+		return branches[0], nil
 	}
 
 	return ast.NewIntersection(branches), nil

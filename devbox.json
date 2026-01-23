@@ -3,14 +3,14 @@
   "packages": [
     "go@1.23",
     "php@8.3",
-    "php83Packages.composer@2.7",
+    "php83Packages.composer@2.9.2",
     "php83Packages.phpstan@2.1.1",
     "python@3.12",
     "golangci-lint@1.61",
-    "nodejs-slim_18@18.20",
+    "nodejs-slim_18@18.20.8",
     "nodePackages.ts-node@10.9.2",
-    "gradle@8.10",
-    "goreleaser@2.2"
+    "gradle@8.14.3",
+    "goreleaser@2.13.3"
   ],
   "shell": {
     "init_hook": [

@@ -1,0 +1,61 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "disjunctions_of_scalars_and_refs",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "DisjunctionOfScalarsAndRefs": {
+        "oneOf": [
+          {
+            "type": "string",
+            "const": "a"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/schemas/MyRefA"
+          },
+          {
+            "$ref": "#/components/schemas/MyRefB"
+          }
+        ]
+      },
+      "MyRefA": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "foo"
+        ],
+        "properties": {
+          "foo": {
+            "type": "string"
+          }
+        }
+      },
+      "MyRefB": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bar"
+        ],
+        "properties": {
+          "bar": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

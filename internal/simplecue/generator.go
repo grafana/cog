@@ -404,6 +404,8 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 		}
 
 		def := ast.NewStruct(fields...)
+		// Add the hints since we can't supply them in the constructor
+		def.Hints = hints
 		def.Default = defVal
 
 		return def, nil
@@ -497,6 +499,26 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
 				return ast.Type{}, err
 			}
+		}
+
+		if v.Kind() == cue.StringKind || v.Kind() == cue.NumberKind {
+			var referenceValue any
+			referenceValue, err = v.String()
+			if err != nil {
+				referenceValue, err = v.Int64()
+				if err != nil {
+					return ast.Type{}, errorWithCueRef(v, err.Error())
+				}
+			}
+
+			// Sometimes the object isn't added because the scope
+			if !g.schema.Objects.Has(refType) {
+				if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
+					return ast.Type{}, err
+				}
+			}
+
+			return ast.NewConstantReferenceType(refPkg, refType, referenceValue), nil
 		}
 
 		// Reference to another package

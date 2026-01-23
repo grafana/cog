@@ -63,6 +63,8 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 		buffer.WriteString(fmt.Sprintf("type %s = %s", def.Name, formatter.formatType(def.Type)))
 	case ast.KindMap, ast.KindArray, ast.KindStruct, ast.KindIntersection:
 		buffer.WriteString(fmt.Sprintf("type %s %s", def.Name, formatter.formatType(def.Type)))
+	case ast.KindConstantRef:
+		buffer.WriteString(fmt.Sprintf("const %s = %s", def.Name, formatScalar(def.Type.AsConstantRef().ReferenceValue)))
 	default:
 		return fmt.Sprintf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -267,6 +269,21 @@ func (formatter *typeFormatter) formatRef(def ast.Type, resolveBuilders bool) st
 
 func (formatter *typeFormatter) formatConstantRef(def ast.Type) string {
 	constRef := def.AsConstantRef()
+
+	obj, ok := formatter.context.LocateObject(constRef.ReferredPkg, constRef.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	nullable := ""
+	if def.Nullable {
+		nullable = "*"
+	}
+
+	if obj.Type.IsScalar() {
+		return nullable + string(obj.Type.AsScalar().ScalarKind)
+	}
+
 	referredPkg := formatter.packageMapper(constRef.ReferredPkg)
 	typeName := constRef.ReferredType
 
@@ -274,7 +291,7 @@ func (formatter *typeFormatter) formatConstantRef(def ast.Type) string {
 		typeName = referredPkg + "." + typeName
 	}
 
-	return typeName
+	return nullable + typeName
 }
 
 func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) string {
@@ -293,6 +310,20 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 		rest = append(rest, b)
 	}
 
+	// Collect field names from embedded references to avoid duplicates
+	refFieldNames := make(map[string]bool)
+	for _, ref := range refs {
+		if ref.IsRef() {
+			if obj, found := formatter.context.LocateObjectByRef(ref.AsRef()); found {
+				if obj.Type.IsStruct() {
+					for _, field := range obj.Type.AsStruct().Fields {
+						refFieldNames[field.Name] = true
+					}
+				}
+			}
+		}
+	}
+
 	for _, ref := range refs {
 		buffer.WriteString("\t" + formatter.formatRef(ref, false) + "\n")
 	}
@@ -304,6 +335,10 @@ func (formatter *typeFormatter) formatIntersection(def ast.IntersectionType) str
 	for _, r := range rest {
 		if r.IsStruct() {
 			for _, fieldDef := range r.Struct.Fields {
+				// Skip fields that are already defined in embedded references
+				if refFieldNames[fieldDef.Name] {
+					continue
+				}
 				buffer.WriteString("\t" + formatter.formatField(fieldDef))
 				buffer.WriteString("\n")
 			}
@@ -337,6 +372,39 @@ func makePathFormatter(typeFormatter *typeFormatter) func(path ast.Path) string 
 					output += fieldPath[i].Index.Argument.Name
 				}
 				output += "]"
+			}
+
+			// don't generate type hints if:
+			// * there isn't one defined
+			// * the type isn't "any"
+			// * as a trailing element in the path
+			if !fieldPath[i].Type.IsAny() || fieldPath[i].TypeHint == nil || i == len(fieldPath)-1 {
+				path += output
+				if !last && fieldPath[i+1].Index == nil {
+					path += "."
+				}
+				continue
+			}
+
+			path += output + fmt.Sprintf(".(*%s)", typeFormatter.doFormatType(*fieldPath[i].TypeHint, false))
+			if !last && fieldPath[i+1].Index == nil {
+				path += "."
+			}
+		}
+
+		return path
+	}
+}
+
+func formatPathForRange(typeFormatter *typeFormatter) func(path ast.Path) string {
+	return func(fieldPath ast.Path) string {
+		path := ""
+
+		for i := range fieldPath {
+			last := i == len(fieldPath)-1
+			output := fieldPath[i].Identifier
+			if !fieldPath[i].Root {
+				output = formatFieldName(output)
 			}
 
 			// don't generate type hints if:

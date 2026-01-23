@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "RefreshRate": {
-      "anyOf": [
+      "oneOf": [
         {
           "type": "string"
         },
@@ -34,7 +34,7 @@
       }
     },
     "BoolOrRef": {
-      "anyOf": [
+      "oneOf": [
         {
           "type": "boolean"
         },
@@ -78,7 +78,7 @@
       }
     },
     "SeveralRefs": {
-      "anyOf": [
+      "oneOf": [
         {
           "$ref": "#/definitions/SomeStruct"
         },

@@ -29,7 +29,9 @@ func (jenny RawTypes) JennyName() string {
 func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
 
-	jenny.tmpl = jenny.tmpl.Funcs(common.TypeResolvingTemplateHelpers(context))
+	jenny.tmpl = jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(common.TypesTemplateHelpers(context))
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.generateSchema(context, schema)
@@ -329,14 +331,20 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			constRef := field.Type.AsConstantRef()
 			t := context.ResolveRefs(ast.NewRef(constRef.ReferredPkg, constRef.ReferredType))
 
-			if !t.IsEnum() {
+			if !t.IsEnum() && !t.IsScalar() {
 				break
 			}
 
-			for _, member := range t.AsEnum().Values {
-				if member.Value == constRef.ReferenceValue {
-					defaultValue = member.Name
-					break
+			if t.IsScalar() && t.AsScalar().ScalarKind == ast.KindString {
+				defaultValue = constRef.ReferredType
+			}
+
+			if t.IsEnum() {
+				for _, member := range t.AsEnum().Values {
+					if member.Value == constRef.ReferenceValue {
+						defaultValue = member.Name
+						break
+					}
 				}
 			}
 
@@ -344,6 +352,8 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			if referredPkg != "" {
 				defaultValue = referredPkg + "." + defaultValue
 			}
+
+			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type)
 		} else if field.Type.IsArray() {
 			defaultValue = "[]" + jenny.typeFormatter.formatType(field.Type.Array.ValueType) + "{}"
 		} else if field.Type.IsMap() {
@@ -366,6 +376,10 @@ func (jenny RawTypes) maybeValueAsPointer(value string, nullable bool, typeDef a
 	}
 
 	if typeDef.IsAnyOf(ast.KindArray, ast.KindMap) {
+		return value
+	}
+
+	if typeDef.IsScalar() && typeDef.AsScalar().ScalarKind == ast.KindBytes {
 		return value
 	}
 

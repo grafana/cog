@@ -243,10 +243,14 @@ func (formatter *typeFormatter) formatConstantReference(def ast.Type) string {
 		return formatter.config.fullNamespaceRef(referredPkg + "\\" + formatObjectName(ref.ReferredType))
 	}
 
+	if obj.Type.IsScalar() {
+		return formatter.formatScalar(obj.Type)
+	}
+
 	return "unknown"
 }
 
-func (formatter *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) string {
+func (formatter *typeFormatter) constantRefValue(def ast.ConstantReferenceType) string {
 	obj, ok := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if !ok {
 		return "unknown"
@@ -254,6 +258,9 @@ func (formatter *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceTyp
 
 	if obj.Type.IsEnum() {
 		return formatter.formatEnumValue(obj, def)
+	}
+	if obj.Type.IsScalar() {
+		return formatter.config.fullNamespaceRef(formatPackageName(def.ReferredPkg) + "\\Constants::" + formatConstantName(def.ReferredType))
 	}
 
 	return "unknown"

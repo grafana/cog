@@ -17,6 +17,7 @@ optionals: {
 	stringField?: string
 	enumField?: #Direction
 	refField?: #Variable
+	byteField?: bytes
 }
 
 arrays: {

@@ -13,5 +13,5 @@ metadata:
     Code generation with a human touch
 spec:
   type: tool
-  owner: group:default/platform-monitoring
+  owner: group:default/grafana-app-platform-squad
   lifecycle: production

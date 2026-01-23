@@ -43,6 +43,7 @@ func (jenny Schema) generateSchema(context languages.Context, schema *ast.Schema
 		ReferenceFormatter: func(ref ast.RefType) string {
 			return fmt.Sprintf("#/components/schemas/%s", ref.ReferredType)
 		},
+		OpenAPI3Compatible: true,
 	}
 
 	jsonSchema := jsonschemaJenny.GenerateSchema(context, schema)

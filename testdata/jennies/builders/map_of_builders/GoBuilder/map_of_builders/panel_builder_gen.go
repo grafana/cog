@@ -8,14 +8,14 @@ var _ cog.Builder[Panel] = (*PanelBuilder)(nil)
 
 type PanelBuilder struct {
     internal *Panel
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewPanelBuilder() *PanelBuilder {
 	resource := NewPanel()
 	builder := &PanelBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -26,6 +26,10 @@ func NewPanelBuilder() *PanelBuilder {
 func (builder *PanelBuilder) Build() (Panel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Panel{}, err
+	}
+	
+	if len(builder.errors) > 0 {
+	    return Panel{}, cog.MakeBuildErrors("map_of_builders.panel", builder.errors)
 	}
 
 	return *builder.internal, nil

@@ -14,14 +14,14 @@ import (
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
-func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplatesDirectories []string) *template.Template {
+func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector) *template.Template {
 	tmpl, err := template.New(
 		"php",
 
 		// "dummy"/unimplemented helpers, to be able to parse the templates before jennies are initialized.
 		// Jennies will override these with proper dependencies.
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
-		template.Funcs(common.TypesTemplateHelpers()),
+		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(common.DynamicFilesTemplateHelpers()),
 
@@ -30,7 +30,7 @@ func initTemplates(apiRefCollector *common.APIReferenceCollector, extraTemplates
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
-		template.ParseDirectories(extraTemplatesDirectories...),
+		template.ParseDirectories(config.OverridesTemplatesDirectories...),
 	)
 	if err != nil {
 		panic(fmt.Errorf("could not initialize templates: %w", err))

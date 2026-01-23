@@ -8,14 +8,14 @@ var _ cog.Builder[Struct] = (*StructBuilder)(nil)
 
 type StructBuilder struct {
     internal *Struct
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewStructBuilder() *StructBuilder {
 	resource := NewStruct()
 	builder := &StructBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
 
 	return builder
@@ -27,6 +27,10 @@ func (builder *StructBuilder) Build() (Struct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Struct{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return Struct{}, cog.MakeBuildErrors("struct_with_defaults.struct", builder.errors)
+	}
 
 	return *builder.internal, nil
 }
@@ -34,7 +38,7 @@ func (builder *StructBuilder) Build() (Struct, error) {
 func (builder *StructBuilder) AllFields(allFields cog.Builder[NestedStruct]) *StructBuilder {
     allFieldsResource, err := allFields.Build()
     if err != nil {
-        builder.errors["allFields"] = err.(cog.BuildErrors)
+        builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
         return builder
     }
     builder.internal.AllFields = allFieldsResource
@@ -45,7 +49,7 @@ func (builder *StructBuilder) AllFields(allFields cog.Builder[NestedStruct]) *St
 func (builder *StructBuilder) PartialFields(partialFields cog.Builder[NestedStruct]) *StructBuilder {
     partialFieldsResource, err := partialFields.Build()
     if err != nil {
-        builder.errors["partialFields"] = err.(cog.BuildErrors)
+        builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
         return builder
     }
     builder.internal.PartialFields = partialFieldsResource
@@ -56,7 +60,7 @@ func (builder *StructBuilder) PartialFields(partialFields cog.Builder[NestedStru
 func (builder *StructBuilder) EmptyFields(emptyFields cog.Builder[NestedStruct]) *StructBuilder {
     emptyFieldsResource, err := emptyFields.Build()
     if err != nil {
-        builder.errors["emptyFields"] = err.(cog.BuildErrors)
+        builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
         return builder
     }
     builder.internal.EmptyFields = emptyFieldsResource

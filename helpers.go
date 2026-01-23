@@ -186,14 +186,18 @@ type GoConfig struct {
 
 	// AnyAsInterface instructs cog to emit `interface{}` instead of `any`.
 	AnyAsInterface bool
+
+	// CustomTemplates accepts a list of directories where are the custom templates
+	CustomTemplatesDirectories []string
 }
 
 // Golang sets the output to Golang types.
 func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Go: &golang.Config{
-			SkipRuntime:            true,
-			GenerateJSONMarshaller: true,
+			SkipRuntime:                   true,
+			GenerateJSONMarshaller:        true,
+			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
 
 			GenerateEqual:  config.GenerateEqual,
 			AnyAsInterface: config.AnyAsInterface,
@@ -223,16 +227,20 @@ type TypescriptConfig struct {
 	// type Direction = "up" | "down" | "left" | "right";
 	// ```
 	EnumsAsUnionTypes bool `yaml:"enums_as_union_types"`
+
+	// CustomTemplates accepts a list of directories where are the custom templates
+	CustomTemplatesDirectories []string
 }
 
 // Typescript sets the output to Typescript types.
 func (pipeline *SchemaToTypesPipeline) Typescript(config TypescriptConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Typescript: &typescript.Config{
-			SkipRuntime:       true,
-			SkipIndex:         true,
-			PackagesImportMap: config.ImportsMap,
-			EnumsAsUnionTypes: config.EnumsAsUnionTypes,
+			SkipRuntime:                   true,
+			SkipIndex:                     true,
+			PackagesImportMap:             config.ImportsMap,
+			EnumsAsUnionTypes:             config.EnumsAsUnionTypes,
+			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
 		},
 	}
 	return pipeline

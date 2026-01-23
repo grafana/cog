@@ -17,6 +17,9 @@ type Definition = *orderedmap.Map[string, any]
 type Schema struct {
 	Config             Config
 	ReferenceFormatter func(ref ast.RefType) string
+	// OpenAPI3Compatible dictates whether the generated JSONSchema will be compatible with OpenAPI 3.0,
+	// rather than JSONSchema (OpenAPI 3.1 is fully compatible with JSON Schema)
+	OpenAPI3Compatible bool
 
 	foreignObjects     *orderedmap.Map[string, ast.Object]
 	referenceResolver  func(ref ast.RefType) (ast.Object, bool)
@@ -123,8 +126,12 @@ func (jenny Schema) formatType(typeDef ast.Type) Definition {
 		return jenny.formatMap(typeDef)
 	case ast.KindDisjunction:
 		return jenny.formatDisjunction(typeDef)
+	case ast.KindIntersection:
+		return jenny.formatIntersection(typeDef)
 	case ast.KindComposableSlot:
 		return jenny.formatComposableSlot()
+	case ast.KindConstantRef:
+		return jenny.formatConstantRef(typeDef)
 	}
 
 	return orderedmap.New[string, any]()
@@ -182,11 +189,21 @@ func (jenny Schema) addNumberConstraints(definition *orderedmap.Map[string, any]
 	for _, constraint := range typeDef.AsScalar().Constraints {
 		switch constraint.Op {
 		case ast.LessThanOp:
-			definition.Set("exclusiveMaximum", constraint.Args[0])
+			if jenny.OpenAPI3Compatible {
+				definition.Set("maximum", constraint.Args[0])
+				definition.Set("exclusiveMaximum", true)
+			} else {
+				definition.Set("exclusiveMaximum", constraint.Args[0])
+			}
 		case ast.LessThanEqualOp:
 			definition.Set("maximum", constraint.Args[0])
 		case ast.GreaterThanOp:
-			definition.Set("exclusiveMinimum", constraint.Args[0])
+			if jenny.OpenAPI3Compatible {
+				definition.Set("minimum", constraint.Args[0])
+				definition.Set("exclusiveMinimum", true)
+			} else {
+				definition.Set("exclusiveMinimum", constraint.Args[0])
+			}
 		case ast.GreaterThanEqualOp:
 			definition.Set("minimum", constraint.Args[0])
 		case ast.MultipleOfOp:
@@ -200,6 +217,11 @@ func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
 
 	definition.Set("type", "object")
 	definition.Set("additionalProperties", false)
+	if typeDef.HasHint(ast.HintOpenStruct) {
+		if val, _ := typeDef.Hints[ast.HintOpenStruct].(string); strings.ToLower(val)[0] == 't' {
+			definition.Set("additionalProperties", map[string]any{})
+		}
+	}
 
 	properties := orderedmap.New[string, any]()
 	var required []string
@@ -250,6 +272,39 @@ func (jenny Schema) formatRef(typeDef ast.Type) Definition {
 	return definition
 }
 
+func (jenny Schema) formatConstantRef(typeDef ast.Type) Definition {
+	definition := orderedmap.New[string, any]()
+	constRef := typeDef.AsConstantRef()
+	ref := ast.NewRef(constRef.ReferredPkg, constRef.ReferredType).AsRef()
+
+	if jenny.isForeignReference(ref) {
+		referredObject, found := jenny.referenceResolver(ref)
+
+		if found {
+			jenny.foreignObjects.Set(referredObject.SelfRef.String(), referredObject)
+		}
+	}
+
+	obj, ok := jenny.referenceResolver(ref)
+	if !ok {
+		definition.Set("$ref", jenny.ReferenceFormatter(ref))
+		return definition
+	}
+
+	// TODO: handle foreign refs
+	if obj.Type.IsEnum() {
+		definition.Set("allOf", []Definition{jenny.formatType(ref.AsType())})
+	} else {
+		definition.Set("$ref", jenny.ReferenceFormatter(ref))
+	}
+
+	if obj, ok := jenny.referenceResolver(ref); ok && obj.Type.IsEnum() {
+		definition.Set("default", constRef.ReferenceValue)
+	}
+
+	return definition
+}
+
 func (jenny Schema) defaultRefFormatter(ref ast.RefType) string {
 	return fmt.Sprintf("#/definitions/%s", ref.ReferredType)
 }
@@ -262,6 +317,11 @@ func (jenny Schema) formatEnum(typeDef ast.Type) Definition {
 	})
 
 	definition.Set("enum", values)
+	// Make an educated guess about the enum type by looking at the first element in the values set
+	if len(typeDef.AsEnum().Values) > 0 {
+		def := jenny.formatType(typeDef.AsEnum().Values[0].Type)
+		definition.Set("type", def.Get("type"))
+	}
 
 	return definition
 }
@@ -288,7 +348,16 @@ func (jenny Schema) formatDisjunction(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 	branches := tools.Map(typeDef.AsDisjunction().Branches, jenny.formatType)
 
-	definition.Set("anyOf", branches)
+	definition.Set("oneOf", branches)
+
+	return definition
+}
+
+func (jenny Schema) formatIntersection(typeDef ast.Type) Definition {
+	definition := orderedmap.New[string, any]()
+	branches := tools.Map(typeDef.AsIntersection().Branches, jenny.formatType)
+
+	definition.Set("allOf", branches)
 
 	return definition
 }

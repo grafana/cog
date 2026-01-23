@@ -207,3 +207,39 @@ func TestAnonymousEnumToExplicitType_withAnonymousEnumInIntersection(t *testing.
 	// Run the compiler pass
 	runPassOnSchema(t, &AnonymousEnumToExplicitType{}, schema, expected)
 }
+
+func TestAnonymousEnumToExplicitType_withFieldWithDefaultValue(t *testing.T) {
+	// Prepare expected input
+	schema := &ast.Schema{
+		Package: "with_default",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("with_default", "Panel", ast.NewStruct(
+				ast.NewStructField("title", ast.String()),
+				ast.NewStructField("type", ast.NewEnum([]ast.EnumValue{
+					{Name: "Foo", Value: "foo", Type: ast.String()},
+					{Name: "Bar", Value: "bar", Type: ast.String()},
+				}, ast.Nullable(), ast.Default("foo"))),
+			)),
+		),
+	}
+
+	// Prepare expected output
+	expected := &ast.Schema{
+		Package: "with_default",
+		Objects: testutils.ObjectsMap(
+			ast.NewObject("with_default", "Panel", ast.NewStruct(
+				ast.NewStructField("title", ast.String()),
+				ast.NewStructField("type", ast.NewRef("with_default", "PanelType", ast.Nullable(), ast.Default("foo"), ast.Trail("AnonymousEnumToExplicitType"))),
+			)),
+
+			// the anonymous enum, turned into an object
+			ast.NewObject("with_default", "PanelType", ast.NewEnum([]ast.EnumValue{
+				{Name: "Foo", Value: "foo", Type: ast.String()},
+				{Name: "Bar", Value: "bar", Type: ast.String()},
+			}), "AnonymousEnumToExplicitType"),
+		),
+	}
+
+	// Run the compiler pass
+	runPassOnSchema(t, &AnonymousEnumToExplicitType{}, schema, expected)
+}

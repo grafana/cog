@@ -117,6 +117,7 @@ type ComposeBuilders struct {
 	CompositionMap           map[string]string `yaml:"composition_map"`
 	ComposedBuilderName      string            `yaml:"composed_builder_name"`
 	PreserveOriginalBuilders bool              `yaml:"preserve_original_builders"`
+	RenameOptions            map[string]string `yaml:"rename_options"`
 }
 
 func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -134,6 +135,7 @@ func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, erro
 			CompositionMap:           rule.CompositionMap,
 			ComposedBuilderName:      rule.ComposedBuilderName,
 			PreserveOriginalBuilders: rule.PreserveOriginalBuilders,
+			RenameOptions:            rule.RenameOptions,
 		},
 	), nil
 }

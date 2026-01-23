@@ -106,10 +106,12 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 		return languages.Context{}, err
 	}
 
+	converterConfig, err := pipeline.readConverterConfig()
 	jenniesInput, err = languages.FormatIdentifiers(language, jenniesInput)
 	if err != nil {
 		return languages.Context{}, err
 	}
 
+	jenniesInput.ConverterConfig = *converterConfig
 	return jenniesInput, nil
 }

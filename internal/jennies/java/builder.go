@@ -34,7 +34,7 @@ func (jenny Builder) Generate(context languages.Context) (codejen.Files, error) 
 			return nil, err
 		}
 
-		filename := filepath.Join(jenny.config.ProjectPath, formatPackageName(builder.Package), fmt.Sprintf("%sBuilder.java", tools.UpperCamelCase(builder.Name)))
+		filename := filepath.Join(jenny.config.ProjectPath, formatPackageName(builder.Package), fmt.Sprintf("%sBuilder.java", jenny.getBuilderName(builder)))
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
@@ -60,7 +60,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		RawPackage:           builder.Package,
 		Imports:              jenny.imports,
 		ObjectName:           tools.UpperCamelCase(object.Name),
-		BuilderName:          tools.UpperCamelCase(builder.Name),
+		BuilderName:          jenny.getBuilderName(builder),
 		BuilderSignatureType: jenny.getBuilderSignature(builder.Package, object),
 		Constructor:          builder.Constructor,
 		Options:              builder.Options,
@@ -78,8 +78,10 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 	})
 
 	return jenny.tmpl.Funcs(map[string]any{
-		"formatBuilderFieldType":   jenny.typeFormatter.formatBuilderFieldType,
-		"emptyValueForType":        jenny.typeFormatter.emptyValueForType,
+		"formatBuilderFieldType": jenny.typeFormatter.formatBuilderFieldType,
+		"emptyValueForType": func(def ast.Type) string {
+			return jenny.typeFormatter.emptyValueForType(def, true)
+		},
 		"typeHasBuilder":           jenny.typeFormatter.typeHasBuilder,
 		"resolvesToComposableSlot": jenny.typeFormatter.resolvesToComposableSlot,
 		"formatAssignmentPath":     jenny.typeFormatter.formatAssignmentPath,
@@ -88,6 +90,14 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		"formatType":               jenny.typeFormatter.formatFieldType,
 		"formatPathIndex":          jenny.typeFormatter.formatPathIndex,
 	}).RenderAsBytes("builders/builder.tmpl", tmpl)
+}
+
+func (jenny Builder) getBuilderName(builder ast.Builder) string {
+	if builder.For.SelfRef.ReferredPkg != builder.Package {
+		return fmt.Sprintf("%s%s", tools.UpperCamelCase(builder.Package), tools.UpperCamelCase(builder.For.SelfRef.ReferredType))
+	}
+
+	return tools.UpperCamelCase(builder.Name)
 }
 
 func (jenny Builder) getBuilderSignature(pkg string, obj ast.Object) string {
@@ -107,5 +117,9 @@ func (jenny Builder) isGenericPanel(builder ast.Builder) bool {
 		return false
 	}
 
-	return builder.Name == "Panel"
+	// TODO: remove this once we have a better way to identify generic builders
+	dashboardLegacy := builder.Package == "dashboard" && builder.Name == "Panel"
+	dashboardv2VizConfig := builder.Package == "dashboardv2beta1" && builder.Name == "VizConfigKind"
+	dashboardv2DataQueryKind := builder.Package == "dashboardv2beta1" && builder.Name == "DataQueryKind"
+	return dashboardLegacy || dashboardv2VizConfig || dashboardv2DataQueryKind
 }

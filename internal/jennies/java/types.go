@@ -102,8 +102,12 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 
 func (tf *typeFormatter) formatConstantReference(def ast.ConstantReferenceType) string {
 	object, _ := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
-	if object.Type.Kind == ast.KindEnum {
+	if object.Type.IsEnum() {
 		return formatObjectName(def.ReferredType)
+	}
+
+	if object.Type.IsScalar() {
+		return formatScalarType(object.Type.AsScalar())
 	}
 
 	return "unknown"
@@ -166,7 +170,7 @@ func formatScalarType(def ast.ScalarType) string {
 	return scalarType
 }
 
-func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
+func (tf *typeFormatter) emptyValueForType(def ast.Type, useBuilders bool) string {
 	switch def.Kind {
 	case ast.KindArray:
 		tf.packageMapper("java.util", "LinkedList")
@@ -176,19 +180,15 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 		return "new HashMap<>()"
 	case ast.KindRef:
 		refDef := fmt.Sprintf("%s.%s", formatPackageName(def.AsRef().ReferredPkg), formatObjectName(def.AsRef().ReferredType))
-		if tf.typeHasBuilder(def) {
+		if useBuilders && tf.typeHasBuilder(def) {
 			return fmt.Sprintf("new %sBuilder().build()", tf.config.formatPackage(refDef))
 		}
 
 		referredObj, found := tf.context.LocateObjectByRef(def.AsRef())
 		if found && referredObj.Type.IsEnum() {
-			enum := referredObj.Type.AsEnum()
-			enumValue, _ := enum.MemberForValue(0)
-			if enum.Values[0].Type.Kind == ast.KindScalar {
-				enumValue, _ = enum.MemberForValue("")
-			}
+			defaultMember := referredObj.Type.AsEnum().Values[0]
 
-			return fmt.Sprintf("%s.%s", referredObj.Name, tools.UpperSnakeCase(enumValue.Name))
+			return fmt.Sprintf("%s.%s", referredObj.Name, tools.UpperSnakeCase(defaultMember.Name))
 		}
 
 		return fmt.Sprintf("new %s()", tf.config.formatPackage(refDef))
@@ -210,6 +210,8 @@ func (tf *typeFormatter) emptyValueForType(def ast.Type) string {
 			return `""`
 		case ast.KindBytes:
 			return "(byte) 0"
+		case ast.KindAny:
+			return "new Object()"
 		default:
 			return "unknown"
 		}
@@ -328,11 +330,11 @@ func (tf *typeFormatter) objectNeedsCustomSerializer(obj ast.Object) bool {
 	return false
 }
 
-func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object) bool {
+func (tf *typeFormatter) objectNeedsCustomDeserializer(obj ast.Object, tmpl *template.Template) bool {
 	if !tf.config.GenerateBuilders || tf.config.SkipRuntime {
 		return false
 	}
-	if objectNeedsCustomDeserialiser(tf.context, obj) {
+	if objectNeedsCustomDeserializer(tf.context, obj, tmpl) {
 		tf.packageMapper(fasterXMLPackageName, "databind.annotation.JsonDeserialize")
 		return true
 	}
@@ -386,10 +388,20 @@ func (tf *typeFormatter) formatGuardPath(fieldPath ast.Path) string {
 	return castedPath + strings.Join(parts, ".")
 }
 
-func (tf *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) string {
+func (tf *typeFormatter) constantRefValue(def ast.ConstantReferenceType) string {
 	obj, ok := tf.context.LocateObject(def.ReferredPkg, def.ReferredType)
 	if !ok {
 		return "unknown"
+	}
+
+	refPkg := tf.packageMapper(def.ReferredPkg, def.ReferredType)
+
+	if obj.Type.IsScalar() {
+		if refPkg != "" {
+			return fmt.Sprintf("%s.%s", refPkg, def.ReferredType)
+		}
+
+		return fmt.Sprintf("Constants.%s", def.ReferredType)
 	}
 
 	if obj.Type.IsEnum() {
@@ -398,7 +410,7 @@ func (tf *typeFormatter) enumFromConstantRef(def ast.ConstantReferenceType) stri
 			return "unknown"
 		}
 
-		if refPkg := tf.packageMapper(def.ReferredPkg, def.ReferredType); refPkg != "" {
+		if refPkg != "" {
 			return fmt.Sprintf("%s.%s.%s", refPkg, def.ReferredType, enumVale.Name)
 		}
 

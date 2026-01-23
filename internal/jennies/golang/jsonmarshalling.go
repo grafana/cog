@@ -65,7 +65,7 @@ func (jenny JSONMarshalling) objectNeedsCustomMarshal(obj ast.Object) bool {
 	// the only case for which we need a custom marshaller is for structs
 	// that are generated from a disjunction by the `DisjunctionToType` compiler pass.
 
-	return obj.Type.IsStructGeneratedFromDisjunction()
+	return obj.Type.IsDisjunctionOfAnyKind()
 }
 
 func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error) {
@@ -93,6 +93,12 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 		})
 	}
 
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
+		return jenny.tmpl.Render("types/disjunction_of_scalars_and_refs.json_marshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
 	return "", fmt.Errorf("could not determine how to render custom marshal")
 }
 
@@ -111,7 +117,7 @@ func (jenny JSONMarshalling) objectNeedsCustomUnmarshal(context languages.Contex
 	}
 
 	// is it a struct generated from a disjunction?
-	if obj.Type.IsStructGeneratedFromDisjunction() {
+	if obj.Type.IsDisjunctionOfAnyKind() {
 		return true
 	}
 
@@ -154,6 +160,12 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 		return jenny.tmpl.Render("types/disjunction_of_refs.json_unmarshal.tmpl", map[string]any{
 			"def":  obj,
 			"hint": obj.Type.Hints[ast.HintDiscriminatedDisjunctionOfRefs],
+		})
+	}
+
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
+		return jenny.tmpl.Render("types/disjunction_of_scalars_and_refs.json_unmarshal.tmpl", map[string]any{
+			"def": obj,
 		})
 	}
 

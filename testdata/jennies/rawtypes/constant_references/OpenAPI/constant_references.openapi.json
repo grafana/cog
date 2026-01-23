@@ -14,7 +14,8 @@
           "ValueA",
           "ValueB",
           "ValueC"
-        ]
+        ],
+        "type": "string"
       },
       "ParentStruct": {
         "type": "object",
@@ -51,7 +52,14 @@
           "myEnum"
         ],
         "properties": {
-          "myEnum": {}
+          "myEnum": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Enum"
+              }
+            ],
+            "default": "ValueA"
+          }
         }
       },
       "StructB": {
@@ -62,7 +70,14 @@
           "myValue"
         ],
         "properties": {
-          "myEnum": {},
+          "myEnum": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Enum"
+              }
+            ],
+            "default": "ValueB"
+          },
           "myValue": {
             "type": "string"
           }

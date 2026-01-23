@@ -1,9 +1,10 @@
 import grafana_foundation_sdk.models.dashboard as dashboard
+from grafana_foundation_sdk.builders.common import StackingConfig as StackingConfigBuilder
 from grafana_foundation_sdk.builders.dashboard import ThresholdsConfig as ThresholdsConfigBuilder
 from grafana_foundation_sdk.cog import builder as cogbuilder
-from .common import default_timeseries, basic_prometheus_query, default_gauge
-from grafana_foundation_sdk.builders.common import StackingConfig as StackingConfigBuilder
 from grafana_foundation_sdk.models.common import StackingMode
+
+from .common import default_timeseries, basic_prometheus_query, default_gauge
 
 
 def memory_usage_timeseries() -> cogbuilder.Builder[dashboard.Panel]:
@@ -51,7 +52,7 @@ def memory_usage_gauge() -> cogbuilder.Builder[dashboard.Panel]:
 
     return (
         default_gauge()
-        .title("Memory Temperatore")
+        .title("Memory Usage")
         .span(6)
         .min(30)
         .max(100)

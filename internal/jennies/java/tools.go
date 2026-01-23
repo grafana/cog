@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -156,6 +157,10 @@ func getJavaFieldTypeCheck(t ast.Type) string {
 			return "isBoolean()"
 		case ast.KindInt8, ast.KindUint8, ast.KindInt32, ast.KindUint32:
 			return "isInt()"
+		case ast.KindInt64, ast.KindUint64:
+			return "isIntegralNumber()"
+		case ast.KindFloat32:
+			return "isFloatingPointNumber()"
 		case ast.KindFloat64:
 			return "isDouble()"
 		default:
@@ -166,7 +171,7 @@ func getJavaFieldTypeCheck(t ast.Type) string {
 	}
 }
 
-func objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object) bool {
+func objectNeedsCustomDeserializer(context languages.Context, obj ast.Object, tmpl *template.Template) bool {
 	// an object needs a custom unmarshal if:
 	// - it is a struct that was generated from a disjunction by the `DisjunctionToType` compiler pass.
 	// - it is a struct and one or more of its fields is a KindComposableSlot, or an array of KindComposableSlot
@@ -175,8 +180,13 @@ func objectNeedsCustomDeserialiser(context languages.Context, obj ast.Object) bo
 		return false
 	}
 
+	// is there a custom unmarshal template block?
+	if tmpl.Exists(template.CustomObjectUnmarshalBlock(obj)) {
+		return true
+	}
+
 	// is it a struct generated from a disjunction?
-	if obj.Type.IsStructGeneratedFromDisjunction() {
+	if obj.Type.IsDisjunctionOfAnyKind() {
 		return true
 	}
 

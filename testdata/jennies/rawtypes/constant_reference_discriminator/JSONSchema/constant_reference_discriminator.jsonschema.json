@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "LayoutWithValue": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/GridLayoutUsingValue"
+        },
+        {
+          "$ref": "#/definitions/RowsLayoutUsingValue"
+        }
+      ]
+    },
+    "GridLayoutUsingValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "gridLayoutProperty"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/GridLayoutKindType"
+        },
+        "gridLayoutProperty": {
+          "type": "string"
+        }
+      }
+    },
+    "RowsLayoutUsingValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "rowsLayoutProperty"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/RowsLayoutKindType"
+        },
+        "rowsLayoutProperty": {
+          "type": "string"
+        }
+      }
+    },
+    "LayoutWithoutValue": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/GridLayoutWithoutValue"
+        },
+        {
+          "$ref": "#/definitions/RowsLayoutWithoutValue"
+        }
+      ]
+    },
+    "GridLayoutWithoutValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "gridLayoutProperty"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/GridLayoutKindType"
+        },
+        "gridLayoutProperty": {
+          "type": "string"
+        }
+      }
+    },
+    "RowsLayoutWithoutValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "rowsLayoutProperty"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/RowsLayoutKindType"
+        },
+        "rowsLayoutProperty": {
+          "type": "string"
+        }
+      }
+    },
+    "GridLayoutKindType": {
+      "type": "string",
+      "const": "GridLayout"
+    },
+    "RowsLayoutKindType": {
+      "type": "string",
+      "const": "RowsLayout"
+    }
+  }
+}

@@ -43,7 +43,7 @@ func (jenny *Converter) Generate(context languages.Context) (codejen.Files, erro
 }
 
 func (jenny *Converter) generateConverter(context languages.Context, builder ast.Builder) ([]byte, error) {
-	converter := languages.NewConverterGenerator(jenny.NullableConfig).FromBuilder(context, builder)
+	converter := languages.NewConverterGenerator(jenny.NullableConfig, context.ConverterConfig).FromBuilder(context, builder)
 
 	imports := NewImportMap(jenny.Config.PackageRoot)
 	typeImportMapper := func(pkg string) string {
@@ -83,10 +83,11 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			"importStdPkg": func(pkg string) string {
 				return imports.Add(pkg, pkg)
 			},
-			"importPkg":    typeImportMapper,
-			"formatType":   builderTypeFormatter(jenny.Config, context, dummyImports, dummyImportMapper).formatType,
-			"formatPath":   makePathFormatter(formatter),
-			"formatRawRef": formatRawRef,
+			"importPkg":          typeImportMapper,
+			"formatType":         builderTypeFormatter(jenny.Config, context, dummyImports, dummyImportMapper).formatType,
+			"formatPath":         makePathFormatter(formatter),
+			"formatPathForRange": formatPathForRange(formatter),
+			"formatRawRef":       formatRawRef,
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
 			"Imports":   imports,

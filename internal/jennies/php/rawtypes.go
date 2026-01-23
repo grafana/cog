@@ -33,10 +33,12 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 	files := make(codejen.Files, 0, len(context.Schemas))
 
 	jenny.shaper = &shape{context: context}
-	jenny.tmpl = jenny.tmpl.Funcs(templateHelpers(templateDeps{
-		config:  jenny.config,
-		context: context,
-	}))
+	jenny.tmpl = jenny.tmpl.
+		Funcs(templateHelpers(templateDeps{
+			config:  jenny.config,
+			context: context,
+		})).
+		Funcs(common.TypesTemplateHelpers(context))
 
 	// generate typehints with a compiler pass
 	context.Schemas, err = (&AddTypehintsComments{config: jenny.config}).Process(context.Schemas)
@@ -289,7 +291,7 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 
 		// values with enums that we don't want to add in the constructor
 		if field.Type.IsConstantRef() {
-			val := jenny.typeFormatter.enumFromConstantRef(field.Type.AsConstantRef())
+			val := jenny.typeFormatter.constantRefValue(field.Type.AsConstantRef())
 			assignments = append(assignments, fmt.Sprintf("    $this->%s = %s;", fieldName, val))
 			continue
 		}

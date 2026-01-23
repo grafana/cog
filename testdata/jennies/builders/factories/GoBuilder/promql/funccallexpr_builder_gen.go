@@ -8,14 +8,14 @@ var _ cog.Builder[FuncCallExpr] = (*FuncCallExprBuilder)(nil)
 
 type FuncCallExprBuilder struct {
     internal *FuncCallExpr
-    errors map[string]cog.BuildErrors
+    errors cog.BuildErrors
 }
 
 func NewFuncCallExprBuilder() *FuncCallExprBuilder {
 	resource := NewFuncCallExpr()
 	builder := &FuncCallExprBuilder{
 		internal: resource,
-		errors: make(map[string]cog.BuildErrors),
+		errors: make(cog.BuildErrors, 0),
 	}
     builder.internal.Type = "funcCallExpr"
 
@@ -69,6 +69,10 @@ func (builder *FuncCallExprBuilder) Build() (FuncCallExpr, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return FuncCallExpr{}, err
 	}
+	
+	if len(builder.errors) > 0 {
+	    return FuncCallExpr{}, cog.MakeBuildErrors("promql.funcCallExpr", builder.errors)
+	}
 
 	return *builder.internal, nil
 }
@@ -84,7 +88,7 @@ func (builder *FuncCallExprBuilder) Args(args []cog.Builder[Expr]) *FuncCallExpr
         for _, r1 := range args {
                 argsDepth1, err := r1.Build()
                 if err != nil {
-                    builder.errors["args"] = err.(cog.BuildErrors)
+                    builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
                     return builder
                 }
                 argsResources = append(argsResources, argsDepth1)
@@ -99,7 +103,7 @@ func (builder *FuncCallExprBuilder) Args(args []cog.Builder[Expr]) *FuncCallExpr
 func (builder *FuncCallExprBuilder) Arg(arg cog.Builder[Expr]) *FuncCallExprBuilder {
     argResource, err := arg.Build()
     if err != nil {
-        builder.errors["args"] = err.(cog.BuildErrors)
+        builder.errors = append(builder.errors, err.(cog.BuildErrors)...)
         return builder
     }
     builder.internal.Args = append(builder.internal.Args, argResource)

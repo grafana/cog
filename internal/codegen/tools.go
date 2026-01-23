@@ -66,8 +66,9 @@ func repositoryTemplatesJenny(pipeline *Pipeline) (*codejen.JennyList[common.Bui
 		return "RepositoryTemplates"
 	})
 	repoTemplatesJenny.AppendOneToMany(&common.RepositoryTemplate{
-		TemplateDir: pipeline.Output.RepositoryTemplates,
-		ExtraData:   pipeline.Output.TemplatesData,
+		TemplateDir:       pipeline.Output.RepositoryTemplates,
+		ExtraData:         pipeline.Output.TemplatesData,
+		ReplaceExtensions: pipeline.Output.OutputOptions.ReplaceExtension,
 	})
 	repoTemplatesJenny.AddPostprocessors(
 		common.GeneratedCommentHeader(pipeline.jenniesConfig()),

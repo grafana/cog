@@ -1,0 +1,106 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "constant_reference_discriminator",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "LayoutWithValue": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/GridLayoutUsingValue"
+          },
+          {
+            "$ref": "#/components/schemas/RowsLayoutUsingValue"
+          }
+        ]
+      },
+      "GridLayoutUsingValue": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "gridLayoutProperty"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/GridLayoutKindType"
+          },
+          "gridLayoutProperty": {
+            "type": "string"
+          }
+        }
+      },
+      "RowsLayoutUsingValue": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "rowsLayoutProperty"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/RowsLayoutKindType"
+          },
+          "rowsLayoutProperty": {
+            "type": "string"
+          }
+        }
+      },
+      "LayoutWithoutValue": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/GridLayoutWithoutValue"
+          },
+          {
+            "$ref": "#/components/schemas/RowsLayoutWithoutValue"
+          }
+        ]
+      },
+      "GridLayoutWithoutValue": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "gridLayoutProperty"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/GridLayoutKindType"
+          },
+          "gridLayoutProperty": {
+            "type": "string"
+          }
+        }
+      },
+      "RowsLayoutWithoutValue": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "rowsLayoutProperty"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/RowsLayoutKindType"
+          },
+          "rowsLayoutProperty": {
+            "type": "string"
+          }
+        }
+      },
+      "GridLayoutKindType": {
+        "type": "string",
+        "const": "GridLayout"
+      },
+      "RowsLayoutKindType": {
+        "type": "string",
+        "const": "RowsLayout"
+      }
+    }
+  }
+}

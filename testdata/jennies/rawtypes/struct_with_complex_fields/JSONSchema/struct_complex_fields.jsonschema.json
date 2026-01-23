@@ -20,7 +20,7 @@
           "$ref": "#/definitions/SomeOtherStruct"
         },
         "FieldDisjunctionOfScalars": {
-          "anyOf": [
+          "oneOf": [
             {
               "type": "string"
             },
@@ -30,7 +30,7 @@
           ]
         },
         "FieldMixedDisjunction": {
-          "anyOf": [
+          "oneOf": [
             {
               "type": "string"
             },
@@ -47,7 +47,8 @@
           "enum": [
             "\u003e",
             "\u003c"
-          ]
+          ],
+          "type": "string"
         },
         "FieldArrayOfStrings": {
           "type": "array",

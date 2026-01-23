@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "DisjunctionOfScalarsAndRefs": {
+      "oneOf": [
+        {
+          "type": "string",
+          "const": "a"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/definitions/MyRefA"
+        },
+        {
+          "$ref": "#/definitions/MyRefB"
+        }
+      ]
+    },
+    "MyRefA": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "foo"
+      ],
+      "properties": {
+        "foo": {
+          "type": "string"
+        }
+      }
+    },
+    "MyRefB": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bar"
+      ],
+      "properties": {
+        "bar": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
