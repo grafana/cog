@@ -2,7 +2,7 @@ module github.com/grafana/cog
 
 go 1.23.0
 
-toolchain go1.23.6
+toolchain go1.25.6
 
 require (
 	cuelang.org/go v0.11.0
