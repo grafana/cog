@@ -4,7 +4,7 @@ import typing
 class Options:
     timeseries_option: str
 
-    def __init__(self, timeseries_option: str = ""):
+    def __init__(self, timeseries_option: str = "") -> None:
         self.timeseries_option = timeseries_option
 
     def to_json(self) -> dict[str, object]:
@@ -26,7 +26,7 @@ class Options:
 class FieldConfig:
     timeseries_field_config_option: str
 
-    def __init__(self, timeseries_field_config_option: str = ""):
+    def __init__(self, timeseries_field_config_option: str = "") -> None:
         self.timeseries_field_config_option = timeseries_field_config_option
 
     def to_json(self) -> dict[str, object]:

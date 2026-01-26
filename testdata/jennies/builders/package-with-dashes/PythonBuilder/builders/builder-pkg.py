@@ -6,7 +6,7 @@ from ..models import with-dashes
 class SomeNiceBuilder(cogbuilder.Builder[with-dashes.SomeStruct]):
     _internal: with-dashes.SomeStruct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = with-dashes.SomeStruct()
 
     def build(self) -> with-dashes.SomeStruct:

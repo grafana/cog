@@ -6,7 +6,7 @@ from ..models import basic_struct_defaults
 class SomeStruct(cogbuilder.Builder[basic_struct_defaults.SomeStruct]):
     _internal: basic_struct_defaults.SomeStruct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = basic_struct_defaults.SomeStruct()
 
     def build(self) -> basic_struct_defaults.SomeStruct:

@@ -6,7 +6,7 @@ from ..models import sandbox
 class Dashboard(cogbuilder.Builder[sandbox.Dashboard]):
     _internal: sandbox.Dashboard
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = sandbox.Dashboard()
 
     def build(self) -> sandbox.Dashboard:

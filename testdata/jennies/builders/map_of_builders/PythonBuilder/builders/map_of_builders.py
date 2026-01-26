@@ -6,7 +6,7 @@ from ..models import map_of_builders
 class Panel(cogbuilder.Builder[map_of_builders.Panel]):
     _internal: map_of_builders.Panel
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = map_of_builders.Panel()
 
     def build(self) -> map_of_builders.Panel:
@@ -25,7 +25,7 @@ class Panel(cogbuilder.Builder[map_of_builders.Panel]):
 class Dashboard(cogbuilder.Builder[map_of_builders.Dashboard]):
     _internal: map_of_builders.Dashboard
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = map_of_builders.Dashboard()
 
     def build(self) -> map_of_builders.Dashboard:

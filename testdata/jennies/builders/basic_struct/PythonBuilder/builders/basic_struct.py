@@ -10,7 +10,7 @@ class SomeStruct(cogbuilder.Builder[basic_struct.SomeStruct]):
     
     _internal: basic_struct.SomeStruct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = basic_struct.SomeStruct()
 
     def build(self) -> basic_struct.SomeStruct:

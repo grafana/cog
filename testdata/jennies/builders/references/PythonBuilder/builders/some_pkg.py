@@ -7,7 +7,7 @@ from ..models import other_pkg
 class Person(cogbuilder.Builder[some_pkg.Person]):
     _internal: some_pkg.Person
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = some_pkg.Person()
 
     def build(self) -> some_pkg.Person:

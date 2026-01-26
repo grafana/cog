@@ -6,7 +6,7 @@ class Query(cogvariants.Dataquery):
     expr: str
     instant: typing.Optional[bool]
 
-    def __init__(self, expr: str = "", instant: typing.Optional[bool] = None):
+    def __init__(self, expr: str = "", instant: typing.Optional[bool] = None) -> None:
         self.expr = expr
         self.instant = instant
 

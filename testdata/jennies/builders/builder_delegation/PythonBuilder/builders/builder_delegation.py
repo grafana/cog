@@ -6,7 +6,7 @@ from ..models import builder_delegation
 class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):
     _internal: builder_delegation.DashboardLink
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = builder_delegation.DashboardLink()
 
     def build(self) -> builder_delegation.DashboardLink:
@@ -30,7 +30,7 @@ class DashboardLink(cogbuilder.Builder[builder_delegation.DashboardLink]):
 class Dashboard(cogbuilder.Builder[builder_delegation.Dashboard]):
     _internal: builder_delegation.Dashboard
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = builder_delegation.Dashboard()
 
     def build(self) -> builder_delegation.Dashboard:

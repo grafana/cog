@@ -6,7 +6,7 @@ from ..models import promql
 class FuncCallExpr(cogbuilder.Builder[promql.FuncCallExpr]):
     _internal: promql.FuncCallExpr
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = promql.FuncCallExpr()        
         self._internal.type_val = "funcCallExpr"
 
@@ -48,7 +48,7 @@ class FuncCallExpr(cogbuilder.Builder[promql.FuncCallExpr]):
 Returns the input vector with all sample values converted to their absolute value.
 See https://prometheus.io/docs/prometheus/latest/querying/functions/#abs
 """
-def abs(v: cogbuilder.Builder[promql.Expr]):
+def abs(v: cogbuilder.Builder[promql.Expr]) -> FuncCallExpr:
     builder = FuncCallExpr()
     builder.function("abs")
     builder.arg(v)
@@ -60,7 +60,7 @@ Returns an empty vector if the vector passed to it has any elements (floats or n
 This is useful for alerting on when no time series exist for a given metric name and label combination.
 See https://prometheus.io/docs/prometheus/latest/querying/functions/#absent
 """
-def absent(v: cogbuilder.Builder[promql.Expr]):
+def absent(v: cogbuilder.Builder[promql.Expr]) -> FuncCallExpr:
     builder = FuncCallExpr()
     builder.function("absent")
     builder.arg(v)
@@ -71,7 +71,7 @@ def absent(v: cogbuilder.Builder[promql.Expr]):
 Returns pi.
 See https://prometheus.io/docs/prometheus/latest/querying/functions/#trigonometric-functions
 """
-def pi():
+def pi() -> FuncCallExpr:
     builder = FuncCallExpr()
     builder.function("pi")
 
@@ -81,7 +81,7 @@ def pi():
 Calculates the φ-quantile (0 ≤ φ ≤ 1) of the values in the specified interval.
 See https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation_over_time
 """
-def quantile_over_time(phi: float, v: cogbuilder.Builder[promql.Expr]):
+def quantile_over_time(phi: float, v: cogbuilder.Builder[promql.Expr]) -> FuncCallExpr:
     builder = FuncCallExpr()
     builder.function("quantile_over_time")
     builder.arg(n(phi))
