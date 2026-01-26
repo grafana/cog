@@ -6,7 +6,7 @@ from ..models import known_any
 class SomeStruct(cogbuilder.Builder[known_any.SomeStruct]):
     _internal: known_any.SomeStruct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = known_any.SomeStruct()
 
     def build(self) -> known_any.SomeStruct:

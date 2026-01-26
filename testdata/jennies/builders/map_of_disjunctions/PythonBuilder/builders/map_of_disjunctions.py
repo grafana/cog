@@ -6,7 +6,7 @@ from ..models import map_of_disjunctions
 class Element(cogbuilder.Builder[map_of_disjunctions.Element]):
     _internal: map_of_disjunctions.Element
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = map_of_disjunctions.Element()
 
     def build(self) -> map_of_disjunctions.Element:
@@ -32,7 +32,7 @@ class Element(cogbuilder.Builder[map_of_disjunctions.Element]):
 class Panel(cogbuilder.Builder[map_of_disjunctions.Panel]):
     _internal: map_of_disjunctions.Panel
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = map_of_disjunctions.Panel()        
         self._internal.kind = "Panel"
 
@@ -52,7 +52,7 @@ class Panel(cogbuilder.Builder[map_of_disjunctions.Panel]):
 class LibraryPanel(cogbuilder.Builder[map_of_disjunctions.LibraryPanel]):
     _internal: map_of_disjunctions.LibraryPanel
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = map_of_disjunctions.LibraryPanel()        
         self._internal.kind = "Library"
 
@@ -72,7 +72,7 @@ class LibraryPanel(cogbuilder.Builder[map_of_disjunctions.LibraryPanel]):
 class Dashboard(cogbuilder.Builder[map_of_disjunctions.Dashboard]):
     _internal: map_of_disjunctions.Dashboard
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = map_of_disjunctions.Dashboard()
 
     def build(self) -> map_of_disjunctions.Dashboard:
@@ -92,7 +92,7 @@ class Dashboard(cogbuilder.Builder[map_of_disjunctions.Dashboard]):
 class PanelOrLibraryPanel(cogbuilder.Builder[map_of_disjunctions.PanelOrLibraryPanel]):
     _internal: map_of_disjunctions.PanelOrLibraryPanel
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = map_of_disjunctions.PanelOrLibraryPanel()
 
     def build(self) -> map_of_disjunctions.PanelOrLibraryPanel:

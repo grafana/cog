@@ -6,7 +6,7 @@ from ..models import dataquery_variant_builder
 class LokiBuilder(cogbuilder.Builder[dataquery_variant_builder.Loki]):
     _internal: dataquery_variant_builder.Loki
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = dataquery_variant_builder.Loki()
 
     def build(self) -> dataquery_variant_builder.Loki:

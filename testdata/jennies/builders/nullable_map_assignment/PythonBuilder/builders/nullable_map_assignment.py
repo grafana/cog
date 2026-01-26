@@ -6,7 +6,7 @@ from ..models import nullable_map_assignment
 class SomeStruct(cogbuilder.Builder[nullable_map_assignment.SomeStruct]):
     _internal: nullable_map_assignment.SomeStruct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = nullable_map_assignment.SomeStruct()
 
     def build(self) -> nullable_map_assignment.SomeStruct:

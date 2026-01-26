@@ -7,7 +7,7 @@ class SomeStruct:
     title: str
     ref_struct: typing.Optional['RefStruct']
 
-    def __init__(self, id_val: int = 0, maybe_id: typing.Optional[int] = None, title: str = "", ref_struct: typing.Optional['RefStruct'] = None):
+    def __init__(self, id_val: int = 0, maybe_id: typing.Optional[int] = None, title: str = "", ref_struct: typing.Optional['RefStruct'] = None) -> None:
         self.id_val = id_val
         self.maybe_id = maybe_id
         self.title = title
@@ -44,7 +44,7 @@ class RefStruct:
     labels: dict[str, str]
     tags: list[str]
 
-    def __init__(self, labels: typing.Optional[dict[str, str]] = None, tags: typing.Optional[list[str]] = None):
+    def __init__(self, labels: typing.Optional[dict[str, str]] = None, tags: typing.Optional[list[str]] = None) -> None:
         self.labels = labels if labels is not None else {}
         self.tags = tags if tags is not None else []
 

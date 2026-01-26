@@ -7,7 +7,7 @@ ObjTime: typing.TypeAlias = str
 class ObjWithTimeField:
     registered_at: str
 
-    def __init__(self, registered_at: str = ""):
+    def __init__(self, registered_at: str = "") -> None:
         self.registered_at = registered_at
 
     def to_json(self) -> dict[str, object]:

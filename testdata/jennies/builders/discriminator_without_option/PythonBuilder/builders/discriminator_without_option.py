@@ -6,7 +6,7 @@ from ..models import discriminator_without_option
 class NoShowFieldOption(cogbuilder.Builder[discriminator_without_option.NoShowFieldOption]):
     _internal: discriminator_without_option.NoShowFieldOption
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = discriminator_without_option.NoShowFieldOption()
 
     def build(self) -> discriminator_without_option.NoShowFieldOption:
@@ -25,7 +25,7 @@ class NoShowFieldOption(cogbuilder.Builder[discriminator_without_option.NoShowFi
 class ShowFieldOption(cogbuilder.Builder[discriminator_without_option.ShowFieldOption]):
     _internal: discriminator_without_option.ShowFieldOption
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = discriminator_without_option.ShowFieldOption()
 
     def build(self) -> discriminator_without_option.ShowFieldOption:
@@ -43,3 +43,4 @@ class ShowFieldOption(cogbuilder.Builder[discriminator_without_option.ShowFieldO
         self._internal.text = text
     
         return self
+    

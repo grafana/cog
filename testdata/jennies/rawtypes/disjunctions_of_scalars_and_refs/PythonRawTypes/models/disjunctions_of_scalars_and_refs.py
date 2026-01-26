@@ -7,7 +7,7 @@ DisjunctionOfScalarsAndRefs: typing.TypeAlias = typing.Union[typing.Literal["a"]
 class MyRefA:
     foo: str
 
-    def __init__(self, foo: str = ""):
+    def __init__(self, foo: str = "") -> None:
         self.foo = foo
 
     def to_json(self) -> dict[str, object]:
@@ -29,7 +29,7 @@ class MyRefA:
 class MyRefB:
     bar: int
 
-    def __init__(self, bar: int = 0):
+    def __init__(self, bar: int = 0) -> None:
         self.bar = bar
 
     def to_json(self) -> dict[str, object]:
@@ -46,3 +46,6 @@ class MyRefB:
             args["bar"] = data["bar"]        
 
         return cls(**args)
+
+
+
