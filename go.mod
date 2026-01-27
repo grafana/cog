@@ -13,7 +13,7 @@ require (
 	github.com/huandu/xstrings v1.5.0
 	github.com/invopop/jsonschema v0.13.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/yalue/merged_fs v1.3.0
 	golang.org/x/mod v0.27.0
