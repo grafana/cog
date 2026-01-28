@@ -114,13 +114,24 @@ func (pipeline *Pipeline) interpolateParameters() {
 }
 
 func (pipeline *Pipeline) interpolate(input string) string {
-	interpolated := input
+	interpolateFun := func(in string) string {
+		interpolated := in
 
-	for key, value := range pipeline.Parameters {
-		interpolated = strings.ReplaceAll(interpolated, "%"+key+"%", value)
+		for key, value := range pipeline.Parameters {
+			interpolated = strings.ReplaceAll(interpolated, "%"+key+"%", value)
+		}
+
+		return interpolated
 	}
 
-	return interpolated
+	finalOutput := input
+	out := interpolateFun(finalOutput)
+	for out != finalOutput {
+		finalOutput = out
+		out = interpolateFun(finalOutput)
+	}
+
+	return finalOutput
 }
 
 func (pipeline *Pipeline) jenniesConfig() languages.Config {
