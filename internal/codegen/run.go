@@ -48,6 +48,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 	}
 
 	if pipeline.Output.RepositoryTemplates != "" {
+		pipeline.reporter("Generating repository templates...")
 		repoTemplatesJenny, err := repositoryTemplatesJenny(pipeline)
 		if err != nil {
 			return nil, err
