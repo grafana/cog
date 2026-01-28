@@ -38,4 +38,4 @@ func PanelOrLibraryPanelConverter(input PanelOrLibraryPanel) string {
     }
 
     return strings.Join(calls, ".\t\n")
-} 
+}

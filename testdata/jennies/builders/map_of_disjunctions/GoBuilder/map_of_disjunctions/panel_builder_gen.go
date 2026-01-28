@@ -41,3 +41,4 @@ func (builder *PanelBuilder) Title(title string) *PanelBuilder {
 
     return builder
 }
+

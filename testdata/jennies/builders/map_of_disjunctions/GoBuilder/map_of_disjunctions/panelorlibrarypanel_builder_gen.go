@@ -56,3 +56,4 @@ func (builder *PanelOrLibraryPanelBuilder) LibraryPanel(libraryPanel cog.Builder
 
     return builder
 }
+

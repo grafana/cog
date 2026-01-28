@@ -17,7 +17,7 @@ export class DashboardBuilder implements cog.Builder<mapOfDisjunctions.Dashboard
 
     panels(panels: Record<string, cog.Builder<mapOfDisjunctions.Element>>): this {
         const panelsResource = (function() {
-            let results1 = {};
+            let results1: Record<string, mapOfDisjunctions.Element> = {};
             for (const key1 in panels) {
                 const val1 = panels[key1];
                 results1[key1] = val1.build();
@@ -28,3 +28,4 @@ export class DashboardBuilder implements cog.Builder<mapOfDisjunctions.Dashboard
         return this;
     }
 }
+
