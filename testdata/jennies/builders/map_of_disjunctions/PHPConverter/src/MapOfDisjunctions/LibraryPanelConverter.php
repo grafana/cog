@@ -27,3 +27,4 @@ final class LibraryPanelConverter
         return \implode("\n\t->", $calls);
     }
 }
+

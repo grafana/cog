@@ -21,3 +21,4 @@ export class LibraryPanelBuilder implements cog.Builder<mapOfDisjunctions.Librar
         return this;
     }
 }
+

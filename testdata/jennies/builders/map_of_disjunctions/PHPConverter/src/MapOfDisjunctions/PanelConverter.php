@@ -27,3 +27,4 @@ final class PanelConverter
         return \implode("\n\t->", $calls);
     }
 }
+

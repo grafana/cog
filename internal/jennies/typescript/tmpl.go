@@ -44,6 +44,9 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 			"typeHasBuilder": func(_ ast.Type) bool {
 				panic("typeHasBuilder() needs to be overridden by a jenny")
 			},
+			"formatTypeNoBuilder": func(_ ast.Type) bool {
+				panic("formatTypeNoBuilder() needs to be overridden by a jenny")
+			},
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},

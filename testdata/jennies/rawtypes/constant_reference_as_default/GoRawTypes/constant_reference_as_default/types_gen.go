@@ -92,3 +92,5 @@ func (resource MyStruct) Equals(other MyStruct) bool {
 func (resource MyStruct) Validate() error {
 	return nil
 }
+
+

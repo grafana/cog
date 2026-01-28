@@ -66,7 +66,7 @@ export class {{ .Builder.Name|upperCamelCase }}Builder implements cog.Builder<{{
         {{ .InputVar }}.map(builder{{ .Depth }} => {{ template "unfold_builders" (dict "InputType" .InputType.Array.ValueType "InputVar" (print "builder" .Depth ) "Depth" (add1 .Depth)) }})
     {{- else if .InputType.IsMap -}}
         (function() {
-            let results{{ .Depth }} = {};
+            let results{{ .Depth }}: {{ .InputType | formatTypeNoBuilder }} = {};
             for (const key{{ .Depth }} in {{ .InputVar }}) {
                 const val{{ .Depth }} = {{ .InputVar }}[key{{ .Depth }}];
                 results{{ .Depth }}[key{{ .Depth }}] = {{ template "unfold_builders" (dict "InputType" .InputType.Map.ValueType "InputVar" (print "val" .Depth ) "Depth" (add1 .Depth)) }};

@@ -9,3 +9,4 @@ export const defaultMyStruct = (): MyStruct => ({
 	aString: ConstantRefString,
 	optString: ConstantRefString,
 });
+

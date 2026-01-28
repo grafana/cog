@@ -40,3 +40,4 @@ final class PanelOrLibraryPanelConverter
         return \implode("\n\t->", $calls);
     }
 }
+

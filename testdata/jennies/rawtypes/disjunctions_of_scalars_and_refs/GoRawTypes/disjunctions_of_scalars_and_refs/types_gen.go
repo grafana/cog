@@ -380,3 +380,5 @@ func (resource StringOrBoolOrArrayOfStringOrMyRefAOrMyRefB) Validate() error {
 
 	return errs
 }
+
+

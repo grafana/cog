@@ -17,3 +17,4 @@ export interface MyRefB {
 export const defaultMyRefB = (): MyRefB => ({
 	bar: 0,
 });
+

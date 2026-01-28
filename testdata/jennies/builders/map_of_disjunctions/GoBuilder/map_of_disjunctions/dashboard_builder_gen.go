@@ -49,3 +49,4 @@ func (builder *DashboardBuilder) Panels(panels map[string]cog.Builder[Element]) 
 
     return builder
 }
+

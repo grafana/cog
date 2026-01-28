@@ -111,6 +111,9 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"emptyValueForGuard": func(guard ast.AssignmentNilCheck) string {
 				return formatValue(jenny.rawTypes.defaultValueForType(guard.EmptyValueType, jenny.typeImportMapper))
 			},
+			"formatTypeNoBuilder": func(def ast.Type) string {
+				return jenny.typeFormatter.doFormatType(def, false)
+			},
 		}).
 		RenderAsBytes("builder.tmpl", map[string]any{
 			"Builder":              builder,
