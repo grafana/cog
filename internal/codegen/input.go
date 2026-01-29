@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/expr-lang/expr"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/semver"
 	"github.com/grafana/cog/internal/tools"
 	cogyaml "github.com/grafana/cog/internal/yaml"
 )
@@ -121,37 +119,10 @@ func (input *Input) loader() (schemaLoader, error) {
 	return nil, fmt.Errorf("empty input")
 }
 
-func (input *Input) shouldLoadSchemas() (bool, error) {
-	if input.If == "" {
-		return true, nil
-	}
-
-	env := map[string]any{
-		"sprintf": fmt.Sprintf,
-		"semver":  semver.ParseTolerant,
-	}
-
-	program, err := expr.Compile(input.If, expr.Env(env))
-	if err != nil {
-		return false, err
-	}
-
-	output, err := expr.Run(program, env)
-	if err != nil {
-		return false, err
-	}
-
-	if _, ok := output.(bool); !ok {
-		return false, fmt.Errorf("expected expression to evaluate to a boolean, got %T", output)
-	}
-
-	return output.(bool), nil
-}
-
 func (input *Input) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	var err error
 
-	shouldLoad, err := input.shouldLoadSchemas()
+	shouldLoad, err := evalExpr(input.If)
 	if err != nil {
 		return nil, err
 	}

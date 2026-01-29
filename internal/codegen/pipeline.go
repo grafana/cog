@@ -162,8 +162,16 @@ func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
 	}
 
 	var veneerFiles []string
-	for _, dir := range pipeline.Transforms.VeneersDirectories {
-		globPattern := filepath.Join(dir, "*.yaml")
+	for _, entry := range pipeline.Transforms.VeneersDirectories {
+		shouldLoad, err := evalExpr(entry.If)
+		if err != nil {
+			return nil, err
+		}
+		if !shouldLoad {
+			continue
+		}
+
+		globPattern := filepath.Join(entry.Path, "*.yaml")
 		matches, err := filepath.Glob(globPattern)
 		if err != nil {
 			return nil, err
