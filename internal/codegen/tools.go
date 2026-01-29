@@ -24,6 +24,18 @@ func guessPackageFromFilename(filename string) string {
 	return strings.TrimSuffix(filepath.Base(filename), filepath.Ext(filename))
 }
 
+func isFile(path string) (bool, error) {
+	stat, err := os.Stat(path)
+	//nolint:gocritic
+	if err != nil {
+		return false, err
+	} else if stat.IsDir() {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func dirExists(dir string) (bool, error) {
 	stat, err := os.Stat(dir)
 	//nolint:gocritic

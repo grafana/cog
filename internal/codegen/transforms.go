@@ -25,9 +25,10 @@ type Transforms struct {
 	// Note: these compiler passes are applied *after* language-specific passes.
 	FinalPasses compiler.Passes `yaml:"-"`
 
-	// VeneersDirectories holds a list of paths to directories containing
-	// veneers to apply to all the builders.
-	VeneersDirectories []VeneerPath `yaml:"builders"`
+	// VeneersPaths holds a list of paths to veneer files to apply to all the
+	// builders.
+	// The paths can refer to files or directories.
+	VeneersPaths []VeneerPath `yaml:"builders"`
 
 	// ConverterConfig is the configuration modify the converters output.
 	ConverterConfig string `yaml:"converters"`
@@ -35,7 +36,7 @@ type Transforms struct {
 
 func (transforms *Transforms) interpolateParameters(interpolator ParametersInterpolator) {
 	transforms.CommonPassesFiles = tools.Map(transforms.CommonPassesFiles, interpolator)
-	transforms.VeneersDirectories = tools.Map(transforms.VeneersDirectories, func(path VeneerPath) VeneerPath {
+	transforms.VeneersPaths = tools.Map(transforms.VeneersPaths, func(path VeneerPath) VeneerPath {
 		path.If = interpolator(path.If)
 		path.Path = interpolator(path.Path)
 
