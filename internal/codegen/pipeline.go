@@ -149,7 +149,20 @@ func (pipeline *Pipeline) commonPasses() (compiler.Passes, error) {
 		return pipeline.Transforms.CommonPasses, nil
 	}
 
-	return cogyaml.NewCompilerLoader().PassesFrom(pipeline.Transforms.CommonPassesFiles)
+	var files []string
+	for _, entry := range pipeline.Transforms.CommonPassesFiles {
+		shouldLoad, err := evalExpr(entry.If)
+		if err != nil {
+			return nil, err
+		}
+		if !shouldLoad {
+			continue
+		}
+
+		files = append(files, entry.Path)
+	}
+
+	return cogyaml.NewCompilerLoader().PassesFrom(files)
 }
 
 func (pipeline *Pipeline) finalPasses() compiler.Passes {
