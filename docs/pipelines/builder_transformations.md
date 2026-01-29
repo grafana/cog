@@ -25,7 +25,7 @@ inputs:
 
 transformations:
   builders:
-    - '%__config_dir%/transformations/builders/'
+    - { path: '%__config_dir%/transformations/builders/' }
 
 output:
   directory: './generated/%l'
@@ -46,7 +46,7 @@ A typical configuration file for builder transformations looks like this:
 # yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/veneers.json
 # transformations/builders/dashboard.yaml
 
-# Which language is being targetted.
+# Which language is being targeted.
 # `all` targets every language configured by the codegen pipeline.
 # To apply the transformations to a specific language, use its name as value.
 # Required.
