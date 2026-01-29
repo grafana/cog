@@ -162,7 +162,7 @@ func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
 	}
 
 	var veneerFiles []string
-	for _, entry := range pipeline.Transforms.VeneersDirectories {
+	for _, entry := range pipeline.Transforms.VeneersPaths {
 		shouldLoad, err := evalExpr(entry.If)
 		if err != nil {
 			return nil, err
@@ -171,13 +171,22 @@ func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
 			continue
 		}
 
-		globPattern := filepath.Join(entry.Path, "*.yaml")
-		matches, err := filepath.Glob(globPattern)
+		isSingleFile, err := isFile(entry.Path)
 		if err != nil {
 			return nil, err
 		}
 
-		veneerFiles = append(veneerFiles, matches...)
+		if isSingleFile {
+			veneerFiles = append(veneerFiles, entry.Path)
+		} else {
+			globPattern := filepath.Join(entry.Path, "*.yaml")
+			matches, err := filepath.Glob(globPattern)
+			if err != nil {
+				return nil, err
+			}
+
+			veneerFiles = append(veneerFiles, matches...)
+		}
 	}
 
 	rewriter, err := cogyaml.NewVeneersLoader().RewriterFrom(veneerFiles, rewrite.Config{
