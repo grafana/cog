@@ -10,11 +10,16 @@ type VeneerPath struct {
 	Path string `yaml:"path"`
 }
 
+type CommonPassPath struct {
+	If   string `yaml:"if"`
+	Path string `yaml:"path"`
+}
+
 type Transforms struct {
 	// CommonPassesFiles holds a list of paths to files containing compiler
 	// passes to apply to all the schemas.
 	// Note: these compiler passes are applied *before* language-specific passes.
-	CommonPassesFiles []string `yaml:"schemas"`
+	CommonPassesFiles []CommonPassPath `yaml:"schemas"`
 
 	// CommonPasses holds a list of compiler passes to apply to all the schemas.
 	// If this field is set, CommonPassesFiles is ignored.
@@ -35,7 +40,12 @@ type Transforms struct {
 }
 
 func (transforms *Transforms) interpolateParameters(interpolator ParametersInterpolator) {
-	transforms.CommonPassesFiles = tools.Map(transforms.CommonPassesFiles, interpolator)
+	transforms.CommonPassesFiles = tools.Map(transforms.CommonPassesFiles, func(path CommonPassPath) CommonPassPath {
+		path.If = interpolator(path.If)
+		path.Path = interpolator(path.Path)
+
+		return path
+	})
 	transforms.VeneersPaths = tools.Map(transforms.VeneersPaths, func(path VeneerPath) VeneerPath {
 		path.If = interpolator(path.If)
 		path.Path = interpolator(path.Path)
