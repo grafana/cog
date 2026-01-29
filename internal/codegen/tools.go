@@ -9,8 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/expr-lang/expr"
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/semver"
 )
 
 func guessPackageFromFilename(filename string) string {
@@ -85,4 +87,31 @@ func runJenny[I any](jenny *codejen.JennyList[I], input I, destinationFS *codeje
 	}
 
 	return destinationFS.Merge(fs)
+}
+
+func evalExpr(in string) (bool, error) {
+	if in == "" {
+		return true, nil
+	}
+
+	env := map[string]any{
+		"sprintf": fmt.Sprintf,
+		"semver":  semver.ParseTolerant,
+	}
+
+	program, err := expr.Compile(in, expr.Env(env))
+	if err != nil {
+		return false, err
+	}
+
+	output, err := expr.Run(program, env)
+	if err != nil {
+		return false, err
+	}
+
+	if _, ok := output.(bool); !ok {
+		return false, fmt.Errorf("expected expression to evaluate to a boolean, got %T", output)
+	}
+
+	return output.(bool), nil
 }
