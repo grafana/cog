@@ -204,7 +204,7 @@
         "ref": {
           "$ref": "#/$defs/AstRefType"
         },
-        "constantreference": {
+        "constant_ref": {
           "$ref": "#/$defs/AstConstantReferenceType"
         },
         "scalar": {
@@ -289,6 +289,15 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlCleanupK8ResourceNames": {
+      "properties": {
+        "prefix_to_remove": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlCompiler": {
       "properties": {
         "passes": {
@@ -365,6 +374,9 @@
         },
         "constant_to_enum": {
           "$ref": "#/$defs/YamlConstantToEnum"
+        },
+        "cleanup_k8_resource_names": {
+          "$ref": "#/$defs/YamlCleanupK8ResourceNames"
         },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
