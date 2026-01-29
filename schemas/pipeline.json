@@ -42,6 +42,10 @@
           "type": "string",
           "description": "Entrypoint refers to a directory containing CUE files."
         },
+        "url": {
+          "type": "string",
+          "description": "URL to a cue file"
+        },
         "forced_envelope": {
           "type": "string",
           "description": "ForcedEnvelope decorates the parsed cue Value with an envelope whose\nname is given. This is useful for dataqueries for example, where the\nschema doesn't define any suitable top-level object."
@@ -314,10 +318,26 @@
         },
         "builders": {
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/CodegenVeneerPath"
           },
           "type": "array",
-          "description": "VeneersDirectories holds a list of paths to directories containing\nveneers to apply to all the builders."
+          "description": "VeneersPaths holds a list of paths to veneer files to apply to all the\nbuilders.\nThe paths can refer to files or directories."
+        },
+        "converters": {
+          "type": "string",
+          "description": "ConverterConfig is the configuration modify the converters output."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CodegenVeneerPath": {
+      "properties": {
+        "if": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
         }
       },
       "additionalProperties": false,

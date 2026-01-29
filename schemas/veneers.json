@@ -303,7 +303,7 @@
         "ref": {
           "$ref": "#/$defs/AstRefType"
         },
-        "constantreference": {
+        "constant_ref": {
           "$ref": "#/$defs/AstConstantReferenceType"
         },
         "scalar": {
@@ -654,6 +654,12 @@
         },
         "preserve_original_builders": {
           "type": "boolean"
+        },
+        "rename_options": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
         }
       },
       "additionalProperties": false,
