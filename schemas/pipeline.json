@@ -18,6 +18,18 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "CodegenCommonPassPath": {
+      "properties": {
+        "if": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "CodegenCueInput": {
       "properties": {
         "allowed_objects": {
@@ -311,7 +323,7 @@
       "properties": {
         "schemas": {
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/CodegenCommonPassPath"
           },
           "type": "array",
           "description": "CommonPassesFiles holds a list of paths to files containing compiler\npasses to apply to all the schemas.\nNote: these compiler passes are applied *before* language-specific passes."
