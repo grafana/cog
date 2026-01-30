@@ -21,8 +21,7 @@ Example:
 
 ## `add_assignment`
 
-N/A
-
+AddAssignmentAction adds an assignment to an existing option.
 ### Usage
 
 ```yaml
@@ -32,8 +31,7 @@ add_assignment:
 
 ## `add_comments`
 
-N/A
-
+AddCommentsAction adds comments to an option.
 ### Usage
 
 ```yaml
@@ -43,8 +41,27 @@ add_comments:
 
 ## `array_to_append`
 
-N/A
+ArrayToAppendAction updates the option to perform an "append" assignment.
 
+Example:
+
+	```
+	func Tags(tags []string) {
+		this.resource.tags = tags
+	}
+	```
+
+Will become:
+
+	```
+	func Tags(tags string) {
+		this.resource.tags.append(tags)
+	}
+	```
+
+This action returns the option unchanged if:
+  - it doesn't have exactly one argument
+  - the argument is not an array
 ### Usage
 
 ```yaml
@@ -53,8 +70,32 @@ array_to_append: {}
 
 ## `disjunction_as_options`
 
-N/A
+DisjunctionAsOptionsAction uses the branches of the first argument's disjunction (assuming it is one) and turns them
+into options.
 
+Example:
+
+	```
+	func Panel(panel Panel|Row) {
+		this.resource.panels.append(panel)
+	}
+	```
+
+Will become:
+
+	```
+	func Panel(panel Panel) {
+		this.resource.panels.append(panel)
+	}
+
+	func Row(row Row) {
+		this.resource.panels.append(row)
+	}
+	```
+
+This action returns the option unchanged if:
+  - it has no arguments
+  - the given argument is not a disjunction or a reference to one
 ### Usage
 
 ```yaml
@@ -75,8 +116,27 @@ duplicate:
 
 ## `map_to_index`
 
-N/A
+MapToIndexAction updates the option to perform an "index" assignment.
 
+Example:
+
+	```
+	func Elements(elements map[string]Element) {
+		this.resource.elements = elements
+	}
+	```
+
+Will become:
+
+	```
+	func Elements(key string, elements Element) {
+		this.resource.elements[key] = tags
+	}
+	```
+
+This action returns the option unchanged if:
+  - it doesn't have exactly one argument
+  - the argument is not a map
 ### Usage
 
 ```yaml
@@ -85,8 +145,7 @@ map_to_index: {}
 
 ## `omit`
 
-N/A
-
+OmitAction removes an option.
 ### Usage
 
 ```yaml
@@ -95,7 +154,7 @@ omit: {}
 
 ## `rename`
 
-Rename does things.
+RenameAction renames an option.
 ### Usage
 
 ```yaml
@@ -105,8 +164,7 @@ rename:
 
 ## `rename_arguments`
 
-N/A
-
+RenameArgumentsAction renames the arguments of an options.
 ### Usage
 
 ```yaml
@@ -116,8 +174,33 @@ rename_arguments:
 
 ## `struct_fields_as_arguments`
 
-N/A
+StructFieldsAsArgumentsAction uses the fields of the first argument's struct (assuming it is one) and turns them
+into arguments.
 
+Optionally, an explicit list of fields to turn into arguments can be given.
+
+Example:
+
+	```
+	func Time(time {from string, to string) {
+		this.resource.time = time
+	}
+	```
+
+Will become:
+
+	```
+	func Time(from string, to string) {
+		this.resource.time.from = from
+		this.resource.time.to = to
+	}
+	```
+
+This action returns the option unchanged if:
+  - it has no arguments
+  - the first argument is not a struct or a reference to one
+
+FIXME: considers the first argument only.
 ### Usage
 
 ```yaml
@@ -127,8 +210,36 @@ struct_fields_as_arguments:
 
 ## `struct_fields_as_options`
 
-N/A
+StructFieldsAsOptionsAction uses the fields of the first argument's struct (assuming it is one) and turns them
+into options.
 
+Optionally, an explicit list of fields to turn into options can be given.
+
+Example:
+
+	```
+	func GridPos(gridPos {x int, y int) {
+		this.resource.gridPos = gridPos
+	}
+	```
+
+Will become:
+
+	```
+	func X(x int) {
+		this.resource.gridPos.x = x
+	}
+
+	func Y(y int) {
+		this.resource.gridPos.y = y
+	}
+	```
+
+This action returns the option unchanged if:
+  - it has no arguments
+  - the first argument is not a struct or a reference to one
+
+FIXME: considers the first argument only.
 ### Usage
 
 ```yaml
@@ -138,8 +249,27 @@ struct_fields_as_options:
 
 ## `unfold_boolean`
 
-N/A
+UnfoldBooleanAction transforms an option accepting a boolean argument into two argument-less options.
 
+Example:
+
+	```
+	func Editable(editable bool) {
+		this.resource.editable = editable
+	}
+	```
+
+Will become:
+
+	```
+	func Editable() {
+		this.resource.editable = true
+	}
+
+	func ReadOnly() {
+		this.resource.editable = false
+	}
+	```
 ### Usage
 
 ```yaml
