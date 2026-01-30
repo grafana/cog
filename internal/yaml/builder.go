@@ -14,26 +14,21 @@ import (
  *****************************************************************************/
 
 type BuilderRule struct {
-	Omit                     *BuilderSelector          `yaml:"omit"`
-	Rename                   *RenameBuilder            `yaml:"rename"`
+	Omit                     *OmitBuilder              `yaml:"omit" rule_name:"Omit"`
+	Rename                   *RenameBuilder            `yaml:"rename" rule_name:"Rename"`
 	MergeInto                *MergeInto                `yaml:"merge_into"`
 	ComposeBuilders          *ComposeBuilders          `yaml:"compose"`
 	Properties               *Properties               `yaml:"properties"`
 	Duplicate                *Duplicate                `yaml:"duplicate"`
 	Initialize               *Initialize               `yaml:"initialize"`
-	PromoteOptsToConstructor *PromoteOptsToConstructor `yaml:"promote_options_to_constructor"`
+	PromoteOptsToConstructor *PromoteOptsToConstructor `yaml:"promote_options_to_constructor" rule_name:"PromoteOptionsToConstructor"`
 	AddOption                *AddOption                `yaml:"add_option"`
 	AddFactory               *AddFactory               `yaml:"add_factory"`
 }
 
 func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	if rule.Omit != nil {
-		selector, err := rule.Omit.AsSelector(pkg)
-		if err != nil {
-			return nil, err
-		}
-
-		return builder.Omit(selector), nil
+		return rule.Omit.AsRewriteRule(pkg)
 	}
 
 	if rule.Rename != nil {
@@ -73,6 +68,19 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	}
 
 	return nil, fmt.Errorf("empty rule")
+}
+
+type OmitBuilder struct {
+	BuilderSelector `yaml:",inline"`
+}
+
+func (rule OmitBuilder) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.Omit(selector), nil
 }
 
 type RenameBuilder struct {
