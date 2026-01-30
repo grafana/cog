@@ -63,6 +63,17 @@ Will become:
 anonymous_structs_to_named: {}
 ```
 
+## `cleanup_k8_resource_names`
+
+N/A
+
+### Usage
+
+```yaml
+cleanup_k8_resource_names:
+  prefix_to_remove: string
+```
+
 ## `constant_to_enum`
 
 ConstantToEnum turns `string` constants into an enum definition with a

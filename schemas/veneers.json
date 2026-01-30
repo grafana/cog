@@ -546,7 +546,7 @@
     "YamlBuilderRule": {
       "properties": {
         "omit": {
-          "$ref": "#/$defs/YamlBuilderSelector"
+          "$ref": "#/$defs/YamlOmitBuilder"
         },
         "rename": {
           "$ref": "#/$defs/YamlRenameBuilder"
@@ -574,25 +574,6 @@
         },
         "add_factory": {
           "$ref": "#/$defs/YamlAddFactory"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlBuilderSelector": {
-      "properties": {
-        "by_object": {
-          "type": "string"
-        },
-        "by_name": {
-          "type": "string"
-        },
-        "by_variant": {
-          "type": "string"
-        },
-        "generated_from_disjunction": {
-          "type": "boolean",
-          "description": "noop?"
         }
       },
       "additionalProperties": false,
@@ -812,10 +793,46 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlOmitBuilder": {
+      "properties": {
+        "by_object": {
+          "type": "string"
+        },
+        "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
+          "type": "string"
+        },
+        "generated_from_disjunction": {
+          "type": "boolean",
+          "description": "noop?"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlOmitOption": {
+      "properties": {
+        "by_name": {
+          "type": "string",
+          "description": "objectName.optionName"
+        },
+        "by_builder": {
+          "type": "string",
+          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
+        },
+        "by_names": {
+          "$ref": "#/$defs/YamlByNamesSelector"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlOptionRule": {
       "properties": {
         "omit": {
-          "$ref": "#/$defs/YamlOptionSelector"
+          "$ref": "#/$defs/YamlOmitOption"
         },
         "rename": {
           "$ref": "#/$defs/YamlRenameOption"
@@ -849,23 +866,6 @@
         },
         "add_comments": {
           "$ref": "#/$defs/YamlAddComments"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlOptionSelector": {
-      "properties": {
-        "by_name": {
-          "type": "string",
-          "description": "objectName.optionName"
-        },
-        "by_builder": {
-          "type": "string",
-          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
-        },
-        "by_names": {
-          "$ref": "#/$defs/YamlByNamesSelector"
         }
       },
       "additionalProperties": false,
