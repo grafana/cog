@@ -18,7 +18,7 @@ import (
 const builderRulesSource = "./internal/veneers/builder/rules.go"
 const builderRulesOuputFile = "./docs/reference/builders_transformations.md"
 
-const optionRulesSource = "./internal/veneers/option/rules.go"
+const optionRulesSource = "./internal/veneers/option/actions.go"
 const optionRulesOuputFile = "./docs/reference/options_transformations.md"
 
 type Rule struct {
@@ -129,7 +129,8 @@ func parseRules(sourceFile string) (map[string]Rule, error) {
 		if _, ok := results[0].Type.(*ast.Ident); !ok {
 			continue
 		}
-		if results[0].Type.(*ast.Ident).String() != "RewriteRule" {
+		returnTypeName := results[0].Type.(*ast.Ident).String()
+		if returnTypeName != "RewriteRule" && returnTypeName != "RewriteAction" {
 			continue
 		}
 
