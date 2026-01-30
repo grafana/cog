@@ -9,7 +9,7 @@
     "golangci-lint@1.61",
     "nodejs-slim_18@18.20.8",
     "nodePackages.ts-node@10.9.2",
-    "gradle@8.14.3",
+    "gradle@8.14.4",
     "goreleaser@2.13.3"
   ],
   "shell": {
