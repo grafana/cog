@@ -7,7 +7,7 @@ toolchain go1.23.6
 require (
 	cuelang.org/go v0.11.0
 	github.com/expr-lang/expr v1.17.7
-	github.com/getkin/kin-openapi v0.131.0
+	github.com/getkin/kin-openapi v0.133.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grafana/codejen v0.0.4-0.20250428224353-8764ced07770
 	github.com/huandu/xstrings v1.5.0
@@ -50,6 +50,7 @@ require (
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
+	github.com/woodsbury/decimal128 v1.3.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
