@@ -60,8 +60,9 @@ compose:
 
 ## `duplicate`
 
-N/A
-
+Duplicate duplicates a builder.
+The name of the duplicated builder has to be specified and some options can
+be excluded.
 ### Usage
 
 ```yaml
@@ -98,8 +99,7 @@ merge_into:
 
 ## `omit`
 
-N/A
-
+Omit removes a builder.
 ### Usage
 
 ```yaml
@@ -131,8 +131,7 @@ properties:
 
 ## `rename`
 
-N/A
-
+Rename renames a builder.
 ### Usage
 
 ```yaml
