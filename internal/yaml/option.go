@@ -13,8 +13,8 @@ import (
  *****************************************************************************/
 
 type OptionRule struct {
-	Omit                    *OptionSelector          `yaml:"omit"`
-	Rename                  *RenameOption            `yaml:"rename"`
+	Omit                    *OmitOption              `yaml:"omit" rule_name:"Omit"`
+	Rename                  *RenameOption            `yaml:"rename" rule_name:"Rename"`
 	RenameArguments         *RenameArguments         `yaml:"rename_arguments"`
 	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean"`
 	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
@@ -22,19 +22,14 @@ type OptionRule struct {
 	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append"`
 	MapToIndex              *MapToIndex              `yaml:"map_to_index"`
 	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
-	Duplicate               *DuplicateOption         `yaml:"duplicate"`
+	Duplicate               *DuplicateOption         `yaml:"duplicate" rule_name:"Duplicate"`
 	AddAssignment           *AddAssignment           `yaml:"add_assignment"`
 	AddComments             *AddComments             `yaml:"add_comments"`
 }
 
 func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 	if rule.Omit != nil {
-		selector, err := rule.Omit.AsSelector(pkg)
-		if err != nil {
-			return option.RewriteRule{}, err
-		}
-
-		return option.Omit(selector), nil
+		return rule.Omit.AsRewriteRule(pkg)
 	}
 
 	if rule.Rename != nil {
@@ -82,6 +77,19 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
+}
+
+type OmitOption struct {
+	OptionSelector `yaml:",inline"`
+}
+
+func (rule OmitOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.Omit(selector), nil
 }
 
 type RenameOption struct {
