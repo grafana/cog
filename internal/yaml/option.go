@@ -13,28 +13,23 @@ import (
  *****************************************************************************/
 
 type OptionRule struct {
-	Omit                    *OptionSelector          `yaml:"omit"`
-	Rename                  *RenameOption            `yaml:"rename"`
-	RenameArguments         *RenameArguments         `yaml:"rename_arguments"`
-	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean"`
-	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments"`
-	StructFieldsAsOptions   *StructFieldsAsOptions   `yaml:"struct_fields_as_options"`
-	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append"`
-	MapToIndex              *MapToIndex              `yaml:"map_to_index"`
-	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options"`
-	Duplicate               *DuplicateOption         `yaml:"duplicate"`
-	AddAssignment           *AddAssignment           `yaml:"add_assignment"`
-	AddComments             *AddComments             `yaml:"add_comments"`
+	Omit                    *OmitOption              `yaml:"omit" rule_name:"OmitAction"`
+	Rename                  *RenameOption            `yaml:"rename" rule_name:"RenameAction"`
+	RenameArguments         *RenameArguments         `yaml:"rename_arguments" rule_name:"RenameArgumentsAction"`
+	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean" rule_name:"UnfoldBooleanAction"`
+	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments" rule_name:"StructFieldsAsArgumentsAction"`
+	StructFieldsAsOptions   *StructFieldsAsOptions   `yaml:"struct_fields_as_options" rule_name:"StructFieldsAsOptionsAction"`
+	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append" rule_name:"ArrayToAppendAction"`
+	MapToIndex              *MapToIndex              `yaml:"map_to_index" rule_name:"MapToIndexAction"`
+	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options" rule_name:"DisjunctionAsOptionsAction"`
+	Duplicate               *DuplicateOption         `yaml:"duplicate" rule_name:"DuplicateAction"`
+	AddAssignment           *AddAssignment           `yaml:"add_assignment" rule_name:"AddAssignmentAction"`
+	AddComments             *AddComments             `yaml:"add_comments" rule_name:"AddCommentsAction"`
 }
 
 func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 	if rule.Omit != nil {
-		selector, err := rule.Omit.AsSelector(pkg)
-		if err != nil {
-			return option.RewriteRule{}, err
-		}
-
-		return option.Omit(selector), nil
+		return rule.Omit.AsRewriteRule(pkg)
 	}
 
 	if rule.Rename != nil {
@@ -82,6 +77,19 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
+}
+
+type OmitOption struct {
+	OptionSelector `yaml:",inline"`
+}
+
+func (rule OmitOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.Omit(selector), nil
 }
 
 type RenameOption struct {

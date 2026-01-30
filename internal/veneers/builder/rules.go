@@ -78,6 +78,7 @@ func mergeBuilderInto(fromBuilder ast.Builder, intoBuilder ast.Builder, underPat
 	return newBuilder, nil
 }
 
+// Omit removes a builder.
 func Omit(selector Selector) RewriteRule {
 	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		filteredBuilders := make([]ast.Builder, 0, len(builders))
@@ -353,6 +354,7 @@ func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
 	}
 }
 
+// Rename renames a builder.
 func Rename(selector Selector, newName string) RewriteRule {
 	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, builder := range builders {
@@ -401,6 +403,9 @@ func Properties(selector Selector, properties []ast.StructField) RewriteRule {
 	}
 }
 
+// Duplicate duplicates a builder.
+// The name of the duplicated builder has to be specified and some options can
+// be excluded.
 func Duplicate(selector Selector, duplicateName string, excludeOptions []string) RewriteRule {
 	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		var newBuilders ast.Builders

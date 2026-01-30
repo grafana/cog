@@ -40,6 +40,7 @@ deps: dev-env-check-binaries ## Installs the dependencies.
 .PHONY: docs
 docs: dev-env-check-binaries ## Generates the documentation.
 	@$(RUN_DEVBOX) go run cmd/compiler-passes-docs/*
+	@$(RUN_DEVBOX) go run cmd/veneers-docs/*
 	@$(RUN_DEVBOX) go run cmd/cog-config-schemas/*
 	$(RUN_DEVBOX) mkdocs build -f ./mkdocs-github.yml -d ./docs-site/
 
