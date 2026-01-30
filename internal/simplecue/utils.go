@@ -101,7 +101,6 @@ func hintsFromCueValue(v cue.Value) ast.JenniesHints {
 		for i < a.NumArgs() {
 			key, value := a.Arg(i)
 			hints[key] = value
-
 			i++
 		}
 	}
@@ -131,7 +130,12 @@ func getTypeHint(v cue.Value) (string, error) {
 		return "", err
 	}
 
-	if !found {
+	_, isOpen, err := attr.Lookup(0, annotationOpen)
+	if err != nil {
+		return "", err
+	}
+
+	if !found && !isOpen {
 		return "", errorWithCueRef(v, "no value for the %q key in @%s attribute", annotationKindFieldName, cogAnnotationName)
 	}
 
