@@ -186,7 +186,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 
 		if !field.Type.Nullable || field.Type.Default != nil {
 			var defaultsOverrides map[string]any
-			if overrides, ok := field.Type.Default.(map[string]interface{}); ok {
+			if overrides, ok := field.Type.Default.(map[string]any); ok {
 				defaultsOverrides = overrides
 			}
 

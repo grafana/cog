@@ -35,7 +35,7 @@ func dumpsyn(v cue.Value) (string, error) {
 	return string(byt), err
 }
 
-func errorWithCueRef(v cue.Value, format string, args ...interface{}) error {
+func errorWithCueRef(v cue.Value, format string, args ...any) error {
 	return fmt.Errorf("%v", v.Pos().String()+": "+fmt.Sprintf(format, args...))
 }
 
@@ -53,6 +53,7 @@ func selectorLabel(sel cue.Selector) string {
 	// fields and definitions because we've not asked the
 	// Fields iterator for those or created them explicitly.
 	panic(fmt.Sprintf("unreachable %v", sel.Type()))
+	return ""
 }
 
 // from https://github.com/cue-lang/cue/blob/99e8578ac45e5e7e6ebf25794303bc916744c0d3/encoding/openapi/build.go#L490
@@ -140,7 +141,7 @@ func getTypeHint(v cue.Value) (string, error) {
 
 // ONLY call this function if it has been established that the provided Value is
 // Concrete.
-func cueConcreteToScalar(v cue.Value) (interface{}, error) {
+func cueConcreteToScalar(v cue.Value) (any, error) {
 	switch v.Kind() {
 	case cue.NullKind:
 		return nil, nil // nolint: nilnil
@@ -179,7 +180,7 @@ func cueConcreteToScalar(v cue.Value) (interface{}, error) {
 
 		return values, nil
 	case cue.StructKind:
-		newMap := make(map[string]interface{})
+		newMap := make(map[string]any)
 		iter, _ := v.Fields(cue.Optional(true), cue.Definitions(true))
 		for iter.Next() {
 			fieldLabel := selectorLabel(iter.Selector())

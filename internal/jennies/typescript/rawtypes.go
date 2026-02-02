@@ -194,7 +194,7 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 				defaults.Set(field.Name, jenny.defaultValuesForReference(field.Type, packageMapper))
 				continue
 			case ast.KindStruct:
-				defaultMap := field.Type.Default.(map[string]interface{})
+				defaultMap := field.Type.Default.(map[string]any)
 				defaults.Set(field.Name, jenny.defaultValueForStructs(field.Type.AsStruct(), orderedmap.FromMap(defaultMap)))
 				continue
 			default:
@@ -377,6 +377,6 @@ func (jenny RawTypes) defaultValueForConstantReferences(def ast.ConstantReferenc
 }
 
 func hasStructDefaults(typeDef ast.Type, defaults any) bool {
-	_, ok := defaults.(map[string]interface{})
+	_, ok := defaults.(map[string]any)
 	return ok && typeDef.IsStruct()
 }

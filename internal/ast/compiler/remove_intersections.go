@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"maps"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -69,9 +71,7 @@ func (r RemoveIntersections) processObject(_ *Visitor, schema *ast.Schema, objec
 		if object.Type.ImplementsVariant() {
 			newObject.Type.Hints[ast.HintImplementsVariant] = object.Type.ImplementedVariant()
 		}
-		for hint, val := range locatedObject.Type.Hints {
-			newObject.Type.Hints[hint] = val
-		}
+		maps.Copy(newObject.Type.Hints, locatedObject.Type.Hints)
 
 		r.objectsToRemove[locatedObject.Name] = object
 		return newObject, nil
@@ -98,9 +98,7 @@ func (r RemoveIntersections) processStruct(_ *Visitor, _ *ast.Schema, def ast.Ty
 				def.AsStruct().Fields[i] = ast.NewStructField(field.Name, ast.NewArray(obj.Type.AsArray().ValueType), ast.Comments(obj.Comments))
 			}
 
-			for hint, value := range field.Type.Hints {
-				def.AsStruct().Fields[i].Type.Hints[hint] = value
-			}
+			maps.Copy(field.Type.Hints, def.AsStruct().Fields[i].Type.Hints)
 		}
 	}
 

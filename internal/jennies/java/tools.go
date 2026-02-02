@@ -45,9 +45,9 @@ func cleanString(s string) string {
 	return s
 }
 
-func formatType(t ast.ScalarKind, val interface{}) string {
+func formatType(t ast.ScalarKind, val any) string {
 	// When the default is 0, is detected as integer even if it's a float.
-	parseFloatVal := func(val interface{}) interface{} {
+	parseFloatVal := func(val any) any {
 		if v, ok := val.(int64); ok {
 			return float64(v)
 		}
@@ -55,7 +55,7 @@ func formatType(t ast.ScalarKind, val interface{}) string {
 	}
 
 	// Integers could be floats in JSON
-	parseIntVal := func(val interface{}) interface{} {
+	parseIntVal := func(val any) any {
 		if v, ok := val.(float64); ok {
 			return int64(v)
 		}
@@ -67,7 +67,7 @@ func formatType(t ast.ScalarKind, val interface{}) string {
 		return val.(int64)
 	}
 
-	if list, ok := val.([]interface{}); ok {
+	if list, ok := val.([]any); ok {
 		items := make([]string, 0, len(list))
 
 		for _, item := range list {

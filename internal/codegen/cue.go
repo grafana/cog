@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -23,6 +24,7 @@ import (
 
 type genericCueLoader struct {
 	*CueInput
+
 	loader func(input CueInput) (ast.Schemas, error)
 }
 
@@ -296,10 +298,7 @@ func buildCueOverlayFromURL(url string, libFs fs.FS, expectedCuePkgName string) 
 		return nil, err
 	}
 
-	for k, v := range source {
-		overlay[k] = v
-	}
-
+	maps.Copy(overlay, source)
 	return overlay, nil
 }
 

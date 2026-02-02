@@ -16,7 +16,7 @@ type Builder struct {
 	Package     string
 	Name        string
 	Properties  []StructField `json:",omitempty"`
-	Constructor Constructor   `json:",omitempty"`
+	Constructor Constructor
 	Options     []Option
 	VeneerTrail []string `json:",omitempty"`
 
@@ -78,8 +78,8 @@ func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, 
 
 	var path Path
 
-	pathParts := strings.Split(pathAsString, ".")
-	for _, part := range pathParts {
+	pathParts := strings.SplitSeq(pathAsString, ".")
+	for part := range pathParts {
 		if currentType.IsRef() {
 			referredObjBuilder, err := resolveRef(currentType.AsRef())
 			if err != nil {

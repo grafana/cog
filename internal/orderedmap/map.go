@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 
 	"github.com/google/go-cmp/cmp"
@@ -33,7 +34,7 @@ func FromMap[K string, V any](original map[K]V) *Map[K, V] {
 		keys = append(keys, key)
 	}
 
-	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
+	slices.Sort(keys)
 
 	for _, k := range keys {
 		orderedMap.Set(k, original[k])
@@ -169,7 +170,7 @@ func (orderedMap *Map[K, V]) MarshalJSON() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// FIXME: does not preserve order
+// UnmarshalJSON FIXME: does not preserve order
 func (orderedMap *Map[K, V]) UnmarshalJSON(raw []byte) error {
 	if orderedMap.records == nil {
 		orderedMap.records = make(map[K]V)
