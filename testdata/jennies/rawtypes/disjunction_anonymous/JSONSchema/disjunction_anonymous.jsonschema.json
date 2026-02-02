@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "MyStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scalars",
+        "sameKind",
+        "refs",
+        "mixed"
+      ],
+      "properties": {
+        "scalars": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        },
+        "sameKind": {
+          "enum": [
+            "a",
+            "b",
+            "c"
+          ],
+          "type": "string"
+        },
+        "refs": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/StructA"
+            },
+            {
+              "$ref": "#/definitions/StructB"
+            }
+          ]
+        },
+        "mixed": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/StructA"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        }
+      }
+    },
+    "StructA": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field"
+      ],
+      "properties": {
+        "field": {
+          "type": "string"
+        }
+      }
+    },
+    "StructB": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

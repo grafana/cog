@@ -1,0 +1,97 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "disjunction_anonymous",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "MyStruct": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scalars",
+          "sameKind",
+          "refs",
+          "mixed"
+        ],
+        "properties": {
+          "scalars": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "sameKind": {
+            "enum": [
+              "a",
+              "b",
+              "c"
+            ],
+            "type": "string"
+          },
+          "refs": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StructA"
+              },
+              {
+                "$ref": "#/components/schemas/StructB"
+              }
+            ]
+          },
+          "mixed": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StructA"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          }
+        }
+      },
+      "StructA": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          }
+        }
+      },
+      "StructB": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
