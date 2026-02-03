@@ -73,11 +73,10 @@ func GeneratedCommentHeader(config languages.Config) codejen.FileMapper {
 		}
 
 		buf := new(bytes.Buffer)
-		err := tmpl.Execute(buf, map[string]any{
+		if err := tmpl.Execute(buf, map[string]any{
 			"Using":  from,
 			"Leader": leader,
-		})
-		if err != nil {
+		}); err != nil {
 			return codejen.File{}, fmt.Errorf("failed executing GeneratedCommentHeader() template: %w", err)
 		}
 		buf.Write(f.Data)

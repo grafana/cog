@@ -49,19 +49,15 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		}
 
 		if typeDef.IsDisjunction() {
-			slices.ContainsFunc(typeDef.AsDisjunction().Branches, func(branch ast.Type) bool {
-				return resolvesToConstraints(branch)
-			})
+			slices.ContainsFunc(typeDef.AsDisjunction().Branches, resolvesToConstraints)
 		}
 
 		if typeDef.IsIntersection() {
-			slices.ContainsFunc(typeDef.AsIntersection().Branches, func(branch ast.Type) bool {
-				return resolvesToConstraints(branch)
-			})
+			slices.ContainsFunc(typeDef.AsIntersection().Branches, resolvesToConstraints)
 		}
 
 		if typeDef.IsStruct() {
-			slices.ContainsFunc(typeDef.AsStruct().Fields, func(field ast.StructField) bool {
+			return slices.ContainsFunc(typeDef.AsStruct().Fields, func(field ast.StructField) bool {
 				return resolvesToConstraints(field.Type)
 			})
 		}

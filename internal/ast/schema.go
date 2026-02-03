@@ -99,9 +99,9 @@ func (schemas Schemas) DeepCopy() []*Schema {
 
 type Schema struct { // nolint: musttag
 	Package        string
-	Metadata       SchemaMeta
-	EntryPoint     string
-	EntryPointType Type
+	Metadata       SchemaMeta `json:",omitempty"`
+	EntryPoint     string     `json:",omitempty"`
+	EntryPointType Type       `json:",omitempty"`
 	Objects        *orderedmap.Map[string, Object]
 }
 
