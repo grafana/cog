@@ -1,6 +1,8 @@
 package common
 
 import (
+	"maps"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -52,9 +54,8 @@ func (jenny DynamicFiles) Generate(context languages.Context) (codejen.Files, er
 		data := map[string]any{
 			"Schema": schema,
 		}
-		for k, v := range jenny.Data {
-			data[k] = v
-		}
+
+		maps.Copy(data, jenny.Data)
 
 		_, err := tmpl.Render(blockName, data)
 		if err != nil {

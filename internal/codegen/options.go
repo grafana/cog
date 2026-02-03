@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"maps"
 )
 
 func StdoutReporter(msg string) {
@@ -10,10 +11,7 @@ func StdoutReporter(msg string) {
 
 func Parameters(extraParameters map[string]string) PipelineOption {
 	return func(pipeline *Pipeline) {
-		for key, value := range extraParameters {
-			pipeline.Parameters[key] = value
-		}
-
+		maps.Copy(pipeline.Parameters, extraParameters)
 		pipeline.interpolateParameters()
 	}
 }

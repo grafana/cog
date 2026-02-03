@@ -143,7 +143,8 @@ func (rule UnfoldBoolean) AsRewriteRule(pkg string) (option.RewriteRule, error) 
 
 type StructFieldsAsArguments struct {
 	OptionSelector `yaml:",inline"`
-	Fields         []string `yaml:"fields"`
+
+	Fields []string `yaml:"fields"`
 }
 
 func (rule StructFieldsAsArguments) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -157,7 +158,8 @@ func (rule StructFieldsAsArguments) AsRewriteRule(pkg string) (option.RewriteRul
 
 type StructFieldsAsOptions struct {
 	OptionSelector `yaml:",inline"`
-	Fields         []string `yaml:"fields"`
+
+	Fields []string `yaml:"fields"`
 }
 
 func (rule StructFieldsAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -197,7 +199,8 @@ func (rule MapToIndex) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 
 type DisjunctionAsOptions struct {
 	OptionSelector `yaml:",inline"`
-	ArgumentIndex  int `yaml:"argument_index"`
+
+	ArgumentIndex int `yaml:"argument_index"`
 }
 
 func (rule DisjunctionAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -211,7 +214,8 @@ func (rule DisjunctionAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, 
 
 type DuplicateOption struct {
 	OptionSelector `yaml:",inline"`
-	As             string `yaml:"as"`
+
+	As string `yaml:"as"`
 }
 
 func (rule DuplicateOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -225,7 +229,8 @@ func (rule DuplicateOption) AsRewriteRule(pkg string) (option.RewriteRule, error
 
 type AddAssignment struct {
 	OptionSelector `yaml:",inline"`
-	Assignment     veneers.Assignment `yaml:"assignment"`
+
+	Assignment veneers.Assignment `yaml:"assignment"`
 }
 
 func (rule AddAssignment) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -239,7 +244,8 @@ func (rule AddAssignment) AsRewriteRule(pkg string) (option.RewriteRule, error) 
 
 type AddComments struct {
 	OptionSelector `yaml:",inline"`
-	Comments       []string `yaml:"comments"`
+
+	Comments []string `yaml:"comments"`
 }
 
 func (rule AddComments) AsRewriteRule(pkg string) (option.RewriteRule, error) {

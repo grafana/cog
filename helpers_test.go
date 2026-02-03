@@ -6,9 +6,8 @@ import (
 
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/grafana/codejen"
-	"github.com/stretchr/testify/require"
-
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTypesFromSchema_OutputGo(t *testing.T) {

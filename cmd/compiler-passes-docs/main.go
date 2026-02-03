@@ -108,7 +108,7 @@ func buildYamlCompilerPassTypesCommentsMap(yamlTypesInputDir string) (map[string
 
 func compilerPassDocEntries(compilerPassComments map[string]string, yamlCompilerPassComments map[string]string) []compilerPassDocEntry {
 	var entries []compilerPassDocEntry
-	yamlCompilerPassTypeOf := reflect.TypeOf(yaml.CompilerPass{})
+	yamlCompilerPassTypeOf := reflect.TypeFor[yaml.CompilerPass]()
 
 	for i := 0; i < yamlCompilerPassTypeOf.NumField(); i++ {
 		field := yamlCompilerPassTypeOf.Field(i)

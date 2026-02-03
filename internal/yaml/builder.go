@@ -150,7 +150,8 @@ func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, erro
 
 type Properties struct {
 	BuilderSelector `yaml:",inline"`
-	Set             []ast.StructField `yaml:"set"`
+
+	Set []ast.StructField `yaml:"set"`
 }
 
 func (rule Properties) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -167,8 +168,9 @@ func (rule Properties) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 type Duplicate struct {
 	BuilderSelector `yaml:",inline"`
-	As              string   `yaml:"as"`
-	ExcludeOptions  []string `yaml:"exclude_options"`
+
+	As             string   `yaml:"as"`
+	ExcludeOptions []string `yaml:"exclude_options"`
 }
 
 func (rule Duplicate) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -191,7 +193,8 @@ type Initialization struct {
 
 type Initialize struct {
 	BuilderSelector `yaml:",inline"`
-	Set             []Initialization `yaml:"set"`
+
+	Set []Initialization `yaml:"set"`
 }
 
 func (rule Initialize) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -210,7 +213,8 @@ func (rule Initialize) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 type PromoteOptsToConstructor struct {
 	BuilderSelector `yaml:",inline"`
-	Options         []string `yaml:"options"`
+
+	Options []string `yaml:"options"`
 }
 
 func (rule PromoteOptsToConstructor) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -224,7 +228,8 @@ func (rule PromoteOptsToConstructor) AsRewriteRule(pkg string) (builder.RewriteR
 
 type AddOption struct {
 	BuilderSelector `yaml:",inline"`
-	Option          veneers.Option `yaml:"option"`
+
+	Option veneers.Option `yaml:"option"`
 }
 
 func (rule AddOption) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -238,7 +243,8 @@ func (rule AddOption) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 type AddFactory struct {
 	BuilderSelector `yaml:",inline"`
-	Factory         ast.BuilderFactory `yaml:"factory"`
+
+	Factory ast.BuilderFactory `yaml:"factory"`
 }
 
 func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {

@@ -32,7 +32,7 @@ func If[Input any](condition bool, innerJenny codejen.OneToMany[Input]) codejen.
 }
 
 // GeneratedCommentHeader produces a FileMapper that injects a comment header onto
-// a [codejen.File] indicating  the jenny or jennies that constructed the
+// a [codejen.File] indicating the jenny or jennies that constructed the
 // file.
 func GeneratedCommentHeader(config languages.Config) codejen.FileMapper {
 	genHeader := `{{ .Leader }} Code generated - EDITING IS FUTILE. DO NOT EDIT.

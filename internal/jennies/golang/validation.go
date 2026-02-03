@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -48,27 +49,17 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		}
 
 		if typeDef.IsDisjunction() {
-			for _, branch := range typeDef.AsDisjunction().Branches {
-				if resolvesToConstraints(branch) {
-					return true
-				}
-			}
+			slices.ContainsFunc(typeDef.AsDisjunction().Branches, resolvesToConstraints)
 		}
 
 		if typeDef.IsIntersection() {
-			for _, branch := range typeDef.AsIntersection().Branches {
-				if resolvesToConstraints(branch) {
-					return true
-				}
-			}
+			slices.ContainsFunc(typeDef.AsIntersection().Branches, resolvesToConstraints)
 		}
 
 		if typeDef.IsStruct() {
-			for _, field := range typeDef.AsStruct().Fields {
-				if resolvesToConstraints(field.Type) {
-					return true
-				}
-			}
+			return slices.ContainsFunc(typeDef.AsStruct().Fields, func(field ast.StructField) bool {
+				return resolvesToConstraints(field.Type)
+			})
 		}
 
 		if typeDef.IsMap() {

@@ -97,7 +97,9 @@ func (pass *DisjunctionInferMapping) inferDiscriminatorField(schema *ast.Schema,
 		candidates[typeName] = make(map[string]any)
 
 		for _, field := range structType.Fields {
-			if !(field.Type.IsConcreteScalar() && field.Type.AsScalar().ScalarKind == ast.KindString) && !field.Type.IsConstantRef() {
+			if (!field.Type.IsConcreteScalar() ||
+				field.Type.AsScalar().ScalarKind != ast.KindString) &&
+				!field.Type.IsConstantRef() {
 				continue
 			}
 
@@ -158,7 +160,9 @@ func (pass *DisjunctionInferMapping) buildDiscriminatorMapping(schema *ast.Schem
 		}
 
 		// trust, but verify: we need the field to be an actual scalar with a concrete value?
-		if !(field.Type.IsScalar() && field.Type.AsScalar().IsConcrete()) && !field.Type.IsConstantRef() {
+		if (!field.Type.IsScalar() ||
+			!field.Type.AsScalar().IsConcrete()) &&
+			!field.Type.IsConstantRef() {
 			return nil, fmt.Errorf("discriminator field '%s' is not a scalar or constant reference", field.Name)
 		}
 

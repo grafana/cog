@@ -117,7 +117,7 @@ func parseRules(sourceFile string) (map[string]Rule, error) {
 
 		// That are public
 		firstChar := funcName[0]
-		if !(firstChar >= 65 && firstChar <= 90) {
+		if firstChar < 65 || firstChar > 90 {
 			continue
 		}
 
@@ -154,7 +154,7 @@ weight: 10
 
 	markdown.WriteString("# Builder transformations\n\n")
 
-	selectorTypeOf := reflect.TypeOf(yaml.BuilderSelector{})
+	selectorTypeOf := reflect.TypeFor[yaml.BuilderSelector]()
 	selectorParams := ruleParameters(selectorTypeOf)
 
 	markdown.WriteString(`Each builder transformation requires the use of one of the following selectors, explicitly and unambiguously stating on which builder(s) the transformation should apply.`)
@@ -220,7 +220,7 @@ weight: 10
 
 	markdown.WriteString("# Option transformations\n\n")
 
-	selectorTypeOf := reflect.TypeOf(yaml.OptionSelector{})
+	selectorTypeOf := reflect.TypeFor[yaml.OptionSelector]()
 	selectorParams := ruleParameters(selectorTypeOf)
 
 	markdown.WriteString(`Each option transformation requires the use of one of the following selectors, explicitly and unambiguously stating on which option(s) the transformation should apply.`)
@@ -282,7 +282,7 @@ func main() {
 		panic(err)
 	}
 
-	builderDocEntries := parseYamlRules(reflect.TypeOf(yaml.BuilderRule{}), builderRules)
+	builderDocEntries := parseYamlRules(reflect.TypeFor[yaml.BuilderRule](), builderRules)
 	if err := os.WriteFile(builderRulesOuputFile, builderDocEntriesToMarkdown(builderDocEntries), 0600); err != nil {
 		panic(err)
 	}
@@ -292,7 +292,7 @@ func main() {
 		panic(err)
 	}
 
-	optionDocEntries := parseYamlRules(reflect.TypeOf(yaml.OptionRule{}), optionRules)
+	optionDocEntries := parseYamlRules(reflect.TypeFor[yaml.OptionRule](), optionRules)
 	if err := os.WriteFile(optionRulesOuputFile, optionDocEntriesToMarkdown(optionDocEntries), 0600); err != nil {
 		panic(err)
 	}

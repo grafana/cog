@@ -2,6 +2,8 @@ package ast
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/grafana/cog/internal/tools"
@@ -142,13 +144,7 @@ func (t *Type) AddToPassesTrail(trail string) {
 }
 
 func (t Type) IsAnyOf(kinds ...Kind) bool {
-	for _, kind := range kinds {
-		if t.Kind == kind {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(kinds, t.Kind)
 }
 
 func (t Type) ImplementsVariant() bool {
@@ -323,9 +319,7 @@ func (t Type) DeepCopy() Type {
 		newType.ConstantReference = &newConstantReference
 	}
 
-	for k, v := range t.Hints {
-		newType.Hints[k] = v
-	}
+	maps.Copy(newType.Hints, t.Hints)
 
 	newType.PassesTrail = append(newType.PassesTrail, t.PassesTrail...)
 
@@ -594,7 +588,7 @@ func (t Type) AsComposableSlot() ComposableSlotType {
 	return *t.ComposableSlot
 }
 
-// named declaration of a type
+// Object named declaration of a type
 type Object struct {
 	Name        string
 	Comments    []string `json:",omitempty"`
@@ -731,10 +725,7 @@ func (t DisjunctionType) DeepCopy() DisjunctionType {
 		newT.Branches = append(newT.Branches, branch.DeepCopy())
 	}
 
-	for k, v := range t.DiscriminatorMapping {
-		newT.DiscriminatorMapping[k] = v
-	}
-
+	maps.Copy(newT.DiscriminatorMapping, t.DiscriminatorMapping)
 	return newT
 }
 

@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-// naive way of checking if the input regex describes a constant string, or something else.
+// RegexMatchesConstantString naive way of checking if the input regex describes a constant string, or something else.
 // ex: `^math$` or `^reduce$` would return true, while `^foo[0-9]+$` wouldn't
 func RegexMatchesConstantString(regex string) bool {
 	if regex == "" {
