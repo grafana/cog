@@ -1,6 +1,8 @@
 package test;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map;
 
 import com.grafana.foundation.common.Constants;
 import com.grafana.foundation.dashboardv2beta1.AutoGridLayoutBuilder;
@@ -40,7 +42,8 @@ public class Main {
                                                                 StringOrArrayOfString.createString(
                                                                                 "grafanacloud-potatopi-prom"),
                                                                 StringOrArrayOfString
-                                                                                .createString("grafanacloud-prom"))))
+                                                                
+                                                                                .createString("grafanacloud-prom"), Map.of())))
                                 .queryVariable(new QueryVariableBuilder("instance")
                                                 .label("Instance")
                                                 .hide(VariableHide.DONT_HIDE)
@@ -51,7 +54,7 @@ public class Main {
                                                                 StringOrArrayOfString.createString(
                                                                                 "potato"),
                                                                 StringOrArrayOfString
-                                                                                .createString("potato")))
+                                                                                .createString("potato"), Map.of()))
                                                 .sort(VariableSort.DISABLED))
                                 // CPU
                                 .panel("cpu_usage", CPU.cpuUsageTimeseries())
