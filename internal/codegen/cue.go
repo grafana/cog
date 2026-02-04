@@ -312,6 +312,10 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 	}
 
 	body, err := loadURL(context.Background(), u.String())
+	if err != nil {
+		return nil, err
+	}
+
 	data, err := io.ReadAll(body)
 	if err != nil {
 		return nil, err
