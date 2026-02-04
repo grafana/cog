@@ -59,7 +59,10 @@ func loadURL(ctx context.Context, url string) (io.ReadCloser, error) {
 	}
 
 	// Necessary for private repositories
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", os.Getenv("GITHUB_TOKEN")))
+	authToken := os.Getenv("AUTH_TOKEN")
+	if authToken != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
