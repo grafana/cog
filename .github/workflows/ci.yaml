@@ -88,7 +88,9 @@ jobs:
 
     strategy:
       matrix:
-        kind_version: [next, v11.4.x, v11.0.x, v10.4.x]
+        # Focus on the latest version of each supported major Grafana version
+        # Note: `next` isn't included here as it will be covered by the `examples` job
+        kind_version: [v11.6.x, v10.4.x]
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
