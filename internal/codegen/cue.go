@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/fs"
 	"maps"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -312,18 +311,8 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 		return nil, fmt.Errorf("entrypoint %q must be a cue url", entrypoint)
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
+	body, err := loadURL(context.Background(), u.String())
+	data, err := io.ReadAll(body)
 	if err != nil {
 		return nil, err
 	}

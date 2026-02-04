@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"context"
-	"net/url"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
@@ -35,12 +34,12 @@ func (input *OpenAPIInput) loadSchema(ctx context.Context) (*openapi3.T, error) 
 		return loader.LoadFromFile(input.Path)
 	}
 
-	parsedURL, err := url.Parse(input.URL)
+	body, err := loadURL(ctx, input.URL)
 	if err != nil {
 		return nil, err
 	}
 
-	return loader.LoadFromURI(parsedURL)
+	return loader.LoadFromIoReader(body)
 }
 
 func (input *OpenAPIInput) packageName() string {
