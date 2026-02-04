@@ -41,6 +41,9 @@ type CueInput struct {
 	// URL to a cue file
 	URL string `yaml:"url"`
 
+	// Subpath is used when the schema is not in the root of the schema
+	Subpath string `yaml:"subpath"`
+
 	// Value represents the CUE value to use as an input. If specified, it
 	// supersedes the Entrypoint option.
 	Value *cue.Value `yaml:"-"`
@@ -167,6 +170,10 @@ func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude, ex
 	value := cuecontext.New().BuildInstance(bis[0])
 	if err := value.Err(); err != nil {
 		return cue.Value{}, fmt.Errorf("could not build cue instance: %w", err)
+	}
+
+	if input.Subpath != "" {
+		value = value.LookupPath(cue.ParsePath(input.Subpath))
 	}
 
 	return value, nil
