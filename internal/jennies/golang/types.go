@@ -147,7 +147,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 
 		// anonymous struct or struct body
 		if def.IsStruct() {
-			output := formatter.formatStructBody(def.AsStruct())
+			output := formatter.formatStructBody(def.AsStruct(), def.HasHint(ast.HintOpenStruct))
 			if def.Nullable {
 				output = "*" + output
 			}
@@ -177,7 +177,7 @@ func (formatter *typeFormatter) variantInterface(variant string) string {
 	return referredPkg + "." + formatObjectName(variant)
 }
 
-func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
+func (formatter *typeFormatter) formatStructBody(def ast.StructType, isOpen bool) string {
 	var buffer strings.Builder
 
 	buffer.WriteString("struct {\n")
@@ -187,6 +187,10 @@ func (formatter *typeFormatter) formatStructBody(def ast.StructType) string {
 		if i != len(def.Fields)-1 {
 			buffer.WriteString("\n")
 		}
+	}
+
+	if isOpen {
+		buffer.WriteString("\n\n" + tools.Indent("ExtraFields map[string]any `json:\"-\"`", 4))
 	}
 
 	buffer.WriteString("\n}")
