@@ -6,6 +6,9 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
+// NOTE: Maybe we make this a func and add a suffix for which language the custom method is for so it only generates for that language?
+var CustomObjectMethodAllBlock = "object_custom_methods_all"
+
 func CustomObjectUnmarshalBlock(obj ast.Object) string {
 	return fmt.Sprintf("object_%s_%s_custom_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }

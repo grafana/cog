@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
 	"strings"
 
@@ -114,6 +115,19 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
 				"Object": object,
 			})
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+			buffer.WriteString("\n")
+		}
+
+		if jenny.tmpl.Exists(template.CustomObjectMethodAllBlock) {
+			vars := map[string]any{
+				"Object": object,
+			}
+			maps.Copy(vars, jenny.config.OverridesTemplatesData)
+			innerErr = jenny.tmpl.RenderInBuffer(&buffer, template.CustomObjectMethodAllBlock, vars)
 			if innerErr != nil {
 				err = innerErr
 				return
