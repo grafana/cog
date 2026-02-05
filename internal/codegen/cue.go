@@ -315,6 +315,7 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 	if err != nil {
 		return nil, err
 	}
+	defer func() { _ = body.Close() }()
 
 	data, err := io.ReadAll(body)
 	if err != nil {

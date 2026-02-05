@@ -38,6 +38,7 @@ func (input *OpenAPIInput) loadSchema(ctx context.Context) (*openapi3.T, error) 
 	if err != nil {
 		return nil, err
 	}
+	defer func() { _ = body.Close() }()
 
 	return loader.LoadFromIoReader(body)
 }
