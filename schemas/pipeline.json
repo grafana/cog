@@ -58,6 +58,10 @@
           "type": "string",
           "description": "URL to a cue file"
         },
+        "subpath": {
+          "type": "string",
+          "description": "Subpath is used when the schema is not in the root of the schema"
+        },
         "forced_envelope": {
           "type": "string",
           "description": "ForcedEnvelope decorates the parsed cue Value with an envelope whose\nname is given. This is useful for dataqueries for example, where the\nschema doesn't define any suitable top-level object."
