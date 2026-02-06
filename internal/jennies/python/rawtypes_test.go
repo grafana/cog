@@ -132,7 +132,7 @@ def custom_method(self) -> str:
 		err := os.MkdirAll(customDir, 0o755)
 		req.NoError(err)
 
-		err = os.WriteFile(filepath.Join(customDir, "methods.tmpl"), []byte(templateContent), 0o644)
+		err = os.WriteFile(filepath.Join(customDir, "methods.tmpl"), []byte(templateContent), 0o600)
 		req.NoError(err)
 
 		config := Config{
