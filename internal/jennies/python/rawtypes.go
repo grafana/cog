@@ -2,6 +2,7 @@ package python
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -117,6 +118,21 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			rendered, innerErr := jenny.tmpl.Render(customMethodsBlock, map[string]any{
 				"Object": object,
 			})
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+
+			buffer.WriteString(tools.Indent(rendered, 4))
+		}
+		customAllBlock := template.CustomObjectMethodAllBlock(LanguageRef)
+		if jenny.tmpl.Exists(customAllBlock) {
+			buffer.WriteString("\n\n")
+			vars := map[string]any{
+				"Object": object,
+			}
+			maps.Copy(vars, jenny.config.OverridesTemplatesData)
+			rendered, innerErr := jenny.tmpl.Render(customAllBlock, vars)
 			if innerErr != nil {
 				err = innerErr
 				return

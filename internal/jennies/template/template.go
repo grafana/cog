@@ -46,6 +46,16 @@ func Parse(payload string) Option {
 	}
 }
 
+func ParseFSSafe(vfs fs.FS, rootDir string) Option {
+	return func(template *Template) error {
+		if vfs == nil {
+			return nil
+		}
+
+		return ParseFS(vfs, rootDir)(template)
+	}
+}
+
 func ParseFS(vfs fs.FS, rootDir string) Option {
 	return func(template *Template) error {
 		err := fs.WalkDir(vfs, rootDir, func(path string, d fs.DirEntry, err error) error {

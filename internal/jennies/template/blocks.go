@@ -6,6 +6,12 @@ import (
 	"github.com/grafana/cog/internal/ast"
 )
 
+// CustomObjectMethodAllBlock returns the template block name for language-specific custom methods.
+// Example: object_custom_methods_all_go
+func CustomObjectMethodAllBlock(language string) string {
+	return fmt.Sprintf("object_custom_methods_all_%s", language)
+}
+
 func CustomObjectUnmarshalBlock(obj ast.Object) string {
 	return fmt.Sprintf("object_%s_%s_custom_unmarshal", obj.SelfRef.ReferredPkg, obj.SelfRef.ReferredType)
 }
