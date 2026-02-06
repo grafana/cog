@@ -9,7 +9,6 @@ import (
 	"testing/fstest"
 	"time"
 
-	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
@@ -117,22 +116,6 @@ func (resource {{ .Object.Name }}) CustomMethod() string {
 			)),
 		),
 	}
-	assertGeneratedMarkers := func(files codejen.Files) {
-		foundWidget := false
-		foundGadget := false
-		for _, file := range files {
-			if bytes.Contains(file.Data, []byte(widgetMarker)) {
-				foundWidget = true
-			}
-			if bytes.Contains(file.Data, []byte(gadgetMarker)) {
-				foundGadget = true
-			}
-		}
-
-		req.True(foundWidget, "expected generated output to include Widget custom method")
-		req.True(foundGadget, "expected generated output to include Gadget custom method")
-	}
-
 	runTest := func(config Config) {
 		jenny := RawTypes{
 			config:          config,
@@ -147,7 +130,19 @@ func (resource {{ .Object.Name }}) CustomMethod() string {
 		files, err := jenny.Generate(languages.Context{Schemas: schemas})
 		req.NoError(err)
 
-		assertGeneratedMarkers(files)
+		foundWidget := false
+		foundGadget := false
+		for _, file := range files {
+			if bytes.Contains(file.Data, []byte(widgetMarker)) {
+				foundWidget = true
+			}
+			if bytes.Contains(file.Data, []byte(gadgetMarker)) {
+				foundGadget = true
+			}
+		}
+
+		req.True(foundWidget, "expected generated output to include Widget custom method")
+		req.True(foundGadget, "expected generated output to include Gadget custom method")
 	}
 
 	t.Run("fs", func(t *testing.T) {
