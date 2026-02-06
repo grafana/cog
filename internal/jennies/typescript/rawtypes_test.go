@@ -57,31 +57,9 @@ func TestRawTypes_Generate_CustomObjectMethod(t *testing.T) {
 	customData := fmt.Sprintf("data-%d", time.Now().UnixNano())
 	widgetMarker := "func-Widget-" + customData
 	gadgetMarker := "func-Gadget-" + customData
-
-	config := Config{
-		OverridesTemplatesFS: fstest.MapFS{
-			"custom/methods.tmpl": {
-				Data: []byte(`{{ define "object_custom_methods_all_typescript" }}
+	templateContent := `{{ define "object_custom_methods_all_typescript" }}
 export const customMethodFor{{ .Object.Name }} = "{{ label .Object.Name }}-{{ .CustomData }}";
-{{ end }}`),
-			},
-		},
-		OverridesTemplatesData: map[string]any{
-			"CustomData": customData,
-		},
-		OverridesTemplateFuncs: map[string]any{
-			"label": func(s string) string {
-				return "func-" + s
-			},
-		},
-	}
-	config.applyDefaults()
-
-	jenny := RawTypes{
-		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
-		config: config,
-	}
-	compilerPasses := New(config).CompilerPasses()
+{{ end }}`
 
 	schema := &ast.Schema{
 		Package: "tests",
@@ -94,75 +72,77 @@ export const customMethodFor{{ .Object.Name }} = "{{ label .Object.Name }}-{{ .C
 			)),
 		),
 	}
-	schemas, err := compilerPasses.Process(ast.Schemas{schema})
-	req.NoError(err)
+	runTest := func(config Config) {
+		config.applyDefaults()
 
-	files, err := jenny.Generate(languages.Context{Schemas: schemas})
-	req.NoError(err)
-
-	foundWidget := false
-	foundGadget := false
-	for _, file := range files {
-		if bytes.Contains(file.Data, []byte(widgetMarker)) {
-			foundWidget = true
+		jenny := RawTypes{
+			tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
+			config: config,
 		}
-		if bytes.Contains(file.Data, []byte(gadgetMarker)) {
-			foundGadget = true
+		compilerPasses := New(config).CompilerPasses()
+
+		schemas, err := compilerPasses.Process(ast.Schemas{schema})
+		req.NoError(err)
+
+		files, err := jenny.Generate(languages.Context{Schemas: schemas})
+		req.NoError(err)
+
+		foundWidget := false
+		foundGadget := false
+		for _, file := range files {
+			if bytes.Contains(file.Data, []byte(widgetMarker)) {
+				foundWidget = true
+			}
+			if bytes.Contains(file.Data, []byte(gadgetMarker)) {
+				foundGadget = true
+			}
 		}
+
+		req.True(foundWidget, "expected generated output to include Widget custom method")
+		req.True(foundGadget, "expected generated output to include Gadget custom method")
 	}
 
-	req.True(foundWidget, "expected generated output to include Widget custom method")
-	req.True(foundGadget, "expected generated output to include Gadget custom method")
-}
-
-func TestRawTypes_Generate_CustomObjectMethod_WithDirectory(t *testing.T) {
-	req := require.New(t)
-
-	const marker = "directory-based-method"
-
-	tmpDir := t.TempDir()
-	customDir := filepath.Join(tmpDir, "custom")
-	err := os.MkdirAll(customDir, 0o755)
-	req.NoError(err)
-
-	templateContent := []byte(`{{ define "object_custom_methods_all_typescript" }}
-export const directoryMethodFor{{ .Object.Name }} = "` + marker + `";
-{{ end }}`)
-	err = os.WriteFile(filepath.Join(customDir, "methods.tmpl"), templateContent, 0o644)
-	req.NoError(err)
-
-	config := Config{
-		OverridesTemplatesDirectories: []string{tmpDir},
-	}
-	config.applyDefaults()
-
-	jenny := RawTypes{
-		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),
-		config: config,
-	}
-	compilerPasses := New(config).CompilerPasses()
-
-	schema := &ast.Schema{
-		Package: "tests",
-		Objects: testutils.ObjectsMap(
-			ast.NewObject("tests", "Widget", ast.NewStruct(
-				ast.NewStructField("name", ast.NewScalar(ast.KindString), ast.Required()),
-			)),
-		),
-	}
-	schemas, err := compilerPasses.Process(ast.Schemas{schema})
-	req.NoError(err)
-
-	files, err := jenny.Generate(languages.Context{Schemas: schemas})
-	req.NoError(err)
-
-	found := false
-	for _, file := range files {
-		if bytes.Contains(file.Data, []byte(marker)) {
-			found = true
-			break
+	t.Run("fs", func(t *testing.T) {
+		config := Config{
+			OverridesTemplatesFS: fstest.MapFS{
+				"custom/methods.tmpl": {
+					Data: []byte(templateContent),
+				},
+			},
+			OverridesTemplatesData: map[string]any{
+				"CustomData": customData,
+			},
+			OverridesTemplateFuncs: map[string]any{
+				"label": func(s string) string {
+					return "func-" + s
+				},
+			},
 		}
-	}
 
-	req.True(found, "expected generated output to include method from directory template")
+		runTest(config)
+	})
+
+	t.Run("directory", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		customDir := filepath.Join(tmpDir, "custom")
+		err := os.MkdirAll(customDir, 0o755)
+		req.NoError(err)
+
+		err = os.WriteFile(filepath.Join(customDir, "methods.tmpl"), []byte(templateContent), 0o644)
+		req.NoError(err)
+
+		config := Config{
+			OverridesTemplatesDirectories: []string{tmpDir},
+			OverridesTemplatesData: map[string]any{
+				"CustomData": customData,
+			},
+			OverridesTemplateFuncs: map[string]any{
+				"label": func(s string) string {
+					return "func-" + s
+				},
+			},
+		}
+
+		runTest(config)
+	})
 }
