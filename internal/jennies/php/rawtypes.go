@@ -2,6 +2,7 @@ package php
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -229,6 +230,20 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 		rendered, err := jenny.tmpl.Render(customMethodsBlock, map[string]any{
 			"Object": object,
 		})
+		if err != nil {
+			return "", err
+		}
+
+		buffer.WriteString("\n\n")
+		buffer.WriteString(tools.Indent(rendered, 4))
+	}
+	customAllBlock := template.CustomObjectMethodAllBlock(LanguageRef)
+	if jenny.tmpl.Exists(customAllBlock) {
+		vars := map[string]any{
+			"Object": object,
+		}
+		maps.Copy(vars, jenny.config.OverridesTemplatesData)
+		rendered, err := jenny.tmpl.Render(customAllBlock, vars)
 		if err != nil {
 			return "", err
 		}
