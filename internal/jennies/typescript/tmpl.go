@@ -58,7 +58,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
-		template.ParseFS(config.OverridesTemplatesFS, "custom"),
+		template.ParseFSSafe(config.OverridesTemplatesFS, "custom"),
 		template.ParseDirectories(config.OverridesTemplatesDirectories...),
 	)
 	if err != nil {
