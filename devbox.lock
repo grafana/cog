@@ -326,51 +326,51 @@
         }
       }
     },
-    "php83Packages.composer@2.9.2": {
-      "last_modified": "2026-01-19T00:39:23Z",
-      "resolved": "github:NixOS/nixpkgs/bde09022887110deb780067364a0818e89258968#php83Packages.composer",
+    "php83Packages.composer@2.9.5": {
+      "last_modified": "2026-02-06T12:24:04Z",
+      "resolved": "github:NixOS/nixpkgs/ae67888ff7ef9dff69b3cf0cc0fbfbcd3a722abe#php83Packages.composer",
       "source": "devbox-search",
-      "version": "2.9.2",
+      "version": "2.9.5",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/ajm1lkwjya8r984a16i9hbm1nljl7y7q-composer-2.9.2",
+              "path": "/nix/store/hghh9j9zbk138vl68ill7plfcfvqqkj9-composer-2.9.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/ajm1lkwjya8r984a16i9hbm1nljl7y7q-composer-2.9.2"
+          "store_path": "/nix/store/hghh9j9zbk138vl68ill7plfcfvqqkj9-composer-2.9.5"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/fjbigwwhlkxva8a4032jqi9jgmj79gk0-composer-2.9.2",
+              "path": "/nix/store/vpbyc704g4gwlybnywp0zxi258pih276-composer-2.9.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/fjbigwwhlkxva8a4032jqi9jgmj79gk0-composer-2.9.2"
+          "store_path": "/nix/store/vpbyc704g4gwlybnywp0zxi258pih276-composer-2.9.5"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/6l5653yj378c726dda15fl1hyjzjmrg6-composer-2.9.2",
+              "path": "/nix/store/564bsciijnjfyq1h6iq4575x3wfii098-composer-2.9.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/6l5653yj378c726dda15fl1hyjzjmrg6-composer-2.9.2"
+          "store_path": "/nix/store/564bsciijnjfyq1h6iq4575x3wfii098-composer-2.9.5"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/8mdx1fv9cvb80i02c7hjwdh9g5585ij6-composer-2.9.2",
+              "path": "/nix/store/kb0ql184avncb6iknvy2k4cbhkx3mmj0-composer-2.9.5",
               "default": true
             }
           ],
-          "store_path": "/nix/store/8mdx1fv9cvb80i02c7hjwdh9g5585ij6-composer-2.9.2"
+          "store_path": "/nix/store/kb0ql184avncb6iknvy2k4cbhkx3mmj0-composer-2.9.5"
         }
       }
     },
