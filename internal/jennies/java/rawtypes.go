@@ -2,7 +2,6 @@ package java
 
 import (
 	"fmt"
-	"maps"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -379,11 +378,9 @@ func (jenny RawTypes) extraFunctionsBlock(schema *ast.Schema, object ast.Object)
 	customAllBlock := template.CustomObjectMethodAllBlock(LanguageRef)
 	if jenny.tmpl.Exists(customAllBlock) {
 		buffer.WriteString("\n\n")
-		vars := map[string]any{
+		if err := jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
 			"Object": object,
-		}
-		maps.Copy(vars, jenny.config.OverridesTemplatesData)
-		if err := jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, vars); err != nil {
+		}); err != nil {
 			return "", err
 		}
 

@@ -32,8 +32,6 @@ type Config struct {
 	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
 	// OverridesTemplatesFS holds an embedded filesystem containing templates
 	OverridesTemplatesFS fs.FS `yaml:"-"`
-	// OverridesTemplatesData holds additional variables to be injected into the override templates.
-	OverridesTemplatesData map[string]any `yaml:"overrides_templates_data"`
 	// OverridesTemplateFuncs holds additional template functions to be injected into the override templates.
 	OverridesTemplateFuncs map[string]any `yaml:"-"`
 

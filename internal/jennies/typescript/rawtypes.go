@@ -2,7 +2,6 @@ package typescript
 
 import (
 	"fmt"
-	"maps"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -120,11 +119,9 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper packageMapper) 
 
 	customAllBlock := template.CustomObjectMethodAllBlock(LanguageRef)
 	if jenny.tmpl.Exists(customAllBlock) {
-		vars := map[string]any{
+		err := jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
 			"Object": def,
-		}
-		maps.Copy(vars, jenny.config.OverridesTemplatesData)
-		err := jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, vars)
+		})
 		if err != nil {
 			return nil, err
 		}

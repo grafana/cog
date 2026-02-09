@@ -2,12 +2,10 @@ package golang
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 	"testing/fstest"
-	"time"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -96,12 +94,11 @@ func TestRawTypes_Generate_AllowMarshalEmptyDisjunctions(t *testing.T) {
 func TestRawTypes_Generate_CustomObjectMethod(t *testing.T) {
 	req := require.New(t)
 
-	customData := fmt.Sprintf("data-%d", time.Now().UnixNano())
-	widgetMarker := "func-Widget-" + customData
-	gadgetMarker := "func-Gadget-" + customData
+	widgetMarker := "func-Widget"
+	gadgetMarker := "func-Gadget"
 	templateContent := `{{ define "object_custom_methods_all_go" }}
 func (resource {{ .Object.Name }}) CustomMethod() string {
-	return "{{ label .Object.Name }}-{{ .CustomData }}"
+	return "{{ label .Object.Name }}"
 }
 {{ end }}`
 
@@ -153,9 +150,6 @@ func (resource {{ .Object.Name }}) CustomMethod() string {
 					Data: []byte(templateContent),
 				},
 			},
-			OverridesTemplatesData: map[string]any{
-				"CustomData": customData,
-			},
 			OverridesTemplateFuncs: map[string]any{
 				"label": func(s string) string {
 					return "func-" + s
@@ -178,9 +172,6 @@ func (resource {{ .Object.Name }}) CustomMethod() string {
 		config := Config{
 			PackageRoot:                   "github.com/grafana/cog/generated",
 			OverridesTemplatesDirectories: []string{tmpDir},
-			OverridesTemplatesData: map[string]any{
-				"CustomData": customData,
-			},
 			OverridesTemplateFuncs: map[string]any{
 				"label": func(s string) string {
 					return "func-" + s

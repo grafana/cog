@@ -192,8 +192,6 @@ type GoConfig struct {
 	CustomTemplatesDirectories []string
 	// CustomTemplatesFS accepts an embedded filesystem containing custom templates
 	CustomTemplatesFS fs.FS
-	// CustomTemplatesData holds additional data to be injected into the templates
-	CustomTemplatesData map[string]any
 	// CustomTemplatesFuncs holds additional functions to be injected into the templates
 	CustomTemplatesFuncs map[string]any
 }
@@ -206,7 +204,6 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 			GenerateJSONMarshaller:        true,
 			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
 			OverridesTemplatesFS:          config.CustomTemplatesFS,
-			OverridesTemplatesData:        config.CustomTemplatesData,
 			OverridesTemplateFuncs:        config.CustomTemplatesFuncs,
 
 			GenerateEqual:  config.GenerateEqual,
