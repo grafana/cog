@@ -375,7 +375,7 @@ func (jenny RawTypes) extraFunctionsBlock(schema *ast.Schema, object ast.Object)
 
 		buffer.WriteString("\n")
 	}
-	customAllBlock := template.CustomObjectMethodAllBlock(LanguageRef)
+	customAllBlock := template.CustomObjectMethodAllBlock()
 	if jenny.tmpl.Exists(customAllBlock) {
 		buffer.WriteString("\n\n")
 		if err := jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{

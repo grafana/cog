@@ -16,7 +16,7 @@ For types, the following blocks are supported:
 * `object_{{ Package }}_{{ ObjectName }}_custom_unmarshal`: allows the definition of a custom unmarshal function for the object.
 * `object_{{ Package }}_{{ ObjectName }}_field_{{ FieldName}}_custom_strict_unmarshal`: allows the definition of a custom — strict — unmarshal logic for a field.
 * `object_{{ Package }}_{{ ObjectName }}_custom_methods`: allows the definition of custom methods on objects.
-* `object_custom_methods_all_{{ LanguageRef }}`: allows the definition of custom methods on all objects for a language (`go`, `java`, `php`, `python`, `typescript`).
+* `object_custom_methods_all`: allows the definition of custom methods on all objects.
 * `variant_{{ VariantName }}_field_unmarshal`: defines how to unmarshal fields of the given variant.
 * `object_variant_{{ VariantName }}`: allows the definition of custom methods for all objects implementing the variant `{{ VariantName }}`.
 * `schema_variant_{{ VariantName }}`: allows the definition of custom code for all schemas implementing the variant `{{ VariantName }}`.
@@ -45,7 +45,7 @@ For dynamically generating files, the following block is supported:
 Custom methods can be added with either:
 
 * `object_{{ Package }}_{{ ObjectName }}_custom_methods`: applies to one object.
-* `object_custom_methods_all_{{ LanguageRef }}`: applies to every object in a language (`go`, `java`, `php`, `python`, `typescript`).
+* `object_all_custom_methods`: applies to every object.
 
 Both blocks receive `Object` in the template context, so you can use object metadata directly
 (for example, `.Object.Name`).
@@ -53,7 +53,7 @@ Both blocks receive `Object` in the template context, so you can use object meta
 Example:
 
 ```gotemplate
-{{ define "object_custom_methods_all_go" }}
+{{ define "object_all_custom_methods" }}
 func (resource {{ .Object.Name|formatObjectName }}) CustomMethod() string {
 	return "custom-for-{{ .Object.Name }}"
 }

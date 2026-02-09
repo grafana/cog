@@ -236,7 +236,7 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 		buffer.WriteString("\n\n")
 		buffer.WriteString(tools.Indent(rendered, 4))
 	}
-	customAllBlock := template.CustomObjectMethodAllBlock(LanguageRef)
+	customAllBlock := template.CustomObjectMethodAllBlock()
 	if jenny.tmpl.Exists(customAllBlock) {
 		rendered, err := jenny.tmpl.Render(customAllBlock, map[string]any{
 			"Object": object,
