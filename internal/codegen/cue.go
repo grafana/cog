@@ -340,6 +340,11 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 
 func getPackageFromFile(url string) (string, error) {
 	body, err := loadURL(context.Background(), url)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = body.Close() }()
+
 	f, err := parser.ParseFile("", body, parser.ParseComments)
 	if err != nil {
 		return "", fmt.Errorf("could not parse cue file: %w", err)
