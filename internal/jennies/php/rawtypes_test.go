@@ -60,7 +60,7 @@ func TestRawTypes_Generate_CustomObjectMethod(t *testing.T) {
 
 	widgetMarker := "func-Widget"
 	gadgetMarker := "func-Gadget"
-	templateContent := `{{ define "object_custom_methods_all_php" }}
+	templateContent := `{{ define "object_all_custom_methods" }}
 public function customMethod(): string
 {
     return "{{ label .Object.Name }}";

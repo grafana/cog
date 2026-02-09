@@ -96,7 +96,7 @@ func TestRawTypes_Generate_CustomObjectMethod(t *testing.T) {
 
 	widgetMarker := "func-Widget"
 	gadgetMarker := "func-Gadget"
-	templateContent := `{{ define "object_custom_methods_all_go" }}
+	templateContent := `{{ define "object_all_custom_methods" }}
 func (resource {{ .Object.Name }}) CustomMethod() string {
 	return "{{ label .Object.Name }}"
 }

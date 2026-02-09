@@ -54,7 +54,7 @@ func TestRawTypes_Generate_CustomObjectMethod(t *testing.T) {
 
 	widgetMarker := "func-Widget"
 	gadgetMarker := "func-Gadget"
-	templateContent := `{{ define "object_custom_methods_all_typescript" }}
+	templateContent := `{{ define "object_all_custom_methods" }}
 export const customMethodFor{{ .Object.Name }} = "{{ label .Object.Name }}";
 {{ end }}`
 
