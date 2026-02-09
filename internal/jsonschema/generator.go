@@ -12,7 +12,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
-	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
+	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 var errUndescriptiveSchema = fmt.Errorf("the schema does not appear to be describing anything")
