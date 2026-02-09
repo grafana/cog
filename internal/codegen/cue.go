@@ -15,6 +15,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
+	"cuelang.org/go/cue/parser"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/grafana/cog/internal/tools"
@@ -102,7 +103,10 @@ func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecu
 	if cuePkgName == "" {
 		cuePkgName = filepath.Base(input.Entrypoint)
 		if input.URL != "" {
-			cuePkgName = filepath.Base(filepath.Dir(input.URL))
+			cuePkgName, err = getPackageFromFile(input.URL)
+			if err != nil {
+				return cue.Value{}, nil, err
+			}
 		}
 	}
 
@@ -332,4 +336,19 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 	return map[string]load.Source{
 		filepath.Join("/cog/vfs/cue.mod/pkg/github.com/cog-vfs/", cuePackage, filepath.Base(u.Path)): load.FromBytes(data),
 	}, nil
+}
+
+func getPackageFromFile(url string) (string, error) {
+	body, err := loadURL(context.Background(), url)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = body.Close() }()
+
+	f, err := parser.ParseFile("", body, parser.ParseComments)
+	if err != nil {
+		return "", fmt.Errorf("could not parse cue file: %w", err)
+	}
+
+	return f.PackageName(), nil
 }
