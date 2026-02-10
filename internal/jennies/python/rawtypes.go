@@ -124,6 +124,19 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 			buffer.WriteString(tools.Indent(rendered, 4))
 		}
+		customAllBlock := template.CustomObjectMethodAllBlock()
+		if jenny.tmpl.Exists(customAllBlock) {
+			buffer.WriteString("\n\n")
+			rendered, innerErr := jenny.tmpl.Render(customAllBlock, map[string]any{
+				"Object": object,
+			})
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+
+			buffer.WriteString(tools.Indent(rendered, 4))
+		}
 
 		customVariantTmpl := template.CustomObjectVariantBlock(object)
 		if object.Type.ImplementsVariant() && jenny.tmpl.Exists(customVariantTmpl) {

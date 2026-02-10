@@ -120,6 +120,18 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			}
 			buffer.WriteString("\n")
 		}
+
+		customAllBlock := template.CustomObjectMethodAllBlock()
+		if jenny.tmpl.Exists(customAllBlock) {
+			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
+				"Object": object,
+			})
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+			buffer.WriteString("\n")
+		}
 	})
 	if err != nil {
 		return nil, err
