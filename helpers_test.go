@@ -183,6 +183,45 @@ Container: {
 		req.Len(files, 1, "expected a single file")
 		testutils.TrimSpacesDiffComparator(t, []byte(expectedCode), files[0].Data, "test.json")
 	})
+
+	t.Run("generating openAPI from cue map of any", func(t *testing.T) {
+		req := require.New(t)
+
+		mapAnySchema := `
+MapOfStringToAny: [string]: _
+`
+
+		expectedMapAnyOpenAPI := `{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "sandbox",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "MapOfStringToAny": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  }
+}`
+
+		cueValue := cuecontext.New().CompileString(mapAnySchema)
+		req.NoError(cueValue.Err())
+
+		files, err := TypesFromSchema().
+			CUEValue("sandbox", cueValue).
+			GenerateOpenAPI(OpenAPIGenerationConfig{}).
+			Run(context.Background())
+		req.NoError(err)
+
+		req.Len(files, 1, "expected a single file")
+		testutils.TrimSpacesDiffComparator(t, []byte(expectedMapAnyOpenAPI), files[0].Data, "test.json")
+	})
 }
 
 func TestTypesFromSchema_SchemaTransformations(t *testing.T) {

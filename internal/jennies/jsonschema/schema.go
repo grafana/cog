@@ -339,7 +339,13 @@ func (jenny Schema) formatMap(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	definition.Set("type", "object")
-	definition.Set("additionalProperties", jenny.formatType(typeDef.AsMap().ValueType))
+	valueType := typeDef.AsMap().ValueType
+	if jenny.OpenAPI3Compatible && valueType.IsAny() {
+		definition.Set("additionalProperties", true)
+		return definition
+	}
+
+	definition.Set("additionalProperties", jenny.formatType(valueType))
 
 	return definition
 }
