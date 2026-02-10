@@ -82,13 +82,9 @@ jobs:
       - name: Docs
         run: make docs
 
-  registry:
-    name: Generate registry
+  sdk:
+    name: Generate SDK
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        kind_version: [next, v11.4.x, v11.0.x, v10.4.x]
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -116,10 +112,7 @@ jobs:
         run: git clone --depth=1 https://github.com/grafana/kind-registry.git ../kind-registry
 
       - name: Run code generation
-        run: |
-          devbox run go run cmd/cli/main.go generate \
-            --config ./config/foundation_sdk.dev.yaml \
-            --parameters grafana_version=${{ matrix.kind_version == 'next' && 'main' || matrix.kind_version }},kind_registry_version=${{ matrix.kind_version }}
+        run: make gen-sdk-dev
         env:
           GOGC: "off"
 
