@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/grafana/cog/generated/go/cog"
 	"github.com/grafana/cog/generated/go/common"
 	dashboard "github.com/grafana/cog/generated/go/dashboardv2beta1"
 	"github.com/grafana/cog/generated/go/units"
@@ -26,8 +25,8 @@ func cpuUsageTimeseries() *dashboard.PanelBuilder {
 					dashboard.NewThresholdsConfigBuilder().
 						Mode(dashboard.ThresholdsModeAbsolute).
 						Steps([]dashboard.Threshold{
-							{Value: cog.ToPtr[float64](0), Color: "green"},
-							{Value: cog.ToPtr[float64](80.0), Color: "red"},
+							{Value: 0, Color: "green"},
+							{Value: 80.0, Color: "red"},
 						}),
 				),
 		).
@@ -48,8 +47,8 @@ func loadAverageTimeseries() *dashboard.PanelBuilder {
 					dashboard.NewThresholdsConfigBuilder().
 						Mode(dashboard.ThresholdsModeAbsolute).
 						Steps([]dashboard.Threshold{
-							{Value: cog.ToPtr[float64](0), Color: "green"},
-							{Value: cog.ToPtr[float64](80.0), Color: "red"},
+							{Value: 0, Color: "green"},
+							{Value: 80.0, Color: "red"},
 						}),
 				).
 				Min(0).
@@ -84,9 +83,9 @@ func cpuTemperatureGauge() *dashboard.PanelBuilder {
 					dashboard.NewThresholdsConfigBuilder().
 						Mode(dashboard.ThresholdsModeAbsolute).
 						Steps([]dashboard.Threshold{
-							{Value: cog.ToPtr[float64](0), Color: "rgba(50, 172, 45, 0.97)"},
-							{Value: cog.ToPtr[float64](65.0), Color: "rgba(237, 129, 40, 0.89)"},
-							{Value: cog.ToPtr[float64](85.0), Color: "rgba(245, 54, 54, 0.9)"},
+							{Value: 0, Color: "rgba(50, 172, 45, 0.97)"},
+							{Value: 65.0, Color: "rgba(237, 129, 40, 0.89)"},
+							{Value: 85.0, Color: "rgba(245, 54, 54, 0.9)"},
 						}),
 				),
 		).
