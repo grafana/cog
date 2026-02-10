@@ -340,7 +340,7 @@ func (jenny Schema) formatMap(typeDef ast.Type) Definition {
 
 	definition.Set("type", "object")
 	valueType := typeDef.AsMap().ValueType
-	if jenny.OpenAPI3Compatible && valueType.IsScalar() && valueType.AsScalar().ScalarKind == ast.KindAny {
+	if jenny.OpenAPI3Compatible && valueType.IsAny() {
 		definition.Set("additionalProperties", true)
 		return definition
 	}
