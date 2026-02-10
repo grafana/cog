@@ -47,7 +47,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./config/foundation-sdk/scripts/release-version.sh next
+          devbox run ./config/foundation-sdk/scripts/prepare-release.sh
         env:
           CODEGEN_PIPELINE_CONFIG: ./config/foundation_sdk.dev.yaml
           WORKSPACE_PATH: /tmp/foundation-workspace-current
@@ -75,7 +75,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./config/foundation-sdk/scripts/release-version.sh next
+          devbox run ./config/foundation-sdk/scripts/prepare-release.sh
         env:
           CODEGEN_PIPELINE_CONFIG: ./config/foundation_sdk.dev.yaml
           WORKSPACE_PATH: /tmp/foundation-workspace-main
