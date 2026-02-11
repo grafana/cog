@@ -34,7 +34,7 @@ inputs:
 
 transformations:
   schemas:
-    - { path: '%__config_dir%/transformations/schemas/common.yaml' }
+    - '%__config_dir%/transformations/schemas/common.yaml'
 
 output:
   directory: './generated/%l'
