@@ -4,7 +4,6 @@ go 1.24.0
 
 require (
 	cuelang.org/go v0.11.0
-	github.com/expr-lang/expr v1.17.7
 	github.com/getkin/kin-openapi v0.133.0
 	github.com/google/go-cmp v0.7.0
 	github.com/grafana/codejen v0.0.4-0.20250428224353-8764ced07770

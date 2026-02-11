@@ -151,30 +151,30 @@ inputs:
 
 transformations:
   schemas:
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/common.schema.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dataqueries.schema.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/panels.schema.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboard/schema.transforms.yaml' }
+    - '%__config_dir%/foundation-sdk/.cog/resources/common.schema.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/dataqueries.schema.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/panels.schema.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/dashboard/schema.transforms.yaml'
     # To avoid it to conflict with the refid in the dataquery schema.
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/dataqueries_refid.schema.transforms.yaml' }
+    - '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/dataqueries_refid.schema.transforms.yaml'
 
   builders:
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/old_datasource.builder.transforms.yaml' }
+    - '%__config_dir%/foundation-sdk/.cog/resources/old_datasource.builder.transforms.yaml'
 
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/accesspolicy/common.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/prometheus/common.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboard/builder-transforms' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/builder-transforms' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/alerting/builder-transforms' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/common/common.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/datasource/builder-transforms' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/cloudwatch/go.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/elasticsearch/common.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/expr/common.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/folder/common.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/heatmap/common.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/team/common.builder.transforms.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/resources/tempo/go.builder.transforms.yaml' }
+    - '%__config_dir%/foundation-sdk/.cog/resources/accesspolicy/common.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/prometheus/common.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/dashboard/builder-transforms'
+    - '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/builder-transforms'
+    - '%__config_dir%/foundation-sdk/.cog/resources/alerting/builder-transforms'
+    - '%__config_dir%/foundation-sdk/.cog/resources/common/common.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/datasource/builder-transforms'
+    - '%__config_dir%/foundation-sdk/.cog/resources/cloudwatch/go.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/elasticsearch/common.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/expr/common.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/folder/common.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/heatmap/common.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/team/common.builder.transforms.yaml'
+    - '%__config_dir%/foundation-sdk/.cog/resources/tempo/go.builder.transforms.yaml'
 
   converters: '%__config_dir%/foundation-sdk/.cog/converters/config.yaml'
 

@@ -18,18 +18,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "CodegenCommonPassPath": {
-      "properties": {
-        "if": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "CodegenCueInput": {
       "properties": {
         "allowed_objects": {
@@ -83,9 +71,6 @@
     },
     "CodegenInput": {
       "properties": {
-        "if": {
-          "type": "string"
-        },
         "jsonschema": {
           "$ref": "#/$defs/CodegenJSONSchemaInput"
         },
@@ -327,14 +312,14 @@
       "properties": {
         "schemas": {
           "items": {
-            "$ref": "#/$defs/CodegenCommonPassPath"
+            "type": "string"
           },
           "type": "array",
           "description": "CommonPassesFiles holds a list of paths to files containing compiler\npasses to apply to all the schemas.\nNote: these compiler passes are applied *before* language-specific passes."
         },
         "builders": {
           "items": {
-            "$ref": "#/$defs/CodegenVeneerPath"
+            "type": "string"
           },
           "type": "array",
           "description": "VeneersPaths holds a list of paths to veneer files to apply to all the\nbuilders.\nThe paths can refer to files or directories."
@@ -342,18 +327,6 @@
         "converters": {
           "type": "string",
           "description": "ConverterConfig is the configuration modify the converters output."
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "CodegenVeneerPath": {
-      "properties": {
-        "if": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
         }
       },
       "additionalProperties": false,

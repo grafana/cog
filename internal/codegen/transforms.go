@@ -5,21 +5,11 @@ import (
 	"github.com/grafana/cog/internal/tools"
 )
 
-type VeneerPath struct {
-	If   string `yaml:"if"`
-	Path string `yaml:"path"`
-}
-
-type CommonPassPath struct {
-	If   string `yaml:"if"`
-	Path string `yaml:"path"`
-}
-
 type Transforms struct {
 	// CommonPassesFiles holds a list of paths to files containing compiler
 	// passes to apply to all the schemas.
 	// Note: these compiler passes are applied *before* language-specific passes.
-	CommonPassesFiles []CommonPassPath `yaml:"schemas"`
+	CommonPassesFiles []string `yaml:"schemas"`
 
 	// CommonPasses holds a list of compiler passes to apply to all the schemas.
 	// If this field is set, CommonPassesFiles is ignored.
@@ -33,24 +23,14 @@ type Transforms struct {
 	// VeneersPaths holds a list of paths to veneer files to apply to all the
 	// builders.
 	// The paths can refer to files or directories.
-	VeneersPaths []VeneerPath `yaml:"builders"`
+	VeneersPaths []string `yaml:"builders"`
 
 	// ConverterConfig is the configuration modify the converters output.
 	ConverterConfig string `yaml:"converters"`
 }
 
 func (transforms *Transforms) interpolateParameters(interpolator ParametersInterpolator) {
-	transforms.CommonPassesFiles = tools.Map(transforms.CommonPassesFiles, func(path CommonPassPath) CommonPassPath {
-		path.If = interpolator(path.If)
-		path.Path = interpolator(path.Path)
-
-		return path
-	})
-	transforms.VeneersPaths = tools.Map(transforms.VeneersPaths, func(path VeneerPath) VeneerPath {
-		path.If = interpolator(path.If)
-		path.Path = interpolator(path.Path)
-
-		return path
-	})
+	transforms.CommonPassesFiles = tools.Map(transforms.CommonPassesFiles, interpolator)
+	transforms.VeneersPaths = tools.Map(transforms.VeneersPaths, interpolator)
 	transforms.ConverterConfig = interpolator(transforms.ConverterConfig)
 }

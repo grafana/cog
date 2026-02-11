@@ -70,8 +70,6 @@ func (input *InputBase) filterSchema(schema *ast.Schema) (ast.Schemas, error) {
 }
 
 type Input struct {
-	If string `yaml:"if"`
-
 	JSONSchema *JSONSchemaInput `yaml:"jsonschema"`
 	OpenAPI    *OpenAPIInput    `yaml:"openapi"`
 
@@ -82,8 +80,6 @@ type Input struct {
 }
 
 func (input *Input) InterpolateParameters(interpolator ParametersInterpolator) error {
-	input.If = interpolator(input.If)
-
 	loader, err := input.loader()
 	if err != nil {
 		return err
@@ -121,14 +117,6 @@ func (input *Input) loader() (schemaLoader, error) {
 
 func (input *Input) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	var err error
-
-	shouldLoad, err := evalExpr(input.If)
-	if err != nil {
-		return nil, err
-	}
-	if !shouldLoad {
-		return nil, nil
-	}
 
 	loader, err := input.loader()
 	if err != nil {

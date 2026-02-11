@@ -25,7 +25,7 @@ inputs:
 
 transformations:
   builders:
-    - { path: '%__config_dir%/transformations/builders/' }
+    - '%__config_dir%/transformations/builders/'
 
 output:
   directory: './generated/%l'
