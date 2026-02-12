@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/golang"
@@ -19,7 +20,6 @@ import (
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	cogyaml "github.com/grafana/cog/internal/yaml"
-	"gopkg.in/yaml.v3"
 )
 
 type ParametersInterpolator func(input string) string
@@ -44,24 +44,22 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 
 	fileHandle, err := os.Open(file)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not open pipeline config: %w", err)
 	}
 	defer func() { _ = fileHandle.Close() }()
-
-	decoder := yaml.NewDecoder(fileHandle)
-	decoder.KnownFields(true)
 
 	pipeline, err := NewPipeline()
 	if err != nil {
 		return nil, err
 	}
-	pipeline.Parameters = map[string]string{
-		"__config_dir":  filepath.Dir(file),
-		"__current_dir": currentDir,
-	}
+
+	decoder := yaml.NewDecoder(fileHandle, yaml.DisallowUnknownField())
 	if err := decoder.Decode(pipeline); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not parse pipeline config:\n%s", yaml.FormatError(err, true, true))
 	}
+
+	pipeline.Parameters["__config_dir"] = filepath.Dir(file)
+	pipeline.Parameters["__current_dir"] = currentDir
 
 	for _, opt := range opts {
 		opt(pipeline)

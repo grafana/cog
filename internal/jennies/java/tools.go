@@ -54,19 +54,6 @@ func formatType(t ast.ScalarKind, val any) string {
 		return val.(float64)
 	}
 
-	// Integers could be floats in JSON
-	parseIntVal := func(val any) any {
-		if v, ok := val.(float64); ok {
-			return int64(v)
-		}
-
-		if v, ok := val.(int); ok {
-			return v
-		}
-
-		return val.(int64)
-	}
-
 	if list, ok := val.([]any); ok {
 		items := make([]string, 0, len(list))
 
@@ -79,9 +66,9 @@ func formatType(t ast.ScalarKind, val any) string {
 
 	switch t {
 	case ast.KindInt64, ast.KindUint64:
-		return fmt.Sprintf("%dL", parseIntVal(val))
+		return fmt.Sprintf("%dL", tools.AnyToInt64(val))
 	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16, ast.KindInt32, ast.KindUint32:
-		return fmt.Sprintf("%d", parseIntVal(val))
+		return fmt.Sprintf("%d", tools.AnyToInt64(val))
 	case ast.KindFloat32:
 		return fmt.Sprintf("%.1ff", parseFloatVal(val))
 	case ast.KindFloat64:

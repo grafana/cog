@@ -2,13 +2,12 @@ package yaml
 
 import (
 	"fmt"
-	"io"
 	"os"
 
+	"github.com/goccy/go-yaml"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
 	"github.com/grafana/cog/internal/veneers/rewrite"
-	"gopkg.in/yaml.v3"
 )
 
 type Veneers struct {
@@ -29,15 +28,9 @@ func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Con
 	languageRules := make([]rewrite.LanguageRules, 0, len(filenames))
 
 	for _, filename := range filenames {
-		reader, err := os.Open(filename)
+		rules, err := loader.load(filename)
 		if err != nil {
 			return nil, err
-		}
-		defer reader.Close()
-
-		rules, err := loader.load(reader)
-		if err != nil {
-			return nil, fmt.Errorf("could not load '%s': %w", filename, err)
 		}
 
 		languageRules = append(languageRules, rules)
@@ -46,41 +39,60 @@ func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Con
 	return rewrite.NewRewrite(languageRules, config), nil
 }
 
-func (loader *VeneersLoader) load(reader io.Reader) (rewrite.LanguageRules, error) {
+func (loader *VeneersLoader) load(file string) (rewrite.LanguageRules, error) {
 	var builderRules []builder.RewriteRule
 	var optionRules []option.RewriteRule
 
-	veneers := &Veneers{}
-
-	decoder := yaml.NewDecoder(reader)
-	decoder.KnownFields(true)
-
-	if err := decoder.Decode(&veneers); err != nil {
+	contents, err := os.ReadFile(file)
+	if err != nil {
 		return rewrite.LanguageRules{}, err
 	}
 
+	veneers := &Veneers{}
+	if err := yaml.UnmarshalWithOptions(contents, veneers, yaml.DisallowUnknownField()); err != nil {
+		return rewrite.LanguageRules{}, fmt.Errorf("can not load veneers: %s\n%s", file, yaml.FormatError(err, true, true))
+	}
+
 	if veneers.Package == "" {
-		return rewrite.LanguageRules{}, fmt.Errorf("missing 'package' statement in veneers file '%s'", reader)
+		return rewrite.LanguageRules{}, fmt.Errorf("missing 'package' statement in veneers file '%s'\n", file)
 	}
 
 	builderRules = make([]builder.RewriteRule, 0, len(veneers.Builders))
 	optionRules = make([]option.RewriteRule, 0, len(veneers.Options))
 
 	// convert builder rules
-	for _, rule := range veneers.Builders {
+	for i, rule := range veneers.Builders {
 		builderRule, err := rule.AsRewriteRule(veneers.Package)
 		if err != nil {
-			return rewrite.LanguageRules{}, err
+			path, innerErr := yaml.PathString(fmt.Sprintf("$.builders[%d]", i))
+			if innerErr != nil {
+				return rewrite.LanguageRules{}, err
+			}
+			source, innerErr := path.AnnotateSource(contents, true)
+			if innerErr != nil {
+				return rewrite.LanguageRules{}, err
+			}
+
+			return rewrite.LanguageRules{}, fmt.Errorf("%w in %s\n%s", err, file, string(source))
 		}
 
 		builderRules = append(builderRules, builderRule)
 	}
 
 	// convert option rules
-	for _, rule := range veneers.Options {
+	for i, rule := range veneers.Options {
 		optionRule, err := rule.AsRewriteRule(veneers.Package)
 		if err != nil {
-			return rewrite.LanguageRules{}, err
+			path, innerErr := yaml.PathString(fmt.Sprintf("$.options[%d]", i))
+			if innerErr != nil {
+				return rewrite.LanguageRules{}, err
+			}
+			source, innerErr := path.AnnotateSource(contents, true)
+			if innerErr != nil {
+				return rewrite.LanguageRules{}, err
+			}
+
+			return rewrite.LanguageRules{}, fmt.Errorf("%w in %s\n%s", err, file, string(source))
 		}
 
 		optionRules = append(optionRules, optionRule)
