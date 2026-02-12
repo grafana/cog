@@ -104,3 +104,26 @@ func runJenny[I any](jenny *codejen.JennyList[I], input I, destinationFS *codeje
 
 	return destinationFS.Merge(fs)
 }
+
+func createInterpolator(parameters map[string]string) ParametersInterpolator {
+	interpolateFun := func(in string) string {
+		interpolated := in
+
+		for key, value := range parameters {
+			interpolated = strings.ReplaceAll(interpolated, "%"+key+"%", value)
+		}
+
+		return interpolated
+	}
+
+	return func(input string) string {
+		finalOutput := input
+		out := interpolateFun(finalOutput)
+		for out != finalOutput {
+			finalOutput = out
+			out = interpolateFun(finalOutput)
+		}
+
+		return finalOutput
+	}
+}
