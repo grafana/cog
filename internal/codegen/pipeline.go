@@ -18,6 +18,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	cogyaml "github.com/grafana/cog/internal/yaml"
 )
@@ -37,11 +38,6 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 		}
 	}
 
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
 	fileHandle, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("could not open pipeline config: %w", err)
@@ -59,7 +55,8 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 	}
 
 	pipeline.Parameters["__config_dir"] = filepath.Dir(file)
-	pipeline.Parameters["__current_dir"] = currentDir
+
+	pipeline.interpolator = createInterpolator(pipeline.Parameters)
 
 	for _, opt := range opts {
 		opt(pipeline)
@@ -71,6 +68,7 @@ func PipelineFromFile(file string, opts ...PipelineOption) (*Pipeline, error) {
 type Pipeline struct {
 	Debug bool `yaml:"debug"`
 
+	UnitsFrom  []string   `yaml:"units_from"`
 	Inputs     []*Input   `yaml:"inputs"`
 	Transforms Transforms `yaml:"transformations"`
 	Output     Output     `yaml:"output"`
@@ -81,6 +79,8 @@ type Pipeline struct {
 	reporter         ProgressReporter
 	veneersRewriter  *rewrite.Rewriter
 	converterConfig  *languages.ConverterConfig
+	interpolator     ParametersInterpolator
+	unitsMerged      bool
 }
 
 func NewPipeline() (*Pipeline, error) {
@@ -89,47 +89,31 @@ func NewPipeline() (*Pipeline, error) {
 		return nil, err
 	}
 
-	return &Pipeline{
+	pipeline := &Pipeline{
 		reporter:         func(msg string) {},
 		currentDirectory: currentDir,
 		Parameters: map[string]string{
-			"__config_dir":  currentDir,
-			"__current_dir": currentDir,
+			"__config_dir": currentDir,
 		},
-	}, nil
+	}
+
+	pipeline.interpolator = createInterpolator(pipeline.Parameters)
+
+	return pipeline, nil
 }
 
 func (pipeline *Pipeline) interpolateParameters() {
+	pipeline.UnitsFrom = tools.Map(pipeline.UnitsFrom, pipeline.interpolator)
+
 	for _, input := range pipeline.Inputs {
 		// An error can only happen with the input isn't descriptive.
 		// This case should have already been handled before
 		// interpolateParameters() is called.
-		_ = input.InterpolateParameters(pipeline.interpolate)
+		_ = input.InterpolateParameters(pipeline.interpolator)
 	}
 
-	pipeline.Transforms.interpolateParameters(pipeline.interpolate)
-	pipeline.Output.interpolateParameters(pipeline.interpolate)
-}
-
-func (pipeline *Pipeline) interpolate(input string) string {
-	interpolateFun := func(in string) string {
-		interpolated := in
-
-		for key, value := range pipeline.Parameters {
-			interpolated = strings.ReplaceAll(interpolated, "%"+key+"%", value)
-		}
-
-		return interpolated
-	}
-
-	finalOutput := input
-	out := interpolateFun(finalOutput)
-	for out != finalOutput {
-		finalOutput = out
-		out = interpolateFun(finalOutput)
-	}
-
-	return finalOutput
+	pipeline.Transforms.interpolateParameters(pipeline.interpolator)
+	pipeline.Output.interpolateParameters(pipeline.interpolator)
 }
 
 func (pipeline *Pipeline) jenniesConfig() languages.Config {
@@ -234,12 +218,56 @@ func (pipeline *Pipeline) languageOutputDir(relativeToDir string, language strin
 	return strings.ReplaceAll(outputDir, "%l", language), nil
 }
 
-// LoadSchemas parses the schemas described by the pipeline and  applies common
-// // transformations.
+// mergeUnit merges the given unit into the pipeline.
+func (pipeline *Pipeline) mergeUnit(unit *Unit) {
+	for _, input := range unit.Inputs {
+		pipeline.Inputs = append(pipeline.Inputs, input)
+	}
+
+	for _, builderTransform := range unit.BuilderTransforms {
+		pipeline.Transforms.VeneersPaths = append(pipeline.Transforms.VeneersPaths, builderTransform)
+	}
+}
+
+// loadUnits loads and merges the codegen units into the current pipeline.
+func (pipeline *Pipeline) loadUnits() error {
+	// Just making sure that this function is idempotent.
+	if pipeline.unitsMerged {
+		return nil
+	}
+
+	for _, unit := range pipeline.UnitsFrom {
+		matches, err := filepath.Glob(unit)
+		if err != nil {
+			return err
+		}
+
+		for _, match := range matches {
+			unit, err := unitFromFile(match, pipeline.Parameters)
+			if err != nil {
+				return err
+			}
+
+			pipeline.mergeUnit(unit)
+		}
+	}
+
+	pipeline.unitsMerged = true
+
+	return nil
+}
+
+// LoadSchemas parses the schemas described by the pipeline and applies common
+// transformations.
 // Note: input-specific transformations are applied.
 func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 	var allSchemas ast.Schemas
 	var err error
+
+	// Merge additional units into the main pipeline
+	if err := pipeline.loadUnits(); err != nil {
+		return nil, err
+	}
 
 	// Parse inputs
 	for _, input := range pipeline.Inputs {
