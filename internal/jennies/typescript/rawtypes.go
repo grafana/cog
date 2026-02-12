@@ -117,6 +117,17 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper packageMapper) 
 		buffer.WriteString("\n")
 	}
 
+	customAllBlock := template.CustomObjectMethodAllBlock()
+	if jenny.tmpl.Exists(customAllBlock) {
+		err := jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
+			"Object": def,
+		})
+		if err != nil {
+			return nil, err
+		}
+		buffer.WriteString("\n")
+	}
+
 	return []byte(buffer.String()), nil
 }
 

@@ -48,6 +48,10 @@ func Parse(payload string) Option {
 
 func ParseFS(vfs fs.FS, rootDir string) Option {
 	return func(template *Template) error {
+		if vfs == nil {
+			return nil
+		}
+
 		err := fs.WalkDir(vfs, rootDir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err

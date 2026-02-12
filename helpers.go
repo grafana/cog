@@ -3,6 +3,7 @@ package cog
 import (
 	"context"
 	"fmt"
+	"io/fs"
 
 	"cuelang.org/go/cue"
 	"github.com/grafana/codejen"
@@ -187,8 +188,12 @@ type GoConfig struct {
 	// AnyAsInterface instructs cog to emit `interface{}` instead of `any`.
 	AnyAsInterface bool
 
-	// CustomTemplates accepts a list of directories where are the custom templates
+	// CustomTemplatesDirectories accepts a list of directories where are the custom templates
 	CustomTemplatesDirectories []string
+	// CustomTemplatesFS accepts an embedded filesystem containing custom templates
+	CustomTemplatesFS fs.FS
+	// CustomTemplatesFuncs holds additional functions to be injected into the templates
+	CustomTemplatesFuncs map[string]any
 }
 
 // Golang sets the output to Golang types.
@@ -198,6 +203,8 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 			SkipRuntime:                   true,
 			GenerateJSONMarshaller:        true,
 			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
+			OverridesTemplatesFS:          config.CustomTemplatesFS,
+			OverridesTemplateFuncs:        config.CustomTemplatesFuncs,
 
 			GenerateEqual:  config.GenerateEqual,
 			AnyAsInterface: config.AnyAsInterface,

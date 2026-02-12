@@ -375,6 +375,17 @@ func (jenny RawTypes) extraFunctionsBlock(schema *ast.Schema, object ast.Object)
 
 		buffer.WriteString("\n")
 	}
+	customAllBlock := template.CustomObjectMethodAllBlock()
+	if jenny.tmpl.Exists(customAllBlock) {
+		buffer.WriteString("\n\n")
+		if err := jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
+			"Object": object,
+		}); err != nil {
+			return "", err
+		}
+
+		buffer.WriteString("\n")
+	}
 
 	customVariantTmpl := template.CustomObjectVariantBlock(object)
 	if object.Type.ImplementsVariant() && jenny.tmpl.Exists(customVariantTmpl) {
