@@ -1,7 +1,7 @@
 package yaml
 
 import (
-	"strings"
+	"os"
 	"testing"
 
 	"github.com/grafana/cog/internal/veneers/rewrite"
@@ -60,7 +60,7 @@ options:
 		t.Run(tc.desc, func(t *testing.T) {
 			req := require.New(t)
 
-			rules, err := NewVeneersLoader().load(strings.NewReader(tc.input))
+			rules, err := NewVeneersLoader().load(tmpFile(t, []byte(tc.input)))
 			req.NoError(err)
 
 			tc.check(req, rules)
@@ -74,7 +74,21 @@ func TestLoader_Load_withNoPackage(t *testing.T) {
 builders: ~
 options: ~`
 
-	_, err := NewVeneersLoader().load(strings.NewReader(input))
+	_, err := NewVeneersLoader().load(tmpFile(t, []byte(input)))
 	req.Error(err)
 	req.ErrorContains(err, "missing 'package'")
+}
+
+func tmpFile(t *testing.T, contents []byte) string {
+	t.Helper()
+
+	handle, err := os.CreateTemp(t.TempDir(), "cog-tests-veneers")
+	require.NoError(t, err)
+
+	_, err = handle.Write(contents)
+	require.NoError(t, err)
+
+	require.NoError(t, handle.Close())
+
+	return handle.Name()
 }
