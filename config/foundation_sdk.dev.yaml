@@ -5,20 +5,30 @@ debug: true
 parameters:
   output_dir: './generated/%l'
   kind_registry_path: '../kind-registry'
-  kind_registry_version: 'next'
-  grafana_version: 'main'
+  kind_registry_version: 'v11.6.x'
+
   go_package_root: 'github.com/grafana/cog/generated/go'
   php_namespace_root: 'Grafana\Foundation'
   java_package_path: 'com.grafana.foundation'
+
+  release_tag: 'v0.0.0'
 
 inputs:
   - kind_registry:
       path: '%kind_registry_path%'
       version: '%kind_registry_version%'
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/compiler/kind_registry.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/kind_registry.schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/candlestick/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/cloudwatch/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/common/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/googlecloudmonitoring/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/heatmap/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/loki/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/piechart/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/timeseries/schema.transforms.yaml'
   - openapi:
-      url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/public/openapi3.json'
+      url: 'https://raw.githubusercontent.com/grafana/grafana/v11.6.0/public/openapi3.json'
       no_validate: true
       package: dashboard
       metadata:
@@ -35,10 +45,10 @@ inputs:
         variant: dataquery
         identifier: __expr__
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/compiler/expr_passes.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/expr/schema.transforms.yaml'
 
   - openapi:
-      url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/public/openapi3.json'
+      url: 'https://raw.githubusercontent.com/grafana/grafana/v11.6.0/public/openapi3.json'
       no_validate: true
       package: alerting
       metadata:
@@ -52,12 +62,11 @@ inputs:
         - NotificationTemplate
         - TimeRange
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/compiler/alerting.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/alerting/schema.transforms.yaml'
 
   # The schema for teams is gone from the kind-registry since v11.2.x
-  - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v11.2.x"))'
-    openapi:
-      url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/public/openapi3.json'
+  - openapi:
+      url: 'https://raw.githubusercontent.com/grafana/grafana/v11.6.0/public/openapi3.json'
       no_validate: true
       package: team
       metadata:
@@ -66,24 +75,22 @@ inputs:
       allowed_objects:
         - CreateTeamCommand
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/compiler/team.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/team/schema.transforms.yaml'
 
   # The schema for testdata queries is gone from the kind-registry since v11.0.x
-  - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v11.0.x"))'
-    jsonschema:
-      url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/pkg/tsdb/grafana-testdata-datasource/kinds/query.panel.schema.json'
+  - jsonschema:
+      url: 'https://raw.githubusercontent.com/grafana/grafana/v11.6.0/pkg/tsdb/grafana-testdata-datasource/kinds/query.panel.schema.json'
       package: testdata
       metadata:
         kind: composable
         variant: dataquery
         identifier: testdata
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/compiler/testdata_passes.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/testdata/schema.transforms.yaml'
 
   # The schema for prometheus queries is gone from the kind-registry since v11.0.x
-  - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v11.0.x"))'
-    kindsys_composable:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/composable/prometheus'
+  - kindsys_composable:
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/prometheus'
       metadata:
         kind: composable
         variant: dataquery
@@ -91,11 +98,11 @@ inputs:
       cue_imports:
         - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/compiler/prometheus.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/prometheus/schema.transforms.yaml'
 
   # The schema for bigquery queries
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/composable/bigquery'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/bigquery'
       metadata:
         kind: composable
         variant: dataquery
@@ -105,7 +112,7 @@ inputs:
 
   # The schema for athena queries
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/composable/athena'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/athena'
       metadata:
         kind: composable
         variant: dataquery
@@ -113,21 +120,11 @@ inputs:
       cue_imports:
         - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/compiler/athena.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/athena/schema.transforms.yaml'
 
   # The schema for "datasource" queries
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/composable/datasource'
-      metadata:
-        kind: composable
-        variant: dataquery
-        identifier: datasource
-      cue_imports:
-        - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
-
-  # The schema for "datasource" queries
-  - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/composable/datasource'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/datasource'
       metadata:
         kind: composable
         variant: dataquery
@@ -136,40 +133,48 @@ inputs:
         - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
 
   # Dashboard v2 appears with v12.0.x
-  - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v12.0.x"))'
-    cue:
-      url: 'https://raw.githubusercontent.com/grafana/grafana/%grafana_version%/apps/dashboard/kinds/v2beta1/dashboard_spec.cue'
+  - cue:
+      url: 'https://raw.githubusercontent.com/grafana/grafana/v12.3.2/apps/dashboard/kinds/v2beta1/dashboard_spec.cue'
       package: dashboardv2beta1
       metadata:
         kind: core
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/compiler/dashboardv2beta1.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/schema.transforms.yaml'
 
   # The schema for units
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/units'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/units'
 
   # The schema for resource manifests
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/schemas/resource'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/resource'
 
 transformations:
   schemas:
-    - { path: '%__config_dir%/foundation-sdk/.cog/compiler/common_passes.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/compiler/dataqueries.yaml' }
-    - if: '"%grafana_version%" != "main" && semver("%grafana_version%").LessThan(semver("v12.0.x"))'
-      path: '%__config_dir%/foundation-sdk/.cog/compiler/datasourceref.dashboardv1.yaml'
-    - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v12.0.x"))'
-      path: '%__config_dir%/foundation-sdk/.cog/compiler/datasourceref.dashboardv2.yaml'
-    - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v12.0.x"))'
-      path: '%__config_dir%/foundation-sdk/.cog/compiler/dataqueries_refid.yaml' # To avoid it to conflict with the refid in the dataquery schema.
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/common.schema.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dataqueries.schema.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/panels.schema.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboard/schema.transforms.yaml' }
+    # To avoid it to conflict with the refid in the dataquery schema.
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/dataqueries_refid.schema.transforms.yaml' }
 
   builders:
-    - { path: '%__config_dir%/foundation-sdk/.cog/veneers' }
-    - if: '"%grafana_version%" != "main" && semver("%grafana_version%").LessThan(semver("v12.0.x"))'
-      path: '%__config_dir%/foundation-sdk/.cog/veneers/dashboardv1'
-    - if: '"%grafana_version%" == "main" || semver("%grafana_version%").MoreThanEqual(semver("v12.0.x"))'
-      path: '%__config_dir%/foundation-sdk/.cog/veneers/dashboardv2'
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/old_datasource.builder.transforms.yaml' }
+
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/accesspolicy/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/prometheus/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboard/builder-transforms' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/builder-transforms' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/alerting/builder-transforms' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/common/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/datasource/builder-transforms' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/cloudwatch/go.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/elasticsearch/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/expr/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/folder/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/heatmap/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/team/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/tempo/go.builder.transforms.yaml' }
 
   converters: '%__config_dir%/foundation-sdk/.cog/converters/config.yaml'
 
@@ -182,34 +187,31 @@ output:
   api_reference: true
 
   templates_data:
-    GrafanaVersion: '%kind_registry_version%'
-    ReleaseBranch: 'release_branch_name'
-    CogVersion: 'snapshot'
-    BuildTimestamp: '1733964347'
+    ReleaseTag: '%release_tag%'
 
   languages:
     - go:
+        generate_json_marshaller: true
+        generate_strict_unmarshaller: true
+        generate_equal: true
+        generate_validate: true
         package_root: '%go_package_root%'
         extra_files_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/go/extra'
         overrides_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/go/overrides'
-        generate_json_marshaller: true
-        generate_strict_unmarshaller: true
-        generate_equal: true
-        generate_validate: true
     - jsonschema: {}
     - openapi: {}
     - php:
-        namespace_root: '%php_namespace_root%'
         generate_json_marshaller: true
+        namespace_root: '%php_namespace_root%'
         extra_files_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/php/extra'
         overrides_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/php/overrides'
     - python:
-        path_prefix: grafana_foundation_sdk
         generate_json_marshaller: true
+        path_prefix: grafana_foundation_sdk
         extra_files_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/python/extra'
         overrides_templates:
@@ -220,8 +222,8 @@ output:
         overrides_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/typescript/overrides'
     - java:
-        package_path: '%java_package_path%'
         generate_json_marshaller: true
+        package_path: '%java_package_path%'
         extra_files_templates:
           - '%__config_dir%/foundation-sdk/.cog/templates/java/extra'
         overrides_templates:
