@@ -43,7 +43,7 @@ public class Main {
                                                                                 "grafanacloud-potatopi-prom"),
                                                                 StringOrArrayOfString
                                                                 
-                                                                                .createString("grafanacloud-prom"), Map.of())))
+                                                                                .createString("grafanacloud-prom"))))
                                 .queryVariable(new QueryVariableBuilder("instance")
                                                 .label("Instance")
                                                 .hide(VariableHide.DONT_HIDE)
@@ -54,7 +54,7 @@ public class Main {
                                                                 StringOrArrayOfString.createString(
                                                                                 "potato"),
                                                                 StringOrArrayOfString
-                                                                                .createString("potato"), Map.of()))
+                                                                                .createString("potato")))
                                                 .sort(VariableSort.DISABLED))
                                 // CPU
                                 .panel("cpu_usage", CPU.cpuUsageTimeseries())
