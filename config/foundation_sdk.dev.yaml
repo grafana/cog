@@ -18,7 +18,15 @@ inputs:
       path: '%kind_registry_path%'
       version: '%kind_registry_version%'
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/post-12/compiler/kind_registry.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/kind_registry.schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/candlestick/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/cloudwatch/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/common/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/googlecloudmonitoring/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/heatmap/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/loki/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/piechart/schema.transforms.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/timeseries/schema.transforms.yaml'
   - openapi:
       url: 'https://raw.githubusercontent.com/grafana/grafana/v11.6.0/public/openapi3.json'
       no_validate: true
@@ -37,7 +45,7 @@ inputs:
         variant: dataquery
         identifier: __expr__
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/post-12/compiler/expr_passes.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/expr/schema.transforms.yaml'
 
   - openapi:
       url: 'https://raw.githubusercontent.com/grafana/grafana/v11.6.0/public/openapi3.json'
@@ -54,7 +62,7 @@ inputs:
         - NotificationTemplate
         - TimeRange
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/post-12/compiler/alerting.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/alerting/schema.transforms.yaml'
 
   # The schema for teams is gone from the kind-registry since v11.2.x
   - openapi:
@@ -67,7 +75,7 @@ inputs:
       allowed_objects:
         - CreateTeamCommand
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/post-12/compiler/team.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/team/schema.transforms.yaml'
 
   # The schema for testdata queries is gone from the kind-registry since v11.0.x
   - jsonschema:
@@ -78,11 +86,11 @@ inputs:
         variant: dataquery
         identifier: testdata
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/post-12/compiler/testdata_passes.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/testdata/schema.transforms.yaml'
 
   # The schema for prometheus queries is gone from the kind-registry since v11.0.x
   - kindsys_composable:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/post-12/schemas/composable/prometheus'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/prometheus'
       metadata:
         kind: composable
         variant: dataquery
@@ -90,11 +98,11 @@ inputs:
       cue_imports:
         - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/post-12/compiler/prometheus.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/prometheus/schema.transforms.yaml'
 
   # The schema for bigquery queries
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/post-12/schemas/composable/bigquery'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/bigquery'
       metadata:
         kind: composable
         variant: dataquery
@@ -104,7 +112,7 @@ inputs:
 
   # The schema for athena queries
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/post-12/schemas/composable/athena'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/athena'
       metadata:
         kind: composable
         variant: dataquery
@@ -112,21 +120,11 @@ inputs:
       cue_imports:
         - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/post-12/compiler/athena.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/athena/schema.transforms.yaml'
 
   # The schema for "datasource" queries
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/post-12/schemas/composable/datasource'
-      metadata:
-        kind: composable
-        variant: dataquery
-        identifier: datasource
-      cue_imports:
-        - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
-
-  # The schema for "datasource" queries
-  - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/post-12/schemas/composable/datasource'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/datasource'
       metadata:
         kind: composable
         variant: dataquery
@@ -141,28 +139,44 @@ inputs:
       metadata:
         kind: core
       transformations:
-        - '%__config_dir%/foundation-sdk/.cog/post-12/compiler/dashboardv2beta1.yaml'
+        - '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/schema.transforms.yaml'
 
   # The schema for units
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/post-12/schemas/units'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/units'
 
   # The schema for resource manifests
   - cue:
-      entrypoint: '%__config_dir%/foundation-sdk/.cog/post-12/schemas/resource'
+      entrypoint: '%__config_dir%/foundation-sdk/.cog/resources/resource'
 
 transformations:
   schemas:
-    - { path: '%__config_dir%/foundation-sdk/.cog/post-12/compiler/common_passes.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/post-12/compiler/dataqueries.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/post-12/compiler/datasourceref.yaml' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/post-12/compiler/dataqueries_refid.yaml' } # To avoid it to conflict with the refid in the dataquery schema.
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/common.schema.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dataqueries.schema.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/panels.schema.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboard/schema.transforms.yaml' }
+    # To avoid it to conflict with the refid in the dataquery schema.
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/dataqueries_refid.schema.transforms.yaml' }
 
   builders:
-    - { path: '%__config_dir%/foundation-sdk/.cog/post-12/veneers' }
-    - { path: '%__config_dir%/foundation-sdk/.cog/post-12/veneers/dashboardv2' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/old_datasource.builder.transforms.yaml' }
 
-  converters: '%__config_dir%/foundation-sdk/.cog/post-12/converters/config.yaml'
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/accesspolicy/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/prometheus/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboard/builder-transforms' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/dashboardv2beta1/builder-transforms' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/alerting/builder-transforms' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/common/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/datasource/builder-transforms' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/cloudwatch/go.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/elasticsearch/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/expr/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/folder/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/heatmap/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/team/common.builder.transforms.yaml' }
+    - { path: '%__config_dir%/foundation-sdk/.cog/resources/tempo/go.builder.transforms.yaml' }
+
+  converters: '%__config_dir%/foundation-sdk/.cog/converters/config.yaml'
 
 output:
   directory: '%output_dir%'
@@ -183,34 +197,34 @@ output:
         generate_validate: true
         package_root: '%go_package_root%'
         extra_files_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/go/extra'
+          - '%__config_dir%/foundation-sdk/.cog/templates/go/extra'
         overrides_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/go/overrides'
+          - '%__config_dir%/foundation-sdk/.cog/templates/go/overrides'
     - jsonschema: {}
     - openapi: {}
     - php:
         generate_json_marshaller: true
         namespace_root: '%php_namespace_root%'
         extra_files_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/php/extra'
+          - '%__config_dir%/foundation-sdk/.cog/templates/php/extra'
         overrides_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/php/overrides'
+          - '%__config_dir%/foundation-sdk/.cog/templates/php/overrides'
     - python:
         generate_json_marshaller: true
         path_prefix: grafana_foundation_sdk
         extra_files_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/python/extra'
+          - '%__config_dir%/foundation-sdk/.cog/templates/python/extra'
         overrides_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/python/overrides'
+          - '%__config_dir%/foundation-sdk/.cog/templates/python/overrides'
     - typescript:
         extra_files_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/typescript/extra'
+          - '%__config_dir%/foundation-sdk/.cog/templates/typescript/extra'
         overrides_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/typescript/overrides'
+          - '%__config_dir%/foundation-sdk/.cog/templates/typescript/overrides'
     - java:
         generate_json_marshaller: true
         package_path: '%java_package_path%'
         extra_files_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/java/extra'
+          - '%__config_dir%/foundation-sdk/.cog/templates/java/extra'
         overrides_templates:
-          - '%__config_dir%/foundation-sdk/.cog/post-12/templates/java/overrides'
+          - '%__config_dir%/foundation-sdk/.cog/templates/java/overrides'
