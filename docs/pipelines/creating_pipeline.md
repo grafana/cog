@@ -113,8 +113,6 @@ cog generate --config cog.yaml
 The following parameters are defined by `cog` and can be used within pipelines:
 
 * `%__config_dir%`: refers to the directory containing the codegen pipeline.
-* `%__current_dir%`: refers to current working directory (the directory from
-  which the `cog` binary was invoked).
 
 ## Inputs
 
