@@ -24,6 +24,7 @@ type BuilderRule struct {
 	PromoteOptsToConstructor *PromoteOptsToConstructor `yaml:"promote_options_to_constructor" rule_name:"PromoteOptionsToConstructor"`
 	AddOption                *AddOption                `yaml:"add_option"`
 	AddFactory               *AddFactory               `yaml:"add_factory"`
+	Debug                    *DebugBuilder             `yaml:"debug" rule_name:"Debug"`
 }
 
 func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -65,6 +66,10 @@ func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 
 	if rule.AddFactory != nil {
 		return rule.AddFactory.AsRewriteRule(pkg)
+	}
+
+	if rule.Debug != nil {
+		return rule.Debug.AsRewriteRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -254,6 +259,19 @@ func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 	}
 
 	return builder.AddFactory(selector, rule.Factory), nil
+}
+
+type DebugBuilder struct {
+	BuilderSelector `yaml:",inline"`
+}
+
+func (rule DebugBuilder) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.Debug(selector), nil
 }
 
 /******************************************************************************
