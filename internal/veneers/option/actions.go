@@ -1,6 +1,7 @@
 package option
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -698,6 +699,22 @@ func AddCommentsAction(comments []string) RewriteAction {
 	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		option.Comments = append(option.Comments, comments...)
 		option.AddToVeneerTrail(fmt.Sprintf("AddComments[%s]", strings.Join(comments, " ")))
+
+		return []ast.Option{option}
+	}
+}
+
+// DebugAction prints debugging information about an option.
+func DebugAction() RewriteAction {
+	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+		marshaled, err := json.MarshalIndent(option, "", "  ")
+		if err != nil {
+			// TODO: we don't have a way of reporting the error :(
+			return []ast.Option{option}
+		}
+
+		fmt.Printf("[debug] option %s.%s.%s:\n", builder.Package, builder.Name, option.Name)
+		fmt.Println(string(marshaled))
 
 		return []ast.Option{option}
 	}

@@ -25,6 +25,7 @@ type OptionRule struct {
 	Duplicate               *DuplicateOption         `yaml:"duplicate" rule_name:"DuplicateAction"`
 	AddAssignment           *AddAssignment           `yaml:"add_assignment" rule_name:"AddAssignmentAction"`
 	AddComments             *AddComments             `yaml:"add_comments" rule_name:"AddCommentsAction"`
+	Debug                   *DebugOption             `yaml:"debug" rule_name:"DebugAction"`
 }
 
 func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
@@ -74,6 +75,10 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 
 	if rule.AddComments != nil {
 		return rule.AddComments.AsRewriteRule(pkg)
+	}
+
+	if rule.Debug != nil {
+		return rule.Debug.AsRewriteRule(pkg)
 	}
 
 	return option.RewriteRule{}, fmt.Errorf("empty rule")
@@ -255,6 +260,19 @@ func (rule AddComments) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 	}
 
 	return option.AddComments(selector, rule.Comments), nil
+}
+
+type DebugOption struct {
+	OptionSelector `yaml:",inline"`
+}
+
+func (rule DebugOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return option.RewriteRule{}, err
+	}
+
+	return option.Debug(selector), nil
 }
 
 /******************************************************************************

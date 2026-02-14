@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -532,6 +533,28 @@ func AddFactory(selector Selector, factory ast.BuilderFactory) RewriteRule {
 			}
 
 			builders[i].Factories = append(builders[i].Factories, factory)
+		}
+
+		return builders, nil
+	}
+}
+
+// Debug prints debugging information about a builder.
+func Debug(selector Selector) RewriteRule {
+	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
+		for _, builder := range builders {
+			if !selector(schemas, builder) {
+				continue
+			}
+
+			marshaled, err := json.MarshalIndent(builder, "", "  ")
+			if err != nil {
+				// TODO: we don't have a way of reporting the error :(
+				continue
+			}
+
+			fmt.Printf("[debug] builder %s.%s:\n", builder.Package, builder.Name)
+			fmt.Println(string(marshaled))
 		}
 
 		return builders, nil

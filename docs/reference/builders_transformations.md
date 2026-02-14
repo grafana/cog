@@ -58,6 +58,15 @@ compose:
   rename_options: map[string]string
 ```
 
+## `debug`
+
+Debug prints debugging information about a builder.
+### Usage
+
+```yaml
+debug: {}
+```
+
 ## `duplicate`
 
 Duplicate duplicates a builder.
