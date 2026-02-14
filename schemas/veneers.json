@@ -574,6 +574,9 @@
         },
         "add_factory": {
           "$ref": "#/$defs/YamlAddFactory"
+        },
+        "debug": {
+          "$ref": "#/$defs/YamlDebugBuilder"
         }
       },
       "additionalProperties": false,
@@ -641,6 +644,42 @@
             "type": "string"
           },
           "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDebugBuilder": {
+      "properties": {
+        "by_object": {
+          "type": "string"
+        },
+        "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
+          "type": "string"
+        },
+        "generated_from_disjunction": {
+          "type": "boolean",
+          "description": "noop?"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDebugOption": {
+      "properties": {
+        "by_name": {
+          "type": "string",
+          "description": "objectName.optionName"
+        },
+        "by_builder": {
+          "type": "string",
+          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
+        },
+        "by_names": {
+          "$ref": "#/$defs/YamlByNamesSelector"
         }
       },
       "additionalProperties": false,
@@ -866,6 +905,9 @@
         },
         "add_comments": {
           "$ref": "#/$defs/YamlAddComments"
+        },
+        "debug": {
+          "$ref": "#/$defs/YamlDebugOption"
         }
       },
       "additionalProperties": false,

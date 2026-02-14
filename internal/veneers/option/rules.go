@@ -99,3 +99,10 @@ func AddComments(selector Selector, comments []string) RewriteRule {
 		Action:   AddCommentsAction(comments),
 	}
 }
+
+func Debug(selector Selector) RewriteRule {
+	return RewriteRule{
+		Selector: selector,
+		Action:   DebugAction(),
+	}
+}

@@ -68,6 +68,15 @@ This action returns the option unchanged if:
 array_to_append: {}
 ```
 
+## `debug`
+
+DebugAction prints debugging information about an option.
+### Usage
+
+```yaml
+debug: {}
+```
+
 ## `disjunction_as_options`
 
 DisjunctionAsOptionsAction uses the branches of the first argument's disjunction (assuming it is one) and turns them
