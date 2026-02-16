@@ -144,7 +144,7 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 
 func (builders Builders) LocateByName(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
-		if builder.For.SelfRef.ReferredPkg == pkg && builder.Name == name {
+		if builder.Package == pkg && builder.Name == name {
 			return builder, true
 		}
 	}
