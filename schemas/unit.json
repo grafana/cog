@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/grafana/cog/main/schemas/unit.json",
+  "$ref": "#/$defs/CodegenUnit",
+  "$defs": {
+    "AstSchemaMeta": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CodegenCueInput": {
+      "properties": {
+        "allowed_objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowedObjects is a list of object names that will be allowed when\nparsing the input schema.\nNote: if AllowedObjects is empty, no filter is applied."
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "metadata": {
+          "$ref": "#/$defs/AstSchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
+        },
+        "entrypoint": {
+          "type": "string",
+          "description": "Entrypoint refers to a directory containing CUE files."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to a cue file"
+        },
+        "subpath": {
+          "type": "string",
+          "description": "Subpath is used when the schema is not in the root of the schema"
+        },
+        "forced_envelope": {
+          "type": "string",
+          "description": "ForcedEnvelope decorates the parsed cue Value with an envelope whose\nname is given. This is useful for dataqueries for example, where the\nschema doesn't define any suitable top-level object."
+        },
+        "package": {
+          "type": "string",
+          "description": "Package name to use for the input schema. If empty, it will be guessed\nfrom the entrypoint."
+        },
+        "cue_imports": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "CueImports allows importing additional libraries.\nFormat: [path]:[import]. Example: '../grafana/common-library:github.com/grafana/grafana/packages/grafana-schema/src/common"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CodegenInput": {
+      "properties": {
+        "jsonschema": {
+          "$ref": "#/$defs/CodegenJSONSchemaInput"
+        },
+        "openapi": {
+          "$ref": "#/$defs/CodegenOpenAPIInput"
+        },
+        "kind_registry": {
+          "$ref": "#/$defs/CodegenKindRegistryInput"
+        },
+        "kindsys_core": {
+          "$ref": "#/$defs/CodegenCueInput"
+        },
+        "kindsys_composable": {
+          "$ref": "#/$defs/CodegenCueInput"
+        },
+        "cue": {
+          "$ref": "#/$defs/CodegenCueInput"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CodegenJSONSchemaInput": {
+      "properties": {
+        "allowed_objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowedObjects is a list of object names that will be allowed when\nparsing the input schema.\nNote: if AllowedObjects is empty, no filter is applied."
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "metadata": {
+          "$ref": "#/$defs/AstSchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to a JSONSchema file."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to a JSONSchema file."
+        },
+        "package": {
+          "type": "string",
+          "description": "Package name to use for the input schema. If empty, it will be guessed\nfrom the input file name."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CodegenKindRegistryInput": {
+      "properties": {
+        "allowed_objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowedObjects is a list of object names that will be allowed when\nparsing the input schema.\nNote: if AllowedObjects is empty, no filter is applied."
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "metadata": {
+          "$ref": "#/$defs/AstSchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
+        },
+        "path": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CodegenOpenAPIInput": {
+      "properties": {
+        "allowed_objects": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowedObjects is a list of object names that will be allowed when\nparsing the input schema.\nNote: if AllowedObjects is empty, no filter is applied."
+        },
+        "transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Transforms holds a list of paths to files containing compiler passes\nto apply to the input."
+        },
+        "metadata": {
+          "$ref": "#/$defs/AstSchemaMeta",
+          "description": "Metadata to add to the schema, this can be used to set Kind and Variant"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to an OpenAPI file."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to an OpenAPI file."
+        },
+        "package": {
+          "type": "string",
+          "description": "Package name to use for the input schema. If empty, it will be guessed\nfrom the input file name."
+        },
+        "no_validate": {
+          "type": "boolean",
+          "description": "NoValidate disables validation of the OpenAPI spec."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CodegenUnit": {
+      "properties": {
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/CodegenInput"
+          },
+          "type": "array"
+        },
+        "builder_transformations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "BuilderTransforms holds a list of paths to builder transformation files.\nThe paths can refer to files or directories."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Unit represents part of a codegen pipeline."
+    }
+  }
+}
