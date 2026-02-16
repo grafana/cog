@@ -13,10 +13,10 @@ type Option struct {
 	Assignments []Assignment   `yaml:"assignments"`
 }
 
-func (opt Option) AsIR(schemas ast.Schemas, builders ast.Builders, root ast.Builder) (ast.Option, error) {
+func (opt Option) AsIR(schemas ast.Schemas, root ast.Builder) (ast.Option, error) {
 	assignments := make([]ast.Assignment, 0, len(opt.Assignments))
 	for _, assignment := range opt.Assignments {
-		irAssignment, err := assignment.AsIR(schemas, builders, root)
+		irAssignment, err := assignment.AsIR(schemas, root)
 		if err != nil {
 			return ast.Option{}, err
 		}
@@ -38,8 +38,8 @@ type Assignment struct {
 	Value  AssignmentValue      `yaml:"value"`
 }
 
-func (assignment Assignment) AsIR(schemas ast.Schemas, builders ast.Builders, root ast.Builder) (ast.Assignment, error) {
-	path, err := root.MakePath(builders, assignment.Path)
+func (assignment Assignment) AsIR(schemas ast.Schemas, root ast.Builder) (ast.Assignment, error) {
+	path, err := root.MakePath(schemas, assignment.Path)
 	if err != nil {
 		return ast.Assignment{}, err
 	}

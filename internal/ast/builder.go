@@ -65,18 +65,18 @@ func (builder *Builder) AddToVeneerTrail(veneerName string) {
 	builder.VeneerTrail = append(builder.VeneerTrail, veneerName)
 }
 
-func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, error) {
+func (builder *Builder) MakePath(schemas Schemas, pathAsString string) (Path, error) {
 	if pathAsString == "" {
 		return nil, fmt.Errorf("can not make path from empty input")
 	}
 
-	resolveRef := func(ref RefType) (Builder, error) {
-		referredObjBuilder, found := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+	resolveRef := func(ref RefType) (Object, error) {
+		referredObj, found := schemas.LocateObjectByRef(ref)
 		if !found {
-			return Builder{}, fmt.Errorf("could not make path '%s': reference '%s' could not be resolved", pathAsString, ref.String())
+			return Object{}, fmt.Errorf("could not make path '%s': reference '%s' could not be resolved", pathAsString, ref.String())
 		}
 
-		return referredObjBuilder, nil
+		return referredObj, nil
 	}
 
 	currentType := builder.For.Type
@@ -94,12 +94,12 @@ func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, 
 	pathParts := strings.SplitSeq(pathAsString, ".")
 	for part := range pathParts {
 		if currentType.IsRef() {
-			referredObjBuilder, err := resolveRef(currentType.AsRef())
+			referredObj, err := resolveRef(currentType.AsRef())
 			if err != nil {
 				return nil, err
 			}
 
-			currentType = referredObjBuilder.For.Type
+			currentType = referredObj.Type
 		}
 
 		if !currentType.IsStruct() {

@@ -12,14 +12,14 @@ import (
 
 type RewriteRule func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error)
 
-func mapToSelected(selector Selector, mapFunc func(builders ast.Builders, builder ast.Builder) (ast.Builder, error)) RewriteRule {
+func mapToSelected(selector Selector, mapFunc func(schemas ast.Schemas, builders ast.Builders, builder ast.Builder) (ast.Builder, error)) RewriteRule {
 	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
 		for i, b := range builders {
 			if !selector(schemas, b) {
 				continue
 			}
 
-			newBuilder, err := mapFunc(builders, b)
+			newBuilder, err := mapFunc(schemas, builders, b)
 			if err != nil {
 				return nil, err
 			}
@@ -97,14 +97,14 @@ func Omit(selector Selector) RewriteRule {
 }
 
 func MergeInto(selector Selector, sourceBuilderName string, underPath string, excludeOptions []string, renameOptions map[string]string) RewriteRule {
-	return mapToSelected(selector, func(builders ast.Builders, destinationBuilder ast.Builder) (ast.Builder, error) {
+	return mapToSelected(selector, func(schemas ast.Schemas, builders ast.Builders, destinationBuilder ast.Builder) (ast.Builder, error) {
 		sourceBuilder, found := builders.LocateByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
 		if !found {
 			// We couldn't find the source builder: let's return the selected builder untouched.
 			return destinationBuilder, nil
 		}
 
-		newRoot, err := destinationBuilder.MakePath(builders, underPath)
+		newRoot, err := destinationBuilder.MakePath(schemas, underPath)
 		if err != nil {
 			return destinationBuilder, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
 		}
@@ -166,7 +166,7 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 			continue
 		}
 
-		newRoot, err := newBuilder.MakePath(builders, underPath)
+		newRoot, err := newBuilder.MakePath(schemas, underPath)
 		if err != nil {
 			return nil, err
 		}
@@ -192,7 +192,7 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 			return nil, fmt.Errorf("schema '%s' does not have an entrypoint", schema.Package)
 		}
 
-		newRoot, err := newBuilder.MakePath(builders, config.CompositionMap["__schema_entrypoint"])
+		newRoot, err := newBuilder.MakePath(schemas, config.CompositionMap["__schema_entrypoint"])
 		if err != nil {
 			return nil, err
 		}
@@ -449,7 +449,7 @@ func Initialize(selector Selector, statements []Initialization) RewriteRule {
 
 			veneerDebug := make([]string, 0, len(statements))
 			for _, statement := range statements {
-				path, err := builders[i].MakePath(builders, statement.PropertyPath)
+				path, err := builders[i].MakePath(schemas, statement.PropertyPath)
 				if err != nil {
 					return nil, fmt.Errorf("could not apply Initialize builder veneer: %w", err)
 				}
@@ -507,7 +507,7 @@ func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
 				continue
 			}
 
-			newOpt, err := newOption.AsIR(schemas, builders, builder)
+			newOpt, err := newOption.AsIR(schemas, builder)
 			if err != nil {
 				return nil, fmt.Errorf("could not apply AddOption builder veneer: %w", err)
 			}
