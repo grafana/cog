@@ -24,11 +24,14 @@ func TestByBuilder(t *testing.T) {
 	req := require.New(t)
 
 	dashboardBuilder := ast.Builder{
-		Name: "EmptyDashboard",
-		For:  ast.NewObject("dashboard", "Dashboard", ast.NewStruct()),
+		Package: "builderpkg",
+		Name:    "EmptyDashboard",
+		For:     ast.NewObject("dashboard", "Dashboard", ast.NewStruct()),
 	}
 
-	req.True(ByName("dashboard", "EmptyDashboard")(ast.Schemas{}, dashboardBuilder))
-	req.True(ByName("dashboard", "emptydashboard")(ast.Schemas{}, dashboardBuilder))
+	req.True(ByName("builderpkg", "EmptyDashboard")(ast.Schemas{}, dashboardBuilder))
+	req.True(ByName("builderpkg", "emptydashboard")(ast.Schemas{}, dashboardBuilder))
+	req.False(ByName("dashboard", "EmptyDashboard")(ast.Schemas{}, dashboardBuilder))
+	req.False(ByName("dashboard", "emptydashboard")(ast.Schemas{}, dashboardBuilder))
 	req.False(ByName("dashboard", "Dashboard")(ast.Schemas{}, dashboardBuilder))
 }

@@ -21,6 +21,11 @@ type Builder struct {
 	VeneerTrail []string `json:",omitempty"`
 
 	Factories []BuilderFactory `json:",omitempty"`
+
+	// After composition, assignments are often expected to start from a new
+	// root path defined at composition time.
+	// e.g.: under `spec`
+	AssignmentsPreferredRoot Path
 }
 
 func (builder *Builder) OptionByName(name string) (Option, bool) {
@@ -77,6 +82,14 @@ func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, 
 	currentType := builder.For.Type
 
 	var path Path
+
+	for _, part := range builder.AssignmentsPreferredRoot {
+		path = append(path, part)
+		currentType = part.Type
+		if part.TypeHint != nil {
+			currentType = *part.TypeHint
+		}
+	}
 
 	pathParts := strings.SplitSeq(pathAsString, ".")
 	for part := range pathParts {

@@ -247,6 +247,8 @@ func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config Co
 		default:
 			return nil, fmt.Errorf("entrypoint '%s.%s' is a %s: not implemented", schema.Package, schema.EntryPoint, resolvedEntrypointType.Kind)
 		}
+
+		newBuilder.AssignmentsPreferredRoot = newRoot
 	}
 
 	composedBuilders = append(composedBuilders, newBuilder)
