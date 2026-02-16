@@ -177,6 +177,9 @@ func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude, ex
 
 	if input.Subpath != "" {
 		value = value.LookupPath(cue.ParsePath(input.Subpath))
+		if value.Err() != nil {
+			return cue.Value{}, fmt.Errorf("could not read subpath '%s': %w", input.Subpath, value.Err())
+		}
 	}
 
 	return value, nil
