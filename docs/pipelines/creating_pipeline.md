@@ -129,8 +129,15 @@ described below.
 inputs:
   - cue:
       # Directory containing the CUE files to parse.
-      # Required.
+      # Required if `url` is empty.
       entrypoint: '%__config_dir%/schemas/cue_module'
+
+      # URL to a cue file to parse.
+      # Required if `entrypoint` is empty.
+      url: 'https://raw.githubusercontent.com/grafana/grafana/v12.3.2/apps/dashboard/kinds/v2beta1/dashboard_spec.cue'
+
+      # Path to the cue value to use as schema.
+      subpath: 'manifestv1alpha1.schema'
 
       # Decorates the parsed cue Value with an envelope whose name is given.
       # This is useful for dataqueries for example, where the schema doesn't
@@ -257,6 +264,11 @@ output:
         # Required.
         package_root: 'github.com/owner/repo/generated/go'
 
+        # GenerateJSONMarshaller controls the generation of `MarshalJSON()` and
+        # `UnmarshalJSON()` methods on types.
+        # Default: false
+        generate_json_marshaller: true
+
         # Controls the generation of `UnmarshalJSONStrict()` methods on types.
         # Default: false
         generate_strict_unmarshaller: true
@@ -278,6 +290,11 @@ output:
         # rely on the runtime to function.
         # Default: false
         skip_runtime: false
+
+        # Disables the formatting of Go files done with `goimports` after code
+        # generation.
+        # Default: false
+        skip_post_formatting: false
 
         # List of directories containing templates describing files to be added
         # to the generated output.
@@ -355,6 +372,19 @@ output:
         # Required.
         namespace_root: 'Vendor\Package'
 
+        # Controls the generation of `fromArray()` and `jsonSerialize()`
+        # methods on types.
+        # Default: false
+        generate_json_marshaller: true
+
+        # Allows to choose the name of the class that will be generated to
+        # hold "builder factories".
+        # By default, this class name is equal to the package name in which
+        # factories are defined.
+        # This option associates these package names with a class name.
+        # Default: {}
+        builder_factories_class_map: {}
+
         # List of directories containing templates describing files to be added
         # to the generated output.
         extra_files_templates:
@@ -377,6 +407,11 @@ output:
         # Prefix to add to every generated file path.
         # Default: ''
         path_prefix: ''
+
+        # Controls the generation of `to_json()` and `from_json()` methods on
+        # types.
+        # Default: false
+        generate_json_marshaller: true
 
         # Disables runtime-related code generation.
         # Note: builders can NOT be generated with this flag turned on, as they
@@ -442,7 +477,7 @@ output:
         # Associates package names to their import path.
         # Default: {}
         packages_import_map:
-            'common': '@org/common'
+          'common': '@org/common'
 
         # List of directories containing templates describing files to be added
         # to the generated output.
