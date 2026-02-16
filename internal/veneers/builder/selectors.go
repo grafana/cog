@@ -29,7 +29,7 @@ func ByObjectName(pkg string, objectName string) Selector {
 // Note: the comparison on builder name is case-insensitive.
 func ByName(pkg string, builderName string) Selector {
 	return func(_ ast.Schemas, builder ast.Builder) bool {
-		return (strings.EqualFold(builder.For.SelfRef.ReferredPkg, pkg) || pkg == "*") &&
+		return (strings.EqualFold(builder.Package, pkg) || pkg == "*") &&
 			strings.EqualFold(builder.Name, builderName)
 	}
 }
