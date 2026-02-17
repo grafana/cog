@@ -5,7 +5,7 @@
     "php@8.4.16",
     "php83Packages.composer@2.9.2",
     "php83Packages.phpstan@2.1.1",
-    "python@3.12",
+    "python@3.14",
     "golangci-lint@2.9.0",
     "nodejs-slim_18@18.20.8",
     "nodePackages.ts-node@10.9.2",
