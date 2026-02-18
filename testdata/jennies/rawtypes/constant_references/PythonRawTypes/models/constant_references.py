@@ -59,14 +59,18 @@ class Struct:
 
 class StructA:
     my_enum: str
+    other: str
 
     def __init__(self, ) -> None:
         self.my_enum = Enum.VALUE_A
+        self.other = Enum.VALUE_A
 
     def to_json(self) -> dict[str, object]:
         payload: dict[str, object] = {
             "myEnum": self.my_enum,
         }
+        if self.other is not None:
+            payload["other"] = self.other
         return payload
 
     @classmethod
