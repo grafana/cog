@@ -154,6 +154,13 @@
         },
         "version": {
           "type": "string"
+        },
+        "excluded": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Excluded lists the packages to be excluded."
         }
       },
       "additionalProperties": false,
