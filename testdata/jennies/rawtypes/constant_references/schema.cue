@@ -14,6 +14,7 @@ Struct: {
 StructA: {
 	ParentStruct
 	myEnum: Enum & "ValueA"
+	other?: Enum & "ValueA"
 }
 
 StructB: {
