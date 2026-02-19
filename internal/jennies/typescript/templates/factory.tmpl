@@ -1,12 +1,16 @@
 {{- define "factory" }}
+{{- $builderPkg := "" }}
+{{- if ne .Builder.Package .Factory.BuilderRef.ReferredPkg }}
+{{- $builderPkg = .Factory.BuilderRef.ReferredPkg|importPkg -}}
+{{- end }}
 {{- with .Factory.Comments}}
 /**
 {{- range . }}
  * {{ . }}{{ end }}
  */
 {{- end }}
-export function {{ .Factory.Name|lowerCamelCase}}({{- template "args" .Factory.Args }}): {{ .Builder.Name }}Builder {
-	const builder = new {{ .Builder.Name }}Builder();
+export function {{ .Factory.Name|lowerCamelCase}}({{- template "args" .Factory.Args }}): {{ if ne $builderPkg "" -}}{{ .Factory.BuilderRef|formatRef }}{{ else }}{{ .Builder.Name|upperCamelCase }}Builder{{ end }} {
+	const builder = new {{ if ne $builderPkg "" -}}{{ $builderPkg }}.{{ end }}{{ .Factory.BuilderRef.ReferredType|upperCamelCase }}Builder();
 
 {{- range $call := .Factory.OptionCalls }}
 	builder.{{ $call.Name|formatIdentifier }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }});
