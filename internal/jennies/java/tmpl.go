@@ -65,6 +65,9 @@ func functions() template.FuncMap {
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
+		"refToType": func(ref ast.RefType) ast.Type {
+			return ref.AsType()
+		},
 		"importStdPkg": func(_ ast.Type) string {
 			panic("importStdPkg() needs to be overridden by a jenny")
 		},

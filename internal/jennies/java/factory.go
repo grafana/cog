@@ -67,6 +67,7 @@ func (jenny *Factory) generateFactories(context languages.Context, factoriesPkg 
 
 	return jenny.tmpl.
 		Funcs(template.FuncMap{
+			"formatBuilderFieldType": typesFormatter.formatBuilderFieldType,
 			"formatRawRef": func(pkg string, referredType string) string {
 				return typesFormatter.formatFieldType(ast.NewRef(pkg, referredType))
 			},
