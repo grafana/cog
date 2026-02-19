@@ -52,7 +52,9 @@ serve-docs: dev-env-check-binaries ## Builds and serves the documentation.
 gen-sdk-dev: dev-env-check-binaries ## Generates a dev version of the Foundation SDK.
 	rm -rf generated
 	$(RUN_DEVBOX) go run cmd/cli/main.go generate \
-		--config ./config/foundation_sdk.dev.yaml
+		--config ./config/foundation-sdk/.cog/config.yaml \
+		--debug \
+		--parameters "output_dir=./generated/%l,kind_registry_path=../kind-registry,go_package_root=github.com/grafana/cog/generated/go"
 
 .PHONY: gen-tests
 gen-tests: dev-env-check-binaries ## Generates the code described by tests schemas.

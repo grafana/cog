@@ -8,6 +8,7 @@ import (
 )
 
 type options struct {
+	Debug           bool
 	ConfigPath      string
 	ExtraParameters map[string]string
 }
@@ -20,10 +21,11 @@ func Command() *cobra.Command {
 		Short: "Generates code from schemas.", // TODO: better descriptions
 		Long:  `Generates code from schemas.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return doGenerate(opts)
+			return doGenerate(cmd.Context(), opts)
 		},
 	}
 
+	cmd.Flags().BoolVar(&opts.Debug, "debug", false, "Debug mode.")
 	cmd.Flags().StringVar(&opts.ConfigPath, "config", "", "Codegen pipeline configuration file.")
 	_ = cmd.MarkFlagFilename("config")
 	_ = cmd.MarkFlagRequired("config")
@@ -33,10 +35,14 @@ func Command() *cobra.Command {
 	return cmd
 }
 
-func doGenerate(opts options) error {
-	ctx := context.Background()
+func doGenerate(ctx context.Context, opts options) error {
+	pipelineOpts := []codegen.PipelineOption{
+		codegen.Parameters(opts.ExtraParameters),
+		codegen.Reporter(codegen.StdoutReporter),
+		codegen.Debug(opts.Debug),
+	}
 
-	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, codegen.Parameters(opts.ExtraParameters), codegen.Reporter(codegen.StdoutReporter))
+	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, pipelineOpts...)
 	if err != nil {
 		return err
 	}
@@ -46,5 +52,5 @@ func doGenerate(opts options) error {
 		return err
 	}
 
-	return generatedFS.Write(context.Background(), "")
+	return generatedFS.Write(ctx, "")
 }

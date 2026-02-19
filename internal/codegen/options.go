@@ -21,3 +21,9 @@ func Reporter(reporter ProgressReporter) PipelineOption {
 		pipeline.reporter = reporter
 	}
 }
+
+func Debug(enabled bool) PipelineOption {
+	return func(pipeline *Pipeline) {
+		pipeline.Debug = enabled
+	}
+}
