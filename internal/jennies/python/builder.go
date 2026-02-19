@@ -101,6 +101,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	return jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
 		Funcs(map[string]any{
+			"importModule":            jenny.importModule,
 			"isDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
 			"formatType":              jenny.typeFormatter.formatType,
 			"formatTypeNotNullable": func(def ast.Type) string {

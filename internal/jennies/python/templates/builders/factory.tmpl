@@ -1,12 +1,16 @@
 {{- define "factory" }}
+{{- $builderPkg := "" }}
+{{- if ne .Builder.Package .Factory.BuilderRef.ReferredPkg }}
+{{- $builderPkg = (importModule (print .Factory.BuilderRef.ReferredPkg "_builder") "..builders" (.Factory.BuilderRef.ReferredPkg)) }}
+{{- end }}
 {{- with .Factory.Comments}}
 """
 {{- range . }}
 {{ . }}{{ end }}
 """
 {{- end }}
-def {{ .Factory.Name|formatFunctionName}}({{- template "factory_args" .Factory.Args }}) -> {{ .Builder.Name|formatObjectName }}:
-    builder = {{ .Builder.Name|formatObjectName }}()
+def {{ .Factory.Name|formatFunctionName}}({{- template "factory_args" .Factory.Args }}) -> {{ if ne $builderPkg "" -}}{{ .Factory.BuilderRef|refToType|formatType }}{{ else }}{{ .Factory.BuilderRef.ReferredType|formatObjectName }}{{ end }}:
+    builder = {{ if ne $builderPkg "" -}}{{ $builderPkg }}.{{- end -}}{{ .Factory.BuilderRef.ReferredType|formatObjectName }}()
 
 {{- range $call := .Factory.OptionCalls }}
     builder.{{ $call.Name|formatFunctionName }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})

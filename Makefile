@@ -30,7 +30,7 @@ lint: dev-env-check-binaries ## Lints the code base.
 
 .PHONY: tests
 tests: dev-env-check-binaries gen-tests ## Runs the tests.
-	$(RUN_DEVBOX) go test -v ./...
+	$(RUN_DEVBOX) go test ./...
 
 .PHONY: deps
 deps: dev-env-check-binaries ## Installs the dependencies.
