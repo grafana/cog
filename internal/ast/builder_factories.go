@@ -6,7 +6,7 @@ import (
 
 type BuilderFactory struct {
 	Name        string
-	BuilderRef  RefType
+	BuilderRef  RefType      `yaml:"builder_ref"`
 	Comments    []string     `json:",omitempty"`
 	Args        []Argument   `json:",omitempty" yaml:"arguments"`
 	OptionCalls []OptionCall `json:",omitempty" yaml:"options"`
