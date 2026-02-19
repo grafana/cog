@@ -7,6 +7,7 @@ import (
 )
 
 type VisitBuilderFunc func(visitor *BuilderVisitor, schemas Schemas, builder Builder) (Builder, error)
+type VisitFactoryFunc func(visitor *BuilderVisitor, schemas Schemas, builder Builder, factory BuilderFactory) (BuilderFactory, error)
 type VisitPropertyFunc func(visitor *BuilderVisitor, schemas Schemas, builder Builder, property StructField) (StructField, error)
 type VisitConstructorFunc func(visitor *BuilderVisitor, schemas Schemas, builder Builder, constructor Constructor) (Constructor, error)
 type VisitOptionFunc func(visitor *BuilderVisitor, schemas Schemas, builder Builder, option Option) (Option, error)
@@ -15,6 +16,7 @@ type VisitAssignmentFunc func(visitor *BuilderVisitor, schemas Schemas, builder 
 
 type BuilderVisitor struct {
 	OnBuilder     VisitBuilderFunc
+	OnFactory     VisitFactoryFunc
 	OnProperty    VisitPropertyFunc
 	OnConstructor VisitConstructorFunc
 	OnOption      VisitOptionFunc
@@ -45,10 +47,23 @@ func (visitor *BuilderVisitor) VisitBuilder(schemas Schemas, builder Builder) (B
 
 func (visitor *BuilderVisitor) TraverseBuilder(schemas Schemas, builder Builder) (Builder, error) {
 	var prop StructField
+	var fac BuilderFactory
 	var opt Option
 	var err error
 
 	builder.Constructor, err = visitor.VisitConstructor(schemas, builder, builder.Constructor)
+	if err != nil {
+		return builder, err
+	}
+
+	builder.Factories = tools.Map(builder.Factories, func(factory BuilderFactory) BuilderFactory {
+		if err != nil {
+			return factory
+		}
+
+		fac, err = visitor.VisitFactory(schemas, builder, factory)
+		return fac
+	})
 	if err != nil {
 		return builder, err
 	}
@@ -75,6 +90,14 @@ func (visitor *BuilderVisitor) TraverseBuilder(schemas Schemas, builder Builder)
 	})
 
 	return builder, err
+}
+
+func (visitor *BuilderVisitor) VisitFactory(schemas Schemas, builder Builder, factory BuilderFactory) (BuilderFactory, error) {
+	if visitor.OnFactory != nil {
+		return visitor.OnFactory(visitor, schemas, builder, factory)
+	}
+
+	return factory, nil
 }
 
 func (visitor *BuilderVisitor) VisitProperty(schemas Schemas, builder Builder, property StructField) (StructField, error) {
