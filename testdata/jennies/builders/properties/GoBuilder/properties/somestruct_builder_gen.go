@@ -23,7 +23,6 @@ func NewSomeStructBuilder() *SomeStructBuilder {
 }
 
 
-
 func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return SomeStruct{}, err

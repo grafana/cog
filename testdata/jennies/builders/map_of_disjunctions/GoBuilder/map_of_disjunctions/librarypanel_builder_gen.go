@@ -23,7 +23,6 @@ func NewLibraryPanelBuilder() *LibraryPanelBuilder {
 }
 
 
-
 func (builder *LibraryPanelBuilder) Build() (LibraryPanel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return LibraryPanel{}, err

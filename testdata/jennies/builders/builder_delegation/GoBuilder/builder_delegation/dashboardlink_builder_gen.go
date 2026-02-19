@@ -22,7 +22,6 @@ func NewDashboardLinkBuilder() *DashboardLinkBuilder {
 }
 
 
-
 func (builder *DashboardLinkBuilder) Build() (DashboardLink, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return DashboardLink{}, err

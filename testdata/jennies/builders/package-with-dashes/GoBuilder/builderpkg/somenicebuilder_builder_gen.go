@@ -23,7 +23,6 @@ func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
 }
 
 
-
 func (builder *SomeNiceBuilderBuilder) Build() (withdashes.SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return withdashes.SomeStruct{}, err

@@ -23,7 +23,6 @@ func NewLokiBuilderBuilder() *LokiBuilderBuilder {
 }
 
 
-
 func (builder *LokiBuilderBuilder) Build() (Dashboard, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Dashboard{}, err

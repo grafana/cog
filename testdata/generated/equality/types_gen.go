@@ -1,7 +1,4 @@
 // Code generated - EDITING IS FUTILE. DO NOT EDIT.
-//
-// Using jennies:
-//     GoRawTypes
 
 package equality
 
@@ -16,7 +13,6 @@ import (
 	cog "github.com/grafana/cog/testdata/generated/cog"
 )
 
-// Modified by compiler pass 'PrefixEnumValues'
 type Direction string
 
 const (
@@ -216,14 +212,10 @@ func (resource Container) Validate() error {
 }
 
 type Optionals struct {
-	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	StringField *string `json:"stringField,omitempty"`
-	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	EnumField *Direction `json:"enumField,omitempty"`
-	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	RefField *Variable `json:"refField,omitempty"`
-	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	ByteField []byte `json:"byteField,omitempty"`
+	StringField *string    `json:"stringField,omitempty"`
+	EnumField   *Direction `json:"enumField,omitempty"`
+	RefField    *Variable  `json:"refField,omitempty"`
+	ByteField   []byte     `json:"byteField,omitempty"`
 }
 
 // NewOptionals creates a new Optionals object.
@@ -835,7 +827,6 @@ func (resource Maps) Validate() error {
 	return errs
 }
 
-// Modified by compiler pass 'AnonymousStructsToNamed'
 type EqualityArraysAnonymousStructs struct {
 	Inner string `json:"inner"`
 }
@@ -897,7 +888,6 @@ func (resource EqualityArraysAnonymousStructs) Validate() error {
 	return nil
 }
 
-// Modified by compiler pass 'AnonymousStructsToNamed'
 type EqualityMapsAnonymousStructs struct {
 	Inner string `json:"inner"`
 }

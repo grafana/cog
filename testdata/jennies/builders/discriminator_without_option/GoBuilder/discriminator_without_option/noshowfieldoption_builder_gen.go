@@ -22,7 +22,6 @@ func NewNoShowFieldOptionBuilder() *NoShowFieldOptionBuilder {
 }
 
 
-
 func (builder *NoShowFieldOptionBuilder) Build() (NoShowFieldOption, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return NoShowFieldOption{}, err

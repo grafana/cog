@@ -23,7 +23,6 @@ func NewPanelBuilder() *PanelBuilder {
 }
 
 
-
 func (builder *PanelBuilder) Build() (Panel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Panel{}, err

@@ -23,7 +23,6 @@ func NewPersonBuilder() *PersonBuilder {
 }
 
 
-
 func (builder *PersonBuilder) Build() (Person, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Person{}, err

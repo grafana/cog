@@ -23,7 +23,6 @@ func NewLokiBuilderBuilder() *LokiBuilderBuilder {
 }
 
 
-
 func (builder *LokiBuilderBuilder) Build() (variants.Dataquery, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Loki{}, err
