@@ -530,7 +530,16 @@ func AddFactory(selector Selector, factory ast.BuilderFactory) RewriteRule {
 				continue
 			}
 
-			if len(builder.Constructor.Args) != 0 {
+			if factory.BuilderRef == nil {
+				factory.BuilderRef = &builders[i].For.SelfRef
+			}
+
+			targetBuilder, found := builders.LocateByName(factory.BuilderRef.ReferredPkg, factory.BuilderRef.ReferredType)
+			if !found {
+				return nil, fmt.Errorf("could not apply find target builder for factory: %s", factory.BuilderRef.String())
+			}
+
+			if len(targetBuilder.Constructor.Args) != 0 {
 				return nil, fmt.Errorf("could not apply AddFactory builder veneer: builder factories can not be defined on builders that accept parameters in their constructor")
 			}
 

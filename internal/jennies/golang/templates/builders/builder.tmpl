@@ -1,5 +1,6 @@
 package {{ .Builder.Package | formatPackageName }}
 {{ $options := include "options" . }}
+{{ $factories := include "factories" . }}
 {{ .Imports }}
 
 var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name|formatObjectName }}Builder)(nil)
@@ -29,9 +30,7 @@ func New{{ .Builder.Name|formatObjectName }}Builder({{- template "args" .Builder
 	return builder
 }
 
-{{ range .Builder.Factories }}
-	{{ template "factory" (dict "Builder" $.Builder "Factory" .) }}
-{{- end }}
+{{- $factories }}
 
 func (builder *{{ .Builder.Name|formatObjectName }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
 	if err := builder.internal.Validate(); err != nil {

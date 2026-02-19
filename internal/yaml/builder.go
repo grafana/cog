@@ -2,6 +2,7 @@ package yaml
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
@@ -249,7 +250,8 @@ func (rule AddOption) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 type AddFactory struct {
 	BuilderSelector `yaml:",inline"`
 
-	Factory ast.BuilderFactory `yaml:"factory"`
+	TargetBuilder *string            `yaml:"target_builder"`
+	Factory       ast.BuilderFactory `yaml:"factory"`
 }
 
 func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
@@ -258,7 +260,20 @@ func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 		return nil, err
 	}
 
-	return builder.AddFactory(selector, rule.Factory), nil
+	factory := rule.Factory
+	if rule.TargetBuilder != nil {
+		pkgName, builderName, found := strings.Cut(*rule.TargetBuilder, ".")
+		if !found {
+			return nil, fmt.Errorf("target builder name '%s' is incorrect. Expected format: pkg.builder_name ", *rule.TargetBuilder)
+		}
+
+		factory.BuilderRef = &ast.RefType{
+			ReferredPkg:  pkgName,
+			ReferredType: builderName,
+		}
+	}
+
+	return builder.AddFactory(selector, factory), nil
 }
 
 type DebugBuilder struct {
