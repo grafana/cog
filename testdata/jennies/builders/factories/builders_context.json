@@ -1598,6 +1598,10 @@
       "Factories": [
         {
           "Name": "Abs",
+          "BuilderRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "FuncCallExpr"
+          },
           "Comments": [
             "Returns the input vector with all sample values converted to their absolute value.",
             "See https://prometheus.io/docs/prometheus/latest/querying/functions/#abs"
@@ -1655,6 +1659,10 @@
         },
         {
           "Name": "Absent",
+          "BuilderRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "FuncCallExpr"
+          },
           "Comments": [
             "Returns an empty vector if the vector passed to it has any elements (floats or native histograms) and a 1-element vector with the value 1 if the vector passed to it has no elements.",
             "This is useful for alerting on when no time series exist for a given metric name and label combination.",
@@ -1713,6 +1721,10 @@
         },
         {
           "Name": "pi",
+          "BuilderRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "FuncCallExpr"
+          },
           "Comments": [
             "Returns pi.",
             "See https://prometheus.io/docs/prometheus/latest/querying/functions/#trigonometric-functions"
@@ -1739,6 +1751,10 @@
         },
         {
           "Name": "quantile_over_time",
+          "BuilderRef": {
+            "ReferredPkg": "promql",
+            "ReferredType": "FuncCallExpr"
+          },
           "Comments": [
             "Calculates the φ-quantile (0 ≤ φ ≤ 1) of the values in the specified interval.",
             "See https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation_over_time"
