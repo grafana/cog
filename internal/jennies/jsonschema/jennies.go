@@ -7,7 +7,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/languages"
-	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
+	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 const LanguageRef = "jsonschema"
