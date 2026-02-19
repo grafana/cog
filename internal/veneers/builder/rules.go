@@ -530,8 +530,8 @@ func AddFactory(selector Selector, factory ast.BuilderFactory) RewriteRule {
 				continue
 			}
 
-			if factory.BuilderRef == nil {
-				factory.BuilderRef = &builders[i].For.SelfRef
+			if factory.BuilderRef.ReferredType == "" {
+				factory.BuilderRef = builders[i].For.SelfRef
 			}
 
 			targetBuilder, found := builders.LocateByName(factory.BuilderRef.ReferredPkg, factory.BuilderRef.ReferredType)

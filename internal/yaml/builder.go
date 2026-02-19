@@ -267,7 +267,7 @@ func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
 			return nil, fmt.Errorf("target builder name '%s' is incorrect. Expected format: pkg.builder_name ", *rule.TargetBuilder)
 		}
 
-		factory.BuilderRef = &ast.RefType{
+		factory.BuilderRef = ast.RefType{
 			ReferredPkg:  pkgName,
 			ReferredType: builderName,
 		}
