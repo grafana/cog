@@ -1,7 +1,4 @@
 // Code generated - EDITING IS FUTILE. DO NOT EDIT.
-//
-// Using jennies:
-//     GoRawTypes
 
 package defaults
 
@@ -14,10 +11,9 @@ import (
 )
 
 type VariableOption struct {
-	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	Selected *BoolOrString/* DisjunctionToType[disjunction → ref] */ `json:"selected,omitempty"`
-	Text     StringOrArrayOfString/* DisjunctionToType[disjunction → ref] */ `json:"text"`
-	Value    StringOrArrayOfString/* DisjunctionToType[disjunction → ref] */ `json:"value"`
+	Selected *BoolOrString         `json:"selected,omitempty"`
+	Text     StringOrArrayOfString `json:"text"`
+	Value    StringOrArrayOfString `json:"value"`
 }
 
 // NewVariableOption creates a new VariableOption object.
@@ -259,7 +255,6 @@ func (resource TextVariable) Validate() error {
 	return errs
 }
 
-// Modified by compiler pass 'DisjunctionToType[created]'
 type BoolOrString struct {
 	Bool   *bool   `json:"Bool,omitempty"`
 	String *string `json:"String,omitempty"`
@@ -383,7 +378,6 @@ func (resource BoolOrString) Validate() error {
 	return nil
 }
 
-// Modified by compiler pass 'DisjunctionToType[created]'
 type StringOrArrayOfString struct {
 	String        *string  `json:"String,omitempty"`
 	ArrayOfString []string `json:"ArrayOfString,omitempty"`

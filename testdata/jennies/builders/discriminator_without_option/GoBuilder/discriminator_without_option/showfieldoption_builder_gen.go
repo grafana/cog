@@ -22,7 +22,6 @@ func NewShowFieldOptionBuilder() *ShowFieldOptionBuilder {
 }
 
 
-
 func (builder *ShowFieldOptionBuilder) Build() (ShowFieldOption, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return ShowFieldOption{}, err

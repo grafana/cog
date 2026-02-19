@@ -1,6 +1,6 @@
 package {{ .Builder.Package | formatPackageName }}
 {{ $options := include "options" . }}
-{{ $factories := include "factories" . }}
+{{- $factories := include "factories" . }}
 {{ .Imports }}
 
 var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name|formatObjectName }}Builder)(nil)

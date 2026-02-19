@@ -22,7 +22,6 @@ func NewElementBuilder() *ElementBuilder {
 }
 
 
-
 func (builder *ElementBuilder) Build() (Element, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Element{}, err

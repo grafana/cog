@@ -22,7 +22,6 @@ func NewPanelOrLibraryPanelBuilder() *PanelOrLibraryPanelBuilder {
 }
 
 
-
 func (builder *PanelOrLibraryPanelBuilder) Build() (PanelOrLibraryPanel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return PanelOrLibraryPanel{}, err
