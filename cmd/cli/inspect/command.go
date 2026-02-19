@@ -44,7 +44,7 @@ Language-specific builder transformations are NOT applied until a language is sp
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return doInspect(opts)
+			return doInspect(cmd.Context(), opts)
 		},
 	}
 
@@ -60,14 +60,14 @@ Language-specific builder transformations are NOT applied until a language is sp
 	return cmd
 }
 
-func doInspect(opts options) error {
+func doInspect(ctx context.Context, opts options) error {
 	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, codegen.Parameters(opts.ExtraParameters))
 	if err != nil {
 		return err
 	}
 
 	// Create a codegen context
-	schemas, err := pipeline.LoadSchemas(context.Background())
+	schemas, err := pipeline.LoadSchemas(ctx)
 	if err != nil {
 		return err
 	}
