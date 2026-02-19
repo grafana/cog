@@ -22,7 +22,6 @@ func NewFuncCallExprBuilder() *FuncCallExprBuilder {
 	return builder
 }
 
-
 	
 // Returns the input vector with all sample values converted to their absolute value.
 // See https://prometheus.io/docs/prometheus/latest/querying/functions/#abs
