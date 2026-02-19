@@ -1,0 +1,5 @@
+{{- define "factories" }}
+{{- range .Builder.Factories }}
+    {{- template "factory" (dict "Builder" $.Builder "Factory" .) }}
+{{- end }}
+{{- end }}

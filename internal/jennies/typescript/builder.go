@@ -90,6 +90,9 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			"typeHasBuilder":              context.ResolveToBuilder,
 			"typeIsDisjunctionOfBuilders": context.IsDisjunctionOfBuilders,
 			"formatType":                  jenny.typeFormatter.formatType,
+			"formatRef": func(ref ast.RefType) string {
+				return jenny.typeFormatter.formatRef(ref, true)
+			},
 			"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 				_, found := context.ResolveToComposableSlot(typeDef)
 				return found
