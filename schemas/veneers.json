@@ -1105,8 +1105,11 @@
     },
     "YamlVeneers": {
       "properties": {
-        "language": {
-          "type": "string"
+        "languages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "package": {
           "type": "string"

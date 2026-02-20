@@ -13,8 +13,8 @@ type Config struct {
 	Debug bool
 }
 
-type LanguageRules struct {
-	Language     string
+type RuleSet struct {
+	Languages    []string
 	BuilderRules []builder.RewriteRule
 	OptionRules  []option.RewriteRule
 }
@@ -28,13 +28,15 @@ type Rewriter struct {
 	optionRules map[string][]option.RewriteRule
 }
 
-func NewRewrite(languageRules []LanguageRules, config Config) *Rewriter {
+func NewRewrite(rules []RuleSet, config Config) *Rewriter {
 	builderRules := make(map[string][]builder.RewriteRule)
 	optionRules := make(map[string][]option.RewriteRule)
 
-	for _, languageConfig := range languageRules {
-		builderRules[languageConfig.Language] = append(builderRules[languageConfig.Language], languageConfig.BuilderRules...)
-		optionRules[languageConfig.Language] = append(optionRules[languageConfig.Language], languageConfig.OptionRules...)
+	for _, set := range rules {
+		for _, language := range set.Languages {
+			builderRules[language] = append(builderRules[language], set.BuilderRules...)
+			optionRules[language] = append(optionRules[language], set.OptionRules...)
+		}
 	}
 
 	return &Rewriter{
