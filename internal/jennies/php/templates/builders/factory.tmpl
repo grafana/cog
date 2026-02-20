@@ -14,8 +14,8 @@ public static function {{ .Factory.Name|formatOptionName}}({{- template "args" .
 	{{- if not (eq .Value.Constant nil) -}}
 		{{- formatValue .Value.Constant.Type .Value.Constant.Value }}
 	{{- end }}
-	{{- with .Value.Argument -}}
-		${{- .Name|formatArgName -}}
+	{{- if not (eq .Value.Argument nil) -}}
+		${{- .Value.Argument.Name|formatArgName -}}{{ if .Value.ForceBuild }}->build(){{ end }}
 	{{- end -}}
 	{{- with .Value.Factory -}}
 		{{ formatRawRef .Ref.Package (.Ref.Package|factoryClassForPkg)}}::{{ .Ref.Factory|formatOptionName }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $arg)}}{{ end }})

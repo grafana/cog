@@ -27,9 +27,9 @@ def {{ .Factory.Name|formatFunctionName}}({{- template "factory_args" .Factory.A
     {{- if not (eq .Value.Constant nil) -}}
         {{- formatValue .Value.Constant.Type .Value.Constant.Value }}
     {{- end }}
-    {{- with .Value.Argument -}}
-        {{- .Name|formatIdentifier -}}
-    {{- end -}}
+	{{- if not (eq .Value.Argument nil) -}}
+		{{- .Value.Argument.Name|formatIdentifier -}}{{ if .Value.ForceBuild }}.build(){{ end }}
+	{{- end -}}
     {{- with .Value.Factory -}}
         {{ .Ref.Factory|formatFunctionName }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $arg)}}{{ end }})
     {{- end -}}
