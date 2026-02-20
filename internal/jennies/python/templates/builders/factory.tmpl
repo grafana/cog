@@ -13,7 +13,7 @@ def {{ .Factory.Name|formatFunctionName}}({{- template "factory_args" .Factory.A
     builder = {{ if ne $builderPkg "" -}}{{ $builderPkg }}.{{- end -}}{{ .Factory.BuilderRef.ReferredType|formatObjectName }}()
 
 {{- range $call := .Factory.OptionCalls }}
-    builder.{{ $call.Name|formatFunctionName }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
+    builder.{{ $call.Name|formatFunctionName }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Builder" $.Builder "Value" $param) -}}{{- end }})
 {{- end }}
 
     return builder
@@ -31,6 +31,10 @@ def {{ .Factory.Name|formatFunctionName}}({{- template "factory_args" .Factory.A
 		{{- .Value.Argument.Name|formatIdentifier -}}{{ if .Value.ForceBuild }}.build(){{ end }}
 	{{- end -}}
     {{- with .Value.Factory -}}
-        {{ .Ref.Factory|formatFunctionName }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $arg)}}{{ end }})
+        {{- $pkg := "" -}}
+        {{- if ne $.Builder.Package .Ref.Package -}}
+        {{- $pkg = (importModule (print .Ref.Package "_builder") "..builders" .Ref.Package) -}}
+        {{- end -}}
+        {{- if ne $pkg "" -}}{{ $pkg }}.{{- end -}}{{ .Ref.Factory|formatFunctionName }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Builder" $.Builder "Value" $arg)}}{{ end }})
     {{- end -}}
 {{- end }}
