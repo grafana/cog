@@ -95,7 +95,7 @@ func (tf *typeFormatter) formatReference(def ast.RefType) string {
 	case ast.KindArray:
 		return tf.formatArray(object.Type.AsArray())
 	default:
-		tf.packageMapper(def.ReferredPkg, def.ReferredType)
+		tf.packageMapper(def.ReferredPkg, formatObjectName(def.ReferredType))
 		return formatObjectName(def.ReferredType)
 	}
 }

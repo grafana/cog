@@ -72,7 +72,7 @@ func (jenny *Factory) generateFactories(context languages.Context, factoriesPkg 
 				return typesFormatter.formatFieldType(ast.NewRef(pkg, referredType))
 			},
 			"factoryClassForPkg": func(pkg string) string {
-				return jenny.config.builderFactoryClassForPackage(pkg)
+				return tools.UpperCamelCase(jenny.config.builderFactoryClassForPackage(pkg))
 			},
 		}).
 		RenderAsBytes("builders/factories.tmpl", map[string]any{
