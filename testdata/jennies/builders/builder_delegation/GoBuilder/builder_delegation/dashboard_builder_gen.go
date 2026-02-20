@@ -34,6 +34,11 @@ func (builder *DashboardBuilder) Build() (Dashboard, error) {
 	return *builder.internal, nil
 }
 
+func (builder *DashboardBuilder) RecordError(path string, err error) *DashboardBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *DashboardBuilder) Id(id int64) *DashboardBuilder {
     builder.internal.Id = id
 

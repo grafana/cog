@@ -34,6 +34,11 @@ func (builder *DashboardBuilder) Build() (Dashboard, error) {
 	return *builder.internal, nil
 }
 
+func (builder *DashboardBuilder) RecordError(path string, err error) *DashboardBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *DashboardBuilder) Panels(panels map[string]cog.Builder[Element]) *DashboardBuilder {
         panelsResource := make(map[string]Element)
         for key1, val1 := range panels {

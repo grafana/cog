@@ -34,6 +34,11 @@ func (builder *NoShowFieldOptionBuilder) Build() (NoShowFieldOption, error) {
 	return *builder.internal, nil
 }
 
+func (builder *NoShowFieldOptionBuilder) RecordError(path string, err error) *NoShowFieldOptionBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *NoShowFieldOptionBuilder) Text(text string) *NoShowFieldOptionBuilder {
     builder.internal.Text = text
 

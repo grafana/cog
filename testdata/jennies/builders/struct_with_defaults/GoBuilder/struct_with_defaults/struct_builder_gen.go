@@ -34,6 +34,11 @@ func (builder *StructBuilder) Build() (Struct, error) {
 	return *builder.internal, nil
 }
 
+func (builder *StructBuilder) RecordError(path string, err error) *StructBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *StructBuilder) AllFields(allFields cog.Builder[NestedStruct]) *StructBuilder {
     allFieldsResource, err := allFields.Build()
     if err != nil {

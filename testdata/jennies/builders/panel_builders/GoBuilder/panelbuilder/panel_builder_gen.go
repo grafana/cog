@@ -34,6 +34,11 @@ func (builder *PanelBuilder) Build() (Panel, error) {
 	return *builder.internal, nil
 }
 
+func (builder *PanelBuilder) RecordError(path string, err error) *PanelBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *PanelBuilder) OnlyFromThisDashboard(onlyFromThisDashboard bool) *PanelBuilder {
     builder.internal.OnlyFromThisDashboard = onlyFromThisDashboard
 

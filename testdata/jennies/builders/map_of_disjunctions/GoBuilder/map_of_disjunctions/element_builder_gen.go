@@ -34,6 +34,11 @@ func (builder *ElementBuilder) Build() (Element, error) {
 	return *builder.internal, nil
 }
 
+func (builder *ElementBuilder) RecordError(path string, err error) *ElementBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *ElementBuilder) Panel(panel cog.Builder[Panel]) *ElementBuilder {
     panelResource, err := panel.Build()
     if err != nil {

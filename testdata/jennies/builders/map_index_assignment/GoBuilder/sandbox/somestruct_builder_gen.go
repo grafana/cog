@@ -34,6 +34,11 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	return *builder.internal, nil
 }
 
+func (builder *SomeStructBuilder) RecordError(path string, err error) *SomeStructBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *SomeStructBuilder) Annotations(key string,value string) *SomeStructBuilder {
 if builder.internal.Annotations == nil {
     builder.internal.Annotations = map[string]string{}

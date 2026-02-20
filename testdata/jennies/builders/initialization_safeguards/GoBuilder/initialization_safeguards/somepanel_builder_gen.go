@@ -34,6 +34,11 @@ func (builder *SomePanelBuilder) Build() (SomePanel, error) {
 	return *builder.internal, nil
 }
 
+func (builder *SomePanelBuilder) RecordError(path string, err error) *SomePanelBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *SomePanelBuilder) Title(title string) *SomePanelBuilder {
     builder.internal.Title = title
 

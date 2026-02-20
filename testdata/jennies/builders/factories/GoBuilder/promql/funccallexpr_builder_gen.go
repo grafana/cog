@@ -27,8 +27,10 @@ func NewFuncCallExprBuilder() *FuncCallExprBuilder {
 // See https://prometheus.io/docs/prometheus/latest/querying/functions/#abs
 func Abs(v cog.Builder[Expr]) *FuncCallExprBuilder {
 	builder := NewFuncCallExprBuilder()
-    builder.Function("abs")
-    builder.Arg(v)
+    
+	builder.Function("abs")
+    
+	builder.Arg(v)
 
 	return builder
 }
@@ -38,8 +40,10 @@ func Abs(v cog.Builder[Expr]) *FuncCallExprBuilder {
 // See https://prometheus.io/docs/prometheus/latest/querying/functions/#absent
 func Absent(v cog.Builder[Expr]) *FuncCallExprBuilder {
 	builder := NewFuncCallExprBuilder()
-    builder.Function("absent")
-    builder.Arg(v)
+    
+	builder.Function("absent")
+    
+	builder.Arg(v)
 
 	return builder
 }
@@ -48,7 +52,8 @@ func Absent(v cog.Builder[Expr]) *FuncCallExprBuilder {
 // See https://prometheus.io/docs/prometheus/latest/querying/functions/#trigonometric-functions
 func Pi() *FuncCallExprBuilder {
 	builder := NewFuncCallExprBuilder()
-    builder.Function("pi")
+    
+	builder.Function("pi")
 
 	return builder
 }
@@ -57,9 +62,12 @@ func Pi() *FuncCallExprBuilder {
 // See https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation_over_time
 func QuantileOverTime(phi float64,v cog.Builder[Expr]) *FuncCallExprBuilder {
 	builder := NewFuncCallExprBuilder()
-    builder.Function("quantile_over_time")
-    builder.Arg(N(phi))
-    builder.Arg(v)
+    
+	builder.Function("quantile_over_time")
+    
+	builder.Arg(N(phi))
+    
+	builder.Arg(v)
 
 	return builder
 }
@@ -74,6 +82,11 @@ func (builder *FuncCallExprBuilder) Build() (FuncCallExpr, error) {
 	}
 
 	return *builder.internal, nil
+}
+
+func (builder *FuncCallExprBuilder) RecordError(path string, err error) *FuncCallExprBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
 }
 
 func (builder *FuncCallExprBuilder) Function(function string) *FuncCallExprBuilder {

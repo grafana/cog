@@ -34,6 +34,11 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	return *builder.internal, nil
 }
 
+func (builder *SomeStructBuilder) RecordError(path string, err error) *SomeStructBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *SomeStructBuilder) Time(from string,to string) *SomeStructBuilder {
 if builder.internal.Time == nil {
     builder.internal.Time = &struct {
