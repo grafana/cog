@@ -11,10 +11,10 @@ import (
 )
 
 type Veneers struct {
-	Language string        `yaml:"language"`
-	Package  string        `yaml:"package"`
-	Builders []BuilderRule `yaml:"builders"`
-	Options  []OptionRule  `yaml:"options"`
+	Languages []string      `yaml:"languages"`
+	Package   string        `yaml:"package"`
+	Builders  []BuilderRule `yaml:"builders"`
+	Options   []OptionRule  `yaml:"options"`
 }
 
 type VeneersLoader struct {
@@ -25,7 +25,7 @@ func NewVeneersLoader() *VeneersLoader {
 }
 
 func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Config) (*rewrite.Rewriter, error) {
-	languageRules := make([]rewrite.LanguageRules, 0, len(filenames))
+	ruleSet := make([]rewrite.RuleSet, 0, len(filenames))
 
 	for _, filename := range filenames {
 		rules, err := loader.load(filename)
@@ -33,28 +33,28 @@ func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Con
 			return nil, err
 		}
 
-		languageRules = append(languageRules, rules)
+		ruleSet = append(ruleSet, rules)
 	}
 
-	return rewrite.NewRewrite(languageRules, config), nil
+	return rewrite.NewRewrite(ruleSet, config), nil
 }
 
-func (loader *VeneersLoader) load(file string) (rewrite.LanguageRules, error) {
+func (loader *VeneersLoader) load(file string) (rewrite.RuleSet, error) {
 	var builderRules []builder.RewriteRule
 	var optionRules []option.RewriteRule
 
 	contents, err := os.ReadFile(file)
 	if err != nil {
-		return rewrite.LanguageRules{}, err
+		return rewrite.RuleSet{}, err
 	}
 
 	veneers := &Veneers{}
 	if err := yaml.UnmarshalWithOptions(contents, veneers, yaml.DisallowUnknownField()); err != nil {
-		return rewrite.LanguageRules{}, fmt.Errorf("can not load veneers: %s\n%s", file, yaml.FormatError(err, true, true))
+		return rewrite.RuleSet{}, fmt.Errorf("can not load veneers: %s\n%s", file, yaml.FormatError(err, true, true))
 	}
 
 	if veneers.Package == "" {
-		return rewrite.LanguageRules{}, fmt.Errorf("missing 'package' statement in veneers file '%s'\n", file)
+		return rewrite.RuleSet{}, fmt.Errorf("missing 'package' statement in veneers file '%s'\n", file)
 	}
 
 	builderRules = make([]builder.RewriteRule, 0, len(veneers.Builders))
@@ -66,14 +66,14 @@ func (loader *VeneersLoader) load(file string) (rewrite.LanguageRules, error) {
 		if err != nil {
 			path, innerErr := yaml.PathString(fmt.Sprintf("$.builders[%d]", i))
 			if innerErr != nil {
-				return rewrite.LanguageRules{}, err
+				return rewrite.RuleSet{}, err
 			}
 			source, innerErr := path.AnnotateSource(contents, true)
 			if innerErr != nil {
-				return rewrite.LanguageRules{}, err
+				return rewrite.RuleSet{}, err
 			}
 
-			return rewrite.LanguageRules{}, fmt.Errorf("%w in %s\n%s", err, file, string(source))
+			return rewrite.RuleSet{}, fmt.Errorf("%w in %s\n%s", err, file, string(source))
 		}
 
 		builderRules = append(builderRules, builderRule)
@@ -85,21 +85,21 @@ func (loader *VeneersLoader) load(file string) (rewrite.LanguageRules, error) {
 		if err != nil {
 			path, innerErr := yaml.PathString(fmt.Sprintf("$.options[%d]", i))
 			if innerErr != nil {
-				return rewrite.LanguageRules{}, err
+				return rewrite.RuleSet{}, err
 			}
 			source, innerErr := path.AnnotateSource(contents, true)
 			if innerErr != nil {
-				return rewrite.LanguageRules{}, err
+				return rewrite.RuleSet{}, err
 			}
 
-			return rewrite.LanguageRules{}, fmt.Errorf("%w in %s\n%s", err, file, string(source))
+			return rewrite.RuleSet{}, fmt.Errorf("%w in %s\n%s", err, file, string(source))
 		}
 
 		optionRules = append(optionRules, optionRule)
 	}
 
-	return rewrite.LanguageRules{
-		Language:     veneers.Language,
+	return rewrite.RuleSet{
+		Languages:    veneers.Languages,
 		BuilderRules: builderRules,
 		OptionRules:  optionRules,
 	}, nil
