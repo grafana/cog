@@ -3,23 +3,40 @@
 {{- range .Factory.Comments }}
 // {{ . }}
 {{- end }}
-func {{ .Factory.Name|formatFunctionName}}({{- template "args" .Factory.Args }}) *{{- if ne $builderPkg "" -}}{{ $builderPkg }}.{{- end -}}{{ .Factory.BuilderRef.ReferredType|formatObjectName }}Builder {
+func {{ .Factory.Name|formatFunctionName }}({{- template "args" .Factory.Args }}) *{{- if ne $builderPkg "" -}}{{ $builderPkg }}.{{- end -}}{{ .Factory.BuilderRef.ReferredType|formatObjectName }}Builder {
 	builder := {{ if ne $builderPkg "" -}}{{ $builderPkg }}.{{- end -}}New{{ .Factory.BuilderRef.ReferredType|formatObjectName }}Builder()
 
 {{- range $call := .Factory.OptionCalls }}
-    builder.{{ $call.Name|formatFunctionName }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
+    {{ template "factory_option_call" (dict "Factory" $.Factory "Call" $call) }}
 {{- end }}
 
 	return builder
 }
 {{- end }}
 
+{{- define "factory_option_call" }}
+	{{- template "factory_option_call_prepare_parameters" (dict "Factory" .Factory "Call" .Call) }}
+	builder.{{ .Call.Name|formatFunctionName }}({{- range $i, $param := .Call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
+{{- end }}
+
+{{- define "factory_option_call_prepare_parameters" }}
+{{- range $i, $param := .Call.Parameters }}
+{{- if and (not (eq $param.Argument nil)) $param.ForceBuild -}}
+	{{- $param.Argument.Name|formatArgName -}}Resource, err := {{- $param.Argument.Name|formatArgName -}}.Build()
+	if err != nil {
+		builder.RecordError("{{ $.Factory.Name|formatFunctionName }}({{ $param.Argument.Name|formatArgName }})", err)
+		return builder
+	}
+{{- end -}}
+{{- end -}}
+{{- end }}
+
 {{- define "factory_parameter_value" }}
 	{{- if not (eq .Value.Constant nil) -}}
 		{{- formatValue .Value.Constant.Type .Value.Constant.Value }}
 	{{- end }}
-	{{- with .Value.Argument -}}
-		{{- .Name|formatArgName -}}
+	{{- if not (eq .Value.Argument nil) -}}
+	{{- .Value.Argument.Name|formatArgName -}}{{- if .Value.ForceBuild -}}Resource{{- end -}}
 	{{- end -}}
 	{{- with .Value.Factory -}}
 		{{- $pkg := .Ref.Package|importPkg -}}

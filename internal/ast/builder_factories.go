@@ -56,9 +56,10 @@ func (constant *TypedConstant) DeepCopy() TypedConstant {
 }
 
 type OptionCallParameter struct {
-	Argument *Argument      `json:",omitempty"`
-	Constant *TypedConstant `json:",omitempty"`
-	Factory  *FactoryCall   `json:",omitempty"`
+	Argument   *Argument      `json:",omitempty"`
+	ForceBuild bool           `yaml:"force_build"`
+	Constant   *TypedConstant `json:",omitempty"`
+	Factory    *FactoryCall   `json:",omitempty"`
 }
 
 func (call *OptionCallParameter) DeepCopy() OptionCallParameter {

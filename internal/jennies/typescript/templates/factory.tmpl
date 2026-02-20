@@ -24,8 +24,8 @@ export function {{ .Factory.Name|lowerCamelCase}}({{- template "args" .Factory.A
 	{{- if not (eq .Value.Constant nil) -}}
 		{{- formatValue .Value.Constant.Type .Value.Constant.Value }}
 	{{- end }}
-	{{- with .Value.Argument -}}
-		{{- .Name|formatIdentifier -}}
+	{{- if not (eq .Value.Argument nil) -}}
+		{{- .Value.Argument.Name|formatIdentifier -}}{{ if .Value.ForceBuild }}.build(){{ end }}
 	{{- end -}}
 	{{- with .Value.Factory -}}
 		{{- $pkg := .Ref.Package|importPkg -}}

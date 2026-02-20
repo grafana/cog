@@ -44,6 +44,11 @@ func (builder *{{ .Builder.Name|formatObjectName }}Builder) Build() ({{ .Builder
 	return *builder.internal, nil
 }
 
+func (builder *{{ .Builder.Name|formatObjectName }}Builder) RecordError(path string, err error) *{{ .Builder.Name|formatObjectName }}Builder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 {{- $customMethodsTmpl := print "builder_" .Builder.Package "_" (.Builder.Name|formatObjectName) "_custom_methods" }}
 {{- includeIfExists $customMethodsTmpl (dict) -}}
 
