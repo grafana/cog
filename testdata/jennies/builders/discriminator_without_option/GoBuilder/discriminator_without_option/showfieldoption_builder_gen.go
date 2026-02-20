@@ -34,6 +34,11 @@ func (builder *ShowFieldOptionBuilder) Build() (ShowFieldOption, error) {
 	return *builder.internal, nil
 }
 
+func (builder *ShowFieldOptionBuilder) RecordError(path string, err error) *ShowFieldOptionBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *ShowFieldOptionBuilder) Field(field AnEnum) *ShowFieldOptionBuilder {
     builder.internal.Field = field
 

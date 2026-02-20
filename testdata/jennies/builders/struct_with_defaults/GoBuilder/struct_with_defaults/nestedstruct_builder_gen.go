@@ -34,6 +34,11 @@ func (builder *NestedStructBuilder) Build() (NestedStruct, error) {
 	return *builder.internal, nil
 }
 
+func (builder *NestedStructBuilder) RecordError(path string, err error) *NestedStructBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *NestedStructBuilder) StringVal(stringVal string) *NestedStructBuilder {
     builder.internal.StringVal = stringVal
 

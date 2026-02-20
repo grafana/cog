@@ -35,6 +35,11 @@ func (builder *PersonBuilder) Build() (Person, error) {
 	return *builder.internal, nil
 }
 
+func (builder *PersonBuilder) RecordError(path string, err error) *PersonBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *PersonBuilder) Name(name other_pkg.Name) *PersonBuilder {
     builder.internal.Name = name
 

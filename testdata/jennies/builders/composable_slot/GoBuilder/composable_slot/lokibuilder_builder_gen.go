@@ -35,6 +35,11 @@ func (builder *LokiBuilderBuilder) Build() (Dashboard, error) {
 	return *builder.internal, nil
 }
 
+func (builder *LokiBuilderBuilder) RecordError(path string, err error) *LokiBuilderBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *LokiBuilderBuilder) Target(target cog.Builder[variants.Dataquery]) *LokiBuilderBuilder {
     targetResource, err := target.Build()
     if err != nil {

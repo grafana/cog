@@ -35,6 +35,11 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	return *builder.internal, nil
 }
 
+func (builder *SomeStructBuilder) RecordError(path string, err error) *SomeStructBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *SomeStructBuilder) Id(id int64) *SomeStructBuilder {
     builder.internal.Id = id
 
