@@ -199,6 +199,9 @@
         "argument": {
           "$ref": "#/$defs/AstArgument"
         },
+        "force_build": {
+          "type": "boolean"
+        },
         "constant": {
           "$ref": "#/$defs/AstTypedConstant"
         },
