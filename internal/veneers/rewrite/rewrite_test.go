@@ -222,9 +222,9 @@ func TestRewriter_ApplyTo(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			req := require.New(t)
 
-			rewriter := NewRewrite([]LanguageRules{
+			rewriter := NewRewrite([]RuleSet{
 				{
-					Language:     AllLanguages,
+					Languages:    []string{AllLanguages},
 					BuilderRules: tc.builderRules,
 					OptionRules:  tc.optionRules,
 				},
