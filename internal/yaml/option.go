@@ -291,7 +291,7 @@ type OptionSelector struct {
 	ByNames *ByNamesSelector `yaml:"by_names"`
 }
 
-func (selector OptionSelector) AsSelector(pkg string) (option.Selector, error) {
+func (selector OptionSelector) AsSelector(pkg string) (*option.Selector, error) {
 	if selector.ByName != nil {
 		objectName, optionName, found := strings.Cut(*selector.ByName, ".")
 		if !found {
@@ -323,7 +323,7 @@ type ByNamesSelector struct {
 	Options []string `yaml:"options"`
 }
 
-func (selector ByNamesSelector) AsSelector(pkg string) (option.Selector, error) {
+func (selector ByNamesSelector) AsSelector(pkg string) (*option.Selector, error) {
 	if selector.Object == "" && selector.Builder == "" {
 		return nil, fmt.Errorf("`object` or `builder` is required")
 	}
