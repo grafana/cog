@@ -157,13 +157,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 			return []ast.Option{option}
 		}
 
-		firstArgType := option.Args[0].Type
-		if firstArgType.IsRef() {
-			referredObject, found := schemas.LocateObject(firstArgType.AsRef().ReferredPkg, firstArgType.AsRef().ReferredType)
-			if found {
-				firstArgType = referredObject.Type
-			}
-		}
+		firstArgType := schemas.ResolveToType(option.Args[0].Type)
 
 		if !firstArgType.IsStruct() {
 			return []ast.Option{option}
@@ -289,13 +283,7 @@ func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 			return []ast.Option{option}
 		}
 
-		firstArgType := option.Args[0].Type
-		if firstArgType.IsRef() {
-			referredObject, found := schemas.LocateObject(firstArgType.AsRef().ReferredPkg, firstArgType.AsRef().ReferredType)
-			if found {
-				firstArgType = referredObject.Type
-			}
-		}
+		firstArgType := schemas.ResolveToType(option.Args[0].Type)
 
 		if !firstArgType.IsStruct() {
 			return []ast.Option{option}
