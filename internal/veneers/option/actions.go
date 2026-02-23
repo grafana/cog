@@ -10,10 +10,10 @@ import (
 	"github.com/grafana/cog/internal/veneers"
 )
 
-type RewriteAction func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option
+type ActionRunner func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option
 
 // RenameAction renames an option.
-func RenameAction(newName string) RewriteAction {
+func RenameAction(newName string) ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		oldName := option.Name
 		option.Name = newName
@@ -24,7 +24,7 @@ func RenameAction(newName string) RewriteAction {
 }
 
 // RenameArgumentsAction renames the arguments of an options.
-func RenameArgumentsAction(newNames []string) RewriteAction {
+func RenameArgumentsAction(newNames []string) ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(newNames) != len(option.Args) {
 			return []ast.Option{option}
@@ -68,7 +68,7 @@ func RenameArgumentsAction(newNames []string) RewriteAction {
 // This action returns the option unchanged if:
 //   - it doesn't have exactly one argument
 //   - the argument is not an array
-func ArrayToAppendAction() RewriteAction {
+func ArrayToAppendAction() ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) != 1 || !option.Args[0].Type.IsArray() {
 			return []ast.Option{option}
@@ -129,7 +129,7 @@ func ArrayToAppendAction() RewriteAction {
 // This action returns the option unchanged if:
 //   - it doesn't have exactly one argument
 //   - the argument is not a map
-func MapToIndexAction() RewriteAction {
+func MapToIndexAction() ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) != 1 || !option.Args[0].Type.IsMap() {
 			return []ast.Option{option}
@@ -177,14 +177,14 @@ func MapToIndexAction() RewriteAction {
 }
 
 // OmitAction removes an option.
-func OmitAction() RewriteAction {
+func OmitAction() ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, _ ast.Option) []ast.Option {
 		return nil
 	}
 }
 
 // VeneerTrailAsCommentsAction removes an option.
-func VeneerTrailAsCommentsAction() RewriteAction {
+func VeneerTrailAsCommentsAction() ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, opt ast.Option) []ast.Option {
 		veneerTrail := tools.Map(opt.VeneerTrail, func(veneer string) string {
 			return fmt.Sprintf("Modified by veneer '%s'", veneer)
@@ -223,7 +223,7 @@ func VeneerTrailAsCommentsAction() RewriteAction {
 //   - the first argument is not a struct or a reference to one
 //
 // FIXME: considers the first argument only.
-func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
+func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
 			return []ast.Option{option}
@@ -385,7 +385,7 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 //   - the first argument is not a struct or a reference to one
 //
 // FIXME: considers the first argument only.
-func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
+func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
 			return []ast.Option{option}
@@ -467,7 +467,7 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 // This action returns the option unchanged if:
 //   - it has no arguments
 //   - the given argument is not a disjunction or a reference to one
-func DisjunctionAsOptionsAction(argumentIndex int) RewriteAction {
+func DisjunctionAsOptionsAction(argumentIndex int) ActionRunner {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) == 0 {
 			return []ast.Option{option}
@@ -624,7 +624,7 @@ type BooleanUnfold struct {
 //		this.resource.editable = false
 //	}
 //	```
-func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
+func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		intoType := option.Assignments[0].Path.Last().Type
 
@@ -667,7 +667,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 	}
 }
 
-func DuplicateAction(duplicateName string) RewriteAction {
+func DuplicateAction(duplicateName string) ActionRunner {
 	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		duplicateOpt := option.DeepCopy()
 		duplicateOpt.Name = duplicateName
@@ -678,7 +678,7 @@ func DuplicateAction(duplicateName string) RewriteAction {
 }
 
 // AddAssignmentAction adds an assignment to an existing option.
-func AddAssignmentAction(assignment veneers.Assignment) RewriteAction {
+func AddAssignmentAction(assignment veneers.Assignment) ActionRunner {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		irAssignment, err := assignment.AsIR(schemas, builder)
 		if err != nil {
@@ -695,7 +695,7 @@ func AddAssignmentAction(assignment veneers.Assignment) RewriteAction {
 }
 
 // AddCommentsAction adds comments to an option.
-func AddCommentsAction(comments []string) RewriteAction {
+func AddCommentsAction(comments []string) ActionRunner {
 	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		option.Comments = append(option.Comments, comments...)
 		option.AddToVeneerTrail(fmt.Sprintf("AddComments[%s]", strings.Join(comments, " ")))
@@ -705,7 +705,7 @@ func AddCommentsAction(comments []string) RewriteAction {
 }
 
 // DebugAction prints debugging information about an option.
-func DebugAction() RewriteAction {
+func DebugAction() ActionRunner {
 	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		marshaled, err := json.MarshalIndent(option, "", "  ")
 		if err != nil {

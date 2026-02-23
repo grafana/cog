@@ -17,7 +17,7 @@ type rewriteTestCase struct {
 
 	inputBuilders  ast.Builders
 	builderRules   []*builder.Rule
-	optionRules    []option.RewriteRule
+	optionRules    []option.Rule
 	outputBuilders ast.Builders
 }
 
@@ -48,7 +48,7 @@ func testData() []rewriteTestCase {
 			description:   "rename single option in single builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules:  nil,
-			optionRules: []option.RewriteRule{
+			optionRules: []option.Rule{
 				option.Rename(
 					option.ByName("test_pkg", "Panel", "type"),
 					"kind",
@@ -101,7 +101,7 @@ func testData() []rewriteTestCase {
 			description:   "omit single option in single builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules:  nil,
-			optionRules: []option.RewriteRule{
+			optionRules: []option.Rule{
 				option.Omit(
 					option.ByName("test_pkg", "Dashboard", "title"),
 				),
