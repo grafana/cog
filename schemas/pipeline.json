@@ -270,6 +270,9 @@
         },
         "typescript": {
           "$ref": "#/$defs/TypescriptConfig"
+        },
+        "terraform": {
+          "$ref": "#/$defs/TerraformConfig"
         }
       },
       "additionalProperties": false,
@@ -517,6 +520,11 @@
           "description": "ExtraFilesTemplatesDirectories holds a list of directories containing\ntemplates describing files to be added to the generated output."
         }
       },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "TerraformConfig": {
+      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },
