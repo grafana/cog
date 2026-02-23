@@ -12,7 +12,6 @@ import (
 
 type ActionRunner func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option
 
-// RenameAction renames an option.
 func RenameAction(newName string) ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		oldName := option.Name
@@ -23,7 +22,6 @@ func RenameAction(newName string) ActionRunner {
 	}
 }
 
-// RenameArgumentsAction renames the arguments of an options.
 func RenameArgumentsAction(newNames []string) ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(newNames) != len(option.Args) {
@@ -47,27 +45,6 @@ func RenameArgumentsAction(newNames []string) ActionRunner {
 	}
 }
 
-// ArrayToAppendAction updates the option to perform an "append" assignment.
-//
-// Example:
-//
-//	```
-//	func Tags(tags []string) {
-//		this.resource.tags = tags
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Tags(tags string) {
-//		this.resource.tags.append(tags)
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it doesn't have exactly one argument
-//   - the argument is not an array
 func ArrayToAppendAction() ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) != 1 || !option.Args[0].Type.IsArray() {
@@ -108,27 +85,6 @@ func ArrayToAppendAction() ActionRunner {
 	}
 }
 
-// MapToIndexAction updates the option to perform an "index" assignment.
-//
-// Example:
-//
-//	```
-//	func Elements(elements map[string]Element) {
-//		this.resource.elements = elements
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Elements(key string, elements Element) {
-//		this.resource.elements[key] = tags
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it doesn't have exactly one argument
-//   - the argument is not a map
 func MapToIndexAction() ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) != 1 || !option.Args[0].Type.IsMap() {
@@ -176,7 +132,6 @@ func MapToIndexAction() ActionRunner {
 	}
 }
 
-// OmitAction removes an option.
 func OmitAction() ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, _ ast.Option) []ast.Option {
 		return nil
@@ -196,33 +151,6 @@ func VeneerTrailAsCommentsAction() ActionRunner {
 	}
 }
 
-// StructFieldsAsArgumentsAction uses the fields of the first argument's struct (assuming it is one) and turns them
-// into arguments.
-//
-// Optionally, an explicit list of fields to turn into arguments can be given.
-//
-// Example:
-//
-//	```
-//	func Time(time {from string, to string) {
-//		this.resource.time = time
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Time(from string, to string) {
-//		this.resource.time.from = from
-//		this.resource.time.to = to
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it has no arguments
-//   - the first argument is not a struct or a reference to one
-//
-// FIXME: considers the first argument only.
 func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
@@ -355,36 +283,6 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 	}
 }
 
-// StructFieldsAsOptionsAction uses the fields of the first argument's struct (assuming it is one) and turns them
-// into options.
-//
-// Optionally, an explicit list of fields to turn into options can be given.
-//
-// Example:
-//
-//	```
-//	func GridPos(gridPos {x int, y int) {
-//		this.resource.gridPos = gridPos
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func X(x int) {
-//		this.resource.gridPos.x = x
-//	}
-//
-//	func Y(y int) {
-//		this.resource.gridPos.y = y
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it has no arguments
-//   - the first argument is not a struct or a reference to one
-//
-// FIXME: considers the first argument only.
 func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
@@ -440,33 +338,6 @@ func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 		return newOptions
 	}
 }
-
-// DisjunctionAsOptionsAction uses the branches of the first argument's disjunction (assuming it is one) and turns them
-// into options.
-//
-// Example:
-//
-//	```
-//	func Panel(panel Panel|Row) {
-//		this.resource.panels.append(panel)
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Panel(panel Panel) {
-//		this.resource.panels.append(panel)
-//	}
-//
-//	func Row(row Row) {
-//		this.resource.panels.append(row)
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it has no arguments
-//   - the given argument is not a disjunction or a reference to one
 func DisjunctionAsOptionsAction(argumentIndex int) ActionRunner {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) == 0 {
@@ -603,27 +474,6 @@ type BooleanUnfold struct {
 	OptionFalse string
 }
 
-// UnfoldBooleanAction transforms an option accepting a boolean argument into two argument-less options.
-//
-// Example:
-//
-//	```
-//	func Editable(editable bool) {
-//		this.resource.editable = editable
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Editable() {
-//		this.resource.editable = true
-//	}
-//
-//	func ReadOnly() {
-//		this.resource.editable = false
-//	}
-//	```
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
 	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
 		intoType := option.Assignments[0].Path.Last().Type
@@ -677,7 +527,6 @@ func DuplicateAction(duplicateName string) ActionRunner {
 	}
 }
 
-// AddAssignmentAction adds an assignment to an existing option.
 func AddAssignmentAction(assignment veneers.Assignment) ActionRunner {
 	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		irAssignment, err := assignment.AsIR(schemas, builder)
@@ -694,7 +543,6 @@ func AddAssignmentAction(assignment veneers.Assignment) ActionRunner {
 	}
 }
 
-// AddCommentsAction adds comments to an option.
 func AddCommentsAction(comments []string) ActionRunner {
 	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		option.Comments = append(option.Comments, comments...)
@@ -704,7 +552,6 @@ func AddCommentsAction(comments []string) ActionRunner {
 	}
 }
 
-// DebugAction prints debugging information about an option.
 func DebugAction() ActionRunner {
 	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
 		marshaled, err := json.MarshalIndent(option, "", "  ")
