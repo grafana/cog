@@ -13,19 +13,19 @@ import (
  *****************************************************************************/
 
 type OptionRule struct {
-	Omit                    *OmitOption              `yaml:"omit" rule_name:"OmitAction"`
-	Rename                  *RenameOption            `yaml:"rename" rule_name:"RenameAction"`
-	RenameArguments         *RenameArguments         `yaml:"rename_arguments" rule_name:"RenameArgumentsAction"`
-	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean" rule_name:"UnfoldBooleanAction"`
-	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments" rule_name:"StructFieldsAsArgumentsAction"`
-	StructFieldsAsOptions   *StructFieldsAsOptions   `yaml:"struct_fields_as_options" rule_name:"StructFieldsAsOptionsAction"`
-	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append" rule_name:"ArrayToAppendAction"`
-	MapToIndex              *MapToIndex              `yaml:"map_to_index" rule_name:"MapToIndexAction"`
-	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options" rule_name:"DisjunctionAsOptionsAction"`
-	Duplicate               *DuplicateOption         `yaml:"duplicate" rule_name:"DuplicateAction"`
-	AddAssignment           *AddAssignment           `yaml:"add_assignment" rule_name:"AddAssignmentAction"`
-	AddComments             *AddComments             `yaml:"add_comments" rule_name:"AddCommentsAction"`
-	Debug                   *DebugOption             `yaml:"debug" rule_name:"DebugAction"`
+	Omit                    *OmitOption              `yaml:"omit" rule_name:"Omit"`
+	Rename                  *RenameOption            `yaml:"rename" rule_name:"Rename"`
+	RenameArguments         *RenameArguments         `yaml:"rename_arguments" rule_name:"RenameArguments"`
+	UnfoldBoolean           *UnfoldBoolean           `yaml:"unfold_boolean" rule_name:"UnfoldBoolean"`
+	StructFieldsAsArguments *StructFieldsAsArguments `yaml:"struct_fields_as_arguments" rule_name:"StructFieldsAsArguments"`
+	StructFieldsAsOptions   *StructFieldsAsOptions   `yaml:"struct_fields_as_options" rule_name:"StructFieldsAsOptions"`
+	ArrayToAppend           *ArrayToAppend           `yaml:"array_to_append" rule_name:"ArrayToAppend"`
+	MapToIndex              *MapToIndex              `yaml:"map_to_index" rule_name:"MapToIndex"`
+	DisjunctionAsOptions    *DisjunctionAsOptions    `yaml:"disjunction_as_options" rule_name:"DisjunctionAsOptions"`
+	Duplicate               *DuplicateOption         `yaml:"duplicate" rule_name:"Duplicate"`
+	AddAssignment           *AddAssignment           `yaml:"add_assignment" rule_name:"AddAssignment"`
+	AddComments             *AddComments             `yaml:"add_comments" rule_name:"AddComments"`
+	Debug                   *DebugOption             `yaml:"debug" rule_name:"Debug"`
 }
 
 func (rule OptionRule) AsRewriteRule(pkg string) (option.Rule, error) {
