@@ -1,5 +1,6 @@
-// Taken from https://github.com/grafana/grafanactl/blob/0d56870b949a9518d3bb02c4b64437fb2ba1da13/internal/logs/handler.go
 package logs
+
+// Taken from https://github.com/grafana/grafanactl/blob/0d56870b949a9518d3bb02c4b64437fb2ba1da13/internal/logs/handler.go
 
 import (
 	"bytes"

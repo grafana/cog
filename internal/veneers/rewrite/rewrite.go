@@ -116,7 +116,8 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 			return nil, fmt.Errorf("builder rule failed: err=%w", err)
 		}
 
-		builders = append(unselectedBuilders, transformedBuilders...)
+		builders = unselectedBuilders
+		builders = append(builders, transformedBuilders...)
 	}
 
 	return builders, nil

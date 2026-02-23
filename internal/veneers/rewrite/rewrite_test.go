@@ -35,10 +35,7 @@ func testData() []rewriteTestCase {
 			description:   "omit an entire builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules: []*builder.Rule{
-				&builder.Rule{
-					Selector: builder.ByObjectName("test_pkg", "Dashboard"),
-					Action:   builder.Omit(),
-				},
+				builder.Omit(builder.ByObjectName("test_pkg", "Dashboard")),
 			},
 			optionRules:    nil,
 			outputBuilders: ast.Builders{panelBuilder()},
