@@ -2,6 +2,7 @@ package option
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -17,12 +18,17 @@ func (rule Rule) Matches(builder ast.Builder, option ast.Option) bool {
 	return rule.Selector.Matches(builder, option)
 }
 
-func (rule Rule) Apply(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
-	return rule.Action.run(schemas, builder, option)
+func (rule Rule) Apply(ctx RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
+	return rule.Action.run(ctx, builder, option)
 }
 
 func (rule Rule) String() string {
 	return fmt.Sprintf("selector=%s, action=%s", rule.Selector, rule.Action)
+}
+
+type RuleCtx struct {
+	Logger  *slog.Logger
+	Schemas ast.Schemas
 }
 
 type Action struct {
