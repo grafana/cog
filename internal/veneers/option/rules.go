@@ -18,7 +18,7 @@ func (rule Rule) Matches(builder ast.Builder, option ast.Option) bool {
 	return rule.Selector.Matches(builder, option)
 }
 
-func (rule Rule) Apply(ctx RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
+func (rule Rule) Apply(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
 	return rule.Action.run(ctx, builder, option)
 }
 
