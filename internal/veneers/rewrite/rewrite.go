@@ -89,13 +89,13 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 	for _, rule := range rules {
 		unselectedBuilders := make([]ast.Builder, 0, len(builders))
 		var matches ast.Builders
-		for _, builder := range builders {
-			if !rule.Selector.Matches(schemas, builder) {
-				unselectedBuilders = append(unselectedBuilders, builder)
+		for _, candidate := range builders {
+			if !rule.Matches(schemas, candidate) {
+				unselectedBuilders = append(unselectedBuilders, candidate)
 				continue
 			}
 
-			matches = append(matches, builder)
+			matches = append(matches, candidate)
 		}
 
 		if len(matches) == 0 {
@@ -107,7 +107,7 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 			Schemas:  schemas,
 			Builders: builders,
 		}
-		transformedBuilders, err = rule.Action.Run(ctx, matches)
+		transformedBuilders, err = rule.Apply(ctx, matches)
 		if err != nil {
 			engine.logger.Error("builder rule failed", slog.String("language", language), slog.String("rule", rule.String()), logs.Err(err))
 			return nil, fmt.Errorf("builder rule failed: err=%w", err)
@@ -152,10 +152,7 @@ func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, b
 
 func (engine *Rewriter) debugBuilderRules() []*builder.Rule {
 	return []*builder.Rule{
-		&builder.Rule{
-			Selector: builder.EveryBuilder(),
-			Action:   builder.VeneerTrailAsComments(),
-		},
+		builder.VeneerTrailAsComments(builder.EveryBuilder()),
 	}
 }
 

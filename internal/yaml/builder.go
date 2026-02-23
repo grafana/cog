@@ -85,10 +85,7 @@ func (rule OmitBuilder) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action:   builder.Omit(),
-	}, nil
+	return builder.Omit(selector), nil
 }
 
 type RenameBuilder struct {
@@ -103,10 +100,7 @@ func (rule RenameBuilder) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action:   builder.Rename(rule.As),
-	}, nil
+	return builder.Rename(selector, rule.As), nil
 }
 
 type MergeInto struct {
@@ -118,15 +112,13 @@ type MergeInto struct {
 }
 
 func (rule MergeInto) AsRule(pkg string) (*builder.Rule, error) {
-	return &builder.Rule{
-		Selector: builder.ByName(pkg, rule.Destination),
-		Action: builder.MergeInto(
-			rule.Source,
-			rule.UnderPath,
-			rule.ExcludeOptions,
-			rule.RenameOptions,
-		),
-	}, nil
+	return builder.MergeInto(
+		builder.ByName(pkg, rule.Destination),
+		rule.Source,
+		rule.UnderPath,
+		rule.ExcludeOptions,
+		rule.RenameOptions,
+	), nil
 }
 
 type ComposeBuilders struct {
@@ -147,18 +139,15 @@ func (rule ComposeBuilders) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action: builder.ComposeBuilders(builder.CompositionConfig{
-			SourceBuilderName:        rule.SourceBuilderName,
-			PluginDiscriminatorField: rule.PluginDiscriminatorField,
-			ExcludeOptions:           rule.ExcludeOptions,
-			CompositionMap:           rule.CompositionMap,
-			ComposedBuilderName:      rule.ComposedBuilderName,
-			PreserveOriginalBuilders: rule.PreserveOriginalBuilders,
-			RenameOptions:            rule.RenameOptions,
-		}),
-	}, nil
+	return builder.ComposeBuilders(selector, builder.CompositionConfig{
+		SourceBuilderName:        rule.SourceBuilderName,
+		PluginDiscriminatorField: rule.PluginDiscriminatorField,
+		ExcludeOptions:           rule.ExcludeOptions,
+		CompositionMap:           rule.CompositionMap,
+		ComposedBuilderName:      rule.ComposedBuilderName,
+		PreserveOriginalBuilders: rule.PreserveOriginalBuilders,
+		RenameOptions:            rule.RenameOptions,
+	}), nil
 }
 
 type Properties struct {
@@ -173,10 +162,7 @@ func (rule Properties) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action:   builder.Properties(rule.Set),
-	}, nil
+	return builder.Properties(selector, rule.Set), nil
 }
 
 type Duplicate struct {
@@ -192,10 +178,7 @@ func (rule Duplicate) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action:   builder.Duplicate(rule.As, rule.ExcludeOptions),
-	}, nil
+	return builder.Duplicate(selector, rule.As, rule.ExcludeOptions), nil
 }
 
 type Initialization struct {
@@ -215,14 +198,12 @@ func (rule Initialize) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action: builder.Initialize(
-			tools.Map(rule.Set, func(init Initialization) builder.Initialization {
-				return builder.Initialization{PropertyPath: init.Property, Value: init.Value}
-			}),
-		),
-	}, nil
+	return builder.Initialize(
+		selector,
+		tools.Map(rule.Set, func(init Initialization) builder.Initialization {
+			return builder.Initialization{PropertyPath: init.Property, Value: init.Value}
+		}),
+	), nil
 }
 
 type PromoteOptsToConstructor struct {
@@ -237,10 +218,7 @@ func (rule PromoteOptsToConstructor) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action:   builder.PromoteOptionsToConstructor(rule.Options),
-	}, nil
+	return builder.PromoteOptionsToConstructor(selector, rule.Options), nil
 }
 
 type AddOption struct {
@@ -255,10 +233,7 @@ func (rule AddOption) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action:   builder.AddOption(rule.Option),
-	}, nil
+	return builder.AddOption(selector, rule.Option), nil
 }
 
 type AddFactory struct {
@@ -273,10 +248,7 @@ func (rule AddFactory) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action:   builder.AddFactory(rule.Factory),
-	}, nil
+	return builder.AddFactory(selector, rule.Factory), nil
 }
 
 type DebugBuilder struct {
@@ -289,10 +261,7 @@ func (rule DebugBuilder) AsRule(pkg string) (*builder.Rule, error) {
 		return nil, err
 	}
 
-	return &builder.Rule{
-		Selector: selector,
-		Action:   builder.Debug(),
-	}, nil
+	return builder.Debug(selector), nil
 }
 
 /******************************************************************************
