@@ -27,49 +27,49 @@ type BuilderRule struct {
 	Debug                    *DebugBuilder             `yaml:"debug" rule_name:"Debug"`
 }
 
-func (rule BuilderRule) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule BuilderRule) AsRule(pkg string) (*builder.Rule, error) {
 	if rule.Omit != nil {
-		return rule.Omit.AsRewriteRule(pkg)
+		return rule.Omit.AsRule(pkg)
 	}
 
 	if rule.Rename != nil {
-		return rule.Rename.AsRewriteRule(pkg)
+		return rule.Rename.AsRule(pkg)
 	}
 
 	if rule.MergeInto != nil {
-		return rule.MergeInto.AsRewriteRule(pkg)
+		return rule.MergeInto.AsRule(pkg)
 	}
 
 	if rule.ComposeBuilders != nil {
-		return rule.ComposeBuilders.AsRewriteRule(pkg)
+		return rule.ComposeBuilders.AsRule(pkg)
 	}
 
 	if rule.Properties != nil {
-		return rule.Properties.AsRewriteRule(pkg)
+		return rule.Properties.AsRule(pkg)
 	}
 
 	if rule.Duplicate != nil {
-		return rule.Duplicate.AsRewriteRule(pkg)
+		return rule.Duplicate.AsRule(pkg)
 	}
 
 	if rule.Initialize != nil {
-		return rule.Initialize.AsRewriteRule(pkg)
+		return rule.Initialize.AsRule(pkg)
 	}
 
 	if rule.PromoteOptsToConstructor != nil {
-		return rule.PromoteOptsToConstructor.AsRewriteRule(pkg)
+		return rule.PromoteOptsToConstructor.AsRule(pkg)
 	}
 
 	if rule.AddOption != nil {
-		return rule.AddOption.AsRewriteRule(pkg)
+		return rule.AddOption.AsRule(pkg)
 	}
 
 	if rule.AddFactory != nil {
-		return rule.AddFactory.AsRewriteRule(pkg)
+		return rule.AddFactory.AsRule(pkg)
 	}
 
 	if rule.Debug != nil {
-		return rule.Debug.AsRewriteRule(pkg)
+		return rule.Debug.AsRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -79,13 +79,16 @@ type OmitBuilder struct {
 	BuilderSelector `yaml:",inline"`
 }
 
-func (rule OmitBuilder) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule OmitBuilder) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.Omit(selector), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action:   builder.Omit(),
+	}, nil
 }
 
 type RenameBuilder struct {
@@ -94,13 +97,16 @@ type RenameBuilder struct {
 	As string `yaml:"as"`
 }
 
-func (rule RenameBuilder) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule RenameBuilder) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.Rename(selector, rule.As), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action:   builder.Rename(rule.As),
+	}, nil
 }
 
 type MergeInto struct {
@@ -111,14 +117,16 @@ type MergeInto struct {
 	RenameOptions  map[string]string `yaml:"rename_options"`
 }
 
-func (rule MergeInto) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
-	return builder.MergeInto(
-		builder.ByName(pkg, rule.Destination),
-		rule.Source,
-		rule.UnderPath,
-		rule.ExcludeOptions,
-		rule.RenameOptions,
-	), nil
+func (rule MergeInto) AsRule(pkg string) (*builder.Rule, error) {
+	return &builder.Rule{
+		Selector: builder.ByName(pkg, rule.Destination),
+		Action: builder.MergeInto(
+			rule.Source,
+			rule.UnderPath,
+			rule.ExcludeOptions,
+			rule.RenameOptions,
+		),
+	}, nil
 }
 
 type ComposeBuilders struct {
@@ -133,15 +141,15 @@ type ComposeBuilders struct {
 	RenameOptions            map[string]string `yaml:"rename_options"`
 }
 
-func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule ComposeBuilders) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.ComposeBuilders(
-		selector,
-		builder.CompositionConfig{
+	return &builder.Rule{
+		Selector: selector,
+		Action: builder.ComposeBuilders(builder.CompositionConfig{
 			SourceBuilderName:        rule.SourceBuilderName,
 			PluginDiscriminatorField: rule.PluginDiscriminatorField,
 			ExcludeOptions:           rule.ExcludeOptions,
@@ -149,8 +157,8 @@ func (rule ComposeBuilders) AsRewriteRule(pkg string) (builder.RewriteRule, erro
 			ComposedBuilderName:      rule.ComposedBuilderName,
 			PreserveOriginalBuilders: rule.PreserveOriginalBuilders,
 			RenameOptions:            rule.RenameOptions,
-		},
-	), nil
+		}),
+	}, nil
 }
 
 type Properties struct {
@@ -159,16 +167,16 @@ type Properties struct {
 	Set []ast.StructField `yaml:"set"`
 }
 
-func (rule Properties) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule Properties) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.Properties(
-		selector,
-		rule.Set,
-	), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action:   builder.Properties(rule.Set),
+	}, nil
 }
 
 type Duplicate struct {
@@ -178,17 +186,16 @@ type Duplicate struct {
 	ExcludeOptions []string `yaml:"exclude_options"`
 }
 
-func (rule Duplicate) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule Duplicate) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.Duplicate(
-		selector,
-		rule.As,
-		rule.ExcludeOptions,
-	), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action:   builder.Duplicate(rule.As, rule.ExcludeOptions),
+	}, nil
 }
 
 type Initialization struct {
@@ -202,18 +209,20 @@ type Initialize struct {
 	Set []Initialization `yaml:"set"`
 }
 
-func (rule Initialize) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule Initialize) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.Initialize(
-		selector,
-		tools.Map(rule.Set, func(init Initialization) builder.Initialization {
-			return builder.Initialization{PropertyPath: init.Property, Value: init.Value}
-		}),
-	), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action: builder.Initialize(
+			tools.Map(rule.Set, func(init Initialization) builder.Initialization {
+				return builder.Initialization{PropertyPath: init.Property, Value: init.Value}
+			}),
+		),
+	}, nil
 }
 
 type PromoteOptsToConstructor struct {
@@ -222,13 +231,16 @@ type PromoteOptsToConstructor struct {
 	Options []string `yaml:"options"`
 }
 
-func (rule PromoteOptsToConstructor) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule PromoteOptsToConstructor) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.PromoteOptionsToConstructor(selector, rule.Options), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action:   builder.PromoteOptionsToConstructor(rule.Options),
+	}, nil
 }
 
 type AddOption struct {
@@ -237,13 +249,16 @@ type AddOption struct {
 	Option veneers.Option `yaml:"option"`
 }
 
-func (rule AddOption) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule AddOption) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.AddOption(selector, rule.Option), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action:   builder.AddOption(rule.Option),
+	}, nil
 }
 
 type AddFactory struct {
@@ -252,26 +267,32 @@ type AddFactory struct {
 	Factory ast.BuilderFactory `yaml:"factory"`
 }
 
-func (rule AddFactory) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule AddFactory) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.AddFactory(selector, rule.Factory), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action:   builder.AddFactory(rule.Factory),
+	}, nil
 }
 
 type DebugBuilder struct {
 	BuilderSelector `yaml:",inline"`
 }
 
-func (rule DebugBuilder) AsRewriteRule(pkg string) (builder.RewriteRule, error) {
+func (rule DebugBuilder) AsRule(pkg string) (*builder.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
 		return nil, err
 	}
 
-	return builder.Debug(selector), nil
+	return &builder.Rule{
+		Selector: selector,
+		Action:   builder.Debug(),
+	}, nil
 }
 
 /******************************************************************************
@@ -287,7 +308,7 @@ type BuilderSelector struct {
 	GeneratedFromDisjunction *bool `yaml:"generated_from_disjunction"` // noop?
 }
 
-func (selector BuilderSelector) AsSelector(pkg string) (builder.Selector, error) {
+func (selector BuilderSelector) AsSelector(pkg string) (*builder.Selector, error) {
 	if selector.ByObject != nil {
 		return builder.ByObjectName(pkg, *selector.ByObject), nil
 	}

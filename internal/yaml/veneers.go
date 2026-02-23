@@ -40,7 +40,7 @@ func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Con
 }
 
 func (loader *VeneersLoader) load(file string) (rewrite.RuleSet, error) {
-	var builderRules []builder.RewriteRule
+	var builderRules []*builder.Rule
 	var optionRules []option.RewriteRule
 
 	contents, err := os.ReadFile(file)
@@ -57,12 +57,12 @@ func (loader *VeneersLoader) load(file string) (rewrite.RuleSet, error) {
 		return rewrite.RuleSet{}, fmt.Errorf("missing 'package' statement in veneers file '%s'\n", file)
 	}
 
-	builderRules = make([]builder.RewriteRule, 0, len(veneers.Builders))
+	builderRules = make([]*builder.Rule, 0, len(veneers.Builders))
 	optionRules = make([]option.RewriteRule, 0, len(veneers.Options))
 
 	// convert builder rules
 	for i, rule := range veneers.Builders {
-		builderRule, err := rule.AsRewriteRule(veneers.Package)
+		builderRule, err := rule.AsRule(veneers.Package)
 		if err != nil {
 			path, innerErr := yaml.PathString(fmt.Sprintf("$.builders[%d]", i))
 			if innerErr != nil {
