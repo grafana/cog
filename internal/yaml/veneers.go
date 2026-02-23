@@ -2,6 +2,7 @@ package yaml
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/goccy/go-yaml"
@@ -24,7 +25,7 @@ func NewVeneersLoader() *VeneersLoader {
 	return &VeneersLoader{}
 }
 
-func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Config) (*rewrite.Rewriter, error) {
+func (loader *VeneersLoader) RewriterFrom(logger *slog.Logger, filenames []string, config rewrite.Config) (*rewrite.Rewriter, error) {
 	ruleSet := make([]rewrite.RuleSet, 0, len(filenames))
 
 	for _, filename := range filenames {
@@ -36,7 +37,7 @@ func (loader *VeneersLoader) RewriterFrom(filenames []string, config rewrite.Con
 		ruleSet = append(ruleSet, rules)
 	}
 
-	return rewrite.NewRewrite(ruleSet, config), nil
+	return rewrite.NewRewrite(logger, ruleSet, config), nil
 }
 
 func (loader *VeneersLoader) load(file string) (rewrite.RuleSet, error) {
