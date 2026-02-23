@@ -42,7 +42,7 @@ func (loader *VeneersLoader) RewriterFrom(logger *slog.Logger, filenames []strin
 
 func (loader *VeneersLoader) load(file string) (rewrite.RuleSet, error) {
 	var builderRules []*builder.Rule
-	var optionRules []option.RewriteRule
+	var optionRules []option.Rule
 
 	contents, err := os.ReadFile(file)
 	if err != nil {
@@ -59,7 +59,7 @@ func (loader *VeneersLoader) load(file string) (rewrite.RuleSet, error) {
 	}
 
 	builderRules = make([]*builder.Rule, 0, len(veneers.Builders))
-	optionRules = make([]option.RewriteRule, 0, len(veneers.Options))
+	optionRules = make([]option.Rule, 0, len(veneers.Options))
 
 	// convert builder rules
 	for i, rule := range veneers.Builders {

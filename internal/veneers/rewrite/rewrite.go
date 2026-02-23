@@ -20,7 +20,7 @@ type Config struct {
 type RuleSet struct {
 	Languages    []string
 	BuilderRules []*builder.Rule
-	OptionRules  []option.RewriteRule
+	OptionRules  []option.Rule
 }
 
 type Rewriter struct {
@@ -30,12 +30,12 @@ type Rewriter struct {
 	// Rules applied to `Builder` objects, grouped by language
 	builderRules map[string][]*builder.Rule
 	// Rules applied to `Option` objects, grouped by language
-	optionRules map[string][]option.RewriteRule
+	optionRules map[string][]option.Rule
 }
 
 func NewRewrite(logger *slog.Logger, rules []RuleSet, config Config) *Rewriter {
 	builderRules := make(map[string][]*builder.Rule)
-	optionRules := make(map[string][]option.RewriteRule)
+	optionRules := make(map[string][]option.Rule)
 
 	for _, set := range rules {
 		for _, language := range set.Languages {
@@ -119,20 +119,20 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 	return builders, nil
 }
 
-func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []option.RewriteRule) []ast.Builder {
+func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []option.Rule) []ast.Builder {
 	for _, rule := range rules {
 		matches := 0
 		for i, b := range builders {
 			processedOptions := make([]ast.Option, 0, len(b.Options))
 
 			for _, opt := range b.Options {
-				if !rule.Selector.Matches(b, opt) {
+				if !rule.Matches(b, opt) {
 					processedOptions = append(processedOptions, opt)
 					continue
 				}
 
 				matches += 1
-				processedOptions = append(processedOptions, rule.Action(schemas, b, opt)...)
+				processedOptions = append(processedOptions, rule.Apply(schemas, b, opt)...)
 			}
 
 			builders[i].Options = processedOptions
@@ -159,8 +159,8 @@ func (engine *Rewriter) debugBuilderRules() []*builder.Rule {
 	}
 }
 
-func (engine *Rewriter) debugOptionRules() []option.RewriteRule {
-	return []option.RewriteRule{
+func (engine *Rewriter) debugOptionRules() []option.Rule {
+	return []option.Rule{
 		option.VeneerTrailAsComments(option.EveryOption()),
 	}
 }
