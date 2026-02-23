@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -11,6 +13,7 @@ import (
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +28,8 @@ type options struct {
 
 func Command() *cobra.Command {
 	opts := options{}
+	verbosity := 0
+	var logger *slog.Logger
 
 	cmd := &cobra.Command{
 		Use:   "inspect",
@@ -41,10 +46,22 @@ Language-specific builder transformations are NOT applied until a language is sp
 			if opts.IRType != "types" && opts.IRType != "builders" && opts.IRType != "converters" {
 				return fmt.Errorf("invalid IR type '%s'. Valid values: types, builders, converters", opts.IRType)
 			}
+
+			logLevel := new(slog.LevelVar)
+			logLevel.Set(slog.LevelWarn)
+			// Multiplying the number of occurrences of the `-v` flag by 4 (gap between log levels in slog)
+			// allows us to increase the logger's verbosity.
+			logLevel.Set(logLevel.Level() - slog.Level(min(verbosity, 3)*4))
+
+			logHandler := logs.NewHandler(os.Stderr, &logs.Options{
+				Level: logLevel,
+			})
+			logger = slog.New(logHandler)
+
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return doInspect(cmd.Context(), opts)
+			return doInspect(cmd.Context(), logger, opts)
 		},
 	}
 
@@ -60,8 +77,8 @@ Language-specific builder transformations are NOT applied until a language is sp
 	return cmd
 }
 
-func doInspect(ctx context.Context, opts options) error {
-	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, codegen.Parameters(opts.ExtraParameters))
+func doInspect(ctx context.Context, logger *slog.Logger, opts options) error {
+	pipeline, err := codegen.PipelineFromFile(opts.ConfigPath, codegen.Parameters(opts.ExtraParameters), codegen.Logger(logger))
 	if err != nil {
 		return err
 	}

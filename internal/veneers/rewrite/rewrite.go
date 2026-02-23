@@ -2,8 +2,10 @@ package rewrite
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
@@ -11,11 +13,8 @@ import (
 
 const AllLanguages = "all"
 
-type Reporter func(msg string)
-
 type Config struct {
-	Debug    bool
-	Reporter Reporter
+	Debug bool
 }
 
 type RuleSet struct {
@@ -25,6 +24,7 @@ type RuleSet struct {
 }
 
 type Rewriter struct {
+	logger *slog.Logger
 	config Config
 
 	// Rules applied to `Builder` objects, grouped by language
@@ -33,7 +33,7 @@ type Rewriter struct {
 	optionRules map[string][]option.RewriteRule
 }
 
-func NewRewrite(rules []RuleSet, config Config) *Rewriter {
+func NewRewrite(logger *slog.Logger, rules []RuleSet, config Config) *Rewriter {
 	builderRules := make(map[string][]*builder.Rule)
 	optionRules := make(map[string][]option.RewriteRule)
 
@@ -44,17 +44,12 @@ func NewRewrite(rules []RuleSet, config Config) *Rewriter {
 		}
 	}
 
-	rewriter := &Rewriter{
+	return &Rewriter{
+		logger:       logger,
 		config:       config,
 		builderRules: builderRules,
 		optionRules:  optionRules,
 	}
-
-	if rewriter.config.Reporter == nil {
-		rewriter.config.Reporter = func(msg string) {}
-	}
-
-	return rewriter
 }
 
 func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, language string) ([]ast.Builder, error) {
@@ -104,7 +99,7 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 		}
 
 		if len(matches) == 0 {
-			engine.config.Reporter(fmt.Sprintf("[%s] builder rule matched nothing: %s", language, rule))
+			engine.logger.Warn("builder rule matched nothing", slog.String("language", language), slog.String("rule", rule.String()))
 			continue
 		}
 
@@ -114,7 +109,8 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 		}
 		transformedBuilders, err = rule.Action.Run(ctx, matches)
 		if err != nil {
-			return nil, fmt.Errorf("[%s] builder rule failed: %s, err=%w", language, rule, err)
+			engine.logger.Error("builder rule failed", slog.String("language", language), slog.String("rule", rule.String()), logs.Err(err))
+			return nil, fmt.Errorf("builder rule failed: err=%w", err)
 		}
 
 		builders = append(unselectedBuilders, transformedBuilders...)
