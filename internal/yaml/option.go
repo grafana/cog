@@ -28,7 +28,7 @@ type OptionRule struct {
 	Debug                   *DebugOption             `yaml:"debug" rule_name:"DebugAction"`
 }
 
-func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule OptionRule) AsRewriteRule(pkg string) (option.Rule, error) {
 	if rule.Omit != nil {
 		return rule.Omit.AsRewriteRule(pkg)
 	}
@@ -81,17 +81,17 @@ func (rule OptionRule) AsRewriteRule(pkg string) (option.RewriteRule, error) {
 		return rule.Debug.AsRewriteRule(pkg)
 	}
 
-	return option.RewriteRule{}, fmt.Errorf("empty rule")
+	return option.Rule{}, fmt.Errorf("empty rule")
 }
 
 type OmitOption struct {
 	OptionSelector `yaml:",inline"`
 }
 
-func (rule OmitOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule OmitOption) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.Omit(selector), nil
@@ -103,10 +103,10 @@ type RenameOption struct {
 	As string `yaml:"as"`
 }
 
-func (rule RenameOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule RenameOption) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.Rename(selector, rule.As), nil
@@ -118,10 +118,10 @@ type RenameArguments struct {
 	As []string `yaml:"as"`
 }
 
-func (rule RenameArguments) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule RenameArguments) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.RenameArguments(selector, rule.As), nil
@@ -134,10 +134,10 @@ type UnfoldBoolean struct {
 	FalseAs string `yaml:"false_as"`
 }
 
-func (rule UnfoldBoolean) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule UnfoldBoolean) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.UnfoldBoolean(selector, option.BooleanUnfold{
@@ -152,10 +152,10 @@ type StructFieldsAsArguments struct {
 	Fields []string `yaml:"fields"`
 }
 
-func (rule StructFieldsAsArguments) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule StructFieldsAsArguments) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.StructFieldsAsArguments(selector, rule.Fields...), nil
@@ -167,10 +167,10 @@ type StructFieldsAsOptions struct {
 	Fields []string `yaml:"fields"`
 }
 
-func (rule StructFieldsAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule StructFieldsAsOptions) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.StructFieldsAsOptions(selector, rule.Fields...), nil
@@ -180,10 +180,10 @@ type ArrayToAppend struct {
 	OptionSelector `yaml:",inline"`
 }
 
-func (rule ArrayToAppend) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule ArrayToAppend) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.ArrayToAppend(selector), nil
@@ -193,10 +193,10 @@ type MapToIndex struct {
 	OptionSelector `yaml:",inline"`
 }
 
-func (rule MapToIndex) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule MapToIndex) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.MapToIndex(selector), nil
@@ -208,10 +208,10 @@ type DisjunctionAsOptions struct {
 	ArgumentIndex int `yaml:"argument_index"`
 }
 
-func (rule DisjunctionAsOptions) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule DisjunctionAsOptions) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.DisjunctionAsOptions(selector, rule.ArgumentIndex), nil
@@ -223,10 +223,10 @@ type DuplicateOption struct {
 	As string `yaml:"as"`
 }
 
-func (rule DuplicateOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule DuplicateOption) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.Duplicate(selector, rule.As), nil
@@ -238,10 +238,10 @@ type AddAssignment struct {
 	Assignment veneers.Assignment `yaml:"assignment"`
 }
 
-func (rule AddAssignment) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule AddAssignment) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.AddAssignment(selector, rule.Assignment), nil
@@ -253,10 +253,10 @@ type AddComments struct {
 	Comments []string `yaml:"comments"`
 }
 
-func (rule AddComments) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule AddComments) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.AddComments(selector, rule.Comments), nil
@@ -266,10 +266,10 @@ type DebugOption struct {
 	OptionSelector `yaml:",inline"`
 }
 
-func (rule DebugOption) AsRewriteRule(pkg string) (option.RewriteRule, error) {
+func (rule DebugOption) AsRewriteRule(pkg string) (option.Rule, error) {
 	selector, err := rule.AsSelector(pkg)
 	if err != nil {
-		return option.RewriteRule{}, err
+		return option.Rule{}, err
 	}
 
 	return option.Debug(selector), nil
