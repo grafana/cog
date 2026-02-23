@@ -1,6 +1,8 @@
 package rewrite
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/builder"
@@ -9,13 +11,16 @@ import (
 
 const AllLanguages = "all"
 
+type Reporter func(msg string)
+
 type Config struct {
-	Debug bool
+	Debug    bool
+	Reporter Reporter
 }
 
 type RuleSet struct {
 	Languages    []string
-	BuilderRules []builder.RewriteRule
+	BuilderRules []*builder.Rule
 	OptionRules  []option.RewriteRule
 }
 
@@ -23,13 +28,13 @@ type Rewriter struct {
 	config Config
 
 	// Rules applied to `Builder` objects, grouped by language
-	builderRules map[string][]builder.RewriteRule
+	builderRules map[string][]*builder.Rule
 	// Rules applied to `Option` objects, grouped by language
 	optionRules map[string][]option.RewriteRule
 }
 
 func NewRewrite(rules []RuleSet, config Config) *Rewriter {
-	builderRules := make(map[string][]builder.RewriteRule)
+	builderRules := make(map[string][]*builder.Rule)
 	optionRules := make(map[string][]option.RewriteRule)
 
 	for _, set := range rules {
@@ -39,11 +44,17 @@ func NewRewrite(rules []RuleSet, config Config) *Rewriter {
 		}
 	}
 
-	return &Rewriter{
+	rewriter := &Rewriter{
 		config:       config,
 		builderRules: builderRules,
 		optionRules:  optionRules,
 	}
+
+	if rewriter.config.Reporter == nil {
+		rewriter.config.Reporter = func(msg string) {}
+	}
+
+	return rewriter
 }
 
 func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, language string) ([]ast.Builder, error) {
@@ -55,7 +66,7 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 	// start by applying veneers common to all languages, then
 	// apply language-specific ones.
 	for _, l := range []string{AllLanguages, language} {
-		newBuilders, err = engine.applyBuilderRules(schemas, newBuilders, engine.builderRules[l])
+		newBuilders, err = engine.applyBuilderRules(language, schemas, newBuilders, engine.builderRules[l])
 		if err != nil {
 			return nil, err
 		}
@@ -65,7 +76,7 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 
 	// and optionally, apply "debug" veneers
 	if engine.config.Debug {
-		newBuilders, err = engine.applyBuilderRules(schemas, newBuilders, engine.debugBuilderRules())
+		newBuilders, err = engine.applyBuilderRules("debug", schemas, newBuilders, engine.debugBuilderRules())
 		if err != nil {
 			return nil, err
 		}
@@ -76,14 +87,37 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 	return newBuilders, nil
 }
 
-func (engine *Rewriter) applyBuilderRules(schemas ast.Schemas, builders []ast.Builder, rules []builder.RewriteRule) ([]ast.Builder, error) {
+func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []*builder.Rule) ([]ast.Builder, error) {
 	var err error
+	var transformedBuilders []ast.Builder
 
 	for _, rule := range rules {
-		builders, err = rule(schemas, builders)
-		if err != nil {
-			return nil, err
+		unselectedBuilders := make([]ast.Builder, 0, len(builders))
+		var matches ast.Builders
+		for _, builder := range builders {
+			if !rule.Selector.Matches(schemas, builder) {
+				unselectedBuilders = append(unselectedBuilders, builder)
+				continue
+			}
+
+			matches = append(matches, builder)
 		}
+
+		if len(matches) == 0 {
+			engine.config.Reporter(fmt.Sprintf("[%s] builder rule matched nothing: %s", language, rule))
+			continue
+		}
+
+		ctx := builder.RuleCtx{
+			Schemas:  schemas,
+			Builders: builders,
+		}
+		transformedBuilders, err = rule.Action.Run(ctx, matches)
+		if err != nil {
+			return nil, fmt.Errorf("[%s] builder rule failed: %s, err=%w", language, rule, err)
+		}
+
+		builders = append(unselectedBuilders, transformedBuilders...)
 	}
 
 	return builders, nil
@@ -113,9 +147,12 @@ func (engine *Rewriter) applyOptionRules(schemas ast.Schemas, builders []ast.Bui
 	})
 }
 
-func (engine *Rewriter) debugBuilderRules() []builder.RewriteRule {
-	return []builder.RewriteRule{
-		builder.VeneerTrailAsComments(builder.EveryBuilder()),
+func (engine *Rewriter) debugBuilderRules() []*builder.Rule {
+	return []*builder.Rule{
+		&builder.Rule{
+			Selector: builder.EveryBuilder(),
+			Action:   builder.VeneerTrailAsComments(),
+		},
 	}
 }
 
