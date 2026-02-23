@@ -10,16 +10,39 @@ import (
 	"github.com/grafana/cog/internal/veneers"
 )
 
-type RewriteRule func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error)
+type Rule struct {
+	Selector *Selector
+	Action   *Action
+}
 
-func mapToSelected(selector Selector, mapFunc func(schemas ast.Schemas, builders ast.Builders, builder ast.Builder) (ast.Builder, error)) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
+func (rule Rule) String() string {
+	return fmt.Sprintf("selector=%s, action=%s", rule.Selector, rule.Action)
+}
+
+type RuleCtx struct {
+	Schemas  ast.Schemas
+	Builders ast.Builders
+}
+
+type actionRunner func(ctx RuleCtx, selectedBuilders ast.Builders) (ast.Builders, error)
+
+type Action struct {
+	description string
+	run         actionRunner
+}
+
+func (action Action) Run(ctx RuleCtx, selectedBuilders ast.Builders) (ast.Builders, error) {
+	return action.run(ctx, selectedBuilders)
+}
+
+func (action Action) String() string {
+	return action.description
+}
+
+func mapToSelected(mapFunc func(ctx RuleCtx, builder ast.Builder) (ast.Builder, error)) actionRunner {
+	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
 		for i, b := range builders {
-			if !selector(schemas, b) {
-				continue
-			}
-
-			newBuilder, err := mapFunc(schemas, builders, b)
+			newBuilder, err := mapFunc(ctx, b)
 			if err != nil {
 				return nil, err
 			}
@@ -80,47 +103,43 @@ func mergeBuilderInto(fromBuilder ast.Builder, intoBuilder ast.Builder, underPat
 }
 
 // Omit removes a builder.
-func Omit(selector Selector) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		filteredBuilders := make([]ast.Builder, 0, len(builders))
-
-		for _, builder := range builders {
-			if selector(schemas, builder) {
-				continue
-			}
-
-			filteredBuilders = append(filteredBuilders, builder)
-		}
-
-		return filteredBuilders, nil
+func Omit() *Action {
+	return &Action{
+		description: "omit",
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			return nil, nil
+		},
 	}
 }
 
-func MergeInto(selector Selector, sourceBuilderName string, underPath string, excludeOptions []string, renameOptions map[string]string) RewriteRule {
-	return mapToSelected(selector, func(schemas ast.Schemas, builders ast.Builders, destinationBuilder ast.Builder) (ast.Builder, error) {
-		sourceBuilder, found := builders.LocateByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
-		if !found {
-			// We couldn't find the source builder: let's return the selected builder untouched.
-			return destinationBuilder, nil
-		}
+func MergeInto(sourceBuilderName string, underPath string, excludeOptions []string, renameOptions map[string]string) *Action {
+	return &Action{
+		description: fmt.Sprintf("merge_into[source: '%s', under_path: '%s']", sourceBuilderName, underPath),
+		run: mapToSelected(func(ctx RuleCtx, destinationBuilder ast.Builder) (ast.Builder, error) {
+			sourceBuilder, found := ctx.Builders.LocateByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
+			if !found {
+				// We couldn't find the source builder: let's return the selected builder untouched.
+				return destinationBuilder, nil
+			}
 
-		newRoot, err := destinationBuilder.MakePath(schemas, underPath)
-		if err != nil {
-			return destinationBuilder, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
-		}
+			newRoot, err := destinationBuilder.MakePath(ctx.Schemas, underPath)
+			if err != nil {
+				return destinationBuilder, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
+			}
 
-		newBuilder, err := mergeBuilderInto(sourceBuilder, destinationBuilder, newRoot, excludeOptions, renameOptions)
-		if err != nil {
-			return ast.Builder{}, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
-		}
+			newBuilder, err := mergeBuilderInto(sourceBuilder, destinationBuilder, newRoot, excludeOptions, renameOptions)
+			if err != nil {
+				return ast.Builder{}, fmt.Errorf("could not apply MergeInto builder veneer: %w", err)
+			}
 
-		newBuilder.AddToVeneerTrail(fmt.Sprintf("MergeInto[source=%s]", sourceBuilder.Name))
+			newBuilder.AddToVeneerTrail(fmt.Sprintf("MergeInto[source=%s]", sourceBuilder.Name))
 
-		return newBuilder, nil
-	})
+			return newBuilder, nil
+		}),
+	}
 }
 
-func composeBuilderForType(schemas ast.Schemas, builders ast.Builders, config CompositionConfig, typeDiscriminator string, sourceBuilder ast.Builder, composableBuilders ast.Builders) (ast.Builders, error) {
+func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDiscriminator string, sourceBuilder ast.Builder, composableBuilders ast.Builders) (ast.Builders, error) {
 	newBuilder := ast.Builder{
 		Package:     composableBuilders[0].Package,
 		For:         sourceBuilder.For,
@@ -303,135 +322,133 @@ type CompositionConfig struct {
 	RenameOptions map[string]string
 }
 
-func ComposeBuilders(selector Selector, config CompositionConfig) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		sourceBuilderPkg, sourceBuilderNameWithoutPkg, found := strings.Cut(config.SourceBuilderName, ".")
-		if !found {
-			return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: SourceBuilderName '%s' is incorrect: no package found", sourceBuilderPkg)
-		}
-
-		sourceBuilder, found := builders.LocateByObject(sourceBuilderPkg, sourceBuilderNameWithoutPkg)
-		if !found {
-			return builders, nil
-		}
-
-		// - add to newBuilders all the builders that are not composable (ie: don't comply to the selector)
-		// - build a map of composable builders, indexed by type
-		// - aggregate the composable builders into a new, composed builder
-		// - add the new composed builders to newBuilders
-
-		newBuilders := make([]ast.Builder, 0, len(builders))
-		composableBuilders := make(map[string]ast.Builders)
-
-		for _, builder := range builders {
-			// the builder isn't selected: let's leave it untouched
-			if !selector(schemas, builder) {
-				newBuilders = append(newBuilders, builder)
-				continue
-			}
-
-			schema, found := schemas.Locate(builder.For.SelfRef.ReferredPkg)
+func ComposeBuilders(config CompositionConfig) *Action {
+	return &Action{
+		description: fmt.Sprintf("compose_builders[source: '%s']", config.SourceBuilderName),
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			sourceBuilderPkg, sourceBuilderNameWithoutPkg, found := strings.Cut(config.SourceBuilderName, ".")
 			if !found {
-				continue
+				return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: SourceBuilderName '%s' is incorrect: no package found", sourceBuilderPkg)
 			}
 
-			panelType := schema.Metadata.Identifier
-			composableBuilders[panelType] = append(composableBuilders[panelType], builder)
-		}
-
-		for panelType, buildersForType := range composableBuilders {
-			composedBuilders, err := composeBuilderForType(schemas, builders, config, panelType, sourceBuilder, buildersForType)
-			if err != nil {
-				return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: %w", err)
+			sourceBuilder, found := ctx.Builders.LocateByObject(sourceBuilderPkg, sourceBuilderNameWithoutPkg)
+			if !found {
+				return builders, nil
 			}
 
-			for i, b := range composedBuilders {
-				b.AddToVeneerTrail(fmt.Sprintf("ComposeBuilders[source=%s]", config.SourceBuilderName))
-				composedBuilders[i] = b
+			// - add to newBuilders all the builders that are not composable (ie: don't comply to the selector)
+			// - build a map of composable builders, indexed by type
+			// - aggregate the composable builders into a new, composed builder
+			// - add the new composed builders to newBuilders
+
+			newBuilders := make([]ast.Builder, 0, len(builders))
+			composableBuilders := make(map[string]ast.Builders)
+
+			for _, builder := range builders {
+				schema, found := ctx.Schemas.Locate(builder.For.SelfRef.ReferredPkg)
+				if !found {
+					continue
+				}
+
+				panelType := schema.Metadata.Identifier
+				composableBuilders[panelType] = append(composableBuilders[panelType], builder)
 			}
 
-			newBuilders = append(newBuilders, composedBuilders...)
-		}
+			for panelType, buildersForType := range composableBuilders {
+				composedBuilders, err := composeBuilderForType(ctx.Schemas, config, panelType, sourceBuilder, buildersForType)
+				if err != nil {
+					return nil, fmt.Errorf("could not apply ComposeBuilders builder veneer: %w", err)
+				}
 
-		return newBuilders, nil
+				for i, b := range composedBuilders {
+					b.AddToVeneerTrail(fmt.Sprintf("ComposeBuilders[source=%s]", config.SourceBuilderName))
+					composedBuilders[i] = b
+				}
+
+				newBuilders = append(newBuilders, composedBuilders...)
+			}
+
+			return newBuilders, nil
+		},
 	}
 }
 
 // Rename renames a builder.
-func Rename(selector Selector, newName string) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for i, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
+func Rename(newName string) *Action {
+	return &Action{
+		description: fmt.Sprintf("rename[as: '%s']", newName),
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			for i := range builders {
+				oldName := builders[i].Name
+				builders[i].Name = newName
+				builders[i].AddToVeneerTrail(fmt.Sprintf("Rename['%s' → '%s']", oldName, newName))
 			}
 
-			builders[i].Name = newName
-			builders[i].AddToVeneerTrail("Rename")
-		}
-
-		return builders, nil
+			return builders, nil
+		},
 	}
 }
 
-func VeneerTrailAsComments(selector Selector) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for i, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
+func VeneerTrailAsComments() *Action {
+	return &Action{
+		description: "venner_trail_as_comments",
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			for i, builder := range builders {
+				veneerTrail := tools.Map(builder.VeneerTrail, func(veneer string) string {
+					return fmt.Sprintf("Modified by veneer '%s'", veneer)
+				})
+
+				builders[i].For.Comments = append(builders[i].For.Comments, veneerTrail...)
 			}
 
-			veneerTrail := tools.Map(builder.VeneerTrail, func(veneer string) string {
-				return fmt.Sprintf("Modified by veneer '%s'", veneer)
-			})
-
-			builders[i].For.Comments = append(builders[i].For.Comments, veneerTrail...)
-		}
-
-		return builders, nil
+			return builders, nil
+		},
 	}
 }
 
-func Properties(selector Selector, properties []ast.StructField) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for i, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
+func Properties(properties []ast.StructField) *Action {
+	propNames := tools.Map(properties, func(prop ast.StructField) string {
+		return prop.Name
+	})
+
+	return &Action{
+		description: fmt.Sprintf("properties['%s']", strings.Join(propNames, ", ")),
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			for i := range builders {
+				builders[i].Properties = append(builders[i].Properties, properties...)
+				builders[i].AddToVeneerTrail("Properties")
 			}
 
-			builders[i].Properties = append(builders[i].Properties, properties...)
-			builders[i].AddToVeneerTrail("Properties")
-		}
-
-		return builders, nil
+			return builders, nil
+		},
 	}
 }
 
 // Duplicate duplicates a builder.
 // The name of the duplicated builder has to be specified and some options can
 // be excluded.
-func Duplicate(selector Selector, duplicateName string, excludeOptions []string) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		var newBuilders ast.Builders
+func Duplicate(duplicateName string, excludeOptions []string) *Action {
+	return &Action{
+		description: fmt.Sprintf("duplicate[as: '%s']", duplicateName),
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			var newBuilders ast.Builders
 
-		for _, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
+			for _, builder := range builders {
+				duplicatedBuilder := builder.DeepCopy()
+				duplicatedBuilder.Name = duplicateName
+				duplicatedBuilder.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s.%s]", builder.Package, builder.Name))
+
+				if len(excludeOptions) != 0 {
+					duplicatedBuilder.Options = tools.Filter(duplicatedBuilder.Options, func(option ast.Option) bool {
+						return !tools.StringInListEqualFold(option.Name, excludeOptions)
+					})
+				}
+
+				newBuilders = append(newBuilders, duplicatedBuilder)
 			}
 
-			duplicatedBuilder := builder.DeepCopy()
-			duplicatedBuilder.Name = duplicateName
-			duplicatedBuilder.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s.%s]", builder.Package, builder.Name))
-
-			if len(excludeOptions) != 0 {
-				duplicatedBuilder.Options = tools.Filter(duplicatedBuilder.Options, func(option ast.Option) bool {
-					return !tools.StringInListEqualFold(option.Name, excludeOptions)
-				})
-			}
-
-			newBuilders = append(newBuilders, duplicatedBuilder)
-		}
-
-		return append(builders, newBuilders...), nil
+			return append(builders, newBuilders...), nil
+		},
 	}
 }
 
@@ -440,135 +457,134 @@ type Initialization struct {
 	Value        any
 }
 
-func Initialize(selector Selector, statements []Initialization) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for i, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
-			}
+func Initialize(statements []Initialization) *Action {
+	initPaths := tools.Map(statements, func(stmt Initialization) string {
+		return stmt.PropertyPath
+	})
 
-			veneerDebug := make([]string, 0, len(statements))
-			for _, statement := range statements {
-				path, err := builders[i].MakePath(schemas, statement.PropertyPath)
-				if err != nil {
-					return nil, fmt.Errorf("could not apply Initialize builder veneer: %w", err)
+	return &Action{
+		description: fmt.Sprintf("initialize[%s]", strings.Join(initPaths, ", ")),
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			for i := range builders {
+				veneerDebug := make([]string, 0, len(statements))
+				for _, statement := range statements {
+					path, err := builders[i].MakePath(ctx.Schemas, statement.PropertyPath)
+					if err != nil {
+						return nil, fmt.Errorf("could not apply Initialize builder veneer: %w", err)
+					}
+
+					builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, ast.ConstantAssignment(path, statement.Value))
+					veneerDebug = append(veneerDebug, fmt.Sprintf("%s = %v", statement.PropertyPath, statement.Value))
 				}
-
-				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, ast.ConstantAssignment(path, statement.Value))
-				veneerDebug = append(veneerDebug, fmt.Sprintf("%s = %v", statement.PropertyPath, statement.Value))
+				builders[i].AddToVeneerTrail(fmt.Sprintf("Initialize[%s]", strings.Join(veneerDebug, ", ")))
 			}
-			builders[i].AddToVeneerTrail(fmt.Sprintf("Initialize[%s]", strings.Join(veneerDebug, ", ")))
-		}
 
-		return builders, nil
+			return builders, nil
+		},
 	}
 }
 
 // PromoteOptionsToConstructor promotes the given options as constructor
 // parameters. Both arguments and assignments described by the options
 // will be exposed in the builder's constructor.
-func PromoteOptionsToConstructor(selector Selector, optionNames []string) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for i, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
-			}
-
-			if len(builder.Factories) != 0 {
-				return nil, fmt.Errorf("could not apply PromoteOptionsToConstructor builder veneer: constructor arguments can not be added to builders that have factories")
-			}
-
-			for _, optName := range optionNames {
-				opt, ok := builder.OptionByName(optName)
-				if !ok {
-					continue
+func PromoteOptionsToConstructor(optionNames []string) *Action {
+	return &Action{
+		description: fmt.Sprintf("promote_options_to_constructor[opts: '%s']", strings.Join(optionNames, ", ")),
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			for i, builder := range builders {
+				if len(builder.Factories) != 0 {
+					return nil, fmt.Errorf("could not apply PromoteOptionsToConstructor builder veneer: constructor arguments can not be added to builders that have factories")
 				}
 
-				// TODO: do it for every argument/assignment?
-				arg := opt.Args[0].DeepCopy()
-				arg.Type.Nullable = false
+				for _, optName := range optionNames {
+					opt, ok := builder.OptionByName(optName)
+					if !ok {
+						continue
+					}
 
-				builders[i].Constructor.Args = append(builders[i].Constructor.Args, arg)
-				builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, opt.Assignments[0])
+					// TODO: do it for every argument/assignment?
+					arg := opt.Args[0].DeepCopy()
+					arg.Type.Nullable = false
 
-				builders[i].AddToVeneerTrail(fmt.Sprintf("PromoteOptionsToConstructor[%s]", optName))
+					builders[i].Constructor.Args = append(builders[i].Constructor.Args, arg)
+					builders[i].Constructor.Assignments = append(builders[i].Constructor.Assignments, opt.Assignments[0])
+
+					builders[i].AddToVeneerTrail(fmt.Sprintf("PromoteOptionsToConstructor[%s]", optName))
+				}
 			}
-		}
 
-		return builders, nil
+			return builders, nil
+		},
 	}
 }
 
 // AddOption adds a completely new option to the selected builders.
-func AddOption(selector Selector, newOption veneers.Option) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for i, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
+func AddOption(newOption veneers.Option) *Action {
+	return &Action{
+		description: fmt.Sprintf("add_option[name: '%s']", newOption.Name),
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			for i, builder := range builders {
+				newOpt, err := newOption.AsIR(ctx.Schemas, builder)
+				if err != nil {
+					return nil, fmt.Errorf("could not apply AddOption builder veneer: %w", err)
+				}
+
+				newOpt.AddToVeneerTrail("AddOption")
+				builders[i].Options = append(builders[i].Options, newOpt)
 			}
 
-			newOpt, err := newOption.AsIR(schemas, builder)
-			if err != nil {
-				return nil, fmt.Errorf("could not apply AddOption builder veneer: %w", err)
-			}
-
-			newOpt.AddToVeneerTrail("AddOption")
-			builders[i].Options = append(builders[i].Options, newOpt)
-		}
-
-		return builders, nil
+			return builders, nil
+		},
 	}
 }
 
 // AddFactory adds a builder factory to the selected builders.
 // These factories are meant to be used to simplify the instantiation of
 // builders for common use-cases.
-func AddFactory(selector Selector, factory ast.BuilderFactory) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for i, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
+func AddFactory(factory ast.BuilderFactory) *Action {
+	return &Action{
+		description: fmt.Sprintf("add_factory[name: '%s']", factory.Name),
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			for i := range builders {
+				if factory.BuilderRef.ReferredType == "" {
+					factory.BuilderRef.ReferredPkg = builders[i].Package
+					factory.BuilderRef.ReferredType = builders[i].Name
+				}
+
+				targetBuilder, found := ctx.Builders.LocateByName(factory.BuilderRef.ReferredPkg, factory.BuilderRef.ReferredType)
+				if !found {
+					return nil, fmt.Errorf("could not find target builder for factory: %s", factory.BuilderRef.String())
+				}
+
+				if len(targetBuilder.Constructor.Args) != 0 {
+					return nil, fmt.Errorf("could not apply AddFactory builder veneer: builder factories can not be defined on builders that accept parameters in their constructor")
+				}
+
+				builders[i].Factories = append(builders[i].Factories, factory)
 			}
 
-			if factory.BuilderRef.ReferredType == "" {
-				factory.BuilderRef.ReferredPkg = builders[i].Package
-				factory.BuilderRef.ReferredType = builders[i].Name
-			}
-
-			targetBuilder, found := builders.LocateByName(factory.BuilderRef.ReferredPkg, factory.BuilderRef.ReferredType)
-			if !found {
-				return nil, fmt.Errorf("could not find target builder for factory: %s", factory.BuilderRef.String())
-			}
-
-			if len(targetBuilder.Constructor.Args) != 0 {
-				return nil, fmt.Errorf("could not apply AddFactory builder veneer: builder factories can not be defined on builders that accept parameters in their constructor")
-			}
-
-			builders[i].Factories = append(builders[i].Factories, factory)
-		}
-
-		return builders, nil
+			return builders, nil
+		},
 	}
 }
 
 // Debug prints debugging information about a builder.
-func Debug(selector Selector) RewriteRule {
-	return func(schemas ast.Schemas, builders ast.Builders) (ast.Builders, error) {
-		for _, builder := range builders {
-			if !selector(schemas, builder) {
-				continue
+func Debug() *Action {
+	return &Action{
+		description: "debug",
+		run: func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+			for _, builder := range builders {
+				marshaled, err := json.MarshalIndent(builder, "", "  ")
+				if err != nil {
+					// TODO: we don't have a way of reporting the error :(
+					continue
+				}
+
+				fmt.Printf("[debug] builder %s.%s:\n", builder.Package, builder.Name)
+				fmt.Println(string(marshaled))
 			}
 
-			marshaled, err := json.MarshalIndent(builder, "", "  ")
-			if err != nil {
-				// TODO: we don't have a way of reporting the error :(
-				continue
-			}
-
-			fmt.Printf("[debug] builder %s.%s:\n", builder.Package, builder.Name)
-			fmt.Println(string(marshaled))
-		}
-
-		return builders, nil
+			return builders, nil
+		},
 	}
 }

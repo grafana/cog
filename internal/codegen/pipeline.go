@@ -166,6 +166,9 @@ func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
 
 	rewriter, err := cogyaml.NewVeneersLoader().RewriterFrom(veneerFiles, rewrite.Config{
 		Debug: pipeline.Debug,
+		Reporter: func(msg string) {
+			fmt.Println(msg)
+		},
 	})
 	if err != nil {
 		return nil, err
