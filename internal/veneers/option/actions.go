@@ -3,6 +3,7 @@ package option
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -10,10 +11,10 @@ import (
 	"github.com/grafana/cog/internal/veneers"
 )
 
-type ActionRunner func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option
+type ActionRunner func(ctx RuleCtx, builder ast.Builder, option ast.Option) []ast.Option
 
 func RenameAction(newName string) ActionRunner {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+	return func(_ RuleCtx, _ ast.Builder, option ast.Option) []ast.Option {
 		oldName := option.Name
 		option.Name = newName
 		option.AddToVeneerTrail(fmt.Sprintf("Rename[%s → %s]", oldName, newName))
@@ -23,7 +24,7 @@ func RenameAction(newName string) ActionRunner {
 }
 
 func RenameArgumentsAction(newNames []string) ActionRunner {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+	return func(_ RuleCtx, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(newNames) != len(option.Args) {
 			return []ast.Option{option}
 		}
@@ -46,7 +47,7 @@ func RenameArgumentsAction(newNames []string) ActionRunner {
 }
 
 func ArrayToAppendAction() ActionRunner {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+	return func(_ RuleCtx, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) != 1 || !option.Args[0].Type.IsArray() {
 			return []ast.Option{option}
 		}
@@ -86,7 +87,7 @@ func ArrayToAppendAction() ActionRunner {
 }
 
 func MapToIndexAction() ActionRunner {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+	return func(_ RuleCtx, _ ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) != 1 || !option.Args[0].Type.IsMap() {
 			return []ast.Option{option}
 		}
@@ -133,14 +134,13 @@ func MapToIndexAction() ActionRunner {
 }
 
 func OmitAction() ActionRunner {
-	return func(_ ast.Schemas, _ ast.Builder, _ ast.Option) []ast.Option {
+	return func(_ RuleCtx, _ ast.Builder, _ ast.Option) []ast.Option {
 		return nil
 	}
 }
 
-// VeneerTrailAsCommentsAction removes an option.
 func VeneerTrailAsCommentsAction() ActionRunner {
-	return func(_ ast.Schemas, _ ast.Builder, opt ast.Option) []ast.Option {
+	return func(_ RuleCtx, _ ast.Builder, opt ast.Option) []ast.Option {
 		veneerTrail := tools.Map(opt.VeneerTrail, func(veneer string) string {
 			return fmt.Sprintf("Modified by veneer '%s'", veneer)
 		})
@@ -152,14 +152,16 @@ func VeneerTrailAsCommentsAction() ActionRunner {
 }
 
 func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
-	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
+			ctx.Logger.Warn("option has no arguments: skipping transformation")
 			return []ast.Option{option}
 		}
 
-		firstArgType := schemas.ResolveToType(option.Args[0].Type)
+		firstArgType := ctx.Schemas.ResolveToType(option.Args[0].Type)
 
 		if !firstArgType.IsStruct() {
+			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ast.TypeName(firstArgType)))
 			return []ast.Option{option}
 		}
 
@@ -278,14 +280,16 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 }
 
 func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
-	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) < 1 {
+			ctx.Logger.Warn("option has no arguments: skipping transformation")
 			return []ast.Option{option}
 		}
 
-		firstArgType := schemas.ResolveToType(option.Args[0].Type)
+		firstArgType := ctx.Schemas.ResolveToType(option.Args[0].Type)
 
 		if !firstArgType.IsStruct() {
+			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ast.TypeName(firstArgType)))
 			return []ast.Option{option}
 		}
 
@@ -327,8 +331,9 @@ func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 	}
 }
 func DisjunctionAsOptionsAction(argumentIndex int) ActionRunner {
-	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
 		if len(option.Args) == 0 {
+			ctx.Logger.Warn("option has no arguments: skipping transformation")
 			return []ast.Option{option}
 		}
 
@@ -341,7 +346,7 @@ func DisjunctionAsOptionsAction(argumentIndex int) ActionRunner {
 
 		// or maybe a reference to a struct that was created to simulate a disjunction?
 		if targetArgType.IsRef() {
-			referredType := schemas.ResolveToType(targetArgType)
+			referredType := ctx.Schemas.ResolveToType(targetArgType)
 			if !referredType.IsStructGeneratedFromDisjunction() {
 				return []ast.Option{option}
 			}
@@ -463,7 +468,7 @@ type BooleanUnfold struct {
 }
 
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+	return func(_ RuleCtx, _ ast.Builder, option ast.Option) []ast.Option {
 		intoType := option.Assignments[0].Path.Last().Type
 
 		if !intoType.IsScalar() || intoType.Scalar.ScalarKind != ast.KindBool {
@@ -506,7 +511,7 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
 }
 
 func DuplicateAction(duplicateName string) ActionRunner {
-	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+	return func(_ RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
 		duplicateOpt := option.DeepCopy()
 		duplicateOpt.Name = duplicateName
 		duplicateOpt.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s]", option.Name))
@@ -516,8 +521,8 @@ func DuplicateAction(duplicateName string) ActionRunner {
 }
 
 func AddAssignmentAction(assignment veneers.Assignment) ActionRunner {
-	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
-		irAssignment, err := assignment.AsIR(schemas, builder)
+	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
+		irAssignment, err := assignment.AsIR(ctx.Schemas, builder)
 		if err != nil {
 			// TODO: let veneers return errors
 			option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[err=%s]", err.Error()))
@@ -532,7 +537,7 @@ func AddAssignmentAction(assignment veneers.Assignment) ActionRunner {
 }
 
 func AddCommentsAction(comments []string) ActionRunner {
-	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+	return func(_ RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
 		option.Comments = append(option.Comments, comments...)
 		option.AddToVeneerTrail(fmt.Sprintf("AddComments[%s]", strings.Join(comments, " ")))
 
@@ -541,7 +546,7 @@ func AddCommentsAction(comments []string) ActionRunner {
 }
 
 func DebugAction() ActionRunner {
-	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+	return func(_ RuleCtx, builder ast.Builder, option ast.Option) []ast.Option {
 		marshaled, err := json.MarshalIndent(option, "", "  ")
 		if err != nil {
 			// TODO: we don't have a way of reporting the error :(

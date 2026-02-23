@@ -126,6 +126,12 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []option.Rule) []ast.Builder {
 	for _, rule := range rules {
 		matches := 0
+		logger := engine.logger.With(slog.String("language", language), slog.String("rule", rule.String()))
+		ctx := option.RuleCtx{
+			Logger:  logger,
+			Schemas: schemas,
+		}
+
 		for i, b := range builders {
 			processedOptions := make([]ast.Option, 0, len(b.Options))
 
@@ -136,14 +142,14 @@ func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, b
 				}
 
 				matches += 1
-				processedOptions = append(processedOptions, rule.Apply(schemas, b, opt)...)
+				processedOptions = append(processedOptions, rule.Apply(ctx, b, opt)...)
 			}
 
 			builders[i].Options = processedOptions
 		}
 
 		if matches == 0 {
-			engine.logger.Warn("option rule matched nothing", slog.String("language", language), slog.String("rule", rule.String()))
+			logger.Warn("option rule matched nothing")
 			continue
 		}
 	}
