@@ -66,7 +66,7 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules(schemas, newBuilders, engine.optionRules[l])
+		newBuilders = engine.applyOptionRules(language, schemas, newBuilders, engine.optionRules[l])
 	}
 
 	// and optionally, apply "debug" veneers
@@ -76,7 +76,7 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules(schemas, newBuilders, engine.debugOptionRules())
+		newBuilders = engine.applyOptionRules("debug", schemas, newBuilders, engine.debugOptionRules())
 	}
 
 	return newBuilders, nil
@@ -119,21 +119,28 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 	return builders, nil
 }
 
-func (engine *Rewriter) applyOptionRules(schemas ast.Schemas, builders []ast.Builder, rules []option.RewriteRule) []ast.Builder {
+func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []option.RewriteRule) []ast.Builder {
 	for _, rule := range rules {
+		matches := 0
 		for i, b := range builders {
 			processedOptions := make([]ast.Option, 0, len(b.Options))
 
 			for _, opt := range b.Options {
-				if !rule.Selector(b, opt) {
+				if !rule.Selector.Matches(b, opt) {
 					processedOptions = append(processedOptions, opt)
 					continue
 				}
 
+				matches += 1
 				processedOptions = append(processedOptions, rule.Action(schemas, b, opt)...)
 			}
 
 			builders[i].Options = processedOptions
+		}
+
+		if matches == 0 {
+			engine.logger.Warn("option rule matched nothing", slog.String("language", language), slog.String("rule", rule.String()))
+			continue
 		}
 	}
 
