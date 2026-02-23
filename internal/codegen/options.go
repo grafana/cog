@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"log/slog"
 	"maps"
 )
 
@@ -16,9 +17,9 @@ func Parameters(extraParameters map[string]string) PipelineOption {
 	}
 }
 
-func Reporter(reporter ProgressReporter) PipelineOption {
+func Logger(logger *slog.Logger) PipelineOption {
 	return func(pipeline *Pipeline) {
-		pipeline.reporter = reporter
+		pipeline.logger = logger
 	}
 }
 

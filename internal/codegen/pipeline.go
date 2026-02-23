@@ -3,6 +3,7 @@ package codegen
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -76,8 +77,8 @@ type Pipeline struct {
 
 	Parameters map[string]string `yaml:"parameters"`
 
+	logger           *slog.Logger
 	currentDirectory string
-	reporter         ProgressReporter
 	veneersRewriter  *rewrite.Rewriter
 	converterConfig  *languages.ConverterConfig
 	interpolator     ParametersInterpolator
@@ -91,7 +92,7 @@ func NewPipeline() (*Pipeline, error) {
 	}
 
 	pipeline := &Pipeline{
-		reporter:         func(msg string) {},
+		logger:           slog.New(slog.NewTextHandler(os.NewFile(0, os.DevNull), nil)),
 		currentDirectory: currentDir,
 		Parameters: map[string]string{
 			"__config_dir": currentDir,
@@ -164,11 +165,8 @@ func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
 		}
 	}
 
-	rewriter, err := cogyaml.NewVeneersLoader().RewriterFrom(veneerFiles, rewrite.Config{
+	rewriter, err := cogyaml.NewVeneersLoader().RewriterFrom(pipeline.logger, veneerFiles, rewrite.Config{
 		Debug: pipeline.Debug,
-		Reporter: func(msg string) {
-			fmt.Println(msg)
-		},
 	})
 	if err != nil {
 		return nil, err
