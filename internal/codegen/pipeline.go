@@ -20,6 +20,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	cogyaml "github.com/grafana/cog/internal/yaml"
@@ -92,7 +93,7 @@ func NewPipeline() (*Pipeline, error) {
 	}
 
 	pipeline := &Pipeline{
-		logger:           slog.New(slog.NewTextHandler(os.NewFile(0, os.DevNull), nil)),
+		logger:           slog.New(logs.NoopHandler()),
 		currentDirectory: currentDir,
 		Parameters: map[string]string{
 			"__config_dir": currentDir,
