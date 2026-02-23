@@ -3,6 +3,7 @@ package builder
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -78,6 +79,7 @@ func MergeIntoAction(sourceBuilderName string, underPath string, excludeOptions 
 		sourceBuilder, found := ctx.Builders.LocateByName(destinationBuilder.For.SelfRef.ReferredPkg, sourceBuilderName)
 		if !found {
 			// We couldn't find the source builder: let's return the selected builder untouched.
+			ctx.Logger.Warn("source builder not found")
 			return destinationBuilder, nil
 		}
 
@@ -289,6 +291,7 @@ func ComposeBuildersAction(config CompositionConfig) ActionRunner {
 
 		sourceBuilder, found := ctx.Builders.LocateByObject(sourceBuilderPkg, sourceBuilderNameWithoutPkg)
 		if !found {
+			ctx.Logger.Warn("source builder not found")
 			return builders, nil
 		}
 
@@ -422,6 +425,7 @@ func PromoteOptionsToConstructorAction(optionNames []string) ActionRunner {
 			for _, optName := range optionNames {
 				opt, ok := builder.OptionByName(optName)
 				if !ok {
+					ctx.Logger.Warn("option not found", slog.String("option", optName))
 					continue
 				}
 
@@ -485,8 +489,7 @@ func DebugAction() ActionRunner {
 		for _, builder := range builders {
 			marshaled, err := json.MarshalIndent(builder, "", "  ")
 			if err != nil {
-				// TODO: we don't have a way of reporting the error :(
-				continue
+				return nil, err
 			}
 
 			fmt.Printf("[debug] builder %s.%s:\n", builder.Package, builder.Name)

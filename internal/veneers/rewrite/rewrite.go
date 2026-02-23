@@ -87,6 +87,8 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 	var transformedBuilders []ast.Builder
 
 	for _, rule := range rules {
+		logger := engine.logger.With(slog.String("language", language), slog.String("rule", rule.String()))
+
 		unselectedBuilders := make([]ast.Builder, 0, len(builders))
 		var matches ast.Builders
 		for _, candidate := range builders {
@@ -99,17 +101,18 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 		}
 
 		if len(matches) == 0 {
-			engine.logger.Warn("builder rule matched nothing", slog.String("language", language), slog.String("rule", rule.String()))
+			logger.Warn("builder rule matched nothing")
 			continue
 		}
 
 		ctx := builder.RuleCtx{
+			Logger:   logger,
 			Schemas:  schemas,
 			Builders: builders,
 		}
 		transformedBuilders, err = rule.Apply(ctx, matches)
 		if err != nil {
-			engine.logger.Error("builder rule failed", slog.String("language", language), slog.String("rule", rule.String()), logs.Err(err))
+			logger.Error("builder rule failed", logs.Err(err))
 			return nil, fmt.Errorf("builder rule failed: err=%w", err)
 		}
 
