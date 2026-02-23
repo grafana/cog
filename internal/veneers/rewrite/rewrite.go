@@ -66,7 +66,10 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules(language, schemas, newBuilders, engine.optionRules[l])
+		newBuilders, err = engine.applyOptionRules(language, schemas, newBuilders, engine.optionRules[l])
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// and optionally, apply "debug" veneers
@@ -76,7 +79,10 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules("debug", schemas, newBuilders, engine.debugOptionRules())
+		newBuilders, err = engine.applyOptionRules("debug", schemas, newBuilders, engine.debugOptionRules())
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return newBuilders, nil
@@ -123,7 +129,7 @@ func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, 
 	return builders, nil
 }
 
-func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []option.Rule) []ast.Builder {
+func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []option.Rule) ([]ast.Builder, error) {
 	for _, rule := range rules {
 		matches := 0
 		logger := engine.logger.With(slog.String("language", language), slog.String("rule", rule.String()))
@@ -142,7 +148,12 @@ func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, b
 				}
 
 				matches += 1
-				processedOptions = append(processedOptions, rule.Apply(ctx, b, opt)...)
+				transformedOpts, err := rule.Apply(ctx, b, opt)
+				if err != nil {
+					logger.Error("option rule failed", logs.Err(err))
+					return nil, fmt.Errorf("option rule failed: err=%w", err)
+				}
+				processedOptions = append(processedOptions, transformedOpts...)
 			}
 
 			builders[i].Options = processedOptions
@@ -157,7 +168,7 @@ func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, b
 	return tools.Filter(builders, func(builder ast.Builder) bool {
 		// "no options" means that the builder was dismissed.
 		return len(builder.Options) != 0
-	})
+	}), nil
 }
 
 func (engine *Rewriter) debugBuilderRules() []*builder.Rule {

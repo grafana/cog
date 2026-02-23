@@ -49,7 +49,7 @@ func ByName(pkg string, objectName string, optionNames ...string) *Selector {
 // Note: the comparison on builder and options names is case-insensitive.
 func ByBuilder(pkg string, builderName string, optionNames ...string) *Selector {
 	return &Selector{
-		description: fmt.Sprintf("by_name[builder.name='%s', option.name=(%s)]", builderName, strings.Join(optionNames, ", ")),
+		description: fmt.Sprintf("by_name[builder.pkg='%s', builder.name='%s', option.name=(%s)]", pkg, builderName, strings.Join(optionNames, ", ")),
 		matcher: func(builder ast.Builder, option ast.Option) bool {
 			return (builder.Package == pkg || pkg == "*") &&
 				strings.EqualFold(builder.Name, builderName) &&
