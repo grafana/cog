@@ -24,8 +24,9 @@ func RenameAction(newName string) ActionRunner {
 }
 
 func RenameArgumentsAction(newNames []string) ActionRunner {
-	return func(_ RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
 		if len(newNames) != len(option.Args) {
+			ctx.Logger.Warn("the number of new argument names does not match the number of arguments: skipping transformation", slog.Int("new_names_count", len(newNames)), slog.Int("args_count", len(option.Args)))
 			return []ast.Option{option}, nil
 		}
 
@@ -47,8 +48,14 @@ func RenameArgumentsAction(newNames []string) ActionRunner {
 }
 
 func ArrayToAppendAction() ActionRunner {
-	return func(_ RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
-		if len(option.Args) != 1 || !option.Args[0].Type.IsArray() {
+	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+		if len(option.Args) != 1 {
+			ctx.Logger.Warn("expecting a single argument: skipping transformation", slog.Int("args_count", len(option.Args)))
+			return []ast.Option{option}, nil
+		}
+
+		if !option.Args[0].Type.IsArray() {
+			ctx.Logger.Warn("first argument is not an array: skipping transformation", slog.String("type", ast.TypeName(option.Args[0].Type)))
 			return []ast.Option{option}, nil
 		}
 
@@ -87,8 +94,14 @@ func ArrayToAppendAction() ActionRunner {
 }
 
 func MapToIndexAction() ActionRunner {
-	return func(_ RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
-		if len(option.Args) != 1 || !option.Args[0].Type.IsMap() {
+	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+		if len(option.Args) != 1 {
+			ctx.Logger.Warn("expecting a single argument: skipping transformation", slog.Int("args_count", len(option.Args)))
+			return []ast.Option{option}, nil
+		}
+
+		if !option.Args[0].Type.IsMap() {
+			ctx.Logger.Warn("first argument is not a map: skipping transformation", slog.String("type", ast.TypeName(option.Args[0].Type)))
 			return []ast.Option{option}, nil
 		}
 
@@ -153,13 +166,12 @@ func VeneerTrailAsCommentsAction() ActionRunner {
 
 func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
-		if len(option.Args) < 1 {
+		if len(option.Args) == 0 {
 			ctx.Logger.Warn("option has no arguments: skipping transformation")
 			return []ast.Option{option}, nil
 		}
 
 		firstArgType := ctx.Schemas.ResolveToType(option.Args[0].Type)
-
 		if !firstArgType.IsStruct() {
 			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ast.TypeName(firstArgType)))
 			return []ast.Option{option}, nil
@@ -281,13 +293,12 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 
 func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
-		if len(option.Args) < 1 {
+		if len(option.Args) == 0 {
 			ctx.Logger.Warn("option has no arguments: skipping transformation")
 			return []ast.Option{option}, nil
 		}
 
 		firstArgType := ctx.Schemas.ResolveToType(option.Args[0].Type)
-
 		if !firstArgType.IsStruct() {
 			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ast.TypeName(firstArgType)))
 			return []ast.Option{option}, nil
@@ -348,12 +359,14 @@ func DisjunctionAsOptionsAction(argumentIndex int) ActionRunner {
 		if targetArgType.IsRef() {
 			referredType := ctx.Schemas.ResolveToType(targetArgType)
 			if !referredType.IsStructGeneratedFromDisjunction() {
+				ctx.Logger.Warn("argument is not a ref to a disjunction: skipping transformation", slog.String("type", ast.TypeName(referredType)))
 				return []ast.Option{option}, nil
 			}
 
 			return disjunctionStructAsOptions(option, referredType, argumentIndex)
 		}
 
+		ctx.Logger.Warn("argument is not a disjunction: skipping transformation", slog.String("type", ast.TypeName(targetArgType)))
 		return []ast.Option{option}, nil
 	}
 }
@@ -468,10 +481,11 @@ type BooleanUnfold struct {
 }
 
 func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
-	return func(_ RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
 		intoType := option.Assignments[0].Path.Last().Type
 
 		if !intoType.IsScalar() || intoType.Scalar.ScalarKind != ast.KindBool {
+			ctx.Logger.Warn("first assignment is not an boolean: skipping transformation", slog.String("type", ast.TypeName(intoType)))
 			return []ast.Option{option}, nil
 		}
 

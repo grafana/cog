@@ -83,7 +83,7 @@ func TestUnfoldBooleanAction_onNonBooleanDoesNothing(t *testing.T) {
 	modifiedOpts, err := UnfoldBooleanAction(BooleanUnfold{
 		OptionTrue:  "TrueOpt",
 		OptionFalse: "FalseOpt",
-	})(RuleCtx{}, ast.Builder{}, option)
+	})(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
 	req.NoError(err)
 
 	req.Len(modifiedOpts, 1)
@@ -337,7 +337,7 @@ func TestArrayToAppendAction_withNoArgument(t *testing.T) {
 			}, true),
 		},
 	}
-	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{}, ast.Builder{}, option)
+	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
 	req.NoError(err)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
@@ -356,7 +356,7 @@ func TestArrayToAppendAction_withNonArrayArgument(t *testing.T) {
 			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
 		},
 	}
-	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{}, ast.Builder{}, option)
+	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
 	req.NoError(err)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
