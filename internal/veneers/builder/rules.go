@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -27,6 +28,7 @@ func (rule Rule) String() string {
 }
 
 type RuleCtx struct {
+	Logger   *slog.Logger
 	Schemas  ast.Schemas
 	Builders ast.Builders
 }
