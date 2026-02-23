@@ -2,9 +2,11 @@ package rewrite
 
 import (
 	"encoding/json"
+	"log/slog"
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
 	"github.com/stretchr/testify/require"
@@ -14,7 +16,7 @@ type rewriteTestCase struct {
 	description string
 
 	inputBuilders  ast.Builders
-	builderRules   []builder.RewriteRule
+	builderRules   []*builder.Rule
 	optionRules    []option.RewriteRule
 	outputBuilders ast.Builders
 }
@@ -32,8 +34,11 @@ func testData() []rewriteTestCase {
 		{
 			description:   "omit an entire builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
-			builderRules: []builder.RewriteRule{
-				builder.Omit(builder.ByObjectName("test_pkg", "Dashboard")),
+			builderRules: []*builder.Rule{
+				&builder.Rule{
+					Selector: builder.ByObjectName("test_pkg", "Dashboard"),
+					Action:   builder.Omit(),
+				},
 			},
 			optionRules:    nil,
 			outputBuilders: ast.Builders{panelBuilder()},
@@ -222,7 +227,7 @@ func TestRewriter_ApplyTo(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			req := require.New(t)
 
-			rewriter := NewRewrite([]RuleSet{
+			rewriter := NewRewrite(slog.New(logs.NoopHandler()), []RuleSet{
 				{
 					Languages:    []string{AllLanguages},
 					BuilderRules: tc.builderRules,
