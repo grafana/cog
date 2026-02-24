@@ -1,4 +1,4 @@
-name: Foundation-sdk diff preview
+name: Foundation SDK
 on:
   pull_request: ~
 
@@ -7,6 +7,128 @@ env:
   FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
 
 jobs:
+  build_lint:
+    name: Generate & lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Restore go vendors
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-${{ matrix.kind_version }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 #v0.14.0
+        with:
+          enable-cache: "true"
+          devbox-version: ${{ env.DEVBOX_VERSION }}
+
+      - name: Run code generation
+        run: make gen-sdk-dev
+        env:
+          GOGC: "off"
+
+      - name: Compile generated Go code
+        run: devbox run ./scripts/ci/build-go.sh
+
+      - name: Compile generated Typescript code
+        run: devbox run ./scripts/ci/build-ts.sh
+
+      - name: Lint generated Python code
+        run: devbox run ./scripts/ci/build-python.sh
+
+      # See https://docs.gradle.org/current/userguide/build_cache.html
+      - name: Restore Gradle build cache
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-build-cache-${{ runner.os }}-${{ matrix.kind_version }}
+          restore-keys: |
+            gradle-build-cache-${{ runner.os }}-
+
+      - name: Compile generated Java code
+        run: devbox run ./scripts/ci/build-java.sh
+
+      # See https://phpstan.org/user-guide/result-cache
+      # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
+      - name: Restore PHP linters cache
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        with:
+          path: |
+            /tmp/phpstan
+            ~/.cache/psalm
+          key: php-linters-result-cache-${{ matrix.kind_version }}
+          restore-keys: |
+            php-linters-result-cache-
+
+      - name: Lint generated PHP code
+        run: devbox run ./scripts/ci/build-php.sh
+
+  examples:
+    name: Run examples
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Restore go vendors
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-next-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 #v0.14.0
+        with:
+          enable-cache: "true"
+          devbox-version: ${{ env.DEVBOX_VERSION }}
+
+      - name: Run code generation
+        run: make gen-sdk-dev
+        env:
+          GOGC: "off"
+
+      - name: Run the Go example
+        run: make run-go-example
+
+      - name: Run the Typescript example
+        run: make run-ts-example
+
+      - name: Run the PHP example
+        run: make run-php-example
+
+      # See https://docs.gradle.org/current/userguide/build_cache.html
+      - name: Restore Gradle build cache
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-build-cache-${{ runner.os }}-${{ matrix.kind_version }}
+          restore-keys: |
+            gradle-build-cache-${{ runner.os }}-
+
+      - name: Run Java example
+        run: make run-java-example
+
+      - name: Run Python example
+        run: make run-python-example
+
   sdk_diff:
     name: Generate diff
     runs-on: ubuntu-latest
