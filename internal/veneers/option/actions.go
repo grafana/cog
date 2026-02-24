@@ -3,6 +3,7 @@ package option
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -10,24 +11,23 @@ import (
 	"github.com/grafana/cog/internal/veneers"
 )
 
-type RewriteAction func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option
+type ActionRunner func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error)
 
-// RenameAction renames an option.
-func RenameAction(newName string) RewriteAction {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+func RenameAction(newName string) ActionRunner {
+	return func(_ RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
 		oldName := option.Name
 		option.Name = newName
 		option.AddToVeneerTrail(fmt.Sprintf("Rename[%s → %s]", oldName, newName))
 
-		return []ast.Option{option}
+		return []ast.Option{option}, nil
 	}
 }
 
-// RenameArgumentsAction renames the arguments of an options.
-func RenameArgumentsAction(newNames []string) RewriteAction {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+func RenameArgumentsAction(newNames []string) ActionRunner {
+	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
 		if len(newNames) != len(option.Args) {
-			return []ast.Option{option}
+			ctx.Logger.Warn("the number of new argument names does not match the number of arguments: skipping transformation", slog.Int("new_names_count", len(newNames)), slog.Int("args_count", len(option.Args)))
+			return []ast.Option{option}, nil
 		}
 
 		for i, arg := range option.Args {
@@ -43,35 +43,20 @@ func RenameArgumentsAction(newNames []string) RewriteAction {
 
 		option.AddToVeneerTrail("RenameArguments")
 
-		return []ast.Option{option}
+		return []ast.Option{option}, nil
 	}
 }
 
-// ArrayToAppendAction updates the option to perform an "append" assignment.
-//
-// Example:
-//
-//	```
-//	func Tags(tags []string) {
-//		this.resource.tags = tags
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Tags(tags string) {
-//		this.resource.tags.append(tags)
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it doesn't have exactly one argument
-//   - the argument is not an array
-func ArrayToAppendAction() RewriteAction {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
-		if len(option.Args) != 1 || !option.Args[0].Type.IsArray() {
-			return []ast.Option{option}
+func ArrayToAppendAction() ActionRunner {
+	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+		if len(option.Args) != 1 {
+			ctx.Logger.Warn("expecting a single argument: skipping transformation", slog.Int("args_count", len(option.Args)))
+			return []ast.Option{option}, nil
+		}
+
+		if !option.Args[0].Type.IsArray() {
+			ctx.Logger.Warn("first argument is not an array: skipping transformation", slog.String("type", ast.TypeName(option.Args[0].Type)))
+			return []ast.Option{option}, nil
 		}
 
 		// Update the argument type from list to a single value
@@ -104,35 +89,20 @@ func ArrayToAppendAction() RewriteAction {
 			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
 		}
 
-		return []ast.Option{newOpt}
+		return []ast.Option{newOpt}, nil
 	}
 }
 
-// MapToIndexAction updates the option to perform an "index" assignment.
-//
-// Example:
-//
-//	```
-//	func Elements(elements map[string]Element) {
-//		this.resource.elements = elements
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Elements(key string, elements Element) {
-//		this.resource.elements[key] = tags
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it doesn't have exactly one argument
-//   - the argument is not a map
-func MapToIndexAction() RewriteAction {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
-		if len(option.Args) != 1 || !option.Args[0].Type.IsMap() {
-			return []ast.Option{option}
+func MapToIndexAction() ActionRunner {
+	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
+		if len(option.Args) != 1 {
+			ctx.Logger.Warn("expecting a single argument: skipping transformation", slog.Int("args_count", len(option.Args)))
+			return []ast.Option{option}, nil
+		}
+
+		if !option.Args[0].Type.IsMap() {
+			ctx.Logger.Warn("first argument is not a map: skipping transformation", slog.String("type", ast.TypeName(option.Args[0].Type)))
+			return []ast.Option{option}, nil
 		}
 
 		oldArgs := option.Args
@@ -172,73 +142,39 @@ func MapToIndexAction() RewriteAction {
 			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
 		}
 
-		return []ast.Option{newOpt}
+		return []ast.Option{newOpt}, nil
 	}
 }
 
-// OmitAction removes an option.
-func OmitAction() RewriteAction {
-	return func(_ ast.Schemas, _ ast.Builder, _ ast.Option) []ast.Option {
-		return nil
+func OmitAction() ActionRunner {
+	return func(_ RuleCtx, _ ast.Builder, _ ast.Option) ([]ast.Option, error) {
+		return nil, nil
 	}
 }
 
-// VeneerTrailAsCommentsAction removes an option.
-func VeneerTrailAsCommentsAction() RewriteAction {
-	return func(_ ast.Schemas, _ ast.Builder, opt ast.Option) []ast.Option {
+func VeneerTrailAsCommentsAction() ActionRunner {
+	return func(_ RuleCtx, _ ast.Builder, opt ast.Option) ([]ast.Option, error) {
 		veneerTrail := tools.Map(opt.VeneerTrail, func(veneer string) string {
 			return fmt.Sprintf("Modified by veneer '%s'", veneer)
 		})
 
 		opt.Comments = append(opt.Comments, veneerTrail...)
 
-		return []ast.Option{opt}
+		return []ast.Option{opt}, nil
 	}
 }
 
-// StructFieldsAsArgumentsAction uses the fields of the first argument's struct (assuming it is one) and turns them
-// into arguments.
-//
-// Optionally, an explicit list of fields to turn into arguments can be given.
-//
-// Example:
-//
-//	```
-//	func Time(time {from string, to string) {
-//		this.resource.time = time
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Time(from string, to string) {
-//		this.resource.time.from = from
-//		this.resource.time.to = to
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it has no arguments
-//   - the first argument is not a struct or a reference to one
-//
-// FIXME: considers the first argument only.
-func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
-	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
-		if len(option.Args) < 1 {
-			return []ast.Option{option}
+func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
+	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+		if len(option.Args) == 0 {
+			ctx.Logger.Warn("option has no arguments: skipping transformation")
+			return []ast.Option{option}, nil
 		}
 
-		firstArgType := option.Args[0].Type
-		if firstArgType.IsRef() {
-			referredObject, found := schemas.LocateObject(firstArgType.AsRef().ReferredPkg, firstArgType.AsRef().ReferredType)
-			if found {
-				firstArgType = referredObject.Type
-			}
-		}
-
+		firstArgType := ctx.Schemas.ResolveToType(option.Args[0].Type)
 		if !firstArgType.IsStruct() {
-			return []ast.Option{option}
+			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ast.TypeName(firstArgType)))
+			return []ast.Option{option}, nil
 		}
 
 		oldArgs := option.Args
@@ -351,56 +287,21 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) RewriteAction {
 			newOpt.Assignments = append(newOpt.Assignments, oldAssignments[1:]...)
 		}
 
-		return []ast.Option{newOpt}
+		return []ast.Option{newOpt}, nil
 	}
 }
 
-// StructFieldsAsOptionsAction uses the fields of the first argument's struct (assuming it is one) and turns them
-// into options.
-//
-// Optionally, an explicit list of fields to turn into options can be given.
-//
-// Example:
-//
-//	```
-//	func GridPos(gridPos {x int, y int) {
-//		this.resource.gridPos = gridPos
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func X(x int) {
-//		this.resource.gridPos.x = x
-//	}
-//
-//	func Y(y int) {
-//		this.resource.gridPos.y = y
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it has no arguments
-//   - the first argument is not a struct or a reference to one
-//
-// FIXME: considers the first argument only.
-func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
-	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
-		if len(option.Args) < 1 {
-			return []ast.Option{option}
+func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
+	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+		if len(option.Args) == 0 {
+			ctx.Logger.Warn("option has no arguments: skipping transformation")
+			return []ast.Option{option}, nil
 		}
 
-		firstArgType := option.Args[0].Type
-		if firstArgType.IsRef() {
-			referredObject, found := schemas.LocateObject(firstArgType.AsRef().ReferredPkg, firstArgType.AsRef().ReferredType)
-			if found {
-				firstArgType = referredObject.Type
-			}
-		}
-
+		firstArgType := ctx.Schemas.ResolveToType(option.Args[0].Type)
 		if !firstArgType.IsStruct() {
-			return []ast.Option{option}
+			ctx.Logger.Warn("first argument does not resolve to a struct: skipping transformation", slog.String("type", ast.TypeName(firstArgType)))
+			return []ast.Option{option}, nil
 		}
 
 		var newOptions []ast.Option
@@ -437,40 +338,14 @@ func StructFieldsAsOptionsAction(explicitFields ...string) RewriteAction {
 			newOptions = append(newOptions, newOpt)
 		}
 
-		return newOptions
+		return newOptions, nil
 	}
 }
-
-// DisjunctionAsOptionsAction uses the branches of the first argument's disjunction (assuming it is one) and turns them
-// into options.
-//
-// Example:
-//
-//	```
-//	func Panel(panel Panel|Row) {
-//		this.resource.panels.append(panel)
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Panel(panel Panel) {
-//		this.resource.panels.append(panel)
-//	}
-//
-//	func Row(row Row) {
-//		this.resource.panels.append(row)
-//	}
-//	```
-//
-// This action returns the option unchanged if:
-//   - it has no arguments
-//   - the given argument is not a disjunction or a reference to one
-func DisjunctionAsOptionsAction(argumentIndex int) RewriteAction {
-	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+func DisjunctionAsOptionsAction(argumentIndex int) ActionRunner {
+	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
 		if len(option.Args) == 0 {
-			return []ast.Option{option}
+			ctx.Logger.Warn("option has no arguments: skipping transformation")
+			return []ast.Option{option}, nil
 		}
 
 		targetArgType := option.Args[argumentIndex].Type
@@ -482,19 +357,21 @@ func DisjunctionAsOptionsAction(argumentIndex int) RewriteAction {
 
 		// or maybe a reference to a struct that was created to simulate a disjunction?
 		if targetArgType.IsRef() {
-			referredType := schemas.ResolveToType(targetArgType)
+			referredType := ctx.Schemas.ResolveToType(targetArgType)
 			if !referredType.IsStructGeneratedFromDisjunction() {
-				return []ast.Option{option}
+				ctx.Logger.Warn("argument is not a ref to a disjunction: skipping transformation", slog.String("type", ast.TypeName(referredType)))
+				return []ast.Option{option}, nil
 			}
 
 			return disjunctionStructAsOptions(option, referredType, argumentIndex)
 		}
 
-		return []ast.Option{option}
+		ctx.Logger.Warn("argument is not a disjunction: skipping transformation", slog.String("type", ast.TypeName(targetArgType)))
+		return []ast.Option{option}, nil
 	}
 }
 
-func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, argIndex int) []ast.Option {
+func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, argIndex int) ([]ast.Option, error) {
 	newOpts := make([]ast.Option, 0, len(disjunctionStruct.AsStruct().Fields))
 	for _, field := range disjunctionStruct.AsStruct().Fields {
 		optClone := option.DeepCopy()
@@ -546,10 +423,10 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, a
 		newOpts = append(newOpts, opt)
 	}
 
-	return newOpts
+	return newOpts, nil
 }
 
-func disjunctionAsOptions(option ast.Option, argIndex int) []ast.Option {
+func disjunctionAsOptions(option ast.Option, argIndex int) ([]ast.Option, error) {
 	disjunction := option.Args[argIndex].Type.AsDisjunction()
 
 	newOpts := make([]ast.Option, 0, len(disjunction.Branches))
@@ -595,7 +472,7 @@ func disjunctionAsOptions(option ast.Option, argIndex int) []ast.Option {
 		newOpts = append(newOpts, opt)
 	}
 
-	return newOpts
+	return newOpts, nil
 }
 
 type BooleanUnfold struct {
@@ -603,33 +480,13 @@ type BooleanUnfold struct {
 	OptionFalse string
 }
 
-// UnfoldBooleanAction transforms an option accepting a boolean argument into two argument-less options.
-//
-// Example:
-//
-//	```
-//	func Editable(editable bool) {
-//		this.resource.editable = editable
-//	}
-//	```
-//
-// Will become:
-//
-//	```
-//	func Editable() {
-//		this.resource.editable = true
-//	}
-//
-//	func ReadOnly() {
-//		this.resource.editable = false
-//	}
-//	```
-func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
-	return func(_ ast.Schemas, _ ast.Builder, option ast.Option) []ast.Option {
+func UnfoldBooleanAction(unfoldOpts BooleanUnfold) ActionRunner {
+	return func(ctx RuleCtx, _ ast.Builder, option ast.Option) ([]ast.Option, error) {
 		intoType := option.Assignments[0].Path.Last().Type
 
 		if !intoType.IsScalar() || intoType.Scalar.ScalarKind != ast.KindBool {
-			return []ast.Option{option}
+			ctx.Logger.Warn("first assignment is not an boolean: skipping transformation", slog.String("type", ast.TypeName(intoType)))
+			return []ast.Option{option}, nil
 		}
 
 		newOpts := []ast.Option{
@@ -663,59 +520,53 @@ func UnfoldBooleanAction(unfoldOpts BooleanUnfold) RewriteAction {
 		newOpts[0].AddToVeneerTrail("UnfoldBoolean")
 		newOpts[1].AddToVeneerTrail("UnfoldBoolean")
 
-		return newOpts
+		return newOpts, nil
 	}
 }
 
-func DuplicateAction(duplicateName string) RewriteAction {
-	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+func DuplicateAction(duplicateName string) ActionRunner {
+	return func(_ RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
 		duplicateOpt := option.DeepCopy()
 		duplicateOpt.Name = duplicateName
 		duplicateOpt.AddToVeneerTrail(fmt.Sprintf("Duplicate[%s]", option.Name))
 
-		return []ast.Option{option, duplicateOpt}
+		return []ast.Option{option, duplicateOpt}, nil
 	}
 }
 
-// AddAssignmentAction adds an assignment to an existing option.
-func AddAssignmentAction(assignment veneers.Assignment) RewriteAction {
-	return func(schemas ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
-		irAssignment, err := assignment.AsIR(schemas, builder)
+func AddAssignmentAction(assignment veneers.Assignment) ActionRunner {
+	return func(ctx RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
+		irAssignment, err := assignment.AsIR(ctx.Schemas, builder)
 		if err != nil {
-			// TODO: let veneers return errors
-			option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[err=%s]", err.Error()))
-			return []ast.Option{option}
+			return nil, err
 		}
 
 		option.Assignments = append(option.Assignments, irAssignment)
 		option.AddToVeneerTrail(fmt.Sprintf("AddAssignment[%s]", irAssignment.Path.String()))
 
-		return []ast.Option{option}
+		return []ast.Option{option}, nil
 	}
 }
 
-// AddCommentsAction adds comments to an option.
-func AddCommentsAction(comments []string) RewriteAction {
-	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+func AddCommentsAction(comments []string) ActionRunner {
+	return func(_ RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
 		option.Comments = append(option.Comments, comments...)
 		option.AddToVeneerTrail(fmt.Sprintf("AddComments[%s]", strings.Join(comments, " ")))
 
-		return []ast.Option{option}
+		return []ast.Option{option}, nil
 	}
 }
 
-// DebugAction prints debugging information about an option.
-func DebugAction() RewriteAction {
-	return func(_ ast.Schemas, builder ast.Builder, option ast.Option) []ast.Option {
+func DebugAction() ActionRunner {
+	return func(_ RuleCtx, builder ast.Builder, option ast.Option) ([]ast.Option, error) {
 		marshaled, err := json.MarshalIndent(option, "", "  ")
 		if err != nil {
-			// TODO: we don't have a way of reporting the error :(
-			return []ast.Option{option}
+			return nil, err
 		}
 
 		fmt.Printf("[debug] option %s.%s.%s:\n", builder.Package, builder.Name, option.Name)
 		fmt.Println(string(marshaled))
 
-		return []ast.Option{option}
+		return []ast.Option{option}, nil
 	}
 }

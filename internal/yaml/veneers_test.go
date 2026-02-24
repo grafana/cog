@@ -12,42 +12,42 @@ func TestLoader_Load_withValidInputs(t *testing.T) {
 	testCases := []struct {
 		desc  string
 		input string
-		check func(req *require.Assertions, rules rewrite.LanguageRules)
+		check func(req *require.Assertions, rules rewrite.RuleSet)
 	}{
 		{
 			desc: "no rules",
-			input: `language: all
+			input: `languages: [all]
 package: accesspolicy
 builders: ~
 options: ~`,
-			check: func(req *require.Assertions, rules rewrite.LanguageRules) {
-				req.Equal(rewrite.AllLanguages, rules.Language)
+			check: func(req *require.Assertions, rules rewrite.RuleSet) {
+				req.ElementsMatch([]string{rewrite.AllLanguages}, rules.Languages)
 				req.Empty(rules.BuilderRules)
 				req.Empty(rules.OptionRules)
 			},
 		},
 		{
 			desc: "single builder rule",
-			input: `language: go
+			input: `languages: [go]
 package: dashboard
 builders: 
   - omit: { by_object: GridPos }
 options: ~`,
-			check: func(req *require.Assertions, rules rewrite.LanguageRules) {
-				req.Equal("go", rules.Language)
+			check: func(req *require.Assertions, rules rewrite.RuleSet) {
+				req.ElementsMatch([]string{"go"}, rules.Languages)
 				req.Len(rules.BuilderRules, 1)
 				req.Empty(rules.OptionRules)
 			},
 		},
 		{
 			desc: "single option rule",
-			input: `language: go
+			input: `languages: [go]
 package: dashboard
 builders: ~
 options: 
   - omit: { by_name: Dashboard.schemaVersion }`,
-			check: func(req *require.Assertions, rules rewrite.LanguageRules) {
-				req.Equal("go", rules.Language)
+			check: func(req *require.Assertions, rules rewrite.RuleSet) {
+				req.ElementsMatch([]string{"go"}, rules.Languages)
 				req.Empty(rules.BuilderRules, 1)
 				req.Len(rules.OptionRules, 1)
 			},
@@ -70,7 +70,7 @@ options:
 
 func TestLoader_Load_withNoPackage(t *testing.T) {
 	req := require.New(t)
-	input := `language: all
+	input := `languages: [all]
 builders: ~
 options: ~`
 

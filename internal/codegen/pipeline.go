@@ -3,6 +3,7 @@ package codegen
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +20,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	cogyaml "github.com/grafana/cog/internal/yaml"
@@ -76,8 +78,8 @@ type Pipeline struct {
 
 	Parameters map[string]string `yaml:"parameters"`
 
+	logger           *slog.Logger
 	currentDirectory string
-	reporter         ProgressReporter
 	veneersRewriter  *rewrite.Rewriter
 	converterConfig  *languages.ConverterConfig
 	interpolator     ParametersInterpolator
@@ -91,7 +93,7 @@ func NewPipeline() (*Pipeline, error) {
 	}
 
 	pipeline := &Pipeline{
-		reporter:         func(msg string) {},
+		logger:           slog.New(logs.NoopHandler()),
 		currentDirectory: currentDir,
 		Parameters: map[string]string{
 			"__config_dir": currentDir,
@@ -164,7 +166,7 @@ func (pipeline *Pipeline) veneers() (*rewrite.Rewriter, error) {
 		}
 	}
 
-	rewriter, err := cogyaml.NewVeneersLoader().RewriterFrom(veneerFiles, rewrite.Config{
+	rewriter, err := cogyaml.NewVeneersLoader().RewriterFrom(pipeline.logger, veneerFiles, rewrite.Config{
 		Debug: pipeline.Debug,
 	})
 	if err != nil {

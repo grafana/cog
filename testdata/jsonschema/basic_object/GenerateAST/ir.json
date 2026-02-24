@@ -61,14 +61,14 @@
                           "Kind": "scalar",
                           "Nullable": false,
                           "Scalar": {
-                            "ScalarKind": "string"
+                            "ScalarKind": "bool"
                           }
                         },
                         {
                           "Kind": "scalar",
                           "Nullable": false,
                           "Scalar": {
-                            "ScalarKind": "bool"
+                            "ScalarKind": "string"
                           }
                         }
                       ]

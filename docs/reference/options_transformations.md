@@ -21,7 +21,7 @@ Example:
 
 ## `add_assignment`
 
-AddAssignmentAction adds an assignment to an existing option.
+AddAssignment adds an assignment to an existing option.
 ### Usage
 
 ```yaml
@@ -31,7 +31,7 @@ add_assignment:
 
 ## `add_comments`
 
-AddCommentsAction adds comments to an option.
+AddComments adds comments to an option.
 ### Usage
 
 ```yaml
@@ -41,7 +41,7 @@ add_comments:
 
 ## `array_to_append`
 
-ArrayToAppendAction updates the option to perform an "append" assignment.
+ArrayToAppend updates the option to perform an "append" assignment.
 
 Example:
 
@@ -70,7 +70,7 @@ array_to_append: {}
 
 ## `debug`
 
-DebugAction prints debugging information about an option.
+Debug prints debugging information about an option.
 ### Usage
 
 ```yaml
@@ -79,7 +79,7 @@ debug: {}
 
 ## `disjunction_as_options`
 
-DisjunctionAsOptionsAction uses the branches of the first argument's disjunction (assuming it is one) and turns them
+DisjunctionAsOptions uses the branches of the first argument's disjunction (assuming it is one) and turns them
 into options.
 
 Example:
@@ -125,7 +125,7 @@ duplicate:
 
 ## `map_to_index`
 
-MapToIndexAction updates the option to perform an "index" assignment.
+MapToIndex updates the option to perform an "index" assignment.
 
 Example:
 
@@ -154,7 +154,7 @@ map_to_index: {}
 
 ## `omit`
 
-OmitAction removes an option.
+Omit removes an option.
 ### Usage
 
 ```yaml
@@ -163,7 +163,7 @@ omit: {}
 
 ## `rename`
 
-RenameAction renames an option.
+Rename renames an option.
 ### Usage
 
 ```yaml
@@ -173,7 +173,7 @@ rename:
 
 ## `rename_arguments`
 
-RenameArgumentsAction renames the arguments of an options.
+RenameArguments renames the arguments of an options.
 ### Usage
 
 ```yaml
@@ -183,7 +183,7 @@ rename_arguments:
 
 ## `struct_fields_as_arguments`
 
-StructFieldsAsArgumentsAction uses the fields of the first argument's struct (assuming it is one) and turns them
+StructFieldsAsArguments uses the fields of the first argument's struct (assuming it is one) and turns them
 into arguments.
 
 Optionally, an explicit list of fields to turn into arguments can be given.
@@ -219,7 +219,7 @@ struct_fields_as_arguments:
 
 ## `struct_fields_as_options`
 
-StructFieldsAsOptionsAction uses the fields of the first argument's struct (assuming it is one) and turns them
+StructFieldsAsOptions uses the fields of the first argument's struct (assuming it is one) and turns them
 into options.
 
 Optionally, an explicit list of fields to turn into options can be given.
@@ -258,7 +258,7 @@ struct_fields_as_options:
 
 ## `unfold_boolean`
 
-UnfoldBooleanAction transforms an option accepting a boolean argument into two argument-less options.
+UnfoldBoolean transforms an option accepting a boolean argument into two argument-less options.
 
 Example:
 

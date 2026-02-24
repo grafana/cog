@@ -17,7 +17,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 		return nil, err
 	}
 
-	pipeline.reporter("Parsing inputs...")
+	pipeline.logger.Info("Parsing inputs...")
 	schemas, err := pipeline.LoadSchemas(ctx)
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 
 	generatedFS := codejen.NewFS()
 	for language, target := range targetsByLanguage {
-		pipeline.reporter(fmt.Sprintf("Running '%s' jennies...", language))
+		pipeline.logger.Info(fmt.Sprintf("Running '%s' jennies...", language))
 
 		languageOutputDir, err := pipeline.languageOutputDir(pipeline.currentDirectory, language)
 		if err != nil {
@@ -48,7 +48,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 	}
 
 	if pipeline.Output.RepositoryTemplates != "" {
-		pipeline.reporter("Generating repository templates...")
+		pipeline.logger.Info("Generating repository templates...")
 		repoTemplatesJenny, err := repositoryTemplatesJenny(pipeline)
 		if err != nil {
 			return nil, err

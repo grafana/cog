@@ -1,7 +1,11 @@
 package rewrite
 
 import (
+	"fmt"
+	"log/slog"
+
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
@@ -13,31 +17,35 @@ type Config struct {
 	Debug bool
 }
 
-type LanguageRules struct {
-	Language     string
-	BuilderRules []builder.RewriteRule
-	OptionRules  []option.RewriteRule
+type RuleSet struct {
+	Languages    []string
+	BuilderRules []*builder.Rule
+	OptionRules  []option.Rule
 }
 
 type Rewriter struct {
+	logger *slog.Logger
 	config Config
 
 	// Rules applied to `Builder` objects, grouped by language
-	builderRules map[string][]builder.RewriteRule
+	builderRules map[string][]*builder.Rule
 	// Rules applied to `Option` objects, grouped by language
-	optionRules map[string][]option.RewriteRule
+	optionRules map[string][]option.Rule
 }
 
-func NewRewrite(languageRules []LanguageRules, config Config) *Rewriter {
-	builderRules := make(map[string][]builder.RewriteRule)
-	optionRules := make(map[string][]option.RewriteRule)
+func NewRewrite(logger *slog.Logger, rules []RuleSet, config Config) *Rewriter {
+	builderRules := make(map[string][]*builder.Rule)
+	optionRules := make(map[string][]option.Rule)
 
-	for _, languageConfig := range languageRules {
-		builderRules[languageConfig.Language] = append(builderRules[languageConfig.Language], languageConfig.BuilderRules...)
-		optionRules[languageConfig.Language] = append(optionRules[languageConfig.Language], languageConfig.OptionRules...)
+	for _, set := range rules {
+		for _, language := range set.Languages {
+			builderRules[language] = append(builderRules[language], set.BuilderRules...)
+			optionRules[language] = append(optionRules[language], set.OptionRules...)
+		}
 	}
 
 	return &Rewriter{
+		logger:       logger,
 		config:       config,
 		builderRules: builderRules,
 		optionRules:  optionRules,
@@ -53,72 +61,124 @@ func (engine *Rewriter) ApplyTo(schemas ast.Schemas, builders []ast.Builder, lan
 	// start by applying veneers common to all languages, then
 	// apply language-specific ones.
 	for _, l := range []string{AllLanguages, language} {
-		newBuilders, err = engine.applyBuilderRules(schemas, newBuilders, engine.builderRules[l])
+		newBuilders, err = engine.applyBuilderRules(language, schemas, newBuilders, engine.builderRules[l])
 		if err != nil {
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules(schemas, newBuilders, engine.optionRules[l])
+		newBuilders, err = engine.applyOptionRules(language, schemas, newBuilders, engine.optionRules[l])
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// and optionally, apply "debug" veneers
 	if engine.config.Debug {
-		newBuilders, err = engine.applyBuilderRules(schemas, newBuilders, engine.debugBuilderRules())
+		newBuilders, err = engine.applyBuilderRules("debug", schemas, newBuilders, engine.debugBuilderRules())
 		if err != nil {
 			return nil, err
 		}
 
-		newBuilders = engine.applyOptionRules(schemas, newBuilders, engine.debugOptionRules())
+		newBuilders, err = engine.applyOptionRules("debug", schemas, newBuilders, engine.debugOptionRules())
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return newBuilders, nil
 }
 
-func (engine *Rewriter) applyBuilderRules(schemas ast.Schemas, builders []ast.Builder, rules []builder.RewriteRule) ([]ast.Builder, error) {
+func (engine *Rewriter) applyBuilderRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []*builder.Rule) ([]ast.Builder, error) {
 	var err error
+	var transformedBuilders []ast.Builder
 
 	for _, rule := range rules {
-		builders, err = rule(schemas, builders)
-		if err != nil {
-			return nil, err
+		logger := engine.logger.With(slog.String("language", language), slog.String("rule", rule.String()))
+
+		unselectedBuilders := make([]ast.Builder, 0, len(builders))
+		var matches ast.Builders
+		for _, candidate := range builders {
+			if !rule.Matches(schemas, candidate) {
+				unselectedBuilders = append(unselectedBuilders, candidate)
+				continue
+			}
+
+			matches = append(matches, candidate)
 		}
+
+		if len(matches) == 0 {
+			logger.Warn("builder rule matched nothing")
+			continue
+		}
+
+		ctx := builder.RuleCtx{
+			Logger:   logger,
+			Schemas:  schemas,
+			Builders: builders,
+		}
+		transformedBuilders, err = rule.Apply(ctx, matches)
+		if err != nil {
+			logger.Error("builder rule failed", logs.Err(err))
+			return nil, fmt.Errorf("builder rule failed: err=%w", err)
+		}
+
+		builders = unselectedBuilders
+		builders = append(builders, transformedBuilders...)
 	}
 
 	return builders, nil
 }
 
-func (engine *Rewriter) applyOptionRules(schemas ast.Schemas, builders []ast.Builder, rules []option.RewriteRule) []ast.Builder {
+func (engine *Rewriter) applyOptionRules(language string, schemas ast.Schemas, builders []ast.Builder, rules []option.Rule) ([]ast.Builder, error) {
 	for _, rule := range rules {
+		matches := 0
+		logger := engine.logger.With(slog.String("language", language), slog.String("rule", rule.String()))
+		ctx := option.RuleCtx{
+			Logger:  logger,
+			Schemas: schemas,
+		}
+
 		for i, b := range builders {
 			processedOptions := make([]ast.Option, 0, len(b.Options))
 
 			for _, opt := range b.Options {
-				if !rule.Selector(b, opt) {
+				if !rule.Matches(b, opt) {
 					processedOptions = append(processedOptions, opt)
 					continue
 				}
 
-				processedOptions = append(processedOptions, rule.Action(schemas, b, opt)...)
+				matches += 1
+				transformedOpts, err := rule.Apply(ctx, b, opt)
+				if err != nil {
+					logger.Error("option rule failed", logs.Err(err))
+					return nil, fmt.Errorf("option rule failed: err=%w", err)
+				}
+				processedOptions = append(processedOptions, transformedOpts...)
 			}
 
 			builders[i].Options = processedOptions
+		}
+
+		if matches == 0 {
+			logger.Warn("option rule matched nothing")
+			continue
 		}
 	}
 
 	return tools.Filter(builders, func(builder ast.Builder) bool {
 		// "no options" means that the builder was dismissed.
 		return len(builder.Options) != 0
-	})
+	}), nil
 }
 
-func (engine *Rewriter) debugBuilderRules() []builder.RewriteRule {
-	return []builder.RewriteRule{
+func (engine *Rewriter) debugBuilderRules() []*builder.Rule {
+	return []*builder.Rule{
 		builder.VeneerTrailAsComments(builder.EveryBuilder()),
 	}
 }
 
-func (engine *Rewriter) debugOptionRules() []option.RewriteRule {
-	return []option.RewriteRule{
+func (engine *Rewriter) debugOptionRules() []option.Rule {
+	return []option.Rule{
 		option.VeneerTrailAsComments(option.EveryOption()),
 	}
 }
