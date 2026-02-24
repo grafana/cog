@@ -42,7 +42,6 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 }
 
 func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
-
 	imports := NewImportMap(jenny.config.PackageRoot)
 	jenny.packageMapper = func(pkg string) string {
 		if imports.IsIdentical(pkg, schema.Package) {
