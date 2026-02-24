@@ -22,7 +22,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: go-deps-${{ runner.os }}-${{ matrix.kind_version }}-${{ hashFiles('go.sum') }}
+          key: go-deps-${{ runner.os }}-${{ hashFiles('go.sum') }}
           restore-keys: |
             go-deps-${{ runner.os }}
 
@@ -32,32 +32,15 @@ jobs:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
-      - name: Run code generation
-        run: make gen-sdk-dev
-        env:
-          GOGC: "off"
-
-      - name: Compile generated Go code
-        run: devbox run ./scripts/ci/build-go.sh
-
-      - name: Compile generated Typescript code
-        run: devbox run ./scripts/ci/build-ts.sh
-
-      - name: Lint generated Python code
-        run: devbox run ./scripts/ci/build-python.sh
-
       # See https://docs.gradle.org/current/userguide/build_cache.html
       - name: Restore Gradle build cache
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
         with:
           path: |
             ~/.gradle/caches
-          key: gradle-build-cache-${{ runner.os }}-${{ matrix.kind_version }}
+          key: gradle-build-cache-${{ runner.os }}-
           restore-keys: |
             gradle-build-cache-${{ runner.os }}-
-
-      - name: Compile generated Java code
-        run: devbox run ./scripts/ci/build-java.sh
 
       # See https://phpstan.org/user-guide/result-cache
       # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
@@ -67,12 +50,34 @@ jobs:
           path: |
             /tmp/phpstan
             ~/.cache/psalm
-          key: php-linters-result-cache-${{ matrix.kind_version }}
+          key: php-linters-result-cache-
           restore-keys: |
             php-linters-result-cache-
 
-      - name: Lint generated PHP code
-        run: devbox run ./scripts/ci/build-php.sh
+      - name: Build cog with current branch
+        shell: bash
+        run: |
+          devbox run go build -o cog ./cmd/cli
+          mkdir -p "${HOME}/.local/bin/"
+          mv cog "${HOME}/.local/bin/"
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
+      - name: Fetch foundation-sdk
+        shell: bash
+        run: |
+          make fetch-foundation-sdk
+
+      - name: Dry-run SDK release with current branch
+        shell: bash
+        run: |
+          git config --global user.email "cog-ci@grafana.com"
+          git config --global user.name "cog - CI"
+
+          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+        env:
+          SKIP_VALIDATION: "no" # the release process will lint the code for us
+          LOG_LEVEL: "7" # debug
+          GOGC: "off"
 
   examples:
     name: Run examples
@@ -99,35 +104,27 @@ jobs:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
-      - name: Run code generation
-        run: make gen-sdk-dev
+      - name: Build cog with current branch
+        shell: bash
+        run: |
+          devbox run go build -o cog ./cmd/cli
+          mkdir -p "${HOME}/.local/bin/"
+          mv cog "${HOME}/.local/bin/"
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
+      - name: Fetch foundation-sdk
+        shell: bash
+        run: |
+          make fetch-foundation-sdk
+
+      - name: Run codegen pipeline
+        run: |
+          devbox run -- 'cd ./build/foundation-sdk ; make generate'
         env:
-          GOGC: "off"
+          GOGC: 'off'
 
-      - name: Run the Go example
-        run: make run-go-example
-
-      - name: Run the Typescript example
-        run: make run-ts-example
-
-      - name: Run the PHP example
-        run: make run-php-example
-
-      # See https://docs.gradle.org/current/userguide/build_cache.html
-      - name: Restore Gradle build cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
-        with:
-          path: |
-            ~/.gradle/caches
-          key: gradle-build-cache-${{ runner.os }}-${{ matrix.kind_version }}
-          restore-keys: |
-            gradle-build-cache-${{ runner.os }}-
-
-      - name: Run Java example
-        run: make run-java-example
-
-      - name: Run Python example
-        run: make run-python-example
+      - name: Run examples
+        run: devbox run ./build/foundation-sdk/scripts/run-examples.sh
 
   sdk_diff:
     name: Generate diff
@@ -154,10 +151,9 @@ jobs:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
-      - name: Fetch foundation-sdk and kind-registry
+      - name: Fetch foundation-sdk
         shell: bash
         run: |
-          make fetch-kind-registry
           make fetch-foundation-sdk
 
       - name: Build cog with current branch
@@ -188,10 +184,9 @@ jobs:
           ref: main
           persist-credentials: false
 
-      - name: Fetch foundation-sdk and kind-registry
+      - name: Fetch foundation-sdk
         shell: bash
         run: |
-          make fetch-kind-registry
           make fetch-foundation-sdk
 
       - name: Build cog with main branch
