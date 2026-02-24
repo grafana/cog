@@ -14,7 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          submodules: recursive
           persist-credentials: false
 
       - name: Restore go vendors
@@ -33,6 +32,12 @@ jobs:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
+      - name: Fetch foundation-sdk and kind-registry
+        shell: bash
+        run: |
+          make fetch-kind-registry
+          make fetch-foundation-sdk
+
       - name: Build cog with current branch
         shell: bash
         run: |
@@ -47,7 +52,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./config/foundation-sdk/scripts/prepare-release.sh
+          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-current
           CLEANUP_WORKSPACE: "no"
@@ -59,7 +64,6 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: main
-          submodules: recursive
           persist-credentials: false
 
       - name: Build cog with main branch
@@ -74,7 +78,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./config/foundation-sdk/scripts/prepare-release.sh
+          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-main
           CLEANUP_WORKSPACE: "no"
@@ -87,12 +91,12 @@ jobs:
           cat <<'EOF' > preview.md
           <!-- grafana-foundation-sdk-diff-preview-marker -->
 
-          **Note:** the diff show code changes that would be introduced by this PR to the output of the `config/foundation_sdk.dev.yaml` codegen pipeline (dev version of the Foundation SDK).
+          **Note:** the diff show code changes that would be introduced by this PR to the output of the *Grafana Foundation SDK* codegen pipeline.
 
           <details>
           <summary>
 
-          ### 🔎 Changes to `config/foundation_sdk.dev.yaml`
+          ### 🔎 Changes to *Grafana Foundation SDK*
 
           </summary>
 

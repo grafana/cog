@@ -48,13 +48,21 @@ docs: dev-env-check-binaries ## Generates the documentation.
 serve-docs: dev-env-check-binaries ## Builds and serves the documentation.
 	$(RUN_DEVBOX) mkdocs serve -w ./docs/ -f ./mkdocs-github.yml
 
+.PHONY: fetch-foundation-sdk
+fetch-foundation-sdk: ## Fetches the Foundation SDK.
+	@./scripts/fetch-repo.sh ./build/foundation-sdk https://github.com/grafana/grafana-foundation-sdk.git
+
+.PHONY: fetch-kind-registry
+fetch-kind-registry: ## Fetches the kind-registry.
+	@./scripts/fetch-repo.sh ./build/kind-registry https://github.com/grafana/kind-registry.git
+
 .PHONY: gen-sdk-dev
-gen-sdk-dev: dev-env-check-binaries ## Generates a dev version of the Foundation SDK.
-	rm -rf generated
+gen-sdk-dev: dev-env-check-binaries fetch-foundation-sdk fetch-kind-registry ## Generates a dev version of the Foundation SDK.
+	@rm -rf generated
 	$(RUN_DEVBOX) go run cmd/cli/main.go generate \
-		--config ./config/foundation-sdk/.cog/config.yaml \
+		--config ./build/foundation-sdk/.cog/config.yaml \
 		--debug \
-		--parameters "output_dir=./generated/%l,kind_registry_path=../kind-registry,go_package_root=github.com/grafana/cog/generated/go"
+		--parameters "output_dir=./generated/%l,kind_registry_path=./build/kind-registry,go_package_root=github.com/grafana/cog/generated/go"
 
 .PHONY: gen-tests
 gen-tests: dev-env-check-binaries ## Generates the code described by tests schemas.
