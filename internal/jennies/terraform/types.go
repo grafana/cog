@@ -49,6 +49,10 @@ func (formatter *typeFormatter) formatTypeDeclaration(object ast.Object) string 
 func (formatter *typeFormatter) formatType(def ast.Type) string {
 	switch def.Kind {
 	case ast.KindScalar:
+		if def.HasHint(ast.HintStringFormatDateTime) {
+			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
+			return "timetypes.RFC3339"
+		}
 		return formatter.formatScalar(def.AsScalar())
 	case ast.KindMap:
 		return "types.Map"
