@@ -11,7 +11,7 @@ require (
 	github.com/grafana/codejen v0.0.4-0.20250428224353-8764ced07770
 	github.com/huandu/xstrings v1.5.0
 	github.com/invopop/jsonschema v0.13.0
-	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/yalue/merged_fs v1.3.0
