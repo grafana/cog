@@ -5,6 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/httputil"
 	"github.com/grafana/cog/internal/openapi"
 )
 
@@ -34,7 +35,7 @@ func (input *OpenAPIInput) loadSchema(ctx context.Context) (*openapi3.T, error) 
 		return loader.LoadFromFile(input.Path)
 	}
 
-	body, err := loadURL(ctx, input.URL)
+	body, err := httputil.LoadURL(ctx, input.URL)
 	if err != nil {
 		return nil, err
 	}

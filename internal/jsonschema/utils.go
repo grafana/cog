@@ -41,3 +41,11 @@ func unwrapJSONNumber(input any) any {
 
 	return input
 }
+
+func maybeDefault(input *any) any {
+	if input == nil {
+		return nil
+	}
+
+	return *input
+}
