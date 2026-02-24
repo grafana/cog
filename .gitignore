@@ -1,5 +1,6 @@
 /generated
-/schemas/kind-registry
+/workspace
+/build
 /examples/*/vendor
 /.devbox
 /gradle.properties
