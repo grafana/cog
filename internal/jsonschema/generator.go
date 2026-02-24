@@ -12,6 +12,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/santhosh-tekuri/jsonschema/v6"
 	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )
 
@@ -50,9 +51,6 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		schema: ast.NewSchema(c.Package, c.SchemaMetadata),
 	}
 
-	compiler := schemaparser.NewCompiler()
-	compiler.ExtractAnnotations = true
-
 	schemaResourceURL := "schema"
 	if c.SchemaPath != "" {
 		absSchemaPath, err := filepath.Abs(c.SchemaPath)
@@ -63,7 +61,21 @@ func GenerateAST(schemaReader io.Reader, c Config) (*ast.Schema, error) {
 		schemaResourceURL = "file://" + absSchemaPath
 	}
 
-	if err := compiler.AddResource(schemaResourceURL, schemaReader); err != nil {
+	loader := jsonschema.SchemeURLLoader{
+		"file":  jsonschema.FileLoader{},
+		"http":  &HTTPURLLoader{},
+		"https": &HTTPURLLoader{},
+	}
+
+	compiler := schemaparser.NewCompiler()
+	compiler.UseLoader(loader)
+
+	unmarshalledSchema, err := jsonschema.UnmarshalJSON(schemaReader)
+	if err != nil {
+		return nil, fmt.Errorf("[%s] %w", c.Package, err)
+	}
+
+	if err := compiler.AddResource(schemaResourceURL, unmarshalledSchema); err != nil {
 		return nil, fmt.Errorf("[%s] %w", c.Package, err)
 	}
 
@@ -150,12 +162,12 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 		return g.walkEnum(schema)
 	}
 
-	if len(schema.Types) == 0 {
+	if schema.Types == nil || len(schema.Types.ToStrings()) == 0 {
 		if schema.Properties != nil || schema.PatternProperties != nil || schema.AdditionalProperties != nil {
 			return g.walkObject(schema)
 		}
 
-		if len(schema.Constant) != 0 {
+		if schema.Const != nil {
 			return g.walkUntypedConstant(schema)
 		}
 
@@ -163,12 +175,12 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 	}
 
 	// nolint: gocritic
-	if len(schema.Types) > 1 {
-		def, err = g.walkScalarDisjunction(schema.Types)
+	if len(schema.Types.ToStrings()) > 1 {
+		def, err = g.walkScalarDisjunction(schema.Types.ToStrings())
 	} else if schema.Enum != nil {
 		def, err = g.walkEnum(schema)
 	} else {
-		switch schema.Types[0] {
+		switch schema.Types.ToStrings()[0] {
 		case typeNull:
 			def = ast.Null()
 		case typeBoolean:
@@ -182,7 +194,7 @@ func (g *generator) walkDefinition(schema *schemaparser.Schema) (ast.Type, error
 		case typeArray:
 			def, err = g.walkList(schema)
 		default:
-			return ast.Type{}, fmt.Errorf("unexpected schema with type '%s'", schema.Types[0])
+			return ast.Type{}, fmt.Errorf("unexpected schema with type '%s'", schema.Types.String())
 		}
 	}
 
@@ -227,7 +239,7 @@ func (g *generator) walkDisjunctionBranches(branches []*schemaparser.Schema) ([]
 }
 
 func (g *generator) walkUntypedConstant(schema *schemaparser.Schema) (ast.Type, error) {
-	value := schema.Constant[0]
+	value := *schema.Const
 
 	switch constant := value.(type) {
 	case json.Number:
@@ -312,10 +324,10 @@ func (g *generator) walkRef(schema *schemaparser.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
-	def := ast.String(ast.Default(schema.Default))
+	def := ast.String(ast.Default(maybeDefault(schema.Default)))
 
-	if schema.Constant != nil {
-		def.Scalar.Value = schema.Constant[0]
+	if schema.Const != nil {
+		def.Scalar.Value = *schema.Const
 	}
 
 	// to handle constant values defined as a string with a "static" regex:
@@ -329,20 +341,20 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 		def.Scalar.Value = tools.ConstantStringFromRegex(schema.Pattern.String())
 	}
 
-	if schema.Format == formatDateTime {
+	if schema.Format != nil && schema.Format.Name == formatDateTime {
 		def.Hints[ast.HintStringFormatDateTime] = true
 	}
 
-	if schema.MinLength != -1 {
+	if schema.MinLength != nil {
 		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
 			Op:   ast.MinLengthOp,
-			Args: []any{schema.MinLength},
+			Args: []any{*schema.MinLength},
 		})
 	}
-	if schema.MaxLength != -1 {
+	if schema.MaxLength != nil {
 		def.Scalar.Constraints = append(def.Scalar.Constraints, ast.TypeConstraint{
 			Op:   ast.MaxLengthOp,
-			Args: []any{schema.MaxLength},
+			Args: []any{*schema.MaxLength},
 		})
 	}
 
@@ -350,10 +362,10 @@ func (g *generator) walkString(schema *schemaparser.Schema) (ast.Type, error) {
 }
 
 func (g *generator) walkBool(schema *schemaparser.Schema) (ast.Type, error) {
-	def := ast.Bool(ast.Default(schema.Default))
+	def := ast.Bool(ast.Default(maybeDefault(schema.Default)))
 
-	if schema.Constant != nil {
-		def.Scalar.Value = schema.Constant[0]
+	if schema.Const != nil {
+		def.Scalar.Value = *schema.Const
 	}
 
 	return def, nil
@@ -361,14 +373,14 @@ func (g *generator) walkBool(schema *schemaparser.Schema) (ast.Type, error) {
 
 func (g *generator) walkNumber(schema *schemaparser.Schema) (ast.Type, error) {
 	scalarKind := ast.KindInt64
-	if schema.Types[0] == typeNumber {
+	if schema.Types.ToStrings()[0] == typeNumber {
 		scalarKind = ast.KindFloat64
 	}
 
-	def := ast.NewScalar(scalarKind, ast.Default(schema.Default))
+	def := ast.NewScalar(scalarKind, ast.Default(maybeDefault(schema.Default)))
 
-	if schema.Constant != nil {
-		def.Scalar.Value = unwrapJSONNumber(schema.Constant[0])
+	if schema.Const != nil {
+		def.Scalar.Value = unwrapJSONNumber(*schema.Const)
 	}
 
 	if schema.Minimum != nil {
@@ -424,22 +436,22 @@ func (g *generator) walkList(schema *schemaparser.Schema) (ast.Type, error) {
 		return ast.Type{}, err
 	}
 
-	return ast.NewArray(itemsDef, ast.Default(schema.Default)), nil
+	return ast.NewArray(itemsDef, ast.Default(maybeDefault(schema.Default))), nil
 }
 
 func (g *generator) walkEnum(schema *schemaparser.Schema) (ast.Type, error) {
-	if len(schema.Enum) == 0 {
+	if schema.Enum == nil || len(schema.Enum.Values) == 0 {
 		return ast.Type{}, fmt.Errorf("enum with no values")
 	}
 
 	// we only want to deal with string or int enums
 	enumType := ast.String()
-	if _, ok := schema.Enum[0].(string); !ok {
+	if _, ok := schema.Enum.Values[0].(string); !ok {
 		enumType = ast.NewScalar(ast.KindInt64)
 	}
 
-	values := make([]ast.EnumValue, 0, len(schema.Enum))
-	for _, enumValue := range schema.Enum {
+	values := make([]ast.EnumValue, 0, len(schema.Enum.Values))
+	for _, enumValue := range schema.Enum.Values {
 		values = append(values, ast.EnumValue{
 			Type:  enumType,
 			Name:  fmt.Sprintf("%v", enumValue),

@@ -17,6 +17,7 @@ import (
 	"cuelang.org/go/cue/load"
 	"cuelang.org/go/cue/parser"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/httputil"
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/yalue/merged_fs"
@@ -325,7 +326,7 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 		return nil, fmt.Errorf("entrypoint %q must be a cue url", entrypoint)
 	}
 
-	body, err := loadURL(context.Background(), u.String())
+	body, err := httputil.LoadURL(context.Background(), u.String())
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +343,7 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 }
 
 func getPackageFromFile(url string) (string, error) {
-	body, err := loadURL(context.Background(), url)
+	body, err := httputil.LoadURL(context.Background(), url)
 	if err != nil {
 		return "", err
 	}
