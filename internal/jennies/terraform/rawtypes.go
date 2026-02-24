@@ -98,9 +98,5 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(object))
 	buffer.WriteString("\n")
 
-	switch object.Type.Kind {
-
-	}
-
 	return nil
 }
