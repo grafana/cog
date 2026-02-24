@@ -69,34 +69,6 @@ gen-tests: dev-env-check-binaries ## Generates the code described by tests schem
 	$(RUN_DEVBOX) go run ./cmd/cli/ generate \
 		--config ./config/foundation_sdk.tests.yaml
 
-.PHONY: run-go-example
-run-go-example: dev-env-check-binaries ## Runs the Go example.
-	$(RUN_DEVBOX) go run ./examples/_go/*
-	$(RUN_DEVBOX) go run ./examples/_go_dashboardv2/*
-
-.PHONY: run-java-example
-run-java-example: dev-env-check-binaries ## Runs the Java example.
-	$(RUN_DEVBOX) gradle publishToMavenLocal -p generated/java
-	$(RUN_DEVBOX) gradle run -p examples/java
-	$(RUN_DEVBOX) gradle run -p examples/java_dashboardv2
-
-.PHONY: run-php-example
-run-php-example: dev-env-check-binaries ## Runs the PHP example.
-	$(RUN_DEVBOX) composer install -d ./examples/php && \
-	$(RUN_DEVBOX) composer install -d ./examples/php_dashboardv2 && \
-	$(RUN_DEVBOX) php ./examples/php/index.php
-	$(RUN_DEVBOX) php ./examples/php_dashboardv2/index.php
-
-.PHONY: run-ts-example
-run-ts-example: dev-env-check-binaries ## Runs the Typescript example.
-	$(RUN_DEVBOX) ts-node examples/typescript
-	$(RUN_DEVBOX) ts-node examples/typescript_dashboardv2
-
-.PHONY: run-python-example
-run-python-example: dev-env-check-binaries ## Runs the Python example.
-	$(RUN_DEVBOX) python examples/python/main.py
-	$(RUN_DEVBOX) python examples/python_dashboardv2/main.py
-
 .PHONY: dev-env-check-binaires
 dev-env-check-binaries: ## Check that the required binary are present.
 	@devbox version >/dev/null 2>&1 || (echo "ERROR: devbox is required. See https://www.jetify.com/devbox/docs/quickstart/"; exit 1)
