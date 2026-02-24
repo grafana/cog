@@ -1,6 +1,9 @@
 package terraform
 
 import (
+	fmt "fmt"
+	"strings"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -11,6 +14,10 @@ const LanguageRef = "terraform"
 
 type Config struct {
 	debug bool
+
+	// Root path for imports.
+	// Ex: github.com/grafana/cog/generated
+	PackageRoot string `yaml:"package_root"`
 }
 
 type Language struct {
@@ -30,8 +37,13 @@ func (config *Config) MergeWithGlobal(global languages.Config) Config {
 	return *newConfig
 }
 
-func (config *Config) InterpolateParameters(_ func(input string) string) {
+func (config *Config) InterpolateParameters(interpolator func(input string) string) {
+	config.PackageRoot = interpolator(config.PackageRoot)
+}
 
+func (config *Config) importPath(suffix string) string {
+	root := strings.TrimSuffix(config.PackageRoot, "/")
+	return fmt.Sprintf("%s/%s", root, suffix)
 }
 
 func (language *Language) Name() string {
@@ -40,6 +52,7 @@ func (language *Language) Name() string {
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
+
 	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
@@ -50,7 +63,19 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 }
 
 func (language *Language) CompilerPasses() compiler.Passes {
-	return compiler.Passes{}
+	return compiler.Passes{
+		&compiler.AnonymousStructsToNamed{},
+		&compiler.NotRequiredFieldAsNullableType{},
+		&compiler.DisjunctionWithNullToOptional{},
+		&compiler.DisjunctionOfConstantsToEnum{},
+		&compiler.AnonymousEnumToExplicitType{},
+		&compiler.PrefixEnumValues{},
+		&compiler.FlattenDisjunctions{},
+		&compiler.DisjunctionOfAnonymousStructsToExplicit{},
+		&compiler.DisjunctionInferMapping{},
+		&compiler.UndiscriminatedDisjunctionToAny{},
+		&compiler.DisjunctionToType{},
+	}
 }
 
 func (language *Language) NullableKinds() languages.NullableConfig {
