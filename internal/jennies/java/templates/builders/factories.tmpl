@@ -26,7 +26,7 @@ public class {{ .ClassName|formatObjectName }} {
 {{- end }}
  */
 {{- end }}
-public static {{ .Factory.BuilderRef|refToType|formatBuilderFieldType }} {{ .Factory.Name|lowerCamelCase|escapeVar }}({{- template "args" (dict "Arguments" .Factory.Args "IsBuilder" true) }}) {
+public static {{ $builderName }} {{ .Factory.Name|lowerCamelCase|escapeVar }}({{- template "args" (dict "Arguments" .Factory.Args "IsBuilder" true) }}) {
     {{ $builderName }} builder = new {{ $builderName }}();
 {{- range $call := .Factory.OptionCalls }}
     builder.{{ $call.Name|lowerCamelCase|escapeVar }}({{- range $i, $param := $call.Parameters }}{{ if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) }}{{- end }});
