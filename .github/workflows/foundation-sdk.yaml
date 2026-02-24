@@ -188,6 +188,12 @@ jobs:
           ref: main
           persist-credentials: false
 
+      - name: Fetch foundation-sdk and kind-registry
+        shell: bash
+        run: |
+          make fetch-kind-registry
+          make fetch-foundation-sdk
+
       - name: Build cog with main branch
         shell: bash
         run: |
