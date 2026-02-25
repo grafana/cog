@@ -402,21 +402,25 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	}
 
 	possibleBuilders := context.BuildersForType(typeDef)
-	// hack to use the runtime to convert panels
-	if len(possibleBuilders) > 1 {
+	// hack to use the runtime to convert panels and dataqueries
+	if len(possibleBuilders) > 1 && typeDef.IsRef() {
 		for _, runtimeConfig := range generator.config.RuntimeConfig {
-			if strings.EqualFold(possibleBuilders[0].Package, runtimeConfig.Package) && strings.EqualFold(runtimeConfig.Name, possibleBuilders[0].For.Name) {
-				typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName(runtimeConfig.DiscriminatorField)
+			ref := typeDef.AsRef()
+			if !strings.EqualFold(ref.ReferredPkg, runtimeConfig.Package) || !strings.EqualFold(runtimeConfig.Name, ref.ReferredType) {
+				continue
+			}
 
-				return ArgumentMapping{
-					Runtime: &RuntimeArgMapping{
-						FuncName: runtimeConfig.NameFunc,
-						Args: []*DirectArgMapping{
-							{ValuePath: valuePath, ValueType: typeDef},
-							{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
-						},
+			resolvedRef := context.ResolveRefs(typeDef)
+			typeField, _ := resolvedRef.Struct.FieldByName(runtimeConfig.DiscriminatorField)
+
+			return ArgumentMapping{
+				Runtime: &RuntimeArgMapping{
+					FuncName: runtimeConfig.NameFunc,
+					Args: []*DirectArgMapping{
+						{ValuePath: valuePath, ValueType: typeDef},
+						{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
 					},
-				}
+				},
 			}
 		}
 	}
