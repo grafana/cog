@@ -10,5 +10,5 @@ type SomeStruct struct {
 
 type RefToSomeStruct = SomeStruct
 
-type RefToSomeStructFromOtherPackage = types.Object
+type RefToSomeStructFromOtherPackage = unknown
 
