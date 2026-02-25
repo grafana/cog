@@ -74,7 +74,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run -c config/devbox/ -- 'cd ../../ && ./build/foundation-sdk/scripts/prepare-release.sh'
+          devbox run -c config/devbox/ -- '. .venv/bin/activate && cd ../../ && make deps && ./build/foundation-sdk/scripts/prepare-release.sh'
         env:
           SKIP_VALIDATION: "no" # the release process will lint the code for us
           LOG_LEVEL: "7" # debug
@@ -125,7 +125,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run -c config/devbox/ -- 'cd ../../ && ./build/foundation-sdk/scripts/prepare-release.sh'
+          devbox run -c config/devbox/ -- '. .venv/bin/activate && cd ../../ && make deps && ./build/foundation-sdk/scripts/prepare-release.sh'
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-examples
           CLEANUP_WORKSPACE: "no"
@@ -181,7 +181,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run -c config/devbox/ -- 'cd ../../ && ./build/foundation-sdk/scripts/prepare-release.sh'
+          devbox run -c config/devbox/ -- '. .venv/bin/activate && cd ../../ && make deps && ./build/foundation-sdk/scripts/prepare-release.sh'
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-current
           CLEANUP_WORKSPACE: "no"
@@ -212,7 +212,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run -c config/devbox/ -- 'cd ../../ && ./build/foundation-sdk/scripts/prepare-release.sh'
+          devbox run -c config/devbox/ -- '. .venv/bin/activate && cd ../../ && make deps && ./build/foundation-sdk/scripts/prepare-release.sh'
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-main
           CLEANUP_WORKSPACE: "no"
