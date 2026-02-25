@@ -122,7 +122,7 @@ func (formatter *typeFormatter) formatReference(ref ast.RefType) string {
 
 	pkg := formatter.packageMapper(ref.ReferredPkg)
 	if pkg != "" {
-		return ref.ReferredPkg + "." + formatObjectName(ref.ReferredType)
+		return pkg + "." + formatObjectName(ref.ReferredType)
 	}
 
 	return formatObjectName(ref.ReferredType)
