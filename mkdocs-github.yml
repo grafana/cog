@@ -6,10 +6,22 @@ repo_url: "https://github.com/grafana/cog"
 edit_uri: edit/main/docs/
 
 docs_dir: ./docs/
+site_dir: ./docs-site/
 
-plugins:
-  - mkdocs-nav-weight
-  - search
+nav:
+  - Cog: index.md
+  - Pipelines:
+    - pipelines/index.md
+    - pipelines/creating_pipeline.md
+    - pipelines/splitting_pipeline.md
+    - pipelines/schema_transformations.md
+    - pipelines/builder_transformations.md
+  - Reference:
+    - reference/glossary.md
+    - reference/template_blocks.md
+    - reference/builders_transformations.md
+    - reference/options_transformations.md
+    - reference/schema_transformations.md
 
 markdown_extensions:
   - admonition
@@ -31,10 +43,8 @@ markdown_extensions:
       permalink: 🔗
 
 theme:
-  name: "material"
   features:
     - navigation.tabs
-    - navigation.indexes
     - navigation.top
     - navigation.prune
     - search.highlight

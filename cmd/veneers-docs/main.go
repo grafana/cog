@@ -158,10 +158,6 @@ func parseRules(sourceFile string) (map[string]Rule, error) {
 func builderDocEntriesToMarkdown(entries []veneerDocEntry) []byte {
 	var markdown bytes.Buffer
 
-	markdown.WriteString(`---
-weight: 10
----
-`)
 	markdown.WriteString("<!-- Generated with `make docs` -->\n")
 
 	markdown.WriteString("# Builder transformations\n\n")
