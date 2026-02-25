@@ -109,7 +109,7 @@ func (formatter *typeFormatter) formatStruct(s ast.StructType) string {
 func (formatter *typeFormatter) formatReference(ref ast.RefType) string {
 	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 	if !ok {
-		return "types.Object" // We don't find the referenced object, so we assume it's a generic object
+		return "unknown" // We don't find the referenced object, so we assume it's a generic object
 	}
 
 	if obj.Type.IsEnum() {
@@ -139,7 +139,7 @@ func (formatter *typeFormatter) formatArray(array ast.ArrayType) string {
 func (formatter *typeFormatter) formatConstantReference(constantRef ast.ConstantReferenceType) string {
 	obj, ok := formatter.context.LocateObject(constantRef.ReferredPkg, constantRef.ReferredType)
 	if !ok {
-		return "types.Object"
+		return "unknown"
 	}
 
 	if obj.Type.IsScalar() {
