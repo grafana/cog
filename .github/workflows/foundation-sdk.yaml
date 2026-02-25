@@ -67,7 +67,7 @@ jobs:
         run: |
           make fetch-foundation-sdk
 
-      - name: Dry-run SDK release with current branch
+      - name: Run SDK codegen pipeline
         shell: bash
         run: |
           git config --global user.email "cog-ci@grafana.com"
@@ -117,14 +117,22 @@ jobs:
         run: |
           make fetch-foundation-sdk
 
-      - name: Run codegen pipeline
+      - name: Run SDK codegen pipeline
+        shell: bash
         run: |
-          devbox run -- 'cd ./build/foundation-sdk ; make generate'
+          git config --global user.email "cog-ci@grafana.com"
+          git config --global user.name "cog - CI"
+
+          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
         env:
-          GOGC: 'off'
+          WORKSPACE_PATH: /tmp/foundation-workspace-examples
+          CLEANUP_WORKSPACE: "no"
+          SKIP_VALIDATION: "yes"
+          LOG_LEVEL: "7" # debug
+          GOGC: "off"
 
       - name: Run examples
-        run: devbox run ./build/foundation-sdk/scripts/run-examples.sh
+        run: devbox run /tmp/foundation-workspace-examples/foundation-sdk/scripts/run-examples.sh
 
   sdk_diff:
     name: Generate diff
