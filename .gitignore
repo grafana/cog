@@ -11,9 +11,7 @@
 # Java building folders
 .gradle/
 build/
-examples/java/bin/
 
 .idea
 
 dist/
-examples/custom-methods-cli
