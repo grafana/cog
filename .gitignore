@@ -4,6 +4,8 @@
 /examples/*/vendor
 /.devbox
 /gradle.properties
+/config/devbox/gradle.properties
+/config/devbox/.devbox
 /vendor
 /cog
 /docs-site

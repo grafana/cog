@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "go@1.26",
+    "php@8.5.3",
+    "php83Packages.composer@2.9.5",
+    "php83Packages.phpstan@2.1.1",
+    "python@3.14",
+    "nodejs-slim_18@18.20.8",
+    "nodePackages.ts-node@10.9.2",
+    "gradle@8.14.4"
+  ]
+}

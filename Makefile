@@ -5,6 +5,8 @@ else # Normal shell
     RUN_DEVBOX:=devbox run
 endif
 
+PREFERRED_SHELL=$(shell grep "^${USER}" /etc/passwd | cut -d ":" -f 7)
+
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -72,3 +74,7 @@ gen-tests: dev-env-check-binaries ## Generates the code described by tests schem
 .PHONY: dev-env-check-binaires
 dev-env-check-binaries: ## Check that the required binary are present.
 	@devbox version >/dev/null 2>&1 || (echo "ERROR: devbox is required. See https://www.jetify.com/devbox/docs/quickstart/"; exit 1)
+
+.PHONY: dev-shell
+dev-shell: dev-env-check-binaries ## Starts a shell with all development tools.
+	@devbox run -c config/devbox/ -- 'cd ../../ && echo "Entering Python venv" && . .venv/bin/activate && echo "Installing dependencies..." && make deps && $(PREFERRED_SHELL)'

@@ -31,6 +31,7 @@ jobs:
         with:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
+          project-path: config/devbox/
 
       # See https://docs.gradle.org/current/userguide/build_cache.html
       - name: Restore Gradle build cache
@@ -57,7 +58,7 @@ jobs:
       - name: Build cog with current branch
         shell: bash
         run: |
-          devbox run go build -o cog ./cmd/cli
+          devbox run -c config/devbox/ -- 'cd ../../ && go build -o cog ./cmd/cli'
           mkdir -p "${HOME}/.local/bin/"
           mv cog "${HOME}/.local/bin/"
           echo "${HOME}/.local/bin" >> $GITHUB_PATH
@@ -73,7 +74,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+          devbox run -c config/devbox/ -- 'cd ../../ && ./build/foundation-sdk/scripts/prepare-release.sh'
         env:
           SKIP_VALIDATION: "no" # the release process will lint the code for us
           LOG_LEVEL: "7" # debug
@@ -103,11 +104,12 @@ jobs:
         with:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
+          project-path: config/devbox/
 
       - name: Build cog with current branch
         shell: bash
         run: |
-          devbox run go build -o cog ./cmd/cli
+          devbox run -c config/devbox/ -- 'cd ../../ && go build -o cog ./cmd/cli'
           mkdir -p "${HOME}/.local/bin/"
           mv cog "${HOME}/.local/bin/"
           echo "${HOME}/.local/bin" >> $GITHUB_PATH
@@ -123,7 +125,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+          devbox run -c config/devbox/ -- 'cd ../../ && ./build/foundation-sdk/scripts/prepare-release.sh'
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-examples
           CLEANUP_WORKSPACE: "no"
@@ -158,6 +160,7 @@ jobs:
         with:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
+          project-path: config/devbox/
 
       - name: Fetch foundation-sdk
         shell: bash
@@ -167,7 +170,7 @@ jobs:
       - name: Build cog with current branch
         shell: bash
         run: |
-          devbox run go build -o cog ./cmd/cli
+          devbox run -c config/devbox/ -- 'cd ../../ && go build -o cog ./cmd/cli'
           mkdir -p "${HOME}/.local/bin/"
           mv cog "${HOME}/.local/bin/"
           echo "${HOME}/.local/bin" >> $GITHUB_PATH
@@ -178,7 +181,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+          devbox run -c config/devbox/ -- 'cd ../../ && ./build/foundation-sdk/scripts/prepare-release.sh'
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-current
           CLEANUP_WORKSPACE: "no"
@@ -200,7 +203,7 @@ jobs:
       - name: Build cog with main branch
         shell: bash
         run: |
-          devbox run go build -o cog ./cmd/cli
+          devbox run go -c config/devbox/ -- 'cd ../../ && build -o cog ./cmd/cli'
           mv cog "${HOME}/.local/bin/"
 
       - name: Dry-run release with main branch
@@ -209,7 +212,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+          devbox run -c config/devbox/ -- 'cd ../../ && ./build/foundation-sdk/scripts/prepare-release.sh'
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-main
           CLEANUP_WORKSPACE: "no"
