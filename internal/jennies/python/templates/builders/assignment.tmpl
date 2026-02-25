@@ -67,8 +67,10 @@ assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name 
 {{- define "value_envelope" }}
 {{- .Envelope.Type | formatRawType }}(
 {{- range .Envelope.Values }}
+    {{- if not .Path.Last.Type.IsConcreteScalar }}
     {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "IntoType" .Path.Last.Type "Value" .Value) }}
     {{ (index .Path 0).Identifier | formatIdentifier }}={{ $value }},
+    {{- end }}
 {{- end }}
 )
 {{- end }}
