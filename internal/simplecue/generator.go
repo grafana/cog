@@ -570,27 +570,7 @@ func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defa
 		return g.declareAnonymousEnum(v, defaultValue, hints)
 	}
 
-	_, disjunctionBranchesWithPossibleDefault := v.Expr()
-	defaultAsCueValue, hasDefault := v.Default()
-
-	disjunctionBranches := make([]cue.Value, 0, len(disjunctionBranchesWithPossibleDefault))
-	for _, branch := range disjunctionBranchesWithPossibleDefault {
-		if hasDefault && branch.Equals(defaultAsCueValue) {
-			_, bPath := branch.ReferencePath()
-			_, dPath := defaultAsCueValue.ReferencePath()
-
-			if bPath.String() == dPath.String() {
-				continue
-			}
-		}
-
-		disjunctionBranches = append(disjunctionBranches, branch)
-	}
-
-	// not a disjunction anymore
-	if len(disjunctionBranchesWithPossibleDefault) != len(disjunctionBranches) && len(disjunctionBranches) == 1 {
-		return g.declareNode(disjunctionBranches[0])
-	}
+	_, disjunctionBranches := v.Expr()
 
 	// We must be looking at a disjunction then (2)
 	branches := make([]ast.Type, 0, len(disjunctionBranches))

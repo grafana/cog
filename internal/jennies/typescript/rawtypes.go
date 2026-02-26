@@ -156,6 +156,14 @@ func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pac
 		}
 
 		return raw(jenny.typeFormatter.enums.formatValue(object, defaultValue))
+	case ast.KindDisjunction:
+		if object.Type.Default != nil {
+			if object.Type.AsDisjunction().Branches[0].IsRef() {
+				return raw(fmt.Sprintf("default%s()", object.Type.Default))
+			}
+			return object.Type.Default
+		}
+		fallthrough
 	default:
 		return jenny.defaultValueForType(object.Type, packageMapper)
 	}

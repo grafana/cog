@@ -152,6 +152,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
 		&compiler.RenameNumericEnumValues{},
+		&compiler.DisjunctionInferMapping{},
 	}
 }
 
