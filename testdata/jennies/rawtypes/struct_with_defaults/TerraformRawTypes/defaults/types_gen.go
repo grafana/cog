@@ -15,7 +15,7 @@ FieldInt32 types.Int32 `tfsdk:"FieldInt32"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"somestruct": types.ObjectAttributes{
+"somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "fieldBool": types.BoolType,
@@ -23,5 +23,6 @@ AttributeTypes: map[string]attr.Type{
 "FieldStringWithConstantValue": types.StringType,
 "FieldFloat32": types.Float32Type,
 "FieldInt32": types.Int32Type,
+},
 },
 }

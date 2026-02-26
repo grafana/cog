@@ -20,17 +20,28 @@ type MapOfStringToRef types.Map
 type MapOfStringToMapOfStringToBool types.Map
 
 var SpecAttributes = map[string]schema.Attribute{
-"mapofstringtoany": types.MapAttribute{
- 
-}"mapofstringtostring": types.MapAttribute{
- 
-}"somestruct": types.ObjectAttributes{
+"mapofstringtoany": schema.ListMapAttribute{
+ ElementType: types.ObjectType{},
+},
+"mapofstringtostring": schema.ListMapAttribute{
+ ElementType: types.StringType,
+},
+"somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-"mapofstringtoref": types.MapAttribute{
- 
-}"mapofstringtomapofstringtobool": types.MapAttribute{
- 
-}}
+},
+"mapofstringtoref": schema.ListMapAttribute{
+ ElementType: types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"FieldAny": types.ObjectType{},
+},
+},
+},
+"mapofstringtomapofstringtobool": schema.ListMapAttribute{
+ ElementType: types.MapType{
+ ElemType: types.BoolType,
+},
+},
+}

@@ -31,15 +31,15 @@ FieldInt64 types.Int64 `tfsdk:"FieldInt64"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"somestruct": types.ObjectAttributes{
+"somestruct": schema.ObjectAttribute{
 Required: true,
 Description: `
 This
 is
 a
 comment
-`,
-,AttributeTypes: map[string]attr.Type{
+`,,
+AttributeTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 "FieldBool": types.BoolType,
 "FieldBytes": types.StringType,
@@ -55,5 +55,6 @@ comment
 "FieldInt16": types.NumberType,
 "FieldInt32": types.Int32Type,
 "FieldInt64": types.Int64Type,
+},
 },
 }

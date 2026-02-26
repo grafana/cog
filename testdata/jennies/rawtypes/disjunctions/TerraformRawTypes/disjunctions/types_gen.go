@@ -47,63 +47,28 @@ YetAnotherStruct YetAnotherStruct `tfsdk:"YetAnotherStruct"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"refreshrate": "stringornull": schema.StringAttribute{
- Optional: true 
-}"somestruct": types.ObjectAttributes{
+"stringornull": schema.StringAttribute{
+ Optional: true, 
+},
+"somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "Type": types.StringType,
 "FieldAny": types.ObjectType{},
 },
-"boolorref": "someotherstruct": types.ObjectAttributes{
+},
+"someotherstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "Type": types.StringType,
 "Foo": types.StringType,
 },
-"yetanotherstruct": types.ObjectAttributes{
+},
+"yetanotherstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "Type": types.StringType,
 "Bar": types.NumberType,
 },
-"severalrefs": "stringorbool": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"String": types.StringType,
-"Bool": types.BoolType,
-},
-"boolorsomestruct": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"Bool": types.BoolType,
-"SomeStruct": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"Type": types.StringType,
-"FieldAny": types.ObjectType{},
-},
-,
-},
-"somestructorsomeotherstructoryetanotherstruct": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"SomeStruct": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"Type": types.StringType,
-"FieldAny": types.ObjectType{},
-},
-,
-"SomeOtherStruct": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"Type": types.StringType,
-"Foo": types.StringType,
-},
-,
-"YetAnotherStruct": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"Type": types.StringType,
-"Bar": types.NumberType,
-},
-,
 },
 }

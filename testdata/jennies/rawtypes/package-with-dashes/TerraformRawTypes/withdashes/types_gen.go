@@ -19,15 +19,10 @@ Bool types.Bool `tfsdk:"Bool"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"somestruct": types.ObjectAttributes{
+"somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-"refreshrate": "stringorbool": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"String": types.StringType,
-"Bool": types.BoolType,
 },
 }

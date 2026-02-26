@@ -35,13 +35,14 @@ IntVal types.Int64 `tfsdk:"intVal"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"nestedstruct": types.ObjectAttributes{
+"nestedstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "stringVal": types.StringType,
 "intVal": types.Int64Type,
 },
-"struct": types.ObjectAttributes{
+},
+"struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "allFields": types.ObjectType{
@@ -49,19 +50,19 @@ AttributeTypes: map[string]attr.Type{
 "stringVal": types.StringType,
 "intVal": types.Int64Type,
 },
-,
+},
 "partialFields": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "stringVal": types.StringType,
 "intVal": types.Int64Type,
 },
-,
+},
 "emptyFields": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "stringVal": types.StringType,
 "intVal": types.Int64Type,
 },
-,
+},
 "complexField": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "uid": types.StringType,
@@ -69,25 +70,27 @@ AttributeTypes: map[string]attr.Type{
  AttrTypes: map[string]attr.Type{
 "nestedVal": types.StringType,
 },
-,
+},
 "array": types.ListType{
  ElemType: types.StringType,
 },
 },
-,
+},
 "partialComplexField": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "uid": types.StringType,
 "intVal": types.Int64Type,
 },
-,
 },
-"defaultsstructcomplexfieldnested": types.ObjectAttributes{
+},
+},
+"defaultsstructcomplexfieldnested": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "nestedVal": types.StringType,
 },
-"defaultsstructcomplexfield": types.ObjectAttributes{
+},
+"defaultsstructcomplexfield": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "uid": types.StringType,
@@ -95,15 +98,17 @@ AttributeTypes: map[string]attr.Type{
  AttrTypes: map[string]attr.Type{
 "nestedVal": types.StringType,
 },
-,
+},
 "array": types.ListType{
  ElemType: types.StringType,
 },
 },
-"defaultsstructpartialcomplexfield": types.ObjectAttributes{
+},
+"defaultsstructpartialcomplexfield": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "uid": types.StringType,
 "intVal": types.Int64Type,
+},
 },
 }

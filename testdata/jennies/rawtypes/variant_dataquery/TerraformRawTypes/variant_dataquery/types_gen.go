@@ -12,10 +12,11 @@ Instant types.Bool `tfsdk:"instant"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"query": types.ObjectAttributes{
+"query": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "expr": types.StringType,
 "instant": types.BoolType,
+},
 },
 }

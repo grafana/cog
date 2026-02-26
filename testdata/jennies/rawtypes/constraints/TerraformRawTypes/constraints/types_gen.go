@@ -19,7 +19,7 @@ Tags types.List `tfsdk:"tags"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"somestruct": types.ObjectAttributes{
+"somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "id": types.Int64Type,
@@ -34,9 +34,10 @@ AttributeTypes: map[string]attr.Type{
  ElemType: types.StringType,
 },
 },
-,
 },
-"refstruct": types.ObjectAttributes{
+},
+},
+"refstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "labels": types.MapType{
@@ -44,6 +45,7 @@ AttributeTypes: map[string]attr.Type{
 },
 "tags": types.ListType{
  ElemType: types.StringType,
+},
 },
 },
 }

@@ -25,16 +25,16 @@ type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
 
 
 var SpecAttributes = map[string]schema.Attribute{
-"somestruct": types.ObjectAttributes{
+"somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "FieldRef": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-,
+},
 "FieldString": types.StringType,
-"Operator": unknown,
+"Operator": types.StringType,
 "FieldArrayOfStrings": types.ListType{
  ElemType: types.StringType,
 },
@@ -42,16 +42,19 @@ AttributeTypes: map[string]attr.Type{
  AttrTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-,
 },
-"someotherstruct": types.ObjectAttributes{
+},
+},
+"someotherstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-"structoptionalfieldssomestructfieldanonymousstruct": types.ObjectAttributes{
+},
+"structoptionalfieldssomestructfieldanonymousstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-"somestructoperator": }
+},
+}

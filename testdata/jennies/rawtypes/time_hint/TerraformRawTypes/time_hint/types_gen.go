@@ -15,11 +15,12 @@ type ObjWithTimeField struct {
 
 var SpecAttributes = map[string]schema.Attribute{
 "objtime": schema.StringAttribute{
- Required: true
- 
-}"objwithtimefield": types.ObjectAttributes{
+ Required: true, 
+},
+"objwithtimefield": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "registeredAt": types.StringType,
+},
 },
 }

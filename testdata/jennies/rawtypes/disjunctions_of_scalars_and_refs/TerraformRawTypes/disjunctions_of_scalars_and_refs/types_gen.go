@@ -25,33 +25,16 @@ MyRefB MyRefB `tfsdk:"MyRefB"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"disjunctionofscalarsandrefs": "myrefa": types.ObjectAttributes{
+"myrefa": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "foo": types.StringType,
 },
-"myrefb": types.ObjectAttributes{
+},
+"myrefb": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "bar": types.Int64Type,
 },
-"stringorboolorarrayofstringormyrefaormyrefb": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"String": types.StringType,
-"Bool": types.BoolType,
-"ArrayOfString": types.ListType{
- ElemType: types.StringType,
-},
-"MyRefA": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"foo": types.StringType,
-},
-,
-"MyRefB": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"bar": types.Int64Type,
-},
-,
 },
 }

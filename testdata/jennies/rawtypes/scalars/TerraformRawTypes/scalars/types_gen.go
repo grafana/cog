@@ -37,48 +37,48 @@ type ScalarTypeInt64 types.Int64
 
 var SpecAttributes = map[string]schema.Attribute{
 "consttypestring": schema.StringAttribute{
- Required: true
- 
-}"scalartypeany": schema.ObjectAttribute{
- Required: true
- 
-}"scalartypebool": schema.BoolAttribute{
- Required: true
- 
-}"scalartypebytes": schema.StringAttribute{
- Required: true
- 
-}"scalartypestring": schema.StringAttribute{
- Required: true
- 
-}"scalartypefloat32": schema.Float32Attribute{
- Required: true
- 
-}"scalartypefloat64": schema.Float64Attribute{
- Required: true
- 
-}"scalartypeuint8": schema.NumberAttribute{
- Required: true
- 
-}"scalartypeuint16": schema.NumberAttribute{
- Required: true
- 
-}"scalartypeuint32": schema.Int32Attribute{
- Required: true
- 
-}"scalartypeuint64": schema.Int64Attribute{
- Required: true
- 
-}"scalartypeint8": schema.NumberAttribute{
- Required: true
- 
-}"scalartypeint16": schema.NumberAttribute{
- Required: true
- 
-}"scalartypeint32": schema.Int32Attribute{
- Required: true
- 
-}"scalartypeint64": schema.Int64Attribute{
- Required: true
- 
-}}
+ Required: true, 
+},
+"scalartypeany": schema.ObjectAttribute{
+ Required: true, 
+},
+"scalartypebool": schema.BoolAttribute{
+ Required: true, 
+},
+"scalartypebytes": schema.StringAttribute{
+ Required: true, 
+},
+"scalartypestring": schema.StringAttribute{
+ Required: true, 
+},
+"scalartypefloat32": schema.Float32Attribute{
+ Required: true, 
+},
+"scalartypefloat64": schema.Float64Attribute{
+ Required: true, 
+},
+"scalartypeuint8": schema.NumberAttribute{
+ Required: true, 
+},
+"scalartypeuint16": schema.NumberAttribute{
+ Required: true, 
+},
+"scalartypeuint32": schema.Int32Attribute{
+ Required: true, 
+},
+"scalartypeuint64": schema.Int64Attribute{
+ Required: true, 
+},
+"scalartypeint8": schema.NumberAttribute{
+ Required: true, 
+},
+"scalartypeint16": schema.NumberAttribute{
+ Required: true, 
+},
+"scalartypeint32": schema.Int32Attribute{
+ Required: true, 
+},
+"scalartypeint64": schema.Int64Attribute{
+ Required: true, 
+},
+}

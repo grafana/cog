@@ -15,9 +15,10 @@ type RefToSomeStruct = SomeStruct
 type RefToSomeStructFromOtherPackage = unknown
 
 var SpecAttributes = map[string]schema.Attribute{
-"somestruct": types.ObjectAttributes{
+"somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-"reftosomestruct": "reftosomestructfromotherpackage": }
+},
+}

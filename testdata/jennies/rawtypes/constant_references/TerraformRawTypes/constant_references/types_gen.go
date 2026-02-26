@@ -28,27 +28,31 @@ MyValue types.String `tfsdk:"myValue"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"enum": "parentstruct": types.ObjectAttributes{
+"parentstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"myEnum": unknown,
+"myEnum": types.StringType,
 },
-"struct": types.ObjectAttributes{
+},
+"struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "myValue": types.StringType,
-"myEnum": unknown,
+"myEnum": types.StringType,
 },
-"structa": types.ObjectAttributes{
+},
+"structa": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"myEnum": unknown,
-"other": unknown,
+"myEnum": types.StringType,
+"other": types.StringType,
 },
-"structb": types.ObjectAttributes{
+},
+"structb": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"myEnum": unknown,
+"myEnum": types.StringType,
 "myValue": types.StringType,
+},
 },
 }

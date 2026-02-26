@@ -42,23 +42,23 @@ SomeOtherStruct SomeOtherStruct `tfsdk:"SomeOtherStruct"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"somestruct": types.ObjectAttributes{
+"somestruct": schema.ObjectAttribute{
 Required: true,
 Description: `
 This struct does things.
-`,
-,AttributeTypes: map[string]attr.Type{
+`,,
+AttributeTypes: map[string]attr.Type{
 "FieldRef": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-,
+},
 "FieldDisjunctionOfScalars": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "String": types.StringType,
 "Bool": types.BoolType,
 },
-,
+},
 "FieldMixedDisjunction": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "String": types.StringType,
@@ -66,11 +66,11 @@ This struct does things.
  AttrTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-,
 },
-,
+},
+},
 "FieldDisjunctionWithNull": types.StringType,
-"Operator": unknown,
+"Operator": types.StringType,
 "FieldArrayOfStrings": types.ListType{
  ElemType: types.StringType,
 },
@@ -81,36 +81,23 @@ This struct does things.
  AttrTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-,
+},
 "fieldRefToConstant": types.StringType,
 },
+},
 "connectionpath": schema.StringAttribute{
- Required: true
- 
-}"someotherstruct": types.ObjectAttributes{
+ Required: true, 
+},
+"someotherstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-"structcomplexfieldssomestructfieldanonymousstruct": types.ObjectAttributes{
+},
+"structcomplexfieldssomestructfieldanonymousstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
-"somestructoperator": "stringorbool": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"String": types.StringType,
-"Bool": types.BoolType,
-},
-"stringorsomeotherstruct": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"String": types.StringType,
-"SomeOtherStruct": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"FieldAny": types.ObjectType{},
-},
-,
 },
 }

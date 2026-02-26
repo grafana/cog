@@ -15,14 +15,16 @@ type FieldConfig struct {
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"options": types.ObjectAttributes{
+"options": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "timeseries_option": types.StringType,
 },
-"fieldconfig": types.ObjectAttributes{
+},
+"fieldconfig": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "timeseries_field_config_option": types.StringType,
+},
 },
 }

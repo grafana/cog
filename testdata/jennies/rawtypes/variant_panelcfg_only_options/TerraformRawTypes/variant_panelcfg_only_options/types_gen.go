@@ -11,9 +11,10 @@ type Options struct {
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"options": types.ObjectAttributes{
+"options": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "content": types.StringType,
+},
 },
 }

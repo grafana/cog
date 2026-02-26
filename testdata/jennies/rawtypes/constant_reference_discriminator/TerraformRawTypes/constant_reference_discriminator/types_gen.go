@@ -45,66 +45,38 @@ RowsLayoutWithoutValue RowsLayoutWithoutValue `tfsdk:"RowsLayoutWithoutValue"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"layoutwithvalue": "gridlayoutusingvalue": types.ObjectAttributes{
+"gridlayoutusingvalue": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"kind": unknown,
+"kind": types.StringType,
 "gridLayoutProperty": types.StringType,
 },
-"rowslayoutusingvalue": types.ObjectAttributes{
+},
+"rowslayoutusingvalue": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"kind": unknown,
+"kind": types.StringType,
 "rowsLayoutProperty": types.StringType,
 },
-"layoutwithoutvalue": "gridlayoutwithoutvalue": types.ObjectAttributes{
+},
+"gridlayoutwithoutvalue": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"kind": unknown,
+"kind": types.StringType,
 "gridLayoutProperty": types.StringType,
 },
-"rowslayoutwithoutvalue": types.ObjectAttributes{
+},
+"rowslayoutwithoutvalue": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"kind": unknown,
+"kind": types.StringType,
 "rowsLayoutProperty": types.StringType,
+},
 },
 "gridlayoutkindtype": schema.StringAttribute{
- Required: true
- 
-}"rowslayoutkindtype": schema.StringAttribute{
- Required: true
- 
-}"gridlayoutusingvalueorrowslayoutusingvalue": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"GridLayoutUsingValue": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"kind": unknown,
-"gridLayoutProperty": types.StringType,
+ Required: true, 
 },
-,
-"RowsLayoutUsingValue": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"kind": unknown,
-"rowsLayoutProperty": types.StringType,
-},
-,
-},
-"gridlayoutwithoutvalueorrowslayoutwithoutvalue": types.ObjectAttributes{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"GridLayoutWithoutValue": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"kind": unknown,
-"gridLayoutProperty": types.StringType,
-},
-,
-"RowsLayoutWithoutValue": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"kind": unknown,
-"rowsLayoutProperty": types.StringType,
-},
-,
+"rowslayoutkindtype": schema.StringAttribute{
+ Required: true, 
 },
 }
