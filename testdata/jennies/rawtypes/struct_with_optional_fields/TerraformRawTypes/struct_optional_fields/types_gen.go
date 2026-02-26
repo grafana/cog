@@ -2,6 +2,8 @@ package struct_optional_fields
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type SomeStruct struct {
@@ -22,3 +24,34 @@ type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
 
 
 
+var SpecAttributes = map[string]schema.Attribute{
+"somestruct": types.ObjectAttributes{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"FieldRef": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"FieldAny": types.ObjectType{},
+},
+,
+"FieldString": types.StringType,
+"Operator": unknown,
+"FieldArrayOfStrings": types.ListType{
+ ElemType: types.StringType,
+},
+"FieldAnonymousStruct": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"FieldAny": types.ObjectType{},
+},
+,
+},
+"someotherstruct": types.ObjectAttributes{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"FieldAny": types.ObjectType{},
+},
+"structoptionalfieldssomestructfieldanonymousstruct": types.ObjectAttributes{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"FieldAny": types.ObjectType{},
+},
+"somestructoperator": }

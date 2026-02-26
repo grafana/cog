@@ -2,6 +2,8 @@ package withdashes
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type SomeStruct struct {
@@ -16,3 +18,16 @@ type StringOrBool struct {
 Bool types.Bool `tfsdk:"Bool"`
  }
 
+var SpecAttributes = map[string]schema.Attribute{
+"somestruct": types.ObjectAttributes{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"FieldAny": types.ObjectType{},
+},
+"refreshrate": "stringorbool": types.ObjectAttributes{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"String": types.StringType,
+"Bool": types.BoolType,
+},
+}

@@ -2,6 +2,8 @@ package variant_dataquery
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type Query struct {
@@ -9,3 +11,11 @@ type Query struct {
 Instant types.Bool `tfsdk:"instant"`
  }
 
+var SpecAttributes = map[string]schema.Attribute{
+"query": types.ObjectAttributes{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"expr": types.StringType,
+"instant": types.BoolType,
+},
+}
