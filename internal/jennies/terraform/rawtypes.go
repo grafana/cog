@@ -51,6 +51,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return imports.Add(pkg, jenny.config.importPath(pkg))
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, imports, jenny.packageMapper)
+	attributesGenerator := newAttributesGenerator(jenny.typeFormatter, jenny.packageMapper)
 
 	// TF base types
 	imports.Add("", "github.com/hashicorp/terraform-plugin-framework/types")
@@ -71,6 +72,13 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	if err != nil {
 		return nil, err
 	}
+
+	attrs, err := attributesGenerator.generateForSchema(schema)
+	if err != nil {
+		return nil, err
+	}
+
+	buffer.WriteString(attrs)
 
 	importStatements := imports.String()
 	if importStatements != "" {
