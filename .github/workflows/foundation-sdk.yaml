@@ -217,23 +217,8 @@ jobs:
           LOG_LEVEL: "7" # debug
           GOGC: "off"
 
-      - name: Preview diff
+      - name: Generate diff
         run: |
-          cat <<'EOF' > preview.md
-          <!-- grafana-foundation-sdk-diff-preview-marker -->
-
-          **Note:** the diff show code changes that would be introduced by this PR to the output of the *Grafana Foundation SDK* codegen pipeline.
-
-          <details>
-          <summary>
-
-          ### 🔎 Changes to *Grafana Foundation SDK*
-
-          </summary>
-
-          ```patch
-          EOF
-
           diff \
             --new-file \
             --unidirectional-new-file \
@@ -245,7 +230,36 @@ jobs:
             --exclude='pyproject.toml' \
             --exclude='package.json' \
             --exclude='*.md' \
-            /tmp/foundation-workspace-main/foundation-sdk/ /tmp/foundation-workspace-current/foundation-sdk/ >> preview.md || true # diff returns 1 if the two targets have differences
+            /tmp/foundation-workspace-main/foundation-sdk/ /tmp/foundation-workspace-current/foundation-sdk/ > diff.patch || true # diff returns 1 if the two targets have differences
+
+      - name: Upload diff as artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        id: artifact-upload-step
+        with:
+          name: diff.patch
+          path: diff.patch
+          retention-days: 7
+
+      - name: Preview diff
+        run: |
+          cat <<'EOF' > preview.md
+          <!-- grafana-foundation-sdk-diff-preview-marker -->
+
+          **Note:** the diff show code changes that would be introduced by this PR to the output of the *Grafana Foundation SDK* codegen pipeline.
+
+          [See full diff](${{ steps.artifact-upload-step.outputs.artifact-url }}).
+
+          <details>
+          <summary>
+
+          ### 🔎 Changes to *Grafana Foundation SDK*
+
+          </summary>
+
+          ```patch
+          EOF
+
+          cat diff.patch >> preview.md
 
           cat <<'EOF' >> preview.md
           ```
