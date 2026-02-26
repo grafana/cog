@@ -33,15 +33,23 @@ func (opt Option) AsIR(schemas ast.Schemas, root ast.Builder) (ast.Option, error
 }
 
 type Assignment struct {
-	Path   string               `yaml:"path"`
-	Method ast.AssignmentMethod `yaml:"method"`
-	Value  AssignmentValue      `yaml:"value"`
+	Path    string               `yaml:"path"`
+	PathObj ast.Path             `yaml:"path_obj"`
+	Method  ast.AssignmentMethod `yaml:"method"`
+	Value   AssignmentValue      `yaml:"value"`
 }
 
 func (assignment Assignment) AsIR(schemas ast.Schemas, root ast.Builder) (ast.Assignment, error) {
-	path, err := root.MakePath(schemas, assignment.Path)
-	if err != nil {
-		return ast.Assignment{}, err
+	var path ast.Path
+	var err error
+
+	if assignment.PathObj != nil {
+		path = assignment.PathObj
+	} else {
+		path, err = root.MakePath(schemas, assignment.Path)
+		if err != nil {
+			return ast.Assignment{}, err
+		}
 	}
 
 	value, err := assignment.Value.AsIR(schemas, path)
@@ -57,17 +65,14 @@ func (assignment Assignment) AsIR(schemas ast.Schemas, root ast.Builder) (ast.As
 }
 
 type AssignmentValue struct {
-	Argument *ast.Argument       `json:",omitempty"`
-	Constant any                 `json:",omitempty"`
+	Argument *ast.Argument `json:",omitempty"`
+	Constant any
 	Envelope *AssignmentEnvelope `json:",omitempty"`
 }
 
 func (value AssignmentValue) AsIR(schemas ast.Schemas, assignmentPath ast.Path) (ast.AssignmentValue, error) {
 	if value.Argument != nil {
 		return ast.AssignmentValue{Argument: value.Argument}, nil
-	}
-	if value.Constant != nil {
-		return ast.AssignmentValue{Constant: value.Constant}, nil
 	}
 	if value.Envelope != nil {
 		envelopeType := assignmentPath.Last().Type
@@ -86,7 +91,7 @@ func (value AssignmentValue) AsIR(schemas ast.Schemas, assignmentPath ast.Path) 
 		return ast.AssignmentValue{Envelope: &envelope}, nil
 	}
 
-	return ast.AssignmentValue{}, fmt.Errorf("empty assignment value")
+	return ast.AssignmentValue{Constant: value.Constant}, nil
 }
 
 type AssignmentEnvelope struct {

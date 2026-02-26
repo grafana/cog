@@ -17,14 +17,8 @@
 {{- end }}
 
 {{- define "assignment_value" }}
-    {{- if not (eq .Value.Constant nil) }}
-        {{- if isNullableNonArray .Assignment.Path.Last.Type }}
-            {{- print "&val" (.Assignment.Path.Last.Identifier | upperCamelCase) }}
-        {{- else }}
-            {{- formatScalar .Value.Constant }}
-        {{- end }}
-    {{- end }}
-    {{- with .Value.Argument }}
+    {{- if .Value.Argument }}
+        {{- with .Value.Argument }}
         {{- $argName := formatArgName .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
@@ -32,9 +26,17 @@
         {{- end }}
 
         {{- maybeAsPointer $.Assignment.Path.Last.Type $argName }}
-    {{- end }}
-    {{- with .Value.Envelope }}
+        {{- end }}
+    {{- else if .Value.Envelope }}
+        {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+        {{- end }}
+    {{- else }}
+        {{- if isNullableNonArray .Assignment.Path.Last.Type }}
+            {{- print "&val" (.Assignment.Path.Last.Identifier | upperCamelCase) }}
+        {{- else }}
+            {{- formatScalar .Value.Constant }}
+        {{- end }}
     {{- end }}
 {{- end }}
 

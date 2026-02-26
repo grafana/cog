@@ -40,10 +40,8 @@
 {{- end }}
 
 {{- define "assignment_value" }}
-    {{- if not (eq .Value.Constant nil) }}
-        {{- formatRefType .IntoType .Value.Constant }}
-    {{- end }}
-    {{- with .Value.Argument }}
+    {{- if .Value.Argument }}
+        {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
             {{- if or .Type.IsMap .Type.IsArray }}
             {{- .Name | escapeVar | lowerCamelCase }}Resources
@@ -53,9 +51,13 @@
         {{- else }}
             {{- .Name | escapeVar | lowerCamelCase }}
         {{- end }}
-    {{- end }}
-    {{- with .Value.Envelope }}
+        {{- end }}
+    {{- else if .Value.Envelope }}
+        {{- with .Value.Envelope }}
         {{- .Type | formatType | lowerCamelCase }}
+        {{- end }}
+    {{- else }}
+        {{- formatRefType .IntoType .Value.Constant }}
     {{- end }}
 {{- end }}
 

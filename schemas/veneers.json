@@ -212,6 +212,48 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "AstPath": {
+      "items": {
+        "$ref": "#/$defs/AstPathItem"
+      },
+      "type": "array"
+    },
+    "AstPathIndex": {
+      "properties": {
+        "argument": {
+          "$ref": "#/$defs/AstArgument"
+        },
+        "constant": {
+          "description": "string or int"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AstPathItem": {
+      "properties": {
+        "identifier": {
+          "type": "string"
+        },
+        "index": {
+          "$ref": "#/$defs/AstPathIndex"
+        },
+        "type": {
+          "$ref": "#/$defs/AstType",
+          "description": "any"
+        },
+        "typehint": {
+          "$ref": "#/$defs/AstType",
+          "description": "useful mostly for composability purposes, when a field Type is \"any\"\nand we're trying to \"compose in\" something of a known type."
+        },
+        "root": {
+          "type": "boolean",
+          "description": "Is this element of the path the root? (ie: a variable, not a member of a struct)"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "AstRefType": {
       "properties": {
         "referred_pkg": {
@@ -368,6 +410,9 @@
       "properties": {
         "path": {
           "type": "string"
+        },
+        "path_obj": {
+          "$ref": "#/$defs/AstPath"
         },
         "method": {
           "type": "string"

@@ -18,10 +18,8 @@
 {{- end }}
 
 {{- define "assignment_value" }}
-    {{- if not (eq .Value.Constant nil) }}
-        {{- formatValue .IntoType .Value.Constant }}
-    {{- end }}
-    {{- with .Value.Argument }}
+    {{- if .Value.Argument }}
+        {{- with .Value.Argument }}
         {{- $argName := formatArgName .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
@@ -29,9 +27,13 @@
         {{- end }}
 
         {{- print "$" $argName }}
-    {{- end }}
-    {{- with .Value.Envelope }}
+        {{- end }}
+    {{- else if .Value.Envelope }}
+        {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+        {{- end }}
+    {{- else }}
+        {{- formatValue .IntoType .Value.Constant }}
     {{- end }}
 {{- end }}
 
