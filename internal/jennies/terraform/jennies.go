@@ -18,6 +18,10 @@ type Config struct {
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string `yaml:"package_root"`
+
+	// SkipPostFormatting disables formatting of Go files done with go imports
+	// after code generation.
+	SkipPostFormatting bool `yaml:"skip_post_formatting"`
 }
 
 type Language struct {
@@ -59,6 +63,12 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 	jenny.AppendOneToMany(
 		common.If(globalConfig.Types, RawTypes{config: config}))
+
+	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	if !config.SkipPostFormatting {
+		jenny.AddPostprocessors(formatGoFiles)
+	}
+
 	return jenny
 }
 

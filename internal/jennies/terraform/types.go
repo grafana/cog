@@ -163,7 +163,7 @@ func (formatter *typeFormatter) formatTypeAttribute(object ast.Object) string {
 		for _, comment := range object.Comments {
 			comments += comment + "\n"
 		}
-		comments += "`,\n"
+		comments += "`,"
 	}
 
 	switch object.Type.Kind {
@@ -174,7 +174,7 @@ func (formatter *typeFormatter) formatTypeAttribute(object ast.Object) string {
 	case ast.KindArray:
 		return formatter.formatArrayAttributes(object.Type)
 	case ast.KindMap:
-		return "types.MapAttribute{\n \n}"
+		return formatter.formatMapAttributes(object.Type)
 	default:
 		return ""
 	}
@@ -182,7 +182,7 @@ func (formatter *typeFormatter) formatTypeAttribute(object ast.Object) string {
 
 func (formatter *typeFormatter) formatStructAttributes(def ast.Type, comments string) string {
 	var buffer strings.Builder
-	buffer.WriteString("types.ObjectAttributes{\n")
+	buffer.WriteString("schema.ObjectAttribute{\n")
 
 	if def.Nullable {
 		buffer.WriteString("Optional: true,\n")
@@ -191,7 +191,7 @@ func (formatter *typeFormatter) formatStructAttributes(def ast.Type, comments st
 	}
 
 	if comments != "" {
-		buffer.WriteString(fmt.Sprintf("Description: %s,", comments))
+		buffer.WriteString(fmt.Sprintf("Description: %s,\n", comments))
 	}
 
 	formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
@@ -200,13 +200,13 @@ func (formatter *typeFormatter) formatStructAttributes(def ast.Type, comments st
 		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", field.Name, formatter.formatElementType(field.Type)))
 	}
 
-	buffer.WriteString("},\n")
+	buffer.WriteString("},\n},\n")
 	return buffer.String()
 }
 
 func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 	var buffer strings.Builder
-	buffer.WriteString("types.ListAttribute{\n ")
+	buffer.WriteString("schema.ListAttribute{\n ")
 	buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", formatter.formatElementType(def.AsArray().ValueType)))
 	buffer.WriteString(fmt.Sprintf("},\n"))
 
@@ -215,7 +215,7 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 
 func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 	var buffer strings.Builder
-	buffer.WriteString("types.ListMapAttribute{\n ")
+	buffer.WriteString("schema.ListMapAttribute{\n ")
 	buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", formatter.formatElementType(def.AsMap().ValueType)))
 	buffer.WriteString(fmt.Sprintf("},\n"))
 
@@ -223,28 +223,28 @@ func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 }
 
 func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
-	required := fmt.Sprintf("Required: %v\n", !def.Nullable)
+	required := fmt.Sprintf("Required: %v,", !def.Nullable)
 	if def.Nullable {
-		required = "Optional: true"
+		required = "Optional: true,"
 	}
 
 	switch def.AsScalar().ScalarKind {
 	case ast.KindString, ast.KindBytes, ast.KindNull:
-		return fmt.Sprintf("schema.StringAttribute{\n %s \n}", required)
+		return fmt.Sprintf("schema.StringAttribute{\n %s \n},\n", required)
 	case ast.KindBool:
-		return fmt.Sprintf("schema.BoolAttribute{\n %s \n}", required)
+		return fmt.Sprintf("schema.BoolAttribute{\n %s \n},\n", required)
 	case ast.KindInt32, ast.KindUint32:
-		return fmt.Sprintf("schema.Int32Attribute{\n %s \n}", required)
+		return fmt.Sprintf("schema.Int32Attribute{\n %s \n},\n", required)
 	case ast.KindInt64, ast.KindUint64:
-		return fmt.Sprintf("schema.Int64Attribute{\n %s \n}", required)
+		return fmt.Sprintf("schema.Int64Attribute{\n %s \n},\n", required)
 	case ast.KindFloat32:
-		return fmt.Sprintf("schema.Float32Attribute{\n %s \n}", required)
+		return fmt.Sprintf("schema.Float32Attribute{\n %s \n},\n", required)
 	case ast.KindFloat64:
-		return fmt.Sprintf("schema.Float64Attribute{\n %s \n}", required)
+		return fmt.Sprintf("schema.Float64Attribute{\n %s \n},\n", required)
 	case ast.KindAny:
-		return fmt.Sprintf("schema.ObjectAttribute{\n %s \n}", required)
+		return fmt.Sprintf("schema.ObjectAttribute{\n %s \n},\n", required)
 	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
-		return fmt.Sprintf("schema.NumberAttribute{\n %s \n}", required) // types.Number can be converted into any numeric type https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/number#setting-values
+		return fmt.Sprintf("schema.NumberAttribute{\n %s \n},\n", required) // types.Number can be converted into any numeric type https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/number#setting-values
 	default:
 		return "unknown"
 	}
@@ -264,6 +264,10 @@ func (formatter *typeFormatter) formatElementType(def ast.Type) string {
 		return formatter.formatMapAsElementType(def.AsMap())
 	case ast.KindStruct:
 		return formatter.formatStructAsElementType(def.AsStruct())
+	case ast.KindConstantRef:
+		return formatter.formatConstantReferenceAsElementType(def.AsConstantRef())
+	case ast.KindEnum:
+		return formatter.formatEnumAsElementType(def.AsEnum())
 	default:
 		return "unknown"
 	}
@@ -320,6 +324,19 @@ func (formatter *typeFormatter) formatStructAsElementType(s ast.StructType) stri
 	for _, field := range s.Fields {
 		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", field.Name, formatter.formatElementType(field.Type)))
 	}
-	buffer.WriteString("},\n")
+	buffer.WriteString("},\n}")
 	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatConstantReferenceAsElementType(ref ast.ConstantReferenceType) string {
+	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	return formatter.formatElementType(obj.Type)
+}
+
+func (formatter *typeFormatter) formatEnumAsElementType(enum ast.EnumType) string {
+	return formatter.formatScalarAsElementType(enum.Values[0].Type.AsScalar())
 }
