@@ -1,6 +1,3 @@
----
-weight: 10
----
 <!-- Generated with `make docs` -->
 # Schema transformations
 

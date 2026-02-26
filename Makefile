@@ -42,7 +42,7 @@ docs: dev-env-check-binaries ## Generates the documentation.
 	@$(RUN_DEVBOX) go run cmd/compiler-passes-docs/*
 	@$(RUN_DEVBOX) go run cmd/veneers-docs/*
 	@$(RUN_DEVBOX) go run cmd/cog-config-schemas/*
-	$(RUN_DEVBOX) mkdocs build -f ./mkdocs-github.yml -d ./docs-site/
+	@$(RUN_DEVBOX) zensical build -f ./mkdocs-github.yml
 
 .PHONY: serve-docs
 serve-docs: dev-env-check-binaries ## Builds and serves the documentation.
