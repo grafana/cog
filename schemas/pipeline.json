@@ -524,7 +524,12 @@
       "type": "object"
     },
     "TerraformConfig": {
-      "properties": {},
+      "properties": {
+        "package_root": {
+          "type": "string",
+          "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     },

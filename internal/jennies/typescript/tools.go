@@ -55,6 +55,10 @@ func isReservedTypescriptKeyword(input string) bool {
 }
 
 func formatValue(val any) string {
+	if val == nil {
+		return "null"
+	}
+
 	if rawVal, ok := val.(raw); ok {
 		return string(rawVal)
 	}

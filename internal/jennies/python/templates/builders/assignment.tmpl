@@ -49,9 +49,7 @@ assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name 
 {{- end }}
 
 {{- define "assignment_value" }}
-{{- if not (eq .Value.Constant nil) }}
-{{- formatValue .IntoType .Value.Constant }}
-{{- end }}
+{{- if .Value.Argument }}
 {{- with .Value.Argument }}
 {{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
 {{- .Name|formatIdentifier }}{{- (or .Type.IsArray .Type.IsMap) | ternary "_resources" "_resource" }}
@@ -59,8 +57,12 @@ assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name 
 {{- .Name|formatIdentifier }}
 {{- end }}
 {{- end }}
+{{- else if .Value.Envelope }}
 {{- with .Value.Envelope }}
 {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+{{- end }}
+{{- else }}
+{{- formatValue .IntoType .Value.Constant }}
 {{- end }}
 {{- end }}
 

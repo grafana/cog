@@ -276,6 +276,9 @@ func (tf *typeFormatter) formatAssignmentPath(resourceRoot string, fieldPath ast
 
 func (tf *typeFormatter) formatRefType(destinationType ast.Type, value any) string {
 	if !destinationType.IsRef() {
+		if value == nil {
+			return "null"
+		}
 		return fmt.Sprintf("%#v", value)
 	}
 
