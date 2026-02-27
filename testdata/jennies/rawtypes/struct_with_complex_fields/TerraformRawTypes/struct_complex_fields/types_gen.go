@@ -42,7 +42,7 @@ SomeOtherStruct SomeOtherStruct `tfsdk:"SomeOtherStruct"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"someStruct": schema.ObjectAttribute{
+"some_struct": schema.ObjectAttribute{
 Required: true,
 Description: `
 This struct does things.
@@ -85,17 +85,17 @@ AttributeTypes: map[string]attr.Type{
 "field_ref_to_constant": types.StringType,
 },
 },
-"connectionPath": schema.StringAttribute{
+"connection_path": schema.StringAttribute{
  Required: true,
 
 },
-"someOtherStruct": schema.ObjectAttribute{
+"some_other_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "field_any": types.ObjectType{},
 },
 },
-"structComplexFieldsSomeStructFieldAnonymousStruct": schema.ObjectAttribute{
+"struct_complex_fields_some_struct_field_anonymous_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "field_any": types.ObjectType{},

@@ -47,25 +47,25 @@ YetAnotherStruct YetAnotherStruct `tfsdk:"YetAnotherStruct"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"stringOrNull": schema.StringAttribute{
+"string_or_null": schema.StringAttribute{
  Optional: true,
 
 },
-"someStruct": schema.ObjectAttribute{
+"some_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "type": types.StringType,
 "field_any": types.ObjectType{},
 },
 },
-"someOtherStruct": schema.ObjectAttribute{
+"some_other_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "type": types.StringType,
 "foo": types.StringType,
 },
 },
-"yetAnotherStruct": schema.ObjectAttribute{
+"yet_another_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "type": types.StringType,

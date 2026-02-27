@@ -15,7 +15,7 @@ FieldInt32 types.Int32 `tfsdk:"FieldInt32"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"someStruct": schema.ObjectAttribute{
+"some_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "field_bool": types.BoolType,

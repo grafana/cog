@@ -18,23 +18,23 @@ type ArrayOfRefs []SomeStruct
 type ArrayOfArrayOfNumbers types.List
 
 var SpecAttributes = map[string]schema.Attribute{
-"arrayOfStrings": schema.ListAttribute{
+"array_of_strings": schema.ListAttribute{
  ElementType: types.StringType,
 },
-"someStruct": schema.ObjectAttribute{
+"some_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "field_any": types.ObjectType{},
 },
 },
-"arrayOfRefs": schema.ListAttribute{
+"array_of_refs": schema.ListAttribute{
  ElementType: types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "fieldAny": types.ObjectType{},
 },
 },
 },
-"arrayOfArrayOfNumbers": schema.ListAttribute{
+"array_of_array_of_numbers": schema.ListAttribute{
  ElementType: types.ListType{
  ElemType: types.Int64Type,
 },

@@ -31,7 +31,7 @@ FieldInt64 types.Int64 `tfsdk:"FieldInt64"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"someStruct": schema.ObjectAttribute{
+"some_struct": schema.ObjectAttribute{
 Required: true,
 Description: `
 This

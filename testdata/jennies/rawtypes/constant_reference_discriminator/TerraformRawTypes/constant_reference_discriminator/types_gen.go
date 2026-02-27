@@ -45,39 +45,39 @@ RowsLayoutWithoutValue RowsLayoutWithoutValue `tfsdk:"RowsLayoutWithoutValue"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"gridLayoutUsingValue": schema.ObjectAttribute{
+"grid_layout_using_value": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "kind": types.StringType,
 "grid_layout_property": types.StringType,
 },
 },
-"rowsLayoutUsingValue": schema.ObjectAttribute{
+"rows_layout_using_value": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "kind": types.StringType,
 "rows_layout_property": types.StringType,
 },
 },
-"gridLayoutWithoutValue": schema.ObjectAttribute{
+"grid_layout_without_value": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "kind": types.StringType,
 "grid_layout_property": types.StringType,
 },
 },
-"rowsLayoutWithoutValue": schema.ObjectAttribute{
+"rows_layout_without_value": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "kind": types.StringType,
 "rows_layout_property": types.StringType,
 },
 },
-"gridLayoutKindType": schema.StringAttribute{
+"grid_layout_kind_type": schema.StringAttribute{
  Required: true,
 
 },
-"rowsLayoutKindType": schema.StringAttribute{
+"rows_layout_kind_type": schema.StringAttribute{
  Required: true,
 
 },
