@@ -31,28 +31,28 @@ var SpecAttributes = map[string]schema.Attribute{
 "parentStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"myEnum": types.StringType,
+"my_enum": types.StringType,
 },
 },
 "struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"myValue": types.StringType,
-"myEnum": types.StringType,
+"my_value": types.StringType,
+"my_enum": types.StringType,
 },
 },
 "structA": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"myEnum": types.StringType,
+"my_enum": types.StringType,
 "other": types.StringType,
 },
 },
 "structB": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"myEnum": types.StringType,
-"myValue": types.StringType,
+"my_enum": types.StringType,
+"my_value": types.StringType,
 },
 },
 }

@@ -49,28 +49,28 @@ var SpecAttributes = map[string]schema.Attribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "kind": types.StringType,
-"gridLayoutProperty": types.StringType,
+"grid_layout_property": types.StringType,
 },
 },
 "rowsLayoutUsingValue": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "kind": types.StringType,
-"rowsLayoutProperty": types.StringType,
+"rows_layout_property": types.StringType,
 },
 },
 "gridLayoutWithoutValue": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "kind": types.StringType,
-"gridLayoutProperty": types.StringType,
+"grid_layout_property": types.StringType,
 },
 },
 "rowsLayoutWithoutValue": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "kind": types.StringType,
-"rowsLayoutProperty": types.StringType,
+"rows_layout_property": types.StringType,
 },
 },
 "gridLayoutKindType": schema.StringAttribute{

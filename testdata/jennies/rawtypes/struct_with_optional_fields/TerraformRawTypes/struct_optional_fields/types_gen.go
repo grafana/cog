@@ -28,17 +28,17 @@ var SpecAttributes = map[string]schema.Attribute{
 "someStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"fieldRef": types.ObjectType{
+"field_ref": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "fieldAny": types.ObjectType{},
 },
 },
-"fieldString": types.StringType,
+"field_string": types.StringType,
 "operator": types.StringType,
-"fieldArrayOfStrings": types.ListType{
+"field_array_of_strings": types.ListType{
  ElemType: types.StringType,
 },
-"fieldAnonymousStruct": types.ObjectType{
+"field_anonymous_struct": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "fieldAny": types.ObjectType{},
 },
@@ -48,13 +48,13 @@ AttributeTypes: map[string]attr.Type{
 "someOtherStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"fieldAny": types.ObjectType{},
+"field_any": types.ObjectType{},
 },
 },
 "structOptionalFieldsSomeStructFieldAnonymousStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"fieldAny": types.ObjectType{},
+"field_any": types.ObjectType{},
 },
 },
 }

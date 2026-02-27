@@ -21,8 +21,8 @@ var SpecAttributes = map[string]schema.Attribute{
 "myStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"aString": types.StringType,
-"optString": types.StringType,
+"a_string": types.StringType,
+"opt_string": types.StringType,
 },
 },
 }

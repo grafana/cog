@@ -18,11 +18,11 @@ var SpecAttributes = map[string]schema.Attribute{
 "someStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"fieldBool": types.BoolType,
-"fieldString": types.StringType,
-"fieldStringWithConstantValue": types.StringType,
-"fieldFloat32": types.Float32Type,
-"fieldInt32": types.Int32Type,
+"field_bool": types.BoolType,
+"field_string": types.StringType,
+"field_string_with_constant_value": types.StringType,
+"field_float32": types.Float32Type,
+"field_int32": types.Int32Type,
 },
 },
 }

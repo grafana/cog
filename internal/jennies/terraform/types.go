@@ -201,7 +201,7 @@ func (formatter *typeFormatter) formatStructAttributes(def ast.Type, comments st
 		if field.Type.IsIntersection() {
 			continue
 		}
-		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", tools.LowerCamelCase(field.Name), formatter.formatElementType(field.Type)))
+		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", tools.SnakeCase(field.Name), formatter.formatElementType(field.Type)))
 	}
 
 	buffer.WriteString("},\n},\n")

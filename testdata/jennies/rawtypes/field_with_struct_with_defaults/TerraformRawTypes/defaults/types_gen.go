@@ -38,32 +38,32 @@ var SpecAttributes = map[string]schema.Attribute{
 "nestedStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"stringVal": types.StringType,
-"intVal": types.Int64Type,
+"string_val": types.StringType,
+"int_val": types.Int64Type,
 },
 },
 "struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"allFields": types.ObjectType{
+"all_fields": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "stringVal": types.StringType,
 "intVal": types.Int64Type,
 },
 },
-"partialFields": types.ObjectType{
+"partial_fields": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "stringVal": types.StringType,
 "intVal": types.Int64Type,
 },
 },
-"emptyFields": types.ObjectType{
+"empty_fields": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "stringVal": types.StringType,
 "intVal": types.Int64Type,
 },
 },
-"complexField": types.ObjectType{
+"complex_field": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "uid": types.StringType,
 "nested": types.ObjectType{
@@ -76,7 +76,7 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 },
-"partialComplexField": types.ObjectType{
+"partial_complex_field": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "uid": types.StringType,
 "intVal": types.Int64Type,
@@ -87,7 +87,7 @@ AttributeTypes: map[string]attr.Type{
 "defaultsStructComplexFieldNested": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"nestedVal": types.StringType,
+"nested_val": types.StringType,
 },
 },
 "defaultsStructComplexField": schema.ObjectAttribute{
@@ -108,7 +108,7 @@ AttributeTypes: map[string]attr.Type{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "uid": types.StringType,
-"intVal": types.Int64Type,
+"int_val": types.Int64Type,
 },
 },
 }

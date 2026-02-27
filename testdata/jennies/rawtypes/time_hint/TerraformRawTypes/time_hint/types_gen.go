@@ -21,7 +21,7 @@ CustomType: timetypes.RFC3339{},
 "objWithTimeField": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"registeredAt": types.StringType,
+"registered_at": types.StringType,
 },
 },
 }

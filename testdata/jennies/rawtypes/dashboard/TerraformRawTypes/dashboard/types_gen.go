@@ -109,7 +109,7 @@ AttributeTypes: map[string]attr.Type{
 "targets": types.ListType{
  ElemType: unknown,
 },
-"fieldConfig": types.ObjectType{
+"field_config": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "defaults": types.ObjectType{
  AttrTypes: map[string]attr.Type{

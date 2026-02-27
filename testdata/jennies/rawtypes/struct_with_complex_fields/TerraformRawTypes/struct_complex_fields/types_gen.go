@@ -48,18 +48,18 @@ Description: `
 This struct does things.
 `,
 AttributeTypes: map[string]attr.Type{
-"fieldRef": types.ObjectType{
+"field_ref": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "fieldAny": types.ObjectType{},
 },
 },
-"fieldDisjunctionOfScalars": types.ObjectType{
+"field_disjunction_of_scalars": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "string": types.StringType,
 "bool": types.BoolType,
 },
 },
-"fieldMixedDisjunction": types.ObjectType{
+"field_mixed_disjunction": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "string": types.StringType,
 "someOtherStruct": types.ObjectType{
@@ -69,20 +69,20 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 },
-"fieldDisjunctionWithNull": types.StringType,
+"field_disjunction_with_null": types.StringType,
 "operator": types.StringType,
-"fieldArrayOfStrings": types.ListType{
+"field_array_of_strings": types.ListType{
  ElemType: types.StringType,
 },
-"fieldMapOfStringToString": types.MapType{
+"field_map_of_string_to_string": types.MapType{
  ElemType: types.StringType,
 },
-"fieldAnonymousStruct": types.ObjectType{
+"field_anonymous_struct": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "fieldAny": types.ObjectType{},
 },
 },
-"fieldRefToConstant": types.StringType,
+"field_ref_to_constant": types.StringType,
 },
 },
 "connectionPath": schema.StringAttribute{
@@ -92,13 +92,13 @@ AttributeTypes: map[string]attr.Type{
 "someOtherStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"fieldAny": types.ObjectType{},
+"field_any": types.ObjectType{},
 },
 },
 "structComplexFieldsSomeStructFieldAnonymousStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"fieldAny": types.ObjectType{},
+"field_any": types.ObjectType{},
 },
 },
 }

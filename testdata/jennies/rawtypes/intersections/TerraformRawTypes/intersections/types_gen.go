@@ -33,7 +33,7 @@ var SpecAttributes = map[string]schema.Attribute{
 "someStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"fieldBool": types.BoolType,
+"field_bool": types.BoolType,
 },
 },
 "common": schema.ObjectAttribute{
