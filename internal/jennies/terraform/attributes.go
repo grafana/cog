@@ -26,7 +26,7 @@ func (a *attributes) generateForSchema(schema *ast.Schema) (string, error) {
 	buffer.WriteString("var SpecAttributes = map[string]schema.Attribute{\n")
 
 	schema.Objects.Iterate(func(_ string, obj ast.Object) {
-		if !obj.Type.IsAnyOf(ast.KindDisjunction, ast.KindRef, ast.KindConstantRef, ast.KindEnum) && !obj.Type.IsDisjunctionOfAnyKind() {
+		if !obj.Type.IsAnyOf(ast.KindDisjunction, ast.KindRef, ast.KindConstantRef, ast.KindEnum, ast.KindIntersection) && !obj.Type.IsDisjunctionOfAnyKind() {
 			buffer.WriteString(fmt.Sprintf("\"%s\": %s", strings.ToLower(obj.Name), a.typeFormatter.formatTypeAttribute(obj)))
 		}
 	})

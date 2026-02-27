@@ -22,7 +22,7 @@ var SpecAttributes = map[string]schema.Attribute{
 "somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"FieldAny": types.ObjectType{},
+"fieldAny": types.ObjectType{},
 },
 },
 }

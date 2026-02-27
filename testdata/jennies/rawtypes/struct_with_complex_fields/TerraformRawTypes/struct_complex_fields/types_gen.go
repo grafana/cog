@@ -46,20 +46,20 @@ var SpecAttributes = map[string]schema.Attribute{
 Required: true,
 Description: `
 This struct does things.
-`,,
+`,
 AttributeTypes: map[string]attr.Type{
-"FieldRef": types.ObjectType{
+"fieldRef": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
 },
-"FieldDisjunctionOfScalars": types.ObjectType{
+"fieldDisjunctionOfScalars": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "String": types.StringType,
 "Bool": types.BoolType,
 },
 },
-"FieldMixedDisjunction": types.ObjectType{
+"fieldMixedDisjunction": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "String": types.StringType,
 "SomeOtherStruct": types.ObjectType{
@@ -69,15 +69,15 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 },
-"FieldDisjunctionWithNull": types.StringType,
-"Operator": types.StringType,
-"FieldArrayOfStrings": types.ListType{
+"fieldDisjunctionWithNull": types.StringType,
+"operator": types.StringType,
+"fieldArrayOfStrings": types.ListType{
  ElemType: types.StringType,
 },
-"FieldMapOfStringToString": types.MapType{
+"fieldMapOfStringToString": types.MapType{
  ElemType: types.StringType,
 },
-"FieldAnonymousStruct": types.ObjectType{
+"fieldAnonymousStruct": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "FieldAny": types.ObjectType{},
 },
@@ -86,18 +86,19 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 "connectionpath": schema.StringAttribute{
- Required: true, 
+ Required: true,
+
 },
 "someotherstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"FieldAny": types.ObjectType{},
+"fieldAny": types.ObjectType{},
 },
 },
 "structcomplexfieldssomestructfieldanonymousstruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"FieldAny": types.ObjectType{},
+"fieldAny": types.ObjectType{},
 },
 },
 }

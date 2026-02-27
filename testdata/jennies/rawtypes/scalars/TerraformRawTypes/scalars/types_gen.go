@@ -37,7 +37,8 @@ type ScalarTypeInt64 types.Int64
 
 var SpecAttributes = map[string]schema.Attribute{
 "consttypestring": schema.StringAttribute{
- Required: true, 
+ Required: true,
+
 },
 "scalartypeany": schema.ObjectAttribute{
  Required: true, 
@@ -46,10 +47,12 @@ var SpecAttributes = map[string]schema.Attribute{
  Required: true, 
 },
 "scalartypebytes": schema.StringAttribute{
- Required: true, 
+ Required: true,
+
 },
 "scalartypestring": schema.StringAttribute{
- Required: true, 
+ Required: true,
+
 },
 "scalartypefloat32": schema.Float32Attribute{
  Required: true, 

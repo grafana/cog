@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type typeFormatter struct {
@@ -163,7 +164,7 @@ func (formatter *typeFormatter) formatTypeAttribute(object ast.Object) string {
 		for _, comment := range object.Comments {
 			comments += comment + "\n"
 		}
-		comments += "`,"
+		comments += "`"
 	}
 
 	switch object.Type.Kind {
@@ -197,7 +198,10 @@ func (formatter *typeFormatter) formatStructAttributes(def ast.Type, comments st
 	formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
 	buffer.WriteString("AttributeTypes: map[string]attr.Type{\n")
 	for _, field := range def.AsStruct().Fields {
-		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", field.Name, formatter.formatElementType(field.Type)))
+		if field.Type.IsIntersection() {
+			continue
+		}
+		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", tools.LowerCamelCase(field.Name), formatter.formatElementType(field.Type)))
 	}
 
 	buffer.WriteString("},\n},\n")
@@ -228,9 +232,15 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 		required = "Optional: true,"
 	}
 
+	customType := "\n"
+	if def.HasHint(ast.HintStringFormatDateTime) {
+		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
+		customType = "\nCustomType: timetypes.RFC3339{},"
+	}
+
 	switch def.AsScalar().ScalarKind {
 	case ast.KindString, ast.KindBytes, ast.KindNull:
-		return fmt.Sprintf("schema.StringAttribute{\n %s \n},\n", required)
+		return fmt.Sprintf("schema.StringAttribute{\n %s%s\n},\n", required, customType)
 	case ast.KindBool:
 		return fmt.Sprintf("schema.BoolAttribute{\n %s \n},\n", required)
 	case ast.KindInt32, ast.KindUint32:

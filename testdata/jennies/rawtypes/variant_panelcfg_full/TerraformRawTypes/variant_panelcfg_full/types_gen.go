@@ -18,13 +18,13 @@ var SpecAttributes = map[string]schema.Attribute{
 "options": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"timeseries_option": types.StringType,
+"timeseriesOption": types.StringType,
 },
 },
 "fieldconfig": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"timeseries_field_config_option": types.StringType,
+"timeseriesFieldConfigOption": types.StringType,
 },
 },
 }

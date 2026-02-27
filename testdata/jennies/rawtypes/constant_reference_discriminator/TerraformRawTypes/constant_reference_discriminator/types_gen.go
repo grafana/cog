@@ -74,9 +74,11 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 "gridlayoutkindtype": schema.StringAttribute{
- Required: true, 
+ Required: true,
+
 },
 "rowslayoutkindtype": schema.StringAttribute{
- Required: true, 
+ Required: true,
+
 },
 }

@@ -20,9 +20,9 @@ Required: true,
 AttributeTypes: map[string]attr.Type{
 "fieldBool": types.BoolType,
 "fieldString": types.StringType,
-"FieldStringWithConstantValue": types.StringType,
-"FieldFloat32": types.Float32Type,
-"FieldInt32": types.Int32Type,
+"fieldStringWithConstantValue": types.StringType,
+"fieldFloat32": types.Float32Type,
+"fieldInt32": types.Int32Type,
 },
 },
 }

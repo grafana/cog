@@ -30,7 +30,7 @@ Contains types.String `tfsdk:"contains"`
 
 
 var SpecAttributes = map[string]schema.Attribute{
-"intersections": "somestruct": schema.ObjectAttribute{
+"somestruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "fieldBool": types.BoolType,
@@ -40,11 +40,11 @@ AttributeTypes: map[string]attr.Type{
 Required: true,
 Description: `
 Base properties for all metrics
-`,,
+`,
 AttributeTypes: map[string]attr.Type{
 "name": types.StringType,
 "type": types.StringType,
 "contains": types.StringType,
 },
 },
-"counter": }
+}
