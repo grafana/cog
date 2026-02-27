@@ -168,6 +168,24 @@ func PrefixObjectsNames(prefix string) compiler.Pass {
 	}
 }
 
+// ConstantToEnum transform constants to enum. The map is a combination between package and list of objects to transform.
+func ConstantToEnum(constants map[string][]string) compiler.Pass {
+	objects := make(compiler.ObjectReferences, 0, len(constants))
+
+	for pkg, values := range constants {
+		for _, obj := range values {
+			objects = append(objects, compiler.ObjectReference{
+				Package: pkg,
+				Object:  obj,
+			})
+		}
+	}
+
+	return &compiler.ConstantToEnum{
+		Objects: objects,
+	}
+}
+
 // SchemaTransformations adds the given transformations to the set of
 // transformations that will be applied to the input schema.
 func (pipeline *SchemaToTypesPipeline) SchemaTransformations(passes ...compiler.Pass) *SchemaToTypesPipeline {
