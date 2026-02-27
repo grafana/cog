@@ -2,6 +2,8 @@ package intersections
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 
@@ -27,3 +29,22 @@ Contains types.String `tfsdk:"contains"`
 
 
 
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"field_bool": types.BoolType,
+},
+},
+"common": schema.ObjectAttribute{
+Required: true,
+Description: `
+Base properties for all metrics
+`,
+AttributeTypes: map[string]attr.Type{
+"name": types.StringType,
+"type": types.StringType,
+"contains": types.StringType,
+},
+},
+}
