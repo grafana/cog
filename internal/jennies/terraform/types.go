@@ -101,7 +101,7 @@ func (formatter *typeFormatter) formatStruct(s ast.StructType) string {
 		for _, comment := range field.Comments {
 			buffer.WriteString(fmt.Sprintf("// %s\n", comment))
 		}
-		buffer.WriteString(fmt.Sprintf("%s %s `tfsdk:\"%s\"`", formatFieldName(field.Name), formatter.formatType(field.Type), field.Name))
+		buffer.WriteString(fmt.Sprintf("%s %s `tfsdk:\"%s\"`", tools.UpperCamelCase(field.Name), formatter.formatType(field.Type), field.Name))
 		buffer.WriteString("\n")
 	}
 	return buffer.String()
@@ -332,7 +332,7 @@ func (formatter *typeFormatter) formatStructAsElementType(s ast.StructType) stri
 
 	buffer.WriteString("types.ObjectType{\n AttrTypes: map[string]attr.Type{\n")
 	for _, field := range s.Fields {
-		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", field.Name, formatter.formatElementType(field.Type)))
+		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", tools.LowerCamelCase(field.Name), formatter.formatElementType(field.Type)))
 	}
 	buffer.WriteString("},\n}")
 	return buffer.String()

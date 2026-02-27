@@ -25,13 +25,13 @@ MyRefB MyRefB `tfsdk:"MyRefB"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"myrefa": schema.ObjectAttribute{
+"myRefA": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "foo": types.StringType,
 },
 },
-"myrefb": schema.ObjectAttribute{
+"myRefB": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "bar": types.Int64Type,

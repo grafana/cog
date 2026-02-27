@@ -42,7 +42,7 @@ SomeOtherStruct SomeOtherStruct `tfsdk:"SomeOtherStruct"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"somestruct": schema.ObjectAttribute{
+"someStruct": schema.ObjectAttribute{
 Required: true,
 Description: `
 This struct does things.
@@ -50,21 +50,21 @@ This struct does things.
 AttributeTypes: map[string]attr.Type{
 "fieldRef": types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"FieldAny": types.ObjectType{},
+"fieldAny": types.ObjectType{},
 },
 },
 "fieldDisjunctionOfScalars": types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"String": types.StringType,
-"Bool": types.BoolType,
+"string": types.StringType,
+"bool": types.BoolType,
 },
 },
 "fieldMixedDisjunction": types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"String": types.StringType,
-"SomeOtherStruct": types.ObjectType{
+"string": types.StringType,
+"someOtherStruct": types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"FieldAny": types.ObjectType{},
+"fieldAny": types.ObjectType{},
 },
 },
 },
@@ -79,23 +79,23 @@ AttributeTypes: map[string]attr.Type{
 },
 "fieldAnonymousStruct": types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"FieldAny": types.ObjectType{},
+"fieldAny": types.ObjectType{},
 },
 },
 "fieldRefToConstant": types.StringType,
 },
 },
-"connectionpath": schema.StringAttribute{
+"connectionPath": schema.StringAttribute{
  Required: true,
 
 },
-"someotherstruct": schema.ObjectAttribute{
+"someOtherStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "fieldAny": types.ObjectType{},
 },
 },
-"structcomplexfieldssomestructfieldanonymousstruct": schema.ObjectAttribute{
+"structComplexFieldsSomeStructFieldAnonymousStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "fieldAny": types.ObjectType{},

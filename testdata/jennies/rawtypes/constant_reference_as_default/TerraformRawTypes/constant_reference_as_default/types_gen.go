@@ -14,11 +14,11 @@ OptString types.String `tfsdk:"optString"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"constantrefstring": schema.StringAttribute{
+"constantRefString": schema.StringAttribute{
  Required: true,
 
 },
-"mystruct": schema.ObjectAttribute{
+"myStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "aString": types.StringType,

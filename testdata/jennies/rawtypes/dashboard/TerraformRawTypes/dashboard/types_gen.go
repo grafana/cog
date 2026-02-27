@@ -69,14 +69,14 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 },
-"datasourceref": schema.ObjectAttribute{
+"dataSourceRef": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "type": types.StringType,
 "uid": types.StringType,
 },
 },
-"fieldconfigsource": schema.ObjectAttribute{
+"fieldConfigSource": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "defaults": types.ObjectType{
@@ -87,7 +87,7 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 },
-"fieldconfig": schema.ObjectAttribute{
+"fieldConfig": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "unit": types.StringType,

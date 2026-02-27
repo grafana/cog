@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type attributes struct {
@@ -27,7 +28,7 @@ func (a *attributes) generateForSchema(schema *ast.Schema) (string, error) {
 
 	schema.Objects.Iterate(func(_ string, obj ast.Object) {
 		if !obj.Type.IsAnyOf(ast.KindDisjunction, ast.KindRef, ast.KindConstantRef, ast.KindEnum, ast.KindIntersection) && !obj.Type.IsDisjunctionOfAnyKind() {
-			buffer.WriteString(fmt.Sprintf("\"%s\": %s", strings.ToLower(obj.Name), a.typeFormatter.formatTypeAttribute(obj)))
+			buffer.WriteString(fmt.Sprintf("\"%s\": %s", tools.LowerCamelCase(obj.Name), a.typeFormatter.formatTypeAttribute(obj)))
 		}
 	})
 

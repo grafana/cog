@@ -21,7 +21,7 @@ AttributeTypes: map[string]attr.Type{
 "timeseriesOption": types.StringType,
 },
 },
-"fieldconfig": schema.ObjectAttribute{
+"fieldConfig": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "timeseriesFieldConfigOption": types.StringType,

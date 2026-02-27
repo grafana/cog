@@ -35,7 +35,7 @@ IntVal types.Int64 `tfsdk:"intVal"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"nestedstruct": schema.ObjectAttribute{
+"nestedStruct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "stringVal": types.StringType,
@@ -84,13 +84,13 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 },
-"defaultsstructcomplexfieldnested": schema.ObjectAttribute{
+"defaultsStructComplexFieldNested": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "nestedVal": types.StringType,
 },
 },
-"defaultsstructcomplexfield": schema.ObjectAttribute{
+"defaultsStructComplexField": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "uid": types.StringType,
@@ -104,7 +104,7 @@ AttributeTypes: map[string]attr.Type{
 },
 },
 },
-"defaultsstructpartialcomplexfield": schema.ObjectAttribute{
+"defaultsStructPartialComplexField": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "uid": types.StringType,
