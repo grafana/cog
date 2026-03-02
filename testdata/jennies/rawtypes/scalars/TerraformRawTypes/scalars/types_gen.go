@@ -2,7 +2,7 @@ package scalars
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
-	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
 const ConstTypeString = "foo"

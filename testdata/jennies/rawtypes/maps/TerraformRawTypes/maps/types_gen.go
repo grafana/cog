@@ -2,8 +2,8 @@ package maps
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
-	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 // String to... something.
@@ -20,10 +20,10 @@ type MapOfStringToRef types.Map
 type MapOfStringToMapOfStringToBool types.Map
 
 var SpecAttributes = map[string]schema.Attribute{
-"map_of_string_to_any": schema.ListMapAttribute{
+"map_of_string_to_any": schema.MapAttribute{
  ElementType: types.ObjectType{},
 },
-"map_of_string_to_string": schema.ListMapAttribute{
+"map_of_string_to_string": schema.MapAttribute{
  ElementType: types.StringType,
 },
 "some_struct": schema.ObjectAttribute{
@@ -32,14 +32,14 @@ AttributeTypes: map[string]attr.Type{
 "field_any": types.ObjectType{},
 },
 },
-"map_of_string_to_ref": schema.ListMapAttribute{
+"map_of_string_to_ref": schema.MapAttribute{
  ElementType: types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "fieldAny": types.ObjectType{},
 },
 },
 },
-"map_of_string_to_map_of_string_to_bool": schema.ListMapAttribute{
+"map_of_string_to_map_of_string_to_bool": schema.MapAttribute{
  ElementType: types.MapType{
  ElemType: types.BoolType,
 },
