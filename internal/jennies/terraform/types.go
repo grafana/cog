@@ -305,7 +305,7 @@ func (formatter *typeFormatter) formatScalarAsElementType(def ast.ScalarType) st
 	case ast.KindFloat64:
 		return "types.Float64Type"
 	case ast.KindAny:
-		return "types.ObjectType{}"
+		return "types.DynamicType"
 	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
 		return "types.NumberType" // types.Number can be converted into any numeric type https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/number#setting-values
 	default:

@@ -24,13 +24,13 @@ var SpecAttributes = map[string]schema.Attribute{
 "some_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"field_any": types.ObjectType{},
+"field_any": types.DynamicType,
 },
 },
 "array_of_refs": schema.ListAttribute{
  ElementType: types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"fieldAny": types.ObjectType{},
+"fieldAny": types.DynamicType,
 },
 },
 },
