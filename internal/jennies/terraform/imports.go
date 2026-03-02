@@ -21,7 +21,6 @@ func NewImportMap(packageRoot string) *common.DirectImportMap {
 				if strings.HasPrefix(importPath, packageRoot) {
 					statements = append(statements, fmt.Sprintf(`	%s "%s"`, alias, importPath))
 				} else { // stdlib import
-					fmt.Println(importPath)
 					statements = append(statements, fmt.Sprintf(`	"%s"`, importPath))
 				}
 			})
