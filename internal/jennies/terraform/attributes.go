@@ -22,7 +22,7 @@ func newAttributesGenerator(cfg Config, typeFormatter *typeFormatter, packageMap
 	}
 }
 
-func (a *attributes) generateFromSchema(schema *ast.Schema) (string, error) {
+func (a *attributes) generateForSchema(schema *ast.Schema) (string, error) {
 	var buffer strings.Builder
 
 	a.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema")

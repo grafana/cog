@@ -83,7 +83,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		attrs, err = attributesGenerator.generateForObject(obj)
 	} else {
-		attrs, err = attributesGenerator.generateFromSchema(schema)
+		attrs, err = attributesGenerator.generateForSchema(schema)
 	}
 
 	if err != nil {
