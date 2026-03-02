@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/languages"
 )
 
@@ -66,7 +67,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 	if !config.SkipPostFormatting {
-		jenny.AddPostprocessors(formatGoFiles)
+		jenny.AddPostprocessors(golang.FormatGoFiles)
 	}
 
 	return jenny

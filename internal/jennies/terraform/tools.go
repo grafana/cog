@@ -22,10 +22,6 @@ func formatObjectName(name string) string {
 	return tools.UpperCamelCase(name)
 }
 
-func formatFieldName(name string) string {
-	return tools.UpperCamelCase(name)
-}
-
 func formatScalar(val any) string {
 	if val == nil {
 		return "nil"
