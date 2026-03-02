@@ -17,6 +17,8 @@ type Config struct {
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string `yaml:"package_root"`
 
+	PrefixAttributeSpec string `yaml:"-"`
+
 	// SkipPostFormatting disables formatting of Go files done with go imports
 	// after code generation.
 	SkipPostFormatting bool `yaml:"skip_post_formatting"`

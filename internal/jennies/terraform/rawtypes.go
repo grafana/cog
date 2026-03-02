@@ -51,7 +51,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return imports.Add(pkg, pkg)
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, imports, jenny.packageMapper)
-	attributesGenerator := newAttributesGenerator(jenny.typeFormatter, jenny.packageMapper)
+	attributesGenerator := newAttributesGenerator(jenny.config, jenny.typeFormatter, jenny.packageMapper)
 
 	// TF base types
 	imports.Add("", "github.com/hashicorp/terraform-plugin-framework/types")
@@ -60,7 +60,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	var err error
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		innerErr := jenny.formatObject(&buffer, schema, object)
+		innerErr := jenny.formatObject(&buffer, object)
 		if innerErr != nil {
 			err = innerErr
 			return
@@ -73,11 +73,22 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return nil, err
 	}
 
-	attrs, err := attributesGenerator.generateForSchema(schema)
+	var attrs string
+	entryPointRef := schema.EntryPointType.Ref
+	if entryPointRef != nil {
+		obj, ok := context.LocateObject(entryPointRef.ReferredPkg, entryPointRef.ReferredType)
+		if !ok {
+			return nil, fmt.Errorf("could not find entry point object %s", entryPointRef.ReferredType)
+		}
+
+		attrs, err = attributesGenerator.generateForObject(obj)
+	} else {
+		attrs, err = attributesGenerator.generateFromSchema(schema)
+	}
+
 	if err != nil {
 		return nil, err
 	}
-
 	buffer.WriteString(attrs)
 
 	importStatements := imports.String()
@@ -90,7 +101,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 %[2]s%[3]s`, formatPackageName(schema.Package), importStatements, buffer.String())), nil
 }
 
-func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, object ast.Object) error {
+func (jenny RawTypes) formatObject(buffer *strings.Builder, object ast.Object) error {
 	comments := object.Comments
 	if jenny.config.debug {
 		passesTrail := tools.Map(object.PassesTrail, func(trail string) string {

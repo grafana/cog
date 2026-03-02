@@ -156,26 +156,16 @@ func (formatter *typeFormatter) formatConstantReference(constantRef ast.Constant
 
 // Schema attributes
 
-func (formatter *typeFormatter) formatTypeAttribute(object ast.Object) string {
-	comments := ""
-	if len(object.Comments) > 0 {
-		comments += "`\n"
-
-		for _, comment := range object.Comments {
-			comments += comment + "\n"
-		}
-		comments += "`"
-	}
-
-	switch object.Type.Kind {
+func (formatter *typeFormatter) formatTypeAttribute(field ast.Type, comments string) string {
+	switch field.Kind {
 	case ast.KindScalar:
-		return formatter.formatScalarAttribute(object.Type)
+		return formatter.formatScalarAttribute(field)
 	case ast.KindStruct:
-		return formatter.formatStructAttributes(object.Type, comments)
+		return formatter.formatStructAttributes(field, comments)
 	case ast.KindArray:
-		return formatter.formatArrayAttributes(object.Type)
+		return formatter.formatArrayAttributes(field)
 	case ast.KindMap:
-		return formatter.formatMapAttributes(object.Type)
+		return formatter.formatMapAttributes(field)
 	default:
 		return ""
 	}
