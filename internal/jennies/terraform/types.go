@@ -166,6 +166,10 @@ func (formatter *typeFormatter) formatTypeAttribute(field ast.Type, comments str
 		return formatter.formatArrayAttributes(field)
 	case ast.KindMap:
 		return formatter.formatMapAttributes(field)
+	case ast.KindRef:
+		return formatter.formatReferenceAttribute(field, comments)
+	case ast.KindEnum:
+		return formatter.formatEnumAttribute(field)
 	default:
 		return ""
 	}
@@ -248,6 +252,19 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 	default:
 		return "unknown"
 	}
+}
+
+func (formatter *typeFormatter) formatReferenceAttribute(def ast.Type, comments string) string {
+	obj, ok := formatter.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	return formatter.formatTypeAttribute(obj.Type, comments)
+}
+
+func (formatter *typeFormatter) formatEnumAttribute(def ast.Type) string {
+	return formatter.formatScalarAttribute(def.AsEnum().Values[0].Type)
 }
 
 // ElementTypes defines the type of the elements for the attributes
