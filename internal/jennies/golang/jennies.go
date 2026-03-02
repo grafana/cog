@@ -143,7 +143,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 	if !config.SkipPostFormatting {
-		jenny.AddPostprocessors(formatGoFiles)
+		jenny.AddPostprocessors(FormatGoFiles)
 	}
 
 	return jenny

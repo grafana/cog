@@ -2,6 +2,8 @@ package struct_complex_fields
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 // This struct does things.
@@ -39,3 +41,64 @@ type StringOrSomeOtherStruct struct {
 SomeOtherStruct SomeOtherStruct `tfsdk:"SomeOtherStruct"`
  }
 
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.ObjectAttribute{
+Required: true,
+Description: `
+This struct does things.
+`,
+AttributeTypes: map[string]attr.Type{
+"field_ref": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"fieldAny": types.ObjectType{},
+},
+},
+"field_disjunction_of_scalars": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"string": types.StringType,
+"bool": types.BoolType,
+},
+},
+"field_mixed_disjunction": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"string": types.StringType,
+"someOtherStruct": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"fieldAny": types.ObjectType{},
+},
+},
+},
+},
+"field_disjunction_with_null": types.StringType,
+"operator": types.StringType,
+"field_array_of_strings": types.ListType{
+ ElemType: types.StringType,
+},
+"field_map_of_string_to_string": types.MapType{
+ ElemType: types.StringType,
+},
+"field_anonymous_struct": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"fieldAny": types.ObjectType{},
+},
+},
+"field_ref_to_constant": types.StringType,
+},
+},
+"connection_path": schema.StringAttribute{
+ Required: true,
+
+},
+"some_other_struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"field_any": types.ObjectType{},
+},
+},
+"struct_complex_fields_some_struct_field_anonymous_struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"field_any": types.ObjectType{},
+},
+},
+}

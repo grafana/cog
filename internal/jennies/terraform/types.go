@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 type typeFormatter struct {
@@ -100,7 +101,7 @@ func (formatter *typeFormatter) formatStruct(s ast.StructType) string {
 		for _, comment := range field.Comments {
 			buffer.WriteString(fmt.Sprintf("// %s\n", comment))
 		}
-		buffer.WriteString(fmt.Sprintf("%s %s `tfsdk:\"%s\"`", formatFieldName(field.Name), formatter.formatType(field.Type), field.Name))
+		buffer.WriteString(fmt.Sprintf("%s %s `tfsdk:\"%s\"`", tools.UpperCamelCase(field.Name), formatter.formatType(field.Type), field.Name))
 		buffer.WriteString("\n")
 	}
 	return buffer.String()
@@ -151,4 +152,201 @@ func (formatter *typeFormatter) formatConstantReference(constantRef ast.Constant
 	}
 
 	return "unknown"
+}
+
+// Schema attributes
+
+func (formatter *typeFormatter) formatTypeAttribute(object ast.Object) string {
+	comments := ""
+	if len(object.Comments) > 0 {
+		comments += "`\n"
+
+		for _, comment := range object.Comments {
+			comments += comment + "\n"
+		}
+		comments += "`"
+	}
+
+	switch object.Type.Kind {
+	case ast.KindScalar:
+		return formatter.formatScalarAttribute(object.Type)
+	case ast.KindStruct:
+		return formatter.formatStructAttributes(object.Type, comments)
+	case ast.KindArray:
+		return formatter.formatArrayAttributes(object.Type)
+	case ast.KindMap:
+		return formatter.formatMapAttributes(object.Type)
+	default:
+		return ""
+	}
+}
+
+func (formatter *typeFormatter) formatStructAttributes(def ast.Type, comments string) string {
+	var buffer strings.Builder
+	buffer.WriteString("schema.ObjectAttribute{\n")
+
+	if def.Nullable {
+		buffer.WriteString("Optional: true,\n")
+	} else {
+		buffer.WriteString("Required: true,\n")
+	}
+
+	if comments != "" {
+		buffer.WriteString(fmt.Sprintf("Description: %s,\n", comments))
+	}
+
+	formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
+	buffer.WriteString("AttributeTypes: map[string]attr.Type{\n")
+	for _, field := range def.AsStruct().Fields {
+		if field.Type.IsIntersection() {
+			continue
+		}
+		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", tools.SnakeCase(field.Name), formatter.formatElementType(field.Type)))
+	}
+
+	buffer.WriteString("},\n},\n")
+	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
+	var buffer strings.Builder
+	buffer.WriteString("schema.ListAttribute{\n ")
+	buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", formatter.formatElementType(def.AsArray().ValueType)))
+	buffer.WriteString(fmt.Sprintf("},\n"))
+
+	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
+	var buffer strings.Builder
+	buffer.WriteString("schema.ListMapAttribute{\n ")
+	buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", formatter.formatElementType(def.AsMap().ValueType)))
+	buffer.WriteString(fmt.Sprintf("},\n"))
+
+	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
+	required := fmt.Sprintf("Required: %v,", !def.Nullable)
+	if def.Nullable {
+		required = "Optional: true,"
+	}
+
+	customType := "\n"
+	if def.HasHint(ast.HintStringFormatDateTime) {
+		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
+		customType = "\nCustomType: timetypes.RFC3339{},"
+	}
+
+	switch def.AsScalar().ScalarKind {
+	case ast.KindString, ast.KindBytes, ast.KindNull:
+		return fmt.Sprintf("schema.StringAttribute{\n %s%s\n},\n", required, customType)
+	case ast.KindBool:
+		return fmt.Sprintf("schema.BoolAttribute{\n %s \n},\n", required)
+	case ast.KindInt32, ast.KindUint32:
+		return fmt.Sprintf("schema.Int32Attribute{\n %s \n},\n", required)
+	case ast.KindInt64, ast.KindUint64:
+		return fmt.Sprintf("schema.Int64Attribute{\n %s \n},\n", required)
+	case ast.KindFloat32:
+		return fmt.Sprintf("schema.Float32Attribute{\n %s \n},\n", required)
+	case ast.KindFloat64:
+		return fmt.Sprintf("schema.Float64Attribute{\n %s \n},\n", required)
+	case ast.KindAny:
+		return fmt.Sprintf("schema.ObjectAttribute{\n %s \n},\n", required)
+	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
+		return fmt.Sprintf("schema.NumberAttribute{\n %s \n},\n", required) // types.Number can be converted into any numeric type https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/number#setting-values
+	default:
+		return "unknown"
+	}
+}
+
+// ElementTypes defines the type of the elements for the attributes
+
+func (formatter *typeFormatter) formatElementType(def ast.Type) string {
+	switch def.Kind {
+	case ast.KindScalar:
+		return formatter.formatScalarAsElementType(def.AsScalar())
+	case ast.KindArray:
+		return formatter.formatArrayAsElementType(def.AsArray())
+	case ast.KindRef:
+		return formatter.formatReferenceAsElementType(def.AsRef())
+	case ast.KindMap:
+		return formatter.formatMapAsElementType(def.AsMap())
+	case ast.KindStruct:
+		return formatter.formatStructAsElementType(def.AsStruct())
+	case ast.KindConstantRef:
+		return formatter.formatConstantReferenceAsElementType(def.AsConstantRef())
+	case ast.KindEnum:
+		return formatter.formatEnumAsElementType(def.AsEnum())
+	default:
+		return "unknown"
+	}
+}
+
+func (formatter *typeFormatter) formatScalarAsElementType(def ast.ScalarType) string {
+	switch def.ScalarKind {
+	case ast.KindString, ast.KindBytes, ast.KindNull:
+		return "types.StringType"
+	case ast.KindBool:
+		return "types.BoolType"
+	case ast.KindInt32, ast.KindUint32:
+		return "types.Int32Type"
+	case ast.KindInt64, ast.KindUint64:
+		return "types.Int64Type"
+	case ast.KindFloat32:
+		return "types.Float32Type"
+	case ast.KindFloat64:
+		return "types.Float64Type"
+	case ast.KindAny:
+		return "types.ObjectType{}"
+	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
+		return "types.NumberType" // types.Number can be converted into any numeric type https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/number#setting-values
+	default:
+		return "unknown"
+	}
+}
+
+func (formatter *typeFormatter) formatArrayAsElementType(def ast.ArrayType) string {
+	return fmt.Sprintf("types.ListType{\n ElemType: %s,\n}", formatter.formatElementType(def.ValueType))
+}
+
+func (formatter *typeFormatter) formatMapAsElementType(def ast.MapType) string {
+	return fmt.Sprintf("types.MapType{\n ElemType: %s,\n}", formatter.formatElementType(def.ValueType))
+}
+
+func (formatter *typeFormatter) formatReferenceAsElementType(ref ast.RefType) string {
+	var buffer strings.Builder
+
+	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	buffer.WriteString(formatter.formatElementType(obj.Type))
+	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatStructAsElementType(s ast.StructType) string {
+	formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
+	var buffer strings.Builder
+
+	buffer.WriteString("types.ObjectType{\n AttrTypes: map[string]attr.Type{\n")
+	for _, field := range s.Fields {
+		buffer.WriteString(fmt.Sprintf("\"%s\": %s,\n", tools.LowerCamelCase(field.Name), formatter.formatElementType(field.Type)))
+	}
+	buffer.WriteString("},\n}")
+	return buffer.String()
+}
+
+func (formatter *typeFormatter) formatConstantReferenceAsElementType(ref ast.ConstantReferenceType) string {
+	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	return formatter.formatElementType(obj.Type)
+}
+
+func (formatter *typeFormatter) formatEnumAsElementType(enum ast.EnumType) string {
+	return formatter.formatScalarAsElementType(enum.Values[0].Type.AsScalar())
 }

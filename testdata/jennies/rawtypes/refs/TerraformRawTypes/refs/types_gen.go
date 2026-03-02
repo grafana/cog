@@ -2,6 +2,8 @@ package refs
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type SomeStruct struct {
@@ -12,3 +14,11 @@ type RefToSomeStruct = SomeStruct
 
 type RefToSomeStructFromOtherPackage = unknown
 
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"field_any": types.ObjectType{},
+},
+},
+}

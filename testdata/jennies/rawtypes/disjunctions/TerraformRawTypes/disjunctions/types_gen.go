@@ -2,6 +2,8 @@ package disjunctions
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 // Refresh rate or disabled.
@@ -44,3 +46,30 @@ SomeOtherStruct SomeOtherStruct `tfsdk:"SomeOtherStruct"`
 YetAnotherStruct YetAnotherStruct `tfsdk:"YetAnotherStruct"`
  }
 
+var SpecAttributes = map[string]schema.Attribute{
+"string_or_null": schema.StringAttribute{
+ Optional: true,
+
+},
+"some_struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"type": types.StringType,
+"field_any": types.ObjectType{},
+},
+},
+"some_other_struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"type": types.StringType,
+"foo": types.StringType,
+},
+},
+"yet_another_struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"type": types.StringType,
+"bar": types.NumberType,
+},
+},
+}

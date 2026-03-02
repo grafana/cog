@@ -2,6 +2,8 @@ package defaults
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type NestedStruct struct {
@@ -32,3 +34,81 @@ type DefaultsStructPartialComplexField struct {
 IntVal types.Int64 `tfsdk:"intVal"`
  }
 
+var SpecAttributes = map[string]schema.Attribute{
+"nested_struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"string_val": types.StringType,
+"int_val": types.Int64Type,
+},
+},
+"struct": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"all_fields": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"stringVal": types.StringType,
+"intVal": types.Int64Type,
+},
+},
+"partial_fields": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"stringVal": types.StringType,
+"intVal": types.Int64Type,
+},
+},
+"empty_fields": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"stringVal": types.StringType,
+"intVal": types.Int64Type,
+},
+},
+"complex_field": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"uid": types.StringType,
+"nested": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"nestedVal": types.StringType,
+},
+},
+"array": types.ListType{
+ ElemType: types.StringType,
+},
+},
+},
+"partial_complex_field": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"uid": types.StringType,
+"intVal": types.Int64Type,
+},
+},
+},
+},
+"defaults_struct_complex_field_nested": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"nested_val": types.StringType,
+},
+},
+"defaults_struct_complex_field": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"uid": types.StringType,
+"nested": types.ObjectType{
+ AttrTypes: map[string]attr.Type{
+"nestedVal": types.StringType,
+},
+},
+"array": types.ListType{
+ ElemType: types.StringType,
+},
+},
+},
+"defaults_struct_partial_complex_field": schema.ObjectAttribute{
+Required: true,
+AttributeTypes: map[string]attr.Type{
+"uid": types.StringType,
+"int_val": types.Int64Type,
+},
+},
+}
