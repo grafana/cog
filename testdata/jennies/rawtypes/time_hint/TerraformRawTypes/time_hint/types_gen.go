@@ -2,9 +2,9 @@ package time_hint
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
-	timetypes "/github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
-	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
+	timetypes "github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type ObjTime types.String

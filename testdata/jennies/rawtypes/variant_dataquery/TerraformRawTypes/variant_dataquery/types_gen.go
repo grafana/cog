@@ -2,8 +2,8 @@ package variant_dataquery
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
-	schema "/github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "/github.com/hashicorp/terraform-plugin-framework/attr"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type Query struct {
