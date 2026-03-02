@@ -219,7 +219,7 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 
 func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 	var buffer strings.Builder
-	buffer.WriteString("schema.ListMapAttribute{\n ")
+	buffer.WriteString("schema.MapAttribute{\n ")
 	buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", formatter.formatElementType(def.AsMap().ValueType)))
 	buffer.WriteString(fmt.Sprintf("},\n"))
 

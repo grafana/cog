@@ -48,7 +48,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			return ""
 		}
 
-		return imports.Add(pkg, jenny.config.importPath(pkg))
+		return imports.Add(pkg, pkg)
 	}
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, imports, jenny.packageMapper)
 	attributesGenerator := newAttributesGenerator(jenny.typeFormatter, jenny.packageMapper)
