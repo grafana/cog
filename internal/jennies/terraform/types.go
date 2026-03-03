@@ -322,15 +322,12 @@ func (formatter *typeFormatter) formatMapAsElementType(def ast.MapType) string {
 }
 
 func (formatter *typeFormatter) formatReferenceAsElementType(ref ast.RefType) string {
-	var buffer strings.Builder
-
 	obj, ok := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
 	if !ok {
 		return "unknown"
 	}
 
-	buffer.WriteString(formatter.formatElementType(obj.Type))
-	return buffer.String()
+	return formatter.formatElementType(obj.Type)
 }
 
 func (formatter *typeFormatter) formatStructAsElementType(s ast.StructType) string {

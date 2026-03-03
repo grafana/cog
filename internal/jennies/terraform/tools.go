@@ -13,6 +13,7 @@ func formatPackageName(pkg string) string {
 	if len(splitPath) > 1 {
 		pkg = splitPath[len(splitPath)-1]
 	}
+
 	rgx := regexp.MustCompile("[^a-zA-Z0-9_]+")
 
 	return strings.ToLower(rgx.ReplaceAllString(pkg, ""))

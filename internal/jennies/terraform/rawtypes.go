@@ -50,8 +50,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		return imports.Add(pkg, pkg)
 	}
+
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, imports, jenny.packageMapper)
-	attributesGenerator := newAttributesGenerator(jenny.config, jenny.typeFormatter, jenny.packageMapper)
+	validator := newValidatorGenerator(jenny.config, context, jenny.typeFormatter)
+	attributesGenerator := newAttributesGenerator(jenny.config, jenny.typeFormatter, jenny.packageMapper, validator)
 
 	// TF base types
 	imports.Add("", "github.com/hashicorp/terraform-plugin-framework/types")
