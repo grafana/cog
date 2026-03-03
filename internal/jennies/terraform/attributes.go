@@ -30,7 +30,7 @@ func (a *attributes) generateForSchema(schema *ast.Schema) (string, error) {
 
 	schema.Objects.Iterate(func(_ string, obj ast.Object) {
 		if !obj.Type.IsAnyOf(ast.KindDisjunction, ast.KindRef, ast.KindConstantRef, ast.KindEnum, ast.KindIntersection) && !obj.Type.IsDisjunctionOfAnyKind() {
-			buffer.WriteString(fmt.Sprintf("\"%s\": %s", tools.SnakeCase(obj.Name), a.typeFormatter.formatTypeAttribute(obj.Type, parseComments(obj.Comments))))
+			buffer.WriteString(fmt.Sprintf("\"%s\": %s", tools.SnakeCase(obj.Name), a.typeFormatter.formatTypeAttribute(obj.Type, formatComments(obj.Comments))))
 		}
 	})
 
@@ -49,14 +49,14 @@ func (a *attributes) generateForObject(obj ast.Object) (string, error) {
 	buffer.WriteString(fmt.Sprintf("var %sSpecAttributes = map[string]schema.Attribute{\n", tools.UpperCamelCase(a.cfg.PrefixAttributeSpec)))
 
 	for _, field := range obj.Type.AsStruct().Fields {
-		buffer.WriteString(fmt.Sprintf("\"%s\": %s", tools.SnakeCase(field.Name), a.typeFormatter.formatTypeAttribute(field.Type, parseComments(obj.Comments))))
+		buffer.WriteString(fmt.Sprintf("\"%s\": %s", tools.SnakeCase(field.Name), a.typeFormatter.formatTypeAttribute(field.Type, formatComments(obj.Comments))))
 	}
 
 	buffer.WriteString("}")
 	return buffer.String(), nil
 }
 
-func parseComments(objectComments []string) string {
+func formatComments(objectComments []string) string {
 	comments := ""
 	if len(objectComments) > 0 {
 		comments += "`\n"
