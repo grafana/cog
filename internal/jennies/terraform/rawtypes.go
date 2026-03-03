@@ -80,7 +80,6 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		if !ok {
 			return nil, fmt.Errorf("could not find entry point object %s", entryPointRef.ReferredType)
 		}
-
 		attrs, err = attributesGenerator.generateForObject(obj)
 	} else {
 		attrs, err = attributesGenerator.generateForSchema(schema)
