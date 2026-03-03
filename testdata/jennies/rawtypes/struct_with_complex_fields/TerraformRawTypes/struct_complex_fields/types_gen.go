@@ -50,7 +50,7 @@ This struct does things.
 AttributeTypes: map[string]attr.Type{
 "field_ref": types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"fieldAny": types.ObjectType{},
+"fieldAny": types.DynamicType,
 },
 },
 "field_disjunction_of_scalars": types.ObjectType{
@@ -64,7 +64,7 @@ AttributeTypes: map[string]attr.Type{
 "string": types.StringType,
 "someOtherStruct": types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"fieldAny": types.ObjectType{},
+"fieldAny": types.DynamicType,
 },
 },
 },
@@ -79,7 +79,7 @@ AttributeTypes: map[string]attr.Type{
 },
 "field_anonymous_struct": types.ObjectType{
  AttrTypes: map[string]attr.Type{
-"fieldAny": types.ObjectType{},
+"fieldAny": types.DynamicType,
 },
 },
 "field_ref_to_constant": types.StringType,
@@ -92,13 +92,13 @@ AttributeTypes: map[string]attr.Type{
 "some_other_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"field_any": types.ObjectType{},
+"field_any": types.DynamicType,
 },
 },
 "struct_complex_fields_some_struct_field_anonymous_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"field_any": types.ObjectType{},
+"field_any": types.DynamicType,
 },
 },
 }

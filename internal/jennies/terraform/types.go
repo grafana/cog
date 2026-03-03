@@ -156,26 +156,20 @@ func (formatter *typeFormatter) formatConstantReference(constantRef ast.Constant
 
 // Schema attributes
 
-func (formatter *typeFormatter) formatTypeAttribute(object ast.Object) string {
-	comments := ""
-	if len(object.Comments) > 0 {
-		comments += "`\n"
-
-		for _, comment := range object.Comments {
-			comments += comment + "\n"
-		}
-		comments += "`"
-	}
-
-	switch object.Type.Kind {
+func (formatter *typeFormatter) formatTypeAttribute(field ast.Type, comments string) string {
+	switch field.Kind {
 	case ast.KindScalar:
-		return formatter.formatScalarAttribute(object.Type)
+		return formatter.formatScalarAttribute(field)
 	case ast.KindStruct:
-		return formatter.formatStructAttributes(object.Type, comments)
+		return formatter.formatStructAttributes(field, comments)
 	case ast.KindArray:
-		return formatter.formatArrayAttributes(object.Type)
+		return formatter.formatArrayAttributes(field)
 	case ast.KindMap:
-		return formatter.formatMapAttributes(object.Type)
+		return formatter.formatMapAttributes(field)
+	case ast.KindRef:
+		return formatter.formatReferenceAttribute(field, comments)
+	case ast.KindEnum:
+		return formatter.formatEnumAttribute(field)
 	default:
 		return ""
 	}
@@ -260,6 +254,19 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 	}
 }
 
+func (formatter *typeFormatter) formatReferenceAttribute(def ast.Type, comments string) string {
+	obj, ok := formatter.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	if !ok {
+		return "unknown"
+	}
+
+	return formatter.formatTypeAttribute(obj.Type, comments)
+}
+
+func (formatter *typeFormatter) formatEnumAttribute(def ast.Type) string {
+	return formatter.formatScalarAttribute(def.AsEnum().Values[0].Type)
+}
+
 // ElementTypes defines the type of the elements for the attributes
 
 func (formatter *typeFormatter) formatElementType(def ast.Type) string {
@@ -298,7 +305,7 @@ func (formatter *typeFormatter) formatScalarAsElementType(def ast.ScalarType) st
 	case ast.KindFloat64:
 		return "types.Float64Type"
 	case ast.KindAny:
-		return "types.ObjectType{}"
+		return "types.DynamicType"
 	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
 		return "types.NumberType" // types.Number can be converted into any numeric type https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/number#setting-values
 	default:

@@ -18,7 +18,7 @@ var SpecAttributes = map[string]schema.Attribute{
 "some_struct": schema.ObjectAttribute{
 Required: true,
 AttributeTypes: map[string]attr.Type{
-"field_any": types.ObjectType{},
+"field_any": types.DynamicType,
 },
 },
 }

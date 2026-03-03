@@ -50,7 +50,7 @@ AttributeTypes: map[string]attr.Type{
 "uid": types.StringType,
 },
 },
-"options": types.ObjectType{},
+"options": types.DynamicType,
 "targets": types.ListType{
  ElemType: unknown,
 },
@@ -59,7 +59,7 @@ AttributeTypes: map[string]attr.Type{
 "defaults": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "unit": types.StringType,
-"custom": types.ObjectType{},
+"custom": types.DynamicType,
 },
 },
 },
@@ -82,7 +82,7 @@ AttributeTypes: map[string]attr.Type{
 "defaults": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "unit": types.StringType,
-"custom": types.ObjectType{},
+"custom": types.DynamicType,
 },
 },
 },
@@ -91,7 +91,7 @@ AttributeTypes: map[string]attr.Type{
 Required: true,
 AttributeTypes: map[string]attr.Type{
 "unit": types.StringType,
-"custom": types.ObjectType{},
+"custom": types.DynamicType,
 },
 },
 "panel": schema.ObjectAttribute{
@@ -105,7 +105,7 @@ AttributeTypes: map[string]attr.Type{
 "uid": types.StringType,
 },
 },
-"options": types.ObjectType{},
+"options": types.DynamicType,
 "targets": types.ListType{
  ElemType: unknown,
 },
@@ -114,7 +114,7 @@ AttributeTypes: map[string]attr.Type{
 "defaults": types.ObjectType{
  AttrTypes: map[string]attr.Type{
 "unit": types.StringType,
-"custom": types.ObjectType{},
+"custom": types.DynamicType,
 },
 },
 },

@@ -40,7 +40,7 @@ a
 comment
 `,
 AttributeTypes: map[string]attr.Type{
-"field_any": types.ObjectType{},
+"field_any": types.DynamicType,
 "field_bool": types.BoolType,
 "field_bytes": types.StringType,
 "field_string": types.StringType,
