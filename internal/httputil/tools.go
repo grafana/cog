@@ -5,13 +5,29 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 )
 
-func LoadURL(ctx context.Context, url string) (io.ReadCloser, error) {
-	client := http.DefaultClient
+func LoadURL(ctx context.Context, rawURL string) (io.ReadCloser, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, err
+	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if u.Scheme != "https" {
+		return nil, fmt.Errorf("unsupported scheme '%s'", u.Scheme)
+	}
+
+	allowedHosts := map[string]struct{}{
+		"raw.githubusercontent.com": {},
+	}
+
+	if _, ok := allowedHosts[u.Hostname()]; !ok {
+		return nil, fmt.Errorf("unsupported host '%s'", u.Hostname())
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,13 +38,13 @@ func LoadURL(ctx context.Context, url string) (io.ReadCloser, error) {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
 	}
 
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("expecting 200 when loading '%s', got %d", url, resp.StatusCode)
+		return nil, fmt.Errorf("expecting 200 when loading '%s', got %d", u.String(), resp.StatusCode)
 	}
 
 	return resp.Body, nil
