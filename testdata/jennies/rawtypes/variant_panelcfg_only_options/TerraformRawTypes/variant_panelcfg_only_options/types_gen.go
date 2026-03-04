@@ -3,7 +3,6 @@ package variant_panelcfg_only_options
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type Options struct {
@@ -11,10 +10,13 @@ type Options struct {
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"options": schema.ObjectAttribute{
+"options": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"content": types.StringType,
+Attributes: map[string]schema.Attribute{
+"content": schema.StringAttribute{
+ Required: true,
+},
+
 },
 },
 }

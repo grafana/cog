@@ -40,3 +40,16 @@ func formatScalar(val any) string {
 
 	return fmt.Sprintf("%#v", val)
 }
+
+func formatComments(objectComments []string) string {
+	comments := ""
+	if len(objectComments) > 0 {
+		comments += "`\n"
+
+		for _, comment := range objectComments {
+			comments += comment + "\n"
+		}
+		comments += "`"
+	}
+	return comments
+}

@@ -3,7 +3,6 @@ package defaults
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type NestedStruct struct {
@@ -35,80 +34,147 @@ IntVal types.Int64 `tfsdk:"intVal"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"nested_struct": schema.ObjectAttribute{
+"nested_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"string_val": types.StringType,
-"int_val": types.Int64Type,
+Attributes: map[string]schema.Attribute{
+"string_val": schema.StringAttribute{
+ Required: true,
+},
+
+"int_val": schema.Int64Attribute{
+ Required: true,
+},
+
 },
 },
-"struct": schema.ObjectAttribute{
+"struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"all_fields": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"stringVal": types.StringType,
-"intVal": types.Int64Type,
-},
-},
-"partial_fields": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"stringVal": types.StringType,
-"intVal": types.Int64Type,
-},
-},
-"empty_fields": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"stringVal": types.StringType,
-"intVal": types.Int64Type,
-},
-},
-"complex_field": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"uid": types.StringType,
-"nested": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"nestedVal": types.StringType,
-},
-},
-"array": types.ListType{
- ElemType: types.StringType,
-},
-},
-},
-"partial_complex_field": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"uid": types.StringType,
-"intVal": types.Int64Type,
-},
-},
-},
-},
-"defaults_struct_complex_field_nested": schema.ObjectAttribute{
+Attributes: map[string]schema.Attribute{
+"all_fields": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"nested_val": types.StringType,
+Attributes: map[string]schema.Attribute{
+"string_val": schema.StringAttribute{
+ Required: true,
+},
+
+"int_val": schema.Int64Attribute{
+ Required: true,
+},
+
 },
 },
-"defaults_struct_complex_field": schema.ObjectAttribute{
+
+"partial_fields": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"uid": types.StringType,
-"nested": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"nestedVal": types.StringType,
+Attributes: map[string]schema.Attribute{
+"string_val": schema.StringAttribute{
+ Required: true,
+},
+
+"int_val": schema.Int64Attribute{
+ Required: true,
+},
+
 },
 },
-"array": types.ListType{
- ElemType: types.StringType,
-},
-},
-},
-"defaults_struct_partial_complex_field": schema.ObjectAttribute{
+
+"empty_fields": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"uid": types.StringType,
-"int_val": types.Int64Type,
+Attributes: map[string]schema.Attribute{
+"string_val": schema.StringAttribute{
+ Required: true,
+},
+
+"int_val": schema.Int64Attribute{
+ Required: true,
+},
+
+},
+},
+
+"complex_field": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"uid": schema.StringAttribute{
+ Required: true,
+},
+
+"nested": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"nested_val": schema.StringAttribute{
+ Required: true,
+},
+
+},
+},
+
+"array": schema.ListAttribute{
+ ElementType: types.StringType,
+},
+
+},
+},
+
+"partial_complex_field": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"uid": schema.StringAttribute{
+ Required: true,
+},
+
+"int_val": schema.Int64Attribute{
+ Required: true,
+},
+
+},
+},
+
+},
+},
+"defaults_struct_complex_field_nested": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"nested_val": schema.StringAttribute{
+ Required: true,
+},
+
+},
+},
+"defaults_struct_complex_field": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"uid": schema.StringAttribute{
+ Required: true,
+},
+
+"nested": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"nested_val": schema.StringAttribute{
+ Required: true,
+},
+
+},
+},
+
+"array": schema.ListAttribute{
+ ElementType: types.StringType,
+},
+
+},
+},
+"defaults_struct_partial_complex_field": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"uid": schema.StringAttribute{
+ Required: true,
+},
+
+"int_val": schema.Int64Attribute{
+ Required: true,
+},
+
 },
 },
 }

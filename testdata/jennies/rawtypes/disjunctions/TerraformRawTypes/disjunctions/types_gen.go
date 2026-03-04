@@ -3,7 +3,7 @@ package disjunctions
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
+	stringdefault "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // Refresh rate or disabled.
@@ -49,27 +49,47 @@ YetAnotherStruct YetAnotherStruct `tfsdk:"YetAnotherStruct"`
 var SpecAttributes = map[string]schema.Attribute{
 "string_or_null": schema.StringAttribute{
  Optional: true,
+},
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"type": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("some-struct"),
+},
+
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
 
 },
-"some_struct": schema.ObjectAttribute{
+},
+"some_other_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"type": types.StringType,
-"field_any": types.DynamicType,
+Attributes: map[string]schema.Attribute{
+"type": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("some-other-struct"),
+},
+
+"foo": schema.StringAttribute{
+ Required: true,
+},
+
 },
 },
-"some_other_struct": schema.ObjectAttribute{
+"yet_another_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"type": types.StringType,
-"foo": types.StringType,
+Attributes: map[string]schema.Attribute{
+"type": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("yet-another-struct"),
 },
+
+"bar": schema.NumberAttribute{
+ Required: true,
 },
-"yet_another_struct": schema.ObjectAttribute{
-Required: true,
-AttributeTypes: map[string]attr.Type{
-"type": types.StringType,
-"bar": types.NumberType,
+
 },
 },
 }

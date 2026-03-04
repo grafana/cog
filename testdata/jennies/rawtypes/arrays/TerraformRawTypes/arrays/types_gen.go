@@ -3,7 +3,6 @@ package arrays
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 // List of tags, maybe?
@@ -21,16 +20,22 @@ var SpecAttributes = map[string]schema.Attribute{
 "array_of_strings": schema.ListAttribute{
  ElementType: types.StringType,
 },
-"some_struct": schema.ObjectAttribute{
+"some_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"field_any": types.DynamicType,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
 },
 },
-"array_of_refs": schema.ListAttribute{
- ElementType: types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"fieldAny": types.DynamicType,
+"array_of_refs": schema.ListNestedAttribute{
+NestedObject: schema.NestedAttributeObject {
+Attributes: map[string]schema.Attribute {
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
 },
 },
 },

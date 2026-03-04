@@ -3,7 +3,6 @@ package constraints
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type SomeStruct struct {
@@ -19,33 +18,48 @@ Tags types.List `tfsdk:"tags"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.ObjectAttribute{
+"some_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"id": types.Int64Type,
-"maybe_id": types.Int64Type,
-"title": types.StringType,
-"ref_struct": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"labels": types.MapType{
- ElemType: types.StringType,
+Attributes: map[string]schema.Attribute{
+"id": schema.Int64Attribute{
+ Required: true,
 },
-"tags": types.ListType{
- ElemType: types.StringType,
+
+"maybe_id": schema.Int64Attribute{
+ Optional: true,
 },
+
+"title": schema.StringAttribute{
+ Required: true,
 },
-},
-},
-},
-"ref_struct": schema.ObjectAttribute{
+
+"ref_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"labels": types.MapType{
- ElemType: types.StringType,
+Attributes: map[string]schema.Attribute{
+"labels": schema.MapAttribute{
+ ElementType: types.StringType,
 },
-"tags": types.ListType{
- ElemType: types.StringType,
+
+"tags": schema.ListAttribute{
+ ElementType: types.StringType,
 },
+
+},
+},
+
+},
+},
+"ref_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"labels": schema.MapAttribute{
+ ElementType: types.StringType,
+},
+
+"tags": schema.ListAttribute{
+ ElementType: types.StringType,
+},
+
 },
 },
 }

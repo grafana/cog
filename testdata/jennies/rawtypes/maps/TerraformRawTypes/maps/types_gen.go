@@ -3,7 +3,6 @@ package maps
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 // String to... something.
@@ -26,16 +25,27 @@ var SpecAttributes = map[string]schema.Attribute{
 "map_of_string_to_string": schema.MapAttribute{
  ElementType: types.StringType,
 },
-"some_struct": schema.ObjectAttribute{
+"some_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"field_any": types.DynamicType,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
 },
 },
-"map_of_string_to_ref": schema.MapAttribute{
- ElementType: types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"fieldAny": types.DynamicType,
+"map_of_string_to_ref": schema.MapNestedAttribute{
+NestedObject: schema.NestedAttributeObject {
+Attributes: map[string]schema.Attribute {
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
+},
+},
 },
 },
 },

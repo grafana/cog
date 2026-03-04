@@ -30,7 +30,7 @@ func (a *attributes) generateForSchema(schema *ast.Schema) (string, error) {
 
 	schema.Objects.Iterate(func(_ string, obj ast.Object) {
 		if !obj.Type.IsAnyOf(ast.KindDisjunction, ast.KindRef, ast.KindConstantRef, ast.KindEnum, ast.KindIntersection) && !obj.Type.IsDisjunctionOfAnyKind() {
-			buffer.WriteString(fmt.Sprintf("\"%s\": %s", tools.SnakeCase(obj.Name), a.typeFormatter.formatTypeAttribute(obj.Type, formatComments(obj.Comments))))
+			buffer.WriteString(a.typeFormatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
 		}
 	})
 
@@ -54,17 +54,4 @@ func (a *attributes) generateForObject(obj ast.Object) (string, error) {
 
 	buffer.WriteString("}")
 	return buffer.String(), nil
-}
-
-func formatComments(objectComments []string) string {
-	comments := ""
-	if len(objectComments) > 0 {
-		comments += "`\n"
-
-		for _, comment := range objectComments {
-			comments += comment + "\n"
-		}
-		comments += "`"
-	}
-	return comments
 }

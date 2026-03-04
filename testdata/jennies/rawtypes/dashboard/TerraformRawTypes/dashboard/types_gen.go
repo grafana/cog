@@ -3,7 +3,6 @@ package dashboard
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type Dashboard struct {
@@ -35,90 +34,170 @@ FieldConfig FieldConfigSource `tfsdk:"fieldConfig"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"dashboard": schema.ObjectAttribute{
+"dashboard": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"title": types.StringType,
-"panels": types.ListType{
- ElemType: types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"title": types.StringType,
-"type": types.StringType,
-"datasource": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"type": types.StringType,
-"uid": types.StringType,
+Attributes: map[string]schema.Attribute{
+"title": schema.StringAttribute{
+ Required: true,
 },
+
+"panels": schema.ListNestedAttribute{
+NestedObject: schema.NestedAttributeObject {
+Attributes: map[string]schema.Attribute {
+"title": schema.StringAttribute{
+ Required: true,
 },
-"options": types.DynamicType,
-"targets": types.ListType{
- ElemType: unknown,
+
+"type": schema.StringAttribute{
+ Required: true,
 },
-"fieldConfig": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"defaults": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"unit": types.StringType,
-"custom": types.DynamicType,
-},
-},
-},
-},
-},
-},
-},
-},
-},
-"data_source_ref": schema.ObjectAttribute{
+
+"datasource": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"type": types.StringType,
-"uid": types.StringType,
+Attributes: map[string]schema.Attribute{
+"type": schema.StringAttribute{
+ Optional: true,
+},
+
+"uid": schema.StringAttribute{
+ Optional: true,
+},
+
 },
 },
-"field_config_source": schema.ObjectAttribute{
+
+"options": schema.ObjectAttribute{
+ Optional: true,
+},
+
+"targets": schema.ListAttribute{
+ ElementType: unknown,
+},
+
+"field_config": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"defaults": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"unit": types.StringType,
-"custom": types.DynamicType,
-},
-},
-},
-},
-"field_config": schema.ObjectAttribute{
+Attributes: map[string]schema.Attribute{
+"defaults": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"unit": types.StringType,
-"custom": types.DynamicType,
+Attributes: map[string]schema.Attribute{
+"unit": schema.StringAttribute{
+ Optional: true,
+},
+
+"custom": schema.ObjectAttribute{
+ Optional: true,
+},
+
 },
 },
-"panel": schema.ObjectAttribute{
+
+},
+},
+
+},
+},
+},
+
+},
+},
+"data_source_ref": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"title": types.StringType,
-"type": types.StringType,
-"datasource": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"type": types.StringType,
-"uid": types.StringType,
+Attributes: map[string]schema.Attribute{
+"type": schema.StringAttribute{
+ Optional: true,
+},
+
+"uid": schema.StringAttribute{
+ Optional: true,
+},
+
 },
 },
-"options": types.DynamicType,
-"targets": types.ListType{
- ElemType: unknown,
+"field_config_source": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"defaults": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"unit": schema.StringAttribute{
+ Optional: true,
 },
-"field_config": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"defaults": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"unit": types.StringType,
-"custom": types.DynamicType,
+
+"custom": schema.ObjectAttribute{
+ Optional: true,
+},
+
 },
 },
+
 },
 },
+"field_config": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"unit": schema.StringAttribute{
+ Optional: true,
+},
+
+"custom": schema.ObjectAttribute{
+ Optional: true,
+},
+
+},
+},
+"panel": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"title": schema.StringAttribute{
+ Required: true,
+},
+
+"type": schema.StringAttribute{
+ Required: true,
+},
+
+"datasource": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"type": schema.StringAttribute{
+ Optional: true,
+},
+
+"uid": schema.StringAttribute{
+ Optional: true,
+},
+
+},
+},
+
+"options": schema.ObjectAttribute{
+ Optional: true,
+},
+
+"targets": schema.ListAttribute{
+ ElementType: unknown,
+},
+
+"field_config": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"defaults": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"unit": schema.StringAttribute{
+ Optional: true,
+},
+
+"custom": schema.ObjectAttribute{
+ Optional: true,
+},
+
+},
+},
+
+},
+},
+
 },
 },
 }

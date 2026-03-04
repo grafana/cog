@@ -3,7 +3,6 @@ package disjunctions_of_scalars_and_refs
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type DisjunctionOfScalarsAndRefs = StringOrBoolOrArrayOfStringOrMyRefAOrMyRefB
@@ -25,16 +24,22 @@ MyRefB MyRefB `tfsdk:"MyRefB"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"my_ref_a": schema.ObjectAttribute{
+"my_ref_a": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"foo": types.StringType,
+Attributes: map[string]schema.Attribute{
+"foo": schema.StringAttribute{
+ Required: true,
+},
+
 },
 },
-"my_ref_b": schema.ObjectAttribute{
+"my_ref_b": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"bar": types.Int64Type,
+Attributes: map[string]schema.Attribute{
+"bar": schema.Int64Attribute{
+ Required: true,
+},
+
 },
 },
 }
