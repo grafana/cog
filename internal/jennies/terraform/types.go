@@ -427,18 +427,3 @@ func (formatter *typeFormatter) formatConstantReferenceAsElementType(ref ast.Con
 func (formatter *typeFormatter) formatEnumAsElementType(enum ast.EnumType) string {
 	return formatter.formatScalarAsElementType(enum.Values[0].Type.AsScalar())
 }
-
-func (formatter *typeFormatter) containsSchema(t ast.Type) (string, bool) {
-	switch t.Kind {
-	case ast.KindRef:
-		obj, ok := formatter.context.LocateObject(t.AsRef().ReferredPkg, t.AsRef().ReferredType)
-		if !ok {
-			return "", false
-		}
-		return formatComments(obj.Comments), !obj.Type.IsEnum()
-	case ast.KindMap, ast.KindArray, ast.KindStruct:
-		return "", true
-	default:
-		return "", false
-	}
-}
