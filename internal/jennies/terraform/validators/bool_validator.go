@@ -38,5 +38,8 @@ func (s BoolValidator) Values() string {
 }
 
 func (s BoolValidator) ValuesMatcher() string {
+	if len(s.values) == 0 {
+		return ""
+	}
 	return fmt.Sprintf("[]bool{%#v}", strings.Join(s.values, ", "))
 }

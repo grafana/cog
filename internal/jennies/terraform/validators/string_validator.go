@@ -10,10 +10,21 @@ type StringValidator struct {
 }
 
 func NewStringValidator(v []any) StringValidator {
-	parts := make([]string, len(v))
-	for i, s := range v {
-		parts[i] = fmt.Sprintf("%v", s)
+	if len(v) == 0 {
+		return StringValidator{}
 	}
+	parts := make([]string, 0, len(v))
+	for _, s := range v {
+		if s == nil {
+			continue
+		}
+		parts = append(parts, fmt.Sprintf("%v", s))
+	}
+
+	if len(parts) == 0 {
+		return StringValidator{}
+	}
+
 	return StringValidator{
 		values: parts,
 	}
@@ -40,5 +51,8 @@ func (s StringValidator) Values() string {
 }
 
 func (s StringValidator) ValuesMatcher() string {
-	return fmt.Sprintf("[]string{%#v}", strings.Join(s.values, ", "))
+	if len(s.values) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%#v", s.values)
 }

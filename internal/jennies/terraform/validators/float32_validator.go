@@ -38,5 +38,8 @@ func (s Float32Validator) Values() string {
 }
 
 func (s Float32Validator) ValuesMatcher() string {
+	if len(s.values) == 0 {
+		return ""
+	}
 	return fmt.Sprintf("[]float32{%#v}", strings.Join(s.values, ", "))
 }

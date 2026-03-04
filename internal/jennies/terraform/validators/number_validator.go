@@ -35,6 +35,9 @@ func (s NumberValidator) ValidatorValue() string {
 }
 
 func (s NumberValidator) Values() string {
+	if len(s.values) == 0 {
+		return ""
+	}
 	return strings.Join(s.values, ", ")
 }
 

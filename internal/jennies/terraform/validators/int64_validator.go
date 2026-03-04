@@ -34,6 +34,9 @@ func (s Int64Validator) ValidatorValue() string {
 }
 
 func (s Int64Validator) Values() string {
+	if len(s.values) == 0 {
+		return ""
+	}
 	return strings.Join(s.values, ", ")
 }
 
