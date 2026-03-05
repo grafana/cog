@@ -215,6 +215,14 @@ func (formatter *typeFormatter) formatFieldAttributes(fields []ast.StructField) 
 
 func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 	var buffer strings.Builder
+
+	defVal := ""
+	if def.Default != nil {
+		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault")
+		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
+		defVal = fmt.Sprintf("Default: listdefault.StaticValue(%s),\n", formatter.parseArrayDefaults(def.AsArray().ValueType, def.Default))
+	}
+
 	switch def.AsArray().ValueType.Kind {
 	case ast.KindRef:
 		ref := def.AsArray().ValueType.AsRef()
@@ -223,18 +231,41 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 			return "unknown"
 		}
 
-		buffer.WriteString("schema.ListNestedAttribute{\n")
-		buffer.WriteString(fmt.Sprintf("NestedObject: schema.NestedAttributeObject {\n"))
-		buffer.WriteString("Attributes: map[string]schema.Attribute {\n")
-		if obj.Type.IsStruct() {
-			buffer.WriteString(formatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
+		if !obj.Type.IsEnum() {
+			buffer.WriteString("schema.ListNestedAttribute{\n")
+			buffer.WriteString(fmt.Sprintf("NestedObject: schema.NestedAttributeObject {\n"))
+			buffer.WriteString("Attributes: map[string]schema.Attribute {\n")
 		} else {
+			buffer.WriteString("schema.ListAttribute{\n")
+			enumType := "types.StringType"
+			if obj.Type.AsEnum().Values[0].Type.AsScalar().IsNumeric() {
+				enumType = "types.Int64Type"
+			}
+			buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", enumType))
+		}
+
+		if defVal != "" {
+			buffer.WriteString(defVal)
+		}
+
+		switch obj.Type.Kind {
+		case ast.KindEnum:
+		case ast.KindStruct:
+			buffer.WriteString(formatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
+		default:
 			buffer.WriteString(formatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
 		}
-		buffer.WriteString("},\n},\n")
+
+		if !obj.Type.IsEnum() {
+			buffer.WriteString("},\n},\n")
+		}
+
 	default:
 		buffer.WriteString("schema.ListAttribute{\n ")
 		buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", formatter.formatElementType(def.AsArray().ValueType)))
+		if defVal != "" {
+			buffer.WriteString(defVal)
+		}
 	}
 	buffer.WriteString(fmt.Sprintf("},\n"))
 
@@ -243,6 +274,13 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 
 func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 	var buffer strings.Builder
+
+	defVal := ""
+	if def.Default != nil {
+		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault")
+		defVal = fmt.Sprintf("Default: mapdefault.StaticValue(%s)\n", formatScalar(defVal))
+	}
+
 	switch def.AsMap().ValueType.Kind {
 	case ast.KindRef:
 		ref := def.AsMap().ValueType.AsRef()
@@ -426,4 +464,75 @@ func (formatter *typeFormatter) formatConstantReferenceAsElementType(ref ast.Con
 
 func (formatter *typeFormatter) formatEnumAsElementType(enum ast.EnumType) string {
 	return formatter.formatScalarAsElementType(enum.Values[0].Type.AsScalar())
+}
+
+type defaultFormatter struct {
+	name         string
+	defFunc      string
+	extraDefFunc string
+}
+
+func (formatter *typeFormatter) parseArrayDefaults(def ast.Type, defVal any) string {
+	var scalarDef = map[ast.ScalarKind]defaultFormatter{
+		ast.KindString:  {name: "StringType", defFunc: "StringValue"},
+		ast.KindBytes:   {name: "StringType", defFunc: "StringValue"},
+		ast.KindNull:    {name: "StringType", defFunc: "StringValue"},
+		ast.KindBool:    {name: "BoolType", defFunc: "BoolValue"},
+		ast.KindInt32:   {name: "Int32Type", defFunc: "Int32Value"},
+		ast.KindUint32:  {name: "Int32Type", defFunc: "Int32Value"},
+		ast.KindInt64:   {name: "Int64Type", defFunc: "Int64Value"},
+		ast.KindUint64:  {name: "Int64Type", defFunc: "Int64Value"},
+		ast.KindFloat32: {name: "Float32Type", defFunc: "Float32Value"},
+		ast.KindFloat64: {name: "Float64Type", defFunc: "Float64Value"},
+		ast.KindInt8:    {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
+		ast.KindUint8:   {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
+		ast.KindInt16:   {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
+		ast.KindUint16:  {name: "NumberType", defFunc: "NumberValue", extraDefFunc: "big.NewFloat"},
+	}
+
+	var enumDef = map[ast.ScalarKind]defaultFormatter{
+		ast.KindString: {name: "StringType", defFunc: "StringValue"},
+		ast.KindInt64:  {name: "StringType", defFunc: "StringValue"},
+	}
+
+	v := defVal.([]interface{})
+
+	var buffer strings.Builder
+	buffer.WriteString("types.ListValueMust(\n")
+	switch def.Kind {
+	case ast.KindScalar:
+		if scalar, ok := scalarDef[def.AsScalar().ScalarKind]; ok {
+			buffer.WriteString(fmt.Sprintf("types.%s, []attr.Value{\n", scalar.name))
+			for _, val := range v {
+				defaultValue := formatScalar(val)
+				if scalar.extraDefFunc != "" {
+					defaultValue = fmt.Sprintf("%s(%s)", scalar.extraDefFunc, defaultValue)
+				}
+				buffer.WriteString(fmt.Sprintf("types.%s(%s),\n", scalar.defFunc, defaultValue))
+			}
+			buffer.WriteString("},\n")
+		}
+
+	case ast.KindRef:
+		obj, ok := formatter.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		if !ok {
+			return "unknown"
+		}
+		if obj.Type.IsEnum() {
+			if enum, ok := enumDef[obj.Type.AsEnum().Values[0].Type.AsScalar().ScalarKind]; ok {
+				buffer.WriteString(fmt.Sprintf("types.%s, []attr.Value{\n", enum.name))
+				for _, val := range v {
+					buffer.WriteString(fmt.Sprintf("types.%s(%s),\n", enum.defFunc, formatScalar(val)))
+				}
+				buffer.WriteString("},\n")
+			}
+		} else {
+			return "unknown"
+		}
+	default:
+		fmt.Println("Unknown type", def.Kind)
+	}
+
+	buffer.WriteString(")")
+	return buffer.String()
 }
