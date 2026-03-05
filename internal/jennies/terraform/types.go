@@ -220,7 +220,7 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 	if def.Default != nil {
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault")
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
-		defVal = fmt.Sprintf("Default: listdefault.StaticValue(%s),\n", formatter.parseArrayDefaults(def.AsArray().ValueType, def.Default))
+		defVal = fmt.Sprintf("Default: listdefault.StaticValue(%s),\n", formatter.parseArrayOrMapDefaults(def.AsArray().ValueType, def.Default, ListDefault))
 	}
 
 	switch def.AsArray().ValueType.Kind {
@@ -278,7 +278,8 @@ func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 	defVal := ""
 	if def.Default != nil {
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault")
-		defVal = fmt.Sprintf("Default: mapdefault.StaticValue(%s)\n", formatScalar(defVal))
+		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
+		defVal = fmt.Sprintf("Default: mapdefault.StaticValue(%s),\n", formatter.parseArrayOrMapDefaults(def.AsMap().ValueType, def.Default, MapDefault))
 	}
 
 	switch def.AsMap().ValueType.Kind {
@@ -288,11 +289,35 @@ func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 		if !ok {
 			return "unknown"
 		}
-		buffer.WriteString("schema.MapNestedAttribute{\n")
-		buffer.WriteString(fmt.Sprintf("NestedObject: schema.NestedAttributeObject {\n"))
-		buffer.WriteString("Attributes: map[string]schema.Attribute {\n")
-		buffer.WriteString(formatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
-		buffer.WriteString("},\n},\n")
+
+		if !obj.Type.IsEnum() {
+			buffer.WriteString("schema.MapNestedAttribute{\n")
+			buffer.WriteString(fmt.Sprintf("NestedObject: schema.NestedAttributeObject {\n"))
+			buffer.WriteString("Attributes: map[string]schema.Attribute {\n")
+		} else {
+			buffer.WriteString("schema.MapAttribute{\n")
+			enumType := "types.StringType"
+			if obj.Type.AsEnum().Values[0].Type.AsScalar().IsNumeric() {
+				enumType = "types.Int64Type"
+			}
+			buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", enumType))
+		}
+
+		if defVal != "" {
+			buffer.WriteString(defVal)
+		}
+
+		switch obj.Type.Kind {
+		case ast.KindEnum:
+		case ast.KindStruct:
+			buffer.WriteString(formatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
+		default:
+			buffer.WriteString(formatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
+		}
+
+		if !obj.Type.IsEnum() {
+			buffer.WriteString("},\n},\n")
+		}
 	default:
 		buffer.WriteString("schema.MapAttribute{\n ")
 		buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", formatter.formatElementType(def.AsMap().ValueType)))
@@ -472,7 +497,12 @@ type defaultFormatter struct {
 	extraDefFunc string
 }
 
-func (formatter *typeFormatter) parseArrayDefaults(def ast.Type, defVal any) string {
+type defaultType string
+
+const MapDefault = "Map"
+const ListDefault = "List"
+
+func (formatter *typeFormatter) parseArrayOrMapDefaults(def ast.Type, defVal any, t defaultType) string {
 	var scalarDef = map[ast.ScalarKind]defaultFormatter{
 		ast.KindString:  {name: "StringType", defFunc: "StringValue"},
 		ast.KindBytes:   {name: "StringType", defFunc: "StringValue"},
@@ -497,12 +527,19 @@ func (formatter *typeFormatter) parseArrayDefaults(def ast.Type, defVal any) str
 
 	v := defVal.([]interface{})
 
+	attrValue := "[]attr.Value"
+	mustValue := "ListValueMust"
+	if t == MapDefault {
+		attrValue = "map[string]attr.Value"
+		attrValue = "MapValueMust"
+	}
+
 	var buffer strings.Builder
-	buffer.WriteString("types.ListValueMust(\n")
+	buffer.WriteString(fmt.Sprintf("types.%s(\n", mustValue))
 	switch def.Kind {
 	case ast.KindScalar:
 		if scalar, ok := scalarDef[def.AsScalar().ScalarKind]; ok {
-			buffer.WriteString(fmt.Sprintf("types.%s, []attr.Value{\n", scalar.name))
+			buffer.WriteString(fmt.Sprintf("types.%s, %s{\n", scalar.name, attrValue))
 			for _, val := range v {
 				defaultValue := formatScalar(val)
 				if scalar.extraDefFunc != "" {
@@ -520,7 +557,7 @@ func (formatter *typeFormatter) parseArrayDefaults(def ast.Type, defVal any) str
 		}
 		if obj.Type.IsEnum() {
 			if enum, ok := enumDef[obj.Type.AsEnum().Values[0].Type.AsScalar().ScalarKind]; ok {
-				buffer.WriteString(fmt.Sprintf("types.%s, []attr.Value{\n", enum.name))
+				buffer.WriteString(fmt.Sprintf("types.%s, %s{\n", enum.name, attrValue))
 				for _, val := range v {
 					buffer.WriteString(fmt.Sprintf("types.%s(%s),\n", enum.defFunc, formatScalar(val)))
 				}
