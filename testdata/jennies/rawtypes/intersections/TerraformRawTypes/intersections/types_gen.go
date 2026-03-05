@@ -35,7 +35,7 @@ Required: true,
 Attributes: map[string]schema.Attribute{
 "field_bool": schema.BoolAttribute{
  Required: true,
-Default: booldefault.StaticBool(true)
+Default: booldefault.StaticBool(true),
 },
 
 },

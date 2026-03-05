@@ -37,15 +37,10 @@ Attributes: map[string]schema.Attribute{
 "map_of_string_to_ref": schema.MapNestedAttribute{
 NestedObject: schema.NestedAttributeObject {
 Attributes: map[string]schema.Attribute {
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
 "field_any": schema.ObjectAttribute{
  Required: true,
 },
 
-},
-},
 },
 },
 },

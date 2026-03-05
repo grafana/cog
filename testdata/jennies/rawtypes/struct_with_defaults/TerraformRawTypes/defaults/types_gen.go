@@ -23,12 +23,12 @@ Required: true,
 Attributes: map[string]schema.Attribute{
 "field_bool": schema.BoolAttribute{
  Required: true,
-Default: booldefault.StaticBool(true)
+Default: booldefault.StaticBool(true),
 },
 
 "field_string": schema.StringAttribute{
  Required: true,
-Default: stringdefault.StaticString("foo")
+Default: stringdefault.StaticString("foo"),
 },
 
 "field_string_with_constant_value": schema.StringAttribute{
@@ -38,12 +38,12 @@ Default: stringdefault.StaticString("auto"),
 
 "field_float32": schema.Float32Attribute{
  Required: true,
-Default: float32default.StaticFloat32(42.42)
+Default: float32default.StaticFloat32(42.42),
 },
 
 "field_int32": schema.Int32Attribute{
  Required: true,
-Default: int32default.StaticInt32(42)
+Default: int32default.StaticInt32(42),
 },
 
 },
