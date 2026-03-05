@@ -292,7 +292,7 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 		defaultVal := ""
 		if def.Default != nil {
 			formatter.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework/resource/schema/%s", attr.defImport))
-			defaultVal = fmt.Sprintf("Default: %s.%s(%s)\n", attr.defImport, attr.defVal, formatScalar(def.Default))
+			defaultVal = fmt.Sprintf("Default: %s.%s(%s),\n", attr.defImport, attr.defVal, formatScalar(def.Default))
 		} else if def.AsScalar().Value != nil {
 			formatter.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework/resource/schema/%s", attr.defImport))
 			defaultVal = fmt.Sprintf("Default: %s.%s(%s),\n", attr.defImport, attr.defVal, formatScalar(def.AsScalar().Value))
@@ -301,7 +301,7 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 		customType := ""
 		if def.HasHint(ast.HintStringFormatDateTime) {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
-			customType = "CustomType: timetypes.RFC3339{},\n"
+			customType = "CustomType: timetypes.RFC3339Type{},\n"
 		}
 		return fmt.Sprintf("schema.%s{\n %s%s%s},\n", attr.name, required, defaultVal, customType)
 	}

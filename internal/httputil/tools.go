@@ -17,7 +17,7 @@ func LoadURL(ctx context.Context, url string) (io.ReadCloser, error) {
 	}
 
 	// Necessary for Github private repositories
-	authToken := os.Getenv("GITHUB_AUTH_TOKEN")
+	authToken := os.Getenv("GITHUB_PAT")
 	if authToken != "" && req.URL.Host == "raw.githubusercontent.com" {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
 	}
