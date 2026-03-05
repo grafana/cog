@@ -532,7 +532,7 @@ func (formatter *typeFormatter) parseArrayOrMapDefaults(def ast.Type, defVal any
 	mustValue := "ListValueMust"
 	if t == MapDefault {
 		attrValue = "map[string]attr.Value"
-		attrValue = "MapValueMust"
+		mustValue = "MapValueMust"
 	}
 
 	var buffer strings.Builder
