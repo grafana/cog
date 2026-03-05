@@ -275,6 +275,7 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 	var buffer strings.Builder
 
+	// TODO: It seems that we aren't parsing default values for maps, so we are not generating the default value for the map.
 	defVal := ""
 	if def.Default != nil {
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault")
