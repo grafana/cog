@@ -235,25 +235,24 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 			buffer.WriteString("schema.ListNestedAttribute{\n")
 			buffer.WriteString(fmt.Sprintf("NestedObject: schema.NestedAttributeObject {\n"))
 			buffer.WriteString("Attributes: map[string]schema.Attribute {\n")
-		} else {
+		}
+
+		switch obj.Type.Kind {
+		case ast.KindEnum:
 			buffer.WriteString("schema.ListAttribute{\n")
 			enumType := "types.StringType"
 			if obj.Type.AsEnum().Values[0].Type.AsScalar().IsNumeric() {
 				enumType = "types.Int64Type"
 			}
 			buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", enumType))
-		}
-
-		if defVal != "" {
-			buffer.WriteString(defVal)
-		}
-
-		switch obj.Type.Kind {
-		case ast.KindEnum:
 		case ast.KindStruct:
 			buffer.WriteString(formatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
 		default:
 			buffer.WriteString(formatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
+		}
+
+		if defVal != "" {
+			buffer.WriteString(defVal)
 		}
 
 		if !obj.Type.IsEnum() {
@@ -295,25 +294,24 @@ func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 			buffer.WriteString("schema.MapNestedAttribute{\n")
 			buffer.WriteString(fmt.Sprintf("NestedObject: schema.NestedAttributeObject {\n"))
 			buffer.WriteString("Attributes: map[string]schema.Attribute {\n")
-		} else {
+		}
+
+		switch obj.Type.Kind {
+		case ast.KindEnum:
 			buffer.WriteString("schema.MapAttribute{\n")
 			enumType := "types.StringType"
 			if obj.Type.AsEnum().Values[0].Type.AsScalar().IsNumeric() {
 				enumType = "types.Int64Type"
 			}
 			buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", enumType))
-		}
-
-		if defVal != "" {
-			buffer.WriteString(defVal)
-		}
-
-		switch obj.Type.Kind {
-		case ast.KindEnum:
 		case ast.KindStruct:
 			buffer.WriteString(formatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
 		default:
 			buffer.WriteString(formatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
+		}
+
+		if defVal != "" {
+			buffer.WriteString(defVal)
 		}
 
 		if !obj.Type.IsEnum() {
