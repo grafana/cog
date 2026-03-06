@@ -3,7 +3,7 @@ package basic
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
+	stringdefault "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 // This
@@ -31,7 +31,7 @@ FieldInt64 types.Int64 `tfsdk:"FieldInt64"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.ObjectAttribute{
+"some_struct": schema.SingleNestedAttribute{
 Required: true,
 Description: `
 This
@@ -39,22 +39,68 @@ is
 a
 comment
 `,
-AttributeTypes: map[string]attr.Type{
-"field_any": types.DynamicType,
-"field_bool": types.BoolType,
-"field_bytes": types.StringType,
-"field_string": types.StringType,
-"field_string_with_constant_value": types.StringType,
-"field_float32": types.Float32Type,
-"field_float64": types.Float64Type,
-"field_uint8": types.NumberType,
-"field_uint16": types.NumberType,
-"field_uint32": types.Int32Type,
-"field_uint64": types.Int64Type,
-"field_int8": types.NumberType,
-"field_int16": types.NumberType,
-"field_int32": types.Int32Type,
-"field_int64": types.Int64Type,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
+"field_bool": schema.BoolAttribute{
+ Required: true,
+},
+
+"field_bytes": schema.StringAttribute{
+ Required: true,
+},
+
+"field_string": schema.StringAttribute{
+ Required: true,
+},
+
+"field_string_with_constant_value": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("auto"),
+},
+
+"field_float32": schema.Float32Attribute{
+ Required: true,
+},
+
+"field_float64": schema.Float64Attribute{
+ Required: true,
+},
+
+"field_uint8": schema.NumberAttribute{
+ Required: true,
+},
+
+"field_uint16": schema.NumberAttribute{
+ Required: true,
+},
+
+"field_uint32": schema.Int32Attribute{
+ Required: true,
+},
+
+"field_uint64": schema.Int64Attribute{
+ Required: true,
+},
+
+"field_int8": schema.NumberAttribute{
+ Required: true,
+},
+
+"field_int16": schema.NumberAttribute{
+ Required: true,
+},
+
+"field_int32": schema.Int32Attribute{
+ Required: true,
+},
+
+"field_int64": schema.Int64Attribute{
+ Required: true,
+},
+
 },
 },
 }

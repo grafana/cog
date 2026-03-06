@@ -3,7 +3,7 @@ package constant_reference_discriminator
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
+	stringdefault "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
 type LayoutWithValue = GridLayoutUsingValueOrRowsLayoutUsingValue
@@ -45,40 +45,68 @@ RowsLayoutWithoutValue RowsLayoutWithoutValue `tfsdk:"RowsLayoutWithoutValue"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"grid_layout_using_value": schema.ObjectAttribute{
+"grid_layout_using_value": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"kind": types.StringType,
-"grid_layout_property": types.StringType,
+Attributes: map[string]schema.Attribute{
+"kind": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("GridLayout"),
+},
+
+"grid_layout_property": schema.StringAttribute{
+ Required: true,
+},
+
 },
 },
-"rows_layout_using_value": schema.ObjectAttribute{
+"rows_layout_using_value": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"kind": types.StringType,
-"rows_layout_property": types.StringType,
+Attributes: map[string]schema.Attribute{
+"kind": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("RowsLayout"),
+},
+
+"rows_layout_property": schema.StringAttribute{
+ Required: true,
+},
+
 },
 },
-"grid_layout_without_value": schema.ObjectAttribute{
+"grid_layout_without_value": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"kind": types.StringType,
-"grid_layout_property": types.StringType,
+Attributes: map[string]schema.Attribute{
+"kind": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("GridLayout"),
+},
+
+"grid_layout_property": schema.StringAttribute{
+ Required: true,
+},
+
 },
 },
-"rows_layout_without_value": schema.ObjectAttribute{
+"rows_layout_without_value": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"kind": types.StringType,
-"rows_layout_property": types.StringType,
+Attributes: map[string]schema.Attribute{
+"kind": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("RowsLayout"),
+},
+
+"rows_layout_property": schema.StringAttribute{
+ Required: true,
+},
+
 },
 },
 "grid_layout_kind_type": schema.StringAttribute{
  Required: true,
-
+Default: stringdefault.StaticString("GridLayout"),
 },
 "rows_layout_kind_type": schema.StringAttribute{
  Required: true,
-
+Default: stringdefault.StaticString("RowsLayout"),
 },
 }

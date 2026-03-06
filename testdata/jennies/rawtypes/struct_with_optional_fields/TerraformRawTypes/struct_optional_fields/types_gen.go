@@ -3,7 +3,6 @@ package struct_optional_fields
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type SomeStruct struct {
@@ -25,36 +24,59 @@ type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
 
 
 var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.ObjectAttribute{
+"some_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"field_ref": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"fieldAny": types.DynamicType,
-},
-},
-"field_string": types.StringType,
-"operator": types.StringType,
-"field_array_of_strings": types.ListType{
- ElemType: types.StringType,
-},
-"field_anonymous_struct": types.ObjectType{
- AttrTypes: map[string]attr.Type{
-"fieldAny": types.DynamicType,
-},
-},
-},
-},
-"some_other_struct": schema.ObjectAttribute{
+Attributes: map[string]schema.Attribute{
+"field_ref": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"field_any": types.DynamicType,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
 },
 },
-"struct_optional_fields_some_struct_field_anonymous_struct": schema.ObjectAttribute{
+
+"field_string": schema.StringAttribute{
+ Optional: true,
+},
+
+"operator": schema.StringAttribute{
+ Required: true,
+},
+
+"field_array_of_strings": schema.ListAttribute{
+ ElementType: types.StringType,
+},
+
+"field_anonymous_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"field_any": types.DynamicType,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
+},
+},
+
+},
+},
+"some_other_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
+},
+},
+"struct_optional_fields_some_struct_field_anonymous_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
 },
 },
 }

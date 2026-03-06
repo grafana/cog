@@ -3,7 +3,6 @@ package variant_dataquery
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type Query struct {
@@ -12,11 +11,17 @@ Instant types.Bool `tfsdk:"instant"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"query": schema.ObjectAttribute{
+"query": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"expr": types.StringType,
-"instant": types.BoolType,
+Attributes: map[string]schema.Attribute{
+"expr": schema.StringAttribute{
+ Required: true,
+},
+
+"instant": schema.BoolAttribute{
+ Optional: true,
+},
+
 },
 },
 }

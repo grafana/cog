@@ -3,7 +3,6 @@ package withdashes
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
 type SomeStruct struct {
@@ -19,10 +18,13 @@ Bool types.Bool `tfsdk:"Bool"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.ObjectAttribute{
+"some_struct": schema.SingleNestedAttribute{
 Required: true,
-AttributeTypes: map[string]attr.Type{
-"field_any": types.DynamicType,
+Attributes: map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
 },
 },
 }
