@@ -15,15 +15,19 @@ type typeFormatter struct {
 	context       languages.Context
 	imports       *common.DirectImportMap
 	packageMapper func(pkg string) string
+	validators    *validators
 }
 
 func defaultTypeFormatter(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
-	return &typeFormatter{
+	tf := &typeFormatter{
 		config:        config,
 		context:       context,
 		imports:       imports,
 		packageMapper: packageMapper,
 	}
+
+	tf.validators = newValidators(tf)
+	return tf
 }
 
 func (formatter *typeFormatter) formatTypeDeclaration(object ast.Object) string {
@@ -365,7 +369,8 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 			customType = "CustomType: timetypes.RFC3339Type{},\n"
 		}
-		return fmt.Sprintf("schema.%s{\n %s%s%s},\n", attr.name, required, defaultVal, customType)
+
+		return fmt.Sprintf("schema.%s{\n %s%s%s%s},\n", attr.name, required, defaultVal, customType, formatter.validators.validate(def.AsScalar().ScalarKind, def.AsScalar().Constraints))
 	}
 
 	return "unknown"
