@@ -280,17 +280,6 @@ func hasStructFields(v cue.Value) bool {
 	return false
 }
 
-func areCuePathsFromSameRoot(a cue.Path, b cue.Path) bool {
-	selectorsA := a.Selectors()
-	selectorsB := b.Selectors()
-
-	if len(selectorsA) == 0 || len(selectorsB) == 0 {
-		return false
-	}
-
-	return selectorsA[0].String() == selectorsB[0].String()
-}
-
 func cuePathIsChildOf(root cue.Path, maybeChild cue.Path) bool {
 	selectorsRoot := root.Selectors()
 	selectorsChild := maybeChild.Selectors()
@@ -306,4 +295,13 @@ func cuePathIsChildOf(root cue.Path, maybeChild cue.Path) bool {
 	}
 
 	return true
+}
+
+func getFilename(v cue.Value) string {
+	file, ok := v.Source().(*cueast.File)
+	if ok {
+		return file.Filename
+	}
+
+	return v.Pos().Filename()
 }

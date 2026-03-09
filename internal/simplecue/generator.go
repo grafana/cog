@@ -72,10 +72,11 @@ type Config struct {
 }
 
 type generator struct {
-	schema      *ast.Schema
-	refResolver *referenceResolver
-	rootVal     cue.Value
-	rootPath    cue.Path
+	schema       *ast.Schema
+	refResolver  *referenceResolver
+	rootVal      cue.Value
+	rootPath     cue.Path
+	rootFilename string
 
 	namingFunc            NameFunc
 	externalReferenceFunc externalReferenceFunc
@@ -88,9 +89,10 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 			Libraries:     c.Libraries,
 			SchemaPackage: c.Package,
 		}),
-		rootVal:    val,
-		rootPath:   val.Path(),
-		namingFunc: c.NameFunc,
+		rootVal:      val,
+		rootPath:     val.Path(),
+		rootFilename: getFilename(val), // TODO: does this still work with cue modules?
+		namingFunc:   c.NameFunc,
 	}
 
 	if g.namingFunc == nil {
@@ -458,7 +460,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 	//   origin: #Origin // `#Origin` refers to a value outside our original root
 	// }
 	// ```
-	if areCuePathsFromSameRoot(g.rootPath, path) && !cuePathIsChildOf(g.rootPath, path) {
+	if getFilename(referenceRootValue) == g.rootFilename && !cuePathIsChildOf(g.rootPath, path) {
 		refType := g.namingFunc(g.rootVal, path)
 		if !g.schema.Objects.Has(refType) {
 			if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
@@ -1006,9 +1008,12 @@ func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.
 		return false, ast.Type{}, nil
 	}
 
-	refPkg, err := g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
-	if err != nil {
-		return false, ast.Type{}, err
+	var refPkg = g.schema.Package
+	if getFilename(conjuncts[0]) != g.rootFilename {
+		refPkg, err = g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
+		if err != nil {
+			return false, ast.Type{}, err
+		}
 	}
 
 	_, path := conjuncts[0].ReferencePath()
