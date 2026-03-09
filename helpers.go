@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/openapi"
+	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/simplecue"
 )
@@ -265,6 +266,21 @@ func (pipeline *SchemaToTypesPipeline) GenerateOpenAPI(config OpenAPIGenerationC
 	pipeline.output = &codegen.OutputLanguage{
 		OpenAPI: &openapi.Config{
 			Compact: config.Compact,
+		},
+	}
+	return pipeline
+}
+
+type TerraformConfig struct {
+	PrefixAttributeSpec string
+	SkipPostFormatting  bool
+}
+
+func (pipeline *SchemaToTypesPipeline) Terraform(config TerraformConfig) *SchemaToTypesPipeline {
+	pipeline.output = &codegen.OutputLanguage{
+		Terraform: &terraform.Config{
+			SkipPostFormatting:  config.SkipPostFormatting,
+			PrefixAttributeSpec: config.PrefixAttributeSpec,
 		},
 	}
 	return pipeline
