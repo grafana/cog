@@ -118,36 +118,88 @@ func newValidators(typeFormatter *typeFormatter) *validators {
 	}
 }
 
-func (v *validators) validate(kind ast.ScalarKind, constraints []ast.TypeConstraint) string {
+func (v *validators) scalarValidator(kind ast.ScalarKind, constraints []ast.TypeConstraint) string {
 	if len(constraints) == 0 {
-		fmt.Println("A")
 		return ""
 	}
 	if validator, ok := v.validatorDefinitions[kind]; ok {
 		var buffer strings.Builder
-		buffer.WriteString(fmt.Sprintf("[]validator.%s{\n", validator.name))
-
 		v.typeFormatter.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework-validators/%s", validator.importName))
-		for _, c := range constraints {
-			switch c.Op {
-			case ast.MinLengthOp, ast.GreaterThanEqualOp, ast.GreaterThanOp:
-				buffer.WriteString(fmt.Sprintf("%s.%s(%s),\n", validator.importName, validator.minFunc, v.calculateConstraint(c.Op, c.Args[0])))
-			case ast.MaxLengthOp, ast.LessThanEqualOp, ast.LessThanOp:
-				buffer.WriteString(fmt.Sprintf("%s.%s(%s),\n", validator.importName, validator.maxFunc, v.calculateConstraint(c.Op, c.Args[0])))
-			case ast.NotEqualOp:
-				buffer.WriteString(fmt.Sprintf("%s.%s(%s),\n", validator.importName, validator.noneOfFunc, formatScalar(c.Args[0])))
-			case ast.EqualOp:
-				buffer.WriteString(fmt.Sprintf("%s.%s(%s),\n", validator.importName, validator.equalFunc, formatScalar(c.Args[0])))
-			default:
-				fmt.Println("Unknown validator op", c.Op)
-			}
-		}
-
+		buffer.WriteString(fmt.Sprintf("[]validator.%s{\n", validator.name))
+		buffer.WriteString(v.constraints(validator, constraints))
 		buffer.WriteString("},\n")
 		return buffer.String()
 	}
 
 	return ""
+}
+
+func (v *validators) constraints(validator scalarValidator, constraints []ast.TypeConstraint) string {
+	var buffer strings.Builder
+	for _, c := range constraints {
+		args := make([]string, len(c.Args))
+		for i, arg := range c.Args {
+			args[i] = formatScalar(arg)
+		}
+
+		switch c.Op {
+		case ast.MinLengthOp, ast.GreaterThanEqualOp, ast.GreaterThanOp:
+			buffer.WriteString(fmt.Sprintf("%s.%s(%s),\n", validator.importName, validator.minFunc, v.calculateConstraint(c.Op, c.Args[0])))
+		case ast.MaxLengthOp, ast.LessThanEqualOp, ast.LessThanOp:
+			buffer.WriteString(fmt.Sprintf("%s.%s(%s),\n", validator.importName, validator.maxFunc, v.calculateConstraint(c.Op, c.Args[0])))
+		case ast.NotEqualOp:
+			buffer.WriteString(fmt.Sprintf("%s.%s(%+v),\n", validator.importName, validator.noneOfFunc, strings.Join(args, ", ")))
+		case ast.EqualOp:
+			buffer.WriteString(fmt.Sprintf("%s.%s(%+v),\n", validator.importName, validator.equalFunc, strings.Join(args, ", ")))
+		default:
+			fmt.Println("Unknown validator op", c.Op)
+		}
+	}
+
+	return buffer.String()
+}
+
+func (v *validators) validateList(def ast.Type) string {
+	var buffer strings.Builder
+	switch def.Kind {
+	case ast.KindRef:
+		obj, ok := v.typeFormatter.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		if !ok {
+			return "unknown validator"
+		}
+
+		if obj.Type.IsEnum() {
+			return v.validateList(obj.Type)
+		}
+
+		return ""
+	case ast.KindEnum:
+		v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
+		buffer.WriteString("[]validator.List{\n")
+		validatorType := "ValueStringsAre"
+		kind := def.AsEnum().Values[0].Type.AsScalar().ScalarKind
+		if kind == ast.KindInt64 {
+			validatorType = "ValueInt64sAre"
+		}
+
+		values := make([]any, len(def.AsEnum().Values))
+		for i, v := range def.AsEnum().Values {
+			values[i] = v.Value
+		}
+
+		constraints := []ast.TypeConstraint{
+			{
+				ast.EqualOp,
+				values,
+			},
+		}
+
+		buffer.WriteString(fmt.Sprintf("listvalidator.%s(%s),\n},\n", validatorType, v.constraints(v.validatorDefinitions[kind], constraints)))
+	default:
+		fmt.Println("Unknown list type", def.Kind)
+	}
+
+	return buffer.String()
 }
 
 func (v *validators) calculateConstraint(op ast.Op, arg any) string {

@@ -226,6 +226,7 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
 		defVal = fmt.Sprintf("Default: listdefault.StaticValue(%s),\n", formatter.parseArrayOrMapDefaults(def.AsArray().ValueType, def.Default, ListDefault))
 	}
+	validator := formatter.validators.validateList(def.AsArray().ValueType)
 
 	switch def.AsArray().ValueType.Kind {
 	case ast.KindRef:
@@ -257,6 +258,10 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 
 		if defVal != "" {
 			buffer.WriteString(defVal)
+		}
+
+		if validator != "" {
+			buffer.WriteString(fmt.Sprintf("Validators: %s", validator))
 		}
 
 		if !obj.Type.IsEnum() {
@@ -370,7 +375,12 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 			customType = "CustomType: timetypes.RFC3339Type{},\n"
 		}
 
-		return fmt.Sprintf("schema.%s{\n %s%s%s%s},\n", attr.name, required, defaultVal, customType, formatter.validators.validate(def.AsScalar().ScalarKind, def.AsScalar().Constraints))
+		validator := formatter.validators.scalarValidator(def.AsScalar().ScalarKind, def.AsScalar().Constraints)
+		if validator != "" {
+			validator = fmt.Sprintf("Validators: %s\n", validator)
+		}
+
+		return fmt.Sprintf("schema.%s{\n %s%s%s%s},\n", attr.name, required, defaultVal, customType, validator)
 	}
 
 	return "unknown"
