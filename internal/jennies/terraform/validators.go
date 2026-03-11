@@ -168,11 +168,7 @@ func (v *validators) validateList(def ast.Type) string {
 			return "unknown validator"
 		}
 
-		if obj.Type.IsEnum() {
-			return v.validateList(obj.Type)
-		}
-
-		return ""
+		return v.validateList(obj.Type)
 	case ast.KindEnum:
 		v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
 		buffer.WriteString("[]validator.List{\n")
@@ -196,7 +192,7 @@ func (v *validators) validateList(def ast.Type) string {
 
 		buffer.WriteString(fmt.Sprintf("listvalidator.%s(%s),\n},\n", validatorType, v.constraints(v.validatorDefinitions[kind], constraints)))
 	default:
-		fmt.Println("Unknown list type", def.Kind)
+		return ""
 	}
 
 	return buffer.String()
