@@ -398,11 +398,15 @@ func (formatter *typeFormatter) formatReferenceAttribute(def ast.Type) string {
 		return "unknown"
 	}
 
+	obj.Type.Default = def.Default
 	return formatter.formatTypeAttribute(obj.Type, formatComments(obj.Comments))
 }
 
 func (formatter *typeFormatter) formatEnumAttribute(def ast.Type) string {
-	return formatter.formatScalarAttribute(def.AsEnum().Values[0].Type)
+	scalarDef := def.AsEnum().Values[0].Type
+	scalarDef.Scalar.Constraints = formatEnumValuesAsConstraints(def.AsEnum().Values)
+	scalarDef.Default = def.Default
+	return formatter.formatScalarAttribute(scalarDef)
 }
 
 func (formatter *typeFormatter) formatConstantReferenceAttribute(def ast.Type) string {

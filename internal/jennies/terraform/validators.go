@@ -178,18 +178,7 @@ func (v *validators) validateList(def ast.Type) string {
 			validatorType = "ValueInt64sAre"
 		}
 
-		values := make([]any, len(def.AsEnum().Values))
-		for i, v := range def.AsEnum().Values {
-			values[i] = v.Value
-		}
-
-		constraints := []ast.TypeConstraint{
-			{
-				ast.EqualOp,
-				values,
-			},
-		}
-
+		constraints := formatEnumValuesAsConstraints(def.AsEnum().Values)
 		buffer.WriteString(fmt.Sprintf("listvalidator.%s(%s),\n},\n", validatorType, v.constraints(v.validatorDefinitions[kind], constraints)))
 	default:
 		return ""
