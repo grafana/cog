@@ -3,6 +3,7 @@ package constant_references
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 )
 
 
@@ -32,6 +33,10 @@ Required: true,
 Attributes: map[string]schema.Attribute{
 "my_enum": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
+},
+
 },
 
 },
@@ -45,6 +50,10 @@ Attributes: map[string]schema.Attribute{
 
 "my_enum": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
+},
+
 },
 
 },
@@ -54,10 +63,18 @@ Required: true,
 Attributes: map[string]schema.Attribute{
 "my_enum": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
+},
+
 },
 
 "other": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
+},
+
 },
 
 },
@@ -67,6 +84,10 @@ Required: true,
 Attributes: map[string]schema.Attribute{
 "my_enum": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
+},
+
 },
 
 "my_value": schema.StringAttribute{
