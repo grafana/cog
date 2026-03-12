@@ -189,15 +189,15 @@ func (v *validators) validateList(def ast.Type) string {
 
 func (v *validators) calculateConstraint(op ast.Op, arg any) string {
 	var value int64
-	switch arg.(type) {
+	switch v := arg.(type) {
 	case int64:
-		value = arg.(int64)
+		value = v
 	case int32:
-		value = int64(arg.(int32))
+		value = int64(v)
 	case float32:
-		value = int64(arg.(float32))
+		value = int64(v)
 	case float64:
-		value = int64(arg.(float64))
+		value = int64(v)
 	}
 	switch op {
 	case ast.GreaterThanOp:
