@@ -28,7 +28,7 @@ CustomType: timetypes.RFC3339Type{},
 
 "duration": schema.StringAttribute{
  Required: true,
-CustomType: timetypes.DurationType{},
+CustomType: timetypes.GoDurationType{},
 },
 
 },
