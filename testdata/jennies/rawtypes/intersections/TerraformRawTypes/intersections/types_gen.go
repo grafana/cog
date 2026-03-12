@@ -4,6 +4,7 @@ import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	booldefault "github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 )
 
 
@@ -52,10 +53,18 @@ Attributes: map[string]schema.Attribute{
 
 "type": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.OneOf("counter", "gauge"),
+},
+
 },
 
 "contains": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.OneOf("default", "time"),
+},
+
 },
 
 },
