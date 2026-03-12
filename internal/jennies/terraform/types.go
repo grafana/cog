@@ -371,7 +371,7 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 		}
 		if def.HasHint(ast.HintStringFormatDuration) {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
-			customType = "CustomType: timetypes.DurationType{},\n"
+			customType = "CustomType: timetypes.GoDurationType{},\n"
 		}
 		return fmt.Sprintf("schema.%s{\n %s%s%s},\n", attr.name, required, defaultVal, customType)
 	}
