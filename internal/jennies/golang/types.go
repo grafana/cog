@@ -127,6 +127,10 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 				typeName = "time.Time"
 				formatter.imports.Add("time", "time")
 			}
+			if def.HasHint(ast.HintStringFormatDuration) {
+				typeName = "time.Duration"
+				formatter.imports.Add("time", "time")
+			}
 			if def.Nullable {
 				typeName = "*" + typeName
 			}

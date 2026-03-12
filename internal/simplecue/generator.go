@@ -668,9 +668,11 @@ func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHint
 	conjuncts := appendSplit(nil, cue.AndOp, v)
 	for _, conjunct := range conjuncts {
 		_, path := conjunct.ReferencePath()
-		// the string was declared as string & time.Time
-		if path.String() == "Time" {
+		switch path.String() {
+		case "Time": // time.Time
 			typeDef.Hints[ast.HintStringFormatDateTime] = true
+		case "Duration": // time.Duration
+			typeDef.Hints[ast.HintStringFormatDuration] = true
 		}
 	}
 

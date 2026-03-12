@@ -41,6 +41,20 @@
                 }
               },
               "Required": true
+            },
+            {
+              "Name": "duration",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                },
+                "Hints": {
+                  "string_format_duration": true
+                }
+              },
+              "Required": true
             }
           ]
         }

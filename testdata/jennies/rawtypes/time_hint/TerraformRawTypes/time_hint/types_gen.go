@@ -10,6 +10,7 @@ type ObjTime types.String
 
 type ObjWithTimeField struct {
  RegisteredAt timetypes.RFC3339 `tfsdk:"registeredAt"`
+Duration timetypes.GoDurationType `tfsdk:"duration"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
@@ -23,6 +24,11 @@ Attributes: map[string]schema.Attribute{
 "registered_at": schema.StringAttribute{
  Required: true,
 CustomType: timetypes.RFC3339Type{},
+},
+
+"duration": schema.StringAttribute{
+ Required: true,
+CustomType: timetypes.DurationType{},
 },
 
 },
