@@ -54,6 +54,10 @@ func (formatter *typeFormatter) formatType(def ast.Type) string {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 			return "timetypes.RFC3339"
 		}
+		if def.HasHint(ast.HintStringFormatDuration) {
+			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
+			return "timetypes.GoDurationType"
+		}
 		return formatter.formatScalar(def.AsScalar())
 	case ast.KindMap:
 		return "types.Map"
@@ -364,6 +368,10 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 		if def.HasHint(ast.HintStringFormatDateTime) {
 			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
 			customType = "CustomType: timetypes.RFC3339Type{},\n"
+		}
+		if def.HasHint(ast.HintStringFormatDuration) {
+			formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes")
+			customType = "CustomType: timetypes.GoDurationType{},\n"
 		}
 		return fmt.Sprintf("schema.%s{\n %s%s%s},\n", attr.name, required, defaultVal, customType)
 	}

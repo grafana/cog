@@ -6,13 +6,16 @@ ObjTime: typing.TypeAlias = str
 
 class ObjWithTimeField:
     registered_at: str
+    duration: str
 
-    def __init__(self, registered_at: str = "") -> None:
+    def __init__(self, registered_at: str = "", duration: str = "") -> None:
         self.registered_at = registered_at
+        self.duration = duration
 
     def to_json(self) -> dict[str, object]:
         payload: dict[str, object] = {
             "registeredAt": self.registered_at,
+            "duration": self.duration,
         }
         return payload
 
@@ -21,7 +24,9 @@ class ObjWithTimeField:
         args: dict[str, typing.Any] = {}
         
         if "registeredAt" in data:
-            args["registered_at"] = data["registeredAt"]        
+            args["registered_at"] = data["registeredAt"]
+        if "duration" in data:
+            args["duration"] = data["duration"]        
 
         return cls(**args)
 

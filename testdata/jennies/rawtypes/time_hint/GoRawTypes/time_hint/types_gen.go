@@ -12,6 +12,7 @@ type ObjTime time.Time
 
 type ObjWithTimeField struct {
     RegisteredAt time.Time `json:"registeredAt"`
+    Duration time.Duration `json:"duration"`
 }
 
 // NewObjWithTimeField creates a new ObjWithTimeField object.
@@ -43,6 +44,18 @@ func (resource *ObjWithTimeField) UnmarshalJSONStrict(raw []byte) error {
 		delete(fields, "registeredAt")
 	} else {errs = append(errs, cog.MakeBuildErrors("registeredAt", errors.New("required field is missing from input"))...)
 	}
+	// Field "duration"
+	if fields["duration"] != nil {
+		if string(fields["duration"]) != "null" {
+			if err := json.Unmarshal(fields["duration"], &resource.Duration); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("duration", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("duration", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "duration")
+	} else {errs = append(errs, cog.MakeBuildErrors("duration", errors.New("required field is missing from input"))...)
+	}
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("ObjWithTimeField", fmt.Errorf("unexpected field '%s'", field))...)
@@ -59,6 +72,9 @@ func (resource *ObjWithTimeField) UnmarshalJSONStrict(raw []byte) error {
 // Equals tests the equality of two `ObjWithTimeField` objects.
 func (resource ObjWithTimeField) Equals(other ObjWithTimeField) bool {
 		if resource.RegisteredAt != other.RegisteredAt {
+			return false
+		}
+		if resource.Duration != other.Duration {
 			return false
 		}
 

@@ -566,7 +566,7 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 
 		// For strings: ensure they're not empty
 		// TODO: deal with datetime strings
-		if assignmentType.IsScalar() && assignmentType.AsScalar().ScalarKind == ast.KindString && !assignmentType.HasHint(ast.HintStringFormatDateTime) {
+		if assignmentType.IsScalar() && assignmentType.AsScalar().ScalarKind == ast.KindString && !assignmentType.HasHint(ast.HintStringFormatDateTime) && !assignmentType.HasHint(ast.HintStringFormatDuration) {
 			guard := MappingGuard{
 				Path:  valuesRootPath.Append(assignment.Path),
 				Op:    ast.NotEqualOp,
