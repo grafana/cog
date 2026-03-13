@@ -495,6 +495,12 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			})), nil
 		}
 
+		if refPkg == "time" && refType == "Duration" {
+			return ast.String(ast.Default(defValue), ast.Hints(ast.JenniesHints{
+				ast.HintStringFormatDuration: true,
+			})), nil
+		}
+
 		// ensure that referenced objects are explored (in case they're not
 		// defined within the "root" cue value given to cog as parsing input)
 		if refPkg == g.schema.Package && !g.schema.Objects.Has(refType) {
