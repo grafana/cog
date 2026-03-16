@@ -144,40 +144,6 @@ func (t Type) EffectiveTypedDefault() *TypeDefault {
 	return nil
 }
 
-// RawValue reconstructs the raw any value from TypeDefault.
-func (td *TypeDefault) RawValue() any {
-	if td == nil {
-		return nil
-	}
-	if td.Scalar != nil {
-		return td.Scalar.Value
-	}
-	if td.Array != nil {
-		result := make([]any, len(td.Array))
-		for i, v := range td.Array {
-			result[i] = v.RawValue()
-		}
-		return result
-	}
-	if td.Struct != nil {
-		return td.RawMap()
-	}
-	return nil
-}
-
-// RawMap returns the struct contents as a map[string]any, suitable for
-// downstream functions that expect the raw representation of a struct default.
-func (td *TypeDefault) RawMap() map[string]any {
-	if td == nil || td.Struct == nil {
-		return nil
-	}
-	result := make(map[string]any, len(td.Struct))
-	for k, v := range td.Struct {
-		result[k] = v.RawValue()
-	}
-	return result
-}
-
 // Type representing every type defined by the IR.
 // Bonus: in a way that can be (un)marshaled to/from JSON,
 // which is useful for unit tests.
