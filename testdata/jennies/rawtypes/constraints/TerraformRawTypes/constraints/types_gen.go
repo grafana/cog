@@ -3,6 +3,7 @@ package constraints
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	int64validator "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 )

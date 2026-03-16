@@ -3,6 +3,7 @@ package struct_complex_fields
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	stringdefault "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
