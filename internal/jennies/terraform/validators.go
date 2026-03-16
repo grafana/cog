@@ -124,6 +124,7 @@ func (v *validators) scalarValidator(kind ast.ScalarKind, constraints []ast.Type
 	}
 	if validator, ok := v.validatorDefinitions[kind]; ok {
 		var buffer strings.Builder
+		v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/schema/validator")
 		v.typeFormatter.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework-validators/%s", validator.importName))
 		buffer.WriteString(fmt.Sprintf("[]validator.%s{\n", validator.name))
 		buffer.WriteString(v.constraints(validator, constraints))
@@ -152,7 +153,7 @@ func (v *validators) constraints(validator scalarValidator, constraints []ast.Ty
 		case ast.EqualOp:
 			buffer.WriteString(fmt.Sprintf("%s.%s(%+v),\n", validator.importName, validator.equalFunc, strings.Join(args, ", ")))
 		default:
-			fmt.Println("Unknown validator op", c.Op)
+			return "unknown"
 		}
 	}
 
