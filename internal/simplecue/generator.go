@@ -839,12 +839,25 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 		v = dvals[0]
 	}
 
-	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
-	if err != nil {
-		return nil, err
+	op, exprs := v.Expr()
+	if op != cue.AndOp {
+		return nil, nil
 	}
 
-	parts := strings.Split(string(numberTypeWithConstraintsAsString), " & ")
+	parts := make([]string, 0, len(exprs))
+	for _, expr := range exprs {
+		numberTypeWithConstraintsAsString, err := format.Node(expr.Syntax())
+		if err != nil {
+			return nil, err
+		}
+
+		split := strings.Split(string(numberTypeWithConstraintsAsString), " & ")
+		if len(split) == 2 {
+			parts = append(parts, split[1])
+		} else {
+			parts = append(parts, split[0])
+		}
+	}
 
 	extractOperatorAndArg := func(input string, numberKind cue.Kind) (ast.Op, any, error) {
 		argStartIndex := -1

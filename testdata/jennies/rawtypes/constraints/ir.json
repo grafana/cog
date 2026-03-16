@@ -64,6 +64,31 @@
               "Required": false
             },
             {
+              "Name": "greaterThanZero",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        3
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
               "Name": "title",
               "Type": {
                 "Kind": "scalar",
@@ -82,33 +107,6 @@
               },
               "Required": true
             },
-            {
-              "Name": "refStruct",
-              "Type": {
-                "Kind": "ref",
-                "Nullable": false,
-                "Ref": {
-                  "ReferredPkg": "constraints",
-                  "ReferredType": "refStruct"
-                }
-              },
-              "Required": false
-            }
-          ]
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "constraints",
-        "ReferredType": "SomeStruct"
-      }
-    },
-    "refStruct": {
-      "Name": "refStruct",
-      "Type": {
-        "Kind": "struct",
-        "Nullable": false,
-        "Struct": {
-          "Fields": [
             {
               "Name": "labels",
               "Type": {
@@ -171,7 +169,7 @@
       },
       "SelfRef": {
         "ReferredPkg": "constraints",
-        "ReferredType": "refStruct"
+        "ReferredType": "SomeStruct"
       }
     }
   }

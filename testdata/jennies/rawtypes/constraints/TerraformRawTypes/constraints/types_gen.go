@@ -8,12 +8,9 @@ import (
 type SomeStruct struct {
  Id types.Int64 `tfsdk:"id"`
 MaybeId types.Int64 `tfsdk:"maybeId"`
+GreaterThanZero types.Int64 `tfsdk:"greaterThanZero"`
 Title types.String `tfsdk:"title"`
-RefStruct RefStruct `tfsdk:"refStruct"`
- }
-
-type RefStruct struct {
- Labels types.Map `tfsdk:"labels"`
+Labels types.Map `tfsdk:"labels"`
 Tags types.List `tfsdk:"tags"`
  }
 
@@ -29,29 +26,14 @@ Attributes: map[string]schema.Attribute{
  Optional: true,
 },
 
+"greater_than_zero": schema.Int64Attribute{
+ Required: true,
+},
+
 "title": schema.StringAttribute{
  Required: true,
 },
 
-"ref_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"labels": schema.MapAttribute{
- ElementType: types.StringType,
-},
-
-"tags": schema.ListAttribute{
- ElementType: types.StringType,
-},
-
-},
-},
-
-},
-},
-"ref_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
 "labels": schema.MapAttribute{
  ElementType: types.StringType,
 },

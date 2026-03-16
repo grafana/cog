@@ -89,7 +89,21 @@
                 "Kind": "scalar",
                 "Nullable": false,
                 "Scalar": {
-                  "ScalarKind": "float32"
+                  "ScalarKind": "float32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        -3.4028234663852886e+38
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        3.4028234663852886e+38
+                      ]
+                    }
+                  ]
                 }
               },
               "Required": true
@@ -100,7 +114,21 @@
                 "Kind": "scalar",
                 "Nullable": false,
                 "Scalar": {
-                  "ScalarKind": "float32"
+                  "ScalarKind": "float32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        -3.4028234663852886e+38
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        3.4028234663852886e+38
+                      ]
+                    }
+                  ]
                 }
               },
               "Required": false
@@ -111,7 +139,21 @@
                 "Kind": "scalar",
                 "Nullable": false,
                 "Scalar": {
-                  "ScalarKind": "float32"
+                  "ScalarKind": "float32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        -3.4028234663852886e+38
+                      ]
+                    },
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        3.4028234663852886e+38
+                      ]
+                    }
+                  ]
                 }
               },
               "Required": false
