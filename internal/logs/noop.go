@@ -6,7 +6,7 @@ import (
 )
 
 func NoopHandler() slog.Handler {
-	return slog.NewTextHandler(io.Discard(), nil)
+	return slog.NewTextHandler(io.Discard, nil)
 }
 
 func NoopLogger() *slog.Logger {
