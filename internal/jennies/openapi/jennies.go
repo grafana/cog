@@ -53,5 +53,6 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		// should be a superset of the compiler passes defined for jsonschema jennies
 		&compiler.DisjunctionWithNullToOptional{},
 		&compiler.InferEntrypoint{},
+		&compiler.DefaultAsTyped{},
 	}
 }

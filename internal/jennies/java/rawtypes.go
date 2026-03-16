@@ -279,11 +279,11 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 			ValueFromArg: name,
 		})
 
-		if field.Type.Default != nil {
+		if field.Type.EffectiveTypedDefault() != nil {
 			defaultConstructorAssignments = append(defaultConstructorAssignments, ConstructorAssignmentTemplate{
 				Name:  name,
 				Type:  field.Type,
-				Value: jenny.genDefaultForType(field.Type, field.Type.Default),
+				Value: jenny.genDefaultForType(field.Type, field.Type.EffectiveTypedDefault()),
 			})
 		} else if field.Required && !field.Type.Nullable { // Fields without an explicit default, but that aren't allowed to be null
 			defaultConstructorAssignments = append(defaultConstructorAssignments, ConstructorAssignmentTemplate{
@@ -312,41 +312,50 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 	return constructors
 }
 
-func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {
+func (jenny RawTypes) genDefaultForType(t ast.Type, td *ast.TypeDefault) string {
 	switch t.Kind {
 	case ast.KindScalar:
-		return formatType(t.AsScalar().ScalarKind, value)
+		if td != nil && td.Scalar != nil {
+			return formatType(t.AsScalar().ScalarKind, td.Scalar.Value)
+		}
+		return formatType(t.AsScalar().ScalarKind, nil)
 	case ast.KindRef:
-		return jenny.formatReferenceDefaults(t, value)
+		return jenny.formatReferenceDefaults(t, td)
 	case ast.KindArray:
-		if value == nil {
+		if td == nil || td.Array == nil {
 			return "List.of()"
 		}
-		return fmt.Sprintf("List.of(%s)", jenny.genDefaultForType(t.AsArray().ValueType, value))
+		items := make([]string, 0, len(td.Array))
+		for _, elem := range td.Array {
+			items = append(items, jenny.genDefaultForType(t.AsArray().ValueType, elem))
+		}
+		return fmt.Sprintf("List.of(%s)", strings.Join(items, ", "))
 	}
 
 	return ""
 }
 
-func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
-	// Enums
-	if _, ok := value.(map[string]any); !ok {
+func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, td *ast.TypeDefault) string {
+	if td == nil || td.Struct == nil {
+		// not a struct default — treat as enum/scalar ref
 		jenny.typeFormatter.packageMapper(ref.AsRef().ReferredPkg, ref.AsRef().ReferredType)
-		return jenny.typeFormatter.formatRefType(ref, value)
+		var scalarValue any
+		if td != nil && td.Scalar != nil {
+			scalarValue = td.Scalar.Value
+		}
+		return jenny.typeFormatter.formatRefType(ref, scalarValue)
 	}
 
 	obj, ok := jenny.typeFormatter.context.LocateObjectByRef(ref.AsRef())
 	if !ok {
 		return ""
 	}
-
-	defaultValues := value.(map[string]any)
 	objectFields := obj.Type.AsStruct().Fields
 
 	args := make([]string, len(objectFields))
 	for i, f := range objectFields {
-		if v, ok := defaultValues[f.Name]; ok {
-			args[i] = jenny.genDefaultForType(f.Type, v)
+		if fieldTD, ok := td.Struct[f.Name]; ok {
+			args[i] = jenny.genDefaultForType(f.Type, fieldTD)
 		} else {
 			args[i] = jenny.typeFormatter.emptyValueForType(f.Type, false)
 		}

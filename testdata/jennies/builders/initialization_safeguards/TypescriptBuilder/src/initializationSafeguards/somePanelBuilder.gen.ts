@@ -25,9 +25,7 @@ export class SomePanelBuilder implements cog.Builder<initializationSafeguards.So
             this.internal.options = initializationSafeguards.defaultOptions();
         }
         if (!this.internal.options.legend) {
-            this.internal.options.legend = {
-	show: true,
-};
+            this.internal.options.legend = { show: true, };
         }
         this.internal.options.legend.show = show;
         return this;

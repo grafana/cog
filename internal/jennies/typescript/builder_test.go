@@ -3,6 +3,7 @@ package typescript
 import (
 	"testing"
 
+	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/testutils"
@@ -32,6 +33,13 @@ func TestBuilder_Generate(t *testing.T) {
 		req := require.New(tc)
 
 		context := tc.UnmarshalJSONInput(testutils.BuildersContextInputFile)
+
+		// Populate TypedDefault on all types so that default-handling code can
+		// work with typed defaults instead of the raw Default any field.
+		pass := &compiler.DefaultAsTyped{}
+		context.Schemas, err = pass.Process(context.Schemas)
+		req.NoError(err)
+
 		context, err = languages.GenerateBuilderNilChecks(language, context)
 		req.NoError(err)
 
