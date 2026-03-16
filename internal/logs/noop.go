@@ -1,12 +1,12 @@
 package logs
 
 import (
+	"io"
 	"log/slog"
-	"os"
 )
 
 func NoopHandler() slog.Handler {
-	return slog.NewTextHandler(os.NewFile(0, os.DevNull), nil)
+	return slog.NewTextHandler(io.Discard(), nil)
 }
 
 func NoopLogger() *slog.Logger {
