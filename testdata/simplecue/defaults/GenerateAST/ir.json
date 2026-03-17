@@ -194,21 +194,7 @@
                 "Nullable": false,
                 "Default": 5,
                 "Scalar": {
-                  "ScalarKind": "int64",
-                  "Constraints": [
-                    {
-                      "Op": "\u003e=",
-                      "Args": [
-                        -9223372036854775808
-                      ]
-                    },
-                    {
-                      "Op": "\u003c=",
-                      "Args": [
-                        9223372036854775807
-                      ]
-                    }
-                  ]
+                  "ScalarKind": "int64"
                 }
               },
               "Required": true

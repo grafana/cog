@@ -46,6 +46,12 @@
                   "ScalarKind": "float64",
                   "Constraints": [
                     {
+                      "Op": "\u003e=",
+                      "Args": [
+                        0
+                      ]
+                    },
+                    {
                       "Op": "\u003c=",
                       "Args": [
                         1
