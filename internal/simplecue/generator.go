@@ -834,7 +834,7 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 
 // having written this makes my soul hurt.
 func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
-	node := v.Syntax() // 🔑 sin Final()
+	node := v.Syntax()
 
 	var constraints []ast.TypeConstraint
 
