@@ -12,6 +12,7 @@ type SomeStruct struct {
     Id uint64 `json:"id"`
     MaybeId *uint64 `json:"maybeId,omitempty"`
     GreaterThanZero uint64 `json:"greaterThanZero"`
+    Negative uint64 `json:"negative"`
     Title string `json:"title"`
     Labels map[string]string `json:"labels"`
     Tags []string `json:"tags"`
@@ -70,6 +71,18 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		}
 		delete(fields, "greaterThanZero")
 	} else {errs = append(errs, cog.MakeBuildErrors("greaterThanZero", errors.New("required field is missing from input"))...)
+	}
+	// Field "negative"
+	if fields["negative"] != nil {
+		if string(fields["negative"]) != "null" {
+			if err := json.Unmarshal(fields["negative"], &resource.Negative); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("negative", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("negative", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "negative")
+	} else {errs = append(errs, cog.MakeBuildErrors("negative", errors.New("required field is missing from input"))...)
 	}
 	// Field "title"
 	if fields["title"] != nil {
@@ -139,6 +152,9 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 		if resource.GreaterThanZero != other.GreaterThanZero {
 			return false
 		}
+		if resource.Negative != other.Negative {
+			return false
+		}
 		if resource.Title != other.Title {
 			return false
 		}
@@ -206,6 +222,18 @@ func (resource SomeStruct) Validate() error {
 			errs = append(errs, cog.MakeBuildErrors(
 				"greaterThanZero",
 				errors.New("must be < 3"),
+			)...)
+		}
+		if !(resource.Negative >= -19) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"negative",
+				errors.New("must be >= -19"),
+			)...)
+		}
+		if !(resource.Negative < 10) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"negative",
+				errors.New("must be < 10"),
 			)...)
 		}
 		if !(len([]rune(resource.Title)) >= 1) {

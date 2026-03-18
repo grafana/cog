@@ -861,12 +861,12 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 			}
 			switch x.Op {
 			case token.GTR, token.GEQ, token.LSS, token.LEQ, token.EQL, token.NEQ:
-				lit, ok := x.X.(*cueast.BasicLit)
+				raw, ok := extractNumber(x.X)
 				if !ok {
 					return
 				}
 
-				arg, err := parseNumber(lit.Value)
+				arg, err := parseNumber(raw)
 				if err != nil {
 					return
 				}
@@ -921,6 +921,29 @@ func mapTokenToAstOp(op token.Token) ast.Op {
 	default:
 		return ""
 	}
+}
+
+func extractNumber(e cueast.Expr) (string, bool) {
+	switch v := e.(type) {
+
+	case *cueast.BasicLit:
+		return v.Value, true
+
+	case *cueast.UnaryExpr:
+		if v.Op == token.SUB {
+			if lit, ok := v.X.(*cueast.BasicLit); ok {
+				return "-" + lit.Value, true
+			}
+		}
+
+		if v.Op == token.ADD {
+			if lit, ok := v.X.(*cueast.BasicLit); ok {
+				return lit.Value, true
+			}
+		}
+	}
+
+	return "", false
 }
 
 func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {

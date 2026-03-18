@@ -9,6 +9,7 @@ type SomeStruct struct {
  Id types.Int64 `tfsdk:"id"`
 MaybeId types.Int64 `tfsdk:"maybeId"`
 GreaterThanZero types.Int64 `tfsdk:"greaterThanZero"`
+Negative types.Int64 `tfsdk:"negative"`
 Title types.String `tfsdk:"title"`
 Labels types.Map `tfsdk:"labels"`
 Tags types.List `tfsdk:"tags"`
@@ -27,6 +28,10 @@ Attributes: map[string]schema.Attribute{
 },
 
 "greater_than_zero": schema.Int64Attribute{
+ Required: true,
+},
+
+"negative": schema.Int64Attribute{
  Required: true,
 },
 

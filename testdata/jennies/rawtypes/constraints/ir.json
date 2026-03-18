@@ -89,6 +89,31 @@
               "Required": true
             },
             {
+              "Name": "negative",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        -19
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        10
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
               "Name": "title",
               "Type": {
                 "Kind": "scalar",
