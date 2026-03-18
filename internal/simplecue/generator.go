@@ -841,10 +841,8 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 	var walk func(cueast.Expr)
 	walk = func(e cueast.Expr) {
 		switch x := e.(type) {
-
 		case *cueast.BinaryExpr:
 			switch x.Op {
-
 			case token.AND:
 				walk(x.X)
 				walk(x.Y)
@@ -855,14 +853,12 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 				} else if isDefault(x.Y) {
 					walk(x.X)
 				}
-
 			}
 
 		case *cueast.UnaryExpr:
 			if x.Op == token.MUL {
 				return
 			}
-
 			switch x.Op {
 			case token.GTR, token.GEQ, token.LSS, token.LEQ, token.EQL, token.NEQ:
 				lit, ok := x.X.(*cueast.BasicLit)
