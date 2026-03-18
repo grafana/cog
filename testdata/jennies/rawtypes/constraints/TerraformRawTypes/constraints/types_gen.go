@@ -42,10 +42,20 @@ int64validator.AtMost(9),
 
 "greater_than_zero": schema.Int64Attribute{
  Required: true,
+Validators: []validator.Int64{
+int64validator.AtLeast(0),
+int64validator.AtMost(2),
+},
+
 },
 
 "negative": schema.Int64Attribute{
  Required: true,
+Validators: []validator.Int64{
+int64validator.AtLeast(-19),
+int64validator.AtMost(9),
+},
+
 },
 
 "title": schema.StringAttribute{
