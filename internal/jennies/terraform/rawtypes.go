@@ -7,6 +7,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -26,6 +27,10 @@ func (jenny RawTypes) JennyName() string {
 
 func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0, len(context.Schemas))
+
+	jenny.tmpl = jenny.tmpl.
+		Funcs(common.TypeResolvingTemplateHelpers(context)).
+		Funcs(common.TypesTemplateHelpers(context))
 
 	for _, schema := range context.Schemas {
 		output, err := jenny.generateSchema(context, schema)
@@ -66,6 +71,30 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		if innerErr != nil {
 			err = innerErr
 			return
+		}
+
+		customMethodsBlock := template.CustomObjectMethodsBlock(object)
+		if jenny.tmpl.Exists(customMethodsBlock) {
+			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+				"Object": object,
+			})
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+			buffer.WriteString("\n")
+		}
+
+		customAllBlock := template.CustomObjectMethodAllBlock()
+		if jenny.tmpl.Exists(customAllBlock) {
+			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
+				"Object": object,
+			})
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+			buffer.WriteString("\n")
 		}
 
 		buffer.WriteString("\n")
