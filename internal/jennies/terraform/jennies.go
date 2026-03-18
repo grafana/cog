@@ -19,6 +19,9 @@ type Config struct {
 
 	PrefixAttributeSpec string `yaml:"-"`
 
+	// OverridesTemplateFuncs holds additional template functions to be injected into the override templates.
+	OverridesTemplateFuncs map[string]any `yaml:"-"`
+
 	// SkipPostFormatting disables formatting of Go files done with go imports
 	// after code generation.
 	SkipPostFormatting bool `yaml:"skip_post_formatting"`
@@ -51,13 +54,14 @@ func (language *Language) Name() string {
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
 	config := language.config.MergeWithGlobal(globalConfig)
+	tmpl := initTemplates(config)
 
 	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
 
 	jenny.AppendOneToMany(
-		common.If(globalConfig.Types, RawTypes{config: config}))
+		common.If(globalConfig.Types, RawTypes{config: config, tmpl: tmpl}))
 
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 	if !config.SkipPostFormatting {

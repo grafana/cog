@@ -7,12 +7,14 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
 	config Config
+	tmpl   *template.Template
 
 	packageMapper func(pkg string) string
 	typeFormatter *typeFormatter
