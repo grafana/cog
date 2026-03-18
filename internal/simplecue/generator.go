@@ -497,6 +497,12 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			})), nil
 		}
 
+		if refPkg == "time" && refType == "Duration" {
+			return ast.String(ast.Default(defValue), ast.Hints(ast.JenniesHints{
+				ast.HintStringFormatDuration: true,
+			})), nil
+		}
+
 		// ensure that referenced objects are explored (in case they're not
 		// defined within the "root" cue value given to cog as parsing input)
 		if refPkg == g.schema.Package && !g.schema.Objects.Has(refType) {
@@ -670,9 +676,11 @@ func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHint
 	conjuncts := appendSplit(nil, cue.AndOp, v)
 	for _, conjunct := range conjuncts {
 		_, path := conjunct.ReferencePath()
-		// the string was declared as string & time.Time
-		if path.String() == "Time" {
+		switch path.String() {
+		case "Time": // time.Time
 			typeDef.Hints[ast.HintStringFormatDateTime] = true
+		case "Duration": // time.Duration
+			typeDef.Hints[ast.HintStringFormatDuration] = true
 		}
 	}
 

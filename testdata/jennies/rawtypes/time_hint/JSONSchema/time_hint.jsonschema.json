@@ -9,12 +9,16 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "registeredAt"
+        "registeredAt",
+        "duration"
       ],
       "properties": {
         "registeredAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "duration": {
+          "type": "string"
         }
       }
     }

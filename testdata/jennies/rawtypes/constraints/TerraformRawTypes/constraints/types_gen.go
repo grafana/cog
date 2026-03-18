@@ -3,6 +3,9 @@ package constraints
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	int64validator "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 )
 
 type SomeStruct struct {
@@ -21,10 +24,20 @@ Required: true,
 Attributes: map[string]schema.Attribute{
 "id": schema.Int64Attribute{
  Required: true,
+Validators: []validator.Int64{
+int64validator.AtLeast(5),
+int64validator.AtMost(9),
+},
+
 },
 
 "maybe_id": schema.Int64Attribute{
  Optional: true,
+Validators: []validator.Int64{
+int64validator.AtLeast(5),
+int64validator.AtMost(9),
+},
+
 },
 
 "greater_than_zero": schema.Int64Attribute{
@@ -37,6 +50,10 @@ Attributes: map[string]schema.Attribute{
 
 "title": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.LengthAtLeast(1),
+},
+
 },
 
 "labels": schema.MapAttribute{
