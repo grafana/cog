@@ -12,7 +12,7 @@ func initTemplates(config Config) *template.Template {
 	tmpl, err := template.New("terraform",
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
-		template.Funcs(config.OverridesTemplateFuncs),
+		template.ParseDirectories(config.OverridesTemplatesDirectories...),
 	)
 
 	if err != nil {

@@ -19,8 +19,9 @@ type Config struct {
 
 	PrefixAttributeSpec string `yaml:"-"`
 
-	// OverridesTemplateFuncs holds additional template functions to be injected into the override templates.
-	OverridesTemplateFuncs map[string]any `yaml:"-"`
+	// OverridesTemplatesDirectories holds a list of directories containing templates
+	// defining blocks used to override parts of builders/types/....
+	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
 
 	// SkipPostFormatting disables formatting of Go files done with go imports
 	// after code generation.
