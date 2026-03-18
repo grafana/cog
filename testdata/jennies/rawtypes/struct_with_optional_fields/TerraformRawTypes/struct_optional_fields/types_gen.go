@@ -3,6 +3,8 @@ package struct_optional_fields
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 )
 
 type SomeStruct struct {
@@ -43,6 +45,10 @@ Attributes: map[string]schema.Attribute{
 
 "operator": schema.StringAttribute{
  Required: true,
+Validators: []validator.String{
+stringvalidator.OneOf(">", "<"),
+},
+
 },
 
 "field_array_of_strings": schema.ListAttribute{

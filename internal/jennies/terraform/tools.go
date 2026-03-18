@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -52,4 +53,18 @@ func formatComments(objectComments []string) string {
 		comments += "`"
 	}
 	return comments
+}
+
+func formatEnumValuesAsConstraints(enumValues []ast.EnumValue) []ast.TypeConstraint {
+	values := make([]any, len(enumValues))
+	for i, v := range enumValues {
+		values[i] = v.Value
+	}
+
+	return []ast.TypeConstraint{
+		{
+			ast.EqualOp,
+			values,
+		},
+	}
 }
