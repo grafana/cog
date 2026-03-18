@@ -854,7 +854,6 @@ func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint,
 					walk(x.X)
 				}
 			}
-
 		case *cueast.UnaryExpr:
 			if x.Op == token.MUL {
 				return
@@ -925,10 +924,8 @@ func mapTokenToAstOp(op token.Token) ast.Op {
 
 func extractNumber(e cueast.Expr) (string, bool) {
 	switch v := e.(type) {
-
 	case *cueast.BasicLit:
 		return v.Value, true
-
 	case *cueast.UnaryExpr:
 		if v.Op == token.SUB {
 			if lit, ok := v.X.(*cueast.BasicLit); ok {
