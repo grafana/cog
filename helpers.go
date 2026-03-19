@@ -274,13 +274,17 @@ func (pipeline *SchemaToTypesPipeline) GenerateOpenAPI(config OpenAPIGenerationC
 type TerraformConfig struct {
 	PrefixAttributeSpec string
 	SkipPostFormatting  bool
+
+	// CustomTemplates accepts a list of directories where are the custom templates
+	CustomTemplatesDirectories []string
 }
 
 func (pipeline *SchemaToTypesPipeline) Terraform(config TerraformConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Terraform: &terraform.Config{
-			SkipPostFormatting:  config.SkipPostFormatting,
-			PrefixAttributeSpec: config.PrefixAttributeSpec,
+			SkipPostFormatting:            config.SkipPostFormatting,
+			PrefixAttributeSpec:           config.PrefixAttributeSpec,
+			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
 		},
 	}
 	return pipeline
