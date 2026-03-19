@@ -14,7 +14,11 @@
         "additionalProperties": false,
         "required": [
           "id",
-          "title"
+          "greaterThanZero",
+          "negative",
+          "title",
+          "labels",
+          "tags"
         ],
         "properties": {
           "id": {
@@ -29,23 +33,22 @@
             "maximum": 10,
             "exclusiveMaximum": true
           },
+          "greaterThanZero": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3,
+            "exclusiveMaximum": true
+          },
+          "negative": {
+            "type": "integer",
+            "minimum": -19,
+            "maximum": 10,
+            "exclusiveMaximum": true
+          },
           "title": {
             "type": "string",
             "minLength": 1
           },
-          "refStruct": {
-            "$ref": "#/components/schemas/refStruct"
-          }
-        }
-      },
-      "refStruct": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "labels",
-          "tags"
-        ],
-        "properties": {
           "labels": {
             "type": "object",
             "additionalProperties": {

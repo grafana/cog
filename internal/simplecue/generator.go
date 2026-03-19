@@ -2,11 +2,13 @@ package simplecue
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"cuelang.org/go/cue"
+	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
-	"cuelang.org/go/pkg/strconv"
+	"cuelang.org/go/cue/token"
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -840,83 +842,113 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 
 // having written this makes my soul hurt.
 func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
-	// if the number has a default value, strip it from `v` before trying to extract constraints.
-	_, hasDefault := v.Default()
-	if hasDefault {
-		_, dvals := v.Expr()
-		v = dvals[0]
-	}
-
-	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
-	if err != nil {
-		return nil, err
-	}
-
-	parts := strings.Split(string(numberTypeWithConstraintsAsString), " & ")
-
-	extractOperatorAndArg := func(input string, numberKind cue.Kind) (ast.Op, any, error) {
-		argStartIndex := -1
-
-		var op ast.Op
-
-		if input[0] == '>' {
-			op = ast.GreaterThanOp
-			argStartIndex = 1
-
-			if input[1] == '=' {
-				op = ast.GreaterThanEqualOp
-				argStartIndex = 2
-			}
-		}
-		if input[0] == '<' {
-			op = ast.LessThanOp
-			argStartIndex = 1
-
-			if input[1] == '=' {
-				op = ast.LessThanEqualOp
-				argStartIndex = 2
-			}
-		}
-		if input[0] == '=' && input[1] == '=' {
-			op = ast.EqualOp
-			argStartIndex = 2
-		}
-		if input[0] == '!' && input[1] == '=' {
-			op = ast.NotEqualOp
-			argStartIndex = 2
-		}
-
-		if op == "" {
-			return op, nil, fmt.Errorf("could not infer operator from '%s'", input)
-		}
-
-		if numberKind.IsAnyOf(cue.FloatKind) {
-			arg, err := strconv.ParseFloat(input[argStartIndex:], 64)
-			return op, arg, err
-		}
-
-		arg, err := strconv.ParseInt(input[argStartIndex:], 10, 64)
-		return op, arg, err
-	}
+	node := v.Syntax()
 
 	var constraints []ast.TypeConstraint
-	for _, part := range parts {
-		if part[0] != '<' && part[0] != '>' {
-			continue
-		}
 
-		op, arg, err := extractOperatorAndArg(part, v.IncompleteKind())
-		if err != nil {
-			return nil, errorWithCueRef(v, "%v", err.Error())
-		}
+	var walk func(cueast.Expr)
+	walk = func(e cueast.Expr) {
+		switch x := e.(type) {
+		case *cueast.BinaryExpr:
+			switch x.Op {
+			case token.AND:
+				walk(x.X)
+				walk(x.Y)
 
-		constraints = append(constraints, ast.TypeConstraint{
-			Op:   op,
-			Args: []any{arg},
-		})
+			case token.OR:
+				if isDefault(x.X) {
+					walk(x.Y)
+				} else if isDefault(x.Y) {
+					walk(x.X)
+				}
+			}
+		case *cueast.UnaryExpr:
+			if x.Op == token.MUL {
+				return
+			}
+			switch x.Op {
+			case token.GTR, token.GEQ, token.LSS, token.LEQ, token.EQL, token.NEQ:
+				raw, ok := extractNumber(x.X)
+				if !ok {
+					return
+				}
+
+				arg, err := parseNumber(raw)
+				if err != nil {
+					return
+				}
+
+				constraints = append(constraints, ast.TypeConstraint{
+					Op:   mapTokenToAstOp(x.Op),
+					Args: []any{arg},
+				})
+			}
+		}
 	}
 
+	expr, ok := node.(cueast.Expr)
+	if !ok {
+		return nil, nil
+	}
+
+	walk(expr)
+
 	return constraints, nil
+}
+
+func isDefault(e cueast.Expr) bool {
+	u, ok := e.(*cueast.UnaryExpr)
+	return ok && u.Op == token.MUL
+}
+
+func parseNumber(raw string) (any, error) {
+	if strings.Contains(raw, ".") {
+		return strconv.ParseFloat(raw, 64)
+	}
+	if i, err := strconv.ParseInt(raw, 10, 64); err == nil {
+		return i, nil
+	}
+	return strconv.ParseFloat(raw, 64)
+}
+
+func mapTokenToAstOp(op token.Token) ast.Op {
+	switch op {
+	case token.GTR:
+		return ast.GreaterThanOp
+	case token.GEQ:
+		return ast.GreaterThanEqualOp
+	case token.LSS:
+		return ast.LessThanOp
+	case token.LEQ:
+		return ast.LessThanEqualOp
+	case token.EQL:
+		return ast.EqualOp
+	case token.NEQ:
+		return ast.NotEqualOp
+	default:
+		return ""
+	}
+}
+
+func extractNumber(e cueast.Expr) (string, bool) {
+	switch v := e.(type) {
+	case *cueast.BasicLit:
+		return v.Value, true
+	case *cueast.UnaryExpr:
+		if v.Op == token.SUB {
+			if lit, ok := v.X.(*cueast.BasicLit); ok {
+				return "-" + lit.Value, true
+			}
+		}
+
+		if v.Op == token.ADD {
+			if lit, ok := v.X.(*cueast.BasicLit); ok {
+				return lit.Value, true
+			}
+		}
+	}
+
+	return "", false
 }
 
 func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {

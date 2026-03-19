@@ -6,7 +6,11 @@
       "additionalProperties": false,
       "required": [
         "id",
-        "title"
+        "greaterThanZero",
+        "negative",
+        "title",
+        "labels",
+        "tags"
       ],
       "properties": {
         "id": {
@@ -19,23 +23,20 @@
           "minimum": 5,
           "exclusiveMaximum": 10
         },
+        "greaterThanZero": {
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMaximum": 3
+        },
+        "negative": {
+          "type": "integer",
+          "minimum": -19,
+          "exclusiveMaximum": 10
+        },
         "title": {
           "type": "string",
           "minLength": 1
         },
-        "refStruct": {
-          "$ref": "#/definitions/refStruct"
-        }
-      }
-    },
-    "refStruct": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "labels",
-        "tags"
-      ],
-      "properties": {
         "labels": {
           "type": "object",
           "additionalProperties": {
