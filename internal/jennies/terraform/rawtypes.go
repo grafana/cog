@@ -63,6 +63,13 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	// TF base types
 	imports.Add("", "github.com/hashicorp/terraform-plugin-framework/types")
 
+	// Per-schema template with importStdPkg wired to the local imports map.
+	schemaTmpl := jenny.tmpl.Funcs(template.FuncMap{
+		"importStdPkg": func(pkg string) string {
+			return imports.Add(pkg, pkg)
+		},
+	})
+
 	var buffer strings.Builder
 	var err error
 
@@ -74,8 +81,8 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		}
 
 		customMethodsBlock := template.CustomObjectMethodsBlock(object)
-		if jenny.tmpl.Exists(customMethodsBlock) {
-			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+		if schemaTmpl.Exists(customMethodsBlock) {
+			innerErr = schemaTmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
 				"Object": object,
 			})
 			if innerErr != nil {
@@ -86,8 +93,8 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		}
 
 		customAllBlock := template.CustomObjectMethodAllBlock()
-		if jenny.tmpl.Exists(customAllBlock) {
-			innerErr = jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
+		if schemaTmpl.Exists(customAllBlock) {
+			innerErr = schemaTmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
 				"Object": object,
 			})
 			if innerErr != nil {
