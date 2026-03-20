@@ -1,6 +1,8 @@
 package terraform
 
 import (
+	"io/fs"
+
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -22,6 +24,10 @@ type Config struct {
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
 	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
+	// OverridesTemplatesFS holds an embedded filesystem containing templates.
+	OverridesTemplatesFS fs.FS `yaml:"-"`
+	// OverridesTemplateFuncs holds additional template functions to inject into override templates.
+	OverridesTemplateFuncs map[string]any `yaml:"-"`
 
 	// SkipPostFormatting disables formatting of Go files done with go imports
 	// after code generation.

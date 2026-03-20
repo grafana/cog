@@ -275,8 +275,12 @@ type TerraformConfig struct {
 	PrefixAttributeSpec string
 	SkipPostFormatting  bool
 
-	// CustomTemplates accepts a list of directories where are the custom templates
+	// CustomTemplatesDirectories accepts a list of directories containing custom templates.
 	CustomTemplatesDirectories []string
+	// CustomTemplatesFS accepts an embedded filesystem containing custom templates.
+	CustomTemplatesFS fs.FS
+	// CustomTemplatesFuncs holds additional functions to be injected into templates.
+	CustomTemplatesFuncs map[string]any
 }
 
 func (pipeline *SchemaToTypesPipeline) Terraform(config TerraformConfig) *SchemaToTypesPipeline {
@@ -285,6 +289,8 @@ func (pipeline *SchemaToTypesPipeline) Terraform(config TerraformConfig) *Schema
 			SkipPostFormatting:            config.SkipPostFormatting,
 			PrefixAttributeSpec:           config.PrefixAttributeSpec,
 			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
+			OverridesTemplatesFS:          config.CustomTemplatesFS,
+			OverridesTemplateFuncs:        config.CustomTemplatesFuncs,
 		},
 	}
 	return pipeline
