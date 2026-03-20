@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -121,6 +122,40 @@ func isReservedGoKeyword(input string) bool {
 
 func anyToDisjunctionBranchName(value any) string {
 	return valueToDisjunctionBranchName(reflect.ValueOf(value))
+}
+
+func formatTypedDefault(td *ast.TypeDefault) string {
+	if td == nil {
+		return "nil"
+	}
+	if td.Array != nil {
+		items := make([]string, 0, len(td.Array))
+		for _, item := range td.Array {
+			items = append(items, formatTypedDefault(item))
+		}
+		// FIXME: this is wrong, we can't just assume a list of strings.
+		return fmt.Sprintf("[]string{%s}", strings.Join(items, ", "))
+	}
+	if td.Scalar != nil {
+		return formatScalar(td.Scalar.Value)
+	}
+	return "nil"
+}
+
+func typedDefaultToDisjunctionBranchName(td *ast.TypeDefault) string {
+	if td.Array != nil {
+		if len(td.Array) > 0 {
+			return "ArrayOf" + typedDefaultToDisjunctionBranchName(td.Array[0])
+		}
+		return "Array"
+	}
+	if td.Scalar != nil {
+		if td.Scalar.ScalarKind != "" {
+			return tools.UpperCamelCase(string(td.Scalar.ScalarKind))
+		}
+		return tools.UpperCamelCase(reflect.TypeOf(td.Scalar.Value).Kind().String())
+	}
+	return "Struct"
 }
 
 func valueToDisjunctionBranchName(value reflect.Value) string {

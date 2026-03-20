@@ -11,8 +11,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
-	"github.com/grafana/cog/internal/orderedmap"
-	"github.com/grafana/cog/internal/tools"
+"github.com/grafana/cog/internal/tools"
 )
 
 type RawTypes struct {
@@ -197,13 +196,8 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 			continue
 		}
 
-		if !field.Type.Nullable || field.Type.Default != nil {
-			var defaultsOverrides map[string]any
-			if overrides, ok := field.Type.Default.(map[string]any); ok {
-				defaultsOverrides = overrides
-			}
-
-			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule, orderedmap.FromMap(defaultsOverrides))
+		if !field.Type.Nullable || field.Type.EffectiveTypedDefault() != nil {
+			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule, field.Type.EffectiveTypedDefault())
 		}
 
 		if field.Type.IsConcreteScalar() {

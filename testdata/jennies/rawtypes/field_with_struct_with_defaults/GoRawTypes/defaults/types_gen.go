@@ -106,7 +106,9 @@ func NewStruct() *Struct {
 		EmptyFields: *NewNestedStruct(),
 		ComplexField: DefaultsStructComplexField{
 		Uid: "myUID",
-		Nested: map[string]interface {}{"nestedVal":"nested"},
+		Nested: DefaultsStructComplexFieldNested{
+		NestedVal: "nested",
+},
 		Array: []string{"hello"},
 },
 		PartialComplexField: DefaultsStructPartialComplexField{

@@ -84,6 +84,66 @@ func (constraint TypeConstraint) DeepCopy() TypeConstraint {
 // JenniesHints meant to be used by jennies, to gain a finer control on the codegen from schemas
 type JenniesHints map[string]any
 
+// TypeDefault represents a typed default value for a field or type.
+// Exactly one of Scalar, Array, or Struct should be non-nil.
+type TypeDefault struct {
+	// Scalar holds the default for scalar and enum types.
+	// ScalarKind identifies the scalar type; Value holds the actual Go value.
+	Scalar *ScalarType
+
+	// Array holds typed defaults for each element of an array default.
+	Array []*TypeDefault
+
+	// Struct maps field names to typed defaults, used for struct/ref types
+	// whose default is an object literal.
+	Struct map[string]*TypeDefault
+}
+
+// AnyToTypedDefault converts a raw any default value into a *TypeDefault.
+// This is the canonical conversion used by the DefaultAsTyped compiler pass and
+// by EffectiveTypedDefault for on-the-fly conversion when the pass hasn't run.
+func AnyToTypedDefault(value any) *TypeDefault {
+	switch v := value.(type) {
+	case string:
+		return &TypeDefault{Scalar: &ScalarType{ScalarKind: KindString, Value: v}}
+	case bool:
+		return &TypeDefault{Scalar: &ScalarType{ScalarKind: KindBool, Value: v}}
+	case float64:
+		return &TypeDefault{Scalar: &ScalarType{ScalarKind: KindFloat64, Value: v}}
+	case int64:
+		return &TypeDefault{Scalar: &ScalarType{ScalarKind: KindInt64, Value: v}}
+	case int:
+		return &TypeDefault{Scalar: &ScalarType{ScalarKind: KindInt64, Value: v}}
+	case []any:
+		arr := make([]*TypeDefault, len(v))
+		for i, elem := range v {
+			arr[i] = AnyToTypedDefault(elem)
+		}
+		return &TypeDefault{Array: arr}
+	case map[string]any:
+		structMap := make(map[string]*TypeDefault, len(v))
+		for k, val := range v {
+			structMap[k] = AnyToTypedDefault(val)
+		}
+		return &TypeDefault{Struct: structMap}
+	default:
+		return &TypeDefault{Scalar: &ScalarType{Value: value}}
+	}
+}
+
+// EffectiveTypedDefault returns TypedDefault if populated by the DefaultAsTyped
+// compiler pass. If not set (e.g. when the pass hasn't run), it derives a
+// TypeDefault from the raw Default field on the fly.
+func (t Type) EffectiveTypedDefault() *TypeDefault {
+	if t.TypedDefault != nil {
+		return t.TypedDefault
+	}
+	if t.Default != nil {
+		return AnyToTypedDefault(t.Default)
+	}
+	return nil
+}
+
 // Type representing every type defined by the IR.
 // Bonus: in a way that can be (un)marshaled to/from JSON,
 // which is useful for unit tests.
@@ -91,6 +151,10 @@ type Type struct {
 	Kind     Kind
 	Nullable bool
 	Default  any `json:",omitempty"`
+
+	// TypedDefault is a typed representation of Default, populated by the
+	// DefaultAsTyped compiler pass. Use this instead of type-asserting Default.
+	TypedDefault *TypeDefault `json:",omitempty"`
 
 	Disjunction       *DisjunctionType       `json:",omitempty"`
 	Array             *ArrayType             `json:",omitempty"`
@@ -337,6 +401,12 @@ func Nullable() TypeOption {
 func Default(value any) TypeOption {
 	return func(def *Type) {
 		def.Default = value
+	}
+}
+
+func TypedDefaultOpt(td *TypeDefault) TypeOption {
+	return func(def *Type) {
+		def.TypedDefault = td
 	}
 }
 

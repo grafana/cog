@@ -241,7 +241,7 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 	buffer.WriteString("\n}\n")
 }
 
-func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast.RefType, objectType ast.Type, maybeExtraDefaults any) string {
+func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast.RefType, objectType ast.Type, extraDefaults *ast.TypeDefault) string {
 	var buffer strings.Builder
 
 	objectName := formatObjectName(objectRef.ReferredType)
@@ -252,16 +252,16 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 
 	buffer.WriteString(objectName + "{\n")
 
-	extraDefaults := map[string]any{}
-	if val, ok := maybeExtraDefaults.(map[string]any); ok {
-		extraDefaults = val
-	}
-
 	for _, field := range objectType.Struct.Fields {
 		resolvedFieldType := context.ResolveRefs(field.Type)
 
-		needsExplicitDefault := field.Type.Default != nil ||
-			extraDefaults[field.Name] != nil ||
+		var fieldExtraDefault *ast.TypeDefault
+		if extraDefaults != nil && extraDefaults.Struct != nil {
+			fieldExtraDefault = extraDefaults.Struct[field.Name]
+		}
+
+		needsExplicitDefault := field.Type.EffectiveTypedDefault() != nil ||
+			fieldExtraDefault != nil ||
 			(field.Required && field.Type.IsRef() && resolvedFieldType.IsStruct()) ||
 			(field.Required && field.Type.IsArray()) ||
 			(field.Required && field.Type.IsMap()) ||
@@ -275,11 +275,10 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 		defaultValue := ""
 
 		// nolint:gocritic
-		if extraDefault, ok := extraDefaults[field.Name]; ok {
-			defaultValue = formatScalar(extraDefault)
-
+		if fieldExtraDefault != nil {
 			if field.Type.IsRef() && resolvedFieldType.IsStructGeneratedFromDisjunction() {
-				disjunctionBranchName := formatFieldName(anyToDisjunctionBranchName(extraDefault))
+				defaultValue = formatTypedDefault(fieldExtraDefault)
+				disjunctionBranchName := formatFieldName(typedDefaultToDisjunctionBranchName(fieldExtraDefault))
 				disjunctionBranch, found := resolvedFieldType.Struct.FieldByName(disjunctionBranchName)
 				if !found {
 					disjunctionBranchName = "Any"
@@ -298,19 +297,25 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 				if field.Type.Nullable {
 					defaultValue = "&" + defaultValue
 				}
+			} else if field.Type.IsRef() && resolvedFieldType.IsStruct() && fieldExtraDefault.Struct != nil {
+				defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, fieldExtraDefault)
+				if field.Type.Nullable {
+					defaultValue = "&" + defaultValue
+				}
 			} else {
+				defaultValue = formatTypedDefault(fieldExtraDefault)
 				defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
 			}
 		} else if field.Type.IsConcreteScalar() {
 			defaultValue = formatScalar(field.Type.Scalar.Value)
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
-		} else if resolvedFieldType.IsAnyOf(ast.KindScalar, ast.KindMap, ast.KindArray) && field.Type.Default != nil {
-			defaultValue = formatScalar(field.Type.Default)
+		} else if resolvedFieldType.IsAnyOf(ast.KindScalar, ast.KindMap, ast.KindArray) && field.Type.EffectiveTypedDefault() != nil {
+			defaultValue = formatTypedDefault(field.Type.EffectiveTypedDefault())
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
-		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.Default != nil {
-			defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.Default)
+		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.EffectiveTypedDefault() != nil {
+			defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.EffectiveTypedDefault())
 			if field.Type.Nullable {
 				defaultValue = "&" + defaultValue
 			}
@@ -327,10 +332,12 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			}
 		} else if field.Type.IsRef() && resolvedFieldType.IsEnum() {
 			memberName := resolvedFieldType.Enum.Values[0].Name
-			for _, member := range resolvedFieldType.Enum.Values {
-				if member.Value == field.Type.Default {
-					memberName = member.Name
-					break
+			if td := field.Type.EffectiveTypedDefault(); td != nil && td.Scalar != nil {
+				for _, member := range resolvedFieldType.Enum.Values {
+					if member.Value == td.Scalar.Value {
+						memberName = member.Name
+						break
+					}
 				}
 			}
 

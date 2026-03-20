@@ -60,6 +60,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
 		&compiler.DisjunctionWithNullToOptional{},
 		&compiler.InferEntrypoint{},
+		&compiler.DefaultAsTyped{},
 	}
 }
 
