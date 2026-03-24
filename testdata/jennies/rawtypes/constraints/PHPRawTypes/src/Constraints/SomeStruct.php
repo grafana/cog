@@ -24,6 +24,10 @@ class SomeStruct implements \JsonSerializable
      */
     public array $tags;
 
+    public string $regex;
+
+    public string $negativeRegex;
+
     /**
      * @param int|null $id
      * @param int|null $maybeId
@@ -32,8 +36,10 @@ class SomeStruct implements \JsonSerializable
      * @param string|null $title
      * @param array<string, string>|null $labels
      * @param array<string>|null $tags
+     * @param string|null $regex
+     * @param string|null $negativeRegex
      */
-    public function __construct(?int $id = null, ?int $maybeId = null, ?int $greaterThanZero = null, ?int $negative = null, ?string $title = null, ?array $labels = null, ?array $tags = null)
+    public function __construct(?int $id = null, ?int $maybeId = null, ?int $greaterThanZero = null, ?int $negative = null, ?string $title = null, ?array $labels = null, ?array $tags = null, ?string $regex = null, ?string $negativeRegex = null)
     {
         $this->id = $id ?: 0;
         $this->maybeId = $maybeId;
@@ -42,6 +48,8 @@ class SomeStruct implements \JsonSerializable
         $this->title = $title ?: "";
         $this->labels = $labels ?: [];
         $this->tags = $tags ?: [];
+        $this->regex = $regex ?: "";
+        $this->negativeRegex = $negativeRegex ?: "";
     }
 
     /**
@@ -49,7 +57,7 @@ class SomeStruct implements \JsonSerializable
      */
     public static function fromArray(array $inputData): self
     {
-        /** @var array{id?: int, maybeId?: int, greaterThanZero?: int, negative?: int, title?: string, labels?: array<string, string>, tags?: array<string>} $inputData */
+        /** @var array{id?: int, maybeId?: int, greaterThanZero?: int, negative?: int, title?: string, labels?: array<string, string>, tags?: array<string>, regex?: string, negativeRegex?: string} $inputData */
         $data = $inputData;
         return new self(
             id: $data["id"] ?? null,
@@ -59,6 +67,8 @@ class SomeStruct implements \JsonSerializable
             title: $data["title"] ?? null,
             labels: $data["labels"] ?? null,
             tags: $data["tags"] ?? null,
+            regex: $data["regex"] ?? null,
+            negativeRegex: $data["negativeRegex"] ?? null,
         );
     }
 
@@ -74,6 +84,8 @@ class SomeStruct implements \JsonSerializable
         $data->title = $this->title;
         $data->labels = $this->labels;
         $data->tags = $this->tags;
+        $data->regex = $this->regex;
+        $data->negativeRegex = $this->negativeRegex;
         if (isset($this->maybeId)) {
             $data->maybeId = $this->maybeId;
         }

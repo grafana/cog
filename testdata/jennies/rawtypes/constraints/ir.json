@@ -72,12 +72,6 @@
                   "ScalarKind": "uint64",
                   "Constraints": [
                     {
-                      "Op": "\u003e=",
-                      "Args": [
-                        0
-                      ]
-                    },
-                    {
                       "Op": "\u003c",
                       "Args": [
                         3
@@ -94,7 +88,7 @@
                 "Kind": "scalar",
                 "Nullable": false,
                 "Scalar": {
-                  "ScalarKind": "uint64",
+                  "ScalarKind": "int64",
                   "Constraints": [
                     {
                       "Op": "\u003e=",
@@ -185,6 +179,44 @@
                       ]
                     }
                   }
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "regex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "=~",
+                      "Args": [
+                        "^[a-zA-Z0-9_-]+$"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "negativeRegex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "!~",
+                      "Args": [
+                        "^[a-zA-Z0-9_-]+$"
+                      ]
+                    }
+                  ]
                 }
               },
               "Required": true

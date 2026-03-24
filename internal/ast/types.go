@@ -63,6 +63,8 @@ const (
 	LessThanEqualOp    Op = "<="
 	GreaterThanOp      Op = ">"
 	GreaterThanEqualOp Op = ">="
+	RegexMatchOp       Op = "=~"
+	NotRegexMatchOp    Op = "!~"
 )
 
 type TypeConstraint struct {

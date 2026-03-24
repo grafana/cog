@@ -9,8 +9,10 @@ class SomeStruct:
     title: str
     labels: dict[str, str]
     tags: list[str]
+    regex: str
+    negative_regex: str
 
-    def __init__(self, id_val: int = 0, maybe_id: typing.Optional[int] = None, greater_than_zero: int = 0, negative: int = 0, title: str = "", labels: typing.Optional[dict[str, str]] = None, tags: typing.Optional[list[str]] = None) -> None:
+    def __init__(self, id_val: int = 0, maybe_id: typing.Optional[int] = None, greater_than_zero: int = 0, negative: int = 0, title: str = "", labels: typing.Optional[dict[str, str]] = None, tags: typing.Optional[list[str]] = None, regex: str = "", negative_regex: str = "") -> None:
         self.id_val = id_val
         self.maybe_id = maybe_id
         self.greater_than_zero = greater_than_zero
@@ -18,6 +20,8 @@ class SomeStruct:
         self.title = title
         self.labels = labels if labels is not None else {}
         self.tags = tags if tags is not None else []
+        self.regex = regex
+        self.negative_regex = negative_regex
 
     def to_json(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -27,6 +31,8 @@ class SomeStruct:
             "title": self.title,
             "labels": self.labels,
             "tags": self.tags,
+            "regex": self.regex,
+            "negativeRegex": self.negative_regex,
         }
         if self.maybe_id is not None:
             payload["maybeId"] = self.maybe_id
@@ -49,6 +55,10 @@ class SomeStruct:
         if "labels" in data:
             args["labels"] = data["labels"]
         if "tags" in data:
-            args["tags"] = data["tags"]        
+            args["tags"] = data["tags"]
+        if "regex" in data:
+            args["regex"] = data["regex"]
+        if "negativeRegex" in data:
+            args["negative_regex"] = data["negativeRegex"]        
 
         return cls(**args)

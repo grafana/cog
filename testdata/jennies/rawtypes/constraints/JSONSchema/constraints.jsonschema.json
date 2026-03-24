@@ -10,7 +10,9 @@
         "negative",
         "title",
         "labels",
-        "tags"
+        "tags",
+        "regex",
+        "negativeRegex"
       ],
       "properties": {
         "id": {
@@ -25,7 +27,6 @@
         },
         "greaterThanZero": {
           "type": "integer",
-          "minimum": 0,
           "exclusiveMaximum": 3
         },
         "negative": {
@@ -50,6 +51,12 @@
             "type": "string",
             "minLength": 1
           }
+        },
+        "regex": {
+          "type": "string"
+        },
+        "negativeRegex": {
+          "type": "string"
         }
       }
     }
