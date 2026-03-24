@@ -72,3 +72,9 @@ gen-tests: dev-env-check-binaries ## Generates the code described by tests schem
 .PHONY: dev-env-check-binaires
 dev-env-check-binaries: ## Check that the required binary are present.
 	@devbox version >/dev/null 2>&1 || (echo "ERROR: devbox is required. See https://www.jetify.com/devbox/docs/quickstart/"; exit 1)
+
+.PHONY: test-inspect
+test-inspect:
+	$(RUN_DEVBOX) go run cmd/cli/main.go inspect \
+		--config config/inspect.test.yaml \
+		--parameters "cue_path=$(CUE_PATH)"
