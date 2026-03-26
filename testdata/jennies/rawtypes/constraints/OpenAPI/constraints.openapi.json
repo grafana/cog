@@ -65,10 +65,14 @@
             }
           },
           "regex": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$"
           },
           "negativeRegex": {
-            "type": "string"
+            "type": "string",
+            "not": {
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
           }
         }
       }

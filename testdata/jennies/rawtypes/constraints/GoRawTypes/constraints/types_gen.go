@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"regexp"
 )
 
 type SomeStruct struct {
@@ -286,16 +287,16 @@ func (resource SomeStruct) Validate() error {
 			)...)
 		}
 		}
-		if !(resource.Regex =~ "^[a-zA-Z0-9_-]+$") {
+		if !regexp.MustCompile("^[a-zA-Z0-9_-]+$").MatchString(resource.Regex) {
 			errs = append(errs, cog.MakeBuildErrors(
 				"regex",
-				errors.New("must be =~ ^[a-zA-Z0-9_-]+$"),
+				errors.New("must match regex ^[a-zA-Z0-9_-]+$"),
 			)...)
 		}
-		if !(resource.NegativeRegex !~ "^[a-zA-Z0-9_-]+$") {
+		if regexp.MustCompile("^[a-zA-Z0-9_-]+$").MatchString(resource.NegativeRegex) {
 			errs = append(errs, cog.MakeBuildErrors(
 				"negativeRegex",
-				errors.New("must be !~ ^[a-zA-Z0-9_-]+$"),
+				errors.New("must not match regex ^[a-zA-Z0-9_-]+$"),
 			)...)
 		}
 

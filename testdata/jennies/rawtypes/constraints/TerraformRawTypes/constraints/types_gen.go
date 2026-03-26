@@ -6,6 +6,7 @@ import (
 	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	int64validator "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	regexp "regexp"
 )
 
 type SomeStruct struct {
@@ -78,15 +79,13 @@ stringvalidator.LengthAtLeast(1),
 "regex": schema.StringAttribute{
  Required: true,
 Validators: []validator.String{
-unknown},
+stringvalidator.RegexMatches(regexp.MustCompile(`^[a-zA-Z0-9_-]+$`), ""),
+},
 
 },
 
 "negative_regex": schema.StringAttribute{
  Required: true,
-Validators: []validator.String{
-unknown},
-
 },
 
 },

@@ -181,6 +181,12 @@ func (jenny Schema) addStringConstraints(definition *orderedmap.Map[string, any]
 			definition.Set("minLength", constraint.Args[0])
 		case ast.MaxLengthOp:
 			definition.Set("maxLength", constraint.Args[0])
+		case ast.RegexMatchOp:
+			definition.Set("pattern", constraint.Args[0])
+		case ast.NotRegexMatchOp:
+			notDef := orderedmap.New[string, any]()
+			notDef.Set("pattern", constraint.Args[0])
+			definition.Set("not", notDef)
 		}
 	}
 }
