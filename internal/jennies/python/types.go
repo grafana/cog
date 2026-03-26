@@ -245,8 +245,8 @@ func (formatter *typeFormatter) formatFullyQualifiedRef(def ast.RefType, escapeF
 }
 
 func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType) string {
-	branches := tools.Map(def.Branches, formatter.formatType)
 	typingPkg := formatter.importPkg("typing", "typing")
+	branches := tools.UniqueFormatted(def.Branches, formatter.formatType)
 
 	return fmt.Sprintf("%s.Union[%s]", typingPkg, strings.Join(branches, ", "))
 }
