@@ -10,7 +10,17 @@
     {{- $leftOperand = print "len(" $leftOperand ")" }}
     {{- $operator = "<=" }}
 {{- end }}
+{{- if eq .Op "=~" }}
+{{- $re := importModule "re" "re" "" }}
+if not re.match("{{ .Parameter }}", {{ $leftOperand }}):
+    raise ValueError("{{ $leftOperand }} must match regex {{ .Parameter }}")
+{{- else if eq .Op "!~" }}
+{{- $re := importModule "re" "re" "" }}
+if re.match("{{ .Parameter }}", {{ $leftOperand }}):
+    raise ValueError("{{ $leftOperand }} must not match regex {{ .Parameter }}")
+{{- else }}
 if not {{ $leftOperand }} {{ $operator }} {{ .Parameter }}:
     raise ValueError("{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}")
+{{- end }}
 {{- end }}
 {{- end }}

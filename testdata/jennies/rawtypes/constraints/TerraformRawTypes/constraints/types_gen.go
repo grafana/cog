@@ -6,6 +6,7 @@ import (
 	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	int64validator "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	regexp "regexp"
 )
 
 type SomeStruct struct {
@@ -16,6 +17,8 @@ Negative types.Int64 `tfsdk:"negative"`
 Title types.String `tfsdk:"title"`
 Labels types.Map `tfsdk:"labels"`
 Tags types.List `tfsdk:"tags"`
+Regex types.String `tfsdk:"regex"`
+NegativeRegex types.String `tfsdk:"negativeRegex"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
@@ -43,7 +46,6 @@ int64validator.AtMost(9),
 "greater_than_zero": schema.Int64Attribute{
  Required: true,
 Validators: []validator.Int64{
-int64validator.AtLeast(0),
 int64validator.AtMost(2),
 },
 
@@ -72,6 +74,18 @@ stringvalidator.LengthAtLeast(1),
 
 "tags": schema.ListAttribute{
  ElementType: types.StringType,
+},
+
+"regex": schema.StringAttribute{
+ Required: true,
+Validators: []validator.String{
+stringvalidator.RegexMatches(regexp.MustCompile(`^[a-zA-Z0-9_-]+$`), ""),
+},
+
+},
+
+"negative_regex": schema.StringAttribute{
+ Required: true,
 },
 
 },

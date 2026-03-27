@@ -75,6 +75,44 @@
                 }
               },
               "Required": true
+            },
+            {
+              "Name": "regex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "=~",
+                      "Args": [
+                        "^[a-zA-Z0-9_-]+$"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "negativeRegex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "!~",
+                      "Args": [
+                        "^[a-zA-Z0-9_-]+$"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
             }
           ]
         }

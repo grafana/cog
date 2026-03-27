@@ -731,34 +731,44 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 	for _, andExpr := range typeAndConstraints {
 		op, args := andExpr.Expr()
 
-		// TODO: support more OPs?
-		if op != cue.CallOp {
-			continue
-		}
+		switch op {
+		case cue.CallOp:
+			// TODO: support more constraints?
+			switch fmt.Sprint(args[0]) {
+			case "strings.MinRunes":
+				scalar, err := cueConcreteToScalar(args[1])
+				if err != nil {
+					return nil, err
+				}
 
-		// TODO: support more constraints?
-		switch fmt.Sprint(args[0]) {
-		case "strings.MinRunes":
-			scalar, err := cueConcreteToScalar(args[1])
-			if err != nil {
-				return nil, err
+				constraints = append(constraints, ast.TypeConstraint{
+					Op:   ast.MinLengthOp,
+					Args: []any{scalar},
+				})
+
+			case "strings.MaxRunes":
+				scalar, err := cueConcreteToScalar(args[1])
+				if err != nil {
+					return nil, err
+				}
+
+				constraints = append(constraints, ast.TypeConstraint{
+					Op:   ast.MaxLengthOp,
+					Args: []any{scalar},
+				})
 			}
-
+		case cue.RegexMatchOp:
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   ast.MinLengthOp,
-				Args: []any{scalar},
+				Op:   ast.RegexMatchOp,
+				Args: []any{args[0]},
 			})
-
-		case "strings.MaxRunes":
-			scalar, err := cueConcreteToScalar(args[1])
-			if err != nil {
-				return nil, err
-			}
-
+		case cue.NotRegexMatchOp:
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   ast.MaxLengthOp,
-				Args: []any{scalar},
+				Op:   ast.NotRegexMatchOp,
+				Args: []any{args[0]},
 			})
+		default:
+			// TODO: support more OPs?
 		}
 	}
 

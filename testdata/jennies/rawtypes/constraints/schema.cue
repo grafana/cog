@@ -10,4 +10,6 @@ SomeStruct: {
 	title: strings.MinRunes(1) & string
 	labels: [string]: (string & strings.MinRunes(1))
 	tags: [...(string & strings.MinRunes(1))]
+	regex: string & =~ "^[a-zA-Z0-9_-]+$"
+	negativeRegex: string & !~ "^[a-zA-Z0-9_-]+$"
 }

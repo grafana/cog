@@ -6,16 +6,19 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"regexp"
 )
 
 type SomeStruct struct {
     Id uint64 `json:"id"`
     MaybeId *uint64 `json:"maybeId,omitempty"`
     GreaterThanZero uint64 `json:"greaterThanZero"`
-    Negative uint64 `json:"negative"`
+    Negative int64 `json:"negative"`
     Title string `json:"title"`
     Labels map[string]string `json:"labels"`
     Tags []string `json:"tags"`
+    Regex string `json:"regex"`
+    NegativeRegex string `json:"negativeRegex"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.
@@ -122,6 +125,30 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		delete(fields, "tags")
 	} else {errs = append(errs, cog.MakeBuildErrors("tags", errors.New("required field is missing from input"))...)
 	}
+	// Field "regex"
+	if fields["regex"] != nil {
+		if string(fields["regex"]) != "null" {
+			if err := json.Unmarshal(fields["regex"], &resource.Regex); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("regex", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("regex", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "regex")
+	} else {errs = append(errs, cog.MakeBuildErrors("regex", errors.New("required field is missing from input"))...)
+	}
+	// Field "negativeRegex"
+	if fields["negativeRegex"] != nil {
+		if string(fields["negativeRegex"]) != "null" {
+			if err := json.Unmarshal(fields["negativeRegex"], &resource.NegativeRegex); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("negativeRegex", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("negativeRegex", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "negativeRegex")
+	} else {errs = append(errs, cog.MakeBuildErrors("negativeRegex", errors.New("required field is missing from input"))...)
+	}
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("SomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
@@ -178,6 +205,12 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 		}
+		if resource.Regex != other.Regex {
+			return false
+		}
+		if resource.NegativeRegex != other.NegativeRegex {
+			return false
+		}
 
 	return true
 }
@@ -211,12 +244,6 @@ func (resource SomeStruct) Validate() error {
 				errors.New("must be < 10"),
 			)...)
 		}
-		}
-		if !(resource.GreaterThanZero >= 0) {
-			errs = append(errs, cog.MakeBuildErrors(
-				"greaterThanZero",
-				errors.New("must be >= 0"),
-			)...)
 		}
 		if !(resource.GreaterThanZero < 3) {
 			errs = append(errs, cog.MakeBuildErrors(
@@ -259,6 +286,18 @@ func (resource SomeStruct) Validate() error {
 				errors.New("must be >= 1"),
 			)...)
 		}
+		}
+		if !regexp.MustCompile("^[a-zA-Z0-9_-]+$").MatchString(resource.Regex) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"regex",
+				errors.New("must match regex ^[a-zA-Z0-9_-]+$"),
+			)...)
+		}
+		if regexp.MustCompile("^[a-zA-Z0-9_-]+$").MatchString(resource.NegativeRegex) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"negativeRegex",
+				errors.New("must not match regex ^[a-zA-Z0-9_-]+$"),
+			)...)
 		}
 
 	if len(errs) == 0 {

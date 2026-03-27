@@ -11,8 +11,18 @@
             {{- $leftOperand = print $leftOperand ".length" }}
             {{- $operator = "<=" }}
         {{- end }}
+        {{- if eq .Op "=~" }}
+        if (!(new RegExp("{{ .Parameter }}").test({{ $leftOperand }}))) {
+            throw new Error("{{ $leftOperand }} must match regex {{ .Parameter }}");
+        }
+        {{- else if eq .Op "!~" }}
+        if ((new RegExp("{{ .Parameter }}").test({{ $leftOperand }}))) {
+            throw new Error("{{ $leftOperand }} must not match regex {{ .Parameter }}");
+        }
+        {{- else }}
         if (!({{ $leftOperand }} {{ $operator }} {{ .Parameter }})) {
             throw new Error("{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}");
         }
+        {{- end }}
     {{- end }}
 {{- end }}

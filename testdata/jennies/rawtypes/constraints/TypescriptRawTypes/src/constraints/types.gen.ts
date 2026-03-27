@@ -6,6 +6,8 @@ export interface SomeStruct {
 	title: string;
 	labels: Record<string, string>;
 	tags: string[];
+	regex: string;
+	negativeRegex: string;
 }
 
 export const defaultSomeStruct = (): SomeStruct => ({
@@ -15,5 +17,7 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	title: "",
 	labels: {},
 	tags: [],
+	regex: "",
+	negativeRegex: "",
 });
 
