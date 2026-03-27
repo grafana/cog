@@ -17,7 +17,7 @@ jobs:
           persist-credentials: false
 
       - name: Restore go vendors
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # 5.0.4
         with:
           path: |
             ~/go/pkg/mod
@@ -27,14 +27,14 @@ jobs:
             go-deps-${{ runner.os }}
 
       - name: Install devbox
-        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 #v0.14.0
+        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
         with:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       # See https://docs.gradle.org/current/userguide/build_cache.html
       - name: Restore Gradle build cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # 5.0.4
         with:
           path: |
             ~/.gradle/caches
@@ -45,7 +45,7 @@ jobs:
       # See https://phpstan.org/user-guide/result-cache
       # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
       - name: Restore PHP linters cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # 5.0.4
         with:
           path: |
             /tmp/phpstan
@@ -89,7 +89,7 @@ jobs:
           persist-credentials: false
 
       - name: Restore go vendors
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # 5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # 5.0.4
         with:
           path: |
             ~/go/pkg/mod
@@ -99,7 +99,7 @@ jobs:
             go-deps-${{ runner.os }}
 
       - name: Install devbox
-        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 #v0.14.0
+        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
         with:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
@@ -144,7 +144,7 @@ jobs:
           persist-credentials: false
 
       - name: Restore go vendors
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: |
             ~/go/pkg/mod
@@ -154,7 +154,7 @@ jobs:
             go-deps-${{ runner.os }}
 
       - name: Install devbox
-        uses: jetify-com/devbox-install-action@a0d2d53632934ae004f878c840055956d9f741b0 #v0.14.0
+        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
         with:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
