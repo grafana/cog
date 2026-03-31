@@ -1,0 +1,21 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "regex_patterns",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "RegexPatterns": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$"
+          }
+        }
+      }
+    }
+  }
+}

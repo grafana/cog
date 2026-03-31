@@ -6,6 +6,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/tools"
 )
 
 func schemaComments(schema *openapi3.Schema) []string {
@@ -59,7 +60,7 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 		})
 	}
 
-	if schema.Pattern != "" {
+	if schema.Pattern != "" && !tools.RegexMatchesConstantString(schema.Pattern) {
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   ast.RegexMatchOp,
 			Args: []any{schema.Pattern},
