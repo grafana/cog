@@ -1,5 +1,6 @@
 # cog
 
+
 `cog` is a **Co**de **g**enerator created with the following objectives in mind:
 
 * Support multiple schema formats: [CUE](https://cuelang.org/), [JSON Schema](https://json-schema.org/), [OpenAPI](https://www.openapis.org/), ...
