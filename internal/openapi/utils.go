@@ -59,6 +59,13 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 		})
 	}
 
+	if schema.Pattern != "" {
+		constraints = append(constraints, ast.TypeConstraint{
+			Op:   ast.RegexMatchOp,
+			Args: []any{schema.Pattern},
+		})
+	}
+
 	if schema.Min != nil {
 		op := ast.GreaterThanEqualOp
 		if schema.ExclusiveMin {
