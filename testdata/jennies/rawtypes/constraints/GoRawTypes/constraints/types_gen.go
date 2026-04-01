@@ -353,6 +353,7 @@ func (resource SomeStruct) Validate() error {
 			)...)
 		}
 		}
+
 		for i1 := range resource.Tags {
 		if !(len([]rune(resource.Tags[i1])) >= 1) {
 			errs = append(errs, cog.MakeBuildErrors(
