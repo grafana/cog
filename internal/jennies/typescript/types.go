@@ -243,10 +243,9 @@ func (formatter *typeFormatter) formatArray(def ast.ArrayType, resolveBuilders b
 }
 
 func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType, resolveBuilders bool) string {
-	subTypes := make([]string, 0, len(def.Branches))
-	for _, subType := range def.Branches {
-		subTypes = append(subTypes, formatter.doFormatType(subType, resolveBuilders))
-	}
+	subTypes := tools.UniqueFormatted(def.Branches, func(subType ast.Type) string {
+		return formatter.doFormatType(subType, resolveBuilders)
+	})
 
 	return strings.Join(subTypes, " | ")
 }

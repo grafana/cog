@@ -358,7 +358,15 @@ func (jenny Schema) formatMap(typeDef ast.Type) Definition {
 
 func (jenny Schema) formatDisjunction(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
-	branches := tools.Map(typeDef.AsDisjunction().Branches, jenny.formatType)
+
+	branches := tools.UniqueFormattedBy(
+		typeDef.AsDisjunction().Branches,
+		jenny.formatType,
+		func(d Definition) string {
+			key, _ := json.Marshal(d)
+			return string(key)
+		},
+	)
 
 	definition.Set("oneOf", branches)
 
