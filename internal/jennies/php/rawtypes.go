@@ -236,6 +236,18 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 		buffer.WriteString("\n\n")
 		buffer.WriteString(tools.Indent(rendered, 4))
 	}
+	customAllBlock := template.CustomObjectMethodAllBlock()
+	if jenny.tmpl.Exists(customAllBlock) {
+		rendered, err := jenny.tmpl.Render(customAllBlock, map[string]any{
+			"Object": object,
+		})
+		if err != nil {
+			return "", err
+		}
+
+		buffer.WriteString("\n\n")
+		buffer.WriteString(tools.Indent(rendered, 4))
+	}
 
 	buffer.WriteString("\n}")
 
@@ -299,7 +311,7 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 		// set for default values for fields that need one or have one
 		if !field.Type.Nullable || field.Type.Default != nil {
 			var defaultsOverrides map[string]any
-			if overrides, ok := field.Type.Default.(map[string]interface{}); ok {
+			if overrides, ok := field.Type.Default.(map[string]any); ok {
 				defaultsOverrides = overrides
 			}
 

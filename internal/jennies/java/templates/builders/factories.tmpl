@@ -8,13 +8,17 @@ package {{ .Package }};
 
 {{- define "factories" -}}
 public class {{ .ClassName|formatObjectName }} {
-{{ range $factory := .Factories }}
-{{ include "factory" (dict "Builder" $factory.Builder "Factory" $factory.Factory) | indent 4 }}
+{{- range $factory := .Factories }}
+{{- include "factory" (dict "Builder" $factory.Builder "Factory" $factory.Factory) | indent 4 }}
 {{ end -}}
 }
 {{- end }}
 
 {{- define "factory" }}
+{{- $builderName := (print (.Builder.Name|formatObjectName) "Builder") -}}
+{{- if ne .Builder.Package .Factory.BuilderRef.ReferredPkg }}
+{{- $builderName = (formatRawRef .Factory.BuilderRef.ReferredPkg (print .Factory.BuilderRef.ReferredType "Builder")) }}
+{{- end }}
 {{- with .Factory.Comments }}
 /**
 {{- range . }}
@@ -22,12 +26,12 @@ public class {{ .ClassName|formatObjectName }} {
 {{- end }}
  */
 {{- end }}
-public static {{ .Builder.Name|formatObjectName }}Builder {{ .Factory.Name|lowerCamelCase|escapeVar }}({{- template "args" (dict "Arguments" .Factory.Args "IsBuilder" true) }}) {
-    {{ .Builder.Name|formatObjectName }}Builder builder = new {{ .Builder.Name|formatObjectName }}Builder();
+public static {{ $builderName }} {{ .Factory.Name|lowerCamelCase|escapeVar }}({{- template "args" (dict "Arguments" .Factory.Args "IsBuilder" true) }}) {
+    {{ $builderName }} builder = new {{ $builderName }}();
 {{- range $call := .Factory.OptionCalls }}
     builder.{{ $call.Name|lowerCamelCase|escapeVar }}({{- range $i, $param := $call.Parameters }}{{ if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) }}{{- end }});
 {{- end }}
-	return builder;
+    return builder;
 }
 {{- end }}
 
@@ -35,8 +39,8 @@ public static {{ .Builder.Name|formatObjectName }}Builder {{ .Factory.Name|lower
 	{{- if not (eq .Value.Constant nil) -}}
 		{{- formatRefType .Value.Constant.Type .Value.Constant.Value }}
 	{{- end }}
-	{{- with .Value.Argument -}}
-		{{- .Name | formatArgName -}}
+	{{- if not (eq .Value.Argument nil) -}}
+		{{- .Value.Argument.Name|formatArgName -}}{{ if .Value.ForceBuild }}.build(){{ end }}
 	{{- end -}}
 	{{- with .Value.Factory -}}
 		{{ formatRawRef .Ref.Package .Ref.Package|factoryClassForPkg}}.{{ .Ref.Factory|lowerCamelCase|escapeVar }}({{ range $i, $arg := .Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $arg)}}{{ end }})

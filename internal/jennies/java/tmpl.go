@@ -20,11 +20,13 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
+		template.Funcs(config.OverridesTemplateFuncs),
 		template.Funcs(functions()),
 		template.Funcs(formattingTemplateFuncs()),
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
+		template.ParseFS(config.OverridesTemplatesFS, "custom"),
 		template.ParseDirectories(config.OverridesTemplatesDirectories...),
 	)
 	if err != nil {
@@ -62,6 +64,9 @@ func functions() template.FuncMap {
 		"getJavaFieldTypeCheck": getJavaFieldTypeCheck,
 		"lastItem": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
+		},
+		"refToType": func(ref ast.RefType) ast.Type {
+			return ref.AsType()
 		},
 		"importStdPkg": func(_ ast.Type) string {
 			panic("importStdPkg() needs to be overridden by a jenny")

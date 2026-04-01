@@ -8,7 +8,7 @@ class SomeStruct:
     field_array_of_strings: typing.Optional[list[str]]
     field_anonymous_struct: typing.Optional['StructOptionalFieldsSomeStructFieldAnonymousStruct']
 
-    def __init__(self, field_ref: typing.Optional['SomeOtherStruct'] = None, field_string: typing.Optional[str] = None, operator: typing.Optional[typing.Literal[">", "<"]] = None, field_array_of_strings: typing.Optional[list[str]] = None, field_anonymous_struct: typing.Optional['StructOptionalFieldsSomeStructFieldAnonymousStruct'] = None):
+    def __init__(self, field_ref: typing.Optional['SomeOtherStruct'] = None, field_string: typing.Optional[str] = None, operator: typing.Optional[typing.Literal[">", "<"]] = None, field_array_of_strings: typing.Optional[list[str]] = None, field_anonymous_struct: typing.Optional['StructOptionalFieldsSomeStructFieldAnonymousStruct'] = None) -> None:
         self.field_ref = field_ref
         self.field_string = field_string
         self.operator = operator
@@ -51,7 +51,7 @@ class SomeStruct:
 class SomeOtherStruct:
     field_any: object
 
-    def __init__(self, field_any: object = None):
+    def __init__(self, field_any: object = None) -> None:
         self.field_any = field_any
 
     def to_json(self) -> dict[str, object]:
@@ -73,7 +73,7 @@ class SomeOtherStruct:
 class StructOptionalFieldsSomeStructFieldAnonymousStruct:
     field_any: object
 
-    def __init__(self, field_any: object = None):
+    def __init__(self, field_any: object = None) -> None:
         self.field_any = field_any
 
     def to_json(self) -> dict[str, object]:

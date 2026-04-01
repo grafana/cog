@@ -6,7 +6,7 @@ from ..models import sandbox
 class SomeStruct(cogbuilder.Builder[sandbox.SomeStruct]):
     _internal: sandbox.SomeStruct
 
-    def __init__(self, title: str):
+    def __init__(self, title: str) -> None:
         self._internal = sandbox.SomeStruct()        
         self._internal.title = title
 

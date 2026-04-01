@@ -22,7 +22,6 @@ func NewStructBuilder() *StructBuilder {
 }
 
 
-
 func (builder *StructBuilder) Build() (Struct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Struct{}, err
@@ -33,6 +32,11 @@ func (builder *StructBuilder) Build() (Struct, error) {
 	}
 
 	return *builder.internal, nil
+}
+
+func (builder *StructBuilder) RecordError(path string, err error) *StructBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
 }
 
 func (builder *StructBuilder) AllFields(allFields cog.Builder[NestedStruct]) *StructBuilder {

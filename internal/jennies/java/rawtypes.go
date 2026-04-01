@@ -330,7 +330,7 @@ func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {
 
 func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
 	// Enums
-	if _, ok := value.(map[string]interface{}); !ok {
+	if _, ok := value.(map[string]any); !ok {
 		jenny.typeFormatter.packageMapper(ref.AsRef().ReferredPkg, ref.AsRef().ReferredType)
 		return jenny.typeFormatter.formatRefType(ref, value)
 	}
@@ -340,7 +340,7 @@ func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
 		return ""
 	}
 
-	defaultValues := value.(map[string]interface{})
+	defaultValues := value.(map[string]any)
 	objectFields := obj.Type.AsStruct().Fields
 
 	args := make([]string, len(objectFields))
@@ -368,6 +368,17 @@ func (jenny RawTypes) extraFunctionsBlock(schema *ast.Schema, object ast.Object)
 	if jenny.tmpl.Exists(customMethodsBlock) {
 		buffer.WriteString("\n\n")
 		if err := jenny.tmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+			"Object": object,
+		}); err != nil {
+			return "", err
+		}
+
+		buffer.WriteString("\n")
+	}
+	customAllBlock := template.CustomObjectMethodAllBlock()
+	if jenny.tmpl.Exists(customAllBlock) {
+		buffer.WriteString("\n\n")
+		if err := jenny.tmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
 			"Object": object,
 		}); err != nil {
 			return "", err

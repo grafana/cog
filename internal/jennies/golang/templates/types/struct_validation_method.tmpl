@@ -77,7 +77,8 @@ func (resource {{ .def.Name|formatObjectName }}) Validate() error {
 	{{- else if .Type.IsScalar }}
 		{{- template "type_constraints" (dict "ConstraintPath" .ConstraintPath "Type" .Type "Constraints" .Type.Scalar.Constraints "SelfName" .SelfName) }}
 	{{- else if .Type.IsConstantRef }}
-    if {{ .SelfName }} != "{{ .Type.ConstantReference.ReferenceValue }}" {
+	{{- $dereference := ternary "*" "" .Type.Nullable }}
+	if {{ $dereference }}{{ .SelfName }} != "{{ .Type.ConstantReference.ReferenceValue }}" {
         errs = append(errs, cog.MakeBuildErrors("{{ .ConstraintPath }}", errors.New("must be {{ .Type.ConstantReference.ReferenceValue }}"))...)
     }
 	{{- else }}
@@ -100,11 +101,29 @@ func (resource {{ .def.Name|formatObjectName }}) Validate() error {
 			{{- $leftOperand = print "len([]rune(" $leftOperand "))" }}
 			{{- $operator = "<=" }}
 		{{- end }}
+		{{- if eq .Op "=~" }}
+			{{- $regexp := importStdPkg "regexp" }}
+		if !regexp.MustCompile({{ $rightOperand|formatScalar }}).MatchString({{ $leftOperand }}) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"{{ $.ConstraintPath }}",
+				errors.New("must match regex {{ $rightOperand }}"),
+			)...)
+		}
+		{{- else if eq .Op "!~" }}
+			{{- $regexp := importStdPkg "regexp" }}
+		if regexp.MustCompile({{ $rightOperand|formatScalar }}).MatchString({{ $leftOperand }}) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"{{ $.ConstraintPath }}",
+				errors.New("must not match regex {{ $rightOperand }}"),
+			)...)
+		}
+		{{- else }}
 		if !({{ $leftOperand }} {{ $operator }} {{ $rightOperand|formatScalar }}) {
 			errs = append(errs, cog.MakeBuildErrors(
 				"{{ $.ConstraintPath }}",
 				errors.New("must be {{ $operator }} {{ $rightOperand }}"),
 			)...)
 		}
+		{{- end }}
 	{{- end }}
 {{- end }}

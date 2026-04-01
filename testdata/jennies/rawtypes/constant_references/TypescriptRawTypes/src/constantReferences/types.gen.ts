@@ -26,10 +26,12 @@ export const defaultStruct = (): Struct => ({
 
 export interface StructA {
 	myEnum: Enum.ValueA;
+	other?: Enum.ValueA;
 }
 
 export const defaultStructA = (): StructA => ({
 	myEnum: Enum.ValueA,
+	other: Enum.ValueA,
 });
 
 export interface StructB {

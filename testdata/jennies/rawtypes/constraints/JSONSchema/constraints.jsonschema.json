@@ -6,7 +6,13 @@
       "additionalProperties": false,
       "required": [
         "id",
-        "title"
+        "greaterThanZero",
+        "negative",
+        "title",
+        "labels",
+        "tags",
+        "regex",
+        "negativeRegex"
       ],
       "properties": {
         "id": {
@@ -19,23 +25,19 @@
           "minimum": 5,
           "exclusiveMaximum": 10
         },
+        "greaterThanZero": {
+          "type": "integer",
+          "exclusiveMaximum": 3
+        },
+        "negative": {
+          "type": "integer",
+          "minimum": -19,
+          "exclusiveMaximum": 10
+        },
         "title": {
           "type": "string",
           "minLength": 1
         },
-        "refStruct": {
-          "$ref": "#/definitions/refStruct"
-        }
-      }
-    },
-    "refStruct": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "labels",
-        "tags"
-      ],
-      "properties": {
         "labels": {
           "type": "object",
           "additionalProperties": {
@@ -48,6 +50,16 @@
           "items": {
             "type": "string",
             "minLength": 1
+          }
+        },
+        "regex": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "negativeRegex": {
+          "type": "string",
+          "not": {
+            "pattern": "^[a-zA-Z0-9_-]+$"
           }
         }
       }

@@ -11,7 +11,7 @@ class Enum(enum.StrEnum):
 class ParentStruct:
     my_enum: 'Enum'
 
-    def __init__(self, my_enum: typing.Optional['Enum'] = None):
+    def __init__(self, my_enum: typing.Optional['Enum'] = None) -> None:
         self.my_enum = my_enum if my_enum is not None else Enum.VALUE_A
 
     def to_json(self) -> dict[str, object]:
@@ -34,7 +34,7 @@ class Struct:
     my_value: str
     my_enum: 'Enum'
 
-    def __init__(self, my_value: str = "", my_enum: typing.Optional['Enum'] = None):
+    def __init__(self, my_value: str = "", my_enum: typing.Optional['Enum'] = None) -> None:
         self.my_value = my_value
         self.my_enum = my_enum if my_enum is not None else Enum.VALUE_A
 
@@ -59,14 +59,18 @@ class Struct:
 
 class StructA:
     my_enum: str
+    other: str
 
-    def __init__(self, ):
+    def __init__(self, ) -> None:
         self.my_enum = Enum.VALUE_A
+        self.other = Enum.VALUE_A
 
     def to_json(self) -> dict[str, object]:
         payload: dict[str, object] = {
             "myEnum": self.my_enum,
         }
+        if self.other is not None:
+            payload["other"] = self.other
         return payload
 
     @classmethod
@@ -79,7 +83,7 @@ class StructB:
     my_enum: str
     my_value: str
 
-    def __init__(self, my_value: str = ""):
+    def __init__(self, my_value: str = "") -> None:
         self.my_enum = Enum.VALUE_B
         self.my_value = my_value
 

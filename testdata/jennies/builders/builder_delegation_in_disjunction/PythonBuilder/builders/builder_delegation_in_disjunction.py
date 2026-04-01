@@ -6,7 +6,7 @@ from ..models import builder_delegation_in_disjunction
 class DashboardLink(cogbuilder.Builder[builder_delegation_in_disjunction.DashboardLink]):
     _internal: builder_delegation_in_disjunction.DashboardLink
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = builder_delegation_in_disjunction.DashboardLink()
 
     def build(self) -> builder_delegation_in_disjunction.DashboardLink:
@@ -30,7 +30,7 @@ class DashboardLink(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboa
 class ExternalLink(cogbuilder.Builder[builder_delegation_in_disjunction.ExternalLink]):
     _internal: builder_delegation_in_disjunction.ExternalLink
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = builder_delegation_in_disjunction.ExternalLink()
 
     def build(self) -> builder_delegation_in_disjunction.ExternalLink:
@@ -49,7 +49,7 @@ class ExternalLink(cogbuilder.Builder[builder_delegation_in_disjunction.External
 class Dashboard(cogbuilder.Builder[builder_delegation_in_disjunction.Dashboard]):
     _internal: builder_delegation_in_disjunction.Dashboard
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = builder_delegation_in_disjunction.Dashboard()
 
     def build(self) -> builder_delegation_in_disjunction.Dashboard:

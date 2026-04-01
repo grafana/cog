@@ -32,3 +32,4 @@ final class DashboardConverter
         return \implode("\n\t->", $calls);
     }
 }
+

@@ -157,12 +157,14 @@ func (resource Struct) Validate() error {
 
 type StructA struct {
     MyEnum Enum `json:"myEnum"`
+    Other *Enum `json:"other,omitempty"`
 }
 
 // NewStructA creates a new StructA object.
 func NewStructA() *StructA {
 	return &StructA{
 		MyEnum: EnumValueA,
+		Other: (func (input Enum) *Enum { return &input })(EnumValueA),
 }
 }
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StructA` from JSON.
@@ -189,6 +191,17 @@ func (resource *StructA) UnmarshalJSONStrict(raw []byte) error {
 		delete(fields, "myEnum")
 	} else {errs = append(errs, cog.MakeBuildErrors("myEnum", errors.New("required field is missing from input"))...)
 	}
+	// Field "other"
+	if fields["other"] != nil {
+		if string(fields["other"]) != "null" {
+			if err := json.Unmarshal(fields["other"], &resource.Other); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("other", err)...)
+			}
+		
+		}
+		delete(fields, "other")
+	
+	}
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("StructA", fmt.Errorf("unexpected field '%s'", field))...)
@@ -207,6 +220,15 @@ func (resource StructA) Equals(other StructA) bool {
         if resource.MyEnum != other.MyEnum {
             return false
         }
+		if resource.Other == nil && other.Other != nil || resource.Other != nil && other.Other == nil {
+			return false
+		}
+
+		if resource.Other != nil {
+        if *resource.Other != *other.Other {
+            return false
+        }
+		}
 
 	return true
 }
@@ -215,9 +237,14 @@ func (resource StructA) Equals(other StructA) bool {
 // Validate checks all the validation constraints that may be defined on `StructA` fields for violations and returns them.
 func (resource StructA) Validate() error {
 	var errs cog.BuildErrors
-    if resource.MyEnum != "ValueA" {
+	if resource.MyEnum != "ValueA" {
         errs = append(errs, cog.MakeBuildErrors("myEnum", errors.New("must be ValueA"))...)
     }
+		if resource.Other != nil {
+	if *resource.Other != "ValueA" {
+        errs = append(errs, cog.MakeBuildErrors("other", errors.New("must be ValueA"))...)
+    }
+		}
 
 	if len(errs) == 0 {
 		return nil
@@ -303,7 +330,7 @@ func (resource StructB) Equals(other StructB) bool {
 // Validate checks all the validation constraints that may be defined on `StructB` fields for violations and returns them.
 func (resource StructB) Validate() error {
 	var errs cog.BuildErrors
-    if resource.MyEnum != "ValueB" {
+	if resource.MyEnum != "ValueB" {
         errs = append(errs, cog.MakeBuildErrors("myEnum", errors.New("must be ValueB"))...)
     }
 

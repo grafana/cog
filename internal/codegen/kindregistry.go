@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/grafana/cog/internal/ast"
 )
@@ -14,6 +15,9 @@ type KindRegistryInput struct {
 
 	Path    string `yaml:"path"`
 	Version string `yaml:"version"`
+
+	// Excluded lists the packages to be excluded.
+	Excluded []string `yaml:"excluded"`
 }
 
 func (input *KindRegistryInput) interpolateParameters(interpolator ParametersInterpolator) {
@@ -104,6 +108,10 @@ func locateEntrypoints(input *KindRegistryInput, kind string) ([]string, error) 
 	results := make([]string, 0, len(files))
 	for _, file := range files {
 		if !file.IsDir() {
+			continue
+		}
+
+		if slices.Contains(input.Excluded, file.Name()) {
 			continue
 		}
 

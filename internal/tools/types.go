@@ -10,6 +10,9 @@ func AnyToInt64(value any) int64 {
 		return int64(v)
 	case int32:
 		return int64(v)
+	case uint64:
+		//nolint:gosec
+		return int64(v)
 	case int64:
 		return v
 

@@ -25,7 +25,6 @@ func (jenny *Deserializers) JennyName() string {
 }
 
 func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, error) {
-	jenny.imports = NewImportMap(jenny.config.PackagePath)
 	jenny.typeFormatter = createFormatter(context, jenny.config)
 	jenny.tmpl = jenny.tmpl.
 		Funcs(common.TypeResolvingTemplateHelpers(context)).
@@ -38,6 +37,7 @@ func (jenny *Deserializers) Generate(context languages.Context) (codejen.Files, 
 	for _, schema := range context.Schemas {
 		var hasErr error
 		schema.Objects.Iterate(func(key string, obj ast.Object) {
+			jenny.imports = NewImportMap(jenny.config.PackagePath)
 			jenny.packageMapper = func(pkg string, class string) string {
 				if jenny.imports.IsIdentical(pkg, schema.Package) {
 					return ""

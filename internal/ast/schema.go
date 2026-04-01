@@ -97,7 +97,7 @@ func (schemas Schemas) DeepCopy() []*Schema {
 	return newSchemas
 }
 
-type Schema struct { //nolint: musttag
+type Schema struct { // nolint: musttag
 	Package        string
 	Metadata       SchemaMeta `json:",omitempty"`
 	EntryPoint     string     `json:",omitempty"`

@@ -20,3 +20,4 @@ export class NoShowFieldOptionBuilder implements cog.Builder<discriminatorWithou
         return this;
     }
 }
+

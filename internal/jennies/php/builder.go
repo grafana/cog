@@ -51,6 +51,25 @@ func (jenny *Builder) Generate(context languages.Context) (codejen.Files, error)
 
 			return option, nil
 		},
+		OnFactory: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, factory ast.BuilderFactory) (ast.BuilderFactory, error) {
+			factory.Args = tools.Map(factory.Args, func(arg ast.Argument) ast.Argument {
+				newArg := arg.DeepCopy()
+				newArg.Type.Nullable = false
+
+				if !hinter.requiresHint(newArg.Type) {
+					return newArg
+				}
+
+				typehint := hinter.paramAnnotationForType(newArg.Name, newArg.Type)
+				if typehint != "" {
+					factory.Comments = append(factory.Comments, typehint)
+				}
+
+				return newArg
+			})
+
+			return factory, nil
+		},
 	}
 	context.Builders, err = visitor.Visit(context.Schemas, context.Builders)
 	if err != nil {

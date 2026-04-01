@@ -22,7 +22,6 @@ func NewDashboardLinkBuilder() *DashboardLinkBuilder {
 }
 
 
-
 func (builder *DashboardLinkBuilder) Build() (DashboardLink, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return DashboardLink{}, err
@@ -33,6 +32,11 @@ func (builder *DashboardLinkBuilder) Build() (DashboardLink, error) {
 	}
 
 	return *builder.internal, nil
+}
+
+func (builder *DashboardLinkBuilder) RecordError(path string, err error) *DashboardLinkBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
 }
 
 func (builder *DashboardLinkBuilder) Title(title string) *DashboardLinkBuilder {

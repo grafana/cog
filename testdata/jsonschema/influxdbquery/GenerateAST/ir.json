@@ -278,14 +278,14 @@
                       "Kind": "scalar",
                       "Nullable": false,
                       "Scalar": {
-                        "ScalarKind": "string"
+                        "ScalarKind": "float64"
                       }
                     },
                     {
                       "Kind": "scalar",
                       "Nullable": false,
                       "Scalar": {
-                        "ScalarKind": "float64"
+                        "ScalarKind": "string"
                       }
                     }
                   ]
@@ -493,14 +493,14 @@
                       "Kind": "scalar",
                       "Nullable": false,
                       "Scalar": {
-                        "ScalarKind": "string"
+                        "ScalarKind": "float64"
                       }
                     },
                     {
                       "Kind": "scalar",
                       "Nullable": false,
                       "Scalar": {
-                        "ScalarKind": "float64"
+                        "ScalarKind": "string"
                       }
                     }
                   ]
@@ -654,14 +654,14 @@
                           "Kind": "scalar",
                           "Nullable": false,
                           "Scalar": {
-                            "ScalarKind": "string"
+                            "ScalarKind": "float64"
                           }
                         },
                         {
                           "Kind": "scalar",
                           "Nullable": false,
                           "Scalar": {
-                            "ScalarKind": "float64"
+                            "ScalarKind": "string"
                           }
                         }
                       ]

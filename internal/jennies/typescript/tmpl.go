@@ -20,10 +20,14 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		template.Funcs(common.TypeResolvingTemplateHelpers(languages.Context{})),
 		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
+		template.Funcs(config.OverridesTemplateFuncs),
 		// placeholder functions, will be overridden by jennies
 		template.Funcs(template.FuncMap{
 			"formatType": func(_ ast.Type) string {
 				panic("formatType() needs to be overridden by a jenny")
+			},
+			"formatRef": func(_ ast.RefType) string {
+				panic("formatRef() needs to be overridden by a jenny")
 			},
 			"formatIdentifier": formatIdentifier,
 			"typeIsDisjunctionOfBuilders": func(_ ast.Type) string {
@@ -44,6 +48,9 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 			"typeHasBuilder": func(_ ast.Type) bool {
 				panic("typeHasBuilder() needs to be overridden by a jenny")
 			},
+			"formatTypeNoBuilder": func(_ ast.Type) bool {
+				panic("formatTypeNoBuilder() needs to be overridden by a jenny")
+			},
 			"resolvesToComposableSlot": func(_ ast.Type) bool {
 				panic("resolvesToComposableSlot() needs to be overridden by a jenny")
 			},
@@ -54,6 +61,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 
 		// parse templates
 		template.ParseFS(templatesFS, "templates"),
+		template.ParseFS(config.OverridesTemplatesFS, "custom"),
 		template.ParseDirectories(config.OverridesTemplatesDirectories...),
 	)
 	if err != nil {

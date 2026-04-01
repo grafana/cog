@@ -1,10 +1,7 @@
 package codegen
 
 import (
-	"context"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,6 +19,18 @@ func guessPackageFromFilename(filename string) string {
 	return strings.TrimSuffix(filepath.Base(filename), filepath.Ext(filename))
 }
 
+func isFile(path string) (bool, error) {
+	stat, err := os.Stat(path)
+	//nolint:gocritic
+	if err != nil {
+		return false, err
+	} else if stat.IsDir() {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func dirExists(dir string) (bool, error) {
 	stat, err := os.Stat(dir)
 	//nolint:gocritic
@@ -36,33 +45,13 @@ func dirExists(dir string) (bool, error) {
 	return true, nil
 }
 
-func loadURL(ctx context.Context, url string) (io.ReadCloser, error) {
-	client := http.DefaultClient
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("expecting 200 when loading '%s', got %d", url, resp.StatusCode)
-	}
-
-	return resp.Body, nil
-}
-
 func repositoryTemplatesJenny(pipeline *Pipeline) (*codejen.JennyList[common.BuildOptions], error) {
 	outputDir, err := pipeline.outputDir(pipeline.currentDirectory)
 	if err != nil {
 		return nil, err
 	}
 
-	repoTemplatesJenny := codejen.JennyListWithNamer[common.BuildOptions](func(_ common.BuildOptions) string {
+	repoTemplatesJenny := codejen.JennyListWithNamer(func(_ common.BuildOptions) string {
 		return "RepositoryTemplates"
 	})
 	repoTemplatesJenny.AppendOneToMany(&common.RepositoryTemplate{
@@ -85,4 +74,27 @@ func runJenny[I any](jenny *codejen.JennyList[I], input I, destinationFS *codeje
 	}
 
 	return destinationFS.Merge(fs)
+}
+
+func createInterpolator(parameters map[string]string) ParametersInterpolator {
+	interpolateFun := func(in string) string {
+		interpolated := in
+
+		for key, value := range parameters {
+			interpolated = strings.ReplaceAll(interpolated, "%"+key+"%", value)
+		}
+
+		return interpolated
+	}
+
+	return func(input string) string {
+		finalOutput := input
+		out := interpolateFun(finalOutput)
+		for out != finalOutput {
+			finalOutput = out
+			out = interpolateFun(finalOutput)
+		}
+
+		return finalOutput
+	}
 }

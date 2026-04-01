@@ -27,7 +27,7 @@ class SomeStruct:
     field_int32: int
     field_int64: int
 
-    def __init__(self, field_any: object = None, field_bool: bool = False, field_bytes: bytes = "", field_string: str = "", field_float32: float = 0, field_float64: float = 0, field_uint8: int = 0, field_uint16: int = 0, field_uint32: int = 0, field_uint64: int = 0, field_int8: int = 0, field_int16: int = 0, field_int32: int = 0, field_int64: int = 0):
+    def __init__(self, field_any: object = None, field_bool: bool = False, field_bytes: bytes = "", field_string: str = "", field_float32: float = 0, field_float64: float = 0, field_uint8: int = 0, field_uint16: int = 0, field_uint32: int = 0, field_uint64: int = 0, field_int8: int = 0, field_int16: int = 0, field_int32: int = 0, field_int64: int = 0) -> None:
         self.field_any = field_any
         self.field_bool = field_bool
         self.field_bytes = field_bytes

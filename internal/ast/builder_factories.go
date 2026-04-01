@@ -6,6 +6,7 @@ import (
 
 type BuilderFactory struct {
 	Name        string
+	BuilderRef  RefType      `yaml:"builder_ref"`
 	Comments    []string     `json:",omitempty"`
 	Args        []Argument   `json:",omitempty" yaml:"arguments"`
 	OptionCalls []OptionCall `json:",omitempty" yaml:"options"`
@@ -13,7 +14,8 @@ type BuilderFactory struct {
 
 func (factory *BuilderFactory) DeepCopy() BuilderFactory {
 	clone := BuilderFactory{
-		Name: factory.Name,
+		Name:       factory.Name,
+		BuilderRef: factory.BuilderRef.DeepCopy(),
 		Args: tools.Map(factory.Args, func(arg Argument) Argument {
 			return arg.DeepCopy()
 		}),
@@ -54,9 +56,10 @@ func (constant *TypedConstant) DeepCopy() TypedConstant {
 }
 
 type OptionCallParameter struct {
-	Argument *Argument      `json:",omitempty"`
-	Constant *TypedConstant `json:",omitempty"`
-	Factory  *FactoryCall   `json:",omitempty"`
+	Argument   *Argument      `json:",omitempty"`
+	ForceBuild bool           `yaml:"force_build"`
+	Constant   *TypedConstant `json:",omitempty"`
+	Factory    *FactoryCall   `json:",omitempty"`
 }
 
 func (call *OptionCallParameter) DeepCopy() OptionCallParameter {

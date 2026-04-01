@@ -181,6 +181,12 @@ func (jenny Schema) addStringConstraints(definition *orderedmap.Map[string, any]
 			definition.Set("minLength", constraint.Args[0])
 		case ast.MaxLengthOp:
 			definition.Set("maxLength", constraint.Args[0])
+		case ast.RegexMatchOp:
+			definition.Set("pattern", constraint.Args[0])
+		case ast.NotRegexMatchOp:
+			notDef := orderedmap.New[string, any]()
+			notDef.Set("pattern", constraint.Args[0])
+			definition.Set("not", notDef)
 		}
 	}
 }
@@ -339,14 +345,28 @@ func (jenny Schema) formatMap(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
 
 	definition.Set("type", "object")
-	definition.Set("additionalProperties", jenny.formatType(typeDef.AsMap().ValueType))
+	valueType := typeDef.AsMap().ValueType
+	if jenny.OpenAPI3Compatible && valueType.IsAny() {
+		definition.Set("additionalProperties", true)
+		return definition
+	}
+
+	definition.Set("additionalProperties", jenny.formatType(valueType))
 
 	return definition
 }
 
 func (jenny Schema) formatDisjunction(typeDef ast.Type) Definition {
 	definition := orderedmap.New[string, any]()
-	branches := tools.Map(typeDef.AsDisjunction().Branches, jenny.formatType)
+
+	branches := tools.UniqueFormattedBy(
+		typeDef.AsDisjunction().Branches,
+		jenny.formatType,
+		func(d Definition) string {
+			key, _ := json.Marshal(d)
+			return string(key)
+		},
+	)
 
 	definition.Set("oneOf", branches)
 

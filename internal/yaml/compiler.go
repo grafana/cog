@@ -1,11 +1,11 @@
 package yaml
 
 import (
-	"io"
+	"fmt"
 	"os"
 
+	"github.com/goccy/go-yaml"
 	"github.com/grafana/cog/internal/ast/compiler"
-	"gopkg.in/yaml.v3"
 )
 
 type Compiler struct {
@@ -20,24 +20,10 @@ func NewCompilerLoader() *CompilerLoader {
 }
 
 func (loader *CompilerLoader) PassesFrom(filenames []string) (compiler.Passes, error) {
-	readers := make([]io.Reader, 0, len(filenames))
+	allPasses := make(compiler.Passes, 0, len(filenames))
+
 	for _, filename := range filenames {
-		reader, err := os.Open(filename)
-		if err != nil {
-			return nil, err
-		}
-
-		readers = append(readers, reader)
-	}
-
-	return loader.LoadAll(readers)
-}
-
-func (loader *CompilerLoader) LoadAll(readers []io.Reader) (compiler.Passes, error) {
-	allPasses := make(compiler.Passes, 0, len(readers))
-
-	for _, reader := range readers {
-		passes, err := loader.Load(reader)
+		passes, err := loader.load(filename)
 		if err != nil {
 			return nil, err
 		}
@@ -48,23 +34,33 @@ func (loader *CompilerLoader) LoadAll(readers []io.Reader) (compiler.Passes, err
 	return allPasses, nil
 }
 
-func (loader *CompilerLoader) Load(reader io.Reader) (compiler.Passes, error) {
-	compilerConfig := &Compiler{}
-
-	decoder := yaml.NewDecoder(reader)
-	decoder.KnownFields(true)
-
-	if err := decoder.Decode(&compilerConfig); err != nil {
+func (loader *CompilerLoader) load(file string) (compiler.Passes, error) {
+	contents, err := os.ReadFile(file)
+	if err != nil {
 		return nil, err
+	}
+
+	compilerConfig := &Compiler{}
+	if err := yaml.UnmarshalWithOptions(contents, compilerConfig, yaml.DisallowUnknownField()); err != nil {
+		return nil, fmt.Errorf("can not load compiler passes: %s\n%s", file, yaml.FormatError(err, true, true))
 	}
 
 	passes := make(compiler.Passes, 0, len(compilerConfig.Passes))
 
 	// convert compiler passes
-	for _, passConfig := range compilerConfig.Passes {
+	for i, passConfig := range compilerConfig.Passes {
 		pass, err := passConfig.AsCompilerPass()
 		if err != nil {
-			return nil, err
+			path, innerErr := yaml.PathString(fmt.Sprintf("$.passes[%d]", i))
+			if innerErr != nil {
+				return nil, err
+			}
+			source, innerErr := path.AnnotateSource(contents, true)
+			if innerErr != nil {
+				return nil, err
+			}
+
+			return nil, fmt.Errorf("%w in %s\n%s", err, file, string(source))
 		}
 
 		passes = append(passes, pass)

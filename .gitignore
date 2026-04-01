@@ -1,6 +1,7 @@
 /generated
-/schemas/kind-registry
-/examples/php/vendor
+/workspace
+/build
+/examples/*/vendor
 /.devbox
 /gradle.properties
 /vendor
@@ -10,7 +11,6 @@
 # Java building folders
 .gradle/
 build/
-examples/java/bin/
 
 .idea
 

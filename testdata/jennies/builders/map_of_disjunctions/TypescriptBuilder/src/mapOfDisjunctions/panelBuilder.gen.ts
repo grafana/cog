@@ -21,3 +21,4 @@ export class PanelBuilder implements cog.Builder<mapOfDisjunctions.Panel> {
         return this;
     }
 }
+

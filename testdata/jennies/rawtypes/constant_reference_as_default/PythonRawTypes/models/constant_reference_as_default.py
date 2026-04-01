@@ -8,7 +8,7 @@ class MyStruct:
     a_string: str
     opt_string: str
 
-    def __init__(self, ):
+    def __init__(self, ) -> None:
         self.a_string = ConstantRefString
         self.opt_string = ConstantRefString
 
@@ -24,3 +24,6 @@ class MyStruct:
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
         return cls(**args)
+
+
+

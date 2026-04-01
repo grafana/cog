@@ -6,7 +6,7 @@ from ..models import panelbuilder
 class Panel(cogbuilder.Builder[panelbuilder.Panel]):
     _internal: panelbuilder.Panel
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = panelbuilder.Panel()
 
     def build(self) -> panelbuilder.Panel:

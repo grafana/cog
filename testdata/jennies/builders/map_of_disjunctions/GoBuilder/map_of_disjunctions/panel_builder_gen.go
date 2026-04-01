@@ -23,7 +23,6 @@ func NewPanelBuilder() *PanelBuilder {
 }
 
 
-
 func (builder *PanelBuilder) Build() (Panel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Panel{}, err
@@ -36,8 +35,14 @@ func (builder *PanelBuilder) Build() (Panel, error) {
 	return *builder.internal, nil
 }
 
+func (builder *PanelBuilder) RecordError(path string, err error) *PanelBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
 func (builder *PanelBuilder) Title(title string) *PanelBuilder {
     builder.internal.Title = title
 
     return builder
 }
+

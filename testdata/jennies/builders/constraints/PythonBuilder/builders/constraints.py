@@ -6,7 +6,7 @@ from ..models import constraints
 class SomeStruct(cogbuilder.Builder[constraints.SomeStruct]):
     _internal: constraints.SomeStruct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = constraints.SomeStruct()
 
     def build(self) -> constraints.SomeStruct:

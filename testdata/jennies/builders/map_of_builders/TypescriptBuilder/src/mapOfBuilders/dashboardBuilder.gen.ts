@@ -17,7 +17,7 @@ export class DashboardBuilder implements cog.Builder<mapOfBuilders.Dashboard> {
 
     panels(panels: Record<string, cog.Builder<mapOfBuilders.Panel>>): this {
         const panelsResource = (function() {
-            let results1 = {};
+            let results1: Record<string, mapOfBuilders.Panel> = {};
             for (const key1 in panels) {
                 const val1 = panels[key1];
                 results1[key1] = val1.build();

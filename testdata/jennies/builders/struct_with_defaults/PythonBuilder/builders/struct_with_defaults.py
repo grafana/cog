@@ -6,7 +6,7 @@ from ..models import struct_with_defaults
 class NestedStruct(cogbuilder.Builder[struct_with_defaults.NestedStruct]):
     _internal: struct_with_defaults.NestedStruct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = struct_with_defaults.NestedStruct()
 
     def build(self) -> struct_with_defaults.NestedStruct:
@@ -30,7 +30,7 @@ class NestedStruct(cogbuilder.Builder[struct_with_defaults.NestedStruct]):
 class Struct(cogbuilder.Builder[struct_with_defaults.Struct]):
     _internal: struct_with_defaults.Struct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = struct_with_defaults.Struct()
 
     def build(self) -> struct_with_defaults.Struct:

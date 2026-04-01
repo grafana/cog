@@ -7,7 +7,7 @@ from ..cog import variants as cogvariants
 class LokiBuilder(cogbuilder.Builder[composable_slot.Dashboard]):
     _internal: composable_slot.Dashboard
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = composable_slot.Dashboard()
 
     def build(self) -> composable_slot.Dashboard:

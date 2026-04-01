@@ -1,0 +1,285 @@
+name: Foundation SDK
+on:
+  pull_request: ~
+
+env:
+  DEVBOX_VERSION: 0.14.0
+  FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
+
+jobs:
+  build_lint:
+    name: Generate & lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Restore go vendors
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # 5.0.4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
+        with:
+          enable-cache: "true"
+          devbox-version: ${{ env.DEVBOX_VERSION }}
+
+      # See https://docs.gradle.org/current/userguide/build_cache.html
+      - name: Restore Gradle build cache
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # 5.0.4
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-build-cache-${{ runner.os }}-
+          restore-keys: |
+            gradle-build-cache-${{ runner.os }}-
+
+      # See https://phpstan.org/user-guide/result-cache
+      # See https://psalm.dev/docs/running_psalm/configuration/#cachedirectory
+      - name: Restore PHP linters cache
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # 5.0.4
+        with:
+          path: |
+            /tmp/phpstan
+            ~/.cache/psalm
+          key: php-linters-result-cache-
+          restore-keys: |
+            php-linters-result-cache-
+
+      - name: Build cog with current branch
+        shell: bash
+        run: |
+          devbox run go build -o cog ./cmd/cli
+          mkdir -p "${HOME}/.local/bin/"
+          mv cog "${HOME}/.local/bin/"
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
+      - name: Fetch foundation-sdk
+        shell: bash
+        run: |
+          make fetch-foundation-sdk
+
+      - name: Run SDK codegen pipeline
+        shell: bash
+        run: |
+          git config --global user.email "cog-ci@grafana.com"
+          git config --global user.name "cog - CI"
+
+          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+        env:
+          SKIP_VALIDATION: "no" # the release process will lint the code for us
+          LOG_LEVEL: "7" # debug
+          GOGC: "off"
+
+  examples:
+    name: Run examples
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Restore go vendors
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # 5.0.4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-next-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
+        with:
+          enable-cache: "true"
+          devbox-version: ${{ env.DEVBOX_VERSION }}
+
+      - name: Build cog with current branch
+        shell: bash
+        run: |
+          devbox run go build -o cog ./cmd/cli
+          mkdir -p "${HOME}/.local/bin/"
+          mv cog "${HOME}/.local/bin/"
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
+      - name: Fetch foundation-sdk
+        shell: bash
+        run: |
+          make fetch-foundation-sdk
+
+      - name: Run SDK codegen pipeline
+        shell: bash
+        run: |
+          git config --global user.email "cog-ci@grafana.com"
+          git config --global user.name "cog - CI"
+
+          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+        env:
+          WORKSPACE_PATH: /tmp/foundation-workspace-examples
+          CLEANUP_WORKSPACE: "no"
+          SKIP_VALIDATION: "yes"
+          LOG_LEVEL: "7" # debug
+          GOGC: "off"
+
+      - name: Run examples
+        run: devbox run /tmp/foundation-workspace-examples/foundation-sdk/scripts/run-examples.sh
+
+  sdk_diff:
+    name: Generate diff
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Restore go vendors
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-deps-${{ runner.os }}-next-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-deps-${{ runner.os }}
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
+        with:
+          enable-cache: "true"
+          devbox-version: ${{ env.DEVBOX_VERSION }}
+
+      - name: Fetch foundation-sdk
+        shell: bash
+        run: |
+          make fetch-foundation-sdk
+
+      - name: Build cog with current branch
+        shell: bash
+        run: |
+          devbox run go build -o cog ./cmd/cli
+          mkdir -p "${HOME}/.local/bin/"
+          mv cog "${HOME}/.local/bin/"
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
+      - name: Dry-run release with current branch
+        shell: bash
+        run: |
+          git config --global user.email "cog-ci@grafana.com"
+          git config --global user.name "cog - CI"
+
+          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+        env:
+          WORKSPACE_PATH: /tmp/foundation-workspace-current
+          CLEANUP_WORKSPACE: "no"
+          SKIP_VALIDATION: "yes"
+          LOG_LEVEL: "7" # debug
+          GOGC: "off"
+
+      - name: Checkout main branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Fetch foundation-sdk
+        shell: bash
+        run: |
+          make fetch-foundation-sdk
+
+      - name: Build cog with main branch
+        shell: bash
+        run: |
+          devbox run go build -o cog ./cmd/cli
+          mv cog "${HOME}/.local/bin/"
+
+      - name: Dry-run release with main branch
+        shell: bash
+        run: |
+          git config --global user.email "cog-ci@grafana.com"
+          git config --global user.name "cog - CI"
+
+          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+        env:
+          WORKSPACE_PATH: /tmp/foundation-workspace-main
+          CLEANUP_WORKSPACE: "no"
+          SKIP_VALIDATION: "yes"
+          LOG_LEVEL: "7" # debug
+          GOGC: "off"
+
+      - name: Generate diff
+        run: |
+          diff \
+            --new-file \
+            --unidirectional-new-file \
+            --color=never \
+            --unified \
+            --recursive \
+            --exclude='.git' \
+            --exclude='gradle.properties' \
+            --exclude='pyproject.toml' \
+            --exclude='package.json' \
+            --exclude='*.md' \
+            /tmp/foundation-workspace-main/foundation-sdk/ /tmp/foundation-workspace-current/foundation-sdk/ > diff.patch || true # diff returns 1 if the two targets have differences
+
+      - name: Upload diff as artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        id: artifact-upload-step
+        with:
+          name: diff.patch
+          path: diff.patch
+          retention-days: 7
+
+      - name: Preview diff
+        run: |
+          cat <<'EOF' > preview.md
+          <!-- grafana-foundation-sdk-diff-preview-marker -->
+
+          **Note:** the diff show code changes that would be introduced by this PR to the output of the *Grafana Foundation SDK* codegen pipeline.
+
+          [See full diff](${{ steps.artifact-upload-step.outputs.artifact-url }}).
+
+          <details>
+          <summary>
+
+          ### 🔎 Changes to *Grafana Foundation SDK*
+
+          </summary>
+
+          ```patch
+          EOF
+
+          cat diff.patch >> preview.md
+
+          cat <<'EOF' >> preview.md
+          ```
+          </details>
+          EOF
+
+      - name: Find preview comment
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad #v4.0.0
+        id: preview-comment-find
+        if: "!contains(github.actor, 'dependabot') && github.repository == 'grafana/cog'" # only run on main repo, and not on dependabot PRs
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "grafana-foundation-sdk-diff-preview-marker"
+
+      - name: Upsert preview comment
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 #v5.0.0
+        if: "!contains(github.actor, 'dependabot') && github.repository == 'grafana/cog'" # only run on main repo, and not on dependabot PRs
+        with:
+          comment-id: ${{ steps.preview-comment-find.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body-path: "./preview.md"

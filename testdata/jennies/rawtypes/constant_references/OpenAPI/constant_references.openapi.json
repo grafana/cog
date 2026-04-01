@@ -59,6 +59,14 @@
               }
             ],
             "default": "ValueA"
+          },
+          "other": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Enum"
+              }
+            ],
+            "default": "ValueA"
           }
         }
       },

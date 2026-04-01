@@ -5,7 +5,7 @@ class NestedStruct:
     string_val: str
     int_val: int
 
-    def __init__(self, string_val: str = "", int_val: int = 0):
+    def __init__(self, string_val: str = "", int_val: int = 0) -> None:
         self.string_val = string_val
         self.int_val = int_val
 
@@ -35,7 +35,7 @@ class Struct:
     complex_field: 'DefaultsStructComplexField'
     partial_complex_field: 'DefaultsStructPartialComplexField'
 
-    def __init__(self, all_fields: typing.Optional['NestedStruct'] = None, partial_fields: typing.Optional['NestedStruct'] = None, empty_fields: typing.Optional['NestedStruct'] = None, complex_field: typing.Optional['DefaultsStructComplexField'] = None, partial_complex_field: typing.Optional['DefaultsStructPartialComplexField'] = None):
+    def __init__(self, all_fields: typing.Optional['NestedStruct'] = None, partial_fields: typing.Optional['NestedStruct'] = None, empty_fields: typing.Optional['NestedStruct'] = None, complex_field: typing.Optional['DefaultsStructComplexField'] = None, partial_complex_field: typing.Optional['DefaultsStructPartialComplexField'] = None) -> None:
         self.all_fields = all_fields if all_fields is not None else NestedStruct(int_val=3, string_val="hello")
         self.partial_fields = partial_fields if partial_fields is not None else NestedStruct(int_val=3)
         self.empty_fields = empty_fields if empty_fields is not None else NestedStruct()
@@ -73,7 +73,7 @@ class Struct:
 class DefaultsStructComplexFieldNested:
     nested_val: str
 
-    def __init__(self, nested_val: str = ""):
+    def __init__(self, nested_val: str = "") -> None:
         self.nested_val = nested_val
 
     def to_json(self) -> dict[str, object]:
@@ -97,7 +97,7 @@ class DefaultsStructComplexField:
     nested: 'DefaultsStructComplexFieldNested'
     array: list[str]
 
-    def __init__(self, uid: str = "", nested: typing.Optional['DefaultsStructComplexFieldNested'] = None, array: typing.Optional[list[str]] = None):
+    def __init__(self, uid: str = "", nested: typing.Optional['DefaultsStructComplexFieldNested'] = None, array: typing.Optional[list[str]] = None) -> None:
         self.uid = uid
         self.nested = nested if nested is not None else DefaultsStructComplexFieldNested()
         self.array = array if array is not None else []
@@ -128,7 +128,7 @@ class DefaultsStructPartialComplexField:
     uid: str
     int_val: int
 
-    def __init__(self, uid: str = "", int_val: int = 0):
+    def __init__(self, uid: str = "", int_val: int = 0) -> None:
         self.uid = uid
         self.int_val = int_val
 

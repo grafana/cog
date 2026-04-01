@@ -51,6 +51,14 @@
             }
           ],
           "default": "ValueA"
+        },
+        "other": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Enum"
+            }
+          ],
+          "default": "ValueA"
         }
       }
     },

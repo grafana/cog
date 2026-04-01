@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/httputil"
 	"github.com/grafana/cog/internal/jsonschema"
 )
 
@@ -36,7 +37,7 @@ func (input *JSONSchemaInput) schemaReader(ctx context.Context) (io.ReadCloser, 
 		return os.Open(input.Path)
 	}
 
-	return loadURL(ctx, input.URL)
+	return httputil.LoadURL(ctx, input.URL)
 }
 
 func (input *JSONSchemaInput) packageName() string {

@@ -2,6 +2,7 @@ package golang
 
 import (
 	"fmt"
+	"io/fs"
 	"strings"
 
 	"github.com/grafana/codejen"
@@ -45,6 +46,10 @@ type Config struct {
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
 	OverridesTemplatesDirectories []string `yaml:"overrides_templates"`
+	// OverridesTemplatesFS holds an embedded filesystem containing templates
+	OverridesTemplatesFS fs.FS `yaml:"-"`
+	// OverridesTemplateFuncs holds additional template functions to be injected into the override templates.
+	OverridesTemplateFuncs map[string]any `yaml:"-"`
 
 	// ExtraFilesTemplatesDirectories holds a list of directories containing
 	// templates describing files to be added to the generated output.
@@ -138,7 +143,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 	if !config.SkipPostFormatting {
-		jenny.AddPostprocessors(formatGoFiles)
+		jenny.AddPostprocessors(FormatGoFiles)
 	}
 
 	return jenny

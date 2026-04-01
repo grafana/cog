@@ -22,7 +22,6 @@ func NewSomeStructBuilder() *SomeStructBuilder {
 }
 
 
-
 func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return SomeStruct{}, err
@@ -33,6 +32,11 @@ func (builder *SomeStructBuilder) Build() (SomeStruct, error) {
 	}
 
 	return *builder.internal, nil
+}
+
+func (builder *SomeStructBuilder) RecordError(path string, err error) *SomeStructBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
 }
 
 func (builder *SomeStructBuilder) Time(time struct {

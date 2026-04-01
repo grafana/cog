@@ -2,11 +2,13 @@ package simplecue
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"cuelang.org/go/cue"
+	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/format"
-	"cuelang.org/go/pkg/strconv"
+	"cuelang.org/go/cue/token"
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -72,10 +74,11 @@ type Config struct {
 }
 
 type generator struct {
-	schema      *ast.Schema
-	refResolver *referenceResolver
-	rootVal     cue.Value
-	rootPath    cue.Path
+	schema       *ast.Schema
+	refResolver  *referenceResolver
+	rootVal      cue.Value
+	rootPath     cue.Path
+	rootFilename string
 
 	namingFunc            NameFunc
 	externalReferenceFunc externalReferenceFunc
@@ -88,9 +91,10 @@ func GenerateAST(val cue.Value, c Config) (*ast.Schema, error) {
 			Libraries:     c.Libraries,
 			SchemaPackage: c.Package,
 		}),
-		rootVal:    val,
-		rootPath:   val.Path(),
-		namingFunc: c.NameFunc,
+		rootVal:      val,
+		rootPath:     val.Path(),
+		rootFilename: getFilename(val), // TODO: does this still work with cue modules?
+		namingFunc:   c.NameFunc,
 	}
 
 	if g.namingFunc == nil {
@@ -458,7 +462,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 	//   origin: #Origin // `#Origin` refers to a value outside our original root
 	// }
 	// ```
-	if areCuePathsFromSameRoot(g.rootPath, path) && !cuePathIsChildOf(g.rootPath, path) {
+	if getFilename(referenceRootValue) == g.rootFilename && !cuePathIsChildOf(g.rootPath, path) {
 		refType := g.namingFunc(g.rootVal, path)
 		if !g.schema.Objects.Has(refType) {
 			if err := g.declareObject(refType, referenceRootValue.LookupPath(path)); err != nil {
@@ -477,7 +481,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 	if path.String() != "" {
 		refPkg, err := g.refResolver.PackageForNode(v.Source(), g.schema.Package)
 		if err != nil {
-			return ast.Type{}, errorWithCueRef(v, err.Error())
+			return ast.Type{}, errorWithCueRef(v, "%v", err.Error())
 		}
 
 		defValue, err := g.extractDefault(defV)
@@ -490,6 +494,12 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 		if refPkg == "time" && refType == "Time" {
 			return ast.String(ast.Default(defValue), ast.Hints(ast.JenniesHints{
 				ast.HintStringFormatDateTime: true,
+			})), nil
+		}
+
+		if refPkg == "time" && refType == "Duration" {
+			return ast.String(ast.Default(defValue), ast.Hints(ast.JenniesHints{
+				ast.HintStringFormatDuration: true,
 			})), nil
 		}
 
@@ -507,7 +517,7 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			if err != nil {
 				referenceValue, err = v.Int64()
 				if err != nil {
-					return ast.Type{}, errorWithCueRef(v, err.Error())
+					return ast.Type{}, errorWithCueRef(v, "%v", err.Error())
 				}
 			}
 
@@ -666,9 +676,11 @@ func (g *generator) declareString(v cue.Value, defVal any, hints ast.JenniesHint
 	conjuncts := appendSplit(nil, cue.AndOp, v)
 	for _, conjunct := range conjuncts {
 		_, path := conjunct.ReferencePath()
-		// the string was declared as string & time.Time
-		if path.String() == "Time" {
+		switch path.String() {
+		case "Time": // time.Time
 			typeDef.Hints[ast.HintStringFormatDateTime] = true
+		case "Duration": // time.Duration
+			typeDef.Hints[ast.HintStringFormatDuration] = true
 		}
 	}
 
@@ -719,34 +731,44 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 	for _, andExpr := range typeAndConstraints {
 		op, args := andExpr.Expr()
 
-		// TODO: support more OPs?
-		if op != cue.CallOp {
-			continue
-		}
+		switch op {
+		case cue.CallOp:
+			// TODO: support more constraints?
+			switch fmt.Sprint(args[0]) {
+			case "strings.MinRunes":
+				scalar, err := cueConcreteToScalar(args[1])
+				if err != nil {
+					return nil, err
+				}
 
-		// TODO: support more constraints?
-		switch fmt.Sprint(args[0]) {
-		case "strings.MinRunes":
-			scalar, err := cueConcreteToScalar(args[1])
-			if err != nil {
-				return nil, err
+				constraints = append(constraints, ast.TypeConstraint{
+					Op:   ast.MinLengthOp,
+					Args: []any{scalar},
+				})
+
+			case "strings.MaxRunes":
+				scalar, err := cueConcreteToScalar(args[1])
+				if err != nil {
+					return nil, err
+				}
+
+				constraints = append(constraints, ast.TypeConstraint{
+					Op:   ast.MaxLengthOp,
+					Args: []any{scalar},
+				})
 			}
-
+		case cue.RegexMatchOp:
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   ast.MinLengthOp,
-				Args: []any{scalar},
+				Op:   ast.RegexMatchOp,
+				Args: []any{args[0]},
 			})
-
-		case "strings.MaxRunes":
-			scalar, err := cueConcreteToScalar(args[1])
-			if err != nil {
-				return nil, err
-			}
-
+		case cue.NotRegexMatchOp:
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   ast.MaxLengthOp,
-				Args: []any{scalar},
+				Op:   ast.NotRegexMatchOp,
+				Args: []any{args[0]},
 			})
+		default:
+			// TODO: support more OPs?
 		}
 	}
 
@@ -830,83 +852,113 @@ func (g *generator) declareNumber(v cue.Value, defVal any, hints ast.JenniesHint
 
 // having written this makes my soul hurt.
 func (g *generator) declareNumberConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
-	// if the number has a default value, strip it from `v` before trying to extract constraints.
-	_, hasDefault := v.Default()
-	if hasDefault {
-		_, dvals := v.Expr()
-		v = dvals[0]
-	}
-
-	numberTypeWithConstraintsAsString, err := format.Node(v.Syntax())
-	if err != nil {
-		return nil, err
-	}
-
-	parts := strings.Split(string(numberTypeWithConstraintsAsString), " & ")
-
-	extractOperatorAndArg := func(input string, numberKind cue.Kind) (ast.Op, any, error) {
-		argStartIndex := -1
-
-		var op ast.Op
-
-		if input[0] == '>' {
-			op = ast.GreaterThanOp
-			argStartIndex = 1
-
-			if input[1] == '=' {
-				op = ast.GreaterThanEqualOp
-				argStartIndex = 2
-			}
-		}
-		if input[0] == '<' {
-			op = ast.LessThanOp
-			argStartIndex = 1
-
-			if input[1] == '=' {
-				op = ast.LessThanEqualOp
-				argStartIndex = 2
-			}
-		}
-		if input[0] == '=' && input[1] == '=' {
-			op = ast.EqualOp
-			argStartIndex = 2
-		}
-		if input[0] == '!' && input[1] == '=' {
-			op = ast.NotEqualOp
-			argStartIndex = 2
-		}
-
-		if op == "" {
-			return op, nil, fmt.Errorf("could not infer operator from '%s'", input)
-		}
-
-		if numberKind.IsAnyOf(cue.FloatKind) {
-			arg, err := strconv.ParseFloat(input[argStartIndex:], 64)
-			return op, arg, err
-		}
-
-		arg, err := strconv.ParseInt(input[argStartIndex:], 10, 64)
-		return op, arg, err
-	}
+	node := v.Syntax()
 
 	var constraints []ast.TypeConstraint
-	for _, part := range parts {
-		if part[0] != '<' && part[0] != '>' {
-			continue
-		}
 
-		op, arg, err := extractOperatorAndArg(part, v.IncompleteKind())
-		if err != nil {
-			return nil, errorWithCueRef(v, err.Error())
-		}
+	var walk func(cueast.Expr)
+	walk = func(e cueast.Expr) {
+		switch x := e.(type) {
+		case *cueast.BinaryExpr:
+			switch x.Op {
+			case token.AND:
+				walk(x.X)
+				walk(x.Y)
 
-		constraints = append(constraints, ast.TypeConstraint{
-			Op:   op,
-			Args: []any{arg},
-		})
+			case token.OR:
+				if isDefault(x.X) {
+					walk(x.Y)
+				} else if isDefault(x.Y) {
+					walk(x.X)
+				}
+			}
+		case *cueast.UnaryExpr:
+			if x.Op == token.MUL {
+				return
+			}
+			switch x.Op {
+			case token.GTR, token.GEQ, token.LSS, token.LEQ, token.EQL, token.NEQ:
+				raw, ok := extractNumber(x.X)
+				if !ok {
+					return
+				}
+
+				arg, err := parseNumber(raw)
+				if err != nil {
+					return
+				}
+
+				constraints = append(constraints, ast.TypeConstraint{
+					Op:   mapTokenToAstOp(x.Op),
+					Args: []any{arg},
+				})
+			}
+		}
 	}
 
+	expr, ok := node.(cueast.Expr)
+	if !ok {
+		return nil, nil
+	}
+
+	walk(expr)
+
 	return constraints, nil
+}
+
+func isDefault(e cueast.Expr) bool {
+	u, ok := e.(*cueast.UnaryExpr)
+	return ok && u.Op == token.MUL
+}
+
+func parseNumber(raw string) (any, error) {
+	if strings.Contains(raw, ".") {
+		return strconv.ParseFloat(raw, 64)
+	}
+	if i, err := strconv.ParseInt(raw, 10, 64); err == nil {
+		return i, nil
+	}
+	return strconv.ParseFloat(raw, 64)
+}
+
+func mapTokenToAstOp(op token.Token) ast.Op {
+	switch op {
+	case token.GTR:
+		return ast.GreaterThanOp
+	case token.GEQ:
+		return ast.GreaterThanEqualOp
+	case token.LSS:
+		return ast.LessThanOp
+	case token.LEQ:
+		return ast.LessThanEqualOp
+	case token.EQL:
+		return ast.EqualOp
+	case token.NEQ:
+		return ast.NotEqualOp
+	default:
+		return ""
+	}
+}
+
+func extractNumber(e cueast.Expr) (string, bool) {
+	switch v := e.(type) {
+	case *cueast.BasicLit:
+		return v.Value, true
+	case *cueast.UnaryExpr:
+		if v.Op == token.SUB {
+			if lit, ok := v.X.(*cueast.BasicLit); ok {
+				return "-" + lit.Value, true
+			}
+		}
+
+		if v.Op == token.ADD {
+			if lit, ok := v.X.(*cueast.BasicLit); ok {
+				return lit.Value, true
+			}
+		}
+	}
+
+	return "", false
 }
 
 func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
@@ -1006,9 +1058,12 @@ func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.
 		return false, ast.Type{}, nil
 	}
 
-	refPkg, err := g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
-	if err != nil {
-		return false, ast.Type{}, err
+	var refPkg = g.schema.Package
+	if getFilename(conjuncts[0]) != g.rootFilename {
+		refPkg, err = g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
+		if err != nil {
+			return false, ast.Type{}, err
+		}
 	}
 
 	_, path := conjuncts[0].ReferencePath()

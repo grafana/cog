@@ -7,7 +7,7 @@ class SomeStruct(cogbuilder.Builder[properties.SomeStruct]):
     _internal: properties.SomeStruct
     __some_builder_property: str = ""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = properties.SomeStruct()
 
     def build(self) -> properties.SomeStruct:

@@ -1,7 +1,4 @@
 // Code generated - EDITING IS FUTILE. DO NOT EDIT.
-//
-// Using jennies:
-//     GoRawTypes
 
 package validation
 
@@ -15,9 +12,7 @@ import (
 )
 
 type Dashboard struct {
-	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
-	Uid *string `json:"uid,omitempty"`
-	// Modified by compiler pass 'NotRequiredFieldAsNullableType[nullable=true]'
+	Uid    *string           `json:"uid,omitempty"`
 	Id     *int64            `json:"id,omitempty"`
 	Title  string            `json:"title"`
 	Tags   []string          `json:"tags"`

@@ -13,6 +13,7 @@ func TestMap_Basic(t *testing.T) {
 
 	req.Equal(0, orderedMap.Len())
 	req.False(orderedMap.Has("some-key"))
+	orderedMap.Remove("some-key") // does not panic
 
 	orderedMap.Set("first-key", "first-value")
 	orderedMap.Set("second-key", "second-value")

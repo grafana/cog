@@ -1,4 +1,5 @@
 {{- $options := include "options" . -}}
+{{- $factories := include "factories" . -}}
 {{- .Imports }}
 {{- range .Builder.For.Comments }}
 // {{ . }}
@@ -29,9 +30,7 @@ export class {{ .Builder.Name|upperCamelCase }}Builder implements cog.Builder<{{
 
 {{- $options -}}
 }
-{{ range .Builder.Factories }}
-    {{- template "factory" (dict "Builder" $.Builder "Factory" .) }}
-{{- end }}
+{{ $factories -}}
 
 {{- define "assignment" }}
 {{- range .Assignment.NilChecks }}
@@ -66,7 +65,7 @@ export class {{ .Builder.Name|upperCamelCase }}Builder implements cog.Builder<{{
         {{ .InputVar }}.map(builder{{ .Depth }} => {{ template "unfold_builders" (dict "InputType" .InputType.Array.ValueType "InputVar" (print "builder" .Depth ) "Depth" (add1 .Depth)) }})
     {{- else if .InputType.IsMap -}}
         (function() {
-            let results{{ .Depth }} = {};
+            let results{{ .Depth }}: {{ .InputType | formatTypeNoBuilder }} = {};
             for (const key{{ .Depth }} in {{ .InputVar }}) {
                 const val{{ .Depth }} = {{ .InputVar }}[key{{ .Depth }}];
                 results{{ .Depth }}[key{{ .Depth }}] = {{ template "unfold_builders" (dict "InputType" .InputType.Map.ValueType "InputVar" (print "val" .Depth ) "Depth" (add1 .Depth)) }};
@@ -83,18 +82,20 @@ export class {{ .Builder.Name|upperCamelCase }}Builder implements cog.Builder<{{
 {{- end }}
 
 {{- define "assignment_value" }}
-    {{- if not (eq .Value.Constant nil) }}
-        {{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
-    {{- end }}
-    {{- with .Value.Argument }}
+    {{- if .Value.Argument }}
+        {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
         {{- .Name|formatIdentifier }}{{- .Type.IsArray | ternary "Resources" "Resource" }}
         {{- else }}
         {{- .Name|formatIdentifier }}
         {{- end }}
-    {{- end }}
-    {{- with .Value.Envelope }}
+        {{- end }}
+    {{- else if .Value.Envelope }}
+        {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+        {{- end }}
+    {{- else }}
+        {{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
     {{- end }}
 {{- end }}
 

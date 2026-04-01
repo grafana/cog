@@ -6,7 +6,7 @@ from ..models import initialization_safeguards
 class SomePanel(cogbuilder.Builder[initialization_safeguards.SomePanel]):
     _internal: initialization_safeguards.SomePanel
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = initialization_safeguards.SomePanel()
 
     def build(self) -> initialization_safeguards.SomePanel:

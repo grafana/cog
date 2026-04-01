@@ -6,7 +6,7 @@ from ..models import some_pkg
 class SomeNiceBuilder(cogbuilder.Builder[some_pkg.SomeStruct]):
     _internal: some_pkg.SomeStruct
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = some_pkg.SomeStruct()
 
     def build(self) -> some_pkg.SomeStruct:

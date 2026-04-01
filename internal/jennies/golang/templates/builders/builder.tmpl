@@ -1,5 +1,6 @@
 package {{ .Builder.Package }}
 {{ $options := include "options" . }}
+{{- $factories := include "factories" . }}
 {{ .Imports }}
 
 var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name }}Builder)(nil)
@@ -29,9 +30,7 @@ func New{{ .Builder.Name }}Builder({{- template "args" .Builder.Constructor.Args
 	return builder
 }
 
-{{ range .Builder.Factories }}
-	{{ template "factory" (dict "Builder" $.Builder "Factory" .) }}
-{{- end }}
+{{- $factories }}
 
 func (builder *{{ .Builder.Name }}Builder) Build() ({{ .BuilderSignatureType }}, error) {
 	if err := builder.internal.Validate(); err != nil {
@@ -45,7 +44,12 @@ func (builder *{{ .Builder.Name }}Builder) Build() ({{ .BuilderSignatureType }},
 	return *builder.internal, nil
 }
 
-{{- $customMethodsTmpl := print "builder_" .Builder.Package "_" (.Builder.Name) "_custom_methods" }}
+func (builder *{{ .Builder.Name|formatObjectName }}Builder) RecordError(path string, err error) *{{ .Builder.Name|formatObjectName }}Builder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
+}
+
+{{- $customMethodsTmpl := print "builder_" .Builder.Package "_" (.Builder.Name|formatObjectName) "_custom_methods" }}
 {{- includeIfExists $customMethodsTmpl (dict) -}}
 
 {{- $options }}

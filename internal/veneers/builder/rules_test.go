@@ -38,8 +38,8 @@ func TestDuplicate(t *testing.T) {
 		},
 	}
 
-	rule := Duplicate(ByName("pkg", "Dashboard"), "NewDashboard", nil)
-	updatedBuilders, err := rule(schemas, originalBuilders)
+	action := DuplicateAction("NewDashboard", nil)
+	updatedBuilders, err := action(RuleCtx{Schemas: schemas, Builders: originalBuilders}, originalBuilders)
 	req.NoError(err)
 
 	req.Len(updatedBuilders, 2)
@@ -79,13 +79,10 @@ func TestInitialize(t *testing.T) {
 		},
 	}
 
-	rule := Initialize(
-		ByName("pkg", "Dashboard"),
-		[]Initialization{
-			{PropertyPath: "name", Value: "great name, isn't it?"},
-		},
-	)
-	updatedBuilders, err := rule(schemas, originalBuilders)
+	action := InitializeAction([]Initialization{
+		{PropertyPath: "name", Value: "great name, isn't it?"},
+	})
+	updatedBuilders, err := action(RuleCtx{Schemas: schemas, Builders: originalBuilders}, originalBuilders)
 	req.NoError(err)
 
 	expectedAssignments := []ast.Assignment{
@@ -130,11 +127,8 @@ func TestPromoteOptionsToConstructor(t *testing.T) {
 		},
 	}
 
-	rule := PromoteOptionsToConstructor(
-		ByName("pkg", "Dashboard"),
-		[]string{"name"},
-	)
-	updatedBuilders, err := rule(schemas, originalBuilders)
+	action := PromoteOptionsToConstructorAction([]string{"name"})
+	updatedBuilders, err := action(RuleCtx{Schemas: schemas, Builders: originalBuilders}, originalBuilders)
 	req.NoError(err)
 
 	expectedArgs := []ast.Argument{argument}

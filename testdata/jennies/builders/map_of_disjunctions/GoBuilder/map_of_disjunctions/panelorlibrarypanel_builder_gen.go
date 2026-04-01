@@ -22,7 +22,6 @@ func NewPanelOrLibraryPanelBuilder() *PanelOrLibraryPanelBuilder {
 }
 
 
-
 func (builder *PanelOrLibraryPanelBuilder) Build() (PanelOrLibraryPanel, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return PanelOrLibraryPanel{}, err
@@ -33,6 +32,11 @@ func (builder *PanelOrLibraryPanelBuilder) Build() (PanelOrLibraryPanel, error) 
 	}
 
 	return *builder.internal, nil
+}
+
+func (builder *PanelOrLibraryPanelBuilder) RecordError(path string, err error) *PanelOrLibraryPanelBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
 }
 
 func (builder *PanelOrLibraryPanelBuilder) Panel(panel cog.Builder[Panel]) *PanelOrLibraryPanelBuilder {
@@ -56,3 +60,4 @@ func (builder *PanelOrLibraryPanelBuilder) LibraryPanel(libraryPanel cog.Builder
 
     return builder
 }
+

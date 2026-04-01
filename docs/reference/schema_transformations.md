@@ -1,6 +1,3 @@
----
-weight: 10
----
 <!-- Generated with `make docs` -->
 # Schema transformations
 
@@ -61,6 +58,17 @@ Will become:
 
 ```yaml
 anonymous_structs_to_named: {}
+```
+
+## `cleanup_k8_resource_names`
+
+N/A
+
+### Usage
+
+```yaml
+cleanup_k8_resource_names:
+  prefix_to_remove: string
 ```
 
 ## `constant_to_enum`

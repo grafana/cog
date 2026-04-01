@@ -23,7 +23,6 @@ func NewLokiBuilderBuilder() *LokiBuilderBuilder {
 }
 
 
-
 func (builder *LokiBuilderBuilder) Build() (variants.Dataquery, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return Loki{}, err
@@ -34,6 +33,11 @@ func (builder *LokiBuilderBuilder) Build() (variants.Dataquery, error) {
 	}
 
 	return *builder.internal, nil
+}
+
+func (builder *LokiBuilderBuilder) RecordError(path string, err error) *LokiBuilderBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
 }
 
 func (builder *LokiBuilderBuilder) Expr(expr string) *LokiBuilderBuilder {

@@ -64,6 +64,50 @@
               "Required": false
             },
             {
+              "Name": "greaterThanZero",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "uint64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        3
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "negative",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        -19
+                      ]
+                    },
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        10
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
               "Name": "title",
               "Type": {
                 "Kind": "scalar",
@@ -82,33 +126,6 @@
               },
               "Required": true
             },
-            {
-              "Name": "refStruct",
-              "Type": {
-                "Kind": "ref",
-                "Nullable": false,
-                "Ref": {
-                  "ReferredPkg": "constraints",
-                  "ReferredType": "refStruct"
-                }
-              },
-              "Required": false
-            }
-          ]
-        }
-      },
-      "SelfRef": {
-        "ReferredPkg": "constraints",
-        "ReferredType": "SomeStruct"
-      }
-    },
-    "refStruct": {
-      "Name": "refStruct",
-      "Type": {
-        "Kind": "struct",
-        "Nullable": false,
-        "Struct": {
-          "Fields": [
             {
               "Name": "labels",
               "Type": {
@@ -165,13 +182,51 @@
                 }
               },
               "Required": true
+            },
+            {
+              "Name": "regex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "=~",
+                      "Args": [
+                        "^[a-zA-Z0-9_-]+$"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "negativeRegex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "!~",
+                      "Args": [
+                        "^[a-zA-Z0-9_-]+$"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
             }
           ]
         }
       },
       "SelfRef": {
         "ReferredPkg": "constraints",
-        "ReferredType": "refStruct"
+        "ReferredType": "SomeStruct"
       }
     }
   }

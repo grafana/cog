@@ -22,7 +22,6 @@ func NewNestedStructBuilder() *NestedStructBuilder {
 }
 
 
-
 func (builder *NestedStructBuilder) Build() (NestedStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return NestedStruct{}, err
@@ -33,6 +32,11 @@ func (builder *NestedStructBuilder) Build() (NestedStruct, error) {
 	}
 
 	return *builder.internal, nil
+}
+
+func (builder *NestedStructBuilder) RecordError(path string, err error) *NestedStructBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
 }
 
 func (builder *NestedStructBuilder) StringVal(stringVal string) *NestedStructBuilder {

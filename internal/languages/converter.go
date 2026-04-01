@@ -24,7 +24,7 @@ type DirectArgMapping struct {
 	ValueType ast.Type
 }
 
-// mapping between a JSON value and an argument delegated to a builder
+// BuilderArgMapping mapping between a JSON value and an argument delegated to a builder
 type BuilderArgMapping struct {
 	ValuePath   ast.Path
 	ValueType   ast.Type
@@ -283,12 +283,12 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 		if mapping.RepeatFor != nil && valueType.IsArray() {
 			valueType = valueType.AsArray().ValueType
 			valuePath = ast.Path{
-				{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+				ast.PathItem{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
 			}
 		} else if mapping.RepeatFor != nil && assignment.Method == ast.IndexAssignment {
 			// index
 			indexPath := ast.Path{
-				{Identifier: mapping.RepeatIndex, Type: valueType, Root: true},
+				ast.PathItem{Identifier: mapping.RepeatIndex, Type: valueType, Root: true},
 			}
 			indexType := assignment.Path.Last().Index.Argument.Type
 			argument := generator.argumentForType(context, converter, mapping.RepeatIndex, indexPath, indexType)
@@ -296,7 +296,7 @@ func (generator *ConverterGenerator) mappingForOption(context Context, converter
 			// If it isn't a disjunction, we have to put the value in the second argument
 			// value
 			valuePath = ast.Path{
-				{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
+				ast.PathItem{Identifier: mapping.RepeatAs, Type: valueType, Root: true},
 			}
 			if !generator.isAssignmentFromDisjunctionStruct(context, assignment) {
 				argument = generator.argumentForType(context, converter, argName, valuePath, valueType)
@@ -402,21 +402,25 @@ func (generator *ConverterGenerator) argumentForType(context Context, converter 
 	}
 
 	possibleBuilders := context.BuildersForType(typeDef)
-	// hack to use the runtime to convert panels
-	if len(possibleBuilders) > 1 {
+	// hack to use the runtime to convert panels and dataqueries
+	if len(possibleBuilders) > 1 && typeDef.IsRef() {
 		for _, runtimeConfig := range generator.config.RuntimeConfig {
-			if strings.EqualFold(possibleBuilders[0].Package, runtimeConfig.Package) && strings.EqualFold(runtimeConfig.Name, possibleBuilders[0].For.Name) {
-				typeField, _ := possibleBuilders[0].For.Type.Struct.FieldByName(runtimeConfig.DiscriminatorField)
+			ref := typeDef.AsRef()
+			if !strings.EqualFold(ref.ReferredPkg, runtimeConfig.Package) || !strings.EqualFold(runtimeConfig.Name, ref.ReferredType) {
+				continue
+			}
 
-				return ArgumentMapping{
-					Runtime: &RuntimeArgMapping{
-						FuncName: runtimeConfig.NameFunc,
-						Args: []*DirectArgMapping{
-							{ValuePath: valuePath, ValueType: typeDef},
-							{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
-						},
+			resolvedRef := context.ResolveRefs(typeDef)
+			typeField, _ := resolvedRef.Struct.FieldByName(runtimeConfig.DiscriminatorField)
+
+			return ArgumentMapping{
+				Runtime: &RuntimeArgMapping{
+					FuncName: runtimeConfig.NameFunc,
+					Args: []*DirectArgMapping{
+						{ValuePath: valuePath, ValueType: typeDef},
+						{ValuePath: valuePath.AppendStructField(typeField), ValueType: typeField.Type},
 					},
-				}
+				},
 			}
 		}
 	}
@@ -562,7 +566,7 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 
 		// For strings: ensure they're not empty
 		// TODO: deal with datetime strings
-		if assignmentType.IsScalar() && assignmentType.AsScalar().ScalarKind == ast.KindString && !assignmentType.HasHint(ast.HintStringFormatDateTime) {
+		if assignmentType.IsScalar() && assignmentType.AsScalar().ScalarKind == ast.KindString && !assignmentType.HasHint(ast.HintStringFormatDateTime) && !assignmentType.HasHint(ast.HintStringFormatDuration) {
 			guard := MappingGuard{
 				Path:  valuesRootPath.Append(assignment.Path),
 				Op:    ast.NotEqualOp,

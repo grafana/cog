@@ -92,11 +92,11 @@ func TestByBuilder(t *testing.T) {
 	req.Len(filter(notFoundSelector, dashboardBuilder, options), 0)
 }
 
-func filter(selector Selector, builder ast.Builder, opts []ast.Option) []ast.Option {
+func filter(selector *Selector, builder ast.Builder, opts []ast.Option) []ast.Option {
 	var selected []ast.Option
 
 	for _, opt := range opts {
-		if selector(builder, opt) {
+		if selector.Matches(builder, opt) {
 			selected = append(selected, opt)
 		}
 	}

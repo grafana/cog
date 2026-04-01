@@ -30,7 +30,7 @@ lint: dev-env-check-binaries ## Lints the code base.
 
 .PHONY: tests
 tests: dev-env-check-binaries gen-tests ## Runs the tests.
-	$(RUN_DEVBOX) go test -v ./...
+	$(RUN_DEVBOX) go test ./...
 
 .PHONY: deps
 deps: dev-env-check-binaries ## Installs the dependencies.
@@ -40,52 +40,41 @@ deps: dev-env-check-binaries ## Installs the dependencies.
 .PHONY: docs
 docs: dev-env-check-binaries ## Generates the documentation.
 	@$(RUN_DEVBOX) go run cmd/compiler-passes-docs/*
+	@$(RUN_DEVBOX) go run cmd/veneers-docs/*
 	@$(RUN_DEVBOX) go run cmd/cog-config-schemas/*
-	$(RUN_DEVBOX) mkdocs build -f ./mkdocs-github.yml -d ./docs-site/
+	@$(RUN_DEVBOX) zensical build -f ./mkdocs-github.yml
 
 .PHONY: serve-docs
 serve-docs: dev-env-check-binaries ## Builds and serves the documentation.
 	$(RUN_DEVBOX) mkdocs serve -w ./docs/ -f ./mkdocs-github.yml
 
+.PHONY: fetch-foundation-sdk
+fetch-foundation-sdk: ## Fetches the Foundation SDK.
+	@./scripts/fetch-repo.sh ./build/foundation-sdk https://github.com/grafana/grafana-foundation-sdk.git
+
+.PHONY: fetch-kind-registry
+fetch-kind-registry: ## Fetches the kind-registry.
+	@./scripts/fetch-repo.sh ./build/kind-registry https://github.com/grafana/kind-registry.git
+
 .PHONY: gen-sdk-dev
-gen-sdk-dev: dev-env-check-binaries ## Generates a dev version of the Foundation SDK.
-	rm -rf generated
+gen-sdk-dev: dev-env-check-binaries fetch-foundation-sdk fetch-kind-registry ## Generates a dev version of the Foundation SDK.
+	@rm -rf generated
 	$(RUN_DEVBOX) go run cmd/cli/main.go generate \
-		--config ./config/foundation_sdk.dev.yaml
+		--config ./build/foundation-sdk/.cog/config.yaml \
+		--debug \
+		--parameters "output_dir=./generated/%l,kind_registry_path=./build/kind-registry,go_package_root=github.com/grafana/cog/generated/go"
 
 .PHONY: gen-tests
 gen-tests: dev-env-check-binaries ## Generates the code described by tests schemas.
 	$(RUN_DEVBOX) go run ./cmd/cli/ generate \
 		--config ./config/foundation_sdk.tests.yaml
 
-.PHONY: run-go-example
-run-go-example: dev-env-check-binaries ## Runs the Go example.
-	$(RUN_DEVBOX) go run ./examples/_go/*
-	$(RUN_DEVBOX) go run ./examples/_go_dashboardv2/*
-
-.PHONY: run-java-example
-run-java-example: dev-env-check-binaries ## Runs the Java example.
-	$(RUN_DEVBOX) gradle publishToMavenLocal -p generated/java
-	$(RUN_DEVBOX) gradle run -p examples/java
-	$(RUN_DEVBOX) gradle run -p examples/java_dashboardv2
-
-.PHONY: run-php-example
-run-php-example: dev-env-check-binaries ## Runs the PHP example.
-	$(RUN_DEVBOX) composer install -d ./examples/php && \
-	$(RUN_DEVBOX) composer install -d ./examples/php_dashboardv2 && \
-	$(RUN_DEVBOX) php ./examples/php/index.php
-	$(RUN_DEVBOX) php ./examples/php_dashboardv2/index.php
-
-.PHONY: run-ts-example
-run-ts-example: dev-env-check-binaries ## Runs the Typescript example.
-	$(RUN_DEVBOX) ts-node examples/typescript
-	$(RUN_DEVBOX) ts-node examples/typescript_dashboardv2
-
-.PHONY: run-python-example
-run-python-example: dev-env-check-binaries ## Runs the Python example.
-	$(RUN_DEVBOX) python examples/python/main.py
-	$(RUN_DEVBOX) python examples/python_dashboardv2/main.py
-
 .PHONY: dev-env-check-binaires
 dev-env-check-binaries: ## Check that the required binary are present.
 	@devbox version >/dev/null 2>&1 || (echo "ERROR: devbox is required. See https://www.jetify.com/devbox/docs/quickstart/"; exit 1)
+
+.PHONY: test-inspect
+test-inspect:
+	$(RUN_DEVBOX) go run cmd/cli/main.go inspect \
+		--config config/inspect.test.yaml \
+		--parameters "cue_path=$(CUE_PATH)"

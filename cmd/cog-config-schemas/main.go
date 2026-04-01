@@ -21,6 +21,7 @@ func main() {
 		{name: "compiler_passes", input: &yaml.Compiler{}},
 		{name: "veneers", input: &yaml.Veneers{}},
 		{name: "pipeline", input: &codegen.Pipeline{}},
+		{name: "unit", input: &codegen.Unit{}},
 	}
 
 	reflector := &jsonschema.Reflector{

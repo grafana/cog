@@ -23,6 +23,7 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 		template.Funcs(common.TypesTemplateHelpers(languages.Context{})),
 		template.Funcs(common.APIRefTemplateHelpers(apiRefCollector)),
 		template.Funcs(formattingTemplateFuncs(config)),
+		template.Funcs(config.OverridesTemplateFuncs),
 		template.Funcs(template.FuncMap{
 			"formatPath": func(_ ast.Path) string {
 				panic("formatPath() needs to be overridden by a jenny")
@@ -86,9 +87,8 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 				return typeDef.Nullable && !typeDef.IsArray()
 			},
 		}),
-
-		// parse templates
 		template.ParseFS(templatesFS, "templates"),
+		template.ParseFS(config.OverridesTemplatesFS, "custom"),
 		template.ParseDirectories(config.OverridesTemplatesDirectories...),
 	)
 	if err != nil {

@@ -138,6 +138,19 @@
                 }
               },
               "Required": true
+            },
+            {
+              "Name": "other",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": true,
+                "ConstantReference": {
+                  "ReferredPkg": "constant_references",
+                  "ReferredType": "Enum",
+                  "ReferenceValue": "ValueA"
+                }
+              },
+              "Required": false
             }
           ]
         }

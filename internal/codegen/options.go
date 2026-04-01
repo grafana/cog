@@ -2,6 +2,8 @@ package codegen
 
 import (
 	"fmt"
+	"log/slog"
+	"maps"
 )
 
 func StdoutReporter(msg string) {
@@ -10,16 +12,19 @@ func StdoutReporter(msg string) {
 
 func Parameters(extraParameters map[string]string) PipelineOption {
 	return func(pipeline *Pipeline) {
-		for key, value := range extraParameters {
-			pipeline.Parameters[key] = value
-		}
-
+		maps.Copy(pipeline.Parameters, extraParameters)
 		pipeline.interpolateParameters()
 	}
 }
 
-func Reporter(reporter ProgressReporter) PipelineOption {
+func Logger(logger *slog.Logger) PipelineOption {
 	return func(pipeline *Pipeline) {
-		pipeline.reporter = reporter
+		pipeline.logger = logger
+	}
+}
+
+func Debug(enabled bool) PipelineOption {
+	return func(pipeline *Pipeline) {
+		pipeline.Debug = enabled
 	}
 }

@@ -27,3 +27,4 @@ export class ElementBuilder implements cog.Builder<mapOfDisjunctions.Element> {
         return this;
     }
 }
+

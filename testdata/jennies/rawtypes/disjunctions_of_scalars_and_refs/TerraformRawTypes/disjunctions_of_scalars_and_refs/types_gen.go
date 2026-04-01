@@ -1,0 +1,45 @@
+package disjunctions_of_scalars_and_refs
+
+import (
+	 "github.com/hashicorp/terraform-plugin-framework/types"
+	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+)
+
+type DisjunctionOfScalarsAndRefs = StringOrBoolOrArrayOfStringOrMyRefAOrMyRefB
+
+type MyRefA struct {
+ Foo types.String `tfsdk:"foo"`
+ }
+
+type MyRefB struct {
+ Bar types.Int64 `tfsdk:"bar"`
+ }
+
+type StringOrBoolOrArrayOfStringOrMyRefAOrMyRefB struct {
+ String types.String `tfsdk:"String"`
+Bool types.Bool `tfsdk:"Bool"`
+ArrayOfString types.List `tfsdk:"ArrayOfString"`
+MyRefA MyRefA `tfsdk:"MyRefA"`
+MyRefB MyRefB `tfsdk:"MyRefB"`
+ }
+
+var SpecAttributes = map[string]schema.Attribute{
+"my_ref_a": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"foo": schema.StringAttribute{
+ Required: true,
+},
+
+},
+},
+"my_ref_b": schema.SingleNestedAttribute{
+Required: true,
+Attributes: map[string]schema.Attribute{
+"bar": schema.Int64Attribute{
+ Required: true,
+},
+
+},
+},
+}

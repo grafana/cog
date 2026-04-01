@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -114,9 +115,8 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 	}
 
 	structType := ast.NewStruct(fields...)
-	for hint, value := range def.Hints {
-		structType.Hints[hint] = value
-	}
+	maps.Copy(structType.Hints, def.Hints)
+
 	switch {
 	case disjunction.Branches.HasOnlyScalarOrArrayOrMap():
 		structType.Hints[ast.HintDisjunctionOfScalars] = disjunction

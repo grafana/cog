@@ -6,7 +6,7 @@ from ..models import constructor_initializations
 class SomePanel(cogbuilder.Builder[constructor_initializations.SomePanel]):
     _internal: constructor_initializations.SomePanel
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._internal = constructor_initializations.SomePanel()        
         self._internal.type_val = "panel_type"        
         self._internal.cursor = constructor_initializations.CursorMode.TOOLTIP

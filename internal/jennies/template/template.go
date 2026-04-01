@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -19,10 +20,7 @@ const recursionMaxNums = 1000
 type FuncMap gotemplate.FuncMap
 
 func (funcMap FuncMap) MergeWith(other FuncMap) FuncMap {
-	for k, v := range other {
-		funcMap[k] = v
-	}
-
+	maps.Copy(funcMap, other)
 	return funcMap
 }
 
@@ -50,6 +48,10 @@ func Parse(payload string) Option {
 
 func ParseFS(vfs fs.FS, rootDir string) Option {
 	return func(template *Template) error {
+		if vfs == nil {
+			return nil
+		}
+
 		err := fs.WalkDir(vfs, rootDir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
@@ -186,7 +188,7 @@ func (template *Template) ExecuteAsBytes(data any) ([]byte, error) {
 
 func (template *Template) builtins() FuncMap {
 	includedNames := make(map[string]int)
-	include := func(name string, data interface{}) (string, error) {
+	include := func(name string, data any) (string, error) {
 		var buf strings.Builder
 		if v, ok := includedNames[name]; ok {
 			if v > recursionMaxNums {
@@ -245,6 +247,7 @@ func (template *Template) builtins() FuncMap {
 				return l2.Interface()
 			default:
 				panic(fmt.Sprintf("Cannot find first on type %s", tp))
+				return nil
 			}
 		},
 		"last": func(list any) any {
@@ -258,10 +261,11 @@ func (template *Template) builtins() FuncMap {
 				return l2.Interface()
 			default:
 				panic(fmt.Sprintf("Cannot find first on type %s", tp))
+				return nil
 			}
 		},
 
-		"slice": func(arr interface{}, start int) interface{} {
+		"slice": func(arr any, start int) any {
 			v := reflect.ValueOf(arr)
 			if v.Kind() != reflect.Slice {
 				panic("slice: input must be a slice")
@@ -315,7 +319,7 @@ func (template *Template) builtins() FuncMap {
 
 // empty returns true if the given value has the zero value for its type.
 // see https://github.com/Masterminds/sprig/blob/e708470d529a10ac1a3f02ab6fdd339b65958372/defaults.go#L35
-func empty(given interface{}) bool {
+func empty(given any) bool {
 	g := reflect.ValueOf(given)
 	if !g.IsValid() {
 		return true

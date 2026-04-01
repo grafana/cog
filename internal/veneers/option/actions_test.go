@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -12,7 +13,8 @@ func TestRenameAction(t *testing.T) {
 	req := require.New(t)
 
 	option := ast.Option{Name: "Name"}
-	modifiedOpts := RenameAction("NewName")(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := RenameAction("NewName")(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 1)
 	req.Equal("NewName", modifiedOpts[0].Name)
@@ -22,7 +24,8 @@ func TestOmitAction(t *testing.T) {
 	req := require.New(t)
 
 	option := ast.Option{Name: "Name"}
-	modifiedOpts := OmitAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := OmitAction()(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Empty(modifiedOpts)
 }
@@ -40,10 +43,11 @@ func TestUnfoldBooleanAction(t *testing.T) {
 			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
 		},
 	}
-	modifiedOpts := UnfoldBooleanAction(BooleanUnfold{
+	modifiedOpts, err := UnfoldBooleanAction(BooleanUnfold{
 		OptionTrue:  "Editable",
 		OptionFalse: "ReadOnly",
-	})(ast.Schemas{}, ast.Builder{}, option)
+	})(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
 
@@ -76,10 +80,11 @@ func TestUnfoldBooleanAction_onNonBooleanDoesNothing(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
 		},
 	}
-	modifiedOpts := UnfoldBooleanAction(BooleanUnfold{
+	modifiedOpts, err := UnfoldBooleanAction(BooleanUnfold{
 		OptionTrue:  "TrueOpt",
 		OptionFalse: "FalseOpt",
-	})(ast.Schemas{}, ast.Builder{}, option)
+	})(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 1)
 	req.Equal(option, modifiedOpts[0])
@@ -104,7 +109,8 @@ func TestDisjunctionAsOptionsAction_withDisjunction(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
-	modifiedOpts := DisjunctionAsOptionsAction(0)(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := DisjunctionAsOptionsAction(0)(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
 
@@ -142,7 +148,8 @@ func TestDisjunctionAsOptionsAction_withDisjunctionAsSecondArg(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: disjunctionType}),
 		},
 	}
-	modifiedOpts := DisjunctionAsOptionsAction(1)(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := DisjunctionAsOptionsAction(1)(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
 
@@ -193,7 +200,11 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStruct(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: ref}),
 		},
 	}
-	modifiedOpts := DisjunctionAsOptionsAction(0)(ast.Schemas{schema}, ast.Builder{}, option)
+	ctx := RuleCtx{
+		Schemas: ast.Schemas{schema},
+	}
+	modifiedOpts, err := DisjunctionAsOptionsAction(0)(ctx, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
 
@@ -242,7 +253,11 @@ func TestDisjunctionAsOptionsAction_withDisjunctionStructAsSecondArg(t *testing.
 			}, ast.Argument{Name: "tags", Type: ref}),
 		},
 	}
-	modifiedOpts := DisjunctionAsOptionsAction(1)(ast.Schemas{schema}, ast.Builder{}, option)
+	ctx := RuleCtx{
+		Schemas: ast.Schemas{schema},
+	}
+	modifiedOpts, err := DisjunctionAsOptionsAction(1)(ctx, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
 
@@ -289,7 +304,11 @@ func TestStructFieldsAsOptionsAction_withRefArg(t *testing.T) {
 			}, ast.Argument{Name: "editable", Type: ref}),
 		},
 	}
-	modifiedOpts := StructFieldsAsOptionsAction("from", "to")(ast.Schemas{schema}, ast.Builder{}, option)
+	ctx := RuleCtx{
+		Schemas: ast.Schemas{schema},
+	}
+	modifiedOpts, err := StructFieldsAsOptionsAction("from", "to")(ctx, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
 
@@ -318,7 +337,8 @@ func TestArrayToAppendAction_withNoArgument(t *testing.T) {
 			}, true),
 		},
 	}
-	modifiedOpts := ArrayToAppendAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
@@ -336,7 +356,8 @@ func TestArrayToAppendAction_withNonArrayArgument(t *testing.T) {
 			}, ast.Argument{Name: "editable", Type: ast.Bool()}),
 		},
 	}
-	modifiedOpts := ArrayToAppendAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
@@ -373,7 +394,8 @@ func TestArrayToAppendAction_withArrayArgument(t *testing.T) {
 		VeneerTrail: []string{"ArrayToAppend"},
 	}
 
-	modifiedOpts := ArrayToAppendAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := ArrayToAppendAction()(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
 }
@@ -388,7 +410,8 @@ func TestStructFieldsAsArgumentsAction_withNoArgument(t *testing.T) {
 			}, true),
 		},
 	}
-	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
@@ -406,7 +429,8 @@ func TestStructFieldsAsArgumentsAction_withNonStructArgument(t *testing.T) {
 			}, ast.Argument{Name: "tags", Type: ast.NewArray(ast.String())}),
 		},
 	}
-	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{Logger: logs.NoopLogger()}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Equal([]ast.Option{option}, modifiedOpts)
 }
@@ -455,7 +479,8 @@ func TestStructFieldsAsArgumentsAction_withStructArgument(t *testing.T) {
 		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}
 
-	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
 }
@@ -521,7 +546,8 @@ func TestStructFieldsAsArgumentsAction_withArrayOfStructArgument(t *testing.T) {
 		VeneerTrail: []string{"StructFieldsAsArguments"},
 	}
 
-	modifiedOpts := StructFieldsAsArgumentsAction()(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := StructFieldsAsArgumentsAction()(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Equal([]ast.Option{expectedOption}, modifiedOpts)
 }
@@ -530,7 +556,8 @@ func TestDuplicateAction(t *testing.T) {
 	req := require.New(t)
 
 	option := ast.Option{Name: "Name"}
-	modifiedOpts := DuplicateAction("Duplicated")(ast.Schemas{}, ast.Builder{}, option)
+	modifiedOpts, err := DuplicateAction("Duplicated")(RuleCtx{}, ast.Builder{}, option)
+	req.NoError(err)
 
 	req.Len(modifiedOpts, 2)
 	req.Equal("Name", modifiedOpts[0].Name)

@@ -3,6 +3,7 @@ package openapi
 import (
 	"context"
 	"fmt"
+	"maps"
 	"regexp"
 	"sort"
 	"strings"
@@ -305,9 +306,7 @@ func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[strin
 	mapping := make(map[string]string)
 	if schema.Discriminator != nil {
 		name = schema.Discriminator.PropertyName
-		for k, v := range schema.Discriminator.Mapping {
-			mapping[k] = v
-		}
+		maps.Copy(mapping, schema.Discriminator.Mapping)
 	}
 
 	return name, mapping

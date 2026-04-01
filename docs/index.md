@@ -44,7 +44,7 @@
         "context"
         "fmt"
 
-	    "github.com/grafana/cog"
+        "github.com/grafana/cog"
     )
 
     func main() {

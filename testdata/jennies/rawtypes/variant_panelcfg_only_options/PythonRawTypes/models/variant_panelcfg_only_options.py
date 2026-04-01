@@ -4,7 +4,7 @@ import typing
 class Options:
     content: str
 
-    def __init__(self, content: str = ""):
+    def __init__(self, content: str = "") -> None:
         self.content = content
 
     def to_json(self) -> dict[str, object]:

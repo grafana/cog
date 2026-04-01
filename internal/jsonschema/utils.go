@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	schemaparser "github.com/santhosh-tekuri/jsonschema/v5"
+	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 func schemaComments(schema *schemaparser.Schema) []string {
@@ -40,4 +40,12 @@ func unwrapJSONNumber(input any) any {
 	}
 
 	return input
+}
+
+func maybeDefault(input *any) any {
+	if input == nil {
+		return nil
+	}
+
+	return *input
 }

@@ -8,7 +8,7 @@ class SomeStruct:
     field_float32: float
     field_int32: int
 
-    def __init__(self, field_bool: bool = True, field_string: str = "foo", field_float32: float = 42.42, field_int32: int = 42):
+    def __init__(self, field_bool: bool = True, field_string: str = "foo", field_float32: float = 42.42, field_int32: int = 42) -> None:
         self.field_bool = field_bool
         self.field_string = field_string
         self.field_string_with_constant_value = "auto"

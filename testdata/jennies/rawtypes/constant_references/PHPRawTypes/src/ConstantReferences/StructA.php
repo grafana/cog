@@ -6,9 +6,12 @@ class StructA implements \JsonSerializable
 {
     public \Grafana\Foundation\ConstantReferences\Enum $myEnum;
 
+    public ?\Grafana\Foundation\ConstantReferences\Enum $other;
+
     public function __construct()
     {
         $this->myEnum = \Grafana\Foundation\ConstantReferences\Enum::valueA();
+        $this->other = \Grafana\Foundation\ConstantReferences\Enum::valueA();
     }
 
     /**
@@ -27,6 +30,9 @@ class StructA implements \JsonSerializable
     {
         $data = new \stdClass;
         $data->myEnum = $this->myEnum;
+        if (isset($this->other)) {
+            $data->other = $this->other;
+        }
         return $data;
     }
 }

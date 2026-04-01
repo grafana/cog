@@ -16,11 +16,16 @@ type Builder struct {
 	Package     string
 	Name        string
 	Properties  []StructField `json:",omitempty"`
-	Constructor Constructor   `json:",omitempty"`
+	Constructor Constructor
 	Options     []Option
 	VeneerTrail []string `json:",omitempty"`
 
 	Factories []BuilderFactory `json:",omitempty"`
+
+	// After composition, assignments are often expected to start from a new
+	// root path defined at composition time.
+	// e.g.: under `spec`
+	AssignmentsPreferredRoot Path
 }
 
 func (builder *Builder) OptionByName(name string) (Option, bool) {
@@ -60,33 +65,41 @@ func (builder *Builder) AddToVeneerTrail(veneerName string) {
 	builder.VeneerTrail = append(builder.VeneerTrail, veneerName)
 }
 
-func (builder *Builder) MakePath(builders Builders, pathAsString string) (Path, error) {
+func (builder *Builder) MakePath(schemas Schemas, pathAsString string) (Path, error) {
 	if pathAsString == "" {
 		return nil, fmt.Errorf("can not make path from empty input")
 	}
 
-	resolveRef := func(ref RefType) (Builder, error) {
-		referredObjBuilder, found := builders.LocateByObject(ref.ReferredPkg, ref.ReferredType)
+	resolveRef := func(ref RefType) (Object, error) {
+		referredObj, found := schemas.LocateObjectByRef(ref)
 		if !found {
-			return Builder{}, fmt.Errorf("could not make path '%s': reference '%s' could not be resolved", pathAsString, ref.String())
+			return Object{}, fmt.Errorf("could not make path '%s': reference '%s' could not be resolved", pathAsString, ref.String())
 		}
 
-		return referredObjBuilder, nil
+		return referredObj, nil
 	}
 
 	currentType := builder.For.Type
 
 	var path Path
 
-	pathParts := strings.Split(pathAsString, ".")
-	for _, part := range pathParts {
+	for _, part := range builder.AssignmentsPreferredRoot {
+		path = append(path, part)
+		currentType = part.Type
+		if part.TypeHint != nil {
+			currentType = *part.TypeHint
+		}
+	}
+
+	pathParts := strings.SplitSeq(pathAsString, ".")
+	for part := range pathParts {
 		if currentType.IsRef() {
-			referredObjBuilder, err := resolveRef(currentType.AsRef())
+			referredObj, err := resolveRef(currentType.AsRef())
 			if err != nil {
 				return nil, err
 			}
 
-			currentType = referredObjBuilder.For.Type
+			currentType = referredObj.Type
 		}
 
 		if !currentType.IsStruct() {
@@ -144,7 +157,7 @@ func (builders Builders) LocateByObject(pkg string, name string) (Builder, bool)
 
 func (builders Builders) LocateByName(pkg string, name string) (Builder, bool) {
 	for _, builder := range builders {
-		if builder.For.SelfRef.ReferredPkg == pkg && builder.Name == name {
+		if builder.Package == pkg && builder.Name == name {
 			return builder, true
 		}
 	}

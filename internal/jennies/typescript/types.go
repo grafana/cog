@@ -98,30 +98,7 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 	case ast.KindDisjunction:
 		return formatter.formatDisjunction(def.AsDisjunction(), resolveBuilders)
 	case ast.KindRef:
-		formatted := tools.CleanupNames(def.AsRef().ReferredType)
-
-		referredPkg := formatter.packageMapper(def.AsRef().ReferredPkg)
-		if referredPkg != "" {
-			formatted = referredPkg + "." + formatted
-		}
-
-		if resolveBuilders && formatter.context.ResolveToBuilder(def) {
-			cogAlias := formatter.packageMapper("cog")
-
-			return fmt.Sprintf("%s.Builder<%s>", cogAlias, formatted)
-		}
-
-		// if the field's type is a reference to a constant,
-		// we need to use the constant's value instead.
-		// ie: `SomeField: "foo"` instead of `SomeField: MyStringConstant`
-		if def.IsRef() {
-			referredType, found := formatter.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
-			if found && referredType.Type.IsConcreteScalar() {
-				return formatter.doFormatType(referredType.Type, resolveBuilders)
-			}
-		}
-
-		return formatted
+		return formatter.formatRef(def.AsRef(), resolveBuilders)
 	case ast.KindArray:
 		return formatter.formatArray(def.AsArray(), resolveBuilders)
 	case ast.KindStruct:
@@ -154,6 +131,31 @@ func (formatter *typeFormatter) doFormatType(def ast.Type, resolveBuilders bool)
 	default:
 		return string(def.Kind)
 	}
+}
+
+func (formatter *typeFormatter) formatRef(refType ast.RefType, resolveBuilders bool) string {
+	formatted := tools.CleanupNames(refType.ReferredType)
+
+	referredPkg := formatter.packageMapper(refType.ReferredPkg)
+	if referredPkg != "" {
+		formatted = referredPkg + "." + formatted
+	}
+
+	if resolveBuilders && formatter.context.ResolveToBuilder(refType.AsType()) {
+		cogAlias := formatter.packageMapper("cog")
+
+		return fmt.Sprintf("%s.Builder<%s>", cogAlias, formatted)
+	}
+
+	// if the field's type is a reference to a constant,
+	// we need to use the constant's value instead.
+	// ie: `SomeField: "foo"` instead of `SomeField: MyStringConstant`
+	referredType, found := formatter.context.LocateObjectByRef(refType)
+	if found && referredType.Type.IsConcreteScalar() {
+		return formatter.doFormatType(referredType.Type, resolveBuilders)
+	}
+
+	return formatted
 }
 
 func (formatter *typeFormatter) formatStructFields(structType ast.Type) string {
@@ -241,10 +243,9 @@ func (formatter *typeFormatter) formatArray(def ast.ArrayType, resolveBuilders b
 }
 
 func (formatter *typeFormatter) formatDisjunction(def ast.DisjunctionType, resolveBuilders bool) string {
-	subTypes := make([]string, 0, len(def.Branches))
-	for _, subType := range def.Branches {
-		subTypes = append(subTypes, formatter.doFormatType(subType, resolveBuilders))
-	}
+	subTypes := tools.UniqueFormatted(def.Branches, func(subType ast.Type) string {
+		return formatter.doFormatType(subType, resolveBuilders)
+	})
 
 	return strings.Join(subTypes, " | ")
 }

@@ -29,6 +29,9 @@
         "name": {
           "type": "string"
         },
+        "builder_ref": {
+          "$ref": "#/$defs/AstRefType"
+        },
         "comments": {
           "items": {
             "type": "string"
@@ -196,11 +199,56 @@
         "argument": {
           "$ref": "#/$defs/AstArgument"
         },
+        "force_build": {
+          "type": "boolean"
+        },
         "constant": {
           "$ref": "#/$defs/AstTypedConstant"
         },
         "factory": {
           "$ref": "#/$defs/AstFactoryCall"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AstPath": {
+      "items": {
+        "$ref": "#/$defs/AstPathItem"
+      },
+      "type": "array"
+    },
+    "AstPathIndex": {
+      "properties": {
+        "argument": {
+          "$ref": "#/$defs/AstArgument"
+        },
+        "constant": {
+          "description": "string or int"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AstPathItem": {
+      "properties": {
+        "identifier": {
+          "type": "string"
+        },
+        "index": {
+          "$ref": "#/$defs/AstPathIndex"
+        },
+        "type": {
+          "$ref": "#/$defs/AstType",
+          "description": "any"
+        },
+        "typehint": {
+          "$ref": "#/$defs/AstType",
+          "description": "useful mostly for composability purposes, when a field Type is \"any\"\nand we're trying to \"compose in\" something of a known type."
+        },
+        "root": {
+          "type": "boolean",
+          "description": "Is this element of the path the root? (ie: a variable, not a member of a struct)"
         }
       },
       "additionalProperties": false,
@@ -303,7 +351,7 @@
         "ref": {
           "$ref": "#/$defs/AstRefType"
         },
-        "constantreference": {
+        "constant_ref": {
           "$ref": "#/$defs/AstConstantReferenceType"
         },
         "scalar": {
@@ -362,6 +410,9 @@
       "properties": {
         "path": {
           "type": "string"
+        },
+        "path_obj": {
+          "$ref": "#/$defs/AstPath"
         },
         "method": {
           "type": "string"
@@ -546,7 +597,7 @@
     "YamlBuilderRule": {
       "properties": {
         "omit": {
-          "$ref": "#/$defs/YamlBuilderSelector"
+          "$ref": "#/$defs/YamlOmitBuilder"
         },
         "rename": {
           "$ref": "#/$defs/YamlRenameBuilder"
@@ -574,25 +625,9 @@
         },
         "add_factory": {
           "$ref": "#/$defs/YamlAddFactory"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlBuilderSelector": {
-      "properties": {
-        "by_object": {
-          "type": "string"
         },
-        "by_name": {
-          "type": "string"
-        },
-        "by_variant": {
-          "type": "string"
-        },
-        "generated_from_disjunction": {
-          "type": "boolean",
-          "description": "noop?"
+        "debug": {
+          "$ref": "#/$defs/YamlDebugBuilder"
         }
       },
       "additionalProperties": false,
@@ -654,6 +689,48 @@
         },
         "preserve_original_builders": {
           "type": "boolean"
+        },
+        "rename_options": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDebugBuilder": {
+      "properties": {
+        "by_object": {
+          "type": "string"
+        },
+        "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
+          "type": "string"
+        },
+        "generated_from_disjunction": {
+          "type": "boolean",
+          "description": "noop?"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDebugOption": {
+      "properties": {
+        "by_name": {
+          "type": "string",
+          "description": "objectName.optionName"
+        },
+        "by_builder": {
+          "type": "string",
+          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
+        },
+        "by_names": {
+          "$ref": "#/$defs/YamlByNamesSelector"
         }
       },
       "additionalProperties": false,
@@ -806,10 +883,46 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlOmitBuilder": {
+      "properties": {
+        "by_object": {
+          "type": "string"
+        },
+        "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
+          "type": "string"
+        },
+        "generated_from_disjunction": {
+          "type": "boolean",
+          "description": "noop?"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlOmitOption": {
+      "properties": {
+        "by_name": {
+          "type": "string",
+          "description": "objectName.optionName"
+        },
+        "by_builder": {
+          "type": "string",
+          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
+        },
+        "by_names": {
+          "$ref": "#/$defs/YamlByNamesSelector"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlOptionRule": {
       "properties": {
         "omit": {
-          "$ref": "#/$defs/YamlOptionSelector"
+          "$ref": "#/$defs/YamlOmitOption"
         },
         "rename": {
           "$ref": "#/$defs/YamlRenameOption"
@@ -843,23 +956,9 @@
         },
         "add_comments": {
           "$ref": "#/$defs/YamlAddComments"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlOptionSelector": {
-      "properties": {
-        "by_name": {
-          "type": "string",
-          "description": "objectName.optionName"
         },
-        "by_builder": {
-          "type": "string",
-          "description": "builderName.optionName\nTODO: ByName should be called ByObject\nand ByBuilder should be called ByName"
-        },
-        "by_names": {
-          "$ref": "#/$defs/YamlByNamesSelector"
+        "debug": {
+          "$ref": "#/$defs/YamlDebugOption"
         }
       },
       "additionalProperties": false,
@@ -1051,8 +1150,11 @@
     },
     "YamlVeneers": {
       "properties": {
-        "language": {
-          "type": "string"
+        "languages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "package": {
           "type": "string"

@@ -9,4 +9,4 @@ set -o nounset
 # Catch the error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
 set -o pipefail
 
-mypy generated/python/
+mypy --strict generated/python/

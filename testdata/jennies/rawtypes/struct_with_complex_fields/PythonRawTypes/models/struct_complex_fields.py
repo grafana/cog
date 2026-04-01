@@ -16,7 +16,7 @@ class SomeStruct:
     field_anonymous_struct: 'StructComplexFieldsSomeStructFieldAnonymousStruct'
     field_ref_to_constant: typing.Literal["straight"]
 
-    def __init__(self, field_ref: typing.Optional['SomeOtherStruct'] = None, field_disjunction_of_scalars: typing.Optional[typing.Union[str, bool]] = None, field_mixed_disjunction: typing.Optional[typing.Union[str, 'SomeOtherStruct']] = None, field_disjunction_with_null: typing.Optional[str] = None, operator: typing.Optional[typing.Literal[">", "<"]] = None, field_array_of_strings: typing.Optional[list[str]] = None, field_map_of_string_to_string: typing.Optional[dict[str, str]] = None, field_anonymous_struct: typing.Optional['StructComplexFieldsSomeStructFieldAnonymousStruct'] = None, field_ref_to_constant: typing.Optional[typing.Literal["straight"]] = None):
+    def __init__(self, field_ref: typing.Optional['SomeOtherStruct'] = None, field_disjunction_of_scalars: typing.Optional[typing.Union[str, bool]] = None, field_mixed_disjunction: typing.Optional[typing.Union[str, 'SomeOtherStruct']] = None, field_disjunction_with_null: typing.Optional[str] = None, operator: typing.Optional[typing.Literal[">", "<"]] = None, field_array_of_strings: typing.Optional[list[str]] = None, field_map_of_string_to_string: typing.Optional[dict[str, str]] = None, field_anonymous_struct: typing.Optional['StructComplexFieldsSomeStructFieldAnonymousStruct'] = None, field_ref_to_constant: typing.Optional[typing.Literal["straight"]] = None) -> None:
         self.field_ref = field_ref if field_ref is not None else SomeOtherStruct()
         self.field_disjunction_of_scalars = field_disjunction_of_scalars if field_disjunction_of_scalars is not None else ""
         self.field_mixed_disjunction = field_mixed_disjunction if field_mixed_disjunction is not None else ""
@@ -73,7 +73,7 @@ ConnectionPath: typing.Literal["straight"] = "straight"
 class SomeOtherStruct:
     field_any: object
 
-    def __init__(self, field_any: object = None):
+    def __init__(self, field_any: object = None) -> None:
         self.field_any = field_any
 
     def to_json(self) -> dict[str, object]:
@@ -95,7 +95,7 @@ class SomeOtherStruct:
 class StructComplexFieldsSomeStructFieldAnonymousStruct:
     field_any: object
 
-    def __init__(self, field_any: object = None):
+    def __init__(self, field_any: object = None) -> None:
         self.field_any = field_any
 
     def to_json(self) -> dict[str, object]:

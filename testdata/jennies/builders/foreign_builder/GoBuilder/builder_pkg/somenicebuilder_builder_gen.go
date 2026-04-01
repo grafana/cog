@@ -23,7 +23,6 @@ func NewSomeNiceBuilderBuilder() *SomeNiceBuilderBuilder {
 }
 
 
-
 func (builder *SomeNiceBuilderBuilder) Build() (some_pkg.SomeStruct, error) {
 	if err := builder.internal.Validate(); err != nil {
 		return some_pkg.SomeStruct{}, err
@@ -34,6 +33,11 @@ func (builder *SomeNiceBuilderBuilder) Build() (some_pkg.SomeStruct, error) {
 	}
 
 	return *builder.internal, nil
+}
+
+func (builder *SomeNiceBuilderBuilder) RecordError(path string, err error) *SomeNiceBuilderBuilder {
+	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
+	return builder
 }
 
 func (builder *SomeNiceBuilderBuilder) Title(title string) *SomeNiceBuilderBuilder {

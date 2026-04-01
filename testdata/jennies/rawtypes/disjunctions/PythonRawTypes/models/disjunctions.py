@@ -12,7 +12,7 @@ class SomeStruct:
     type: typing.Literal["some-struct"]
     field_any: object
 
-    def __init__(self, field_any: object = None):
+    def __init__(self, field_any: object = None) -> None:
         self.type = "some-struct"
         self.field_any = field_any
 
@@ -40,7 +40,7 @@ class SomeOtherStruct:
     type: typing.Literal["some-other-struct"]
     foo: bytes
 
-    def __init__(self, foo: bytes = ""):
+    def __init__(self, foo: bytes = "") -> None:
         self.type = "some-other-struct"
         self.foo = foo
 
@@ -65,7 +65,7 @@ class YetAnotherStruct:
     type: typing.Literal["yet-another-struct"]
     bar: int
 
-    def __init__(self, bar: int = 0):
+    def __init__(self, bar: int = 0) -> None:
         self.type = "yet-another-struct"
         self.bar = bar
 

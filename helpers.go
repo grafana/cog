@@ -3,6 +3,7 @@ package cog
 import (
 	"context"
 	"fmt"
+	"io/fs"
 
 	"cuelang.org/go/cue"
 	"github.com/grafana/codejen"
@@ -10,6 +11,7 @@ import (
 	"github.com/grafana/cog/internal/codegen"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/openapi"
+	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/simplecue"
 )
@@ -187,8 +189,12 @@ type GoConfig struct {
 	// AnyAsInterface instructs cog to emit `interface{}` instead of `any`.
 	AnyAsInterface bool
 
-	// CustomTemplates accepts a list of directories where are the custom templates
+	// CustomTemplatesDirectories accepts a list of directories where are the custom templates
 	CustomTemplatesDirectories []string
+	// CustomTemplatesFS accepts an embedded filesystem containing custom templates
+	CustomTemplatesFS fs.FS
+	// CustomTemplatesFuncs holds additional functions to be injected into the templates
+	CustomTemplatesFuncs map[string]any
 }
 
 // Golang sets the output to Golang types.
@@ -198,6 +204,8 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 			SkipRuntime:                   true,
 			GenerateJSONMarshaller:        true,
 			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
+			OverridesTemplatesFS:          config.CustomTemplatesFS,
+			OverridesTemplateFuncs:        config.CustomTemplatesFuncs,
 
 			GenerateEqual:  config.GenerateEqual,
 			AnyAsInterface: config.AnyAsInterface,
@@ -258,6 +266,31 @@ func (pipeline *SchemaToTypesPipeline) GenerateOpenAPI(config OpenAPIGenerationC
 	pipeline.output = &codegen.OutputLanguage{
 		OpenAPI: &openapi.Config{
 			Compact: config.Compact,
+		},
+	}
+	return pipeline
+}
+
+type TerraformConfig struct {
+	PrefixAttributeSpec string
+	SkipPostFormatting  bool
+
+	// CustomTemplatesDirectories accepts a list of directories containing custom templates.
+	CustomTemplatesDirectories []string
+	// CustomTemplatesFS accepts an embedded filesystem containing custom templates.
+	CustomTemplatesFS fs.FS
+	// CustomTemplatesFuncs holds additional functions to be injected into templates.
+	CustomTemplatesFuncs map[string]any
+}
+
+func (pipeline *SchemaToTypesPipeline) Terraform(config TerraformConfig) *SchemaToTypesPipeline {
+	pipeline.output = &codegen.OutputLanguage{
+		Terraform: &terraform.Config{
+			SkipPostFormatting:            config.SkipPostFormatting,
+			PrefixAttributeSpec:           config.PrefixAttributeSpec,
+			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
+			OverridesTemplatesFS:          config.CustomTemplatesFS,
+			OverridesTemplateFuncs:        config.CustomTemplatesFuncs,
 		},
 	}
 	return pipeline

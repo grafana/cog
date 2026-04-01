@@ -633,3 +633,5 @@ func (resource GridLayoutWithoutValueOrRowsLayoutWithoutValue) Validate() error 
 
 	return errs
 }
+
+

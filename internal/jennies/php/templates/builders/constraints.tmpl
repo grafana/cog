@@ -11,8 +11,18 @@
         {{- $leftOperand = print "strlen(" $leftOperand ")" }}
         {{- $operator = "<=" }}
     {{- end }}
+    {{- if eq .Op "=~" }}
+    if (!preg_match("/{{ .Parameter }}/", {{ $leftOperand }})) {
+        throw new \ValueError('{{ $leftOperand }} must match regex {{ .Parameter }}');
+    }
+    {{- else if eq .Op "!~" }}
+    if (preg_match("/{{ .Parameter }}/", {{ $leftOperand }})) {
+        throw new \ValueError('{{ $leftOperand }} must not match regex {{ .Parameter }}');
+    }
+    {{- else }}
     if (!({{ $leftOperand }} {{ $operator }} {{ .Parameter }})) {
         throw new \ValueError('{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}');
     }
+    {{- end }}
 {{- end }}
 {{- end }}

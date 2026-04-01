@@ -33,3 +33,8 @@ to generate code.
 
 A typical pipeline contains schemas used as inputs and configuration describing
 the desired outputs.
+
+## Unit
+
+A unit – or *codegen unit* – is a fragment of a codegen pipeline that contains a
+set of inputs and their associated schema/builder transformations.

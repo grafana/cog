@@ -8,7 +8,7 @@ ArrayOfStrings: typing.TypeAlias = list[str]
 class SomeStruct:
     field_any: object
 
-    def __init__(self, field_any: object = None):
+    def __init__(self, field_any: object = None) -> None:
         self.field_any = field_any
 
     def to_json(self) -> dict[str, object]:

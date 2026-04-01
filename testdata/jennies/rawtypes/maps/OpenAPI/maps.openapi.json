@@ -11,10 +11,7 @@
     "schemas": {
       "MapOfStringToAny": {
         "type": "object",
-        "additionalProperties": {
-          "type": "object",
-          "additionalProperties": {}
-        },
+        "additionalProperties": true,
         "description": "String to... something."
       },
       "MapOfStringToString": {

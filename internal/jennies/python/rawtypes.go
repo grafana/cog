@@ -124,6 +124,19 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 			buffer.WriteString(tools.Indent(rendered, 4))
 		}
+		customAllBlock := template.CustomObjectMethodAllBlock()
+		if jenny.tmpl.Exists(customAllBlock) {
+			buffer.WriteString("\n\n")
+			rendered, innerErr := jenny.tmpl.Render(customAllBlock, map[string]any{
+				"Object": object,
+			})
+			if innerErr != nil {
+				err = innerErr
+				return
+			}
+
+			buffer.WriteString(tools.Indent(rendered, 4))
+		}
 
 		customVariantTmpl := template.CustomObjectVariantBlock(object)
 		if object.Type.ImplementsVariant() && jenny.tmpl.Exists(customVariantTmpl) {
@@ -186,7 +199,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 
 		if !field.Type.Nullable || field.Type.Default != nil {
 			var defaultsOverrides map[string]any
-			if overrides, ok := field.Type.Default.(map[string]interface{}); ok {
+			if overrides, ok := field.Type.Default.(map[string]any); ok {
 				defaultsOverrides = overrides
 			}
 
@@ -216,7 +229,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 		assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s", fieldName))
 	}
 
-	buffer.WriteString(fmt.Sprintf("    def __init__(self, %s):\n", strings.Join(args, ", ")))
+	buffer.WriteString(fmt.Sprintf("    def __init__(self, %s) -> None:\n", strings.Join(args, ", ")))
 	buffer.WriteString(strings.Join(assignments, "\n"))
 
 	return strings.TrimSuffix(buffer.String(), "\n")

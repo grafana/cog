@@ -1,9 +1,10 @@
 package yaml
 
 import (
+	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 type ConverterConfig struct {
@@ -28,19 +29,14 @@ func (c ConverterConfigReader) ReadConverterConfig(filename string) (ConverterCo
 		return ConverterConfig{}, nil
 	}
 
-	f, err := os.Open(filename)
+	contents, err := os.ReadFile(filename)
 	if err != nil {
 		return ConverterConfig{}, err
 	}
 
-	defer f.Close()
-
-	decoder := yaml.NewDecoder(f)
-	decoder.KnownFields(true)
-
 	var config ConverterConfig
-	if err = decoder.Decode(&config); err != nil {
-		return config, err
+	if err = yaml.UnmarshalWithOptions(contents, &config, yaml.DisallowUnknownField()); err != nil {
+		return config, fmt.Errorf("can not read converter config: %s\n%s", filename, yaml.FormatError(err, true, true))
 	}
 
 	return config, nil

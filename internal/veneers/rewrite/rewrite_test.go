@@ -2,9 +2,11 @@ package rewrite
 
 import (
 	"encoding/json"
+	"log/slog"
 	"testing"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/veneers/builder"
 	"github.com/grafana/cog/internal/veneers/option"
 	"github.com/stretchr/testify/require"
@@ -14,8 +16,8 @@ type rewriteTestCase struct {
 	description string
 
 	inputBuilders  ast.Builders
-	builderRules   []builder.RewriteRule
-	optionRules    []option.RewriteRule
+	builderRules   []*builder.Rule
+	optionRules    []option.Rule
 	outputBuilders ast.Builders
 }
 
@@ -32,7 +34,7 @@ func testData() []rewriteTestCase {
 		{
 			description:   "omit an entire builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
-			builderRules: []builder.RewriteRule{
+			builderRules: []*builder.Rule{
 				builder.Omit(builder.ByObjectName("test_pkg", "Dashboard")),
 			},
 			optionRules:    nil,
@@ -43,7 +45,7 @@ func testData() []rewriteTestCase {
 			description:   "rename single option in single builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules:  nil,
-			optionRules: []option.RewriteRule{
+			optionRules: []option.Rule{
 				option.Rename(
 					option.ByName("test_pkg", "Panel", "type"),
 					"kind",
@@ -96,7 +98,7 @@ func testData() []rewriteTestCase {
 			description:   "omit single option in single builder",
 			inputBuilders: ast.Builders{dashboardBuilder(), panelBuilder()},
 			builderRules:  nil,
-			optionRules: []option.RewriteRule{
+			optionRules: []option.Rule{
 				option.Omit(
 					option.ByName("test_pkg", "Dashboard", "title"),
 				),
@@ -222,9 +224,9 @@ func TestRewriter_ApplyTo(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			req := require.New(t)
 
-			rewriter := NewRewrite([]LanguageRules{
+			rewriter := NewRewrite(slog.New(logs.NoopHandler()), []RuleSet{
 				{
-					Language:     AllLanguages,
+					Languages:    []string{AllLanguages},
 					BuilderRules: tc.builderRules,
 					OptionRules:  tc.optionRules,
 				},

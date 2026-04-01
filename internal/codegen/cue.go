@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"net/http"
+	"maps"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -15,7 +15,9 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
+	"cuelang.org/go/cue/parser"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/httputil"
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/yalue/merged_fs"
@@ -23,6 +25,7 @@ import (
 
 type genericCueLoader struct {
 	*CueInput
+
 	loader func(input CueInput) (ast.Schemas, error)
 }
 
@@ -38,6 +41,9 @@ type CueInput struct {
 
 	// URL to a cue file
 	URL string `yaml:"url"`
+
+	// Subpath is used when the schema is not in the root of the schema
+	Subpath string `yaml:"subpath"`
 
 	// Value represents the CUE value to use as an input. If specified, it
 	// supersedes the Entrypoint option.
@@ -98,7 +104,10 @@ func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecu
 	if cuePkgName == "" {
 		cuePkgName = filepath.Base(input.Entrypoint)
 		if input.URL != "" {
-			cuePkgName = filepath.Base(filepath.Dir(input.URL))
+			cuePkgName, err = getPackageFromFile(input.URL)
+			if err != nil {
+				return cue.Value{}, nil, err
+			}
 		}
 	}
 
@@ -165,6 +174,13 @@ func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude, ex
 	value := cuecontext.New().BuildInstance(bis[0])
 	if err := value.Err(); err != nil {
 		return cue.Value{}, fmt.Errorf("could not build cue instance: %w", err)
+	}
+
+	if input.Subpath != "" {
+		value = value.LookupPath(cue.ParsePath(input.Subpath))
+		if value.Err() != nil {
+			return cue.Value{}, fmt.Errorf("could not read subpath '%s': %w", input.Subpath, value.Err())
+		}
 	}
 
 	return value, nil
@@ -296,10 +312,7 @@ func buildCueOverlayFromURL(url string, libFs fs.FS, expectedCuePkgName string) 
 		return nil, err
 	}
 
-	for k, v := range source {
-		overlay[k] = v
-	}
-
+	maps.Copy(overlay, source)
 	return overlay, nil
 }
 
@@ -313,18 +326,13 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 		return nil, fmt.Errorf("entrypoint %q must be a cue url", entrypoint)
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
+	body, err := httputil.LoadURL(context.Background(), u.String())
 	if err != nil {
 		return nil, err
 	}
+	defer func() { _ = body.Close() }()
 
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Body.Close()
-	data, err := io.ReadAll(res.Body)
+	data, err := io.ReadAll(body)
 	if err != nil {
 		return nil, err
 	}
@@ -332,4 +340,19 @@ func readCueURL(entrypoint string, cuePackage string) (map[string]load.Source, e
 	return map[string]load.Source{
 		filepath.Join("/cog/vfs/cue.mod/pkg/github.com/cog-vfs/", cuePackage, filepath.Base(u.Path)): load.FromBytes(data),
 	}, nil
+}
+
+func getPackageFromFile(url string) (string, error) {
+	body, err := httputil.LoadURL(context.Background(), url)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = body.Close() }()
+
+	f, err := parser.ParseFile("", body, parser.ParseComments)
+	if err != nil {
+		return "", fmt.Errorf("could not parse cue file: %w", err)
+	}
+
+	return f.PackageName(), nil
 }

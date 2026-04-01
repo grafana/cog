@@ -8,7 +8,7 @@ class GridLayoutUsingValue:
     kind: str
     grid_layout_property: str
 
-    def __init__(self, grid_layout_property: str = ""):
+    def __init__(self, grid_layout_property: str = "") -> None:
         self.kind = GridLayoutKindType
         self.grid_layout_property = grid_layout_property
 
@@ -33,7 +33,7 @@ class RowsLayoutUsingValue:
     kind: str
     rows_layout_property: str
 
-    def __init__(self, rows_layout_property: str = ""):
+    def __init__(self, rows_layout_property: str = "") -> None:
         self.kind = RowsLayoutKindType
         self.rows_layout_property = rows_layout_property
 
@@ -61,7 +61,7 @@ class GridLayoutWithoutValue:
     kind: str
     grid_layout_property: str
 
-    def __init__(self, grid_layout_property: str = ""):
+    def __init__(self, grid_layout_property: str = "") -> None:
         self.kind = GridLayoutKindType
         self.grid_layout_property = grid_layout_property
 
@@ -86,7 +86,7 @@ class RowsLayoutWithoutValue:
     kind: str
     rows_layout_property: str
 
-    def __init__(self, rows_layout_property: str = ""):
+    def __init__(self, rows_layout_property: str = "") -> None:
         self.kind = RowsLayoutKindType
         self.rows_layout_property = rows_layout_property
 
@@ -111,3 +111,6 @@ GridLayoutKindType: typing.Literal["GridLayout"] = "GridLayout"
 
 
 RowsLayoutKindType: typing.Literal["RowsLayout"] = "RowsLayout"
+
+
+

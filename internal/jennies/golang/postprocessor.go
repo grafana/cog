@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-func formatGoFiles(file codejen.File) (codejen.File, error) {
+func FormatGoFiles(file codejen.File) (codejen.File, error) {
 	if !strings.HasSuffix(file.RelativePath, ".go") {
 		return file, nil
 	}
