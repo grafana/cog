@@ -26,13 +26,39 @@ func (resource {{ .def.Name|formatObjectName }}) Validate() error {
 		{{- if $needsDereference }}
 		if {{ .SelfName }} != nil {
 		{{- end }}
+		{{- $errors := importStdPkg "errors" -}}
+		{{- range (resolveRefs .Type).Array.Constraints }}
+			{{- if eq .Op "minItems" }}
+		if len({{ $dereference }}{{ $.SelfName }}) < {{ .Args | first }} {
+			errs = append(errs, cog.MakeBuildErrors("{{ $.ConstraintPath }}", errors.New("must have at least {{ .Args | first }} items"))...)
+		}
+			{{- else if eq .Op "maxItems" }}
+		if len({{ $dereference }}{{ $.SelfName }}) > {{ .Args | first }} {
+			errs = append(errs, cog.MakeBuildErrors("{{ $.ConstraintPath }}", errors.New("must have at most {{ .Args | first }} items"))...)
+		}
+			{{- else if eq .Op "uniqueItems" }}
+			{{- $seen := importStdPkg "fmt" }}
+			{{- $seenVar := print "seen" ($.ConstraintPath | toGoIdent) }}
+		{{ $seenVar }} := make(map[string]struct{})
+		for _, item{{ $depth }} := range {{ $dereference }}{{ $.SelfName }} {
+			key{{ $depth }} := fmt.Sprintf("%v", item{{ $depth }})
+			if _, exists{{ $depth }} := {{ $seenVar }}[key{{ $depth }}]; exists{{ $depth }} {
+				errs = append(errs, cog.MakeBuildErrors("{{ $.ConstraintPath }}", errors.New("must have unique items"))...)
+				break
+			}
+			{{ $seenVar }}[key{{ $depth }}] = struct{}{}
+		}
+			{{- end }}
+		{{- end }}
 
+		{{- if resolvesToConstraints (resolveRefs .Type).Array.ValueType }}
 		for i{{ $depth }} := range {{ $dereference }}{{ .SelfName }} {
 			{{- $selfKey := print (ternary (print "(*" .SelfName ")") .SelfName $needsDereference) "[i" $depth "]" }}
 			{{- $constraintPath := print .ConstraintPath "[\"+strconv.Itoa(i" $depth ")+\"]" }}
 			{{- $strconv := importStdPkg "strconv" -}}
 			{{- template "type_validate_check" (dict "ConstraintPath" $constraintPath "Type" (resolveRefs .Type).Array.ValueType "Nullable" (resolveRefs .Type).Array.ValueType.Nullable "Dereference" false "SelfName" $selfKey "Depth" (add1 $depth)) }}
 		}
+		{{- end }}
 		{{- if $needsDereference }}}{{ end }}
 	{{- else if resolvesToMap .Type }}
 		{{- $needsDereference := and .Type.IsRef .Type.Nullable }}
