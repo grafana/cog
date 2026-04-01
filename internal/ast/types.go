@@ -65,6 +65,9 @@ const (
 	GreaterThanEqualOp Op = ">="
 	RegexMatchOp       Op = "=~"
 	NotRegexMatchOp    Op = "!~"
+	MinItemsOp         Op = "minItems"
+	MaxItemsOp         Op = "maxItems"
+	UniqueItemsOp      Op = "uniqueItems"
 )
 
 type TypeConstraint struct {
@@ -732,7 +735,8 @@ func (t DisjunctionType) DeepCopy() DisjunctionType {
 }
 
 type ArrayType struct {
-	ValueType Type `yaml:"value_type"`
+	ValueType   Type             `yaml:"value_type"`
+	Constraints []TypeConstraint `yaml:",omitempty" json:",omitempty"`
 }
 
 func (t *ArrayType) AcceptsValue(value any) bool {
@@ -740,9 +744,13 @@ func (t *ArrayType) AcceptsValue(value any) bool {
 }
 
 func (t ArrayType) DeepCopy() ArrayType {
-	return ArrayType{
+	newT := ArrayType{
 		ValueType: t.ValueType.DeepCopy(),
 	}
+	for _, c := range t.Constraints {
+		newT.Constraints = append(newT.Constraints, c.DeepCopy())
+	}
+	return newT
 }
 
 func (t ArrayType) IsArrayOf(acceptedKinds ...Kind) bool {
