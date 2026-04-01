@@ -736,7 +736,7 @@ func (t DisjunctionType) DeepCopy() DisjunctionType {
 
 type ArrayType struct {
 	ValueType   Type             `yaml:"value_type"`
-	Constraints []TypeConstraint `yaml:",omitempty" json:",omitempty"`
+	Constraints []TypeConstraint `json:",omitempty"`
 }
 
 func (t *ArrayType) AcceptsValue(value any) bool {
