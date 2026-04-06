@@ -15,5 +15,5 @@ export const defaultRefToSomeStruct = (): RefToSomeStruct => (defaultSomeStruct(
 
 export type RefToSomeStructFromOtherPackage = otherpkg.SomeDistantStruct;
 
-export const defaultRefToSomeStructFromOtherPackage = (): RefToSomeStructFromOtherPackage => (otherpkg.default());
+export const defaultRefToSomeStructFromOtherPackage = (): RefToSomeStructFromOtherPackage => (otherpkg.defaultSomeDistantStruct());
 
