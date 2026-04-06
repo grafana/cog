@@ -57,6 +57,17 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 				Ref:      &ref,
 			}, nil
 		},
+		OnEnum: func(visitor *compiler.Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
+			if identifiersConfig.ObjectNameFunc == nil {
+				return def, nil
+			}
+			enumType := def.AsEnum().DeepCopy()
+			for i, val := range enumType.Values {
+				enumType.Values[i].Name = identifiersConfig.ObjectNameFunc(val.Name)
+			}
+			def.Enum = &enumType
+			return def, nil
+		},
 		OnConstantRef: func(visitor *compiler.Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
 			ref := def.AsConstantRef().DeepCopy()
 			if identifiersConfig.PackageNameFunc != nil {
