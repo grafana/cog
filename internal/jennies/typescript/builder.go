@@ -138,7 +138,7 @@ func (jenny *Builder) formatFieldPath(fieldPath ast.Path) string {
 
 	for i, chunk := range fieldPath {
 		last := i == len(fieldPath)-1
-		output := chunk.Identifier
+		output := formatIdentifier(chunk.Identifier)
 
 		if chunk.Index != nil {
 			output += "["

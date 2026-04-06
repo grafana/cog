@@ -17,13 +17,13 @@ export class PanelOrLibraryPanelBuilder implements cog.Builder<mapOfDisjunctions
 
     panel(panel: cog.Builder<mapOfDisjunctions.Panel>): this {
         const panelResource = panel.build();
-        this.internal.Panel = panelResource;
+        this.internal.panel = panelResource;
         return this;
     }
 
     libraryPanel(libraryPanel: cog.Builder<mapOfDisjunctions.LibraryPanel>): this {
         const libraryPanelResource = libraryPanel.build();
-        this.internal.LibraryPanel = libraryPanelResource;
+        this.internal.libraryPanel = libraryPanelResource;
         return this;
     }
 }

@@ -20,7 +20,7 @@ export class FuncCallExprBuilder implements cog.Builder<promql.FuncCallExpr> {
         if (!(functionVal.length >= 1)) {
             throw new Error("functionVal.length must be >= 1");
         }
-        this.internal.function = functionVal;
+        this.internal.functionVal = functionVal;
         return this;
     }
 
