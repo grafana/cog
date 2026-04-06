@@ -1,8 +1,8 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $errors := importStdPkg "errors" -}}
 {{- $bytes := importStdPkg "bytes" -}}
-// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
-func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) error {
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `{{ .def.Name }}` from JSON.
+func (resource *{{ .def.Name }}) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -16,17 +16,17 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSON(raw []byte) erro
     {{ .Name | lowerCamelCase }}dec.DisallowUnknownFields()
     if err := {{ .Name | lowerCamelCase }}dec.Decode(&{{ .Name }}); err != nil {
         errList = append(errList, err)
-        resource.{{ .Name|formatFieldName }} = nil
+        resource.{{ .Name }} = nil
     } else {
-        resource.{{ .Name|formatFieldName }} = &{{ .Name }}
+        resource.{{ .Name }} = &{{ .Name }}
         return nil
     }
     {{- else }}
 	if err := json.Unmarshal(raw, &{{ .Name }}); err != nil {
 		errList = append(errList, err)
-		resource.{{ .Name|formatFieldName }} = nil
+		resource.{{ .Name }} = nil
 	} else {
-		resource.{{ .Name|formatFieldName }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
+		resource.{{ .Name }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
 		return nil
 	}
 	{{- end }}

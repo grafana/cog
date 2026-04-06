@@ -1,9 +1,9 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $fmt := importStdPkg "fmt" -}}
 {{- $struct := .def.Type.Struct -}}
-// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name }}` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
-func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte) error {
+func (resource *{{ .def.Name }}) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -27,12 +27,12 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte
 		{{- else }}
 		case "{{ $discriminatorValue }}":
 		{{- end }}
-		{{ $typeName|formatVarName }} := &{{ $typeName|formatObjectName }}{}
+		{{ $typeName|formatVarName }} := &{{ $typeName }}{}
 		if err := {{ $typeName|formatVarName }}.UnmarshalJSONStrict(raw); err != nil {
 			return err
 		}
 
-		resource.{{ ($struct.FieldByRefName $typeName).Name|formatFieldName }} = {{ $typeName|formatVarName }}
+		resource.{{ ($struct.FieldByRefName $typeName).Name }} = {{ $typeName|formatVarName }}
 		return nil
 	{{- end }}
 	}

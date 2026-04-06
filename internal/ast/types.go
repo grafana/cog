@@ -878,11 +878,9 @@ func (structType StructType) DeepCopy() StructType {
 func (structType StructType) FieldByName(name string) (StructField, bool) {
 	// FIXME: we don't have a way to directly get a struct field by name :(
 	for _, field := range structType.Fields {
-		if field.Name != name {
-			continue
+		if field.Name == name || (field.OriginalName != "" && field.OriginalName == name) {
+			return field, true
 		}
-
-		return field, true
 	}
 
 	return StructField{}, false

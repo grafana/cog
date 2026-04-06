@@ -1,8 +1,8 @@
 {{- $json := importStdPkg "encoding/json" -}}
 {{- $errors := importStdPkg "errors" -}}
-// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name }}` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
-func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte) error {
+func (resource *{{ .def.Name }}) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -17,7 +17,7 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte
 	if err := json.Unmarshal(raw, &{{ .Name }}); err != nil {
 		errList = append(errList, err)
 	} else {
-		resource.{{ .Name|formatFieldName }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
+		resource.{{ .Name }} = {{ if and (ne .Type.Kind "array") (ne .Type.Kind "map") }}&{{ end }}{{ .Name }}
 		return nil
 	}
 {{ end }}

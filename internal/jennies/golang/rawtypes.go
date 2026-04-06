@@ -257,8 +257,15 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 	for _, field := range objectType.Struct.Fields {
 		resolvedFieldType := context.ResolveRefs(field.Type)
 
+		// Use OriginalName for extraDefaults lookups since the Default JSON uses
+		// original (pre-formatting) field names as keys.
+		fieldOriginalName := field.OriginalName
+		if fieldOriginalName == "" {
+			fieldOriginalName = field.Name
+		}
+
 		needsExplicitDefault := field.Type.Default != nil ||
-			extraDefaults[field.Name] != nil ||
+			extraDefaults[fieldOriginalName] != nil ||
 			(field.Required && field.Type.IsRef() && resolvedFieldType.IsStruct()) ||
 			(field.Required && field.Type.IsArray()) ||
 			(field.Required && field.Type.IsMap()) ||
@@ -272,7 +279,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 		defaultValue := ""
 
 		// nolint:gocritic
-		if extraDefault, ok := extraDefaults[field.Name]; ok {
+		if extraDefault, ok := extraDefaults[fieldOriginalName]; ok {
 			defaultValue = formatScalar(extraDefault)
 
 			if field.Type.IsRef() && resolvedFieldType.IsStructGeneratedFromDisjunction() {

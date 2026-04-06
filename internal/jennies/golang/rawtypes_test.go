@@ -30,12 +30,13 @@ func TestRawTypes_Generate(t *testing.T) {
 		GenerateStrictUnmarshaller: true,
 		GenerateValidate:           true,
 	}
+	language := New(config)
 	jenny := RawTypes{
 		config:          config,
 		tmpl:            initTemplates(config, common.NewAPIReferenceCollector()),
 		apiRefCollector: common.NewAPIReferenceCollector(),
 	}
-	compilerPasses := New(config).CompilerPasses()
+	compilerPasses := language.CompilerPasses()
 
 	test.Run(t, func(tc *testutils.Test[ast.Schema]) {
 		req := require.New(tc)
@@ -49,9 +50,10 @@ func TestRawTypes_Generate(t *testing.T) {
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
 
-		files, err := jenny.Generate(languages.Context{
-			Schemas: processedAsts,
-		})
+		context, err := languages.FormatIdentifiers(language, languages.Context{Schemas: processedAsts})
+		req.NoError(err)
+
+		files, err := jenny.Generate(context)
 		req.NoError(err)
 
 		tc.WriteFiles(files)

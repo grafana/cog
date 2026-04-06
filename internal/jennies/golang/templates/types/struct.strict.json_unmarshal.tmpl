@@ -1,7 +1,7 @@
 {{- $json := importStdPkg "encoding/json" -}}
-// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name|formatObjectName }}` from JSON.
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `{{ .def.Name }}` from JSON.
 // Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
-func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte) error {
+func (resource *{{ .def.Name }}) UnmarshalJSONStrict(raw []byte) error {
 	if raw == nil {
 		return nil
 	}
@@ -14,33 +14,33 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte
 		return err
 	}
 	{{- range $field := .def.Type.Struct.Fields }}
-	{{- $customFieldBlockName := print "object_" $.def.SelfRef.ReferredPkg "_" $.def.Name "_field_" $field.Name "_custom_strict_unmarshal" }}
-	// Field "{{ $field.Name }}"
-	if fields[{{ $field.Name|formatScalar }}] != nil {
-		if string(fields[{{ $field.Name|formatScalar }}]) != "null" {
+	{{- $customFieldBlockName := print "object_" $.def.SelfRef.ReferredPkg "_" $.def.Name "_field_" $field.OriginalName "_custom_strict_unmarshal" }}
+	// Field "{{ $field.OriginalName }}"
+	if fields[{{ $field.OriginalName|formatScalar }}] != nil {
+		if string(fields[{{ $field.OriginalName|formatScalar }}]) != "null" {
 	{{- if blockExists $customFieldBlockName }}
 		{{ include $customFieldBlockName (dict "Object" $.def "Field" $field) }}
 	{{- else }}
-	{{- $inputRef := print "fields[" ($field.Name|formatScalar) "]" }}
-	{{- $unmarshalInto := print "resource." ($field.Name|formatFieldName) }}
-			{{ template "strict_unmarshal_field_type" (dict "RawInputRef" $inputRef "InputType" $field.Type "UnmarshalInto" $unmarshalInto "ErrorBreadcrumb" $field.Name "Depth" 1) }}
+	{{- $inputRef := print "fields[" ($field.OriginalName|formatScalar) "]" }}
+	{{- $unmarshalInto := print "resource." $field.Name }}
+			{{ template "strict_unmarshal_field_type" (dict "RawInputRef" $inputRef "InputType" $field.Type "UnmarshalInto" $unmarshalInto "ErrorBreadcrumb" $field.OriginalName "Depth" 1) }}
 	{{- end }}
 		{{ if and $field.Required (not $field.Type.Nullable) -}} } else {
 			{{- $errors := importStdPkg "errors" -}}
-			errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is null"))...)
+			errs = append(errs, cog.MakeBuildErrors({{ $field.OriginalName|formatScalar }}, errors.New("required field is null"))...)
 		{{ end }}
 		}
-		delete(fields, {{ $field.Name|formatScalar }})
+		delete(fields, {{ $field.OriginalName|formatScalar }})
 	{{ if and $field.Required (eq $field.Type.Default nil) -}} } else {
 		{{- $errors := importStdPkg "errors" -}}
-		errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is missing from input"))...)
+		errs = append(errs, cog.MakeBuildErrors({{ $field.OriginalName|formatScalar }}, errors.New("required field is missing from input"))...)
 	{{- end }}
 	}
 	{{- end }}
 
 	{{ $fmt := importStdPkg "fmt" -}}
 	for field := range fields {
-		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|formatObjectName }}", fmt.Errorf("unexpected field '%s'", field))...)
+		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name }}", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
 	if len(errs) == 0 {

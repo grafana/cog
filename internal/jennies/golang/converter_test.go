@@ -39,6 +39,9 @@ func TestConverter_Generate(t *testing.T) {
 		context, err = languages.GenerateBuilderNilChecks(language, context)
 		req.NoError(err)
 
+		context, err = languages.FormatIdentifiers(language, context)
+		req.NoError(err)
+
 		files, err := jenny.Generate(context)
 		req.NoError(err)
 

@@ -1,5 +1,5 @@
-// Validate checks all the validation constraints that may be defined on `{{ .def.Name|formatObjectName }}` fields for violations and returns them.
-func (resource {{ .def.Name|formatObjectName }}) Validate() error {
+// Validate checks all the validation constraints that may be defined on `{{ .def.Name }}` fields for violations and returns them.
+func (resource {{ .def.Name }}) Validate() error {
 	{{- if resolvesToConstraints .def.Type }}
 	{{- $cog := importPkg "cog" }}
 	var errs cog.BuildErrors
@@ -60,9 +60,8 @@ func (resource {{ .def.Name|formatObjectName }}) Validate() error {
 	{{- else if .Type.IsStruct }}
 		{{- range $field := .Type.Struct.Fields }}
 			{{- if resolvesToConstraints $field.Type -}}
-				{{- $fieldName := $field.Name|formatFieldName -}}
-				{{- $selfKey := print $.SelfName "." $fieldName }}
-				{{- $constraintPath := $field.Name }}
+				{{- $selfKey := print $.SelfName "." $field.Name }}
+				{{- $constraintPath := $field.OriginalName }}
 				{{- if ne $.ConstraintPath "" -}}
 					{{- $constraintPath = print $.ConstraintPath "." $constraintPath -}}
 				{{- end -}}

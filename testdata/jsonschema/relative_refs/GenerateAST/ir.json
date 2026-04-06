@@ -20,6 +20,7 @@
           "Fields": [
             {
               "Name": "id",
+              "OriginalName": "id",
               "Comments": [
                 "The identifier"
               ],
@@ -49,6 +50,7 @@
           "Fields": [
             {
               "Name": "common",
+              "OriginalName": "common",
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
@@ -61,6 +63,7 @@
             },
             {
               "Name": "name",
+              "OriginalName": "name",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,

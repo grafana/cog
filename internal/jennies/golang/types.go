@@ -226,11 +226,15 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 		}
 	}
 
+	jsonTag := def.OriginalName
+	if jsonTag == "" {
+		jsonTag = def.Name
+	}
 	buffer.WriteString(fmt.Sprintf(
 		"%s %s `json:\"%s%s\"`",
-		def.Name,
+		formatFieldName(def.Name),
 		formatter.doFormatType(fieldType, false),
-		def.OriginalName,
+		jsonTag,
 		jsonOmitEmpty,
 	))
 

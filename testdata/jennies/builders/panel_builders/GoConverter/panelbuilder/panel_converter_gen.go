@@ -42,8 +42,8 @@ func PanelConverter(input Panel) string {
     buffer.WriteString(`Tags(`)
         tmparg0 := []string{}
         for _, arg1 := range input.Tags {
-        tmptagsarg1 :=fmt.Sprintf("%#v", arg1)
-        tmparg0 = append(tmparg0, tmptagsarg1)
+        tmpTagsarg1 :=fmt.Sprintf("%#v", arg1)
+        tmparg0 = append(tmparg0, tmpTagsarg1)
         }
         arg0 := "[]string{" + strings.Join(tmparg0, ",\n") + "}"
         buffer.WriteString(arg0)

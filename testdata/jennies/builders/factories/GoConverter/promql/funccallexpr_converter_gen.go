@@ -31,8 +31,8 @@ func FuncCallExprConverter(input FuncCallExpr) string {
     buffer.WriteString(`Args(`)
         tmparg0 := []string{}
         for _, arg1 := range input.Args {
-        tmpargsarg1 :=cog.Dump(arg1)
-        tmparg0 = append(tmparg0, tmpargsarg1)
+        tmpArgsarg1 :=cog.Dump(arg1)
+        tmparg0 = append(tmparg0, tmpArgsarg1)
         }
         arg0 := "[]cog.Builder[promql.Expr]{" + strings.Join(tmparg0, ",\n") + "}"
         buffer.WriteString(arg0)

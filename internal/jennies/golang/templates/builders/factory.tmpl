@@ -16,15 +16,15 @@ func {{ .Factory.Name }}({{- template "args" .Factory.Args }}) *{{ .Builder.Name
 
 {{- define "factory_option_call" }}
 	{{- template "factory_option_call_prepare_parameters" (dict "Factory" .Factory "Call" .Call) }}
-	builder.{{ .Call.Name|formatFunctionName }}({{- range $i, $param := .Call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
+	builder.{{ .Call.Name }}({{- range $i, $param := .Call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
 {{- end }}
 
 {{- define "factory_option_call_prepare_parameters" }}
 {{- range $i, $param := .Call.Parameters }}
 {{- if and (not (eq $param.Argument nil)) $param.ForceBuild -}}
-	{{- $param.Argument.Name|formatArgName -}}Resource, err := {{- $param.Argument.Name|formatArgName -}}.Build()
+	{{- $param.Argument.Name -}}Resource, err := {{- $param.Argument.Name -}}.Build()
 	if err != nil {
-		builder.RecordError("{{ $.Factory.Name|formatFunctionName }}({{ $param.Argument.Name|formatArgName }})", err)
+		builder.RecordError("{{ $.Factory.Name }}({{ $param.Argument.Name }})", err)
 		return builder
 	}
 {{- end -}}

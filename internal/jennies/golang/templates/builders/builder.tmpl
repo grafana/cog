@@ -38,13 +38,13 @@ func (builder *{{ .Builder.Name }}Builder) Build() ({{ .BuilderSignatureType }},
 	}
 	
 	if len(builder.errors) > 0 {
-	    return {{ .ObjectName }}{}, cog.MakeBuildErrors("{{ .Builder.Package | formatPackageName }}.{{ .Builder.Name | lowerCamelCase }}", builder.errors)
+	    return {{ .ObjectName }}{}, cog.MakeBuildErrors("{{ .Builder.Package }}.{{ .Builder.Name | lowerCamelCase }}", builder.errors)
 	}
 
 	return *builder.internal, nil
 }
 
-func (builder *{{ .Builder.Name|formatObjectName }}Builder) RecordError(path string, err error) *{{ .Builder.Name|formatObjectName }}Builder {
+func (builder *{{ .Builder.Name }}Builder) RecordError(path string, err error) *{{ .Builder.Name }}Builder {
 	builder.errors = append(builder.errors, cog.MakeBuildErrors(path, err)...)
 	return builder
 }

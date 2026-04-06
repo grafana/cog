@@ -17,21 +17,15 @@
 {{- end }}
 
 {{- define "assignment_value" }}
-    {{- if not (eq .Value.Constant nil) }}
-        {{- if isNullableNonArray .Assignment.Path.Last.Type }}
-            {{- print "&val" (.Assignment.Path.Last.Identifier | upperCamelCase) }}
-        {{- else }}
-            {{- formatScalar .Value.Constant }}
-        {{- end }}
-    {{- end }}
-    {{- with .Value.Argument }}
-        {{- $argName := .Name }}
+    {{- if .Value.Argument }}
+        {{- with .Value.Argument }}
+            {{- $argName := .Name }}
 
-        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-            {{- $argName = .Type.IsArray | ternary (print $argName "Resources") (print $argName "Resource") }}
-        {{- end }}
+            {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+                {{- $argName = .Type.IsArray | ternary (print $argName "Resources") (print $argName "Resource") }}
+            {{- end }}
 
-        {{- maybeAsPointer $.Assignment.Path.Last.Type $argName }}
+            {{- maybeAsPointer $.Assignment.Path.Last.Type $argName }}
         {{- end }}
     {{- else if .Value.Envelope }}
         {{- with .Value.Envelope }}

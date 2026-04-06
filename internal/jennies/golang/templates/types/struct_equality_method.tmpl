@@ -1,5 +1,5 @@
-// Equals tests the equality of two `{{ .def.Name|formatObjectName }}` objects.
-func (resource {{ .def.Name|formatObjectName }}) Equals(other {{ .def.Name|formatObjectName }}) bool {
+// Equals tests the equality of two `{{ .def.Name }}` objects.
+func (resource {{ .def.Name }}) Equals(other {{ .def.Name }}) bool {
 	{{- template "type_equality_check" (dict "Type" .def.Type "Nullable" .def.Type.Nullable "Dereference" false "SelfName" "resource" "OtherName" "other" "Depth" 0) }}
 
 	return true
@@ -68,9 +68,8 @@ func (resource {{ .def.Name|formatObjectName }}) Equals(other {{ .def.Name|forma
 		}
 	{{- else if .Type.IsStruct }}
 		{{- range $field := .Type.Struct.Fields }}
-			{{- $fieldName := $field.Name|formatFieldName -}}
-			{{- $selfKey := print $.SelfName "." $fieldName }}
-			{{- $otherKey := print $.OtherName "." $fieldName }}
+			{{- $selfKey := print $.SelfName "." $field.Name }}
+			{{- $otherKey := print $.OtherName "." $field.Name }}
 
 			{{- template "type_equality_check" (dict "Type" $field.Type "Nullable" $field.Type.Nullable "Dereference" false "SelfName" $selfKey "OtherName" $otherKey "Depth" $.Depth) }}
 		{{- end }}

@@ -18,8 +18,8 @@ func SomeStructConverter(input SomeStruct) string {
     buffer.WriteString(`Config(`)
         arg0 := "map[string]string{"
         for key, arg1 := range input.Config {
-            tmpconfigarg1 :=fmt.Sprintf("%#v", arg1)
-            arg0 += "\t" + fmt.Sprintf("%#v", key) + ": " + tmpconfigarg1 +","
+            tmpConfigarg1 :=fmt.Sprintf("%#v", arg1)
+            arg0 += "\t" + fmt.Sprintf("%#v", key) + ": " + tmpConfigarg1 +","
         }
         arg0 += "}"
         buffer.WriteString(arg0)

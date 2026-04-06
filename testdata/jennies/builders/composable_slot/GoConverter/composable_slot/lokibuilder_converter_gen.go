@@ -30,8 +30,8 @@ func LokiBuilderConverter(input Dashboard) string {
     buffer.WriteString(`Targets(`)
         tmparg0 := []string{}
         for _, arg1 := range input.Targets {
-        tmptargetsarg1 := cog.ConvertDataqueryToCode(arg1, )
-        tmparg0 = append(tmparg0, tmptargetsarg1)
+        tmpTargetsarg1 := cog.ConvertDataqueryToCode(arg1, )
+        tmparg0 = append(tmparg0, tmpTargetsarg1)
         }
         arg0 := "[]cog.Builder[variants.Dataquery]{" + strings.Join(tmparg0, ",\n") + "}"
         buffer.WriteString(arg0)
