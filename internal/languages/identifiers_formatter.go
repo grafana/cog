@@ -22,69 +22,7 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 		identifiersConfig = identifierProvider.Identifiers()
 	}
 
-	schemaVisitor := compiler.Visitor{
-		OnObject: func(visitor *compiler.Visitor, schema *ast.Schema, object ast.Object) (ast.Object, error) {
-			if identifiersConfig.PackageNameFunc != nil {
-				object.SelfRef.ReferredPkg = identifiersConfig.PackageNameFunc(schema.Package)
-			}
-			if identifiersConfig.ObjectNameFunc != nil {
-				object.Name = identifiersConfig.ObjectNameFunc(object.Name)
-				object.SelfRef.ReferredType = object.Name
-			}
-			return visitor.TransverseObject(schema, object)
-		},
-		OnStructField: func(visitor *compiler.Visitor, schema *ast.Schema, field ast.StructField) (ast.StructField, error) {
-			if identifiersConfig.FieldNameFunc != nil {
-				if field.OriginalName == "" {
-					field.OriginalName = field.Name
-				}
-				field.Name = identifiersConfig.FieldNameFunc(field.Name)
-			}
-			return visitor.TransverseStructField(schema, field)
-		},
-		OnRef: func(visitor *compiler.Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
-			ref := def.AsRef().DeepCopy()
-			if identifiersConfig.PackageNameFunc != nil {
-				ref.ReferredPkg = identifiersConfig.PackageNameFunc(ref.ReferredPkg)
-			}
-			if identifiersConfig.ObjectNameFunc != nil {
-				ref.ReferredType = identifiersConfig.ObjectNameFunc(ref.ReferredType)
-			}
-			return ast.Type{
-				Kind:     ast.KindRef,
-				Nullable: def.Nullable,
-				Default:  def.Default,
-				Ref:      &ref,
-			}, nil
-		},
-		OnEnum: func(visitor *compiler.Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
-			if identifiersConfig.ObjectNameFunc == nil {
-				return def, nil
-			}
-			enumType := def.AsEnum().DeepCopy()
-			for i, val := range enumType.Values {
-				enumType.Values[i].Name = identifiersConfig.ObjectNameFunc(val.Name)
-			}
-			def.Enum = &enumType
-			return def, nil
-		},
-		OnConstantRef: func(visitor *compiler.Visitor, schema *ast.Schema, def ast.Type) (ast.Type, error) {
-			ref := def.AsConstantRef().DeepCopy()
-			if identifiersConfig.PackageNameFunc != nil {
-				ref.ReferredPkg = identifiersConfig.PackageNameFunc(ref.ReferredPkg)
-			}
-			if identifiersConfig.ObjectNameFunc != nil {
-				ref.ReferredType = identifiersConfig.ObjectNameFunc(ref.ReferredType)
-			}
-			return ast.Type{
-				Kind:              ast.KindConstantRef,
-				Nullable:          def.Nullable,
-				Default:           def.Default,
-				ConstantReference: &ref,
-			}, nil
-		},
-	}
-
+	schemaVisitor := identifiersConfig.schemaVisitor()
 	context.Schemas, err = schemaVisitor.VisitSchemas(context.Schemas)
 	if err != nil {
 		return Context{}, err
@@ -99,91 +37,192 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 		}
 	}
 
-	builderVisitor := ast.BuilderVisitor{
-		OnBuilder: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder) (ast.Builder, error) {
-			if identifiersConfig.PackageNameFunc != nil {
-				builder.Package = identifiersConfig.PackageNameFunc(builder.Package)
-			}
-			if identifiersConfig.BuilderNameFunc != nil {
-				builder.Name = identifiersConfig.BuilderNameFunc(builder.Name)
-			}
-			return visitor.TraverseBuilder(schemas, builder)
-		},
-		OnFactory: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, factory ast.BuilderFactory) (ast.BuilderFactory, error) {
-			if identifiersConfig.OptionNameFunc != nil {
-				factory.Name = identifiersConfig.OptionNameFunc(factory.Name)
-			}
-			if identifiersConfig.PackageNameFunc != nil {
-				factory.BuilderRef.ReferredPkg = identifiersConfig.PackageNameFunc(factory.BuilderRef.ReferredPkg)
-			}
-			if identifiersConfig.ObjectNameFunc != nil {
-				factory.BuilderRef.ReferredType = identifiersConfig.ObjectNameFunc(factory.BuilderRef.ReferredType)
-			}
-			for i, arg := range factory.Args {
-				if identifiersConfig.ArgNameFunc != nil {
-					factory.Args[i].Name = identifiersConfig.ArgNameFunc(arg.Name)
-				}
-			}
-			for i, call := range factory.OptionCalls {
-				if identifiersConfig.OptionNameFunc != nil {
-					factory.OptionCalls[i].Name = identifiersConfig.OptionNameFunc(call.Name)
-				}
-				for j, param := range call.Parameters {
-					if param.Argument != nil && identifiersConfig.ArgNameFunc != nil {
-						factory.OptionCalls[i].Parameters[j].Argument.Name = identifiersConfig.ArgNameFunc(param.Argument.Name)
-					}
-					if param.Factory != nil && identifiersConfig.OptionNameFunc != nil {
-						factory.OptionCalls[i].Parameters[j].Factory.Ref.Factory = identifiersConfig.OptionNameFunc(param.Factory.Ref.Factory)
-					}
-				}
-			}
-			return factory, nil
-		},
-		OnOption: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, option ast.Option) (ast.Option, error) {
-			if identifiersConfig.OptionNameFunc != nil {
-				option.Name = identifiersConfig.OptionNameFunc(option.Name)
-			}
-			return visitor.TraverseOption(schemas, builder, option)
-		},
-		OnArgument: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, argument ast.Argument) (ast.Argument, error) {
-			if identifiersConfig.ArgNameFunc != nil {
-				argument.Name = identifiersConfig.ArgNameFunc(argument.Name)
-			}
-			return argument, nil
-		},
-		OnAssignment: func(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, assignment ast.Assignment) (ast.Assignment, error) {
-			if identifiersConfig.AssignmentFunc != nil {
-				for i, p := range assignment.Path {
-					assignment.Path[i].Identifier = identifiersConfig.AssignmentFunc(p.Identifier)
-				}
-			}
-			if identifiersConfig.ArgNameFunc != nil {
-				if assignment.Value.Argument != nil {
-					assignment.Value.Argument.Name = identifiersConfig.ArgNameFunc(assignment.Value.Argument.Name)
-				}
-			}
-
-			updateEnvelope(assignment.Value.Envelope, identifiersConfig.ArgNameFunc, identifiersConfig.AssignmentFunc)
-
-			for i, nilCheck := range assignment.NilChecks {
-				if identifiersConfig.AssignmentFunc != nil {
-					for j, p := range nilCheck.Path {
-						assignment.NilChecks[i].Path[j].Identifier = identifiersConfig.AssignmentFunc(p.Identifier)
-					}
-				}
-				assignment.NilChecks[i].EmptyValueType = formatTypeRefs(nilCheck.EmptyValueType, identifiersConfig.PackageNameFunc, identifiersConfig.ObjectNameFunc)
-			}
-
-			return assignment, nil
-		},
-	}
-
+	builderVisitor := identifiersConfig.builderVisitor()
 	context.Builders, err = builderVisitor.Visit(context.Schemas, context.Builders)
 	if err != nil {
 		return Context{}, err
 	}
 
 	return context, nil
+}
+
+func (cfg IdentifiersConfig) schemaVisitor() compiler.Visitor {
+	return compiler.Visitor{
+		OnObject:      cfg.onObject,
+		OnStructField: cfg.onStructField,
+		OnRef:         cfg.onRef,
+		OnEnum:        cfg.onEnum,
+		OnConstantRef: cfg.onConstantRef,
+	}
+}
+
+func (cfg IdentifiersConfig) builderVisitor() ast.BuilderVisitor {
+	return ast.BuilderVisitor{
+		OnBuilder:    cfg.onBuilder,
+		OnFactory:    cfg.onFactory,
+		OnOption:     cfg.onOption,
+		OnArgument:   cfg.onArgument,
+		OnAssignment: cfg.onAssignment,
+	}
+}
+
+func (cfg IdentifiersConfig) onObject(visitor *compiler.Visitor, schema *ast.Schema, object ast.Object) (ast.Object, error) {
+	if cfg.PackageNameFunc != nil {
+		object.SelfRef.ReferredPkg = cfg.PackageNameFunc(schema.Package)
+	}
+	if cfg.ObjectNameFunc != nil {
+		object.Name = cfg.ObjectNameFunc(object.Name)
+		object.SelfRef.ReferredType = object.Name
+	}
+	return visitor.TransverseObject(schema, object)
+}
+
+func (cfg IdentifiersConfig) onStructField(visitor *compiler.Visitor, schema *ast.Schema, field ast.StructField) (ast.StructField, error) {
+	if cfg.FieldNameFunc != nil {
+		if field.OriginalName == "" {
+			field.OriginalName = field.Name
+		}
+		field.Name = cfg.FieldNameFunc(field.Name)
+	}
+	return visitor.TransverseStructField(schema, field)
+}
+
+func (cfg IdentifiersConfig) onRef(_ *compiler.Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
+	ref := def.AsRef().DeepCopy()
+	if cfg.PackageNameFunc != nil {
+		ref.ReferredPkg = cfg.PackageNameFunc(ref.ReferredPkg)
+	}
+	if cfg.ObjectNameFunc != nil {
+		ref.ReferredType = cfg.ObjectNameFunc(ref.ReferredType)
+	}
+	return ast.Type{
+		Kind:     ast.KindRef,
+		Nullable: def.Nullable,
+		Default:  def.Default,
+		Ref:      &ref,
+	}, nil
+}
+
+func (cfg IdentifiersConfig) onEnum(_ *compiler.Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
+	if cfg.ObjectNameFunc == nil {
+		return def, nil
+	}
+	enumType := def.AsEnum().DeepCopy()
+	for i, val := range enumType.Values {
+		enumType.Values[i].Name = cfg.ObjectNameFunc(val.Name)
+	}
+	def.Enum = &enumType
+	return def, nil
+}
+
+func (cfg IdentifiersConfig) onConstantRef(_ *compiler.Visitor, _ *ast.Schema, def ast.Type) (ast.Type, error) {
+	ref := def.AsConstantRef().DeepCopy()
+	if cfg.PackageNameFunc != nil {
+		ref.ReferredPkg = cfg.PackageNameFunc(ref.ReferredPkg)
+	}
+	if cfg.ObjectNameFunc != nil {
+		ref.ReferredType = cfg.ObjectNameFunc(ref.ReferredType)
+	}
+	return ast.Type{
+		Kind:              ast.KindConstantRef,
+		Nullable:          def.Nullable,
+		Default:           def.Default,
+		ConstantReference: &ref,
+	}, nil
+}
+
+func (cfg IdentifiersConfig) onBuilder(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder) (ast.Builder, error) {
+	if cfg.PackageNameFunc != nil {
+		builder.Package = cfg.PackageNameFunc(builder.Package)
+		builder.For.SelfRef.ReferredPkg = cfg.PackageNameFunc(builder.For.SelfRef.ReferredPkg)
+	}
+	if cfg.ObjectNameFunc != nil {
+		builder.For.Name = cfg.ObjectNameFunc(builder.For.Name)
+		builder.For.SelfRef.ReferredType = builder.For.Name
+	}
+	if cfg.BuilderNameFunc != nil {
+		builder.Name = cfg.BuilderNameFunc(builder.Name)
+	}
+	return visitor.TraverseBuilder(schemas, builder)
+}
+
+func (cfg IdentifiersConfig) onFactory(_ *ast.BuilderVisitor, _ ast.Schemas, _ ast.Builder, factory ast.BuilderFactory) (ast.BuilderFactory, error) {
+	if cfg.OptionNameFunc != nil {
+		factory.Name = cfg.OptionNameFunc(factory.Name)
+	}
+	if cfg.PackageNameFunc != nil {
+		factory.BuilderRef.ReferredPkg = cfg.PackageNameFunc(factory.BuilderRef.ReferredPkg)
+	}
+	if cfg.ObjectNameFunc != nil {
+		factory.BuilderRef.ReferredType = cfg.ObjectNameFunc(factory.BuilderRef.ReferredType)
+	}
+	for i, arg := range factory.Args {
+		if cfg.ArgNameFunc != nil {
+			factory.Args[i].Name = cfg.ArgNameFunc(arg.Name)
+		}
+	}
+	for i, call := range factory.OptionCalls {
+		if cfg.OptionNameFunc != nil {
+			factory.OptionCalls[i].Name = cfg.OptionNameFunc(call.Name)
+		}
+		for j, param := range call.Parameters {
+			if param.Argument != nil && cfg.ArgNameFunc != nil {
+				factory.OptionCalls[i].Parameters[j].Argument.Name = cfg.ArgNameFunc(param.Argument.Name)
+			}
+			if param.Factory != nil && cfg.OptionNameFunc != nil {
+				factory.OptionCalls[i].Parameters[j].Factory.Ref.Factory = cfg.OptionNameFunc(param.Factory.Ref.Factory)
+			}
+		}
+	}
+	return factory, nil
+}
+
+func (cfg IdentifiersConfig) onOption(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder, option ast.Option) (ast.Option, error) {
+	if cfg.OptionNameFunc != nil {
+		option.Name = cfg.OptionNameFunc(option.Name)
+	}
+	return visitor.TraverseOption(schemas, builder, option)
+}
+
+func (cfg IdentifiersConfig) onArgument(_ *ast.BuilderVisitor, _ ast.Schemas, _ ast.Builder, argument ast.Argument) (ast.Argument, error) {
+	if cfg.ArgNameFunc != nil {
+		argument.Name = cfg.ArgNameFunc(argument.Name)
+	}
+	return argument, nil
+}
+
+func (cfg IdentifiersConfig) onAssignment(_ *ast.BuilderVisitor, _ ast.Schemas, _ ast.Builder, assignment ast.Assignment) (ast.Assignment, error) {
+	for i, p := range assignment.Path {
+		if cfg.AssignmentFunc != nil {
+			assignment.Path[i].Identifier = cfg.AssignmentFunc(p.Identifier)
+		}
+		if p.TypeHint != nil {
+			hint := formatTypeRefs(*p.TypeHint, cfg.PackageNameFunc, cfg.ObjectNameFunc)
+			assignment.Path[i].TypeHint = &hint
+		}
+	}
+	if cfg.ArgNameFunc != nil {
+		if assignment.Value.Argument != nil {
+			assignment.Value.Argument.Name = cfg.ArgNameFunc(assignment.Value.Argument.Name)
+		}
+	}
+
+	updateEnvelope(assignment.Value.Envelope, cfg.ArgNameFunc, cfg.AssignmentFunc)
+
+	for i, nilCheck := range assignment.NilChecks {
+		for j, p := range nilCheck.Path {
+			if cfg.AssignmentFunc != nil {
+				assignment.NilChecks[i].Path[j].Identifier = cfg.AssignmentFunc(p.Identifier)
+			}
+			if p.TypeHint != nil {
+				hint := formatTypeRefs(*p.TypeHint, cfg.PackageNameFunc, cfg.ObjectNameFunc)
+				assignment.NilChecks[i].Path[j].TypeHint = &hint
+			}
+		}
+		assignment.NilChecks[i].EmptyValueType = formatTypeRefs(nilCheck.EmptyValueType, cfg.PackageNameFunc, cfg.ObjectNameFunc)
+	}
+
+	return assignment, nil
 }
 
 // formatTypeRefs applies package/object name formatters to all refs within a type, recursively.

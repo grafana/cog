@@ -2,7 +2,7 @@ package builderpkg
 
 import (
 	cog "github.com/grafana/cog/generated/cog"
-	withdashes "github.com/grafana/cog/generated/with-dashes"
+	withdashes "github.com/grafana/cog/generated/withdashes"
 )
 
 var _ cog.Builder[withdashes.SomeStruct] = (*SomeNiceBuilderBuilder)(nil)

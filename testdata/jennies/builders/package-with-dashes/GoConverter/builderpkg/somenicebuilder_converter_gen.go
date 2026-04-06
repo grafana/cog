@@ -3,7 +3,7 @@ package builderpkg
 
 
 import (
-	withdashes "github.com/grafana/cog/generated/with-dashes"
+	withdashes "github.com/grafana/cog/generated/withdashes"
 	"strings"
 	"fmt"
 )

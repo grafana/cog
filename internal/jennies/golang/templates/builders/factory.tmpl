@@ -3,11 +3,11 @@
 {{- range .Factory.Comments }}
 // {{ . }}
 {{- end }}
-func {{ .Factory.Name }}({{- template "args" .Factory.Args }}) *{{ .Builder.Name }}Builder {
-	builder := New{{ .Builder.Name }}Builder()
+func {{ .Factory.Name }}({{- template "args" .Factory.Args }}) *{{- if ne $builderPkg "" -}}{{ $builderPkg }}.{{- end -}}{{ .Factory.BuilderRef.ReferredType }}Builder {
+	builder := {{ if ne $builderPkg "" -}}{{ $builderPkg }}.{{- end -}}New{{ .Factory.BuilderRef.ReferredType }}Builder()
 
 {{- range $call := .Factory.OptionCalls }}
-    builder.{{ $call.Name }}({{- range $i, $param := $call.Parameters }}{{- if gt $i 0 }}, {{ end }}{{ template "factory_parameter_value" (dict "Value" $param) -}}{{- end }})
+    {{ template "factory_option_call" (dict "Factory" $.Factory "Call" $call) }}
 {{- end }}
 
 	return builder
@@ -35,8 +35,8 @@ func {{ .Factory.Name }}({{- template "args" .Factory.Args }}) *{{ .Builder.Name
 	{{- if not (eq .Value.Constant nil) -}}
 		{{- formatValue .Value.Constant.Type .Value.Constant.Value }}
 	{{- end }}
-	{{- with .Value.Argument -}}
-		{{- .Name -}}
+	{{- if not (eq .Value.Argument nil) -}}
+		{{- .Value.Argument.Name -}}{{- if .Value.ForceBuild -}}Resource{{- end -}}
 	{{- end -}}
 	{{- with .Value.Factory -}}
 		{{- $pkg := .Ref.Package|importPkg -}}
