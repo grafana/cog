@@ -2,6 +2,7 @@ package languages
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
@@ -184,8 +185,13 @@ func (generator *ConverterGenerator) FromBuilder(context Context, builder ast.Bu
 		return generator.convertOption(context, converter, option)
 	})
 
-	for _, opts := range generator.listOfDisjunctionOptions {
-		converter.Mappings = append(converter.Mappings, generator.convertListOfDisjunctionOptions(context, converter, opts))
+	disjunctionPaths := make([]string, 0, len(generator.listOfDisjunctionOptions))
+	for path := range generator.listOfDisjunctionOptions {
+		disjunctionPaths = append(disjunctionPaths, path)
+	}
+	sort.Strings(disjunctionPaths)
+	for _, path := range disjunctionPaths {
+		converter.Mappings = append(converter.Mappings, generator.convertListOfDisjunctionOptions(context, converter, generator.listOfDisjunctionOptions[path]))
 	}
 
 	converter.Mappings = tools.Filter(converter.Mappings, func(mapping ConversionMapping) bool {
