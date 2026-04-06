@@ -528,6 +528,17 @@
         "package_root": {
           "type": "string",
           "description": "Root path for imports.\nEx: github.com/grafana/cog/generated"
+        },
+        "overrides_templates": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "OverridesTemplatesDirectories holds a list of directories containing templates\ndefining blocks used to override parts of builders/types/...."
+        },
+        "skip_post_formatting": {
+          "type": "boolean",
+          "description": "SkipPostFormatting disables formatting of Go files done with go imports\nafter code generation."
         }
       },
       "additionalProperties": false,

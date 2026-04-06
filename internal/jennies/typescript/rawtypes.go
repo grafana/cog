@@ -288,6 +288,9 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	pkg := packageMapper(ref.ReferredPkg)
 	referredType, _ := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 	referredTypeName := formatObjectName(referredType.Name)
+	if referredTypeName == "" {
+		referredTypeName = formatObjectName(ref.ReferredType)
+	}
 
 	// is the reference to a constant?
 	if referredType.Type.IsConcreteScalar() {

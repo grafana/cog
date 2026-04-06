@@ -169,6 +169,29 @@ func (v *validators) constraints(validator scalarValidator, constraints []ast.Ty
 	return buffer.String()
 }
 
+func (v *validators) arrayConstraintValidator(constraints []ast.TypeConstraint) string {
+	if len(constraints) == 0 {
+		return ""
+	}
+
+	var buffer strings.Builder
+	v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/schema/validator")
+	v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
+	buffer.WriteString("[]validator.List{\n")
+	for _, c := range constraints {
+		switch c.Op {
+		case ast.MinItemsOp:
+			buffer.WriteString(fmt.Sprintf("listvalidator.SizeAtLeast(%s),\n", formatScalar(c.Args[0])))
+		case ast.MaxItemsOp:
+			buffer.WriteString(fmt.Sprintf("listvalidator.SizeAtMost(%s),\n", formatScalar(c.Args[0])))
+		case ast.UniqueItemsOp:
+			buffer.WriteString("listvalidator.UniqueValues(),\n")
+		}
+	}
+	buffer.WriteString("},\n")
+	return buffer.String()
+}
+
 func (v *validators) validateList(def ast.Type) string {
 	var buffer strings.Builder
 	switch def.Kind {
