@@ -11,8 +11,11 @@ class SomeStruct:
     tags: list[str]
     regex: str
     negative_regex: str
+    min_max_list: list[str]
+    unique_list: list[str]
+    full_constraint_list: list[int]
 
-    def __init__(self, id_val: int = 0, maybe_id: typing.Optional[int] = None, greater_than_zero: int = 0, negative: int = 0, title: str = "", labels: typing.Optional[dict[str, str]] = None, tags: typing.Optional[list[str]] = None, regex: str = "", negative_regex: str = "") -> None:
+    def __init__(self, id_val: int = 0, maybe_id: typing.Optional[int] = None, greater_than_zero: int = 0, negative: int = 0, title: str = "", labels: typing.Optional[dict[str, str]] = None, tags: typing.Optional[list[str]] = None, regex: str = "", negative_regex: str = "", min_max_list: typing.Optional[list[str]] = None, unique_list: typing.Optional[list[str]] = None, full_constraint_list: typing.Optional[list[int]] = None) -> None:
         self.id_val = id_val
         self.maybe_id = maybe_id
         self.greater_than_zero = greater_than_zero
@@ -22,6 +25,9 @@ class SomeStruct:
         self.tags = tags if tags is not None else []
         self.regex = regex
         self.negative_regex = negative_regex
+        self.min_max_list = min_max_list if min_max_list is not None else []
+        self.unique_list = unique_list if unique_list is not None else []
+        self.full_constraint_list = full_constraint_list if full_constraint_list is not None else []
 
     def to_json(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -33,6 +39,9 @@ class SomeStruct:
             "tags": self.tags,
             "regex": self.regex,
             "negativeRegex": self.negative_regex,
+            "minMaxList": self.min_max_list,
+            "uniqueList": self.unique_list,
+            "fullConstraintList": self.full_constraint_list,
         }
         if self.maybe_id is not None:
             payload["maybeId"] = self.maybe_id
@@ -59,6 +68,12 @@ class SomeStruct:
         if "regex" in data:
             args["regex"] = data["regex"]
         if "negativeRegex" in data:
-            args["negative_regex"] = data["negativeRegex"]        
+            args["negative_regex"] = data["negativeRegex"]
+        if "minMaxList" in data:
+            args["min_max_list"] = data["minMaxList"]
+        if "uniqueList" in data:
+            args["unique_list"] = data["uniqueList"]
+        if "fullConstraintList" in data:
+            args["full_constraint_list"] = data["fullConstraintList"]        
 
         return cls(**args)

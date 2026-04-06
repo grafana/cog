@@ -7,6 +7,7 @@ import (
 	int64validator "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	regexp "regexp"
+	listvalidator "github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 )
 
 type SomeStruct struct {
@@ -19,6 +20,9 @@ Labels types.Map `tfsdk:"labels"`
 Tags types.List `tfsdk:"tags"`
 Regex types.String `tfsdk:"regex"`
 NegativeRegex types.String `tfsdk:"negativeRegex"`
+MinMaxList types.List `tfsdk:"minMaxList"`
+UniqueList types.List `tfsdk:"uniqueList"`
+FullConstraintList types.List `tfsdk:"fullConstraintList"`
  }
 
 var SpecAttributes = map[string]schema.Attribute{
@@ -86,6 +90,30 @@ stringvalidator.RegexMatches(regexp.MustCompile(`^[a-zA-Z0-9_-]+$`), ""),
 
 "negative_regex": schema.StringAttribute{
  Required: true,
+},
+
+"min_max_list": schema.ListAttribute{
+ ElementType: types.StringType,
+Validators: []validator.List{
+listvalidator.SizeAtLeast(1),
+listvalidator.SizeAtMost(64),
+},
+},
+
+"unique_list": schema.ListAttribute{
+ ElementType: types.StringType,
+Validators: []validator.List{
+listvalidator.UniqueValues(),
+},
+},
+
+"full_constraint_list": schema.ListAttribute{
+ ElementType: types.Int64Type,
+Validators: []validator.List{
+listvalidator.SizeAtLeast(2),
+listvalidator.SizeAtMost(10),
+listvalidator.UniqueValues(),
+},
 },
 
 },

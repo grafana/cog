@@ -7,6 +7,12 @@
       "properties": {
         "value_type": {
           "$ref": "#/$defs/AstType"
+        },
+        "constraints": {
+          "items": {
+            "$ref": "#/$defs/AstTypeConstraint"
+          },
+          "type": "array"
         }
       },
       "additionalProperties": false,
