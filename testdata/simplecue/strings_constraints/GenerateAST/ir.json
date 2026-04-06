@@ -81,6 +81,7 @@
             },
             {
               "Name": "regex",
+              "OriginalName": "regex",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -100,6 +101,7 @@
             },
             {
               "Name": "negativeRegex",
+              "OriginalName": "negativeRegex",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
