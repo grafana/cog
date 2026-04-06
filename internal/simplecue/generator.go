@@ -728,10 +728,14 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 
 	constraints := make([]ast.TypeConstraint, 0, len(typeAndConstraints))
 
-	for _, andExpr := range typeAndConstraints {
+	for i := 0; i < len(typeAndConstraints); i++ {
+		andExpr := typeAndConstraints[i]
 		op, args := andExpr.Expr()
 
 		switch op {
+		case cue.SelectorOp:
+			scope, refPath := andExpr.ReferencePath()
+			typeAndConstraints = append(typeAndConstraints, scope.LookupPath(refPath))
 		case cue.CallOp:
 			// TODO: support more constraints?
 			switch fmt.Sprint(args[0]) {
