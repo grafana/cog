@@ -42,8 +42,8 @@ func DashboardConverter(input Dashboard) string {
     buffer.WriteString(`Links(`)
         tmparg0 := []string{}
         for _, arg1 := range input.Links {
-        tmpLinksarg1 := DashboardLinkConverter(arg1)
-        tmparg0 = append(tmparg0, tmpLinksarg1)
+        tmplinksarg1 := DashboardLinkConverter(arg1)
+        tmparg0 = append(tmparg0, tmplinksarg1)
         }
         arg0 := "[]cog.Builder[builder_delegation.DashboardLink]{" + strings.Join(tmparg0, ",\n") + "}"
         buffer.WriteString(arg0)
@@ -59,13 +59,13 @@ func DashboardConverter(input Dashboard) string {
     buffer.WriteString(`LinksOfLinks(`)
         tmparg0 := []string{}
         for _, arg1 := range input.LinksOfLinks {
-        tmptmpLinksOfLinksarg1 := []string{}
+        tmptmplinksOfLinksarg1 := []string{}
         for _, arg1Value := range arg1 {
         tmparg1arg1Value := DashboardLinkConverter(arg1Value)
-        tmptmpLinksOfLinksarg1 = append(tmptmpLinksOfLinksarg1, tmparg1arg1Value)
+        tmptmplinksOfLinksarg1 = append(tmptmplinksOfLinksarg1, tmparg1arg1Value)
         }
-        tmpLinksOfLinksarg1 := "[]cog.Builder[builder_delegation.DashboardLink]{" + strings.Join(tmptmpLinksOfLinksarg1, ",\n") + "}"
-        tmparg0 = append(tmparg0, tmpLinksOfLinksarg1)
+        tmplinksOfLinksarg1 := "[]cog.Builder[builder_delegation.DashboardLink]{" + strings.Join(tmptmplinksOfLinksarg1, ",\n") + "}"
+        tmparg0 = append(tmparg0, tmplinksOfLinksarg1)
         }
         arg0 := "[][]cog.Builder[builder_delegation.DashboardLink]{" + strings.Join(tmparg0, ",\n") + "}"
         buffer.WriteString(arg0)

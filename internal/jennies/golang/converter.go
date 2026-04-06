@@ -88,6 +88,7 @@ func (jenny *Converter) generateConverter(context languages.Context, builder ast
 			"formatPath":         makePathFormatter(formatter),
 			"formatPathForRange": formatPathForRange(formatter),
 			"formatRawRef":       formatRawRef,
+			"formatVarName":      formatVarName,
 		}).
 		RenderAsBytes("converters/converter.tmpl", map[string]any{
 			"Imports":   imports,

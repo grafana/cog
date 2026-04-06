@@ -58,7 +58,7 @@ package {{ .Converter.Package }}
         {{- $reflect := importStdPkg "strings" -}}
         tmp{{ $.IntoVar }} := []string{}
         for _, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
-        {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
+        {{- $subIntoVar := print "tmp" (.For.Last.Identifier | formatVarName) (.ValueAs | formatPath) }}
         {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
         tmp{{ $.IntoVar }} = append(tmp{{ $.IntoVar }}, {{ $subIntoVar }})
         }
@@ -68,7 +68,7 @@ package {{ .Converter.Package }}
         {{- $reflect := importStdPkg "fmt" -}}
         {{ $.IntoVar }} := "map[{{ .IndexType | formatType }}]{{ .ValueType | formatType }}{"
         for key, {{ .ValueAs | formatPath }} := range {{ .For | formatPath }} {
-        {{- $subIntoVar := print "tmp" .For.Last.Identifier (.ValueAs | formatPath) }}
+        {{- $subIntoVar := print "tmp" (.For.Last.Identifier | formatVarName) (.ValueAs | formatPath) }}
             {{ template "prepare_arg" (dict "IntoVar" $subIntoVar "Arg" .ForArg) }}
             {{ $.IntoVar }} += "\t" + fmt.Sprintf("%#v", key) + ": " + {{ $subIntoVar }} +","
         }
