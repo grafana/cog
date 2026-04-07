@@ -6,6 +6,34 @@
     "Nullable": false
   },
   "Objects": {
+    "Pattern": {
+      "Name": "Pattern",
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "string"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Pattern"
+      }
+    },
+    "NegativePattern": {
+      "Name": "NegativePattern",
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "string"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "NegativePattern"
+      }
+    },
     "container": {
       "Name": "container",
       "Type": {
@@ -102,6 +130,44 @@
             {
               "Name": "negativeRegex",
               "OriginalName": "negativeRegex",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "!~",
+                      "Args": [
+                        "^[a-zA-Z0-9_-]+$"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "regexRef",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string",
+                  "Constraints": [
+                    {
+                      "Op": "=~",
+                      "Args": [
+                        "^[a-zA-Z0-9_-]+$"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "negativeRegexRef",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
