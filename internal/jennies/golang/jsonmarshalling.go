@@ -189,7 +189,7 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 			return fmt.Errorf("error decoding field '%[1]s': %%w", err)
 		}
 	}
-`, field.OriginalName, formatFieldName(field.Name)))
+`, field.OriginalName, field.Name))
 	}
 
 	// unmarshal "composable slot" fields
