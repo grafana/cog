@@ -337,8 +337,22 @@ func (jenny Schema) formatArray(typeDef ast.Type) Definition {
 
 	definition.Set("type", "array")
 	definition.Set("items", jenny.formatType(typeDef.AsArray().ValueType))
+	jenny.addArrayConstraints(definition, typeDef)
 
 	return definition
+}
+
+func (jenny Schema) addArrayConstraints(definition *orderedmap.Map[string, any], typeDef ast.Type) {
+	for _, constraint := range typeDef.AsArray().Constraints {
+		switch constraint.Op {
+		case ast.MinItemsOp:
+			definition.Set("minItems", constraint.Args[0])
+		case ast.MaxItemsOp:
+			definition.Set("maxItems", constraint.Args[0])
+		case ast.UniqueItemsOp:
+			definition.Set("uniqueItems", true)
+		}
+	}
 }
 
 func (jenny Schema) formatMap(typeDef ast.Type) Definition {

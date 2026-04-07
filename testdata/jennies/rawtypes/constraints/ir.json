@@ -220,6 +220,93 @@
                 }
               },
               "Required": true
+            },
+            {
+              "Name": "minMaxList",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Constraints": [
+                    {
+                      "Op": "minItems",
+                      "Args": [
+                        1
+                      ]
+                    },
+                    {
+                      "Op": "maxItems",
+                      "Args": [
+                        64
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "uniqueList",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Constraints": [
+                    {
+                      "Op": "uniqueItems"
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "fullConstraintList",
+              "Type": {
+                "Kind": "array",
+                "Nullable": false,
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "int64"
+                    }
+                  },
+                  "Constraints": [
+                    {
+                      "Op": "minItems",
+                      "Args": [
+                        2
+                      ]
+                    },
+                    {
+                      "Op": "maxItems",
+                      "Args": [
+                        10
+                      ]
+                    },
+                    {
+                      "Op": "uniqueItems"
+                    }
+                  ]
+                }
+              },
+              "Required": true
             }
           ]
         }

@@ -728,10 +728,14 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 
 	constraints := make([]ast.TypeConstraint, 0, len(typeAndConstraints))
 
-	for _, andExpr := range typeAndConstraints {
+	for i := 0; i < len(typeAndConstraints); i++ {
+		andExpr := typeAndConstraints[i]
 		op, args := andExpr.Expr()
 
 		switch op {
+		case cue.SelectorOp:
+			scope, refPath := andExpr.ReferencePath()
+			typeAndConstraints = append(typeAndConstraints, scope.LookupPath(refPath))
 		case cue.CallOp:
 			// TODO: support more constraints?
 			switch fmt.Sprint(args[0]) {
@@ -961,6 +965,53 @@ func extractNumber(e cueast.Expr) (string, bool) {
 	return "", false
 }
 
+func (g *generator) declareListConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
+	conjuncts := appendSplit(nil, cue.AndOp, v)
+
+	if len(conjuncts) == 1 {
+		return nil, nil
+	}
+
+	var constraints []ast.TypeConstraint
+
+	for _, conjunct := range conjuncts {
+		op, args := conjunct.Expr()
+		if op != cue.CallOp {
+			continue
+		}
+
+		switch fmt.Sprint(args[0]) {
+		case "list.MinItems":
+			scalar, err := cueConcreteToScalar(args[1])
+			if err != nil {
+				return nil, err
+			}
+			constraints = append(constraints, ast.TypeConstraint{
+				Op:   ast.MinItemsOp,
+				Args: []any{scalar},
+			})
+
+		case "list.MaxItems":
+			scalar, err := cueConcreteToScalar(args[1])
+			if err != nil {
+				return nil, err
+			}
+			constraints = append(constraints, ast.TypeConstraint{
+				Op:   ast.MaxItemsOp,
+				Args: []any{scalar},
+			})
+
+		case "list.UniqueItems":
+			constraints = append(constraints, ast.TypeConstraint{
+				Op:   ast.UniqueItemsOp,
+				Args: nil,
+			})
+		}
+	}
+
+	return constraints, nil
+}
+
 func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
 	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints), ast.Default(defVal))
 
@@ -981,6 +1032,12 @@ func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints)
 		_, dvals := v.Expr()
 		v = dvals[0]
 	}
+
+	constraints, err := g.declareListConstraints(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+	typeDef.Array.Constraints = constraints
 
 	e := v.LookupPath(cue.MakePath(cue.AnyIndex))
 	if !e.Exists() {

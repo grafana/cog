@@ -20,7 +20,10 @@
           "labels",
           "tags",
           "regex",
-          "negativeRegex"
+          "negativeRegex",
+          "minMaxList",
+          "uniqueList",
+          "fullConstraintList"
         ],
         "properties": {
           "id": {
@@ -73,6 +76,30 @@
             "not": {
               "pattern": "^[a-zA-Z0-9_-]+$"
             }
+          },
+          "minMaxList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 64
+          },
+          "uniqueList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "fullConstraintList": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 2,
+            "maxItems": 10,
+            "uniqueItems": true
           }
         }
       }

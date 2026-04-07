@@ -8,6 +8,9 @@ export interface SomeStruct {
 	tags: string[];
 	regex: string;
 	negativeRegex: string;
+	minMaxList: string[];
+	uniqueList: string[];
+	fullConstraintList: number[];
 }
 
 export const defaultSomeStruct = (): SomeStruct => ({
@@ -19,5 +22,8 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	tags: [],
 	regex: "",
 	negativeRegex: "",
+	minMaxList: [],
+	uniqueList: [],
+	fullConstraintList: [],
 });
 
