@@ -36,6 +36,13 @@ func FormatIdentifiers(language Language, context Context) (Context, error) {
 			schema.Package = identifiersConfig.PackageNameFunc(schema.Package)
 		}
 	}
+	if identifiersConfig.ObjectNameFunc != nil {
+		for _, schema := range context.Schemas {
+			if schema.EntryPoint != "" {
+				schema.EntryPoint = identifiersConfig.ObjectNameFunc(schema.EntryPoint)
+			}
+		}
+	}
 
 	builderVisitor := identifiersConfig.builderVisitor()
 	context.Builders, err = builderVisitor.Visit(context.Schemas, context.Builders)
