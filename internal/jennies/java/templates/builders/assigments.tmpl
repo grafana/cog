@@ -31,10 +31,10 @@
         {{- $builtResultName := (print .Name "Resource") }}
         {{- if or .Type.IsArray .Type.IsMap }}
         {{- $builtResultName = (print .Name "Resources") }}
-        {{ .Type | formatType }} {{ $builtResultName | lowerCamelCase | escapeVar }} = {{ .Type | emptyValueForType }};
+        {{ .Type | formatType }} {{ $builtResultName }} = {{ .Type | emptyValueForType }};
         {{- end }}
-        
-        {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" (.Name  | lowerCamelCase | escapeVar) "InputVar" (.Name  | lowerCamelCase | escapeVar) "AssignmentPath" $.Assignment.Path "ResultVar" ($builtResultName | lowerCamelCase | escapeVar)) }}
+
+        {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" .Name "InputVar" .Name "AssignmentPath" $.Assignment.Path "ResultVar" $builtResultName) }}
         {{- end }}
     {{- end }}
 {{- end }}
@@ -44,12 +44,12 @@
         {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
             {{- if or .Type.IsMap .Type.IsArray }}
-            {{- .Name | escapeVar | lowerCamelCase }}Resources
+            {{- .Name }}Resources
             {{- else }}
-            {{- .Name | escapeVar | lowerCamelCase }}Resource
+            {{- .Name }}Resource
             {{- end }}
         {{- else }}
-            {{- .Name | escapeVar | lowerCamelCase }}
+            {{- .Name }}
         {{- end }}
         {{- end }}
     {{- else if .Value.Envelope }}

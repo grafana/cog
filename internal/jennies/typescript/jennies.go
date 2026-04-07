@@ -162,3 +162,15 @@ func (language *Language) NullableKinds() languages.NullableConfig {
 		AnyIsNullable:      true,
 	}
 }
+
+func (language *Language) Identifiers() languages.IdentifiersConfig {
+	return languages.IdentifiersConfig{
+		PackageNameFunc: formatPackageName,
+		ObjectNameFunc:  formatObjectName,
+		FieldNameFunc:   formatIdentifier,
+		BuilderNameFunc: formatObjectName,
+		OptionNameFunc:  formatIdentifier,
+		ArgNameFunc:     formatIdentifier,
+		AssignmentFunc:  formatIdentifier,
+	}
+}

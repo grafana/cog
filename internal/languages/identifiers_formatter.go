@@ -72,7 +72,7 @@ func (cfg IdentifiersConfig) onObject(visitor *compiler.Visitor, schema *ast.Sch
 	}
 	if cfg.ObjectNameFunc != nil {
 		object.Name = cfg.ObjectNameFunc(object.Name)
-		object.SelfRef.ReferredType = object.Name
+		object.SelfRef.ReferredType = cfg.ObjectNameFunc(object.SelfRef.ReferredType)
 	}
 	return visitor.TransverseObject(schema, object)
 }
@@ -188,6 +188,7 @@ func (cfg IdentifiersConfig) onArgument(_ *ast.BuilderVisitor, _ ast.Schemas, _ 
 	if cfg.ArgNameFunc != nil {
 		argument.Name = cfg.ArgNameFunc(argument.Name)
 	}
+	argument.Type = formatTypeRefs(argument.Type, cfg.PackageNameFunc, cfg.ObjectNameFunc)
 	return argument, nil
 }
 
@@ -196,24 +197,27 @@ func (cfg IdentifiersConfig) onAssignment(_ *ast.BuilderVisitor, _ ast.Schemas, 
 		if cfg.AssignmentFunc != nil {
 			assignment.Path[i].Identifier = cfg.AssignmentFunc(p.Identifier)
 		}
+		assignment.Path[i].Type = formatTypeRefs(p.Type, cfg.PackageNameFunc, cfg.ObjectNameFunc)
 		if p.TypeHint != nil {
 			hint := formatTypeRefs(*p.TypeHint, cfg.PackageNameFunc, cfg.ObjectNameFunc)
 			assignment.Path[i].TypeHint = &hint
 		}
 	}
-	if cfg.ArgNameFunc != nil {
-		if assignment.Value.Argument != nil {
+	if assignment.Value.Argument != nil {
+		if cfg.ArgNameFunc != nil {
 			assignment.Value.Argument.Name = cfg.ArgNameFunc(assignment.Value.Argument.Name)
 		}
+		assignment.Value.Argument.Type = formatTypeRefs(assignment.Value.Argument.Type, cfg.PackageNameFunc, cfg.ObjectNameFunc)
 	}
 
-	updateEnvelope(assignment.Value.Envelope, cfg.ArgNameFunc, cfg.AssignmentFunc)
+	updateEnvelope(assignment.Value.Envelope, cfg.ArgNameFunc, cfg.AssignmentFunc, cfg.PackageNameFunc, cfg.ObjectNameFunc)
 
 	for i, nilCheck := range assignment.NilChecks {
 		for j, p := range nilCheck.Path {
 			if cfg.AssignmentFunc != nil {
 				assignment.NilChecks[i].Path[j].Identifier = cfg.AssignmentFunc(p.Identifier)
 			}
+			assignment.NilChecks[i].Path[j].Type = formatTypeRefs(p.Type, cfg.PackageNameFunc, cfg.ObjectNameFunc)
 			if p.TypeHint != nil {
 				hint := formatTypeRefs(*p.TypeHint, cfg.PackageNameFunc, cfg.ObjectNameFunc)
 				assignment.NilChecks[i].Path[j].TypeHint = &hint
@@ -247,28 +251,37 @@ func formatTypeRefs(typeDef ast.Type, pkgFn func(string) string, objFn func(stri
 		typeDef = typeDef.DeepCopy()
 		valueType := formatTypeRefs(typeDef.AsMap().ValueType, pkgFn, objFn)
 		typeDef.Map.ValueType = valueType
+	case ast.KindDisjunction:
+		typeDef = typeDef.DeepCopy()
+		for i, branch := range typeDef.Disjunction.Branches {
+			typeDef.Disjunction.Branches[i] = formatTypeRefs(branch, pkgFn, objFn)
+		}
 	}
 	return typeDef
 }
 
-func updateEnvelope(envelope *ast.AssignmentEnvelope, argFn func(string) string, assignFn func(string) string) {
+func updateEnvelope(envelope *ast.AssignmentEnvelope, argFn func(string) string, assignFn func(string) string, pkgFn func(string) string, objFn func(string) string) {
 	if envelope == nil {
 		return
 	}
 
 	for i, env := range envelope.Values {
-		if env.Value.Argument != nil && argFn != nil {
-			envelope.Values[i].Value.Argument.Name = argFn(env.Value.Argument.Name)
+		if env.Value.Argument != nil {
+			if argFn != nil {
+				envelope.Values[i].Value.Argument.Name = argFn(env.Value.Argument.Name)
+			}
+			envelope.Values[i].Value.Argument.Type = formatTypeRefs(env.Value.Argument.Type, pkgFn, objFn)
 		}
 
 		for j, p := range env.Path {
 			if assignFn != nil {
 				envelope.Values[i].Path[j].Identifier = assignFn(p.Identifier)
 			}
+			envelope.Values[i].Path[j].Type = formatTypeRefs(p.Type, pkgFn, objFn)
 		}
 
 		if env.Value.Envelope != nil {
-			updateEnvelope(envelope.Values[i].Value.Envelope, argFn, assignFn)
+			updateEnvelope(envelope.Values[i].Value.Envelope, argFn, assignFn, pkgFn, objFn)
 		}
 	}
 }

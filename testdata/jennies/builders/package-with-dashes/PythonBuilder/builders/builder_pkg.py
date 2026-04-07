@@ -1,15 +1,15 @@
 import typing
 from ..cog import builder as cogbuilder
-from ..models import with-dashes
+from ..models import with_dashes
 
 
-class SomeNiceBuilder(cogbuilder.Builder[with-dashes.SomeStruct]):
-    _internal: with-dashes.SomeStruct
+class SomeNiceBuilder(cogbuilder.Builder[with_dashes.SomeStruct]):
+    _internal: with_dashes.SomeStruct
 
     def __init__(self) -> None:
-        self._internal = with-dashes.SomeStruct()
+        self._internal = with_dashes.SomeStruct()
 
-    def build(self) -> with-dashes.SomeStruct:
+    def build(self) -> with_dashes.SomeStruct:
         """
         Builds the object.
         """

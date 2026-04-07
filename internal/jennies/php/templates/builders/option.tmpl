@@ -1,6 +1,6 @@
 {{- define "option" }}
 {{- .Option.Comments|formatDocsBlock -}}
-public function {{ .Option.Name|formatOptionName }}({{- template "args" .Option.Args }}): static
+public function {{ .Option.Name }}({{- template "args" .Option.Args }}): static
 {
 {{- range .Option.Assignments }}
     {{- template "assignment" (dict "Assignment" . "Builder" $.Builder "Option" $.Option) }}

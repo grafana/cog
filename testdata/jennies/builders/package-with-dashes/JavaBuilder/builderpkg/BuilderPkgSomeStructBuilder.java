@@ -1,14 +1,14 @@
-package builder-pkg;
+package builderpkg;
 
-import with-dashes.SomeStruct;
+import withdashes.SomeStruct;
 
-public class BuilderPkgSomeStructBuilder implements cog.Builder<SomeStruct> {
+public class BuilderpkgSomeStructBuilder implements cog.Builder<SomeStruct> {
     protected final SomeStruct internal;
     
-    public BuilderPkgSomeStructBuilder() {
+    public BuilderpkgSomeStructBuilder() {
         this.internal = new SomeStruct();
     }
-    public BuilderPkgSomeStructBuilder title(String title) {
+    public BuilderpkgSomeStructBuilder title(String title) {
         this.internal.title = title;
         return this;
     }

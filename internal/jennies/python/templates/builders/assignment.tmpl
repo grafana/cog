@@ -21,8 +21,8 @@
 {{- with .Value.Argument }}
 {{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
 {{- $builtResultSuffix := ternary "_resources" "_resource" (or .Type.IsArray .Type.IsMap) }}
-{{- $name := print (.Name|formatIdentifier) $builtResultSuffix }}
-{{ $name }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" (formatIdentifier .Name) "Depth" 1) }}
+{{- $name := print .Name $builtResultSuffix }}
+{{ $name }} = {{ template "unfold_builders" (dict "InputType" .Type "InputVar" .Name "Depth" 1) }}
 {{- if and .Type.IsDisjunction (not (isDisjunctionOfBuilders .Type)) }}
 {{ $branchesCount := sub1 (len .Type.Disjunction.Branches) -}}
 assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name }}, {{ $branch|formatRawType}}){{ if ne $i $branchesCount }} or {{ end }}{{ end -}}
@@ -52,9 +52,9 @@ assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name 
 {{- if .Value.Argument }}
 {{- with .Value.Argument }}
 {{- if or (resolvesToBuilder .Type) (resolvesToComposableSlot .Type) }}
-{{- .Name|formatIdentifier }}{{- (or .Type.IsArray .Type.IsMap) | ternary "_resources" "_resource" }}
+{{- .Name }}{{- (or .Type.IsArray .Type.IsMap) | ternary "_resources" "_resource" }}
 {{- else }}
-{{- .Name|formatIdentifier }}
+{{- .Name }}
 {{- end }}
 {{- end }}
 {{- else if .Value.Envelope }}
@@ -71,7 +71,7 @@ assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name 
 {{- range .Envelope.Values }}
     {{- if not .Path.Last.Type.IsConcreteScalar }}
     {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "IntoType" .Path.Last.Type "Value" .Value) }}
-    {{ (index .Path 0).Identifier | formatIdentifier }}={{ $value }},
+    {{ (index .Path 0).Identifier }}={{ $value }},
     {{- end }}
 {{- end }}
 )

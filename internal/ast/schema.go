@@ -118,7 +118,7 @@ func (schema *Schema) IsComposableVariant(variant string) bool {
 }
 
 func (schema *Schema) AddObject(object Object) {
-	schema.Objects.Set(object.Name, object)
+	schema.Objects.Set(object.SelfRef.ReferredType, object)
 }
 
 func (schema *Schema) AddObjects(objects ...Object) {

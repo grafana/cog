@@ -20,7 +20,7 @@
 {{- define "assignment_value" }}
     {{- if .Value.Argument }}
         {{- with .Value.Argument }}
-        {{- $argName := formatArgName .Name }}
+        {{- $argName := .Name }}
 
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
             {{- $argName = (or .Type.IsArray .Type.IsMap) | ternary (print $argName "Resources") (print $argName "Resource") }}
@@ -40,13 +40,13 @@
 {{- define "assignment_setup" }}
     {{- with .Value.Argument }}
         {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
-        {{- $builtResultName := (print (formatArgName .Name) "Resource") }}
+        {{- $builtResultName := (print .Name "Resource") }}
         {{- if or .Type.IsArray .Type.IsMap }}
-        {{- $builtResultName = (print (formatArgName .Name) "Resources") }}
+        {{- $builtResultName = (print .Name "Resources") }}
         ${{ $builtResultName }} = [];
         {{- end }}
 
-        {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" (formatArgName .Name) "InputVar" (formatArgName .Name) "AssignmentPath" $.Assignment.Path "ResultVar" $builtResultName) }}
+        {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" .Name "InputVar" .Name "AssignmentPath" $.Assignment.Path "ResultVar" $builtResultName) }}
         {{- end }}
     {{- end }}
     {{- with .Value.Envelope }}
