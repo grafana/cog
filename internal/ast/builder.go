@@ -13,8 +13,9 @@ type Builder struct {
 	// The builder itself
 	// These fields are completely derived from the fields above and can be freely manipulated
 	// by veneers.
-	Package     string
-	Name        string
+	Package         string
+	OriginalPackage string `json:",omitempty"`
+	Name            string
 	Properties  []StructField `json:",omitempty"`
 	Constructor Constructor
 	Options     []Option

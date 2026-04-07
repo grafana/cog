@@ -140,6 +140,9 @@ func (cfg IdentifiersConfig) onConstantRef(_ *compiler.Visitor, _ *ast.Schema, d
 
 func (cfg IdentifiersConfig) onBuilder(visitor *ast.BuilderVisitor, schemas ast.Schemas, builder ast.Builder) (ast.Builder, error) {
 	if cfg.PackageNameFunc != nil {
+		if builder.OriginalPackage == "" {
+			builder.OriginalPackage = builder.Package
+		}
 		builder.Package = cfg.PackageNameFunc(builder.Package)
 		builder.For.SelfRef.ReferredPkg = cfg.PackageNameFunc(builder.For.SelfRef.ReferredPkg)
 	}
