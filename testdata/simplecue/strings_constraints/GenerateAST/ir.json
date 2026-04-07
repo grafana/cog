@@ -149,6 +149,7 @@
             },
             {
               "Name": "regexRef",
+              "OriginalName": "regexRef",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
@@ -168,6 +169,7 @@
             },
             {
               "Name": "negativeRegexRef",
+              "OriginalName": "negativeRegexRef",
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
