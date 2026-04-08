@@ -446,6 +446,13 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
 		return true, exprs[0], exprs[1]
 	}
+
+	// We could have a reference unified with a cue.TopKind (_). We can assume that if we have an existing path unified with this
+	// it's a valid reference.
+	if path.String() != "" && exprs[1].IncompleteKind() == cue.TopKind {
+		return true, exprs[0], exprs[0]
+	}
+
 	return false, v, v
 }
 
