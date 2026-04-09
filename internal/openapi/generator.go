@@ -3,7 +3,6 @@ package openapi
 import (
 	"context"
 	"fmt"
-	"maps"
 	"regexp"
 	"sort"
 	"strings"
@@ -306,7 +305,12 @@ func (g *generator) getDiscriminator(schema *openapi3.Schema) (string, map[strin
 	mapping := make(map[string]string)
 	if schema.Discriminator != nil {
 		name = schema.Discriminator.PropertyName
-		maps.Copy(mapping, schema.Discriminator.Mapping)
+		// schema.Discriminator.Mapping is a openapi3.StringMap[openapi3.MappingRef],
+		// where openapi3.MappingRef is an alias for openapi3.SchemaRef that marshals to/from a string, using the `Ref` field.
+		// As such, as can use v.Ref to get the value, instead of having to cast between []byte and string (and handle an always-nil error) with v.MarshalText()
+		for k, v := range schema.Discriminator.Mapping {
+			mapping[k] = v.Ref
+		}
 	}
 
 	return name, mapping
