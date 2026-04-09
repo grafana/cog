@@ -53,12 +53,19 @@
           "default": "ValueA"
         },
         "other": {
-          "allOf": [
+          "anyOf": [
             {
-              "$ref": "#/definitions/Enum"
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Enum"
+                }
+              ],
+              "default": "ValueA"
+            },
+            {
+              "type": "null"
             }
-          ],
-          "default": "ValueA"
+          ]
         }
       }
     },

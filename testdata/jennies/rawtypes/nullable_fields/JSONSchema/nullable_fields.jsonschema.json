@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Struct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "a",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g"
+      ],
+      "properties": {
+        "a": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/MyObject"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[MyObject|null → MyObject?]'"
+        },
+        "b": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/MyObject"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[MyObject|null → MyObject?]'"
+        },
+        "c": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[String|null → String?]'"
+        },
+        "d": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[ArrayOfString|null → ArrayOfString?]'"
+        },
+        "e": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "f": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "a"
+              ],
+              "properties": {
+                "a": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[Struct|null → Struct?]'"
+        },
+        "g": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ConstantRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[ConstantRef|null → ConstantRef?]'"
+        }
+      }
+    },
+    "MyObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field"
+      ],
+      "properties": {
+        "field": {
+          "type": "string"
+        }
+      }
+    },
+    "ConstantRef": {
+      "type": "string",
+      "const": "hey"
+    }
+  }
+}

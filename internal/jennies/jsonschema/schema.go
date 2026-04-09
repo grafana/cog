@@ -111,30 +111,68 @@ func (jenny Schema) objectToDefinition(object ast.Object) Definition {
 }
 
 func (jenny Schema) formatType(typeDef ast.Type) Definition {
+	var definition Definition
 	switch typeDef.Kind {
 	case ast.KindStruct:
-		return jenny.formatStruct(typeDef)
+		definition = jenny.formatStruct(typeDef)
 	case ast.KindScalar:
-		return jenny.formatScalar(typeDef)
+		definition = jenny.formatScalar(typeDef)
 	case ast.KindRef:
-		return jenny.formatRef(typeDef)
+		definition = jenny.formatRef(typeDef)
 	case ast.KindEnum:
-		return jenny.formatEnum(typeDef)
+		definition = jenny.formatEnum(typeDef)
 	case ast.KindArray:
-		return jenny.formatArray(typeDef)
+		definition = jenny.formatArray(typeDef)
 	case ast.KindMap:
-		return jenny.formatMap(typeDef)
+		definition = jenny.formatMap(typeDef)
 	case ast.KindDisjunction:
-		return jenny.formatDisjunction(typeDef)
+		definition = jenny.formatDisjunction(typeDef)
 	case ast.KindIntersection:
-		return jenny.formatIntersection(typeDef)
+		definition = jenny.formatIntersection(typeDef)
 	case ast.KindComposableSlot:
-		return jenny.formatComposableSlot()
+		definition = jenny.formatComposableSlot()
 	case ast.KindConstantRef:
-		return jenny.formatConstantRef(typeDef)
+		definition = jenny.formatConstantRef(typeDef)
+	default:
+		definition = orderedmap.New[string, any]()
 	}
 
-	return orderedmap.New[string, any]()
+	if typeDef.Nullable {
+		definition = jenny.applyNullable(typeDef.Kind, definition)
+	}
+
+	return definition
+}
+
+// applyNullable wraps a definition to express "type | null".
+// Ref-like kinds need special treatment in OpenAPI 3.0 because $ref replaces the whole object
+// and cannot be combined with other keywords — those use allOf as a wrapper.
+// All other kinds can carry nullable: true inline (OpenAPI 3.0) or use anyOf (JSON Schema).
+func (jenny Schema) applyNullable(kind ast.Kind, definition Definition) Definition {
+	nullDef := orderedmap.New[string, any]()
+	nullDef.Set("type", "null")
+
+	refLike := kind == ast.KindRef || kind == ast.KindConstantRef
+
+	if jenny.OpenAPI3Compatible {
+		nullable := orderedmap.New[string, any]()
+		if refLike {
+			nullable.Set("nullable", true)
+			nullable.Set("allOf", []Definition{definition})
+		} else {
+			// Copy the existing definition and add nullable: true inline
+			definition.Iterate(func(key string, value any) {
+				nullable.Set(key, value)
+			})
+			nullable.Set("nullable", true)
+		}
+		return nullable
+	}
+
+	// JSON Schema: anyOf: [{...}, {type: "null"}]
+	wrapper := orderedmap.New[string, any]()
+	wrapper.Set("anyOf", []Definition{definition, nullDef})
+	return wrapper
 }
 
 func (jenny Schema) formatScalar(typeDef ast.Type) Definition {

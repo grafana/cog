@@ -61,12 +61,17 @@
             "default": "ValueA"
           },
           "other": {
+            "nullable": true,
             "allOf": [
               {
-                "$ref": "#/components/schemas/Enum"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Enum"
+                  }
+                ],
+                "default": "ValueA"
               }
-            ],
-            "default": "ValueA"
+            ]
           }
         }
       },
