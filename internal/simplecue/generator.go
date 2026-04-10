@@ -518,13 +518,20 @@ func (g *generator) declareReference(v cue.Value, defV cue.Value) (ast.Type, err
 			}
 		}
 
-		if v.Kind() == cue.StringKind || v.Kind() == cue.NumberKind {
+		// concreteV is v if v is a concrete string/number (e.g. #Enum1 & "A" when "A" is not the default),
+		// or defV when v is abstract but defV is a concrete constraint (e.g. #Enum2 & "C" where "C" is the
+		// default of #Enum2 — CUE's subsumption collapses the conjunction so v becomes the abstract reference).
+		concreteV := v
+		if concreteV.Kind() != cue.StringKind && concreteV.Kind() != cue.NumberKind {
+			concreteV = defV
+		}
+		if concreteV.Kind() == cue.StringKind || concreteV.Kind() == cue.NumberKind {
 			var referenceValue any
-			referenceValue, err = v.String()
+			referenceValue, err = concreteV.String()
 			if err != nil {
-				referenceValue, err = v.Int64()
+				referenceValue, err = concreteV.Int64()
 				if err != nil {
-					return ast.Type{}, errorWithCueRef(v, "%v", err.Error())
+					return ast.Type{}, errorWithCueRef(concreteV, "%v", err.Error())
 				}
 			}
 
