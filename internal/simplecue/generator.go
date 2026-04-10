@@ -426,20 +426,33 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 
 	op, exprs := v.Expr()
 
-	if len(exprs) != 2 {
+	if len(exprs) == 0 || len(exprs) > 2 {
 		return false, v, v
 	}
 
 	_, path = exprs[0].ReferencePath()
 	if v.Kind() == cue.BottomKind && v.IncompleteKind() == cue.StructKind && path.String() != "" {
 		// When a struct with defaults is completely filled, it usually has a NoOp op.
+		// In CUE v0.16+, `A | *B` where B is subsumed by A may reduce Expr() to (NoOp, [A]),
+		// filtering out the default branch entirely. We handle both the two-expr (v0.11) and
+		// one-expr (v0.16) cases identically: return the type branch (exprs[0]) as the reference.
 		if op == cue.NoOp {
-			return true, exprs[0], v
+			if len(exprs) == 1 {
+				// v0.16: only the type branch remains in Expr(); confirm v still has a default.
+				if _, ok := v.Default(); ok {
+					return true, exprs[0], v
+				}
+			} else {
+				// len(exprs) == 2: v0.11 behavior — both type branch and default struct present.
+				return true, exprs[0], v
+			}
 		}
 
 		// Accepts [AStruct | *{ ... }] and skips [AStruct | BStruct]
-		if _, ok := v.Default(); ok {
-			return true, exprs[0], v
+		if len(exprs) == 2 {
+			if _, ok := v.Default(); ok {
+				return true, exprs[0], v
+			}
 		}
 	}
 
