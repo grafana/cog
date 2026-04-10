@@ -596,9 +596,27 @@ func (g *generator) declareDisjunction(v cue.Value, hints ast.JenniesHints, defa
 	_, disjunctionBranchesWithPossibleDefault := v.Expr()
 	defaultAsCueValue, hasDefault := v.Default()
 
+	// Count how many branches equal the default value (with same reference path).
+	// In CUE v0.16+, Equals() may return true for structurally-equivalent open lists
+	// (e.g., [...bool].Equals([...string]) == true, [...bool].Equals([]) == true).
+	// To avoid over-filtering, we only remove the default branch when exactly one
+	// branch matches — otherwise we'd silently drop all branches of the disjunction.
+	matchingDefaultCount := 0
+	if hasDefault {
+		for _, branch := range disjunctionBranchesWithPossibleDefault {
+			if branch.Equals(defaultAsCueValue) {
+				_, bPath := branch.ReferencePath()
+				_, dPath := defaultAsCueValue.ReferencePath()
+				if bPath.String() == dPath.String() {
+					matchingDefaultCount++
+				}
+			}
+		}
+	}
+
 	disjunctionBranches := make([]cue.Value, 0, len(disjunctionBranchesWithPossibleDefault))
 	for _, branch := range disjunctionBranchesWithPossibleDefault {
-		if hasDefault && branch.Equals(defaultAsCueValue) {
+		if hasDefault && matchingDefaultCount == 1 && branch.Equals(defaultAsCueValue) {
 			_, bPath := branch.ReferencePath()
 			_, dPath := defaultAsCueValue.ReferencePath()
 
