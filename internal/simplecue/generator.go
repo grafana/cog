@@ -954,22 +954,56 @@ func extractNumber(e cueast.Expr) (string, bool) {
 func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {
 	typeDef := ast.NewArray(ast.Any(), ast.Hints(hints), ast.Default(defVal))
 
+	// If the value has a concrete default that differs from the type (e.g. [...string] | *["val"]),
+	// peel off the default branch so AnyIndex lookups operate on the type, not the default.
+	//
+	// We intentionally avoid cue.Value.Equals() here: in CUE v0.16+, Equals() returns true for
+	// open lists compared to the empty closed list (their implicit default), and may also return
+	// true when comparing a concrete default to a disjunction whose evaluated value equals that
+	// default. Instead we use IsConcrete() as the signal: if the default is concrete but v itself
+	// is not, v must have a non-trivial typed structure (open list type or disjunction) that we
+	// need to unwrap.
+	defv, hasDefv := v.Default()
+	if hasDefv && defv.IsConcrete() && !v.IsConcrete() {
+		_, dvals := v.Expr()
+		if len(dvals) > 0 {
+			v = dvals[0]
+		}
+	}
+
 	// closed list are not supported: our IR can't represent them :/
 	// example of closed list:
 	// ```cue
 	// someList: [string, string] // a list with exactly two strings
 	// ```
 	if !v.Allows(cue.AnyIndex) {
+		// A concrete closed list (e.g. ["val"]) can appear here when processing
+		// a default value — for instance, a struct default whose field holds a
+		// concrete list. We're generating the type definition, not the default's
+		// definition, so derive the element type from the concrete elements
+		// instead of erroring. This is safe because a type-level closed list
+		// (e.g. [string, int]) is never concrete.
+		if v.IsConcrete() {
+			iter, _ := v.List()
+			elemType := ast.Any()
+			if iter.Next() {
+				switch iter.Value().IncompleteKind() {
+				case cue.StringKind:
+					elemType = ast.String()
+				case cue.IntKind:
+					elemType = ast.NewScalar(ast.KindInt64)
+				case cue.FloatKind:
+					elemType = ast.NewScalar(ast.KindFloat64)
+				case cue.BoolKind:
+					elemType = ast.Bool()
+				case cue.BytesKind:
+					elemType = ast.Bytes()
+				}
+			}
+			typeDef.Array.ValueType = elemType
+			return typeDef, nil
+		}
 		return ast.Type{}, errorWithCueRef(v, "closed lists are not supported")
-	}
-
-	// If the default (all lists have a default, usually self, ugh) differs from the
-	// input list, peel it off. Otherwise, our AnyIndex lookup may end up getting
-	// sent on the wrong path.
-	defv, _ := v.Default()
-	if !defv.Equals(v) {
-		_, dvals := v.Expr()
-		v = dvals[0]
 	}
 
 	e := v.LookupPath(cue.MakePath(cue.AnyIndex))
