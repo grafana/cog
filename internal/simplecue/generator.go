@@ -1070,6 +1070,12 @@ func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints)
 		}
 	}
 
+	constraints, err := g.declareListConstraints(v)
+	if err != nil {
+		return ast.Type{}, err
+	}
+	typeDef.Array.Constraints = constraints
+
 	// closed list are not supported: our IR can't represent them :/
 	// example of closed list:
 	// ```cue
@@ -1104,12 +1110,6 @@ func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints)
 		}
 		return ast.Type{}, errorWithCueRef(v, "closed lists are not supported")
 	}
-
-	constraints, err := g.declareListConstraints(v)
-	if err != nil {
-		return ast.Type{}, err
-	}
-	typeDef.Array.Constraints = constraints
 
 	e := v.LookupPath(cue.MakePath(cue.AnyIndex))
 	if !e.Exists() {
