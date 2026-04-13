@@ -18,7 +18,12 @@
           "negative",
           "title",
           "labels",
-          "tags"
+          "tags",
+          "regex",
+          "negativeRegex",
+          "minMaxList",
+          "uniqueList",
+          "fullConstraintList"
         ],
         "properties": {
           "id": {
@@ -35,7 +40,6 @@
           },
           "greaterThanZero": {
             "type": "integer",
-            "minimum": 0,
             "maximum": 3,
             "exclusiveMaximum": true
           },
@@ -62,6 +66,40 @@
               "type": "string",
               "minLength": 1
             }
+          },
+          "regex": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "negativeRegex": {
+            "type": "string",
+            "not": {
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          "minMaxList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 64
+          },
+          "uniqueList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "fullConstraintList": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 2,
+            "maxItems": 10,
+            "uniqueItems": true
           }
         }
       }

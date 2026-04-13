@@ -1,0 +1,283 @@
+{
+  "Package": "nullable_fields",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "Struct": {
+      "Name": "Struct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "a",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "nullable_fields",
+                        "ReferredType": "MyObject"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "null"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "b",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "nullable_fields",
+                        "ReferredType": "MyObject"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "null"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "c",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "null"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "d",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "array",
+                      "Nullable": false,
+                      "Array": {
+                        "ValueType": {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "null"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "e",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "disjunction",
+                    "Nullable": false,
+                    "Disjunction": {
+                      "Branches": [
+                        {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "string"
+                          }
+                        },
+                        {
+                          "Kind": "scalar",
+                          "Nullable": false,
+                          "Scalar": {
+                            "ScalarKind": "null"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "f",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "struct",
+                      "Nullable": false,
+                      "Struct": {
+                        "Fields": [
+                          {
+                            "Name": "a",
+                            "Type": {
+                              "Kind": "scalar",
+                              "Nullable": false,
+                              "Scalar": {
+                                "ScalarKind": "string"
+                              }
+                            },
+                            "Required": true
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "null"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "g",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "constant_ref",
+                      "Nullable": false,
+                      "ConstantReference": {
+                        "ReferredPkg": "nullable_fields",
+                        "ReferredType": "ConstantRef",
+                        "ReferenceValue": "hey"
+                      }
+                    },
+                    {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "null"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "nullable_fields",
+        "ReferredType": "Struct"
+      }
+    },
+    "MyObject": {
+      "Name": "MyObject",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "field",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "nullable_fields",
+        "ReferredType": "MyObject"
+      }
+    },
+    "ConstantRef": {
+      "Name": "ConstantRef",
+      "Type": {
+        "Kind": "scalar",
+        "Nullable": false,
+        "Scalar": {
+          "ScalarKind": "string",
+          "Value": "hey"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "nullable_fields",
+        "ReferredType": "ConstantRef"
+      }
+    }
+  }
+}

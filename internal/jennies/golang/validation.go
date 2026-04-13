@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"unicode"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
@@ -67,7 +68,7 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 		}
 
 		if typeDef.IsArray() {
-			return resolvesToConstraints(typeDef.AsArray().ValueType)
+			return len(typeDef.AsArray().Constraints) != 0 || resolvesToConstraints(typeDef.AsArray().ValueType)
 		}
 
 		if typeDef.IsConstantRef() {
@@ -93,6 +94,15 @@ func (jenny validationMethods) generateForObject(buffer *strings.Builder, contex
 			"importPkg":             jenny.packageMapper,
 			"importStdPkg": func(pkg string) string {
 				return imports.Add(pkg, pkg)
+			},
+			"toGoIdent": func(s string) string {
+				var b strings.Builder
+				for _, r := range s {
+					if unicode.IsLetter(r) || unicode.IsDigit(r) {
+						b.WriteRune(r)
+					}
+				}
+				return b.String()
 			},
 		})
 

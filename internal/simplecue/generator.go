@@ -459,6 +459,13 @@ func getReference(v cue.Value) (bool, cue.Value, cue.Value) {
 	if op == cue.AndOp && exprs[0].Subsume(exprs[1]) == nil && exprs[1].Subsume(exprs[0]) == nil {
 		return true, exprs[0], exprs[1]
 	}
+
+	// We could have a reference unified with a cue.TopKind (_). We can assume that if we have an existing path unified with this
+	// it's a valid reference.
+	if path.String() != "" && exprs[1].IncompleteKind() == cue.TopKind {
+		return true, exprs[0], exprs[0]
+	}
+
 	return false, v, v
 }
 
@@ -759,37 +766,51 @@ func (g *generator) declareStringConstraints(v cue.Value) ([]ast.TypeConstraint,
 
 	constraints := make([]ast.TypeConstraint, 0, len(typeAndConstraints))
 
-	for _, andExpr := range typeAndConstraints {
+	for i := 0; i < len(typeAndConstraints); i++ {
+		andExpr := typeAndConstraints[i]
 		op, args := andExpr.Expr()
 
-		// TODO: support more OPs?
-		if op != cue.CallOp {
-			continue
-		}
+		switch op {
+		case cue.SelectorOp:
+			scope, refPath := andExpr.ReferencePath()
+			typeAndConstraints = append(typeAndConstraints, scope.LookupPath(refPath))
+		case cue.CallOp:
+			// TODO: support more constraints?
+			switch fmt.Sprint(args[0]) {
+			case "strings.MinRunes":
+				scalar, err := cueConcreteToScalar(args[1])
+				if err != nil {
+					return nil, err
+				}
 
-		// TODO: support more constraints?
-		switch fmt.Sprint(args[0]) {
-		case "strings.MinRunes":
-			scalar, err := cueConcreteToScalar(args[1])
-			if err != nil {
-				return nil, err
+				constraints = append(constraints, ast.TypeConstraint{
+					Op:   ast.MinLengthOp,
+					Args: []any{scalar},
+				})
+
+			case "strings.MaxRunes":
+				scalar, err := cueConcreteToScalar(args[1])
+				if err != nil {
+					return nil, err
+				}
+
+				constraints = append(constraints, ast.TypeConstraint{
+					Op:   ast.MaxLengthOp,
+					Args: []any{scalar},
+				})
 			}
-
+		case cue.RegexMatchOp:
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   ast.MinLengthOp,
-				Args: []any{scalar},
+				Op:   ast.RegexMatchOp,
+				Args: []any{args[0]},
 			})
-
-		case "strings.MaxRunes":
-			scalar, err := cueConcreteToScalar(args[1])
-			if err != nil {
-				return nil, err
-			}
-
+		case cue.NotRegexMatchOp:
 			constraints = append(constraints, ast.TypeConstraint{
-				Op:   ast.MaxLengthOp,
-				Args: []any{scalar},
+				Op:   ast.NotRegexMatchOp,
+				Args: []any{args[0]},
 			})
+		default:
+			// TODO: support more OPs?
 		}
 	}
 
@@ -980,6 +1001,53 @@ func extractNumber(e cueast.Expr) (string, bool) {
 	}
 
 	return "", false
+}
+
+func (g *generator) declareListConstraints(v cue.Value) ([]ast.TypeConstraint, error) {
+	conjuncts := appendSplit(nil, cue.AndOp, v)
+
+	if len(conjuncts) == 1 {
+		return nil, nil
+	}
+
+	var constraints []ast.TypeConstraint
+
+	for _, conjunct := range conjuncts {
+		op, args := conjunct.Expr()
+		if op != cue.CallOp {
+			continue
+		}
+
+		switch fmt.Sprint(args[0]) {
+		case "list.MinItems":
+			scalar, err := cueConcreteToScalar(args[1])
+			if err != nil {
+				return nil, err
+			}
+			constraints = append(constraints, ast.TypeConstraint{
+				Op:   ast.MinItemsOp,
+				Args: []any{scalar},
+			})
+
+		case "list.MaxItems":
+			scalar, err := cueConcreteToScalar(args[1])
+			if err != nil {
+				return nil, err
+			}
+			constraints = append(constraints, ast.TypeConstraint{
+				Op:   ast.MaxItemsOp,
+				Args: []any{scalar},
+			})
+
+		case "list.UniqueItems":
+			constraints = append(constraints, ast.TypeConstraint{
+				Op:   ast.UniqueItemsOp,
+				Args: nil,
+			})
+		}
+	}
+
+	return constraints, nil
 }
 
 func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints) (ast.Type, error) {

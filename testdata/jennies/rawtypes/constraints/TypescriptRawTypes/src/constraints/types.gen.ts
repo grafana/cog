@@ -6,6 +6,11 @@ export interface SomeStruct {
 	title: string;
 	labels: Record<string, string>;
 	tags: string[];
+	regex: string;
+	negativeRegex: string;
+	minMaxList: string[];
+	uniqueList: string[];
+	fullConstraintList: number[];
 }
 
 export const defaultSomeStruct = (): SomeStruct => ({
@@ -15,5 +20,10 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	title: "",
 	labels: {},
 	tags: [],
+	regex: "",
+	negativeRegex: "",
+	minMaxList: [],
+	uniqueList: [],
+	fullConstraintList: [],
 });
 

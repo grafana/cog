@@ -40,7 +40,14 @@
           ]
         },
         "FieldDisjunctionWithNull": {
-          "type": "string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[String|null → String?]'"
         },
         "Operator": {

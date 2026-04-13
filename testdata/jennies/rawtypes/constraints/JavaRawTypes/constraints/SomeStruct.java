@@ -13,6 +13,11 @@ public class SomeStruct {
     public String title;
     public Map<String, String> labels;
     public List<String> tags;
+    public String regex;
+    public String negativeRegex;
+    public List<String> minMaxList;
+    public List<String> uniqueList;
+    public List<Long> fullConstraintList;
     public SomeStruct() {
         this.id = 0L;
         this.greaterThanZero = 0L;
@@ -20,8 +25,13 @@ public class SomeStruct {
         this.title = "";
         this.labels = new HashMap<>();
         this.tags = new LinkedList<>();
+        this.regex = "";
+        this.negativeRegex = "";
+        this.minMaxList = new LinkedList<>();
+        this.uniqueList = new LinkedList<>();
+        this.fullConstraintList = new LinkedList<>();
     }
-    public SomeStruct(Long id,Long maybeId,Long greaterThanZero,Long negative,String title,Map<String, String> labels,List<String> tags) {
+    public SomeStruct(Long id,Long maybeId,Long greaterThanZero,Long negative,String title,Map<String, String> labels,List<String> tags,String regex,String negativeRegex,List<String> minMaxList,List<String> uniqueList,List<Long> fullConstraintList) {
         this.id = id;
         this.maybeId = maybeId;
         this.greaterThanZero = greaterThanZero;
@@ -29,5 +39,10 @@ public class SomeStruct {
         this.title = title;
         this.labels = labels;
         this.tags = tags;
+        this.regex = regex;
+        this.negativeRegex = negativeRegex;
+        this.minMaxList = minMaxList;
+        this.uniqueList = uniqueList;
+        this.fullConstraintList = fullConstraintList;
     }
 }

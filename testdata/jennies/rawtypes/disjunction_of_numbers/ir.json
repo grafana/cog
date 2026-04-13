@@ -1,0 +1,60 @@
+{
+  "Package": "disjunction_of_numbers",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "Numbers": {
+      "Name": "Numbers",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "int64"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "float64"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "int64"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "float32"
+              }
+            },
+            {
+              "Kind": "scalar",
+              "Nullable": false,
+              "Scalar": {
+                "ScalarKind": "float64"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunction_of_numbers",
+        "ReferredType": "Numbers"
+      }
+    }
+  }
+}

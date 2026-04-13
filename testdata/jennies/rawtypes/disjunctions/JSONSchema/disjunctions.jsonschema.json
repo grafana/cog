@@ -13,7 +13,14 @@
       "description": "Refresh rate or disabled."
     },
     "StringOrNull": {
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "SomeStruct": {
       "type": "object",

@@ -230,6 +230,7 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
 		defVal = fmt.Sprintf("Default: listdefault.StaticValue(%s),\n", formatter.parseArrayOrMapDefaults(def.AsArray().ValueType, def.Default, ListDefault))
 	}
+	arrayValidator := formatter.validators.arrayConstraintValidator(def.AsArray().Constraints)
 	validator := formatter.validators.validateList(def.AsArray().ValueType)
 
 	switch def.AsArray().ValueType.Kind {
@@ -264,7 +265,9 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 			buffer.WriteString(defVal)
 		}
 
-		if validator != "" {
+		if arrayValidator != "" {
+			buffer.WriteString(fmt.Sprintf("Validators: %s", arrayValidator))
+		} else if validator != "" {
 			buffer.WriteString(fmt.Sprintf("Validators: %s", validator))
 		}
 
@@ -277,6 +280,9 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 		buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", formatter.formatElementType(def.AsArray().ValueType)))
 		if defVal != "" {
 			buffer.WriteString(defVal)
+		}
+		if arrayValidator != "" {
+			buffer.WriteString(fmt.Sprintf("Validators: %s", arrayValidator))
 		}
 	}
 	buffer.WriteString(fmt.Sprintf("},\n"))

@@ -85,7 +85,11 @@ func (input *CueInput) packageName() string {
 
 func (input *CueInput) schemaRootValue(cuePkgName string) (cue.Value, []simplecue.LibraryInclude, error) {
 	if input.Value != nil {
-		return *input.Value, nil, nil
+		libraries, err := simplecue.ParseImports(input.CueImports)
+		if err != nil {
+			return cue.Value{}, nil, err
+		}
+		return *input.Value, libraries, nil
 	}
 
 	if input.Entrypoint == "" && input.URL == "" {

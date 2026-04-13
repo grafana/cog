@@ -49,6 +49,7 @@
           },
           "FieldDisjunctionWithNull": {
             "type": "string",
+            "nullable": true,
             "description": "Modified by compiler pass 'DisjunctionWithNullToOptional[String|null → String?]'"
           },
           "Operator": {

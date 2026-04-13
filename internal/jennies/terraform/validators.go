@@ -14,6 +14,7 @@ type scalarValidator struct {
 	maxFunc    string
 	noneOfFunc string
 	equalFunc  string
+	regexFunc  string
 }
 
 type validators struct {
@@ -32,6 +33,7 @@ func newValidators(typeFormatter *typeFormatter) *validators {
 				maxFunc:    "LengthAtMost",
 				noneOfFunc: "NoneOf",
 				equalFunc:  "OneOf",
+				regexFunc:  "RegexMatches",
 			},
 			ast.KindInt64: {
 				importName: "int64validator",
@@ -123,11 +125,15 @@ func (v *validators) scalarValidator(kind ast.ScalarKind, constraints []ast.Type
 		return ""
 	}
 	if validator, ok := v.validatorDefinitions[kind]; ok {
+		constraintsStr := v.constraints(validator, constraints)
+		if constraintsStr == "" {
+			return ""
+		}
 		var buffer strings.Builder
 		v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/schema/validator")
 		v.typeFormatter.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework-validators/%s", validator.importName))
 		buffer.WriteString(fmt.Sprintf("[]validator.%s{\n", validator.name))
-		buffer.WriteString(v.constraints(validator, constraints))
+		buffer.WriteString(constraintsStr)
 		buffer.WriteString("},\n")
 		return buffer.String()
 	}
@@ -152,11 +158,37 @@ func (v *validators) constraints(validator scalarValidator, constraints []ast.Ty
 			buffer.WriteString(fmt.Sprintf("%s.%s(%+v),\n", validator.importName, validator.noneOfFunc, strings.Join(args, ", ")))
 		case ast.EqualOp:
 			buffer.WriteString(fmt.Sprintf("%s.%s(%+v),\n", validator.importName, validator.equalFunc, strings.Join(args, ", ")))
-		default:
-			return "unknown"
+		case ast.RegexMatchOp:
+			if validator.regexFunc != "" {
+				v.typeFormatter.packageMapper("regexp")
+				buffer.WriteString(fmt.Sprintf("%s.%s(regexp.MustCompile(`%s`), \"\"),\n", validator.importName, validator.regexFunc, c.Args[0]))
+			}
 		}
 	}
 
+	return buffer.String()
+}
+
+func (v *validators) arrayConstraintValidator(constraints []ast.TypeConstraint) string {
+	if len(constraints) == 0 {
+		return ""
+	}
+
+	var buffer strings.Builder
+	v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/schema/validator")
+	v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
+	buffer.WriteString("[]validator.List{\n")
+	for _, c := range constraints {
+		switch c.Op {
+		case ast.MinItemsOp:
+			buffer.WriteString(fmt.Sprintf("listvalidator.SizeAtLeast(%s),\n", formatScalar(c.Args[0])))
+		case ast.MaxItemsOp:
+			buffer.WriteString(fmt.Sprintf("listvalidator.SizeAtMost(%s),\n", formatScalar(c.Args[0])))
+		case ast.UniqueItemsOp:
+			buffer.WriteString("listvalidator.UniqueValues(),\n")
+		}
+	}
+	buffer.WriteString("},\n")
 	return buffer.String()
 }
 

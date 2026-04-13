@@ -6,16 +6,22 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"regexp"
 )
 
 type SomeStruct struct {
     Id uint64 `json:"id"`
     MaybeId *uint64 `json:"maybeId,omitempty"`
     GreaterThanZero uint64 `json:"greaterThanZero"`
-    Negative uint64 `json:"negative"`
+    Negative int64 `json:"negative"`
     Title string `json:"title"`
     Labels map[string]string `json:"labels"`
     Tags []string `json:"tags"`
+    Regex string `json:"regex"`
+    NegativeRegex string `json:"negativeRegex"`
+    MinMaxList []string `json:"minMaxList"`
+    UniqueList []string `json:"uniqueList"`
+    FullConstraintList []int64 `json:"fullConstraintList"`
 }
 
 // NewSomeStruct creates a new SomeStruct object.
@@ -23,6 +29,9 @@ func NewSomeStruct() *SomeStruct {
 	return &SomeStruct{
 		Labels: map[string]string{},
 		Tags: []string{},
+		MinMaxList: []string{},
+		UniqueList: []string{},
+		FullConstraintList: []int64{},
 }
 }
 // UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SomeStruct` from JSON.
@@ -122,6 +131,69 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		delete(fields, "tags")
 	} else {errs = append(errs, cog.MakeBuildErrors("tags", errors.New("required field is missing from input"))...)
 	}
+	// Field "regex"
+	if fields["regex"] != nil {
+		if string(fields["regex"]) != "null" {
+			if err := json.Unmarshal(fields["regex"], &resource.Regex); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("regex", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("regex", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "regex")
+	} else {errs = append(errs, cog.MakeBuildErrors("regex", errors.New("required field is missing from input"))...)
+	}
+	// Field "negativeRegex"
+	if fields["negativeRegex"] != nil {
+		if string(fields["negativeRegex"]) != "null" {
+			if err := json.Unmarshal(fields["negativeRegex"], &resource.NegativeRegex); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("negativeRegex", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("negativeRegex", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "negativeRegex")
+	} else {errs = append(errs, cog.MakeBuildErrors("negativeRegex", errors.New("required field is missing from input"))...)
+	}
+	// Field "minMaxList"
+	if fields["minMaxList"] != nil {
+		if string(fields["minMaxList"]) != "null" {
+			
+			if err := json.Unmarshal(fields["minMaxList"], &resource.MinMaxList); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("minMaxList", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("minMaxList", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "minMaxList")
+	} else {errs = append(errs, cog.MakeBuildErrors("minMaxList", errors.New("required field is missing from input"))...)
+	}
+	// Field "uniqueList"
+	if fields["uniqueList"] != nil {
+		if string(fields["uniqueList"]) != "null" {
+			
+			if err := json.Unmarshal(fields["uniqueList"], &resource.UniqueList); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("uniqueList", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("uniqueList", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "uniqueList")
+	} else {errs = append(errs, cog.MakeBuildErrors("uniqueList", errors.New("required field is missing from input"))...)
+	}
+	// Field "fullConstraintList"
+	if fields["fullConstraintList"] != nil {
+		if string(fields["fullConstraintList"]) != "null" {
+			
+			if err := json.Unmarshal(fields["fullConstraintList"], &resource.FullConstraintList); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("fullConstraintList", err)...)
+			}
+		} else {errs = append(errs, cog.MakeBuildErrors("fullConstraintList", errors.New("required field is null"))...)
+		
+		}
+		delete(fields, "fullConstraintList")
+	} else {errs = append(errs, cog.MakeBuildErrors("fullConstraintList", errors.New("required field is missing from input"))...)
+	}
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("SomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
@@ -178,6 +250,42 @@ func (resource SomeStruct) Equals(other SomeStruct) bool {
 			return false
 		}
 		}
+		if resource.Regex != other.Regex {
+			return false
+		}
+		if resource.NegativeRegex != other.NegativeRegex {
+			return false
+		}
+
+		if len(resource.MinMaxList) != len(other.MinMaxList) {
+			return false
+		}
+
+		for i1 := range resource.MinMaxList {
+		if resource.MinMaxList[i1] != other.MinMaxList[i1] {
+			return false
+		}
+		}
+
+		if len(resource.UniqueList) != len(other.UniqueList) {
+			return false
+		}
+
+		for i1 := range resource.UniqueList {
+		if resource.UniqueList[i1] != other.UniqueList[i1] {
+			return false
+		}
+		}
+
+		if len(resource.FullConstraintList) != len(other.FullConstraintList) {
+			return false
+		}
+
+		for i1 := range resource.FullConstraintList {
+		if resource.FullConstraintList[i1] != other.FullConstraintList[i1] {
+			return false
+		}
+		}
 
 	return true
 }
@@ -211,12 +319,6 @@ func (resource SomeStruct) Validate() error {
 				errors.New("must be < 10"),
 			)...)
 		}
-		}
-		if !(resource.GreaterThanZero >= 0) {
-			errs = append(errs, cog.MakeBuildErrors(
-				"greaterThanZero",
-				errors.New("must be >= 0"),
-			)...)
 		}
 		if !(resource.GreaterThanZero < 3) {
 			errs = append(errs, cog.MakeBuildErrors(
@@ -259,6 +361,48 @@ func (resource SomeStruct) Validate() error {
 				errors.New("must be >= 1"),
 			)...)
 		}
+		}
+		if !regexp.MustCompile("^[a-zA-Z0-9_-]+$").MatchString(resource.Regex) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"regex",
+				errors.New("must match regex ^[a-zA-Z0-9_-]+$"),
+			)...)
+		}
+		if regexp.MustCompile("^[a-zA-Z0-9_-]+$").MatchString(resource.NegativeRegex) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"negativeRegex",
+				errors.New("must not match regex ^[a-zA-Z0-9_-]+$"),
+			)...)
+		}
+		if len(resource.MinMaxList) < 1 {
+			errs = append(errs, cog.MakeBuildErrors("minMaxList", errors.New("must have at least 1 items"))...)
+		}
+		if len(resource.MinMaxList) > 64 {
+			errs = append(errs, cog.MakeBuildErrors("minMaxList", errors.New("must have at most 64 items"))...)
+		}
+		seenuniqueList := make(map[string]struct{})
+		for _, item1 := range resource.UniqueList {
+			key1 := fmt.Sprintf("%v", item1)
+			if _, exists1 := seenuniqueList[key1]; exists1 {
+				errs = append(errs, cog.MakeBuildErrors("uniqueList", errors.New("must have unique items"))...)
+				break
+			}
+			seenuniqueList[key1] = struct{}{}
+		}
+		if len(resource.FullConstraintList) < 2 {
+			errs = append(errs, cog.MakeBuildErrors("fullConstraintList", errors.New("must have at least 2 items"))...)
+		}
+		if len(resource.FullConstraintList) > 10 {
+			errs = append(errs, cog.MakeBuildErrors("fullConstraintList", errors.New("must have at most 10 items"))...)
+		}
+		seenfullConstraintList := make(map[string]struct{})
+		for _, item1 := range resource.FullConstraintList {
+			key1 := fmt.Sprintf("%v", item1)
+			if _, exists1 := seenfullConstraintList[key1]; exists1 {
+				errs = append(errs, cog.MakeBuildErrors("fullConstraintList", errors.New("must have unique items"))...)
+				break
+			}
+			seenfullConstraintList[key1] = struct{}{}
 		}
 
 	if len(errs) == 0 {

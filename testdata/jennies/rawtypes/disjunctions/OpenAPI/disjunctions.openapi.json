@@ -21,7 +21,8 @@
         "description": "Refresh rate or disabled."
       },
       "StringOrNull": {
-        "type": "string"
+        "type": "string",
+        "nullable": true
       },
       "SomeStruct": {
         "type": "object",
