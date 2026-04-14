@@ -1,0 +1,398 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "Enum1": {
+      "Name": "Enum1",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "A",
+              "Value": "A"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "B",
+              "Value": "B"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Enum1"
+      }
+    },
+    "Enum2": {
+      "Name": "Enum2",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Default": "C",
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "C",
+              "Value": "C"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "D",
+              "Value": "D"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Enum2"
+      }
+    },
+    "Struct": {
+      "Name": "Struct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "aOrB",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "MyStructA"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "MyStructB"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "cOrD",
+              "Type": {
+                "Kind": "disjunction",
+                "Nullable": false,
+                "Disjunction": {
+                  "Branches": [
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "MyStructC"
+                      }
+                    },
+                    {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "grafanatest",
+                        "ReferredType": "MyStructD"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "disjAorB",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "DisjAB"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "disjCorD",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "DisjCD"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Struct"
+      }
+    },
+    "MyStructA": {
+      "Name": "MyStructA",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": false,
+                "ConstantReference": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "Enum1",
+                  "ReferenceValue": "A"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "field",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "MyStructA"
+      }
+    },
+    "MyStructB": {
+      "Name": "MyStructB",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": false,
+                "ConstantReference": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "Enum1",
+                  "ReferenceValue": "B"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "something",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "MyStructB"
+      }
+    },
+    "MyStructC": {
+      "Name": "MyStructC",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": false,
+                "ConstantReference": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "Enum2",
+                  "ReferenceValue": "C"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "field",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "MyStructC"
+      }
+    },
+    "MyStructD": {
+      "Name": "MyStructD",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "type",
+              "Type": {
+                "Kind": "constant_ref",
+                "Nullable": false,
+                "ConstantReference": {
+                  "ReferredPkg": "grafanatest",
+                  "ReferredType": "Enum2",
+                  "ReferenceValue": "D"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "something",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "MyStructD"
+      }
+    },
+    "DisjAB": {
+      "Name": "DisjAB",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "MyStructA"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "MyStructB"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "DisjAB"
+      }
+    },
+    "DisjCD": {
+      "Name": "DisjCD",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "MyStructC"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "grafanatest",
+                "ReferredType": "MyStructD"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "DisjCD"
+      }
+    }
+  }
+}
