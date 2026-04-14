@@ -10,7 +10,7 @@
     "nodejs-slim_18@18.20.8",
     "nodePackages.ts-node@10.9.2",
     "gradle@8.14.4",
-    "goreleaser@2.15.0"
+    "goreleaser@2.15.2"
   ],
   "shell": {
     "init_hook": [
