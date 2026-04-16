@@ -65,6 +65,11 @@ type Config struct {
 
 	// AnyAsInterface instructs this jenny to emit `interface{}` instead of `any`.
 	AnyAsInterface bool `yaml:"any_as_interface"`
+
+	// GenerateUndiscriminatedDisjunctions controls whether disjunctions of refs
+	// without a discriminator field are generated as a union struct type.
+	// When false (default), such disjunctions are emitted as interface{}/any.
+	GenerateUndiscriminatedDisjunctions bool `yaml:"generate_undiscriminated_disjunctions"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
@@ -160,7 +165,10 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.FlattenDisjunctions{},
 		&compiler.DisjunctionOfAnonymousStructsToExplicit{},
 		&compiler.DisjunctionInferMapping{},
-		&compiler.UndiscriminatedDisjunctionToAny{},
+		tools.IfElse[compiler.Pass](language.config.GenerateUndiscriminatedDisjunctions,
+			&compiler.UndiscriminatedDisjunctionToType{},
+			&compiler.UndiscriminatedDisjunctionToAny{},
+		),
 		&compiler.DisjunctionToType{},
 	}
 }

@@ -28,3 +28,10 @@ func AnyToInt64(value any) int64 {
 func ToPtr[T any](v T) *T {
 	return &v
 }
+
+func IfElse[T any](condition bool, thenVal T, elseVal T) T {
+	if condition {
+		return thenVal
+	}
+	return elseVal
+}

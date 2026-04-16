@@ -99,6 +99,12 @@ func (jenny JSONMarshalling) renderCustomMarshal(obj ast.Object) (string, error)
 		})
 	}
 
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintUndiscriminatedDisjunctionOfRefs) {
+		return jenny.tmpl.Render("types/disjunction_of_refs_without_discriminator.json_marshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
 	return "", fmt.Errorf("could not determine how to render custom marshal")
 }
 
@@ -165,6 +171,12 @@ func (jenny JSONMarshalling) renderCustomUnmarshal(context languages.Context, ob
 
 	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintDisjunctionOfScalarsAndRefs) {
 		return jenny.tmpl.Render("types/disjunction_of_scalars_and_refs.json_unmarshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
+	if obj.Type.IsStruct() && obj.Type.HasHint(ast.HintUndiscriminatedDisjunctionOfRefs) {
+		return jenny.tmpl.Render("types/disjunction_of_refs_without_discriminator.json_unmarshal.tmpl", map[string]any{
 			"def": obj,
 		})
 	}
