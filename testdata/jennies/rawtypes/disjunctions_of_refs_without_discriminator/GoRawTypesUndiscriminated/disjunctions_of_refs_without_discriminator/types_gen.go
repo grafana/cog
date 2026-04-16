@@ -60,16 +60,6 @@ func (resource *TypeA) UnmarshalJSONStrict(raw []byte) error {
 }
 
 
-// Equals tests the equality of two `TypeA` objects.
-func (resource TypeA) Equals(other TypeA) bool {
-		if resource.FieldA != other.FieldA {
-			return false
-		}
-
-	return true
-}
-
-
 // Validate checks all the validation constraints that may be defined on `TypeA` fields for violations and returns them.
 func (resource TypeA) Validate() error {
 	return nil
@@ -119,16 +109,6 @@ func (resource *TypeB) UnmarshalJSONStrict(raw []byte) error {
 	}
 
 	return errs
-}
-
-
-// Equals tests the equality of two `TypeB` objects.
-func (resource TypeB) Equals(other TypeB) bool {
-		if resource.FieldB != other.FieldB {
-			return false
-		}
-
-	return true
 }
 
 
@@ -236,31 +216,6 @@ func (resource *TypeAOrTypeB) UnmarshalJSONStrict(raw []byte) error {
 
 	return errs
 }
-
-// Equals tests the equality of two `TypeAOrTypeB` objects.
-func (resource TypeAOrTypeB) Equals(other TypeAOrTypeB) bool {
-		if resource.TypeA == nil && other.TypeA != nil || resource.TypeA != nil && other.TypeA == nil {
-			return false
-		}
-
-		if resource.TypeA != nil {
-		if !resource.TypeA.Equals(*other.TypeA) {
-			return false
-		}
-		}
-		if resource.TypeB == nil && other.TypeB != nil || resource.TypeB != nil && other.TypeB == nil {
-			return false
-		}
-
-		if resource.TypeB != nil {
-		if !resource.TypeB.Equals(*other.TypeB) {
-			return false
-		}
-		}
-
-	return true
-}
-
 
 // Validate checks all the validation constraints that may be defined on `TypeAOrTypeB` fields for violations and returns them.
 func (resource TypeAOrTypeB) Validate() error {
