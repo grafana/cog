@@ -92,12 +92,11 @@ func TestRawTypes_Generate_WithUndiscriminatedDisjunctions(t *testing.T) {
 	}
 
 	config := Config{
-		PackageRoot:                          "github.com/grafana/cog/generated",
-		GenerateEqual:                        true,
-		GenerateJSONMarshaller:               true,
-		GenerateStrictUnmarshaller:           true,
-		GenerateValidate:                     true,
-		GenerateUndiscriminatedDisjunctions:  true,
+		PackageRoot:                         "github.com/grafana/cog/generated",
+		GenerateJSONMarshaller:              true,
+		GenerateStrictUnmarshaller:          true,
+		GenerateValidate:                    true,
+		GenerateUndiscriminatedDisjunctions: true,
 	}
 	jenny := RawTypes{
 		config:          config,
