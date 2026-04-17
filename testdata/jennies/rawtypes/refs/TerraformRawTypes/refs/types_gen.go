@@ -13,14 +13,16 @@ type RefToSomeStruct = SomeStruct
 
 type RefToSomeStructFromOtherPackage = unknown
 
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var SomeStructAttributes = map[string]schema.Attribute{
 "field_any": schema.ObjectAttribute{
  Required: true,
 },
 
-},
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: SomeStructAttributes,
 },
 }

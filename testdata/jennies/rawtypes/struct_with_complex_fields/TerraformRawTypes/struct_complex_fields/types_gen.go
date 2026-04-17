@@ -43,55 +43,20 @@ type StringOrSomeOtherStruct struct {
 SomeOtherStruct SomeOtherStruct `tfsdk:"SomeOtherStruct"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Description: `
-This struct does things.
-`,
-Attributes: map[string]schema.Attribute{
+var SomeStructAttributes = map[string]schema.Attribute{
 "field_ref": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+Attributes: SomeOtherStructAttributes,
 },
 
 "field_disjunction_of_scalars": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"string": schema.StringAttribute{
- Optional: true,
-},
-
-"bool": schema.BoolAttribute{
- Optional: true,
-},
-
-},
+Attributes: StringOrBoolAttributes,
 },
 
 "field_mixed_disjunction": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"string": schema.StringAttribute{
- Optional: true,
-},
-
-"some_other_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
-},
-
-},
+Attributes: StringOrSomeOtherStructAttributes,
 },
 
 "field_disjunction_with_null": schema.StringAttribute{
@@ -116,12 +81,7 @@ stringvalidator.OneOf(">", "<"),
 
 "field_anonymous_struct": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+Attributes: StructComplexFieldsSomeStructFieldAnonymousStructAttributes,
 },
 
 "field_ref_to_constant": schema.StringAttribute{
@@ -129,7 +89,52 @@ Attributes: map[string]schema.Attribute{
 Default: stringdefault.StaticString("straight"),
 },
 
+}
+
+var SomeOtherStructAttributes = map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
 },
+
+}
+
+var StructComplexFieldsSomeStructFieldAnonymousStructAttributes = map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
+}
+
+var StringOrBoolAttributes = map[string]schema.Attribute{
+"string": schema.StringAttribute{
+ Optional: true,
+},
+
+"bool": schema.BoolAttribute{
+ Optional: true,
+},
+
+}
+
+var StringOrSomeOtherStructAttributes = map[string]schema.Attribute{
+"string": schema.StringAttribute{
+ Optional: true,
+},
+
+"some_other_struct": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: SomeOtherStructAttributes,
+},
+
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Description: `
+This struct does things.
+`,
+Attributes: SomeStructAttributes,
 },
 "connection_path": schema.StringAttribute{
  Required: true,
@@ -137,20 +142,10 @@ Default: stringdefault.StaticString("straight"),
 },
 "some_other_struct": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+Attributes: SomeOtherStructAttributes,
 },
 "struct_complex_fields_some_struct_field_anonymous_struct": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+Attributes: StructComplexFieldsSomeStructFieldAnonymousStructAttributes,
 },
 }
