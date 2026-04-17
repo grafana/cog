@@ -42,7 +42,9 @@ func (a *attributes) generateForAllObjects(schema *ast.Schema, skipObjectName st
 		}
 
 		buffer.WriteString(fmt.Sprintf("var %s = map[string]schema.Attribute{\n", attributesVarName(obj.Name)))
+		a.typeFormatter.structDepth[obj.Name]++
 		buffer.WriteString(a.typeFormatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
+		a.typeFormatter.structDepth[obj.Name]--
 		buffer.WriteString("}\n\n")
 	})
 

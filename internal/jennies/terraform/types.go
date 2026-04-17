@@ -16,6 +16,7 @@ type typeFormatter struct {
 	imports       *common.DirectImportMap
 	packageMapper func(pkg string) string
 	validators    *validators
+	structDepth   map[string]int
 }
 
 func defaultTypeFormatter(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
@@ -24,6 +25,7 @@ func defaultTypeFormatter(config Config, context languages.Context, imports *com
 		context:       context,
 		imports:       imports,
 		packageMapper: packageMapper,
+		structDepth:   make(map[string]int),
 	}
 
 	tf.validators = newValidators(tf)
@@ -215,7 +217,11 @@ func (formatter *typeFormatter) formatFieldAttributes(fields []ast.StructField) 
 		if field.Type.IsIntersection() {
 			continue
 		}
-		buffer.WriteString(fmt.Sprintf("\"%s\": %s\n", tools.SnakeCase(field.Name), formatter.formatTypeAttribute(field.Type, "")))
+		attr := formatter.formatTypeAttribute(field.Type, "")
+		if attr == "" {
+			continue
+		}
+		buffer.WriteString(fmt.Sprintf("\"%s\": %s\n", tools.SnakeCase(field.Name), attr))
 	}
 
 	return buffer.String()
@@ -431,6 +437,22 @@ func (formatter *typeFormatter) formatReferenceAttribute(def ast.Type) string {
 		if def.Nullable {
 			required = "Optional: true,"
 		}
+
+		if formatter.structDepth[obj.Name] >= 2 {
+			// Already inlining this struct: break the cycle by returning empty.
+			return ""
+		}
+
+		if formatter.structDepth[obj.Name] == 1 {
+			// Self-referential: inline attributes instead of referencing the var
+			// to avoid a Go initialization cycle.
+			formatter.structDepth[obj.Name]++
+			attrs := formatter.formatFieldAttributes(obj.Type.AsStruct().Fields)
+			formatter.structDepth[obj.Name]--
+			return fmt.Sprintf("schema.SingleNestedAttribute{\n%s\nAttributes: map[string]schema.Attribute{\n%s},\n},\n",
+				required, attrs)
+		}
+
 		return fmt.Sprintf("schema.SingleNestedAttribute{\n%s\nAttributes: %s,\n},\n",
 			required, attributesVarName(obj.Name))
 	}
