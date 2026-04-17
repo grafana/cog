@@ -268,6 +268,46 @@ func isImplicitEnum(v cue.Value) (bool, error) {
 	return true, nil
 }
 
+// bulkOptionalFieldFromSyntax finds the first bulk-optional field [X]: T in v.
+// Returns the pattern expression X and the value expression T.
+//
+// It first tries v.Syntax() (the CUE Def export), but falls back to v.Source()
+// when Syntax() returns a *ast.BadExpr — which happens for enum-indexed maps
+// due to a CUE exporter bug: "reference in label expression refers to field
+// against which it would be matched" (see https://cuelang.org/issues/new).
+func bulkOptionalFieldFromSyntax(v cue.Value) (patternExpr, valueExpr cueast.Expr, ok bool) {
+	syntax := v.Syntax()
+
+	// Fall back to Source() when Syntax() hits the CUE exporter bug.
+	if _, isBad := syntax.(*cueast.BadExpr); isBad {
+		syntax = v.Source()
+	}
+
+	// Source() returns the *ast.Field that wraps the value (e.g. the field
+	// "EnumIndexedMap: {[X]: T}"). Unwrap to get just the struct-lit value.
+	if field, isField := syntax.(*cueast.Field); isField {
+		syntax = field.Value
+	}
+
+	sl, isStruct := syntax.(*cueast.StructLit)
+	if !isStruct {
+		return nil, nil, false
+	}
+
+	for _, elt := range sl.Elts {
+		f, isField := elt.(*cueast.Field)
+		if !isField {
+			continue
+		}
+		ll, isBracket := f.Label.(*cueast.ListLit)
+		if !isBracket || len(ll.Elts) != 1 {
+			continue
+		}
+		return ll.Elts[0], f.Value, true
+	}
+	return nil, nil, false
+}
+
 func hasStructFields(v cue.Value) bool {
 	if v.IncompleteKind() != cue.StructKind {
 		return false

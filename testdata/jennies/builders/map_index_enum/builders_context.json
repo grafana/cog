@@ -1,0 +1,463 @@
+{
+  "Schemas": [
+    {
+      "Package": "sandbox",
+      "Metadata": {},
+      "Objects": {
+        "StringEnum": {
+          "Name": "StringEnum",
+          "Type": {
+            "Kind": "enum",
+            "Nullable": false,
+            "Enum": {
+              "Values": [
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "a",
+                  "Value": "a"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "b",
+                  "Value": "b"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "c",
+                  "Value": "c"
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "StringEnum"
+          }
+        },
+        "StringEnumWithDefault": {
+          "Name": "StringEnumWithDefault",
+          "Type": {
+            "Kind": "enum",
+            "Nullable": false,
+            "Default": "a",
+            "Enum": {
+              "Values": [
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "a",
+                  "Value": "a"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "b",
+                  "Value": "b"
+                },
+                {
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Name": "c",
+                  "Value": "c"
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "StringEnumWithDefault"
+          }
+        },
+        "SomeStruct": {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "data",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "StringEnum"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "SomeStruct"
+          }
+        },
+        "SomeStructWithDefaultEnum": {
+          "Name": "SomeStructWithDefaultEnum",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "data",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "StringEnumWithDefault"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "SomeStructWithDefaultEnum"
+          }
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "data",
+                "Type": {
+                  "Kind": "map",
+                  "Nullable": false,
+                  "Map": {
+                    "IndexType": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "sandbox",
+                        "ReferredType": "StringEnum"
+                      }
+                    },
+                    "ValueType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "sandbox",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "sandbox",
+      "Name": "SomeStruct",
+      "Options": [
+        {
+          "Name": "data",
+          "Args": [
+            {
+              "Name": "key",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "sandbox",
+                  "ReferredType": "StringEnum"
+                }
+              }
+            },
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "data",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "StringEnum"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "Index": {
+                    "Argument": {
+                      "Name": "key",
+                      "Type": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "StringEnum"
+                        }
+                      }
+                    }
+                  },
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "index"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "For": {
+        "Name": "SomeStructWithDefaultEnum",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "data",
+                "Type": {
+                  "Kind": "map",
+                  "Nullable": false,
+                  "Map": {
+                    "IndexType": {
+                      "Kind": "ref",
+                      "Nullable": false,
+                      "Ref": {
+                        "ReferredPkg": "sandbox",
+                        "ReferredType": "StringEnumWithDefault"
+                      }
+                    },
+                    "ValueType": {
+                      "Kind": "scalar",
+                      "Nullable": false,
+                      "Scalar": {
+                        "ScalarKind": "string"
+                      }
+                    }
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "sandbox",
+          "ReferredType": "SomeStructWithDefaultEnum"
+        }
+      },
+      "Package": "sandbox",
+      "Name": "SomeStructWithDefaultEnum",
+      "Options": [
+        {
+          "Name": "data",
+          "Args": [
+            {
+              "Name": "key",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "sandbox",
+                  "ReferredType": "StringEnumWithDefault"
+                }
+              }
+            },
+            {
+              "Name": "value",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "data",
+                  "Type": {
+                    "Kind": "map",
+                    "Nullable": false,
+                    "Map": {
+                      "IndexType": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "StringEnumWithDefault"
+                        }
+                      },
+                      "ValueType": {
+                        "Kind": "scalar",
+                        "Nullable": false,
+                        "Scalar": {
+                          "ScalarKind": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "Index": {
+                    "Argument": {
+                      "Name": "key",
+                      "Type": {
+                        "Kind": "ref",
+                        "Nullable": false,
+                        "Ref": {
+                          "ReferredPkg": "sandbox",
+                          "ReferredType": "StringEnumWithDefault"
+                        }
+                      }
+                    }
+                  },
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "value",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "index"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
