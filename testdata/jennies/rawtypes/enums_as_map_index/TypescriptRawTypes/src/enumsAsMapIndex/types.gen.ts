@@ -18,19 +18,7 @@ export interface SomeStruct {
 	data: Record<StringEnum, string>;
 }
 
-export const defaultSomeStruct = (): SomeStruct => ({
-	data: {
-        [StringEnum.A]: "",
-        [StringEnum.B]: "",
-        [StringEnum.C]: ""
-    },
-});
-
 export interface SomeStructWithDefaultEnum {
 	data: Record<StringEnumWithDefault, string>;
 }
-
-export const defaultSomeStructWithDefaultEnum = (): SomeStructWithDefaultEnum => ({
-	data: {},
-});
 

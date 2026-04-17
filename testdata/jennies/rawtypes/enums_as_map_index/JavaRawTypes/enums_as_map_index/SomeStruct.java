@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SomeStruct {
-    public Map<String, String> data;
+    public Map<StringEnum, String> data;
     public SomeStruct() {
         this.data = new HashMap<>();
     }
-    public SomeStruct(Map<String, String> data) {
+    public SomeStruct(Map<StringEnum, String> data) {
         this.data = data;
     }
 }

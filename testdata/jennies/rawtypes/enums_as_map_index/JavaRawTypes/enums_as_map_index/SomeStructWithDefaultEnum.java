@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SomeStructWithDefaultEnum {
-    public Map<String, String> data;
+    public Map<StringEnumWithDefault, String> data;
     public SomeStructWithDefaultEnum() {
         this.data = new HashMap<>();
     }
-    public SomeStructWithDefaultEnum(Map<String, String> data) {
+    public SomeStructWithDefaultEnum(Map<StringEnumWithDefault, String> data) {
         this.data = data;
     }
 }

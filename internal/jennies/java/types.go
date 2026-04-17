@@ -67,7 +67,8 @@ func (tf *typeFormatter) formatBuilderFieldType(def ast.Type) string {
 		case ast.KindArray:
 			return tf.formatArrayOrMapFields(def.AsArray().ValueType, "List", "List<")
 		case ast.KindMap:
-			return tf.formatArrayOrMapFields(def.AsMap().ValueType, "Map", "Map<String, ")
+			keyType := tf.formatFieldType(def.AsMap().IndexType)
+			return tf.formatArrayOrMapFields(def.AsMap().ValueType, "Map", fmt.Sprintf("Map<%s, ", keyType))
 		default:
 			return fmt.Sprintf("%s.Builder<%s>", tf.config.formatPackage("cog"), tf.formatFieldType(def))
 		}
@@ -120,6 +121,7 @@ func (tf *typeFormatter) formatArray(def ast.ArrayType) string {
 
 func (tf *typeFormatter) formatMap(def ast.MapType) string {
 	tf.packageMapper("java.util", "Map")
+	keyType := tf.formatFieldType(def.IndexType)
 	mapType := "unknown"
 	switch def.ValueType.Kind {
 	case ast.KindRef:
@@ -134,7 +136,7 @@ func (tf *typeFormatter) formatMap(def ast.MapType) string {
 		mapType = tf.formatConstantReference(def.ValueType.AsConstantRef())
 	}
 
-	return fmt.Sprintf("Map<String, %s>", mapType)
+	return fmt.Sprintf("Map<%s, %s>", keyType, mapType)
 }
 
 func (tf *typeFormatter) formatComposable(def ast.ComposableSlotType) string {
