@@ -165,11 +165,12 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.FlattenDisjunctions{},
 		&compiler.DisjunctionOfAnonymousStructsToExplicit{},
 		&compiler.DisjunctionInferMapping{},
-		tools.IfElse[compiler.Pass](language.config.GenerateUndiscriminatedDisjunctions,
-			&compiler.UndiscriminatedDisjunctionToType{},
-			&compiler.UndiscriminatedDisjunctionToAny{},
-		),
-		&compiler.DisjunctionToType{},
+		&compiler.UndiscriminatedDisjunctionToAny{
+			GenerateUndiscriminatedDisjunctions: language.config.GenerateUndiscriminatedDisjunctions,
+		},
+		&compiler.DisjunctionToType{
+			GenerateUndiscriminatedDisjunctions: language.config.GenerateUndiscriminatedDisjunctions,
+		},
 	}
 }
 

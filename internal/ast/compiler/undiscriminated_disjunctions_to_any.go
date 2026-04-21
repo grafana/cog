@@ -12,9 +12,14 @@ var _ Pass = (*UndiscriminatedDisjunctionToAny)(nil)
 // discriminator field and mapping are not impacted (see DisjunctionInferMapping).
 // Note: this pass _should_ run after DisjunctionInferMapping.
 type UndiscriminatedDisjunctionToAny struct {
+	GenerateUndiscriminatedDisjunctions bool
 }
 
 func (pass *UndiscriminatedDisjunctionToAny) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	if pass.GenerateUndiscriminatedDisjunctions {
+		return schemas, nil
+	}
+	
 	visitor := &Visitor{
 		OnDisjunction: pass.processDisjunction,
 	}
