@@ -2,13 +2,13 @@ package builder-pkg;
 
 import with-dashes.SomeStruct;
 
-public class BuilderPkgSomeStructBuilder implements cog.Builder<SomeStruct> {
+public class SomeNiceBuilderBuilder implements cog.Builder<SomeStruct> {
     protected final SomeStruct internal;
     
-    public BuilderPkgSomeStructBuilder() {
+    public SomeNiceBuilderBuilder() {
         this.internal = new SomeStruct();
     }
-    public BuilderPkgSomeStructBuilder title(String title) {
+    public SomeNiceBuilderBuilder title(String title) {
         this.internal.title = title;
         return this;
     }
