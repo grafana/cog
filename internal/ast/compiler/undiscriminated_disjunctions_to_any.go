@@ -19,7 +19,7 @@ func (pass *UndiscriminatedDisjunctionToAny) Process(schemas []*ast.Schema) ([]*
 	if pass.GenerateUndiscriminatedDisjunctions {
 		return schemas, nil
 	}
-	
+
 	visitor := &Visitor{
 		OnDisjunction: pass.processDisjunction,
 	}
