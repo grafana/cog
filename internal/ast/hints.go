@@ -40,6 +40,7 @@ const (
 	// HintUndiscriminatedDisjunctionOfRefs indicates that the struct was
 	// previously represented in the IR by a disjunction of references to structs
 	// with no discriminator field.
+	// This option is only used in Go via the client to generate union types instead of interface{}/any.
 	HintUndiscriminatedDisjunctionOfRefs = "undiscriminated_disjunction_of_refs"
 )
 
