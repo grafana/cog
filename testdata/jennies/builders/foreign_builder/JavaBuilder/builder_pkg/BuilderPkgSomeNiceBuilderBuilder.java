@@ -2,13 +2,13 @@ package builder_pkg;
 
 import some_pkg.SomeStruct;
 
-public class BuilderPkgSomeStructSomeNiceBuilderBuilder implements cog.Builder<SomeStruct> {
+public class BuilderPkgSomeNiceBuilderBuilder implements cog.Builder<SomeStruct> {
     protected final SomeStruct internal;
     
-    public BuilderPkgSomeStructSomeNiceBuilderBuilder() {
+    public BuilderPkgSomeNiceBuilderBuilder() {
         this.internal = new SomeStruct();
     }
-    public BuilderPkgSomeStructSomeNiceBuilderBuilder title(String title) {
+    public BuilderPkgSomeNiceBuilderBuilder title(String title) {
         this.internal.title = title;
         return this;
     }
