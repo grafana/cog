@@ -1,5 +1,6 @@
 package basic;
 
+import java.util.Objects;
 
 // This
 // is
@@ -56,5 +57,33 @@ public class SomeStruct {
         this.fieldInt16 = fieldInt16;
         this.fieldInt32 = fieldInt32;
         this.fieldInt64 = fieldInt64;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof SomeStruct)) return false;
+        SomeStruct o = (SomeStruct) other;
+        if (!Objects.equals(this.fieldAny, o.fieldAny)) return false;
+        if (!Objects.equals(this.fieldBool, o.fieldBool)) return false;
+        if (!Objects.equals(this.fieldBytes, o.fieldBytes)) return false;
+        if (!Objects.equals(this.fieldString, o.fieldString)) return false;
+        if (!Objects.equals(this.fieldStringWithConstantValue, o.fieldStringWithConstantValue)) return false;
+        if (!Objects.equals(this.fieldFloat32, o.fieldFloat32)) return false;
+        if (!Objects.equals(this.fieldFloat64, o.fieldFloat64)) return false;
+        if (!Objects.equals(this.fieldUint8, o.fieldUint8)) return false;
+        if (!Objects.equals(this.fieldUint16, o.fieldUint16)) return false;
+        if (!Objects.equals(this.fieldUint32, o.fieldUint32)) return false;
+        if (!Objects.equals(this.fieldUint64, o.fieldUint64)) return false;
+        if (!Objects.equals(this.fieldInt8, o.fieldInt8)) return false;
+        if (!Objects.equals(this.fieldInt16, o.fieldInt16)) return false;
+        if (!Objects.equals(this.fieldInt32, o.fieldInt32)) return false;
+        if (!Objects.equals(this.fieldInt64, o.fieldInt64)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.fieldAny, this.fieldBool, this.fieldBytes, this.fieldString, this.fieldStringWithConstantValue, this.fieldFloat32, this.fieldFloat64, this.fieldUint8, this.fieldUint16, this.fieldUint32, this.fieldUint64, this.fieldInt8, this.fieldInt16, this.fieldInt32, this.fieldInt64);
     }
 }

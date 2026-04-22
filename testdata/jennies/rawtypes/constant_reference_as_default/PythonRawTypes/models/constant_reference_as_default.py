@@ -25,5 +25,14 @@ class MyStruct:
         args: dict[str, typing.Any] = {}
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MyStruct):
+            return False
+        if self.a_string != other.a_string:
+            return False
+        if self.opt_string != other.opt_string:
+            return False
+        return True
+
 
 

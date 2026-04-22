@@ -1,5 +1,6 @@
 package disjunction_of_numbers;
 
+import java.util.Objects;
 
 public class Numbers {
     protected Long int64;
@@ -20,5 +21,21 @@ public class Numbers {
         Numbers numbers = new Numbers();
         numbers.float32 = float32;
         return numbers;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Numbers)) return false;
+        Numbers o = (Numbers) other;
+        if (!Objects.equals(this.int64, o.int64)) return false;
+        if (!Objects.equals(this.float64, o.float64)) return false;
+        if (!Objects.equals(this.float32, o.float32)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.int64, this.float64, this.float32);
     }
 }

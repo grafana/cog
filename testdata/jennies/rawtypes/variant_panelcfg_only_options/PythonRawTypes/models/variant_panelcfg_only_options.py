@@ -21,3 +21,10 @@ class Options:
             args["content"] = data["content"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Options):
+            return False
+        if self.content != other.content:
+            return False
+        return True

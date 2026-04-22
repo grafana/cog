@@ -40,3 +40,23 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	FieldInt64: 0,
 });
 
+// equalsSomeStruct tests the equality of two `SomeStruct` objects.
+export const equalsSomeStruct = (a: SomeStruct, b: SomeStruct): boolean => {
+	if (JSON.stringify(a.fieldAny) !== JSON.stringify(b.fieldAny)) return false;
+	if (a.fieldBool !== b.fieldBool) return false;
+	if (a.fieldBytes !== b.fieldBytes) return false;
+	if (a.fieldString !== b.fieldString) return false;
+	if (a.fieldStringWithConstantValue !== b.fieldStringWithConstantValue) return false;
+	if (a.fieldFloat32 !== b.fieldFloat32) return false;
+	if (a.fieldFloat64 !== b.fieldFloat64) return false;
+	if (a.fieldUint8 !== b.fieldUint8) return false;
+	if (a.fieldUint16 !== b.fieldUint16) return false;
+	if (a.fieldUint32 !== b.fieldUint32) return false;
+	if (a.fieldUint64 !== b.fieldUint64) return false;
+	if (a.fieldInt8 !== b.fieldInt8) return false;
+	if (a.fieldInt16 !== b.fieldInt16) return false;
+	if (a.fieldInt32 !== b.fieldInt32) return false;
+	if (a.fieldInt64 !== b.fieldInt64) return false;
+	return true;
+};
+

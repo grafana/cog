@@ -40,6 +40,59 @@ class Panel implements \JsonSerializable
         $this->fieldConfig = $fieldConfig;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->title !== $other->title) {
+            return false;
+        }
+    
+        if ($this->type !== $other->type) {
+            return false;
+        }
+    
+        if (($this->datasource === null) !== ($other->datasource === null)) {
+            return false;
+        }
+        if ($this->datasource !== null) {
+            if (!$this->datasource->equals($other->datasource)) {
+                return false;
+            }
+        }
+    
+        if (($this->options === null) !== ($other->options === null)) {
+            return false;
+        }
+        if ($this->options !== null) {
+            if ($this->options !== $other->options) {
+                return false;
+            }
+        }
+    
+        if (($this->targets === null) !== ($other->targets === null)) {
+            return false;
+        }
+        if ($this->targets !== null) {
+            if ($this->targets != $other->targets) {
+                return false;
+            }
+        }
+    
+        if (($this->fieldConfig === null) !== ($other->fieldConfig === null)) {
+            return false;
+        }
+        if ($this->fieldConfig !== null) {
+            if (!$this->fieldConfig->equals($other->fieldConfig)) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */
