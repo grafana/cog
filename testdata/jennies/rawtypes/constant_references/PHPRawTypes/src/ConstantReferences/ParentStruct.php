@@ -14,6 +14,19 @@ class ParentStruct implements \JsonSerializable
         $this->myEnum = $myEnum ?: \Grafana\Foundation\ConstantReferences\Enum::ValueA();
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->myEnum !== $other->myEnum) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

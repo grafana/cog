@@ -30,6 +30,35 @@ class Struct implements \JsonSerializable
         $this->partialComplexField = $partialComplexField ?: new \Grafana\Foundation\Defaults\DefaultsStructPartialComplexField();
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if (!$this->allFields->equals($other->allFields)) {
+            return false;
+        }
+    
+        if (!$this->partialFields->equals($other->partialFields)) {
+            return false;
+        }
+    
+        if (!$this->emptyFields->equals($other->emptyFields)) {
+            return false;
+        }
+    
+        if (!$this->complexField->equals($other->complexField)) {
+            return false;
+        }
+    
+        if (!$this->partialComplexField->equals($other->partialComplexField)) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

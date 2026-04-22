@@ -30,5 +30,14 @@ class ObjWithTimeField:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ObjWithTimeField):
+            return False
+        if self.registered_at != other.registered_at:
+            return False
+        if self.duration != other.duration:
+            return False
+        return True
+
 
 

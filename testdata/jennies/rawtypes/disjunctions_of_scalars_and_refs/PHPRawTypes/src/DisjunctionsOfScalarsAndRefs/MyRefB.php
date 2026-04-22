@@ -14,6 +14,19 @@ class MyRefB implements \JsonSerializable
         $this->bar = $bar ?: 0;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->bar !== $other->bar) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

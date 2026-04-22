@@ -17,6 +17,23 @@ class StructB implements \JsonSerializable
         $this->myValue = $myValue ?: "";
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->myEnum !== $other->myEnum) {
+            return false;
+        }
+    
+        if ($this->myValue !== $other->myValue) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

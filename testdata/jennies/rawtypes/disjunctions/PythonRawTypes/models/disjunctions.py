@@ -32,6 +32,15 @@ class SomeStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeStruct):
+            return False
+        if self.type != other.type:
+            return False
+        if self.field_any != other.field_any:
+            return False
+        return True
+
 
 BoolOrRef: typing.TypeAlias = typing.Union[bool, 'SomeStruct']
 
@@ -60,6 +69,15 @@ class SomeOtherStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeOtherStruct):
+            return False
+        if self.type != other.type:
+            return False
+        if self.foo != other.foo:
+            return False
+        return True
+
 
 class YetAnotherStruct:
     type: typing.Literal["yet-another-struct"]
@@ -84,6 +102,15 @@ class YetAnotherStruct:
             args["bar"] = data["Bar"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, YetAnotherStruct):
+            return False
+        if self.type != other.type:
+            return False
+        if self.bar != other.bar:
+            return False
+        return True
 
 
 SeveralRefs: typing.TypeAlias = typing.Union['SomeStruct', 'SomeOtherStruct', 'YetAnotherStruct']

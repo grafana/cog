@@ -16,6 +16,9 @@ const LanguageRef = "python"
 type Config struct {
 	PathPrefix string `yaml:"path_prefix"`
 
+	// GenerateEqual controls the generation of `__eq__()` methods on types.
+	GenerateEqual bool `yaml:"generate_equal"`
+
 	// GenerateJSONMarshaller controls the generation of `to_json()` and
 	// `from_json()` methods on types.
 	GenerateJSONMarshaller bool `yaml:"generate_json_marshaller"`

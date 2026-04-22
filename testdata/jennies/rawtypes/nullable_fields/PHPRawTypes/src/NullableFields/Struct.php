@@ -43,6 +43,73 @@ class Struct implements \JsonSerializable
         $this->g = \Grafana\Foundation\NullableFields\Constants::CONSTANT_REF;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if (($this->a === null) !== ($other->a === null)) {
+            return false;
+        }
+        if ($this->a !== null) {
+            if (!$this->a->equals($other->a)) {
+                return false;
+            }
+        }
+    
+        if (($this->b === null) !== ($other->b === null)) {
+            return false;
+        }
+        if ($this->b !== null) {
+            if (!$this->b->equals($other->b)) {
+                return false;
+            }
+        }
+    
+        if (($this->c === null) !== ($other->c === null)) {
+            return false;
+        }
+        if ($this->c !== null) {
+            if ($this->c !== $other->c) {
+                return false;
+            }
+        }
+    
+        if (($this->d === null) !== ($other->d === null)) {
+            return false;
+        }
+        if ($this->d !== null) {
+            if ($this->d != $other->d) {
+                return false;
+            }
+        }
+    
+        if ($this->e != $other->e) {
+            return false;
+        }
+    
+        if (($this->f === null) !== ($other->f === null)) {
+            return false;
+        }
+        if ($this->f !== null) {
+            if (!$this->f->equals($other->f)) {
+                return false;
+            }
+        }
+    
+        if (($this->g === null) !== ($other->g === null)) {
+            return false;
+        }
+        if ($this->g !== null) {
+            if ($this->g !== $other->g) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */
