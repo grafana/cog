@@ -62,7 +62,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, pkgMapper)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
-		typeDefGen, innerErr := jenny.formatObject(object, pkgMapper)
+		typeDefGen, innerErr := jenny.formatObject(context, object, pkgMapper)
 		if innerErr != nil {
 			err = innerErr
 			return
@@ -83,7 +83,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	return []byte(importStatements + buffer.String()), nil
 }
 
-func (jenny RawTypes) formatObject(def ast.Object, packageMapper packageMapper) ([]byte, error) {
+func (jenny RawTypes) formatObject(context languages.Context, def ast.Object, packageMapper packageMapper) ([]byte, error) {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
@@ -104,6 +104,14 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper packageMapper) 
 		buffer.WriteString(formattedDefaults)
 
 		buffer.WriteString(");\n")
+	}
+
+	if jenny.config.GenerateEqual && def.Type.IsStruct() {
+		eqFunc := newEqualityMethods().generateForObject(context, def)
+		if eqFunc != "" {
+			buffer.WriteString("\n")
+			buffer.WriteString(eqFunc)
+		}
 	}
 
 	customMethodsBlock := template.CustomObjectMethodsBlock(def)
