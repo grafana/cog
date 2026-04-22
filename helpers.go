@@ -189,6 +189,11 @@ type GoConfig struct {
 	// AnyAsInterface instructs cog to emit `interface{}` instead of `any`.
 	AnyAsInterface bool
 
+	// GenerateUndiscriminatedDisjunctions controls whether disjunctions of refs
+	// without a discriminator field are generated as a union struct type.
+	// When false (default), such disjunctions are emitted as interface{}/any.
+	GenerateUndiscriminatedDisjunctions bool
+
 	// CustomTemplatesDirectories accepts a list of directories where are the custom templates
 	CustomTemplatesDirectories []string
 	// CustomTemplatesFS accepts an embedded filesystem containing custom templates
@@ -207,8 +212,9 @@ func (pipeline *SchemaToTypesPipeline) Golang(config GoConfig) *SchemaToTypesPip
 			OverridesTemplatesFS:          config.CustomTemplatesFS,
 			OverridesTemplateFuncs:        config.CustomTemplatesFuncs,
 
-			GenerateEqual:  config.GenerateEqual,
-			AnyAsInterface: config.AnyAsInterface,
+			GenerateEqual:                       config.GenerateEqual,
+			AnyAsInterface:                      config.AnyAsInterface,
+			GenerateUndiscriminatedDisjunctions: config.GenerateUndiscriminatedDisjunctions,
 		},
 	}
 	return pipeline
