@@ -116,6 +116,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.FlattenDisjunctions{},
 		&compiler.DisjunctionInferMapping{},
 		&compiler.RenameNumericEnumValues{},
+		&compiler.DefaultAsTyped{},
 	}
 }
 

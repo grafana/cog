@@ -151,8 +151,8 @@ func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pac
 	case ast.KindEnum:
 		enum := object.Type.AsEnum()
 		defaultValue := enum.Values[0].Value
-		if object.Type.Default != nil {
-			defaultValue = object.Type.Default
+		if td := object.Type.EffectiveTypedDefault(); td != nil && td.Scalar != nil {
+			defaultValue = td.Scalar.Value
 		}
 
 		return raw(jenny.typeFormatter.enums.formatValue(object, defaultValue))
@@ -162,8 +162,20 @@ func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pac
 }
 
 func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper packageMapper) any {
-	if typeDef.Default != nil {
-		return typeDef.Default
+	if td := typeDef.EffectiveTypedDefault(); td != nil {
+		if td.Scalar != nil {
+			return td.Scalar.Value
+		}
+		if td.Array != nil {
+			items := make([]any, len(td.Array))
+			for i, elem := range td.Array {
+				if elem.Scalar != nil {
+					items[i] = elem.Scalar.Value
+				}
+			}
+			return items
+		}
+		// Struct default → fall through to switch
 	}
 
 	switch typeDef.Kind {
@@ -173,8 +185,8 @@ func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper packag
 		return jenny.defaultValuesForStructType(typeDef, packageMapper)
 	case ast.KindEnum: // anonymous enum
 		defaultValue := typeDef.AsEnum().Values[0].Value
-		if typeDef.Default != nil {
-			defaultValue = typeDef.Default
+		if td := typeDef.EffectiveTypedDefault(); td != nil && td.Scalar != nil {
+			defaultValue = td.Scalar.Value
 		}
 
 		return defaultValue
@@ -199,17 +211,26 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 	defaults := orderedmap.New[string, any]()
 
 	for _, field := range structType.AsStruct().Fields {
-		if field.Type.Default != nil {
+		if td := field.Type.EffectiveTypedDefault(); td != nil {
 			switch field.Type.Kind {
 			case ast.KindRef:
 				defaults.Set(field.Name, jenny.defaultValuesForReference(field.Type, packageMapper))
 				continue
 			case ast.KindStruct:
-				defaultMap := field.Type.Default.(map[string]any)
-				defaults.Set(field.Name, jenny.defaultValueForStructs(field.Type.AsStruct(), orderedmap.FromMap(defaultMap)))
+				defaults.Set(field.Name, jenny.defaultValueForStructs(field.Type.AsStruct(), td.Struct))
 				continue
 			default:
-				defaults.Set(field.Name, field.Type.Default)
+				if td.Scalar != nil {
+					defaults.Set(field.Name, td.Scalar.Value)
+				} else if td.Array != nil {
+					items := make([]any, len(td.Array))
+					for i, elem := range td.Array {
+						if elem.Scalar != nil {
+							items[i] = elem.Scalar.Value
+						}
+					}
+					defaults.Set(field.Name, items)
+				}
 				continue
 			}
 		}
@@ -302,12 +323,15 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	}
 
 	if referredType.Type.IsEnum() {
-		return raw(jenny.typeFormatter.enums.formatValue(referredType, typeDef.Default))
+		var enumDefault any
+		if td := typeDef.EffectiveTypedDefault(); td != nil && td.Scalar != nil {
+			enumDefault = td.Scalar.Value
+		}
+		return raw(jenny.typeFormatter.enums.formatValue(referredType, enumDefault))
 	}
 
-	if hasStructDefaults(referredType.Type, typeDef.Default) {
-		defaultMap := typeDef.Default.(map[string]any)
-		return jenny.defaultValueForStructs(referredType.Type.AsStruct(), orderedmap.FromMap(defaultMap))
+	if td := typeDef.EffectiveTypedDefault(); referredType.Type.IsStruct() && td != nil && td.Struct != nil {
+		return jenny.defaultValueForStructs(referredType.Type.AsStruct(), td.Struct)
 	}
 
 	if pkg != "" {
@@ -317,28 +341,36 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 	return raw(fmt.Sprintf("default%s()", tools.UpperCamelCase(referredTypeName)))
 }
 
-func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.Map[string, any]) any {
+func (jenny RawTypes) defaultValueForStructs(def ast.StructType, defaults map[string]*ast.TypeDefault) any {
 	var buffer strings.Builder
 
 	for _, f := range def.Fields {
-		if m.Has(f.Name) {
-			switch x := m.Get(f.Name).(type) {
-			case map[string]any:
-				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.defaultValueForStructs(f.Type.AsStruct(), orderedmap.FromMap(x))))
-			case nil:
+		if td, ok := defaults[f.Name]; ok {
+			if td.Struct != nil {
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.defaultValueForStructs(f.Type.AsStruct(), td.Struct)))
+			} else if td.Array != nil {
+				items := make([]any, len(td.Array))
+				for i, elem := range td.Array {
+					if elem.Scalar != nil {
+						items[i] = elem.Scalar.Value
+					}
+				}
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue(items)))
+			} else if td.Scalar == nil {
+				// null/unset value
 				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue([]any{})))
-			default:
+			} else {
 				if f.Type.IsRef() {
 					ref := f.Type.AsRef()
 					referredType, refFound := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 
 					if refFound && referredType.Type.IsEnum() {
-						buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.typeFormatter.enums.formatValue(referredType, x)))
+						buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.typeFormatter.enums.formatValue(referredType, td.Scalar.Value)))
 						continue
 					}
 				}
 
-				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue(x)))
+				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue(td.Scalar.Value)))
 			}
 		} else if f.Required {
 			switch f.Type.Kind {
@@ -390,7 +422,3 @@ func (jenny RawTypes) defaultValueForConstantReferences(def ast.ConstantReferenc
 	return "unknown"
 }
 
-func hasStructDefaults(typeDef ast.Type, defaults any) bool {
-	_, ok := defaults.(map[string]any)
-	return ok && typeDef.IsStruct()
-}

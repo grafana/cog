@@ -2,11 +2,12 @@ package php
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/orderedmap"
 	"github.com/grafana/cog/internal/tools"
 )
 
@@ -160,9 +161,21 @@ func disjunctionCaseForType(typesFormatter *typeFormatter, input string, typeDef
  *  Default and "empty" values management *
  *****************************************/
 
-func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, defaultsOverrides *orderedmap.Map[string, any]) any {
-	if !typeDef.IsRef() && typeDef.Default != nil {
-		return typeDef.Default
+func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, overrideDefault *ast.TypeDefault) any {
+	if !typeDef.IsRef() && overrideDefault != nil {
+		if overrideDefault.Scalar != nil {
+			return overrideDefault.Scalar.Value
+		}
+		if overrideDefault.Array != nil {
+			items := make([]any, len(overrideDefault.Array))
+			for i, elem := range overrideDefault.Array {
+				if elem.Scalar != nil {
+					items[i] = elem.Scalar.Value
+				}
+			}
+			return items
+		}
+		// Struct default → fall through
 	}
 
 	switch typeDef.Kind {
@@ -178,10 +191,12 @@ func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, d
 		referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 		if found && referredObj.Type.IsEnum() {
 			enumName := formatObjectName(referredObj.Type.AsEnum().Values[0].Name)
-			for _, enumValue := range referredObj.Type.AsEnum().Values {
-				if enumValue.Value == typeDef.Default {
-					enumName = formatEnumMemberName(enumValue.Name)
-					break
+			if overrideDefault != nil && overrideDefault.Scalar != nil {
+				for _, enumValue := range referredObj.Type.AsEnum().Values {
+					if enumValue.Value == overrideDefault.Scalar.Value {
+						enumName = formatEnumMemberName(enumValue.Name)
+						break
+					}
 				}
 			}
 
@@ -192,29 +207,36 @@ func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, d
 
 		var extraDefaults []string
 
-		if defaultsOverrides != nil {
-			extraDefaults = make([]string, 0, defaultsOverrides.Len())
-			defaultsOverrides.Iterate(func(k string, v any) {
+		if overrideDefault != nil && overrideDefault.Struct != nil {
+			keys := slices.Sorted(maps.Keys(overrideDefault.Struct))
+			extraDefaults = make([]string, 0, len(keys))
+			for _, k := range keys {
+				fieldTD := overrideDefault.Struct[k]
 				if !referredObj.Type.IsStruct() {
-					return
+					continue
 				}
 				field, fieldFound := referredObj.Type.AsStruct().FieldByName(k)
 				if !fieldFound {
-					return
+					continue
 				}
 
-				value := v
+				var value any
 				if field.Type.IsRef() {
-					var fieldOverrides *orderedmap.Map[string, any]
-					if overrides, ok := value.(map[string]any); ok {
-						fieldOverrides = orderedmap.FromMap(overrides)
+					value = defaultValueForType(config, schemas, field.Type, fieldTD)
+				} else if fieldTD.Scalar != nil {
+					value = fieldTD.Scalar.Value
+				} else if fieldTD.Array != nil {
+					items := make([]any, len(fieldTD.Array))
+					for i, elem := range fieldTD.Array {
+						if elem.Scalar != nil {
+							items[i] = elem.Scalar.Value
+						}
 					}
-
-					value = defaultValueForType(config, schemas, field.Type, fieldOverrides)
+					value = items
 				}
 
 				extraDefaults = append(extraDefaults, fmt.Sprintf("%s: %s", formatFieldName(k), formatValue(value)))
-			})
+			}
 		}
 
 		formattedRef := formatObjectName(ref.ReferredType)

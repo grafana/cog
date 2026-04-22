@@ -167,6 +167,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.InlineObjectsWithTypes{
 			InlineTypes: []ast.Kind{ast.KindScalar, ast.KindArray, ast.KindMap, ast.KindDisjunction},
 		},
+		&compiler.DefaultAsTyped{},
 	}
 }
 
