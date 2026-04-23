@@ -13,14 +13,7 @@ type MyStruct struct {
 OptString types.String `tfsdk:"optString"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"constant_ref_string": schema.StringAttribute{
- Required: true,
-Default: stringdefault.StaticString("AString"),
-},
-"my_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var MyStructAttributes = map[string]schema.Attribute{
 "a_string": schema.StringAttribute{
  Required: true,
 Default: stringdefault.StaticString("AString"),
@@ -31,6 +24,15 @@ Default: stringdefault.StaticString("AString"),
 Default: stringdefault.StaticString("AString"),
 },
 
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"constant_ref_string": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("AString"),
 },
+"my_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: MyStructAttributes,
 },
 }

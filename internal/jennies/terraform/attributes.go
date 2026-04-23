@@ -22,6 +22,35 @@ func newAttributesGenerator(cfg Config, typeFormatter *typeFormatter, packageMap
 	}
 }
 
+func attributesVarName(name string) string {
+	return tools.UpperCamelCase(name) + "Attributes"
+}
+
+// generateForAllObjects generates a named `var XxxAttributes` for each struct object in the schema,
+// skipping the object named skipObjectName (used to avoid duplicating the entry point).
+func (a *attributes) generateForAllObjects(schema *ast.Schema, skipObjectName string) (string, error) {
+	var buffer strings.Builder
+
+	a.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema")
+
+	schema.Objects.Iterate(func(_ string, obj ast.Object) {
+		if obj.Name == skipObjectName {
+			return
+		}
+		if !obj.Type.IsStruct() {
+			return
+		}
+
+		buffer.WriteString(fmt.Sprintf("var %s = map[string]schema.Attribute{\n", attributesVarName(obj.Name)))
+		a.typeFormatter.structDepth[obj.Name]++
+		buffer.WriteString(a.typeFormatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
+		a.typeFormatter.structDepth[obj.Name]--
+		buffer.WriteString("}\n\n")
+	})
+
+	return buffer.String(), nil
+}
+
 func (a *attributes) generateForSchema(schema *ast.Schema) (string, error) {
 	var buffer strings.Builder
 
@@ -29,7 +58,21 @@ func (a *attributes) generateForSchema(schema *ast.Schema) (string, error) {
 	buffer.WriteString("var SpecAttributes = map[string]schema.Attribute{\n")
 
 	schema.Objects.Iterate(func(_ string, obj ast.Object) {
-		if !obj.Type.IsAnyOf(ast.KindDisjunction, ast.KindRef, ast.KindConstantRef, ast.KindEnum, ast.KindIntersection) && !obj.Type.IsDisjunctionOfAnyKind() {
+		if obj.Type.IsAnyOf(ast.KindDisjunction, ast.KindRef, ast.KindConstantRef, ast.KindEnum, ast.KindIntersection) || obj.Type.IsDisjunctionOfAnyKind() {
+			return
+		}
+		if obj.Type.IsStruct() {
+			required := "Required: true,"
+			if obj.Type.Nullable {
+				required = "Optional: true,"
+			}
+			comments := ""
+			if c := formatComments(obj.Comments); c != "" {
+				comments = fmt.Sprintf("Description: %s,\n", c)
+			}
+			buffer.WriteString(fmt.Sprintf("\"%s\": schema.SingleNestedAttribute{\n%s\n%sAttributes: %s,\n},\n",
+				tools.SnakeCase(obj.Name), required, comments, attributesVarName(obj.Name)))
+		} else {
 			buffer.WriteString(a.typeFormatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
 		}
 	})

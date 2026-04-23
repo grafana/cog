@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "next": {
+          "$ref": "#/definitions/Node"
+        }
+      },
+      "description": "Node represents a node in a singly-linked list.\nThe next field points to the following node, or is absent if this is the last node."
+    }
+  }
+}

@@ -25,10 +25,7 @@ UniqueList types.List `tfsdk:"uniqueList"`
 FullConstraintList types.List `tfsdk:"fullConstraintList"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var SomeStructAttributes = map[string]schema.Attribute{
 "id": schema.Int64Attribute{
  Required: true,
 Validators: []validator.Int64{
@@ -116,6 +113,11 @@ listvalidator.UniqueValues(),
 },
 },
 
-},
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: SomeStructAttributes,
 },
 }
