@@ -96,14 +96,29 @@ func (jenny RawTypes) formatObject(def ast.Object, packageMapper packageMapper) 
 
 	// generate a "default value factory" for every object, except for constants or composability slots
 	if (!def.Type.IsScalar() && !def.Type.IsComposableSlot()) || (def.Type.IsScalar() && !def.Type.AsScalar().IsConcrete()) {
-		buffer.WriteString("\n")
+		defaultVal := jenny.defaultValueForObject(def, packageMapper)
 
-		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(objectName), objectName))
+		// Skip generating the default factory for structs whose required fields all have
+		// no valid empty default (e.g., maps with enum index types).
+		skipFactory := false
+		if orderedMap, ok := defaultVal.(*orderedmap.Map[string, any]); ok && orderedMap.Len() == 0 && def.Type.Kind == ast.KindStruct {
+			for _, field := range def.Type.AsStruct().Fields {
+				if field.Required {
+					skipFactory = true
+					break
+				}
+			}
+		}
 
-		formattedDefaults := formatValue(jenny.defaultValueForObject(def, packageMapper))
-		buffer.WriteString(formattedDefaults)
+		if !skipFactory {
+			buffer.WriteString("\n")
 
-		buffer.WriteString(");\n")
+			buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(objectName), objectName))
+
+			buffer.WriteString(formatValue(defaultVal))
+
+			buffer.WriteString(");\n")
+		}
 	}
 
 	customMethodsBlock := template.CustomObjectMethodsBlock(def)
@@ -215,6 +230,10 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 		}
 
 		if !field.Required && !field.Type.IsConstantRef() {
+			continue
+		}
+
+		if field.Type.Kind == ast.KindMap && field.Type.AsMap().IndexType.Kind != ast.KindScalar {
 			continue
 		}
 
