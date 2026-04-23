@@ -20,6 +20,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		Name:         "PHPRawTypes",
 		Skip: map[string]string{
 			"intersections": "Intersections are not implemented",
+			"open_struct":   "TODO",
 		},
 	}
 

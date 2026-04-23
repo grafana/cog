@@ -58,6 +58,22 @@ func (jenny JSONMarshalling) generateForObject(buffer *strings.Builder, context 
 		buffer.WriteString("\n")
 	}
 
+	if jenny.objectIsOpenStruct(object) {
+		jsonMarshal, err := jenny.renderOpenStructMarshal(object)
+		if err != nil {
+			return err
+		}
+		buffer.WriteString(jsonMarshal)
+		buffer.WriteString("\n")
+
+		jsonUnmarshal, err := jenny.renderOpenStructUnmarshal(object)
+		if err != nil {
+			return err
+		}
+		buffer.WriteString(jsonUnmarshal)
+		buffer.WriteString("\n")
+	}
+
 	return nil
 }
 
@@ -228,4 +244,34 @@ func (resource *%[1]s) UnmarshalJSON(raw []byte) error {
 	return nil
 }
 `, formatObjectName(obj.Name), buffer.String()), nil
+}
+
+func (jenny JSONMarshalling) objectIsOpenStruct(obj ast.Object) bool {
+	return obj.Type.HasHint(ast.HintOpenStruct)
+}
+
+func (jenny JSONMarshalling) renderOpenStructMarshal(obj ast.Object) (string, error) {
+	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
+		Name: "MarshalJSON",
+		Comments: []string{
+			fmt.Sprintf("MarshalJSON implements a custom JSON marshalling logic to encode `%s` as JSON.", formatObjectName(obj.Name)),
+		},
+		Return: "([]byte, error)",
+	})
+	return jenny.tmpl.Render("types/open_struct.json_marshal.tmpl", map[string]any{
+		"def": obj,
+	})
+}
+
+func (jenny JSONMarshalling) renderOpenStructUnmarshal(obj ast.Object) (string, error) {
+	jenny.apiRefCollector.ObjectMethod(obj, common.MethodReference{
+		Name: "MarshalJSON",
+		Comments: []string{
+			fmt.Sprintf("MarshalJSON implements a custom JSON marshalling logic to encode `%s` as JSON.", formatObjectName(obj.Name)),
+		},
+		Return: "([]byte, error)",
+	})
+	return jenny.tmpl.Render("types/open_struct.json_unmarshal.tmpl", map[string]any{
+		"def": obj,
+	})
 }
