@@ -481,6 +481,14 @@ func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ast.Typ
 })`, formattedRef, assignment)
 	} else if found && referredObject.Type.IsEnum() {
 		return fmt.Sprintf(`(function($input) { return %[1]s::fromValue($input); })`, formattedRef)
+	} else if found && referredObject.Type.IsRef() {
+		assignment := fmt.Sprintf("/** @var array<string, mixed> */\n")
+		assignment += "$val = $input;"
+
+		return fmt.Sprintf(`(function($input) {
+        %[2]s
+        return %[1]s::fromArray($val);
+  })`, formattedRef, assignment)
 	}
 
 	// TODO: should not happen?
