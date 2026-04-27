@@ -1,0 +1,78 @@
+{
+  "Package": "reference_of_reference",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "MyStruct": {
+      "Name": "MyStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "field",
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "reference_of_reference",
+                  "ReferredType": "OtherStruct"
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "reference_of_reference",
+        "ReferredType": "MyStruct"
+      }
+    },
+    "OtherStruct": {
+      "Name": "OtherStruct",
+      "Type": {
+        "Kind": "ref",
+        "Nullable": false,
+        "Ref": {
+          "ReferredPkg": "reference_of_reference",
+          "ReferredType": "AnotherStruct"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "reference_of_reference",
+        "ReferredType": "OtherStruct"
+      }
+    },
+    "AnotherStruct": {
+      "Name": "AnotherStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "a",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "reference_of_reference",
+        "ReferredType": "AnotherStruct"
+      }
+    }
+  }
+}

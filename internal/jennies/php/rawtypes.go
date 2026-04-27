@@ -471,7 +471,8 @@ func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ast.Typ
 	referredObject, found := context.LocateObjectByRef(refDef.AsRef())
 	formattedRef := jenny.typeFormatter.formatRef(refDef, false)
 
-	if found && referredObject.Type.IsStruct() {
+	switch {
+	case found && referredObject.Type.IsStruct():
 		assignment := fmt.Sprintf("/** @var %s */\n", jenny.shaper.typeShape(referredObject.Type))
 		assignment += "$val = $input;"
 
@@ -479,12 +480,20 @@ func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ast.Typ
 	%[2]s
 	return %[1]s::fromArray($val);
 })`, formattedRef, assignment)
-	} else if found && referredObject.Type.IsEnum() {
+	case found && referredObject.Type.IsEnum():
 		return fmt.Sprintf(`(function($input) { return %[1]s::fromValue($input); })`, formattedRef)
-	}
+	case found && referredObject.Type.IsRef():
+		assignment := fmt.Sprintf("/** @var array<string, mixed> */\n")
+		assignment += "$val = $input;"
 
-	// TODO: should not happen?
-	return `/* ref to a non-struct, non-enum, this should have been inlined */ (function(array $input) { return $input; })`
+		return fmt.Sprintf(`(function($input) {
+        %[2]s
+        return %[1]s::fromArray($val);
+  })`, formattedRef, assignment)
+	default:
+		// TODO: should not happen?
+		return `/* ref to a non-struct, non-enum, this should have been inlined */ (function(array $input) { return $input; })`
+	}
 }
 
 func (jenny RawTypes) unmarshalComposableSlot(context languages.Context, parentObject ast.Object, def ast.Type, inputVar string) string {
