@@ -23,10 +23,10 @@ class MyStruct implements \JsonSerializable
         $data = $inputData;
         return new self(
             field: isset($data["field"]) ? (function($input) {
-            /** @var array<string, mixed> */
+    	/** @var array{a?: string} */
     $val = $input;
-            return \Grafana\Foundation\ReferenceOfReference\OtherStruct::fromArray($val);
-      })($data["field"]) : null,
+    	return \Grafana\Foundation\ReferenceOfReference\OtherStruct::fromArray($val);
+    })($data["field"]) : null,
         );
     }
 
