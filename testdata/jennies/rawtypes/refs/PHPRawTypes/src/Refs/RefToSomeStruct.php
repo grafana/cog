@@ -10,7 +10,7 @@ class RefToSomeStruct extends \Grafana\Foundation\Refs\SomeStruct
     public static function fromArray(array $inputData): static
     {
         $base = parent::fromArray($inputData);
-        $obj = new self();
+        $obj = new static();
         foreach (get_object_vars($base) as $key => $value) {
             $obj->$key = $value;
         }
