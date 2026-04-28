@@ -148,7 +148,26 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 
 		buffer.WriteString(enum)
 	case ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type)))
+		parentRef := jenny.typeFormatter.formatType(def.Type)
+		if jenny.config.GenerateJSONMarshaller {
+			fromArray := strings.Join([]string{
+				"/**",
+				" * @param array<string, mixed> $inputData",
+				" */",
+				"public static function fromArray(array $inputData): static",
+				"{",
+				"    $base = parent::fromArray($inputData);",
+				"    $obj = new static();",
+				"    foreach (get_object_vars($base) as $key => $value) {",
+				"        $obj->$key = $value;",
+				"    }",
+				"    return $obj;",
+				"}",
+			}, "\n")
+			buffer.WriteString(fmt.Sprintf("class %s extends %s\n{\n%s\n}", defName, parentRef, tools.Indent(fromArray, 4)))
+		} else {
+			buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, parentRef))
+		}
 	case ast.KindStruct:
 		structDef, err := jenny.formatStructDef(context, schema, def)
 		if err != nil {
