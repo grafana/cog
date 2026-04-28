@@ -1,0 +1,101 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "Constraints": {
+      "Name": "Constraints",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "ExclusiveMax",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003c",
+                      "Args": [
+                        10
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "ExclusiveMin",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e",
+                      "Args": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "Max",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003c=",
+                      "Args": [
+                        10
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            },
+            {
+              "Name": "Min",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "float32",
+                  "Constraints": [
+                    {
+                      "Op": "\u003e=",
+                      "Args": [
+                        1
+                      ]
+                    }
+                  ]
+                }
+              },
+              "Required": false
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "Constraints"
+      }
+    }
+  }
+}

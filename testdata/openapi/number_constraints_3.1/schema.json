@@ -1,0 +1,33 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "constraints",
+    "version": "0.0"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Constraints": {
+        "type": "object",
+        "properties": {
+          "Min": {
+            "type": "number",
+            "minimum": 1
+          },
+          "ExclusiveMin": {
+            "type": "number",
+            "exclusiveMinimum": 1
+          },
+          "Max": {
+            "type": "number",
+            "maximum": 10
+          },
+          "ExclusiveMax": {
+            "type": "number",
+            "exclusiveMaximum": 10
+          }
+        }
+      }
+    }
+  }
+}
