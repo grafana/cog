@@ -59,25 +59,39 @@ func getConstraints(schema *openapi3.Schema) []ast.TypeConstraint {
 		})
 	}
 
-	if schema.Min != nil {
+	if schema.Min != nil || schema.ExclusiveMin.Value != nil {
+		// In openapi3.0, schema.Min is used alongside a boolean exclusiveMinimum.
+		// In 3.1, exclusiveMinimum is the actual value, rather than the boolean modifying minimum
 		op := ast.GreaterThanEqualOp
-		if schema.ExclusiveMin {
+		min := schema.Min
+		if schema.ExclusiveMin.IsTrue() {
 			op = ast.GreaterThanOp
+		} else if schema.ExclusiveMin.Value != nil {
+			// If the value is set, this is 3.1 style, and the value should be used as the min
+			op = ast.GreaterThanOp
+			min = schema.ExclusiveMin.Value
 		}
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   op,
-			Args: getArgs(schema.Min, schema.Type.Slice()[0]),
+			Args: getArgs(min, schema.Type.Slice()[0]),
 		})
 	}
 
-	if schema.Max != nil {
+	if schema.Max != nil || schema.ExclusiveMax.Value != nil {
+		// In openapi3.0, schema.Max is used alongside a boolean exclusiveMaximum.
+		// In 3.1, exclusiveMaximum is the actual value, rather than the boolean modifying maximum
 		op := ast.LessThanEqualOp
-		if schema.ExclusiveMax {
+		max := schema.Max
+		if schema.ExclusiveMax.IsTrue() {
 			op = ast.LessThanOp
+		} else if schema.ExclusiveMax.Value != nil {
+			// If the value is set, this is 3.1 style, and the value should be used as the max
+			op = ast.LessThanOp
+			max = schema.ExclusiveMax.Value
 		}
 		constraints = append(constraints, ast.TypeConstraint{
 			Op:   op,
-			Args: getArgs(schema.Max, schema.Type.Slice()[0]),
+			Args: getArgs(max, schema.Type.Slice()[0]),
 		})
 	}
 
