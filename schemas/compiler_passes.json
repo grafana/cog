@@ -396,6 +396,9 @@
         "disjunction_infer_mapping": {
           "$ref": "#/$defs/YamlDisjunctionInferMapping"
         },
+        "undiscriminated_disjunction_to_any": {
+          "$ref": "#/$defs/YamlUndiscriminatedDisjunctionToAny"
+        },
         "disjunction_with_constant_to_default": {
           "$ref": "#/$defs/YamlDisjunctionWithConstantToDefault"
         }
@@ -643,6 +646,11 @@
       "type": "object"
     },
     "YamlTrimEnumValues": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlUndiscriminatedDisjunctionToAny": {
       "properties": {},
       "additionalProperties": false,
       "type": "object"

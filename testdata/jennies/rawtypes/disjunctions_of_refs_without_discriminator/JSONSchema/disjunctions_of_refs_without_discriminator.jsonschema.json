@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "DisjunctionWithoutDiscriminator": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/TypeA"
+        },
+        {
+          "$ref": "#/definitions/TypeB"
+        }
+      ]
+    },
+    "TypeA": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fieldA"
+      ],
+      "properties": {
+        "fieldA": {
+          "type": "string"
+        }
+      }
+    },
+    "TypeB": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fieldB"
+      ],
+      "properties": {
+        "fieldB": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
