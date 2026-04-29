@@ -63,7 +63,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 	fullObjectName := jenny.importType(builder.For.SelfRef)
 	buildObjectSignature := fullObjectName
-	if builder.For.Type.ImplementsVariant() {
+	if builder.For.Type.ImplementsVariant() && !builder.For.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
