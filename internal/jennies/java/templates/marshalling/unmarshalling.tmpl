@@ -99,10 +99,13 @@ public class {{ .Name }}Deserializer extends JsonDeserializer<{{ .Name }}> {
           {{ $.Name | lowerCamelCase }}.{{ .FieldName }} = mapper.treeToValue(root.get({{ printf "%#v" .FieldName }}), clazz);
       } else {
           UnknownDataquery unknownDataquery = new UnknownDataquery();
-          Iterator<Map.Entry<String, JsonNode>> fieldsIterator = root.get({{ printf "%#v" .FieldName }}).fields();
-          while (fieldsIterator.hasNext()) {
-              Map.Entry<String, JsonNode> field = fieldsIterator.next();
-              unknownDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
+          JsonNode targetNode = root.get({{ printf "%#v" .FieldName }});
+          if (targetNode != null && !targetNode.isNull()) {
+              Iterator<Map.Entry<String, JsonNode>> fieldsIterator = targetNode.fields();
+              while (fieldsIterator.hasNext()) {
+                  Map.Entry<String, JsonNode> field = fieldsIterator.next();
+                  unknownDataquery.genericFields.put(field.getKey(), mapper.treeToValue(field.getValue(), Object.class));
+              }
           }
           {{ $.Name | lowerCamelCase }}.{{ .FieldName | lowerCamelCase }} = unknownDataquery;
       }

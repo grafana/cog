@@ -1,0 +1,93 @@
+{
+  "Package": "disjunctions_of_refs_without_discriminator",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "DisjunctionWithoutDiscriminator": {
+      "Name": "DisjunctionWithoutDiscriminator",
+      "Type": {
+        "Kind": "disjunction",
+        "Nullable": false,
+        "Disjunction": {
+          "Branches": [
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "disjunctions_of_refs_without_discriminator",
+                "ReferredType": "TypeA"
+              }
+            },
+            {
+              "Kind": "ref",
+              "Nullable": false,
+              "Ref": {
+                "ReferredPkg": "disjunctions_of_refs_without_discriminator",
+                "ReferredType": "TypeB"
+              }
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_refs_without_discriminator",
+        "ReferredType": "DisjunctionWithoutDiscriminator"
+      }
+    },
+    "TypeA": {
+      "Name": "TypeA",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "fieldA",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_refs_without_discriminator",
+        "ReferredType": "TypeA"
+      }
+    },
+    "TypeB": {
+      "Name": "TypeB",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "fieldB",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "disjunctions_of_refs_without_discriminator",
+        "ReferredType": "TypeB"
+      }
+    }
+  }
+}

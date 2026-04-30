@@ -55,6 +55,7 @@ var _ Pass = (*DisjunctionToType)(nil)
 //		}
 //		```
 type DisjunctionToType struct {
+	GenerateUndiscriminatedDisjunctions bool
 }
 
 func (pass *DisjunctionToType) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
@@ -121,13 +122,17 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 	case disjunction.Branches.HasOnlyScalarOrArrayOrMap():
 		structType.Hints[ast.HintDisjunctionOfScalars] = disjunction
 	case disjunction.Branches.HasOnlyRefs():
-		if len(disjunction.Discriminator) == 0 {
-			return ast.Type{}, fmt.Errorf("discriminator not set")
+		if pass.GenerateUndiscriminatedDisjunctions && len(disjunction.Discriminator) == 0 && len(disjunction.DiscriminatorMapping) == 0 {
+			structType.Hints[ast.HintUndiscriminatedDisjunctionOfRefs] = disjunction
+		} else {
+			if len(disjunction.Discriminator) == 0 {
+				return ast.Type{}, fmt.Errorf("discriminator not set")
+			}
+			if len(disjunction.DiscriminatorMapping) == 0 {
+				return ast.Type{}, fmt.Errorf("discriminator mapping not set")
+			}
+			structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunction
 		}
-		if len(disjunction.DiscriminatorMapping) == 0 {
-			return ast.Type{}, fmt.Errorf("discriminator mapping not set")
-		}
-		structType.Hints[ast.HintDiscriminatedDisjunctionOfRefs] = disjunction
 	default:
 		structType.Hints[ast.HintDisjunctionOfScalarsAndRefs] = disjunction
 	}
