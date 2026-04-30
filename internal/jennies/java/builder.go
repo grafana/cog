@@ -105,7 +105,7 @@ func (jenny Builder) getBuilderSignature(pkg string, obj ast.Object) string {
 		jenny.imports.Add(obj.SelfRef.ReferredType, obj.SelfRef.ReferredPkg)
 	}
 
-	if !obj.Type.IsDataqueryVariant() {
+	if !obj.Type.IsDataqueryVariant() || obj.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
 		return obj.Name
 	}
 
