@@ -274,7 +274,7 @@ func isImplicitEnum(v cue.Value) (bool, error) {
 // It first tries v.Syntax() (the CUE Def export), but falls back to v.Source()
 // when Syntax() returns a *ast.BadExpr — which happens for enum-indexed maps
 // due to a CUE exporter bug: "reference in label expression refers to field
-// against which it would be matched" (see https://cuelang.org/issues/new).
+// against which it would be matched" (see https://github.com/cue-lang/cue/issues/4291).
 func bulkOptionalFieldFromSyntax(v cue.Value) (cueast.Expr, cueast.Expr, bool) {
 	syntax := v.Syntax()
 
