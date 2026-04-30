@@ -24,8 +24,9 @@ func (jenny equalityMethods) generateForObject(context languages.Context, object
 	objectName := formatObjectName(object.Name)
 	var buffer strings.Builder
 
-	buffer.WriteString(fmt.Sprintf("// equals%s tests the equality of two `%s` objects.\n", objectName, objectName))
-	buffer.WriteString(fmt.Sprintf("export const equals%s = (a: %s, b: %s): boolean => {\n", objectName, objectName, objectName))
+	funcName := jenny.equalsFuncNameForObject(objectName)
+	buffer.WriteString(fmt.Sprintf("// %s tests the equality of two `%s` objects.\n", funcName, objectName))
+	buffer.WriteString(fmt.Sprintf("export const %s = (a: %s, b: %s): boolean => {\n", funcName, objectName, objectName))
 
 	for _, field := range object.Type.AsStruct().Fields {
 		fieldName := formatIdentifier(field.Name)
@@ -91,9 +92,13 @@ func (jenny equalityMethods) writeTypeEquality(
 	buffer.WriteString(fmt.Sprintf("%sif (%s !== %s) return false;\n", indent, selfExpr, otherExpr))
 }
 
+func (jenny equalityMethods) equalsFuncNameForObject(name string) string {
+	return "equals" + formatObjectName(name)
+}
+
 func (jenny equalityMethods) equalsFuncName(typeDef ast.Type) string {
 	if typeDef.IsRef() {
-		return "equals" + formatObjectName(typeDef.AsRef().ReferredType)
+		return jenny.equalsFuncNameForObject(typeDef.AsRef().ReferredType)
 	}
 	return "equalsUnknown"
 }

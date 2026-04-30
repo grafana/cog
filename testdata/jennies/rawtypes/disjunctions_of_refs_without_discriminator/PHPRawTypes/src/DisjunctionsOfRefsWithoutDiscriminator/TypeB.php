@@ -1,20 +1,17 @@
 <?php
 
-namespace Grafana\Foundation\Refs;
+namespace Grafana\Foundation\DisjunctionsOfRefsWithoutDiscriminator;
 
-class SomeStruct implements \JsonSerializable
+class TypeB implements \JsonSerializable
 {
-    /**
-     * @var mixed
-     */
-    public $fieldAny;
+    public int $fieldB;
 
     /**
-     * @param mixed|null $fieldAny
+     * @param int|null $fieldB
      */
-    public function __construct( $fieldAny = null)
+    public function __construct(?int $fieldB = null)
     {
-        $this->fieldAny = $fieldAny ?: null;
+        $this->fieldB = $fieldB ?: 0;
     }
 
     public function equals(mixed $other): bool
@@ -23,7 +20,7 @@ class SomeStruct implements \JsonSerializable
             return false;
         }
     
-        if ($this->fieldAny !== $other->fieldAny) {
+        if ($this->fieldB !== $other->fieldB) {
             return false;
         }
     
@@ -35,10 +32,10 @@ class SomeStruct implements \JsonSerializable
      */
     public static function fromArray(array $inputData): self
     {
-        /** @var array{FieldAny?: mixed} $inputData */
+        /** @var array{fieldB?: int} $inputData */
         $data = $inputData;
         return new self(
-            fieldAny: $data["FieldAny"] ?? null,
+            fieldB: $data["fieldB"] ?? null,
         );
     }
 
@@ -48,7 +45,7 @@ class SomeStruct implements \JsonSerializable
     public function jsonSerialize(): mixed
     {
         $data = new \stdClass;
-        $data->FieldAny = $this->fieldAny;
+        $data->fieldB = $this->fieldB;
         return $data;
     }
 }

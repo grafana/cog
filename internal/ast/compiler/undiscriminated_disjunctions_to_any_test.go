@@ -53,3 +53,22 @@ func TestUndiscriminatedDisjunctionToAny(t *testing.T) {
 
 	runPassOnObjects(t, &UndiscriminatedDisjunctionToAny{}, objects, expected)
 }
+
+func TestUndiscriminatedDisjunctionToAny_WhenGenerateEnabled_HasNoImpact(t *testing.T) {
+	disjunctionType := ast.NewDisjunction([]ast.Type{
+		ast.NewRef("test", "SomeStruct"),
+		ast.NewRef("test", "OtherStruct"),
+	})
+
+	objects := []ast.Object{
+		ast.NewObject("test", "ADisjunctionOfRefs", disjunctionType),
+		ast.NewObject("test", "SomeStruct", ast.NewStruct(
+			ast.NewStructField("FieldFoo", ast.String()),
+		)),
+		ast.NewObject("test", "OtherStruct", ast.NewStruct(
+			ast.NewStructField("FieldBar", ast.Bool()),
+		)),
+	}
+
+	runPassOnObjects(t, &UndiscriminatedDisjunctionToAny{GenerateUndiscriminatedDisjunctions: true}, objects, objects)
+}
