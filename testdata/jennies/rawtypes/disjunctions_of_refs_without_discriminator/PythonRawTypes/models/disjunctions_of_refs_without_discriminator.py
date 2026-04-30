@@ -25,6 +25,13 @@ class TypeA:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, TypeA):
+            return False
+        if self.field_a != other.field_a:
+            return False
+        return True
+
 
 class TypeB:
     field_b: int
@@ -46,6 +53,13 @@ class TypeB:
             args["field_b"] = data["fieldB"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, TypeB):
+            return False
+        if self.field_b != other.field_b:
+            return False
+        return True
 
 
 

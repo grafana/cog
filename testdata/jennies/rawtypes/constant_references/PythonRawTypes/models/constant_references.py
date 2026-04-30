@@ -29,6 +29,13 @@ class ParentStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ParentStruct):
+            return False
+        if self.my_enum != other.my_enum:
+            return False
+        return True
+
 
 class Struct:
     my_value: str
@@ -56,6 +63,15 @@ class Struct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Struct):
+            return False
+        if self.my_value != other.my_value:
+            return False
+        if self.my_enum != other.my_enum:
+            return False
+        return True
+
 
 class StructA:
     my_enum: str
@@ -77,6 +93,15 @@ class StructA:
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, StructA):
+            return False
+        if self.my_enum != other.my_enum:
+            return False
+        if self.other != other.other:
+            return False
+        return True
 
 
 class StructB:
@@ -102,6 +127,15 @@ class StructB:
             args["my_value"] = data["myValue"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, StructB):
+            return False
+        if self.my_enum != other.my_enum:
+            return False
+        if self.my_value != other.my_value:
+            return False
+        return True
 
 
 

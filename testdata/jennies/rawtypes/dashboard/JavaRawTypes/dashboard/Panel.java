@@ -1,5 +1,6 @@
 package dashboard;
 
+import java.util.Objects;
 import java.util.List;
 import cog.variants.Dataquery;
 
@@ -21,5 +22,24 @@ public class Panel {
         this.options = options;
         this.targets = targets;
         this.fieldConfig = fieldConfig;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Panel)) return false;
+        Panel o = (Panel) other;
+        if (!Objects.equals(this.title, o.title)) return false;
+        if (!Objects.equals(this.type, o.type)) return false;
+        if (!Objects.equals(this.datasource, o.datasource)) return false;
+        if (!Objects.equals(this.options, o.options)) return false;
+        if (!Objects.equals(this.targets, o.targets)) return false;
+        if (!Objects.equals(this.fieldConfig, o.fieldConfig)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.title, this.type, this.datasource, this.options, this.targets, this.fieldConfig);
     }
 }

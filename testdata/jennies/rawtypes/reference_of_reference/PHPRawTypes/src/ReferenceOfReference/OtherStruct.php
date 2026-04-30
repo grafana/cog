@@ -14,6 +14,19 @@ class OtherStruct implements \JsonSerializable
         $this->a = $a ?: "";
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->a !== $other->a) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

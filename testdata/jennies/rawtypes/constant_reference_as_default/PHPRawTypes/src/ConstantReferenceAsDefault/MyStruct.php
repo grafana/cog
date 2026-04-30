@@ -14,6 +14,28 @@ class MyStruct implements \JsonSerializable
         $this->optString = \Grafana\Foundation\ConstantReferenceAsDefault\Constants::CONSTANT_REF_STRING;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->aString !== $other->aString) {
+            return false;
+        }
+    
+        if (($this->optString === null) !== ($other->optString === null)) {
+            return false;
+        }
+        if ($this->optString !== null) {
+            if ($this->optString !== $other->optString) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

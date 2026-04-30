@@ -14,6 +14,19 @@ class FieldConfig implements \JsonSerializable
         $this->timeseriesFieldConfigOption = $timeseriesFieldConfigOption ?: "";
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->timeseriesFieldConfigOption !== $other->timeseriesFieldConfigOption) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

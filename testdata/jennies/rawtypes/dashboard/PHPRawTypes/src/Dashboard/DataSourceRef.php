@@ -18,6 +18,33 @@ class DataSourceRef implements \JsonSerializable
         $this->uid = $uid;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if (($this->type === null) !== ($other->type === null)) {
+            return false;
+        }
+        if ($this->type !== null) {
+            if ($this->type !== $other->type) {
+                return false;
+            }
+        }
+    
+        if (($this->uid === null) !== ($other->uid === null)) {
+            return false;
+        }
+        if ($this->uid !== null) {
+            if ($this->uid !== $other->uid) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

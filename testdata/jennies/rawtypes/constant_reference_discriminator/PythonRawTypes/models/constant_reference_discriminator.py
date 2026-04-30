@@ -28,6 +28,15 @@ class GridLayoutUsingValue:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, GridLayoutUsingValue):
+            return False
+        if self.kind != other.kind:
+            return False
+        if self.grid_layout_property != other.grid_layout_property:
+            return False
+        return True
+
 
 class RowsLayoutUsingValue:
     kind: str
@@ -52,6 +61,15 @@ class RowsLayoutUsingValue:
             args["rows_layout_property"] = data["rowsLayoutProperty"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, RowsLayoutUsingValue):
+            return False
+        if self.kind != other.kind:
+            return False
+        if self.rows_layout_property != other.rows_layout_property:
+            return False
+        return True
 
 
 LayoutWithoutValue: typing.TypeAlias = typing.Union['GridLayoutWithoutValue', 'RowsLayoutWithoutValue']
@@ -81,6 +99,15 @@ class GridLayoutWithoutValue:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, GridLayoutWithoutValue):
+            return False
+        if self.kind != other.kind:
+            return False
+        if self.grid_layout_property != other.grid_layout_property:
+            return False
+        return True
+
 
 class RowsLayoutWithoutValue:
     kind: str
@@ -105,6 +132,15 @@ class RowsLayoutWithoutValue:
             args["rows_layout_property"] = data["rowsLayoutProperty"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, RowsLayoutWithoutValue):
+            return False
+        if self.kind != other.kind:
+            return False
+        if self.rows_layout_property != other.rows_layout_property:
+            return False
+        return True
 
 
 GridLayoutKindType: typing.Literal["GridLayout"] = "GridLayout"

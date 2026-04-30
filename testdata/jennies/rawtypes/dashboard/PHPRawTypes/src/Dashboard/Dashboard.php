@@ -21,6 +21,28 @@ class Dashboard implements \JsonSerializable
         $this->panels = $panels;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->title !== $other->title) {
+            return false;
+        }
+    
+        if (($this->panels === null) !== ($other->panels === null)) {
+            return false;
+        }
+        if ($this->panels !== null) {
+            if ($this->panels != $other->panels) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

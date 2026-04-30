@@ -25,6 +25,7 @@ func TestRawTypes_Generate(t *testing.T) {
 	}
 
 	config := Config{
+		GenerateEqual:          true,
 		GenerateJSONMarshaller: true,
 	}
 	jenny := RawTypes{
