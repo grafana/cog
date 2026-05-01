@@ -1,0 +1,11 @@
+{{- /* Lazily initialises a parent on the assignment path so deeply
+       nested options can be set without forcing the caller to pre-build
+       every intermediary struct.
+*/ -}}
+{{- define "nil_check" }}
+        {{- $path := formatAssignmentPath "this.@internal" .Path }}
+        if ({{ $path }} == null)
+        {
+            {{ $path }} = {{ .EmptyValueType | emptyValueForType }};
+        }
+{{- end }}

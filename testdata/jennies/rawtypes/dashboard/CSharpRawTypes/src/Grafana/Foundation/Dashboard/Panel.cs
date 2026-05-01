@@ -8,7 +8,7 @@ public class Panel
     public string Type;
     public DataSourceRef Datasource;
     public object Options;
-    public List<object> Targets;
+    public List<Cog.Variants.Dataquery> Targets;
     public FieldConfigSource FieldConfig;
 
     public Panel()
@@ -17,7 +17,7 @@ public class Panel
         this.Type = "";
     }
 
-    public Panel(string title, string type, DataSourceRef datasource, object options, List<object> targets, FieldConfigSource fieldConfig)
+    public Panel(string title, string type, DataSourceRef datasource, object options, List<Cog.Variants.Dataquery> targets, FieldConfigSource fieldConfig)
     {
         this.Title = title;
         this.Type = type;

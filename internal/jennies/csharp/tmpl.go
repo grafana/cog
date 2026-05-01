@@ -9,7 +9,7 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
-//go:embed templates/types/*.tmpl templates/marshalling/*.tmpl
+//go:embed templates/types/*.tmpl templates/marshalling/*.tmpl templates/builders/*.tmpl templates/runtime/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -36,7 +36,18 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 // formattingTemplateFuncs returns helpers that are pure formatting
 // utilities — they don't depend on a typeFormatter and so can be added
 // to the template root without an active jenny.
+//
+// The builder-jenny helpers (formatBuilderFieldType, formatType, …)
+// are registered as panic-stubs so that templates referencing them
+// parse cleanly at init time. Each Builder.Generate call overrides the
+// stubs with real implementations via Template.Funcs(...).
 func formattingTemplateFuncs() template.FuncMap {
+	stub := func(name string) func(...any) string {
+		return func(...any) string {
+			panic(name + "() needs to be overridden by a jenny")
+		}
+	}
+
 	return template.FuncMap{
 		"formatFieldName":   formatFieldName,
 		"formatArgName":     formatArgName,
@@ -46,6 +57,16 @@ func formattingTemplateFuncs() template.FuncMap {
 		"lastValueIndex": func(index int, values []EnumValue) bool {
 			return len(values)-1 == index
 		},
+
+		"formatBuilderFieldType":   stub("formatBuilderFieldType"),
+		"formatType":               stub("formatType"),
+		"formatRefType":            stub("formatRefType"),
+		"formatAssignmentPath":     stub("formatAssignmentPath"),
+		"formatPath":               stub("formatPath"),
+		"formatPathIndex":          stub("formatPathIndex"),
+		"emptyValueForType":        stub("emptyValueForType"),
+		"typeHasBuilder":           func(...any) bool { return false },
+		"resolvesToComposableSlot": func(...any) bool { return false },
 	}
 }
 

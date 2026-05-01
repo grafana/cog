@@ -132,6 +132,12 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AppendOneToMany(
 		RawTypes{config: config, tmpl: tmpl},
 		common.If(config.GenerateJSONConverters && !config.SkipRuntime, &Converters{config: config, tmpl: tmpl}),
+		common.If(config.GenerateBuilders && !config.SkipRuntime, Runtime{config: config, tmpl: tmpl}),
+		common.If(config.GenerateBuilders && !config.SkipRuntime, Builder{
+			config:          config,
+			tmpl:            tmpl,
+			apiRefCollector: language.apiRefCollector,
+		}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 
