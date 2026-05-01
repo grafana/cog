@@ -1,0 +1,24 @@
+{{- /* C# enum template — Phase 2 (raw types only).
+       Generates a strongly-typed C# enum. For string-valued enums,
+       member names are PascalCased and original values are recorded
+       in [EnumMember] attributes so a JsonStringEnumMemberConverter
+       (added in Phase 3) can round-trip the original strings.
+*/ -}}
+namespace {{ .Namespace }};
+{{ if .NeedsEnumMember }}
+using System.Runtime.Serialization;
+{{ end }}
+{{- range .Comments }}
+// {{ . }}
+{{- end }}
+public enum {{ .Name }}
+{
+    {{- range $i, $val := .Values }}
+    {{- if $.IsString }}
+    [EnumMember(Value = {{ $val.RawValue | printf "%q" }})]
+    {{ $val.Name }}{{- if not (lastValueIndex $i $.Values) }},{{ end }}
+    {{- else }}
+    {{ $val.Name }} = {{ $val.RawValue }}{{- if not (lastValueIndex $i $.Values) }},{{ end }}
+    {{- end }}
+    {{- end }}
+}

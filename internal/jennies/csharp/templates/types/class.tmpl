@@ -1,0 +1,39 @@
+{{- /* C# class template — Phase 2 (raw types only).
+       Produces a public class with public fields, a parameterless
+       constructor that assigns defaults, and an all-args constructor.
+       Mirrors the Java class template's basic structure; JSON
+       (de)serializer attributes and Equals/GetHashCode overrides will
+       be added in later phases.
+*/ -}}
+namespace {{ .Namespace }};
+{{ if .Imports }}
+{{ .Imports }}
+{{- end }}
+{{- range .Comments }}
+// {{ . }}
+{{- end }}
+public class {{ .Name }}{{ if .Extends }} : {{ join ", " .Extends }}{{ end }}
+{
+    {{- range .Fields }}
+    {{- range .Comments }}
+    // {{ . }}
+    {{- end }}
+    public {{ .Type }} {{ .Name }};
+    {{- end }}
+
+    public {{ .Name }}()
+    {
+        {{- range .DefaultAssignments }}
+        this.{{ .Name }} = {{ .Value }};
+        {{- end }}
+    }
+    {{- if .HasArgsConstructor }}
+
+    public {{ .Name }}({{- range $i, $a := .Args }}{{ if $i }}, {{ end }}{{ $a.Type }} {{ $a.Name }}{{- end }})
+    {
+        {{- range .ArgAssignments }}
+        this.{{ .Name }} = {{ .ValueFromArg }};
+        {{- end }}
+    }
+    {{- end }}
+}
