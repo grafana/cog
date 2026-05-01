@@ -111,8 +111,19 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		return nil, err
 	}
 
-	var attrs string
 	entryPointRef := schema.EntryPointType.Ref
+	skipObjectName := ""
+	if entryPointRef != nil {
+		skipObjectName = entryPointRef.ReferredType
+	}
+
+	allObjVars, err := attributesGenerator.generateForAllObjects(schema, skipObjectName)
+	if err != nil {
+		return nil, err
+	}
+	buffer.WriteString(allObjVars)
+
+	var attrs string
 	if entryPointRef != nil {
 		obj, ok := context.LocateObject(entryPointRef.ReferredPkg, entryPointRef.ReferredType)
 		if !ok {

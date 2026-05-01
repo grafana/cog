@@ -33,17 +33,50 @@ Targets types.List `tfsdk:"targets"`
 FieldConfig FieldConfigSource `tfsdk:"fieldConfig"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"dashboard": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var DashboardAttributes = map[string]schema.Attribute{
 "title": schema.StringAttribute{
  Required: true,
 },
 
 "panels": schema.ListNestedAttribute{
-NestedObject: schema.NestedAttributeObject {
-Attributes: map[string]schema.Attribute {
+NestedObject: schema.NestedAttributeObject{
+Attributes: PanelAttributes,
+},
+},
+
+}
+
+var DataSourceRefAttributes = map[string]schema.Attribute{
+"type": schema.StringAttribute{
+ Optional: true,
+},
+
+"uid": schema.StringAttribute{
+ Optional: true,
+},
+
+}
+
+var FieldConfigSourceAttributes = map[string]schema.Attribute{
+"defaults": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: FieldConfigAttributes,
+},
+
+}
+
+var FieldConfigAttributes = map[string]schema.Attribute{
+"unit": schema.StringAttribute{
+ Optional: true,
+},
+
+"custom": schema.ObjectAttribute{
+ Optional: true,
+},
+
+}
+
+var PanelAttributes = map[string]schema.Attribute{
 "title": schema.StringAttribute{
  Required: true,
 },
@@ -53,17 +86,8 @@ Attributes: map[string]schema.Attribute {
 },
 
 "datasource": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"type": schema.StringAttribute{
- Optional: true,
-},
-
-"uid": schema.StringAttribute{
- Optional: true,
-},
-
-},
+Optional: true,
+Attributes: DataSourceRefAttributes,
 },
 
 "options": schema.ObjectAttribute{
@@ -75,129 +99,31 @@ Attributes: map[string]schema.Attribute{
 },
 
 "field_config": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: FieldConfigSourceAttributes,
+},
+
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"dashboard": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"defaults": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"unit": schema.StringAttribute{
- Optional: true,
-},
-
-"custom": schema.ObjectAttribute{
- Optional: true,
-},
-
-},
-},
-
-},
-},
-
-},
-},
-},
-
-},
+Attributes: DashboardAttributes,
 },
 "data_source_ref": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"type": schema.StringAttribute{
- Optional: true,
-},
-
-"uid": schema.StringAttribute{
- Optional: true,
-},
-
-},
+Attributes: DataSourceRefAttributes,
 },
 "field_config_source": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"defaults": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"unit": schema.StringAttribute{
- Optional: true,
-},
-
-"custom": schema.ObjectAttribute{
- Optional: true,
-},
-
-},
-},
-
-},
+Attributes: FieldConfigSourceAttributes,
 },
 "field_config": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"unit": schema.StringAttribute{
- Optional: true,
-},
-
-"custom": schema.ObjectAttribute{
- Optional: true,
-},
-
-},
+Attributes: FieldConfigAttributes,
 },
 "panel": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"title": schema.StringAttribute{
- Required: true,
-},
-
-"type": schema.StringAttribute{
- Required: true,
-},
-
-"datasource": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"type": schema.StringAttribute{
- Optional: true,
-},
-
-"uid": schema.StringAttribute{
- Optional: true,
-},
-
-},
-},
-
-"options": schema.ObjectAttribute{
- Optional: true,
-},
-
-"targets": schema.ListAttribute{
- ElementType: unknown,
-},
-
-"field_config": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"defaults": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"unit": schema.StringAttribute{
- Optional: true,
-},
-
-"custom": schema.ObjectAttribute{
- Optional: true,
-},
-
-},
-},
-
-},
-},
-
-},
+Attributes: PanelAttributes,
 },
 }

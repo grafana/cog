@@ -26,28 +26,15 @@ type NullableFieldsStructF struct {
  A types.String `tfsdk:"a"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var StructAttributes = map[string]schema.Attribute{
 "a": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field": schema.StringAttribute{
- Required: true,
-},
-
-},
+Optional: true,
+Attributes: MyObjectAttributes,
 },
 
 "b": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field": schema.StringAttribute{
- Required: true,
-},
-
-},
+Optional: true,
+Attributes: MyObjectAttributes,
 },
 
 "c": schema.StringAttribute{
@@ -63,13 +50,8 @@ Attributes: map[string]schema.Attribute{
 },
 
 "f": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"a": schema.StringAttribute{
- Required: true,
-},
-
-},
+Optional: true,
+Attributes: NullableFieldsStructFAttributes,
 },
 
 "g": schema.StringAttribute{
@@ -77,16 +59,30 @@ Attributes: map[string]schema.Attribute{
 Default: stringdefault.StaticString("hey"),
 },
 
-},
-},
-"my_object": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var MyObjectAttributes = map[string]schema.Attribute{
 "field": schema.StringAttribute{
  Required: true,
 },
 
+}
+
+var NullableFieldsStructFAttributes = map[string]schema.Attribute{
+"a": schema.StringAttribute{
+ Required: true,
 },
+
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: StructAttributes,
+},
+"my_object": schema.SingleNestedAttribute{
+Required: true,
+Attributes: MyObjectAttributes,
 },
 "constant_ref": schema.StringAttribute{
  Required: true,
@@ -94,11 +90,6 @@ Default: stringdefault.StaticString("hey"),
 },
 "nullable_fields_struct_f": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"a": schema.StringAttribute{
- Required: true,
-},
-
-},
+Attributes: NullableFieldsStructFAttributes,
 },
 }

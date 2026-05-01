@@ -16,27 +16,24 @@ type ArrayOfRefs []SomeStruct
 
 type ArrayOfArrayOfNumbers types.List
 
+var SomeStructAttributes = map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
+},
+
+}
+
 var SpecAttributes = map[string]schema.Attribute{
 "array_of_strings": schema.ListAttribute{
  ElementType: types.StringType,
 },
 "some_struct": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+Attributes: SomeStructAttributes,
 },
 "array_of_refs": schema.ListNestedAttribute{
-NestedObject: schema.NestedAttributeObject {
-Attributes: map[string]schema.Attribute {
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+NestedObject: schema.NestedAttributeObject{
+Attributes: SomeStructAttributes,
 },
 },
 "array_of_array_of_numbers": schema.ListAttribute{

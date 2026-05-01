@@ -44,62 +44,96 @@ type GridLayoutWithoutValueOrRowsLayoutWithoutValue struct {
 RowsLayoutWithoutValue RowsLayoutWithoutValue `tfsdk:"RowsLayoutWithoutValue"`
  }
 
+var GridLayoutUsingValueAttributes = map[string]schema.Attribute{
+"kind": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("GridLayout"),
+},
+
+"grid_layout_property": schema.StringAttribute{
+ Required: true,
+},
+
+}
+
+var RowsLayoutUsingValueAttributes = map[string]schema.Attribute{
+"kind": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("RowsLayout"),
+},
+
+"rows_layout_property": schema.StringAttribute{
+ Required: true,
+},
+
+}
+
+var GridLayoutWithoutValueAttributes = map[string]schema.Attribute{
+"kind": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("GridLayout"),
+},
+
+"grid_layout_property": schema.StringAttribute{
+ Required: true,
+},
+
+}
+
+var RowsLayoutWithoutValueAttributes = map[string]schema.Attribute{
+"kind": schema.StringAttribute{
+ Required: true,
+Default: stringdefault.StaticString("RowsLayout"),
+},
+
+"rows_layout_property": schema.StringAttribute{
+ Required: true,
+},
+
+}
+
+var GridLayoutUsingValueOrRowsLayoutUsingValueAttributes = map[string]schema.Attribute{
+"grid_layout_using_value": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: GridLayoutUsingValueAttributes,
+},
+
+"rows_layout_using_value": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: RowsLayoutUsingValueAttributes,
+},
+
+}
+
+var GridLayoutWithoutValueOrRowsLayoutWithoutValueAttributes = map[string]schema.Attribute{
+"grid_layout_without_value": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: GridLayoutWithoutValueAttributes,
+},
+
+"rows_layout_without_value": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: RowsLayoutWithoutValueAttributes,
+},
+
+}
+
 var SpecAttributes = map[string]schema.Attribute{
 "grid_layout_using_value": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"kind": schema.StringAttribute{
- Required: true,
-Default: stringdefault.StaticString("GridLayout"),
-},
-
-"grid_layout_property": schema.StringAttribute{
- Required: true,
-},
-
-},
+Attributes: GridLayoutUsingValueAttributes,
 },
 "rows_layout_using_value": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"kind": schema.StringAttribute{
- Required: true,
-Default: stringdefault.StaticString("RowsLayout"),
-},
-
-"rows_layout_property": schema.StringAttribute{
- Required: true,
-},
-
-},
+Attributes: RowsLayoutUsingValueAttributes,
 },
 "grid_layout_without_value": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"kind": schema.StringAttribute{
- Required: true,
-Default: stringdefault.StaticString("GridLayout"),
-},
-
-"grid_layout_property": schema.StringAttribute{
- Required: true,
-},
-
-},
+Attributes: GridLayoutWithoutValueAttributes,
 },
 "rows_layout_without_value": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"kind": schema.StringAttribute{
- Required: true,
-Default: stringdefault.StaticString("RowsLayout"),
-},
-
-"rows_layout_property": schema.StringAttribute{
- Required: true,
-},
-
-},
+Attributes: RowsLayoutWithoutValueAttributes,
 },
 "grid_layout_kind_type": schema.StringAttribute{
  Required: true,

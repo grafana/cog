@@ -46,13 +46,7 @@ SomeOtherStruct SomeOtherStruct `tfsdk:"SomeOtherStruct"`
 YetAnotherStruct YetAnotherStruct `tfsdk:"YetAnotherStruct"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"string_or_null": schema.StringAttribute{
- Optional: true,
-},
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var SomeStructAttributes = map[string]schema.Attribute{
 "type": schema.StringAttribute{
  Required: true,
 Default: stringdefault.StaticString("some-struct"),
@@ -62,11 +56,9 @@ Default: stringdefault.StaticString("some-struct"),
  Required: true,
 },
 
-},
-},
-"some_other_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var SomeOtherStructAttributes = map[string]schema.Attribute{
 "type": schema.StringAttribute{
  Required: true,
 Default: stringdefault.StaticString("some-other-struct"),
@@ -76,11 +68,9 @@ Default: stringdefault.StaticString("some-other-struct"),
  Required: true,
 },
 
-},
-},
-"yet_another_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var YetAnotherStructAttributes = map[string]schema.Attribute{
 "type": schema.StringAttribute{
  Required: true,
 Default: stringdefault.StaticString("yet-another-struct"),
@@ -90,6 +80,63 @@ Default: stringdefault.StaticString("yet-another-struct"),
  Required: true,
 },
 
+}
+
+var StringOrBoolAttributes = map[string]schema.Attribute{
+"string": schema.StringAttribute{
+ Optional: true,
 },
+
+"bool": schema.BoolAttribute{
+ Optional: true,
+},
+
+}
+
+var BoolOrSomeStructAttributes = map[string]schema.Attribute{
+"bool": schema.BoolAttribute{
+ Optional: true,
+},
+
+"some_struct": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: SomeStructAttributes,
+},
+
+}
+
+var SomeStructOrSomeOtherStructOrYetAnotherStructAttributes = map[string]schema.Attribute{
+"some_struct": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: SomeStructAttributes,
+},
+
+"some_other_struct": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: SomeOtherStructAttributes,
+},
+
+"yet_another_struct": schema.SingleNestedAttribute{
+Optional: true,
+Attributes: YetAnotherStructAttributes,
+},
+
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"string_or_null": schema.StringAttribute{
+ Optional: true,
+},
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: SomeStructAttributes,
+},
+"some_other_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: SomeOtherStructAttributes,
+},
+"yet_another_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: YetAnotherStructAttributes,
 },
 }

@@ -13,23 +13,27 @@ type FieldConfig struct {
  TimeseriesFieldConfigOption types.String `tfsdk:"timeseries_field_config_option"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"options": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var OptionsAttributes = map[string]schema.Attribute{
 "timeseries_option": schema.StringAttribute{
  Required: true,
 },
 
-},
-},
-"field_config": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var FieldConfigAttributes = map[string]schema.Attribute{
 "timeseries_field_config_option": schema.StringAttribute{
  Required: true,
 },
 
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"options": schema.SingleNestedAttribute{
+Required: true,
+Attributes: OptionsAttributes,
 },
+"field_config": schema.SingleNestedAttribute{
+Required: true,
+Attributes: FieldConfigAttributes,
 },
 }
