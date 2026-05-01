@@ -11,6 +11,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/internal/jennies/csharp"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
@@ -307,6 +308,8 @@ func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 		switch {
 		case output.Go != nil:
 			outputs[golang.LanguageRef] = golang.New(*output.Go)
+		case output.CSharp != nil:
+			outputs[csharp.LanguageRef] = csharp.New(*output.CSharp)
 		case output.Java != nil:
 			outputs[java.LanguageRef] = java.New(*output.Java)
 		case output.JSONSchema != nil:
