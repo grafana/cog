@@ -1,0 +1,131 @@
+{{- /* Builder option assignment.
+       Drives constraint validation, nil-checks for nested parent
+       initialisation, builder-typed argument unfolding, and the
+       final write into `this.@internal.<path>`.
+*/ -}}
+{{- define "assignment" }}
+    {{- template "constraints" .Assignment.Constraints }}
+    {{- range .Assignment.NilChecks }}
+        {{- template "nil_check" . }}
+    {{- end }}
+
+    {{- template "assignment_setup" (dict "Assignment" .Assignment "Value" .Assignment.Value) }}
+
+    {{- $value := include "assignment_value" (dict "Assignment" .Assignment "IntoType" .Assignment.Path.Last.Type "Value" .Assignment.Value) -}}
+
+    {{- $preTmpl := print "pre_assignment_" .BuilderName "_" .OptionName }}
+    {{- includeIfExists $preTmpl (dict) -}}
+
+    {{- template "assignment_method" (dict "Method" .Assignment.Method "Path" .Assignment.Path "Value" $value) -}}
+
+    {{- $postTmpl := print "post_assignment_" .BuilderName "_" .OptionName }}
+    {{- includeIfExists $postTmpl (dict) -}}
+{{- end }}
+
+{{- /* Pre-assignment scratch work — declares envelope locals and
+       collects builder-typed arguments into their built form.
+*/ -}}
+{{- define "assignment_setup" }}
+    {{- with .Value.Envelope }}
+        {{- range .Values }}
+        {{- template "assignment_setup" (dict "Assignment" $.Assignment "Value" .Value) }}
+        {{- end }}
+
+        {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
+    {{- end }}
+    {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+        {{- $builtResultName := (print .Name "Resource") }}
+        {{- if or .Type.IsArray .Type.IsMap }}
+        {{- $builtResultName = (print .Name "Resources") }}
+        {{ .Type | formatType }} {{ $builtResultName | escapeVar | lowerCamelCase }} = {{ .Type | emptyValueForType }};
+        {{- end }}
+
+        {{- template "unfold_builders" (dict "Depth" 1 "InputType" .Type "OriginalInputVar" (.Name | escapeVar | lowerCamelCase) "InputVar" (.Name | escapeVar | lowerCamelCase) "AssignmentPath" $.Assignment.Path "ResultVar" ($builtResultName | escapeVar | lowerCamelCase)) }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- /* Renders the value being assigned (RHS), accounting for builder
+       unfolding, envelopes, and constant references.
+*/ -}}
+{{- define "assignment_value" }}
+    {{- if .Value.Argument }}
+        {{- with .Value.Argument }}
+        {{- if or (typeHasBuilder .Type) (resolvesToComposableSlot .Type) }}
+            {{- if or .Type.IsMap .Type.IsArray }}
+            {{- .Name | escapeVar | lowerCamelCase }}Resources
+            {{- else }}
+            {{- .Name | escapeVar | lowerCamelCase }}Resource
+            {{- end }}
+        {{- else }}
+            {{- .Name | escapeVar | lowerCamelCase }}
+        {{- end }}
+        {{- end }}
+    {{- else if .Value.Envelope }}
+        {{- with .Value.Envelope }}
+        {{- .Type | formatType | lowerCamelCase }}
+        {{- end }}
+    {{- else }}
+        {{- formatRefType .IntoType .Value.Constant }}
+    {{- end }}
+{{- end }}
+
+{{- define "value_envelope" }}
+    {{ $envelopeType := .Envelope.Type | formatType }}
+        {{- $envelopeType }} {{ $envelopeType | lowerCamelCase }} = new {{ $envelopeType }}();
+    {{- range .Envelope.Values }}
+        {{- $value := include "assignment_value" (dict "Assignment" $.Assignment "IntoType" .Path.Last.Type "Value" .Value) }}
+        {{ $envelopeType | lowerCamelCase }}.{{ (index .Path 0).Identifier | upperCamelCase }} = {{ $value }};
+    {{- end }}
+{{- end }}
+
+{{- /* Final write into the path. `direct` overwrites, `index` writes
+       through a [key]/index slot, `append` calls .Add(...).
+*/ -}}
+{{- define "assignment_method" }}
+        {{ $path := formatAssignmentPath "this.@internal" .Path }}
+        {{- if eq .Method "direct" }}{{ $path }} = {{ .Value }};{{ end }}
+        {{- if eq .Method "index" }}
+            {{- $index := .Path.Last.Index }}
+            {{- $path = formatAssignmentPath "this.@internal" .Path.RemoveLast }}
+            {{- $path }}[{{ $index | formatPathIndex }}] = {{ .Value }};
+        {{- end }}
+        {{- if and (eq .Method "index") (.Path.Last.Type.IsArray) }}{{ $path }} = {{ .Value }};{{ end }}
+        {{- if eq .Method "append" }}{{ $path }}.Add({{ .Value }});{{ end -}}
+{{- end }}
+
+{{- /* Recursively unfolds builder-typed arrays/maps into their built
+       counterparts so the underlying field can be assigned a plain
+       List<T>/Dictionary<…> rather than a list of builders.
+*/ -}}
+{{- define "unfold_builders" }}
+    {{- if .InputType.IsArray }}
+        foreach ({{ .InputType.AsArray.ValueType | formatBuilderFieldType }} r{{ .Depth }} in {{ .InputVar }})
+        {
+            {{- if .InputType.Array.ValueType.IsArray }}
+                {{ .InputType.Array.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = {{ .InputType.Array.ValueType | emptyValueForType }};
+
+                {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Array.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "r" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
+
+                {{ .ResultVar }}.Add({{ .OriginalInputVar }}Depth{{ .Depth }});
+            {{- else }}
+                {{ .InputType.AsArray.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = r{{ .Depth }}.Build();
+                {{ .ResultVar }}.Add({{ .OriginalInputVar }}Depth{{ .Depth }});
+            {{- end }}
+        }
+    {{- else if .InputType.IsMap }}
+        foreach (var entry{{ .Depth }} in {{ .InputVar }})
+        {
+            {{- if .InputType.Map.ValueType.IsArray }}
+                {{- template "unfold_builders" (dict "Depth" (add1 .Depth) "InputType" .InputType.Map.ValueType "OriginalInputVar" .OriginalInputVar "InputVar" (print "entry" .Depth) "AssignmentPath" $.AssignmentPath "ResultVar" (print .OriginalInputVar "Depth" .Depth)) }}
+                {{ .ResultVar }}[entry{{ .Depth }}.Key] = entry{{ .Depth }}.Value;
+            {{- else }}
+                {{ .InputType.Map.ValueType | formatType }} {{ .OriginalInputVar }}Depth{{ .Depth }} = entry{{ .Depth }}.Value.Build();
+                {{ .ResultVar }}[entry{{ .Depth }}.Key] = {{ .OriginalInputVar }}Depth{{ .Depth }};
+            {{- end }}
+        }
+    {{- else }}
+        {{ .InputType | formatType }} {{ .ResultVar }} = {{ .InputVar }}.Build();
+    {{- end }}
+{{- end }}

@@ -1,0 +1,30 @@
+{{- /* C# enum template — Phase 2/3.
+       String enums use [JsonStringEnumMemberName("…")] (.NET 9+) on
+       members and rely on [JsonConverter(typeof(
+       JsonStringEnumConverter<T>))] (passed in via EnumAttributes
+       when JSON marshalling is enabled) to round-trip the original
+       string payload. Integer enums use explicit numeric values.
+*/ -}}
+namespace {{ .Namespace }};
+{{ if .Imports }}
+{{ .Imports }}
+{{- end }}
+{{- range .Comments }}
+// {{ . }}
+{{- end }}
+{{- range .EnumAttributes }}
+{{ . }}
+{{- end }}
+public enum {{ .Name }}
+{
+    {{- range $i, $val := .Values }}
+    {{- if and $.IsString $.JSONEnabled }}
+    [JsonStringEnumMemberName({{ $val.RawValue | printf "%q" }})]
+    {{ $val.Name }}{{- if not (lastValueIndex $i $.Values) }},{{ end }}
+    {{- else if $.IsString }}
+    {{ $val.Name }}{{- if not (lastValueIndex $i $.Values) }},{{ end }}
+    {{- else }}
+    {{ $val.Name }} = {{ $val.RawValue }}{{- if not (lastValueIndex $i $.Values) }},{{ end }}
+    {{- end }}
+    {{- end }}
+}
