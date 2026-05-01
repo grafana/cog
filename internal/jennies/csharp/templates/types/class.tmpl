@@ -12,11 +12,17 @@ namespace {{ .Namespace }};
 {{- range .Comments }}
 // {{ . }}
 {{- end }}
+{{- range .ClassAttributes }}
+{{ . }}
+{{- end }}
 public class {{ .Name }}{{ if .Extends }} : {{ join ", " .Extends }}{{ end }}
 {
     {{- range .Fields }}
     {{- range .Comments }}
     // {{ . }}
+    {{- end }}
+    {{- range .Attributes }}
+    {{ . }}
     {{- end }}
     public {{ .Type }} {{ .Name }};
     {{- end }}

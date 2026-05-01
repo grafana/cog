@@ -1,6 +1,7 @@
 package csharp
 
 import (
+	"fmt"
 	"path/filepath"
 	"sort"
 
@@ -23,8 +24,9 @@ type RawTypes struct {
 	tmpl   *template.Template
 
 	// Reset per-file in genFilesForObject.
-	imports       *importMap
-	typeFormatter *typeFormatter
+	imports        *importMap
+	typeFormatter  *typeFormatter
+	jsonMarshaller jsonMarshaller
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -34,6 +36,7 @@ func (jenny RawTypes) JennyName() string {
 func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error) {
 	files := make(codejen.Files, 0)
 	jenny.typeFormatter = newTypeFormatter(context, jenny.config, nil)
+	jenny.jsonMarshaller = newJSONMarshaller(jenny.config)
 
 	for _, schema := range context.Schemas {
 		out, err := jenny.genFilesForSchema(schema)
@@ -122,7 +125,7 @@ func (jenny RawTypes) formatStruct(namespace string, object ast.Object) ([]byte,
 	jenny.typeFormatter = jenny.typeFormatter.withImports(jenny.imports)
 
 	fields := object.Type.AsStruct().Fields
-	cls := jenny.buildClassTemplate(namespace, formatObjectName(object.Name), object.Comments, nil, fields)
+	cls := jenny.buildClassTemplate(namespace, formatObjectName(object.Name), object.Comments, nil, fields, object)
 
 	return jenny.renderClass(cls)
 }
@@ -179,39 +182,66 @@ func (jenny RawTypes) formatIntersection(namespace string, object ast.Object) ([
 		}
 	}
 
-	cls := jenny.buildClassTemplate(namespace, formatObjectName(object.Name), object.Comments, extends, fields)
+	cls := jenny.buildClassTemplate(namespace, formatObjectName(object.Name), object.Comments, extends, fields, object)
 	return jenny.renderClass(cls)
 }
 
 // buildClassTemplate populates the template-facing classTemplate struct
 // from a struct's fields, generating the field declarations and the
 // two constructors' assignment lists.
-func (jenny RawTypes) buildClassTemplate(namespace string, name string, comments []string, extends []string, fields []ast.StructField) classTemplate {
+//
+// `object` is threaded through so the model can pick up
+// disjunction-derived hints (used to nullable-ify value-type scalars
+// and skip default initialization).
+func (jenny RawTypes) buildClassTemplate(namespace string, name string, comments []string, extends []string, fields []ast.StructField, object ast.Object) classTemplate {
 	clsFields := make([]classField, 0, len(fields))
 	defaults := make([]assignment, 0, len(fields))
 	args := make([]classArg, 0, len(fields))
 	argAssignments := make([]assignment, 0, len(fields))
 
+	isDisjunctionStruct := needsCustomConverter(object)
+	jsonEnabled := jenny.jsonMarshaller.enabled()
+	// Nullable value-type fields and the suppression of default
+	// assignments are only required when we'll emit a custom
+	// JsonConverter that relies on `null` as the branch sentinel. With
+	// JSON marshalling disabled we keep the plain POCO shape so the
+	// type stays usable as a regular DTO.
+	disjunctionPOCO := isDisjunctionStruct && jsonEnabled
+
 	for _, field := range fields {
 		fieldName := formatFieldName(field.Name)
 		argName := formatArgName(field.Name)
 		typeExpr := jenny.typeFormatter.formatFieldType(field.Type)
+		if disjunctionPOCO {
+			typeExpr = disjunctionFieldType(typeExpr, field.Type)
+		}
+
+		var attrs []string
+		if jsonEnabled {
+			if attr := jenny.jsonMarshaller.fieldPropertyAttribute(field); attr != "" {
+				attrs = append(attrs, attr)
+			}
+		}
 
 		clsFields = append(clsFields, classField{
-			Name:     fieldName,
-			Type:     typeExpr,
-			Comments: field.Comments,
+			Name:       fieldName,
+			Type:       typeExpr,
+			Comments:   field.Comments,
+			Attributes: attrs,
 		})
 
-		// Default-constructor assignment: explicit default, or empty value.
-		var defaultExpr string
-		if field.Type.Default != nil {
-			defaultExpr = jenny.formatDefault(field.Type, field.Type.Default)
-		} else if field.Required && !field.Type.Nullable {
-			defaultExpr = jenny.typeFormatter.emptyValueForType(field.Type)
-		}
-		if defaultExpr != "" {
-			defaults = append(defaults, assignment{Name: fieldName, Value: defaultExpr})
+		// Disjunction-derived structs leave fields un-initialised so
+		// that `null` is the unambiguous "branch not selected" marker.
+		if !disjunctionPOCO {
+			var defaultExpr string
+			if field.Type.Default != nil {
+				defaultExpr = jenny.formatDefault(field.Type, field.Type.Default)
+			} else if field.Required && !field.Type.Nullable {
+				defaultExpr = jenny.typeFormatter.emptyValueForType(field.Type)
+			}
+			if defaultExpr != "" {
+				defaults = append(defaults, assignment{Name: fieldName, Value: defaultExpr})
+			}
 		}
 
 		args = append(args, classArg{Name: argName, Type: typeExpr})
@@ -221,11 +251,24 @@ func (jenny RawTypes) buildClassTemplate(namespace string, name string, comments
 		})
 	}
 
+	var classAttrs []string
+	if jsonEnabled {
+		if attr := jenny.jsonMarshaller.classConverterAttribute(object); attr != "" {
+			classAttrs = append(classAttrs, attr)
+			jenny.imports.addNamespace("System.Text.Json.Serialization")
+		}
+		if len(clsFields) > 0 {
+			// At least one [JsonPropertyName] attribute will be emitted.
+			jenny.imports.addNamespace("System.Text.Json.Serialization")
+		}
+	}
+
 	return classTemplate{
 		Namespace:          namespace,
 		Name:               name,
 		Imports:            jenny.imports,
 		Comments:           comments,
+		ClassAttributes:    classAttrs,
 		Extends:            extends,
 		Fields:             clsFields,
 		DefaultAssignments: defaults,
@@ -268,13 +311,24 @@ func (jenny RawTypes) formatEnum(namespace string, object ast.Object) ([]byte, e
 		})
 	}
 
+	var enumImports fmt.Stringer
+	var enumAttrs []string
+	if isString && jenny.jsonMarshaller.enabled() {
+		im := newImportMap(jenny.config.namespaceRoot(), namespace)
+		im.addNamespace("System.Text.Json.Serialization")
+		enumImports = im
+		enumAttrs = append(enumAttrs, jenny.jsonMarshaller.enumConverterAttribute(formatObjectName(object.Name)))
+	}
+
 	data := enumTemplate{
-		Namespace:       namespace,
-		Name:            formatObjectName(object.Name),
-		Comments:        object.Comments,
-		IsString:        isString,
-		NeedsEnumMember: isString,
-		Values:          values,
+		Namespace:      namespace,
+		Name:           formatObjectName(object.Name),
+		Comments:       object.Comments,
+		IsString:       isString,
+		Imports:        enumImports,
+		EnumAttributes: enumAttrs,
+		JSONEnabled:    jenny.jsonMarshaller.enabled(),
+		Values:         values,
 	}
 
 	return jenny.tmpl.RenderAsBytes("types/enum.tmpl", data)

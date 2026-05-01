@@ -9,7 +9,7 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
-//go:embed templates/types/*.tmpl
+//go:embed templates/types/*.tmpl templates/marshalling/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 
@@ -59,6 +59,9 @@ type classTemplate struct {
 	Name               string
 	Imports            fmt.Stringer
 	Comments           []string
+	// ClassAttributes are emitted on lines preceding the class
+	// declaration (e.g. `[JsonConverter(typeof(FooJsonConverter))]`).
+	ClassAttributes    []string
 	Extends            []string
 	Fields             []classField
 	DefaultAssignments []assignment
@@ -75,6 +78,9 @@ type classField struct {
 	Name     string
 	Type     string
 	Comments []string
+	// Attributes are emitted on lines preceding the field declaration
+	// (e.g. `[JsonPropertyName("origName")]`).
+	Attributes []string
 }
 
 type classArg struct {
@@ -90,12 +96,23 @@ type assignment struct {
 
 // enumTemplate is the model bound to templates/types/enum.tmpl.
 type enumTemplate struct {
-	Namespace       string
-	Name            string
-	Comments        []string
-	IsString        bool
-	NeedsEnumMember bool
-	Values          []EnumValue
+	Namespace string
+	Name      string
+	Comments  []string
+	IsString  bool
+	// Imports is rendered between the namespace declaration and the
+	// enum declaration. Pre-built so we can include the
+	// System.Text.Json.Serialization namespace when JSON-marshalling
+	// is enabled.
+	Imports fmt.Stringer
+	// EnumAttributes are emitted on lines preceding the enum
+	// declaration (e.g. `[JsonConverter(typeof(JsonStringEnumConverter<X>))]`).
+	EnumAttributes []string
+	// JSONEnabled mirrors Config.GenerateJSONConverters and controls
+	// whether per-member [JsonStringEnumMemberName] attributes are
+	// emitted on string enums.
+	JSONEnabled bool
+	Values      []EnumValue
 }
 
 // EnumValue is exported so it can be used by the lastValueIndex helper.
@@ -103,10 +120,10 @@ type EnumValue struct {
 	// Name is the C# member identifier (PascalCase, escaped).
 	Name string
 	// RawValue is the underlying schema value:
-	//   - for integer enums: the int64 itself, formatted as `{n}` in
-	//     templates;
+	//   - for integer enums: a pre-formatted literal string;
 	//   - for string enums: the original string, used inside
-	//     [EnumMember(Value = "…")].
+	//     [JsonStringEnumMemberName("…")] when JSON-marshalling is
+	//     enabled (and as a comment otherwise).
 	RawValue any
 }
 
