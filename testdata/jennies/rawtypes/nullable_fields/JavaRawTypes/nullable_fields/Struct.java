@@ -1,5 +1,6 @@
 package nullable_fields;
 
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,5 +25,25 @@ public class Struct {
         this.e = e;
         this.f = f;
         this.g = Constants.ConstantRef;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Struct)) return false;
+        Struct o = (Struct) other;
+        if (!Objects.equals(this.a, o.a)) return false;
+        if (!Objects.equals(this.b, o.b)) return false;
+        if (!Objects.equals(this.c, o.c)) return false;
+        if (!Objects.equals(this.d, o.d)) return false;
+        if (!Objects.equals(this.e, o.e)) return false;
+        if (!Objects.equals(this.f, o.f)) return false;
+        if (!Objects.equals(this.g, o.g)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.a, this.b, this.c, this.d, this.e, this.f, this.g);
     }
 }

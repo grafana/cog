@@ -39,3 +39,18 @@ class SomeStruct:
             args["field_int32"] = data["FieldInt32"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeStruct):
+            return False
+        if self.field_bool != other.field_bool:
+            return False
+        if self.field_string != other.field_string:
+            return False
+        if self.field_string_with_constant_value != other.field_string_with_constant_value:
+            return False
+        if self.field_float32 != other.field_float32:
+            return False
+        if self.field_int32 != other.field_int32:
+            return False
+        return True

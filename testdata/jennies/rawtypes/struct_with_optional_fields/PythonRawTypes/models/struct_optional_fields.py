@@ -47,6 +47,21 @@ class SomeStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeStruct):
+            return False
+        if self.field_ref != other.field_ref:
+            return False
+        if self.field_string != other.field_string:
+            return False
+        if self.operator != other.operator:
+            return False
+        if self.field_array_of_strings != other.field_array_of_strings:
+            return False
+        if self.field_anonymous_struct != other.field_anonymous_struct:
+            return False
+        return True
+
 
 class SomeOtherStruct:
     field_any: object
@@ -69,6 +84,13 @@ class SomeOtherStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeOtherStruct):
+            return False
+        if self.field_any != other.field_any:
+            return False
+        return True
+
 
 class StructOptionalFieldsSomeStructFieldAnonymousStruct:
     field_any: object
@@ -90,6 +112,13 @@ class StructOptionalFieldsSomeStructFieldAnonymousStruct:
             args["field_any"] = data["FieldAny"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, StructOptionalFieldsSomeStructFieldAnonymousStruct):
+            return False
+        if self.field_any != other.field_any:
+            return False
+        return True
 
 
 

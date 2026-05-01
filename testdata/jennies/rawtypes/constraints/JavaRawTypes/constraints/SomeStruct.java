@@ -1,5 +1,6 @@
 package constraints;
 
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -44,5 +45,30 @@ public class SomeStruct {
         this.minMaxList = minMaxList;
         this.uniqueList = uniqueList;
         this.fullConstraintList = fullConstraintList;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof SomeStruct)) return false;
+        SomeStruct o = (SomeStruct) other;
+        if (!Objects.equals(this.id, o.id)) return false;
+        if (!Objects.equals(this.maybeId, o.maybeId)) return false;
+        if (!Objects.equals(this.greaterThanZero, o.greaterThanZero)) return false;
+        if (!Objects.equals(this.negative, o.negative)) return false;
+        if (!Objects.equals(this.title, o.title)) return false;
+        if (!Objects.equals(this.labels, o.labels)) return false;
+        if (!Objects.equals(this.tags, o.tags)) return false;
+        if (!Objects.equals(this.regex, o.regex)) return false;
+        if (!Objects.equals(this.negativeRegex, o.negativeRegex)) return false;
+        if (!Objects.equals(this.minMaxList, o.minMaxList)) return false;
+        if (!Objects.equals(this.uniqueList, o.uniqueList)) return false;
+        if (!Objects.equals(this.fullConstraintList, o.fullConstraintList)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id, this.maybeId, this.greaterThanZero, this.negative, this.title, this.labels, this.tags, this.regex, this.negativeRegex, this.minMaxList, this.uniqueList, this.fullConstraintList);
     }
 }

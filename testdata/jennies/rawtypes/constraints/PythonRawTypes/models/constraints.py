@@ -77,3 +77,32 @@ class SomeStruct:
             args["full_constraint_list"] = data["fullConstraintList"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeStruct):
+            return False
+        if self.id_val != other.id_val:
+            return False
+        if self.maybe_id != other.maybe_id:
+            return False
+        if self.greater_than_zero != other.greater_than_zero:
+            return False
+        if self.negative != other.negative:
+            return False
+        if self.title != other.title:
+            return False
+        if self.labels != other.labels:
+            return False
+        if self.tags != other.tags:
+            return False
+        if self.regex != other.regex:
+            return False
+        if self.negative_regex != other.negative_regex:
+            return False
+        if self.min_max_list != other.min_max_list:
+            return False
+        if self.unique_list != other.unique_list:
+            return False
+        if self.full_constraint_list != other.full_constraint_list:
+            return False
+        return True

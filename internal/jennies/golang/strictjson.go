@@ -106,6 +106,12 @@ func (jenny strictJSONUnmarshal) renderUnmarshal(context languages.Context, obj 
 		})
 	}
 
+	if obj.Type.IsUndiscriminatedDisjunctionOfRefs() {
+		return jenny.tmpl.Render("types/disjunction_of_refs_without_discriminator.strict.json_unmarshal.tmpl", map[string]any{
+			"def": obj,
+		})
+	}
+
 	if obj.Type.IsDisjunctionOfAnyKind() {
 		return jenny.tmpl.Render("types/disjunction_of_scalars_and_refs.strict.json_unmarshal.tmpl", map[string]any{
 			"def": obj,

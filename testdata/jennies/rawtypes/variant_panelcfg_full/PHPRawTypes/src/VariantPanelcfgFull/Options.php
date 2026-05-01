@@ -14,6 +14,19 @@ class Options implements \JsonSerializable
         $this->timeseriesOption = $timeseriesOption ?: "";
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->timeseriesOption !== $other->timeseriesOption) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

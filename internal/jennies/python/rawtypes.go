@@ -109,6 +109,14 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 				}
 				buffer.WriteString(fromJSON)
 			}
+
+			if jenny.config.GenerateEqual {
+				eqMethod := newEqualityMethods().generateForObject(object)
+				if eqMethod != "" {
+					buffer.WriteString("\n\n")
+					buffer.WriteString(eqMethod)
+				}
+			}
 		}
 
 		customMethodsBlock := template.CustomObjectMethodsBlock(object)

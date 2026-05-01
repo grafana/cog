@@ -73,6 +73,68 @@ class SomeStruct implements \JsonSerializable
         $this->fullConstraintList = $fullConstraintList ?: [];
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->id !== $other->id) {
+            return false;
+        }
+    
+        if (($this->maybeId === null) !== ($other->maybeId === null)) {
+            return false;
+        }
+        if ($this->maybeId !== null) {
+            if ($this->maybeId !== $other->maybeId) {
+                return false;
+            }
+        }
+    
+        if ($this->greaterThanZero !== $other->greaterThanZero) {
+            return false;
+        }
+    
+        if ($this->negative !== $other->negative) {
+            return false;
+        }
+    
+        if ($this->title !== $other->title) {
+            return false;
+        }
+    
+        if ($this->labels != $other->labels) {
+            return false;
+        }
+    
+        if ($this->tags != $other->tags) {
+            return false;
+        }
+    
+        if ($this->regex !== $other->regex) {
+            return false;
+        }
+    
+        if ($this->negativeRegex !== $other->negativeRegex) {
+            return false;
+        }
+    
+        if ($this->minMaxList != $other->minMaxList) {
+            return false;
+        }
+    
+        if ($this->uniqueList != $other->uniqueList) {
+            return false;
+        }
+    
+        if ($this->fullConstraintList != $other->fullConstraintList) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

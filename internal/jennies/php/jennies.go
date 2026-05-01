@@ -21,6 +21,9 @@ type Config struct {
 
 	NamespaceRoot string `yaml:"namespace_root"`
 
+	// GenerateEqual controls the generation of `equals()` methods on types.
+	GenerateEqual bool `yaml:"generate_equal"`
+
 	// GenerateJSONMarshaller controls the generation of `fromArray()` and
 	// `jsonSerialize()` methods on types.
 	GenerateJSONMarshaller bool `yaml:"generate_json_marshaller"`
@@ -164,6 +167,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.FlattenDisjunctions{},
 		&compiler.DisjunctionInferMapping{},
 		&compiler.UndiscriminatedDisjunctionToAny{},
+		&compiler.RemoveIntersections{},
 		&compiler.InlineObjectsWithTypes{
 			InlineTypes: []ast.Kind{ast.KindScalar, ast.KindArray, ast.KindMap, ast.KindDisjunction},
 		},

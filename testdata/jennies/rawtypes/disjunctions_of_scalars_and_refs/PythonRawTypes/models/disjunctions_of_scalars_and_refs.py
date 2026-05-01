@@ -25,6 +25,13 @@ class MyRefA:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MyRefA):
+            return False
+        if self.foo != other.foo:
+            return False
+        return True
+
 
 class MyRefB:
     bar: int
@@ -46,6 +53,13 @@ class MyRefB:
             args["bar"] = data["bar"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MyRefB):
+            return False
+        if self.bar != other.bar:
+            return False
+        return True
 
 
 

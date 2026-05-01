@@ -1,0 +1,48 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "disjunctions_of_refs_without_discriminator",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "DisjunctionWithoutDiscriminator": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TypeA"
+          },
+          {
+            "$ref": "#/components/schemas/TypeB"
+          }
+        ]
+      },
+      "TypeA": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fieldA"
+        ],
+        "properties": {
+          "fieldA": {
+            "type": "string"
+          }
+        }
+      },
+      "TypeB": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fieldB"
+        ],
+        "properties": {
+          "fieldB": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

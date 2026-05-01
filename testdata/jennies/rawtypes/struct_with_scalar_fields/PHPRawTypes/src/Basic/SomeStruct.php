@@ -81,6 +81,75 @@ class SomeStruct implements \JsonSerializable
         $this->fieldInt64 = $fieldInt64 ?: 0;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->fieldAny !== $other->fieldAny) {
+            return false;
+        }
+    
+        if ($this->fieldBool !== $other->fieldBool) {
+            return false;
+        }
+    
+        if ($this->fieldBytes !== $other->fieldBytes) {
+            return false;
+        }
+    
+        if ($this->fieldString !== $other->fieldString) {
+            return false;
+        }
+    
+        if ($this->fieldStringWithConstantValue !== $other->fieldStringWithConstantValue) {
+            return false;
+        }
+    
+        if ($this->fieldFloat32 !== $other->fieldFloat32) {
+            return false;
+        }
+    
+        if ($this->fieldFloat64 !== $other->fieldFloat64) {
+            return false;
+        }
+    
+        if ($this->fieldUint8 !== $other->fieldUint8) {
+            return false;
+        }
+    
+        if ($this->fieldUint16 !== $other->fieldUint16) {
+            return false;
+        }
+    
+        if ($this->fieldUint32 !== $other->fieldUint32) {
+            return false;
+        }
+    
+        if ($this->fieldUint64 !== $other->fieldUint64) {
+            return false;
+        }
+    
+        if ($this->fieldInt8 !== $other->fieldInt8) {
+            return false;
+        }
+    
+        if ($this->fieldInt16 !== $other->fieldInt16) {
+            return false;
+        }
+    
+        if ($this->fieldInt32 !== $other->fieldInt32) {
+            return false;
+        }
+    
+        if ($this->fieldInt64 !== $other->fieldInt64) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

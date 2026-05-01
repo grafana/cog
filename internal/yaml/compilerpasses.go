@@ -36,6 +36,7 @@ type CompilerPass struct {
 	DisjunctionToType                       *DisjunctionToType                       `yaml:"disjunction_to_type"`
 	DisjunctionOfAnonymousStructsToExplicit *DisjunctionOfAnonymousStructsToExplicit `yaml:"disjunction_of_anonymous_structs_to_explicit"`
 	DisjunctionInferMapping                 *DisjunctionInferMapping                 `yaml:"disjunction_infer_mapping"`
+	UndiscriminatedDisjunctionToAny         *UndiscriminatedDisjunctionToAny         `yaml:"undiscriminated_disjunction_to_any"`
 	DisjunctionWithConstantToDefault        *DisjunctionWithConstantToDefault        `yaml:"disjunction_with_constant_to_default"`
 }
 
@@ -119,6 +120,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.DisjunctionInferMapping != nil {
 		return pass.DisjunctionInferMapping.AsCompilerPass()
+	}
+	if pass.UndiscriminatedDisjunctionToAny != nil {
+		return pass.UndiscriminatedDisjunctionToAny.AsCompilerPass()
 	}
 	if pass.DisjunctionWithConstantToDefault != nil {
 		return pass.DisjunctionWithConstantToDefault.AsCompilerPass()
@@ -465,6 +469,13 @@ type DisjunctionInferMapping struct {
 
 func (pass DisjunctionInferMapping) AsCompilerPass() (*compiler.DisjunctionInferMapping, error) {
 	return &compiler.DisjunctionInferMapping{}, nil
+}
+
+type UndiscriminatedDisjunctionToAny struct {
+}
+
+func (pass UndiscriminatedDisjunctionToAny) AsCompilerPass() (*compiler.UndiscriminatedDisjunctionToAny, error) {
+	return &compiler.UndiscriminatedDisjunctionToAny{}, nil
 }
 
 type DisjunctionWithConstantToDefault struct {

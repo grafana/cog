@@ -25,6 +25,27 @@ class DefaultsStructComplexField implements \JsonSerializable
         $this->array = $array ?: [];
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->uid !== $other->uid) {
+            return false;
+        }
+    
+        if (!$this->nested->equals($other->nested)) {
+            return false;
+        }
+    
+        if ($this->array != $other->array) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */
