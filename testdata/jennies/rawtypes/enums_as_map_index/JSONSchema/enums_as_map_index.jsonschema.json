@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "StringEnum": {
+      "enum": [
+        "a",
+        "b",
+        "c"
+      ],
+      "type": "string"
+    },
+    "StringEnumWithDefault": {
+      "enum": [
+        "a",
+        "b",
+        "c"
+      ],
+      "type": "string"
+    },
+    "SomeStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "SomeStructWithDefaultEnum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
