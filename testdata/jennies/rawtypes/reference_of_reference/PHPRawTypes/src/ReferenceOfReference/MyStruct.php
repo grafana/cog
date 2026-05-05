@@ -14,6 +14,24 @@ class MyStruct implements \JsonSerializable
         $this->field = $field;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if (($this->field === null) !== ($other->field === null)) {
+            return false;
+        }
+        if ($this->field !== null) {
+            if (!$this->field->equals($other->field)) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

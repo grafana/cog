@@ -14,6 +14,24 @@ class FieldConfigSource implements \JsonSerializable
         $this->defaults = $defaults;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if (($this->defaults === null) !== ($other->defaults === null)) {
+            return false;
+        }
+        if ($this->defaults !== null) {
+            if (!$this->defaults->equals($other->defaults)) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

@@ -40,6 +40,9 @@ type Config struct {
 	// rely on the runtime to function.
 	SkipRuntime bool `yaml:"skip_runtime"`
 
+	// GenerateEqual controls the generation of `equals()` and `hashCode()` methods on types.
+	GenerateEqual bool `yaml:"generate_equal"`
+
 	// GenerateJSONMarshaller controls the generation of `MarshalJSON()` and
 	// `UnmarshalJSON()` methods on types.
 	GenerateJSONMarshaller bool `yaml:"generate_json_marshaller"`

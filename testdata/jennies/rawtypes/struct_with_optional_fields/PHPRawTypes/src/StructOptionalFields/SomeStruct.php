@@ -33,6 +33,60 @@ class SomeStruct implements \JsonSerializable
         $this->fieldAnonymousStruct = $fieldAnonymousStruct;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if (($this->fieldRef === null) !== ($other->fieldRef === null)) {
+            return false;
+        }
+        if ($this->fieldRef !== null) {
+            if (!$this->fieldRef->equals($other->fieldRef)) {
+                return false;
+            }
+        }
+    
+        if (($this->fieldString === null) !== ($other->fieldString === null)) {
+            return false;
+        }
+        if ($this->fieldString !== null) {
+            if ($this->fieldString !== $other->fieldString) {
+                return false;
+            }
+        }
+    
+        if (($this->operator === null) !== ($other->operator === null)) {
+            return false;
+        }
+        if ($this->operator !== null) {
+            if ($this->operator !== $other->operator) {
+                return false;
+            }
+        }
+    
+        if (($this->fieldArrayOfStrings === null) !== ($other->fieldArrayOfStrings === null)) {
+            return false;
+        }
+        if ($this->fieldArrayOfStrings !== null) {
+            if ($this->fieldArrayOfStrings != $other->fieldArrayOfStrings) {
+                return false;
+            }
+        }
+    
+        if (($this->fieldAnonymousStruct === null) !== ($other->fieldAnonymousStruct === null)) {
+            return false;
+        }
+        if ($this->fieldAnonymousStruct !== null) {
+            if (!$this->fieldAnonymousStruct->equals($other->fieldAnonymousStruct)) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

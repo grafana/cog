@@ -18,6 +18,23 @@ class DefaultsStructPartialComplexField implements \JsonSerializable
         $this->intVal = $intVal ?: 0;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->uid !== $other->uid) {
+            return false;
+        }
+    
+        if ($this->intVal !== $other->intVal) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

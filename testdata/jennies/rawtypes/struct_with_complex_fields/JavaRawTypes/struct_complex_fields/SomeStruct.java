@@ -1,5 +1,6 @@
 package struct_complex_fields;
 
+import java.util.Objects;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,5 +37,27 @@ public class SomeStruct {
         this.fieldMapOfStringToString = fieldMapOfStringToString;
         this.fieldAnonymousStruct = fieldAnonymousStruct;
         this.fieldRefToConstant = fieldRefToConstant;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof SomeStruct)) return false;
+        SomeStruct o = (SomeStruct) other;
+        if (!Objects.equals(this.fieldRef, o.fieldRef)) return false;
+        if (!Objects.equals(this.fieldDisjunctionOfScalars, o.fieldDisjunctionOfScalars)) return false;
+        if (!Objects.equals(this.fieldMixedDisjunction, o.fieldMixedDisjunction)) return false;
+        if (!Objects.equals(this.fieldDisjunctionWithNull, o.fieldDisjunctionWithNull)) return false;
+        if (!Objects.equals(this.operator, o.operator)) return false;
+        if (!Objects.equals(this.fieldArrayOfStrings, o.fieldArrayOfStrings)) return false;
+        if (!Objects.equals(this.fieldMapOfStringToString, o.fieldMapOfStringToString)) return false;
+        if (!Objects.equals(this.fieldAnonymousStruct, o.fieldAnonymousStruct)) return false;
+        if (!Objects.equals(this.fieldRefToConstant, o.fieldRefToConstant)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.fieldRef, this.fieldDisjunctionOfScalars, this.fieldMixedDisjunction, this.fieldDisjunctionWithNull, this.operator, this.fieldArrayOfStrings, this.fieldMapOfStringToString, this.fieldAnonymousStruct, this.fieldRefToConstant);
     }
 }

@@ -14,6 +14,28 @@ class StructA implements \JsonSerializable
         $this->other = \Grafana\Foundation\ConstantReferences\Enum::valueA();
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->myEnum !== $other->myEnum) {
+            return false;
+        }
+    
+        if (($this->other === null) !== ($other->other === null)) {
+            return false;
+        }
+        if ($this->other !== null) {
+            if ($this->other !== $other->other) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

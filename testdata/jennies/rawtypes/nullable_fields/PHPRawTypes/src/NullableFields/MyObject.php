@@ -14,6 +14,19 @@ class MyObject implements \JsonSerializable
         $this->field = $field ?: "";
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->field !== $other->field) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

@@ -51,6 +51,25 @@ class Struct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Struct):
+            return False
+        if self.a != other.a:
+            return False
+        if self.b != other.b:
+            return False
+        if self.c != other.c:
+            return False
+        if self.d != other.d:
+            return False
+        if self.e != other.e:
+            return False
+        if self.f != other.f:
+            return False
+        if self.g != other.g:
+            return False
+        return True
+
 
 class MyObject:
     field: str
@@ -72,6 +91,13 @@ class MyObject:
             args["field"] = data["field"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MyObject):
+            return False
+        if self.field != other.field:
+            return False
+        return True
 
 
 ConstantRef: typing.Literal["hey"] = "hey"
@@ -97,6 +123,13 @@ class NullableFieldsStructF:
             args["a"] = data["a"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, NullableFieldsStructF):
+            return False
+        if self.a != other.a:
+            return False
+        return True
 
 
 

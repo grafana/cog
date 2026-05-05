@@ -21,6 +21,33 @@ class FieldConfig implements \JsonSerializable
         $this->custom = $custom;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if (($this->unit === null) !== ($other->unit === null)) {
+            return false;
+        }
+        if ($this->unit !== null) {
+            if ($this->unit !== $other->unit) {
+                return false;
+            }
+        }
+    
+        if (($this->custom === null) !== ($other->custom === null)) {
+            return false;
+        }
+        if ($this->custom !== null) {
+            if ($this->custom !== $other->custom) {
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

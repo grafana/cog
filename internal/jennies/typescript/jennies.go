@@ -19,6 +19,9 @@ type Config struct {
 	// If left undefined, `src` is used as a default prefix.
 	PathPrefix *string `yaml:"path_prefix"`
 
+	// GenerateEqual controls the generation of `equalsTypeName()` functions for types.
+	GenerateEqual bool `yaml:"generate_equal"`
+
 	// SkipRuntime disables runtime-related code generation when enabled.
 	// Note: builders can NOT be generated with this flag turned on, as they
 	// rely on the runtime to function.

@@ -28,3 +28,12 @@ class Query(cogvariants.Dataquery):
             args["instant"] = data["instant"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Query):
+            return False
+        if self.expr != other.expr:
+            return False
+        if self.instant != other.instant:
+            return False
+        return True

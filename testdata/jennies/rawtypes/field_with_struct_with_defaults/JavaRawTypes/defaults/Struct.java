@@ -1,5 +1,6 @@
 package defaults;
 
+import java.util.Objects;
 
 public class Struct {
     public NestedStruct allFields;
@@ -20,5 +21,23 @@ public class Struct {
         this.emptyFields = emptyFields;
         this.complexField = complexField;
         this.partialComplexField = partialComplexField;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Struct)) return false;
+        Struct o = (Struct) other;
+        if (!Objects.equals(this.allFields, o.allFields)) return false;
+        if (!Objects.equals(this.partialFields, o.partialFields)) return false;
+        if (!Objects.equals(this.emptyFields, o.emptyFields)) return false;
+        if (!Objects.equals(this.complexField, o.complexField)) return false;
+        if (!Objects.equals(this.partialComplexField, o.partialComplexField)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.allFields, this.partialFields, this.emptyFields, this.complexField, this.partialComplexField);
     }
 }

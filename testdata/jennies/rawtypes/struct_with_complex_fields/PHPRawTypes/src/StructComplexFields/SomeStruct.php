@@ -61,6 +61,56 @@ class SomeStruct implements \JsonSerializable
         $this->fieldRefToConstant = $fieldRefToConstant ?: \Grafana\Foundation\StructComplexFields\ConnectionPath;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if (!$this->fieldRef->equals($other->fieldRef)) {
+            return false;
+        }
+    
+        if ($this->fieldDisjunctionOfScalars !== $other->fieldDisjunctionOfScalars) {
+            return false;
+        }
+    
+        if ($this->fieldMixedDisjunction !== $other->fieldMixedDisjunction) {
+            return false;
+        }
+    
+        if (($this->fieldDisjunctionWithNull === null) !== ($other->fieldDisjunctionWithNull === null)) {
+            return false;
+        }
+        if ($this->fieldDisjunctionWithNull !== null) {
+            if ($this->fieldDisjunctionWithNull !== $other->fieldDisjunctionWithNull) {
+                return false;
+            }
+        }
+    
+        if ($this->operator !== $other->operator) {
+            return false;
+        }
+    
+        if ($this->fieldArrayOfStrings != $other->fieldArrayOfStrings) {
+            return false;
+        }
+    
+        if ($this->fieldMapOfStringToString != $other->fieldMapOfStringToString) {
+            return false;
+        }
+    
+        if (!$this->fieldAnonymousStruct->equals($other->fieldAnonymousStruct)) {
+            return false;
+        }
+    
+        if ($this->fieldRefToConstant !== $other->fieldRefToConstant) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

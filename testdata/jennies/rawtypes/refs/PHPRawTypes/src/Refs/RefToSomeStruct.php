@@ -17,6 +17,19 @@ class RefToSomeStruct implements \JsonSerializable
         $this->fieldAny = $fieldAny ?: null;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->fieldAny !== $other->fieldAny) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

@@ -27,6 +27,15 @@ class NestedStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, NestedStruct):
+            return False
+        if self.string_val != other.string_val:
+            return False
+        if self.int_val != other.int_val:
+            return False
+        return True
+
 
 class Struct:
     all_fields: 'NestedStruct'
@@ -69,6 +78,21 @@ class Struct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Struct):
+            return False
+        if self.all_fields != other.all_fields:
+            return False
+        if self.partial_fields != other.partial_fields:
+            return False
+        if self.empty_fields != other.empty_fields:
+            return False
+        if self.complex_field != other.complex_field:
+            return False
+        if self.partial_complex_field != other.partial_complex_field:
+            return False
+        return True
+
 
 class DefaultsStructComplexFieldNested:
     nested_val: str
@@ -90,6 +114,13 @@ class DefaultsStructComplexFieldNested:
             args["nested_val"] = data["nestedVal"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DefaultsStructComplexFieldNested):
+            return False
+        if self.nested_val != other.nested_val:
+            return False
+        return True
 
 
 class DefaultsStructComplexField:
@@ -123,6 +154,17 @@ class DefaultsStructComplexField:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DefaultsStructComplexField):
+            return False
+        if self.uid != other.uid:
+            return False
+        if self.nested != other.nested:
+            return False
+        if self.array != other.array:
+            return False
+        return True
+
 
 class DefaultsStructPartialComplexField:
     uid: str
@@ -149,6 +191,15 @@ class DefaultsStructPartialComplexField:
             args["int_val"] = data["intVal"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DefaultsStructPartialComplexField):
+            return False
+        if self.uid != other.uid:
+            return False
+        if self.int_val != other.int_val:
+            return False
+        return True
 
 
 

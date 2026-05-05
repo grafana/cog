@@ -23,6 +23,13 @@ class MyStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, MyStruct):
+            return False
+        if self.field != other.field:
+            return False
+        return True
+
 
 OtherStruct: typing.TypeAlias = 'AnotherStruct'
 
@@ -47,6 +54,13 @@ class AnotherStruct:
             args["a"] = data["a"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, AnotherStruct):
+            return False
+        if self.a != other.a:
+            return False
+        return True
 
 
 

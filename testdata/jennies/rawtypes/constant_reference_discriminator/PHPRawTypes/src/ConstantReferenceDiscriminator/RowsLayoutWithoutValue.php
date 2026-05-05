@@ -17,6 +17,23 @@ class RowsLayoutWithoutValue implements \JsonSerializable
         $this->rowsLayoutProperty = $rowsLayoutProperty ?: "";
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->kind !== $other->kind) {
+            return false;
+        }
+    
+        if ($this->rowsLayoutProperty !== $other->rowsLayoutProperty) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

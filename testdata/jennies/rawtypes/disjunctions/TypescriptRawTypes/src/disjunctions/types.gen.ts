@@ -17,6 +17,13 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	FieldAny: {},
 });
 
+// equalsSomeStruct tests the equality of two `SomeStruct` objects.
+export const equalsSomeStruct = (a: SomeStruct, b: SomeStruct): boolean => {
+	if (a.type !== b.type) return false;
+	if (JSON.stringify(a.fieldAny) !== JSON.stringify(b.fieldAny)) return false;
+	return true;
+};
+
 export type BoolOrRef = boolean | SomeStruct;
 
 export const defaultBoolOrRef = (): BoolOrRef => (false);
@@ -31,6 +38,13 @@ export const defaultSomeOtherStruct = (): SomeOtherStruct => ({
 	Foo: "",
 });
 
+// equalsSomeOtherStruct tests the equality of two `SomeOtherStruct` objects.
+export const equalsSomeOtherStruct = (a: SomeOtherStruct, b: SomeOtherStruct): boolean => {
+	if (a.type !== b.type) return false;
+	if (a.foo !== b.foo) return false;
+	return true;
+};
+
 export interface YetAnotherStruct {
 	Type: "yet-another-struct";
 	Bar: number;
@@ -40,6 +54,13 @@ export const defaultYetAnotherStruct = (): YetAnotherStruct => ({
 	Type: "yet-another-struct",
 	Bar: 0,
 });
+
+// equalsYetAnotherStruct tests the equality of two `YetAnotherStruct` objects.
+export const equalsYetAnotherStruct = (a: YetAnotherStruct, b: YetAnotherStruct): boolean => {
+	if (a.type !== b.type) return false;
+	if (a.bar !== b.bar) return false;
+	return true;
+};
 
 export type SeveralRefs = SomeStruct | SomeOtherStruct | YetAnotherStruct;
 

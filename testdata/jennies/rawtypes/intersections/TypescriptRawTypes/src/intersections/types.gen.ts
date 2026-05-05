@@ -19,6 +19,12 @@ export const defaultSomeStruct = (): SomeStruct => ({
 	fieldBool: true,
 });
 
+// equalsSomeStruct tests the equality of two `SomeStruct` objects.
+export const equalsSomeStruct = (a: SomeStruct, b: SomeStruct): boolean => {
+	if (a.fieldBool !== b.fieldBool) return false;
+	return true;
+};
+
 // Base properties for all metrics
 export interface Common {
 	// The metric name
@@ -34,6 +40,14 @@ export const defaultCommon = (): Common => ({
 	type: "counter",
 	contains: "default",
 });
+
+// equalsCommon tests the equality of two `Common` objects.
+export const equalsCommon = (a: Common, b: Common): boolean => {
+	if (a.name !== b.name) return false;
+	if (a.type !== b.type) return false;
+	if (a.contains !== b.contains) return false;
+	return true;
+};
 
 // Counter metric combining common properties with specific values
 export interface Counter extends Common {

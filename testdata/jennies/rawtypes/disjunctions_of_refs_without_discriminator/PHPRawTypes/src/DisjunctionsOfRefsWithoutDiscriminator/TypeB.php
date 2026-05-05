@@ -14,6 +14,19 @@ class TypeB implements \JsonSerializable
         $this->fieldB = $fieldB ?: 0;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->fieldB !== $other->fieldB) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

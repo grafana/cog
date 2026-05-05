@@ -10,6 +10,12 @@ export const defaultMyRefA = (): MyRefA => ({
 	foo: "",
 });
 
+// equalsMyRefA tests the equality of two `MyRefA` objects.
+export const equalsMyRefA = (a: MyRefA, b: MyRefA): boolean => {
+	if (a.foo !== b.foo) return false;
+	return true;
+};
+
 export interface MyRefB {
 	bar: number;
 }
@@ -17,4 +23,10 @@ export interface MyRefB {
 export const defaultMyRefB = (): MyRefB => ({
 	bar: 0,
 });
+
+// equalsMyRefB tests the equality of two `MyRefB` objects.
+export const equalsMyRefB = (a: MyRefB, b: MyRefB): boolean => {
+	if (a.bar !== b.bar) return false;
+	return true;
+};
 

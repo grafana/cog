@@ -18,6 +18,23 @@ class ObjWithTimeField implements \JsonSerializable
         $this->duration = $duration ?: "";
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->registeredAt !== $other->registeredAt) {
+            return false;
+        }
+    
+        if ($this->duration !== $other->duration) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

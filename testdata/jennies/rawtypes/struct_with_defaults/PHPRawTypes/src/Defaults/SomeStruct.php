@@ -30,6 +30,35 @@ class SomeStruct implements \JsonSerializable
         $this->fieldInt32 = $fieldInt32 ?: 42;
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->fieldBool !== $other->fieldBool) {
+            return false;
+        }
+    
+        if ($this->fieldString !== $other->fieldString) {
+            return false;
+        }
+    
+        if ($this->fieldStringWithConstantValue !== $other->fieldStringWithConstantValue) {
+            return false;
+        }
+    
+        if ($this->fieldFloat32 !== $other->fieldFloat32) {
+            return false;
+        }
+    
+        if ($this->fieldInt32 !== $other->fieldInt32) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

@@ -20,7 +20,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		Name:         "TypescriptRawTypes",
 	}
 
-	config := Config{}
+	config := Config{GenerateEqual: true}
 	config.applyDefaults()
 	jenny := RawTypes{
 		tmpl:   initTemplates(config, common.NewAPIReferenceCollector()),

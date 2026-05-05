@@ -195,6 +195,14 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 
 	buffer.WriteString(tools.Indent(jenny.generateConstructor(context, object), 4))
 
+	if jenny.config.GenerateEqual {
+		eqMethod := newEqualityMethods().generateForObject(context, object)
+		if eqMethod != "" {
+			buffer.WriteString("\n\n")
+			buffer.WriteString(tools.Indent(eqMethod, 4))
+		}
+	}
+
 	if jenny.config.GenerateJSONMarshaller {
 		fromJSON, err := jenny.generateFromJSON(context, object)
 		if err != nil {

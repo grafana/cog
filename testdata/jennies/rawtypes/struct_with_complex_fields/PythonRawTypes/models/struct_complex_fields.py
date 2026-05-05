@@ -66,6 +66,29 @@ class SomeStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeStruct):
+            return False
+        if self.field_ref != other.field_ref:
+            return False
+        if self.field_disjunction_of_scalars != other.field_disjunction_of_scalars:
+            return False
+        if self.field_mixed_disjunction != other.field_mixed_disjunction:
+            return False
+        if self.field_disjunction_with_null != other.field_disjunction_with_null:
+            return False
+        if self.operator != other.operator:
+            return False
+        if self.field_array_of_strings != other.field_array_of_strings:
+            return False
+        if self.field_map_of_string_to_string != other.field_map_of_string_to_string:
+            return False
+        if self.field_anonymous_struct != other.field_anonymous_struct:
+            return False
+        if self.field_ref_to_constant != other.field_ref_to_constant:
+            return False
+        return True
+
 
 ConnectionPath: typing.Literal["straight"] = "straight"
 
@@ -91,6 +114,13 @@ class SomeOtherStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeOtherStruct):
+            return False
+        if self.field_any != other.field_any:
+            return False
+        return True
+
 
 class StructComplexFieldsSomeStructFieldAnonymousStruct:
     field_any: object
@@ -112,6 +142,13 @@ class StructComplexFieldsSomeStructFieldAnonymousStruct:
             args["field_any"] = data["FieldAny"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, StructComplexFieldsSomeStructFieldAnonymousStruct):
+            return False
+        if self.field_any != other.field_any:
+            return False
+        return True
 
 
 

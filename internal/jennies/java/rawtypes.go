@@ -364,6 +364,14 @@ func (jenny RawTypes) formatReferenceDefaults(ref ast.Type, value any) string {
 func (jenny RawTypes) extraFunctionsBlock(schema *ast.Schema, object ast.Object) (string, error) {
 	buffer := strings.Builder{}
 
+	if jenny.config.GenerateEqual {
+		eqMethods := newEqualityMethods().generateForObject(object)
+		if eqMethods != "" {
+			jenny.imports.Add("Objects", "java.util")
+			buffer.WriteString(eqMethods)
+		}
+	}
+
 	customMethodsBlock := template.CustomObjectMethodsBlock(object)
 	if jenny.tmpl.Exists(customMethodsBlock) {
 		buffer.WriteString("\n\n")

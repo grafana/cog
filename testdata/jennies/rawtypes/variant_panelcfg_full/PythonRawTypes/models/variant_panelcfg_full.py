@@ -22,6 +22,13 @@ class Options:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Options):
+            return False
+        if self.timeseries_option != other.timeseries_option:
+            return False
+        return True
+
 
 class FieldConfig:
     timeseries_field_config_option: str
@@ -43,6 +50,13 @@ class FieldConfig:
             args["timeseries_field_config_option"] = data["timeseries_field_config_option"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, FieldConfig):
+            return False
+        if self.timeseries_field_config_option != other.timeseries_field_config_option:
+            return False
+        return True
 
 
 

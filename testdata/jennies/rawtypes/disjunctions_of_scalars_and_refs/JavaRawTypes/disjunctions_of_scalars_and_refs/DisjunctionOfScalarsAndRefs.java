@@ -1,5 +1,6 @@
 package disjunctions_of_scalars_and_refs;
 
+import java.util.Objects;
 import java.util.List;
 
 public class DisjunctionOfScalarsAndRefs {
@@ -33,5 +34,23 @@ public class DisjunctionOfScalarsAndRefs {
         DisjunctionOfScalarsAndRefs disjunctionOfScalarsAndRefs = new DisjunctionOfScalarsAndRefs();
         disjunctionOfScalarsAndRefs.myRefB = myRefB;
         return disjunctionOfScalarsAndRefs;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof DisjunctionOfScalarsAndRefs)) return false;
+        DisjunctionOfScalarsAndRefs o = (DisjunctionOfScalarsAndRefs) other;
+        if (!Objects.equals(this.string, o.string)) return false;
+        if (!Objects.equals(this.bool, o.bool)) return false;
+        if (!Objects.equals(this.arrayOfString, o.arrayOfString)) return false;
+        if (!Objects.equals(this.myRefA, o.myRefA)) return false;
+        if (!Objects.equals(this.myRefB, o.myRefB)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.string, this.bool, this.arrayOfString, this.myRefA, this.myRefB);
     }
 }
