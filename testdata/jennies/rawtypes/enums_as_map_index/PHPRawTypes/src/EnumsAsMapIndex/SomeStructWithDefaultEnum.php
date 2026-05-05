@@ -17,6 +17,19 @@ class SomeStructWithDefaultEnum implements \JsonSerializable
         $this->data = $data ?: [];
     }
 
+    public function equals(mixed $other): bool
+    {
+        if (!($other instanceof self)) {
+            return false;
+        }
+    
+        if ($this->data != $other->data) {
+            return false;
+        }
+    
+        return true;
+    }
+
     /**
      * @param array<string, mixed> $inputData
      */

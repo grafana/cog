@@ -35,6 +35,13 @@ class SomeStruct:
 
         return cls(**args)
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeStruct):
+            return False
+        if self.data != other.data:
+            return False
+        return True
+
 
 class SomeStructWithDefaultEnum:
     data: dict['StringEnumWithDefault', str]
@@ -56,6 +63,13 @@ class SomeStructWithDefaultEnum:
             args["data"] = data["data"]        
 
         return cls(**args)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SomeStructWithDefaultEnum):
+            return False
+        if self.data != other.data:
+            return False
+        return True
 
 
 
