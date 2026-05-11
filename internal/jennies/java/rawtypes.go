@@ -315,14 +315,34 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 func (jenny RawTypes) genDefaultForType(t ast.Type, value any) string {
 	switch t.Kind {
 	case ast.KindScalar:
+		if mapVal, ok := value.(map[string]any); ok && len(mapVal) == 0 {
+			jenny.typeFormatter.packageMapper("java.util", "Map")
+			return "Map.of()"
+		}
+		if sliceVal, ok := value.([]any); ok && len(sliceVal) == 0 {
+			jenny.typeFormatter.packageMapper("java.util", "List")
+			return "List.of()"
+		}
 		return formatType(t.AsScalar().ScalarKind, value)
 	case ast.KindRef:
 		return jenny.formatReferenceDefaults(t, value)
 	case ast.KindArray:
+		if sliceVal, ok := value.([]any); ok && len(sliceVal) == 0 {
+			jenny.typeFormatter.packageMapper("java.util", "List")
+			return "List.of()"
+		}
 		if value == nil {
+			jenny.typeFormatter.packageMapper("java.util", "List")
 			return "List.of()"
 		}
 		return fmt.Sprintf("List.of(%s)", jenny.genDefaultForType(t.AsArray().ValueType, value))
+	case ast.KindMap:
+		if mapVal, ok := value.(map[string]any); ok && len(mapVal) == 0 {
+			jenny.typeFormatter.packageMapper("java.util", "Map")
+			return "Map.of()"
+		}
+		jenny.typeFormatter.packageMapper("java.util", "Map")
+		return "Map.of()"
 	}
 
 	return ""

@@ -305,7 +305,23 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			defaultValue = formatScalar(field.Type.Scalar.Value)
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
-		} else if resolvedFieldType.IsAnyOf(ast.KindScalar, ast.KindMap, ast.KindArray) && field.Type.Default != nil {
+		} else if resolvedFieldType.IsMap() && field.Type.Default != nil {
+			if emptyMap, ok := field.Type.Default.(map[string]any); ok && len(emptyMap) == 0 {
+				defaultValue = "map[" + jenny.typeFormatter.formatType(resolvedFieldType.Map.IndexType) + "]" + jenny.typeFormatter.formatType(resolvedFieldType.Map.ValueType) + "{}"
+			} else {
+				defaultValue = formatScalar(field.Type.Default)
+			}
+
+			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
+		} else if resolvedFieldType.IsArray() && field.Type.Default != nil {
+			if emptySlice, ok := field.Type.Default.([]any); ok && len(emptySlice) == 0 {
+				defaultValue = "[]" + jenny.typeFormatter.formatType(resolvedFieldType.Array.ValueType) + "{}"
+			} else {
+				defaultValue = formatScalar(field.Type.Default)
+			}
+
+			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
+		} else if resolvedFieldType.IsScalar() && field.Type.Default != nil {
 			defaultValue = formatScalar(field.Type.Default)
 
 			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)

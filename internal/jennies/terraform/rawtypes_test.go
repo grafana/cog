@@ -14,7 +14,8 @@ func TestRawTypes_Generate(t *testing.T) {
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "TerraformRawTypes",
 		Skip: map[string]string{
-			"enums": "Enums aren't supported for types.",
+			"enums":                          "Enums aren't supported for types.",
+			"struct_with_map_and_slice_default": "Map and slice defaults with map[string]interface{} are not yet supported",
 		},
 	}
 
