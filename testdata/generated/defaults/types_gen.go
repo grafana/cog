@@ -184,7 +184,8 @@ func (resource *TextVariable) UnmarshalJSONStrict(raw []byte) error {
 
 		}
 		delete(fields, "name")
-
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("name", errors.New("required field is missing from input"))...)
 	}
 	// Field "current"
 	if fields["current"] != nil {
@@ -199,7 +200,8 @@ func (resource *TextVariable) UnmarshalJSONStrict(raw []byte) error {
 
 		}
 		delete(fields, "current")
-
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("current", errors.New("required field is missing from input"))...)
 	}
 	// Field "skipUrlSync"
 	if fields["skipUrlSync"] != nil {
@@ -212,7 +214,8 @@ func (resource *TextVariable) UnmarshalJSONStrict(raw []byte) error {
 
 		}
 		delete(fields, "skipUrlSync")
-
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("skipUrlSync", errors.New("required field is missing from input"))...)
 	}
 
 	for field := range fields {

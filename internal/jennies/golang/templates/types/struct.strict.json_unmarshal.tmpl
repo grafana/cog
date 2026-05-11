@@ -31,7 +31,7 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte
 		{{ end }}
 		}
 		delete(fields, {{ $field.Name|formatScalar }})
-	{{ if and $field.Required (eq $field.Type.Default nil) -}} } else {
+	{{ if $field.Required -}} } else {
 		{{- $errors := importStdPkg "errors" -}}
 		errs = append(errs, cog.MakeBuildErrors({{ $field.Name|formatScalar }}, errors.New("required field is missing from input"))...)
 	{{- end }}

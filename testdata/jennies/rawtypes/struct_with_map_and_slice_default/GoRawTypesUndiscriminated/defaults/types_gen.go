@@ -67,7 +67,7 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		
 		}
 		delete(fields, "extra")
-	
+	} else {errs = append(errs, cog.MakeBuildErrors("extra", errors.New("required field is missing from input"))...)
 	}
 
 	for field := range fields {
