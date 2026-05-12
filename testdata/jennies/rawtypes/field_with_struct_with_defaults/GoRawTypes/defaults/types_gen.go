@@ -58,10 +58,6 @@ func (resource *NestedStruct) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("NestedStruct", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -200,10 +196,6 @@ func (resource *Struct) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("Struct", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -295,10 +287,6 @@ func (resource *DefaultsStructComplexFieldNested) UnmarshalJSONStrict(raw []byte
 		errs = append(errs, cog.MakeBuildErrors("DefaultsStructComplexFieldNested", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -386,10 +374,6 @@ func (resource *DefaultsStructComplexField) UnmarshalJSONStrict(raw []byte) erro
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("DefaultsStructComplexField", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs
@@ -483,10 +467,6 @@ func (resource *DefaultsStructPartialComplexField) UnmarshalJSONStrict(raw []byt
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("DefaultsStructPartialComplexField", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs

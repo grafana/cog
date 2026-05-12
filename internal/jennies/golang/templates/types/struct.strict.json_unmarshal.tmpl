@@ -43,10 +43,6 @@ func (resource *{{ .def.Name|formatObjectName }}) UnmarshalJSONStrict(raw []byte
 		errs = append(errs, cog.MakeBuildErrors("{{ .def.Name|formatObjectName }}", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
