@@ -26,6 +26,10 @@ type Builder struct {
 	// root path defined at composition time.
 	// e.g.: under `spec`
 	AssignmentsPreferredRoot Path
+
+	// IsGeneric is used by some languages as Java to be able to generate the builder as generic to simplify
+	// the extension of the builder.
+	IsGeneric bool `json:",omitempty"`
 }
 
 func (builder *Builder) OptionByName(name string) (Option, bool) {

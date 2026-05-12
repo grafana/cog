@@ -66,7 +66,7 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		Options:              builder.Options,
 		Properties:           builder.Properties,
 		ImportAlias:          jenny.config.PackagePath,
-		IsGenericPanel:       jenny.isGenericPanel(builder),
+		IsGenericPanel:       builder.IsGeneric,
 	}
 
 	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
@@ -110,16 +110,4 @@ func (jenny Builder) getBuilderSignature(pkg string, obj ast.Object) string {
 	}
 
 	return fmt.Sprintf("%s.%s", jenny.config.formatPackage("cog.variants"), tools.UpperCamelCase(obj.Type.ImplementedVariant()))
-}
-
-func (jenny Builder) isGenericPanel(builder ast.Builder) bool {
-	if builder.Package != builder.For.SelfRef.ReferredPkg {
-		return false
-	}
-
-	// TODO: remove this once we have a better way to identify generic builders
-	dashboardLegacy := builder.Package == "dashboard" && builder.Name == "Panel"
-	dashboardv2VizConfig := builder.Package == "dashboardv2beta1" && builder.Name == "VizConfigKind"
-	dashboardv2DataQueryKind := builder.Package == "dashboardv2beta1" && builder.Name == "DataQueryKind"
-	return dashboardLegacy || dashboardv2VizConfig || dashboardv2DataQueryKind
 }

@@ -499,3 +499,15 @@ func DebugAction() ActionRunner {
 		return builders, nil
 	}
 }
+
+func GenericAction(selector *Selector) ActionRunner {
+	return func(ctx RuleCtx, builders ast.Builders) (ast.Builders, error) {
+		for i := range builders {
+			if selector.Matches(ctx.Schemas, builders[i]) {
+				builders[i].IsGeneric = true
+				builders[i].AddToVeneerTrail(fmt.Sprintf("Generic[selector=%s.%s]", builders[i].For.SelfRef.ReferredPkg, builders[i].For.SelfRef.ReferredType))
+			}
+		}
+		return builders, nil
+	}
+}
