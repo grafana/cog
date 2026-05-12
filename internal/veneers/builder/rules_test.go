@@ -138,3 +138,40 @@ func TestPromoteOptionsToConstructor(t *testing.T) {
 	req.Equal(expectedArgs, updatedBuilders[0].Constructor.Args)
 	req.Equal(expectedAssignments, updatedBuilders[0].Constructor.Assignments)
 }
+
+func TestGenericAction(t *testing.T) {
+	req := require.New(t)
+
+	originalObject := ast.NewObject("generic", "Panel", ast.NewStruct(
+		ast.NewStructField("uid", ast.String()),
+		ast.NewStructField("name", ast.String()),
+	))
+
+	schemas := ast.Schemas{
+		&ast.Schema{
+			Package: "generic",
+			Objects: testutils.ObjectsMap(originalObject),
+		},
+	}
+	originalBuilders := ast.Builders{
+		{
+			For:     originalObject,
+			Package: "generic",
+		},
+	}
+
+	expectedBuilders := ast.Builders{
+		{
+			For:         originalObject,
+			Package:     "generic",
+			IsGeneric:   true,
+			VeneerTrail: []string{"Generic[selector=generic.Panel]"},
+		},
+	}
+
+	action := GenericAction(ByObjectName("generic", "Panel"))
+	updatedBuilders, err := action(RuleCtx{Schemas: schemas, Builders: originalBuilders}, originalBuilders)
+	req.NoError(err)
+
+	req.Equal(expectedBuilders, updatedBuilders)
+}

@@ -195,3 +195,13 @@ func Debug(selector *Selector) *Rule {
 		},
 	}
 }
+
+func Generic(selector *Selector) *Rule {
+	return &Rule{
+		Selector: selector,
+		Action: &Action{
+			description: "generic",
+			run:         GenericAction(selector),
+		},
+	}
+}
