@@ -251,7 +251,10 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 
 	buffer.WriteString(objectName + "{\n")
 
-	extraDefaults, _ := maybeExtraDefaults.(map[string]any)
+	extraDefaults := map[string]any{}
+	if val, ok := maybeExtraDefaults.(map[string]any); ok {
+		extraDefaults = val
+	}
 
 	for _, field := range objectType.Struct.Fields {
 		resolvedFieldType := context.ResolveRefs(field.Type)
@@ -336,9 +339,7 @@ func (jenny RawTypes) defaultFromExtraDefault(field ast.StructField, resolvedFie
 	nonNullableRefType := field.Type.DeepCopy()
 	nonNullableRefType.Nullable = false
 
-	defaultValue = jenny.typeFormatter.formatRef(nonNullableRefType, false) + "{\n"
-	defaultValue += fmt.Sprintf("\t%s: %s,\n", formatFieldName(disjunctionBranchName), actualDefault)
-	defaultValue += "}"
+	defaultValue = fmt.Sprintf("%s{\n\t%s: %s,\n}", jenny.typeFormatter.formatRef(nonNullableRefType, false), formatFieldName(disjunctionBranchName), actualDefault)
 
 	if field.Type.Nullable {
 		defaultValue = "&" + defaultValue
