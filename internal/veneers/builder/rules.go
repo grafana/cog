@@ -195,3 +195,15 @@ func Debug(selector *Selector) *Rule {
 		},
 	}
 }
+
+// Generic sets a builder as generic. Useful when a language needs special generation
+// when a builder has to be extensible.
+func Generic(selector *Selector) *Rule {
+	return &Rule{
+		Selector: selector,
+		Action: &Action{
+			description: "generic",
+			run:         GenericAction(selector),
+		},
+	}
+}

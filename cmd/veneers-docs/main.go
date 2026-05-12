@@ -16,10 +16,10 @@ import (
 )
 
 const builderRulesSource = "./internal/veneers/builder/rules.go"
-const builderRulesOuputFile = "./docs/reference/builders_transformations.md"
+const builderRulesOutputFile = "./docs/reference/builders_transformations.md"
 
 const optionRulesSource = "./internal/veneers/option/rules.go"
-const optionRulesOuputFile = "./docs/reference/options_transformations.md"
+const optionRulesOutputFile = "./docs/reference/options_transformations.md"
 
 type Rule struct {
 	Name string
@@ -291,7 +291,7 @@ func main() {
 	}
 
 	builderDocEntries := parseYamlRules(reflect.TypeFor[yaml.BuilderRule](), builderRules)
-	if err := os.WriteFile(builderRulesOuputFile, builderDocEntriesToMarkdown(builderDocEntries), 0600); err != nil {
+	if err := os.WriteFile(builderRulesOutputFile, builderDocEntriesToMarkdown(builderDocEntries), 0600); err != nil {
 		panic(err)
 	}
 
@@ -301,7 +301,7 @@ func main() {
 	}
 
 	optionDocEntries := parseYamlRules(reflect.TypeFor[yaml.OptionRule](), optionRules)
-	if err := os.WriteFile(optionRulesOuputFile, optionDocEntriesToMarkdown(optionDocEntries), 0600); err != nil {
+	if err := os.WriteFile(optionRulesOutputFile, optionDocEntriesToMarkdown(optionDocEntries), 0600); err != nil {
 		panic(err)
 	}
 }

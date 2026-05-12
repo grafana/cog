@@ -25,6 +25,7 @@ type BuilderRule struct {
 	AddOption                *AddOption                `yaml:"add_option"`
 	AddFactory               *AddFactory               `yaml:"add_factory"`
 	Debug                    *DebugBuilder             `yaml:"debug" rule_name:"Debug"`
+	SetAsGeneric             *SetAsGeneric             `yaml:"set_as_generic"`
 }
 
 func (rule BuilderRule) AsRule(pkg string) (*builder.Rule, error) {
@@ -70,6 +71,10 @@ func (rule BuilderRule) AsRule(pkg string) (*builder.Rule, error) {
 
 	if rule.Debug != nil {
 		return rule.Debug.AsRule(pkg)
+	}
+
+	if rule.SetAsGeneric != nil {
+		return rule.SetAsGeneric.AsRule(pkg)
 	}
 
 	return nil, fmt.Errorf("empty rule")
@@ -262,6 +267,19 @@ func (rule DebugBuilder) AsRule(pkg string) (*builder.Rule, error) {
 	}
 
 	return builder.Debug(selector), nil
+}
+
+type SetAsGeneric struct {
+	BuilderSelector `yaml:",inline"`
+}
+
+func (rule SetAsGeneric) AsRule(pkg string) (*builder.Rule, error) {
+	selector, err := rule.AsSelector(pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.Generic(selector), nil
 }
 
 /******************************************************************************
