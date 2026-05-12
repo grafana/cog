@@ -145,3 +145,13 @@ rename:
   as: string
 ```
 
+## `set_as_generic`
+
+N/A
+
+### Usage
+
+```yaml
+set_as_generic: {}
+```
+
