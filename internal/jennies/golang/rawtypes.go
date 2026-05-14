@@ -171,6 +171,9 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 	for _, commentLine := range comments {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
+	if object.DeprecationMessage != "" {
+		buffer.WriteString(fmt.Sprintf("// Deprecated: %s\n", object.DeprecationMessage))
+	}
 
 	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(object))
 	buffer.WriteString("\n")

@@ -9,6 +9,12 @@ package {{ .Package }};
 {{- range .Comments }}
 // {{ . }}
 {{- end }}
+{{- if .DeprecationMessage }}
+/** 
+ * @deprecated {{ .DeprecationMessage }}
+ */
+@Deprecated(forRemoval = true)
+{{- end }}
 
 {{- if .ShouldAddDeserializer }}
 @JsonDeserialize(using = {{ .Name }}Deserializer.class)

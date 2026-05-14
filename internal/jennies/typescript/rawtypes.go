@@ -89,6 +89,9 @@ func (jenny RawTypes) formatObject(context languages.Context, def ast.Object, pa
 	for _, commentLine := range def.Comments {
 		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
 	}
+	if def.DeprecationMessage != "" {
+		buffer.WriteString(fmt.Sprintf("/**\n* @deprecated: %s\n*/\n", def.DeprecationMessage))
+	}
 
 	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(def))
 

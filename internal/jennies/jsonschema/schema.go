@@ -106,6 +106,10 @@ func (jenny Schema) objectToDefinition(object ast.Object) Definition {
 	if comments := jenny.objectComments(object); len(comments) != 0 {
 		definition.Set("description", comments)
 	}
+	if object.DeprecationMessage != "" {
+		definition.Set("deprecated", true)
+		definition.Set("x-deprecation-message", object.DeprecationMessage)
+	}
 
 	return definition
 }

@@ -137,6 +137,10 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 		comments = append(comments, passesTrail...)
 	}
 
+	if def.DeprecationMessage != "" {
+		comments = append(comments, fmt.Sprintf("@deprecated %s", def.DeprecationMessage))
+	}
+
 	buffer.WriteString(formatCommentsBlock(comments))
 
 	switch def.Type.Kind {

@@ -1,0 +1,30 @@
+{
+  "Package": "basic",
+  "Objects": {
+    "SomeStruct": {
+      "Name": "SomeStruct",
+      "DeprecationMessage": "This object is deprecated, use NewStruct instead.",
+      "SelfRef": {
+        "ReferredPkg": "basic",
+        "ReferredType": "SomeStruct"
+      },
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "FieldString",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

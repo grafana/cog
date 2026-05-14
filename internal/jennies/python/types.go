@@ -173,6 +173,10 @@ func (formatter *typeFormatter) formatStruct(def ast.Object) string {
 	}
 
 	buffer.WriteString(fmt.Sprintf("class %s%s:\n", formatObjectName(def.Name), classBases))
+	if def.DeprecationMessage != "" {
+		formatter.importPkg("warnings", "warnings")
+		buffer.WriteString(fmt.Sprintf("    warnings.warn(\n        %#v,\n        DeprecationWarning,\n        stacklevel=2,\n    )\n", def.DeprecationMessage))
+	}
 	buffer.WriteString(formatter.formatClassComments(def.Comments))
 
 	fields := def.Type.AsStruct().Fields
