@@ -296,6 +296,18 @@ name_anonymous_struct:
   as: string
 ```
 
+## `object_deprecation`
+
+N/A
+
+### Usage
+
+```yaml
+object_deprecation:
+  object: string
+  message: string
+```
+
 ## `omit`
 
 Omit rewrites schemas to omit the configured objects.

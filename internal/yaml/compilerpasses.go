@@ -32,6 +32,7 @@ type CompilerPass struct {
 	ExtractK8ResourceNames   *CleanupK8ResourceNames   `yaml:"cleanup_k8_resource_names"`
 	TrimObjectNamePrefix     *TrimObjectNamePrefix     `yaml:"trim_object_name_prefix"`
 	SanitizeEnumMemberNames  *SanitizeEnumMemberNames  `yaml:"sanitize_enum_member_names"`
+	ObjectDeprecation        *ObjectDeprecation        `yaml:"object_deprecation"`
 
 	AnonymousStructsToNamed     *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 	AnonymousEnumToExplicitType *AnonymousEnumsToNamed   `yaml:"anonymous_enum_to_named"`
@@ -115,6 +116,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.SanitizeEnumMemberNames != nil {
 		return pass.SanitizeEnumMemberNames.AsCompilerPass()
+	}
+	if pass.ObjectDeprecation != nil {
+		return pass.ObjectDeprecation.AsCompilerPass()
 	}
 
 	if pass.AnonymousStructsToNamed != nil {
@@ -554,4 +558,21 @@ type SanitizeEnumMemberNames struct {
 
 func (pass SanitizeEnumMemberNames) AsCompilerPass() (*compiler.SanitizeEnumMemberNames, error) {
 	return &compiler.SanitizeEnumMemberNames{}, nil
+}
+
+type ObjectDeprecation struct {
+	Object  string // Expected format: [package].[object]
+	Message string
+}
+
+func (pass ObjectDeprecation) AsCompilerPass() (*compiler.DeprecationMessage, error) {
+	ref, err := compiler.ObjectReferenceFromString(pass.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.DeprecationMessage{
+		Object:  ref,
+		Message: pass.Message,
+	}, nil
 }
