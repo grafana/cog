@@ -1,0 +1,121 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "default_disjunction_value",
+    "version": "0.0.0",
+    "x-schema-identifier": "",
+    "x-schema-kind": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "DisjunctionClasses": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ValueA"
+          },
+          {
+            "$ref": "#/components/schemas/ValueB"
+          },
+          {
+            "$ref": "#/components/schemas/ValueC"
+          }
+        ]
+      },
+      "ValueA": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "anArray",
+          "otherRef"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "A"
+          },
+          "anArray": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "otherRef": {
+            "$ref": "#/components/schemas/ValueB"
+          }
+        }
+      },
+      "ValueB": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "aMap",
+          "def"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "B"
+          },
+          "aMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "def": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "const": 1
+              },
+              {
+                "type": "string",
+                "const": "a"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "default": 1
+          }
+        }
+      },
+      "ValueC": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "other"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "C"
+          },
+          "other": {
+            "type": "number"
+          }
+        }
+      },
+      "DisjunctionConstants": {
+        "anyOf": [
+          {
+            "type": "string",
+            "const": "abc"
+          },
+          {
+            "type": "integer",
+            "const": 1
+          },
+          {
+            "type": "boolean",
+            "const": true
+          }
+        ]
+      }
+    }
+  }
+}
