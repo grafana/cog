@@ -133,8 +133,8 @@ func isReservedPythonKeyword(input string) bool {
 ******************************************************************************/
 
 func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule moduleImporter, defaultsOverrides *orderedmap.Map[string, any]) any {
-	if !typeDef.IsRef() && typeDef.Default != nil {
-		return typeDef.Default
+	if !typeDef.IsRef() && typeDef.TypedDefault != nil {
+		return ast.TypedDefaultToAny(*typeDef.TypedDefault)
 	}
 
 	switch typeDef.Kind {
@@ -151,9 +151,13 @@ func defaultValueForType(schemas ast.Schemas, typeDef ast.Type, importModule mod
 
 		referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 		if found && referredObj.Type.IsEnum() {
+			var enumDefault any
+			if typeDef.TypedDefault != nil {
+				enumDefault = ast.TypedDefaultToAny(*typeDef.TypedDefault)
+			}
 			enumName := tools.UpperSnakeCase(referredObj.Type.AsEnum().Values[0].Name)
 			for _, enumValue := range referredObj.Type.AsEnum().Values {
-				if enumValue.Value == typeDef.Default {
+				if enumValue.Value == enumDefault {
 					enumName = tools.UpperSnakeCase(enumValue.Name)
 					break
 				}

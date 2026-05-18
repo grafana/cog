@@ -156,9 +156,13 @@ func (pass *AnonymousEnumToExplicitType) processAnonymousEnum(pkg string, parent
 
 	pass.newObjects = append(pass.newObjects, newObject)
 
+	var rawDefault any
+	if def.TypedDefault != nil {
+		rawDefault = ast.TypedDefaultToAny(*def.TypedDefault)
+	}
 	typeOpts := []ast.TypeOption{
 		ast.Trail("AnonymousEnumToExplicitType"),
-		ast.Default(def.Default),
+		ast.Default(rawDefault),
 	}
 	if def.Nullable {
 		typeOpts = append(typeOpts, ast.Nullable())

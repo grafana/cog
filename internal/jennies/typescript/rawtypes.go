@@ -159,8 +159,8 @@ func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pac
 	case ast.KindEnum:
 		enum := object.Type.AsEnum()
 		defaultValue := enum.Values[0].Value
-		if object.Type.Default != nil {
-			defaultValue = object.Type.Default
+		if object.Type.TypedDefault != nil {
+			defaultValue = ast.TypedDefaultToAny(*object.Type.TypedDefault)
 		}
 
 		return raw(jenny.typeFormatter.enums.formatValue(object, defaultValue))
@@ -170,8 +170,8 @@ func (jenny RawTypes) defaultValueForObject(object ast.Object, packageMapper pac
 }
 
 func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper packageMapper) any {
-	if typeDef.Default != nil {
-		return typeDef.Default
+	if typeDef.TypedDefault != nil {
+		return ast.TypedDefaultToAny(*typeDef.TypedDefault)
 	}
 
 	switch typeDef.Kind {
@@ -180,12 +180,7 @@ func (jenny RawTypes) defaultValueForType(typeDef ast.Type, packageMapper packag
 	case ast.KindStruct:
 		return jenny.defaultValuesForStructType(typeDef, packageMapper)
 	case ast.KindEnum: // anonymous enum
-		defaultValue := typeDef.AsEnum().Values[0].Value
-		if typeDef.Default != nil {
-			defaultValue = typeDef.Default
-		}
-
-		return defaultValue
+		return typeDef.AsEnum().Values[0].Value
 	case ast.KindRef:
 		return jenny.defaultValuesForReference(typeDef, packageMapper)
 	case ast.KindMap:
@@ -207,17 +202,18 @@ func (jenny RawTypes) defaultValuesForStructType(structType ast.Type, packageMap
 	defaults := orderedmap.New[string, any]()
 
 	for _, field := range structType.AsStruct().Fields {
-		if field.Type.Default != nil {
+		if field.Type.TypedDefault != nil {
+			rawDefault := ast.TypedDefaultToAny(*field.Type.TypedDefault)
 			switch field.Type.Kind {
 			case ast.KindRef:
 				defaults.Set(field.Name, jenny.defaultValuesForReference(field.Type, packageMapper))
 				continue
 			case ast.KindStruct:
-				defaultMap := field.Type.Default.(map[string]any)
+				defaultMap, _ := rawDefault.(map[string]any)
 				defaults.Set(field.Name, jenny.defaultValueForStructs(field.Type.AsStruct(), orderedmap.FromMap(defaultMap)))
 				continue
 			default:
-				defaults.Set(field.Name, field.Type.Default)
+				defaults.Set(field.Name, rawDefault)
 				continue
 			}
 		}
@@ -309,12 +305,17 @@ func (jenny RawTypes) defaultValuesForReference(typeDef ast.Type, packageMapper 
 		return raw(referredTypeName)
 	}
 
-	if referredType.Type.IsEnum() {
-		return raw(jenny.typeFormatter.enums.formatValue(referredType, typeDef.Default))
+	var rawDefault any
+	if typeDef.TypedDefault != nil {
+		rawDefault = ast.TypedDefaultToAny(*typeDef.TypedDefault)
 	}
 
-	if hasStructDefaults(referredType.Type, typeDef.Default) {
-		defaultMap := typeDef.Default.(map[string]any)
+	if referredType.Type.IsEnum() {
+		return raw(jenny.typeFormatter.enums.formatValue(referredType, rawDefault))
+	}
+
+	if hasStructDefaults(referredType.Type, rawDefault) {
+		defaultMap, _ := rawDefault.(map[string]any)
 		return jenny.defaultValueForStructs(referredType.Type.AsStruct(), orderedmap.FromMap(defaultMap))
 	}
 

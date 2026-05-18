@@ -148,7 +148,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": "value1",
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": "value1"
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "string"
                 }
@@ -175,7 +180,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": "value2",
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": "value2"
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "string"
                 }
@@ -202,7 +212,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": "value3",
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": "value3"
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "string"
                 }

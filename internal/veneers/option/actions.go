@@ -212,7 +212,8 @@ func StructFieldsAsArgumentsAction(explicitFields ...string) ActionRunner {
 			// It sets the default to the args to simplify the process to extract the values in each language
 			// since defaults don't have enough information to detect a reference.
 			if def, ok := defaults[field.Name]; ok {
-				field.Type.Default = def
+				td := ast.BuildTypedDefault(field.Type, def)
+				field.Type.TypedDefault = &td
 			}
 
 			newArg := ast.Argument{
@@ -329,9 +330,9 @@ func StructFieldsAsOptionsAction(explicitFields ...string) ActionRunner {
 
 			newOpt.Assignments[0].Path = assignmentPathPrefix.Append(newOpt.Assignments[0].Path)
 
-			if field.Type.Default != nil {
+			if field.Type.TypedDefault != nil {
 				newOpt.Default = &ast.OptionDefault{
-					ArgsValues: []any{field.Type.Default},
+					ArgsValues: []any{ast.TypedDefaultToAny(*field.Type.TypedDefault)},
 				}
 			}
 
@@ -414,9 +415,9 @@ func disjunctionStructAsOptions(option ast.Option, disjunctionStruct ast.Type, a
 		}
 		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
-		if field.Type.Default != nil {
+		if field.Type.TypedDefault != nil {
 			opt.Default = &ast.OptionDefault{
-				ArgsValues: []any{field.Type.Default},
+				ArgsValues: []any{ast.TypedDefaultToAny(*field.Type.TypedDefault)},
 			}
 		}
 
@@ -463,9 +464,9 @@ func disjunctionAsOptions(option ast.Option, argIndex int) ([]ast.Option, error)
 		}
 		opt.AddToVeneerTrail("DisjunctionAsOptions")
 
-		if branch.Default != nil {
+		if branch.TypedDefault != nil {
 			opt.Default = &ast.OptionDefault{
-				ArgsValues: []any{branch.Default},
+				ArgsValues: []any{ast.TypedDefaultToAny(*branch.TypedDefault)},
 			}
 		}
 

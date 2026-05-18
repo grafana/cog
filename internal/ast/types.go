@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"slices"
@@ -95,7 +96,6 @@ type JenniesHints map[string]any
 type Type struct {
 	Kind         Kind
 	Nullable     bool
-	Default      any           `json:",omitempty"`
 	TypedDefault *TypedDefault `json:",omitempty"`
 
 	Disjunction       *DisjunctionType       `json:",omitempty"`
@@ -289,7 +289,6 @@ func (t Type) DeepCopy() Type {
 	newType := Type{
 		Kind:     t.Kind,
 		Nullable: t.Nullable,
-		Default:  t.Default,
 		Hints:    make(JenniesHints, len(t.Hints)),
 	}
 
@@ -345,6 +344,28 @@ func (t Type) DeepCopy() Type {
 	return newType
 }
 
+// UnmarshalJSON accepts both the current shape (with TypedDefault) and the
+// legacy shape (with a raw "Default" any), converting the latter into a
+// TypedDefault using the surrounding Kind. This lets older fixtures keep
+// working without rewriting them by hand.
+func (t *Type) UnmarshalJSON(data []byte) error {
+	type typeAlias Type
+	aux := struct {
+		*typeAlias
+		Default any `json:"Default,omitempty"`
+	}{typeAlias: (*typeAlias)(t)}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	if t.TypedDefault == nil && aux.Default != nil {
+		td := BuildTypedDefault(*t, aux.Default)
+		t.TypedDefault = &td
+	}
+	return nil
+}
+
 type TypeOption func(def *Type)
 
 func Nullable() TypeOption {
@@ -355,7 +376,11 @@ func Nullable() TypeOption {
 
 func Default(value any) TypeOption {
 	return func(def *Type) {
-		def.Default = value
+		if value == nil {
+			return
+		}
+		td := BuildTypedDefault(*def, value)
+		def.TypedDefault = &td
 	}
 }
 

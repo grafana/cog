@@ -279,11 +279,11 @@ func (jenny RawTypes) constructors(object ast.Object) []ConstructorTemplate {
 			ValueFromArg: name,
 		})
 
-		if field.Type.Default != nil {
+		if field.Type.TypedDefault != nil {
 			defaultConstructorAssignments = append(defaultConstructorAssignments, ConstructorAssignmentTemplate{
 				Name:  name,
 				Type:  field.Type,
-				Value: jenny.genDefaultForType(field.Type, field.Type.Default),
+				Value: jenny.genDefaultForType(field.Type, ast.TypedDefaultToAny(*field.Type.TypedDefault)),
 			})
 		} else if field.Required && !field.Type.Nullable { // Fields without an explicit default, but that aren't allowed to be null
 			defaultConstructorAssignments = append(defaultConstructorAssignments, ConstructorAssignmentTemplate{

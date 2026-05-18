@@ -23,11 +23,31 @@
               "Type": {
                 "Kind": "array",
                 "Nullable": false,
-                "Default": [
-                  "default",
-                  "array",
-                  "values"
-                ],
+                "TypedDefault": {
+                  "Kind": "array",
+                  "Array": {
+                    "Items": [
+                      {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "Value": "default"
+                        }
+                      },
+                      {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "Value": "array"
+                        }
+                      },
+                      {
+                        "Kind": "scalar",
+                        "Scalar": {
+                          "Value": "values"
+                        }
+                      }
+                    ]
+                  }
+                },
                 "Array": {
                   "ValueType": {
                     "Kind": "scalar",
@@ -45,7 +65,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": true,
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": true
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "bool"
                 }
@@ -57,7 +82,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": 42,
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": 42
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "int64"
                 }
@@ -69,7 +99,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": 42,
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": 42
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "float64"
                 }
@@ -88,7 +123,12 @@
                       "Type": {
                         "Kind": "scalar",
                         "Nullable": false,
-                        "Default": "foo",
+                        "TypedDefault": {
+                          "Kind": "scalar",
+                          "Scalar": {
+                            "Value": "foo"
+                          }
+                        },
                         "Scalar": {
                           "ScalarKind": "string"
                         }
@@ -105,7 +145,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": "default-string",
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": "default-string"
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "string"
                 }

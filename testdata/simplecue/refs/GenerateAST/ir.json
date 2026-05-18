@@ -11,7 +11,12 @@
       "Type": {
         "Kind": "enum",
         "Nullable": false,
-        "Default": 2,
+        "TypedDefault": {
+          "Kind": "enum",
+          "Enum": {
+            "Value": 2
+          }
+        },
         "Enum": {
           "Values": [
             {
@@ -116,7 +121,17 @@
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
-                "Default": 2,
+                "TypedDefault": {
+                  "Kind": "ref",
+                  "Ref": {
+                    "Inner": {
+                      "Kind": "scalar",
+                      "Scalar": {
+                        "Value": 2
+                      }
+                    }
+                  }
+                },
                 "Ref": {
                   "ReferredPkg": "grafanatest",
                   "ReferredType": "IntEnum"

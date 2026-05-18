@@ -225,10 +225,10 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 	var buffer strings.Builder
 
 	defVal := ""
-	if def.Default != nil {
+	if def.TypedDefault != nil {
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault")
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
-		defVal = fmt.Sprintf("Default: listdefault.StaticValue(%s),\n", formatter.parseArrayOrMapDefaults(def.AsArray().ValueType, def.Default, ListDefault))
+		defVal = fmt.Sprintf("Default: listdefault.StaticValue(%s),\n", formatter.parseArrayOrMapDefaults(def.AsArray().ValueType, ast.TypedDefaultToAny(*def.TypedDefault), ListDefault))
 	}
 	arrayValidator := formatter.validators.arrayConstraintValidator(def.AsArray().Constraints)
 	validator := formatter.validators.validateList(def.AsArray().ValueType)
@@ -295,10 +295,10 @@ func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 
 	// TODO: It seems that we aren't parsing default values for maps, so we are not generating the default value for the map.
 	defVal := ""
-	if def.Default != nil {
+	if def.TypedDefault != nil {
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/resource/schema/mapdefault")
 		formatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/attr")
-		defVal = fmt.Sprintf("Default: mapdefault.StaticValue(%s),\n", formatter.parseArrayOrMapDefaults(def.AsMap().ValueType, def.Default, MapDefault))
+		defVal = fmt.Sprintf("Default: mapdefault.StaticValue(%s),\n", formatter.parseArrayOrMapDefaults(def.AsMap().ValueType, ast.TypedDefaultToAny(*def.TypedDefault), MapDefault))
 	}
 
 	switch def.AsMap().ValueType.Kind {
@@ -371,9 +371,9 @@ func (formatter *typeFormatter) formatScalarAttribute(def ast.Type) string {
 			required = "Optional: true,\n"
 		}
 		defaultVal := ""
-		if def.Default != nil {
+		if def.TypedDefault != nil {
 			formatter.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework/resource/schema/%s", attr.defImport))
-			defaultVal = fmt.Sprintf("Default: %s.%s(%s),\n", attr.defImport, attr.defVal, formatScalar(def.Default))
+			defaultVal = fmt.Sprintf("Default: %s.%s(%s),\n", attr.defImport, attr.defVal, formatScalar(ast.TypedDefaultToAny(*def.TypedDefault)))
 		} else if def.AsScalar().Value != nil {
 			formatter.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework/resource/schema/%s", attr.defImport))
 			defaultVal = fmt.Sprintf("Default: %s.%s(%s),\n", attr.defImport, attr.defVal, formatScalar(def.AsScalar().Value))
@@ -413,14 +413,14 @@ func (formatter *typeFormatter) formatReferenceAttribute(def ast.Type) string {
 		return "unknown"
 	}
 
-	obj.Type.Default = def.Default
+	obj.Type.TypedDefault = def.TypedDefault
 	return formatter.formatTypeAttribute(obj.Type, formatComments(obj.Comments))
 }
 
 func (formatter *typeFormatter) formatEnumAttribute(def ast.Type) string {
 	scalarDef := def.AsEnum().Values[0].Type
 	scalarDef.Scalar.Constraints = formatEnumValuesAsConstraints(def.AsEnum().Values)
-	scalarDef.Default = def.Default
+	scalarDef.TypedDefault = def.TypedDefault
 	return formatter.formatScalarAttribute(scalarDef)
 }
 

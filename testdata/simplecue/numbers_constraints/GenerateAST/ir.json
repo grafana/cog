@@ -86,7 +86,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": 0,
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": 0
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "uint8",
                   "Constraints": [

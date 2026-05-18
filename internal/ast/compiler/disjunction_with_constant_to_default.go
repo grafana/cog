@@ -42,10 +42,10 @@ func (pass *DisjunctionWithConstantToDefault) processDisjunction(_ *Visitor, _ *
 
 	if branches[0].Scalar.IsConcrete() {
 		def = branches[1]
-		def.Default = branches[0].Scalar.Value
+		def.TypedDefault = ast.NewScalarDefault(branches[0].Scalar.Value)
 	} else {
 		def = branches[0]
-		def.Default = branches[1].Scalar.Value
+		def.TypedDefault = ast.NewScalarDefault(branches[1].Scalar.Value)
 	}
 
 	def.AddToPassesTrail("DisjunctionWithConstantToDefault")

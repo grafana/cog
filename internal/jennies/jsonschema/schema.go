@@ -284,8 +284,8 @@ func (jenny Schema) formatStruct(typeDef ast.Type) Definition {
 		}
 
 		// TODO: review defaults management
-		if field.Type.Default != nil {
-			fieldDef.Set("default", field.Type.Default)
+		if field.Type.TypedDefault != nil {
+			fieldDef.Set("default", ast.TypedDefaultToAny(*field.Type.TypedDefault))
 		}
 	}
 

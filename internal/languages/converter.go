@@ -584,17 +584,13 @@ func (generator *ConverterGenerator) guardForAssignments(valuesRootPath ast.Path
 		// For scalar values, add a guard against assignments equal to the default value for that path.
 		// Map and slice defaults are skipped: they can't be compared with != in Go (compile error
 		// for concrete map types, runtime panic for interface types).
-		if assignmentType.IsScalar() && assignmentType.Default != nil {
-			_, defaultIsMap := assignmentType.Default.(map[string]interface{})
-			_, defaultIsSlice := assignmentType.Default.([]interface{})
-			if !defaultIsMap && !defaultIsSlice {
-				guard := MappingGuard{
-					Path:  valuesRootPath.Append(assignment.Path),
-					Op:    ast.NotEqualOp,
-					Value: assignmentType.Default,
-				}
-				guards.Set(guard.String(), guard)
+		if assignmentType.IsScalar() && assignmentType.TypedDefault != nil && assignmentType.TypedDefault.Scalar != nil {
+			guard := MappingGuard{
+				Path:  valuesRootPath.Append(assignment.Path),
+				Op:    ast.NotEqualOp,
+				Value: assignmentType.TypedDefault.Scalar.Value,
 			}
+			guards.Set(guard.String(), guard)
 		}
 
 		// TODO: is that correct/needed?

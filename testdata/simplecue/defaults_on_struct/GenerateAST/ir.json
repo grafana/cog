@@ -148,10 +148,35 @@
               "Type": {
                 "Kind": "ref",
                 "Nullable": false,
-                "Default": {
-                  "enum": "b",
-                  "fill": "dark-orange",
-                  "scheme": "Oranges"
+                "TypedDefault": {
+                  "Kind": "ref",
+                  "Ref": {
+                    "Inner": {
+                      "Kind": "struct",
+                      "Struct": {
+                        "Fields": {
+                          "enum": {
+                            "Kind": "scalar",
+                            "Scalar": {
+                              "Value": "b"
+                            }
+                          },
+                          "fill": {
+                            "Kind": "scalar",
+                            "Scalar": {
+                              "Value": "dark-orange"
+                            }
+                          },
+                          "scheme": {
+                            "Kind": "scalar",
+                            "Scalar": {
+                              "Value": "Oranges"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 },
                 "Ref": {
                   "ReferredPkg": "grafanatest",
