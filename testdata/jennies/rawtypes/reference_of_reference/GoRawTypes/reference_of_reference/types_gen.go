@@ -46,10 +46,6 @@ func (resource *MyStruct) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("MyStruct", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -129,10 +125,6 @@ func (resource *AnotherStruct) UnmarshalJSONStrict(raw []byte) error {
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("AnotherStruct", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs

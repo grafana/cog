@@ -98,10 +98,6 @@ func (resource *SomeStruct) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("SomeStruct", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -219,10 +215,6 @@ func (resource *SomeOtherStruct) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("SomeOtherStruct", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -280,10 +272,6 @@ func (resource *StructOptionalFieldsSomeStructFieldAnonymousStruct) UnmarshalJSO
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("StructOptionalFieldsSomeStructFieldAnonymousStruct", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs

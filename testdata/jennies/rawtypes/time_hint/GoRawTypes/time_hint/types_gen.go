@@ -61,10 +61,6 @@ func (resource *ObjWithTimeField) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("ObjWithTimeField", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 

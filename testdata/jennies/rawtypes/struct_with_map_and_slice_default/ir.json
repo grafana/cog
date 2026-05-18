@@ -1,0 +1,68 @@
+{
+  "Package": "defaults",
+  "Objects": {
+    "SomeStruct": {
+      "Name": "SomeStruct",
+      "SelfRef": {
+        "ReferredPkg": "defaults",
+        "ReferredType": "SomeStruct"
+      },
+      "Type": {
+        "Kind": "struct",
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "options",
+              "Required": false,
+              "Type": {
+                "Kind": "map",
+                "Default": {},
+                "Map": {
+                  "IndexType": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "any"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "Name": "items",
+              "Required": false,
+              "Type": {
+                "Kind": "array",
+                "Default": [],
+                "Array": {
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "Name": "extra",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Default": {},
+                "Scalar": {
+                  "ScalarKind": "any"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

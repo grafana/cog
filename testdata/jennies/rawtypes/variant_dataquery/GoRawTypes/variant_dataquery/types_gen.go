@@ -59,10 +59,6 @@ func (resource *Query) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("Query", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 

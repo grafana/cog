@@ -245,8 +245,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 	var buffer strings.Builder
 
 	objectName := formatObjectName(objectRef.ReferredType)
-	referredPkg := jenny.packageMapper(objectRef.ReferredPkg)
-	if referredPkg != "" {
+	if referredPkg := jenny.packageMapper(objectRef.ReferredPkg); referredPkg != "" {
 		objectName = referredPkg + "." + objectName
 	}
 
@@ -257,132 +256,178 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 	for _, field := range objectType.Struct.Fields {
 		resolvedFieldType := context.ResolveRefs(field.Type)
 
-		fieldDefault, hasFieldDefault := fieldDefaultAsAny(field.Type)
-		extraDefault, hasExtraDefault := extraDefaults[field.Name]
-
-		needsExplicitDefault := hasFieldDefault ||
-			hasExtraDefault ||
-			(field.Required && field.Type.IsRef() && resolvedFieldType.IsStruct()) ||
-			(field.Required && field.Type.IsArray()) ||
-			(field.Required && field.Type.IsMap()) ||
-			field.Type.IsConcreteScalar() ||
-			field.Type.IsConstantRef()
-		if !needsExplicitDefault {
+		if !fieldNeedsExplicitDefault(field, resolvedFieldType, extraDefaults) {
 			continue
 		}
 
-		fieldName := formatFieldName(field.Name)
-		defaultValue := ""
-
-		// nolint:gocritic
-		if hasExtraDefault {
-			defaultValue = formatScalar(extraDefault)
-
-			if field.Type.IsRef() && resolvedFieldType.IsStructGeneratedFromDisjunction() {
-				disjunctionBranchName := formatFieldName(anyToDisjunctionBranchName(extraDefault))
-				disjunctionBranch, found := resolvedFieldType.Struct.FieldByName(disjunctionBranchName)
-				if !found {
-					disjunctionBranchName = "Any"
-					disjunctionBranch, _ = resolvedFieldType.Struct.FieldByName(disjunctionBranchName)
-				}
-
-				actualDefault := jenny.maybeValueAsPointer(defaultValue, true, disjunctionBranch.Type)
-
-				nonNullableRefType := field.Type.DeepCopy()
-				nonNullableRefType.Nullable = false
-
-				defaultValue = jenny.typeFormatter.formatRef(nonNullableRefType, false) + "{\n"
-				defaultValue += fmt.Sprintf("\t%s: %s,\n", formatFieldName(disjunctionBranchName), actualDefault)
-				defaultValue += "}"
-
-				if field.Type.Nullable {
-					defaultValue = "&" + defaultValue
-				}
-			} else {
-				defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
-			}
-		} else if field.Type.IsConcreteScalar() {
-			defaultValue = formatScalar(field.Type.Scalar.Value)
-
-			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
-		} else if resolvedFieldType.IsAnyOf(ast.KindScalar, ast.KindMap, ast.KindArray) && hasFieldDefault {
-			defaultValue = formatScalar(fieldDefault)
-
-			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
-		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() && hasFieldDefault {
-			defaultValue = jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.TypedDefault)
-			if field.Type.Nullable {
-				defaultValue = "&" + defaultValue
-			}
-		} else if field.Type.IsRef() && resolvedFieldType.IsStruct() {
-			defaultValue = "New" + formatObjectName(field.Type.Ref.ReferredType) + "()"
-
-			referredPkg = jenny.packageMapper(field.Type.Ref.ReferredPkg)
-			if referredPkg != "" {
-				defaultValue = referredPkg + "." + defaultValue
-			}
-
-			if !field.Type.Nullable {
-				defaultValue = "*" + defaultValue
-			}
-		} else if field.Type.IsRef() && resolvedFieldType.IsEnum() {
-			memberName := resolvedFieldType.Enum.Values[0].Name
-			for _, member := range resolvedFieldType.Enum.Values {
-				if member.Value == fieldDefault {
-					memberName = member.Name
-					break
-				}
-			}
-
-			defaultValue = memberName
-
-			referredPkg = jenny.packageMapper(field.Type.Ref.ReferredPkg)
-			if referredPkg != "" {
-				defaultValue = referredPkg + "." + defaultValue
-			}
-
-			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type)
-		} else if field.Type.IsConstantRef() {
-			constRef := field.Type.AsConstantRef()
-			t := context.ResolveRefs(ast.NewRef(constRef.ReferredPkg, constRef.ReferredType))
-
-			if !t.IsEnum() && !t.IsScalar() {
-				break
-			}
-
-			if t.IsScalar() && t.AsScalar().ScalarKind == ast.KindString {
-				defaultValue = constRef.ReferredType
-			}
-
-			if t.IsEnum() {
-				for _, member := range t.AsEnum().Values {
-					if member.Value == constRef.ReferenceValue {
-						defaultValue = member.Name
-						break
-					}
-				}
-			}
-
-			referredPkg = jenny.packageMapper(constRef.ReferredPkg)
-			if referredPkg != "" {
-				defaultValue = referredPkg + "." + defaultValue
-			}
-
-			defaultValue = jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type)
-		} else if field.Type.IsArray() {
-			defaultValue = "[]" + jenny.typeFormatter.formatType(field.Type.Array.ValueType) + "{}"
-		} else if field.Type.IsMap() {
-			defaultValue = "map[" + jenny.typeFormatter.formatType(field.Type.Map.IndexType) + "]" + jenny.typeFormatter.formatType(field.Type.Map.ValueType) + "{}"
-		} else {
-			defaultValue = "\"unsupported default value case: this is likely a bug in cog\""
+		defaultValue, abort := jenny.defaultValueForField(context, field, resolvedFieldType, extraDefaults)
+		if abort {
+			break
 		}
 
-		buffer.WriteString(fmt.Sprintf("\t\t%s: %s,\n", fieldName, defaultValue))
+		buffer.WriteString(fmt.Sprintf("\t\t%s: %s,\n", formatFieldName(field.Name), defaultValue))
 	}
 
 	buffer.WriteString("}")
 
 	return buffer.String()
+}
+
+func fieldNeedsExplicitDefault(field ast.StructField, resolvedFieldType ast.Type, extraDefaults map[string]any) bool {
+	return field.Type.TypedDefault != nil ||
+		extraDefaults[field.Name] != nil ||
+		(field.Required && field.Type.IsRef() && resolvedFieldType.IsStruct()) ||
+		(field.Required && field.Type.IsArray()) ||
+		(field.Required && field.Type.IsMap()) ||
+		field.Type.IsConcreteScalar() ||
+		field.Type.IsConstantRef()
+}
+
+// defaultValueForField computes the Go literal for a field's default. The
+// second return value signals the caller to abort writing further fields
+// (used when a constant ref resolves to something we can't render).
+func (jenny RawTypes) defaultValueForField(context languages.Context, field ast.StructField, resolvedFieldType ast.Type, extraDefaults map[string]any) (string, bool) {
+	if extraDefault, ok := extraDefaults[field.Name]; ok {
+		return jenny.defaultFromExtraDefault(field, resolvedFieldType, extraDefault), false
+	}
+
+	switch {
+	case field.Type.IsConcreteScalar():
+		return jenny.maybeValueAsPointer(formatScalar(field.Type.Scalar.Value), field.Type.Nullable, resolvedFieldType), false
+	case resolvedFieldType.IsMap() && field.Type.TypedDefault != nil:
+		return jenny.maybeValueAsPointer(jenny.defaultForMapWithDefault(field, resolvedFieldType), field.Type.Nullable, resolvedFieldType), false
+	case resolvedFieldType.IsArray() && field.Type.TypedDefault != nil:
+		return jenny.maybeValueAsPointer(jenny.defaultForArrayWithDefault(field, resolvedFieldType), field.Type.Nullable, resolvedFieldType), false
+	case resolvedFieldType.IsScalar() && field.Type.TypedDefault != nil:
+		return jenny.maybeValueAsPointer(formatScalar(ast.TypedDefaultToAny(*field.Type.TypedDefault)), field.Type.Nullable, resolvedFieldType), false
+	case field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.TypedDefault != nil:
+		return jenny.defaultForStructRefWithDefault(context, field, resolvedFieldType), false
+	case field.Type.IsRef() && resolvedFieldType.IsStruct():
+		return jenny.defaultForStructRef(field), false
+	case field.Type.IsRef() && resolvedFieldType.IsEnum():
+		return jenny.defaultForEnumRef(field, resolvedFieldType), false
+	case field.Type.IsConstantRef():
+		return jenny.defaultForConstantRef(context, field)
+	case field.Type.IsArray():
+		return "[]" + jenny.typeFormatter.formatType(field.Type.Array.ValueType) + "{}", false
+	case field.Type.IsMap():
+		return "map[" + jenny.typeFormatter.formatType(field.Type.Map.IndexType) + "]" + jenny.typeFormatter.formatType(field.Type.Map.ValueType) + "{}", false
+	default:
+		return "\"unsupported default value case: this is likely a bug in cog\"", false
+	}
+}
+
+func (jenny RawTypes) defaultFromExtraDefault(field ast.StructField, resolvedFieldType ast.Type, extraDefault any) string {
+	defaultValue := formatScalar(extraDefault)
+
+	if !(field.Type.IsRef() && resolvedFieldType.IsStructGeneratedFromDisjunction()) {
+		return jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, resolvedFieldType)
+	}
+
+	disjunctionBranchName := formatFieldName(anyToDisjunctionBranchName(extraDefault))
+	disjunctionBranch, found := resolvedFieldType.Struct.FieldByName(disjunctionBranchName)
+	if !found {
+		disjunctionBranchName = "Any"
+		disjunctionBranch, _ = resolvedFieldType.Struct.FieldByName(disjunctionBranchName)
+	}
+
+	actualDefault := jenny.maybeValueAsPointer(defaultValue, true, disjunctionBranch.Type)
+
+	nonNullableRefType := field.Type.DeepCopy()
+	nonNullableRefType.Nullable = false
+
+	defaultValue = fmt.Sprintf("%s{\n\t%s: %s,\n}", jenny.typeFormatter.formatRef(nonNullableRefType, false), formatFieldName(disjunctionBranchName), actualDefault)
+
+	if field.Type.Nullable {
+		defaultValue = "&" + defaultValue
+	}
+
+	return defaultValue
+}
+
+func (jenny RawTypes) defaultForMapWithDefault(field ast.StructField, resolvedFieldType ast.Type) string {
+	defaultAny := ast.TypedDefaultToAny(*field.Type.TypedDefault)
+	if emptyMap, ok := defaultAny.(map[string]any); ok && len(emptyMap) == 0 {
+		return "map[" + jenny.typeFormatter.formatType(resolvedFieldType.Map.IndexType) + "]" + jenny.typeFormatter.formatType(resolvedFieldType.Map.ValueType) + "{}"
+	}
+	return formatScalar(defaultAny)
+}
+
+func (jenny RawTypes) defaultForArrayWithDefault(field ast.StructField, resolvedFieldType ast.Type) string {
+	defaultAny := ast.TypedDefaultToAny(*field.Type.TypedDefault)
+	if emptySlice, ok := defaultAny.([]any); ok && len(emptySlice) == 0 {
+		return "[]" + jenny.typeFormatter.formatType(resolvedFieldType.Array.ValueType) + "{}"
+	}
+	return formatScalar(defaultAny)
+}
+
+func (jenny RawTypes) defaultForStructRefWithDefault(context languages.Context, field ast.StructField, resolvedFieldType ast.Type) string {
+	defaultValue := jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.TypedDefault)
+	if field.Type.Nullable {
+		defaultValue = "&" + defaultValue
+	}
+	return defaultValue
+}
+
+func (jenny RawTypes) defaultForStructRef(field ast.StructField) string {
+	defaultValue := "New" + formatObjectName(field.Type.Ref.ReferredType) + "()"
+
+	if referredPkg := jenny.packageMapper(field.Type.Ref.ReferredPkg); referredPkg != "" {
+		defaultValue = referredPkg + "." + defaultValue
+	}
+
+	if !field.Type.Nullable {
+		defaultValue = "*" + defaultValue
+	}
+
+	return defaultValue
+}
+
+func (jenny RawTypes) defaultForEnumRef(field ast.StructField, resolvedFieldType ast.Type) string {
+	fieldDefault, _ := fieldDefaultAsAny(field.Type)
+	memberName := resolvedFieldType.Enum.Values[0].Name
+	for _, member := range resolvedFieldType.Enum.Values {
+		if member.Value == fieldDefault {
+			memberName = member.Name
+			break
+		}
+	}
+
+	defaultValue := memberName
+	if referredPkg := jenny.packageMapper(field.Type.Ref.ReferredPkg); referredPkg != "" {
+		defaultValue = referredPkg + "." + defaultValue
+	}
+
+	return jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type)
+}
+
+func (jenny RawTypes) defaultForConstantRef(context languages.Context, field ast.StructField) (string, bool) {
+	constRef := field.Type.AsConstantRef()
+	t := context.ResolveRefs(ast.NewRef(constRef.ReferredPkg, constRef.ReferredType))
+
+	if !t.IsEnum() && !t.IsScalar() {
+		return "", true
+	}
+
+	var defaultValue string
+	if t.IsScalar() && t.AsScalar().ScalarKind == ast.KindString {
+		defaultValue = constRef.ReferredType
+	}
+
+	if t.IsEnum() {
+		for _, member := range t.AsEnum().Values {
+			if member.Value == constRef.ReferenceValue {
+				defaultValue = member.Name
+				break
+			}
+		}
+	}
+
+	if referredPkg := jenny.packageMapper(constRef.ReferredPkg); referredPkg != "" {
+		defaultValue = referredPkg + "." + defaultValue
+	}
+
+	return jenny.maybeValueAsPointer(defaultValue, field.Type.Nullable, field.Type), false
 }
 
 func (jenny RawTypes) maybeValueAsPointer(value string, nullable bool, typeDef ast.Type) string {

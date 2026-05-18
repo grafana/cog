@@ -53,10 +53,6 @@ func (resource *ParentStruct) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("ParentStruct", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -126,10 +122,6 @@ func (resource *Struct) UnmarshalJSONStrict(raw []byte) error {
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("Struct", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs
@@ -205,10 +197,6 @@ func (resource *StructA) UnmarshalJSONStrict(raw []byte) error {
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("StructA", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs
@@ -304,10 +292,6 @@ func (resource *StructB) UnmarshalJSONStrict(raw []byte) error {
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("StructB", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs

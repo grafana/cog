@@ -38,6 +38,26 @@ func formatValue(val any) string {
 		return fmt.Sprintf("[%s]", strings.Join(items, ", "))
 	}
 
+	if mapVal, ok := val.(map[string]any); ok {
+		items := make([]string, 0, len(mapVal))
+
+		for key, value := range mapVal {
+			items = append(items, fmt.Sprintf("%q: %s", key, formatValue(value)))
+		}
+
+		return fmt.Sprintf("{%s}", strings.Join(items, ", "))
+	}
+
+	if orderedMap, ok := val.(*orderedmap.Map[string, any]); ok {
+		items := make([]string, 0, orderedMap.Len())
+
+		orderedMap.Iterate(func(key string, value any) {
+			items = append(items, fmt.Sprintf("%q: %s", key, formatValue(value)))
+		})
+
+		return fmt.Sprintf("{%s}", strings.Join(items, ", "))
+	}
+
 	return fmt.Sprintf("%#v", val)
 }
 
