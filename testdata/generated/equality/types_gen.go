@@ -62,10 +62,6 @@ func (resource *Variable) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("Variable", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -170,10 +166,6 @@ func (resource *Container) UnmarshalJSONStrict(raw []byte) error {
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("Container", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs
@@ -284,10 +276,6 @@ func (resource *Optionals) UnmarshalJSONStrict(raw []byte) error {
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("Optionals", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs
@@ -499,10 +487,6 @@ func (resource *Arrays) UnmarshalJSONStrict(raw []byte) error {
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("Arrays", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs
@@ -740,10 +724,6 @@ func (resource *Maps) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("Maps", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -867,10 +847,6 @@ func (resource *EqualityArraysAnonymousStructs) UnmarshalJSONStrict(raw []byte) 
 		errs = append(errs, cog.MakeBuildErrors("EqualityArraysAnonymousStructs", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -926,10 +902,6 @@ func (resource *EqualityMapsAnonymousStructs) UnmarshalJSONStrict(raw []byte) er
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("EqualityMapsAnonymousStructs", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs

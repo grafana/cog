@@ -67,6 +67,12 @@ func formatScalar(val any) string {
 		return fmt.Sprintf("[]string{%s}", strings.Join(items, ", "))
 	}
 
+	if mapVal, ok := val.(map[string]any); ok {
+		if len(mapVal) == 0 {
+			return "map[string]interface{}{}"
+		}
+	}
+
 	return fmt.Sprintf("%#v", val)
 }
 

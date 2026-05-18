@@ -130,10 +130,6 @@ func (resource *Struct) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("Struct", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -281,10 +277,6 @@ func (resource *MyObject) UnmarshalJSONStrict(raw []byte) error {
 		errs = append(errs, cog.MakeBuildErrors("MyObject", fmt.Errorf("unexpected field '%s'", field))...)
 	}
 
-	if len(errs) == 0 {
-		return nil
-	}
-
 	return errs
 }
 
@@ -343,10 +335,6 @@ func (resource *NullableFieldsStructF) UnmarshalJSONStrict(raw []byte) error {
 
 	for field := range fields {
 		errs = append(errs, cog.MakeBuildErrors("NullableFieldsStructF", fmt.Errorf("unexpected field '%s'", field))...)
-	}
-
-	if len(errs) == 0 {
-		return nil
 	}
 
 	return errs
