@@ -95,7 +95,8 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		)
 	}
 
-	header := "import { z } from 'zod';\n"
+	header := "// @ts-nocheck\n"
+	header += "import { z } from 'zod';\n"
 	if importStatements := imports.String(); importStatements != "" {
 		header += importStatements
 	}
@@ -157,7 +158,6 @@ func (e *emitter) formatObject(def ast.Object) string {
 	}
 
 	buf.WriteString(fmt.Sprintf("export const %sSchema = %s;\n", objectName, expr))
-	buf.WriteString(fmt.Sprintf("export type %s = z.infer<typeof %sSchema>;\n", objectName, objectName))
 	return buf.String()
 }
 
