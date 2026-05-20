@@ -95,7 +95,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		)
 	}
 
-	header := "// @ts-nocheck\n"
+	header := ""
+	if schemaHasCycle(schema) {
+		header += "// @ts-nocheck\n"
+	}
 	header += "import { z } from 'zod';\n"
 	if importStatements := imports.String(); importStatements != "" {
 		header += importStatements
@@ -103,6 +106,81 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	header += "\n"
 
 	return []byte(header + body.String()), nil
+}
+
+// schemaHasCycle returns true when any object in the schema participates in a
+// cycle via same-package references. Recursive Zod schemas built with z.lazy()
+// trip TS strict-mode declaration-emit (TS7022/TS7024), and only the
+// cycle-bearing files need the @ts-nocheck suppression. Cycle detection is a
+// standard 3-color DFS over the same-package reference graph.
+func schemaHasCycle(schema *ast.Schema) bool {
+	adj := make(map[string]map[string]struct{})
+	schema.Objects.Iterate(func(name string, obj ast.Object) {
+		refs := make(map[string]struct{})
+		collectSamePackageRefs(obj.Type, schema.Package, refs)
+		adj[name] = refs
+	})
+
+	const (
+		white = 0
+		gray  = 1
+		black = 2
+	)
+	color := make(map[string]int, len(adj))
+
+	var dfs func(string) bool
+	dfs = func(node string) bool {
+		switch color[node] {
+		case gray:
+			return true
+		case black:
+			return false
+		}
+		color[node] = gray
+		for next := range adj[node] {
+			if dfs(next) {
+				return true
+			}
+		}
+		color[node] = black
+		return false
+	}
+
+	for node := range adj {
+		if color[node] == white && dfs(node) {
+			return true
+		}
+	}
+	return false
+}
+
+// collectSamePackageRefs walks t and records every referenced object name in
+// the same package. Cross-package refs and scalars are skipped because they
+// cannot close a cycle within this file.
+func collectSamePackageRefs(t ast.Type, pkg string, out map[string]struct{}) {
+	switch t.Kind {
+	case ast.KindRef:
+		r := t.AsRef()
+		if r.ReferredPkg == "" || r.ReferredPkg == pkg {
+			out[r.ReferredType] = struct{}{}
+		}
+	case ast.KindStruct:
+		for _, f := range t.AsStruct().Fields {
+			collectSamePackageRefs(f.Type, pkg, out)
+		}
+	case ast.KindArray:
+		collectSamePackageRefs(t.AsArray().ValueType, pkg, out)
+	case ast.KindMap:
+		collectSamePackageRefs(t.AsMap().ValueType, pkg, out)
+	case ast.KindDisjunction:
+		for _, b := range t.AsDisjunction().Branches {
+			collectSamePackageRefs(b, pkg, out)
+		}
+	case ast.KindIntersection:
+		for _, b := range t.AsIntersection().Branches {
+			collectSamePackageRefs(b, pkg, out)
+		}
+	}
 }
 
 // emitter walks the AST for one schema and produces Zod source as strings.
