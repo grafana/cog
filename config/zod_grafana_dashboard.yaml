@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+# Generates Zod schemas for every dashboard kind version, writing each
+# alongside its TS interface counterpart in @grafana/schema.
+#
+# Layout (matches Option A from the design discussion):
+#   packages/grafana-schema/src/schema/dashboard/<version>/types.spec.zod.gen.ts
+
+debug: true
+
+parameters:
+  grafana_schema_dir: '/Users/kristinademeshchik/work/grafana/packages/grafana-schema/src/schema/dashboard'
+
+inputs:
+  - cue:
+      entrypoint: '/Users/kristinademeshchik/work/grafana/apps/dashboard/kinds/v0alpha1'
+  - cue:
+      entrypoint: '/Users/kristinademeshchik/work/grafana/apps/dashboard/kinds/v1beta1'
+  - cue:
+      entrypoint: '/Users/kristinademeshchik/work/grafana/apps/dashboard/kinds/v2'
+  - cue:
+      entrypoint: '/Users/kristinademeshchik/work/grafana/apps/dashboard/kinds/v2alpha1'
+  - cue:
+      entrypoint: '/Users/kristinademeshchik/work/grafana/apps/dashboard/kinds/v2beta1'
+
+output:
+  directory: '%grafana_schema_dir%'
+
+  types: true
+
+  languages:
+    - zod:
+        # Files land directly under the directory above (no extra "src" prefix);
+        # the per-version subdir comes from the CUE package name.
+        path_prefix: ''
+        filename: 'types.spec.zod.gen.ts'
+
+        # Required string-literal fields (e.g. `kind: "Panel"` in CUE) are
+        # emitted as .optional().default("Panel"). 
+        optional_kind_literals: true
+
+        # Closed CUE structs are emitted without a mode modifier, so Zod's
+        # default `strip` behaviour applies: unknown keys are silently
+        # dropped instead of raising. Required for round-tripping legacy
+        # dashboards and forward-compatible mutation payloads. Open CUE
+        # structs (`...` / `[string]: _`) still emit as `.loose()`.
+        object_mode: strip
+
+        # Emit z.unknown() instead of z.any() for CUE's top type (`_`).
+        # Forces consumers to narrow before using the value, which is the
+        # safer default for an LLM-facing API.
+        prefer_unknown_for_any: true
+
+        # Emit .optional().default(X) for fields with a default, matching
+        # the explicit form used in handwritten Zod. Also gives a more
+        # accurate inferred output type for non-required fields (no
+        # spurious `| undefined`).
+        verbose_defaults: true

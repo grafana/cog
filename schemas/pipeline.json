@@ -273,6 +273,9 @@
         },
         "terraform": {
           "$ref": "#/$defs/TerraformConfig"
+        },
+        "zod": {
+          "$ref": "#/$defs/ZodConfig"
         }
       },
       "additionalProperties": false,
@@ -395,6 +398,10 @@
         "any_as_interface": {
           "type": "boolean",
           "description": "AnyAsInterface instructs this jenny to emit `interface{}` instead of `any`."
+        },
+        "generate_undiscriminated_disjunctions": {
+          "type": "boolean",
+          "description": "GenerateUndiscriminatedDisjunctions controls whether disjunctions of refs\nwithout a discriminator field are generated as a union struct type.\nWhen false (default), such disjunctions are emitted as interface{}/any."
         }
       },
       "additionalProperties": false,
@@ -422,6 +429,10 @@
         "skip_runtime": {
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `equals()` and `hashCode()` methods on types."
         },
         "generate_json_marshaller": {
           "type": "boolean",
@@ -463,6 +474,10 @@
         "namespace_root": {
           "type": "string"
         },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `equals()` methods on types."
+        },
         "generate_json_marshaller": {
           "type": "boolean",
           "description": "GenerateJSONMarshaller controls the generation of `fromArray()` and\n`jsonSerialize()` methods on types."
@@ -496,6 +511,10 @@
       "properties": {
         "path_prefix": {
           "type": "string"
+        },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `__eq__()` methods on types."
         },
         "generate_json_marshaller": {
           "type": "boolean",
@@ -550,6 +569,10 @@
           "type": "string",
           "description": "PathPrefix holds an optional prefix for all Typescript file paths generated.\nIf left undefined, `src` is used as a default prefix."
         },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `equalsTypeName()` functions for types."
+        },
         "skip_runtime": {
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
@@ -582,6 +605,40 @@
         "enums_as_union_types": {
           "type": "boolean",
           "description": "EnumsAsUnionTypes generates enums as a union of values instead of using\nan actual `enum` declaration.\nIf EnumsAsUnionTypes is false, an enum will be generated as:\n```ts\nenum Direction {\n  Up = \"up\",\n  Down = \"down\",\n  Left = \"left\",\n  Right = \"right\",\n}\n```\nIf EnumsAsUnionTypes is true, the same enum will be generated as:\n```ts\ntype Direction = \"up\" | \"down\" | \"left\" | \"right\";\n```"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ZodConfig": {
+      "properties": {
+        "path_prefix": {
+          "type": "string",
+          "description": "PathPrefix is the directory prefix for generated files. Defaults to \"src\"."
+        },
+        "filename": {
+          "type": "string",
+          "description": "Filename overrides the per-package output filename. Defaults to\n\"schemas.gen.ts\"."
+        },
+        "flat_layout": {
+          "type": "boolean",
+          "description": "FlatLayout drops the per-package directory and writes directly into\nPathPrefix. Useful when the consumer manages its own layout."
+        },
+        "optional_kind_literals": {
+          "type": "boolean",
+          "description": "OptionalKindLiterals turns required fields whose type is a concrete\nstring literal (e.g. `kind: \"Panel\"`) into `.optional().default(\"X\")`,\nso callers don't have to repeat the discriminator. The literal still\nconstrains values that are supplied. Implies VerboseDefaults so the\ngenerated file uses one form for every defaulted field."
+        },
+        "object_mode": {
+          "type": "string",
+          "description": "ObjectMode controls how unknown keys are handled at parse time:\n  - \"strip\" (default): unknown keys are silently dropped (Zod's default).\n  - \"strict\":          unknown keys cause parse errors.\n  - \"loose\":           unknown keys are kept on the parsed output."
+        },
+        "prefer_unknown_for_any": {
+          "type": "boolean",
+          "description": "PreferUnknownForAny emits `z.unknown()` instead of `z.any()` for CUE's\ntop type (`_`), forcing consumers to narrow before use."
+        },
+        "verbose_defaults": {
+          "type": "boolean",
+          "description": "VerboseDefaults emits defaulted fields as `.optional().default(X)`\nrather than `.default(X).optional()`. The verbose form fixes the\ninferred output type, which would otherwise include `undefined` even\nthough the default always fires. Implied by OptionalKindLiterals."
         }
       },
       "additionalProperties": false,

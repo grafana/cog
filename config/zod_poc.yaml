@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+# POC config for the Zod jenny.
+# Points at the dashboard v2beta1 CUE spec so we can compare the generated
+# Zod schemas against the existing handwritten/generated TS interfaces.
+
+debug: true
+
+parameters:
+  output_dir: './generated/zod'
+  v2beta1_path: '/Users/kristinademeshchik/work/grafana/apps/dashboard/kinds/v2beta1'
+
+inputs:
+  - cue:
+      entrypoint: '%v2beta1_path%'
+
+output:
+  directory: '%output_dir%'
+
+  types: true
+
+  languages:
+    - zod:
+        optional_kind_literals: true
