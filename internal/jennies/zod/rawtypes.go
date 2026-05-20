@@ -256,6 +256,12 @@ func (e *emitter) formatScalar(s ast.ScalarType) string {
 		return fmt.Sprintf("z.literal(%s)", formatLiteral(s.Value))
 	}
 
+	for _, c := range s.Constraints {
+		if c.Op == ast.EqualOp {
+			return fmt.Sprintf("z.literal(%s)", formatLiteral(c.Args[0]))
+		}
+	}
+
 	switch s.ScalarKind {
 	case ast.KindNull:
 		return "z.null()"
@@ -286,6 +292,8 @@ func applyStringConstraints(base string, cs []ast.TypeConstraint) string {
 			base += fmt.Sprintf(".max(%s)", formatLiteral(c.Args[0]))
 		case ast.RegexMatchOp:
 			base += fmt.Sprintf(".regex(new RegExp(%s))", formatLiteral(c.Args[0]))
+		case ast.NotRegexMatchOp:
+			base += fmt.Sprintf(".refine((value) => !(new RegExp(%s)).test(value), { message: %q })", formatLiteral(c.Args[0]), "String must not match forbidden pattern")
 		}
 	}
 	return base
@@ -304,6 +312,10 @@ func applyNumberConstraints(base string, cs []ast.TypeConstraint) string {
 			base += fmt.Sprintf(".gte(%s)", formatLiteral(c.Args[0]))
 		case ast.MultipleOfOp:
 			base += fmt.Sprintf(".multipleOf(%s)", formatLiteral(c.Args[0]))
+		case ast.NotEqualOp:
+			base += fmt.Sprintf(".refine((value) => value !== %s, { message: %q })", formatLiteral(c.Args[0]), "Value must not equal forbidden constant")
+		case ast.EqualOp:
+			base += fmt.Sprintf(".refine((value) => value === %s, { message: %q })", formatLiteral(c.Args[0]), "Value must equal required constant")
 		}
 	}
 	return base
@@ -349,6 +361,8 @@ func (e *emitter) formatArray(arr ast.ArrayType) string {
 			base += fmt.Sprintf(".min(%s)", formatLiteral(c.Args[0]))
 		case ast.MaxItemsOp:
 			base += fmt.Sprintf(".max(%s)", formatLiteral(c.Args[0]))
+		case ast.UniqueItemsOp:
+			base += `.refine((items) => new Set(items.map((item) => JSON.stringify(item))).size === items.length, { message: "Array items must be unique" })`
 		}
 	}
 	return base
