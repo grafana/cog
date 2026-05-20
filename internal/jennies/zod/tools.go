@@ -47,7 +47,10 @@ func formatLiteral(val any) string {
 	}
 	switch v := val.(type) {
 	case string:
-		b, _ := json.Marshal(v)
+		b, err := json.Marshal(v)
+		if err != nil {
+			return "null"
+		}
 		return string(b)
 	case bool:
 		return fmt.Sprintf("%t", v)
@@ -88,7 +91,10 @@ func quoteFieldName(name string) string {
 	if jsIdentifier.MatchString(name) {
 		return name
 	}
-	b, _ := json.Marshal(name)
+	b, err := json.Marshal(name)
+	if err != nil {
+		return `""`
+	}
 	return string(b)
 }
 
