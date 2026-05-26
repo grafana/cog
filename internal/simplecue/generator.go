@@ -395,6 +395,17 @@ func (g *generator) declareNode(v cue.Value) (ast.Type, error) {
 
 				return ast.NewMap(ast.String(), typeDef, ast.Hints(hints), ast.Default(defVal)), nil
 			}
+
+			// Try to detect [#SomeEnum]: T — enum-indexed map.
+			// Pass the original v (not evaluated) so v.Syntax() uses the
+			// conjunct-based exporter which preserves BulkOptionalField.
+			if !hasStructFields(evaluated) {
+				if mapType, found, err := g.tryDeclareEnumIndexedMap(v, hints, defVal); err != nil {
+					return ast.Type{}, err
+				} else if found {
+					return mapType, nil
+				}
+			}
 		}
 
 		fields, err := g.structFields(v)
@@ -1067,6 +1078,62 @@ func (g *generator) declareList(v cue.Value, defVal any, hints ast.JenniesHints)
 	typeDef.Array.ValueType = expr
 
 	return typeDef, nil
+}
+
+// tryDeclareEnumIndexedMap detects [#SomeEnum]: T patterns in a struct value
+// and generates the corresponding ast.Map type.
+func (g *generator) tryDeclareEnumIndexedMap(v cue.Value, hints ast.JenniesHints, defVal any) (ast.Type, bool, error) {
+	patternExpr, valueExpr, ok := bulkOptionalFieldFromSyntax(v)
+	if !ok {
+		return ast.Type{}, false, nil
+	}
+
+	indexType, err := g.resolveAstExprAsType(patternExpr)
+	if err != nil {
+		return ast.Type{}, false, err
+	}
+
+	valueType, err := g.resolveAstExprAsType(valueExpr)
+	if err != nil {
+		return ast.Type{}, false, err
+	}
+
+	return ast.NewMap(indexType, valueType, ast.Hints(hints), ast.Default(defVal)), true, nil
+}
+
+// resolveAstExprAsType converts a CUE AST expression to an ast.Type.
+//
+// For definition references (#Foo), it looks up the definition in rootVal and
+// returns a KindRef — bypassing CompileString which loses reference identity.
+// For all other expressions (scalar types, literals, disjunctions), it compiles
+// the expression with rootVal as scope and delegates to declareNode.
+func (g *generator) resolveAstExprAsType(expr cueast.Expr) (ast.Type, error) {
+	// Definition references: #Foo → KindRef{Foo}
+	if ident, ok := expr.(*cueast.Ident); ok && strings.HasPrefix(ident.Name, "#") {
+		parsedPath := cue.ParsePath(ident.Name)
+		refVal := g.rootVal.LookupPath(parsedPath)
+		if refVal.Err() != nil {
+			return ast.Type{}, fmt.Errorf("reference %q not found: %w", ident.Name, refVal.Err())
+		}
+		refName := g.namingFunc(g.rootVal, parsedPath)
+		if !g.schema.Objects.Has(refName) {
+			if err := g.declareObject(refName, refVal); err != nil {
+				return ast.Type{}, err
+			}
+		}
+		return ast.NewRef(g.schema.Package, refName), nil
+	}
+
+	// Scalar types and other expressions: compile with scope and use declareNode.
+	b, err := format.Node(expr)
+	if err != nil {
+		return ast.Type{}, fmt.Errorf("cannot format expression: %w", err)
+	}
+	compiled := g.rootVal.Context().CompileString(string(b), cue.Scope(g.rootVal))
+	if compiled.Err() != nil {
+		return ast.Type{}, fmt.Errorf("cannot compile expression %q: %w", string(b), compiled.Err())
+	}
+	return g.declareNode(compiled)
 }
 
 // removeTautologicalUnification simplifies CUE unifications

@@ -1,0 +1,187 @@
+{
+  "Package": "enums_as_map_index",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "StringEnum": {
+      "Name": "StringEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "c",
+              "Value": "c"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "enums_as_map_index",
+        "ReferredType": "StringEnum"
+      }
+    },
+    "StringEnumWithDefault": {
+      "Name": "StringEnumWithDefault",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Default": "a",
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "c",
+              "Value": "c"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "enums_as_map_index",
+        "ReferredType": "StringEnumWithDefault"
+      }
+    },
+    "SomeStruct": {
+      "Name": "SomeStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "data",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "enums_as_map_index",
+                      "ReferredType": "StringEnum"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "enums_as_map_index",
+        "ReferredType": "SomeStruct"
+      }
+    },
+    "SomeStructWithDefaultEnum": {
+      "Name": "SomeStructWithDefaultEnum",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "data",
+              "Type": {
+                "Kind": "map",
+                "Nullable": false,
+                "Map": {
+                  "IndexType": {
+                    "Kind": "ref",
+                    "Nullable": false,
+                    "Ref": {
+                      "ReferredPkg": "enums_as_map_index",
+                      "ReferredType": "StringEnumWithDefault"
+                    }
+                  },
+                  "ValueType": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "enums_as_map_index",
+        "ReferredType": "SomeStructWithDefaultEnum"
+      }
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "Package": "grafanatest",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "StringEnum": {
+      "Name": "StringEnum",
+      "Type": {
+        "Kind": "enum",
+        "Nullable": false,
+        "Enum": {
+          "Values": [
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "a",
+              "Value": "a"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "b",
+              "Value": "b"
+            },
+            {
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Name": "c",
+              "Value": "c"
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "StringEnum"
+      }
+    },
+    "SomeStruct": {
+      "Name": "SomeStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "field",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            }
+          ]
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "SomeStruct"
+      }
+    },
+    "EnumIndexedMap": {
+      "Name": "EnumIndexedMap",
+      "Type": {
+        "Kind": "map",
+        "Nullable": false,
+        "Map": {
+          "IndexType": {
+            "Kind": "ref",
+            "Nullable": false,
+            "Ref": {
+              "ReferredPkg": "grafanatest",
+              "ReferredType": "StringEnum"
+            }
+          },
+          "ValueType": {
+            "Kind": "scalar",
+            "Nullable": false,
+            "Scalar": {
+              "ScalarKind": "string"
+            }
+          }
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "EnumIndexedMap"
+      }
+    },
+    "EnumIndexedMapOfStructs": {
+      "Name": "EnumIndexedMapOfStructs",
+      "Type": {
+        "Kind": "map",
+        "Nullable": false,
+        "Map": {
+          "IndexType": {
+            "Kind": "ref",
+            "Nullable": false,
+            "Ref": {
+              "ReferredPkg": "grafanatest",
+              "ReferredType": "StringEnum"
+            }
+          },
+          "ValueType": {
+            "Kind": "ref",
+            "Nullable": false,
+            "Ref": {
+              "ReferredPkg": "grafanatest",
+              "ReferredType": "SomeStruct"
+            }
+          }
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "grafanatest",
+        "ReferredType": "EnumIndexedMapOfStructs"
+      }
+    }
+  }
+}
