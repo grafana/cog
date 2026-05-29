@@ -6,6 +6,7 @@ import (
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
 )
@@ -72,8 +73,10 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 		Schemas: schemas,
 	}
 
-	// apply  language-specific compiler passes
 	compilerPasses := language.CompilerPasses().Concat(pipeline.finalPasses())
+	compilerPasses = append(compilerPasses, &compiler.Verify{})
+
+	// apply language-specific compiler passes
 	jenniesInput.Schemas, err = compilerPasses.Process(jenniesInput.Schemas)
 	if err != nil {
 		return languages.Context{}, err
