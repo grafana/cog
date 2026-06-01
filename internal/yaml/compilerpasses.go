@@ -30,6 +30,7 @@ type CompilerPass struct {
 	TrimEnumValues           *TrimEnumValues           `yaml:"trim_enum_values"`
 	ConstantToEnum           *ConstantToEnum           `yaml:"constant_to_enum"`
 	ExtractK8ResourceNames   *CleanupK8ResourceNames   `yaml:"cleanup_k8_resource_names"`
+	TrimObjectNamePrefix     *TrimObjectNamePrefix     `yaml:"trim_object_name_prefix"`
 
 	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 
@@ -106,6 +107,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.ExtractK8ResourceNames != nil {
 		return pass.ExtractK8ResourceNames.AsCompilerPass()
+	}
+	if pass.TrimObjectNamePrefix != nil {
+		return pass.TrimObjectNamePrefix.AsCompilerPass()
 	}
 
 	if pass.AnonymousStructsToNamed != nil {
@@ -517,5 +521,15 @@ type CleanupK8ResourceNames struct {
 func (pass CleanupK8ResourceNames) AsCompilerPass() (*compiler.CleanupK8ResourceNames, error) {
 	return &compiler.CleanupK8ResourceNames{
 		PrefixToRemove: pass.PrefixToRemove,
+	}, nil
+}
+
+type TrimObjectNamePrefix struct {
+	Prefix string `yaml:"prefix"`
+}
+
+func (pass TrimObjectNamePrefix) AsCompilerPass() (*compiler.TrimObjectNamePrefix, error) {
+	return &compiler.TrimObjectNamePrefix{
+		Prefix: pass.Prefix,
 	}, nil
 }

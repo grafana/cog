@@ -384,6 +384,9 @@
         "cleanup_k8_resource_names": {
           "$ref": "#/$defs/YamlCleanupK8ResourceNames"
         },
+        "trim_object_name_prefix": {
+          "$ref": "#/$defs/YamlTrimObjectNamePrefix"
+        },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
         },
@@ -647,6 +650,15 @@
     },
     "YamlTrimEnumValues": {
       "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlTrimObjectNamePrefix": {
+      "properties": {
+        "prefix": {
+          "type": "string"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     },

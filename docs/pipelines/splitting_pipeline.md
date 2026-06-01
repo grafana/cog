@@ -100,7 +100,7 @@ builder_transformations:
             # yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/unit.json
             ```
 
-[units.json]: https://raw.githubusercontent.com/grafana/cog/main/schemas/units.json
+[unit.json]: https://raw.githubusercontent.com/grafana/cog/main/schemas/unit.json
 [vscode-yaml]: https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml
 [settings.json]: https://code.visualstudio.com/docs/getstarted/settings
 
