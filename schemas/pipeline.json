@@ -395,6 +395,10 @@
         "any_as_interface": {
           "type": "boolean",
           "description": "AnyAsInterface instructs this jenny to emit `interface{}` instead of `any`."
+        },
+        "generate_undiscriminated_disjunctions": {
+          "type": "boolean",
+          "description": "GenerateUndiscriminatedDisjunctions controls whether disjunctions of refs\nwithout a discriminator field are generated as a union struct type.\nWhen false (default), such disjunctions are emitted as interface{}/any."
         }
       },
       "additionalProperties": false,
@@ -422,6 +426,10 @@
         "skip_runtime": {
           "type": "boolean",
           "description": "SkipRuntime disables runtime-related code generation when enabled.\nNote: builders can NOT be generated with this flag turned on, as they\nrely on the runtime to function."
+        },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `equals()` and `hashCode()` methods on types."
         },
         "generate_json_marshaller": {
           "type": "boolean",
@@ -463,6 +471,10 @@
         "namespace_root": {
           "type": "string"
         },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `equals()` methods on types."
+        },
         "generate_json_marshaller": {
           "type": "boolean",
           "description": "GenerateJSONMarshaller controls the generation of `fromArray()` and\n`jsonSerialize()` methods on types."
@@ -496,6 +508,10 @@
       "properties": {
         "path_prefix": {
           "type": "string"
+        },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `__eq__()` methods on types."
         },
         "generate_json_marshaller": {
           "type": "boolean",
@@ -549,6 +565,10 @@
         "path_prefix": {
           "type": "string",
           "description": "PathPrefix holds an optional prefix for all Typescript file paths generated.\nIf left undefined, `src` is used as a default prefix."
+        },
+        "generate_equal": {
+          "type": "boolean",
+          "description": "GenerateEqual controls the generation of `equalsTypeName()` functions for types."
         },
         "skip_runtime": {
           "type": "boolean",

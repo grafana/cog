@@ -634,6 +634,9 @@
         },
         "debug": {
           "$ref": "#/$defs/YamlDebugBuilder"
+        },
+        "set_as_generic": {
+          "$ref": "#/$defs/YamlSetAsGeneric"
         }
       },
       "additionalProperties": false,
@@ -1080,6 +1083,25 @@
         },
         "as": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlSetAsGeneric": {
+      "properties": {
+        "by_object": {
+          "type": "string"
+        },
+        "by_name": {
+          "type": "string"
+        },
+        "by_variant": {
+          "type": "string"
+        },
+        "generated_from_disjunction": {
+          "type": "boolean",
+          "description": "noop?"
         }
       },
       "additionalProperties": false,

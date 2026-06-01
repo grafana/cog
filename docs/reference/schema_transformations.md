@@ -372,6 +372,31 @@ It could happen when they add them by mistake in jsonschema/openapi when they de
 trim_enum_values: {}
 ```
 
+## `trim_object_name_prefix`
+
+TrimObjectNamePrefix removes the given prefix from every object's name.
+
+### Usage
+
+```yaml
+trim_object_name_prefix:
+  prefix: string
+```
+
+## `undiscriminated_disjunction_to_any`
+
+UndiscriminatedDisjunctionToAny turns any undiscriminated disjunction into
+the `any` type.
+Disjunctions of scalars are not impacted, disjunctions having a configured
+discriminator field and mapping are not impacted (see DisjunctionInferMapping).
+Note: this pass _should_ run after DisjunctionInferMapping.
+
+### Usage
+
+```yaml
+undiscriminated_disjunction_to_any: {}
+```
+
 ## `unspec`
 
 Unspec removes the Kubernetes-style envelope added by kindsys.
