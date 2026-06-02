@@ -50,6 +50,7 @@ compose:
   plugin_discriminator_field: string
   exclude_options: []string
   composition_map: map[string]string
+  initialize_composition_map: bool
   composed_builder_name: string
   preserve_original_builders: bool
   rename_options: map[string]string

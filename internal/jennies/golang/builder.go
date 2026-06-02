@@ -67,12 +67,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
-	constructorName := "New" + formatObjectName(builder.For.SelfRef.ReferredType)
-	constructorPkg := jenny.typeImportMapper(builder.For.SelfRef.ReferredPkg)
-	if constructorPkg != "" {
-		constructorName = constructorPkg + "." + constructorName
-	}
-
 	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
 		Name: "Build",
 		Comments: []string{
@@ -93,6 +87,16 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			}),
 			Return: "*" + builder.Name + "Builder",
 		})
+	}
+
+	constructorFor := func(ref *ast.RefType) string {
+		constructorName := "New" + formatObjectName(ref.ReferredType)
+		constructorPkg := jenny.typeImportMapper(ref.ReferredPkg)
+		if constructorPkg != "" {
+			constructorName = constructorPkg + "." + constructorName
+		}
+
+		return constructorName
 	}
 
 	return jenny.Tmpl.
@@ -128,13 +132,14 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 
 				return formatted
 			},
+			"constructorFor": constructorFor,
 		}).
 		RenderAsBytes("builders/builder.tmpl", map[string]any{
 			"Builder":              builder,
 			"BuilderSignatureType": buildObjectSignature,
 			"Imports":              imports,
 			"ObjectName":           fullObjectName,
-			"ConstructorName":      constructorName,
+			"ConstructorName":      constructorFor(&builder.For.SelfRef),
 		})
 }
 

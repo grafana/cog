@@ -693,6 +693,9 @@
           },
           "type": "object"
         },
+        "initialize_composition_map": {
+          "type": "boolean"
+        },
         "composed_builder_name": {
           "type": "string"
         },

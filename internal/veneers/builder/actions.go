@@ -158,6 +158,16 @@ func composeBuilderForType(schemas ast.Schemas, config CompositionConfig, typeDi
 			return nil, err
 		}
 
+		if config.InitializeCompositionMap {
+			newBuilder.Constructor.Assignments = append(newBuilder.Constructor.Assignments, ast.Assignment{
+				Path:   newRoot,
+				Method: ast.DirectAssignment,
+				Value: ast.AssignmentValue{
+					ConstructorFor: refType.Ref,
+				},
+			})
+		}
+
 		// we do this to ensure that the same builder can be composed more than once
 		// ie: dashboard and dashboardv2 packages
 		if config.PreserveOriginalBuilders {
@@ -261,6 +271,17 @@ type CompositionConfig struct {
 	// }
 	// ```
 	CompositionMap map[string]string
+
+	// InitializeCompositionMap indicates that each path in the composition map
+	// must be initialized with a call to the constructor of the type associated
+	// to it.
+	//
+	// Example:
+	// ```go
+	// builder.internal.Spec.Options = NewOptions()
+	// builder.internal.Spec.FieldConfig.Defaults.Custom = NewFieldConfig()
+	// ```
+	InitializeCompositionMap bool
 
 	// ExcludeOptions lists option names to exclude in the resulting
 	// composed builders.

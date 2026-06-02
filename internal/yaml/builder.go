@@ -133,6 +133,7 @@ type ComposeBuilders struct {
 	PluginDiscriminatorField string            `yaml:"plugin_discriminator_field"`
 	ExcludeOptions           []string          `yaml:"exclude_options"`
 	CompositionMap           map[string]string `yaml:"composition_map"`
+	InitializeCompositionMap bool              `yaml:"initialize_composition_map"`
 	ComposedBuilderName      string            `yaml:"composed_builder_name"`
 	PreserveOriginalBuilders bool              `yaml:"preserve_original_builders"`
 	RenameOptions            map[string]string `yaml:"rename_options"`
@@ -149,6 +150,7 @@ func (rule ComposeBuilders) AsRule(pkg string) (*builder.Rule, error) {
 		PluginDiscriminatorField: rule.PluginDiscriminatorField,
 		ExcludeOptions:           rule.ExcludeOptions,
 		CompositionMap:           rule.CompositionMap,
+		InitializeCompositionMap: rule.InitializeCompositionMap,
 		ComposedBuilderName:      rule.ComposedBuilderName,
 		PreserveOriginalBuilders: rule.PreserveOriginalBuilders,
 		RenameOptions:            rule.RenameOptions,
