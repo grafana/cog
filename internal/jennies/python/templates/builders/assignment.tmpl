@@ -61,6 +61,8 @@ assert {{ range $i, $branch := .Type.Disjunction.Branches }}isinstance({{ $name 
 {{- with .Value.Envelope }}
 {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
 {{- end }}
+{{- else if .Value.ConstructorFor }}
+{{- .Value.ConstructorFor.AsType|formatRawType }}()
 {{- else }}
 {{- formatValue .IntoType .Value.Constant }}
 {{- end }}

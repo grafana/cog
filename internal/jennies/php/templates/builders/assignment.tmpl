@@ -32,6 +32,8 @@
         {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
         {{- end }}
+    {{- else if .Value.ConstructorFor -}}
+        new {{ .Value.ConstructorFor.AsType|formatRawType }}()
     {{- else }}
         {{- formatValue .IntoType .Value.Constant }}
     {{- end }}

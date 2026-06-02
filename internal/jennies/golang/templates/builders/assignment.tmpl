@@ -31,6 +31,8 @@
         {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
         {{- end }}
+    {{- else if .Value.ConstructorFor }}
+        {{- .Value.ConstructorFor|constructorFor }}()
     {{- else }}
         {{- if isNullableNonArray .Assignment.Path.Last.Type }}
             {{- print "&val" (.Assignment.Path.Last.Identifier | upperCamelCase) }}

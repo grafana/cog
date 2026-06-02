@@ -380,9 +380,10 @@ func (envelope *AssignmentEnvelope) DeepCopy() AssignmentEnvelope {
 }
 
 type AssignmentValue struct {
-	Argument *Argument           `json:",omitempty"`
-	Constant any                 `json:",omitempty"`
-	Envelope *AssignmentEnvelope `json:",omitempty"`
+	Argument       *Argument           `json:",omitempty"`
+	Constant       any                 `json:",omitempty"`
+	Envelope       *AssignmentEnvelope `json:",omitempty"`
+	ConstructorFor *RefType            `json:",omitempty"`
 }
 
 func (value *AssignmentValue) DeepCopy() AssignmentValue {
@@ -398,6 +399,11 @@ func (value *AssignmentValue) DeepCopy() AssignmentValue {
 	if value.Envelope != nil {
 		envelope := value.Envelope.DeepCopy()
 		clone.Envelope = &envelope
+	}
+
+	if value.ConstructorFor != nil {
+		ref := value.ConstructorFor.DeepCopy()
+		clone.ConstructorFor = &ref
 	}
 
 	return clone

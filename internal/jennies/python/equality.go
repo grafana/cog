@@ -24,13 +24,13 @@ func (jenny equalityMethods) generateForObject(object ast.Object) string {
 	objectName := formatObjectName(object.Name)
 	var buffer strings.Builder
 
-	buffer.WriteString(fmt.Sprintf("    def __eq__(self, other: object) -> bool:\n"))
-	buffer.WriteString(fmt.Sprintf("        if not isinstance(other, %s):\n", objectName))
+	fmt.Fprintf(&buffer, "    def __eq__(self, other: object) -> bool:\n")
+	fmt.Fprintf(&buffer, "        if not isinstance(other, %s):\n", objectName)
 	buffer.WriteString("            return False\n")
 
 	for _, field := range object.Type.AsStruct().Fields {
 		fieldName := formatIdentifier(field.Name)
-		buffer.WriteString(fmt.Sprintf("        if self.%s != other.%s:\n", fieldName, fieldName))
+		fmt.Fprintf(&buffer, "        if self.%s != other.%s:\n", fieldName, fieldName)
 		buffer.WriteString("            return False\n")
 	}
 

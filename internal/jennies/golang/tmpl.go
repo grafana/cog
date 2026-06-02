@@ -67,6 +67,9 @@ func initTemplates(config Config, apiRefCollector *common.APIReferenceCollector)
 			"toGoIdent": func(_ string) string {
 				panic("toGoIdent() needs to be overridden by a jenny")
 			},
+			"constructorFor": func(ref *ast.RefType) string {
+				panic("constructorFor() needs to be overridden by a jenny")
+			},
 			"formatValue": func(destinationType ast.Type, value any) string {
 				panic("formatValue() needs to be overridden by a jenny")
 			},

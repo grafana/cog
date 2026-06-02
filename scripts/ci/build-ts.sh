@@ -9,4 +9,6 @@ set -o nounset
 # Catch the error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
 set -o pipefail
 
-tsc generated/typescript/src/*/*.ts
+cd generated/typescript 
+
+yarn install && yarn build

@@ -74,7 +74,6 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	jenny.importModule("cogbuilder", "..cog", "builder")
 
 	fullObjectName := jenny.typeFormatter.formatRef(builder.For.SelfRef)
-	buildObjectSignature := fullObjectName
 
 	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
 		Name: "build",
@@ -132,8 +131,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 			},
 		}).
 		RenderAsBytes("builders/builder.tmpl", map[string]any{
-			"Builder":              builder,
-			"BuilderSignatureType": buildObjectSignature,
-			"ObjectName":           fullObjectName,
+			"Builder":    builder,
+			"ObjectName": fullObjectName,
 		})
 }
