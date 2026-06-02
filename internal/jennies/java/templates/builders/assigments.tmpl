@@ -56,6 +56,8 @@
         {{- with .Value.Envelope }}
         {{- .Type | formatType | lowerCamelCase }}
         {{- end }}
+    {{- else if .Value.ConstructorFor }}
+        {{- .Value.ConstructorFor.AsType|emptyValueForType}}
     {{- else }}
         {{- formatRefType .IntoType .Value.Constant }}
     {{- end }}
