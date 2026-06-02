@@ -148,7 +148,7 @@ func (jenny RawTypes) formatObject(context languages.Context, schema *ast.Schema
 
 		buffer.WriteString(enum)
 	case ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type)))
+		fmt.Fprintf(&buffer, "class %s extends %s {}", defName, jenny.typeFormatter.formatType(def.Type))
 	case ast.KindStruct:
 		structDef, err := jenny.formatStructDef(context, schema, def)
 		if err != nil {
@@ -182,11 +182,11 @@ func (jenny RawTypes) formatStructDef(context languages.Context, schema *ast.Sch
 		variant = ", " + jenny.config.fullNamespaceRef("Cog\\"+formatObjectName(object.Type.ImplementedVariant()))
 	}
 
-	buffer.WriteString(fmt.Sprintf("class %s", formatObjectName(object.Name)))
+	fmt.Fprintf(&buffer, "class %s", formatObjectName(object.Name))
 	if jenny.config.GenerateJSONMarshaller {
 		buffer.WriteString(" implements \\JsonSerializable")
 	}
-	buffer.WriteString(fmt.Sprintf("%s\n{\n", variant))
+	fmt.Fprintf(&buffer, "%s\n{\n", variant)
 
 	for _, fieldDef := range object.Type.Struct.Fields {
 		buffer.WriteString(tools.Indent(jenny.typeFormatter.formatField(fieldDef), 4))
@@ -352,7 +352,7 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 		buffer.WriteString(formatCommentsBlock(typeAnnotations))
 	}
 
-	buffer.WriteString(fmt.Sprintf("public function __construct(%s)\n", strings.Join(args, ", ")))
+	fmt.Fprintf(&buffer, "public function __construct(%s)\n", strings.Join(args, ", "))
 	buffer.WriteString("{\n")
 
 	buffer.WriteString(strings.Join(assignments, "\n"))
@@ -398,7 +398,7 @@ func (jenny RawTypes) generateFromJSON(context languages.Context, def ast.Object
 	buffer.WriteString("public static function fromArray(array $inputData): self\n")
 	buffer.WriteString("{\n")
 	if len(constructorArgs) != 0 {
-		buffer.WriteString(fmt.Sprintf("    /** @var %s $inputData */\n", jenny.shaper.typeShape(def.Type)))
+		fmt.Fprintf(&buffer, "    /** @var %s $inputData */\n", jenny.shaper.typeShape(def.Type))
 		buffer.WriteString("    $data = $inputData;\n")
 	}
 	buffer.WriteString("    return new self(\n")
@@ -491,7 +491,7 @@ func (jenny RawTypes) unmarshalRefFunc(context languages.Context, refDef ast.Typ
 	case found && referredObject.Type.IsEnum():
 		return fmt.Sprintf(`(function($input) { return %[1]s::fromValue($input); })`, formattedRef)
 	case found && referredObject.Type.IsRef():
-		assignment := fmt.Sprintf("/** @var array<string, mixed> */\n")
+		assignment := "/** @var array<string, mixed> */\n"
 		assignment += "$val = $input;"
 
 		return fmt.Sprintf(`(function($input) {
@@ -647,7 +647,7 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 			continue
 		}
 
-		buffer.WriteString(fmt.Sprintf(`    $data->%s = $this->%s;`+"\n", field.Name, formatFieldName(field.Name)))
+		fmt.Fprintf(&buffer, `    $data->%s = $this->%s;`+"\n", field.Name, formatFieldName(field.Name))
 	}
 
 	for _, field := range def.Type.AsStruct().Fields {
@@ -657,8 +657,8 @@ func (jenny RawTypes) generateJSONSerialize(def ast.Object) string {
 
 		fieldName := formatFieldName(field.Name)
 
-		buffer.WriteString(fmt.Sprintf("    if (isset($this->%s)) {\n", fieldName))
-		buffer.WriteString(fmt.Sprintf(`        $data->%s = $this->%s;`+"\n", field.Name, fieldName))
+		fmt.Fprintf(&buffer, "    if (isset($this->%s)) {\n", fieldName)
+		fmt.Fprintf(&buffer, `        $data->%s = $this->%s;`+"\n", field.Name, fieldName)
 		buffer.WriteString("    }\n")
 	}
 
