@@ -117,22 +117,22 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 
 	tmpl := initTemplates(language.config, language.apiRefCollector)
 
-	jenny := codejen.JennyListWithNamer[languages.Context](func(_ languages.Context) string {
+	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
 	jenny.AppendOneToMany(
-		common.If[languages.Context](!language.config.SkipRuntime, Runtime{config: language.config}),
+		common.If(!language.config.SkipRuntime, Runtime{config: language.config}),
 
-		common.If[languages.Context](globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl}),
-		common.If[languages.Context](!language.config.SkipRuntime && globalConfig.Builders, &Builder{
+		common.If(globalConfig.Types, RawTypes{config: language.config, tmpl: tmpl}),
+		common.If(!language.config.SkipRuntime && globalConfig.Builders, &Builder{
 			config:          language.config,
 			tmpl:            tmpl,
 			apiRefCollector: language.apiRefCollector,
 		}),
 
-		common.If[languages.Context](!language.config.SkipIndex, Index{config: language.config, Targets: globalConfig}),
+		common.If(!language.config.SkipIndex, Index{config: language.config, Targets: globalConfig}),
 
-		common.If[languages.Context](globalConfig.APIReference, common.APIReference{
+		common.If(globalConfig.APIReference, common.APIReference{
 			Collector: language.apiRefCollector,
 			Language:  LanguageRef,
 			Formatter: apiReferenceFormatter(language.config),

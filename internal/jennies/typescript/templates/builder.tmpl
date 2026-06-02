@@ -94,6 +94,8 @@ export class {{ .Builder.Name|upperCamelCase }}Builder implements cog.Builder<{{
         {{- with .Value.Envelope }}
         {{- template "value_envelope" (dict "Assignment" $.Assignment "Envelope" .) }}
         {{- end }}
+    {{- else if .Value.ConstructorFor }}
+        {{- .Value.ConstructorFor.AsType | defaultValueForType }}
     {{- else }}
         {{- formatValue .Assignment.Path.Last.Type .Value.Constant }}
     {{- end }}
