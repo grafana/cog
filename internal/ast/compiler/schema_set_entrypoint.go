@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -15,6 +17,10 @@ func (pass *SchemaSetEntrypoint) Process(schemas []*ast.Schema) ([]*ast.Schema, 
 	for _, schema := range schemas {
 		if schema.Package != pass.Package {
 			continue
+		}
+
+		if !schema.HasObject(pass.EntryPoint) {
+			return nil, fmt.Errorf("can not use %s as entrypoint for schema %s: object not found", pass.EntryPoint, pass.Package)
 		}
 
 		schema.EntryPoint = pass.EntryPoint

@@ -89,6 +89,9 @@ func doInspect(ctx context.Context, logger *slog.Logger, opts options) error {
 		return err
 	}
 
+	// To ensure we won't build bother with builder-related things when building the context.
+	pipeline.Output.Builders = opts.IRType == "builders"
+
 	language, err := inspectedLanguage(pipeline, opts)
 	if err != nil {
 		return err
