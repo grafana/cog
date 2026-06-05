@@ -1,0 +1,9 @@
+{
+    "name": "grafana/cog",
+    "type": "project",
+    "require-dev": {
+        "phpstan/phpstan": "^2.2"
+    },
+    "license": "Apache-2.0",
+    "require": {}
+}
