@@ -168,6 +168,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 		&compiler.DisjunctionInferMapping{},
 		&compiler.UndiscriminatedDisjunctionToAny{},
 		&compiler.RemoveIntersections{},
+		&compiler.DisjunctionPropagateVariant{},
 		&compiler.InlineObjectsWithTypes{
 			InlineTypes: []ast.Kind{ast.KindScalar, ast.KindArray, ast.KindMap, ast.KindDisjunction},
 		},
