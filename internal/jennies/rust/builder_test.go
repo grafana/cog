@@ -22,23 +22,23 @@ func TestBuilder_Generate(t *testing.T) {
 		// implemented in a later chunk (delegation, factories, envelopes, variants,
 		// array-append, constraints, anonymous structs, etc).
 		Skip: map[string]string{
-			"anonymous_struct":                  "anonymous structs out of scope for Phase 4a",
-			"builder_delegation":                "builder delegation out of scope for Phase 4a",
-			"builder_delegation_in_disjunction": "builder delegation out of scope for Phase 4a",
+			"anonymous_struct": "anonymous structs out of scope for Phase 4a",
+			// builder_delegation_in_disjunction stays skipped: its delegated arguments
+			// are inline disjunctions (e.g. Builder<T> | string), which have no clean
+			// idiomatic-Rust delegation bound. The Rust target does not run the
+			// DisjunctionToType compiler pass, so these never become named union types.
+			// This matches the Go target, which also skips the fixture.
+			"builder_delegation_in_disjunction": "inline-disjunction delegation has no idiomatic Rust mapping (Rust skips DisjunctionToType)",
 			"composable_slot":                   "composable slots out of scope for Phase 4a",
 			"dashboard_panel":                   "out of scope for Phase 4a",
 			"dataquery_variant_builder":         "variants out of scope for Phase 4a",
 			"envelope_assignment":               "envelopes out of scope for Phase 4a",
 			"factories":                         "factories out of scope for Phase 4a",
-			"foreign_builder":                   "out of scope for Phase 4a",
 			"initialization_safeguards":         "nil-check guards out of scope for Phase 4a",
-			"map_of_builders":                   "builder delegation out of scope for Phase 4a",
 			"map_of_disjunctions":               "out of scope for Phase 4a",
 			"package-with-dashes":               "out of scope for Phase 4a",
 			"panel_builders":                    "out of scope for Phase 4a",
-			"references":                        "out of scope for Phase 4a",
 			"struct_fields_as_args_assignment":  "out of scope for Phase 4a",
-			"struct_with_defaults":              "builder delegation + anonymous struct args out of scope for Phase 4a",
 		},
 	}
 

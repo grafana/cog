@@ -98,12 +98,20 @@ func (jenny Builder) generateBuilder(context languages.Context, builder ast.Buil
 	formatter.importSamePackageRefs = true
 
 	objectType := formatTypeName(builder.For.Name)
-	builderType := objectType + "Builder"
+	// The builder struct is named after the builder (which can differ from the
+	// object it builds: a foreign builder lives in one package and builds a type in
+	// another, e.g. SomeNiceBuilder builds some_pkg::SomeStruct).
+	builderType := formatTypeName(builder.Name) + "Builder"
 
-	// The object lives in the builder's own module under crate::types so the
-	// builder can name it without a same-package short name (the builder module
-	// is distinct from the types module).
-	objectPath := fmt.Sprintf("crate::types::%s::%s", formatter.packageName, objectType)
+	// The object lives in its own (possibly foreign) package under crate::types, so
+	// resolve the path from the builder's For.SelfRef rather than assuming the
+	// builder's own package. The builder module is distinct from the types module,
+	// so the object is always imported explicitly.
+	objectPkg := formatter.packageName
+	if builder.For.SelfRef.ReferredPkg != "" {
+		objectPkg = formatPackageName(builder.For.SelfRef.ReferredPkg)
+	}
+	objectPath := fmt.Sprintf("crate::types::%s::%s", objectPkg, objectType)
 	imports.Add(objectPath)
 
 	var body strings.Builder
@@ -193,15 +201,37 @@ func (jenny Builder) rejectUnsupported(context languages.Context, builder ast.Bu
 		if len(assignment.NilChecks) != 0 && !isKnownAnyPath(assignment.Path) {
 			return fmt.Errorf("rust builder %q: nil-check guards are not supported until a later phase", builder.Name)
 		}
-		// A direct assignment of an option argument whose type resolves to a struct
-		// with its own builder is builder delegation, handled in a later chunk. A
-		// ref to an enum (no builder) is a plain value assignment and is in scope.
+		// Builder delegation (an option argument whose type, or a collection's
+		// element type, resolves to a builder) is in scope as of Phase 4d for the
+		// ref / array-of-ref / map-of-ref shapes. A disjunction-typed delegated
+		// argument (e.g. `Builder<T> | string`) has no clean idiomatic-Rust mapping
+		// and is rejected (its fixture is skipped, matching the Go target which
+		// eliminates disjunctions via a compiler pass the Rust target does not run).
 		if assignment.Value.Argument != nil && context.ResolveToBuilder(assignment.Value.Argument.Type) {
-			return fmt.Errorf("rust builder %q: ref-typed option arguments (builder delegation) are not supported until a later phase", builder.Name)
+			if !isDelegableType(assignment.Value.Argument.Type) {
+				return fmt.Errorf("rust builder %q: disjunction-typed builder delegation is not supported", builder.Name)
+			}
 		}
 	}
 
 	return nil
+}
+
+// isDelegableType reports whether a builder-valued type can be rendered with the
+// `impl cog::Builder<T>` delegation shape: a bare ref, or an array/map whose
+// (recursive) element type is a delegable ref. A disjunction branch is not
+// delegable (no single static builder bound exists for it).
+func isDelegableType(def ast.Type) bool {
+	switch {
+	case def.IsArray():
+		return isDelegableType(def.AsArray().ValueType)
+	case def.IsMap():
+		return isDelegableType(def.AsMap().ValueType)
+	case def.IsRef():
+		return true
+	default:
+		return false
+	}
 }
 
 // formatConstructor emits `new`. When the constructor takes no arguments the
@@ -213,7 +243,7 @@ func (jenny Builder) formatConstructor(formatter *typeFormatter, context languag
 
 	fmt.Fprintf(&buffer, "impl %s {\n", builderType)
 
-	args := jenny.formatArgs(formatter, builder.Constructor.Args)
+	args := jenny.formatArgs(formatter, builder.Constructor.Args, context)
 	fmt.Fprintf(&buffer, "    pub fn new(%s) -> Self {\n", args)
 
 	if len(builder.Constructor.Assignments) == 0 {
@@ -274,14 +304,24 @@ func (jenny Builder) formatOption(formatter *typeFormatter, context languages.Co
 	var buffer strings.Builder
 
 	buffer.WriteString(formatComments(option.Comments, ""))
-	fmt.Fprintf(&buffer, "impl %sBuilder {\n", formatTypeName(builder.For.Name))
+	fmt.Fprintf(&buffer, "impl %sBuilder {\n", formatTypeName(builder.Name))
 
-	args := jenny.formatArgs(formatter, option.Args)
+	args := jenny.formatArgs(formatter, option.Args, context)
 	methodName := formatFieldName(option.Name)
 	if args == "" {
 		fmt.Fprintf(&buffer, "    pub fn %s(mut self) -> Self {\n", methodName)
 	} else {
-		fmt.Fprintf(&buffer, "    pub fn %s(mut self, %s) -> Self {\n", methodName, args)
+		// rustfmt keeps the signature on one line only while it fits the 100-column
+		// max width; beyond that it puts each parameter (including `mut self`) on its
+		// own line. Emit the form rustfmt would settle on so the golden is
+		// `cargo fmt --check` clean (builder-delegated args can be long, e.g. a
+		// nested `Vec<Vec<impl cog::Builder<T>>>`).
+		signature := fmt.Sprintf("    pub fn %s(mut self, %s) -> Self {\n", methodName, args)
+		if len(signature)-1 <= 100 {
+			buffer.WriteString(signature)
+		} else {
+			fmt.Fprintf(&buffer, "    pub fn %s(\n        mut self,\n        %s,\n    ) -> Self {\n", methodName, args)
+		}
 	}
 
 	for _, assignment := range option.Assignments {
@@ -424,13 +464,22 @@ func (jenny Builder) formatBuild(builderType, objectType string) string {
 // formatArgs renders a method/constructor argument list. Argument types are
 // rendered through the shared type formatter, so cross-package refs and
 // collections match the rawtypes output exactly.
-func (jenny Builder) formatArgs(formatter *typeFormatter, args []ast.Argument) string {
+func (jenny Builder) formatArgs(formatter *typeFormatter, args []ast.Argument, context languages.Context) string {
 	if len(args) == 0 {
 		return ""
 	}
 	parts := make([]string, 0, len(args))
 	for _, arg := range args {
-		parts = append(parts, fmt.Sprintf("%s: %s", formatArgName(arg.Name), formatter.formatType(arg.Type)))
+		argType := formatter.formatType(arg.Type)
+		// An argument whose value is produced by a nested builder (its type, or a
+		// collection's element type, resolves to a builder) is rendered with the
+		// generic `impl cog::Builder<T>` bound, mirroring the Go target's
+		// `cog.Builder[T]` arg. The setter calls build() on it (see
+		// formatDelegatedAssignment).
+		if context.ResolveToBuilder(arg.Type) {
+			argType = formatter.formatBuilderArgType(arg.Type)
+		}
+		parts = append(parts, fmt.Sprintf("%s: %s", formatArgName(arg.Name), argType))
 	}
 	return strings.Join(parts, ", ")
 }
@@ -452,6 +501,15 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 	}
 
 	field := assignment.Path[0]
+
+	// Builder delegation: the option argument is itself produced by one or more
+	// nested builders. The setter calls build() on the argument (or each element of
+	// a collection of builders), accumulating any errors and assigning the built
+	// value(s).
+	if assignment.Value.Argument != nil && context.ResolveToBuilder(assignment.Value.Argument.Type) {
+		return jenny.formatDelegatedAssignment(field, assignment.Value.Argument, receiver)
+	}
+
 	fieldName := formatFieldName(field.Identifier)
 	value := jenny.formatValue(formatter, context, field.Type, assignment.Value)
 
@@ -459,6 +517,84 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 		return fmt.Sprintf("%s.internal.%s = Some(%s);", receiver, fieldName, value)
 	}
 	return fmt.Sprintf("%s.internal.%s = %s;", receiver, fieldName, value)
+}
+
+// formatDelegatedAssignment renders builder delegation: the option argument is a
+// builder (or a collection of builders) whose build() produces the value(s)
+// assigned to the field. Errors are accumulated into <receiver>.errors and, on
+// the first failure, the setter returns early - mirroring the Go target, which
+// appends the built builder's errors and `return`s the builder rather than
+// continuing. (Early return keeps the partially-built object untouched by a
+// failed delegation and avoids inserting a zero value; build() will surface the
+// accumulated errors.)
+//
+// The destination field type drives the shape: a single ref builds one value; an
+// array builds a Vec (nested arrays recurse); a map builds a HashMap. An
+// Option-wrapped destination is assigned Some(value).
+func (jenny Builder) formatDelegatedAssignment(field ast.PathItem, arg *ast.Argument, receiver string) string {
+	fieldName := formatFieldName(field.Identifier)
+	argName := formatArgName(arg.Name)
+
+	const indent = "        "
+	var buffer strings.Builder
+
+	// Every statement is emitted fully indented; the caller prefixes the block's
+	// first line with the same indentation, so the leading indent of the first line
+	// is trimmed before returning to avoid a double indent.
+	value := jenny.formatDelegatedValue(&buffer, field.Type, argName, receiver, indent, 0)
+
+	if isOptionWrapped(field.Type) {
+		fmt.Fprintf(&buffer, "%s%s.internal.%s = Some(%s);", indent, receiver, fieldName, value)
+	} else {
+		fmt.Fprintf(&buffer, "%s%s.internal.%s = %s;", indent, receiver, fieldName, value)
+	}
+	return strings.TrimPrefix(buffer.String(), indent)
+}
+
+// formatDelegatedValue writes the statements needed to build the delegated value
+// of destType from the source `expr` (a builder, or a collection of builders),
+// emitting an error-accumulating match for each build() call, and returns the
+// Rust expression holding the built result. Every emitted line carries `indent`;
+// the returned expression is spliced into the caller's assignment line. Nested
+// loops carry `depth` so their bindings never collide.
+func (jenny Builder) formatDelegatedValue(buffer *strings.Builder, destType ast.Type, expr, receiver, indent string, depth int) string {
+	switch {
+	case destType.IsArray():
+		elem := destType.AsArray().ValueType
+		// Build each element with a for-loop, pushing onto a fresh Vec. A nested
+		// array recurses (the inner build runs per innermost builder).
+		built := fmt.Sprintf("built%d", depth)
+		item := fmt.Sprintf("item%d", depth)
+		fmt.Fprintf(buffer, "%slet mut %s = Vec::new();\n", indent, built)
+		fmt.Fprintf(buffer, "%sfor %s in %s {\n", indent, item, expr)
+		inner := jenny.formatDelegatedValue(buffer, elem, item, receiver, indent+"    ", depth+1)
+		fmt.Fprintf(buffer, "%s    %s.push(%s);\n", indent, built, inner)
+		fmt.Fprintf(buffer, "%s}\n", indent)
+		return built
+	case destType.IsMap():
+		valueType := destType.AsMap().ValueType
+		built := fmt.Sprintf("built%d", depth)
+		key := fmt.Sprintf("key%d", depth)
+		item := fmt.Sprintf("item%d", depth)
+		fmt.Fprintf(buffer, "%slet mut %s = std::collections::HashMap::new();\n", indent, built)
+		fmt.Fprintf(buffer, "%sfor (%s, %s) in %s {\n", indent, key, item, expr)
+		inner := jenny.formatDelegatedValue(buffer, valueType, item, receiver, indent+"    ", depth+1)
+		fmt.Fprintf(buffer, "%s    %s.insert(%s, %s);\n", indent, built, key, inner)
+		fmt.Fprintf(buffer, "%s}\n", indent)
+		return built
+	default:
+		// A single builder: build() it, accumulating errors and returning early on
+		// failure, then bind the built value.
+		binding := fmt.Sprintf("built%d", depth)
+		fmt.Fprintf(buffer, "%slet %s = match %s.build() {\n", indent, binding, expr)
+		fmt.Fprintf(buffer, "%s    Ok(val) => val,\n", indent)
+		fmt.Fprintf(buffer, "%s    Err(mut err) => {\n", indent)
+		fmt.Fprintf(buffer, "%s        %s.errors.append(&mut err);\n", indent, receiver)
+		fmt.Fprintf(buffer, "%s        return %s;\n", indent, receiver)
+		fmt.Fprintf(buffer, "%s    }\n", indent)
+		fmt.Fprintf(buffer, "%s};\n", indent)
+		return binding
+	}
 }
 
 // isAppendPath reports the append shape: a single, non-indexed path element

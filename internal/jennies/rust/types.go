@@ -126,6 +126,30 @@ func (formatter *typeFormatter) formatRef(ref ast.RefType) string {
 	return typeName
 }
 
+// formatBuilderArgType renders a builder-valued option argument's type. A ref
+// whose target has a builder becomes `impl cog::Builder<T>` (the idiomatic Rust
+// equivalent of Go's `cog.Builder[T]`); a collection of builders becomes
+// Vec<...>/HashMap<_, ...> wrapping the same bound recursively, matching Go's
+// `[]cog.Builder[T]` / `map[K]cog.Builder[T]`. The referenced type is imported so
+// the bound resolves. Only types for which ResolveToBuilder is true reach here.
+func (formatter *typeFormatter) formatBuilderArgType(def ast.Type) string {
+	switch {
+	case def.IsArray():
+		return fmt.Sprintf("Vec<%s>", formatter.formatBuilderArgType(def.AsArray().ValueType))
+	case def.IsMap():
+		m := def.AsMap()
+		formatter.imports.Add("std::collections::HashMap")
+		return fmt.Sprintf("HashMap<%s, %s>", formatter.formatType(m.IndexType), formatter.formatBuilderArgType(m.ValueType))
+	case def.IsRef():
+		// formatRef records the cross-module import for the referred type.
+		return fmt.Sprintf("impl cog::Builder<%s>", formatter.formatRef(def.AsRef()))
+	default:
+		// Defensive: a non-ref, non-collection that resolved to a builder should not
+		// occur in the in-scope fixtures. Fall back to the plain rendering.
+		return formatter.formatType(def)
+	}
+}
+
 func (formatter *typeFormatter) formatScalar(scalar ast.ScalarType) string {
 	// Both concrete (constant) and non-concrete scalars map to the same storage
 	// type: a concrete scalar's value is fixed by a Default impl, so the field
