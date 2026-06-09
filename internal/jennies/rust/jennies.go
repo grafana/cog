@@ -105,6 +105,7 @@ func (language *Language) CompilerPasses() compiler.Passes {
 	return compiler.Passes{
 		&compiler.AnonymousStructsToNamed{},
 		&compiler.AnonymousEnumToExplicitType{},
+		&compiler.PrefixEnumValues{},
 		&compiler.NotRequiredFieldAsNullableType{},
 		&compiler.DisjunctionWithNullToOptional{},
 		&compiler.DisjunctionOfConstantsToEnum{},

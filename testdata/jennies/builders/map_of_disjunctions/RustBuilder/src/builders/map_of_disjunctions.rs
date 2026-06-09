@@ -1,21 +1,17 @@
 use crate::cog;
-use crate::types::map_of_disjunctions::Dashboard;
-use crate::types::map_of_disjunctions::Element;
-use crate::types::map_of_disjunctions::LibraryPanel;
-use crate::types::map_of_disjunctions::Panel;
-use crate::types::map_of_disjunctions::PanelOrLibraryPanel;
+use crate::types::map_of_disjunctions;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct ElementBuilder {
-    internal: Element,
-    errors: Vec<cog::BuildError>,
+    internal: map_of_disjunctions::Element,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl ElementBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Element::default(),
+            internal: map_of_disjunctions::Element::default(),
             errors: Vec::new(),
         }
     }
@@ -28,7 +24,7 @@ impl Default for ElementBuilder {
 }
 
 impl ElementBuilder {
-    pub fn panel(mut self, panel: impl cog::Builder<Panel>) -> Self {
+    pub fn panel(mut self, panel: impl cog::Builder<map_of_disjunctions::Panel>) -> Self {
         let built0 = match panel.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -43,7 +39,10 @@ impl ElementBuilder {
 }
 
 impl ElementBuilder {
-    pub fn library_panel(mut self, library_panel: impl cog::Builder<LibraryPanel>) -> Self {
+    pub fn library_panel(
+        mut self,
+        library_panel: impl cog::Builder<map_of_disjunctions::LibraryPanel>,
+    ) -> Self {
         let built0 = match library_panel.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -57,8 +56,8 @@ impl ElementBuilder {
     }
 }
 
-impl cog::Builder<Element> for ElementBuilder {
-    fn build(&self) -> Result<Element, Vec<cog::BuildError>> {
+impl cog::Builder<map_of_disjunctions::Element> for ElementBuilder {
+    fn build(&self) -> Result<map_of_disjunctions::Element, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }
@@ -69,14 +68,14 @@ impl cog::Builder<Element> for ElementBuilder {
 
 #[derive(Debug, Clone)]
 pub struct PanelBuilder {
-    internal: Panel,
-    errors: Vec<cog::BuildError>,
+    internal: map_of_disjunctions::Panel,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl PanelBuilder {
     pub fn new() -> Self {
         let mut builder = Self {
-            internal: Panel::default(),
+            internal: map_of_disjunctions::Panel::default(),
             errors: Vec::new(),
         };
         builder.internal.kind = "Panel".to_string();
@@ -99,8 +98,8 @@ impl PanelBuilder {
     }
 }
 
-impl cog::Builder<Panel> for PanelBuilder {
-    fn build(&self) -> Result<Panel, Vec<cog::BuildError>> {
+impl cog::Builder<map_of_disjunctions::Panel> for PanelBuilder {
+    fn build(&self) -> Result<map_of_disjunctions::Panel, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }
@@ -111,14 +110,14 @@ impl cog::Builder<Panel> for PanelBuilder {
 
 #[derive(Debug, Clone)]
 pub struct LibraryPanelBuilder {
-    internal: LibraryPanel,
-    errors: Vec<cog::BuildError>,
+    internal: map_of_disjunctions::LibraryPanel,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl LibraryPanelBuilder {
     pub fn new() -> Self {
         let mut builder = Self {
-            internal: LibraryPanel::default(),
+            internal: map_of_disjunctions::LibraryPanel::default(),
             errors: Vec::new(),
         };
         builder.internal.kind = "Library".to_string();
@@ -141,8 +140,8 @@ impl LibraryPanelBuilder {
     }
 }
 
-impl cog::Builder<LibraryPanel> for LibraryPanelBuilder {
-    fn build(&self) -> Result<LibraryPanel, Vec<cog::BuildError>> {
+impl cog::Builder<map_of_disjunctions::LibraryPanel> for LibraryPanelBuilder {
+    fn build(&self) -> Result<map_of_disjunctions::LibraryPanel, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }
@@ -153,14 +152,14 @@ impl cog::Builder<LibraryPanel> for LibraryPanelBuilder {
 
 #[derive(Debug, Clone)]
 pub struct DashboardBuilder {
-    internal: Dashboard,
-    errors: Vec<cog::BuildError>,
+    internal: map_of_disjunctions::Dashboard,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl DashboardBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Dashboard::default(),
+            internal: map_of_disjunctions::Dashboard::default(),
             errors: Vec::new(),
         }
     }
@@ -173,7 +172,10 @@ impl Default for DashboardBuilder {
 }
 
 impl DashboardBuilder {
-    pub fn panels(mut self, panels: HashMap<String, impl cog::Builder<Element>>) -> Self {
+    pub fn panels(
+        mut self,
+        panels: HashMap<String, impl cog::Builder<map_of_disjunctions::Element>>,
+    ) -> Self {
         let mut built0 = std::collections::HashMap::new();
         for (key0, item0) in panels {
             let built1 = match item0.build() {
@@ -191,8 +193,8 @@ impl DashboardBuilder {
     }
 }
 
-impl cog::Builder<Dashboard> for DashboardBuilder {
-    fn build(&self) -> Result<Dashboard, Vec<cog::BuildError>> {
+impl cog::Builder<map_of_disjunctions::Dashboard> for DashboardBuilder {
+    fn build(&self) -> Result<map_of_disjunctions::Dashboard, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }
@@ -203,14 +205,14 @@ impl cog::Builder<Dashboard> for DashboardBuilder {
 
 #[derive(Debug, Clone)]
 pub struct PanelOrLibraryPanelBuilder {
-    internal: PanelOrLibraryPanel,
-    errors: Vec<cog::BuildError>,
+    internal: map_of_disjunctions::PanelOrLibraryPanel,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl PanelOrLibraryPanelBuilder {
     pub fn new() -> Self {
         Self {
-            internal: PanelOrLibraryPanel::default(),
+            internal: map_of_disjunctions::PanelOrLibraryPanel::default(),
             errors: Vec::new(),
         }
     }
@@ -223,7 +225,7 @@ impl Default for PanelOrLibraryPanelBuilder {
 }
 
 impl PanelOrLibraryPanelBuilder {
-    pub fn panel(mut self, panel: impl cog::Builder<Panel>) -> Self {
+    pub fn panel(mut self, panel: impl cog::Builder<map_of_disjunctions::Panel>) -> Self {
         let built0 = match panel.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -238,7 +240,10 @@ impl PanelOrLibraryPanelBuilder {
 }
 
 impl PanelOrLibraryPanelBuilder {
-    pub fn library_panel(mut self, library_panel: impl cog::Builder<LibraryPanel>) -> Self {
+    pub fn library_panel(
+        mut self,
+        library_panel: impl cog::Builder<map_of_disjunctions::LibraryPanel>,
+    ) -> Self {
         let built0 = match library_panel.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -252,8 +257,8 @@ impl PanelOrLibraryPanelBuilder {
     }
 }
 
-impl cog::Builder<PanelOrLibraryPanel> for PanelOrLibraryPanelBuilder {
-    fn build(&self) -> Result<PanelOrLibraryPanel, Vec<cog::BuildError>> {
+impl cog::Builder<map_of_disjunctions::PanelOrLibraryPanel> for PanelOrLibraryPanelBuilder {
+    fn build(&self) -> Result<map_of_disjunctions::PanelOrLibraryPanel, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

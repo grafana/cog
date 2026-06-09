@@ -1,17 +1,16 @@
 use crate::cog;
-use crate::types::sandbox::Dashboard;
-use crate::types::sandbox::Variable;
+use crate::types::sandbox;
 
 #[derive(Debug, Clone)]
 pub struct DashboardBuilder {
-    internal: Dashboard,
-    errors: Vec<cog::BuildError>,
+    internal: sandbox::Dashboard,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl DashboardBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Dashboard::default(),
+            internal: sandbox::Dashboard::default(),
             errors: Vec::new(),
         }
     }
@@ -25,14 +24,16 @@ impl Default for DashboardBuilder {
 
 impl DashboardBuilder {
     pub fn with_variable(mut self, name: String, value: String) -> Self {
-        self.internal.variables.push(Variable { name, value });
+        self.internal
+            .variables
+            .push(sandbox::Variable { name, value });
 
         self
     }
 }
 
-impl cog::Builder<Dashboard> for DashboardBuilder {
-    fn build(&self) -> Result<Dashboard, Vec<cog::BuildError>> {
+impl cog::Builder<sandbox::Dashboard> for DashboardBuilder {
+    fn build(&self) -> Result<sandbox::Dashboard, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

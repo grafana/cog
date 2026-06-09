@@ -77,7 +77,7 @@ pub struct StructComplexFieldsSomeStructFieldAnonymousStruct {
 pub enum SomeStructOperator {
     #[default]
     #[serde(rename = ">")]
-    GreaterThan,
+    SomeStructOperatorGreaterThan,
     #[serde(rename = "<")]
-    LessThan,
+    SomeStructOperatorLessThan,
 }

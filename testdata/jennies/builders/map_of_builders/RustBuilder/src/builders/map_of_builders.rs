@@ -1,18 +1,17 @@
 use crate::cog;
-use crate::types::map_of_builders::Dashboard;
-use crate::types::map_of_builders::Panel;
+use crate::types::map_of_builders;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct PanelBuilder {
-    internal: Panel,
-    errors: Vec<cog::BuildError>,
+    internal: map_of_builders::Panel,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl PanelBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Panel::default(),
+            internal: map_of_builders::Panel::default(),
             errors: Vec::new(),
         }
     }
@@ -32,8 +31,8 @@ impl PanelBuilder {
     }
 }
 
-impl cog::Builder<Panel> for PanelBuilder {
-    fn build(&self) -> Result<Panel, Vec<cog::BuildError>> {
+impl cog::Builder<map_of_builders::Panel> for PanelBuilder {
+    fn build(&self) -> Result<map_of_builders::Panel, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }
@@ -44,14 +43,14 @@ impl cog::Builder<Panel> for PanelBuilder {
 
 #[derive(Debug, Clone)]
 pub struct DashboardBuilder {
-    internal: Dashboard,
-    errors: Vec<cog::BuildError>,
+    internal: map_of_builders::Dashboard,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl DashboardBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Dashboard::default(),
+            internal: map_of_builders::Dashboard::default(),
             errors: Vec::new(),
         }
     }
@@ -64,7 +63,10 @@ impl Default for DashboardBuilder {
 }
 
 impl DashboardBuilder {
-    pub fn panels(mut self, panels: HashMap<String, impl cog::Builder<Panel>>) -> Self {
+    pub fn panels(
+        mut self,
+        panels: HashMap<String, impl cog::Builder<map_of_builders::Panel>>,
+    ) -> Self {
         let mut built0 = std::collections::HashMap::new();
         for (key0, item0) in panels {
             let built1 = match item0.build() {
@@ -82,8 +84,8 @@ impl DashboardBuilder {
     }
 }
 
-impl cog::Builder<Dashboard> for DashboardBuilder {
-    fn build(&self) -> Result<Dashboard, Vec<cog::BuildError>> {
+impl cog::Builder<map_of_builders::Dashboard> for DashboardBuilder {
+    fn build(&self) -> Result<map_of_builders::Dashboard, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

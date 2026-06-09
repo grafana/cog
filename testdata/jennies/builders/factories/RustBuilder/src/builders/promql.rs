@@ -1,17 +1,16 @@
 use crate::cog;
-use crate::types::promql::Expr;
-use crate::types::promql::FuncCallExpr;
+use crate::types::promql;
 
 #[derive(Debug, Clone)]
 pub struct FuncCallExprBuilder {
-    internal: FuncCallExpr,
-    errors: Vec<cog::BuildError>,
+    internal: promql::FuncCallExpr,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl FuncCallExprBuilder {
     pub fn new() -> Self {
         let mut builder = Self {
-            internal: FuncCallExpr::default(),
+            internal: promql::FuncCallExpr::default(),
             errors: Vec::new(),
         };
         builder.internal.r#type = "funcCallExpr".to_string();
@@ -41,7 +40,7 @@ impl FuncCallExprBuilder {
 }
 
 impl FuncCallExprBuilder {
-    pub fn args(mut self, args: Vec<impl cog::Builder<Expr>>) -> Self {
+    pub fn args(mut self, args: Vec<impl cog::Builder<promql::Expr>>) -> Self {
         let mut built0 = Vec::new();
         for item0 in args {
             let built1 = match item0.build() {
@@ -62,7 +61,7 @@ impl FuncCallExprBuilder {
 /// Modified by veneer 'Duplicate[args]'
 /// Modified by veneer 'ArrayToAppend'
 impl FuncCallExprBuilder {
-    pub fn arg(mut self, arg: impl cog::Builder<Expr>) -> Self {
+    pub fn arg(mut self, arg: impl cog::Builder<promql::Expr>) -> Self {
         let built0 = match arg.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -79,7 +78,7 @@ impl FuncCallExprBuilder {
 /// Returns the input vector with all sample values converted to their absolute value.
 /// See https://prometheus.io/docs/prometheus/latest/querying/functions/#abs
 impl FuncCallExprBuilder {
-    pub fn abs(v: impl cog::Builder<Expr>) -> Self {
+    pub fn abs(v: impl cog::Builder<promql::Expr>) -> Self {
         Self::new().function("abs".to_string()).arg(v)
     }
 }
@@ -88,7 +87,7 @@ impl FuncCallExprBuilder {
 /// This is useful for alerting on when no time series exist for a given metric name and label combination.
 /// See https://prometheus.io/docs/prometheus/latest/querying/functions/#absent
 impl FuncCallExprBuilder {
-    pub fn absent(v: impl cog::Builder<Expr>) -> Self {
+    pub fn absent(v: impl cog::Builder<promql::Expr>) -> Self {
         Self::new().function("absent".to_string()).arg(v)
     }
 }
@@ -104,7 +103,7 @@ impl FuncCallExprBuilder {
 /// Calculates the φ-quantile (0 ≤ φ ≤ 1) of the values in the specified interval.
 /// See https://prometheus.io/docs/prometheus/latest/querying/functions/#aggregation_over_time
 impl FuncCallExprBuilder {
-    pub fn quantile_over_time(phi: f64, v: impl cog::Builder<Expr>) -> Self {
+    pub fn quantile_over_time(phi: f64, v: impl cog::Builder<promql::Expr>) -> Self {
         Self::new()
             .function("quantile_over_time".to_string())
             .arg(NumberLiteralExprBuilder::n(phi))
@@ -112,8 +111,8 @@ impl FuncCallExprBuilder {
     }
 }
 
-impl cog::Builder<FuncCallExpr> for FuncCallExprBuilder {
-    fn build(&self) -> Result<FuncCallExpr, Vec<cog::BuildError>> {
+impl cog::Builder<promql::FuncCallExpr> for FuncCallExprBuilder {
+    fn build(&self) -> Result<promql::FuncCallExpr, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

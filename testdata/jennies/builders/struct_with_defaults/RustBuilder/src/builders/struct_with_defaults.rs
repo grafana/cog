@@ -1,17 +1,16 @@
 use crate::cog;
-use crate::types::struct_with_defaults::NestedStruct;
-use crate::types::struct_with_defaults::Struct;
+use crate::types::struct_with_defaults;
 
 #[derive(Debug, Clone)]
 pub struct NestedStructBuilder {
-    internal: NestedStruct,
-    errors: Vec<cog::BuildError>,
+    internal: struct_with_defaults::NestedStruct,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl NestedStructBuilder {
     pub fn new() -> Self {
         Self {
-            internal: NestedStruct::default(),
+            internal: struct_with_defaults::NestedStruct::default(),
             errors: Vec::new(),
         }
     }
@@ -39,8 +38,8 @@ impl NestedStructBuilder {
     }
 }
 
-impl cog::Builder<NestedStruct> for NestedStructBuilder {
-    fn build(&self) -> Result<NestedStruct, Vec<cog::BuildError>> {
+impl cog::Builder<struct_with_defaults::NestedStruct> for NestedStructBuilder {
+    fn build(&self) -> Result<struct_with_defaults::NestedStruct, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }
@@ -51,14 +50,14 @@ impl cog::Builder<NestedStruct> for NestedStructBuilder {
 
 #[derive(Debug, Clone)]
 pub struct StructBuilder {
-    internal: Struct,
-    errors: Vec<cog::BuildError>,
+    internal: struct_with_defaults::Struct,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl StructBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Struct::default(),
+            internal: struct_with_defaults::Struct::default(),
             errors: Vec::new(),
         }
     }
@@ -71,7 +70,10 @@ impl Default for StructBuilder {
 }
 
 impl StructBuilder {
-    pub fn all_fields(mut self, all_fields: impl cog::Builder<NestedStruct>) -> Self {
+    pub fn all_fields(
+        mut self,
+        all_fields: impl cog::Builder<struct_with_defaults::NestedStruct>,
+    ) -> Self {
         let built0 = match all_fields.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -86,7 +88,10 @@ impl StructBuilder {
 }
 
 impl StructBuilder {
-    pub fn partial_fields(mut self, partial_fields: impl cog::Builder<NestedStruct>) -> Self {
+    pub fn partial_fields(
+        mut self,
+        partial_fields: impl cog::Builder<struct_with_defaults::NestedStruct>,
+    ) -> Self {
         let built0 = match partial_fields.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -101,7 +106,10 @@ impl StructBuilder {
 }
 
 impl StructBuilder {
-    pub fn empty_fields(mut self, empty_fields: impl cog::Builder<NestedStruct>) -> Self {
+    pub fn empty_fields(
+        mut self,
+        empty_fields: impl cog::Builder<struct_with_defaults::NestedStruct>,
+    ) -> Self {
         let built0 = match empty_fields.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -131,8 +139,8 @@ impl StructBuilder {
     }
 }
 
-impl cog::Builder<Struct> for StructBuilder {
-    fn build(&self) -> Result<Struct, Vec<cog::BuildError>> {
+impl cog::Builder<struct_with_defaults::Struct> for StructBuilder {
+    fn build(&self) -> Result<struct_with_defaults::Struct, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

@@ -1,16 +1,16 @@
 use crate::cog;
-use crate::types::some_pkg::SomeStruct;
+use crate::types::some_pkg;
 
 #[derive(Debug, Clone)]
 pub struct SomeNiceBuilderBuilder {
-    internal: SomeStruct,
-    errors: Vec<cog::BuildError>,
+    internal: some_pkg::SomeStruct,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl SomeNiceBuilderBuilder {
     pub fn new() -> Self {
         Self {
-            internal: SomeStruct::default(),
+            internal: some_pkg::SomeStruct::default(),
             errors: Vec::new(),
         }
     }
@@ -30,8 +30,8 @@ impl SomeNiceBuilderBuilder {
     }
 }
 
-impl cog::Builder<SomeStruct> for SomeNiceBuilderBuilder {
-    fn build(&self) -> Result<SomeStruct, Vec<cog::BuildError>> {
+impl cog::Builder<some_pkg::SomeStruct> for SomeNiceBuilderBuilder {
+    fn build(&self) -> Result<some_pkg::SomeStruct, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

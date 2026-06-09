@@ -117,6 +117,17 @@ func (jenny RawTypes) formatEnum(imports *importMap, object ast.Object) string {
 	enum := object.Type.AsEnum()
 	numeric := enumIsNumeric(enum)
 
+	// A numeric enum with duplicate discriminant values cannot be a Rust C-like
+	// enum (each discriminant must be unique: E0081). Grafana's common.ScaleDirection
+	// is one such enum (Up=1, Right=1, Down=-1, Left=-1: distinct directions sharing
+	// numeric codes). Emit it the way the Go target models all numeric enums: a type
+	// alias over the integer plus one associated const per value. Duplicate values
+	// are then legal (several consts simply share a number) and serde treats the
+	// field as the plain integer.
+	if numeric && enumHasDuplicateValues(enum) {
+		return jenny.formatNumericEnumAsConsts(object, enum)
+	}
+
 	var buffer strings.Builder
 	buffer.WriteString(formatComments(object.Comments, ""))
 
@@ -153,6 +164,42 @@ func (jenny RawTypes) formatEnum(imports *importMap, object ast.Object) string {
 		fmt.Fprintf(&buffer, "    %s,\n", variant)
 	}
 	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+// enumHasDuplicateValues reports whether two or more of a numeric enum's members
+// share the same discriminant value. Such an enum cannot be rendered as a Rust
+// C-like enum (E0081: each discriminant must be unique).
+func enumHasDuplicateValues(enum ast.EnumType) bool {
+	seen := map[string]struct{}{}
+	for _, value := range enum.Values {
+		key := fmt.Sprintf("%v", value.Value)
+		if _, dup := seen[key]; dup {
+			return true
+		}
+		seen[key] = struct{}{}
+	}
+	return false
+}
+
+// formatNumericEnumAsConsts emits a numeric enum as a type alias over its
+// underlying integer plus one associated const per member. This is the fallback
+// for enums whose discriminants are not unique (which a Rust enum forbids); it
+// mirrors the Go target's representation of numeric enums (type + const block)
+// and serializes as the plain integer with no serde glue.
+func (jenny RawTypes) formatNumericEnumAsConsts(object ast.Object, enum ast.EnumType) string {
+	var buffer strings.Builder
+	buffer.WriteString(formatComments(object.Comments, ""))
+
+	typeName := formatTypeName(object.Name)
+	repr := enumReprType(enum)
+	fmt.Fprintf(&buffer, "pub type %s = %s;\n", typeName, repr)
+
+	for _, value := range enum.Values {
+		constName := formatConstName(value.Name)
+		fmt.Fprintf(&buffer, "\npub const %s: %s = %s;", constName, typeName, formatScalarValue(value.Value, value.Type.AsScalar().ScalarKind))
+	}
 
 	return buffer.String()
 }
@@ -341,9 +388,11 @@ func (jenny RawTypes) formatVariantImpl(imports *importMap, schema *ast.Schema, 
 	if !object.Type.ImplementsVariant() || object.Type.IsRef() {
 		return ""
 	}
-	if object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
-		return ""
-	}
+	// HintSkipVariantPluginRegistration only suppresses registration in the variant
+	// plugin registry (handled in the plugins jenny); the type still needs its
+	// Dataquery trait impl so a builder can box it as Box<dyn Dataquery> (e.g.
+	// cloudwatch's MetricsQuery/LogsQuery/AnnotationQuery, which are dataquery
+	// variants flagged skip-registration but still built through the slot).
 	if !object.Type.IsDataqueryVariant() {
 		// Panelcfg (and any other) variants carry no rawtypes-level impl.
 		return ""
@@ -653,10 +702,38 @@ func defaultExpression(formatter *typeFormatter, typeDef ast.Type, indent string
 		if literal, ok := refStructLiteralDefault(formatter, typeDef.AsRef(), typeDef.Default, indent); ok {
 			return literal
 		}
+		// A ref-to-enum field default resolves to the matching enum variant (or the
+		// matching const for a type-aliased enum), wrapped in Some when the field is
+		// nullable.
+		if literal, ok := enumRefDefaultVariant(formatter, typeDef.AsRef(), typeDef.Default); ok {
+			if typeDef.Nullable {
+				return fmt.Sprintf("Some(%s)", literal)
+			}
+			return literal
+		}
+		// A disjunction-typed ref with a scalar default falls back to the
+		// disjunction's own Default (its first branch's zero value); a bare scalar
+		// literal would not type-check against the untagged enum.
+		if isDisjunctionRef(formatter, typeDef.AsRef()) {
+			literal := fmt.Sprintf("%s::default()", formatter.formatRef(typeDef.AsRef()))
+			if typeDef.Nullable {
+				return fmt.Sprintf("Some(%s)", literal)
+			}
+			return literal
+		}
 	}
 
 	if typeDef.Default != nil {
-		return defaultLiteral(typeDef)
+		literal := defaultLiteral(typeDef)
+		// A nullable scalar/array/map field with a default is stored as Option<T>; the
+		// default literal is the bare T, so wrap it in Some so it type-checks against
+		// the Option field (e.g. a nullable bool defaulting to false -> Some(false)).
+		// Bare collections (Vec/HashMap) are not Option-wrapped even when nullable, so
+		// they are excluded.
+		if isOptionWrapped(typeDef) {
+			return fmt.Sprintf("Some(%s)", literal)
+		}
+		return literal
 	}
 
 	return "Default::default()"
@@ -728,6 +805,20 @@ func fieldOverrideLiteral(formatter *typeFormatter, typeDef ast.Type, value any,
 		if literal, ok := refStructLiteralDefault(formatter, typeDef.AsRef(), value, indent); ok {
 			return literal
 		}
+		// A ref to an enum with a scalar default resolves to the matching variant
+		// (e.g. a `hide` field defaulting to "dontHide" becomes VariableHide::DontHide),
+		// not the bare scalar literal. The enum type is module-qualified and imported
+		// via formatRef.
+		if literal, ok := enumRefDefaultVariant(formatter, typeDef.AsRef(), value); ok {
+			return literal
+		}
+		// A disjunction-typed ref (emitted as an untagged enum, e.g. a variable
+		// option's text/value of type String|Vec<String>) cannot take a bare scalar
+		// literal. Fall back to the disjunction's own Default, which selects its first
+		// branch's zero value - the conventional default and a valid value.
+		if isDisjunctionRef(formatter, typeDef.AsRef()) {
+			return fmt.Sprintf("%s::default()", formatter.formatRef(typeDef.AsRef()))
+		}
 	}
 
 	switch {
@@ -737,6 +828,13 @@ func fieldOverrideLiteral(formatter *typeFormatter, typeDef ast.Type, value any,
 		return mapDefaultLiteral(typeDef.AsMap(), value)
 	case typeDef.IsScalar():
 		return scalarDefaultLiteral(typeDef.AsScalar().ScalarKind, value)
+	case typeDef.IsDisjunction():
+		// An inline disjunction field (a hoisted untagged enum, e.g. a variable
+		// option's text/value of type String|Vec<String>) cannot take a bare scalar
+		// default literal. Defer to Default::default(): Rust infers the field's
+		// concrete (hoisted) type from the struct literal, and the disjunction's
+		// derived Default is its first branch's zero value.
+		return "Default::default()"
 	default:
 		return formatValue(value)
 	}
@@ -771,6 +869,41 @@ func constantRefDefault(formatter *typeFormatter, ref ast.ConstantReferenceType)
 
 // defaultLiteral renders an explicit IR default into a Rust expression, using
 // the field's type to pick the correct literal form.
+// enumRefDefaultVariant renders a default value for a ref-to-enum field as the
+// matching enum variant (Enum::Variant), or the matching associated const for an
+// enum emitted as a type alias (duplicate-discriminant enums, see
+// formatNumericEnumAsConsts). It reports false when the ref does not resolve to
+// an enum or no member matches the default value.
+func enumRefDefaultVariant(formatter *typeFormatter, ref ast.RefType, value any) (string, bool) {
+	referred, found := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	if !found || !referred.Type.IsEnum() {
+		return "", false
+	}
+	enum := referred.Type.AsEnum()
+	typeName := formatter.formatRef(ref)
+	for _, member := range enum.Values {
+		if fmt.Sprintf("%v", member.Value) != fmt.Sprintf("%v", value) {
+			continue
+		}
+		// A numeric enum with duplicate discriminants is emitted as a type alias plus
+		// associated consts; the default is the matching const name. A normal enum
+		// uses the Enum::Variant form.
+		if enumIsNumeric(enum) && enumHasDuplicateValues(enum) {
+			return formatConstName(member.Name), true
+		}
+		return fmt.Sprintf("%s::%s", typeName, formatTypeName(member.Name)), true
+	}
+	return "", false
+}
+
+// isDisjunctionRef reports whether a ref resolves to a disjunction-typed object
+// (emitted as an untagged enum). Such a field cannot take a bare scalar default
+// literal.
+func isDisjunctionRef(formatter *typeFormatter, ref ast.RefType) bool {
+	referred, found := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	return found && referred.Type.IsDisjunction()
+}
+
 func defaultLiteral(typeDef ast.Type) string {
 	switch {
 	case typeDef.IsArray():
@@ -865,6 +998,20 @@ func formatScalarValue(value any, kind ast.ScalarKind) string {
 		if f, ok := value.(float64); ok {
 			return strconv.FormatInt(int64(f), 10)
 		}
+	}
+	// A float-typed field whose default parsed as a whole number (JSON has no
+	// integer/float distinction, so 0 arrives as 0.0 -> rendered "0") needs an
+	// explicit float literal; a bare integer literal does not coerce to f32/f64
+	// (E0308). strconv renders a whole float as e.g. "0" so append ".0" when the
+	// rendered form has no decimal point or exponent.
+	if kind == ast.KindFloat32 || kind == ast.KindFloat64 {
+		rendered := formatValue(value)
+		if _, err := strconv.Atoi(rendered); err == nil {
+			// A whole-number rendering (e.g. "0") is an integer literal that does not
+			// coerce to f32/f64; append ".0" so it is a float literal.
+			rendered += ".0"
+		}
+		return rendered
 	}
 	return formatValue(value)
 }

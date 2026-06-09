@@ -1,17 +1,16 @@
 use crate::cog;
-use crate::types::builder_delegation::Dashboard;
-use crate::types::builder_delegation::DashboardLink;
+use crate::types::builder_delegation;
 
 #[derive(Debug, Clone)]
 pub struct DashboardLinkBuilder {
-    internal: DashboardLink,
-    errors: Vec<cog::BuildError>,
+    internal: builder_delegation::DashboardLink,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl DashboardLinkBuilder {
     pub fn new() -> Self {
         Self {
-            internal: DashboardLink::default(),
+            internal: builder_delegation::DashboardLink::default(),
             errors: Vec::new(),
         }
     }
@@ -39,8 +38,8 @@ impl DashboardLinkBuilder {
     }
 }
 
-impl cog::Builder<DashboardLink> for DashboardLinkBuilder {
-    fn build(&self) -> Result<DashboardLink, Vec<cog::BuildError>> {
+impl cog::Builder<builder_delegation::DashboardLink> for DashboardLinkBuilder {
+    fn build(&self) -> Result<builder_delegation::DashboardLink, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }
@@ -51,14 +50,14 @@ impl cog::Builder<DashboardLink> for DashboardLinkBuilder {
 
 #[derive(Debug, Clone)]
 pub struct DashboardBuilder {
-    internal: Dashboard,
-    errors: Vec<cog::BuildError>,
+    internal: builder_delegation::Dashboard,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl DashboardBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Dashboard::default(),
+            internal: builder_delegation::Dashboard::default(),
             errors: Vec::new(),
         }
     }
@@ -88,7 +87,10 @@ impl DashboardBuilder {
 
 /// will be expanded to []cog.Builder<DashboardLink>
 impl DashboardBuilder {
-    pub fn links(mut self, links: Vec<impl cog::Builder<DashboardLink>>) -> Self {
+    pub fn links(
+        mut self,
+        links: Vec<impl cog::Builder<builder_delegation::DashboardLink>>,
+    ) -> Self {
         let mut built0 = Vec::new();
         for item0 in links {
             let built1 = match item0.build() {
@@ -110,7 +112,7 @@ impl DashboardBuilder {
 impl DashboardBuilder {
     pub fn links_of_links(
         mut self,
-        links_of_links: Vec<Vec<impl cog::Builder<DashboardLink>>>,
+        links_of_links: Vec<Vec<impl cog::Builder<builder_delegation::DashboardLink>>>,
     ) -> Self {
         let mut built0 = Vec::new();
         for item0 in links_of_links {
@@ -135,7 +137,10 @@ impl DashboardBuilder {
 
 /// will be expanded to cog.Builder<DashboardLink>
 impl DashboardBuilder {
-    pub fn single_link(mut self, single_link: impl cog::Builder<DashboardLink>) -> Self {
+    pub fn single_link(
+        mut self,
+        single_link: impl cog::Builder<builder_delegation::DashboardLink>,
+    ) -> Self {
         let built0 = match single_link.build() {
             Ok(val) => val,
             Err(mut err) => {
@@ -149,8 +154,8 @@ impl DashboardBuilder {
     }
 }
 
-impl cog::Builder<Dashboard> for DashboardBuilder {
-    fn build(&self) -> Result<Dashboard, Vec<cog::BuildError>> {
+impl cog::Builder<builder_delegation::Dashboard> for DashboardBuilder {
+    fn build(&self) -> Result<builder_delegation::Dashboard, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

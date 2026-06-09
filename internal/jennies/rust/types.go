@@ -128,8 +128,18 @@ func (formatter *typeFormatter) formatRef(ref ast.RefType) string {
 	typeName := formatTypeName(ref.ReferredType)
 	referredPkg := formatPackageName(ref.ReferredPkg)
 
-	if referredPkg != "" && (formatter.importSamePackageRefs || referredPkg != formatter.packageName) {
-		formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", referredPkg, typeName))
+	// A cross-package reference is module-qualified (`<pkg>::<Type>`) rather than
+	// imported by its bare name. The real Grafana schema set has many same-named
+	// types across package versions (dashboard / dashboardv2 / dashboardv2beta1 all
+	// export MatcherConfig, ValueMapping, FieldColor, ...); bare-name imports of
+	// these collide within a single module (E0252). Importing the module instead
+	// (`use crate::types::<pkg>;`) is collision-free, since package names are
+	// unique, and matches the Go target's package-qualified style. Same-package
+	// refs remain bare (the type is emitted in this very module).
+	crossPackage := referredPkg != "" && (formatter.importSamePackageRefs || referredPkg != formatter.packageName)
+	if crossPackage {
+		formatter.imports.Add(fmt.Sprintf("crate::types::%s", referredPkg))
+		typeName = referredPkg + "::" + typeName
 	}
 
 	// A directly recursive reference (the target transitively reaches back to the
@@ -175,9 +185,12 @@ func (formatter *typeFormatter) refIsRecursive(ref ast.RefType) bool {
 			return false
 		}
 		for _, field := range obj.Type.AsStruct().Fields {
-			// Only non-collection, non-optional direct ref fields keep the type
-			// unsized; a ref behind Vec/HashMap/Option is already indirected.
-			if !field.Type.IsRef() || isOptionWrapped(field.Type) {
+			// A ref field keeps the owning type unsized whether or not it is
+			// Option-wrapped: Rust's Option<T> stores T inline (no heap indirection),
+			// so a cycle through Option<Ref> is still infinitely sized and must be
+			// Boxed. Only Vec<T> and HashMap<K, V> break the cycle (their contents are
+			// heap-allocated), so a ref reached through a collection is skipped.
+			if !field.Type.IsRef() {
 				continue
 			}
 			fr := field.Type.AsRef()

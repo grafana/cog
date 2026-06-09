@@ -1,16 +1,16 @@
 use crate::cog;
-use crate::types::properties::SomeStruct;
+use crate::types::properties;
 
 #[derive(Debug, Clone)]
 pub struct SomeStructBuilder {
-    internal: SomeStruct,
-    errors: Vec<cog::BuildError>,
+    internal: properties::SomeStruct,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl SomeStructBuilder {
     pub fn new() -> Self {
         Self {
-            internal: SomeStruct::default(),
+            internal: properties::SomeStruct::default(),
             errors: Vec::new(),
         }
     }
@@ -30,8 +30,8 @@ impl SomeStructBuilder {
     }
 }
 
-impl cog::Builder<SomeStruct> for SomeStructBuilder {
-    fn build(&self) -> Result<SomeStruct, Vec<cog::BuildError>> {
+impl cog::Builder<properties::SomeStruct> for SomeStructBuilder {
+    fn build(&self) -> Result<properties::SomeStruct, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

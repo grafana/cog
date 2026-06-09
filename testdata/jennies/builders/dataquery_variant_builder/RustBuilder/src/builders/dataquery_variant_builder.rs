@@ -1,17 +1,17 @@
 use crate::cog;
 use crate::cog::variants;
-use crate::types::dataquery_variant_builder::Loki;
+use crate::types::dataquery_variant_builder;
 
 #[derive(Debug, Clone)]
 pub struct LokiBuilderBuilder {
-    internal: Loki,
-    errors: Vec<cog::BuildError>,
+    internal: dataquery_variant_builder::Loki,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl LokiBuilderBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Loki::default(),
+            internal: dataquery_variant_builder::Loki::default(),
             errors: Vec::new(),
         }
     }

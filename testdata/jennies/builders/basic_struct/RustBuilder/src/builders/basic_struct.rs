@@ -1,17 +1,17 @@
 use crate::cog;
-use crate::types::basic_struct::SomeStruct;
+use crate::types::basic_struct;
 
 /// SomeStruct, to hold data.
 #[derive(Debug, Clone)]
 pub struct SomeStructBuilder {
-    internal: SomeStruct,
-    errors: Vec<cog::BuildError>,
+    internal: basic_struct::SomeStruct,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl SomeStructBuilder {
     pub fn new() -> Self {
         Self {
-            internal: SomeStruct::default(),
+            internal: basic_struct::SomeStruct::default(),
             errors: Vec::new(),
         }
     }
@@ -58,8 +58,8 @@ impl SomeStructBuilder {
     }
 }
 
-impl cog::Builder<SomeStruct> for SomeStructBuilder {
-    fn build(&self) -> Result<SomeStruct, Vec<cog::BuildError>> {
+impl cog::Builder<basic_struct::SomeStruct> for SomeStructBuilder {
+    fn build(&self) -> Result<basic_struct::SomeStruct, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

@@ -1,21 +1,20 @@
 use crate::cog;
-use crate::types::constructor_initializations::CursorMode;
-use crate::types::constructor_initializations::SomePanel;
+use crate::types::constructor_initializations;
 
 #[derive(Debug, Clone)]
 pub struct SomePanelBuilder {
-    internal: SomePanel,
-    errors: Vec<cog::BuildError>,
+    internal: constructor_initializations::SomePanel,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl SomePanelBuilder {
     pub fn new() -> Self {
         let mut builder = Self {
-            internal: SomePanel::default(),
+            internal: constructor_initializations::SomePanel::default(),
             errors: Vec::new(),
         };
         builder.internal.r#type = "panel_type".to_string();
-        builder.internal.cursor = CursorMode::Tooltip;
+        builder.internal.cursor = constructor_initializations::CursorMode::Tooltip;
 
         builder
     }
@@ -35,8 +34,8 @@ impl SomePanelBuilder {
     }
 }
 
-impl cog::Builder<SomePanel> for SomePanelBuilder {
-    fn build(&self) -> Result<SomePanel, Vec<cog::BuildError>> {
+impl cog::Builder<constructor_initializations::SomePanel> for SomePanelBuilder {
+    fn build(&self) -> Result<constructor_initializations::SomePanel, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

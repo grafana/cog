@@ -1,17 +1,17 @@
 use crate::cog;
 use crate::cog::variants;
-use crate::types::composable_slot::Dashboard;
+use crate::types::composable_slot;
 
 #[derive(Debug, Clone)]
 pub struct LokiBuilderBuilder {
-    internal: Dashboard,
-    errors: Vec<cog::BuildError>,
+    internal: composable_slot::Dashboard,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl LokiBuilderBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Dashboard::default(),
+            internal: composable_slot::Dashboard::default(),
             errors: Vec::new(),
         }
     }
@@ -60,8 +60,8 @@ impl LokiBuilderBuilder {
     }
 }
 
-impl cog::Builder<Dashboard> for LokiBuilderBuilder {
-    fn build(&self) -> Result<Dashboard, Vec<cog::BuildError>> {
+impl cog::Builder<composable_slot::Dashboard> for LokiBuilderBuilder {
+    fn build(&self) -> Result<composable_slot::Dashboard, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

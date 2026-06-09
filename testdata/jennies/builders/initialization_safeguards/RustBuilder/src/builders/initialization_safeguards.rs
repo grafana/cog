@@ -1,17 +1,16 @@
 use crate::cog;
-use crate::types::initialization_safeguards::Options;
-use crate::types::initialization_safeguards::SomePanel;
+use crate::types::initialization_safeguards;
 
 #[derive(Debug, Clone)]
 pub struct SomePanelBuilder {
-    internal: SomePanel,
-    errors: Vec<cog::BuildError>,
+    internal: initialization_safeguards::SomePanel,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl SomePanelBuilder {
     pub fn new() -> Self {
         Self {
-            internal: SomePanel::default(),
+            internal: initialization_safeguards::SomePanel::default(),
             errors: Vec::new(),
         }
     }
@@ -35,7 +34,7 @@ impl SomePanelBuilder {
     pub fn show_legend(mut self, show: bool) -> Self {
         self.internal
             .options
-            .get_or_insert_with(Options::default)
+            .get_or_insert_with(initialization_safeguards::Options::default)
             .legend
             .show = show;
 
@@ -43,8 +42,8 @@ impl SomePanelBuilder {
     }
 }
 
-impl cog::Builder<SomePanel> for SomePanelBuilder {
-    fn build(&self) -> Result<SomePanel, Vec<cog::BuildError>> {
+impl cog::Builder<initialization_safeguards::SomePanel> for SomePanelBuilder {
+    fn build(&self) -> Result<initialization_safeguards::SomePanel, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

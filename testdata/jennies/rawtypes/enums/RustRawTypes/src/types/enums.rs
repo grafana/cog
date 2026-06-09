@@ -7,27 +7,27 @@ use serde_repr::Serialize_repr;
 pub enum Operator {
     #[default]
     #[serde(rename = ">")]
-    GreaterThan,
+    OperatorGreaterThan,
     #[serde(rename = "<")]
-    LessThan,
+    OperatorLessThan,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum TableSortOrder {
     #[default]
     #[serde(rename = "asc")]
-    Asc,
+    TableSortOrderAsc,
     #[serde(rename = "desc")]
-    Desc,
+    TableSortOrderDesc,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum LogsSortOrder {
     #[default]
     #[serde(rename = "time_asc")]
-    Asc,
+    LogsSortOrderAsc,
     #[serde(rename = "time_desc")]
-    Desc,
+    LogsSortOrderDesc,
 }
 
 /// 0 for no shared crosshair or tooltip (default).
@@ -37,7 +37,7 @@ pub enum LogsSortOrder {
 #[repr(i8)]
 pub enum DashboardCursorSync {
     #[default]
-    Off = 0,
-    Crosshair = 1,
-    Tooltip = 2,
+    DashboardCursorSyncOff = 0,
+    DashboardCursorSyncCrosshair = 1,
+    DashboardCursorSyncTooltip = 2,
 }

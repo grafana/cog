@@ -1,17 +1,17 @@
 use crate::cog;
+use crate::types::known_any;
 use crate::types::known_any::Config;
-use crate::types::known_any::SomeStruct;
 
 #[derive(Debug, Clone)]
 pub struct SomeStructBuilder {
-    internal: SomeStruct,
-    errors: Vec<cog::BuildError>,
+    internal: known_any::SomeStruct,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl SomeStructBuilder {
     pub fn new() -> Self {
         Self {
-            internal: SomeStruct::default(),
+            internal: known_any::SomeStruct::default(),
             errors: Vec::new(),
         }
     }
@@ -25,16 +25,22 @@ impl Default for SomeStructBuilder {
 
 impl SomeStructBuilder {
     pub fn title(mut self, title: String) -> Self {
-        let config = Config { title };
+        let mut custom = self
+            .internal
+            .config
+            .clone()
+            .and_then(|raw| serde_json::from_value::<known_any::Config>(raw).ok())
+            .unwrap_or_default();
+        custom.title = title;
         self.internal.config =
-            Some(serde_json::to_value(config).expect("Config should serialize to JSON"));
+            Some(serde_json::to_value(custom).expect("known_any::Config should serialize to JSON"));
 
         self
     }
 }
 
-impl cog::Builder<SomeStruct> for SomeStructBuilder {
-    fn build(&self) -> Result<SomeStruct, Vec<cog::BuildError>> {
+impl cog::Builder<known_any::SomeStruct> for SomeStructBuilder {
+    fn build(&self) -> Result<known_any::SomeStruct, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

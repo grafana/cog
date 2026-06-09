@@ -1,16 +1,16 @@
 use crate::cog;
-use crate::types::panelbuilder::Panel;
+use crate::types::panelbuilder;
 
 #[derive(Debug, Clone)]
 pub struct PanelBuilder {
-    internal: Panel,
-    errors: Vec<cog::BuildError>,
+    internal: panelbuilder::Panel,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl PanelBuilder {
     pub fn new() -> Self {
         Self {
-            internal: Panel::default(),
+            internal: panelbuilder::Panel::default(),
             errors: Vec::new(),
         }
     }
@@ -102,8 +102,8 @@ impl PanelBuilder {
     }
 }
 
-impl cog::Builder<Panel> for PanelBuilder {
-    fn build(&self) -> Result<Panel, Vec<cog::BuildError>> {
+impl cog::Builder<panelbuilder::Panel> for PanelBuilder {
+    fn build(&self) -> Result<panelbuilder::Panel, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

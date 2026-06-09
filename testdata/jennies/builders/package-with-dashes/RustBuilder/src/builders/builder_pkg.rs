@@ -1,16 +1,16 @@
 use crate::cog;
-use crate::types::with_dashes::SomeStruct;
+use crate::types::with_dashes;
 
 #[derive(Debug, Clone)]
 pub struct SomeNiceBuilderBuilder {
-    internal: SomeStruct,
-    errors: Vec<cog::BuildError>,
+    internal: with_dashes::SomeStruct,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl SomeNiceBuilderBuilder {
     pub fn new() -> Self {
         Self {
-            internal: SomeStruct::default(),
+            internal: with_dashes::SomeStruct::default(),
             errors: Vec::new(),
         }
     }
@@ -30,8 +30,8 @@ impl SomeNiceBuilderBuilder {
     }
 }
 
-impl cog::Builder<SomeStruct> for SomeNiceBuilderBuilder {
-    fn build(&self) -> Result<SomeStruct, Vec<cog::BuildError>> {
+impl cog::Builder<with_dashes::SomeStruct> for SomeNiceBuilderBuilder {
+    fn build(&self) -> Result<with_dashes::SomeStruct, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

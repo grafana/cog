@@ -3,9 +3,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum Enum {
     #[default]
-    ValueA,
-    ValueB,
-    ValueC,
+    #[serde(rename = "ValueA")]
+    EnumValueA,
+    #[serde(rename = "ValueB")]
+    EnumValueB,
+    #[serde(rename = "ValueC")]
+    EnumValueC,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
@@ -36,14 +39,14 @@ pub struct StructA {
 impl Default for StructA {
     fn default() -> Self {
         Self {
-            my_enum: Enum::ValueA,
-            other: Some(Enum::ValueA),
+            my_enum: Enum::EnumValueA,
+            other: Some(Enum::EnumValueA),
         }
     }
 }
 
 fn default_struct_a_my_enum() -> Enum {
-    Enum::ValueA
+    Enum::EnumValueA
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -59,12 +62,12 @@ pub struct StructB {
 impl Default for StructB {
     fn default() -> Self {
         Self {
-            my_enum: Enum::ValueB,
+            my_enum: Enum::EnumValueB,
             my_value: Default::default(),
         }
     }
 }
 
 fn default_struct_b_my_enum() -> Enum {
-    Enum::ValueB
+    Enum::EnumValueB
 }

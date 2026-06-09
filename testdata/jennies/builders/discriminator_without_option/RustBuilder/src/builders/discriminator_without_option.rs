@@ -1,18 +1,16 @@
 use crate::cog;
-use crate::types::discriminator_without_option::AnEnum;
-use crate::types::discriminator_without_option::NoShowFieldOption;
-use crate::types::discriminator_without_option::ShowFieldOption;
+use crate::types::discriminator_without_option;
 
 #[derive(Debug, Clone)]
 pub struct NoShowFieldOptionBuilder {
-    internal: NoShowFieldOption,
-    errors: Vec<cog::BuildError>,
+    internal: discriminator_without_option::NoShowFieldOption,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl NoShowFieldOptionBuilder {
     pub fn new() -> Self {
         Self {
-            internal: NoShowFieldOption::default(),
+            internal: discriminator_without_option::NoShowFieldOption::default(),
             errors: Vec::new(),
         }
     }
@@ -32,8 +30,10 @@ impl NoShowFieldOptionBuilder {
     }
 }
 
-impl cog::Builder<NoShowFieldOption> for NoShowFieldOptionBuilder {
-    fn build(&self) -> Result<NoShowFieldOption, Vec<cog::BuildError>> {
+impl cog::Builder<discriminator_without_option::NoShowFieldOption> for NoShowFieldOptionBuilder {
+    fn build(
+        &self,
+    ) -> Result<discriminator_without_option::NoShowFieldOption, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }
@@ -44,14 +44,14 @@ impl cog::Builder<NoShowFieldOption> for NoShowFieldOptionBuilder {
 
 #[derive(Debug, Clone)]
 pub struct ShowFieldOptionBuilder {
-    internal: ShowFieldOption,
-    errors: Vec<cog::BuildError>,
+    internal: discriminator_without_option::ShowFieldOption,
+    pub(crate) errors: Vec<cog::BuildError>,
 }
 
 impl ShowFieldOptionBuilder {
     pub fn new() -> Self {
         Self {
-            internal: ShowFieldOption::default(),
+            internal: discriminator_without_option::ShowFieldOption::default(),
             errors: Vec::new(),
         }
     }
@@ -64,7 +64,7 @@ impl Default for ShowFieldOptionBuilder {
 }
 
 impl ShowFieldOptionBuilder {
-    pub fn field(mut self, field: AnEnum) -> Self {
+    pub fn field(mut self, field: discriminator_without_option::AnEnum) -> Self {
         self.internal.field = field;
 
         self
@@ -79,8 +79,8 @@ impl ShowFieldOptionBuilder {
     }
 }
 
-impl cog::Builder<ShowFieldOption> for ShowFieldOptionBuilder {
-    fn build(&self) -> Result<ShowFieldOption, Vec<cog::BuildError>> {
+impl cog::Builder<discriminator_without_option::ShowFieldOption> for ShowFieldOptionBuilder {
+    fn build(&self) -> Result<discriminator_without_option::ShowFieldOption, Vec<cog::BuildError>> {
         if !self.errors.is_empty() {
             return Err(self.errors.clone());
         }

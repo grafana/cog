@@ -1,4 +1,4 @@
-use crate::types::otherpkg::SomeDistantStruct;
+use crate::types::otherpkg;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
@@ -9,4 +9,4 @@ pub struct SomeStruct {
 
 pub type RefToSomeStruct = SomeStruct;
 
-pub type RefToSomeStructFromOtherPackage = SomeDistantStruct;
+pub type RefToSomeStructFromOtherPackage = otherpkg::SomeDistantStruct;
