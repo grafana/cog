@@ -215,6 +215,27 @@ func (formatter *typeFormatter) formatBuilderArgType(def ast.Type) string {
 	}
 }
 
+// formatComposableSlotBuilderArgType renders the argument type of an option that
+// fills a composable slot: a builder of the slot's variant value. A bare
+// dataquery slot becomes `impl cog::Builder<Box<dyn variants::Dataquery>>`; a
+// collection of slots becomes a Vec/HashMap of those builders. This mirrors the
+// Go/Python target's `cog.Builder[variants.Dataquery]`, where the setter calls
+// build() and stores the resulting boxed trait object.
+func (formatter *typeFormatter) formatComposableSlotBuilderArgType(def ast.Type) string {
+	switch {
+	case def.IsArray():
+		return fmt.Sprintf("Vec<%s>", formatter.formatComposableSlotBuilderArgType(def.AsArray().ValueType))
+	case def.IsMap():
+		m := def.AsMap()
+		formatter.imports.Add("std::collections::HashMap")
+		return fmt.Sprintf("HashMap<%s, %s>", formatter.formatType(m.IndexType), formatter.formatComposableSlotBuilderArgType(m.ValueType))
+	case def.IsComposableSlot():
+		return fmt.Sprintf("impl cog::Builder<%s>", formatter.formatComposableSlot(def.AsComposableSlot()))
+	default:
+		return formatter.formatType(def)
+	}
+}
+
 // formatComposableSlot renders a composable-slot field. A dataquery slot becomes
 // a boxed trait object (`Box<dyn crate::cog::variants::Dataquery>`): the concrete
 // query type is unknown at compile time and resolved at runtime by the registry

@@ -221,6 +221,18 @@ impl PartialEq for Box<dyn Dataquery> {
     }
 }
 
+/// Default value for a boxed [`Dataquery`] trait object.
+///
+/// A generated struct with a required (non-optional, non-collection) composable
+/// dataquery slot derives `Default`, which requires its `Box<dyn Dataquery>`
+/// field to be `Default`. The empty [`UnknownDataquery`] bag serves as that
+/// default, mirroring the Go target's zero-value variant interface.
+impl Default for Box<dyn Dataquery> {
+    fn default() -> Self {
+        Box::new(UnknownDataquery::default())
+    }
+}
+
 /// The process-wide default variant registry.
 ///
 /// The Go and TypeScript SDKs populate a global runtime from a `plugins`

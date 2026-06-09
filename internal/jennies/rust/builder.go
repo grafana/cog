@@ -140,7 +140,7 @@ func (jenny Builder) generateBuilder(context languages.Context, builder ast.Buil
 	}
 
 	body.WriteString("\n\n")
-	body.WriteString(jenny.formatBuild(builderType, objectType))
+	body.WriteString(jenny.formatBuild(formatter, builder, builderType, objectType))
 	body.WriteString("\n")
 
 	return body.String(), nil
@@ -297,6 +297,22 @@ func isDelegableType(def ast.Type) bool {
 	case def.IsMap():
 		return isDelegableType(def.AsMap().ValueType)
 	case def.IsRef():
+		return true
+	default:
+		return false
+	}
+}
+
+// isComposableSlotType reports whether a type is a composable slot, or a
+// collection (array/map) whose element type is (recursively) a composable slot.
+// Such an option argument is filled by a builder of the slot's variant value.
+func isComposableSlotType(def ast.Type) bool {
+	switch {
+	case def.IsArray():
+		return isComposableSlotType(def.AsArray().ValueType)
+	case def.IsMap():
+		return isComposableSlotType(def.AsMap().ValueType)
+	case def.IsComposableSlot():
 		return true
 	default:
 		return false
@@ -492,14 +508,30 @@ func negateComparisonOp(op ast.Op) string {
 // setters accumulate violations into self.errors; build() surfaces them (mirroring
 // the Go target's RecordError/errors slice) and otherwise clones the assembled
 // object. Required-field nil checks are layered in by later chunks.
-func (jenny Builder) formatBuild(builderType, objectType string) string {
+func (jenny Builder) formatBuild(formatter *typeFormatter, builder ast.Builder, builderType, objectType string) string {
+	// A builder whose target type implements a variant (a dataquery-variant
+	// builder, e.g. LokiBuilder building a Loki query) implements
+	// cog::Builder<Box<dyn variants::Dataquery>> and boxes the assembled object,
+	// mirroring the Go target whose Build() returns the variant interface. This
+	// makes the variant builder usable wherever a composable dataquery slot is
+	// filled (which takes impl cog::Builder<Box<dyn variants::Dataquery>>). A
+	// non-variant builder implements cog::Builder<ConcreteType> and returns the
+	// concrete object.
+	buildType := objectType
+	okExpr := "self.internal.clone()"
+	if builder.For.Type.ImplementsVariant() && builder.For.Type.ImplementedVariant() == string(ast.SchemaVariantDataQuery) {
+		formatter.imports.Add("crate::cog::variants")
+		buildType = "Box<dyn variants::Dataquery>"
+		okExpr = "Box::new(self.internal.clone())"
+	}
+
 	var buffer strings.Builder
-	fmt.Fprintf(&buffer, "impl cog::Builder<%s> for %s {\n", objectType, builderType)
-	fmt.Fprintf(&buffer, "    fn build(&self) -> Result<%s, Vec<cog::BuildError>> {\n", objectType)
+	fmt.Fprintf(&buffer, "impl cog::Builder<%s> for %s {\n", buildType, builderType)
+	fmt.Fprintf(&buffer, "    fn build(&self) -> Result<%s, Vec<cog::BuildError>> {\n", buildType)
 	buffer.WriteString("        if !self.errors.is_empty() {\n")
 	buffer.WriteString("            return Err(self.errors.clone());\n")
 	buffer.WriteString("        }\n\n")
-	buffer.WriteString("        Ok(self.internal.clone())\n")
+	fmt.Fprintf(&buffer, "        Ok(%s)\n", okExpr)
 	buffer.WriteString("    }\n")
 	buffer.WriteString("}")
 	return buffer.String()
@@ -522,6 +554,13 @@ func (jenny Builder) formatArgs(formatter *typeFormatter, args []ast.Argument, c
 		// formatDelegatedAssignment).
 		if context.ResolveToBuilder(arg.Type) {
 			argType = formatter.formatBuilderArgType(arg.Type)
+		} else if isComposableSlotType(arg.Type) {
+			// A composable-slot option argument (e.g. a dataquery slot, or a
+			// collection of them) is filled by a builder of the slot's variant value,
+			// mirroring the Go/Python target's `cog.Builder[variants.Dataquery]` arg.
+			// The setter calls build() on it and stores the boxed trait object (see
+			// formatComposableSlotAssignment).
+			argType = formatter.formatComposableSlotBuilderArgType(arg.Type)
 		}
 		parts = append(parts, fmt.Sprintf("%s: %s", formatArgName(arg.Name), argType))
 	}
@@ -558,6 +597,15 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 	// a collection of builders), accumulating any errors and assigning the built
 	// value(s).
 	if assignment.Value.Argument != nil && context.ResolveToBuilder(assignment.Value.Argument.Type) {
+		return jenny.formatDelegatedAssignment(field, assignment.Value.Argument, receiver)
+	}
+
+	// Composable-slot delegation: the option argument is a builder of the slot's
+	// variant value (e.g. cog::Builder<Box<dyn variants::Dataquery>>). Build it
+	// and store the boxed trait object, reusing the builder-delegation machinery
+	// (the destination field type drives single/Vec/HashMap shaping and the leaf
+	// build() call). Errors accumulate exactly as for ordinary delegation.
+	if assignment.Value.Argument != nil && isComposableSlotType(assignment.Value.Argument.Type) {
 		return jenny.formatDelegatedAssignment(field, assignment.Value.Argument, receiver)
 	}
 
