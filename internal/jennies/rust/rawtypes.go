@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/tools"
 )
 
 // RawTypes emits idiomatic Rust type definitions (structs, type aliases and
@@ -90,6 +91,14 @@ func (jenny RawTypes) formatObject(formatter *typeFormatter, imports *importMap,
 		return jenny.formatEnum(imports, object), nil
 	case object.Type.IsDisjunction() && disjunctionBranchesAreScalars(object.Type.AsDisjunction()):
 		return jenny.formatScalarDisjunction(formatter, imports, object), nil
+	case object.Type.IsDisjunction():
+		// Both discriminated and undiscriminated disjunctions of refs are emitted as
+		// untagged enums. The branch structs already serialize their own constant
+		// discriminator field, so an internally tagged enum (#[serde(tag = "...")])
+		// would emit that key twice. Untagged serialization yields the key exactly
+		// once, byte-identical to the Go/Python/TS targets, and round-trips because
+		// the branch structs have distinct shapes.
+		return jenny.formatUntaggedDisjunction(formatter, imports, object), nil
 	case object.Type.IsScalar(), object.Type.IsArray(), object.Type.IsMap(), object.Type.IsRef():
 		return jenny.formatTypeAlias(formatter, object), nil
 	default:
@@ -114,17 +123,24 @@ func (jenny RawTypes) formatEnum(imports *importMap, object ast.Object) string {
 	if numeric {
 		imports.Add("serde_repr::Serialize_repr")
 		imports.Add("serde_repr::Deserialize_repr")
-		fmt.Fprintf(&buffer, "#[derive(Serialize_repr, Deserialize_repr, Debug, Clone, Copy, PartialEq, Eq, Hash)]\n")
+		fmt.Fprintf(&buffer, "#[derive(Serialize_repr, Deserialize_repr, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]\n")
 		fmt.Fprintf(&buffer, "#[repr(%s)]\n", enumReprType(enum))
 	} else {
 		imports.Add("serde::Serialize")
 		imports.Add("serde::Deserialize")
-		buffer.WriteString("#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]\n")
+		buffer.WriteString("#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]\n")
 	}
 
 	fmt.Fprintf(&buffer, "pub enum %s {\n", formatTypeName(object.Name))
-	for _, value := range enum.Values {
+	for i, value := range enum.Values {
 		variant := formatTypeName(value.Name)
+		// The first variant is the enum's Default. A constant reference to an enum
+		// pins a specific variant in the owning struct's Default impl, but a plain
+		// enum-typed field still needs a derivable Default; the first declared value
+		// is the conventional choice and matches the other targets.
+		if i == 0 {
+			buffer.WriteString("    #[default]\n")
+		}
 		if numeric {
 			fmt.Fprintf(&buffer, "    %s = %s,\n", variant, formatScalarValue(value.Value, value.Type.AsScalar().ScalarKind))
 			continue
@@ -178,6 +194,56 @@ func (jenny RawTypes) formatScalarDisjunction(formatter *typeFormatter, imports 
 	buffer.WriteString("}")
 
 	return buffer.String()
+}
+
+// formatUntaggedDisjunction emits a disjunction of refs (discriminated or not, or a
+// mix of scalars, arrays and refs) as an untagged Rust enum. serde tries the
+// variants top-down on deserialization, so branch order is preserved. Eq is
+// omitted because a branch may carry a float payload.
+func (jenny RawTypes) formatUntaggedDisjunction(formatter *typeFormatter, imports *importMap, object ast.Object) string {
+	imports.Add("serde::Serialize")
+	imports.Add("serde::Deserialize")
+
+	branches := object.Type.AsDisjunction().Branches
+
+	var buffer strings.Builder
+	buffer.WriteString(formatComments(object.Comments, ""))
+	buffer.WriteString("#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]\n")
+	buffer.WriteString("#[serde(untagged)]\n")
+	fmt.Fprintf(&buffer, "pub enum %s {\n", formatTypeName(object.Name))
+
+	used := make(map[string]struct{}, len(branches))
+	for _, branch := range branches {
+		inner := formatter.formatType(branch)
+		variant := disambiguateVariant(disjunctionVariantName(branch, inner), used)
+		fmt.Fprintf(&buffer, "    %s(%s),\n", variant, inner)
+	}
+	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+// disjunctionVariantName derives a PascalCase variant identifier for a branch of
+// an untagged disjunction: a ref uses its referred type name, anything else
+// (scalar, array, map) uses the PascalCase form of its rendered Rust type.
+func disjunctionVariantName(branch ast.Type, rendered string) string {
+	if branch.IsRef() {
+		return formatTypeName(branch.AsRef().ReferredType)
+	}
+	return formatTypeName(rendered)
+}
+
+// disambiguateVariant guarantees a unique variant identifier within an enum by
+// appending an incrementing numeric suffix on collision.
+func disambiguateVariant(name string, used map[string]struct{}) string {
+	candidate := name
+	for i := 2; ; i++ {
+		if _, taken := used[candidate]; !taken {
+			used[candidate] = struct{}{}
+			return candidate
+		}
+		candidate = fmt.Sprintf("%s%d", name, i)
+	}
 }
 
 // disjunctionBranchesAreScalars reports whether every branch of a disjunction is
@@ -248,25 +314,74 @@ func (jenny RawTypes) formatStruct(formatter *typeFormatter, imports *importMap,
 			if i != 0 {
 				buffer.WriteString("\n")
 			}
-			buffer.WriteString(jenny.formatStructField(formatter, field))
+			buffer.WriteString(jenny.formatStructField(formatter, object.Name, field))
 		}
 		buffer.WriteString("}")
 	}
 
-	if defaultImpl := jenny.formatDefaultImpl(object); defaultImpl != "" {
+	if defaultImpl := jenny.formatDefaultImpl(formatter, object); defaultImpl != "" {
 		buffer.WriteString("\n\n")
 		buffer.WriteString(defaultImpl)
+	}
+
+	for _, field := range fields {
+		if fn := jenny.formatFieldDefaultFn(formatter, object.Name, field); fn != "" {
+			buffer.WriteString("\n\n")
+			buffer.WriteString(fn)
+		}
 	}
 
 	return buffer.String()
 }
 
-func (jenny RawTypes) formatStructField(formatter *typeFormatter, field ast.StructField) string {
+// fieldNeedsConstantDefaultFn reports whether a field is a required constant or
+// constant reference whose pinned value must be restored by serde when the key
+// is absent from the input (most notably when the struct is a branch of an
+// internally tagged disjunction, where serde consumes the discriminator key for
+// the tag). serde's bare #[serde(default)] would fall back to the field type's
+// Default (e.g. an empty String) rather than the pinned constant, so a dedicated
+// default function is generated instead.
+func fieldNeedsConstantDefaultFn(field ast.StructField) bool {
+	if !field.Required {
+		return false
+	}
+	return field.Type.IsConcreteScalar() || field.Type.IsConstantRef()
+}
+
+// fieldDefaultFnName returns the deterministic, unique name of the serde default
+// function generated for a constant field.
+func fieldDefaultFnName(structName string, field ast.StructField) string {
+	return fmt.Sprintf("default_%s_%s", tools.SnakeCase(structName), tools.SnakeCase(field.Name))
+}
+
+// formatFieldDefaultFn renders the serde default function for a constant field,
+// returning the field's pinned constant value. It returns the empty string for
+// fields that need no such function.
+func (jenny RawTypes) formatFieldDefaultFn(formatter *typeFormatter, structName string, field ast.StructField) string {
+	if !fieldNeedsConstantDefaultFn(field) {
+		return ""
+	}
+
+	var value string
+	if field.Type.IsConstantRef() {
+		value = constantRefDefault(formatter, field.Type.AsConstantRef())
+	} else {
+		value = constScalarLiteral(field.Type.AsScalar())
+	}
+
+	var buffer strings.Builder
+	fmt.Fprintf(&buffer, "fn %s() -> %s {\n", fieldDefaultFnName(structName, field), formatter.formatType(field.Type))
+	fmt.Fprintf(&buffer, "    %s\n", value)
+	buffer.WriteString("}")
+	return buffer.String()
+}
+
+func (jenny RawTypes) formatStructField(formatter *typeFormatter, structName string, field ast.StructField) string {
 	var buffer strings.Builder
 
 	buffer.WriteString(formatComments(field.Comments, "    "))
 
-	for _, attr := range fieldSerdeAttributes(field) {
+	for _, attr := range fieldSerdeAttributes(structName, field) {
 		fmt.Fprintf(&buffer, "    %s\n", attr)
 	}
 
@@ -277,7 +392,7 @@ func (jenny RawTypes) formatStructField(formatter *typeFormatter, field ast.Stru
 
 // fieldSerdeAttributes returns the serde attribute lines for a struct field:
 // rename for non-snake-case keys and skip/default handling for optionals.
-func fieldSerdeAttributes(field ast.StructField) []string {
+func fieldSerdeAttributes(structName string, field ast.StructField) []string {
 	var attrs []string
 
 	if rustFieldNeedsRename(field.Name) {
@@ -299,6 +414,14 @@ func fieldSerdeAttributes(field ast.StructField) []string {
 		// A nullable scalar/struct/ref field is rendered as Option<T> and so gets the
 		// Option skip/default attribute.
 		attrs = append(attrs, `#[serde(default, skip_serializing_if = "Option::is_none")]`)
+	case fieldNeedsConstantDefaultFn(field):
+		// A required constant (or constant reference) field carries a value pinned by
+		// the struct's Default impl. A dedicated default function restores the pinned
+		// constant on deserialization (bare #[serde(default)] would yield the field
+		// type's zero value instead) while the value is still serialized. This keeps
+		// the discriminator present on both standalone use and as an untagged
+		// disjunction branch, matching the Go/Python/TS wire format.
+		attrs = append(attrs, fmt.Sprintf("#[serde(default = %q)]", fieldDefaultFnName(structName, field)))
 	}
 
 	return attrs
@@ -323,6 +446,9 @@ func needsManualDefault(fields []ast.StructField) bool {
 		if field.Type.IsConcreteScalar() {
 			return true
 		}
+		if field.Type.IsConstantRef() {
+			return true
+		}
 		if field.Type.Default != nil {
 			return true
 		}
@@ -330,7 +456,7 @@ func needsManualDefault(fields []ast.StructField) bool {
 	return false
 }
 
-func (jenny RawTypes) formatDefaultImpl(object ast.Object) string {
+func (jenny RawTypes) formatDefaultImpl(formatter *typeFormatter, object ast.Object) string {
 	fields := object.Type.AsStruct().Fields
 	if !needsManualDefault(fields) {
 		return ""
@@ -342,7 +468,7 @@ func (jenny RawTypes) formatDefaultImpl(object ast.Object) string {
 	buffer.WriteString("        Self {\n")
 
 	for _, field := range fields {
-		fmt.Fprintf(&buffer, "            %s: %s,\n", formatFieldName(field.Name), defaultExpression(field.Type))
+		fmt.Fprintf(&buffer, "            %s: %s,\n", formatFieldName(field.Name), defaultExpression(formatter, field.Type))
 	}
 
 	buffer.WriteString("        }\n")
@@ -354,7 +480,18 @@ func (jenny RawTypes) formatDefaultImpl(object ast.Object) string {
 
 // defaultExpression returns the Rust expression used to initialise a field in a
 // manual Default impl.
-func defaultExpression(typeDef ast.Type) string {
+func defaultExpression(formatter *typeFormatter, typeDef ast.Type) string {
+	if typeDef.IsConstantRef() {
+		pinned := constantRefDefault(formatter, typeDef.AsConstantRef())
+		// A nullable constant reference is stored as Option<T>; the pinned constant
+		// is wrapped in Some so the field still round-trips to its constant value
+		// rather than to None.
+		if typeDef.Nullable {
+			return fmt.Sprintf("Some(%s)", pinned)
+		}
+		return pinned
+	}
+
 	if typeDef.IsConcreteScalar() {
 		return constScalarLiteral(typeDef.AsScalar())
 	}
@@ -364,6 +501,33 @@ func defaultExpression(typeDef ast.Type) string {
 	}
 
 	return "Default::default()"
+}
+
+// constantRefDefault renders the pinned constant value of a constant reference.
+// A reference to an enum resolves to the matching enum variant
+// (Enum::Variant); a reference to a scalar constant resolves to that scalar's
+// literal (a string becomes an owned String).
+func constantRefDefault(formatter *typeFormatter, ref ast.ConstantReferenceType) string {
+	referredObject, found := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	if found && referredObject.Type.IsEnum() {
+		typeName := formatter.formatRef(ast.RefType{ReferredPkg: ref.ReferredPkg, ReferredType: ref.ReferredType})
+		for _, value := range referredObject.Type.AsEnum().Values {
+			if fmt.Sprintf("%v", value.Value) == fmt.Sprintf("%v", ref.ReferenceValue) {
+				return fmt.Sprintf("%s::%s", typeName, formatTypeName(value.Name))
+			}
+		}
+		return fmt.Sprintf("%s::default()", typeName)
+	}
+
+	if found && referredObject.Type.IsScalar() {
+		scalar := referredObject.Type.AsScalar()
+		if scalar.ScalarKind == ast.KindString {
+			return fmt.Sprintf("%s.to_string()", formatValue(ref.ReferenceValue))
+		}
+		return formatScalarValue(ref.ReferenceValue, scalar.ScalarKind)
+	}
+
+	return formatValue(ref.ReferenceValue)
 }
 
 // defaultLiteral renders an explicit IR default into a Rust expression, using

@@ -21,6 +21,7 @@ pub struct SomeStruct {
     pub field_string: String,
 
     #[serde(rename = "FieldStringWithConstantValue")]
+    #[serde(default = "default_some_struct_field_string_with_constant_value")]
     pub field_string_with_constant_value: String,
 
     #[serde(rename = "FieldFloat32")]
@@ -74,4 +75,8 @@ impl Default for SomeStruct {
             field_int64: Default::default(),
         }
     }
+}
+
+fn default_some_struct_field_string_with_constant_value() -> String {
+    "auto".to_string()
 }

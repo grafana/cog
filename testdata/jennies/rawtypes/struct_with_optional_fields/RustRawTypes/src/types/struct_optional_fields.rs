@@ -35,8 +35,9 @@ pub struct StructOptionalFieldsSomeStructFieldAnonymousStruct {
     pub field_any: serde_json::Value,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum SomeStructOperator {
+    #[default]
     #[serde(rename = ">")]
     GreaterThan,
     #[serde(rename = "<")]

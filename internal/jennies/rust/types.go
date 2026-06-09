@@ -94,10 +94,24 @@ func (formatter *typeFormatter) formatMap(def ast.MapType) string {
 	return fmt.Sprintf("HashMap<%s, %s>", formatter.formatType(def.IndexType), formatter.formatType(def.ValueType))
 }
 
+// formatConstantRef renders the storage type of a constant reference: the type
+// of the object it refers to. A reference to a top-level scalar constant renders
+// as that scalar's Rust kind; a reference to an enum renders as the enum type
+// (cross-module references are recorded just like a plain ref). The constant
+// value itself is pinned separately via the struct's Default impl.
 func (formatter *typeFormatter) formatConstantRef(def ast.ConstantReferenceType) string {
 	referredObject, found := formatter.context.LocateObject(def.ReferredPkg, def.ReferredType)
-	if found && referredObject.Type.IsScalar() {
+	if !found {
+		return "serde_json::Value"
+	}
+
+	if referredObject.Type.IsScalar() {
 		return formatScalarKind(referredObject.Type.AsScalar().ScalarKind)
 	}
+
+	if referredObject.Type.IsEnum() {
+		return formatter.formatRef(ast.RefType{ReferredPkg: def.ReferredPkg, ReferredType: def.ReferredType})
+	}
+
 	return "serde_json::Value"
 }
