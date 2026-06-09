@@ -20,6 +20,12 @@ type typeFormatter struct {
 	// emitted, used when synthesizing same-package refs (e.g. hoisted disjunction
 	// enums) so they render as bare short names.
 	rawPackage string
+	// importSamePackageRefs forces refs whose referred package matches the current
+	// package to still be imported (from crate::types::<pkg>). The builder jenny
+	// sets this: a builder module is distinct from its types module, so even a
+	// same-package type it names (an enum-typed option argument, say) must be
+	// brought in explicitly rather than assumed to be in scope.
+	importSamePackageRefs bool
 }
 
 func newTypeFormatter(context languages.Context, imports *importMap, packageName string) *typeFormatter {
@@ -113,7 +119,7 @@ func (formatter *typeFormatter) formatRef(ref ast.RefType) string {
 	typeName := formatTypeName(ref.ReferredType)
 	referredPkg := formatPackageName(ref.ReferredPkg)
 
-	if referredPkg != "" && referredPkg != formatter.packageName {
+	if referredPkg != "" && (formatter.importSamePackageRefs || referredPkg != formatter.packageName) {
 		formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", referredPkg, typeName))
 	}
 

@@ -1,7 +1,7 @@
 use crate::cog;
-use crate::types::basic_struct::SomeStruct;
+use crate::types::known_any::Config;
+use crate::types::known_any::SomeStruct;
 
-/// SomeStruct, to hold data.
 #[derive(Debug, Clone)]
 pub struct SomeStructBuilder {
     internal: SomeStruct,
@@ -23,36 +23,11 @@ impl Default for SomeStructBuilder {
     }
 }
 
-/// id identifies something. Weird, right?
 impl SomeStructBuilder {
-    pub fn id(mut self, id: i64) -> Self {
-        self.internal.id = id;
-
-        self
-    }
-}
-
-impl SomeStructBuilder {
-    pub fn uid(mut self, uid: String) -> Self {
-        self.internal.uid = uid;
-
-        self
-    }
-}
-
-impl SomeStructBuilder {
-    pub fn tags(mut self, tags: Vec<String>) -> Self {
-        self.internal.tags = tags;
-
-        self
-    }
-}
-
-/// This thing could be live.
-/// Or maybe not.
-impl SomeStructBuilder {
-    pub fn live_now(mut self, live_now: bool) -> Self {
-        self.internal.live_now = live_now;
+    pub fn title(mut self, title: String) -> Self {
+        let config = Config { title };
+        self.internal.config =
+            Some(serde_json::to_value(config).expect("Config should serialize to JSON"));
 
         self
     }

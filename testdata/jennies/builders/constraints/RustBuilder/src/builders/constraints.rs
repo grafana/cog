@@ -1,7 +1,6 @@
 use crate::cog;
-use crate::types::basic_struct::SomeStruct;
+use crate::types::constraints::SomeStruct;
 
-/// SomeStruct, to hold data.
 #[derive(Debug, Clone)]
 pub struct SomeStructBuilder {
     internal: SomeStruct,
@@ -23,9 +22,16 @@ impl Default for SomeStructBuilder {
     }
 }
 
-/// id identifies something. Weird, right?
 impl SomeStructBuilder {
-    pub fn id(mut self, id: i64) -> Self {
+    pub fn id(mut self, id: u64) -> Self {
+        if id < 5 {
+            self.errors
+                .push(cog::BuildError::new("id", "id must be >= 5".to_string()));
+        }
+        if id >= 10 {
+            self.errors
+                .push(cog::BuildError::new("id", "id must be < 10".to_string()));
+        }
         self.internal.id = id;
 
         self
@@ -33,26 +39,14 @@ impl SomeStructBuilder {
 }
 
 impl SomeStructBuilder {
-    pub fn uid(mut self, uid: String) -> Self {
-        self.internal.uid = uid;
-
-        self
-    }
-}
-
-impl SomeStructBuilder {
-    pub fn tags(mut self, tags: Vec<String>) -> Self {
-        self.internal.tags = tags;
-
-        self
-    }
-}
-
-/// This thing could be live.
-/// Or maybe not.
-impl SomeStructBuilder {
-    pub fn live_now(mut self, live_now: bool) -> Self {
-        self.internal.live_now = live_now;
+    pub fn title(mut self, title: String) -> Self {
+        if title.chars().count() < 1 {
+            self.errors.push(cog::BuildError::new(
+                "title",
+                "title length must be >= 1".to_string(),
+            ));
+        }
+        self.internal.title = title;
 
         self
     }

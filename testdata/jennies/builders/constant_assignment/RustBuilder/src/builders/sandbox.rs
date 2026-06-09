@@ -1,7 +1,6 @@
 use crate::cog;
-use crate::types::basic_struct::SomeStruct;
+use crate::types::sandbox::SomeStruct;
 
-/// SomeStruct, to hold data.
 #[derive(Debug, Clone)]
 pub struct SomeStructBuilder {
     internal: SomeStruct,
@@ -23,36 +22,33 @@ impl Default for SomeStructBuilder {
     }
 }
 
-/// id identifies something. Weird, right?
 impl SomeStructBuilder {
-    pub fn id(mut self, id: i64) -> Self {
-        self.internal.id = id;
+    pub fn editable(mut self) -> Self {
+        self.internal.editable = true;
 
         self
     }
 }
 
 impl SomeStructBuilder {
-    pub fn uid(mut self, uid: String) -> Self {
-        self.internal.uid = uid;
+    pub fn readonly(mut self) -> Self {
+        self.internal.editable = false;
 
         self
     }
 }
 
 impl SomeStructBuilder {
-    pub fn tags(mut self, tags: Vec<String>) -> Self {
-        self.internal.tags = tags;
+    pub fn auto_refresh(mut self) -> Self {
+        self.internal.auto_refresh = Some(true);
 
         self
     }
 }
 
-/// This thing could be live.
-/// Or maybe not.
 impl SomeStructBuilder {
-    pub fn live_now(mut self, live_now: bool) -> Self {
-        self.internal.live_now = live_now;
+    pub fn no_auto_refresh(mut self) -> Self {
+        self.internal.auto_refresh = Some(false);
 
         self
     }

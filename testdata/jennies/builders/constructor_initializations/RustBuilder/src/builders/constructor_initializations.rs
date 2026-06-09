@@ -5,12 +5,14 @@ use crate::types::constructor_initializations::SomePanel;
 #[derive(Debug, Clone)]
 pub struct SomePanelBuilder {
     internal: SomePanel,
+    errors: Vec<cog::BuildError>,
 }
 
 impl SomePanelBuilder {
     pub fn new() -> Self {
         let mut builder = Self {
             internal: SomePanel::default(),
+            errors: Vec::new(),
         };
         builder.internal.r#type = "panel_type".to_string();
         builder.internal.cursor = CursorMode::Tooltip;
@@ -35,6 +37,10 @@ impl SomePanelBuilder {
 
 impl cog::Builder<SomePanel> for SomePanelBuilder {
     fn build(&self) -> Result<SomePanel, Vec<cog::BuildError>> {
+        if !self.errors.is_empty() {
+            return Err(self.errors.clone());
+        }
+
         Ok(self.internal.clone())
     }
 }
