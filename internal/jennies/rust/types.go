@@ -16,6 +16,10 @@ type typeFormatter struct {
 	// emitted. A ref whose (sanitized) referred package matches this is rendered as
 	// a bare short name; any other ref is rendered cross-module via a `use`.
 	packageName string
+	// rawPackage is the unsanitized IR package of the schema currently being
+	// emitted, used when synthesizing same-package refs (e.g. hoisted disjunction
+	// enums) so they render as bare short names.
+	rawPackage string
 }
 
 func newTypeFormatter(context languages.Context, imports *importMap, packageName string) *typeFormatter {
@@ -23,6 +27,7 @@ func newTypeFormatter(context languages.Context, imports *importMap, packageName
 		context:     context,
 		imports:     imports,
 		packageName: formatPackageName(packageName),
+		rawPackage:  packageName,
 	}
 }
 
@@ -34,11 +39,28 @@ func newTypeFormatter(context languages.Context, imports *importMap, packageName
 func (formatter *typeFormatter) formatType(def ast.Type) string {
 	inner := formatter.formatInnerType(def)
 
-	if def.Nullable && !def.IsArray() && !def.IsMap() {
+	if isOptionWrapped(def) {
 		return fmt.Sprintf("Option<%s>", inner)
 	}
 
 	return inner
+}
+
+// isBareCollection reports whether a type is rendered as a bare collection (Vec
+// or HashMap) rather than wrapped in Option, even when it is nullable. A
+// collection carries its own "empty" representation, so absence is modelled by
+// emptiness, mirroring the Go target which never pointer-wraps slices or maps.
+func isBareCollection(def ast.Type) bool {
+	return def.IsArray() || def.IsMap()
+}
+
+// isOptionWrapped reports whether a type is rendered as Option<T>. A nullable
+// non-collection type is the optional case; collections stay bare (see
+// isBareCollection). This is the single predicate the type formatter, the serde
+// attribute generator and the constant-default decision all share, so the serde
+// attribute can never drift from what formatType actually emits.
+func isOptionWrapped(def ast.Type) bool {
+	return def.Nullable && !isBareCollection(def)
 }
 
 func (formatter *typeFormatter) formatInnerType(def ast.Type) string {
@@ -60,6 +82,13 @@ func (formatter *typeFormatter) formatInnerType(def ast.Type) string {
 		// that renders any residual inline enum as its underlying scalar type.
 		return formatScalarKind(def.AsEnum().Values[0].Type.AsScalar().ScalarKind)
 	default:
+		// An inline (field-level) disjunction reaches this branch: the Rust target
+		// does not run the DisjunctionToType pass (it would rewrite the top-level
+		// untagged-enum disjunctions emitted in earlier phases into Go-style
+		// struct-of-options), so a disjunction that was never promoted to a named
+		// top-level object is rendered as the permissive serde_json::Value. This
+		// round-trips any branch and stays wire-compatible; a typed union is only
+		// emitted for disjunctions that exist as named top-level objects.
 		return "serde_json::Value"
 	}
 }
@@ -71,6 +100,16 @@ func (formatter *typeFormatter) formatInnerType(def ast.Type) string {
 // uses the bare short name, mirroring how the serde and HashMap imports are
 // collected and deduped at the top of the module.
 func (formatter *typeFormatter) formatRef(ref ast.RefType) string {
+	// A reference to a concrete scalar object resolves to its underlying Rust
+	// scalar type. Such an object is emitted as a `const` item (see
+	// RawTypes.formatConstant), not a type alias, so its name is not a usable type;
+	// the field instead takes the underlying scalar kind, matching the Go target
+	// (which renders the field as the bare scalar). The pinned value, if used as a
+	// field default, is restored separately through the owning struct's Default.
+	if referred, found := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType); found && referred.Type.IsConcreteScalar() {
+		return formatScalarKind(referred.Type.AsScalar().ScalarKind)
+	}
+
 	typeName := formatTypeName(ref.ReferredType)
 	referredPkg := formatPackageName(ref.ReferredPkg)
 

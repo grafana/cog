@@ -89,16 +89,16 @@ func (jenny RawTypes) formatObject(formatter *typeFormatter, imports *importMap,
 		return jenny.formatStruct(formatter, imports, object), nil
 	case object.Type.IsEnum():
 		return jenny.formatEnum(imports, object), nil
-	case object.Type.IsDisjunction() && disjunctionBranchesAreScalars(object.Type.AsDisjunction()):
-		return jenny.formatScalarDisjunction(formatter, imports, object), nil
 	case object.Type.IsDisjunction():
-		// Both discriminated and undiscriminated disjunctions of refs are emitted as
-		// untagged enums. The branch structs already serialize their own constant
-		// discriminator field, so an internally tagged enum (#[serde(tag = "...")])
-		// would emit that key twice. Untagged serialization yields the key exactly
-		// once, byte-identical to the Go/Python/TS targets, and round-trips because
-		// the branch structs have distinct shapes.
-		return jenny.formatUntaggedDisjunction(formatter, imports, object), nil
+		// Every disjunction (scalar, ref, or mixed; discriminated or not) is emitted as
+		// a single untagged enum. The branch structs already serialize their own
+		// constant discriminator field, so an internally tagged enum (#[serde(tag =
+		// "...")]) would emit that key twice. Untagged serialization yields the key
+		// exactly once, byte-identical to the Go/Python/TS targets, and round-trips
+		// because the branches have distinct shapes. Variant identifiers are
+		// disambiguated so branches that render to the same Rust type still compile.
+		def := object.Type.AsDisjunction()
+		return jenny.formatUntaggedEnum(formatter, imports, formatTypeName(object.Name), object.Comments, def.Branches), nil
 	case object.Type.IsScalar(), object.Type.IsArray(), object.Type.IsMap(), object.Type.IsRef():
 		return jenny.formatTypeAlias(formatter, object), nil
 	default:
@@ -171,46 +171,24 @@ func enumReprType(enum ast.EnumType) string {
 	return formatScalarKind(enum.Values[0].Type.AsScalar().ScalarKind)
 }
 
-// formatScalarDisjunction emits a disjunction of scalar types as an untagged
-// Rust enum, with one variant per branch named after its Rust type. Untagged
-// (de)serialization makes each variant round-trip as the bare scalar value,
-// matching the JSON the other targets produce. Eq is omitted because a branch
-// may carry a float payload.
-func (jenny RawTypes) formatScalarDisjunction(formatter *typeFormatter, imports *importMap, object ast.Object) string {
+// formatUntaggedEnum emits a disjunction (scalar, ref, or a mix of scalars,
+// arrays, maps and refs; discriminated or not) as a single untagged Rust enum.
+// serde tries the variants top-down on deserialization, so branch order is
+// preserved, and untagged (de)serialization makes each variant round-trip as the
+// bare value, matching the JSON the other targets produce. Variant identifiers
+// are disambiguated so two branches rendering to the same Rust type (e.g. two
+// distinct refs that resolve to the same scalar) still emit unique, compiling
+// identifiers. Eq and Hash are omitted because a branch may carry a float
+// payload (directly or transitively through a ref), which is not Eq/Hash in Rust.
+func (jenny RawTypes) formatUntaggedEnum(formatter *typeFormatter, imports *importMap, name string, comments []string, branches ast.Types) string {
 	imports.Add("serde::Serialize")
 	imports.Add("serde::Deserialize")
 
-	branches := object.Type.AsDisjunction().Branches
-
 	var buffer strings.Builder
-	buffer.WriteString(formatComments(object.Comments, ""))
+	buffer.WriteString(formatComments(comments, ""))
 	buffer.WriteString("#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]\n")
 	buffer.WriteString("#[serde(untagged)]\n")
-	fmt.Fprintf(&buffer, "pub enum %s {\n", formatTypeName(object.Name))
-	for _, branch := range branches {
-		inner := formatter.formatType(branch)
-		fmt.Fprintf(&buffer, "    %s(%s),\n", formatTypeName(inner), inner)
-	}
-	buffer.WriteString("}")
-
-	return buffer.String()
-}
-
-// formatUntaggedDisjunction emits a disjunction of refs (discriminated or not, or a
-// mix of scalars, arrays and refs) as an untagged Rust enum. serde tries the
-// variants top-down on deserialization, so branch order is preserved. Eq is
-// omitted because a branch may carry a float payload.
-func (jenny RawTypes) formatUntaggedDisjunction(formatter *typeFormatter, imports *importMap, object ast.Object) string {
-	imports.Add("serde::Serialize")
-	imports.Add("serde::Deserialize")
-
-	branches := object.Type.AsDisjunction().Branches
-
-	var buffer strings.Builder
-	buffer.WriteString(formatComments(object.Comments, ""))
-	buffer.WriteString("#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]\n")
-	buffer.WriteString("#[serde(untagged)]\n")
-	fmt.Fprintf(&buffer, "pub enum %s {\n", formatTypeName(object.Name))
+	fmt.Fprintf(&buffer, "pub enum %s {\n", name)
 
 	used := make(map[string]struct{}, len(branches))
 	for _, branch := range branches {
@@ -246,20 +224,6 @@ func disambiguateVariant(name string, used map[string]struct{}) string {
 	}
 }
 
-// disjunctionBranchesAreScalars reports whether every branch of a disjunction is
-// a plain scalar, the only disjunction shape RawTypes emits in this phase.
-func disjunctionBranchesAreScalars(def ast.DisjunctionType) bool {
-	if len(def.Branches) == 0 {
-		return false
-	}
-	for _, branch := range def.Branches {
-		if !branch.IsScalar() {
-			return false
-		}
-	}
-	return true
-}
-
 // formatConstant emits a top-level constant scalar as a Rust `const`.
 func (jenny RawTypes) formatConstant(object ast.Object) string {
 	var buffer strings.Builder
@@ -273,7 +237,7 @@ func (jenny RawTypes) formatConstant(object ast.Object) string {
 		"pub const %s: %s = %s;",
 		formatConstName(object.Name),
 		constType,
-		formatConstValue(scalar.Value, scalar.ScalarKind),
+		formatScalarValue(scalar.Value, scalar.ScalarKind),
 	)
 
 	return buffer.String()
@@ -298,6 +262,15 @@ func (jenny RawTypes) formatStruct(formatter *typeFormatter, imports *importMap,
 	imports.Add("serde::Deserialize")
 
 	fields := object.Type.AsStruct().Fields
+
+	// An inline (anonymous) multi-arm non-null disjunction field has no named type
+	// to reference, so it is hoisted here into a named untagged enum emitted in this
+	// same module, and the field is rewritten to reference it. This mirrors the
+	// Python target (typing.Union[...]) and the Go target (a named union type)
+	// rather than degrading to the type-erased serde_json::Value. The synthesized
+	// enums are emitted after the struct (and its Default impl / default fns) so the
+	// struct stays first, matching how every other top-level object is ordered.
+	fields, hoistedEnums := jenny.hoistInlineDisjunctions(formatter, imports, object.Name, fields)
 
 	var buffer strings.Builder
 	buffer.WriteString(formatComments(object.Comments, ""))
@@ -331,7 +304,84 @@ func (jenny RawTypes) formatStruct(formatter *typeFormatter, imports *importMap,
 		}
 	}
 
+	for _, enum := range hoistedEnums {
+		buffer.WriteString("\n\n")
+		buffer.WriteString(enum)
+	}
+
 	return buffer.String()
+}
+
+// hoistInlineDisjunctions rewrites every struct field whose type is an inline
+// (anonymous) multi-arm non-null disjunction into a reference to a freshly named
+// untagged enum, and returns the rewritten field list alongside the rendered enum
+// blocks. The synthesized enum is named <StructName><FieldName> in PascalCase,
+// which is deterministic and unique within the schema (a struct cannot have two
+// fields of the same name). A null branch never survives to this point for a
+// two-arm disjunction (DisjunctionWithNullToOptional rewrites string|null to
+// Option<String>); should a null branch reach here as part of a larger
+// disjunction it is dropped from the enum because untagged serde already models
+// JSON null via the surrounding field, mirroring the other targets.
+func (jenny RawTypes) hoistInlineDisjunctions(formatter *typeFormatter, imports *importMap, structName string, fields []ast.StructField) ([]ast.StructField, []string) {
+	var enums []string
+
+	rewritten := make([]ast.StructField, len(fields))
+	copy(rewritten, fields)
+
+	for i, field := range fields {
+		if !field.Type.IsDisjunction() {
+			continue
+		}
+
+		branches := nonNullBranches(field.Type.AsDisjunction().Branches)
+		if len(branches) < 2 {
+			// A single surviving branch is not a union; leave it for the generic
+			// formatter (it renders as that branch's type or serde_json::Value).
+			continue
+		}
+
+		enumName := formatTypeName(structName + field.Name)
+		enums = append(enums, jenny.formatUntaggedEnum(formatter, imports, enumName, nil, branches))
+		enums = append(enums, hoistedEnumDefaultImpl(formatter, enumName, branches[0]))
+
+		rewritten[i].Type = ast.NewRef(formatter.rawPackage, enumName)
+		rewritten[i].Type.Nullable = field.Type.Nullable
+	}
+
+	return rewritten, enums
+}
+
+// hoistedEnumDefaultImpl emits a manual Default impl for a synthesized untagged
+// enum. derive(Default) cannot mark a tuple variant as #[default], so the impl is
+// written by hand, defaulting to the first branch wrapped in its variant. The
+// first branch is the conventional Default and matches what the other targets do
+// (Python defaults a Union field to the first arm's zero value).
+func hoistedEnumDefaultImpl(formatter *typeFormatter, enumName string, firstBranch ast.Type) string {
+	inner := formatter.formatType(firstBranch)
+	variant := disjunctionVariantName(firstBranch, inner)
+
+	var buffer strings.Builder
+	fmt.Fprintf(&buffer, "impl Default for %s {\n", enumName)
+	buffer.WriteString("    fn default() -> Self {\n")
+	fmt.Fprintf(&buffer, "        Self::%s(Default::default())\n", variant)
+	buffer.WriteString("    }\n")
+	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+// nonNullBranches returns the disjunction branches that are not the bare null
+// type. Untagged serde models JSON null through the surrounding optional field,
+// so a null branch needs no enum variant.
+func nonNullBranches(branches ast.Types) ast.Types {
+	filtered := make(ast.Types, 0, len(branches))
+	for _, branch := range branches {
+		if branch.IsNull() {
+			continue
+		}
+		filtered = append(filtered, branch)
+	}
+	return filtered
 }
 
 // fieldNeedsConstantDefaultFn reports whether a field is a required constant or
@@ -343,6 +393,14 @@ func (jenny RawTypes) formatStruct(formatter *typeFormatter, imports *importMap,
 // default function is generated instead.
 func fieldNeedsConstantDefaultFn(field ast.StructField) bool {
 	if !field.Required {
+		return false
+	}
+	// A nullable constant (rendered as Option<T>) takes the Option skip/default
+	// serde attribute instead: an absent key deserializes to None and the pinned
+	// constant lives in the struct's Default impl. Generating a const default
+	// function here would both shadow that attribute and return the bare T rather
+	// than Option<T>, so Option-wrapped fields are excluded.
+	if isOptionWrapped(field.Type) {
 		return false
 	}
 	return field.Type.IsConcreteScalar() || field.Type.IsConstantRef()
@@ -410,7 +468,7 @@ func fieldSerdeAttributes(structName string, field ast.StructField) []string {
 		attrs = append(attrs, `#[serde(default, skip_serializing_if = "Vec::is_empty")]`)
 	case !field.Required && field.Type.IsMap():
 		attrs = append(attrs, `#[serde(default, skip_serializing_if = "HashMap::is_empty")]`)
-	case field.Type.Nullable && !field.Type.IsArray() && !field.Type.IsMap():
+	case isOptionWrapped(field.Type):
 		// A nullable scalar/struct/ref field is rendered as Option<T> and so gets the
 		// Option skip/default attribute.
 		attrs = append(attrs, `#[serde(default, skip_serializing_if = "Option::is_none")]`)
@@ -468,7 +526,7 @@ func (jenny RawTypes) formatDefaultImpl(formatter *typeFormatter, object ast.Obj
 	buffer.WriteString("        Self {\n")
 
 	for _, field := range fields {
-		fmt.Fprintf(&buffer, "            %s: %s,\n", formatFieldName(field.Name), defaultExpression(formatter, field.Type))
+		fmt.Fprintf(&buffer, "            %s: %s,\n", formatFieldName(field.Name), defaultExpression(formatter, field.Type, "            "))
 	}
 
 	buffer.WriteString("        }\n")
@@ -479,8 +537,10 @@ func (jenny RawTypes) formatDefaultImpl(formatter *typeFormatter, object ast.Obj
 }
 
 // defaultExpression returns the Rust expression used to initialise a field in a
-// manual Default impl.
-func defaultExpression(formatter *typeFormatter, typeDef ast.Type) string {
+// manual Default impl. indent is the leading whitespace of the line the
+// expression begins on, so any multi-line struct literal it produces nests its
+// inner lines correctly and matches rustfmt's layout.
+func defaultExpression(formatter *typeFormatter, typeDef ast.Type, indent string) string {
 	if typeDef.IsConstantRef() {
 		pinned := constantRefDefault(formatter, typeDef.AsConstantRef())
 		// A nullable constant reference is stored as Option<T>; the pinned constant
@@ -496,11 +556,102 @@ func defaultExpression(formatter *typeFormatter, typeDef ast.Type) string {
 		return constScalarLiteral(typeDef.AsScalar())
 	}
 
+	// A ref-typed field carrying a struct-literal default (a map of overridden
+	// fields) delegates to the referred struct's Default impl, overriding only the
+	// named fields. Anything not named falls back via `..Default::default()`. The
+	// referred object is resolved so each override is rendered with the correct
+	// field type (snake-cased name, scalar/struct literal value).
+	if typeDef.IsRef() && typeDef.Default != nil {
+		if literal, ok := refStructLiteralDefault(formatter, typeDef.AsRef(), typeDef.Default, indent); ok {
+			return literal
+		}
+	}
+
 	if typeDef.Default != nil {
 		return defaultLiteral(typeDef)
 	}
 
 	return "Default::default()"
+}
+
+// refStructLiteralDefault renders a struct-literal Default expression for a
+// ref-typed field whose IR default is a map of overridden field values. It
+// resolves the referred struct so each override is rendered with the field's
+// real Rust type and snake-cased identifier, and closes the literal with
+// `..Default::default()` so unspecified fields inherit the struct's own Default.
+// It reports false when the default is not a map or the referred type cannot be
+// resolved to a struct, letting the caller fall back to the generic path. The
+// literal is rendered multi-line (one field per line) to match rustfmt, with
+// inner lines indented one level deeper than indent.
+func refStructLiteralDefault(formatter *typeFormatter, ref ast.RefType, def any, indent string) (string, bool) {
+	overrides, ok := def.(map[string]any)
+	if !ok {
+		return "", false
+	}
+
+	referredObject, found := formatter.context.LocateObject(ref.ReferredPkg, ref.ReferredType)
+	if !found || !referredObject.Type.IsStruct() {
+		return "", false
+	}
+
+	typeName := formatter.formatRef(ref)
+	if len(overrides) == 0 {
+		return fmt.Sprintf("%s::default()", typeName), true
+	}
+
+	// Walk the struct's declared fields in order so the emitted literal is
+	// deterministic and only includes fields the default actually overrides.
+	structFields := referredObject.Type.AsStruct().Fields
+	inner := indent + "    "
+	var parts []string
+	for _, field := range structFields {
+		value, present := overrides[field.Name]
+		if !present {
+			continue
+		}
+		parts = append(parts, fmt.Sprintf(
+			"%s%s: %s,",
+			inner,
+			formatFieldName(field.Name),
+			fieldOverrideLiteral(formatter, field.Type, value, inner),
+		))
+	}
+
+	if len(parts) == 0 {
+		return fmt.Sprintf("%s::default()", typeName), true
+	}
+
+	// A `..Default::default()` rest-update is only emitted when the default leaves
+	// at least one field unspecified; clippy's needless_update lint rejects it when
+	// every field is already named.
+	if len(parts) != len(structFields) {
+		parts = append(parts, inner+"..Default::default()")
+	}
+
+	return fmt.Sprintf("%s {\n%s\n%s}", typeName, strings.Join(parts, "\n"), indent), true
+}
+
+// fieldOverrideLiteral renders a single overridden field value inside a struct
+// literal default. A nested ref-with-map value recurses to produce a nested
+// struct literal (indented relative to indent); scalars, arrays and maps use the
+// existing default-literal renderers; a String scalar yields an owned String.
+func fieldOverrideLiteral(formatter *typeFormatter, typeDef ast.Type, value any, indent string) string {
+	if typeDef.IsRef() {
+		if literal, ok := refStructLiteralDefault(formatter, typeDef.AsRef(), value, indent); ok {
+			return literal
+		}
+	}
+
+	switch {
+	case typeDef.IsArray():
+		return arrayDefaultLiteral(typeDef.AsArray(), value)
+	case typeDef.IsMap():
+		return mapDefaultLiteral(typeDef.AsMap(), value)
+	case typeDef.IsScalar():
+		return scalarDefaultLiteral(typeDef.AsScalar().ScalarKind, value)
+	default:
+		return formatValue(value)
+	}
 }
 
 // constantRefDefault renders the pinned constant value of a constant reference.
@@ -663,10 +814,6 @@ func constReferenceType(kind ast.ScalarKind) string {
 		return "&str"
 	}
 	return formatScalarKind(kind)
-}
-
-func formatConstValue(value any, kind ast.ScalarKind) string {
-	return formatScalarValue(value, kind)
 }
 
 // constScalarLiteral renders a constant scalar field's value for use in a Default

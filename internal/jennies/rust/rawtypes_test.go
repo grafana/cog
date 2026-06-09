@@ -11,25 +11,21 @@ import (
 )
 
 // TestRawTypes_Generate runs the golden-file harness for the Rust RawTypes
-// jenny. Phases 3a-3c cover scalar/struct/enum/scalar-disjunction emission plus
-// top-level array and map type aliases and array/map field defaults; every other
-// rawtypes fixture is skipped until later phases implement refs across packages,
-// disjunctions of refs, intersections, constant references and variants.
+// jenny. Phases 3a-3f cover scalars, structs, enums, arrays/maps, cross-package
+// refs, untagged disjunctions, constant references, constraints, time hints,
+// nullable fields and cross-object struct-literal defaults. Only intersections
+// (matching the Python target, which also omits them) and the variant/dashboard
+// fixtures (composable slots, Phase 6) remain skipped.
 func TestRawTypes_Generate(t *testing.T) {
 	test := testutils.GoldenFilesTestSuite[ast.Schema]{
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "RustRawTypes",
 		Skip: map[string]string{
-			"constraints":                     "Phase 3b+: constraints not implemented",
-			"dashboard":                       "Phase 6: composable slots not implemented",
-			"field_with_struct_with_defaults": "Phase 3b+: cross-object defaults not implemented",
-			"intersections":                   "Phase 3b+: intersections not implemented",
-			"nullable_fields":                 "Phase 3b: constant references not implemented",
-			"struct_with_complex_fields":      "Phase 4+: needs refs, disjunctions-of-refs and constant references (out of scope for Phase 3c)",
-			"time_hint":                       "Phase 3b+: time hints not implemented",
-			"variant_dataquery":               "Phase 6: variants not implemented",
-			"variant_panelcfg_full":           "Phase 6: variants not implemented",
-			"variant_panelcfg_only_options":   "Phase 6: variants not implemented",
+			"dashboard":                     "Phase 6: composable slots not implemented",
+			"intersections":                 "Intersections not implemented, matching the python target",
+			"variant_dataquery":             "Phase 6: variants not implemented",
+			"variant_panelcfg_full":         "Phase 6: variants not implemented",
+			"variant_panelcfg_only_options": "Phase 6: variants not implemented",
 		},
 	}
 
