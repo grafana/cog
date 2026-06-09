@@ -52,6 +52,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If(!language.config.SkipRuntime && globalConfig.Builders, Builder{config: language.config, apiRefCollector: language.apiRefCollector}),
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	jenny.AddPostprocessors(FormatRustFiles)
 
 	if language.config.PathPrefix != "" {
 		jenny.AddPostprocessors(common.PathPrefixer(language.config.PathPrefix))

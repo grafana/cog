@@ -134,6 +134,11 @@ func (jenny Builder) generateBuilder(context languages.Context, builder ast.Buil
 		body.WriteString(method)
 	}
 
+	for _, factory := range builder.Factories {
+		body.WriteString("\n\n")
+		body.WriteString(jenny.formatFactory(formatter, context, builder, builderType, factory))
+	}
+
 	body.WriteString("\n\n")
 	body.WriteString(jenny.formatBuild(builderType, objectType))
 	body.WriteString("\n")
@@ -149,8 +154,15 @@ func (jenny Builder) rejectUnsupported(context languages.Context, builder ast.Bu
 	// in the `properties` fixture) are not referenced by any in-scope option's
 	// assignments, so they are inert holders here and intentionally not emitted.
 	// Later chunks that introduce options consuming a property will surface them.
-	if len(builder.Factories) != 0 {
-		return fmt.Errorf("rust builder %q: factories are not supported until a later phase", builder.Name)
+	//
+	// Factories (named alternate constructors that preset option calls) are in
+	// scope as of Phase 4f. Validate every option call references a real option
+	// and every call parameter is a constant, an argument, or a nested factory
+	// call (the shapes the in-scope fixtures use); reject anything else loudly.
+	for _, factory := range builder.Factories {
+		if err := checkFactorySupported(builder, factory); err != nil {
+			return fmt.Errorf("rust builder %q: %w", builder.Name, err)
+		}
 	}
 
 	allAssignments := append([]ast.Assignment{}, builder.Constructor.Assignments...)
@@ -159,83 +171,118 @@ func (jenny Builder) rejectUnsupported(context languages.Context, builder ast.Bu
 	}
 
 	for _, assignment := range allAssignments {
-		switch assignment.Method {
-		case ast.DirectAssignment:
-			// In scope since Phase 4a.
-		case ast.AppendAssignment:
-			// Phase 4c: append a single value to a Vec field. The path is a single
-			// (non-indexed) array-typed field; the value is appended via push.
-			if !isAppendPath(assignment.Path) {
-				return fmt.Errorf("rust builder %q: unsupported append path shape", builder.Name)
-			}
-			// Phase 4e: an append whose value is an envelope constructs the nested
-			// element inline (a struct literal of the envelope's ref type) and pushes
-			// it. Reject an envelope whose own field paths are not the simple
-			// single-level shape this phase renders.
-			if assignment.Value.Envelope != nil {
-				if err := checkEnvelopeSupported(*assignment.Value.Envelope); err != nil {
-					return fmt.Errorf("rust builder %q: %w", builder.Name, err)
-				}
-			}
-			continue
-		case ast.IndexAssignment:
-			// Phase 4c: insert a value at a key into a HashMap field. The path is a
-			// two-level path: a map-typed field followed by an indexed element whose
-			// Index carries the key (a constant or an option argument).
-			if !isIndexPath(assignment.Path) {
-				return fmt.Errorf("rust builder %q: unsupported index path shape", builder.Name)
-			}
-			continue
-		default:
-			return fmt.Errorf("rust builder %q: assignment method %q is not supported until a later phase", builder.Name, assignment.Method)
-		}
-		// A factory constructor value (ConstructorFor) is a Phase 5 feature.
-		if assignment.Value.ConstructorFor != nil {
-			return fmt.Errorf("rust builder %q: constructor-value assignments are not supported until a later phase", builder.Name)
-		}
-		// Supported direct-assignment path shapes:
-		//   - single-level field (the common case),
-		//   - the `known_any` two-level composition shape,
-		//   - a multi-level ref/struct path (Phase 4e), where intermediate
-		//     Option-wrapped refs are lazily initialised via get_or_insert_with using
-		//     the NilChecks the pipeline injects, and a bare intermediate is accessed
-		//     directly. Every non-leaf element must be a plain (non-indexed) ref so
-		//     the get_or_insert_with chain has a concrete default type; an anonymous
-		//     inline struct intermediate is unsupported (Rust models it as
-		//     serde_json::Value, which cannot carry typed nested fields).
-		if !isKnownAnyPath(assignment.Path) {
-			if len(assignment.Path) == 1 {
-				if assignment.Path[0].Index != nil {
-					return fmt.Errorf("rust builder %q: indexed single-level paths are not supported in direct assignment", builder.Name)
-				}
-			} else if err := checkMultiLevelPathSupported(assignment.Path); err != nil {
-				return fmt.Errorf("rust builder %q: %w", builder.Name, err)
-			}
-		}
-		// A nil-check whose initialised path element is not a plain ref (for example
-		// an anonymous inline struct) has no idiomatic default-construction in Rust.
-		for _, check := range assignment.NilChecks {
-			if isKnownAnyPath(assignment.Path) {
-				continue
-			}
-			leaf := check.Path.Last()
-			if !leaf.Type.IsArray() && !leaf.Type.IsMap() && !leaf.Type.IsRef() {
-				return fmt.Errorf("rust builder %q: nil-check on non-ref intermediate %q is not supported", builder.Name, check.Path.String())
-			}
-		}
-		// Builder delegation (an option argument whose type, or a collection's
-		// element type, resolves to a builder) is in scope as of Phase 4d for the
-		// ref / array-of-ref / map-of-ref shapes. A disjunction-typed delegated
-		// argument (e.g. `Builder<T> | string`) has no clean idiomatic-Rust mapping
-		// and is rejected (its fixture is skipped, matching the Go target which
-		// eliminates disjunctions via a compiler pass the Rust target does not run).
-		if assignment.Value.Argument != nil && context.ResolveToBuilder(assignment.Value.Argument.Type) {
-			if !isDelegableType(assignment.Value.Argument.Type) {
-				return fmt.Errorf("rust builder %q: disjunction-typed builder delegation is not supported", builder.Name)
-			}
+		if err := checkAssignmentSupported(context, assignment); err != nil {
+			return fmt.Errorf("rust builder %q: %w", builder.Name, err)
 		}
 	}
 
+	return nil
+}
+
+// checkAssignmentSupported validates a single builder assignment against the
+// shapes the Rust target renders, dispatching on the assignment method. It
+// returns a plain (unwrapped) error so the caller can attach the builder name.
+func checkAssignmentSupported(context languages.Context, assignment ast.Assignment) error {
+	switch assignment.Method {
+	case ast.DirectAssignment:
+		return checkDirectAssignmentSupported(context, assignment)
+	case ast.AppendAssignment:
+		return checkAppendAssignmentSupported(assignment)
+	case ast.IndexAssignment:
+		return checkIndexAssignmentSupported(assignment)
+	default:
+		return fmt.Errorf("assignment method %q is not supported until a later phase", assignment.Method)
+	}
+}
+
+// checkAppendAssignmentSupported validates a Phase 4c append: a single
+// (non-indexed) array-typed field path the value is pushed onto. An envelope
+// value (Phase 4e) additionally must construct a ref via simple single-level
+// field paths.
+func checkAppendAssignmentSupported(assignment ast.Assignment) error {
+	if !isAppendPath(assignment.Path) {
+		return fmt.Errorf("unsupported append path shape")
+	}
+	if assignment.Value.Envelope != nil {
+		if err := checkEnvelopeSupported(*assignment.Value.Envelope); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// checkIndexAssignmentSupported validates a Phase 4c index assignment: a
+// two-level path whose first element is a map-typed field and whose second
+// element carries the key (a constant or an option argument).
+func checkIndexAssignmentSupported(assignment ast.Assignment) error {
+	if !isIndexPath(assignment.Path) {
+		return fmt.Errorf("unsupported index path shape")
+	}
+	return nil
+}
+
+// checkDirectAssignmentSupported validates a direct assignment: its value shape,
+// its path shape, the nil-checks the pipeline injected, and any builder
+// delegation.
+func checkDirectAssignmentSupported(context languages.Context, assignment ast.Assignment) error {
+	// A factory constructor value (ConstructorFor) is a Phase 5 feature.
+	if assignment.Value.ConstructorFor != nil {
+		return fmt.Errorf("constructor-value assignments are not supported until a later phase")
+	}
+	if err := checkDirectAssignmentPathSupported(assignment.Path); err != nil {
+		return err
+	}
+	if err := checkNilChecksSupported(assignment); err != nil {
+		return err
+	}
+	return checkBuilderDelegationSupported(context, assignment)
+}
+
+// checkDirectAssignmentPathSupported validates the path of a direct assignment.
+// Supported shapes are a single-level field, the `known_any` two-level
+// composition shape, and a multi-level ref/struct path (Phase 4e) whose
+// non-leaf elements are plain (non-indexed) refs.
+func checkDirectAssignmentPathSupported(path ast.Path) error {
+	if isKnownAnyPath(path) {
+		return nil
+	}
+	if len(path) == 1 {
+		if path[0].Index != nil {
+			return fmt.Errorf("indexed single-level paths are not supported in direct assignment")
+		}
+		return nil
+	}
+	return checkMultiLevelPathSupported(path)
+}
+
+// checkNilChecksSupported rejects a nil-check whose initialised path element is
+// not a plain ref/array/map (for example an anonymous inline struct), which has
+// no idiomatic default-construction in Rust. The `known_any` shape carries its
+// own composition and is exempt.
+func checkNilChecksSupported(assignment ast.Assignment) error {
+	if isKnownAnyPath(assignment.Path) {
+		return nil
+	}
+	for _, check := range assignment.NilChecks {
+		leaf := check.Path.Last()
+		if !leaf.Type.IsArray() && !leaf.Type.IsMap() && !leaf.Type.IsRef() {
+			return fmt.Errorf("nil-check on non-ref intermediate %q is not supported", check.Path.String())
+		}
+	}
+	return nil
+}
+
+// checkBuilderDelegationSupported validates builder delegation: an option
+// argument whose type (or a collection's element type) resolves to a builder is
+// in scope for the ref / array-of-ref / map-of-ref shapes. A disjunction-typed
+// delegated argument has no clean idiomatic-Rust mapping and is rejected,
+// matching the Go target.
+func checkBuilderDelegationSupported(context languages.Context, assignment ast.Assignment) error {
+	if assignment.Value.Argument != nil && context.ResolveToBuilder(assignment.Value.Argument.Type) {
+		if !isDelegableType(assignment.Value.Argument.Type) {
+			return fmt.Errorf("disjunction-typed builder delegation is not supported")
+		}
+	}
 	return nil
 }
 
@@ -277,29 +324,25 @@ func (jenny Builder) formatConstructor(formatter *typeFormatter, context languag
 		buffer.WriteString("        }\n")
 		buffer.WriteString("    }\n")
 		buffer.WriteString("}")
+	} else {
+		fmt.Fprintf(&buffer, "        let mut builder = Self {\n")
+		fmt.Fprintf(&buffer, "            internal: %s::default(),\n", objectType)
+		fmt.Fprintf(&buffer, "            errors: Vec::new(),\n")
+		buffer.WriteString("        };\n")
 
-		if len(builder.Constructor.Args) == 0 {
-			buffer.WriteString("\n\n")
-			buffer.WriteString(jenny.formatDefaultImpl(builderType))
+		for _, assignment := range builder.Constructor.Assignments {
+			buffer.WriteString("        ")
+			buffer.WriteString(jenny.formatAssignment(formatter, context, assignment, "builder"))
+			buffer.WriteString("\n")
 		}
-		return buffer.String()
+
+		buffer.WriteString("\n        builder\n")
+		buffer.WriteString("    }\n")
+		buffer.WriteString("}")
 	}
 
-	fmt.Fprintf(&buffer, "        let mut builder = Self {\n")
-	fmt.Fprintf(&buffer, "            internal: %s::default(),\n", objectType)
-	fmt.Fprintf(&buffer, "            errors: Vec::new(),\n")
-	buffer.WriteString("        };\n")
-
-	for _, assignment := range builder.Constructor.Assignments {
-		buffer.WriteString("        ")
-		buffer.WriteString(jenny.formatAssignment(formatter, context, assignment, "builder"))
-		buffer.WriteString("\n")
-	}
-
-	buffer.WriteString("\n        builder\n")
-	buffer.WriteString("    }\n")
-	buffer.WriteString("}")
-
+	// An argument-less constructor also derives a Default impl that delegates to
+	// new(), matching the Go target.
 	if len(builder.Constructor.Args) == 0 {
 		buffer.WriteString("\n\n")
 		buffer.WriteString(jenny.formatDefaultImpl(builderType))
@@ -330,20 +373,12 @@ func (jenny Builder) formatOption(formatter *typeFormatter, context languages.Co
 
 	args := jenny.formatArgs(formatter, option.Args, context)
 	methodName := formatFieldName(option.Name)
+	// Emit the signature on a single line and let the FormatRustFiles
+	// postprocessor (rustfmt) wrap it across lines if it exceeds the max width.
 	if args == "" {
 		fmt.Fprintf(&buffer, "    pub fn %s(mut self) -> Self {\n", methodName)
 	} else {
-		// rustfmt keeps the signature on one line only while it fits the 100-column
-		// max width; beyond that it puts each parameter (including `mut self`) on its
-		// own line. Emit the form rustfmt would settle on so the golden is
-		// `cargo fmt --check` clean (builder-delegated args can be long, e.g. a
-		// nested `Vec<Vec<impl cog::Builder<T>>>`).
-		signature := fmt.Sprintf("    pub fn %s(mut self, %s) -> Self {\n", methodName, args)
-		if len(signature)-1 <= 100 {
-			buffer.WriteString(signature)
-		} else {
-			fmt.Fprintf(&buffer, "    pub fn %s(\n        mut self,\n        %s,\n    ) -> Self {\n", methodName, args)
-		}
+		fmt.Fprintf(&buffer, "    pub fn %s(mut self, %s) -> Self {\n", methodName, args)
 	}
 
 	for _, assignment := range option.Assignments {
@@ -426,23 +461,10 @@ func (jenny Builder) formatConstraint(constraint ast.AssignmentConstraint) (stri
 }
 
 // formatErrorPush renders `self.errors.push(cog::BuildError::new(path, message))`
-// at 12-space indentation, choosing the same line wrapping rustfmt would apply
-// (max width 100): a single line, then the receiver/method split, then one
-// argument per line. Emitting the rustfmt-canonical form keeps generated builders
-// `cargo fmt --check` clean without a formatting post-process step.
+// at 12-space indentation. It emits the single-line form and lets the
+// FormatRustFiles postprocessor (rustfmt) apply any chain/call wrapping.
 func formatErrorPush(path, message string) string {
-	newCall := fmt.Sprintf("cog::BuildError::new(%q, %q.to_string())", path, message)
-
-	// rustfmt's chain_width default (60) means the `.push(...)` segment is always
-	// too wide to stay inline with the `self.errors` receiver, so the receiver and
-	// method split onto separate lines. The inner `cog::BuildError::new(...)` call
-	// then stays on one line only while it fits rustfmt's fn_call_width (60);
-	// beyond that rustfmt expands the call arguments one per line.
-	if len(newCall) <= 60 {
-		return fmt.Sprintf("            self.errors\n                .push(%s);\n", newCall)
-	}
-
-	return fmt.Sprintf("            self.errors.push(cog::BuildError::new(\n                %q,\n                %q.to_string(),\n            ));\n", path, message)
+	return fmt.Sprintf("            self.errors.push(cog::BuildError::new(%q, %q.to_string()));\n", path, message)
 }
 
 // negateComparisonOp returns the Rust operator that is true exactly when the
@@ -540,7 +562,7 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 	}
 
 	fieldName := formatFieldName(field.Identifier)
-	value := jenny.formatValue(formatter, context, field.Type, assignment.Value)
+	value := jenny.formatAssignmentValue(formatter, context, field.Type, assignment.Value)
 
 	if isOptionWrapped(field.Type) {
 		return fmt.Sprintf("%s.internal.%s = Some(%s);", receiver, fieldName, value)
@@ -562,21 +584,30 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 // Option-wrapped destination is assigned Some(value).
 func (jenny Builder) formatDelegatedAssignment(field ast.PathItem, arg *ast.Argument, receiver string) string {
 	fieldName := formatFieldName(field.Identifier)
+	return jenny.formatDelegatedFieldStatement(field.Type, isOptionWrapped(field.Type), arg, receiver, func(builtValue string) string {
+		return fmt.Sprintf("%s.internal.%s = %s;", receiver, fieldName, builtValue)
+	})
+}
+
+// formatDelegatedFieldStatement renders the shared builder-delegation sequence:
+// build the delegated value of buildType from the argument (emitting the
+// error-accumulating build() calls), wrap it in Some(...) when wrapInSome is
+// set, then emit the final statement produced by `finalStmt` (an assignment or
+// a push). Every line is emitted at the standard 8-space body indent; the caller
+// prefixes the block's first line with the same indentation, so the leading
+// indent of the first line is trimmed to avoid a double indent.
+func (jenny Builder) formatDelegatedFieldStatement(buildType ast.Type, wrapInSome bool, arg *ast.Argument, receiver string, finalStmt func(builtValue string) string) string {
 	argName := formatArgName(arg.Name)
 
 	const indent = "        "
 	var buffer strings.Builder
 
-	// Every statement is emitted fully indented; the caller prefixes the block's
-	// first line with the same indentation, so the leading indent of the first line
-	// is trimmed before returning to avoid a double indent.
-	value := jenny.formatDelegatedValue(&buffer, field.Type, argName, receiver, indent, 0)
-
-	if isOptionWrapped(field.Type) {
-		fmt.Fprintf(&buffer, "%s%s.internal.%s = Some(%s);", indent, receiver, fieldName, value)
-	} else {
-		fmt.Fprintf(&buffer, "%s%s.internal.%s = %s;", indent, receiver, fieldName, value)
+	value := jenny.formatDelegatedValue(&buffer, buildType, argName, receiver, indent, 0)
+	if wrapInSome {
+		value = fmt.Sprintf("Some(%s)", value)
 	}
+
+	fmt.Fprintf(&buffer, "%s%s", indent, finalStmt(value))
 	return strings.TrimPrefix(buffer.String(), indent)
 }
 
@@ -626,6 +657,130 @@ func (jenny Builder) formatDelegatedValue(buffer *strings.Builder, destType ast.
 	}
 }
 
+// checkFactorySupported validates a builder factory against the shapes the Rust
+// target renders: every option call must name a real option on the builder, and
+// every call parameter must be a constant, an argument, or a nested factory call
+// (recursively validated). ForceBuild is tolerated: an argument that is itself a
+// builder is delegated through the option's own build() call, so no special
+// pre-build is needed here.
+func checkFactorySupported(builder ast.Builder, factory ast.BuilderFactory) error {
+	for _, call := range factory.OptionCalls {
+		if _, found := builder.OptionByName(call.Name); !found {
+			return fmt.Errorf("factory %q calls unknown option %q", factory.Name, call.Name)
+		}
+		for _, param := range call.Parameters {
+			if err := checkFactoryParameterSupported(factory, param); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// checkFactoryParameterSupported validates a single option-call parameter: it is
+// a constant, an argument, or a nested factory call whose own parameters are also
+// supported.
+func checkFactoryParameterSupported(factory ast.BuilderFactory, param ast.OptionCallParameter) error {
+	switch {
+	case param.Constant != nil, param.Argument != nil:
+		return nil
+	case param.Factory != nil:
+		for _, nested := range param.Factory.Parameters {
+			if err := checkFactoryParameterSupported(factory, nested); err != nil {
+				return err
+			}
+		}
+		return nil
+	default:
+		return fmt.Errorf("factory %q has an unsupported option-call parameter", factory.Name)
+	}
+}
+
+// formatFactory emits a named alternate constructor as an associated function on
+// the builder. It mirrors the Go/Python factories (a function that creates a
+// fresh builder and applies a fixed sequence of option calls), rendered the
+// idiomatic-Rust way: `Self::new(...)` chained through the preset options,
+// returning the builder for further chaining. The factory name is snake_cased to
+// match the Rust option/function convention.
+func (jenny Builder) formatFactory(formatter *typeFormatter, context languages.Context, builder ast.Builder, builderType string, factory ast.BuilderFactory) string {
+	var buffer strings.Builder
+
+	buffer.WriteString(formatComments(factory.Comments, ""))
+	fmt.Fprintf(&buffer, "impl %s {\n", builderType)
+
+	args := jenny.formatArgs(formatter, factory.Args, context)
+	factoryName := formatFieldName(factory.Name)
+
+	// Build the chained call expression: Self::new() followed by one option call
+	// per preset, each consuming and returning Self.
+	chain := []string{"Self::new()"}
+	for _, call := range factory.OptionCalls {
+		option, _ := builder.OptionByName(call.Name)
+		chain = append(chain, jenny.formatFactoryOptionCall(formatter, context, option, call))
+	}
+
+	// Emit the signature and the chained call on single lines; the FormatRustFiles
+	// postprocessor (rustfmt) lays the signature and method chain out across lines
+	// when they exceed the max width.
+	fmt.Fprintf(&buffer, "    pub fn %s(%s) -> Self {\n", factoryName, args)
+	fmt.Fprintf(&buffer, "        %s\n", strings.Join(chain, "."))
+
+	buffer.WriteString("    }\n")
+	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+// formatFactoryOptionCall renders one preset option call inside a factory, e.g.
+// `function("abs".to_string())` or `arg(v)`. Each parameter is rendered against
+// the matching option argument's type so constants, arguments, and nested factory
+// calls all produce the value the option setter expects.
+func (jenny Builder) formatFactoryOptionCall(formatter *typeFormatter, context languages.Context, option ast.Option, call ast.OptionCall) string {
+	methodName := formatFieldName(call.Name)
+
+	params := make([]string, 0, len(call.Parameters))
+	for i, param := range call.Parameters {
+		var argType ast.Type
+		if i < len(option.Args) {
+			argType = option.Args[i].Type
+		}
+		params = append(params, jenny.formatFactoryParameter(formatter, context, argType, param))
+	}
+
+	return fmt.Sprintf("%s(%s)", methodName, strings.Join(params, ", "))
+}
+
+// formatFactoryParameter renders a single option-call parameter. A constant is
+// rendered against the option argument's type (so a string constant becomes an
+// owned String, an enum-ref constant becomes the matching variant); an argument
+// is the bare factory-argument identifier; a nested factory call becomes a call
+// to the referenced builder's factory associated function (which yields a builder
+// the option delegates through build()).
+func (jenny Builder) formatFactoryParameter(formatter *typeFormatter, context languages.Context, argType ast.Type, param ast.OptionCallParameter) string {
+	switch {
+	case param.Constant != nil:
+		return jenny.formatConstantValue(formatter, context, argType, param.Constant.Value)
+	case param.Argument != nil:
+		return formatArgName(param.Argument.Name)
+	case param.Factory != nil:
+		ref := param.Factory.Ref
+		builderType := formatTypeName(ref.Builder) + "Builder"
+		// The referenced builder lives in some package's builders module; bring it
+		// in so the associated-function call resolves. A same-package builder is in
+		// this very module, so only import a foreign one.
+		if formatPackageName(ref.Package) != formatter.packageName {
+			formatter.imports.Add(fmt.Sprintf("crate::builders::%s::%s", formatPackageName(ref.Package), builderType))
+		}
+		nestedParams := make([]string, 0, len(param.Factory.Parameters))
+		for _, nested := range param.Factory.Parameters {
+			nestedParams = append(nestedParams, jenny.formatFactoryParameter(formatter, context, ast.Type{}, nested))
+		}
+		return fmt.Sprintf("%s::%s(%s)", builderType, formatFieldName(ref.Factory), strings.Join(nestedParams, ", "))
+	default:
+		return ""
+	}
+}
+
 // isAppendPath reports the append shape: a single, non-indexed path element
 // whose type is an array (Vec) field. The option argument is pushed onto it.
 func isAppendPath(path ast.Path) bool {
@@ -661,14 +816,27 @@ func (jenny Builder) formatAppendAssignment(formatter *typeFormatter, context la
 	// type) from the envelope's per-field values, then pushes it. This is the
 	// envelope_assignment shape: each WithVariable call builds a fresh Variable.
 	if assignment.Value.Envelope != nil {
-		literal := jenny.formatEnvelopeLiteral(formatter, context, *assignment.Value.Envelope, "        ")
+		literal := jenny.formatEnvelopeLiteral(formatter, context, *assignment.Value.Envelope)
 		if isOptionWrapped(elementType) {
 			literal = fmt.Sprintf("Some(%s)", literal)
 		}
 		return fmt.Sprintf("%s.internal.%s.push(%s);", receiver, fieldName, literal)
 	}
 
-	value := jenny.formatValue(formatter, context, elementType, assignment.Value)
+	// Builder delegation: the appended element is itself produced by a nested
+	// builder (the ArrayToAppend veneer shape, e.g. promql's `arg`). Build the
+	// argument (accumulating errors, returning early on failure) then push the
+	// built value, mirroring the Go target which appends `argResource` after
+	// building it.
+	if assignment.Value.Argument != nil && context.ResolveToBuilder(assignment.Value.Argument.Type) {
+		// The value is built against the argument's type but wrapped (Some) against
+		// the array's element type, matching the original per-element shape.
+		return jenny.formatDelegatedFieldStatement(assignment.Value.Argument.Type, isOptionWrapped(elementType), assignment.Value.Argument, receiver, func(builtValue string) string {
+			return fmt.Sprintf("%s.internal.%s.push(%s);", receiver, fieldName, builtValue)
+		})
+	}
+
+	value := jenny.formatAssignmentValue(formatter, context, elementType, assignment.Value)
 	if isOptionWrapped(elementType) {
 		value = fmt.Sprintf("Some(%s)", value)
 	}
@@ -689,7 +857,7 @@ func (jenny Builder) formatIndexAssignment(formatter *typeFormatter, context lan
 	leaf := assignment.Path[1]
 	key := jenny.formatIndexKey(formatter, context, mapType.IndexType, *leaf.Index)
 
-	value := jenny.formatValue(formatter, context, mapType.ValueType, assignment.Value)
+	value := jenny.formatAssignmentValue(formatter, context, mapType.ValueType, assignment.Value)
 	if isOptionWrapped(mapType.ValueType) {
 		value = fmt.Sprintf("Some(%s)", value)
 	}
@@ -774,7 +942,7 @@ func (jenny Builder) formatKnownAnyAssignment(formatter *typeFormatter, context 
 	concreteType := formatter.formatRef(ref)
 	formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", formatPackageName(ref.ReferredPkg), formatTypeName(ref.ReferredType)))
 
-	value := jenny.formatValue(formatter, context, nested.Type, assignment.Value)
+	value := jenny.formatAssignmentValue(formatter, context, nested.Type, assignment.Value)
 	if isOptionWrapped(nested.Type) {
 		value = fmt.Sprintf("Some(%s)", value)
 	}
@@ -797,27 +965,20 @@ func (jenny Builder) formatKnownAnyAssignment(formatter *typeFormatter, context 
 	}
 
 	var buffer strings.Builder
-	// rustfmt collapses a single-field struct literal with no rest onto one line;
-	// a literal with a rest expression stays multi-line. Emit the form rustfmt
-	// would settle on so the golden is `cargo fmt --check` clean.
+	// Emit the struct literal on a single line; rustfmt expands it across lines
+	// when it carries a rest expression or exceeds the max width. The rest
+	// expression is included only when the hinted struct has more fields than the
+	// one being set (otherwise it trips clippy's needless_update).
 	if needsRest {
-		fmt.Fprintf(&buffer, "let %s = %s {\n", rootField, concreteType)
-		fmt.Fprintf(&buffer, "            %s,\n", fieldInit)
-		fmt.Fprintf(&buffer, "            ..%s::default()\n", concreteType)
-		buffer.WriteString("        };\n")
+		fmt.Fprintf(&buffer, "let %s = %s { %s, ..%s::default() };\n", rootField, concreteType, fieldInit, concreteType)
 	} else {
 		fmt.Fprintf(&buffer, "let %s = %s { %s };\n", rootField, concreteType, fieldInit)
 	}
 
-	// rustfmt breaks the assignment after `=` when the value does not fit on the
-	// statement line (max width 100).
+	// Emit the store assignment on a single line; rustfmt breaks it after `=` when
+	// the value does not fit.
 	store := fmt.Sprintf("serde_json::to_value(%s).expect(\"%s should serialize to JSON\")", rootField, concreteType)
-	stmt := fmt.Sprintf("        %s.internal.%s = Some(%s);", receiver, rootField, store)
-	if len(stmt) <= 100 {
-		buffer.WriteString(stmt)
-	} else {
-		fmt.Fprintf(&buffer, "        %s.internal.%s =\n            Some(%s);", receiver, rootField, store)
-	}
+	fmt.Fprintf(&buffer, "        %s.internal.%s = Some(%s);", receiver, rootField, store)
 	return buffer.String()
 }
 
@@ -836,12 +997,10 @@ func (jenny Builder) formatKnownAnyAssignment(formatter *typeFormatter, context 
 // access chain is built from the path itself and validated against the
 // NilChecks (every Option-wrapped intermediate must have a NilCheck).
 func (jenny Builder) formatMultiLevelAssignment(formatter *typeFormatter, context languages.Context, assignment ast.Assignment, receiver string) string {
-	// Build the access chain as an ordered list of dotted segments so the assignment
-	// can be rendered either inline or, when rustfmt would break the method chain,
-	// one segment per line. `hasCall` records whether any segment is a method call
-	// (get_or_insert_with): rustfmt only multi-lines a chain that contains a call.
+	// Build the access chain as a list of dotted segments and emit it on a single
+	// line; the FormatRustFiles postprocessor (rustfmt) breaks a method chain out
+	// one segment per line when it exceeds the chain width.
 	segments := []string{fmt.Sprintf("%s.internal", receiver)}
-	hasCall := false
 
 	for i := 0; i < len(assignment.Path)-1; i++ {
 		item := assignment.Path[i]
@@ -854,12 +1013,8 @@ func (jenny Builder) formatMultiLevelAssignment(formatter *typeFormatter, contex
 			ref := item.Type.AsRef()
 			concreteType := formatter.formatRef(ref)
 			formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", formatPackageName(ref.ReferredPkg), formatTypeName(ref.ReferredType)))
-			// Two chain segments: the field access and the get_or_insert_with call.
-			// rustfmt lays a broken method chain out one dot-segment per line, so the
-			// field and the call must be separate segments to match its output.
 			segments = append(segments, fieldName)
 			segments = append(segments, fmt.Sprintf("get_or_insert_with(%s::default)", concreteType))
-			hasCall = true
 		} else {
 			segments = append(segments, fieldName)
 		}
@@ -868,44 +1023,20 @@ func (jenny Builder) formatMultiLevelAssignment(formatter *typeFormatter, contex
 	leaf := assignment.Path.Last()
 	segments = append(segments, formatFieldName(leaf.Identifier))
 
-	value := jenny.formatValue(formatter, context, leaf.Type, assignment.Value)
+	value := jenny.formatAssignmentValue(formatter, context, leaf.Type, assignment.Value)
 	if isOptionWrapped(leaf.Type) {
 		value = fmt.Sprintf("Some(%s)", value)
 	}
 
-	inline := fmt.Sprintf("%s = %s;", strings.Join(segments, "."), value)
-
-	// rustfmt keeps the assignment inline only when the whole statement fits its
-	// chain layout. A chain containing a method call (get_or_insert_with) is laid
-	// out one segment per line once it no longer fits rustfmt's chain_width (60)
-	// measured from the 8-space statement indent. Match that: a call-bearing chain
-	// wider than 60 (statement body, excluding the leading indent) breaks; a
-	// plain field chain (no call) always stays inline.
-	const stmtIndent = "        "
-	if !hasCall || len(inline) <= 60 {
-		return inline
-	}
-
-	var buffer strings.Builder
-	buffer.WriteString(segments[0])
-	buffer.WriteString("\n")
-	for i, seg := range segments[1:] {
-		fmt.Fprintf(&buffer, "%s    .%s", stmtIndent, seg)
-		if i < len(segments)-2 {
-			buffer.WriteString("\n")
-		}
-	}
-	fmt.Fprintf(&buffer, " = %s;", value)
-	return buffer.String()
+	return fmt.Sprintf("%s = %s;", strings.Join(segments, "."), value)
 }
 
-// formatEnvelopeLiteral renders an assignment envelope as a Rust struct literal
-// of the envelope's ref type, setting one named field per envelope value and
-// filling the rest from Default. The literal is emitted at `indent` so a
-// multi-field literal nests cleanly inside the enclosing statement; rustfmt
-// keeps a short single-field literal inline, so the form here matches what
-// rustfmt would settle on.
-func (jenny Builder) formatEnvelopeLiteral(formatter *typeFormatter, context languages.Context, envelope ast.AssignmentEnvelope, indent string) string {
+// formatEnvelopeLiteral renders an assignment envelope as a single-line Rust
+// struct literal of the envelope's ref type, setting one named field per
+// envelope value and filling the rest from Default. The FormatRustFiles
+// postprocessor (rustfmt) expands the literal across lines when it exceeds the
+// max width.
+func (jenny Builder) formatEnvelopeLiteral(formatter *typeFormatter, context languages.Context, envelope ast.AssignmentEnvelope) string {
 	ref := envelope.Type.AsRef()
 	typeName := formatter.formatRef(ref)
 	formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", formatPackageName(ref.ReferredPkg), typeName))
@@ -922,7 +1053,7 @@ func (jenny Builder) formatEnvelopeLiteral(formatter *typeFormatter, context lan
 	for _, value := range envelope.Values {
 		field := value.Path[0]
 		fieldName := formatFieldName(field.Identifier)
-		rendered := jenny.formatValue(formatter, context, field.Type, value.Value)
+		rendered := jenny.formatAssignmentValue(formatter, context, field.Type, value.Value)
 		if isOptionWrapped(field.Type) {
 			rendered = fmt.Sprintf("Some(%s)", rendered)
 		}
@@ -933,29 +1064,15 @@ func (jenny Builder) formatEnvelopeLiteral(formatter *typeFormatter, context lan
 		}
 	}
 
-	// rustfmt collapses a struct literal with no rest expression onto a single
-	// line while it fits the 100-column max width; a literal carrying a
-	// `..Default::default()` rest stays multi-line. Emit the form rustfmt would
-	// settle on so the golden is `cargo fmt --check` clean. The inline width is
-	// estimated from the enclosing statement indent plus the literal text; this is
-	// conservative and only collapses when it comfortably fits.
-	if !needsRest {
-		singleLine := fmt.Sprintf("%s { %s }", typeName, strings.Join(inits, ", "))
-		if len(indent)+len("self.internal..push();")+len(singleLine) <= 100 {
-			return singleLine
-		}
-	}
-
-	var buffer strings.Builder
-	fmt.Fprintf(&buffer, "%s {\n", typeName)
-	for _, init := range inits {
-		fmt.Fprintf(&buffer, "%s    %s,\n", indent, init)
-	}
+	// Emit the struct literal on a single line; the FormatRustFiles postprocessor
+	// (rustfmt) expands it across lines when it exceeds the max width. The
+	// `..Default::default()` rest is included only when the envelope does not set
+	// every field (otherwise it trips clippy's needless_update).
+	fields := strings.Join(inits, ", ")
 	if needsRest {
-		fmt.Fprintf(&buffer, "%s    ..Default::default()\n", indent)
+		return fmt.Sprintf("%s { %s, ..Default::default() }", typeName, fields)
 	}
-	fmt.Fprintf(&buffer, "%s}", indent)
-	return buffer.String()
+	return fmt.Sprintf("%s { %s }", typeName, fields)
 }
 
 // formatValue renders the right-hand side of an assignment. A constant is
@@ -963,7 +1080,7 @@ func (jenny Builder) formatEnvelopeLiteral(formatter *typeFormatter, context lan
 // String, an enum-ref field takes the matching variant); an option argument is
 // rendered as the bare argument identifier (a String argument is converted to an
 // owned String since the argument is taken by value as String already).
-func (jenny Builder) formatValue(formatter *typeFormatter, context languages.Context, destType ast.Type, value ast.AssignmentValue) string {
+func (jenny Builder) formatAssignmentValue(formatter *typeFormatter, context languages.Context, destType ast.Type, value ast.AssignmentValue) string {
 	if value.Argument != nil {
 		return formatArgName(value.Argument.Name)
 	}

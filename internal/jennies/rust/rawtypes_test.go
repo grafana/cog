@@ -47,6 +47,12 @@ func TestRawTypes_Generate(t *testing.T) {
 		files, err := jenny.Generate(languages.Context{Schemas: processedAsts})
 		req.NoError(err)
 
+		// The Builder/RawTypes jennies emit the simple single-line form and let the
+		// FormatRustFiles postprocessor (rustfmt) own all wrapping. The golden-file
+		// harness does not run postprocessors, so run rustfmt here too, otherwise
+		// the goldens (which are rustfmt-formatted) would never match.
+		files = formatRustGoldenFiles(tc, files)
+
 		tc.WriteFiles(files)
 	})
 }

@@ -35,13 +35,10 @@ func TestBuilder_Generate(t *testing.T) {
 			// DisjunctionToType compiler pass, so these never become named union types.
 			// This matches the Go target, which also skips the fixture.
 			"builder_delegation_in_disjunction": "inline-disjunction delegation has no idiomatic Rust mapping (Rust skips DisjunctionToType)",
-			"composable_slot":                   "composable slots out of scope for Phase 4a",
-			"dashboard_panel":                   "out of scope for Phase 4a",
-			"dataquery_variant_builder":         "variants out of scope for Phase 4a",
-			"factories":                         "factories out of scope for Phase 4a",
-			"map_of_disjunctions":               "out of scope for Phase 4a",
-			"package-with-dashes":               "out of scope for Phase 4a",
-			"panel_builders":                    "out of scope for Phase 4a",
+			"composable_slot":                   "composable slots / variants out of scope until Phase 6",
+			"dashboard_panel":                   "Java-generics-specific builder shape; Python also skips this fixture",
+			"dataquery_variant_builder":         "variants out of scope until Phase 6",
+			"panel_builders":                    "composable-slot panel variants out of scope until Phase 6",
 			// struct_fields_as_args_assignment stays skipped for the same reason as
 			// anonymous_struct: the target `time` field is a nullable inline anonymous
 			// struct (not hoisted to a named type in this context), which Rust models as
@@ -66,6 +63,11 @@ func TestBuilder_Generate(t *testing.T) {
 
 		files, err := jenny.Generate(context)
 		req.NoError(err)
+
+		// See rawtypes_test.go: the harness does not run postprocessors, so format
+		// the generated files with rustfmt here to match the rustfmt-formatted
+		// goldens the FormatRustFiles postprocessor produces in real generation.
+		files = formatRustGoldenFiles(tc, files)
 
 		tc.WriteFiles(files)
 	})
