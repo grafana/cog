@@ -21,11 +21,8 @@ func TestRawTypes_Generate(t *testing.T) {
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "RustRawTypes",
 		Skip: map[string]string{
-			"dashboard":                     "Phase 6: composable slots not implemented",
-			"intersections":                 "Intersections not implemented, matching the python target",
-			"variant_dataquery":             "Phase 6: variants not implemented",
-			"variant_panelcfg_full":         "Phase 6: variants not implemented",
-			"variant_panelcfg_only_options": "Phase 6: variants not implemented",
+			"dashboard":     "Phase 6: composable slots not implemented",
+			"intersections": "Intersections not implemented, matching the python target",
 		},
 	}
 

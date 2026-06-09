@@ -54,7 +54,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 			return
 		}
 
-		block, err := jenny.formatObject(formatter, imports, object)
+		block, err := jenny.formatObject(formatter, imports, schema, object)
 		if err != nil {
 			genErr = err
 			return
@@ -81,12 +81,12 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 	return []byte(out.String()), nil
 }
 
-func (jenny RawTypes) formatObject(formatter *typeFormatter, imports *importMap, object ast.Object) (string, error) {
+func (jenny RawTypes) formatObject(formatter *typeFormatter, imports *importMap, schema *ast.Schema, object ast.Object) (string, error) {
 	switch {
 	case object.Type.IsConcreteScalar():
 		return jenny.formatConstant(object), nil
 	case object.Type.IsStruct():
-		return jenny.formatStruct(formatter, imports, object), nil
+		return jenny.formatStruct(formatter, imports, schema, object), nil
 	case object.Type.IsEnum():
 		return jenny.formatEnum(imports, object), nil
 	case object.Type.IsDisjunction():
@@ -257,7 +257,7 @@ func (jenny RawTypes) formatTypeAlias(formatter *typeFormatter, object ast.Objec
 	return buffer.String()
 }
 
-func (jenny RawTypes) formatStruct(formatter *typeFormatter, imports *importMap, object ast.Object) string {
+func (jenny RawTypes) formatStruct(formatter *typeFormatter, imports *importMap, schema *ast.Schema, object ast.Object) string {
 	imports.Add("serde::Serialize")
 	imports.Add("serde::Deserialize")
 
@@ -308,6 +308,58 @@ func (jenny RawTypes) formatStruct(formatter *typeFormatter, imports *importMap,
 		buffer.WriteString("\n\n")
 		buffer.WriteString(enum)
 	}
+
+	if impl := jenny.formatVariantImpl(imports, schema, object); impl != "" {
+		buffer.WriteString("\n\n")
+		buffer.WriteString(impl)
+	}
+
+	return buffer.String()
+}
+
+// formatVariantImpl emits the runtime variant trait implementation for an object
+// that implements a composable variant. A dataquery variant object gets a
+// `cog::variants::Dataquery` impl whose `dataquery_type` returns the schema's
+// datasource type identifier (the wire discriminator) and whose
+// `dataquery_equals` compares the two queries structurally via their JSON form.
+// This mirrors the Go target's `Implements<Variant>Variant()` marker plus the
+// `variants.Dataquery` interface (DataqueryType/Equals), giving a composable
+// query slot a `Box<dyn Dataquery>` it can resolve and round-trip by
+// discriminator. Panelcfg variant objects are plain structs and need no impl
+// here: their options/fieldConfig payloads are dispatched by the registry,
+// matching the Go panelcfg variant (a bare marker interface).
+func (jenny RawTypes) formatVariantImpl(imports *importMap, schema *ast.Schema, object ast.Object) string {
+	if !object.Type.ImplementsVariant() || object.Type.IsRef() {
+		return ""
+	}
+	if object.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
+		return ""
+	}
+	if !object.Type.IsDataqueryVariant() {
+		// Panelcfg (and any other) variants carry no rawtypes-level impl.
+		return ""
+	}
+
+	imports.Add("crate::cog::variants")
+
+	typeName := formatTypeName(object.Name)
+	identifier := schema.Metadata.Identifier
+
+	var buffer strings.Builder
+	fmt.Fprintf(&buffer, "impl variants::Dataquery for %s {\n", typeName)
+	buffer.WriteString("    fn dataquery_type(&self) -> String {\n")
+	fmt.Fprintf(&buffer, "        %q.to_string()\n", identifier)
+	buffer.WriteString("    }\n\n")
+	buffer.WriteString("    fn dataquery_equals(&self, other: &dyn variants::Dataquery) -> bool {\n")
+	buffer.WriteString("        match (\n")
+	buffer.WriteString("            variants::DataquerySerialize::to_json_value(self),\n")
+	buffer.WriteString("            other.to_json_value(),\n")
+	buffer.WriteString("        ) {\n")
+	buffer.WriteString("            (Ok(a), Ok(b)) => a == b,\n")
+	buffer.WriteString("            _ => false,\n")
+	buffer.WriteString("        }\n")
+	buffer.WriteString("    }\n")
+	buffer.WriteString("}")
 
 	return buffer.String()
 }

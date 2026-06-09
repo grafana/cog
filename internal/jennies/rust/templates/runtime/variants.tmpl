@@ -1,28 +1,109 @@
 //! Variant support for composable resources (data queries and panel configs).
 //!
-//! These are stubs. Phase 6: implement the full dataquery/panelcfg variant
-//! trait and registry used to resolve composable slots at runtime. The shapes
-//! below exist only so generated code and the rest of the runtime compile; do
-//! not rely on them yet.
+//! Grafana panels and queries are pluggable: a panel's `options`/`fieldConfig`
+//! shape depends on its panel `type` (the panelcfg variant), and a query's
+//! shape depends on its datasource `type` (the dataquery variant). These are
+//! "composable slots": a slot can be filled by any registered variant and is
+//! (de)serialized by its discriminator (the panel type or datasource type).
+//!
+//! serde's `#[serde(untagged)]` cannot disambiguate variants that differ only
+//! by a discriminator value, so deserialization here is discriminator-driven: a
+//! [`Registry`] maps each discriminator string to a decoder function, the
+//! discriminator is read from the raw JSON, and the matching decoder turns the
+//! JSON into the concrete variant. This mirrors the Go runtime's
+//! `DataqueryConfig`/`PanelcfgConfig` plus `Runtime` maps exactly, so the wire
+//! format round-trips byte-for-byte with the Go, TypeScript and Python SDKs.
 
+use serde::Serialize;
 use std::collections::HashMap;
 
-/// Identifies a composable variant kind (for example a panel type or data
-/// source type) used to look up the concrete type at runtime.
+/// A data query variant (for example a Prometheus or Loki query).
 ///
-/// Phase 6: flesh out into the real dataquery/panelcfg variant abstraction.
-pub trait Variant {
-    /// Returns the discriminator value that selects this variant.
-    fn variant_discriminator(&self) -> String;
+/// Every generated dataquery config type implements this trait, mirroring the
+/// Go `variants.Dataquery` interface. The trait is object-safe so a composable
+/// query slot can hold a `Box<dyn Dataquery>` whose concrete type is resolved
+/// at runtime from the datasource type discriminator.
+pub trait Dataquery: DataquerySerialize + std::fmt::Debug {
+    /// Returns the datasource type discriminator that selects this variant.
+    fn dataquery_type(&self) -> String;
+
+    /// Reports whether this dataquery equals `other`.
+    fn dataquery_equals(&self, other: &dyn Dataquery) -> bool;
 }
 
-/// Maps variant discriminators to the metadata needed to decode them.
+/// Object-safe serialization shim for [`Dataquery`] trait objects.
 ///
-/// Phase 6: implement decoding/dispatch. For now this is an empty registry so
-/// the type exists and the module compiles.
-#[derive(Debug, Default)]
+/// `serde::Serialize` is not object-safe, so a blanket impl exposes a
+/// `to_json_value` method that every `Serialize` type satisfies. This lets a
+/// `Box<dyn Dataquery>` be serialized without pulling in the `erased-serde`
+/// crate.
+pub trait DataquerySerialize {
+    /// Serializes the value to a [`serde_json::Value`].
+    fn to_json_value(&self) -> Result<serde_json::Value, serde_json::Error>;
+}
+
+impl<T> DataquerySerialize for T
+where
+    T: Serialize,
+{
+    fn to_json_value(&self) -> Result<serde_json::Value, serde_json::Error> {
+        serde_json::to_value(self)
+    }
+}
+
+impl Serialize for dyn Dataquery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let value = self.to_json_value().map_err(serde::ser::Error::custom)?;
+        value.serialize(serializer)
+    }
+}
+
+/// A panel configuration variant (its `options` and `fieldConfig` types).
+///
+/// Mirrors the Go `variants.Panelcfg` marker interface. Generated panelcfg
+/// config types are plain structs; the registry below carries the decoders for
+/// their `options` and `fieldConfig` payloads keyed by panel type.
+pub trait Panelcfg {}
+
+/// Decodes a dataquery payload from raw JSON into a concrete variant.
+pub type DataqueryDecoder = fn(&serde_json::Value) -> Result<Box<dyn Dataquery>, serde_json::Error>;
+
+/// Decodes a panelcfg `options` or `fieldConfig` payload from raw JSON.
+pub type PanelOptionsDecoder =
+    fn(&serde_json::Value) -> Result<serde_json::Value, serde_json::Error>;
+
+/// Registration record for a dataquery variant, keyed by datasource type.
+#[derive(Clone)]
+pub struct DataqueryConfig {
+    /// The datasource type discriminator (for example `"prometheus"`).
+    pub identifier: String,
+    /// Decoder turning raw JSON into the concrete dataquery type.
+    pub decoder: DataqueryDecoder,
+}
+
+/// Registration record for a panelcfg variant, keyed by panel type.
+#[derive(Clone)]
+pub struct PanelcfgConfig {
+    /// The panel type discriminator (for example `"timeseries"`).
+    pub identifier: String,
+    /// Decoder for the panel's `options` payload, if any.
+    pub options_decoder: Option<PanelOptionsDecoder>,
+    /// Decoder for the panel's `fieldConfig.defaults.custom` payload, if any.
+    pub field_config_decoder: Option<PanelOptionsDecoder>,
+}
+
+/// Maps variant discriminators to their decoders.
+///
+/// This is the Rust counterpart of the Go `Runtime`'s `panelcfgVariants` and
+/// `dataqueryVariants` maps. Generated code registers each variant at startup;
+/// the slot (de)serialization helpers then dispatch on the discriminator.
+#[derive(Default)]
 pub struct Registry {
-    entries: HashMap<String, String>,
+    panelcfg_variants: HashMap<String, PanelcfgConfig>,
+    dataquery_variants: HashMap<String, DataqueryConfig>,
 }
 
 impl Registry {
@@ -31,15 +112,80 @@ impl Registry {
         Self::default()
     }
 
-    /// Registers a placeholder entry for `discriminator`.
-    ///
-    /// Phase 6: replace the value type with real decoder metadata.
-    pub fn register(&mut self, discriminator: impl Into<String>, type_name: impl Into<String>) {
-        self.entries.insert(discriminator.into(), type_name.into());
+    /// Registers a panelcfg variant under its panel type identifier.
+    pub fn register_panelcfg_variant(&mut self, config: PanelcfgConfig) {
+        self.panelcfg_variants
+            .insert(config.identifier.clone(), config);
     }
 
-    /// Looks up the placeholder entry registered for `discriminator`.
-    pub fn lookup(&self, discriminator: &str) -> Option<&String> {
-        self.entries.get(discriminator)
+    /// Registers a dataquery variant under its datasource type identifier.
+    pub fn register_dataquery_variant(&mut self, config: DataqueryConfig) {
+        self.dataquery_variants
+            .insert(config.identifier.clone(), config);
+    }
+
+    /// Returns the panelcfg config registered for `identifier`, if any.
+    pub fn config_for_panelcfg_variant(&self, identifier: &str) -> Option<&PanelcfgConfig> {
+        self.panelcfg_variants.get(identifier)
+    }
+
+    /// Returns the dataquery config registered for `identifier`, if any.
+    pub fn config_for_dataquery_variant(&self, identifier: &str) -> Option<&DataqueryConfig> {
+        self.dataquery_variants.get(identifier)
+    }
+
+    /// Deserializes a dataquery from raw JSON using discriminator-driven
+    /// dispatch.
+    ///
+    /// When `type_hint` is non-empty it is used directly; otherwise the
+    /// datasource type is read from the JSON's `datasource.type` field, matching
+    /// the Go runtime's `UnmarshalDataquery`. When no variant is registered for
+    /// the discriminator the payload is preserved as an [`UnknownDataquery`] bag
+    /// so no data is lost.
+    pub fn unmarshal_dataquery(
+        &self,
+        raw: &serde_json::Value,
+        type_hint: &str,
+    ) -> Result<Box<dyn Dataquery>, serde_json::Error> {
+        if !type_hint.is_empty() {
+            if let Some(config) = self.dataquery_variants.get(type_hint) {
+                return (config.decoder)(raw);
+            }
+        }
+
+        if let Some(datasource_type) = raw
+            .get("datasource")
+            .and_then(|ds| ds.get("type"))
+            .and_then(|t| t.as_str())
+        {
+            if let Some(config) = self.dataquery_variants.get(datasource_type) {
+                return (config.decoder)(raw);
+            }
+        }
+
+        // Unknown variant: keep the raw payload so nothing is dropped.
+        let bag: UnknownDataquery = serde_json::from_value(raw.clone())?;
+        Ok(Box::new(bag))
+    }
+}
+
+/// Fallback dataquery used when no registered variant matches the discriminator.
+///
+/// It preserves the raw JSON object so round-tripping an unknown query loses no
+/// data, mirroring the Go `variants.UnknownDataquery` bag.
+#[derive(Debug, Clone, Default, Serialize, serde::Deserialize)]
+#[serde(transparent)]
+pub struct UnknownDataquery(pub serde_json::Map<String, serde_json::Value>);
+
+impl Dataquery for UnknownDataquery {
+    fn dataquery_type(&self) -> String {
+        "unknown".to_string()
+    }
+
+    fn dataquery_equals(&self, other: &dyn Dataquery) -> bool {
+        match (self.to_json_value(), other.to_json_value()) {
+            (Ok(a), Ok(b)) => a == b,
+            _ => false,
+        }
     }
 }
