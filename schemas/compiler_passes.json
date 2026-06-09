@@ -290,6 +290,11 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlAnonymousEnumsToNamed": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlAnonymousStructsToNamed": {
       "properties": {},
       "additionalProperties": false,
@@ -389,6 +394,9 @@
         },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
+        },
+        "anonymous_enum_to_named": {
+          "$ref": "#/$defs/YamlAnonymousEnumsToNamed"
         },
         "disjunction_to_type": {
           "$ref": "#/$defs/YamlDisjunctionToType"

@@ -28,6 +28,37 @@ add_object:
   comments: []string
 ```
 
+## `anonymous_enum_to_named`
+
+AnonymousEnumToExplicitType turns "anonymous enums" into a named
+object.
+
+Example:
+
+	```
+	Panel struct {
+		Type enum(Foo, Bar, Baz)
+	}
+	```
+
+Will become:
+
+	```
+	Panel struct {
+		Type PanelType
+	}
+
+	PanelType enum(Foo, Bar, Baz)
+	```
+
+Note: this compiler pass looks for anonymous enums in structs and arrays only.
+
+### Usage
+
+```yaml
+anonymous_enum_to_named: {}
+```
+
 ## `anonymous_structs_to_named`
 
 AnonymousStructsToNamed turns "anonymous structs" into a named object.

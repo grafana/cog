@@ -32,7 +32,8 @@ type CompilerPass struct {
 	ExtractK8ResourceNames   *CleanupK8ResourceNames   `yaml:"cleanup_k8_resource_names"`
 	TrimObjectNamePrefix     *TrimObjectNamePrefix     `yaml:"trim_object_name_prefix"`
 
-	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
+	AnonymousStructsToNamed     *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
+	AnonymousEnumToExplicitType *AnonymousEnumsToNamed   `yaml:"anonymous_enum_to_named"`
 
 	DisjunctionToType                       *DisjunctionToType                       `yaml:"disjunction_to_type"`
 	DisjunctionOfAnonymousStructsToExplicit *DisjunctionOfAnonymousStructsToExplicit `yaml:"disjunction_of_anonymous_structs_to_explicit"`
@@ -114,6 +115,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 
 	if pass.AnonymousStructsToNamed != nil {
 		return pass.AnonymousStructsToNamed.AsCompilerPass()
+	}
+	if pass.AnonymousEnumToExplicitType != nil {
+		return pass.AnonymousEnumToExplicitType.AsCompilerPass()
 	}
 
 	if pass.DisjunctionToType != nil {
@@ -452,6 +456,13 @@ type AnonymousStructsToNamed struct {
 
 func (pass AnonymousStructsToNamed) AsCompilerPass() (*compiler.AnonymousStructsToNamed, error) {
 	return &compiler.AnonymousStructsToNamed{}, nil
+}
+
+type AnonymousEnumsToNamed struct {
+}
+
+func (pass AnonymousEnumsToNamed) AsCompilerPass() (*compiler.AnonymousEnumToExplicitType, error) {
+	return &compiler.AnonymousEnumToExplicitType{}, nil
 }
 
 type DisjunctionToType struct {
