@@ -153,7 +153,7 @@ func (t Type) IsAnyOf(kinds ...Kind) bool {
 }
 
 func (t Type) ImplementsVariant() bool {
-	return t.HasHint(HintImplementsVariant)
+	return t.HasHint(HintImplementsVariant) && t.Hints[HintImplementsVariant] != nil
 }
 
 func (t Type) ImplementedVariant() string {
@@ -169,10 +169,23 @@ func (t Type) IsDataqueryVariant() bool {
 		return false
 	}
 
-	return t.Hints[HintImplementsVariant].(string) == string(SchemaVariantDataQuery)
+	if t.Hints[HintImplementsVariant] == nil {
+		return false
+	}
+
+	variant, ok := t.Hints[HintImplementsVariant].(string)
+	if !ok {
+		return false
+	}
+
+	return variant == string(SchemaVariantDataQuery)
 }
 
 func (t Type) HasHint(hintName string) bool {
+	if t.Hints == nil {
+		return false
+	}
+
 	_, found := t.Hints[hintName]
 
 	return found

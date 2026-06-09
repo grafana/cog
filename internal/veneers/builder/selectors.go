@@ -62,8 +62,9 @@ func StructGeneratedFromDisjunction() *Selector {
 		description: "struct_generated_from_disjunction",
 		matcher: func(schemas ast.Schemas, builder ast.Builder) bool {
 			resolved := schemas.ResolveToType(builder.For.Type)
+			implementsVariant := builder.For.Type.ImplementsVariant()
 
-			return resolved.IsStructGeneratedFromDisjunction()
+			return resolved.IsStructGeneratedFromDisjunction() && !implementsVariant
 		},
 	}
 }

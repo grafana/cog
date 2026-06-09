@@ -19,6 +19,12 @@ func (pass *RenameObject) Process(schemas []*ast.Schema) ([]*ast.Schema, error) 
 		OnRef:    pass.processRef,
 	}
 
+	for _, schema := range schemas {
+		if schema.Package == pass.From.Package && schema.EntryPoint == pass.From.Object {
+			schema.EntryPoint = pass.To
+		}
+	}
+
 	return visitor.VisitSchemas(schemas)
 }
 
