@@ -10,6 +10,12 @@ pub enum DisjunctionOfScalarsAndRefs {
     MyRefB(MyRefB),
 }
 
+impl Default for DisjunctionOfScalarsAndRefs {
+    fn default() -> Self {
+        Self::String(Default::default())
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct MyRefA {
     pub foo: String,

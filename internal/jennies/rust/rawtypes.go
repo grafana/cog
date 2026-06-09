@@ -98,7 +98,15 @@ func (jenny RawTypes) formatObject(formatter *typeFormatter, imports *importMap,
 		// because the branches have distinct shapes. Variant identifiers are
 		// disambiguated so branches that render to the same Rust type still compile.
 		def := object.Type.AsDisjunction()
-		return jenny.formatUntaggedEnum(formatter, imports, formatTypeName(object.Name), object.Comments, def.Branches), nil
+		enum := jenny.formatUntaggedEnum(formatter, imports, formatTypeName(object.Name), object.Comments, def.Branches)
+		// A disjunction object can itself be a dataquery variant (a schema whose root
+		// query type is a union of query kinds, e.g. cloudwatch's Request or expr's
+		// Expr). It is boxed as Box<dyn Dataquery> by the plugin registry, so it needs
+		// the Dataquery trait impl just like a struct query type.
+		if impl := jenny.formatVariantImpl(imports, schema, object); impl != "" {
+			enum += "\n\n" + impl
+		}
+		return enum, nil
 	case object.Type.IsScalar(), object.Type.IsArray(), object.Type.IsMap(), object.Type.IsRef():
 		return jenny.formatTypeAlias(formatter, object), nil
 	default:
@@ -244,6 +252,16 @@ func (jenny RawTypes) formatUntaggedEnum(formatter *typeFormatter, imports *impo
 		fmt.Fprintf(&buffer, "    %s(%s),\n", variant, inner)
 	}
 	buffer.WriteString("}")
+
+	// An untagged enum cannot derive Default (no variant is implicitly the default),
+	// yet a disjunction-typed field of a struct that derives Default needs one (e.g.
+	// a v2 variable's `value: VariableValueSingle`). Emit a manual Default selecting
+	// the first branch's zero value, the conventional default matching the other
+	// targets and consistent with hoisted inline disjunctions.
+	if nonNull := nonNullBranches(branches); len(nonNull) > 0 {
+		buffer.WriteString("\n\n")
+		buffer.WriteString(hoistedEnumDefaultImpl(formatter, name, nonNull[0]))
+	}
 
 	return buffer.String()
 }
@@ -451,8 +469,9 @@ func (jenny RawTypes) hoistInlineDisjunctions(formatter *typeFormatter, imports 
 		}
 
 		enumName := formatTypeName(structName + field.Name)
+		// formatUntaggedEnum now appends the manual Default impl itself (selecting the
+		// first non-null branch), so it is not emitted again here.
 		enums = append(enums, jenny.formatUntaggedEnum(formatter, imports, enumName, nil, branches))
-		enums = append(enums, hoistedEnumDefaultImpl(formatter, enumName, branches[0]))
 
 		rewritten[i].Type = ast.NewRef(formatter.rawPackage, enumName)
 		rewritten[i].Type.Nullable = field.Type.Nullable
@@ -613,6 +632,12 @@ func fieldSerdeAttributes(structName string, field ast.StructField) []string {
 func dataquerySlotSerdeAttribute(field ast.StructField) (string, bool) {
 	switch {
 	case field.Type.IsComposableSlot() && field.Type.AsComposableSlot().Variant == ast.SchemaVariantDataQuery:
+		// A nullable scalar slot is Option<Box<dyn Dataquery>> and needs the
+		// Option-aware deserializer (the non-optional helper returns a bare Box, which
+		// the `?`-based generated visitor cannot coerce into the Option field).
+		if field.Type.Nullable {
+			return `#[serde(deserialize_with = "crate::cog::variants::deserialize_opt_dataquery")]`, true
+		}
 		return `#[serde(deserialize_with = "crate::cog::variants::deserialize_dataquery")]`, true
 	case field.Type.IsArray() && field.Type.AsArray().ValueType.IsComposableSlot() &&
 		field.Type.AsArray().ValueType.AsComposableSlot().Variant == ast.SchemaVariantDataQuery:
@@ -700,6 +725,12 @@ func defaultExpression(formatter *typeFormatter, typeDef ast.Type, indent string
 	// field type (snake-cased name, scalar/struct literal value).
 	if typeDef.IsRef() && typeDef.Default != nil {
 		if literal, ok := refStructLiteralDefault(formatter, typeDef.AsRef(), typeDef.Default, indent); ok {
+			// A nullable ref field with a struct-literal default is stored as
+			// Option<T>; wrap the literal in Some so it type-checks (e.g. heatmap's
+			// filter_values: Option<FilterValueRange>).
+			if isOptionWrapped(typeDef) {
+				return fmt.Sprintf("Some(%s)", literal)
+			}
 			return literal
 		}
 		// A ref-to-enum field default resolves to the matching enum variant (or the
@@ -801,6 +832,20 @@ func refStructLiteralDefault(formatter *typeFormatter, ref ast.RefType, def any,
 // struct literal (indented relative to indent); scalars, arrays and maps use the
 // existing default-literal renderers; a String scalar yields an owned String.
 func fieldOverrideLiteral(formatter *typeFormatter, typeDef ast.Type, value any, indent string) string {
+	literal := fieldOverrideLiteralInner(formatter, typeDef, value, indent)
+	// A nullable scalar/ref/enum field is stored as Option<T>; a bare override
+	// literal must be wrapped in Some to type-check (e.g. heatmap's nested
+	// FilterValueRange.le: Option<f32> defaulting to a float). Bare collections
+	// (Vec/HashMap) are not Option-wrapped even when nullable, so they are excluded
+	// via isOptionWrapped. A struct-literal default already returns Some when the
+	// ref field is nullable, so it is not double-wrapped (it is not a bare literal).
+	if isOptionWrapped(typeDef) && !strings.HasPrefix(literal, "Some(") {
+		return fmt.Sprintf("Some(%s)", literal)
+	}
+	return literal
+}
+
+func fieldOverrideLiteralInner(formatter *typeFormatter, typeDef ast.Type, value any, indent string) string {
 	if typeDef.IsRef() {
 		if literal, ok := refStructLiteralDefault(formatter, typeDef.AsRef(), value, indent); ok {
 			return literal

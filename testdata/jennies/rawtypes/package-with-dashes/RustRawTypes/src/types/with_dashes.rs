@@ -13,3 +13,9 @@ pub enum RefreshRate {
     String(String),
     Bool(bool),
 }
+
+impl Default for RefreshRate {
+    fn default() -> Self {
+        Self::String(Default::default())
+    }
+}

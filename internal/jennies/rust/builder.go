@@ -364,7 +364,7 @@ func (jenny Builder) formatConstructor(formatter *typeFormatter, context languag
 
 		for _, assignment := range builder.Constructor.Assignments {
 			buffer.WriteString("        ")
-			buffer.WriteString(jenny.formatAssignment(formatter, context, assignment, "builder"))
+			buffer.WriteString(jenny.formatAssignment(formatter, context, builder, builder.Constructor.Args, assignment, "builder"))
 			buffer.WriteString("\n")
 		}
 
@@ -425,7 +425,7 @@ func (jenny Builder) formatOption(formatter *typeFormatter, context languages.Co
 
 	for _, assignment := range option.Assignments {
 		buffer.WriteString("        ")
-		buffer.WriteString(jenny.formatAssignment(formatter, context, assignment, "self"))
+		buffer.WriteString(jenny.formatAssignment(formatter, context, builder, option.Args, assignment, "self"))
 		buffer.WriteString("\n")
 	}
 
@@ -611,7 +611,7 @@ func (jenny Builder) formatArgs(formatter *typeFormatter, args []ast.Argument, c
 // held in receiver.internal. The field type drives the value rendering: an
 // Option-wrapped field is assigned Some(value); a bare field is assigned the
 // value directly.
-func (jenny Builder) formatAssignment(formatter *typeFormatter, context languages.Context, assignment ast.Assignment, receiver string) string {
+func (jenny Builder) formatAssignment(formatter *typeFormatter, context languages.Context, builder ast.Builder, currentArgs []ast.Argument, assignment ast.Assignment, receiver string) string {
 	if isKnownAnyPath(assignment.Path) {
 		return jenny.formatKnownAnyAssignment(formatter, context, assignment, receiver)
 	}
@@ -637,7 +637,7 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 	// a collection of builders), accumulating any errors and assigning the built
 	// value(s).
 	if assignment.Value.Argument != nil && shouldDelegate(context, assignment.Value.Argument.Type) {
-		return jenny.formatDelegatedAssignment(field, assignment.Value.Argument, receiver)
+		return jenny.formatDelegatedAssignment(formatter, builder.For.SelfRef, field, assignment.Value.Argument, receiver)
 	}
 
 	// Composable-slot delegation: the option argument is a builder of the slot's
@@ -646,16 +646,78 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 	// (the destination field type drives single/Vec/HashMap shaping and the leaf
 	// build() call). Errors accumulate exactly as for ordinary delegation.
 	if assignment.Value.Argument != nil && isComposableSlotType(assignment.Value.Argument.Type) {
-		return jenny.formatDelegatedAssignment(field, assignment.Value.Argument, receiver)
+		return jenny.formatDelegatedAssignment(formatter, builder.For.SelfRef, field, assignment.Value.Argument, receiver)
 	}
 
 	fieldName := formatFieldName(field.Identifier)
 	value := jenny.formatAssignmentValue(formatter, context, field.Type, assignment.Value)
 
-	if isOptionWrapped(field.Type) && !valueIsAlreadyOption(assignment.Value) {
+	// The setter argument for a disjunction-typed field is rendered as
+	// serde_json::Value (an inline disjunction has no single Rust type), but the
+	// generated struct field is the concrete hoisted (named) disjunction type, e.g.
+	// VariableModel's `query` field hoisted to VariableModelquery. Resolve the
+	// generated field type from the builder's target object and, when the rendered
+	// argument is Value while the field is a concrete type, deserialize the Value
+	// into the field type (defaulting on failure).
+	arg := assignment.Value.Argument
+	if arg != nil {
+		argNonNull := arg.Type
+		argNonNull.Nullable = false
+		if formatter.formatType(argNonNull) == "serde_json::Value" {
+			if genType, ok := jenny.knownAnyLeafType(context, builder.For.SelfRef, assignment.Path); ok {
+				nonNull := genType
+				nonNull.Nullable = false
+				concrete := formatter.formatType(nonNull)
+				if concrete != "serde_json::Value" {
+					if isOptionWrapped(arg.Type) {
+						return fmt.Sprintf("%s.internal.%s = %s.and_then(|v| serde_json::from_value::<%s>(v).ok());", receiver, fieldName, value, concrete)
+					}
+					coerced := fmt.Sprintf("serde_json::from_value::<%s>(%s).unwrap_or_default()", concrete, value)
+					if isOptionWrapped(field.Type) {
+						coerced = fmt.Sprintf("Some(%s)", coerced)
+					}
+					return fmt.Sprintf("%s.internal.%s = %s;", receiver, fieldName, coerced)
+				}
+			}
+		}
+	}
+
+	// The generated struct field may be Option-wrapped even when the IR path leaf
+	// type is not (the NotRequiredFieldAsNullableType pass makes a not-required
+	// field nullable in the emitted struct only). Resolve optionality from the
+	// target object's generated field so a required-typed value (e.g. a constructor
+	// arg) assigned to a now-optional field is wrapped in Some(...).
+	fieldOptional := isOptionWrapped(field.Type) || jenny.knownAnyLeafOptional(context, builder.For.SelfRef, assignment.Path)
+	// Whether the rendered value is already an Option must be judged from the
+	// builder's declared argument (whose type drives the emitted setter/constructor
+	// signature), not the assignment-embedded argument copy, which can carry a stale
+	// nullability that diverges from the signature (e.g. a required constructor arg
+	// rendered as a bare String while its embedded copy is still nullable). Using
+	// the stale copy wrongly suppresses the Some(...) wrap and produces
+	// `field: bare_value` against an Option field.
+	if fieldOptional && !valueRendersAsOption(currentArgs, assignment.Value) {
 		return fmt.Sprintf("%s.internal.%s = Some(%s);", receiver, fieldName, value)
 	}
 	return fmt.Sprintf("%s.internal.%s = %s;", receiver, fieldName, value)
+}
+
+// valueRendersAsOption reports whether the rendered assignment value is already an
+// Option<T>, resolving the argument's nullability from the current method's
+// declared arguments (the constructor's or the option's own args) so it matches
+// the emitted signature exactly. The assignment-embedded argument copy can carry a
+// stale nullability that diverges from the signature (a required constructor arg
+// rendered as a bare value while its embedded copy is still nullable), so the
+// signature args are authoritative. A non-argument value is never an Option here.
+func valueRendersAsOption(currentArgs []ast.Argument, value ast.AssignmentValue) bool {
+	if value.Argument == nil {
+		return false
+	}
+	for _, a := range currentArgs {
+		if a.Name == value.Argument.Name {
+			return isOptionWrapped(a.Type)
+		}
+	}
+	return isOptionWrapped(value.Argument.Type)
 }
 
 // valueIsAlreadyOption reports whether an assignment value is an option argument
@@ -678,11 +740,71 @@ func valueIsAlreadyOption(value ast.AssignmentValue) bool {
 // The destination field type drives the shape: a single ref builds one value; an
 // array builds a Vec (nested arrays recurse); a map builds a HashMap. An
 // Option-wrapped destination is assigned Some(value).
-func (jenny Builder) formatDelegatedAssignment(field ast.PathItem, arg *ast.Argument, receiver string) string {
+func (jenny Builder) formatDelegatedAssignment(formatter *typeFormatter, ownerRef ast.RefType, field ast.PathItem, arg *ast.Argument, receiver string) string {
 	fieldName := formatFieldName(field.Identifier)
-	return jenny.formatDelegatedFieldStatement(field.Type, isOptionWrapped(field.Type), arg, receiver, func(builtValue string) string {
+	// When the destination struct field is `any` (rendered serde_json::Value, e.g.
+	// the disjunction-of-spec-kinds `spec` field of a ConstructorFor target like
+	// expr's QueryV2 or a folder's spec), the built value is a concrete type and
+	// must be serialized into a Value. Detect a Value destination and wrap the
+	// built result in serde_json::to_value (infallible for a generated
+	// serializable type, so the Result is unwrapped via expect).
+	if fieldRendersAsValue(formatter, field.Type) {
+		return jenny.formatDelegatedFieldStatement(field.Type, false, arg, receiver, func(builtValue string) string {
+			coerced := fmt.Sprintf("serde_json::to_value(%s).expect(\"%s should serialize to JSON\")", builtValue, fieldName)
+			if isOptionWrapped(field.Type) {
+				coerced = fmt.Sprintf("Some(%s)", coerced)
+			}
+			return fmt.Sprintf("%s.internal.%s = %s;", receiver, fieldName, coerced)
+		})
+	}
+	// A directly recursive ref field is emitted as Box<T> (see formatRef's
+	// refIsRecursive), so the built bare T must be boxed, e.g. Snapshot's
+	// `dashboard: Option<Box<Dashboard>>` fed by a Dashboard builder.
+	if fieldIsBoxedRef(formatter, ownerRef, field.Type) {
+		optional := isOptionWrapped(field.Type)
+		return jenny.formatDelegatedFieldStatement(field.Type, false, arg, receiver, func(builtValue string) string {
+			boxed := fmt.Sprintf("Box::new(%s)", builtValue)
+			if optional {
+				boxed = fmt.Sprintf("Some(%s)", boxed)
+			}
+			return fmt.Sprintf("%s.internal.%s = %s;", receiver, fieldName, boxed)
+		})
+	}
+	// A Vec/HashMap whose element is a directly recursive ref boxes each element
+	// (e.g. a NotificationPolicy's routes: Vec<Box<NotificationPolicy>>); the boxed
+	// variant supplies the owner context so formatDelegatedValue can box per element.
+	return jenny.formatDelegatedFieldStatementBoxed(formatter, ownerRef, field.Type, isOptionWrapped(field.Type), arg, receiver, func(builtValue string) string {
 		return fmt.Sprintf("%s.internal.%s = %s;", receiver, fieldName, builtValue)
 	})
+}
+
+// fieldIsBoxedRef reports whether a single (non-collection) ref field of the
+// owner struct is emitted as Box<T> because it forms a direct recursive cycle. It
+// renders the field type with the formatter's current object temporarily set to
+// the owner so refIsRecursive resolves against the right struct, then checks for a
+// Box wrapper.
+func fieldIsBoxedRef(formatter *typeFormatter, ownerRef ast.RefType, fieldType ast.Type) bool {
+	if formatter == nil || ownerRef.ReferredType == "" {
+		return false
+	}
+	inner := fieldType
+	inner.Nullable = false
+	if !inner.IsRef() {
+		return false
+	}
+	prevPkg, prevName := formatter.currentObjectPkg, formatter.currentObjectName
+	formatter.currentObjectPkg, formatter.currentObjectName = ownerRef.ReferredPkg, ownerRef.ReferredType
+	rendered := formatter.formatType(inner)
+	formatter.currentObjectPkg, formatter.currentObjectName = prevPkg, prevName
+	return strings.HasPrefix(rendered, "Box<")
+}
+
+// fieldRendersAsValue reports whether the destination field type renders to
+// serde_json::Value (an `any`/bare disjunction field), ignoring nullability.
+func fieldRendersAsValue(formatter *typeFormatter, t ast.Type) bool {
+	nonNull := t
+	nonNull.Nullable = false
+	return formatter.formatType(nonNull) == "serde_json::Value"
 }
 
 // formatDelegatedFieldStatement renders the shared builder-delegation sequence:
@@ -693,12 +815,22 @@ func (jenny Builder) formatDelegatedAssignment(field ast.PathItem, arg *ast.Argu
 // prefixes the block's first line with the same indentation, so the leading
 // indent of the first line is trimmed to avoid a double indent.
 func (jenny Builder) formatDelegatedFieldStatement(buildType ast.Type, wrapInSome bool, arg *ast.Argument, receiver string, finalStmt func(builtValue string) string) string {
+	return jenny.formatDelegatedFieldStatementBoxed(nil, ast.RefType{}, buildType, wrapInSome, arg, receiver, finalStmt)
+}
+
+// formatDelegatedFieldStatementBoxed is formatDelegatedFieldStatement with the
+// owner context needed to box recursively-typed elements: when formatter and a
+// non-empty ownerRef are supplied, a built element whose type is a directly
+// recursive ref (emitted as Box<T> in the owner struct, e.g. a
+// NotificationPolicy's `routes: Vec<Box<NotificationPolicy>>`) is wrapped in
+// Box::new before assignment.
+func (jenny Builder) formatDelegatedFieldStatementBoxed(formatter *typeFormatter, ownerRef ast.RefType, buildType ast.Type, wrapInSome bool, arg *ast.Argument, receiver string, finalStmt func(builtValue string) string) string {
 	argName := formatArgName(arg.Name)
 
 	const indent = "        "
 	var buffer strings.Builder
 
-	value := jenny.formatDelegatedValue(&buffer, buildType, argName, receiver, indent, 0)
+	value := jenny.formatDelegatedValue(&buffer, formatter, ownerRef, buildType, argName, receiver, indent, 0)
 	if wrapInSome {
 		value = fmt.Sprintf("Some(%s)", value)
 	}
@@ -713,7 +845,7 @@ func (jenny Builder) formatDelegatedFieldStatement(buildType ast.Type, wrapInSom
 // Rust expression holding the built result. Every emitted line carries `indent`;
 // the returned expression is spliced into the caller's assignment line. Nested
 // loops carry `depth` so their bindings never collide.
-func (jenny Builder) formatDelegatedValue(buffer *strings.Builder, destType ast.Type, expr, receiver, indent string, depth int) string {
+func (jenny Builder) formatDelegatedValue(buffer *strings.Builder, formatter *typeFormatter, ownerRef ast.RefType, destType ast.Type, expr, receiver, indent string, depth int) string {
 	switch {
 	case destType.IsArray():
 		elem := destType.AsArray().ValueType
@@ -723,7 +855,10 @@ func (jenny Builder) formatDelegatedValue(buffer *strings.Builder, destType ast.
 		item := fmt.Sprintf("item%d", depth)
 		fmt.Fprintf(buffer, "%slet mut %s = Vec::new();\n", indent, built)
 		fmt.Fprintf(buffer, "%sfor %s in %s {\n", indent, item, expr)
-		inner := jenny.formatDelegatedValue(buffer, elem, item, receiver, indent+"    ", depth+1)
+		inner := jenny.formatDelegatedValue(buffer, formatter, ownerRef, elem, item, receiver, indent+"    ", depth+1)
+		if fieldIsBoxedRef(formatter, ownerRef, elem) {
+			inner = fmt.Sprintf("Box::new(%s)", inner)
+		}
 		fmt.Fprintf(buffer, "%s    %s.push(%s);\n", indent, built, inner)
 		fmt.Fprintf(buffer, "%s}\n", indent)
 		return built
@@ -734,7 +869,10 @@ func (jenny Builder) formatDelegatedValue(buffer *strings.Builder, destType ast.
 		item := fmt.Sprintf("item%d", depth)
 		fmt.Fprintf(buffer, "%slet mut %s = std::collections::HashMap::new();\n", indent, built)
 		fmt.Fprintf(buffer, "%sfor (%s, %s) in %s {\n", indent, key, item, expr)
-		inner := jenny.formatDelegatedValue(buffer, valueType, item, receiver, indent+"    ", depth+1)
+		inner := jenny.formatDelegatedValue(buffer, formatter, ownerRef, valueType, item, receiver, indent+"    ", depth+1)
+		if fieldIsBoxedRef(formatter, ownerRef, valueType) {
+			inner = fmt.Sprintf("Box::new(%s)", inner)
+		}
 		fmt.Fprintf(buffer, "%s    %s.insert(%s, %s);\n", indent, built, key, inner)
 		fmt.Fprintf(buffer, "%s}\n", indent)
 		return built
@@ -882,6 +1020,16 @@ func (jenny Builder) formatFreeFactory(formatter *typeFormatter, context languag
 	var buffer strings.Builder
 	buffer.WriteString(formatComments(factory.Comments, ""))
 	fmt.Fprintf(&buffer, "pub fn %s(%s) -> %s {\n", factoryName, args, targetType)
+
+	// With no preset option calls the body would be `let mut builder = X::new();
+	// builder`, which trips clippy's let_and_return (and an unused mut). Return the
+	// fresh builder directly instead.
+	if len(factory.OptionCalls) == 0 {
+		fmt.Fprintf(&buffer, "    %s::new()\n", targetType)
+		buffer.WriteString("}")
+		return buffer.String()
+	}
+
 	fmt.Fprintf(&buffer, "    let mut builder = %s::new();\n", targetType)
 
 	for _, call := range factory.OptionCalls {
@@ -905,7 +1053,14 @@ func (jenny Builder) formatFreeFactory(formatter *typeFormatter, context languag
 				buffer.WriteString("            return builder;\n")
 				buffer.WriteString("        }\n")
 				buffer.WriteString("    };\n")
-				params = append(params, built)
+				// When the target option's parameter is `any` (rendered serde_json::Value,
+				// e.g. a manifest factory's `spec` setter), serialize the built concrete
+				// value into a Value before passing it.
+				if fieldRendersAsValue(formatter, argType) {
+					params = append(params, fmt.Sprintf("serde_json::to_value(%s).expect(\"%s should serialize to JSON\")", built, formatArgName(param.Argument.Name)))
+				} else {
+					params = append(params, built)
+				}
 				continue
 			}
 			params = append(params, jenny.formatFactoryParameter(formatter, context, argType, param))
@@ -948,7 +1103,15 @@ func (jenny Builder) formatFactoryParameter(formatter *typeFormatter, context la
 	case param.Constant != nil:
 		return jenny.formatConstantValue(formatter, context, argType, param.Constant.Value)
 	case param.Argument != nil:
-		return formatArgName(param.Argument.Name)
+		argName := formatArgName(param.Argument.Name)
+		// The target option's parameter may be Option-wrapped (the option arg is
+		// nullable) while the factory's own argument is a bare value, e.g. a Row
+		// factory's `title: String` passed to a `.title(Option<String>)` setter. Wrap
+		// in Some(...) so the bare value satisfies the optional setter parameter.
+		if isOptionWrapped(argType) && !isOptionWrapped(param.Argument.Type) {
+			return fmt.Sprintf("Some(%s)", argName)
+		}
+		return argName
 	case param.Factory != nil:
 		ref := param.Factory.Ref
 		builderType := formatTypeName(ref.Builder) + "Builder"
@@ -1068,6 +1231,18 @@ func (jenny Builder) formatAppendAssignment(formatter *typeFormatter, context la
 	// builder) is built and the boxed trait object pushed, reusing the same
 	// delegation machinery as ordinary builder delegation.
 	if assignment.Value.Argument != nil && (shouldDelegate(context, assignment.Value.Argument.Type) || isComposableSlotType(assignment.Value.Argument.Type)) {
+		// A Value-typed element (a disjunction-of-kinds array, e.g. a dashboard's
+		// `panels: Vec<Value>` taking a Panel/RowPanel builder) must serialize the
+		// built concrete value into a serde_json::Value before the push.
+		if fieldRendersAsValue(formatter, elementType) {
+			return jenny.formatDelegatedFieldStatement(assignment.Value.Argument.Type, false, assignment.Value.Argument, receiver, func(builtValue string) string {
+				coerced := fmt.Sprintf("serde_json::to_value(%s).expect(\"%s should serialize to JSON\")", builtValue, formatFieldName(leaf.Identifier))
+				if isOptionWrapped(elementType) {
+					coerced = fmt.Sprintf("Some(%s)", coerced)
+				}
+				return fmt.Sprintf("%s.push(%s);", target, coerced)
+			})
+		}
 		// The value is built against the argument's type but wrapped (Some) against
 		// the array's element type, matching the original per-element shape.
 		return jenny.formatDelegatedFieldStatement(assignment.Value.Argument.Type, isOptionWrapped(elementType), assignment.Value.Argument, receiver, func(builtValue string) string {
@@ -1095,6 +1270,25 @@ func (jenny Builder) formatIndexAssignment(formatter *typeFormatter, context lan
 
 	leaf := assignment.Path[1]
 	key := jenny.formatIndexKey(formatter, context, mapType.IndexType, *leaf.Index)
+
+	// Builder delegation: the inserted value is itself produced by a nested builder
+	// (or a composable slot), e.g. a v2 dashboard's `element(key, Builder<Element>)`
+	// inserting into elements: HashMap<String, Element>. Build it (accumulating
+	// errors, returning early on failure) then insert the built value.
+	if assignment.Value.Argument != nil && (shouldDelegate(context, assignment.Value.Argument.Type) || isComposableSlotType(assignment.Value.Argument.Type)) {
+		if fieldRendersAsValue(formatter, mapType.ValueType) {
+			return jenny.formatDelegatedFieldStatement(assignment.Value.Argument.Type, false, assignment.Value.Argument, receiver, func(builtValue string) string {
+				coerced := fmt.Sprintf("serde_json::to_value(%s).expect(\"%s should serialize to JSON\")", builtValue, fieldName)
+				if isOptionWrapped(mapType.ValueType) {
+					coerced = fmt.Sprintf("Some(%s)", coerced)
+				}
+				return fmt.Sprintf("%s.internal.%s.insert(%s, %s);", receiver, fieldName, key, coerced)
+			})
+		}
+		return jenny.formatDelegatedFieldStatement(assignment.Value.Argument.Type, isOptionWrapped(mapType.ValueType), assignment.Value.Argument, receiver, func(builtValue string) string {
+			return fmt.Sprintf("%s.internal.%s.insert(%s, %s);", receiver, fieldName, key, builtValue)
+		})
+	}
 
 	value := jenny.formatAssignmentValue(formatter, context, mapType.ValueType, assignment.Value)
 	if isOptionWrapped(mapType.ValueType) {
@@ -1291,7 +1485,11 @@ func (jenny Builder) formatKnownAnyAssignment(formatter *typeFormatter, context 
 	// field is optional; a plain argument that is itself already Option<T> is not
 	// re-wrapped.
 	leafOptional := jenny.knownAnyLeafOptional(context, ref, innerPath)
-	if leafOptional && (delegated || !valueIsAlreadyOption(assignment.Value)) {
+	// A null constant assigned to an optional leaf already renders as the Option's
+	// None (e.g. disable_pagination sets per_page to null on an Option<f64> field);
+	// re-wrapping it would produce Some(None). Skip the Some(...) wrap for a bare
+	// None value.
+	if leafOptional && value != "None" && (delegated || !valueIsAlreadyOption(assignment.Value)) {
 		value = fmt.Sprintf("Some(%s)", value)
 	}
 
@@ -1322,10 +1520,11 @@ func (jenny Builder) formatKnownAnyAssignment(formatter *typeFormatter, context 
 func (jenny Builder) knownAnyLeafOptional(context languages.Context, ref ast.RefType, innerPath ast.Path) bool {
 	currentPkg, currentType := ref.ReferredPkg, ref.ReferredType
 	for i, item := range innerPath {
-		obj, found := context.LocateObject(currentPkg, currentType)
-		if !found || !obj.Type.IsStruct() {
+		obj, resolvedPkg, _, found := resolveStructObject(context, currentPkg, currentType)
+		if !found {
 			return isOptionWrapped(item.Type)
 		}
+		currentPkg = resolvedPkg
 		var field ast.StructField
 		fieldFound := false
 		for _, f := range obj.Type.AsStruct().Fields {
@@ -1352,13 +1551,37 @@ func (jenny Builder) knownAnyLeafOptional(context languages.Context, ref ast.Ref
 // ultimately sets, walking the hinted struct (ref) along innerPath the same way
 // as knownAnyLeafOptional. It reports false when the struct or field cannot be
 // resolved.
+// resolveStructObject locates the object named by (pkg, name), following type
+// aliases (an object whose own type is a ref, e.g. candlestick::FieldConfig =
+// common::GraphFieldConfig) until it reaches a struct. It returns the resolved
+// struct object together with its own (possibly rewritten) package and name so a
+// caller can synthesize package-qualified types for that struct's fields.
+func resolveStructObject(context languages.Context, pkg, name string) (ast.Object, string, string, bool) {
+	for range 16 {
+		obj, found := context.LocateObject(pkg, name)
+		if !found {
+			return ast.Object{}, "", "", false
+		}
+		if obj.Type.IsStruct() {
+			return obj, pkg, name, true
+		}
+		if obj.Type.IsRef() {
+			pkg, name = obj.Type.AsRef().ReferredPkg, obj.Type.AsRef().ReferredType
+			continue
+		}
+		return ast.Object{}, "", "", false
+	}
+	return ast.Object{}, "", "", false
+}
+
 func (jenny Builder) knownAnyLeafType(context languages.Context, ref ast.RefType, innerPath ast.Path) (ast.Type, bool) {
 	currentPkg, currentType := ref.ReferredPkg, ref.ReferredType
 	for i, item := range innerPath {
-		obj, found := context.LocateObject(currentPkg, currentType)
-		if !found || !obj.Type.IsStruct() {
+		obj, resolvedPkg, resolvedName, found := resolveStructObject(context, currentPkg, currentType)
+		if !found {
 			return ast.Type{}, false
 		}
+		currentPkg, currentType = resolvedPkg, resolvedName
 		var field ast.StructField
 		fieldFound := false
 		for _, f := range obj.Type.AsStruct().Fields {
@@ -1371,6 +1594,15 @@ func (jenny Builder) knownAnyLeafType(context languages.Context, ref ast.RefType
 			return ast.Type{}, false
 		}
 		if i == len(innerPath)-1 {
+			// The rawtypes jenny hoists an inline (anonymous) multi-arm non-null
+			// disjunction field into a freshly named untagged enum referenced from the
+			// generated struct (see RawTypes.hoistInlineDisjunctions). The IR field
+			// type is still the inline disjunction (which renders as
+			// serde_json::Value), so resolve the generated field type to that hoisted
+			// ref here, matching the emitted struct exactly.
+			if hoisted, ok := hoistedDisjunctionRef(currentPkg, currentType, field); ok {
+				return hoisted, true
+			}
 			return field.Type, true
 		}
 		if !field.Type.IsRef() {
@@ -1379,6 +1611,26 @@ func (jenny Builder) knownAnyLeafType(context languages.Context, ref ast.RefType
 		currentPkg, currentType = field.Type.AsRef().ReferredPkg, field.Type.AsRef().ReferredType
 	}
 	return ast.Type{}, false
+}
+
+// hoistedDisjunctionRef mirrors RawTypes.hoistInlineDisjunctions: an inline
+// multi-arm non-null disjunction struct field is emitted not as serde_json::Value
+// but as a ref to a synthesized untagged enum named <StructName><FieldName>. When
+// the field qualifies, this returns that ref type (carrying the field's
+// nullability) so the builder coerces into the concrete generated type rather than
+// the raw IR disjunction.
+func hoistedDisjunctionRef(structPkg, structName string, field ast.StructField) (ast.Type, bool) {
+	if !field.Type.IsDisjunction() {
+		return ast.Type{}, false
+	}
+	branches := nonNullBranches(field.Type.AsDisjunction().Branches)
+	if len(branches) < 2 {
+		return ast.Type{}, false
+	}
+	enumName := formatTypeName(structName + field.Name)
+	ref := ast.NewRef(structPkg, enumName)
+	ref.Nullable = field.Type.Nullable
+	return ref, true
 }
 
 // formatMultiLevelAssignment renders a direct assignment whose path descends
@@ -1423,6 +1675,37 @@ func (jenny Builder) formatMultiLevelAssignment(formatter *typeFormatter, contex
 	}
 
 	value := jenny.formatAssignmentValue(formatter, context, leaf.Type, assignment.Value)
+
+	// A leaf whose generated field is a concrete (named) type while the rendered
+	// argument is serde_json::Value (an inline disjunction with no single Rust
+	// type, e.g. a layout slot's `layout` field hoisted to RowsLayoutRowSpeclayout)
+	// must deserialize the Value into the field type. Resolve the generated leaf
+	// type via the owning struct (the penultimate path element's ref).
+	if arg != nil && len(assignment.Path) >= 2 {
+		argNonNull := arg.Type
+		argNonNull.Nullable = false
+		if formatter.formatType(argNonNull) == "serde_json::Value" {
+			parent := assignment.Path[len(assignment.Path)-2]
+			if parent.Type.IsRef() {
+				if genType, ok := jenny.knownAnyLeafType(context, parent.Type.AsRef(), ast.Path{leaf}); ok {
+					nonNull := genType
+					nonNull.Nullable = false
+					concrete := formatter.formatType(nonNull)
+					if concrete != "serde_json::Value" {
+						if isOptionWrapped(arg.Type) {
+							return fmt.Sprintf("%s = %s.and_then(|v| serde_json::from_value::<%s>(v).ok());", target, value, concrete)
+						}
+						coerced := fmt.Sprintf("serde_json::from_value::<%s>(%s).unwrap_or_default()", concrete, value)
+						if leafOptional {
+							coerced = fmt.Sprintf("Some(%s)", coerced)
+						}
+						return fmt.Sprintf("%s = %s;", target, coerced)
+					}
+				}
+			}
+		}
+	}
+
 	if leafOptional && !valueIsAlreadyOption(assignment.Value) {
 		value = fmt.Sprintf("Some(%s)", value)
 	}

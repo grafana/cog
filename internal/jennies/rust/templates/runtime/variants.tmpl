@@ -277,6 +277,28 @@ where
         .map_err(serde::de::Error::custom)
 }
 
+/// serde `deserialize_with` helper for an optional single composable dataquery
+/// slot (a nullable `Option<Box<dyn Dataquery>>` field).
+///
+/// A JSON null deserializes to `None`; any other value is dispatched through the
+/// [`default_registry`] like [`deserialize_dataquery`] and wrapped in `Some`.
+pub fn deserialize_opt_dataquery<'de, D>(
+    deserializer: D,
+) -> Result<Option<Box<dyn Dataquery>>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let raw = Option::<serde_json::Value>::deserialize(deserializer)?;
+    match raw {
+        None => Ok(None),
+        Some(value) if value.is_null() => Ok(None),
+        Some(value) => default_registry()
+            .unmarshal_dataquery(&value, "")
+            .map(Some)
+            .map_err(serde::de::Error::custom),
+    }
+}
+
 /// serde `deserialize_with` helper for a list of composable dataquery slots
 /// (a panel's `targets`).
 pub fn deserialize_dataquery_vec<'de, D>(

@@ -7,6 +7,12 @@ pub enum DisjunctionWithoutDiscriminator {
     TypeB(TypeB),
 }
 
+impl Default for DisjunctionWithoutDiscriminator {
+    fn default() -> Self {
+        Self::TypeA(Default::default())
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct TypeA {
     #[serde(rename = "fieldA")]

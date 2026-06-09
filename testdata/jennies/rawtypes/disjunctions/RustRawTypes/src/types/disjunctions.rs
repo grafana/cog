@@ -8,6 +8,12 @@ pub enum RefreshRate {
     Bool(bool),
 }
 
+impl Default for RefreshRate {
+    fn default() -> Self {
+        Self::String(Default::default())
+    }
+}
+
 pub type StringOrNull = Option<String>;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -38,6 +44,12 @@ fn default_some_struct_type() -> String {
 pub enum BoolOrRef {
     Bool(bool),
     SomeStruct(SomeStruct),
+}
+
+impl Default for BoolOrRef {
+    fn default() -> Self {
+        Self::Bool(Default::default())
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -92,4 +104,10 @@ pub enum SeveralRefs {
     SomeStruct(SomeStruct),
     SomeOtherStruct(SomeOtherStruct),
     YetAnotherStruct(YetAnotherStruct),
+}
+
+impl Default for SeveralRefs {
+    fn default() -> Self {
+        Self::SomeStruct(Default::default())
+    }
 }

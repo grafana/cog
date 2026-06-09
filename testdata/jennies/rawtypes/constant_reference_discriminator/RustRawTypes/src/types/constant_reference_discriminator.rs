@@ -7,6 +7,12 @@ pub enum LayoutWithValue {
     RowsLayoutUsingValue(RowsLayoutUsingValue),
 }
 
+impl Default for LayoutWithValue {
+    fn default() -> Self {
+        Self::GridLayoutUsingValue(Default::default())
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct GridLayoutUsingValue {
     #[serde(default = "default_grid_layout_using_value_kind")]
@@ -56,6 +62,12 @@ fn default_rows_layout_using_value_kind() -> String {
 pub enum LayoutWithoutValue {
     GridLayoutWithoutValue(GridLayoutWithoutValue),
     RowsLayoutWithoutValue(RowsLayoutWithoutValue),
+}
+
+impl Default for LayoutWithoutValue {
+    fn default() -> Self {
+        Self::GridLayoutWithoutValue(Default::default())
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]

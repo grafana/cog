@@ -85,9 +85,26 @@ func (jenny ModuleInit) libRs(withBuilders bool) []byte {
 //   - enum_variant_names: union variants often repeat the enum name.
 //   - large_enum_variant: union branches can differ widely in size.
 //   - too_many_arguments: builder constructors mirror upstream option sets.
+//   - unused_imports: a module imports every type/builder it may reference; some
+//     are unused on paths that resolve through a parent module alias instead.
+//   - absurd_extreme_comparisons / useless comparisons: numeric constraint guards
+//     are emitted verbatim from the schema (e.g. an h <= 0 check on an unsigned
+//     int) to stay wire-faithful across all targets, even when the bound is
+//     trivially true/false in Rust's type system.
+//   - derivable_impls: a manual Default is emitted whenever a field carries an
+//     explicit schema default; some of those defaults coincide with the type's
+//     zero value, which clippy would prefer to derive.
+//   - tabs_in_doc_comments / doc_lazy_continuation: doc comments reproduce the
+//     upstream schema text faithfully, including tabs and loose list formatting.
 #![allow(clippy::enum_variant_names)]
 #![allow(clippy::large_enum_variant)]
 #![allow(clippy::too_many_arguments)]
+#![allow(unused_imports)]
+#![allow(clippy::absurd_extreme_comparisons)]
+#![allow(unused_comparisons)]
+#![allow(clippy::derivable_impls)]
+#![allow(clippy::tabs_in_doc_comments)]
+#![allow(clippy::doc_lazy_continuation)]
 
 `)
 	if !jenny.config.SkipRuntime {
