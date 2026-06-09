@@ -22,7 +22,13 @@ func TestBuilder_Generate(t *testing.T) {
 		// implemented in a later chunk (delegation, factories, envelopes, variants,
 		// array-append, constraints, anonymous structs, etc).
 		Skip: map[string]string{
-			"anonymous_struct": "anonymous structs out of scope for Phase 4a",
+			// anonymous_struct stays skipped: the option argument is a bare inline
+			// anonymous struct (Type.Kind == struct), and this builder-test context does
+			// not run the AnonymousStructsToNamed pass, so no named type exists to name
+			// in the signature. Rust models an un-hoisted inline struct as
+			// serde_json::Value, which cannot serve as a typed argument; this matches
+			// Python, which also skips this fixture ("anonymous structs not supported").
+			"anonymous_struct": "inline anonymous struct (not hoisted to a named type) has no idiomatic Rust argument type; matches Python skip",
 			// builder_delegation_in_disjunction stays skipped: its delegated arguments
 			// are inline disjunctions (e.g. Builder<T> | string), which have no clean
 			// idiomatic-Rust delegation bound. The Rust target does not run the
@@ -32,13 +38,18 @@ func TestBuilder_Generate(t *testing.T) {
 			"composable_slot":                   "composable slots out of scope for Phase 4a",
 			"dashboard_panel":                   "out of scope for Phase 4a",
 			"dataquery_variant_builder":         "variants out of scope for Phase 4a",
-			"envelope_assignment":               "envelopes out of scope for Phase 4a",
 			"factories":                         "factories out of scope for Phase 4a",
-			"initialization_safeguards":         "nil-check guards out of scope for Phase 4a",
 			"map_of_disjunctions":               "out of scope for Phase 4a",
 			"package-with-dashes":               "out of scope for Phase 4a",
 			"panel_builders":                    "out of scope for Phase 4a",
-			"struct_fields_as_args_assignment":  "out of scope for Phase 4a",
+			// struct_fields_as_args_assignment stays skipped for the same reason as
+			// anonymous_struct: the target `time` field is a nullable inline anonymous
+			// struct (not hoisted to a named type in this context), which Rust models as
+			// Option<serde_json::Value>. A deep assignment into its `from`/`to` fields
+			// is not type-safe Rust, so this is unsupportable without the
+			// AnonymousStructsToNamed pass. Python tolerates it only via a degenerate
+			// `unknown` placeholder.
+			"struct_fields_as_args_assignment": "deep assignment into an un-hoisted inline anonymous struct (serde_json::Value) is not type-safe Rust",
 		},
 	}
 

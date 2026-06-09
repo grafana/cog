@@ -168,6 +168,15 @@ func (jenny Builder) rejectUnsupported(context languages.Context, builder ast.Bu
 			if !isAppendPath(assignment.Path) {
 				return fmt.Errorf("rust builder %q: unsupported append path shape", builder.Name)
 			}
+			// Phase 4e: an append whose value is an envelope constructs the nested
+			// element inline (a struct literal of the envelope's ref type) and pushes
+			// it. Reject an envelope whose own field paths are not the simple
+			// single-level shape this phase renders.
+			if assignment.Value.Envelope != nil {
+				if err := checkEnvelopeSupported(*assignment.Value.Envelope); err != nil {
+					return fmt.Errorf("rust builder %q: %w", builder.Name, err)
+				}
+			}
 			continue
 		case ast.IndexAssignment:
 			// Phase 4c: insert a value at a key into a HashMap field. The path is a
@@ -180,26 +189,39 @@ func (jenny Builder) rejectUnsupported(context languages.Context, builder ast.Bu
 		default:
 			return fmt.Errorf("rust builder %q: assignment method %q is not supported until a later phase", builder.Name, assignment.Method)
 		}
-		// A single-level field assignment is the common case. The only supported
-		// multi-level path is the `known_any` shape: a two-level path whose first
-		// element is an `any`-typed field carrying a concrete ref TypeHint (the
-		// builder constructs that concrete type, sets the nested field and stores
-		// the result back into the `any` field). Any other multi-level or indexed
-		// path is out of scope.
+		// A factory constructor value (ConstructorFor) is a Phase 5 feature.
+		if assignment.Value.ConstructorFor != nil {
+			return fmt.Errorf("rust builder %q: constructor-value assignments are not supported until a later phase", builder.Name)
+		}
+		// Supported direct-assignment path shapes:
+		//   - single-level field (the common case),
+		//   - the `known_any` two-level composition shape,
+		//   - a multi-level ref/struct path (Phase 4e), where intermediate
+		//     Option-wrapped refs are lazily initialised via get_or_insert_with using
+		//     the NilChecks the pipeline injects, and a bare intermediate is accessed
+		//     directly. Every non-leaf element must be a plain (non-indexed) ref so
+		//     the get_or_insert_with chain has a concrete default type; an anonymous
+		//     inline struct intermediate is unsupported (Rust models it as
+		//     serde_json::Value, which cannot carry typed nested fields).
 		if !isKnownAnyPath(assignment.Path) {
-			if len(assignment.Path) != 1 || assignment.Path[0].Index != nil {
-				return fmt.Errorf("rust builder %q: only single-level field assignments are supported in this phase", builder.Name)
+			if len(assignment.Path) == 1 {
+				if assignment.Path[0].Index != nil {
+					return fmt.Errorf("rust builder %q: indexed single-level paths are not supported in direct assignment", builder.Name)
+				}
+			} else if err := checkMultiLevelPathSupported(assignment.Path); err != nil {
+				return fmt.Errorf("rust builder %q: %w", builder.Name, err)
 			}
 		}
-		if assignment.Value.Envelope != nil || assignment.Value.ConstructorFor != nil {
-			return fmt.Errorf("rust builder %q: envelope/constructor assignments are not supported until a later phase", builder.Name)
-		}
-		// The only nil-check tolerated here is the one the pipeline injects for the
-		// known_any composition (the `if config is None` guard); that path
-		// fresh-constructs the hinted type, subsuming the check. Any other nil-check
-		// guard is out of scope.
-		if len(assignment.NilChecks) != 0 && !isKnownAnyPath(assignment.Path) {
-			return fmt.Errorf("rust builder %q: nil-check guards are not supported until a later phase", builder.Name)
+		// A nil-check whose initialised path element is not a plain ref (for example
+		// an anonymous inline struct) has no idiomatic default-construction in Rust.
+		for _, check := range assignment.NilChecks {
+			if isKnownAnyPath(assignment.Path) {
+				continue
+			}
+			leaf := check.Path.Last()
+			if !leaf.Type.IsArray() && !leaf.Type.IsMap() && !leaf.Type.IsRef() {
+				return fmt.Errorf("rust builder %q: nil-check on non-ref intermediate %q is not supported", builder.Name, check.Path.String())
+			}
 		}
 		// Builder delegation (an option argument whose type, or a collection's
 		// element type, resolves to a builder) is in scope as of Phase 4d for the
@@ -500,6 +522,13 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 		return jenny.formatIndexAssignment(formatter, context, assignment, receiver)
 	}
 
+	// Multi-level ref path (Phase 4e): walk into nested objects, lazily
+	// initialising Option-wrapped intermediates via get_or_insert_with, and assign
+	// the leaf.
+	if len(assignment.Path) > 1 {
+		return jenny.formatMultiLevelAssignment(formatter, context, assignment, receiver)
+	}
+
 	field := assignment.Path[0]
 
 	// Builder delegation: the option argument is itself produced by one or more
@@ -627,6 +656,18 @@ func (jenny Builder) formatAppendAssignment(formatter *typeFormatter, context la
 	field := assignment.Path[0]
 	fieldName := formatFieldName(field.Identifier)
 	elementType := field.Type.AsArray().ValueType
+
+	// An envelope value constructs the element inline as a struct literal (its ref
+	// type) from the envelope's per-field values, then pushes it. This is the
+	// envelope_assignment shape: each WithVariable call builds a fresh Variable.
+	if assignment.Value.Envelope != nil {
+		literal := jenny.formatEnvelopeLiteral(formatter, context, *assignment.Value.Envelope, "        ")
+		if isOptionWrapped(elementType) {
+			literal = fmt.Sprintf("Some(%s)", literal)
+		}
+		return fmt.Sprintf("%s.internal.%s.push(%s);", receiver, fieldName, literal)
+	}
+
 	value := jenny.formatValue(formatter, context, elementType, assignment.Value)
 	if isOptionWrapped(elementType) {
 		value = fmt.Sprintf("Some(%s)", value)
@@ -664,6 +705,43 @@ func (jenny Builder) formatIndexKey(formatter *typeFormatter, context languages.
 		return formatArgName(index.Argument.Name)
 	}
 	return jenny.formatConstantValue(formatter, context, indexType, index.Constant)
+}
+
+// checkMultiLevelPathSupported validates a multi-level direct-assignment path.
+// Every non-leaf element must be a plain (non-indexed) ref so its intermediate
+// object can be default-constructed when absent; the leaf may be any field.
+func checkMultiLevelPathSupported(path ast.Path) error {
+	for i := 0; i < len(path)-1; i++ {
+		item := path[i]
+		if item.Index != nil {
+			return fmt.Errorf("indexed multi-level paths are not supported")
+		}
+		if !item.Type.IsRef() {
+			return fmt.Errorf("multi-level path through a non-ref field %q is not supported", item.Identifier)
+		}
+	}
+	if path.Last().Index != nil {
+		return fmt.Errorf("indexed leaf in multi-level path is not supported")
+	}
+	return nil
+}
+
+// checkEnvelopeSupported validates an assignment envelope: it must construct a
+// ref type, and each of its field values must target a single-level field path
+// (the nested struct literal sets one named field per envelope value).
+func checkEnvelopeSupported(envelope ast.AssignmentEnvelope) error {
+	if !envelope.Type.IsRef() {
+		return fmt.Errorf("envelope of a non-ref type is not supported")
+	}
+	for _, value := range envelope.Values {
+		if len(value.Path) != 1 || value.Path[0].Index != nil {
+			return fmt.Errorf("envelope field with a multi-level or indexed path is not supported")
+		}
+		if value.Value.Envelope != nil || value.Value.ConstructorFor != nil {
+			return fmt.Errorf("nested envelope/constructor in an envelope field is not supported")
+		}
+	}
+	return nil
 }
 
 // isKnownAnyPath reports the `known_any` shape: a two-level path whose first
@@ -740,6 +818,143 @@ func (jenny Builder) formatKnownAnyAssignment(formatter *typeFormatter, context 
 	} else {
 		fmt.Fprintf(&buffer, "        %s.internal.%s =\n            Some(%s);", receiver, rootField, store)
 	}
+	return buffer.String()
+}
+
+// formatMultiLevelAssignment renders a direct assignment whose path descends
+// through one or more nested ref objects (the initialization_safeguards shape:
+// `options.legend.show = show`). Each intermediate that is Option-wrapped is
+// lazily initialised with `get_or_insert_with(T::default)` so the leaf can be
+// reached; this both initialises a missing intermediate and reuses an existing
+// one (no clobber on a repeat call), matching the Go target's
+// `if x == nil { x = NewT() }` then deep-assign. A bare (non-Option)
+// intermediate is accessed directly. The leaf is assigned the value, wrapped in
+// Some(...) when the leaf field is itself Option-wrapped.
+//
+// The EmptyValueType of the corresponding NilCheck names the type to
+// default-construct; the path element types provide the same information, so the
+// access chain is built from the path itself and validated against the
+// NilChecks (every Option-wrapped intermediate must have a NilCheck).
+func (jenny Builder) formatMultiLevelAssignment(formatter *typeFormatter, context languages.Context, assignment ast.Assignment, receiver string) string {
+	// Build the access chain as an ordered list of dotted segments so the assignment
+	// can be rendered either inline or, when rustfmt would break the method chain,
+	// one segment per line. `hasCall` records whether any segment is a method call
+	// (get_or_insert_with): rustfmt only multi-lines a chain that contains a call.
+	segments := []string{fmt.Sprintf("%s.internal", receiver)}
+	hasCall := false
+
+	for i := 0; i < len(assignment.Path)-1; i++ {
+		item := assignment.Path[i]
+		fieldName := formatFieldName(item.Identifier)
+		if isOptionWrapped(item.Type) {
+			// The intermediate ref is Option-wrapped: initialise-if-absent (preserving
+			// an already-present value: get_or_insert_with does not overwrite Some),
+			// then descend into the contained value. The default type is the ref's
+			// concrete type (imported so the path resolves).
+			ref := item.Type.AsRef()
+			concreteType := formatter.formatRef(ref)
+			formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", formatPackageName(ref.ReferredPkg), formatTypeName(ref.ReferredType)))
+			// Two chain segments: the field access and the get_or_insert_with call.
+			// rustfmt lays a broken method chain out one dot-segment per line, so the
+			// field and the call must be separate segments to match its output.
+			segments = append(segments, fieldName)
+			segments = append(segments, fmt.Sprintf("get_or_insert_with(%s::default)", concreteType))
+			hasCall = true
+		} else {
+			segments = append(segments, fieldName)
+		}
+	}
+
+	leaf := assignment.Path.Last()
+	segments = append(segments, formatFieldName(leaf.Identifier))
+
+	value := jenny.formatValue(formatter, context, leaf.Type, assignment.Value)
+	if isOptionWrapped(leaf.Type) {
+		value = fmt.Sprintf("Some(%s)", value)
+	}
+
+	inline := fmt.Sprintf("%s = %s;", strings.Join(segments, "."), value)
+
+	// rustfmt keeps the assignment inline only when the whole statement fits its
+	// chain layout. A chain containing a method call (get_or_insert_with) is laid
+	// out one segment per line once it no longer fits rustfmt's chain_width (60)
+	// measured from the 8-space statement indent. Match that: a call-bearing chain
+	// wider than 60 (statement body, excluding the leading indent) breaks; a
+	// plain field chain (no call) always stays inline.
+	const stmtIndent = "        "
+	if !hasCall || len(inline) <= 60 {
+		return inline
+	}
+
+	var buffer strings.Builder
+	buffer.WriteString(segments[0])
+	buffer.WriteString("\n")
+	for i, seg := range segments[1:] {
+		fmt.Fprintf(&buffer, "%s    .%s", stmtIndent, seg)
+		if i < len(segments)-2 {
+			buffer.WriteString("\n")
+		}
+	}
+	fmt.Fprintf(&buffer, " = %s;", value)
+	return buffer.String()
+}
+
+// formatEnvelopeLiteral renders an assignment envelope as a Rust struct literal
+// of the envelope's ref type, setting one named field per envelope value and
+// filling the rest from Default. The literal is emitted at `indent` so a
+// multi-field literal nests cleanly inside the enclosing statement; rustfmt
+// keeps a short single-field literal inline, so the form here matches what
+// rustfmt would settle on.
+func (jenny Builder) formatEnvelopeLiteral(formatter *typeFormatter, context languages.Context, envelope ast.AssignmentEnvelope, indent string) string {
+	ref := envelope.Type.AsRef()
+	typeName := formatter.formatRef(ref)
+	formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", formatPackageName(ref.ReferredPkg), typeName))
+
+	// Determine whether the envelope sets every field of the struct; if not, a
+	// `..Default::default()` rest is required (and otherwise omitted to keep
+	// clippy's needless_update quiet).
+	needsRest := true
+	if referred, found := context.LocateObjectByRef(ref); found && referred.Type.IsStruct() {
+		needsRest = len(referred.Type.AsStruct().Fields) > len(envelope.Values)
+	}
+
+	inits := make([]string, 0, len(envelope.Values))
+	for _, value := range envelope.Values {
+		field := value.Path[0]
+		fieldName := formatFieldName(field.Identifier)
+		rendered := jenny.formatValue(formatter, context, field.Type, value.Value)
+		if isOptionWrapped(field.Type) {
+			rendered = fmt.Sprintf("Some(%s)", rendered)
+		}
+		if rendered == fieldName {
+			inits = append(inits, fieldName)
+		} else {
+			inits = append(inits, fmt.Sprintf("%s: %s", fieldName, rendered))
+		}
+	}
+
+	// rustfmt collapses a struct literal with no rest expression onto a single
+	// line while it fits the 100-column max width; a literal carrying a
+	// `..Default::default()` rest stays multi-line. Emit the form rustfmt would
+	// settle on so the golden is `cargo fmt --check` clean. The inline width is
+	// estimated from the enclosing statement indent plus the literal text; this is
+	// conservative and only collapses when it comfortably fits.
+	if !needsRest {
+		singleLine := fmt.Sprintf("%s { %s }", typeName, strings.Join(inits, ", "))
+		if len(indent)+len("self.internal..push();")+len(singleLine) <= 100 {
+			return singleLine
+		}
+	}
+
+	var buffer strings.Builder
+	fmt.Fprintf(&buffer, "%s {\n", typeName)
+	for _, init := range inits {
+		fmt.Fprintf(&buffer, "%s    %s,\n", indent, init)
+	}
+	if needsRest {
+		fmt.Fprintf(&buffer, "%s    ..Default::default()\n", indent)
+	}
+	fmt.Fprintf(&buffer, "%s}", indent)
 	return buffer.String()
 }
 
