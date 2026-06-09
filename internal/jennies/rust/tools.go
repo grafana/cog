@@ -15,6 +15,20 @@ func formatTypeName(name string) string {
 	return tools.UpperCamelCase(name)
 }
 
+// formatPackageName sanitizes an IR package name into a legal Rust module
+// identifier. IR package names may contain characters that are illegal in a Rust
+// identifier (most notably dashes, e.g. "with-dashes"), and may carry a path
+// prefix. The last path segment is taken, dashes are folded to underscores, and
+// the result is snake_cased so it is a valid `mod`/`use` identifier. The wire
+// format is unaffected because package names are never JSON keys.
+func formatPackageName(pkg string) string {
+	if idx := strings.LastIndex(pkg, "/"); idx != -1 {
+		pkg = pkg[idx+1:]
+	}
+	pkg = strings.ReplaceAll(pkg, "-", "_")
+	return tools.SnakeCase(pkg)
+}
+
 // formatConstName converts an IR name into an idiomatic Rust constant name
 // (SCREAMING_SNAKE_CASE), e.g. "constTypeString" -> "CONST_TYPE_STRING".
 func formatConstName(name string) string {

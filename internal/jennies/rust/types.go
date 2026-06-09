@@ -12,12 +12,17 @@ import (
 type typeFormatter struct {
 	context languages.Context
 	imports *importMap
+	// packageName is the sanitized Rust module name of the schema currently being
+	// emitted. A ref whose (sanitized) referred package matches this is rendered as
+	// a bare short name; any other ref is rendered cross-module via a `use`.
+	packageName string
 }
 
-func newTypeFormatter(context languages.Context, imports *importMap) *typeFormatter {
+func newTypeFormatter(context languages.Context, imports *importMap, packageName string) *typeFormatter {
 	return &typeFormatter{
-		context: context,
-		imports: imports,
+		context:     context,
+		imports:     imports,
+		packageName: formatPackageName(packageName),
 	}
 }
 
@@ -45,7 +50,7 @@ func (formatter *typeFormatter) formatInnerType(def ast.Type) string {
 	case def.IsMap():
 		return formatter.formatMap(def.AsMap())
 	case def.IsRef():
-		return formatTypeName(def.AsRef().ReferredType)
+		return formatter.formatRef(def.AsRef())
 	case def.IsConstantRef():
 		return formatter.formatConstantRef(def.AsConstantRef())
 	case def.IsEnum():
@@ -57,6 +62,23 @@ func (formatter *typeFormatter) formatInnerType(def ast.Type) string {
 	default:
 		return "serde_json::Value"
 	}
+}
+
+// formatRef renders a reference to a named type. A reference whose target lives
+// in the same schema package is rendered as a bare short name (the type is
+// emitted in this same Rust module). A reference into another package records a
+// `use crate::types::<package>::<Type>;` through the import collector and then
+// uses the bare short name, mirroring how the serde and HashMap imports are
+// collected and deduped at the top of the module.
+func (formatter *typeFormatter) formatRef(ref ast.RefType) string {
+	typeName := formatTypeName(ref.ReferredType)
+	referredPkg := formatPackageName(ref.ReferredPkg)
+
+	if referredPkg != "" && referredPkg != formatter.packageName {
+		formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", referredPkg, typeName))
+	}
+
+	return typeName
 }
 
 func (formatter *typeFormatter) formatScalar(scalar ast.ScalarType) string {

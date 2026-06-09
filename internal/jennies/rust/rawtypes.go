@@ -33,7 +33,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 			return nil, err
 		}
 
-		filename := filepath.Join("src", "types", schema.Package+".rs")
+		filename := filepath.Join("src", "types", formatPackageName(schema.Package)+".rs")
 		files = append(files, *codejen.NewFile(filename, output, jenny))
 	}
 
@@ -42,7 +42,7 @@ func (jenny RawTypes) Generate(context languages.Context) (codejen.Files, error)
 
 func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Schema) ([]byte, error) {
 	imports := newImportMap()
-	formatter := newTypeFormatter(context, imports)
+	formatter := newTypeFormatter(context, imports, schema.Package)
 
 	var body strings.Builder
 	blocks := make([]string, 0, schema.Objects.Len())
@@ -90,7 +90,7 @@ func (jenny RawTypes) formatObject(formatter *typeFormatter, imports *importMap,
 		return jenny.formatEnum(imports, object), nil
 	case object.Type.IsDisjunction() && disjunctionBranchesAreScalars(object.Type.AsDisjunction()):
 		return jenny.formatScalarDisjunction(formatter, imports, object), nil
-	case object.Type.IsScalar(), object.Type.IsArray(), object.Type.IsMap():
+	case object.Type.IsScalar(), object.Type.IsArray(), object.Type.IsMap(), object.Type.IsRef():
 		return jenny.formatTypeAlias(formatter, object), nil
 	default:
 		return "", fmt.Errorf("rust rawtypes: unsupported top-level object kind %q for %q (Phase 3b+)", object.Type.Kind, object.Name)
