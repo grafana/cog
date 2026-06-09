@@ -272,6 +272,15 @@ func (jenny RawTypes) formatStruct(formatter *typeFormatter, imports *importMap,
 	// struct stays first, matching how every other top-level object is ordered.
 	fields, hoistedEnums := jenny.hoistInlineDisjunctions(formatter, imports, object.Name, fields)
 
+	// Anchor recursive-reference detection on this object while its fields render,
+	// so a ref field pointing (transitively) back here is wrapped in Box<T>.
+	formatter.currentObjectPkg = schema.Package
+	formatter.currentObjectName = object.Name
+	defer func() {
+		formatter.currentObjectPkg = ""
+		formatter.currentObjectName = ""
+	}()
+
 	var buffer strings.Builder
 	buffer.WriteString(formatComments(object.Comments, ""))
 
@@ -509,6 +518,16 @@ func fieldSerdeAttributes(structName string, field ast.StructField) []string {
 		attrs = append(attrs, fmt.Sprintf("#[serde(rename = %q)]", field.Name))
 	}
 
+	// A composable dataquery slot (a `Box<dyn variants::Dataquery>`, directly or in
+	// a Vec) cannot derive Deserialize: the concrete query type is only known at
+	// runtime from the datasource type discriminator. A serde `deserialize_with`
+	// helper reads the raw JSON and dispatches through the variant registry, while
+	// serialization goes through the trait object's own Serialize impl. An array
+	// slot additionally keeps the empty-collection omit behaviour below.
+	if attr, ok := dataquerySlotSerdeAttribute(field); ok {
+		attrs = append(attrs, attr)
+	}
+
 	// Collections (arrays and maps) are rendered as bare Vec/HashMap rather than
 	// Option<T> (see typeFormatter.formatType). The Go target marks every
 	// not-required field ",omitempty", which for an empty collection omits the key
@@ -535,6 +554,23 @@ func fieldSerdeAttributes(structName string, field ast.StructField) []string {
 	}
 
 	return attrs
+}
+
+// dataquerySlotSerdeAttribute returns the serde `deserialize_with` attribute for
+// a composable dataquery slot field, and whether the field is such a slot. A
+// scalar slot (`Box<dyn Dataquery>`) uses the single-value helper; an array slot
+// (`Vec<Box<dyn Dataquery>>`) uses the vector helper. Panelcfg slots render as
+// serde_json::Value and need no custom (de)serialization, so they are excluded.
+func dataquerySlotSerdeAttribute(field ast.StructField) (string, bool) {
+	switch {
+	case field.Type.IsComposableSlot() && field.Type.AsComposableSlot().Variant == ast.SchemaVariantDataQuery:
+		return `#[serde(deserialize_with = "crate::cog::variants::deserialize_dataquery")]`, true
+	case field.Type.IsArray() && field.Type.AsArray().ValueType.IsComposableSlot() &&
+		field.Type.AsArray().ValueType.AsComposableSlot().Variant == ast.SchemaVariantDataQuery:
+		return `#[serde(deserialize_with = "crate::cog::variants::deserialize_dataquery_vec")]`, true
+	default:
+		return "", false
+	}
 }
 
 // structDerives returns the #[derive(...)] line for a struct. Default is derived

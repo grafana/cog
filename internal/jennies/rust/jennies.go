@@ -48,6 +48,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	})
 	jenny.AppendOneToMany(
 		common.If(!language.config.SkipRuntime, Runtime{tmpl: tmpl}),
+		common.If(!language.config.SkipRuntime, Plugins{config: language.config}),
 		RawTypes{config: language.config, apiRefCollector: language.apiRefCollector},
 		common.If(!language.config.SkipRuntime && globalConfig.Builders, Builder{config: language.config, apiRefCollector: language.apiRefCollector}),
 	)

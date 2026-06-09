@@ -26,6 +26,13 @@ type typeFormatter struct {
 	// same-package type it names (an enum-typed option argument, say) must be
 	// brought in explicitly rather than assumed to be in scope.
 	importSamePackageRefs bool
+	// currentObject is the (pkg, name) of the struct whose fields are currently
+	// being rendered. It anchors recursive-reference detection: a ref field whose
+	// target transitively reaches back to this object through non-indirected
+	// (non-collection) refs would make the struct infinitely sized in Rust, so the
+	// recursive edge is wrapped in Box<T>. Empty when not rendering a struct body.
+	currentObjectPkg  string
+	currentObjectName string
 }
 
 func newTypeFormatter(context languages.Context, imports *importMap, packageName string) *typeFormatter {
@@ -81,6 +88,8 @@ func (formatter *typeFormatter) formatInnerType(def ast.Type) string {
 		return formatter.formatRef(def.AsRef())
 	case def.IsConstantRef():
 		return formatter.formatConstantRef(def.AsConstantRef())
+	case def.IsComposableSlot():
+		return formatter.formatComposableSlot(def.AsComposableSlot())
 	case def.IsEnum():
 		// Inline enums are hoisted to named top-level enum objects by the
 		// AnonymousEnumToExplicitType compiler pass before emission, so a field
@@ -123,7 +132,63 @@ func (formatter *typeFormatter) formatRef(ref ast.RefType) string {
 		formatter.imports.Add(fmt.Sprintf("crate::types::%s::%s", referredPkg, typeName))
 	}
 
+	// A directly recursive reference (the target transitively reaches back to the
+	// struct currently being rendered through non-collection refs) would make the
+	// owning struct infinitely sized. Wrap the recursive edge in Box<T> so it sits
+	// behind a pointer and the type becomes Sized. Collections (Vec/HashMap) and
+	// Option already box their contents on the heap, so a cycle that passes through
+	// one is not detected here and needs no Box.
+	if formatter.refIsRecursive(ref) {
+		return fmt.Sprintf("Box<%s>", typeName)
+	}
+
 	return typeName
+}
+
+// refIsRecursive reports whether following ref (and any further non-collection
+// refs from its target's fields) leads back to the object currently being
+// rendered. It is the conservative, sound cycle detector backing the Box-wrapping
+// in formatRef: it only traverses ref edges that are direct struct fields (not
+// inside a Vec/HashMap/Option, which already provide heap indirection), so it
+// boxes exactly the edges that would otherwise be infinitely sized. It returns
+// false when no current object is set (e.g. type aliases) or the cycle cannot be
+// confirmed.
+func (formatter *typeFormatter) refIsRecursive(ref ast.RefType) bool {
+	if formatter.currentObjectName == "" {
+		return false
+	}
+
+	visited := map[string]bool{}
+	var reaches func(pkg, name string) bool
+	reaches = func(pkg, name string) bool {
+		if pkg == formatter.currentObjectPkg && name == formatter.currentObjectName {
+			return true
+		}
+		key := pkg + "." + name
+		if visited[key] {
+			return false
+		}
+		visited[key] = true
+
+		obj, found := formatter.context.LocateObject(pkg, name)
+		if !found || !obj.Type.IsStruct() {
+			return false
+		}
+		for _, field := range obj.Type.AsStruct().Fields {
+			// Only non-collection, non-optional direct ref fields keep the type
+			// unsized; a ref behind Vec/HashMap/Option is already indirected.
+			if !field.Type.IsRef() || isOptionWrapped(field.Type) {
+				continue
+			}
+			fr := field.Type.AsRef()
+			if reaches(fr.ReferredPkg, fr.ReferredType) {
+				return true
+			}
+		}
+		return false
+	}
+
+	return reaches(ref.ReferredPkg, ref.ReferredType)
 }
 
 // formatBuilderArgType renders a builder-valued option argument's type. A ref
@@ -148,6 +213,23 @@ func (formatter *typeFormatter) formatBuilderArgType(def ast.Type) string {
 		// occur in the in-scope fixtures. Fall back to the plain rendering.
 		return formatter.formatType(def)
 	}
+}
+
+// formatComposableSlot renders a composable-slot field. A dataquery slot becomes
+// a boxed trait object (`Box<dyn crate::cog::variants::Dataquery>`): the concrete
+// query type is unknown at compile time and resolved at runtime by the registry
+// from the datasource type discriminator, mirroring Go's `variants.Dataquery`
+// interface value. A panelcfg slot (a panel's `options`/`fieldConfig`) carries no
+// compile-time type either; it is rendered as the permissive `serde_json::Value`
+// (matching the Go target's `any`) and is dispatched through the panelcfg
+// registry by callers that know the panel type. The field's (de)serialization is
+// wired separately through serde attributes (see fieldSerdeAttributes).
+func (formatter *typeFormatter) formatComposableSlot(slot ast.ComposableSlotType) string {
+	if slot.Variant == ast.SchemaVariantDataQuery {
+		formatter.imports.Add("crate::cog::variants")
+		return "Box<dyn variants::Dataquery>"
+	}
+	return "serde_json::Value"
 }
 
 func (formatter *typeFormatter) formatScalar(scalar ast.ScalarType) string {

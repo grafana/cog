@@ -14,7 +14,7 @@
 //! `DataqueryConfig`/`PanelcfgConfig` plus `Runtime` maps exactly, so the wire
 //! format round-trips byte-for-byte with the Go, TypeScript and Python SDKs.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// A data query variant (for example a Prometheus or Loki query).
@@ -23,7 +23,7 @@ use std::collections::HashMap;
 /// Go `variants.Dataquery` interface. The trait is object-safe so a composable
 /// query slot can hold a `Box<dyn Dataquery>` whose concrete type is resolved
 /// at runtime from the datasource type discriminator.
-pub trait Dataquery: DataquerySerialize + std::fmt::Debug {
+pub trait Dataquery: DataquerySerialize + DataqueryClone + std::fmt::Debug {
     /// Returns the datasource type discriminator that selects this variant.
     fn dataquery_type(&self) -> String;
 
@@ -188,4 +188,95 @@ impl Dataquery for UnknownDataquery {
             _ => false,
         }
     }
+}
+
+/// Clones a boxed [`Dataquery`] trait object.
+///
+/// `Clone` is not object-safe, so the trait exposes `dataquery_clone`; a blanket
+/// impl supplies it for every concrete `Dataquery` that is `Clone`. This lets a
+/// composable query slot field (`Vec<Box<dyn Dataquery>>`) derive `Clone`.
+pub trait DataqueryClone {
+    /// Clones the value into a new boxed trait object.
+    fn dataquery_clone(&self) -> Box<dyn Dataquery>;
+}
+
+impl<T> DataqueryClone for T
+where
+    T: 'static + Dataquery + Clone,
+{
+    fn dataquery_clone(&self) -> Box<dyn Dataquery> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn Dataquery> {
+    fn clone(&self) -> Self {
+        self.dataquery_clone()
+    }
+}
+
+impl PartialEq for Box<dyn Dataquery> {
+    fn eq(&self, other: &Self) -> bool {
+        self.dataquery_equals(other.as_ref())
+    }
+}
+
+/// The process-wide default variant registry.
+///
+/// The Go and TypeScript SDKs populate a global runtime from a `plugins`
+/// package `init()`; the Rust SDK mirrors this with a settable global. The
+/// generated `plugins` module builds a [`Registry`] from every known variant and
+/// installs it via [`set_default_registry`]; the composable-slot deserialize
+/// helpers below read it back through [`default_registry`]. Until a registry is
+/// installed an empty one is used, so unknown queries fall back to
+/// [`UnknownDataquery`] rather than failing.
+static DEFAULT_REGISTRY: std::sync::OnceLock<Registry> = std::sync::OnceLock::new();
+
+/// Installs the process-wide default variant registry.
+///
+/// Returns `Err` with the supplied registry if one was already installed; the
+/// first writer wins, matching the once-only `init()` semantics of the other
+/// SDKs.
+pub fn set_default_registry(registry: Registry) -> Result<(), Registry> {
+    DEFAULT_REGISTRY.set(registry)
+}
+
+/// Returns the process-wide default variant registry, or an empty one when none
+/// has been installed.
+pub fn default_registry() -> &'static Registry {
+    static EMPTY: std::sync::OnceLock<Registry> = std::sync::OnceLock::new();
+    DEFAULT_REGISTRY
+        .get()
+        .unwrap_or_else(|| EMPTY.get_or_init(Registry::new))
+}
+
+/// serde `deserialize_with` helper for a single composable dataquery slot.
+///
+/// Reads the raw JSON and dispatches through the [`default_registry`] on the
+/// datasource type discriminator, producing the concrete [`Dataquery`] variant
+/// (or [`UnknownDataquery`] when none is registered).
+pub fn deserialize_dataquery<'de, D>(deserializer: D) -> Result<Box<dyn Dataquery>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let raw = serde_json::Value::deserialize(deserializer)?;
+    default_registry()
+        .unmarshal_dataquery(&raw, "")
+        .map_err(serde::de::Error::custom)
+}
+
+/// serde `deserialize_with` helper for a list of composable dataquery slots
+/// (a panel's `targets`).
+pub fn deserialize_dataquery_vec<'de, D>(
+    deserializer: D,
+) -> Result<Vec<Box<dyn Dataquery>>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let raw: Vec<serde_json::Value> = Vec::deserialize(deserializer)?;
+    let registry = default_registry();
+    raw.into_iter()
+        .map(|value| registry.unmarshal_dataquery(&value, ""))
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(serde::de::Error::custom)
 }
