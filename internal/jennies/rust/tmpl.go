@@ -9,11 +9,9 @@ import (
 	"github.com/grafana/cog/internal/languages"
 )
 
-// templatesFS embeds the templates directory. The directory currently holds
-// only a .gitkeep placeholder. Embedding the directory itself (rather than a
-// glob over .tmpl files) keeps this compiling until real templates land.
+// templatesFS embeds the runtime (and future) templates.
 //
-//go:embed all:templates
+//go:embed templates/*/*.tmpl
 //nolint:gochecknoglobals
 var templatesFS embed.FS
 

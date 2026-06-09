@@ -15,6 +15,9 @@ var _ languages.Language = (*Language)(nil)
 
 type Config struct {
 	PathPrefix string `yaml:"path_prefix"`
+
+	// SkipRuntime disables runtime-related code generation when enabled.
+	SkipRuntime bool `yaml:"skip_runtime"`
 }
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
@@ -38,9 +41,19 @@ func (language *Language) Name() string {
 }
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
+	tmpl := initTemplates(language.config, language.apiRefCollector)
+
 	jenny := codejen.JennyListWithNamer(func(_ languages.Context) string {
 		return LanguageRef
 	})
+	jenny.AppendOneToMany(
+		common.If(!language.config.SkipRuntime, Runtime{tmpl: tmpl}),
+	)
+	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+
+	if language.config.PathPrefix != "" {
+		jenny.AddPostprocessors(common.PathPrefixer(language.config.PathPrefix))
+	}
 
 	return jenny
 }

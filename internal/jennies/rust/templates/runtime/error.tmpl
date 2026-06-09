@@ -1,0 +1,35 @@
+//! Error types produced while building strongly-typed values.
+
+use std::fmt;
+
+/// An error reported by a [`Builder`](super::builder::Builder) when a value
+/// cannot be constructed, for example because a required field is missing or
+/// fails validation.
+///
+/// `path` identifies the field that caused the error using a dotted path
+/// (for example `panel.title`), and `message` describes the problem.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct BuildError {
+    /// Dotted path to the field that caused the error.
+    pub path: String,
+    /// Human-readable description of the problem.
+    pub message: String,
+}
+
+impl BuildError {
+    /// Creates a new [`BuildError`] for the given field `path` and `message`.
+    pub fn new(path: impl Into<String>, message: impl Into<String>) -> Self {
+        Self {
+            path: path.into(),
+            message: message.into(),
+        }
+    }
+}
+
+impl fmt::Display for BuildError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.path, self.message)
+    }
+}
+
+impl std::error::Error for BuildError {}

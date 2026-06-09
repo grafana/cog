@@ -1,0 +1,45 @@
+//! Variant support for composable resources (data queries and panel configs).
+//!
+//! These are stubs. Phase 6: implement the full dataquery/panelcfg variant
+//! trait and registry used to resolve composable slots at runtime. The shapes
+//! below exist only so generated code and the rest of the runtime compile; do
+//! not rely on them yet.
+
+use std::collections::HashMap;
+
+/// Identifies a composable variant kind (for example a panel type or data
+/// source type) used to look up the concrete type at runtime.
+///
+/// Phase 6: flesh out into the real dataquery/panelcfg variant abstraction.
+pub trait Variant {
+    /// Returns the discriminator value that selects this variant.
+    fn variant_discriminator(&self) -> String;
+}
+
+/// Maps variant discriminators to the metadata needed to decode them.
+///
+/// Phase 6: implement decoding/dispatch. For now this is an empty registry so
+/// the type exists and the module compiles.
+#[derive(Debug, Default)]
+pub struct Registry {
+    entries: HashMap<String, String>,
+}
+
+impl Registry {
+    /// Creates an empty registry.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Registers a placeholder entry for `discriminator`.
+    ///
+    /// Phase 6: replace the value type with real decoder metadata.
+    pub fn register(&mut self, discriminator: impl Into<String>, type_name: impl Into<String>) {
+        self.entries.insert(discriminator.into(), type_name.into());
+    }
+
+    /// Looks up the placeholder entry registered for `discriminator`.
+    pub fn lookup(&self, discriminator: &str) -> Option<&String> {
+        self.entries.get(discriminator)
+    }
+}

@@ -1,0 +1,12 @@
+//! Runtime support shared by every generated Rust SDK.
+//!
+//! Generated code depends on the items re-exported here:
+//! the [`Builder`] trait, the [`BuildError`] type, and the
+//! [`variants`] module.
+
+pub mod builder;
+pub mod error;
+pub mod variants;
+
+pub use builder::Builder;
+pub use error::BuildError;
