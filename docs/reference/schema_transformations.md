@@ -368,6 +368,16 @@ retype_object:
   comments: []string
 ```
 
+## `sanitize_enum_member_names`
+
+N/A
+
+### Usage
+
+```yaml
+sanitize_enum_member_names: {}
+```
+
 ## `schema_set_entry_point`
 
 N/A

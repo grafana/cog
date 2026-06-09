@@ -392,6 +392,9 @@
         "trim_object_name_prefix": {
           "$ref": "#/$defs/YamlTrimObjectNamePrefix"
         },
+        "sanitize_enum_member_names": {
+          "$ref": "#/$defs/YamlSanitizeEnumMemberNames"
+        },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
         },
@@ -629,6 +632,11 @@
           "type": "array"
         }
       },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlSanitizeEnumMemberNames": {
+      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },
