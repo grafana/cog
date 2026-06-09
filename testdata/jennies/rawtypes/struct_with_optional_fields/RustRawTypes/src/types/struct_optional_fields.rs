@@ -15,8 +15,8 @@ pub struct SomeStruct {
     pub operator: Option<SomeStructOperator>,
 
     #[serde(rename = "FieldArrayOfStrings")]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub field_array_of_strings: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub field_array_of_strings: Vec<String>,
 
     #[serde(rename = "FieldAnonymousStruct")]
     #[serde(default, skip_serializing_if = "Option::is_none")]

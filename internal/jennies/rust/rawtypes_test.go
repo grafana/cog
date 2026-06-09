@@ -11,33 +11,30 @@ import (
 )
 
 // TestRawTypes_Generate runs the golden-file harness for the Rust RawTypes
-// jenny. Phase 3a only covers scalar/struct type emission for the fixtures
-// listed below; every other rawtypes fixture is skipped until later phases
-// implement enums, arrays-as-types, maps-as-types, refs across packages,
-// disjunctions, intersections and variants.
+// jenny. Phases 3a-3c cover scalar/struct/enum/scalar-disjunction emission plus
+// top-level array and map type aliases and array/map field defaults; every other
+// rawtypes fixture is skipped until later phases implement refs across packages,
+// disjunctions of refs, intersections, constant references and variants.
 func TestRawTypes_Generate(t *testing.T) {
 	test := testutils.GoldenFilesTestSuite[ast.Schema]{
 		TestDataRoot: "../../../testdata/jennies/rawtypes",
 		Name:         "RustRawTypes",
 		Skip: map[string]string{
-			"arrays":                           "Phase 3b+: array type aliases not implemented",
-			"constant_reference_as_default":    "Phase 3b+: constant references not implemented",
-			"constant_reference_discriminator": "Phase 3b+: constant references not implemented",
-			"constant_references":              "Phase 3b+: constant references not implemented",
-			"constraints":                      "Phase 3b+: constraints not implemented",
-			"dashboard":                        "Phase 6: composable slots not implemented",
-			"disjunctions":                     "Phase 3b+: disjunctions not implemented",
+			"constant_reference_as_default":              "Phase 3b+: constant references not implemented",
+			"constant_reference_discriminator":           "Phase 3b+: constant references not implemented",
+			"constant_references":                        "Phase 3b+: constant references not implemented",
+			"constraints":                                "Phase 3b+: constraints not implemented",
+			"dashboard":                                  "Phase 6: composable slots not implemented",
+			"disjunctions":                               "Phase 3b+: disjunctions not implemented",
 			"disjunctions_of_refs_without_discriminator": "Phase 3b+: disjunctions not implemented",
 			"disjunctions_of_scalars_and_refs":           "Phase 3b+: disjunctions not implemented",
 			"field_with_struct_with_defaults":            "Phase 3b+: cross-object defaults not implemented",
 			"intersections":                              "Phase 3b+: intersections not implemented",
-			"maps":                                       "Phase 3b+: map type aliases not implemented",
 			"nullable_fields":                            "Phase 3b: constant references not implemented",
 			"package-with-dashes":                        "Phase 3b+: refs not implemented",
 			"reference_of_reference":                     "Phase 3b+: refs not implemented",
 			"refs":                                       "Phase 3b+: refs not implemented",
-			"struct_with_complex_fields":                 "Phase 3b+: complex fields not implemented",
-			"struct_with_map_and_slice_default":          "Phase 3b+: map/slice defaults not implemented",
+			"struct_with_complex_fields":                 "Phase 4+: needs refs, disjunctions-of-refs and constant references (out of scope for Phase 3c)",
 			"time_hint":                                  "Phase 3b+: time hints not implemented",
 			"variant_dataquery":                          "Phase 6: variants not implemented",
 			"variant_panelcfg_full":                      "Phase 6: variants not implemented",

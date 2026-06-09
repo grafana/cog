@@ -3,6 +3,7 @@ package rust
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -89,7 +90,7 @@ func (jenny RawTypes) formatObject(formatter *typeFormatter, imports *importMap,
 		return jenny.formatEnum(imports, object), nil
 	case object.Type.IsDisjunction() && disjunctionBranchesAreScalars(object.Type.AsDisjunction()):
 		return jenny.formatScalarDisjunction(formatter, imports, object), nil
-	case object.Type.IsScalar():
+	case object.Type.IsScalar(), object.Type.IsArray(), object.Type.IsMap():
 		return jenny.formatTypeAlias(formatter, object), nil
 	default:
 		return "", fmt.Errorf("rust rawtypes: unsupported top-level object kind %q for %q (Phase 3b+)", object.Type.Kind, object.Name)
@@ -283,7 +284,20 @@ func fieldSerdeAttributes(field ast.StructField) []string {
 		attrs = append(attrs, fmt.Sprintf("#[serde(rename = %q)]", field.Name))
 	}
 
-	if field.Type.Nullable {
+	// Collections (arrays and maps) are rendered as bare Vec/HashMap rather than
+	// Option<T> (see typeFormatter.formatType). The Go target marks every
+	// not-required field ",omitempty", which for an empty collection omits the key
+	// from the JSON entirely. To stay wire-compatible with the Go/TS/Python SDKs and
+	// Grafana, a not-required collection field is given default + skip-when-empty so
+	// an empty Vec/HashMap is omitted and an absent key deserializes to empty.
+	switch {
+	case !field.Required && field.Type.IsArray():
+		attrs = append(attrs, `#[serde(default, skip_serializing_if = "Vec::is_empty")]`)
+	case !field.Required && field.Type.IsMap():
+		attrs = append(attrs, `#[serde(default, skip_serializing_if = "HashMap::is_empty")]`)
+	case field.Type.Nullable && !field.Type.IsArray() && !field.Type.IsMap():
+		// A nullable scalar/struct/ref field is rendered as Option<T> and so gets the
+		// Option skip/default attribute.
 		attrs = append(attrs, `#[serde(default, skip_serializing_if = "Option::is_none")]`)
 	}
 
@@ -353,18 +367,91 @@ func defaultExpression(typeDef ast.Type) string {
 }
 
 // defaultLiteral renders an explicit IR default into a Rust expression, using
-// the field's scalar kind to pick the correct literal form.
+// the field's type to pick the correct literal form.
 func defaultLiteral(typeDef ast.Type) string {
-	if !typeDef.IsScalar() {
+	switch {
+	case typeDef.IsArray():
+		return arrayDefaultLiteral(typeDef.AsArray(), typeDef.Default)
+	case typeDef.IsMap():
+		return mapDefaultLiteral(typeDef.AsMap(), typeDef.Default)
+	case typeDef.IsScalar():
+		return scalarDefaultLiteral(typeDef.AsScalar().ScalarKind, typeDef.Default)
+	default:
 		return formatValue(typeDef.Default)
 	}
+}
 
-	kind := typeDef.AsScalar().ScalarKind
-	if kind == ast.KindString {
-		return fmt.Sprintf("%s.to_string()", formatValue(typeDef.Default))
+// scalarDefaultLiteral renders a scalar default. The `any` kind maps to
+// serde_json::Value, whose JSON-object default (the only shape seen so far, an
+// empty `{}`) is an empty JSON object.
+func scalarDefaultLiteral(kind ast.ScalarKind, value any) string {
+	switch kind {
+	case ast.KindString:
+		return fmt.Sprintf("%s.to_string()", formatValue(value))
+	case ast.KindAny:
+		return "serde_json::Value::Object(serde_json::Map::new())"
+	default:
+		return formatScalarValue(value, kind)
+	}
+}
+
+// arrayDefaultLiteral renders an array default. An empty default produces
+// Vec::new(); a non-empty default produces a vec![...] literal whose elements
+// are rendered from the array's value type.
+func arrayDefaultLiteral(def ast.ArrayType, value any) string {
+	elements, ok := value.([]any)
+	if !ok || len(elements) == 0 {
+		return "Vec::new()"
 	}
 
-	return formatScalarValue(typeDef.Default, kind)
+	rendered := make([]string, 0, len(elements))
+	for _, element := range elements {
+		rendered = append(rendered, elementDefaultLiteral(def.ValueType, element))
+	}
+
+	return fmt.Sprintf("vec![%s]", strings.Join(rendered, ", "))
+}
+
+// mapDefaultLiteral renders a map default. An empty default produces
+// HashMap::new(); a non-empty default produces a HashMap::from([...]) literal.
+func mapDefaultLiteral(def ast.MapType, value any) string {
+	entries, ok := value.(map[string]any)
+	if !ok || len(entries) == 0 {
+		return "HashMap::new()"
+	}
+
+	// Sort keys so the emitted literal is deterministic.
+	keys := make([]string, 0, len(entries))
+	for key := range entries {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	pairs := make([]string, 0, len(entries))
+	for _, key := range keys {
+		pairs = append(pairs, fmt.Sprintf(
+			"(%s.to_string(), %s)",
+			strconv.Quote(key),
+			elementDefaultLiteral(def.ValueType, entries[key]),
+		))
+	}
+
+	return fmt.Sprintf("HashMap::from([%s])", strings.Join(pairs, ", "))
+}
+
+// elementDefaultLiteral renders a single element of an array or map default,
+// dispatching on the element's type.
+func elementDefaultLiteral(typeDef ast.Type, value any) string {
+	switch {
+	case typeDef.IsArray():
+		return arrayDefaultLiteral(typeDef.AsArray(), value)
+	case typeDef.IsMap():
+		return mapDefaultLiteral(typeDef.AsMap(), value)
+	case typeDef.IsScalar():
+		return scalarDefaultLiteral(typeDef.AsScalar().ScalarKind, value)
+	default:
+		return formatValue(value)
+	}
 }
 
 // formatScalarValue renders a value according to the target scalar kind. JSON

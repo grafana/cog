@@ -22,11 +22,14 @@ func newTypeFormatter(context languages.Context, imports *importMap) *typeFormat
 }
 
 // formatType renders an arbitrary IR type. A nullable (optional) type is wrapped
-// in Option<T>.
+// in Option<T>, except for arrays and maps: Vec and HashMap carry their own
+// "empty" representation (an empty collection), so a nullable collection is
+// rendered as the bare Vec/HashMap and its absence is modelled by emptiness.
+// This mirrors the Go target, which likewise never pointer-wraps slices or maps.
 func (formatter *typeFormatter) formatType(def ast.Type) string {
 	inner := formatter.formatInnerType(def)
 
-	if def.Nullable {
+	if def.Nullable && !def.IsArray() && !def.IsMap() {
 		return fmt.Sprintf("Option<%s>", inner)
 	}
 
