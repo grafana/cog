@@ -18,10 +18,48 @@ type Config struct {
 
 	// SkipRuntime disables runtime-related code generation when enabled.
 	SkipRuntime bool `yaml:"skip_runtime"`
+
+	// CrateName is the package name written to the generated Cargo.toml. It
+	// defaults to defaultCrateName when left empty.
+	CrateName string `yaml:"crate_name"`
+
+	// CrateVersion is the package version written to the generated Cargo.toml.
+	// It defaults to defaultCrateVersion when left empty.
+	CrateVersion string `yaml:"crate_version"`
+
+	// GenerateCargoToml controls whether a Cargo.toml manifest is emitted. The
+	// lib.rs and mod.rs scaffolding is always emitted, but the manifest is gated
+	// because consumers frequently vendor the generated modules into an existing
+	// crate that already owns its Cargo.toml. This mirrors the golang target,
+	// which gates go.mod generation rather than always overwriting it.
+	GenerateCargoToml bool `yaml:"generate_cargo_toml"`
 }
+
+const (
+	defaultCrateName    = "grafana_foundation_sdk"
+	defaultCrateVersion = "0.0.1"
+)
 
 func (config *Config) InterpolateParameters(interpolator func(input string) string) {
 	config.PathPrefix = interpolator(config.PathPrefix)
+	config.CrateName = interpolator(config.CrateName)
+	config.CrateVersion = interpolator(config.CrateVersion)
+}
+
+// crateName returns the configured crate name or the default.
+func (config Config) crateName() string {
+	if config.CrateName != "" {
+		return config.CrateName
+	}
+	return defaultCrateName
+}
+
+// crateVersion returns the configured crate version or the default.
+func (config Config) crateVersion() string {
+	if config.CrateVersion != "" {
+		return config.CrateVersion
+	}
+	return defaultCrateVersion
 }
 
 type Language struct {
@@ -51,6 +89,7 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If(!language.config.SkipRuntime, Plugins{config: language.config}),
 		RawTypes{config: language.config, apiRefCollector: language.apiRefCollector},
 		common.If(!language.config.SkipRuntime && globalConfig.Builders, Builder{config: language.config, apiRefCollector: language.apiRefCollector}),
+		ModuleInit{config: language.config},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 	jenny.AddPostprocessors(FormatRustFiles)
