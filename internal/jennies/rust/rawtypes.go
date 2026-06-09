@@ -85,11 +85,112 @@ func (jenny RawTypes) formatObject(formatter *typeFormatter, imports *importMap,
 		return jenny.formatConstant(object), nil
 	case object.Type.IsStruct():
 		return jenny.formatStruct(formatter, imports, object), nil
+	case object.Type.IsEnum():
+		return jenny.formatEnum(imports, object), nil
+	case object.Type.IsDisjunction() && disjunctionBranchesAreScalars(object.Type.AsDisjunction()):
+		return jenny.formatScalarDisjunction(formatter, imports, object), nil
 	case object.Type.IsScalar():
 		return jenny.formatTypeAlias(formatter, object), nil
 	default:
 		return "", fmt.Errorf("rust rawtypes: unsupported top-level object kind %q for %q (Phase 3b+)", object.Type.Kind, object.Name)
 	}
+}
+
+// formatEnum emits a top-level enum object as an idiomatic Rust enum.
+//
+// String-valued enums serialize to their string value via #[serde(rename)] when
+// the variant identifier differs from the wire value, and derive Eq + Hash so
+// they can be used as map keys. Integer-valued enums serialize to their numeric
+// value using serde_repr (#[repr(...)] + Serialize_repr/Deserialize_repr) with
+// explicit discriminants, and likewise derive Eq + Hash.
+func (jenny RawTypes) formatEnum(imports *importMap, object ast.Object) string {
+	enum := object.Type.AsEnum()
+	numeric := enumIsNumeric(enum)
+
+	var buffer strings.Builder
+	buffer.WriteString(formatComments(object.Comments, ""))
+
+	if numeric {
+		imports.Add("serde_repr::Serialize_repr")
+		imports.Add("serde_repr::Deserialize_repr")
+		fmt.Fprintf(&buffer, "#[derive(Serialize_repr, Deserialize_repr, Debug, Clone, Copy, PartialEq, Eq, Hash)]\n")
+		fmt.Fprintf(&buffer, "#[repr(%s)]\n", enumReprType(enum))
+	} else {
+		imports.Add("serde::Serialize")
+		imports.Add("serde::Deserialize")
+		buffer.WriteString("#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]\n")
+	}
+
+	fmt.Fprintf(&buffer, "pub enum %s {\n", formatTypeName(object.Name))
+	for _, value := range enum.Values {
+		variant := formatTypeName(value.Name)
+		if numeric {
+			fmt.Fprintf(&buffer, "    %s = %s,\n", variant, formatScalarValue(value.Value, value.Type.AsScalar().ScalarKind))
+			continue
+		}
+
+		wire := fmt.Sprintf("%v", value.Value)
+		if variant != wire {
+			fmt.Fprintf(&buffer, "    #[serde(rename = %q)]\n", wire)
+		}
+		fmt.Fprintf(&buffer, "    %s,\n", variant)
+	}
+	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+// enumIsNumeric reports whether an enum's values are integer-valued (as opposed
+// to string-valued). Enum values share a single scalar kind across all members.
+func enumIsNumeric(enum ast.EnumType) bool {
+	if len(enum.Values) == 0 {
+		return false
+	}
+	return enum.Values[0].Type.AsScalar().ScalarKind != ast.KindString
+}
+
+// enumReprType returns the Rust integer type used for a numeric enum's #[repr].
+func enumReprType(enum ast.EnumType) string {
+	return formatScalarKind(enum.Values[0].Type.AsScalar().ScalarKind)
+}
+
+// formatScalarDisjunction emits a disjunction of scalar types as an untagged
+// Rust enum, with one variant per branch named after its Rust type. Untagged
+// (de)serialization makes each variant round-trip as the bare scalar value,
+// matching the JSON the other targets produce. Eq is omitted because a branch
+// may carry a float payload.
+func (jenny RawTypes) formatScalarDisjunction(formatter *typeFormatter, imports *importMap, object ast.Object) string {
+	imports.Add("serde::Serialize")
+	imports.Add("serde::Deserialize")
+
+	branches := object.Type.AsDisjunction().Branches
+
+	var buffer strings.Builder
+	buffer.WriteString(formatComments(object.Comments, ""))
+	buffer.WriteString("#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]\n")
+	buffer.WriteString("#[serde(untagged)]\n")
+	fmt.Fprintf(&buffer, "pub enum %s {\n", formatTypeName(object.Name))
+	for _, branch := range branches {
+		inner := formatter.formatType(branch)
+		fmt.Fprintf(&buffer, "    %s(%s),\n", formatTypeName(inner), inner)
+	}
+	buffer.WriteString("}")
+
+	return buffer.String()
+}
+
+// disjunctionBranchesAreScalars reports whether every branch of a disjunction is
+// a plain scalar, the only disjunction shape RawTypes emits in this phase.
+func disjunctionBranchesAreScalars(def ast.DisjunctionType) bool {
+	if len(def.Branches) == 0 {
+		return false
+	}
+	for _, branch := range def.Branches {
+		if !branch.IsScalar() {
+			return false
+		}
+	}
+	return true
 }
 
 // formatConstant emits a top-level constant scalar as a Rust `const`.

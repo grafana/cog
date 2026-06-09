@@ -46,8 +46,10 @@ func (formatter *typeFormatter) formatInnerType(def ast.Type) string {
 	case def.IsConstantRef():
 		return formatter.formatConstantRef(def.AsConstantRef())
 	case def.IsEnum():
-		// Anonymous enums are emitted as their underlying scalar type for now;
-		// full enum support arrives in a later phase.
+		// Inline enums are hoisted to named top-level enum objects by the
+		// AnonymousEnumToExplicitType compiler pass before emission, so a field
+		// referencing one arrives as a ref. This branch is a defensive fallback
+		// that renders any residual inline enum as its underlying scalar type.
 		return formatScalarKind(def.AsEnum().Values[0].Type.AsScalar().ScalarKind)
 	default:
 		return "serde_json::Value"
