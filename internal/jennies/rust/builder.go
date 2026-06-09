@@ -151,7 +151,25 @@ func (jenny Builder) rejectUnsupported(context languages.Context, builder ast.Bu
 	}
 
 	for _, assignment := range allAssignments {
-		if assignment.Method != ast.DirectAssignment {
+		switch assignment.Method {
+		case ast.DirectAssignment:
+			// In scope since Phase 4a.
+		case ast.AppendAssignment:
+			// Phase 4c: append a single value to a Vec field. The path is a single
+			// (non-indexed) array-typed field; the value is appended via push.
+			if !isAppendPath(assignment.Path) {
+				return fmt.Errorf("rust builder %q: unsupported append path shape", builder.Name)
+			}
+			continue
+		case ast.IndexAssignment:
+			// Phase 4c: insert a value at a key into a HashMap field. The path is a
+			// two-level path: a map-typed field followed by an indexed element whose
+			// Index carries the key (a constant or an option argument).
+			if !isIndexPath(assignment.Path) {
+				return fmt.Errorf("rust builder %q: unsupported index path shape", builder.Name)
+			}
+			continue
+		default:
 			return fmt.Errorf("rust builder %q: assignment method %q is not supported until a later phase", builder.Name, assignment.Method)
 		}
 		// A single-level field assignment is the common case. The only supported
@@ -426,6 +444,13 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 		return jenny.formatKnownAnyAssignment(formatter, context, assignment, receiver)
 	}
 
+	switch assignment.Method {
+	case ast.AppendAssignment:
+		return jenny.formatAppendAssignment(formatter, context, assignment, receiver)
+	case ast.IndexAssignment:
+		return jenny.formatIndexAssignment(formatter, context, assignment, receiver)
+	}
+
 	field := assignment.Path[0]
 	fieldName := formatFieldName(field.Identifier)
 	value := jenny.formatValue(formatter, context, field.Type, assignment.Value)
@@ -434,6 +459,75 @@ func (jenny Builder) formatAssignment(formatter *typeFormatter, context language
 		return fmt.Sprintf("%s.internal.%s = Some(%s);", receiver, fieldName, value)
 	}
 	return fmt.Sprintf("%s.internal.%s = %s;", receiver, fieldName, value)
+}
+
+// isAppendPath reports the append shape: a single, non-indexed path element
+// whose type is an array (Vec) field. The option argument is pushed onto it.
+func isAppendPath(path ast.Path) bool {
+	if len(path) != 1 {
+		return false
+	}
+	root := path[0]
+	return root.Index == nil && root.Type.IsArray()
+}
+
+// isIndexPath reports the index shape: a two-level path whose first element is a
+// map (HashMap) field and whose second element carries an Index (the key, either
+// a constant or an option argument). The option value is inserted at that key.
+func isIndexPath(path ast.Path) bool {
+	if len(path) != 2 {
+		return false
+	}
+	root := path[0]
+	leaf := path[1]
+	return root.Index == nil && root.Type.IsMap() && leaf.Index != nil
+}
+
+// formatAppendAssignment renders an append to a Vec field. The IR models a
+// single-element append (the option argument is a single value, the field a
+// Vec<value>), so this emits the idiomatic `push`. The value is rendered against
+// the array's element type so an Option-valued element is wrapped in Some(...).
+func (jenny Builder) formatAppendAssignment(formatter *typeFormatter, context languages.Context, assignment ast.Assignment, receiver string) string {
+	field := assignment.Path[0]
+	fieldName := formatFieldName(field.Identifier)
+	elementType := field.Type.AsArray().ValueType
+	value := jenny.formatValue(formatter, context, elementType, assignment.Value)
+	if isOptionWrapped(elementType) {
+		value = fmt.Sprintf("Some(%s)", value)
+	}
+	return fmt.Sprintf("%s.internal.%s.push(%s);", receiver, fieldName, value)
+}
+
+// formatIndexAssignment renders an insert into a HashMap field. The key comes
+// from the leaf path element's Index (a constant or an option argument); the
+// value is the assignment value rendered against the map's value type (an
+// Option-valued map value is wrapped in Some(...)). Per the rawtypes convention
+// maps are bare HashMap even when nullable, so no initialize-if-absent guard is
+// needed: the field is always a constructed HashMap.
+func (jenny Builder) formatIndexAssignment(formatter *typeFormatter, context languages.Context, assignment ast.Assignment, receiver string) string {
+	field := assignment.Path[0]
+	fieldName := formatFieldName(field.Identifier)
+	mapType := field.Type.AsMap()
+
+	leaf := assignment.Path[1]
+	key := jenny.formatIndexKey(formatter, context, mapType.IndexType, *leaf.Index)
+
+	value := jenny.formatValue(formatter, context, mapType.ValueType, assignment.Value)
+	if isOptionWrapped(mapType.ValueType) {
+		value = fmt.Sprintf("Some(%s)", value)
+	}
+
+	return fmt.Sprintf("%s.internal.%s.insert(%s, %s);", receiver, fieldName, key, value)
+}
+
+// formatIndexKey renders a map key from a PathIndex. An argument key is the bare
+// argument identifier (a String argument is already owned); a constant key is
+// rendered against the map's index type (a String index yields an owned String).
+func (jenny Builder) formatIndexKey(formatter *typeFormatter, context languages.Context, indexType ast.Type, index ast.PathIndex) string {
+	if index.Argument != nil {
+		return formatArgName(index.Argument.Name)
+	}
+	return jenny.formatConstantValue(formatter, context, indexType, index.Constant)
 }
 
 // isKnownAnyPath reports the `known_any` shape: a two-level path whose first

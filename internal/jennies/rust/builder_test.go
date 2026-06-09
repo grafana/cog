@@ -23,7 +23,6 @@ func TestBuilder_Generate(t *testing.T) {
 		// array-append, constraints, anonymous structs, etc).
 		Skip: map[string]string{
 			"anonymous_struct":                  "anonymous structs out of scope for Phase 4a",
-			"array_append":                      "array-append out of scope for Phase 4a",
 			"builder_delegation":                "builder delegation out of scope for Phase 4a",
 			"builder_delegation_in_disjunction": "builder delegation out of scope for Phase 4a",
 			"composable_slot":                   "composable slots out of scope for Phase 4a",
@@ -33,10 +32,8 @@ func TestBuilder_Generate(t *testing.T) {
 			"factories":                         "factories out of scope for Phase 4a",
 			"foreign_builder":                   "out of scope for Phase 4a",
 			"initialization_safeguards":         "nil-check guards out of scope for Phase 4a",
-			"map_index_assignment":              "index assignment out of scope for Phase 4a",
 			"map_of_builders":                   "builder delegation out of scope for Phase 4a",
 			"map_of_disjunctions":               "out of scope for Phase 4a",
-			"nullable_map_assignment":           "out of scope for Phase 4a",
 			"package-with-dashes":               "out of scope for Phase 4a",
 			"panel_builders":                    "out of scope for Phase 4a",
 			"references":                        "out of scope for Phase 4a",
