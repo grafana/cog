@@ -46,7 +46,7 @@ docs: dev-env-check-binaries ## Generates the documentation.
 
 .PHONY: serve-docs
 serve-docs: dev-env-check-binaries ## Builds and serves the documentation.
-	$(RUN_DEVBOX) mkdocs serve -w ./docs/ -f ./mkdocs-github.yml
+	$(RUN_DEVBOX) zensical serve -f ./mkdocs-github.yml
 
 .PHONY: fetch-foundation-sdk
 fetch-foundation-sdk: ## Fetches the Foundation SDK.
