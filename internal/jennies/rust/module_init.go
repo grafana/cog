@@ -69,10 +69,16 @@ func (jenny ModuleInit) Generate(context languages.Context) (codejen.Files, erro
 // serde_json back every emitted type; serde_repr backs the numeric enums the
 // RawTypes jenny derives with #[derive(Serialize_repr, Deserialize_repr)].
 func (jenny ModuleInit) cargoToml() []byte {
+	// The empty [workspace] table pins the crate as its own workspace root. A
+	// standalone checkout behaves identically without it, but when the crate is
+	// vendored inside another repository cargo would otherwise walk up and try
+	// to attach it to the enclosing workspace.
 	return fmt.Appendf(nil, `[package]
 name = %q
 version = %q
 edition = "2021"
+
+[workspace]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
