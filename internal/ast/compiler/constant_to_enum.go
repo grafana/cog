@@ -1,7 +1,10 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/tools"
 )
 
 var _ Pass = (*ConstantToEnum)(nil)
@@ -11,10 +14,15 @@ var _ Pass = (*ConstantToEnum)(nil)
 // This is useful to "future-proof" a schema where a type can have a single
 // value for now but is expected to allow more in the future.
 type ConstantToEnum struct {
-	Objects ObjectReferences
+	Objects      ObjectReferences
+	objectsFound []string
+	warnings     []string
 }
 
 func (pass *ConstantToEnum) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	pass.objectsFound = nil
+	pass.warnings = nil
+
 	visitor := &Visitor{
 		OnObject: pass.processObject,
 	}
@@ -28,6 +36,7 @@ func (pass *ConstantToEnum) processObject(_ *Visitor, _ *ast.Schema, object ast.
 	}
 
 	if !object.Type.IsConcreteScalar() || object.Type.Scalar.ScalarKind != ast.KindString {
+		pass.warnings = append(pass.warnings, fmt.Sprintf("object '%s' is not a concrete string", object.SelfRef))
 		return object, nil
 	}
 
@@ -40,5 +49,25 @@ func (pass *ConstantToEnum) processObject(_ *Visitor, _ *ast.Schema, object ast.
 	})
 	object.AddToPassesTrail("ConstantToEnum")
 
+	pass.objectsFound = append(pass.objectsFound, object.SelfRef.String())
+
 	return object, nil
+}
+
+func (pass *ConstantToEnum) Diagnostics() []string {
+	var diags []string
+	diags = append(diags, pass.warnings...)
+
+	if len(pass.objectsFound) == len(pass.Objects) {
+		return diags
+	}
+
+	expected := tools.Map(pass.Objects, func(ref ObjectReference) string {
+		return ref.String()
+	})
+	missing := tools.Map(tools.SliceFindMissing(pass.objectsFound, expected), func(ref string) string {
+		return fmt.Sprintf("object not found '%s'", ref)
+	})
+
+	return append(diags, missing...)
 }

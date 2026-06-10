@@ -18,11 +18,13 @@ type DuplicateObject struct {
 	As         ObjectReference
 	OmitFields []string
 
-	schemas ast.Schemas
+	schemas     ast.Schemas
+	objectFound bool
 }
 
 func (pass *DuplicateObject) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
 	pass.schemas = schemas
+	pass.objectFound = false
 
 	visitor := &Visitor{
 		OnSchema: pass.processSchema,
@@ -41,6 +43,8 @@ func (pass *DuplicateObject) processSchema(visitor *Visitor, schema *ast.Schema)
 		return schema, nil
 	}
 
+	pass.objectFound = true
+
 	duplicate := sourceObj.DeepCopy()
 	duplicate.Name = pass.As.Object
 	duplicate.SelfRef.ReferredPkg = pass.As.Package
@@ -58,4 +62,14 @@ func (pass *DuplicateObject) processSchema(visitor *Visitor, schema *ast.Schema)
 	visitor.RegisterNewObject(duplicate)
 
 	return schema, nil
+}
+
+func (pass *DuplicateObject) Diagnostics() []string {
+	if pass.objectFound {
+		return nil
+	}
+
+	return []string{
+		fmt.Sprintf("object '%s' not found", pass.Object),
+	}
 }

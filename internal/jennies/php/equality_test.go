@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -44,7 +45,7 @@ func TestEquality_PHP_GeneratesEqualsMethods(t *testing.T) {
 	schema := equalitySchema()
 
 	// Run PHP compiler passes so nullable types are handled correctly
-	processedSchemas, err := New(config).CompilerPasses().Process(ast.Schemas{schema})
+	processedSchemas, err := New(config).CompilerPasses().Process(logs.NoopLogger(), ast.Schemas{schema})
 	req.NoError(err)
 
 	context := languages.Context{Schemas: processedSchemas}

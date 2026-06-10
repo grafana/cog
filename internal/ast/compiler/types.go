@@ -67,6 +67,10 @@ func (ref FieldReference) Matches(object ast.Object, field ast.StructField) bool
 		strings.EqualFold(field.Name, ref.Field)
 }
 
+func (ref FieldReference) String() string {
+	return fmt.Sprintf("%s.%s.%s", ref.Package, ref.Object, ref.Field)
+}
+
 func FieldReferenceFromString(ref string) (FieldReference, error) {
 	parts := strings.Split(ref, ".")
 	if len(parts) != 3 {

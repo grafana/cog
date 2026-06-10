@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/testutils"
 	"github.com/stretchr/testify/require"
 )
@@ -42,7 +43,7 @@ func TestRawTypes_Generate(t *testing.T) {
 		// might not be able to translate some of the IR's semantics into Python.
 		// Example: anonymous objects.
 		schema := tc.UnmarshalJSONInput(testutils.RawTypesIRInputFile)
-		processedAsts, err := compilerPasses.Process(ast.Schemas{&schema})
+		processedAsts, err := compilerPasses.Process(logs.NoopLogger(), ast.Schemas{&schema})
 		req.NoError(err)
 
 		req.Len(processedAsts, 1, "we somehow got more ast.Schema than we put in")
@@ -83,7 +84,7 @@ def custom_method(self) -> str:
 		}
 		compilerPasses := New(config).CompilerPasses()
 
-		schemas, err := compilerPasses.Process(ast.Schemas{schema})
+		schemas, err := compilerPasses.Process(logs.NoopLogger(), ast.Schemas{schema})
 		req.NoError(err)
 
 		files, err := jenny.Generate(languages.Context{Schemas: schemas})

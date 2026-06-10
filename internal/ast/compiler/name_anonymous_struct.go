@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/grafana/cog/internal/ast"
 )
 
@@ -9,11 +11,14 @@ var _ Pass = (*NameAnonymousStruct)(nil)
 // NameAnonymousStruct rewrites the definition of a struct field typed as an
 // anonymous struct to instead refer to a named type.
 type NameAnonymousStruct struct {
-	Field FieldReference
-	As    string
+	Field      FieldReference
+	As         string
+	fieldFound bool
 }
 
 func (pass *NameAnonymousStruct) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	pass.fieldFound = false
+
 	for i, schema := range schemas {
 		schemas[i] = pass.processSchema(schema)
 	}
@@ -55,10 +60,12 @@ func (pass *NameAnonymousStruct) processObject(object ast.Object) (ast.Object, a
 			continue
 		}
 
-		// we expect the target field to be defined an inline struct
+		// we expect the target field to be defined as an inline struct
 		if !field.Type.IsStruct() {
 			continue
 		}
+
+		pass.fieldFound = true
 
 		newObject = ast.NewObject(pkg, pass.As, field.Type)
 		newObject.AddToPassesTrail("NameAnonymousStruct")
@@ -67,4 +74,14 @@ func (pass *NameAnonymousStruct) processObject(object ast.Object) (ast.Object, a
 	}
 
 	return object, newObject
+}
+
+func (pass *NameAnonymousStruct) Diagnostics() []string {
+	if pass.fieldFound {
+		return nil
+	}
+
+	return []string{
+		fmt.Sprintf("field '%s' not found", pass.Field),
+	}
 }
