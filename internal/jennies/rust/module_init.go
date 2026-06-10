@@ -27,6 +27,10 @@ var _ codejen.OneToMany[languages.Context] = ModuleInit{}
 // names the RawTypes and Builder jennies emit.
 type ModuleInit struct {
 	config Config
+	// generateConverters mirrors the converter jenny's gate: when set, the
+	// scaffolding declares the src/converters/ module tree the Converter jenny
+	// populates (one module per builder package).
+	generateConverters bool
 }
 
 func (jenny ModuleInit) JennyName() string {
@@ -43,11 +47,19 @@ func (jenny ModuleInit) Generate(context languages.Context) (codejen.Files, erro
 		files = append(files, *codejen.NewFile("Cargo.toml", jenny.cargoToml(), jenny))
 	}
 
-	files = append(files, *codejen.NewFile("src/lib.rs", jenny.libRs(len(builderPackages) > 0), jenny))
+	withConverters := jenny.generateConverters && len(builderPackages) > 0
+
+	files = append(files, *codejen.NewFile("src/lib.rs", jenny.libRs(len(builderPackages) > 0, withConverters), jenny))
 	files = append(files, *codejen.NewFile("src/types/mod.rs", modFile(typePackages), jenny))
 
 	if len(builderPackages) > 0 {
 		files = append(files, *codejen.NewFile("src/builders/mod.rs", modFile(builderPackages), jenny))
+	}
+
+	// Converters mirror the builder packages one-to-one: every builder module
+	// has a matching converter module.
+	if withConverters {
+		files = append(files, *codejen.NewFile("src/converters/mod.rs", modFile(builderPackages), jenny))
 	}
 
 	return files, nil
@@ -76,7 +88,7 @@ serde_repr = "0.1"
 // constructors mirror wide upstream option sets (too_many_arguments). Silencing
 // them at the crate root keeps `cargo clippy -D warnings` green without
 // peppering #[allow] across every generated item.
-func (jenny ModuleInit) libRs(withBuilders bool) []byte {
+func (jenny ModuleInit) libRs(withBuilders bool, withConverters bool) []byte {
 	var b strings.Builder
 	b.WriteString(`// Generated crate root.
 //
@@ -96,7 +108,12 @@ func (jenny ModuleInit) libRs(withBuilders bool) []byte {
 //     zero value, which clippy would prefer to derive.
 //   - tabs_in_doc_comments / doc_lazy_continuation: doc comments reproduce the
 //     upstream schema text faithfully, including tabs and loose list formatting.
+//   - unnecessary_unwrap: converters guard every Option access with an is_some
+//     check before unwrapping, the same shape the Go converters use with nil
+//     checks; clippy would prefer if-let, which does not map onto the shared
+//     guard/value emission structure.
 #![allow(clippy::enum_variant_names)]
+#![allow(clippy::unnecessary_unwrap)]
 #![allow(clippy::large_enum_variant)]
 #![allow(clippy::too_many_arguments)]
 #![allow(unused_imports)]
@@ -113,6 +130,9 @@ func (jenny ModuleInit) libRs(withBuilders bool) []byte {
 	b.WriteString("pub mod types;\n")
 	if withBuilders {
 		b.WriteString("pub mod builders;\n")
+	}
+	if withConverters {
+		b.WriteString("pub mod converters;\n")
 	}
 	return []byte(b.String())
 }

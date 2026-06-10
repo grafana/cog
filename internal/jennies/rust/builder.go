@@ -118,6 +118,31 @@ func (jenny Builder) generateBuilder(context languages.Context, builder ast.Buil
 	imports.Add(fmt.Sprintf("crate::types::%s", objectPkg))
 	objectType = objectPkg + "::" + objectType
 
+	// API reference collection, mirroring the Python builder jenny: the `build`
+	// method on every builder, plus one function entry per factory. Options and
+	// constructors are documented by the common APIReference jenny directly from
+	// the builder IR, so they need no registration here.
+	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
+		Name: "build",
+		Comments: []string{
+			"Builds the object.",
+		},
+		Return: fmt.Sprintf("Result<%s, Vec<cog::BuildError>>", objectType),
+	})
+	for _, factory := range builder.Factories {
+		jenny.apiRefCollector.RegisterFunction(builder.Package, common.FunctionReference{
+			Name:     factory.Name,
+			Comments: factory.Comments,
+			Arguments: tools.Map(factory.Args, func(arg ast.Argument) common.ArgumentReference {
+				return common.ArgumentReference{
+					Name: formatArgName(arg.Name),
+					Type: formatter.formatType(arg.Type),
+				}
+			}),
+			Return: builderType,
+		})
+	}
+
 	var body strings.Builder
 
 	body.WriteString(formatComments(builder.For.Comments, ""))
@@ -1101,7 +1126,7 @@ func (jenny Builder) formatFactoryOptionCall(formatter *typeFormatter, context l
 func (jenny Builder) formatFactoryParameter(formatter *typeFormatter, context languages.Context, argType ast.Type, param ast.OptionCallParameter) string {
 	switch {
 	case param.Constant != nil:
-		return jenny.formatConstantValue(formatter, context, argType, param.Constant.Value)
+		return formatConstantValue(formatter, context, argType, param.Constant.Value)
 	case param.Argument != nil:
 		argName := formatArgName(param.Argument.Name)
 		// The target option's parameter may be Option-wrapped (the option arg is
@@ -1305,7 +1330,7 @@ func (jenny Builder) formatIndexKey(formatter *typeFormatter, context languages.
 	if index.Argument != nil {
 		return formatArgName(index.Argument.Name)
 	}
-	return jenny.formatConstantValue(formatter, context, indexType, index.Constant)
+	return formatConstantValue(formatter, context, indexType, index.Constant)
 }
 
 // checkMultiLevelPathSupported validates a multi-level direct-assignment path.
@@ -1826,7 +1851,7 @@ func (jenny Builder) formatAssignmentValue(formatter *typeFormatter, context lan
 	}
 
 	// Constant assignment.
-	return jenny.coerceToAny(destType, jenny.formatConstantValue(formatter, context, destType, value.Constant))
+	return jenny.coerceToAny(destType, formatConstantValue(formatter, context, destType, value.Constant))
 }
 
 // coerceToAny converts a rendered value into a serde_json::Value when the
@@ -1847,7 +1872,7 @@ func (jenny Builder) coerceToAny(destType ast.Type, rendered string) string {
 // formatConstantValue renders a constant assigned to a field of destType. A ref
 // to an enum resolves to Enum::Variant; a String scalar yields an owned String;
 // other scalars render as their literal.
-func (jenny Builder) formatConstantValue(formatter *typeFormatter, context languages.Context, destType ast.Type, constant any) string {
+func formatConstantValue(formatter *typeFormatter, context languages.Context, destType ast.Type, constant any) string {
 	if destType.IsRef() {
 		ref := destType.AsRef()
 		if referred, found := context.LocateObject(ref.ReferredPkg, ref.ReferredType); found && referred.Type.IsEnum() {

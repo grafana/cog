@@ -146,6 +146,9 @@ func (jenny Plugins) render(dataqueries []dataqueryVariant, panelcfgKeys []strin
 			buffer.WriteString("    registry.register_dataquery_variant(variants::DataqueryConfig {\n")
 			fmt.Fprintf(&buffer, "        identifier: %q.to_string(),\n", dq.identifier)
 			fmt.Fprintf(&buffer, "        decoder: |raw| Ok(Box::new(serde_json::from_value::<%s>(raw.clone())?)),\n", dq.typePath)
+			// Converter registration is a veneer-level concern; cog itself never
+			// populates it, mirroring the Go target's unset GoConverter hook.
+			buffer.WriteString("        converter: None,\n")
 			buffer.WriteString("    });\n")
 		}
 	}
@@ -166,6 +169,9 @@ func (jenny Plugins) render(dataqueries []dataqueryVariant, panelcfgKeys []strin
 			} else {
 				buffer.WriteString("        field_config_decoder: None,\n")
 			}
+			// See the dataquery configs above: converters are registered by
+			// veneers, never by cog itself.
+			buffer.WriteString("        converter: None,\n")
 			buffer.WriteString("    });\n")
 		}
 	}

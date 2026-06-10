@@ -89,7 +89,17 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		common.If(!language.config.SkipRuntime, Plugins{config: language.config}),
 		RawTypes{config: language.config, apiRefCollector: language.apiRefCollector},
 		common.If(!language.config.SkipRuntime && globalConfig.Builders, Builder{config: language.config, apiRefCollector: language.apiRefCollector}),
-		ModuleInit{config: language.config},
+		common.If(!language.config.SkipRuntime && globalConfig.Builders && globalConfig.Converters, Converter{config: language.config, apiRefCollector: language.apiRefCollector}),
+		common.If(globalConfig.APIReference, common.APIReference{
+			Collector: language.apiRefCollector,
+			Language:  LanguageRef,
+			Formatter: apiReferenceFormatter(),
+			Tmpl:      tmpl,
+		}),
+		ModuleInit{
+			config:             language.config,
+			generateConverters: !language.config.SkipRuntime && globalConfig.Builders && globalConfig.Converters,
+		},
 	)
 	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
 	jenny.AddPostprocessors(FormatRustFiles)

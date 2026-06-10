@@ -22,6 +22,7 @@ func (jenny Runtime) Generate(_ languages.Context) (codejen.Files, error) {
 		"src/cog/mod.rs":      "runtime/mod.tmpl",
 		"src/cog/builder.rs":  "runtime/builder.tmpl",
 		"src/cog/error.rs":    "runtime/error.tmpl",
+		"src/cog/tools.rs":    "runtime/tools.tmpl",
 		"src/cog/variants.rs": "runtime/variants.tmpl",
 	}
 

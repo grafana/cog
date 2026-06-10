@@ -75,6 +75,14 @@ pub type DataqueryDecoder = fn(&serde_json::Value) -> Result<Box<dyn Dataquery>,
 pub type PanelOptionsDecoder =
     fn(&serde_json::Value) -> Result<serde_json::Value, serde_json::Error>;
 
+/// Renders the JSON representation of a variant as Rust builder source code.
+///
+/// This is the Rust counterpart of the Go runtime's per-variant `GoConverter`
+/// hook: the value arrives as raw JSON (rather than a trait object) so a
+/// registered converter can deserialize it into its concrete type without
+/// downcasting.
+pub type VariantConverter = fn(&serde_json::Value) -> String;
+
 /// Registration record for a dataquery variant, keyed by datasource type.
 #[derive(Clone)]
 pub struct DataqueryConfig {
@@ -82,6 +90,8 @@ pub struct DataqueryConfig {
     pub identifier: String,
     /// Decoder turning raw JSON into the concrete dataquery type.
     pub decoder: DataqueryDecoder,
+    /// Renders the dataquery as Rust builder source code, if registered.
+    pub converter: Option<VariantConverter>,
 }
 
 /// Registration record for a panelcfg variant, keyed by panel type.
@@ -93,6 +103,8 @@ pub struct PanelcfgConfig {
     pub options_decoder: Option<PanelOptionsDecoder>,
     /// Decoder for the panel's `fieldConfig.defaults.custom` payload, if any.
     pub field_config_decoder: Option<PanelOptionsDecoder>,
+    /// Renders the panel as Rust builder source code, if registered.
+    pub converter: Option<VariantConverter>,
 }
 
 /// Maps variant discriminators to their decoders.
@@ -187,6 +199,30 @@ impl Dataquery for UnknownDataquery {
             (Ok(a), Ok(b)) => a == b,
             _ => false,
         }
+    }
+}
+
+/// Builder wrapping an already-built [`UnknownDataquery`].
+///
+/// Converter-generated code uses this as the fallback when no converter is
+/// registered for a dataquery variant, mirroring the Go runtime's
+/// `NewUnknownDataqueryBuilderFromObject` fallback: the raw payload is carried
+/// as-is and surfaces from `build()` unchanged.
+#[derive(Debug, Clone, Default)]
+pub struct UnknownDataqueryBuilder {
+    internal: UnknownDataquery,
+}
+
+impl UnknownDataqueryBuilder {
+    /// Wraps an already-built [`UnknownDataquery`] in a builder.
+    pub fn from_object(object: UnknownDataquery) -> Self {
+        Self { internal: object }
+    }
+}
+
+impl crate::cog::Builder<Box<dyn Dataquery>> for UnknownDataqueryBuilder {
+    fn build(&self) -> Result<Box<dyn Dataquery>, Vec<crate::cog::BuildError>> {
+        Ok(Box::new(self.internal.clone()))
     }
 }
 
