@@ -8,6 +8,8 @@ import (
 
 var _ Pass = (*DeprecateObject)(nil)
 
+// DeprecateObject marks an object as deprecated.
+// Note: builders generated from this object will be marked as well.
 type DeprecateObject struct {
 	Object      ObjectReference
 	Message     string

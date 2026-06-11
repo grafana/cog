@@ -128,7 +128,8 @@ dataquery_identification: {}
 
 ## `deprecate_object`
 
-N/A
+DeprecateObject marks an object as deprecated.
+Note: builders generated from this object will be marked as well.
 
 ### Usage
 
