@@ -2,12 +2,8 @@ import warnings
 import typing
 
 
+@warnings.deprecated("This object is deprecated, use NewStruct instead.")
 class SomeStruct:
-    warnings.warn(
-        "This object is deprecated, use NewStruct instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     field_string: str
 
     def __init__(self, field_string: str = "") -> None:
