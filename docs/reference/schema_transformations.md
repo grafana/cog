@@ -126,6 +126,18 @@ N/A
 dataquery_identification: {}
 ```
 
+## `deprecate_object`
+
+N/A
+
+### Usage
+
+```yaml
+deprecate_object:
+  object: string
+  message: string
+```
+
 ## `disjunction_infer_mapping`
 
 DisjunctionInferMapping infers the discriminator field and mapping used to
@@ -294,18 +306,6 @@ anonymous struct to instead refer to a named type.
 name_anonymous_struct:
   field: string
   as: string
-```
-
-## `object_deprecation`
-
-N/A
-
-### Usage
-
-```yaml
-object_deprecation:
-  object: string
-  message: string
 ```
 
 ## `omit`

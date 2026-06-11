@@ -22,6 +22,7 @@ type CompilerPass struct {
 	RenameObject             *RenameObject             `yaml:"rename_object"`
 	RetypeObject             *RetypeObject             `yaml:"retype_object"`
 	HintObject               *HintObject               `yaml:"hint_object"`
+	DeprecateObject          *DeprecateObject          `yaml:"deprecate_object"`
 	RetypeField              *RetypeField              `yaml:"retype_field"`
 	OmitFields               *OmitFields               `yaml:"omit_fields"`
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
@@ -32,7 +33,6 @@ type CompilerPass struct {
 	ExtractK8ResourceNames   *CleanupK8ResourceNames   `yaml:"cleanup_k8_resource_names"`
 	TrimObjectNamePrefix     *TrimObjectNamePrefix     `yaml:"trim_object_name_prefix"`
 	SanitizeEnumMemberNames  *SanitizeEnumMemberNames  `yaml:"sanitize_enum_member_names"`
-	ObjectDeprecation        *ObjectDeprecation        `yaml:"object_deprecation"`
 
 	AnonymousStructsToNamed     *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
 	AnonymousEnumToExplicitType *AnonymousEnumsToNamed   `yaml:"anonymous_enum_to_named"`
@@ -81,6 +81,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.HintObject != nil {
 		return pass.HintObject.AsCompilerPass()
 	}
+	if pass.DeprecateObject != nil {
+		return pass.DeprecateObject.AsCompilerPass()
+	}
 	if pass.AddObject != nil {
 		return pass.AddObject.AsCompilerPass()
 	}
@@ -116,9 +119,6 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.SanitizeEnumMemberNames != nil {
 		return pass.SanitizeEnumMemberNames.AsCompilerPass()
-	}
-	if pass.ObjectDeprecation != nil {
-		return pass.ObjectDeprecation.AsCompilerPass()
 	}
 
 	if pass.AnonymousStructsToNamed != nil {
@@ -560,18 +560,18 @@ func (pass SanitizeEnumMemberNames) AsCompilerPass() (*compiler.SanitizeEnumMemb
 	return &compiler.SanitizeEnumMemberNames{}, nil
 }
 
-type ObjectDeprecation struct {
+type DeprecateObject struct {
 	Object  string // Expected format: [package].[object]
 	Message string
 }
 
-func (pass ObjectDeprecation) AsCompilerPass() (*compiler.DeprecationMessage, error) {
+func (pass DeprecateObject) AsCompilerPass() (*compiler.DeprecateObject, error) {
 	ref, err := compiler.ObjectReferenceFromString(pass.Object)
 	if err != nil {
 		return nil, err
 	}
 
-	return &compiler.DeprecationMessage{
+	return &compiler.DeprecateObject{
 		Object:  ref,
 		Message: pass.Message,
 	}, nil

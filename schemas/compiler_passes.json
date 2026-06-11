@@ -365,6 +365,9 @@
         "hint_object": {
           "$ref": "#/$defs/YamlHintObject"
         },
+        "deprecate_object": {
+          "$ref": "#/$defs/YamlDeprecateObject"
+        },
         "retype_field": {
           "$ref": "#/$defs/YamlRetypeField"
         },
@@ -394,9 +397,6 @@
         },
         "sanitize_enum_member_names": {
           "$ref": "#/$defs/YamlSanitizeEnumMemberNames"
-        },
-        "object_deprecation": {
-          "$ref": "#/$defs/YamlObjectDeprecation"
         },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
@@ -438,6 +438,19 @@
     },
     "YamlDataqueryIdentification": {
       "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDeprecateObject": {
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     },
@@ -541,19 +554,6 @@
           "description": "Expected format: [package].[object].[field]"
         },
         "as": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "YamlObjectDeprecation": {
-      "properties": {
-        "object": {
-          "type": "string",
-          "description": "Expected format: [package].[object]"
-        },
-        "message": {
           "type": "string"
         }
       },
