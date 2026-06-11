@@ -9,12 +9,15 @@ import (
 var _ Pass = (*RetypeField)(nil)
 
 type RetypeField struct {
-	Field    FieldReference
-	As       ast.Type
-	Comments []string
+	Field      FieldReference
+	As         ast.Type
+	Comments   []string
+	fieldFound bool
 }
 
 func (pass *RetypeField) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	pass.fieldFound = false
+
 	visitor := &Visitor{
 		OnObject: pass.processObject,
 	}
@@ -39,8 +42,20 @@ func (pass *RetypeField) processObject(_ *Visitor, _ *ast.Schema, object ast.Obj
 			object.Type.Struct.Fields[i].Comments = pass.Comments
 		}
 
+		pass.fieldFound = true
+
 		break
 	}
 
 	return object, nil
+}
+
+func (pass *RetypeField) Diagnostics() []string {
+	if pass.fieldFound {
+		return nil
+	}
+
+	return []string{
+		fmt.Sprintf("field '%s' not found", pass.Field),
+	}
 }

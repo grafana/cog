@@ -3,6 +3,7 @@ package codegen
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/ast/compiler"
@@ -115,7 +116,7 @@ func (input *Input) loader() (schemaLoader, error) {
 	return nil, fmt.Errorf("empty input")
 }
 
-func (input *Input) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
+func (input *Input) LoadSchemas(ctx context.Context, logger *slog.Logger) (ast.Schemas, error) {
 	var err error
 
 	loader, err := input.loader()
@@ -134,7 +135,10 @@ func (input *Input) LoadSchemas(ctx context.Context) (ast.Schemas, error) {
 			return nil, err
 		}
 
-		return passes.Process(schemas)
+		schemas, err = passes.Process(logger, schemas)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return schemas, nil

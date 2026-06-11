@@ -3,6 +3,7 @@ package codegen
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
@@ -72,9 +73,11 @@ func (pipeline *Pipeline) ContextForLanguage(language languages.Language, schema
 		Schemas: schemas,
 	}
 
+	logger := pipeline.logger.With(slog.String("language", language.Name()))
+
 	// apply  language-specific compiler passes
 	compilerPasses := language.CompilerPasses().Concat(pipeline.finalPasses())
-	jenniesInput.Schemas, err = compilerPasses.Process(jenniesInput.Schemas)
+	jenniesInput.Schemas, err = compilerPasses.Process(logger, jenniesInput.Schemas)
 	if err != nil {
 		return languages.Context{}, err
 	}

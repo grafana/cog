@@ -9,11 +9,14 @@ import (
 var _ Pass = (*RenameObject)(nil)
 
 type RenameObject struct {
-	From ObjectReference
-	To   string
+	From        ObjectReference
+	To          string
+	objectFound bool
 }
 
 func (pass *RenameObject) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	pass.objectFound = false
+
 	visitor := &Visitor{
 		OnObject: pass.processObject,
 		OnRef:    pass.processRef,
@@ -32,6 +35,8 @@ func (pass *RenameObject) processObject(visitor *Visitor, schema *ast.Schema, ob
 	var err error
 
 	if pass.From.Matches(object) {
+		pass.objectFound = true
+
 		originalName := object.Name
 		object.Name = pass.To
 		object.SelfRef.ReferredType = pass.To
@@ -52,4 +57,14 @@ func (pass *RenameObject) processRef(_ *Visitor, _ *ast.Schema, def ast.Type) (a
 	}
 
 	return def, nil
+}
+
+func (pass *RenameObject) Diagnostics() []string {
+	if pass.objectFound {
+		return nil
+	}
+
+	return []string{
+		fmt.Sprintf("object '%s' not found", pass.From),
+	}
 }

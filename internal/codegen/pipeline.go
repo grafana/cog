@@ -274,7 +274,7 @@ func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) 
 
 	// Parse inputs
 	for _, input := range pipeline.Inputs {
-		schemas, err := input.LoadSchemas(ctx)
+		schemas, err := input.LoadSchemas(ctx, pipeline.logger)
 		if err != nil {
 			return nil, err
 		}
@@ -297,7 +297,12 @@ func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) 
 		return nil, err
 	}
 
-	return commonPasses.Process(allSchemas)
+	allSchemas, err = commonPasses.Process(pipeline.logger, allSchemas)
+	if err != nil {
+		return nil, err
+	}
+
+	return allSchemas, err
 }
 
 func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {

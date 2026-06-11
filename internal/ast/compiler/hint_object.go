@@ -11,11 +11,13 @@ import (
 var _ Pass = (*HintObject)(nil)
 
 type HintObject struct {
-	Object ObjectReference
-	Hints  ast.JenniesHints
+	Object      ObjectReference
+	Hints       ast.JenniesHints
+	objectFound bool
 }
 
 func (pass *HintObject) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	pass.objectFound = false
 	visitor := &Visitor{
 		OnObject: pass.processObject,
 	}
@@ -27,6 +29,8 @@ func (pass *HintObject) processObject(_ *Visitor, _ *ast.Schema, object ast.Obje
 	if !pass.Object.Matches(object) {
 		return object, nil
 	}
+
+	pass.objectFound = true
 
 	hintsTrail := make([]string, 0, len(pass.Hints))
 	for hint, val := range pass.Hints {
@@ -40,4 +44,14 @@ func (pass *HintObject) processObject(_ *Visitor, _ *ast.Schema, object ast.Obje
 	object.AddToPassesTrail(fmt.Sprintf("HintObject[%s]", strings.Join(hintsTrail, ", ")))
 
 	return object, nil
+}
+
+func (pass *HintObject) Diagnostics() []string {
+	if pass.objectFound {
+		return nil
+	}
+
+	return []string{
+		fmt.Sprintf("object '%s' not found", pass.Object),
+	}
 }

@@ -11,11 +11,14 @@ var _ Pass = (*AddFields)(nil)
 // AddFields rewrites the definition of an object to add new fields.
 // Note: existing fields will not be overwritten.
 type AddFields struct {
-	Object ObjectReference
-	Fields []ast.StructField
+	Object      ObjectReference
+	Fields      []ast.StructField
+	objectFound bool
 }
 
 func (pass *AddFields) Process(schemas []*ast.Schema) ([]*ast.Schema, error) {
+	pass.objectFound = false
+
 	visitor := &Visitor{
 		OnObject: pass.processObject,
 	}
@@ -43,5 +46,17 @@ func (pass *AddFields) processObject(_ *Visitor, _ *ast.Schema, object ast.Objec
 		object.Type.Struct.Fields = append(object.Type.Struct.Fields, field)
 	}
 
+	pass.objectFound = true
+
 	return object, nil
+}
+
+func (pass *AddFields) Diagnostics() []string {
+	if pass.objectFound {
+		return nil
+	}
+
+	return []string{
+		fmt.Sprintf("object '%s' not found", pass.Object),
+	}
 }
