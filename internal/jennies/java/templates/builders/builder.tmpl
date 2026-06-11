@@ -7,6 +7,17 @@ package {{ .Package }};
 {{- $class }}
 
 {{- define "builder" }}
+{{- if or .Comments .DeprecationMessage }}
+/**
+{{- range .Comments }}
+ * {{ . }}
+{{- end }}{{ if .DeprecationMessage }}
+ * @deprecated {{ .DeprecationMessage }}
+{{- end }}
+ */{{ if .DeprecationMessage }}
+@Deprecated(forRemoval = true)
+{{- end }}
+{{- end }}
 public class {{ .BuilderName }}Builder{{ if .IsGenericPanel }}<T extends {{ .BuilderName }}Builder<T>>{{ end }} implements {{ if not (eq .ImportAlias "") }}{{ .ImportAlias }}.{{ end }}cog.Builder<{{ .BuilderSignatureType }}> {
     protected final {{ .ObjectName }} internal;
     

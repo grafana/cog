@@ -2,10 +2,12 @@ package basic;
 
 import java.util.Objects;
 
-// This
-// is
-// a
-// comment
+/**
+ * This
+ * is
+ * a
+ * comment
+ */
 public class SomeStruct {
     // Anything can go in there.
     // Really, anything.

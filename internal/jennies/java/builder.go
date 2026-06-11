@@ -67,6 +67,8 @@ func (jenny Builder) genBuilder(context languages.Context, builder ast.Builder) 
 		Properties:           builder.Properties,
 		ImportAlias:          jenny.config.PackagePath,
 		IsGenericPanel:       builder.IsGeneric,
+		Comments:             builder.For.Comments,
+		DeprecationMessage:   builder.DeprecationMessage,
 	}
 
 	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{

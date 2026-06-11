@@ -2,6 +2,9 @@ package basic_struct;
 
 import java.util.List;
 
+/**
+ * SomeStruct, to hold data.
+ */
 public class SomeStructBuilder implements cog.Builder<SomeStruct> {
     protected final SomeStruct internal;
     

@@ -2,7 +2,7 @@ package basic;
 
 import java.util.Objects;
 
-/** 
+/**
  * @deprecated This object is deprecated, use NewStruct instead.
  */
 @Deprecated(forRemoval = true)

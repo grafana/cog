@@ -6,16 +6,17 @@ package {{ .Package }};
 {{- $class }}
 
 {{- define "class" }}
+{{- if or .Comments .DeprecationMessage }}
+/**
 {{- range .Comments }}
-// {{ . }}
-{{- end }}
-{{- if .DeprecationMessage }}
-/** 
+ * {{ . }}
+{{- end }}{{ if .DeprecationMessage }}
  * @deprecated {{ .DeprecationMessage }}
- */
+{{- end }}
+ */{{ if .DeprecationMessage }}
 @Deprecated(forRemoval = true)
 {{- end }}
-
+{{- end }}
 {{- if .ShouldAddDeserializer }}
 @JsonDeserialize(using = {{ .Name }}Deserializer.class)
 {{- end }}

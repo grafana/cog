@@ -195,6 +195,7 @@ type BuilderTemplate struct {
 	Imports              fmt.Stringer
 	ImportAlias          string // alias to the pkg in which the object being built lives.
 	Comments             []string
+	DeprecationMessage   string
 	Constructor          ast.Constructor
 	Properties           []ast.StructField
 	Options              []ast.Option
