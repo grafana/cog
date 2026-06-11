@@ -13,12 +13,13 @@ type Builder struct {
 	// The builder itself
 	// These fields are completely derived from the fields above and can be freely manipulated
 	// by veneers.
-	Package     string
-	Name        string
-	Properties  []StructField `json:",omitempty"`
-	Constructor Constructor
-	Options     []Option
-	VeneerTrail []string `json:",omitempty"`
+	Package            string
+	Name               string
+	Properties         []StructField `json:",omitempty"`
+	Constructor        Constructor
+	Options            []Option
+	VeneerTrail        []string `json:",omitempty"`
+	DeprecationMessage string   `json:",omitempty"`
 
 	Factories []BuilderFactory `json:",omitempty"`
 
@@ -44,13 +45,14 @@ func (builder *Builder) OptionByName(name string) (Option, bool) {
 
 func (builder *Builder) DeepCopy() Builder {
 	clone := Builder{
-		For:         builder.For,
-		Package:     builder.Package,
-		Name:        builder.Name,
-		Properties:  make([]StructField, 0, len(builder.Properties)),
-		Constructor: builder.Constructor.DeepCopy(),
-		Options:     make([]Option, 0, len(builder.Options)),
-		VeneerTrail: make([]string, 0, len(builder.VeneerTrail)),
+		For:                builder.For,
+		Package:            builder.Package,
+		Name:               builder.Name,
+		Properties:         make([]StructField, 0, len(builder.Properties)),
+		Constructor:        builder.Constructor.DeepCopy(),
+		Options:            make([]Option, 0, len(builder.Options)),
+		VeneerTrail:        make([]string, 0, len(builder.VeneerTrail)),
+		DeprecationMessage: builder.DeprecationMessage,
 	}
 
 	clone.VeneerTrail = append(clone.VeneerTrail, builder.VeneerTrail...)
@@ -564,9 +566,10 @@ func (generator *BuilderGenerator) FromAST(schemas Schemas) []Builder {
 
 func (generator *BuilderGenerator) structObjectToBuilder(schemas Schemas, schema *Schema, object Object) Builder {
 	builder := Builder{
-		Package: schema.Package,
-		For:     object,
-		Name:    object.Name,
+		Package:            schema.Package,
+		For:                object,
+		Name:               object.Name,
+		DeprecationMessage: object.DeprecationMessage,
 	}
 
 	structType := schemas.ResolveToType(object.Type).AsStruct()

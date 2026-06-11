@@ -6,6 +6,8 @@ package {{ .Builder.Package | formatPackageName }}
 var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name|formatObjectName }}Builder)(nil)
 {{ range .Builder.For.Comments }}
 // {{ . }}
+{{- end }}{{ if .Builder.DeprecationMessage }}
+// Deprecated: {{ .Builder.DeprecationMessage|formatScalar }}
 {{- end }}
 type {{ .Builder.Name|formatObjectName }}Builder struct {
     internal *{{ .ObjectName }}
@@ -15,7 +17,9 @@ type {{ .Builder.Name|formatObjectName }}Builder struct {
     {{ .Name }} {{ .Type | formatType }}
     {{- end }}
 }
-
+{{ if .Builder.DeprecationMessage -}}
+// Deprecated: {{ .Builder.DeprecationMessage|formatScalar }}
+{{- end }}
 func New{{ .Builder.Name|formatObjectName }}Builder({{- template "args" .Builder.Constructor.Args }}) *{{ .Builder.Name|formatObjectName }}Builder {
 	resource := {{ .ConstructorName }}()
 	builder := &{{ .Builder.Name|formatObjectName }}Builder{
