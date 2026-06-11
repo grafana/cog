@@ -270,7 +270,7 @@ func (jenny APIReference) schemaIndex(context languages.Context, schema *ast.Sch
 	})
 
 	for _, builder := range builders {
-		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+		buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder)))
 	}
 
 	functions := jenny.Collector.functionsForPackage(schema.Package)
@@ -311,9 +311,15 @@ func (jenny APIReference) referenceForObject(context languages.Context, object a
 	buffer.WriteString(fmt.Sprintf(`---
 title: %[2]s %[1]s
 ---
-`, objectName, jenny.kindBadge(object.Type.Kind)))
+`, objectName, jenny.objectBadge(object)))
 
-	buffer.WriteString(fmt.Sprintf("# %[2]s %[1]s\n\n", objectName, jenny.kindBadge(object.Type.Kind)))
+	buffer.WriteString(fmt.Sprintf("# %[2]s %[1]s\n\n", objectName, jenny.objectBadge(object)))
+
+	if object.DeprecationMessage != "" {
+		buffer.WriteString(jenny.deprecatedBadge())
+		buffer.WriteString(object.DeprecationMessage)
+		buffer.WriteString("\n\n")
+	}
 
 	if len(object.Comments) != 0 {
 		buffer.WriteString(strings.Join(object.Comments, "\n\n") + "\n\n")
@@ -348,9 +354,9 @@ title: %[2]s %[1]s
 		})
 		for _, builder := range buildersForObjet {
 			if builder.Package == object.SelfRef.ReferredPkg {
-				buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+				buffer.WriteString(fmt.Sprintf(" * %[2]s [%[1]s](./builder-%[1]s.md)\n", jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder)))
 			} else {
-				buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/builder-%[2]s.md)\n", builder.Package, jenny.Formatter.BuilderName(builder), jenny.builderBadge()))
+				buffer.WriteString(fmt.Sprintf(" * %[3]s [%[1]s.%[2]s](../%[1]s/builder-%[2]s.md)\n", builder.Package, jenny.Formatter.BuilderName(builder), jenny.builderBadge(builder)))
 			}
 		}
 	}
@@ -391,9 +397,19 @@ func (jenny APIReference) referenceForBuilder(context languages.Context, builder
 	buffer.WriteString(fmt.Sprintf(`---
 title: %[2]s %[1]s
 ---
-`, builderName, jenny.builderBadge()))
+`, builderName, jenny.builderBadge(builder)))
 
-	buffer.WriteString(fmt.Sprintf("# %[2]s %[1]s\n\n", builderName, jenny.builderBadge()))
+	buffer.WriteString(fmt.Sprintf("# %[2]s %[1]s\n\n", builderName, jenny.builderBadge(builder)))
+
+	if builder.DeprecationMessage != "" {
+		buffer.WriteString(jenny.deprecatedBadge())
+		buffer.WriteString(builder.DeprecationMessage)
+		buffer.WriteString("\n\n")
+	}
+
+	if len(builder.For.Comments) != 0 {
+		buffer.WriteString(strings.Join(builder.For.Comments, "\n\n") + "\n\n")
+	}
 
 	buffer.WriteString("## Constructor\n\n")
 
@@ -462,6 +478,16 @@ func (jenny APIReference) packageBadge(schema *ast.Schema) string {
 	return fmt.Sprintf("<span class=\"badge package-variant-%s\"></span>", string(schema.Metadata.Variant))
 }
 
+func (jenny APIReference) objectBadge(object ast.Object) string {
+	badge := jenny.kindBadge(object.Type.Kind)
+
+	if object.DeprecationMessage != "" {
+		badge += " " + jenny.deprecatedBadge()
+	}
+
+	return badge
+}
+
 func (jenny APIReference) kindBadge(kind ast.Kind) string {
 	return fmt.Sprintf("<span class=\"badge object-type-%s\"></span>", jenny.Formatter.KindName(kind))
 }
@@ -474,8 +500,18 @@ func (jenny APIReference) functionBadge() string {
 	return "<span class=\"badge function\"></span>"
 }
 
-func (jenny APIReference) builderBadge() string {
-	return "<span class=\"badge builder\"></span>"
+func (jenny APIReference) builderBadge(builder ast.Builder) string {
+	badge := "<span class=\"badge builder\"></span>"
+
+	if builder.DeprecationMessage != "" {
+		badge += " " + jenny.deprecatedBadge()
+	}
+
+	return badge
+}
+
+func (jenny APIReference) deprecatedBadge() string {
+	return "<span class=\"badge deprecated\"></span>"
 }
 
 func (jenny APIReference) renderIfExists(buffer *bytes.Buffer, blockName string, data any) error {
