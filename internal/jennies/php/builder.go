@@ -99,6 +99,10 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 		fmt.Sprintf("@implements %s<%s>", jenny.config.fullNamespaceRef("Cog\\Builder"), jenny.typeFormatter.doFormatType(builder.For.SelfRef.AsType(), false)),
 	)
 
+	if builder.DeprecationMessage != "" {
+		builder.For.Comments = append(builder.For.Comments, "@deprecated "+builder.DeprecationMessage)
+	}
+
 	jenny.apiRefCollector.BuilderMethod(builder, common.MethodReference{
 		Name: "build",
 		Comments: []string{
