@@ -12,7 +12,9 @@ export const equalssomeStruct = (a: someStruct, b: someStruct): boolean => {
 	return true;
 };
 
-// Refresh rate or disabled.
+/**
+ * Refresh rate or disabled.
+ */
 export type RefreshRate = string | boolean;
 
 export const defaultRefreshRate = (): RefreshRate => ("");

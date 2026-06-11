@@ -86,11 +86,16 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 func (jenny RawTypes) formatObject(context languages.Context, def ast.Object, packageMapper packageMapper) ([]byte, error) {
 	var buffer strings.Builder
 
-	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
-	}
-	if def.DeprecationMessage != "" {
-		buffer.WriteString(fmt.Sprintf("/**\n* @deprecated: %s\n*/\n", def.DeprecationMessage))
+	if len(def.Comments) != 0 || def.DeprecationMessage != "" {
+		fmt.Fprintf(&buffer, "/**\n")
+		for _, commentLine := range def.Comments {
+			fmt.Fprintf(&buffer, " * %s\n", commentLine)
+		}
+		if def.DeprecationMessage != "" {
+			fmt.Fprintf(&buffer, " * @deprecated %s\n", def.DeprecationMessage)
+		}
+
+		fmt.Fprintf(&buffer, " */\n")
 	}
 
 	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(def))
@@ -101,7 +106,7 @@ func (jenny RawTypes) formatObject(context languages.Context, def ast.Object, pa
 	if (!def.Type.IsScalar() && !def.Type.IsComposableSlot()) || (def.Type.IsScalar() && !def.Type.AsScalar().IsConcrete()) {
 		buffer.WriteString("\n")
 
-		buffer.WriteString(fmt.Sprintf("export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(objectName), objectName))
+		fmt.Fprintf(&buffer, "export const default%[1]s = (): %[2]s => (", tools.UpperCamelCase(objectName), objectName)
 
 		formattedDefaults := formatValue(jenny.defaultValueForObject(def, packageMapper))
 		buffer.WriteString(formattedDefaults)
@@ -335,30 +340,30 @@ func (jenny RawTypes) defaultValueForStructs(def ast.StructType, m *orderedmap.M
 		if m.Has(f.Name) {
 			switch x := m.Get(f.Name).(type) {
 			case map[string]any:
-				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.defaultValueForStructs(f.Type.AsStruct(), orderedmap.FromMap(x))))
+				fmt.Fprintf(&buffer, "%s: %v, ", f.Name, jenny.defaultValueForStructs(f.Type.AsStruct(), orderedmap.FromMap(x)))
 			case nil:
-				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue([]any{})))
+				fmt.Fprintf(&buffer, "%s: %v, ", f.Name, formatValue([]any{}))
 			default:
 				if f.Type.IsRef() {
 					ref := f.Type.AsRef()
 					referredType, refFound := jenny.schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 
 					if refFound && referredType.Type.IsEnum() {
-						buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, jenny.typeFormatter.enums.formatValue(referredType, x)))
+						fmt.Fprintf(&buffer, "%s: %v, ", f.Name, jenny.typeFormatter.enums.formatValue(referredType, x))
 						continue
 					}
 				}
 
-				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, formatValue(x)))
+				fmt.Fprintf(&buffer, "%s: %v, ", f.Name, formatValue(x))
 			}
 		} else if f.Required {
 			switch f.Type.Kind {
 			case ast.KindStruct:
-				buffer.WriteString(fmt.Sprintf("%s: { %v }, ", f.Name, defaultEmptyValuesForStructs(f.Type.AsStruct())))
+				fmt.Fprintf(&buffer, "%s: { %v }, ", f.Name, defaultEmptyValuesForStructs(f.Type.AsStruct()))
 			case ast.KindArray:
-				buffer.WriteString(fmt.Sprintf("%s: []", f.Name))
+				fmt.Fprintf(&buffer, "%s: []", f.Name)
 			case ast.KindScalar:
-				buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar())))
+				fmt.Fprintf(&buffer, "%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar()))
 			}
 		}
 	}
@@ -372,11 +377,11 @@ func defaultEmptyValuesForStructs(def ast.StructType) string {
 	for _, f := range def.Fields {
 		switch f.Type.Kind {
 		case ast.KindStruct:
-			buffer.WriteString(fmt.Sprintf("%s: { %v }, ", f.Name, defaultEmptyValuesForStructs(f.Type.AsStruct())))
+			fmt.Fprintf(&buffer, "%s: { %v }, ", f.Name, defaultEmptyValuesForStructs(f.Type.AsStruct()))
 		case ast.KindArray:
-			buffer.WriteString(fmt.Sprintf("%s: []", f.Name))
+			fmt.Fprintf(&buffer, "%s: []", f.Name)
 		case ast.KindScalar:
-			buffer.WriteString(fmt.Sprintf("%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar())))
+			fmt.Fprintf(&buffer, "%s: %v, ", f.Name, defaultValueForScalar(f.Type.AsScalar()))
 		default:
 		}
 	}

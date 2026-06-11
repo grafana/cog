@@ -7,7 +7,7 @@ var _ cog.Builder[{{ .BuilderSignatureType }}] = (*{{ .Builder.Name|formatObject
 {{ range .Builder.For.Comments }}
 // {{ . }}
 {{- end }}{{ if .Builder.DeprecationMessage }}
-// Deprecated: {{ .Builder.DeprecationMessage|formatScalar }}
+// Deprecated: {{ .Builder.DeprecationMessage }}
 {{- end }}
 type {{ .Builder.Name|formatObjectName }}Builder struct {
     internal *{{ .ObjectName }}

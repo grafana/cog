@@ -1,6 +1,6 @@
 /**
-* @deprecated: This object is deprecated, use NewStruct instead.
-*/
+ * @deprecated This object is deprecated, use NewStruct instead.
+ */
 export interface SomeStruct {
 	FieldString: string;
 }

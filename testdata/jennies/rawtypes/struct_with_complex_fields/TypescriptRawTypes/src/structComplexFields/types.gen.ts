@@ -1,4 +1,6 @@
-// This struct does things.
+/**
+ * This struct does things.
+ */
 export interface SomeStruct {
 	FieldRef: SomeOtherStruct;
 	FieldDisjunctionOfScalars: string | boolean;
