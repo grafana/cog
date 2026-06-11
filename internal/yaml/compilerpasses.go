@@ -31,8 +31,10 @@ type CompilerPass struct {
 	ConstantToEnum           *ConstantToEnum           `yaml:"constant_to_enum"`
 	ExtractK8ResourceNames   *CleanupK8ResourceNames   `yaml:"cleanup_k8_resource_names"`
 	TrimObjectNamePrefix     *TrimObjectNamePrefix     `yaml:"trim_object_name_prefix"`
+	SanitizeEnumMemberNames  *SanitizeEnumMemberNames  `yaml:"sanitize_enum_member_names"`
 
-	AnonymousStructsToNamed *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
+	AnonymousStructsToNamed     *AnonymousStructsToNamed `yaml:"anonymous_structs_to_named"`
+	AnonymousEnumToExplicitType *AnonymousEnumsToNamed   `yaml:"anonymous_enum_to_named"`
 
 	DisjunctionToType                       *DisjunctionToType                       `yaml:"disjunction_to_type"`
 	DisjunctionOfAnonymousStructsToExplicit *DisjunctionOfAnonymousStructsToExplicit `yaml:"disjunction_of_anonymous_structs_to_explicit"`
@@ -111,9 +113,15 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	if pass.TrimObjectNamePrefix != nil {
 		return pass.TrimObjectNamePrefix.AsCompilerPass()
 	}
+	if pass.SanitizeEnumMemberNames != nil {
+		return pass.SanitizeEnumMemberNames.AsCompilerPass()
+	}
 
 	if pass.AnonymousStructsToNamed != nil {
 		return pass.AnonymousStructsToNamed.AsCompilerPass()
+	}
+	if pass.AnonymousEnumToExplicitType != nil {
+		return pass.AnonymousEnumToExplicitType.AsCompilerPass()
 	}
 
 	if pass.DisjunctionToType != nil {
@@ -454,6 +462,13 @@ func (pass AnonymousStructsToNamed) AsCompilerPass() (*compiler.AnonymousStructs
 	return &compiler.AnonymousStructsToNamed{}, nil
 }
 
+type AnonymousEnumsToNamed struct {
+}
+
+func (pass AnonymousEnumsToNamed) AsCompilerPass() (*compiler.AnonymousEnumToExplicitType, error) {
+	return &compiler.AnonymousEnumToExplicitType{}, nil
+}
+
 type DisjunctionToType struct {
 }
 
@@ -532,4 +547,11 @@ func (pass TrimObjectNamePrefix) AsCompilerPass() (*compiler.TrimObjectNamePrefi
 	return &compiler.TrimObjectNamePrefix{
 		Prefix: pass.Prefix,
 	}, nil
+}
+
+type SanitizeEnumMemberNames struct {
+}
+
+func (pass SanitizeEnumMemberNames) AsCompilerPass() (*compiler.SanitizeEnumMemberNames, error) {
+	return &compiler.SanitizeEnumMemberNames{}, nil
 }

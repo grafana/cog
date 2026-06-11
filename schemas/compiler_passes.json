@@ -290,6 +290,11 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "YamlAnonymousEnumsToNamed": {
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
     "YamlAnonymousStructsToNamed": {
       "properties": {},
       "additionalProperties": false,
@@ -387,8 +392,14 @@
         "trim_object_name_prefix": {
           "$ref": "#/$defs/YamlTrimObjectNamePrefix"
         },
+        "sanitize_enum_member_names": {
+          "$ref": "#/$defs/YamlSanitizeEnumMemberNames"
+        },
         "anonymous_structs_to_named": {
           "$ref": "#/$defs/YamlAnonymousStructsToNamed"
+        },
+        "anonymous_enum_to_named": {
+          "$ref": "#/$defs/YamlAnonymousEnumsToNamed"
         },
         "disjunction_to_type": {
           "$ref": "#/$defs/YamlDisjunctionToType"
@@ -621,6 +632,11 @@
           "type": "array"
         }
       },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlSanitizeEnumMemberNames": {
+      "properties": {},
       "additionalProperties": false,
       "type": "object"
     },
