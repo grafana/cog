@@ -1,6 +1,6 @@
 {{- if .Builder.DeprecationMessage -}}
 {{- $warnings := importModule "warnings" "warnings" "" -}}
-@warnings.warn({{ .Builder.DeprecationMessage|formatConcrete }}, warnings.DeprecationWarning)
+@warnings.warn({{ .Builder.DeprecationMessage|formatConcrete }}, DeprecationWarning)
 {{ end -}}
 class {{ .Builder.Name|formatObjectName }}(cogbuilder.Builder[{{ .ObjectName }}]):
     {{- include "comments" (dict "Comments" .Builder.For.Comments) | indent 4 }}
