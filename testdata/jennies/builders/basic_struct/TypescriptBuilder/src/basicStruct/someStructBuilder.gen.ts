@@ -1,7 +1,9 @@
 import * as cog from '../cog';
 import * as basicStruct from '../basicStruct';
 
-// SomeStruct, to hold data.
+/**
+ * SomeStruct, to hold data.
+ */
 export class SomeStructBuilder implements cog.Builder<basicStruct.SomeStruct> {
     protected readonly internal: basicStruct.SomeStruct;
 

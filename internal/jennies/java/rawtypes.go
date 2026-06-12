@@ -139,6 +139,7 @@ func (jenny RawTypes) formatStruct(pkg string, identifier string, object ast.Obj
 		Name:                    tools.UpperCamelCase(object.Name),
 		Fields:                  object.Type.AsStruct().Fields,
 		Comments:                object.Comments,
+		DeprecationMessage:      object.DeprecationMessage,
 		Variant:                 jenny.getVariant(object.Type),
 		Identifier:              identifier,
 		Annotation:              jenny.jsonMarshaller.annotation(object.Type),

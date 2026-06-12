@@ -1,4 +1,6 @@
-// List of tags, maybe?
+/**
+ * List of tags, maybe?
+ */
 export type ArrayOfStrings = string[];
 
 export const defaultArrayOfStrings = (): ArrayOfStrings => ([]);

@@ -2,7 +2,9 @@ package withdashes;
 
 import java.util.Objects;
 
-// Refresh rate or disabled.
+/**
+ * Refresh rate or disabled.
+ */
 public class RefreshRate {
     protected String string;
     protected Boolean bool;

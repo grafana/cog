@@ -47,7 +47,7 @@ func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) 
 	}
 
 	if object.Type.IsConcreteScalar() {
-		buffer.WriteString(fmt.Sprintf("%s: %s = %s", defName, formatter.formatType(object.Type), formatValue(object.Type.AsScalar().Value)))
+		fmt.Fprintf(&buffer, "%s: %s = %s", defName, formatter.formatType(object.Type), formatValue(object.Type.AsScalar().Value))
 
 		return buffer.String(), nil
 	}
@@ -59,7 +59,7 @@ func (formatter *typeFormatter) formatObject(object ast.Object) (string, error) 
 		return formatter.formatStruct(object), nil
 	default:
 		typingPkg := formatter.importPkg("typing", "typing")
-		buffer.WriteString(fmt.Sprintf("%s: %s.TypeAlias = %s", defName, typingPkg, formatter.formatType(object.Type)))
+		fmt.Fprintf(&buffer, "%s: %s.TypeAlias = %s", defName, typingPkg, formatter.formatType(object.Type))
 	}
 
 	return buffer.String(), nil
@@ -137,12 +137,12 @@ func (formatter *typeFormatter) formatEnum(def ast.Object) string {
 	if enumType.Values[0].Type.AsScalar().ScalarKind == ast.KindString {
 		enumKind = enumPkg + ".StrEnum"
 	}
-	buffer.WriteString(fmt.Sprintf("class %s(%s):\n", enumName, enumKind))
+	fmt.Fprintf(&buffer, "class %s(%s):\n", enumName, enumKind)
 	buffer.WriteString(formatter.formatClassComments(def.Comments))
 
 	for i, val := range enumType.Values {
 		memberName := tools.UpperSnakeCase(val.Name)
-		buffer.WriteString(fmt.Sprintf("    %s = %#v", memberName, val.Value))
+		fmt.Fprintf(&buffer, "    %s = %#v", memberName, val.Value)
 
 		if i != len(enumType.Values)-1 {
 			buffer.WriteString("\n")
@@ -172,7 +172,11 @@ func (formatter *typeFormatter) formatStruct(def ast.Object) string {
 		classBases = fmt.Sprintf("(%s.%s)", cogVariants, variant)
 	}
 
-	buffer.WriteString(fmt.Sprintf("class %s%s:\n", formatObjectName(def.Name), classBases))
+	if def.DeprecationMessage != "" {
+		formatter.importPkg("warnings", "warnings")
+		fmt.Fprintf(&buffer, "@warnings.deprecated(%s)\n", formatValue(def.DeprecationMessage))
+	}
+	fmt.Fprintf(&buffer, "class %s%s:\n", formatObjectName(def.Name), classBases)
 	buffer.WriteString(formatter.formatClassComments(def.Comments))
 
 	fields := def.Type.AsStruct().Fields
@@ -197,12 +201,10 @@ func (formatter *typeFormatter) formatStructField(def ast.StructField) string {
 	var buffer strings.Builder
 
 	for _, commentLine := range def.Comments {
-		buffer.WriteString(fmt.Sprintf("    # %s\n", commentLine))
+		fmt.Fprintf(&buffer, "    # %s\n", commentLine)
 	}
 
-	field := formatter.formatType(def.Type)
-
-	buffer.WriteString(fmt.Sprintf("    %s: %s", formatIdentifier(def.Name), field))
+	fmt.Fprintf(&buffer, "    %s: %s", formatIdentifier(def.Name), formatter.formatType(def.Type))
 
 	return buffer.String()
 }
@@ -300,7 +302,7 @@ func (formatter *typeFormatter) formatClassComments(comments []string) string {
 
 	buffer.WriteString(`    """` + "\n")
 	for _, commentLine := range comments {
-		buffer.WriteString(fmt.Sprintf("    %s\n", commentLine))
+		fmt.Fprintf(&buffer, "    %s\n", commentLine)
 	}
 	buffer.WriteString(`    """` + "\n\n")
 

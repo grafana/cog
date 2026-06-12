@@ -81,5 +81,6 @@ func formattingTemplateFuncs() template.FuncMap {
 		"formatFunctionName": formatFunctionName,
 		"formatPath":         formatFieldPath,
 		"formatObjectName":   formatObjectName,
+		"formatConcrete":     formatValue,
 	}
 }

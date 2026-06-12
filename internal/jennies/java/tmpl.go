@@ -139,12 +139,13 @@ type EnumValue struct {
 }
 
 type ClassTemplate struct {
-	Package    string
-	RawPackage string
-	Imports    fmt.Stringer
-	Name       string
-	Extends    []string
-	Comments   []string
+	Package            string
+	RawPackage         string
+	Imports            fmt.Stringer
+	Name               string
+	Extends            []string
+	Comments           []string
+	DeprecationMessage string
 
 	Fields     []ast.StructField
 	Builders   []BuilderTemplate
@@ -194,6 +195,7 @@ type BuilderTemplate struct {
 	Imports              fmt.Stringer
 	ImportAlias          string // alias to the pkg in which the object being built lives.
 	Comments             []string
+	DeprecationMessage   string
 	Constructor          ast.Constructor
 	Properties           []ast.StructField
 	Options              []ast.Option

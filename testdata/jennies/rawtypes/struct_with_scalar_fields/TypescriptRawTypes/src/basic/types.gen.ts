@@ -1,7 +1,9 @@
-// This
-// is
-// a
-// comment
+/**
+ * This
+ * is
+ * a
+ * comment
+ */
 export interface SomeStruct {
 	// Anything can go in there.
 	// Really, anything.

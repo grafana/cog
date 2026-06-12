@@ -1,4 +1,6 @@
-// String to... something.
+/**
+ * String to... something.
+ */
 export type MapOfStringToAny = Record<string, any>;
 
 export const defaultMapOfStringToAny = (): MapOfStringToAny => ({});

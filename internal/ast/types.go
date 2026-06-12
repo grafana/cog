@@ -617,11 +617,12 @@ func (t Type) AsComposableSlot() ComposableSlotType {
 
 // Object named declaration of a type
 type Object struct {
-	Name        string
-	Comments    []string `json:",omitempty"`
-	Type        Type
-	SelfRef     RefType
-	PassesTrail []string `json:",omitempty"`
+	Name               string
+	Comments           []string `json:",omitempty"`
+	DeprecationMessage string   `json:",omitempty"`
+	Type               Type
+	SelfRef            RefType
+	PassesTrail        []string `json:",omitempty"`
 }
 
 func NewObject(pkg string, name string, objectType Type, passesTrail ...string) Object {
@@ -649,14 +650,16 @@ func (object Object) Equal(other Object) bool {
 		cmp.Equal(object.Comments, other.Comments) &&
 		cmp.Equal(object.Type, other.Type) &&
 		cmp.Equal(object.SelfRef, other.SelfRef) &&
-		cmp.Equal(object.PassesTrail, other.PassesTrail)
+		cmp.Equal(object.PassesTrail, other.PassesTrail) &&
+		cmp.Equal(object.DeprecationMessage, other.DeprecationMessage)
 }
 
 func (object Object) DeepCopy() Object {
 	newObject := Object{
-		Name:    object.Name,
-		Type:    object.Type.DeepCopy(),
-		SelfRef: object.SelfRef.DeepCopy(),
+		Name:               object.Name,
+		Type:               object.Type.DeepCopy(),
+		SelfRef:            object.SelfRef.DeepCopy(),
+		DeprecationMessage: object.DeprecationMessage,
 	}
 
 	newObject.PassesTrail = append(newObject.PassesTrail, object.PassesTrail...)

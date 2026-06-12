@@ -25,7 +25,9 @@ export const equalsSomeStruct = (a: SomeStruct, b: SomeStruct): boolean => {
 	return true;
 };
 
-// Base properties for all metrics
+/**
+ * Base properties for all metrics
+ */
 export interface Common {
 	// The metric name
 	name: string;
@@ -49,7 +51,9 @@ export const equalsCommon = (a: Common, b: Common): boolean => {
 	return true;
 };
 
-// Counter metric combining common properties with specific values
+/**
+ * Counter metric combining common properties with specific values
+ */
 export interface Counter extends Common {
 	type: "counter";
 	// Counter metric values

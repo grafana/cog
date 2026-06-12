@@ -22,6 +22,7 @@ type CompilerPass struct {
 	RenameObject             *RenameObject             `yaml:"rename_object"`
 	RetypeObject             *RetypeObject             `yaml:"retype_object"`
 	HintObject               *HintObject               `yaml:"hint_object"`
+	DeprecateObject          *DeprecateObject          `yaml:"deprecate_object"`
 	RetypeField              *RetypeField              `yaml:"retype_field"`
 	OmitFields               *OmitFields               `yaml:"omit_fields"`
 	SchemaSetIdentifier      *SchemaSetIdentifier      `yaml:"schema_set_identifier"`
@@ -79,6 +80,9 @@ func (pass CompilerPass) AsCompilerPass() (compiler.Pass, error) {
 	}
 	if pass.HintObject != nil {
 		return pass.HintObject.AsCompilerPass()
+	}
+	if pass.DeprecateObject != nil {
+		return pass.DeprecateObject.AsCompilerPass()
 	}
 	if pass.AddObject != nil {
 		return pass.AddObject.AsCompilerPass()
@@ -554,4 +558,21 @@ type SanitizeEnumMemberNames struct {
 
 func (pass SanitizeEnumMemberNames) AsCompilerPass() (*compiler.SanitizeEnumMemberNames, error) {
 	return &compiler.SanitizeEnumMemberNames{}, nil
+}
+
+type DeprecateObject struct {
+	Object  string // Expected format: [package].[object]
+	Message string
+}
+
+func (pass DeprecateObject) AsCompilerPass() (*compiler.DeprecateObject, error) {
+	ref, err := compiler.ObjectReferenceFromString(pass.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compiler.DeprecateObject{
+		Object:  ref,
+		Message: pass.Message,
+	}, nil
 }

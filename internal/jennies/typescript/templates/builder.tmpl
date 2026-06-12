@@ -1,8 +1,14 @@
 {{- $options := include "options" . -}}
 {{- $factories := include "factories" . -}}
 {{- .Imports }}
+{{- if or .Builder.For.Comments .Builder.DeprecationMessage }}
+/**
 {{- range .Builder.For.Comments }}
-// {{ . }}
+ * {{ . }}
+{{- end }}{{ if .Builder.DeprecationMessage }}
+ * @deprecated {{ .Builder.DeprecationMessage }}
+{{- end }}
+ */
 {{- end }}
 export class {{ .Builder.Name|upperCamelCase }}Builder implements cog.Builder<{{ .BuilderSignatureType }}> {
     protected readonly internal: {{ .ImportAlias }}.{{ .ObjectName }};

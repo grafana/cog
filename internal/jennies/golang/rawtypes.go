@@ -169,7 +169,10 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 	}
 
 	for _, commentLine := range comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
+		fmt.Fprintf(buffer, "// %s\n", commentLine)
+	}
+	if object.DeprecationMessage != "" {
+		fmt.Fprintf(buffer, "// Deprecated: %s\n", object.DeprecationMessage)
 	}
 
 	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(object))
@@ -178,7 +181,7 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, schema *ast.Schema, 
 	if object.Type.ImplementsVariant() && !object.Type.IsRef() {
 		variant := tools.UpperCamelCase(object.Type.ImplementedVariant())
 
-		buffer.WriteString(fmt.Sprintf("func (resource %s) Implements%sVariant() {}\n", objectName, variant))
+		fmt.Fprintf(buffer, "func (resource %s) Implements%sVariant() {}\n", objectName, variant)
 		buffer.WriteString("\n")
 
 		customVariantTmpl := template.CustomObjectVariantBlock(object)
@@ -216,8 +219,8 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 		}
 
 		declareConstructor()
-		buffer.WriteString(fmt.Sprintf("// %[1]s creates a new %[2]s object.\n", constructorName, objectName))
-		buffer.WriteString(fmt.Sprintf("func %[1]s() *%[2]s {\n", constructorName, objectName))
+		fmt.Fprintf(buffer, "// %[1]s creates a new %[2]s object.\n", constructorName, objectName)
+		fmt.Fprintf(buffer, "func %[1]s() *%[2]s {\n", constructorName, objectName)
 
 		delegatedConstructorName := fmt.Sprintf("New%s", formatObjectName(referredObj.Name))
 		referredPkg := jenny.packageMapper(referredObj.SelfRef.ReferredPkg)
@@ -225,7 +228,7 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 			delegatedConstructorName = fmt.Sprintf("%s.%s", referredPkg, delegatedConstructorName)
 		}
 
-		buffer.WriteString(fmt.Sprintf("\treturn %s()", delegatedConstructorName))
+		fmt.Fprintf(buffer, "\treturn %s()", delegatedConstructorName)
 		buffer.WriteString("\n}\n")
 		return
 	}
@@ -235,9 +238,9 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 	}
 
 	declareConstructor()
-	buffer.WriteString(fmt.Sprintf("// %[1]s creates a new %[2]s object.\n", constructorName, objectName))
-	buffer.WriteString(fmt.Sprintf("func %[1]s() *%[2]s {\n", constructorName, objectName))
-	buffer.WriteString(fmt.Sprintf("\treturn &%s", jenny.defaultsForStruct(context, object.SelfRef, object.Type, nil)))
+	fmt.Fprintf(buffer, "// %[1]s creates a new %[2]s object.\n", constructorName, objectName)
+	fmt.Fprintf(buffer, "func %[1]s() *%[2]s {\n", constructorName, objectName)
+	fmt.Fprintf(buffer, "\treturn &%s", jenny.defaultsForStruct(context, object.SelfRef, object.Type, nil))
 	buffer.WriteString("\n}\n")
 }
 
@@ -249,7 +252,8 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 		objectName = referredPkg + "." + objectName
 	}
 
-	buffer.WriteString(objectName + "{\n")
+	buffer.WriteString(objectName)
+	buffer.WriteString("{\n")
 
 	extraDefaults := map[string]any{}
 	if val, ok := maybeExtraDefaults.(map[string]any); ok {
@@ -268,7 +272,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 			break
 		}
 
-		buffer.WriteString(fmt.Sprintf("\t\t%s: %s,\n", formatFieldName(field.Name), defaultValue))
+		fmt.Fprintf(&buffer, "\t\t%s: %s,\n", formatFieldName(field.Name), defaultValue)
 	}
 
 	buffer.WriteString("}")

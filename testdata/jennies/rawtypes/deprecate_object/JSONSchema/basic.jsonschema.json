@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "SomeStruct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "FieldString"
+      ],
+      "properties": {
+        "FieldString": {
+          "type": "string"
+        }
+      },
+      "deprecated": true,
+      "x-deprecation-message": "This object is deprecated, use NewStruct instead."
+    }
+  }
+}

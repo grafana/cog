@@ -2,7 +2,9 @@ package intersections;
 
 import java.util.Objects;
 
-// Base properties for all metrics
+/**
+ * Base properties for all metrics
+ */
 public class Common {
     // The metric name
     public String name;

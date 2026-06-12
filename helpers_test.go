@@ -106,7 +106,9 @@ Container: {
 
 	expectedCode := `// Code generated - EDITING IS FUTILE. DO NOT EDIT.
 
-// Contains things.
+/**
+ * Contains things.
+ */
 export interface Container {
 	str: string;
 }

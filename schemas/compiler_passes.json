@@ -365,6 +365,9 @@
         "hint_object": {
           "$ref": "#/$defs/YamlHintObject"
         },
+        "deprecate_object": {
+          "$ref": "#/$defs/YamlDeprecateObject"
+        },
         "retype_field": {
           "$ref": "#/$defs/YamlRetypeField"
         },
@@ -435,6 +438,19 @@
     },
     "YamlDataqueryIdentification": {
       "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "YamlDeprecateObject": {
+      "properties": {
+        "object": {
+          "type": "string",
+          "description": "Expected format: [package].[object]"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
       "additionalProperties": false,
       "type": "object"
     },

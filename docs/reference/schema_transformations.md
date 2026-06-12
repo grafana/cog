@@ -126,6 +126,19 @@ N/A
 dataquery_identification: {}
 ```
 
+## `deprecate_object`
+
+DeprecateObject marks an object as deprecated.
+Note: builders generated from this object will be marked as well.
+
+### Usage
+
+```yaml
+deprecate_object:
+  object: string
+  message: string
+```
+
 ## `disjunction_infer_mapping`
 
 DisjunctionInferMapping infers the discriminator field and mapping used to
