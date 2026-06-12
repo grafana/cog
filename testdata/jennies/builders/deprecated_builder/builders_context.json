@@ -1,0 +1,115 @@
+{
+  "Schemas": [
+    {
+      "Package": "sandbox",
+      "Metadata": {},
+      "Objects": {
+        "SomeStruct": {
+          "Name": "SomeStruct",
+          "Type": {
+            "Kind": "struct",
+            "Nullable": false,
+            "Struct": {
+              "Fields": [
+                {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  },
+                  "Required": true
+                }
+              ]
+            }
+          },
+          "SelfRef": {
+            "ReferredPkg": "sandbox",
+            "ReferredType": "SomeStruct"
+          }
+        }
+      }
+    }
+  ],
+  "Builders": [
+    {
+      "For": {
+        "Name": "SomeStruct",
+        "Type": {
+          "Kind": "struct",
+          "Nullable": false,
+          "Struct": {
+            "Fields": [
+              {
+                "Name": "title",
+                "Type": {
+                  "Kind": "scalar",
+                  "Nullable": false,
+                  "Scalar": {
+                    "ScalarKind": "string"
+                  }
+                },
+                "Required": true
+              }
+            ]
+          }
+        },
+        "SelfRef": {
+          "ReferredPkg": "sandbox",
+          "ReferredType": "SomeStruct"
+        }
+      },
+      "Package": "sandbox",
+      "Name": "SomeStruct",
+      "DeprecationMessage": "This builder is deprecated. Don't use. Please.",
+      "Options": [
+        {
+          "Name": "title",
+          "Args": [
+            {
+              "Name": "title",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            }
+          ],
+          "Assignments": [
+            {
+              "Path": [
+                {
+                  "Identifier": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              ],
+              "Value": {
+                "Argument": {
+                  "Name": "title",
+                  "Type": {
+                    "Kind": "scalar",
+                    "Nullable": false,
+                    "Scalar": {
+                      "ScalarKind": "string"
+                    }
+                  }
+                }
+              },
+              "Method": "direct"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
