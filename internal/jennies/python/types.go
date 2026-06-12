@@ -172,12 +172,13 @@ func (formatter *typeFormatter) formatStruct(def ast.Object) string {
 		classBases = fmt.Sprintf("(%s.%s)", cogVariants, variant)
 	}
 
-	if def.DeprecationMessage != "" {
-		formatter.importPkg("warnings", "warnings")
-		fmt.Fprintf(&buffer, "@warnings.warn(%s, DeprecationWarning)\n", formatValue(def.DeprecationMessage))
-	}
 	fmt.Fprintf(&buffer, "class %s%s:\n", formatObjectName(def.Name), classBases)
 	buffer.WriteString(formatter.formatClassComments(def.Comments))
+
+	if def.DeprecationMessage != "" {
+		formatter.importPkg("warnings", "warnings")
+		fmt.Fprintf(&buffer, "    warnings.warn(%s, DeprecationWarning)\n", formatValue(def.DeprecationMessage))
+	}
 
 	fields := def.Type.AsStruct().Fields
 
