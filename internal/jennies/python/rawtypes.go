@@ -237,7 +237,7 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 		assignments = append(assignments, fmt.Sprintf("        self.%[1]s = %[1]s", fieldName))
 	}
 
-	buffer.WriteString(fmt.Sprintf("    def __init__(self, %s) -> None:\n", strings.Join(args, ", ")))
+	fmt.Fprintf(&buffer, "    def __init__(self, %s) -> None:\n", strings.Join(args, ", "))
 	buffer.WriteString(strings.Join(assignments, "\n"))
 
 	return strings.TrimSuffix(buffer.String(), "\n")
@@ -262,7 +262,7 @@ func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 			continue
 		}
 
-		buffer.WriteString(fmt.Sprintf(`            "%s": self.%s,`+"\n", field.Name, formatIdentifier(field.Name)))
+		fmt.Fprintf(&buffer, `            "%s": self.%s,`+"\n", field.Name, formatIdentifier(field.Name))
 	}
 
 	buffer.WriteString("        }\n")
@@ -274,8 +274,8 @@ func (jenny RawTypes) generateToJSONMethod(object ast.Object) string {
 
 		fieldName := formatIdentifier(field.Name)
 
-		buffer.WriteString(fmt.Sprintf("        if self.%s is not None:\n", fieldName))
-		buffer.WriteString(fmt.Sprintf(`            payload["%s"] = self.%s`+"\n", field.Name, fieldName))
+		fmt.Fprintf(&buffer, "        if self.%s is not None:\n", fieldName)
+		fmt.Fprintf(&buffer, `            payload["%s"] = self.%s`+"\n", field.Name, fieldName)
 	}
 
 	buffer.WriteString("        return payload")
@@ -311,9 +311,8 @@ func (jenny RawTypes) generateFromJSONMethod(context languages.Context, object a
 	typingPkg := jenny.importPkg("typing", "typing")
 
 	buffer.WriteString("    @classmethod\n")
-	buffer.WriteString(fmt.Sprintf("    def from_json(cls, data: dict[str, %[1]s.Any]) -> %[1]s.Self:\n", typingPkg))
-
-	buffer.WriteString(fmt.Sprintf("        args: dict[str, %s.Any] = {}\n", typingPkg))
+	fmt.Fprintf(&buffer, "    def from_json(cls, data: dict[str, %[1]s.Any]) -> %[1]s.Self:\n", typingPkg)
+	fmt.Fprintf(&buffer, "        args: dict[str, %s.Any] = {}\n", typingPkg)
 	var assignments []string
 	for _, field := range object.Type.AsStruct().Fields {
 		value := fmt.Sprintf(`data["%s"]`, field.Name)

@@ -2,7 +2,7 @@ import warnings
 import typing
 
 
-@warnings.deprecated("This object is deprecated, use NewStruct instead.")
+@warnings.warn("This object is deprecated, use NewStruct instead.", warnings.DeprecationWarning)
 class SomeStruct:
     field_string: str
 
