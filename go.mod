@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/yalue/merged_fs v1.3.0
 	golang.org/x/text v0.38.0
-	golang.org/x/tools v0.45.0
+	golang.org/x/tools v0.46.0
 )
 
 require (
@@ -44,10 +44,10 @@ require (
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
-	golang.org/x/mod v0.36.0 // indirect
-	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/mod v0.37.0 // indirect
+	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
