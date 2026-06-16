@@ -2,6 +2,9 @@ name: Foundation SDK
 on:
   pull_request: ~
 
+permissions:
+  contents: read
+
 env:
   DEVBOX_VERSION: 0.14.0
   FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
@@ -137,6 +140,10 @@ jobs:
   sdk_diff:
     name: Generate diff
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write # to write a comment on the PR
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
