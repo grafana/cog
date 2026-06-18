@@ -2,6 +2,7 @@ package httputil
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,7 +17,7 @@ func LoadURL(ctx context.Context, url string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	// Necessary for Github private repositories
+	// Necessary for GitHub private repositories
 	authToken := os.Getenv("GITHUB_AUTH_TOKEN")
 	if authToken != "" && req.URL.Host == "raw.githubusercontent.com" {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authToken))
@@ -32,4 +33,14 @@ func LoadURL(ctx context.Context, url string) (io.ReadCloser, error) {
 	}
 
 	return resp.Body, nil
+}
+
+func LoadJSON(ctx context.Context, url string, decodeInto any) error {
+	body, err := LoadURL(ctx, url)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = body.Close() }()
+
+	return json.NewDecoder(body).Decode(decodeInto)
 }

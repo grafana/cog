@@ -7,7 +7,7 @@ import (
 )
 
 func kindsysCoreLoader(input CueInput) (ast.Schemas, error) {
-	schemaRootValue, libraries, err := input.schemaRootValue("kind")
+	schemaRootValue, libraries, err := input.schemaRootValue()
 	if err != nil {
 		return nil, err
 	}
