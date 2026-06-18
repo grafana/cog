@@ -71,14 +71,6 @@ type CueInput struct {
 	InlineExternalReference bool `yaml:"-"`
 }
 
-func (input *CueInput) packageName() string {
-	if input.Package != "" {
-		return input.Package
-	}
-
-	return filepath.Base(input.Entrypoint)
-}
-
 func (input *CueInput) schemaRootValue() (cue.Value, []simplecue.LibraryInclude, error) {
 	if input.Value != nil {
 		libraries, err := simplecue.ParseImports(input.CueImports)
@@ -102,8 +94,11 @@ func (input *CueInput) schemaRootValue() (cue.Value, []simplecue.LibraryInclude,
 	}
 
 	value, err := input.parseCueEntrypoint(libraries)
+	if err != nil {
+		return cue.Value{}, nil, fmt.Errorf("could not parse cue entrypoint: %w", err)
+	}
 
-	return value, libraries, err
+	return value, libraries, nil
 }
 
 func (input *CueInput) interpolateParameters(interpolator ParametersInterpolator) {
@@ -121,7 +116,7 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 	}
 
 	schema, err := simplecue.GenerateAST(schemaRootValue, simplecue.Config{
-		Package:                 input.packageName(),
+		Package:                 input.Package,
 		ForceNamedEnvelope:      input.ForcedEnvelope,
 		SchemaMetadata:          input.schemaMetadata(),
 		Libraries:               libraries,
@@ -136,32 +131,31 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 }
 
 func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude) (cue.Value, error) {
+	var err error
+	var instanceName string
+
+	prefix := "/cog/vfs/cue.mod/pkg"
 	overlay := map[string]load.Source{
 		"/cog/vfs/cue.mod/module.cue": load.FromBytes([]byte(
 			"language: { version: \"v0.10.1\" }\nmodule: \"cog.vfs\"\n",
 		)),
 	}
 
-	if err := addLibrariesToOverlay(overlay, imports); err != nil {
-		return cue.Value{}, err
+	if err = addLibrariesToOverlay(overlay, prefix, imports); err != nil {
+		return cue.Value{}, fmt.Errorf("could not add libraries to overlay: %w", err)
 	}
 
-	var instanceName string
-	prefix := "/cog/vfs/cue.mod/pkg/"
-
 	if input.URL != "" {
-		var err error
 		instanceName, err = addURLToOverlay(overlay, prefix, input.URL)
 		if err != nil {
-			return cue.Value{}, err
+			return cue.Value{}, fmt.Errorf("could not add URL '%s' to overlay: %w", input.URL, err)
 		}
 	}
 
 	if input.Entrypoint != "" {
-		instanceName = "github.com/cog-vfs/" + filepath.Base(input.Entrypoint)
-
-		if err := addDirToOverlay(overlay, prefix+instanceName, input.Entrypoint); err != nil {
-			return cue.Value{}, err
+		instanceName, err = addDirToOverlay(overlay, prefix, input.Entrypoint)
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("could not add entrypoint '%s' to overlay: %w", input.Entrypoint, err)
 		}
 	}
 
@@ -193,13 +187,14 @@ func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude) (c
 	return value, nil
 }
 
-func addDirToOverlay(overlay map[string]load.Source, overlayPrefix string, directory string) error {
+func addDirToOverlay(overlay map[string]load.Source, prefix string, directory string) (string, error) {
 	absolutePath, err := filepath.Abs(directory)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return filepath.Walk(absolutePath, func(path string, info fs.FileInfo, err error) error {
+	var instanceName string
+	err = filepath.Walk(absolutePath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -208,22 +203,59 @@ func addDirToOverlay(overlay map[string]load.Source, overlayPrefix string, direc
 			return nil
 		}
 
+		if !strings.HasSuffix(info.Name(), ".cue") {
+			return nil
+		}
+
 		content, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
 
-		overlay[filepath.Join(overlayPrefix, info.Name())] = load.FromBytes(content)
+		if instanceName == "" {
+			file, err := parser.ParseFile(path, content, parser.ParseComments)
+			if err != nil {
+				return fmt.Errorf("parse error in '%s': %w", path, err)
+			}
+			instanceName = "github.com/cog-vfs/" + file.PackageName()
+		}
+
+		overlay[prefix+"/"+instanceName+"/"+info.Name()] = load.FromBytes(content)
 
 		return nil
 	})
+	if err != nil {
+		return "", err
+	}
+
+	return instanceName, nil
 }
 
-func addLibrariesToOverlay(overlay map[string]load.Source, imports []simplecue.LibraryInclude) error {
+func addLibrariesToOverlay(overlay map[string]load.Source, prefix string, imports []simplecue.LibraryInclude) error {
 	for _, importDefinition := range imports {
-		prefix := "/cog/vfs/cue.mod/pkg/" + importDefinition.ImportPath
+		err := filepath.Walk(importDefinition.FSPath, func(path string, info fs.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
 
-		if err := addDirToOverlay(overlay, prefix, importDefinition.FSPath); err != nil {
+			if info.IsDir() {
+				return nil
+			}
+
+			if !strings.HasSuffix(info.Name(), ".cue") {
+				return nil
+			}
+
+			content, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			overlay[prefix+"/"+importDefinition.ImportPath+"/"+info.Name()] = load.FromBytes(content)
+
+			return nil
+		})
+		if err != nil {
 			return err
 		}
 	}
@@ -271,16 +303,18 @@ func addURLToOverlay(overlay map[string]load.Source, overlayPrefix string, entry
 			if !strings.HasPrefix(importPath, "github.com") || fetched[importPath] {
 				continue
 			}
+
 			fetched[importPath] = true
 			ghInfo = parseRawGitHubURL(importPath)
 			repoPath := strings.TrimPrefix(importPath, "github.com")
+
 			pkgFiles, err := fetchGitHubDirectory(ghInfo.owner, ghInfo.repo, repoPath, ghInfo.ref)
 			if err != nil {
 				continue
 			}
+
 			for fname, fcontent := range pkgFiles {
-				overlayPath := filepath.Join("/cog/vfs/cue.mod/pkg", importPath, fname)
-				overlay[overlayPath] = load.FromBytes(fcontent)
+				overlay[overlayPrefix+"/"+importPath+"/"+fname] = load.FromBytes(fcontent)
 			}
 		}
 	}

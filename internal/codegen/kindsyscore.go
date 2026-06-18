@@ -18,7 +18,7 @@ func kindsysCoreLoader(input CueInput) (ast.Schemas, error) {
 	}
 
 	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
-		Package: input.packageName(),
+		Package: input.Package,
 		SchemaMetadata: ast.SchemaMeta{
 			Kind:       ast.SchemaKindCore,
 			Identifier: kindIdentifier,

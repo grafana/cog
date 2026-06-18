@@ -21,7 +21,7 @@ func (pipeline *Pipeline) Run(ctx context.Context) (*codejen.FS, error) {
 	pipeline.logger.Info("Parsing inputs...")
 	schemas, err := pipeline.LoadSchemas(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not load schemas: %w", err)
 	}
 
 	generatedFS := codejen.NewFS()
