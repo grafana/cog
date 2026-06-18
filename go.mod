@@ -14,7 +14,6 @@ require (
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
-	github.com/yalue/merged_fs v1.3.0
 	golang.org/x/text v0.38.0
 	golang.org/x/tools v0.46.0
 )
