@@ -294,12 +294,12 @@ func (pipeline *Pipeline) LoadSchemas(ctx context.Context) (ast.Schemas, error) 
 	// Apply common and final compiler passes
 	commonPasses, err := pipeline.commonPasses()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not initialize common schema transformations: %w", err)
 	}
 
 	allSchemas, err = commonPasses.Process(pipeline.logger, allSchemas)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not apply common schema transformations: %w", err)
 	}
 
 	return allSchemas, err

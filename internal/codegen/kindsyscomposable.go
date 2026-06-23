@@ -10,7 +10,7 @@ import (
 )
 
 func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
-	schemaRootValue, libraries, err := input.schemaRootValue("grafanaplugin")
+	schemaRootValue, libraries, err := input.schemaRootValue()
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
 	}
 
 	schema, err := simplecue.GenerateAST(schemaFromThemaLineage(schemaRootValue), simplecue.Config{
-		Package:            input.packageName(),
+		Package:            input.Package,
 		ForceNamedEnvelope: forceNamedEnvelope,
 		SchemaMetadata: ast.SchemaMeta{
 			Kind:       ast.SchemaKindComposable,

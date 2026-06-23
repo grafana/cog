@@ -62,6 +62,7 @@ func (input *KindRegistryInput) LoadSchemas(_ context.Context) (ast.Schemas, err
 				InputBase:  input.InputBase,
 				Entrypoint: entrypoint,
 				CueImports: cueImports,
+				Package:    filepath.Base(entrypoint),
 			})
 			if err != nil {
 				return err

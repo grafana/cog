@@ -16,13 +16,15 @@ type referenceResolverConfig struct {
 type referenceResolver struct {
 	config referenceResolverConfig
 
+	rootFileName    string
 	importsAliasMap map[string]string // map[alias]packageName
 	librariesMap    map[string]string // map[libraryImportPath]packageName
 }
 
 func newReferenceResolver(root cue.Value, config referenceResolverConfig) *referenceResolver {
 	resolver := &referenceResolver{
-		config: config,
+		config:       config,
+		rootFileName: getFilename(root),
 	}
 
 	resolver.importsAliasMap = resolver.buildImportsAliasMap(root)
@@ -67,6 +69,10 @@ func (resolver *referenceResolver) PackageForNode(source cueast.Node, defaultPac
 		}
 
 		scope := ident.Scope.(*cueast.File)
+		if scope.Filename == resolver.rootFileName {
+			return resolver.config.SchemaPackage, nil
+		}
+
 		if len(scope.Decls) == 0 {
 			return defaultPackage, nil
 		}
