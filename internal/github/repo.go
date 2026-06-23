@@ -40,6 +40,22 @@ func RawURLToRepoDescriptor(rawURL string) *RepoDescriptor {
 	return &RepoDescriptor{Owner: owner, Name: repo, Ref: ref}
 }
 
+// URLToRepoDescriptor extracts owner and repo from a GitHub URL.
+func URLToRepoDescriptor(repoUrl string, ref string) *RepoDescriptor {
+	u, err := url.Parse(repoUrl)
+	if err != nil || u.Host != "github.com" {
+		return nil
+	}
+
+	parts := strings.Split(strings.TrimPrefix(u.Path, "/"), "/")
+	if len(parts) < 4 {
+		return nil
+	}
+
+	owner, repo := parts[0], parts[1]
+	return &RepoDescriptor{Owner: owner, Name: repo, Ref: ref}
+}
+
 // FetchDirectory fetches all files with the given extension in a repository
 // directory via the GitHub Contents API.
 // Returns a map of filename → file content.

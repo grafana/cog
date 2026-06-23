@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
+	cueast "cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
 	"cuelang.org/go/cue/parser"
@@ -129,15 +130,23 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 	return input.filterSchema(schema)
 }
 
+type cueOverlay struct {
+	files     map[string]load.Source
+	instances map[string]bool
+}
+
 func (input *CueInput) parseCueEntrypoint(ctx context.Context, imports []simplecue.LibraryInclude) (cue.Value, error) {
 	var err error
 	var instanceName string
 
 	prefix := "/cog/vfs/cue.mod/pkg"
-	overlay := map[string]load.Source{
-		"/cog/vfs/cue.mod/module.cue": load.FromBytes([]byte(
-			"language: { version: \"v0.10.1\" }\nmodule: \"cog.vfs\"\n",
-		)),
+	overlay := cueOverlay{
+		files: map[string]load.Source{
+			"/cog/vfs/cue.mod/module.cue": load.FromBytes([]byte(
+				"language: { version: \"v0.10.1\" }\nmodule: \"cog.vfs\"\n",
+			)),
+		},
+		instances: map[string]bool{},
 	}
 
 	if err = addLibrariesToOverlay(overlay, prefix, imports); err != nil {
@@ -152,7 +161,7 @@ func (input *CueInput) parseCueEntrypoint(ctx context.Context, imports []simplec
 	}
 
 	if input.Entrypoint != "" {
-		instanceName, err = addDirToOverlay(overlay, prefix, input.Entrypoint)
+		instanceName, err = addDirToOverlay(ctx, overlay, prefix, input.Entrypoint)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not add entrypoint '%s' to overlay: %w", input.Entrypoint, err)
 		}
@@ -160,7 +169,7 @@ func (input *CueInput) parseCueEntrypoint(ctx context.Context, imports []simplec
 
 	// Load Cue files into Cue build.Instances slice
 	bis := load.Instances([]string{instanceName}, &load.Config{
-		Overlay: overlay,
+		Overlay: overlay.files,
 		// Point cue to a directory defined by the cueFsOverlay as base directory
 		// for import path resolution instead of using the current working directory.
 		// This ensures that only files/schemas defined in the vfs will be parsed.
@@ -186,7 +195,7 @@ func (input *CueInput) parseCueEntrypoint(ctx context.Context, imports []simplec
 	return value, nil
 }
 
-func addDirToOverlay(overlay map[string]load.Source, prefix string, directory string) (string, error) {
+func addDirToOverlay(ctx context.Context, overlay cueOverlay, prefix string, directory string) (string, error) {
 	absolutePath, err := filepath.Abs(directory)
 	if err != nil {
 		return "", err
@@ -211,15 +220,24 @@ func addDirToOverlay(overlay map[string]load.Source, prefix string, directory st
 			return err
 		}
 
+		file, err := parser.ParseFile(path, content, parser.ParseComments)
+		if err != nil {
+			return fmt.Errorf("parse error in '%s': %w", path, err)
+		}
+
 		if instanceName == "" {
-			file, err := parser.ParseFile(path, content, parser.ParseComments)
-			if err != nil {
-				return fmt.Errorf("parse error in '%s': %w", path, err)
-			}
 			instanceName = "github.com/cog-vfs/" + file.PackageName()
 		}
 
-		overlay[prefix+"/"+instanceName+"/"+info.Name()] = load.FromBytes(content)
+		err = addFileImportsToOverlay(ctx, overlay, prefix, file)
+		if err != nil {
+			return fmt.Errorf("could add file imports to overlay: %w", err)
+		}
+
+		instance := prefix + "/" + instanceName
+
+		overlay.files[instance+"/"+info.Name()] = load.FromBytes(content)
+		overlay.instances[instance] = true
 
 		return nil
 	})
@@ -230,7 +248,7 @@ func addDirToOverlay(overlay map[string]load.Source, prefix string, directory st
 	return instanceName, nil
 }
 
-func addLibrariesToOverlay(overlay map[string]load.Source, prefix string, imports []simplecue.LibraryInclude) error {
+func addLibrariesToOverlay(overlay cueOverlay, prefix string, imports []simplecue.LibraryInclude) error {
 	for _, importDefinition := range imports {
 		err := filepath.Walk(importDefinition.FSPath, func(path string, info fs.FileInfo, err error) error {
 			if err != nil {
@@ -250,7 +268,10 @@ func addLibrariesToOverlay(overlay map[string]load.Source, prefix string, import
 				return err
 			}
 
-			overlay[prefix+"/"+importDefinition.ImportPath+"/"+info.Name()] = load.FromBytes(content)
+			instance := prefix + "/" + importDefinition.ImportPath
+
+			overlay.files[instance+"/"+info.Name()] = load.FromBytes(content)
+			overlay.instances[instance] = true
 
 			return nil
 		})
@@ -262,7 +283,7 @@ func addLibrariesToOverlay(overlay map[string]load.Source, prefix string, import
 	return nil
 }
 
-func addURLToOverlay(ctx context.Context, overlay map[string]load.Source, overlayPrefix string, entrypoint string) (string, error) {
+func addURLToOverlay(ctx context.Context, overlay cueOverlay, overlayPrefix string, entrypoint string) (string, error) {
 	u, err := url.Parse(entrypoint)
 	if err != nil {
 		return "", err
@@ -282,49 +303,58 @@ func addURLToOverlay(ctx context.Context, overlay map[string]load.Source, overla
 		return "", fmt.Errorf("fetch directory: %w", err)
 	}
 
-	allFiles := make(map[string][]byte, len(dirFiles))
-	fetched := make(map[string]bool)
-
 	var instanceName string
 	for name, content := range dirFiles {
 		file, err := parser.ParseFile(name, content, parser.ParseComments)
 		if err != nil {
-			continue
+			return "", fmt.Errorf("parse error in '%s': %w", name, err)
 		}
 
 		if instanceName == "" {
 			instanceName = "github.com/cog-vfs/" + file.PackageName()
 		}
 
-		overlay[overlayPrefix+"/"+instanceName+"/"+name] = load.FromBytes(content)
-		allFiles[name] = content
+		instance := overlayPrefix + "/" + instanceName
 
-		for _, imp := range file.Imports {
-			importPath := strings.Trim(imp.Path.Value, `"`)
-			if !strings.HasPrefix(importPath, "github.com") || fetched[importPath] {
-				continue
-			}
+		overlay.files[instance+"/"+name] = load.FromBytes(content)
+		overlay.instances[instance] = true
 
-			// TODO: check if the import is already included via the "libraries includes"
-
-			fetched[importPath] = true
-			// TODO: this isn't a raw url :o
-			ghInfo = github.RawURLToRepoDescriptor(importPath)
-			if ghInfo == nil {
-				return "", fmt.Errorf("could not parse import path as repo descriptor: %s", importPath)
-			}
-
-			repoPath := strings.TrimPrefix(importPath, "github.com")
-			pkgFiles, err := github.FetchDirectory(ctx, *ghInfo, repoPath, ".cue")
-			if err != nil {
-				return "", fmt.Errorf("could not fetch import path: %s", importPath)
-			}
-
-			for fileName, fileContent := range pkgFiles {
-				overlay[overlayPrefix+"/"+importPath+"/"+fileName] = load.FromBytes(fileContent)
-			}
+		err = addFileImportsToOverlay(ctx, overlay, overlayPrefix, file)
+		if err != nil {
+			return "", fmt.Errorf("could add file imports to overlay: %w", err)
 		}
 	}
 
 	return instanceName, nil
+}
+
+func addFileImportsToOverlay(ctx context.Context, overlay cueOverlay, overlayPrefix string, file *cueast.File) error {
+	for _, imp := range file.Imports {
+		importPath := strings.Trim(imp.Path.Value, `"`)
+		instance := overlayPrefix + "/" + importPath
+
+		if !strings.HasPrefix(importPath, "github.com") || overlay.instances[instance] {
+			// TODO: log? (could also just be an import if a standard pkg)
+			continue
+		}
+
+		// TODO: make the ref configurable?
+		ghInfo := github.URLToRepoDescriptor("https://"+importPath, "main")
+		if ghInfo == nil {
+			return fmt.Errorf("could not parse import path as repo descriptor: %s", importPath)
+		}
+
+		repoPath := strings.TrimPrefix(importPath, fmt.Sprintf("github.com/%s/%s/", ghInfo.Owner, ghInfo.Name))
+		pkgFiles, err := github.FetchDirectory(ctx, *ghInfo, repoPath, ".cue")
+		if err != nil {
+			return fmt.Errorf("could not fetch import path %s: %w", importPath, err)
+		}
+
+		for fileName, fileContent := range pkgFiles {
+			overlay.files[instance+"/"+fileName] = load.FromBytes(fileContent)
+			overlay.instances[instance] = true
+		}
+	}
+
+	return nil
 }
