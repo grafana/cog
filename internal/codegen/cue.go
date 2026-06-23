@@ -3,7 +3,6 @@ package codegen
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/fs"
 	"net/url"
 	"os"
@@ -15,7 +14,7 @@ import (
 	"cuelang.org/go/cue/load"
 	"cuelang.org/go/cue/parser"
 	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/httputil"
+	"github.com/grafana/cog/internal/github"
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/grafana/cog/internal/tools"
 )
@@ -93,7 +92,7 @@ func (input *CueInput) schemaRootValue() (cue.Value, []simplecue.LibraryInclude,
 		return cue.Value{}, nil, err
 	}
 
-	value, err := input.parseCueEntrypoint(libraries)
+	value, err := input.parseCueEntrypoint(context.Background(), libraries)
 	if err != nil {
 		return cue.Value{}, nil, fmt.Errorf("could not parse cue entrypoint: %w", err)
 	}
@@ -130,7 +129,7 @@ func cueLoader(input CueInput) (ast.Schemas, error) {
 	return input.filterSchema(schema)
 }
 
-func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude) (cue.Value, error) {
+func (input *CueInput) parseCueEntrypoint(ctx context.Context, imports []simplecue.LibraryInclude) (cue.Value, error) {
 	var err error
 	var instanceName string
 
@@ -146,7 +145,7 @@ func (input *CueInput) parseCueEntrypoint(imports []simplecue.LibraryInclude) (c
 	}
 
 	if input.URL != "" {
-		instanceName, err = addURLToOverlay(overlay, prefix, input.URL)
+		instanceName, err = addURLToOverlay(ctx, overlay, prefix, input.URL)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not add URL '%s' to overlay: %w", input.URL, err)
 		}
@@ -263,20 +262,22 @@ func addLibrariesToOverlay(overlay map[string]load.Source, prefix string, import
 	return nil
 }
 
-func addURLToOverlay(overlay map[string]load.Source, overlayPrefix string, entrypoint string) (string, error) {
+func addURLToOverlay(ctx context.Context, overlay map[string]load.Source, overlayPrefix string, entrypoint string) (string, error) {
 	u, err := url.Parse(entrypoint)
 	if err != nil {
 		return "", err
 	}
 
 	if !strings.HasSuffix(u.Path, ".cue") {
-		return "", fmt.Errorf("entrypoint %q must be a cue url", entrypoint)
+		return "", fmt.Errorf("entrypoint %s must be a cue url", entrypoint)
 	}
 
-	ghInfo := parseRawGitHubURL(entrypoint)
-	dirPath := repoDirPath(entrypoint)
+	ghInfo := github.RawURLToRepoDescriptor(entrypoint)
+	if ghInfo == nil {
+		return "", fmt.Errorf("could not parse raw url as repo descriptor: %s", entrypoint)
+	}
 
-	dirFiles, err := fetchGitHubDirectory(ghInfo.owner, ghInfo.repo, dirPath, ghInfo.ref)
+	dirFiles, err := github.FetchDirectory(ctx, *ghInfo, github.DirPath(entrypoint), ".cue")
 	if err != nil {
 		return "", fmt.Errorf("fetch directory: %w", err)
 	}
@@ -304,109 +305,26 @@ func addURLToOverlay(overlay map[string]load.Source, overlayPrefix string, entry
 				continue
 			}
 
-			fetched[importPath] = true
-			ghInfo = parseRawGitHubURL(importPath)
-			repoPath := strings.TrimPrefix(importPath, "github.com")
+			// TODO: check if the import is already included via the "libraries includes"
 
-			pkgFiles, err := fetchGitHubDirectory(ghInfo.owner, ghInfo.repo, repoPath, ghInfo.ref)
-			if err != nil {
-				continue
+			fetched[importPath] = true
+			// TODO: this isn't a raw url :o
+			ghInfo = github.RawURLToRepoDescriptor(importPath)
+			if ghInfo == nil {
+				return "", fmt.Errorf("could not parse import path as repo descriptor: %s", importPath)
 			}
 
-			for fname, fcontent := range pkgFiles {
-				overlay[overlayPrefix+"/"+importPath+"/"+fname] = load.FromBytes(fcontent)
+			repoPath := strings.TrimPrefix(importPath, "github.com")
+			pkgFiles, err := github.FetchDirectory(ctx, *ghInfo, repoPath, ".cue")
+			if err != nil {
+				return "", fmt.Errorf("could not fetch import path: %s", importPath)
+			}
+
+			for fileName, fileContent := range pkgFiles {
+				overlay[overlayPrefix+"/"+importPath+"/"+fileName] = load.FromBytes(fileContent)
 			}
 		}
 	}
 
 	return instanceName, nil
-}
-
-// repoDirPath extracts the repo-relative directory path from a raw GitHub URL.
-// For "https://raw.githubusercontent.com/owner/repo/refs/heads/main/apps/iam/kinds/manifest.cue"
-// it returns "apps/iam/kinds".
-func repoDirPath(rawURL string) string {
-	u, err := url.Parse(rawURL)
-	if err != nil || u.Host != "raw.githubusercontent.com" {
-		return ""
-	}
-	ghInfo := parseRawGitHubURL(rawURL)
-	if ghInfo == nil {
-		return ""
-	}
-	refParts := strings.Split(ghInfo.ref, "/")
-	// allParts: [owner, repo, ref_part1, ..., ref_partN, path_part1, ..., filename]
-	allParts := strings.Split(strings.TrimPrefix(u.Path, "/"), "/")
-	skip := 2 + len(refParts) // skip owner + repo + ref segments
-	if skip >= len(allParts) {
-		return ""
-	}
-	pathParts := allParts[skip : len(allParts)-1] // exclude filename
-	return strings.Join(pathParts, "/")
-}
-
-// rawGitHubURLInfo holds components extracted from a raw.githubusercontent.com URL.
-type rawGitHubURLInfo struct {
-	owner string
-	repo  string
-	ref   string
-}
-
-// parseRawGitHubURL extracts owner, repo, and ref from a raw GitHub URL.
-// Handles both "refs/heads/main" and bare branch names.
-func parseRawGitHubURL(rawURL string) *rawGitHubURLInfo {
-	u, err := url.Parse(rawURL)
-	if err != nil || u.Host != "raw.githubusercontent.com" {
-		return nil
-	}
-	parts := strings.Split(strings.TrimPrefix(u.Path, "/"), "/")
-	if len(parts) < 4 {
-		return nil
-	}
-	owner, repo := parts[0], parts[1]
-	var ref string
-	if parts[2] == "refs" && len(parts) > 4 {
-		ref = strings.Join(parts[2:5], "/")
-	} else {
-		ref = parts[2]
-	}
-	return &rawGitHubURLInfo{owner: owner, repo: repo, ref: ref}
-}
-
-// fetchGitHubDirectory fetches all *.cue files in a repository directory via
-// the GitHub Contents API. Returns a map of filename → file content.
-func fetchGitHubDirectory(owner string, repo string, dirPath string, ref string) (map[string][]byte, error) {
-	// Note: ref may contain slashes (e.g. "refs/heads/main") which must NOT be
-	// percent-encoded in the query string — the GitHub API expects them raw.
-	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s?ref=%s", owner, repo, dirPath, ref)
-
-	var entries []struct {
-		Name        string `json:"name"`
-		Type        string `json:"type"`
-		DownloadURL string `json:"download_url"`
-	}
-	if err := httputil.LoadJSON(context.Background(), apiURL, &entries); err != nil {
-		return nil, err
-	}
-
-	files := make(map[string][]byte)
-	for _, entry := range entries {
-		if entry.Type != "file" || !strings.HasSuffix(entry.Name, ".cue") {
-			continue
-		}
-
-		body, err := httputil.LoadURL(context.Background(), entry.DownloadURL)
-		if err != nil {
-			return nil, err
-		}
-		defer func() { _ = body.Close() }()
-
-		data, err := io.ReadAll(body)
-		if err != nil {
-			continue
-		}
-
-		files[entry.Name] = data
-	}
-	return files, nil
 }
