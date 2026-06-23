@@ -149,7 +149,7 @@ func (input *CueInput) parseCueEntrypoint(ctx context.Context, imports []simplec
 		instances: map[string]bool{},
 	}
 
-	if err = addLibrariesToOverlay(overlay, prefix, imports); err != nil {
+	if err = addLibrariesToOverlay(ctx, overlay, prefix, imports); err != nil {
 		return cue.Value{}, fmt.Errorf("could not add libraries to overlay: %w", err)
 	}
 
@@ -195,6 +195,7 @@ func (input *CueInput) parseCueEntrypoint(ctx context.Context, imports []simplec
 	return value, nil
 }
 
+// addDirToOverlay adds the contents of the given directory to the overlay, as an entrypoint.
 func addDirToOverlay(ctx context.Context, overlay cueOverlay, prefix string, directory string) (string, error) {
 	absolutePath, err := filepath.Abs(directory)
 	if err != nil {
@@ -229,15 +230,15 @@ func addDirToOverlay(ctx context.Context, overlay cueOverlay, prefix string, dir
 			instanceName = "github.com/cog-vfs/" + file.PackageName()
 		}
 
-		err = addFileImportsToOverlay(ctx, overlay, prefix, file)
-		if err != nil {
-			return fmt.Errorf("could add file imports to overlay: %w", err)
-		}
-
 		instance := prefix + "/" + instanceName
 
 		overlay.files[instance+"/"+info.Name()] = load.FromBytes(content)
 		overlay.instances[instance] = true
+
+		err = addFileImportsToOverlay(ctx, overlay, prefix, file)
+		if err != nil {
+			return fmt.Errorf("could add file imports to overlay: %w", err)
+		}
 
 		return nil
 	})
@@ -248,7 +249,10 @@ func addDirToOverlay(ctx context.Context, overlay cueOverlay, prefix string, dir
 	return instanceName, nil
 }
 
-func addLibrariesToOverlay(overlay cueOverlay, prefix string, imports []simplecue.LibraryInclude) error {
+// addLibrariesToOverlay adds libraries from the local filesystem to the overlay.
+// The libraries included here will be available for the entrypoint to use,
+// similar to how an "include path" would behave.
+func addLibrariesToOverlay(ctx context.Context, overlay cueOverlay, prefix string, imports []simplecue.LibraryInclude) error {
 	for _, importDefinition := range imports {
 		err := filepath.Walk(importDefinition.FSPath, func(path string, info fs.FileInfo, err error) error {
 			if err != nil {
@@ -273,6 +277,16 @@ func addLibrariesToOverlay(overlay cueOverlay, prefix string, imports []simplecu
 			overlay.files[instance+"/"+info.Name()] = load.FromBytes(content)
 			overlay.instances[instance] = true
 
+			file, err := parser.ParseFile(path, content, parser.ParseComments)
+			if err != nil {
+				return fmt.Errorf("parse error in '%s': %w", path, err)
+			}
+
+			err = addFileImportsToOverlay(ctx, overlay, prefix, file)
+			if err != nil {
+				return fmt.Errorf("could add file imports to overlay: %w", err)
+			}
+
 			return nil
 		})
 		if err != nil {
@@ -283,6 +297,7 @@ func addLibrariesToOverlay(overlay cueOverlay, prefix string, imports []simplecu
 	return nil
 }
 
+// addDirToOverlay adds the contents of the given URL to the overlay, as an entrypoint.
 func addURLToOverlay(ctx context.Context, overlay cueOverlay, overlayPrefix string, entrypoint string) (string, error) {
 	u, err := url.Parse(entrypoint)
 	if err != nil {
