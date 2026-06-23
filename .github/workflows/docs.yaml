@@ -1,9 +1,11 @@
 name: Publish documentation
-
 on:
   workflow_dispatch: ~
   push:
     tags: ["v*"]
+
+permissions:
+  contents: read
 
 env:
   DEVBOX_VERSION: 0.14.0

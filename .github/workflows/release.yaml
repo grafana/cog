@@ -1,11 +1,10 @@
 name: Release
-
 on:
   push:
     tags: ["v*"]
 
 permissions:
-  contents: write # To create a GitHub release
+  contents: read
 
 env:
   DEVBOX_VERSION: 0.14.0
@@ -20,6 +19,9 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # To create a GitHub release
 
     steps:
       - name: Checkout

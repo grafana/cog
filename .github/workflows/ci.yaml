@@ -4,6 +4,9 @@ on:
   push:
     branches: [main] # so that we build a Go cache that can be re-used in PRs
 
+permissions:
+  contents: read
+
 env:
   DEVBOX_VERSION: 0.14.0
 
