@@ -1,13 +1,15 @@
 package codegen
 
 import (
+	"context"
+
 	"cuelang.org/go/cue"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
 )
 
 func kindsysCoreLoader(input CueInput) (ast.Schemas, error) {
-	schemaRootValue, libraries, err := input.schemaRootValue()
+	schemaRootValue, libraries, err := input.schemaRootValue(context.Background())
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {
-	schemaRootValue, libraries, err := input.schemaRootValue()
+	schemaRootValue, libraries, err := input.schemaRootValue(context.Background())
 	if err != nil {
 		return nil, err
 	}
