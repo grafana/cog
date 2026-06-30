@@ -3,34 +3,36 @@ package time_hint
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
 	timetypes "github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
+	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
-type ObjTime types.String
+type ObjTimeModel = types.String
+var ObjTimeType = timetypes.RFC3339
 
-type ObjWithTimeField struct {
- RegisteredAt timetypes.RFC3339 `tfsdk:"registeredAt"`
-Duration timetypes.GoDurationType `tfsdk:"duration"`
- }
 
-var SpecAttributes = map[string]schema.Attribute{
-"obj_time": schema.StringAttribute{
- Required: true,
-CustomType: timetypes.RFC3339Type{},
+type ObjWithTimeFieldModel struct {
+	RegisteredAt timetypes.RFC3339 `tfsdk:"registered_at"`
+	Duration timetypes.GoDurationType `tfsdk:"duration"`
+}
+var ObjWithTimeFieldType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"registered_at": timetypes.RFC3339,
+		"duration": timetypes.GoDurationType,
+	},
+}
+var ObjWithTimeFieldSchema = schema.SingleNestedBlock{
+	Attributes: map[string]schema.Attribute{
+	"registered_at": schema.StringAttribute{
+	Required: true,
+	CustomType: timetypes.RFC3339Type{},
 },
-"obj_with_time_field": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"registered_at": schema.StringAttribute{
- Required: true,
-CustomType: timetypes.RFC3339Type{},
+	"duration": schema.StringAttribute{
+	Required: true,
+	CustomType: timetypes.GoDurationType{},
 },
-
-"duration": schema.StringAttribute{
- Required: true,
-CustomType: timetypes.GoDurationType{},
 },
-
-},
+	Blocks: map[string]schema.Block{
 },
 }
+

@@ -12,14 +12,24 @@ import (
 
 const LanguageRef = "terraform"
 
+type ValidatorsConfig struct {
+	// Name of a validator function that verifies that exactly n of the
+	// specified attributes are configured.
+	// Expected signature: `func(n int, attributeNames ...string) validator.Object`
+	AttributeCountExactly string
+
+	// Name of a validator function that verifies that required attributes are
+	// set only when a block is configured.
+	// Expected signature: `func(names ...string) validator.Object`
+	RequireAttrsWhenPresent string
+}
+
 type Config struct {
 	debug bool
 
 	// Root path for imports.
 	// Ex: github.com/grafana/cog/generated
 	PackageRoot string `yaml:"package_root"`
-
-	PrefixAttributeSpec string `yaml:"-"`
 
 	// OverridesTemplatesDirectories holds a list of directories containing templates
 	// defining blocks used to override parts of builders/types/....
@@ -32,6 +42,8 @@ type Config struct {
 	// SkipPostFormatting disables formatting of Go files done with go imports
 	// after code generation.
 	SkipPostFormatting bool `yaml:"skip_post_formatting"`
+
+	Validators ValidatorsConfig `yaml:"-"`
 }
 
 type Language struct {

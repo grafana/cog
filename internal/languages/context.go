@@ -133,6 +133,23 @@ func (context *Context) ResolveToStruct(def ast.Type) bool {
 	return context.ResolveToStruct(referredObj.Type)
 }
 
+func (context *Context) ResolveRefsChain(def ast.Type) ast.Type {
+	if !def.IsRef() {
+		return def
+	}
+
+	referredObj, found := context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+	if !found {
+		return def
+	}
+
+	if !referredObj.Type.IsRef() {
+		return def
+	}
+
+	return context.ResolveRefsChain(referredObj.Type)
+}
+
 func (context *Context) ResolveRefs(def ast.Type) ast.Type {
 	if !def.IsRef() {
 		return def

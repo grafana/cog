@@ -2,85 +2,65 @@ package scalars
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
-	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	stringdefault "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 )
 
-const ConstTypeString = "foo"
+const ConstTypeStringModel = "foo"
+var ConstTypeStringType = types.StringType
 
-type ScalarTypeAny types.Object
 
-type ScalarTypeBool types.Bool
+type ScalarTypeAnyModel = types.String
+var ScalarTypeAnyType = types.StringType
 
-type ScalarTypeBytes types.String
 
-type ScalarTypeString types.String
+type ScalarTypeBoolModel = types.Bool
+var ScalarTypeBoolType = types.BoolType
 
-type ScalarTypeFloat32 types.Float32
 
-type ScalarTypeFloat64 types.Float64
+type ScalarTypeBytesModel = types.String
+var ScalarTypeBytesType = types.StringType
 
-type ScalarTypeUint8 types.Number
 
-type ScalarTypeUint16 types.Number
+type ScalarTypeStringModel = types.String
+var ScalarTypeStringType = types.StringType
 
-type ScalarTypeUint32 types.Int32
 
-type ScalarTypeUint64 types.Int64
+type ScalarTypeFloat32Model = types.Float32
+var ScalarTypeFloat32Type = types.Float32Type
 
-type ScalarTypeInt8 types.Number
 
-type ScalarTypeInt16 types.Number
+type ScalarTypeFloat64Model = types.Float64
+var ScalarTypeFloat64Type = types.Float64Type
 
-type ScalarTypeInt32 types.Int32
 
-type ScalarTypeInt64 types.Int64
+type ScalarTypeUint8Model = types.Number
+var ScalarTypeUint8Type = types.NumberType
 
-var SpecAttributes = map[string]schema.Attribute{
-"const_type_string": schema.StringAttribute{
- Required: true,
-Default: stringdefault.StaticString("foo"),
-},
-"scalar_type_any": schema.ObjectAttribute{
- Required: true,
-},
-"scalar_type_bool": schema.BoolAttribute{
- Required: true,
-},
-"scalar_type_bytes": schema.StringAttribute{
- Required: true,
-},
-"scalar_type_string": schema.StringAttribute{
- Required: true,
-},
-"scalar_type_float32": schema.Float32Attribute{
- Required: true,
-},
-"scalar_type_float64": schema.Float64Attribute{
- Required: true,
-},
-"scalar_type_uint8": schema.NumberAttribute{
- Required: true,
-},
-"scalar_type_uint16": schema.NumberAttribute{
- Required: true,
-},
-"scalar_type_uint32": schema.Int32Attribute{
- Required: true,
-},
-"scalar_type_uint64": schema.Int64Attribute{
- Required: true,
-},
-"scalar_type_int8": schema.NumberAttribute{
- Required: true,
-},
-"scalar_type_int16": schema.NumberAttribute{
- Required: true,
-},
-"scalar_type_int32": schema.Int32Attribute{
- Required: true,
-},
-"scalar_type_int64": schema.Int64Attribute{
- Required: true,
-},
-}
+
+type ScalarTypeUint16Model = types.Number
+var ScalarTypeUint16Type = types.NumberType
+
+
+type ScalarTypeUint32Model = types.Int32
+var ScalarTypeUint32Type = types.Int32Type
+
+
+type ScalarTypeUint64Model = types.Int64
+var ScalarTypeUint64Type = types.Int64Type
+
+
+type ScalarTypeInt8Model = types.Number
+var ScalarTypeInt8Type = types.NumberType
+
+
+type ScalarTypeInt16Model = types.Number
+var ScalarTypeInt16Type = types.NumberType
+
+
+type ScalarTypeInt32Model = types.Int32
+var ScalarTypeInt32Type = types.Int32Type
+
+
+type ScalarTypeInt64Model = types.Int64
+var ScalarTypeInt64Type = types.Int64Type
+
+

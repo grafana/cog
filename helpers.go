@@ -277,9 +277,20 @@ func (pipeline *SchemaToTypesPipeline) GenerateOpenAPI(config OpenAPIGenerationC
 	return pipeline
 }
 
+type TerraformValidators struct {
+	// Name of a validator function that verifies that exactly n of the
+	// specified attributes are configured.
+	// Expected signature: `func(n int, attributeNames ...string) validator.Object`
+	AttributeCountExactly string
+
+	// Name of a validator function that verifies that required attributes are
+	// set only when a block is configured.
+	// Expected signature: `func(names ...string) validator.Object`
+	RequireAttrsWhenPresent string
+}
+
 type TerraformConfig struct {
-	PrefixAttributeSpec string
-	SkipPostFormatting  bool
+	SkipPostFormatting bool
 
 	// CustomTemplatesDirectories accepts a list of directories containing custom templates.
 	CustomTemplatesDirectories []string
@@ -287,16 +298,21 @@ type TerraformConfig struct {
 	CustomTemplatesFS fs.FS
 	// CustomTemplatesFuncs holds additional functions to be injected into templates.
 	CustomTemplatesFuncs map[string]any
+
+	Validators TerraformValidators
 }
 
 func (pipeline *SchemaToTypesPipeline) Terraform(config TerraformConfig) *SchemaToTypesPipeline {
 	pipeline.output = &codegen.OutputLanguage{
 		Terraform: &terraform.Config{
 			SkipPostFormatting:            config.SkipPostFormatting,
-			PrefixAttributeSpec:           config.PrefixAttributeSpec,
 			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
 			OverridesTemplatesFS:          config.CustomTemplatesFS,
 			OverridesTemplateFuncs:        config.CustomTemplatesFuncs,
+			Validators: terraform.ValidatorsConfig{
+				AttributeCountExactly:   config.Validators.AttributeCountExactly,
+				RequireAttrsWhenPresent: config.Validators.RequireAttrsWhenPresent,
+			},
 		},
 	}
 	return pipeline

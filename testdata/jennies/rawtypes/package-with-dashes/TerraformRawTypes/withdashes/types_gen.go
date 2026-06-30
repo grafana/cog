@@ -2,29 +2,57 @@ package withdashes
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-type SomeStruct struct {
- FieldAny types.Object `tfsdk:"FieldAny"`
- }
-
-// Refresh rate or disabled.
-type RefreshRate = StringOrBool
-
-type StringOrBool struct {
- String types.String `tfsdk:"String"`
-Bool types.Bool `tfsdk:"Bool"`
- }
-
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
+type SomeStructModel struct {
+	FieldAny types.String `tfsdk:"field_any"`
+}
+var SomeStructType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"field_any": types.StringType,
+	},
+}
+var SomeStructSchema = schema.SingleNestedBlock{
+	Attributes: map[string]schema.Attribute{
+	"field_any": schema.StringAttribute{
+	Required: true,
 },
-
 },
+	Blocks: map[string]schema.Block{
 },
 }
+
+// Refresh rate or disabled.
+type RefreshRateModel = types.Object
+var RefreshRateType = StringOrBoolType
+
+
+type StringOrBoolModel struct {
+	String types.String `tfsdk:"string"`
+	Bool types.Bool `tfsdk:"bool"`
+}
+var StringOrBoolType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"string": types.StringType,
+		"bool": types.BoolType,
+	},
+}
+var StringOrBoolSchema = schema.SingleNestedBlock{
+	Attributes: map[string]schema.Attribute{
+	"string": schema.StringAttribute{
+	Optional: true,
+},
+	"bool": schema.BoolAttribute{
+	Optional: true,
+},
+},
+	Blocks: map[string]schema.Block{
+},
+	Validators: []validator.Object{
+		(1, "string", "bool"),
+	},
+}
+

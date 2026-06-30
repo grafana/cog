@@ -23,6 +23,22 @@ func formatObjectName(name string) string {
 	return tools.UpperCamelCase(name)
 }
 
+func formatModelName(ref ast.RefType) string {
+	return formatObjectName(ref.ReferredType) + "Model"
+}
+
+func formatModelFieldName(name string) string {
+	return tools.UpperCamelCase(name)
+}
+
+func formatTypeName(ref ast.RefType) string {
+	return formatObjectName(ref.ReferredType) + "Type"
+}
+
+func formatTfSDKAttrName(input string) string {
+	return tools.SnakeCase(input)
+}
+
 func formatScalar(val any) string {
 	if val == nil {
 		return "nil"
@@ -42,19 +58,6 @@ func formatScalar(val any) string {
 	return fmt.Sprintf("%#v", val)
 }
 
-func formatComments(objectComments []string) string {
-	comments := ""
-	if len(objectComments) > 0 {
-		comments += "`\n"
-
-		for _, comment := range objectComments {
-			comments += comment + "\n"
-		}
-		comments += "`"
-	}
-	return comments
-}
-
 func formatEnumValuesAsConstraints(enumValues []ast.EnumValue) []ast.TypeConstraint {
 	values := make([]any, len(enumValues))
 	for i, v := range enumValues {
@@ -63,8 +66,31 @@ func formatEnumValuesAsConstraints(enumValues []ast.EnumValue) []ast.TypeConstra
 
 	return []ast.TypeConstraint{
 		{
-			ast.EqualOp,
-			values,
+			Op:   ast.EqualOp,
+			Args: values,
 		},
+	}
+}
+
+func formatScalarAsModel(scalar ast.ScalarType) string {
+	switch scalar.ScalarKind {
+	case ast.KindString, ast.KindBytes, ast.KindNull:
+		return "types.String"
+	case ast.KindBool:
+		return "types.Bool"
+	case ast.KindInt32, ast.KindUint32:
+		return "types.Int32"
+	case ast.KindInt64, ast.KindUint64:
+		return "types.Int64"
+	case ast.KindFloat32:
+		return "types.Float32"
+	case ast.KindFloat64:
+		return "types.Float64"
+	case ast.KindAny:
+		return "types.String" // `any` should be represented as a string holding a JSON payload
+	case ast.KindInt8, ast.KindUint8, ast.KindInt16, ast.KindUint16:
+		return "types.Number" // types.Number can be converted into any numeric type https://developer.hashicorp.com/terraform/plugin/framework/handling-data/types/number#setting-values
+	default:
+		return fmt.Sprintf("unsupported scalar kind '%s'", scalar.ScalarKind)
 	}
 }

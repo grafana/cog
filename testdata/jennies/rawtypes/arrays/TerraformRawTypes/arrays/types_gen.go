@@ -2,46 +2,46 @@ package arrays
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
 // List of tags, maybe?
-type ArrayOfStrings types.List
+type ArrayOfStringsModel = types.List
+var ArrayOfStringsType = types.ListType{
+	ElemType: types.StringType,
+}
 
-type SomeStruct struct {
- FieldAny types.Object `tfsdk:"FieldAny"`
- }
 
-type ArrayOfRefs []SomeStruct
-
-type ArrayOfArrayOfNumbers types.List
-
-var SpecAttributes = map[string]schema.Attribute{
-"array_of_strings": schema.ListAttribute{
- ElementType: types.StringType,
-},
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
+type SomeStructModel struct {
+	FieldAny types.String `tfsdk:"field_any"`
+}
+var SomeStructType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"field_any": types.StringType,
+	},
+}
+var SomeStructSchema = schema.SingleNestedBlock{
+	Attributes: map[string]schema.Attribute{
+	"field_any": schema.StringAttribute{
+	Required: true,
 },
 },
-"array_of_refs": schema.ListNestedAttribute{
-NestedObject: schema.NestedAttributeObject {
-Attributes: map[string]schema.Attribute {
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
-},
-},
-"array_of_array_of_numbers": schema.ListAttribute{
- ElementType: types.ListType{
- ElemType: types.Int64Type,
-},
+	Blocks: map[string]schema.Block{
 },
 }
+
+type ArrayOfRefsModel = types.List
+var ArrayOfRefsType = types.ListType{
+	ElemType: SomeStructType,
+}
+
+
+type ArrayOfArrayOfNumbersModel = types.List
+var ArrayOfArrayOfNumbersType = types.ListType{
+	ElemType: types.ListType{
+	ElemType: types.Int64Type,
+},
+}
+
+

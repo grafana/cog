@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/internal/languages"
 )
 
 type scalarValidator struct {
@@ -18,13 +19,15 @@ type scalarValidator struct {
 }
 
 type validators struct {
-	typeFormatter        *typeFormatter
+	context              languages.Context
+	packageMapper        func(pkg string) string
 	validatorDefinitions map[ast.ScalarKind]scalarValidator
 }
 
-func newValidators(typeFormatter *typeFormatter) *validators {
+func newValidators(context languages.Context, packageMapper func(pkg string) string) *validators {
 	return &validators{
-		typeFormatter: typeFormatter,
+		context:       context,
+		packageMapper: packageMapper,
 		validatorDefinitions: map[ast.ScalarKind]scalarValidator{
 			ast.KindString: {
 				importName: "stringvalidator",
@@ -130,11 +133,11 @@ func (v *validators) scalarValidator(kind ast.ScalarKind, constraints []ast.Type
 			return ""
 		}
 		var buffer strings.Builder
-		v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/schema/validator")
-		v.typeFormatter.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework-validators/%s", validator.importName))
+		v.packageMapper("github.com/hashicorp/terraform-plugin-framework/schema/validator")
+		v.packageMapper(fmt.Sprintf("github.com/hashicorp/terraform-plugin-framework-validators/%s", validator.importName))
 		buffer.WriteString(fmt.Sprintf("[]validator.%s{\n", validator.name))
 		buffer.WriteString(constraintsStr)
-		buffer.WriteString("},\n")
+		buffer.WriteString("}")
 		return buffer.String()
 	}
 
@@ -160,7 +163,7 @@ func (v *validators) constraints(validator scalarValidator, constraints []ast.Ty
 			buffer.WriteString(fmt.Sprintf("%s.%s(%+v),\n", validator.importName, validator.equalFunc, strings.Join(args, ", ")))
 		case ast.RegexMatchOp:
 			if validator.regexFunc != "" {
-				v.typeFormatter.packageMapper("regexp")
+				v.packageMapper("regexp")
 				buffer.WriteString(fmt.Sprintf("%s.%s(regexp.MustCompile(`%s`), \"\"),\n", validator.importName, validator.regexFunc, c.Args[0]))
 			}
 		}
@@ -175,8 +178,8 @@ func (v *validators) arrayConstraintValidator(constraints []ast.TypeConstraint) 
 	}
 
 	var buffer strings.Builder
-	v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework/schema/validator")
-	v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
+	v.packageMapper("github.com/hashicorp/terraform-plugin-framework/schema/validator")
+	v.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
 	buffer.WriteString("[]validator.List{\n")
 	for _, c := range constraints {
 		switch c.Op {
@@ -188,7 +191,7 @@ func (v *validators) arrayConstraintValidator(constraints []ast.TypeConstraint) 
 			buffer.WriteString("listvalidator.UniqueValues(),\n")
 		}
 	}
-	buffer.WriteString("},\n")
+	buffer.WriteString("}")
 	return buffer.String()
 }
 
@@ -196,14 +199,14 @@ func (v *validators) validateList(def ast.Type) string {
 	var buffer strings.Builder
 	switch def.Kind {
 	case ast.KindRef:
-		obj, ok := v.typeFormatter.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
+		obj, ok := v.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 		if !ok {
 			return "unknown validator"
 		}
 
 		return v.validateList(obj.Type)
 	case ast.KindEnum:
-		v.typeFormatter.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
+		v.packageMapper("github.com/hashicorp/terraform-plugin-framework-validators/listvalidator")
 		buffer.WriteString("[]validator.List{\n")
 		validatorType := "ValueStringsAre"
 		kind := def.AsEnum().Values[0].Type.AsScalar().ScalarKind
@@ -212,7 +215,7 @@ func (v *validators) validateList(def ast.Type) string {
 		}
 
 		constraints := formatEnumValuesAsConstraints(def.AsEnum().Values)
-		buffer.WriteString(fmt.Sprintf("listvalidator.%s(%s),\n},\n", validatorType, v.constraints(v.validatorDefinitions[kind], constraints)))
+		buffer.WriteString(fmt.Sprintf("listvalidator.%s(%s),\n}", validatorType, v.constraints(v.validatorDefinitions[kind], constraints)))
 	default:
 		return ""
 	}
