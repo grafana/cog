@@ -56,7 +56,12 @@
       "Type": {
         "Kind": "disjunction",
         "Nullable": false,
-        "Default": "browser",
+        "TypedDefault": {
+          "Kind": "scalar",
+          "Scalar": {
+            "Value": "browser"
+          }
+        },
         "Disjunction": {
           "Branches": [
             {

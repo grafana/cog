@@ -244,7 +244,7 @@ func (jenny RawTypes) generateConstructor(buffer *strings.Builder, context langu
 	buffer.WriteString("\n}\n")
 }
 
-func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast.RefType, objectType ast.Type, maybeExtraDefaults any) string {
+func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast.RefType, objectType ast.Type, extraTyped *ast.TypedDefault) string {
 	var buffer strings.Builder
 
 	objectName := formatObjectName(objectRef.ReferredType)
@@ -255,10 +255,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 	buffer.WriteString(objectName)
 	buffer.WriteString("{\n")
 
-	extraDefaults := map[string]any{}
-	if val, ok := maybeExtraDefaults.(map[string]any); ok {
-		extraDefaults = val
-	}
+	extraDefaults := structFieldDefaultsAsAny(extraTyped)
 
 	for _, field := range objectType.Struct.Fields {
 		resolvedFieldType := context.ResolveRefs(field.Type)
@@ -281,7 +278,7 @@ func (jenny RawTypes) defaultsForStruct(context languages.Context, objectRef ast
 }
 
 func fieldNeedsExplicitDefault(field ast.StructField, resolvedFieldType ast.Type, extraDefaults map[string]any) bool {
-	return field.Type.Default != nil ||
+	return field.Type.TypedDefault != nil ||
 		extraDefaults[field.Name] != nil ||
 		(field.Required && field.Type.IsRef() && resolvedFieldType.IsStruct()) ||
 		(field.Required && field.Type.IsArray()) ||
@@ -301,13 +298,13 @@ func (jenny RawTypes) defaultValueForField(context languages.Context, field ast.
 	switch {
 	case field.Type.IsConcreteScalar():
 		return jenny.maybeValueAsPointer(formatScalar(field.Type.Scalar.Value), field.Type.Nullable, resolvedFieldType), false
-	case resolvedFieldType.IsMap() && field.Type.Default != nil:
+	case resolvedFieldType.IsMap() && field.Type.TypedDefault != nil:
 		return jenny.maybeValueAsPointer(jenny.defaultForMapWithDefault(field, resolvedFieldType), field.Type.Nullable, resolvedFieldType), false
-	case resolvedFieldType.IsArray() && field.Type.Default != nil:
+	case resolvedFieldType.IsArray() && field.Type.TypedDefault != nil:
 		return jenny.maybeValueAsPointer(jenny.defaultForArrayWithDefault(field, resolvedFieldType), field.Type.Nullable, resolvedFieldType), false
-	case resolvedFieldType.IsScalar() && field.Type.Default != nil:
-		return jenny.maybeValueAsPointer(formatScalar(field.Type.Default), field.Type.Nullable, resolvedFieldType), false
-	case field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.Default != nil:
+	case resolvedFieldType.IsScalar() && field.Type.TypedDefault != nil:
+		return jenny.maybeValueAsPointer(formatScalar(ast.TypedDefaultToAny(*field.Type.TypedDefault)), field.Type.Nullable, resolvedFieldType), false
+	case field.Type.IsRef() && resolvedFieldType.IsStruct() && field.Type.TypedDefault != nil:
 		return jenny.defaultForStructRefWithDefault(context, field, resolvedFieldType), false
 	case field.Type.IsRef() && resolvedFieldType.IsStruct():
 		return jenny.defaultForStructRef(field), false
@@ -353,21 +350,23 @@ func (jenny RawTypes) defaultFromExtraDefault(field ast.StructField, resolvedFie
 }
 
 func (jenny RawTypes) defaultForMapWithDefault(field ast.StructField, resolvedFieldType ast.Type) string {
-	if emptyMap, ok := field.Type.Default.(map[string]any); ok && len(emptyMap) == 0 {
+	defaultAny := ast.TypedDefaultToAny(*field.Type.TypedDefault)
+	if emptyMap, ok := defaultAny.(map[string]any); ok && len(emptyMap) == 0 {
 		return "map[" + jenny.typeFormatter.formatType(resolvedFieldType.Map.IndexType) + "]" + jenny.typeFormatter.formatType(resolvedFieldType.Map.ValueType) + "{}"
 	}
-	return formatScalar(field.Type.Default)
+	return formatScalar(defaultAny)
 }
 
 func (jenny RawTypes) defaultForArrayWithDefault(field ast.StructField, resolvedFieldType ast.Type) string {
-	if emptySlice, ok := field.Type.Default.([]any); ok && len(emptySlice) == 0 {
+	defaultAny := ast.TypedDefaultToAny(*field.Type.TypedDefault)
+	if emptySlice, ok := defaultAny.([]any); ok && len(emptySlice) == 0 {
 		return "[]" + jenny.typeFormatter.formatType(resolvedFieldType.Array.ValueType) + "{}"
 	}
-	return formatScalar(field.Type.Default)
+	return formatScalar(defaultAny)
 }
 
 func (jenny RawTypes) defaultForStructRefWithDefault(context languages.Context, field ast.StructField, resolvedFieldType ast.Type) string {
-	defaultValue := jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.Default)
+	defaultValue := jenny.defaultsForStruct(context, *field.Type.Ref, resolvedFieldType, field.Type.TypedDefault)
 	if field.Type.Nullable {
 		defaultValue = "&" + defaultValue
 	}
@@ -389,9 +388,10 @@ func (jenny RawTypes) defaultForStructRef(field ast.StructField) string {
 }
 
 func (jenny RawTypes) defaultForEnumRef(field ast.StructField, resolvedFieldType ast.Type) string {
+	fieldDefault, _ := fieldDefaultAsAny(field.Type)
 	memberName := resolvedFieldType.Enum.Values[0].Name
 	for _, member := range resolvedFieldType.Enum.Values {
-		if member.Value == field.Type.Default {
+		if member.Value == fieldDefault {
 			memberName = member.Name
 			break
 		}
@@ -453,4 +453,38 @@ func (jenny RawTypes) maybeValueAsPointer(value string, nullable bool, typeDef a
 
 	// we don't use cog.ToPtr() to avoid a dependency on cog's runtime
 	return fmt.Sprintf("(func (input %[1]s) *%[1]s { return &input })(%[2]s)", typeHint, value)
+}
+
+// fieldDefaultAsAny returns the field's default value as a raw `any`. The
+// second return value reports whether a default is present.
+func fieldDefaultAsAny(fieldType ast.Type) (any, bool) {
+	if fieldType.TypedDefault != nil {
+		return ast.TypedDefaultToAny(*fieldType.TypedDefault), true
+	}
+	return nil, false
+}
+
+// structFieldDefaultsAsAny extracts per-field defaults from a struct (or
+// ref-to-struct) TypedDefault as raw `any` values keyed by field name.
+func structFieldDefaultsAsAny(td *ast.TypedDefault) map[string]any {
+	if td == nil {
+		return map[string]any{}
+	}
+	switch td.Kind {
+	case ast.KindStruct:
+		if td.Struct == nil {
+			return nil
+		}
+		out := make(map[string]any, len(td.Struct.Fields))
+		for name, fieldDefault := range td.Struct.Fields {
+			out[name] = ast.TypedDefaultToAny(fieldDefault)
+		}
+		return out
+	case ast.KindRef:
+		if td.Ref == nil {
+			return nil
+		}
+		return structFieldDefaultsAsAny(&td.Ref.Inner)
+	}
+	return nil
 }

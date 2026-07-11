@@ -52,7 +52,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": 3.5,
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": 3.5
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "float32"
                 }
@@ -81,7 +86,12 @@
               "Type": {
                 "Kind": "scalar",
                 "Nullable": false,
-                "Default": 3,
+                "TypedDefault": {
+                  "Kind": "scalar",
+                  "Scalar": {
+                    "Value": 3
+                  }
+                },
                 "Scalar": {
                   "ScalarKind": "int32"
                 }

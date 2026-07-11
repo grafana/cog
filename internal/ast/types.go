@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"slices"
@@ -93,9 +94,9 @@ type JenniesHints map[string]any
 // Bonus: in a way that can be (un)marshaled to/from JSON,
 // which is useful for unit tests.
 type Type struct {
-	Kind     Kind
-	Nullable bool
-	Default  any `json:",omitempty"`
+	Kind         Kind
+	Nullable     bool
+	TypedDefault *TypedDefault `json:",omitempty"`
 
 	Disjunction       *DisjunctionType       `json:",omitempty"`
 	Array             *ArrayType             `json:",omitempty"`
@@ -301,7 +302,6 @@ func (t Type) DeepCopy() Type {
 	newType := Type{
 		Kind:     t.Kind,
 		Nullable: t.Nullable,
-		Default:  t.Default,
 		Hints:    make(JenniesHints, len(t.Hints)),
 	}
 
@@ -345,12 +345,38 @@ func (t Type) DeepCopy() Type {
 		newConstantReference := t.ConstantReference.DeepCopy()
 		newType.ConstantReference = &newConstantReference
 	}
+	if t.TypedDefault != nil {
+		newTypedDefault := t.TypedDefault.DeepCopy()
+		newType.TypedDefault = &newTypedDefault
+	}
 
 	maps.Copy(newType.Hints, t.Hints)
 
 	newType.PassesTrail = append(newType.PassesTrail, t.PassesTrail...)
 
 	return newType
+}
+
+// UnmarshalJSON accepts both the current shape (with TypedDefault) and the
+// legacy shape (with a raw "Default" any), converting the latter into a
+// TypedDefault using the surrounding Kind. This lets older fixtures keep
+// working without rewriting them by hand.
+func (t *Type) UnmarshalJSON(data []byte) error {
+	type typeAlias Type
+	aux := struct {
+		*typeAlias
+		Default any `json:"Default,omitempty"`
+	}{typeAlias: (*typeAlias)(t)}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	if t.TypedDefault == nil && aux.Default != nil {
+		td := BuildTypedDefault(*t, aux.Default)
+		t.TypedDefault = &td
+	}
+	return nil
 }
 
 type TypeOption func(def *Type)
@@ -363,7 +389,11 @@ func Nullable() TypeOption {
 
 func Default(value any) TypeOption {
 	return func(def *Type) {
-		def.Default = value
+		if value == nil {
+			return
+		}
+		td := BuildTypedDefault(*def, value)
+		def.TypedDefault = &td
 	}
 }
 
@@ -1164,4 +1194,138 @@ func (slot ComposableSlotType) DeepCopy() ComposableSlotType {
 	return ComposableSlotType{
 		Variant: slot.Variant,
 	}
+}
+
+// TypedDefault is a typed representation of a default value.
+// Exactly one of the *Default fields is set, matching Kind.
+//
+// Code generators should read TypedDefault instead of the raw Type.Default any,
+// to avoid unsafe type assertions like def.Default.(map[string]any).
+type TypedDefault struct {
+	Kind Kind
+
+	Scalar *ScalarDefault `json:",omitempty"`
+	Array  *ArrayDefault  `json:",omitempty"`
+	Map    *MapDefault    `json:",omitempty"`
+	Struct *StructDefault `json:",omitempty"`
+	Enum   *EnumDefault   `json:",omitempty"`
+	Ref    *RefDefault    `json:",omitempty"`
+}
+
+// ScalarDefault holds the primitive default of a scalar type
+// (bool, string, int*, float*, []byte).
+type ScalarDefault struct {
+	Value any
+}
+
+// EnumDefault holds the default value of an enum (a string or int).
+type EnumDefault struct {
+	Value any
+}
+
+// ArrayDefault holds the typed defaults of each item in an array.
+type ArrayDefault struct {
+	Items []TypedDefault
+}
+
+// MapDefault holds the typed defaults of each entry in a map.
+type MapDefault struct {
+	Entries map[string]TypedDefault
+}
+
+// StructDefault holds the typed defaults of each field in a struct.
+// Only fields with an explicit default are present.
+type StructDefault struct {
+	Fields map[string]TypedDefault
+}
+
+// RefDefault wraps the default of the referred type.
+// For a ref to a struct, Inner is a StructDefault. For a ref to an
+// enum/scalar, Inner is an EnumDefault/ScalarDefault.
+type RefDefault struct {
+	Inner TypedDefault
+}
+
+func NewScalarDefault(value any) *TypedDefault {
+	return &TypedDefault{Kind: KindScalar, Scalar: &ScalarDefault{Value: value}}
+}
+
+func NewEnumDefault(value any) *TypedDefault {
+	return &TypedDefault{Kind: KindEnum, Enum: &EnumDefault{Value: value}}
+}
+
+func NewArrayDefault(items []TypedDefault) *TypedDefault {
+	return &TypedDefault{Kind: KindArray, Array: &ArrayDefault{Items: items}}
+}
+
+func NewMapDefault(entries map[string]TypedDefault) *TypedDefault {
+	return &TypedDefault{Kind: KindMap, Map: &MapDefault{Entries: entries}}
+}
+
+func NewStructDefault(fields map[string]TypedDefault) *TypedDefault {
+	return &TypedDefault{Kind: KindStruct, Struct: &StructDefault{Fields: fields}}
+}
+
+func NewRefDefault(inner TypedDefault) *TypedDefault {
+	return &TypedDefault{Kind: KindRef, Ref: &RefDefault{Inner: inner}}
+}
+
+func (d TypedDefault) DeepCopy() TypedDefault {
+	newD := TypedDefault{Kind: d.Kind}
+	if d.Scalar != nil {
+		cp := d.Scalar.DeepCopy()
+		newD.Scalar = &cp
+	}
+	if d.Array != nil {
+		cp := d.Array.DeepCopy()
+		newD.Array = &cp
+	}
+	if d.Map != nil {
+		cp := d.Map.DeepCopy()
+		newD.Map = &cp
+	}
+	if d.Struct != nil {
+		cp := d.Struct.DeepCopy()
+		newD.Struct = &cp
+	}
+	if d.Enum != nil {
+		cp := d.Enum.DeepCopy()
+		newD.Enum = &cp
+	}
+	if d.Ref != nil {
+		cp := d.Ref.DeepCopy()
+		newD.Ref = &cp
+	}
+	return newD
+}
+
+func (d ScalarDefault) DeepCopy() ScalarDefault { return ScalarDefault{Value: d.Value} }
+func (d EnumDefault) DeepCopy() EnumDefault     { return EnumDefault{Value: d.Value} }
+
+func (d ArrayDefault) DeepCopy() ArrayDefault {
+	newD := ArrayDefault{Items: make([]TypedDefault, 0, len(d.Items))}
+	for _, item := range d.Items {
+		newD.Items = append(newD.Items, item.DeepCopy())
+	}
+	return newD
+}
+
+func (d MapDefault) DeepCopy() MapDefault {
+	newD := MapDefault{Entries: make(map[string]TypedDefault, len(d.Entries))}
+	for k, v := range d.Entries {
+		newD.Entries[k] = v.DeepCopy()
+	}
+	return newD
+}
+
+func (d StructDefault) DeepCopy() StructDefault {
+	newD := StructDefault{Fields: make(map[string]TypedDefault, len(d.Fields))}
+	for k, v := range d.Fields {
+		newD.Fields[k] = v.DeepCopy()
+	}
+	return newD
+}
+
+func (d RefDefault) DeepCopy() RefDefault {
+	return RefDefault{Inner: d.Inner.DeepCopy()}
 }

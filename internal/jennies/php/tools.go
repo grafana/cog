@@ -181,8 +181,8 @@ func disjunctionCaseForType(typesFormatter *typeFormatter, input string, typeDef
  *****************************************/
 
 func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, defaultsOverrides *orderedmap.Map[string, any]) any {
-	if !typeDef.IsRef() && typeDef.Default != nil {
-		return typeDef.Default
+	if !typeDef.IsRef() && typeDef.TypedDefault != nil {
+		return ast.TypedDefaultToAny(*typeDef.TypedDefault)
 	}
 
 	switch typeDef.Kind {
@@ -197,9 +197,13 @@ func defaultValueForType(config Config, schemas ast.Schemas, typeDef ast.Type, d
 		referredPkg := formatPackageName(ref.ReferredPkg)
 		referredObj, found := schemas.LocateObject(ref.ReferredPkg, ref.ReferredType)
 		if found && referredObj.Type.IsEnum() {
+			var enumDefault any
+			if typeDef.TypedDefault != nil {
+				enumDefault = ast.TypedDefaultToAny(*typeDef.TypedDefault)
+			}
 			enumName := formatObjectName(referredObj.Type.AsEnum().Values[0].Name)
 			for _, enumValue := range referredObj.Type.AsEnum().Values {
-				if enumValue.Value == typeDef.Default {
+				if enumValue.Value == enumDefault {
 					enumName = formatEnumMemberName(enumValue.Name)
 					break
 				}

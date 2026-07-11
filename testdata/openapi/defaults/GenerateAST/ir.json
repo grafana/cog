@@ -11,9 +11,19 @@
       "Type": {
         "Kind": "array",
         "Nullable": false,
-        "Default": [
-          "anything"
-        ],
+        "TypedDefault": {
+          "Kind": "array",
+          "Array": {
+            "Items": [
+              {
+                "Kind": "scalar",
+                "Scalar": {
+                  "Value": "anything"
+                }
+              }
+            ]
+          }
+        },
         "Array": {
           "ValueType": {
             "Kind": "scalar",
@@ -34,7 +44,12 @@
       "Type": {
         "Kind": "scalar",
         "Nullable": false,
-        "Default": true,
+        "TypedDefault": {
+          "Kind": "scalar",
+          "Scalar": {
+            "Value": true
+          }
+        },
         "Scalar": {
           "ScalarKind": "bool"
         }
@@ -49,7 +64,12 @@
       "Type": {
         "Kind": "enum",
         "Nullable": false,
-        "Default": "bar",
+        "TypedDefault": {
+          "Kind": "enum",
+          "Enum": {
+            "Value": "bar"
+          }
+        },
         "Enum": {
           "Values": [
             {
@@ -87,7 +107,12 @@
       "Type": {
         "Kind": "scalar",
         "Nullable": false,
-        "Default": 32.32,
+        "TypedDefault": {
+          "Kind": "scalar",
+          "Scalar": {
+            "Value": 32.32
+          }
+        },
         "Scalar": {
           "ScalarKind": "float32"
         }
@@ -102,7 +127,12 @@
       "Type": {
         "Kind": "scalar",
         "Nullable": false,
-        "Default": 32,
+        "TypedDefault": {
+          "Kind": "scalar",
+          "Scalar": {
+            "Value": 32
+          }
+        },
         "Scalar": {
           "ScalarKind": "int64"
         }
@@ -117,7 +147,12 @@
       "Type": {
         "Kind": "scalar",
         "Nullable": false,
-        "Default": "default value",
+        "TypedDefault": {
+          "Kind": "scalar",
+          "Scalar": {
+            "Value": "default value"
+          }
+        },
         "Scalar": {
           "ScalarKind": "string"
         }

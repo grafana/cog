@@ -205,10 +205,12 @@ func (jenny RawTypes) generateInitMethod(schemas ast.Schemas, object ast.Object)
 			continue
 		}
 
-		if !field.Type.Nullable || field.Type.Default != nil {
+		if !field.Type.Nullable || field.Type.TypedDefault != nil {
 			var defaultsOverrides map[string]any
-			if overrides, ok := field.Type.Default.(map[string]any); ok {
-				defaultsOverrides = overrides
+			if field.Type.TypedDefault != nil {
+				if raw, ok := ast.TypedDefaultToAny(*field.Type.TypedDefault).(map[string]any); ok {
+					defaultsOverrides = raw
+				}
 			}
 
 			defaultValue = defaultValueForType(schemas, field.Type, jenny.importModule, orderedmap.FromMap(defaultsOverrides))

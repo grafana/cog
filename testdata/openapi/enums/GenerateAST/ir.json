@@ -86,7 +86,12 @@
               "Type": {
                 "Kind": "enum",
                 "Nullable": false,
-                "Default": "a",
+                "TypedDefault": {
+                  "Kind": "enum",
+                  "Enum": {
+                    "Value": "a"
+                  }
+                },
                 "Enum": {
                   "Values": [
                     {

@@ -321,10 +321,12 @@ func (jenny RawTypes) generateConstructor(context languages.Context, def ast.Obj
 		}
 
 		// set for default values for fields that need one or have one
-		if !field.Type.Nullable || field.Type.Default != nil {
+		if !field.Type.Nullable || field.Type.TypedDefault != nil {
 			var defaultsOverrides map[string]any
-			if overrides, ok := field.Type.Default.(map[string]any); ok {
-				defaultsOverrides = overrides
+			if field.Type.TypedDefault != nil {
+				if raw, ok := ast.TypedDefaultToAny(*field.Type.TypedDefault).(map[string]any); ok {
+					defaultsOverrides = raw
+				}
 			}
 
 			defaultValue = defaultValueForType(jenny.config, context.Schemas, field.Type, orderedmap.FromMap(defaultsOverrides))

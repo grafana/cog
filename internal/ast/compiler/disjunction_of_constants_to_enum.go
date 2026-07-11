@@ -96,8 +96,12 @@ func (pass *DisjunctionOfConstantsToEnum) processDisjunction(_ *Visitor, _ *ast.
 		return def, nil
 	}
 
+	var rawDefault any
+	if def.TypedDefault != nil {
+		rawDefault = ast.TypedDefaultToAny(*def.TypedDefault)
+	}
 	typeOpts := []ast.TypeOption{
-		ast.Default(def.Default),
+		ast.Default(rawDefault),
 		ast.Trail("DisjunctionOfConstantsToEnum"),
 	}
 	if def.Nullable {

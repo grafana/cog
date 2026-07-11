@@ -130,7 +130,10 @@ func (pass *AnonymousStructsToNamed) processStruct(pkg string, parentName string
 
 	ref := ast.NewRef(pkg, parentName)
 	ref.Nullable = def.Nullable
-	ref.Default = def.Default
+	if def.TypedDefault != nil {
+		td := def.TypedDefault.DeepCopy()
+		ref.TypedDefault = ast.NewRefDefault(td)
+	}
 
 	return ref
 }

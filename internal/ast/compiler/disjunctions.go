@@ -74,7 +74,11 @@ func (pass *DisjunctionToType) processDisjunction(visitor *Visitor, schema *ast.
 		resolvedType, _ := schema.Resolve(disjunction.Branches[0])
 		scalarKind := resolvedType.AsScalar().ScalarKind
 
-		return ast.NewScalar(scalarKind, ast.Default(def.Default)), nil
+		var rawDefault any
+		if def.TypedDefault != nil {
+			rawDefault = ast.TypedDefaultToAny(*def.TypedDefault)
+		}
+		return ast.NewScalar(scalarKind, ast.Default(rawDefault)), nil
 	}
 
 	// type | otherType | something (| null)?
