@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/grafana/cog/main/schemas/pipeline.json
+
+debug: true
+
+parameters:
+  output_dir: './sandbox/'
+  go_package_root: 'github.com/grafana/cog/sandbox'
+  php_namespace_root: 'Grafana\Foundation'
+  java_package_path: 'com.grafana.foundation'
+  kind_registry_path: './kind-registry'
+  kind_registry_version: 'v11.6.x'
+
+inputs:
+  - cue:
+      url: 'https://raw.githubusercontent.com/grafana/grafana/refs/heads/main/apps/playlist/kinds/manifest.cue'
+      subpath: playlistv1.schema.spec
+      forced_envelope: Star
+      package: playlistv1
+
+  - cue:
+      entrypoint: %__config_dir%/athenav1/
+      metadata:
+        kind: composable
+        variant: dataquery
+        identifier: grafana-athena-datasource
+      cue_imports:
+        - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
+
+  - cue:
+      entrypoint: /home/kevin/sandbox/work/kind-registry/grafana/v11.6.x/composable/loki/
+      metadata:
+        kind: composable
+        variant: dataquery
+        identifier: loki
+      subpath: lineage.schemas[0].schema
+      package: loki
+      forced_envelope: Target
+      cue_imports:
+        - '%kind_registry_path%/grafana/%kind_registry_version%/common:github.com/grafana/grafana/packages/grafana-schema/src/common'
+
+output:
+  directory: '%output_dir%'
+
+  types: true
+
+  languages:
+    - go:
+        package_root: '%go_package_root%'
+        generate_json_marshaller: true
+        generate_strict_unmarshaller: true
+        generate_equal: true
+        generate_validate: true
+        #skip_post_formatting: true

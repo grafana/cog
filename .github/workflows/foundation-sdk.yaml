@@ -6,6 +6,7 @@ permissions:
   contents: read
 
 env:
+  # TODO: remove
   DEVBOX_VERSION: 0.14.0
   FOUNDATION_SDK_REPO: https://github.com/grafana/grafana-foundation-sdk.git
 
@@ -29,11 +30,16 @@ jobs:
           restore-keys: |
             go-deps-${{ runner.os }}
 
-      - name: Install devbox
-        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
         with:
-          enable-cache: "true"
-          devbox-version: ${{ env.DEVBOX_VERSION }}
+          install: true
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          make deps
+          echo "$(pwd)/vendor/bin" >> $GITHUB_PATH
 
       # See https://docs.gradle.org/current/userguide/build_cache.html
       - name: Restore Gradle build cache
@@ -60,7 +66,7 @@ jobs:
       - name: Build cog with current branch
         shell: bash
         run: |
-          devbox run go build -o cog ./cmd/cli
+          mise exec -- go build -o cog ./cmd/cli
           mkdir -p "${HOME}/.local/bin/"
           mv cog "${HOME}/.local/bin/"
           echo "${HOME}/.local/bin" >> $GITHUB_PATH
@@ -76,7 +82,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+          mise exec -- ./build/foundation-sdk/scripts/prepare-release.sh
         env:
           SKIP_VALIDATION: "no" # the release process will lint the code for us
           LOG_LEVEL: "7" # debug
@@ -101,16 +107,19 @@ jobs:
           restore-keys: |
             go-deps-${{ runner.os }}
 
-      - name: Install devbox
-        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
         with:
-          enable-cache: "true"
-          devbox-version: ${{ env.DEVBOX_VERSION }}
+          install: true
+          cache: true
+
+      - name: Install dependencies
+        run: make deps
 
       - name: Build cog with current branch
         shell: bash
         run: |
-          devbox run go build -o cog ./cmd/cli
+          mise exec -- go build -o cog ./cmd/cli
           mkdir -p "${HOME}/.local/bin/"
           mv cog "${HOME}/.local/bin/"
           echo "${HOME}/.local/bin" >> $GITHUB_PATH
@@ -126,7 +135,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+          mise exec -- ./build/foundation-sdk/scripts/prepare-release.sh
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-examples
           CLEANUP_WORKSPACE: "no"
@@ -135,7 +144,7 @@ jobs:
           GOGC: "off"
 
       - name: Run examples
-        run: devbox run /tmp/foundation-workspace-examples/foundation-sdk/scripts/run-examples.sh
+        run: mise exec -- /tmp/foundation-workspace-examples/foundation-sdk/scripts/run-examples.sh
 
   sdk_diff:
     name: Generate diff
@@ -160,11 +169,21 @@ jobs:
           restore-keys: |
             go-deps-${{ runner.os }}
 
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
+        with:
+          install: true
+          cache: true
+
+      # TODO: remove
       - name: Install devbox
         uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
         with:
           enable-cache: "true"
           devbox-version: ${{ env.DEVBOX_VERSION }}
+
+      - name: Install dependencies
+        run: make deps
 
       - name: Fetch foundation-sdk
         shell: bash
@@ -174,7 +193,7 @@ jobs:
       - name: Build cog with current branch
         shell: bash
         run: |
-          devbox run go build -o cog ./cmd/cli
+          mise exec -- go build -o cog ./cmd/cli
           mkdir -p "${HOME}/.local/bin/"
           mv cog "${HOME}/.local/bin/"
           echo "${HOME}/.local/bin" >> $GITHUB_PATH
@@ -185,7 +204,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+          mise exec -- ./build/foundation-sdk/scripts/prepare-release.sh
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-current
           CLEANUP_WORKSPACE: "no"
@@ -207,7 +226,7 @@ jobs:
       - name: Build cog with main branch
         shell: bash
         run: |
-          devbox run go build -o cog ./cmd/cli
+          mise exec -- go build -o cog ./cmd/cli
           mv cog "${HOME}/.local/bin/"
 
       - name: Dry-run release with main branch
@@ -216,7 +235,7 @@ jobs:
           git config --global user.email "cog-ci@grafana.com"
           git config --global user.name "cog - CI"
 
-          devbox run ./build/foundation-sdk/scripts/prepare-release.sh
+          mise exec -- ./build/foundation-sdk/scripts/prepare-release.sh
         env:
           WORKSPACE_PATH: /tmp/foundation-workspace-main
           CLEANUP_WORKSPACE: "no"

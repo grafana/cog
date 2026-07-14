@@ -7,9 +7,6 @@ on:
 permissions:
   contents: read
 
-env:
-  DEVBOX_VERSION: 0.14.0
-
 jobs:
   linters:
     name: Linters
@@ -30,11 +27,14 @@ jobs:
           restore-keys: |
             go-deps-${{ runner.os }}
 
-      - name: Install devbox
-        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
         with:
-          enable-cache: "true"
-          devbox-version: ${{ env.DEVBOX_VERSION }}
+          install: true
+          cache: true
+
+      - name: Install dependencies
+        run: make deps
 
       - name: Run golangci-lint
         run: make lint
@@ -58,11 +58,14 @@ jobs:
           restore-keys: |
             go-deps-${{ runner.os }}
 
-      - name: Install devbox
-        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
         with:
-          enable-cache: "true"
-          devbox-version: ${{ env.DEVBOX_VERSION }}
+          install: true
+          cache: true
+
+      - name: Install dependencies
+        run: make deps
 
       - name: Tests
         run: make tests
@@ -76,11 +79,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install devbox
-        uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4
         with:
-          enable-cache: "true"
-          devbox-version: ${{ env.DEVBOX_VERSION }}
+          install: true
+          cache: true
+
+      - name: Install dependencies
+        run: make deps
 
       - name: Docs
         run: make docs
