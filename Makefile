@@ -1,8 +1,8 @@
 # Within devbox
-ifneq "$(DEVBOX_CONFIG_DIR)" ""
-    RUN_DEVBOX:=
+ifneq "$(MISE_SHELL)" ""
+    MISE_EXEC:=
 else # Normal shell
-    RUN_DEVBOX:=devbox run
+    MISE_EXEC:=mise exec --
 endif
 
 ##@ General
@@ -26,27 +26,28 @@ help: ## Display this help.
 
 .PHONY: lint
 lint: dev-env-check-binaries ## Lints the code base.
-	$(RUN_DEVBOX) golangci-lint run -c .golangci.yaml
+	$(MISE_EXEC) golangci-lint run -c .golangci.yaml
 
 .PHONY: tests
 tests: dev-env-check-binaries gen-tests ## Runs the tests.
-	$(RUN_DEVBOX) go test ./...
+	$(MISE_EXEC) go test ./...
 
 .PHONY: deps
 deps: dev-env-check-binaries ## Installs the dependencies.
-	$(RUN_DEVBOX) go mod vendor
-	$(RUN_DEVBOX) pip install -qq -r requirements.txt
+	$(MISE_EXEC) go mod vendor
+	$(MISE_EXEC) composer install --no-interaction --quiet
+	$(MISE_EXEC) pip install -qq -r requirements.txt
 
 .PHONY: docs
 docs: dev-env-check-binaries ## Generates the documentation.
-	@$(RUN_DEVBOX) go run cmd/compiler-passes-docs/*
-	@$(RUN_DEVBOX) go run cmd/veneers-docs/*
-	@$(RUN_DEVBOX) go run cmd/cog-config-schemas/*
-	@$(RUN_DEVBOX) zensical build -f ./mkdocs-github.yml
+	@$(MISE_EXEC) go run cmd/compiler-passes-docs/*
+	@$(MISE_EXEC) go run cmd/veneers-docs/*
+	@$(MISE_EXEC) go run cmd/cog-config-schemas/*
+	@$(MISE_EXEC) zensical build -f ./mkdocs-github.yml
 
 .PHONY: serve-docs
 serve-docs: dev-env-check-binaries ## Builds and serves the documentation.
-	$(RUN_DEVBOX) zensical serve -f ./mkdocs-github.yml
+	$(MISE_EXEC) zensical serve -f ./mkdocs-github.yml
 
 .PHONY: fetch-foundation-sdk
 fetch-foundation-sdk: ## Fetches the Foundation SDK.
@@ -59,22 +60,22 @@ fetch-kind-registry: ## Fetches the kind-registry.
 .PHONY: gen-sdk-dev
 gen-sdk-dev: dev-env-check-binaries fetch-foundation-sdk fetch-kind-registry ## Generates a dev version of the Foundation SDK.
 	@rm -rf generated
-	$(RUN_DEVBOX) go run cmd/cli/main.go generate \
+	$(MISE_EXEC) go run cmd/cli/main.go generate \
 		--config ./build/foundation-sdk/.cog/config.yaml \
 		--debug \
 		--parameters "output_dir=./generated/%l,kind_registry_path=./build/kind-registry,go_package_root=github.com/grafana/cog/generated/go"
 
 .PHONY: gen-tests
 gen-tests: dev-env-check-binaries ## Generates the code described by tests schemas.
-	$(RUN_DEVBOX) go run ./cmd/cli/ generate \
+	$(MISE_EXEC) go run ./cmd/cli/ generate \
 		--config ./config/foundation_sdk.tests.yaml
 
 .PHONY: dev-env-check-binaires
 dev-env-check-binaries: ## Check that the required binary are present.
-	@devbox version >/dev/null 2>&1 || (echo "ERROR: devbox is required. See https://www.jetify.com/devbox/docs/quickstart/"; exit 1)
+	@mise version >/dev/null 2>&1 || (echo "ERROR: mise is required. See https://mise.jdx.dev/getting-started.html"; exit 1)
 
 .PHONY: test-inspect
 test-inspect:
-	$(RUN_DEVBOX) go run cmd/cli/main.go inspect \
+	$(MISE_EXEC) go run cmd/cli/main.go inspect \
 		--config config/inspect.test.yaml \
 		--parameters "cue_path=$(CUE_PATH)"

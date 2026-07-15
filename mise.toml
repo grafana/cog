@@ -1,0 +1,21 @@
+min_version = "2024.1.0"
+
+[tools]
+go = "1.26"
+golangci-lint = "2.9.0"
+goreleaser = "2.16.0"
+php = "8.5.7"
+python = "3.14"
+node = "20"
+yarn = "1.22.22"
+java = "17"
+gradle = "8.14.4"
+
+[plugins]
+php = "https://github.com/verzly/mise-php"
+
+[env._.php]
+prebuilt_static = true
+
+[env._.python]
+venv = { path = ".venv", create = true }
