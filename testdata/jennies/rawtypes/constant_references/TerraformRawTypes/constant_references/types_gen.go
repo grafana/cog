@@ -28,10 +28,7 @@ type StructB struct {
 MyValue types.String `tfsdk:"myValue"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"parent_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var ParentStructAttributes = map[string]schema.Attribute{
 "my_enum": schema.StringAttribute{
  Required: true,
 Validators: []validator.String{
@@ -40,11 +37,9 @@ stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
 
 },
 
-},
-},
-"struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var StructAttributes = map[string]schema.Attribute{
 "my_value": schema.StringAttribute{
  Required: true,
 },
@@ -57,11 +52,9 @@ stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
 
 },
 
-},
-},
-"struct_a": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var StructAAttributes = map[string]schema.Attribute{
 "my_enum": schema.StringAttribute{
  Required: true,
 Validators: []validator.String{
@@ -78,11 +71,9 @@ stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
 
 },
 
-},
-},
-"struct_b": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var StructBAttributes = map[string]schema.Attribute{
 "my_enum": schema.StringAttribute{
  Required: true,
 Validators: []validator.String{
@@ -95,6 +86,23 @@ stringvalidator.OneOf("ValueA", "ValueB", "ValueC"),
  Required: true,
 },
 
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"parent_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: ParentStructAttributes,
 },
+"struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: StructAttributes,
+},
+"struct_a": schema.SingleNestedAttribute{
+Required: true,
+Attributes: StructAAttributes,
+},
+"struct_b": schema.SingleNestedAttribute{
+Required: true,
+Attributes: StructBAttributes,
 },
 }

@@ -33,10 +33,7 @@ type DefaultsStructPartialComplexField struct {
 IntVal types.Int64 `tfsdk:"intVal"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"nested_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var NestedStructAttributes = map[string]schema.Attribute{
 "string_val": schema.StringAttribute{
  Required: true,
 },
@@ -45,128 +42,60 @@ Attributes: map[string]schema.Attribute{
  Required: true,
 },
 
-},
-},
-"struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var StructAttributes = map[string]schema.Attribute{
 "all_fields": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"string_val": schema.StringAttribute{
- Required: true,
-},
-
-"int_val": schema.Int64Attribute{
- Required: true,
-},
-
-},
+Attributes: NestedStructAttributes,
 },
 
 "partial_fields": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"string_val": schema.StringAttribute{
- Required: true,
-},
-
-"int_val": schema.Int64Attribute{
- Required: true,
-},
-
-},
+Attributes: NestedStructAttributes,
 },
 
 "empty_fields": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"string_val": schema.StringAttribute{
- Required: true,
-},
-
-"int_val": schema.Int64Attribute{
- Required: true,
-},
-
-},
+Attributes: NestedStructAttributes,
 },
 
 "complex_field": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"uid": schema.StringAttribute{
- Required: true,
-},
-
-"nested": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"nested_val": schema.StringAttribute{
- Required: true,
-},
-
-},
-},
-
-"array": schema.ListAttribute{
- ElementType: types.StringType,
-},
-
-},
+Attributes: DefaultsStructComplexFieldAttributes,
 },
 
 "partial_complex_field": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"uid": schema.StringAttribute{
- Required: true,
+Attributes: DefaultsStructPartialComplexFieldAttributes,
 },
 
-"int_val": schema.Int64Attribute{
- Required: true,
-},
+}
 
-},
-},
-
-},
-},
-"defaults_struct_complex_field_nested": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var DefaultsStructComplexFieldNestedAttributes = map[string]schema.Attribute{
 "nested_val": schema.StringAttribute{
  Required: true,
 },
 
-},
-},
-"defaults_struct_complex_field": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var DefaultsStructComplexFieldAttributes = map[string]schema.Attribute{
 "uid": schema.StringAttribute{
  Required: true,
 },
 
 "nested": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"nested_val": schema.StringAttribute{
- Required: true,
-},
-
-},
+Attributes: DefaultsStructComplexFieldNestedAttributes,
 },
 
 "array": schema.ListAttribute{
  ElementType: types.StringType,
 },
 
-},
-},
-"defaults_struct_partial_complex_field": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+}
+
+var DefaultsStructPartialComplexFieldAttributes = map[string]schema.Attribute{
 "uid": schema.StringAttribute{
  Required: true,
 },
@@ -175,6 +104,27 @@ Attributes: map[string]schema.Attribute{
  Required: true,
 },
 
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"nested_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: NestedStructAttributes,
 },
+"struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: StructAttributes,
+},
+"defaults_struct_complex_field_nested": schema.SingleNestedAttribute{
+Required: true,
+Attributes: DefaultsStructComplexFieldNestedAttributes,
+},
+"defaults_struct_complex_field": schema.SingleNestedAttribute{
+Required: true,
+Attributes: DefaultsStructComplexFieldAttributes,
+},
+"defaults_struct_partial_complex_field": schema.SingleNestedAttribute{
+Required: true,
+Attributes: DefaultsStructPartialComplexFieldAttributes,
 },
 }

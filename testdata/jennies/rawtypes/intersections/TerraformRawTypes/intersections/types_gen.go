@@ -31,23 +31,15 @@ Contains types.String `tfsdk:"contains"`
 
 
 
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var SomeStructAttributes = map[string]schema.Attribute{
 "field_bool": schema.BoolAttribute{
  Required: true,
 Default: booldefault.StaticBool(true),
 },
 
-},
-},
-"common": schema.SingleNestedAttribute{
-Required: true,
-Description: `
-Base properties for all metrics
-`,
-Attributes: map[string]schema.Attribute{
+}
+
+var CommonAttributes = map[string]schema.Attribute{
 "name": schema.StringAttribute{
  Required: true,
 },
@@ -68,6 +60,18 @@ stringvalidator.OneOf("default", "time"),
 
 },
 
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: SomeStructAttributes,
 },
+"common": schema.SingleNestedAttribute{
+Required: true,
+Description: `
+Base properties for all metrics
+`,
+Attributes: CommonAttributes,
 },
 }

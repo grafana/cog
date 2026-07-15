@@ -17,10 +17,7 @@ FieldFloat32 types.Float32 `tfsdk:"FieldFloat32"`
 FieldInt32 types.Int32 `tfsdk:"FieldInt32"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var SomeStructAttributes = map[string]schema.Attribute{
 "field_bool": schema.BoolAttribute{
  Required: true,
 Default: booldefault.StaticBool(true),
@@ -46,6 +43,11 @@ Default: float32default.StaticFloat32(42.42),
 Default: int32default.StaticInt32(42),
 },
 
-},
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: SomeStructAttributes,
 },
 }

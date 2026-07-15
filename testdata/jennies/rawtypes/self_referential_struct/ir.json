@@ -1,0 +1,52 @@
+{
+  "Package": "self_referential_struct",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "Node": {
+      "Name": "Node",
+      "Comments": [
+        "Node represents a node in a singly-linked list.",
+        "The next field points to the following node, or is absent if this is the last node."
+      ],
+      "SelfRef": {
+        "ReferredPkg": "self_referential_struct",
+        "ReferredType": "Node"
+      },
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "value",
+              "Required": true,
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              }
+            },
+            {
+              "Name": "next",
+              "Required": false,
+              "Type": {
+                "Kind": "ref",
+                "Nullable": false,
+                "Ref": {
+                  "ReferredPkg": "self_referential_struct",
+                  "ReferredType": "Node"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

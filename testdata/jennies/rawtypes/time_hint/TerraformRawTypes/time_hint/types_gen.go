@@ -13,14 +13,7 @@ type ObjWithTimeField struct {
 Duration timetypes.GoDurationType `tfsdk:"duration"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"obj_time": schema.StringAttribute{
- Required: true,
-CustomType: timetypes.RFC3339Type{},
-},
-"obj_with_time_field": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var ObjWithTimeFieldAttributes = map[string]schema.Attribute{
 "registered_at": schema.StringAttribute{
  Required: true,
 CustomType: timetypes.RFC3339Type{},
@@ -31,6 +24,15 @@ CustomType: timetypes.RFC3339Type{},
 CustomType: timetypes.GoDurationType{},
 },
 
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"obj_time": schema.StringAttribute{
+ Required: true,
+CustomType: timetypes.RFC3339Type{},
 },
+"obj_with_time_field": schema.SingleNestedAttribute{
+Required: true,
+Attributes: ObjWithTimeFieldAttributes,
 },
 }

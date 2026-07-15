@@ -16,6 +16,7 @@ type typeFormatter struct {
 	imports       *common.DirectImportMap
 	packageMapper func(pkg string) string
 	validators    *validators
+	structDepth   map[string]int
 }
 
 func defaultTypeFormatter(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
@@ -24,6 +25,7 @@ func defaultTypeFormatter(config Config, context languages.Context, imports *com
 		context:       context,
 		imports:       imports,
 		packageMapper: packageMapper,
+		structDepth:   make(map[string]int),
 	}
 
 	tf.validators = newValidators(tf)
@@ -215,7 +217,11 @@ func (formatter *typeFormatter) formatFieldAttributes(fields []ast.StructField) 
 		if field.Type.IsIntersection() {
 			continue
 		}
-		buffer.WriteString(fmt.Sprintf("\"%s\": %s\n", tools.SnakeCase(field.Name), formatter.formatTypeAttribute(field.Type, "")))
+		attr := formatter.formatTypeAttribute(field.Type, "")
+		if attr == "" {
+			continue
+		}
+		buffer.WriteString(fmt.Sprintf("\"%s\": %s\n", tools.SnakeCase(field.Name), attr))
 	}
 
 	return buffer.String()
@@ -241,12 +247,6 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 			return "unknown"
 		}
 
-		if !obj.Type.IsEnum() {
-			buffer.WriteString("schema.ListNestedAttribute{\n")
-			buffer.WriteString(fmt.Sprintf("NestedObject: schema.NestedAttributeObject {\n"))
-			buffer.WriteString("Attributes: map[string]schema.Attribute {\n")
-		}
-
 		switch obj.Type.Kind {
 		case ast.KindEnum:
 			buffer.WriteString("schema.ListAttribute{\n")
@@ -255,24 +255,41 @@ func (formatter *typeFormatter) formatArrayAttributes(def ast.Type) string {
 				enumType = "types.Int64Type"
 			}
 			buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", enumType))
+			if defVal != "" {
+				buffer.WriteString(defVal)
+			}
+			if arrayValidator != "" {
+				buffer.WriteString(fmt.Sprintf("Validators: %s", arrayValidator))
+			} else if validator != "" {
+				buffer.WriteString(fmt.Sprintf("Validators: %s", validator))
+			}
 		case ast.KindStruct:
-			buffer.WriteString(formatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
+			buffer.WriteString("schema.ListNestedAttribute{\n")
+			buffer.WriteString("NestedObject: schema.NestedAttributeObject{\n")
+			buffer.WriteString(fmt.Sprintf("Attributes: %s,\n", attributesVarName(obj.Name)))
+			buffer.WriteString("},\n")
+			if defVal != "" {
+				buffer.WriteString(defVal)
+			}
+			if arrayValidator != "" {
+				buffer.WriteString(fmt.Sprintf("Validators: %s", arrayValidator))
+			} else if validator != "" {
+				buffer.WriteString(fmt.Sprintf("Validators: %s", validator))
+			}
 		default:
+			buffer.WriteString("schema.ListNestedAttribute{\n")
+			buffer.WriteString("NestedObject: schema.NestedAttributeObject{\n")
+			buffer.WriteString("Attributes: map[string]schema.Attribute{\n")
 			buffer.WriteString(formatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
-		}
-
-		if defVal != "" {
-			buffer.WriteString(defVal)
-		}
-
-		if arrayValidator != "" {
-			buffer.WriteString(fmt.Sprintf("Validators: %s", arrayValidator))
-		} else if validator != "" {
-			buffer.WriteString(fmt.Sprintf("Validators: %s", validator))
-		}
-
-		if !obj.Type.IsEnum() {
 			buffer.WriteString("},\n},\n")
+			if defVal != "" {
+				buffer.WriteString(defVal)
+			}
+			if arrayValidator != "" {
+				buffer.WriteString(fmt.Sprintf("Validators: %s", arrayValidator))
+			} else if validator != "" {
+				buffer.WriteString(fmt.Sprintf("Validators: %s", validator))
+			}
 		}
 
 	default:
@@ -309,12 +326,6 @@ func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 			return "unknown"
 		}
 
-		if !obj.Type.IsEnum() {
-			buffer.WriteString("schema.MapNestedAttribute{\n")
-			buffer.WriteString(fmt.Sprintf("NestedObject: schema.NestedAttributeObject {\n"))
-			buffer.WriteString("Attributes: map[string]schema.Attribute {\n")
-		}
-
 		switch obj.Type.Kind {
 		case ast.KindEnum:
 			buffer.WriteString("schema.MapAttribute{\n")
@@ -323,18 +334,26 @@ func (formatter *typeFormatter) formatMapAttributes(def ast.Type) string {
 				enumType = "types.Int64Type"
 			}
 			buffer.WriteString(fmt.Sprintf("ElementType: %s,\n", enumType))
+			if defVal != "" {
+				buffer.WriteString(defVal)
+			}
 		case ast.KindStruct:
-			buffer.WriteString(formatter.formatFieldAttributes(obj.Type.AsStruct().Fields))
+			buffer.WriteString("schema.MapNestedAttribute{\n")
+			buffer.WriteString("NestedObject: schema.NestedAttributeObject{\n")
+			buffer.WriteString(fmt.Sprintf("Attributes: %s,\n", attributesVarName(obj.Name)))
+			buffer.WriteString("},\n")
+			if defVal != "" {
+				buffer.WriteString(defVal)
+			}
 		default:
+			buffer.WriteString("schema.MapNestedAttribute{\n")
+			buffer.WriteString("NestedObject: schema.NestedAttributeObject{\n")
+			buffer.WriteString("Attributes: map[string]schema.Attribute{\n")
 			buffer.WriteString(formatter.formatTypeAttributeForObject(obj, formatComments(obj.Comments)))
-		}
-
-		if defVal != "" {
-			buffer.WriteString(defVal)
-		}
-
-		if !obj.Type.IsEnum() {
 			buffer.WriteString("},\n},\n")
+			if defVal != "" {
+				buffer.WriteString(defVal)
+			}
 		}
 	default:
 		buffer.WriteString("schema.MapAttribute{\n ")
@@ -411,6 +430,31 @@ func (formatter *typeFormatter) formatReferenceAttribute(def ast.Type) string {
 	obj, ok := formatter.context.LocateObject(def.AsRef().ReferredPkg, def.AsRef().ReferredType)
 	if !ok {
 		return "unknown"
+	}
+
+	if obj.Type.IsStruct() {
+		required := "Required: true,"
+		if def.Nullable {
+			required = "Optional: true,"
+		}
+
+		if formatter.structDepth[obj.Name] >= 2 {
+			// Already inlining this struct: break the cycle by returning empty.
+			return ""
+		}
+
+		if formatter.structDepth[obj.Name] == 1 {
+			// Self-referential: inline attributes instead of referencing the var
+			// to avoid a Go initialization cycle.
+			formatter.structDepth[obj.Name]++
+			attrs := formatter.formatFieldAttributes(obj.Type.AsStruct().Fields)
+			formatter.structDepth[obj.Name]--
+			return fmt.Sprintf("schema.SingleNestedAttribute{\n%s\nAttributes: map[string]schema.Attribute{\n%s},\n},\n",
+				required, attrs)
+		}
+
+		return fmt.Sprintf("schema.SingleNestedAttribute{\n%s\nAttributes: %s,\n},\n",
+			required, attributesVarName(obj.Name))
 	}
 
 	obj.Type.Default = def.Default

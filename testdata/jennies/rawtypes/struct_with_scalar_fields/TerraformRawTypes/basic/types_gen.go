@@ -30,16 +30,7 @@ FieldInt32 types.Int32 `tfsdk:"FieldInt32"`
 FieldInt64 types.Int64 `tfsdk:"FieldInt64"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Description: `
-This
-is
-a
-comment
-`,
-Attributes: map[string]schema.Attribute{
+var SomeStructAttributes = map[string]schema.Attribute{
 "field_any": schema.ObjectAttribute{
  Required: true,
 },
@@ -101,6 +92,17 @@ Default: stringdefault.StaticString("auto"),
  Required: true,
 },
 
-},
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Description: `
+This
+is
+a
+comment
+`,
+Attributes: SomeStructAttributes,
 },
 }

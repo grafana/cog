@@ -9,14 +9,16 @@ type Options struct {
  Content types.String `tfsdk:"content"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"options": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var OptionsAttributes = map[string]schema.Attribute{
 "content": schema.StringAttribute{
  Required: true,
 },
 
-},
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"options": schema.SingleNestedAttribute{
+Required: true,
+Attributes: OptionsAttributes,
 },
 }

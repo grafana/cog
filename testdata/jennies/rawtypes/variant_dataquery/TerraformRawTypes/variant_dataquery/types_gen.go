@@ -10,10 +10,7 @@ type Query struct {
 Instant types.Bool `tfsdk:"instant"`
  }
 
-var SpecAttributes = map[string]schema.Attribute{
-"query": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var QueryAttributes = map[string]schema.Attribute{
 "expr": schema.StringAttribute{
  Required: true,
 },
@@ -22,6 +19,11 @@ Attributes: map[string]schema.Attribute{
  Optional: true,
 },
 
-},
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"query": schema.SingleNestedAttribute{
+Required: true,
+Attributes: QueryAttributes,
 },
 }

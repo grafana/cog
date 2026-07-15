@@ -25,18 +25,10 @@ type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
 
 
 
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+var SomeStructAttributes = map[string]schema.Attribute{
 "field_ref": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+Optional: true,
+Attributes: SomeOtherStructAttributes,
 },
 
 "field_string": schema.StringAttribute{
@@ -56,33 +48,37 @@ stringvalidator.OneOf(">", "<"),
 },
 
 "field_anonymous_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
+Optional: true,
+Attributes: StructOptionalFieldsSomeStructFieldAnonymousStructAttributes,
+},
+
+}
+
+var SomeOtherStructAttributes = map[string]schema.Attribute{
 "field_any": schema.ObjectAttribute{
  Required: true,
 },
 
-},
+}
+
+var StructOptionalFieldsSomeStructFieldAnonymousStructAttributes = map[string]schema.Attribute{
+"field_any": schema.ObjectAttribute{
+ Required: true,
 },
 
-},
+}
+
+var SpecAttributes = map[string]schema.Attribute{
+"some_struct": schema.SingleNestedAttribute{
+Required: true,
+Attributes: SomeStructAttributes,
 },
 "some_other_struct": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+Attributes: SomeOtherStructAttributes,
 },
 "struct_optional_fields_some_struct_field_anonymous_struct": schema.SingleNestedAttribute{
 Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+Attributes: StructOptionalFieldsSomeStructFieldAnonymousStructAttributes,
 },
 }

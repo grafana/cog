@@ -13,5 +13,20 @@ Float64 types.Float64 `tfsdk:"Float64"`
 Float32 types.Float32 `tfsdk:"Float32"`
  }
 
+var Int64OrFloat64OrFloat32Attributes = map[string]schema.Attribute{
+"int64": schema.Int64Attribute{
+ Optional: true,
+},
+
+"float64": schema.Float64Attribute{
+ Optional: true,
+},
+
+"float32": schema.Float32Attribute{
+ Optional: true,
+},
+
+}
+
 var SpecAttributes = map[string]schema.Attribute{
 }
