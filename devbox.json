@@ -4,7 +4,7 @@
     "go@1.26",
     "php@8.5.8",
     "php83Packages.composer@2.10.2",
-    "php83Packages.phpstan@2.1.1",
+    "php83Packages.phpstan@2.1.32",
     "python@3.14",
     "golangci-lint@2.12.2",
     "yarn@1.22",
