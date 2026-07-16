@@ -19,6 +19,10 @@ type typeFormatter struct {
 	context    languages.Context
 }
 
+func MakeTypeFormatterHelper(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) func(def ast.Type) string {
+	return defaultTypeFormatter(config, context, imports, packageMapper).formatType
+}
+
 func defaultTypeFormatter(config Config, context languages.Context, imports *common.DirectImportMap, packageMapper func(pkg string) string) *typeFormatter {
 	return &typeFormatter{
 		imports:       imports,
