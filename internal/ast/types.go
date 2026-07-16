@@ -997,6 +997,17 @@ type ConstantReferenceType struct {
 	ReferenceValue any    `yaml:"reference_value"`
 }
 
+func (t ConstantReferenceType) AsRef() RefType {
+	return RefType{
+		ReferredPkg:  t.ReferredPkg,
+		ReferredType: t.ReferredType,
+	}
+}
+
+func (t ConstantReferenceType) String() string {
+	return fmt.Sprintf("%v as %s.%s", t.ReferenceValue, t.ReferredPkg, t.ReferredType)
+}
+
 func (t ConstantReferenceType) DeepCopy() ConstantReferenceType {
 	return ConstantReferenceType{
 		ReferredPkg:    t.ReferredPkg,
