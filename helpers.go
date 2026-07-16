@@ -290,7 +290,14 @@ type TerraformValidators struct {
 }
 
 type TerraformConfig struct {
+	// SkipPostFormatting disables formatting of Go files done with go imports
+	// after code generation.
 	SkipPostFormatting bool
+
+	// SkipGeneratedHeader disables the addition of a
+	// "Code generated - EDITING IS FUTILE. DO NOT EDIT." comment in generated
+	// files headers.
+	SkipGeneratedHeader bool
 
 	// CustomTemplatesDirectories accepts a list of directories containing custom templates.
 	CustomTemplatesDirectories []string
@@ -306,6 +313,7 @@ func (pipeline *SchemaToTypesPipeline) Terraform(config TerraformConfig) *Schema
 	pipeline.output = &codegen.OutputLanguage{
 		Terraform: &terraform.Config{
 			SkipPostFormatting:            config.SkipPostFormatting,
+			SkipGeneratedHeader:           config.SkipGeneratedHeader,
 			OverridesTemplatesDirectories: config.CustomTemplatesDirectories,
 			OverridesTemplatesFS:          config.CustomTemplatesFS,
 			OverridesTemplateFuncs:        config.CustomTemplatesFuncs,
