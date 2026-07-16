@@ -1,6 +1,8 @@
 package common
 
 import (
+	"encoding/json"
+
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
@@ -38,6 +40,14 @@ func TypeResolvingTemplateHelpers(context languages.Context) template.FuncMap {
 
 func TypesTemplateHelpers(context languages.Context) template.FuncMap {
 	return template.FuncMap{
+		"dumpJson": func(input any) string {
+			payload, err := json.Marshal(input)
+			if err != nil {
+				panic("could not marshal to JSON")
+			}
+
+			return string(payload)
+		},
 		"schemaHasObject": func(schema *ast.Schema, name string) bool {
 			return schema.HasObject(name)
 		},
