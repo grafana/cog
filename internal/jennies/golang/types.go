@@ -59,18 +59,18 @@ func (formatter *typeFormatter) formatTypeDeclaration(def ast.Object) string {
 
 		// nolint: gocritic
 		if scalarType.Value != nil {
-			buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(scalarType.Value)))
+			fmt.Fprintf(&buffer, "const %s = %s", defName, formatScalar(scalarType.Value))
 		} else if scalarType.ScalarKind == ast.KindBytes {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, "[]byte"))
+			fmt.Fprintf(&buffer, "type %s %s", defName, "[]byte")
 		} else {
-			buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatter.formatType(def.Type)))
+			fmt.Fprintf(&buffer, "type %s %s", defName, formatter.formatType(def.Type))
 		}
 	case ast.KindRef:
-		buffer.WriteString(fmt.Sprintf("type %s = %s", defName, formatter.formatType(def.Type)))
+		fmt.Fprintf(&buffer, "type %s = %s", defName, formatter.formatType(def.Type))
 	case ast.KindMap, ast.KindArray, ast.KindStruct, ast.KindIntersection:
-		buffer.WriteString(fmt.Sprintf("type %s %s", defName, formatter.formatType(def.Type)))
+		fmt.Fprintf(&buffer, "type %s %s", defName, formatter.formatType(def.Type))
 	case ast.KindConstantRef:
-		buffer.WriteString(fmt.Sprintf("const %s = %s", defName, formatScalar(def.Type.AsConstantRef().ReferenceValue)))
+		fmt.Fprintf(&buffer, "const %s = %s", defName, formatScalar(def.Type.AsConstantRef().ReferenceValue))
 	default:
 		return fmt.Sprintf("unhandled type def kind: %s", def.Type.Kind)
 	}
@@ -84,12 +84,12 @@ func (formatter *typeFormatter) formatEnumDef(def ast.Object) string {
 	enumName := formatObjectName(def.Name)
 	enumType := def.Type.AsEnum()
 
-	buffer.WriteString(fmt.Sprintf("type %s %s\n", enumName, formatter.formatType(enumType.Values[0].Type)))
+	fmt.Fprintf(&buffer, "type %s %s\n", enumName, formatter.formatType(enumType.Values[0].Type))
 
 	buffer.WriteString("const (\n")
 	for _, val := range enumType.Values {
 		name := tools.CleanupNames(formatObjectName(val.Name))
-		buffer.WriteString(fmt.Sprintf("\t%s %s = %#v\n", name, enumName, val.Value))
+		fmt.Fprintf(&buffer, "\t%s %s = %#v\n", name, enumName, val.Value)
 	}
 	buffer.WriteString(")\n")
 
@@ -234,13 +234,12 @@ func (formatter *typeFormatter) formatField(def ast.StructField) string {
 		}
 	}
 
-	buffer.WriteString(fmt.Sprintf(
-		"%s %s `json:\"%s%s\"`",
+	fmt.Fprintf(&buffer, "%s %s `json:\"%s%s\"`",
 		formatFieldName(def.Name),
 		formatter.doFormatType(fieldType, false),
 		def.Name,
 		jsonOmitEmpty,
-	))
+	)
 
 	return buffer.String()
 }

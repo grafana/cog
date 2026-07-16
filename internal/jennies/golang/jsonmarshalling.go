@@ -195,13 +195,13 @@ func (jenny JSONMarshalling) renderCustomComposableSlotUnmarshal(context languag
 		}
 
 		jenny.imports.Add("fmt", "fmt")
-		buffer.WriteString(fmt.Sprintf(`
+		fmt.Fprintf(&buffer, `
 	if fields["%[1]s"] != nil {
 		if err := json.Unmarshal(fields["%[1]s"], &resource.%[2]s); err != nil {
 			return fmt.Errorf("error decoding field '%[1]s': %%w", err)
 		}
 	}
-`, field.Name, formatFieldName(field.Name)))
+`, field.Name, formatFieldName(field.Name))
 	}
 
 	// unmarshal "composable slot" fields
