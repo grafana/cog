@@ -43,6 +43,11 @@ type Config struct {
 	// after code generation.
 	SkipPostFormatting bool `yaml:"skip_post_formatting"`
 
+	// SkipGeneratedHeader disables the addition of a
+	// "Code generated - EDITING IS FUTILE. DO NOT EDIT." comment in generated
+	// files headers.
+	SkipGeneratedHeader bool `yaml:"skip_generated_header"`
+
 	Validators ValidatorsConfig `yaml:"-"`
 }
 
@@ -82,7 +87,9 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 	jenny.AppendOneToMany(
 		common.If(globalConfig.Types, RawTypes{config: config, tmpl: tmpl}))
 
-	jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	if !config.SkipGeneratedHeader {
+		jenny.AddPostprocessors(common.GeneratedCommentHeader(globalConfig))
+	}
 	if !config.SkipPostFormatting {
 		jenny.AddPostprocessors(golang.FormatGoFiles)
 	}
