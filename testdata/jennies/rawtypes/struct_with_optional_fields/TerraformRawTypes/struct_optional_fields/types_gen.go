@@ -2,87 +2,97 @@ package struct_optional_fields
 
 import (
 	 "github.com/hashicorp/terraform-plugin-framework/types"
+	attr "github.com/hashicorp/terraform-plugin-framework/attr"
 	schema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 )
 
-type SomeStruct struct {
- FieldRef SomeOtherStruct `tfsdk:"FieldRef"`
-FieldString types.String `tfsdk:"FieldString"`
-Operator types.String `tfsdk:"Operator"`
-FieldArrayOfStrings types.List `tfsdk:"FieldArrayOfStrings"`
-FieldAnonymousStruct StructOptionalFieldsSomeStructFieldAnonymousStruct `tfsdk:"FieldAnonymousStruct"`
- }
-
-type SomeOtherStruct struct {
- FieldAny types.Object `tfsdk:"FieldAny"`
- }
-
-type StructOptionalFieldsSomeStructFieldAnonymousStruct struct {
- FieldAny types.Object `tfsdk:"FieldAny"`
- }
-
-
-
-var SpecAttributes = map[string]schema.Attribute{
-"some_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_ref": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
+type SomeStructModel struct {
+	FieldRef types.Object `tfsdk:"field_ref"`
+	FieldString types.String `tfsdk:"field_string"`
+	Operator types.String `tfsdk:"operator"`
+	FieldArrayOfStrings types.List `tfsdk:"field_array_of_strings"`
+	FieldAnonymousStruct types.Object `tfsdk:"field_anonymous_struct"`
+}
+var SomeStructType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"field_ref": SomeOtherStructType,
+		"field_string": types.StringType,
+		"operator": types.StringType,
+		"field_array_of_strings": types.ListType{
+	ElemType: types.StringType,
 },
-
+		"field_anonymous_struct": StructOptionalFieldsSomeStructFieldAnonymousStructType,
+	},
+}
+var SomeStructSchema = schema.SingleNestedBlock{
+	Attributes: map[string]schema.Attribute{
+	"field_string": schema.StringAttribute{
+	Optional: true,
 },
-},
-
-"field_string": schema.StringAttribute{
- Optional: true,
-},
-
-"operator": schema.StringAttribute{
- Required: true,
-Validators: []validator.String{
+	"operator": schema.StringAttribute{
+	Required: true,
+	Validators: []validator.String{
 stringvalidator.OneOf(">", "<"),
 },
-
 },
-
-"field_array_of_strings": schema.ListAttribute{
- ElementType: types.StringType,
-},
-
-"field_anonymous_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
+	"field_array_of_strings": schema.ListAttribute{
+	ElementType: types.StringType,
+	Optional: true,
 },
 },
-
-},
-},
-"some_other_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
-},
-"struct_optional_fields_some_struct_field_anonymous_struct": schema.SingleNestedAttribute{
-Required: true,
-Attributes: map[string]schema.Attribute{
-"field_any": schema.ObjectAttribute{
- Required: true,
-},
-
-},
+	Blocks: map[string]schema.Block{
+	"field_ref": schema.SingleNestedBlock{
+		Attributes: SomeOtherStructSchema.Attributes,
+		Blocks: SomeOtherStructSchema.Blocks,
+		Validators: SomeOtherStructSchema.Validators,
+	},
+	"field_anonymous_struct": schema.SingleNestedBlock{
+		Attributes: StructOptionalFieldsSomeStructFieldAnonymousStructSchema.Attributes,
+		Blocks: StructOptionalFieldsSomeStructFieldAnonymousStructSchema.Blocks,
+		Validators: StructOptionalFieldsSomeStructFieldAnonymousStructSchema.Validators,
+	},
 },
 }
+
+type SomeOtherStructModel struct {
+	FieldAny types.String `tfsdk:"field_any"`
+}
+var SomeOtherStructType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"field_any": types.StringType,
+	},
+}
+var SomeOtherStructSchema = schema.SingleNestedBlock{
+	Attributes: map[string]schema.Attribute{
+	"field_any": schema.StringAttribute{
+	Required: true,
+},
+},
+	Blocks: map[string]schema.Block{
+},
+}
+
+type StructOptionalFieldsSomeStructFieldAnonymousStructModel struct {
+	FieldAny types.String `tfsdk:"field_any"`
+}
+var StructOptionalFieldsSomeStructFieldAnonymousStructType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"field_any": types.StringType,
+	},
+}
+var StructOptionalFieldsSomeStructFieldAnonymousStructSchema = schema.SingleNestedBlock{
+	Attributes: map[string]schema.Attribute{
+	"field_any": schema.StringAttribute{
+	Required: true,
+},
+},
+	Blocks: map[string]schema.Block{
+},
+}
+
+type SomeStructOperatorModel types.String
+var SomeStructOperatorType = types.StringType
+
+

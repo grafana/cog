@@ -31,6 +31,7 @@ func TypeResolvingTemplateHelpers(context languages.Context) template.FuncMap {
 		},
 		"resolvesToBuilder": context.ResolveToBuilder,
 		"resolveRefs":       context.ResolveRefs,
+		"resolveRefsChain":  context.ResolveRefsChain,
 		"resolvesToComposableSlot": func(typeDef ast.Type) bool {
 			_, found := context.ResolveToComposableSlot(typeDef)
 			return found

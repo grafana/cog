@@ -1108,14 +1108,6 @@ func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.
 		return false, ast.Type{}, nil
 	}
 
-	var refPkg = g.schema.Package
-	if getFilename(conjuncts[0]) != g.rootFilename {
-		refPkg, err = g.refResolver.PackageForNode(conjuncts[0].Source(), g.schema.Package)
-		if err != nil {
-			return false, ast.Type{}, err
-		}
-	}
-
 	_, path := conjuncts[0].ReferencePath()
 	if path.String() != "" {
 		// ensure that the type referenced in the conjunction is discovered by
@@ -1125,7 +1117,7 @@ func (g *generator) stringOrIntegerFromEnum(v cue.Value, defVal any, opts []ast.
 		}
 
 		refType := g.namingFunc(g.rootVal, path)
-		return true, ast.NewConstantReferenceType(refPkg, refType, val, opts...), nil
+		return true, ast.NewConstantReferenceType(g.schema.Package, refType, val, opts...), nil
 	}
 
 	return false, ast.Type{}, nil

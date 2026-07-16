@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/codejen"
 	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
+	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/template"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
@@ -18,7 +19,10 @@ type RawTypes struct {
 	tmpl   *template.Template
 
 	packageMapper func(pkg string) string
-	typeFormatter *typeFormatter
+
+	typeFormatter  *typeFormatter
+	modelFormatter *modelFormatter
+	attributes     *attributes
 }
 
 func (jenny RawTypes) JennyName() string {
@@ -57,8 +61,10 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		return imports.Add(pkg, pkg)
 	}
-	jenny.typeFormatter = defaultTypeFormatter(jenny.config, context, imports, jenny.packageMapper)
-	attributesGenerator := newAttributesGenerator(jenny.config, jenny.typeFormatter, jenny.packageMapper)
+	goTypesFormatterHelper := golang.MakeTypeFormatterHelper(golang.Config{}, context, imports, jenny.packageMapper)
+	jenny.typeFormatter = defaultTypeFormatter(context, jenny.packageMapper)
+	jenny.modelFormatter = defaultModelFormatter(context, jenny.packageMapper)
+	jenny.attributes = newAttributesGenerator(context, jenny.config, jenny.typeFormatter, jenny.packageMapper)
 
 	// TF base types
 	imports.Add("", "github.com/hashicorp/terraform-plugin-framework/types")
@@ -68,10 +74,16 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		"importStdPkg": func(pkg string) string {
 			return imports.Add(pkg, pkg)
 		},
+		"toGoType":          goTypesFormatterHelper,
+		"toTfType":          jenny.typeFormatter.formatType,
+		"toTfModel":         jenny.modelFormatter.formatModel,
+		"toTfModelWithRefs": modelFormatterWithRefs(context, jenny.packageMapper).formatModel,
 	})
 
 	var buffer strings.Builder
 	var err error
+
+	jenny.attributes.identifyDisjunctionBranches(schema)
 
 	schema.Objects.Iterate(func(_ string, object ast.Object) {
 		innerErr := jenny.formatObject(&buffer, object)
@@ -83,6 +95,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		customMethodsBlock := template.CustomObjectMethodsBlock(object)
 		if schemaTmpl.Exists(customMethodsBlock) {
 			innerErr = schemaTmpl.RenderInBuffer(&buffer, customMethodsBlock, map[string]any{
+				"Schema": schema,
 				"Object": object,
 			})
 			if innerErr != nil {
@@ -95,6 +108,7 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 		customAllBlock := template.CustomObjectMethodAllBlock()
 		if schemaTmpl.Exists(customAllBlock) {
 			innerErr = schemaTmpl.RenderInBuffer(&buffer, customAllBlock, map[string]any{
+				"Schema": schema,
 				"Object": object,
 			})
 			if innerErr != nil {
@@ -106,27 +120,9 @@ func (jenny RawTypes) generateSchema(context languages.Context, schema *ast.Sche
 
 		buffer.WriteString("\n")
 	})
-
 	if err != nil {
 		return nil, err
 	}
-
-	var attrs string
-	entryPointRef := schema.EntryPointType.Ref
-	if entryPointRef != nil {
-		obj, ok := context.LocateObject(entryPointRef.ReferredPkg, entryPointRef.ReferredType)
-		if !ok {
-			return nil, fmt.Errorf("could not find entry point object %s", entryPointRef.ReferredType)
-		}
-		attrs, err = attributesGenerator.generateForObject(obj)
-	} else {
-		attrs, err = attributesGenerator.generateForSchema(schema)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	buffer.WriteString(attrs)
 
 	importStatements := imports.String()
 	if importStatements != "" {
@@ -148,10 +144,16 @@ func (jenny RawTypes) formatObject(buffer *strings.Builder, object ast.Object) e
 	}
 
 	for _, commentLine := range comments {
-		buffer.WriteString(fmt.Sprintf("// %s\n", commentLine))
+		fmt.Fprintf(buffer, "// %s\n", commentLine)
 	}
 
-	buffer.WriteString(jenny.typeFormatter.formatTypeDeclaration(object))
+	buffer.WriteString(jenny.modelFormatter.formatDeclaration(object))
+	buffer.WriteString("\n")
+
+	buffer.WriteString(jenny.typeFormatter.formatDeclaration(object))
+	buffer.WriteString("\n")
+
+	buffer.WriteString(jenny.attributes.generateForObject(object))
 	buffer.WriteString("\n")
 
 	return nil
