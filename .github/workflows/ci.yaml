@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 env:
-  DEVBOX_VERSION: 0.14.0
+  DEVBOX_VERSION: 0.17.5
 
 jobs:
   linters:
@@ -33,7 +33,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
         with:
-          enable-cache: "true"
+          enable-cache: true
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Run golangci-lint
@@ -61,7 +61,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
         with:
-          enable-cache: "true"
+          enable-cache: true
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Tests
@@ -79,7 +79,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@8c6a66ed6273138b1915457069de78cb52fe3bd7 # v0.15.0
         with:
-          enable-cache: "true"
+          enable-cache: true
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
       - name: Docs
