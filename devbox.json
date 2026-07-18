@@ -9,7 +9,7 @@
     "golangci-lint@2.9.0",
     "yarn@1.22",
     "gradle@8.14.4",
-    "goreleaser@2.16.0"
+    "goreleaser@2.17.0"
   ],
   "shell": {
     "init_hook": [
