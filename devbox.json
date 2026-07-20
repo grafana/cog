@@ -2,14 +2,14 @@
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
   "packages": [
     "go@1.26",
-    "php@8.5.7",
+    "php@8.5.8",
     "php83Packages.composer@2.10.2",
     "php83Packages.phpstan@2.1.1",
     "python@3.14",
-    "golangci-lint@2.9.0",
+    "golangci-lint@2.12.2",
     "yarn@1.22",
     "gradle@8.14.4",
-    "goreleaser@2.16.0"
+    "goreleaser@2.17.0"
   ],
   "shell": {
     "init_hook": [

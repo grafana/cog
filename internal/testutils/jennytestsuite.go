@@ -223,7 +223,7 @@ func (x *GoldenFilesTestSuite[GoldenFileType]) Run(t *testing.T, f func(tc *Test
 				relativeGoldenFilePath := strings.TrimLeft(strings.TrimPrefix(path, outputDir), "/")
 				if _, found := tc.outFiles[relativeGoldenFilePath]; !found {
 					if envvars.UpdateGoldenFiles {
-						if err := os.Remove(path); err != nil {
+						if err := os.Remove(path); err != nil { //nolint:gosec
 							t.Fatalf("could not remove golden file: %s", err)
 						}
 					} else {
