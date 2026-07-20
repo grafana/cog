@@ -165,7 +165,7 @@ func addDirToOverlay(ctx context.Context, overlay cueOverlay, prefix string, dir
 			return nil
 		}
 
-		content, err := os.ReadFile(path)
+		content, err := os.ReadFile(path) //nolint:gosec
 		if err != nil {
 			return err
 		}
@@ -216,7 +216,7 @@ func addLibrariesToOverlay(ctx context.Context, overlay cueOverlay, prefix strin
 				return nil
 			}
 
-			content, err := os.ReadFile(path)
+			content, err := os.ReadFile(path) //nolint:gosec
 			if err != nil {
 				return err
 			}

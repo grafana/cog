@@ -57,7 +57,7 @@ func (jenny RepositoryTemplate) renderDirectory(directory string) (codejen.Files
 			return nil
 		}
 
-		templateContent, err := os.ReadFile(path)
+		templateContent, err := os.ReadFile(path) //nolint:gosec
 		if err != nil {
 			return err
 		}

@@ -94,7 +94,7 @@ func ParseDirectories(rootDirs ...string) Option {
 					return nil
 				}
 
-				fileHandle, err := os.Open(path)
+				fileHandle, err := os.Open(path) //nolint:gosec
 				if err != nil {
 					return err
 				}

@@ -56,7 +56,7 @@ func (jenny CustomTemplates) generateForTemplatesDirectory(context languages.Con
 			return nil
 		}
 
-		templateContent, err := os.ReadFile(path)
+		templateContent, err := os.ReadFile(path) //nolint:gosec
 		if err != nil {
 			return err
 		}
