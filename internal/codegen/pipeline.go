@@ -19,6 +19,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/python"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
+	"github.com/grafana/cog/internal/jennies/zod"
 	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
@@ -326,6 +327,8 @@ func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 			outputs[typescript.LanguageRef] = typescript.New(*output.Typescript)
 		case output.Terraform != nil:
 			outputs[terraform.LanguageRef] = terraform.New(*output.Terraform)
+		case output.Zod != nil:
+			outputs[zod.LanguageRef] = zod.New(*output.Zod)
 		default:
 			return nil, fmt.Errorf("empty language configuration")
 		}
