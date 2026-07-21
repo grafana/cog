@@ -3,7 +3,7 @@ module github.com/grafana/cog
 go 1.25.0
 
 require (
-	cuelang.org/go v0.11.0
+	cuelang.org/go v0.17.1
 	github.com/fatih/color v1.19.0
 	github.com/getkin/kin-openapi v0.142.0
 	github.com/goccy/go-yaml v1.19.2
@@ -41,6 +41,7 @@ require (
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20260716171823-6d48527148f0 // indirect
 	github.com/rogpeppe/go-internal v1.15.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.6 // indirect
 	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/net v0.57.0 // indirect
