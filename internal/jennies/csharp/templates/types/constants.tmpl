@@ -1,0 +1,12 @@
+{{- /* C# constants template — Phase 2.
+       Emits each schema-level concrete scalar as a `public const` field
+       on a static class named "Constants" (one per package).
+*/ -}}
+namespace {{ .Namespace }};
+
+public static class {{ .Name }}
+{
+    {{- range .Constants }}
+    public const {{ .Type }} {{ .Name | formatFieldName }} = {{ .Value }};
+    {{- end }}
+}

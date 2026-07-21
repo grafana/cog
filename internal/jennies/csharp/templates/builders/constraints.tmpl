@@ -1,0 +1,34 @@
+{{- /* Validates a builder option argument before assigning it.
+       Maps the AST constraint vocabulary onto C# expressions; regex
+       constraints lean on System.Text.RegularExpressions.Regex.
+*/ -}}
+{{- define "constraints" }}
+{{- range . }}
+    {{- $leftOperand := .Argument.Name | escapeVar | lowerCamelCase }}
+    {{- $operator := .Op }}
+    {{- if eq .Op "minLength" }}
+        {{- $leftOperand = print $leftOperand ".Length" }}
+        {{- $operator = ">=" }}
+    {{- end }}
+    {{- if eq .Op "maxLength" }}
+        {{- $leftOperand = print $leftOperand ".Length" }}
+        {{- $operator = "<=" }}
+    {{- end }}
+    {{- if eq .Op "=~" }}
+        if (!System.Text.RegularExpressions.Regex.IsMatch({{ $leftOperand }}, "{{ .Parameter }}"))
+        {
+            throw new System.ArgumentException("{{ $leftOperand }} must match regex {{ .Parameter }}");
+        }
+    {{- else if eq .Op "!~" }}
+        if (System.Text.RegularExpressions.Regex.IsMatch({{ $leftOperand }}, "{{ .Parameter }}"))
+        {
+            throw new System.ArgumentException("{{ $leftOperand }} must not match regex {{ .Parameter }}");
+        }
+    {{- else }}
+        if (!({{ $leftOperand }} {{ $operator }} {{ .Parameter }}))
+        {
+            throw new System.ArgumentException("{{ $leftOperand }} must be {{ $operator }} {{ .Parameter }}");
+        }
+    {{- end }}
+{{- end }}
+{{- end }}

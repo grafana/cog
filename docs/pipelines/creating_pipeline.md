@@ -307,6 +307,47 @@ output:
           - '%__config_dir%/templates/go/overrides'
 ```
 
+### C#
+
+```yaml
+output:
+  # …
+
+  languages:
+    - csharp:
+        # Root namespace for generated types. Generated source files land
+        # under `src/<namespace-as-folders>/<Package>/<Type>.cs`.
+        # Default: 'Grafana.Foundation'
+        namespace_root: 'Org.Package'
+
+        # Disables runtime-related code generation (e.g. `Cog.IBuilder<T>`).
+        # Note: builders can NOT be generated with this flag turned on, as
+        # they rely on the runtime to function.
+        # Default: false
+        skip_runtime: false
+
+        # Controls the generation of `System.Text.Json`-style
+        # `JsonConverter<T>` classes alongside generated types. Required
+        # for disjunction/discriminator support.
+        # Default: false
+        generate_json_converters: true
+
+        # Controls the generation of `Equals()` and `GetHashCode()`
+        # overrides on types.
+        # Default: false
+        generate_equality: false
+
+        # List of directories containing templates describing files to be
+        # added to the generated output.
+        extra_files_templates:
+          - '%__config_dir%/templates/csharp/extra'
+
+        # List of directories containing templates defining blocks used to
+        # override parts of builders/types/....
+        overrides_templates:
+          - '%__config_dir%/templates/csharp/overrides'
+```
+
 ### Java
 
 ```yaml
