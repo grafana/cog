@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	cuelang.org/go v0.11.0
 	github.com/fatih/color v1.19.0
-	github.com/getkin/kin-openapi v0.142.0
+	github.com/getkin/kin-openapi v0.143.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/google/go-cmp v0.7.0
 	github.com/grafana/codejen v0.0.4
