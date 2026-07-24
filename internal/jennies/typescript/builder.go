@@ -58,7 +58,7 @@ func (jenny *Builder) generateBuilder(context languages.Context, builder ast.Bui
 	jenny.typeFormatter = builderTypeFormatter(jenny.config, context, jenny.typeImportMapper)
 
 	buildObjectSignature := formatPackageName(builder.For.SelfRef.ReferredPkg) + "." + tools.CleanupNames(builder.For.Name)
-	if builder.For.Type.ImplementsVariant() {
+	if builder.For.Type.ImplementsVariant() && !builder.For.Type.HasHint(ast.HintSkipVariantPluginRegistration) {
 		buildObjectSignature = jenny.typeFormatter.variantInterface(builder.For.Type.ImplementedVariant())
 	}
 
