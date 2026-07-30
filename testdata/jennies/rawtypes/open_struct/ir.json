@@ -1,0 +1,50 @@
+{
+  "Package": "open_struct",
+  "Metadata": {},
+  "EntryPointType": {
+    "Kind": "",
+    "Nullable": false
+  },
+  "Objects": {
+    "OpenStruct": {
+      "Name": "OpenStruct",
+      "Type": {
+        "Kind": "struct",
+        "Nullable": false,
+        "Struct": {
+          "Fields": [
+            {
+              "Name": "a",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "string"
+                }
+              },
+              "Required": true
+            },
+            {
+              "Name": "b",
+              "Type": {
+                "Kind": "scalar",
+                "Nullable": false,
+                "Scalar": {
+                  "ScalarKind": "int64"
+                }
+              },
+              "Required": true
+            }
+          ]
+        },
+        "Hints": {
+          "open": "true"
+        }
+      },
+      "SelfRef": {
+        "ReferredPkg": "open_struct",
+        "ReferredType": "OpenStruct"
+      }
+    }
+  }
+}
