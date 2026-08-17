@@ -11,11 +11,11 @@ require (
 	github.com/grafana/codejen v0.0.4
 	github.com/huandu/xstrings v1.5.0
 	github.com/invopop/jsonschema v0.14.0
-	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/spf13/cobra v1.10.2
-	github.com/stretchr/testify v1.11.1
-	golang.org/x/text v0.40.0
-	golang.org/x/tools v0.48.0
+	github.com/stretchr/testify v1.12.0
+	golang.org/x/text v0.41.0
+	golang.org/x/tools v0.49.0
 )
 
 require (
@@ -23,7 +23,6 @@ require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.2.0 // indirect
 	github.com/cockroachdb/apd/v3 v3.2.3 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/proto v1.14.3 // indirect
 	github.com/go-openapi/jsonpointer v1.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -37,13 +36,12 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20260716171823-6d48527148f0 // indirect
 	github.com/rogpeppe/go-internal v1.15.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.6 // indirect
-	golang.org/x/mod v0.38.0 // indirect
-	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/mod v0.39.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
