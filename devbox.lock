@@ -274,6 +274,45 @@
         }
       }
     },
+    "php@8.5.9": {
+      "last_modified": "2026-08-12T11:28:58Z",
+      "plugin_version": "0.0.3",
+      "resolved": "github:NixOS/nixpkgs/044bfe75bfe4c7bbe043dc17b5e42ea823b84a09#php85",
+      "source": "devbox-search",
+      "version": "8.5.9",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/0pzmg5aryi4n57hg7mbm42h0m41mvgxv-php-with-extensions-8.5.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/0pzmg5aryi4n57hg7mbm42h0m41mvgxv-php-with-extensions-8.5.9"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/5wmijcvxgkx1xs32fnhcmgz6c3x6hl3v-php-with-extensions-8.5.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/5wmijcvxgkx1xs32fnhcmgz6c3x6hl3v-php-with-extensions-8.5.9"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mgkav1aqhshfw2hgngq8byykq3vng9xw-php-with-extensions-8.5.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mgkav1aqhshfw2hgngq8byykq3vng9xw-php-with-extensions-8.5.9"
+        }
+      }
+    },
     "python@3.14": {
       "last_modified": "2026-06-27T07:37:20Z",
       "plugin_version": "0.0.4",
