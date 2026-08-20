@@ -7,6 +7,7 @@ parameters:
   go_package_root: 'github.com/grafana/cog/testdata/generated'
   php_namespace_root: 'Grafana\Foundation'
   java_package_path: 'com.grafana.foundation'
+  csharp_namespace_root: 'Grafana.Foundation'
 
 inputs:
   - cue:
@@ -28,3 +29,6 @@ output:
         generate_strict_unmarshaller: true
         generate_equal: true
         generate_validate: true
+    - csharp:
+        namespace_root: '%csharp_namespace_root%'
+        generate_json_converters: true
