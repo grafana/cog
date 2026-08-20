@@ -17,6 +17,7 @@ import (
 	"github.com/grafana/cog/internal/jennies/openapi"
 	"github.com/grafana/cog/internal/jennies/php"
 	"github.com/grafana/cog/internal/jennies/python"
+	"github.com/grafana/cog/internal/jennies/remote"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
 	"github.com/grafana/cog/internal/languages"
@@ -329,6 +330,10 @@ func (pipeline *Pipeline) OutputLanguages() (languages.Languages, error) {
 		default:
 			return nil, fmt.Errorf("empty language configuration")
 		}
+	}
+
+	for name, config := range pipeline.Output.LanguagePlugins {
+		outputs[name] = remote.New(name, config)
 	}
 
 	return outputs, nil

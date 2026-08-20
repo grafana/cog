@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
@@ -20,6 +21,8 @@ type Output struct {
 	APIReference bool `yaml:"api_reference"`
 
 	Languages []*OutputLanguage `yaml:"languages"`
+
+	LanguagePlugins map[string]OutputLanguagePlugin `yaml:"language_plugins"`
 
 	// RepositoryTemplates is the path to a directory containing
 	// "repository-level templates".
@@ -58,6 +61,12 @@ func (output *Output) interpolateParameters(interpolator ParametersInterpolator)
 	for _, outputLanguage := range output.Languages {
 		outputLanguage.interpolateParameters(output, interpolator)
 	}
+
+	for _, config := range output.LanguagePlugins {
+		config.interpolateParameters(interpolator)
+	}
+
+	spew.Dump(output.LanguagePlugins)
 }
 
 type OutputLanguage struct {
@@ -92,9 +101,25 @@ func (outputLanguage *OutputLanguage) interpolateParameters(output *Output, inte
 		outputLanguage.Typescript.InterpolateParameters(interpolator)
 		outputLanguage.Typescript.ExtraFilesTemplatesData = output.TemplatesData
 	}
-
 	if outputLanguage.Terraform != nil {
 		outputLanguage.Terraform.InterpolateParameters(interpolator)
+	}
+}
+
+type OutputLanguagePlugin map[string]any
+
+func (outputLanguagePlugin OutputLanguagePlugin) interpolateParameters(interpolator ParametersInterpolator) {
+	interpolateAny := func(input any) any {
+		stringVal, ok := input.(string)
+		if ok {
+			return interpolator(stringVal)
+		}
+
+		return input
+	}
+
+	for key, val := range outputLanguagePlugin {
+		outputLanguagePlugin[key] = interpolateAny(val)
 	}
 }
 

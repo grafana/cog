@@ -28,3 +28,8 @@ output:
         generate_strict_unmarshaller: true
         generate_equal: true
         generate_validate: true
+
+  language_plugins:
+    rust:
+      crate_root: '%go_package_root%'
+      some_config: true
