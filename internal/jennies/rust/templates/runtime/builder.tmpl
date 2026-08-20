@@ -1,0 +1,14 @@
+//! The [`Builder`] trait implemented by every generated builder.
+
+use super::error::BuildError;
+
+/// Constructs a value of type `T`, validating it in the process.
+///
+/// Generated builders implement this trait. [`build`](Builder::build) returns
+/// the constructed value on success, or the list of [`BuildError`]s that
+/// prevented construction.
+pub trait Builder<T> {
+    /// Builds and validates the value, returning every accumulated error on
+    /// failure.
+    fn build(&self) -> Result<T, Vec<BuildError>>;
+}
