@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/common"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ast"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 func apiReferenceFormatter(config Config) common.APIReferenceFormatter {

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/pkg/ast"
 )
 
 func schemaComments(schema *openapi3.Schema) []string {

@@ -1,8 +1,8 @@
 package java
 
 import (
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/template"
+	"github.com/grafana/cog/pkg/ast"
 )
 
 type JSONMarshaller struct {

@@ -1,8 +1,8 @@
 package codegen
 
 import (
-	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ast/compiler"
 )
 
 type Transforms struct {

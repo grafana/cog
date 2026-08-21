@@ -3,7 +3,7 @@ package option
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/pkg/ast"
 	"github.com/stretchr/testify/require"
 )
 

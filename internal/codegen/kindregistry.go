@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/pkg/ast"
 )
 
 type KindRegistryInput struct {

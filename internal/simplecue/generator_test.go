@@ -7,8 +7,8 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/ast"
 	"github.com/stretchr/testify/require"
 )
 

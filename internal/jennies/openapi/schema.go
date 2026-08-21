@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/orderedmap"
+	"github.com/grafana/cog/pkg/ast"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type Schema struct {

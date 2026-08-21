@@ -9,8 +9,6 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/golang"
 	"github.com/grafana/cog/internal/jennies/java"
 	"github.com/grafana/cog/internal/jennies/jsonschema"
@@ -20,11 +18,13 @@ import (
 	"github.com/grafana/cog/internal/jennies/remote"
 	"github.com/grafana/cog/internal/jennies/terraform"
 	"github.com/grafana/cog/internal/jennies/typescript"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
 	"github.com/grafana/cog/internal/veneers/rewrite"
 	cogyaml "github.com/grafana/cog/internal/yaml"
+	"github.com/grafana/cog/pkg/ast"
+	"github.com/grafana/cog/pkg/ast/compiler"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type ParametersInterpolator func(input string) string

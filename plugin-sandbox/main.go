@@ -5,13 +5,17 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/grafana/codejen"
+	"github.com/grafana/cog/pkg/languages"
 	cogplugin "github.com/grafana/cog/pkg/plugin"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 )
+
+var _ cogplugin.Language = (*DummyLanguage)(nil)
 
 // Here is a real implementation of Greeter
 type DummyLanguage struct {
@@ -24,12 +28,25 @@ func (g *DummyLanguage) ValidateConfig(config map[string]any) error {
 	return nil
 }
 
-func (g *DummyLanguage) Generate() (codejen.Files, error) {
+func (g *DummyLanguage) Transform(codegenConfig languages.Config, config map[string]any, context languages.Context) (languages.Context, error) {
+	g.logger.Debug("message from DummyLanguage.Transform")
+
+	return context, nil
+}
+
+func (g *DummyLanguage) Generate(codegenConfig languages.Config, config map[string]any, context languages.Context) (codejen.Files, error) {
 	g.logger.Debug("message from DummyLanguage.Generate")
 
 	var files codejen.Files
 
-	files = append(files, *codejen.NewFile("foo/bar/baz.rs", []byte("lala")))
+	for _, schema := range context.Schemas {
+		filename := filepath.Join(
+			schema.Package,
+			"types_gen.rs",
+		)
+
+		files = append(files, *codejen.NewFile(filename, []byte("lala")))
+	}
 
 	return files, nil
 }

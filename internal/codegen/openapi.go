@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/httputil"
 	"github.com/grafana/cog/internal/openapi"
+	"github.com/grafana/cog/pkg/ast"
 )
 
 type OpenAPIInput struct {

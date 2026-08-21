@@ -3,7 +3,7 @@ package template
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/pkg/ast"
 )
 
 // CustomObjectMethodAllBlock returns the template block name for custom methods.

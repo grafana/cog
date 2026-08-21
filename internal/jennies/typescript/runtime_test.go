@@ -3,7 +3,7 @@ package typescript
 import (
 	"testing"
 
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/languages"
 	"github.com/stretchr/testify/require"
 )
 

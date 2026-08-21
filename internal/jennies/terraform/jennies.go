@@ -4,10 +4,10 @@ import (
 	"io/fs"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/jennies/common"
 	"github.com/grafana/cog/internal/jennies/golang"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ast/compiler"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 const LanguageRef = "terraform"

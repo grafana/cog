@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ast/compiler"
+	"github.com/grafana/cog/pkg/languages"
 	schemaparser "github.com/santhosh-tekuri/jsonschema/v6"
 )
 

@@ -3,7 +3,7 @@ package veneers
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
+	"github.com/grafana/cog/pkg/ast"
 )
 
 type Option struct {

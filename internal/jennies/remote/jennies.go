@@ -1,11 +1,9 @@
 package remote
 
 import (
-	"fmt"
-
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ast/compiler"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type Language struct {
@@ -21,7 +19,7 @@ func New(name string, config map[string]any) *Language {
 }
 
 func (language *Language) Name() string {
-	return fmt.Sprintf("remote/%s", language.name)
+	return language.name
 }
 
 func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyList[languages.Context] {
@@ -29,7 +27,8 @@ func (language *Language) Jennies(globalConfig languages.Config) *codejen.JennyL
 		return language.Name()
 	})
 	jenny.AppendOneToMany(remote{
-		config: language.config,
+		globalConfig: globalConfig,
+		config:       language.config,
 	})
 
 	return jenny

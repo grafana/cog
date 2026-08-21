@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ast"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 type equalityMethods struct{}

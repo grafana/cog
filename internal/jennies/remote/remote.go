@@ -6,15 +6,16 @@ import (
 	"os/exec"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/languages"
 	cogplugin "github.com/grafana/cog/pkg/plugin"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 )
 
 type remote struct {
-	config map[string]any
+	globalConfig languages.Config
+	config       map[string]any
 }
 
 func (jenny remote) JennyName() string {
@@ -60,7 +61,12 @@ func (jenny remote) Generate(context languages.Context) (codejen.Files, error) {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
 
-	files, err := remoteLang.Generate()
+	transformed, err := remoteLang.Transform(jenny.globalConfig, jenny.config, context)
+	if err != nil {
+		return nil, err
+	}
+
+	files, err := remoteLang.Generate(jenny.globalConfig, jenny.config, transformed)
 	if err != nil {
 		return nil, err
 	}

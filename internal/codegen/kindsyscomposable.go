@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
+	"github.com/grafana/cog/pkg/ast"
 )
 
 func kindsysComposableLoader(input CueInput) (ast.Schemas, error) {

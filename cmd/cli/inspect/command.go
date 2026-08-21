@@ -9,12 +9,12 @@ import (
 	"strings"
 
 	"github.com/grafana/codejen"
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
 	"github.com/grafana/cog/internal/codegen"
-	"github.com/grafana/cog/internal/languages"
 	"github.com/grafana/cog/internal/logs"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ast"
+	"github.com/grafana/cog/pkg/ast/compiler"
+	"github.com/grafana/cog/pkg/languages"
 	"github.com/spf13/cobra"
 )
 

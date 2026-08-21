@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/pkg/ast/compiler"
 )
 
 type Compiler struct {

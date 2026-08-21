@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/testutils"
+	"github.com/grafana/cog/pkg/ast"
 	"github.com/stretchr/testify/require"
 )
 

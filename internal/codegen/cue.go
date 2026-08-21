@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"cuelang.org/go/cue"
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/simplecue"
 	"github.com/grafana/cog/internal/tools"
+	"github.com/grafana/cog/pkg/ast"
 	cogcue "github.com/grafana/cog/pkg/cue"
 )
 

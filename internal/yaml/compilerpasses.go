@@ -3,8 +3,8 @@ package yaml
 import (
 	"fmt"
 
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
+	"github.com/grafana/cog/pkg/ast"
+	"github.com/grafana/cog/pkg/ast/compiler"
 )
 
 type CompilerPass struct {

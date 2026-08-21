@@ -1,9 +1,9 @@
 package php
 
 import (
-	"github.com/grafana/cog/internal/ast"
-	"github.com/grafana/cog/internal/ast/compiler"
-	"github.com/grafana/cog/internal/languages"
+	"github.com/grafana/cog/pkg/ast"
+	"github.com/grafana/cog/pkg/ast/compiler"
+	"github.com/grafana/cog/pkg/languages"
 )
 
 var _ compiler.Pass = (*AddTypehintsComments)(nil)

@@ -1,8 +1,8 @@
 package testutils
 
 import (
-	"github.com/grafana/cog/internal/ast"
 	"github.com/grafana/cog/internal/orderedmap"
+	"github.com/grafana/cog/pkg/ast"
 )
 
 func ObjectsMap(objects ...ast.Object) *orderedmap.Map[string, ast.Object] {
